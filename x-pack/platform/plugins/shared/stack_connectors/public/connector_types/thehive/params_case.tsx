@@ -11,10 +11,11 @@ import {
   TextAreaWithMessageVariables,
   ActionParamsProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { EuiFormRow, EuiSelect, EuiComboBox, EuiText } from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiComboBox } from '@elastic/eui';
 import { ExecutorParams, ExecutorSubActionPushParams } from '../../../common/thehive/types';
 import { severityOptions, tlpOptions } from './constants';
 import * as translations from './translations';
+import { OptionalFieldLabel } from '../../common/optional_field_label';
 
 export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>> = ({
   actionParams,
@@ -132,15 +133,7 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
         />
       </EuiFormRow>
 
-      <EuiFormRow
-        fullWidth
-        label={translations.TAGS_LABEL}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            {translations.OPTIONAL_LABEL}
-          </EuiText>
-        }
-      >
+      <EuiFormRow fullWidth label={translations.TAGS_LABEL} labelAppend={OptionalFieldLabel}>
         <EuiComboBox
           data-test-subj="tagsInput"
           fullWidth

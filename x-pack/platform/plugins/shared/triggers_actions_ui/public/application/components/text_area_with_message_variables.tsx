@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { EuiTextArea, EuiFormRow } from '@elastic/eui';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
-import { LabelAppendWithMessageVariables } from './label_append_with_message_variables';
+import { AddMessageVariablesOptional } from './add_message_variables_optional';
 import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
 import { TextAreaWithAutocomplete } from './text_area_with_autocomplete';
 import { templateActionVariable } from '../lib';
@@ -63,7 +63,7 @@ const TextAreaWithMessageVariablesLegacy: React.FunctionComponent<Props> = ({
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
       label={label}
       labelAppend={
-        <LabelAppendWithMessageVariables
+        <AddMessageVariablesOptional
           isOptionalField={isOptionalField}
           messageVariables={messageVariables}
           onSelectEventHandler={onSelectMessageVariable}

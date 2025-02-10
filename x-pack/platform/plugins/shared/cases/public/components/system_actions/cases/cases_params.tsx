@@ -18,7 +18,6 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiComboBox,
-  EuiText,
 } from '@elastic/eui';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import * as i18n from './translations';
@@ -32,6 +31,7 @@ import type { CasesConfigurationUITemplate } from '../../../containers/types';
 import { getOwnerFromRuleConsumerProducer } from '../../../../common/utils/owner';
 import { getConfigurationByOwner } from '../../../containers/configure/utils';
 import { useGetAllCaseConfigurations } from '../../../containers/configure/use_get_all_case_configurations';
+import { OptionalFieldLabel } from '../../optional_field_label';
 
 const DEFAULT_EMPTY_TEMPLATE_KEY = 'defaultEmptyTemplateKey';
 
@@ -180,15 +180,7 @@ export const CasesParamsFieldsComponent: React.FunctionComponent<
     <>
       <EuiFlexGroup>
         <EuiFlexItem grow={true}>
-          <EuiFormRow
-            fullWidth
-            label={i18n.GROUP_BY_ALERT}
-            labelAppend={
-              <EuiText size="xs" color="subdued">
-                {i18n.GROUP_BY_ALERT_OPTIONAL_LABEL}
-              </EuiText>
-            }
-          >
+          <EuiFormRow fullWidth label={i18n.GROUP_BY_ALERT} labelAppend={OptionalFieldLabel}>
             <EuiComboBox
               fullWidth
               isClearable={true}

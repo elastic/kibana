@@ -22,9 +22,9 @@ import {
   RULE_NAME_INPUT_TITLE,
   RULE_TAG_INPUT_TITLE,
   RULE_TAG_PLACEHOLDER,
-  ADD_ACTION_OPTIONAL_TEXT,
 } from '../translations';
 import { useRuleFormState, useRuleFormDispatch } from '../hooks';
+import { OptionalFieldLabel } from '../optional_field_label';
 
 export const RuleDetails = () => {
   const { formData, baseErrors } = useRuleFormState();
@@ -104,11 +104,7 @@ export const RuleDetails = () => {
       <EuiFormRow
         fullWidth
         label={RULE_TAG_INPUT_TITLE}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            {ADD_ACTION_OPTIONAL_TEXT}
-          </EuiText>
-        }
+        labelAppend={OptionalFieldLabel}
         isInvalid={!!baseErrors?.tags?.length}
         error={baseErrors?.tags}
       >

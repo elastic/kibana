@@ -11,7 +11,6 @@ import {
   EuiComboBox,
   EuiSelect,
   EuiSpacer,
-  EuiText,
   EuiTitle,
   EuiComboBoxOptionOption,
   EuiSelectOption,
@@ -27,6 +26,7 @@ import { ResilientActionParams } from './types';
 
 import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
+import { OptionalFieldLabel } from '../../common/optional_field_label';
 
 const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<ResilientActionParams>> = ({
   actionConnector,
@@ -174,16 +174,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           'xpack.stackConnectors.components.resilient.urgencySelectFieldLabel',
           { defaultMessage: 'Incident type' }
         )}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            {i18n.translate(
-              'xpack.stackConnectors.components.resilient.incidentTypeOptionalFieldLabel',
-              {
-                defaultMessage: 'Optional',
-              }
-            )}
-          </EuiText>
-        }
+        labelAppend={OptionalFieldLabel}
       >
         <EuiComboBox
           fullWidth
@@ -203,16 +194,7 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
         label={i18n.translate('xpack.stackConnectors.components.resilient.severity', {
           defaultMessage: 'Severity',
         })}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            {i18n.translate(
-              'xpack.stackConnectors.components.resilient.severityOptionalFieldLabel',
-              {
-                defaultMessage: 'Optional',
-              }
-            )}
-          </EuiText>
-        }
+        labelAppend={OptionalFieldLabel}
       >
         <EuiSelect
           data-test-subj="severitySelect"

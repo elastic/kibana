@@ -17,7 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiText,
   EuiIconTip,
 } from '@elastic/eui';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
@@ -31,6 +30,7 @@ import { JiraActionParams } from './types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
+import { OptionalFieldLabel } from '../../common/optional_field_label';
 
 const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionParams>> = ({
   actionConnector,
@@ -205,13 +205,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
         label={i18n.translate('xpack.stackConnectors.components.jira.urgencySelectFieldLabel', {
           defaultMessage: 'Issue type',
         })}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.stackConnectors.components.jira.issueTypeOptionalLabel', {
-              defaultMessage: 'Optional',
-            })}
-          </EuiText>
-        }
+        labelAppend={OptionalFieldLabel}
       >
         <EuiSelect
           fullWidth

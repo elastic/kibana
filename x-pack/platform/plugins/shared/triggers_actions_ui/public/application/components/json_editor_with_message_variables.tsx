@@ -15,7 +15,7 @@ import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
 
 import { ActionVariable } from '@kbn/alerting-plugin/common';
-import { LabelAppendWithMessageVariables } from './label_append_with_message_variables';
+import { AddMessageVariablesOptional } from './add_message_variables_optional';
 import { templateActionVariable } from '../lib';
 
 const NO_EDITOR_ERROR_TITLE = i18n.translate(
@@ -164,7 +164,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
       label={label}
       labelAppend={
-        <LabelAppendWithMessageVariables
+        <AddMessageVariablesOptional
           isOptionalField={isOptionalField}
           buttonTitle={buttonTitle}
           messageVariables={messageVariables}

@@ -15,7 +15,6 @@ import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static
 import { i18n } from '@kbn/i18n';
 import type { ActionConnector } from '../../../common/types/domain';
 import { ConnectorsDropdown } from '../configure_cases/connectors_dropdown';
-import { OptionalFieldLabel } from '../optional_field_label';
 
 const ADD_CONNECTOR_HELPER_TEXT = i18n.translate(
   'xpack.cases.connectorSelector.addConnectorHelperText',
@@ -72,7 +71,7 @@ export const ConnectorSelector = ({
       helpText={ADD_CONNECTOR_HELPER_TEXT}
       isInvalid={isInvalid}
       label={field.label}
-      labelAppend={OptionalFieldLabel}
+      labelAppend={field.labelAppend}
     >
       <ConnectorsDropdown
         connectors={connectors}
