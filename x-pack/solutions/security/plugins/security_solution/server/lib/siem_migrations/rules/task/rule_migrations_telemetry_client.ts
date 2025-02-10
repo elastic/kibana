@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
+import type { AnalyticsServiceSetup, Logger, EventTypeOpts } from '@kbn/core/server';
 import {
   SIEM_MIGRATIONS_INTEGRATIONS_MATCH,
   SIEM_MIGRATIONS_MIGRATION_FAILURE,
@@ -48,12 +48,11 @@ export class SiemMigrationTelemetryClient {
     private readonly modelName: string = ''
   ) {}
 
-  private reportEvent(eventType: string, data: Record<string, unknown>): void {
+  private reportEvent<T extends object>(eventTypeOpts: EventTypeOpts<T>, data: T): void {
     try {
-      this.telemetry.reportEvent(eventType, data);
+      this.telemetry.reportEvent(eventTypeOpts.eventType, data);
     } catch (e) {
-      // Log the error but don't throw it, we don't want to fail the migration because of telemetry
-      this.logger.error(`Error reporting event ${eventType}: ${e.message}`);
+      this.logger.error(`Error reporting event ${eventTypeOpts.eventType}: ${e.message}`);
     }
   }
 
@@ -61,7 +60,7 @@ export class SiemMigrationTelemetryClient {
     preFilterIntegrations,
     postFilterIntegration,
   }: IntegrationMatchEvent): void {
-    this.reportEvent(SIEM_MIGRATIONS_INTEGRATIONS_MATCH.eventType, {
+    this.reportEvent(SIEM_MIGRATIONS_INTEGRATIONS_MATCH, {
       model: this.modelName,
       migrationId: this.migrationId,
       preFilterIntegrationNames: preFilterIntegrations.map((integration) => integration.id) || [],
@@ -74,7 +73,7 @@ export class SiemMigrationTelemetryClient {
     preFilterRules,
     postFilterRule,
   }: PrebuiltRuleMatchEvent): void {
-    this.reportEvent(SIEM_MIGRATIONS_PREBUILT_RULES_MATCH.eventType, {
+    this.reportEvent(SIEM_MIGRATIONS_PREBUILT_RULES_MATCH, {
       model: this.modelName,
       migrationId: this.migrationId,
       preFilterRuleNames: preFilterRules.map((rule) => rule.rule_id) || [],
@@ -92,7 +91,7 @@ export class SiemMigrationTelemetryClient {
       const duration = Date.now() - startTime;
 
       if (error) {
-        this.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE.eventType, {
+        this.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE, {
           migrationId: this.migrationId,
           error: error.message,
           model: this.modelName,
@@ -100,9 +99,9 @@ export class SiemMigrationTelemetryClient {
         return;
       }
 
-      this.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS.eventType, {
+      this.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS, {
         migrationId: this.migrationId,
-        translationResult: migrationResult?.translation_result,
+        translationResult: migrationResult?.translation_result || '',
         duration,
         model: this.modelName,
         prebuiltMatch: migrationResult?.elastic_rule?.prebuilt_rule_id ? true : false,
@@ -117,7 +116,7 @@ export class SiemMigrationTelemetryClient {
       const total = stats ? stats.completed + stats.failed : 0;
 
       if (error) {
-        this.reportEvent(SIEM_MIGRATIONS_MIGRATION_FAILURE.eventType, {
+        this.reportEvent(SIEM_MIGRATIONS_MIGRATION_FAILURE, {
           migrationId: this.migrationId,
           model: this.modelName || '',
           completed: stats ? stats.completed : 0,
@@ -129,7 +128,7 @@ export class SiemMigrationTelemetryClient {
         return;
       }
 
-      this.reportEvent(SIEM_MIGRATIONS_MIGRATION_SUCCESS.eventType, {
+      this.reportEvent(SIEM_MIGRATIONS_MIGRATION_SUCCESS, {
         migrationId: this.migrationId,
         model: this.modelName || '',
         completed: stats ? stats.completed : 0,
