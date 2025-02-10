@@ -578,6 +578,7 @@ export class TrainedModelsService {
     // Clear operation state
     this.downloadInProgress.clear();
     this.abortedDownloads.clear();
+    this.processedDeployments.clear();
     this.downloadStatusFetchInProgress = false;
 
     // Clear subscriptions
