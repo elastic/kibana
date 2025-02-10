@@ -1490,6 +1490,7 @@
     "@kbn/scout": "link:packages/kbn-scout",
     "@kbn/scout-info": "link:packages/kbn-scout-info",
     "@kbn/scout-reporting": "link:packages/kbn-scout-reporting",
+    "@kbn/scout-security": "link:x-pack/solutions/security/packages/kbn-scout-security",
     "@kbn/security-api-integration-helpers": "link:x-pack/test/security_api_integration/packages/helpers",
     "@kbn/serverless-storybook-config": "link:packages/serverless/storybook/config",
     "@kbn/set-map": "link:packages/kbn-set-map",

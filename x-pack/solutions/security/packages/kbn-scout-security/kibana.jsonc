@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/scout-security",
+  "owner": "@elastic/security-solution",
+  "devOnly": true
+}
