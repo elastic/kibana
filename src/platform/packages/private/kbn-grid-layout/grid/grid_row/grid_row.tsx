@@ -25,11 +25,17 @@ export interface GridRowProps {
     panelId: string,
     setDragHandles?: (refs: Array<HTMLElement | null>) => void
   ) => React.ReactNode;
+  hasCustomDragHandle: boolean;
   gridLayoutStateManager: GridLayoutStateManager;
 }
 
 export const GridRow = React.memo(
-  ({ rowIndex, renderPanelContents, gridLayoutStateManager }: GridRowProps) => {
+  ({
+    rowIndex,
+    renderPanelContents,
+    hasCustomDragHandle,
+    gridLayoutStateManager,
+  }: GridRowProps) => {
     const currentRow = gridLayoutStateManager.gridLayout$.value[rowIndex];
 
     const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
@@ -161,6 +167,7 @@ export const GridRow = React.memo(
                 rowIndex={rowIndex}
                 gridLayoutStateManager={gridLayoutStateManager}
                 renderPanelContents={renderPanelContents}
+                hasCustomDragHandle={hasCustomDragHandle}
               />
             ))}
             <DragPreview rowIndex={rowIndex} gridLayoutStateManager={gridLayoutStateManager} />

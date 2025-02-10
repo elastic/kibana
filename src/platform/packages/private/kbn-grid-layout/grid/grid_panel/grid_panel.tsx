@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { GridLayoutStateManager } from '../types';
-import { DragHandle, DragHandleApi } from './drag_handle';
+import { DefaultDragHandle } from './drag_handle/default_drag_handle';
+import { useDragHandleApi } from './drag_handle/use_drag_handle_api';
 import { ResizeHandle } from './resize_handle';
 
 export interface GridPanelProps {
@@ -24,13 +25,20 @@ export interface GridPanelProps {
     panelId: string,
     setDragHandles?: (refs: Array<HTMLElement | null>) => void
   ) => React.ReactNode;
+  hasCustomDragHandle: boolean;
   gridLayoutStateManager: GridLayoutStateManager;
 }
 
 export const GridPanel = React.memo(
-  ({ panelId, rowIndex, renderPanelContents, gridLayoutStateManager }: GridPanelProps) => {
-    const [dragHandleApi, setDragHandleApi] = useState<DragHandleApi | null>(null);
+  ({
+    panelId,
+    rowIndex,
+    renderPanelContents,
+    hasCustomDragHandle,
+    gridLayoutStateManager,
+  }: GridPanelProps) => {
     const { euiTheme } = useEuiTheme();
+    const dragHandleApi = useDragHandleApi({ gridLayoutStateManager, panelId, rowIndex });
 
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
@@ -156,9 +164,10 @@ export const GridPanel = React.memo(
      * Memoize panel contents to prevent unnecessary re-renders
      */
     const panelContents = useMemo(() => {
-      if (!dragHandleApi) return <></>; // delays the rendering of the panel until after dragHandleApi is defined
       return renderPanelContents(panelId, dragHandleApi.setDragHandles);
     }, [panelId, renderPanelContents, dragHandleApi]);
+
+    console.log('render');
 
     return (
       <div
@@ -171,12 +180,7 @@ export const GridPanel = React.memo(
         css={initialStyles}
         className="kbnGridPanel"
       >
-        <DragHandle
-          ref={setDragHandleApi}
-          gridLayoutStateManager={gridLayoutStateManager}
-          panelId={panelId}
-          rowIndex={rowIndex}
-        />
+        {!hasCustomDragHandle && <DefaultDragHandle dragHandleApi={dragHandleApi} />}
         {panelContents}
         <ResizeHandle
           gridLayoutStateManager={gridLayoutStateManager}
