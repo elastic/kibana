@@ -80,7 +80,8 @@ export const simulateProcessorRoute = createServerRoute({
 
     const { normalizedDocs, processorsMetrics } = normalizePipelineSimulationResult(
       pipelineSimulationResult,
-      simulationData.docs
+      simulationData.docs,
+      params.body.processing
     );
 
     return prepareSimulationResponse(normalizedDocs, processorsMetrics);
@@ -224,10 +225,12 @@ interface SimulatedDocError {
   message: string;
 }
 
+type DocSimulationStatus = 'parsed' | 'partially_parsed' | 'failed';
+
 interface NormalizedSimulationDoc {
   detected_fields: Array<{ processor_id: string; field: string }>;
   errors: SimulatedDocError[];
-  status: 'parsed' | 'partially_parsed' | 'failed';
+  status: DocSimulationStatus;
   value: RecursiveRecord;
 }
 
@@ -238,14 +241,9 @@ interface ProcessorMetrics {
   success_rate: number;
 }
 
-const initProcessorMetricsMap = (simulationResult: IngestSimulateResponse) => {
-  const processorIds =
-    simulationResult.docs[0].processor_results
-      ?.filter((processorResult) => !!processorResult.tag)
-      .map((processorResult) => processorResult.tag!) ?? [];
-
-  const processorMetricsEntries: Array<[string, ProcessorMetrics]> = processorIds.map((id) => [
-    id,
+const initProcessorMetricsMap = (processing: ProcessorDefinitionWithId[]) => {
+  const processorMetricsEntries: Array<[string, ProcessorMetrics]> = processing.map((processor) => [
+    processor.id,
     {
       detected_fields: [],
       errors: [],
@@ -273,25 +271,30 @@ const extractProcessorMetrics = (processorsMap: Map<string, ProcessorMetrics>) =
   });
 };
 
+const getDocumentStatus = (doc: IngestSimulateSimulateDocumentResult): DocSimulationStatus => {
+  if (isSuccessfulDocument(doc)) return 'parsed';
+
+  if (isPartiallySuccessfulDocument(doc)) return 'partially_parsed';
+
+  return 'failed';
+};
+
 const normalizePipelineSimulationResult = (
   simulationResult: IngestSimulateResponse,
-  sampleDocs: Array<{ _source: RecursiveRecord }>
+  sampleDocs: Array<{ _source: RecursiveRecord }>,
+  processing: ProcessorDefinitionWithId[]
 ): {
   normalizedDocs: NormalizedSimulationDoc[];
   processorsMetrics: Record<string, ProcessorMetrics>;
 } => {
-  const processorsMap = initProcessorMetricsMap(simulationResult);
+  const processorsMap = initProcessorMetricsMap(processing);
 
   const normalizedDocs = simulationResult.docs.map((docResult, id) => {
     const lastDocSource = docResult.processor_results?.at(-1)?.doc?._source!; // Safe to use ! here since we force the processor to not ignore failures
 
     const diff = computeSimulationDocDiff(docResult, sampleDocs[id]._source);
 
-    const status: NormalizedSimulationDoc['status'] = isSuccessfulDocument(docResult)
-      ? 'parsed'
-      : isPartiallySuccessfulDocument(docResult)
-      ? 'partially_parsed'
-      : 'failed';
+    const status = getDocumentStatus(docResult);
 
     const { _errors, ...docSource } = lastDocSource;
     const errors = (_errors ?? []) as SimulatedDocError[];
@@ -377,23 +380,23 @@ const computeSimulationDocDiff = (
   return diffResult;
 };
 
-const assertSimulationResult = (simulationDiffs: ReturnType<typeof prepareSimulationDiffs>) => {
-  // Assert mappings are compatible with the documents
-  // const entryWithError = simulationResult.docs.find(isMappingFailure);
-  // if (entryWithError) {
-  //   throw new DetectedMappingFailureError(
-  //     `The detected field types might not be compatible with these documents. ${entryWithError.doc.error.reason}`
-  //   );
-  // }
-  // Assert that the processors are purely additive to the documents
-  const updatedFields = computeUpdatedFields(simulationDiffs);
+// const assertSimulationResult = (simulationDiffs: ReturnType<typeof prepareSimulationDiffs>) => {
+//   // Assert mappings are compatible with the documents
+//   const entryWithError = simulationResult.docs.find(isMappingFailure);
+//   if (entryWithError) {
+//     throw new DetectedMappingFailureError(
+//       `The detected field types might not be compatible with these documents. ${entryWithError.doc.error.reason}`
+//     );
+//   }
+//   // Assert that the processors are purely additive to the documents
+//   const updatedFields = computeUpdatedFields(simulationDiffs);
 
-  if (!isEmpty(updatedFields)) {
-    throw new NonAdditiveProcessorError(
-      `The processor is not additive to the documents. It might update fields [${updatedFields.join()}]`
-    );
-  }
-};
+//   if (!isEmpty(updatedFields)) {
+//     throw new NonAdditiveProcessorError(
+//       `The processor is not additive to the documents. It might update fields [${updatedFields.join()}]`
+//     );
+//   }
+// };
 
 const prepareSimulationResponse = (
   normalizedDocs: NormalizedSimulationDoc[],
@@ -404,36 +407,36 @@ const prepareSimulationResponse = (
   const failureRate = 1 - successRate;
 
   return {
+    detected_fields: detectedFields,
     documents: normalizedDocs,
     processor_metrics: processorMetrics,
-    success_rate: parseFloat(successRate.toFixed(2)),
     failure_rate: parseFloat(failureRate.toFixed(2)),
-    detected_fields: detectedFields,
+    success_rate: parseFloat(successRate.toFixed(2)),
   };
 };
 
-const prepareSimulationDiffs = (
-  normalizedDocs: NormalizedSimulationDoc[],
-  sampleDocs: Array<{ _source: RecursiveRecord }>
-) => {
-  // Since we filter out failed documents, we need to map the simulation docs to the sample docs for later retrieval
-  const samplesToSimulationMap = new Map(
-    normalizedDocs.map((doc, id) => [doc.value, sampleDocs[id]])
-  );
+// const prepareSimulationDiffs = (
+//   normalizedDocs: NormalizedSimulationDoc[],
+//   sampleDocs: Array<{ _source: RecursiveRecord }>
+// ) => {
+//   // Since we filter out failed documents, we need to map the simulation docs to the sample docs for later retrieval
+//   const samplesToSimulationMap = new Map(
+//     normalizedDocs.map((doc, id) => [doc.value, sampleDocs[id]])
+//   );
 
-  const diffs = normalizedDocs
-    .filter((doc) => doc.status !== 'failed') // Exclude completely failed documents, keep parsed and partially parsed
-    .map((doc) => {
-      const sample = samplesToSimulationMap.get(doc.value);
-      if (sample) {
-        return calculateObjectDiff(sample._source, doc.value);
-      }
+//   const diffs = normalizedDocs
+//     .filter((doc) => doc.status !== 'failed') // Exclude completely failed documents, keep parsed and partially parsed
+//     .map((doc) => {
+//       const sample = samplesToSimulationMap.get(doc.value);
+//       if (sample) {
+//         return calculateObjectDiff(sample._source, doc.value);
+//       }
 
-      return calculateObjectDiff({});
-    });
+//       return calculateObjectDiff({});
+//     });
 
-  return diffs;
-};
+//   return diffs;
+// };
 
 const computeDetectedFields = (
   processorMetrics: Record<string, ProcessorMetrics>
@@ -448,15 +451,15 @@ const computeDetectedFields = (
   return uniqueFields.map((name) => ({ name, type: 'unmapped' }));
 };
 
-const computeUpdatedFields = (simulationDiff: ReturnType<typeof prepareSimulationDiffs>) => {
-  const diffs = simulationDiff
-    .map((simulatedDoc) => flattenObject(simulatedDoc.updated))
-    .flatMap(Object.keys);
+// const computeUpdatedFields = (simulationDiff: ReturnType<typeof prepareSimulationDiffs>) => {
+//   const diffs = simulationDiff
+//     .map((simulatedDoc) => flattenObject(simulatedDoc.updated))
+//     .flatMap(Object.keys);
 
-  const uniqueFields = [...new Set(diffs)];
+//   const uniqueFields = [...new Set(diffs)];
 
-  return uniqueFields;
-};
+//   return uniqueFields;
+// };
 
 const computeSuccessRate = (docs: NormalizedSimulationDoc[]) => {
   const successfulCount = docs.reduce((rate, doc) => (rate += doc.status === 'parsed' ? 1 : 0), 0);
