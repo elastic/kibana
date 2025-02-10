@@ -5,14 +5,15 @@
  * 2.0.
  */
 
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { PackageService } from '@kbn/fleet-plugin/server';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import type {
-  UpdateRuleMigrationData,
   RuleMigrationTranslationResult,
+  UpdateRuleMigrationData,
 } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import {
   type RuleMigration,
@@ -31,6 +32,7 @@ export interface SiemRuleMigrationsClientDependencies {
   actionsClient: ActionsClient;
   savedObjectsClient: SavedObjectsClientContract;
   packageService?: PackageService;
+  telemetry: AnalyticsServiceSetup;
 }
 
 export interface RuleMigrationIntegration {

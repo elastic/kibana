@@ -36,7 +36,7 @@ const mainApiRequestsToIntercept = [
 
 const mainAliasNames = mainApiRequestsToIntercept.map(({ aliasName }) => `@${aliasName}`);
 
-describe('Service inventory', () => {
+describe('Service Inventory', () => {
   before(() => {
     const { rangeFrom, rangeTo } = timeRange;
     synthtrace.index(
