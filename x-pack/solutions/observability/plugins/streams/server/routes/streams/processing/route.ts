@@ -19,9 +19,10 @@ import {
   recursiveRecord,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { isEmpty } from 'lodash';
+import { isEmpty, mapValues, omit, uniq } from 'lodash';
 import {
   IngestProcessorContainer,
+  IngestSimulatePipelineSimulation,
   IngestSimulateRequest,
   IngestSimulateResponse,
   IngestSimulateSimulateDocumentResult,
@@ -80,13 +81,7 @@ export const simulateProcessorRoute = createServerRoute({
       simulationData.docs
     );
 
-    const simulationDiffs = prepareSimulationDiffs(normalizedDocs, pipelineSimulationBody.docs);
-
-    // console.log(JSON.stringify(normalizedPipelineSimulationResult[0], null, 2));
-
-    assertSimulationResult(simulationDiffs);
-
-    return prepareSimulationResponse(simulationResult, normalizedDocs, params.body.detected_fields);
+    return prepareSimulationResponse(normalizedDocs, processorsMetrics);
   },
 });
 
@@ -228,69 +223,156 @@ interface SimulatedDocError {
 }
 
 interface NormalizedSimulationDoc {
-  value: RecursiveRecord;
+  detected_fields: Array<{ processor_id: string; field: string }>;
+  errors: SimulatedDocError[];
   status: 'parsed' | 'partially_parsed' | 'failed';
-  errors?: string[];
+  value: RecursiveRecord;
 }
 
 interface ProcessorMetrics {
-  success_rate: number;
+  detected_fields: string[];
+  errors: string[];
   failure_rate: number;
-  errors?: string[];
+  success_rate: number;
 }
+
+const initProcessorMetricsMap = (simulationResult: IngestSimulateResponse) => {
+  const processorIds =
+    simulationResult.docs[0].processor_results
+      ?.filter((processorResult) => !!processorResult.tag)
+      .map((processorResult) => processorResult.tag!) ?? [];
+
+  const processorMetricsEntries: Array<[string, ProcessorMetrics]> = processorIds.map((id) => [
+    id,
+    {
+      detected_fields: [],
+      errors: [],
+      failure_rate: 0,
+      success_rate: 1,
+    },
+  ]);
+
+  return new Map(processorMetricsEntries);
+};
+
+const extractProcessorMetrics = (processorsMap: Map<string, ProcessorMetrics>) => {
+  return mapValues(Object.fromEntries(processorsMap), (metrics) => {
+    const failureRate = metrics.failure_rate / 100;
+    const successRate = 1 - failureRate;
+    const detected_fields = uniq(metrics.detected_fields);
+    const errors = uniq(metrics.errors);
+
+    return {
+      detected_fields,
+      errors,
+      failure_rate: parseFloat(failureRate.toFixed(2)),
+      success_rate: parseFloat(successRate.toFixed(2)),
+    };
+  });
+};
 
 const normalizePipelineSimulationResult = (
   simulationResult: IngestSimulateResponse,
   sampleDocs: Array<{ _source: RecursiveRecord }>
-) => {
-  const processorsMap = new Map<string, ProcessorMetrics>();
+): {
+  normalizedDocs: NormalizedSimulationDoc[];
+  processorsMetrics: Record<string, ProcessorMetrics>;
+} => {
+  const processorsMap = initProcessorMetricsMap(simulationResult);
 
   const normalizedDocs = simulationResult.docs.map((docResult, id) => {
-    const lastDocSource = docResult.processor_results?.at(-1)?.doc?._source;
+    const lastDocSource = docResult.processor_results?.at(-1)?.doc?._source!; // Safe to use ! here since we force the processor to not ignore failures
 
-    const status = isSuccessfulPipelineSimulationDocument(docResult)
+    const diff = computeSimulationDocDiff(docResult, sampleDocs[id]._source);
+
+    const status: NormalizedSimulationDoc['status'] = isSuccessfulDocument(docResult)
       ? 'parsed'
-      : isPartiallySuccessfulPipelineSimulationDocument(docResult)
+      : isPartiallySuccessfulDocument(docResult)
       ? 'partially_parsed'
       : 'failed';
 
-    if (lastDocSource) {
-      const { _errors, ...docSource } = lastDocSource;
-      const errors = _errors as SimulatedDocError[] | undefined;
+    const { _errors, ...docSource } = lastDocSource;
+    const errors = (_errors ?? []) as SimulatedDocError[];
 
-      if (errors) {
-        errors?.forEach((error) => {
-          const procId = error.processor_id;
-          const metrics = processorsMap.get(procId) ?? {
-            errors: [],
-            success_rate: 0,
-            failure_rate: 0,
-          };
+    diff.detected_fields.forEach(({ processor_id, field }) => {
+      const metrics = processorsMap.get(processor_id)!; // Safe to use ! here since we initialize the map with all processor ids
 
-          metrics.errors?.push(error.message);
-          metrics.failure_rate++;
+      metrics.detected_fields.push(field);
 
-          processorsMap.set(procId, metrics);
-        });
-      }
+      processorsMap.set(processor_id, metrics);
+    });
 
-      return {
-        value: flattenObject(docSource),
-        errors,
-        status,
-      };
-    } else {
-      return {
-        value: flattenObject(sampleDocs[id]._source),
-        errors: [{ processor_id: 'unknown', message: 'Unknown error' }],
-        status: 'failed',
-      };
-    }
+    errors.push(...diff.errors);
+    errors.forEach((error) => {
+      const procId = error.processor_id;
+      const metrics = processorsMap.get(procId)!; // Safe to use ! here since we initialize the map with all processor ids
+
+      metrics.errors.push(extractGrokErrorMessage(error.message));
+      metrics.failure_rate++;
+
+      processorsMap.set(procId, metrics);
+    });
+
+    return {
+      value: flattenObject(docSource),
+      detected_fields: diff.detected_fields,
+      errors,
+      status,
+    };
   });
 
-  const processorsMetrics = Object.fromEntries(processorsMap);
+  const processorsMetrics = extractProcessorMetrics(processorsMap);
 
   return { normalizedDocs, processorsMetrics };
+};
+
+const computeSimulationDocDiff = (
+  docResult: IngestSimulateSimulateDocumentResult,
+  sample: RecursiveRecord
+) => {
+  const successfulProcessors = docResult.processor_results!.filter(isSuccessfulProcessor);
+
+  const comparisonDocs = [
+    { processor_id: 'base', value: sample },
+    ...successfulProcessors?.map((proc) => ({
+      processor_id: proc.tag,
+      value: omit(proc.doc._source, ['_errors', 'ingest']),
+    })),
+  ];
+
+  const diffResult: Pick<NormalizedSimulationDoc, 'detected_fields' | 'errors'> = {
+    detected_fields: [],
+    errors: [],
+  };
+
+  while (comparisonDocs.length > 1) {
+    const currentDoc = comparisonDocs.shift()!; // Safe to use ! here since we check the length
+    const nextDoc = comparisonDocs[0];
+
+    const { added, updated } = calculateObjectDiff(
+      flattenObject(currentDoc.value),
+      flattenObject(nextDoc.value)
+    );
+
+    const addedFields = Object.keys(flattenObject(added));
+    const updatedFields = Object.keys(flattenObject(updated));
+
+    const processorDetectedFields = [...addedFields, ...updatedFields].map((field) => ({
+      processor_id: nextDoc.processor_id,
+      field,
+    }));
+
+    diffResult.detected_fields.push(...processorDetectedFields);
+
+    if (!isEmpty(updatedFields)) {
+      diffResult.errors.push({
+        processor_id: nextDoc.processor_id,
+        message: `The processor is not additive to the documents. It might update fields [${updatedFields.join()}]`,
+      });
+    }
+  }
+
+  return diffResult;
 };
 
 const assertSimulationResult = (simulationDiffs: ReturnType<typeof prepareSimulationDiffs>) => {
@@ -312,24 +394,22 @@ const assertSimulationResult = (simulationDiffs: ReturnType<typeof prepareSimula
 };
 
 const prepareSimulationResponse = (
-  simulationResult: any,
   normalizedDocs: NormalizedSimulationDoc[],
-  detectedFields?: ProcessingSimulateParams['body']['detected_fields']
+  processorMetrics: Record<string, ProcessorMetrics>
 ) => {
-  // const confirmedValidDetectedFields = computeMappingProperties(detectedFields ?? []);
-  // const detectedFieldsResult = computeDetectedFields(simulationDiffs, confirmedValidDetectedFields);
-  const successRate = computeSuccessRate(simulationResult);
+  const detectedFields = computeDetectedFields(processorMetrics);
+  const successRate = computeSuccessRate(normalizedDocs);
   const failureRate = 1 - successRate;
 
   return {
     documents: normalizedDocs,
+    processor_metrics: processorMetrics,
     success_rate: parseFloat(successRate.toFixed(2)),
     failure_rate: parseFloat(failureRate.toFixed(2)),
-    detected_fields: detectedFieldsResult,
+    detected_fields: detectedFields,
   };
 };
 
-// TODO: update type once Kibana updates to elasticsearch-js 8.17
 const prepareSimulationDiffs = (
   normalizedDocs: NormalizedSimulationDoc[],
   sampleDocs: Array<{ _source: RecursiveRecord }>
@@ -354,33 +434,14 @@ const prepareSimulationDiffs = (
 };
 
 const computeDetectedFields = (
-  simulation: IngestSimulateResponse,
-  sampleDocs: Array<{ _source: Record<string, unknown> }>
+  processorMetrics: Record<string, ProcessorMetrics>
 ): Array<{
   name: string;
   type: FieldDefinitionConfig['type'] | 'unmapped';
 }> => {
-  // Since we filter out failed documents, we need to map the simulation docs to the sample docs for later retrieval
-  const samplesToSimulationMap = new Map(simulation.docs.map((doc, id) => [doc, sampleDocs[id]]));
+  const fields = Object.values(processorMetrics).flatMap((metrics) => metrics.detected_fields);
 
-  const diffs = simulation.docs
-    .filter(isSuccessfulDocument)
-    .map((doc) => {
-      const sample = samplesToSimulationMap.get(doc);
-      if (sample) {
-        const { added } = calculateObjectDiff(
-          sample._source,
-          doc.processor_results.at(-1)?.doc?._source
-        );
-        return flattenObject(added);
-      }
-
-      return {};
-    })
-    .map(Object.keys)
-    .flat();
-
-  const uniqueFields = [...new Set(diffs)];
+  const uniqueFields = uniq(fields);
 
   return uniqueFields.map((name) => ({ name, type: 'unmapped' }));
 };
@@ -395,41 +456,10 @@ const computeUpdatedFields = (simulationDiff: ReturnType<typeof prepareSimulatio
   return uniqueFields;
 };
 
-interface ProcessorMetrics {
-  success_rate: number;
-  failure_rate: number;
-  errors?: string[];
-}
-
-// const computeSimulationMetrics = (
-//   docs: NormalizedSimulationDoc[],
-//   processors: ProcessorDefinition[]
-// ): ProcessorMetrics[] => {
-//   const processorIds = processors.map((_, id) => getProcessorId(id));
-//   const processorsMap = new Map<string, ProcessorMetrics>(
-//     processorIds.map((id) => [id, { success_rate: 0, failure_rate: 0, errors: [] }])
-//   );
-
-//   processorIds.forEach((id) => {
-//     const metrics = processorsMap.get(id)!; // Safe to use ! here since we initialize the map with all processor ids
-//     docs.forEach((doc) => {
-//       if (doc.errors) {
-//         const processorErrors = doc.errors.filter((error) => error.processor_id === id);
-//         metrics.errors?.push(...processorErrors.map((error) => error.message));
-//       }
-//     });
-
-//     processorsMap.set(id, metrics);
-//   });
-// };
-
-// TODO: update type once Kibana updates to elasticsearch-js 8.17
 const computeSuccessRate = (docs: NormalizedSimulationDoc[]) => {
-  const successfulCount = docs.reduce((rate, entry) => {
-    return (rate += doc ? 1 : 0);
-  }, 0);
+  const successfulCount = docs.reduce((rate, doc) => (rate += doc.status === 'parsed' ? 1 : 0), 0);
 
-  return successfulCount / simulation.docs.length;
+  return successfulCount / docs.length;
 };
 
 const computeMappingProperties = (
@@ -438,24 +468,31 @@ const computeMappingProperties = (
   return Object.fromEntries(detectedFields.map(({ name, type }) => [name, { type }]));
 };
 
-// TODO: update type once Kibana updates to elasticsearch-js 8.17
-const isSuccessfulDocument = (entry: any) => entry.doc.error === undefined;
-// TODO: update type once Kibana updates to elasticsearch-js 8.17
-const isMappingFailure = (entry: any) =>
-  !isSuccessfulDocument(entry) && entry.doc.error.type === 'document_parsing_exception';
-
-const isSuccessfulPipelineSimulationDocument = (
+const isSuccessfulDocument = (
   doc: IngestSimulateSimulateDocumentResult
 ): doc is Required<IngestSimulateSimulateDocumentResult> =>
-  doc.processor_results?.every((processorSimulation) => processorSimulation.status === 'success') ??
-  false;
+  doc.processor_results?.every(isSuccessfulProcessor) ?? false;
 
-const isPartiallySuccessfulPipelineSimulationDocument = (
+const isPartiallySuccessfulDocument = (
   doc: IngestSimulateSimulateDocumentResult
 ): doc is Required<IngestSimulateSimulateDocumentResult> =>
-  doc.processor_results?.some(
-    (processorSimulation) => processorSimulation.status === 'success' && processorSimulation.tag
-  ) ?? false;
+  doc.processor_results?.some(isSuccessfulProcessor) ?? false;
+
+const isSuccessfulProcessor = (
+  processor: IngestSimulatePipelineSimulation
+): processor is WithRequired<IngestSimulatePipelineSimulation, 'doc' | 'tag'> =>
+  processor.status === 'success' && !!processor.tag;
+
+const baseGrokMatchError = 'Provided Grok expressions do not match field value';
+
+const extractGrokErrorMessage = (message: string) => {
+  const baseRegex = new RegExp(`${baseGrokMatchError}: (?:.*)`);
+  const isMatch = baseRegex.test(message);
+
+  return isMatch ? baseGrokMatchError : message;
+};
+
+type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKey]-?: TObj[TProp] };
 
 export const processingRoutes = {
   ...simulateProcessorRoute,
