@@ -15,7 +15,7 @@ echo '--- Lint: eslint'
 # after possibly commiting fixed files to the repo
 set +e;
 if is_pr && ! is_auto_commit_disabled; then
-  moon ci :lint -- --fix
+  moon ci :lint-fix
 else
   moon ci :lint
 fi

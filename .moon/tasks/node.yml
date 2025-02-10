@@ -36,9 +36,29 @@ tasks:
   lint:
     command: node
     args:
-      - $workspaceRoot/scripts/eslint.js
-      - $projectRoot
+      - scripts/eslint.js
+      - '@meta(sourceRoot)'
       - '--no-error-on-unmatched-pattern'
+    options:
+      runFromWorkspaceRoot: true
+    inputs:
+      # Source and test files
+      - 'src/**/*'
+      - 'tests/**/*'
+      # Other config files
+      - '*.config.*'
+      # Project configs, any format, any depth
+      - '**/.eslintrc.*'
+      # Root configs, any format
+      - '/.eslintignore'
+      - '/.eslintrc.*'
+  lint-fix:
+    command: node
+    args:
+      - scripts/eslint.js
+      - '@meta(sourceRoot)'
+      - '--no-error-on-unmatched-pattern'
+      - '--fix'
     options:
       runFromWorkspaceRoot: true
     inputs:
@@ -72,7 +92,7 @@ tasks:
     command:
       - 'tsc'
       - '--build'
-      - 'tsconfig.moon.json'
+      - '$projectSource/tsconfig.moon.json'
       - '--pretty'
       - '--verbose'
     inputs:
