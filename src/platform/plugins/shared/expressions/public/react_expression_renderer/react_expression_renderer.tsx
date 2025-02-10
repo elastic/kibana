@@ -14,6 +14,7 @@ import { EuiProgress, useEuiTheme } from '@elastic/eui';
 import { ExpressionRenderError } from '../types';
 import type { ExpressionRendererParams } from './use_expression_renderer';
 import { useExpressionRenderer } from './use_expression_renderer';
+import { css } from '@emotion/react';
 
 // Accept all options of the runner as props except for the
 // dom element which is provided by the component itself
@@ -58,7 +59,7 @@ export function ReactExpressionRenderer({
   }
 
   return (
-    <div {...dataAttrs} className={classes}>
+    <div {...dataAttrs} className={classes} css={expExpressionRendererStyles}>
       {isEmpty && <PanelLoader />}
       {isLoading && (
         <EuiProgress size="xs" color="accent" position="absolute" css={{ zIndex: 1 }} />
@@ -68,3 +69,23 @@ export function ReactExpressionRenderer({
     </div>
   );
 }
+
+const expExpressionRendererStyles = css({
+  position: 'relative',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  width: '100%',
+  height: '100%',
+
+  '& .expExpressionRenderer__expression': {
+    width: '100%',
+    height: '100%',
+  },
+
+  '&.expExpressionRenderer-isEmpty, &.expExpressionRenderer-hasError': {
+    '& .expExpressionRenderer__expression': {
+      display: 'none',
+    },
+  },
+});
