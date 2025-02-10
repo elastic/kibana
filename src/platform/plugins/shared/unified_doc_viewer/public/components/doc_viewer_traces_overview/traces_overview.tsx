@@ -12,8 +12,8 @@ import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiPanel, EuiSpacer, EuiTitle, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getTraceDocumentOverview } from '@kbn/discover-utils';
-import { spanAttributeIds, transactionAttributeIds } from './resources/attribute_ids';
-import { getAttributeConfiguration } from './resources/get_attribute_configuration';
+import { spanFieldIds, transactionFieldIds } from './resources/field_ids';
+import { getFieldConfiguration } from './resources/get_field_configuration';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
 import { FieldWithActions } from './sub_components/field_with_actions/field_with_actions';
 export type TracesOverviewProps = DocViewRenderProps;
@@ -48,18 +48,18 @@ export function TracesOverview({
           <h1>{detailTitle}</h1>
         </EuiTitle>
         <EuiSpacer size="m" />
-        {(isTransaction ? transactionAttributeIds : spanAttributeIds).map((attributeId) => {
-          const attributeConfiguration = getAttributeConfiguration(parsedDoc)[attributeId];
+        {(isTransaction ? transactionFieldIds : spanFieldIds).map((fieldId) => {
+          const attributeConfiguration = getFieldConfiguration(parsedDoc)[fieldId];
 
           if (!attributeConfiguration.content) {
             return null;
           }
           return (
-            <div key={attributeId}>
+            <div key={fieldId}>
               <FieldWithActions
-                data-test-subj={`unifiedDocViewTracesOverviewAttribute-${attributeId}`}
+                data-test-subj={`unifiedDocViewTracesOverviewAttribute-${fieldId}`}
                 label={attributeConfiguration.title}
-                field={attributeId}
+                field={fieldId}
                 value={attributeConfiguration.value}
                 formattedValue={attributeConfiguration.value}
               >

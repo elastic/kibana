@@ -36,7 +36,7 @@ import { Duration } from '../sub_components/duration';
 import { DependencyNameLink } from '../sub_components/dependency_name_link';
 import { HttpStatusCode } from '../sub_components/http_status_code';
 
-export const getAttributeConfiguration = (
+export const getFieldConfiguration = (
   attributes: TraceDocumentOverview
 ): Record<string, { title: string; content: React.ReactNode; value: any }> => {
   return {
