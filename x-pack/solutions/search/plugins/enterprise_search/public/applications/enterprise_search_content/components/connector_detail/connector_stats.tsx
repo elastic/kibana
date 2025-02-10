@@ -487,56 +487,58 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
             footer={
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  {agentlessAgentExists && (
-                    <EuiButton
-                      data-test-subj="connectorStatsViewLogsButton"
-                      aria-label={i18n.translate(
-                        'xpack.enterpriseSearch.connectors.connectorStats.viewLogsButtonLabel',
-                        { defaultMessage: 'View in Discover' }
-                      )}
-                      iconType="discoverApp"
-                      onClick={() => {
-                        discover.locator?.navigate({
-                          dataViewId: 'logs-*',
-                          filters: [
-                            {
-                              meta: {
-                                key: 'labels.connector_id',
-                                index: 'logs-*',
-                                type: 'phrase',
-                                params: connector.id,
-                              },
-                              query: {
-                                match_phrase: {
-                                  'labels.connector_id': connector.id,
-                                },
+                  <EuiButton
+                    data-test-subj="connectorStatsViewLogsButton"
+                    aria-label={i18n.translate(
+                      'xpack.enterpriseSearch.connectors.connectorStats.viewLogsButtonLabel',
+                      { defaultMessage: 'View in Discover' }
+                    )}
+                    disabled={!agentlessAgentExists}
+                    iconType="discoverApp"
+                    onClick={() => {
+                      if (!agentlessAgentExists) {
+                        return;
+                      }
+                      discover.locator?.navigate({
+                        dataViewId: 'logs-*',
+                        filters: [
+                          {
+                            meta: {
+                              key: 'labels.connector_id',
+                              index: 'logs-*',
+                              type: 'phrase',
+                              params: connector.id,
+                            },
+                            query: {
+                              match_phrase: {
+                                'labels.connector_id': connector.id,
                               },
                             },
-                            {
-                              meta: {
-                                key: 'elastic_agent.id',
-                                index: 'logs-*',
-                                type: 'phrase',
-                                params: connector.id,
-                              },
-                              query: {
-                                match_phrase: {
-                                  'elastic_agent.id': agentlessOverview.agent.id,
-                                },
+                          },
+                          {
+                            meta: {
+                              key: 'elastic_agent.id',
+                              index: 'logs-*',
+                              type: 'phrase',
+                              params: connector.id,
+                            },
+                            query: {
+                              match_phrase: {
+                                'elastic_agent.id': agentlessOverview.agent.id,
                               },
                             },
-                          ],
-                          timeRange: logsTimeRangeLast6hrs,
-                          columns: ['message', 'log.level', 'labels.sync_job_id'],
-                        });
-                      }}
-                    >
-                      {i18n.translate(
-                        'xpack.enterpriseSearch.connectors.connectorStats.viewLogsButtonLabel',
-                        { defaultMessage: 'View logs' }
-                      )}
-                    </EuiButton>
-                  )}
+                          },
+                        ],
+                        timeRange: logsTimeRangeLast6hrs,
+                        columns: ['message', 'log.level', 'labels.sync_job_id'],
+                      });
+                    }}
+                  >
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.connectors.connectorStats.viewLogsButtonLabel',
+                      { defaultMessage: 'View logs' }
+                    )}
+                  </EuiButton>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   {agentlessAgentExists ? (
