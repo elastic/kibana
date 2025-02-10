@@ -131,6 +131,50 @@ describe('useRuleFormSteps', () => {
   });
 });
 
+test('renders actions as incomplete if there are 0 defined actions', async () => {
+  useRuleFormState.mockReturnValue({
+    ...ruleFormStateMock,
+    formData: {
+      ...formDataMock,
+      actions: [],
+    },
+  });
+
+  const TestComponent = () => {
+    const { steps } = useRuleFormSteps();
+
+    return <EuiSteps steps={steps} />;
+  };
+
+  render(<TestComponent />);
+
+  expect(await screen.getByText('Step 2 is incomplete')).toBeInTheDocument();
+  const step2 = screen.getByTestId('ruleFormStep-rule-actions-reportOnBlur');
+  await fireEvent.blur(step2!);
+  // Use regex with negative lookahead because the testing library doesn't like doing not.toBeInTheDocument() with text matchers
+  expect(await screen.getByText(/Step 2(?! has errors)/)).toBeInTheDocument();
+});
+
+test('renders actions as complete if there are more than 0 defined actions', async () => {
+  useRuleFormState.mockReturnValue({
+    ...ruleFormStateMock,
+    formData: {
+      ...formDataMock,
+      actions: [{ id: '1', actionTypeId: 'test', name: 'test' }],
+    },
+  });
+
+  const TestComponent = () => {
+    const { steps } = useRuleFormSteps();
+
+    return <EuiSteps steps={steps} />;
+  };
+
+  render(<TestComponent />);
+
+  expect(await screen.getByText(/Step 2(?!( is incomplete)|( has errors))/)).toBeInTheDocument();
+});
+
 describe('useRuleFormHorizontalSteps', () => {
   afterEach(() => {
     jest.clearAllMocks();
