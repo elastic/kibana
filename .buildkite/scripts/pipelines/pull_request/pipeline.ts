@@ -288,10 +288,40 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/entity_analytics.yml')
       );
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution/explore.yml'));
       pipeline.push(
         getPipeline('.buildkite/pipelines/pull_request/security_solution/rule_management.yml')
       );
+    }
+
+    if (
+      (await doAnyChangesMatch([
+        /^package.json/,
+        /^packages\/kbn-securitysolution-.*/,
+        /^x-pack\/platform\/plugins\/shared\/alerting/,
+        /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
+        /^x-pack\/solutions\/security\/plugins\/lists/,
+        /^x-pack\/platform\/plugins\/shared\/rule_registry\/common/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution_ess/,
+        /^x-pack\/solutions\/security\/plugins\/security_solution_serverless/,
+        /^x-pack\/platform\/plugins\/shared\/task_manager/,
+        /^x-pack\/platform\/plugins\/shared\/timelines/,
+        /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
+        /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
+        /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/server\/connector_types\/openai/,
+        /^x-pack\/platform\/plugins\/shared\/triggers_actions_ui\/server\/connector_types\/bedrock/,
+        /^x-pack\/platform\/plugins\/shared\/usage_collection\/public/,
+        /^x-pack\/solutions\/security\/plugins\/elastic_assistant/,
+        /^x-pack\/solutions\/security\/packages/,
+        /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant/,
+        /^x-pack\/platform\/packages\/shared\/kbn-elastic-assistant-common/,
+        /^x-pack\/test\/functional\/es_archives\/security_solution/,
+        /^x-pack\/test\/security_solution_cypress/,
+        /^src\/platform\/plugins\/shared\/dashboard\/public\/dashboard_container/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/security_solution/explore.yml'));
     }
 
     if (
