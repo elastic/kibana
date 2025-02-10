@@ -38,6 +38,7 @@ import { getDegradedFieldValues } from './get_degraded_field_values';
 import { getDegradedFields } from './get_degraded_fields';
 import { getNonAggregatableDataStreams } from './get_non_aggregatable_data_streams';
 import { updateFieldLimit } from './update_field_limit';
+import { getDataStreamsCreationDate } from './get_data_streams_creation_date';
 
 const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
@@ -81,15 +82,20 @@ const statsRoute = createDatasetQualityServerRoute({
       return dataStream.userPrivileges.canMonitor;
     });
 
-    const dataStreamsStats = isServerless
-      ? await getDataStreamsMeteringStats({
-          esClient: esClientAsSecondaryAuthUser,
-          dataStreams: privilegedDataStreams.map((stream) => stream.name),
-        })
-      : await getDataStreamsStats({
-          esClient,
-          dataStreams: privilegedDataStreams.map((stream) => stream.name),
-        });
+    const dataStreamsNames = privilegedDataStreams.map((stream) => stream.name);
+    const [dataStreamsStats, dataStreamsCreationDate] = await Promise.all([
+      isServerless
+        ? getDataStreamsMeteringStats({
+            esClient: esClientAsSecondaryAuthUser,
+            dataStreams: dataStreamsNames,
+          })
+        : getDataStreamsStats({
+            esClient,
+            dataStreams: dataStreamsNames,
+          }),
+
+      getDataStreamsCreationDate({ esClient, dataStreams: dataStreamsNames }),
+    ]);
 
     return {
       datasetUserPrivileges,
@@ -97,7 +103,7 @@ const statsRoute = createDatasetQualityServerRoute({
         dataStream.size = dataStreamsStats[dataStream.name]?.size;
         dataStream.sizeBytes = dataStreamsStats[dataStream.name]?.sizeBytes;
         dataStream.totalDocs = dataStreamsStats[dataStream.name]?.totalDocs;
-        dataStream.creationDate = dataStreamsStats[dataStream.name]?.creationDate;
+        dataStream.creationDate = dataStreamsCreationDate[dataStream.name];
 
         return dataStream;
       }),
