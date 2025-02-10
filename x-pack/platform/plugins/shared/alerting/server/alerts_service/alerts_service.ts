@@ -46,6 +46,7 @@ import type { LegacyAlertsClientParams, AlertRuleData } from '../alerts_client';
 import { AlertsClient } from '../alerts_client';
 import { IAlertsClient } from '../alerts_client/types';
 import { setAlertsToUntracked, SetAlertsToUntrackedParams } from './lib/set_alerts_to_untracked';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 
 export const TOTAL_FIELDS_LIMIT = 2500;
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
@@ -494,6 +495,29 @@ export class AlertsService implements IAlertsService {
       logger: this.options.logger,
       esClient: await this.options.elasticsearchClientPromise,
       ...opts,
+    });
+  }
+
+  public async getRuntimeFields({ index }: { index: string }): Promise<string[]> {
+    const esClient = await this.options.elasticsearchClientPromise;
+    const fields = await esClient.indices.getMapping({ index });
+    const runtimeFieldsMapping = fields[index]?.mappings?.runtime;
+    if (runtimeFieldsMapping) {
+      return Object.keys(runtimeFieldsMapping);
+    }
+    return [];
+  }
+  public async addRuntimeFields({ index, fields }: { index: string; fields: string[] }) {
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    const runtime: MappingRuntimeFields = {};
+    fields.forEach((f) => {
+      runtime[f] = { type: 'keyword' };
+    });
+
+    await esClient.indices.putMapping({
+      index,
+      runtime,
     });
   }
 }

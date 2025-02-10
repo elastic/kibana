@@ -34,6 +34,8 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
+import { useFetchAlertsFieldsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query';
+import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { useKibana } from '../../utils/kibana_react';
 import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
@@ -44,6 +46,7 @@ import { RuleConditionChart as PreviewChart } from '../rule_condition_chart/rule
 import { getSearchConfiguration } from './helpers/get_search_configuration';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
+const MAX_SELECTABLE_RUNTIME_FIELDS = 25;
 
 type Props = Omit<
   RuleTypeParamsExpressionProps<RuleTypeParams & AlertParams, AlertContextMeta>,
@@ -67,6 +70,7 @@ export const defaultExpression: MetricExpression = {
 export default function Expressions(props: Props) {
   const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
   const {
+    http,
     data,
     dataViews,
     dataViewEditor,
@@ -84,6 +88,7 @@ export default function Expressions(props: Props) {
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
   const [dataView, setDataView] = useState<DataView>();
   const [dataViewTimeFieldError, setDataViewTimeFieldError] = useState<string>();
+  const [groupByError, setGroupByError] = useState<string>();
   const [searchSource, setSearchSource] = useState<ISearchSource>();
   const [paramsError, setParamsError] = useState<Error>();
   const [paramsWarning, setParamsWarning] = useState<string>();
@@ -98,6 +103,32 @@ export default function Expressions(props: Props) {
     }),
     [dataView]
   );
+
+  const fieldsQuery = useFetchAlertsFieldsQuery(
+    {
+      http,
+      ruleTypeIds: [OBSERVABILITY_THRESHOLD_RULE_TYPE_ID],
+    },
+    {
+      enabled: true,
+    }
+  );
+
+  useEffect(() => {
+    const groupingFields = Object.keys(
+      fieldsQuery.data?.browserFields?.kibana?.fields || {}
+    ).filter((f) => {
+      return f.startsWith('kibana.alert.grouping');
+    });
+
+    if ((ruleParams.groupBy || []).length + groupingFields.length > MAX_SELECTABLE_RUNTIME_FIELDS) {
+      setGroupByError(
+        `You can't select more than ${MAX_SELECTABLE_RUNTIME_FIELDS - groupingFields.length} groups`
+      );
+    } else {
+      setGroupByError(undefined);
+    }
+  }, [fieldsQuery, ruleParams.groupBy]);
 
   useEffect(() => {
     const initSearchSource = async () => {
@@ -557,6 +588,11 @@ export default function Expressions(props: Props) {
           }}
         />
       </EuiFormRow>
+      {groupByError && (
+        <EuiFormErrorText data-test-subj="thresholdRuleDataViewErrorNoTimestamp">
+          {groupByError}
+        </EuiFormErrorText>
+      )}
       <EuiSpacer size="s" />
       <EuiCheckbox
         id="metrics-alert-group-disappear-toggle"

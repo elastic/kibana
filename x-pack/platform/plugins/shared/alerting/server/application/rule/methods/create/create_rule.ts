@@ -6,8 +6,10 @@
  */
 import Semver from 'semver';
 import Boom from '@hapi/boom';
+import { get } from 'lodash';
 import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { getIndexTemplateAndPattern } from '../../../../alerts_service/resource_installer_utils';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
@@ -49,6 +51,8 @@ export interface CreateRuleParams<Params extends RuleParams = never> {
   allowMissingConnectorSecrets?: boolean;
   isFlappingEnabled?: boolean;
 }
+
+const MAX_ALERT_RUNTIME_FIELDS = 25;
 
 export async function createRule<Params extends RuleParams = never>(
   context: RulesClientContext,
@@ -233,6 +237,53 @@ export async function createRule<Params extends RuleParams = never>(
       paramsWithRefs: updatedParams,
     },
   });
+
+  const alertRuntimeFields = ruleType.alerts?.runtimeFields;
+
+  if (alertRuntimeFields && alertRuntimeFields.length) {
+    const runtimeFieldsToAdd: string[] = [];
+    try {
+      alertRuntimeFields.forEach((field) => {
+        const fieldInRule = get(ruleAttributes, field.fieldInRule);
+        if (fieldInRule) {
+          if (Array.isArray(fieldInRule)) {
+            fieldInRule.forEach((value) => {
+              runtimeFieldsToAdd.push(`${field.prefix}.${value}`);
+            });
+          } else {
+            runtimeFieldsToAdd.push(`${field.prefix}.${fieldInRule}`);
+          }
+        }
+      });
+    } catch (e) {
+      context.logger.warn(`Can't get the runtime fields ${e}`);
+    }
+
+    if (runtimeFieldsToAdd.length > 0) {
+      let existingRuntimeFields = [];
+      if (ruleType.alerts?.context) {
+        const indexName = getIndexTemplateAndPattern({
+          context: ruleType.alerts?.context,
+          namespace: context.spaceId,
+        }).name;
+
+        existingRuntimeFields = await context.alertsService!.getRuntimeFields({
+          index: indexName,
+        });
+
+        if (existingRuntimeFields.length + runtimeFieldsToAdd.length > MAX_ALERT_RUNTIME_FIELDS) {
+          throw Boom.badRequest(
+            `You can't add more than ${MAX_ALERT_RUNTIME_FIELDS} fields to your alerts`
+          );
+        }
+
+        await context.alertsService!.addRuntimeFields({
+          index: indexName,
+          fields: runtimeFieldsToAdd,
+        });
+      }
+    }
+  }
 
   const createdRuleSavedObject: SavedObject<RawRule> = await withSpan(
     { name: 'createRuleSavedObject', type: 'rules' },

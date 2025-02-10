@@ -51,6 +51,7 @@ export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts<CustomThresholdAle
   useEcs: true,
   useLegacyAlerts: false,
   shouldWrite: true,
+  runtimeFields: [{ fieldInRule: 'params.groupBy', prefix: 'kibana.alert.grouping' }],
 };
 
 export const searchConfigurationSchema = schema.object({

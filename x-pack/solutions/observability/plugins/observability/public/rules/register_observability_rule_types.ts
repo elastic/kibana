@@ -68,6 +68,7 @@ export const registerObservabilityRuleTypes = (
     criteria: CustomMetricExpressionParams[];
     searchConfiguration: CustomThresholdSearchSourceFields;
   }) => validateCustomThreshold({ criteria, searchConfiguration, uiSettings });
+
   observabilityRuleTypeRegistry.register({
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
     description: i18n.translate(
