@@ -37,11 +37,6 @@ export class GetSLOGroupings {
       throw new Error("Provided groupingKey doesn't match the SLO's groupBy field");
     }
 
-    const groupingValues = params.instanceId.split(',') ?? [];
-    if (groupingKeys.length !== groupingValues.length) {
-      throw new Error('Provided instanceId does not match the number of grouping keys');
-    }
-
     const response = await this.esClient.search<
       unknown,
       {
@@ -70,7 +65,7 @@ export class GetSLOGroupings {
 
 function generateQuery(slo: SLODefinition, params: GetSLOGroupingsParams, settings: SLOSettings) {
   const groupingKeys = [slo.groupBy].flat();
-  const groupingValues = params.instanceId.split(',') ?? [];
+  const groupingValues = params.instanceId !== ALL_VALUE ? params.instanceId.split(',') : [];
 
   const groupingKeyValuePairs = groupingKeys.map((groupingKey, index) => [
     groupingKey,
@@ -107,13 +102,15 @@ function generateQuery(slo: SLODefinition, params: GetSLOGroupingsParams, settin
               ]
             : []),
           // Set other groupings as term filters
-          ...groupingKeyValuePairs
-            .filter(([groupingKey]) => groupingKey !== params.groupingKey)
-            .map(([groupingKey, groupingValue]) => ({
-              term: {
-                [`slo.groupings.${groupingKey}`]: groupingValue,
-              },
-            })),
+          ...(!!groupingValues.length
+            ? groupingKeyValuePairs
+                .filter(([groupingKey]) => groupingKey !== params.groupingKey)
+                .map(([groupingKey, groupingValue]) => ({
+                  term: {
+                    [`slo.groupings.${groupingKey}`]: groupingValue,
+                  },
+                }))
+            : []),
           // search on the specified groupingKey
           ...(params.search
             ? [
