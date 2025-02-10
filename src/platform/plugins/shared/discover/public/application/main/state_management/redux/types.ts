@@ -108,13 +108,13 @@ export interface DiscoverInternalState {
   adHocDataViews: DataViewSpec[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;
+  dataRequestParams: InternalStateDataRequestParams;
   overriddenVisContextAfterInvalidation: UnifiedHistogramVisContext | {} | undefined; // it will be used during saved search saving
-  isESQLToDataViewTransitionModalVisible?: boolean;
+  isESQLToDataViewTransitionModalVisible: boolean;
   resetDefaultProfileState: {
     resetId: string;
     columns: boolean;
     rowHeight: boolean;
     breakdownField: boolean;
   };
-  dataRequestParams: InternalStateDataRequestParams;
 }
