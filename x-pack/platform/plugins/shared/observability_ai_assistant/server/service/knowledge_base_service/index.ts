@@ -438,7 +438,7 @@ export class KnowledgeBaseService {
       }
 
       if (isSemanticTextUnsupportedError(error)) {
-        this.reIndexKnowledgeBase();
+        void this.reIndexKnowledgeBase();
       }
 
       throw error;
