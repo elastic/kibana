@@ -23,7 +23,6 @@ import {
   apiPublishesSavedSearch,
   PublishesSavedSearch,
   HasTimeRange,
-  EmbeddableTitle,
 } from '@kbn/discover-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -35,6 +34,7 @@ import {
   EmbeddableApiContext,
   getInheritedViewMode,
   HasType,
+  PublishesTitle,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CSV_REPORTING_ACTION, JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
@@ -86,7 +86,7 @@ type GetCsvActionApi = HasType &
   PublishesSavedSearch &
   CanAccessViewMode &
   HasTimeRange &
-  EmbeddableTitle;
+  PublishesTitle;
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is GetCsvActionApi => {
   return (
@@ -95,7 +95,7 @@ const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is Get
     apiPublishesSavedSearch(api) &&
     apiCanAccessViewMode(api) &&
     Boolean((api as unknown as HasTimeRange).hasTimeRange) &&
-    Boolean((api as unknown as EmbeddableTitle).title$)
+    Boolean((api as unknown as PublishesTitle).title$)
   );
 };
 
