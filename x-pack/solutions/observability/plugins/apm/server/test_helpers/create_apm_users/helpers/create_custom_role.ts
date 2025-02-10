@@ -39,6 +39,9 @@ export async function createCustomRole({
       data: {
         ...omit(role, 'applications'),
       },
+      headers: {
+        'elastic-api-version': '2023-10-31',
+      },
     },
   });
 }

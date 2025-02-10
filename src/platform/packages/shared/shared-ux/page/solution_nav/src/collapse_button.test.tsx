@@ -7,24 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { SolutionNavCollapseButton } from './collapse_button';
 
 describe('SolutionNavCollapseButton', () => {
   test('renders', () => {
-    const component = shallow(<SolutionNavCollapseButton isCollapsed={false} />);
-    expect(component).toMatchSnapshot();
-    expect(component.find('.kbnSolutionNavCollapseButton').prop('title')).toBe(
-      'Collapse side navigation'
-    );
+    render(<SolutionNavCollapseButton isCollapsed={false} />);
+    screen.getByTitle('Collapse side navigation');
   });
 
   test('isCollapsed', () => {
-    const component = shallow(<SolutionNavCollapseButton isCollapsed={true} />);
-    expect(component).toMatchSnapshot();
-    expect(component.find('.kbnSolutionNavCollapseButton').prop('title')).toBe(
-      'Open side navigation'
-    );
+    render(<SolutionNavCollapseButton isCollapsed={true} />);
+    screen.getByTitle('Open side navigation');
   });
 });

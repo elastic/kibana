@@ -100,7 +100,7 @@ A Discover session includes the query text, filters, and optionally, the time fi
 [role="xpack"]
 [[discover-read-only-access]]
 ==== Read-only access
-When you have insufficient privileges to save searches, the following indicator in Kibana will be
+When you have insufficient privileges to save Discover sessions, the following indicator in Kibana will be
 displayed and the *Save* button won't be visible. For more information on granting access to
 Kibana see <<xpack-security-authorization>>.
 

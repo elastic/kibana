@@ -11,18 +11,15 @@ import { PluginInitializerContext } from '@kbn/core/public';
 
 import { DashboardPlugin } from './plugin';
 export {
-  createDashboardEditUrl,
   DASHBOARD_APP_ID,
   LEGACY_DASHBOARD_APP_ID,
-  DASHBOARD_GRID_COLUMN_COUNT,
   PanelPlacementStrategy,
-} from './dashboard_constants';
+} from './plugin_constants';
+export { DASHBOARD_GRID_COLUMN_COUNT } from '../common/content_management';
 export type { DashboardApi, DashboardCreationOptions } from './dashboard_api/types';
-export {
-  LazyDashboardRenderer as DashboardRenderer,
-  DASHBOARD_CONTAINER_TYPE,
-  type DashboardLocatorParams,
-} from './dashboard_container';
+export { DASHBOARD_API_TYPE } from './dashboard_api/types';
+export { LazyDashboardRenderer as DashboardRenderer } from './dashboard_container/external_api/lazy_dashboard_renderer';
+export type { DashboardLocatorParams } from './dashboard_container/types';
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
 
 export { DashboardListingTable } from './dashboard_listing';

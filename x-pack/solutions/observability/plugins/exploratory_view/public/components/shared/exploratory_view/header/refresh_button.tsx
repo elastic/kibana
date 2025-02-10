@@ -7,28 +7,20 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { LastUpdated } from './last_updated';
+import { EuiButton } from '@elastic/eui';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 
 export function RefreshButton() {
-  const { setLastRefresh, chartTimeRangeContext } = useSeriesStorage();
+  const { setLastRefresh } = useSeriesStorage();
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="m">
-      <EuiFlexItem style={{ textAlign: 'right', minWidth: 280 }}>
-        <LastUpdated chartTimeRange={chartTimeRangeContext} />
-      </EuiFlexItem>
-      <EuiFlexItem style={{ textAlign: 'right' }}>
-        <EuiButton
-          data-test-subj="o11yRefreshButtonButton"
-          iconType="refresh"
-          onClick={() => setLastRefresh(Date.now())}
-        >
-          {REFRESH_LABEL}
-        </EuiButton>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiButton
+      data-test-subj="o11yRefreshButtonButton"
+      iconType="refresh"
+      onClick={() => setLastRefresh(Date.now())}
+    >
+      {REFRESH_LABEL}
+    </EuiButton>
   );
 }
 

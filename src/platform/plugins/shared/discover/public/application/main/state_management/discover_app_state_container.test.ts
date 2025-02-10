@@ -46,6 +46,7 @@ describe('Test discover app state container', () => {
     savedSearchState = getSavedSearchContainer({
       services: discoverServiceMock,
       globalStateContainer: getDiscoverGlobalStateContainer(stateStorage),
+      internalStateContainer: internalState,
     });
   });
 

@@ -6,15 +6,16 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiFlexItem, type EuiFlexGroupProps, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, type EuiFlexGroupProps, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
+import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks/use_get_severity_status_color';
 import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import { getVulnerabilityStats, hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
 import {
   uiMetricService,
-  VULNERABILITIES_INSIGHT,
+  type CloudSecurityUiCounters,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { InsightDistributionBar } from './insight_distribution_bar';
@@ -38,7 +39,7 @@ interface VulnerabilitiesInsightProps {
   /**
    * used to track the instance of this component, prefer kebab-case
    */
-  telemetrySuffix?: string;
+  telemetryKey?: CloudSecurityUiCounters;
 }
 
 /*
@@ -48,10 +49,12 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
   hostName,
   direction,
   'data-test-subj': dataTestSubj,
-  telemetrySuffix,
+  telemetryKey,
 }) => {
+  const renderingId = useGeneratedHtmlId();
   const { scopeId, isPreview } = useDocumentDetailsContext();
   const { euiTheme } = useEuiTheme();
+  const { getSeverityStatusColor } = useGetSeverityStatusColor();
   const { data } = useVulnerabilitiesPreview({
     query: buildGenericEntityFlyoutPreviewQuery('host.name', hostName),
     sort: [],
@@ -60,12 +63,10 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
   });
 
   useEffect(() => {
-    uiMetricService.trackUiMetric(
-      METRIC_TYPE.COUNT,
-      `${VULNERABILITIES_INSIGHT}-${telemetrySuffix}`
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (telemetryKey) {
+      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, telemetryKey);
+    }
+  }, [telemetryKey, renderingId]);
 
   const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
   const totalVulnerabilities = useMemo(
@@ -87,14 +88,17 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
 
   const vulnerabilitiesStats = useMemo(
     () =>
-      getVulnerabilityStats({
-        critical: CRITICAL,
-        high: HIGH,
-        medium: MEDIUM,
-        low: LOW,
-        none: NONE,
-      }),
-    [CRITICAL, HIGH, MEDIUM, LOW, NONE]
+      getVulnerabilityStats(
+        {
+          critical: CRITICAL,
+          high: HIGH,
+          medium: MEDIUM,
+          low: LOW,
+          none: NONE,
+        },
+        getSeverityStatusColor
+      ),
+    [CRITICAL, HIGH, MEDIUM, LOW, NONE, getSeverityStatusColor]
   );
 
   const count = useMemo(

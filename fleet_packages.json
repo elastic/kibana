@@ -24,7 +24,7 @@
 [
   {
     "name": "apm",
-    "version": "8.15.0-preview-1716438434",
+    "version": "9.0.0-preview-1738343125",
     "forceAlignStackVersion": true,
     "allowSyncToPrerelease": true
   },
@@ -34,11 +34,11 @@
   },
   {
     "name": "endpoint",
-    "version": "8.15.1"
+    "version": "9.0.0"
   },
   {
     "name": "fleet_server",
-    "version": "1.5.0"
+    "version": "1.6.0"
   },
   {
     "name": "profiler_symbolizer",

@@ -7,14 +7,7 @@
 
 import React, { memo } from 'react';
 import type { EuiCommentProps } from '@elastic/eui';
-import {
-  EuiAccordion,
-  EuiCommentList,
-  EuiFlexItem,
-  EuiPanel,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiAccordion, EuiCommentList, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 
 import * as i18n from './translations';
 
@@ -23,16 +16,12 @@ export interface ExceptionItemCardCommentsProps {
 }
 
 export const ExceptionItemCardComments = memo<ExceptionItemCardCommentsProps>(({ comments }) => {
-  const { euiTheme } = useEuiTheme();
-
   return (
     <EuiFlexItem>
       <EuiAccordion
         id="exceptionItemCardComments"
         buttonContent={
-          <EuiText size="s" style={{ color: euiTheme.colors.primary }}>
-            {i18n.exceptionItemCommentsAccordion(comments.length)}
-          </EuiText>
+          <EuiText size="s">{i18n.exceptionItemCommentsAccordion(comments.length)}</EuiText>
         }
         arrowDisplay="none"
         data-test-subj="exceptionsViewerCommentAccordion"

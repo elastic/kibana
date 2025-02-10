@@ -193,6 +193,7 @@ describe('schema validation', () => {
         map: [],
         index_pattern: [],
         ml_module: [],
+        security_ai_prompt: [],
         security_rule: [],
         tag: [],
         csp_rule_template: [],

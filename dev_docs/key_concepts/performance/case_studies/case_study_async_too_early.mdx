@@ -35,7 +35,7 @@ By filtering the network tab in Chrome for `console`, I was able to see the chun
 
 The embedded console consisted of two parts, each being loaded asynchronously in React: the black bottom bar that expands upward to reveal the console, and the console itself:
 
-[![Network tab of Chrome showing the console chunks](./assets/async_too_early_before.png)](./async_too_early_before.png)
+[![Network tab of Chrome showing the console chunks](./assets/async_too_early_before.png)](./assets/async_too_early_before.png)
 
 The console portion was quite large-- `181k`-- and, given the conditional nature of showing that console, this was a sure sign that _a great deal of code_ was being loaded too early.
 

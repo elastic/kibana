@@ -46,8 +46,15 @@ export async function changeDataView(
 
   try {
     nextDataView = typeof id === 'string' ? await dataViews.get(id, false) : id;
+
+    // If nextDataView is an ad hoc data view with no fields, refresh its field list.
+    // This can happen when default profile data views are created without fields
+    // to avoid unnecessary requests on startup.
+    if (!nextDataView.isPersisted() && !nextDataView.fields.length) {
+      await dataViews.refreshFields(nextDataView);
+    }
   } catch (e) {
-    //
+    // Swallow the error and keep the current data view
   }
 
   if (nextDataView && dataView) {

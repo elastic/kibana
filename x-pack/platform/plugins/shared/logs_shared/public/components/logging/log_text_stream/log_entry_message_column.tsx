@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { LogColumn, LogMessagePart } from '../../../../common/log_entry';
 import {
   isConstantSegment,
@@ -59,7 +59,7 @@ interface MessageColumnContentProps {
   wrapMode: WrapMode;
 }
 
-const MessageColumnContent = euiStyled(LogEntryColumnContent)<MessageColumnContentProps>`
+const MessageColumnContent = styled(LogEntryColumnContent)<MessageColumnContentProps>`
   text-overflow: ellipsis;
   ${(props) =>
     props.wrapMode === 'long'

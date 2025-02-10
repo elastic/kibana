@@ -66,6 +66,10 @@ export async function get({
       isSystemAction: foundInMemoryConnector.isSystemAction,
       isDeprecated: isConnectorDeprecated(foundInMemoryConnector),
     };
+
+    if (foundInMemoryConnector.exposeConfig) {
+      connector.config = foundInMemoryConnector.config;
+    }
   } else {
     const result = await getConnectorSo({
       unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,

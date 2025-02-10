@@ -31,7 +31,7 @@ import { SECURITY_LABS_RESOURCE } from '../constants';
 export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
     .get({
-      access: 'internal',
+      access: 'public',
       path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
       security: {
         authz: {
@@ -41,7 +41,7 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(FindKnowledgeBaseEntriesRequestQuery),

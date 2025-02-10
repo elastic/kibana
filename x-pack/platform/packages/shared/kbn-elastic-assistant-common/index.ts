@@ -22,6 +22,24 @@ export {
   replaceOriginalValuesWithUuidValues,
 } from './impl/data_anonymization/helpers';
 
+export {
+  newContentReferencesStore,
+  securityAlertReference,
+  knowledgeBaseReference,
+  securityAlertsPageReference,
+  productDocumentationReference,
+  esqlQueryReference,
+  contentReferenceString,
+  contentReferenceBlock,
+  removeContentReferences,
+  pruneContentReferences,
+} from './impl/content_references';
+
+export type {
+  ContentReferencesStore,
+  ContentReferenceBlock,
+} from './impl/content_references/types';
+
 export { transformRawData } from './impl/data_anonymization/transform_raw_data';
 export { parseBedrockBuffer, handleBedrockChunk } from './impl/utils/bedrock';
 export * from './constants';

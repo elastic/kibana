@@ -57,7 +57,6 @@ import {
 import { defaultPaletteParams } from '../constants';
 import { ChartSplit } from './chart_split';
 import { getSplitDimensionAccessor, createSplitPoint } from '../utils/get_split_dimension_utils';
-import './index.scss';
 
 declare global {
   interface Window {
@@ -572,6 +571,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
           // eui color subdued
           textColor: chartBaseTheme.axes.tickLabel.fill,
           padding: xAxisColumn?.name ? 8 : 0,
+          rotation:
+            args.gridConfig.xAxisLabelRotation && Math.abs(args.gridConfig.xAxisLabelRotation), // rotation is a positive value
         },
         brushMask: {
           fill: isDarkTheme ? 'rgb(30,31,35,80%)' : 'rgb(247,247,247,50%)',

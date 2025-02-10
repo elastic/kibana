@@ -6,12 +6,10 @@
  */
 
 import type { Unionize } from 'utility-types';
-import { euiLightVars as theme } from '@kbn/ui-theme';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { AggregationOptionsByType } from '@kbn/es-types';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { getVizColorForIndex } from '../../../common/viz_colors';
 import type {
   APMEventClient,
   APMEventESSearchRequest,
@@ -53,7 +51,6 @@ export interface FetchAndTransformMetrics {
     title: string;
     key: string;
     type: ChartType;
-    color: string;
     overallValue: number;
     data: Coordinate[];
   }>;
@@ -139,7 +136,6 @@ export async function fetchAndTransformMetrics<T extends MetricAggs>({
               title: chartBase.series[seriesKey].title,
               key: seriesKey,
               type: chartBase.type,
-              color: chartBase.series[seriesKey].color || getVizColorForIndex(i, theme),
               overallValue,
               data:
                 timeseriesData?.buckets.map((bucket) => {

@@ -7,13 +7,14 @@
 
 import { getCombinedRefinePrompt } from '.';
 import { mockAttackDiscoveries } from '../../../../../../evaluation/__mocks__/mock_attack_discoveries';
-import { getContinuePrompt } from '../../../helpers/get_continue_prompt';
+import { ATTACK_DISCOVERY_CONTINUE } from '../../../../../../../prompt/prompts';
 
 describe('getCombinedRefinePrompt', () => {
   it('returns the base query when combinedRefinements is empty', () => {
     const result = getCombinedRefinePrompt({
       attackDiscoveryPrompt: 'Initial query',
       combinedRefinements: '',
+      continuePrompt: ATTACK_DISCOVERY_CONTINUE,
       refinePrompt: 'Refine prompt',
       unrefinedResults: [...mockAttackDiscoveries],
     });
@@ -33,6 +34,7 @@ ${JSON.stringify(mockAttackDiscoveries, null, 2)}
     const result = getCombinedRefinePrompt({
       attackDiscoveryPrompt: 'Initial query',
       combinedRefinements: 'Combined refinements',
+      continuePrompt: ATTACK_DISCOVERY_CONTINUE,
       refinePrompt: 'Refine prompt',
       unrefinedResults: [...mockAttackDiscoveries],
     });
@@ -47,7 +49,7 @@ ${JSON.stringify(mockAttackDiscoveries, null, 2)}
 
 
 
-${getContinuePrompt()}
+${ATTACK_DISCOVERY_CONTINUE}
 
 """
 Combined refinements
@@ -60,6 +62,7 @@ Combined refinements
     const result = getCombinedRefinePrompt({
       attackDiscoveryPrompt: 'Initial query',
       combinedRefinements: '',
+      continuePrompt: ATTACK_DISCOVERY_CONTINUE,
       refinePrompt: 'Refine prompt',
       unrefinedResults: null,
     });

@@ -28,12 +28,16 @@ export const LEGACY_ALERT_USER_CRITICALITY = `${ALERT_NAMESPACE}.user.criticalit
 
 export const ALERT_HOST_CRITICALITY = `host.asset.criticality` as const;
 export const ALERT_USER_CRITICALITY = `user.asset.criticality` as const;
+export const ALERT_SERVICE_CRITICALITY = `service.asset.criticality` as const;
 export const ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL = `host.risk.calculated_level` as const;
 export const ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM =
   `host.risk.calculated_score_norm` as const;
 export const ALERT_USER_RISK_SCORE_CALCULATED_LEVEL = `user.risk.calculated_level` as const;
 export const ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM =
   `user.risk.calculated_score_norm` as const;
+export const ALERT_SERVICE_RISK_SCORE_CALCULATED_LEVEL = `service.risk.calculated_level` as const;
+export const ALERT_SERVICE_RISK_SCORE_CALCULATED_SCORE_NORM =
+  `service.risk.calculated_score_norm` as const;
 
 export const ALERT_ORIGINAL_EVENT = `${ALERT_NAMESPACE}.original_event` as const;
 export const ALERT_ORIGINAL_EVENT_ACTION = `${ALERT_ORIGINAL_EVENT}.action` as const;

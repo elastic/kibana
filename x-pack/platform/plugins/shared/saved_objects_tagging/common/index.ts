@@ -17,3 +17,12 @@ export {
   tagNameMaxLength,
   tagDescriptionMaxLength,
 } from './validation';
+export {
+  convertTagNameToId,
+  getObjectTags,
+  getTag,
+  getTagIdsFromReferences,
+  getTagsFromReferences,
+  replaceTagReferences,
+  tagIdToReference,
+} from './references';

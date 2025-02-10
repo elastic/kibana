@@ -14,7 +14,8 @@ import { clickEnableRiskScore } from '../../../tasks/risk_scores';
 import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 import { PAGE_TITLE } from '../../../screens/entity_analytics_management';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/206580
+describe.skip(
   'Enable risk scores from dashboard',
   {
     tags: ['@ess', '@serverless'],

@@ -16,6 +16,7 @@ import { useGlobalTime } from '../../common/containers/use_global_time';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../overview/components/detection_response/alerts_by_status/types';
 import { useNonClosedAlerts } from './use_non_closed_alerts';
 import { useHasRiskScore } from './use_risk_score_data';
+import type { CloudPostureEntityIdentifier } from '../components/entity_insight';
 
 export const useNavigateEntityInsight = ({
   field,
@@ -23,7 +24,7 @@ export const useNavigateEntityInsight = ({
   subTab,
   queryIdExtension,
 }: {
-  field: 'host.name' | 'user.name';
+  field: CloudPostureEntityIdentifier;
   value: string;
   subTab: string;
   queryIdExtension: string;

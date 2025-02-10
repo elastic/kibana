@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
@@ -69,7 +69,7 @@ export const snoozeRule = (id: string, duration: number): Cypress.Chainable =>
     body: {
       snooze_schedule: {
         duration,
-        rRule: { dtstart: new Date().toISOString(), count: 1, tzid: moment().format('zz') },
+        rRule: { dtstart: new Date().toISOString(), count: 1, tzid: moment.tz.guess() },
       },
     },
     failOnStatusCode: false,

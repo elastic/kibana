@@ -268,8 +268,17 @@ interface BaseOperationDefinitionProps<
   getDefaultLabel: (
     column: C,
     columns: Record<string, GenericIndexPatternColumn>,
-    indexPattern?: IndexPattern
+    indexPattern?: IndexPattern,
+    uiSettings?: IUiSettingsClient,
+    dateRange?: DateRange
   ) => string;
+  getSerializedFormat?: (
+    column: C,
+    targetColumn: C,
+    indexPattern?: IndexPattern,
+    uiSettings?: IUiSettingsClient,
+    dateRange?: DateRange
+  ) => Record<string, unknown>;
   /**
    * This function is called if another column in the same layer changed or got added/removed.
    * Can be used to update references to other columns (e.g. for sorting).
@@ -444,6 +453,15 @@ interface BaseOperationDefinitionProps<
    * When present returns a dictionary of unsupported layer settings
    */
   getUnsupportedSettings?: () => LayerSettingsFeatures;
+
+  toESQL?: (
+    column: C,
+    columnId: string,
+    indexPattern: IndexPattern,
+    layer: FormBasedLayer,
+    uiSettings: IUiSettingsClient,
+    dateRange: DateRange
+  ) => string | undefined;
 }
 
 interface BaseBuildColumnArgs {

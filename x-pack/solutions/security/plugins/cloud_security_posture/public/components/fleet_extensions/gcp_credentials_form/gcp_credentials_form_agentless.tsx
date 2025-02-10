@@ -164,6 +164,7 @@ export const GcpCredentialsFormAgentless = ({
   updatePolicy,
   disabled,
   packageInfo,
+  hasInvalidRequiredVars,
 }: GcpFormProps) => {
   const accountType = input.streams?.[0]?.vars?.['gcp.account_type']?.value;
   const isOrganization = accountType === ORGANIZATION_ACCOUNT;
@@ -250,6 +251,7 @@ export const GcpCredentialsFormAgentless = ({
         }
         isOrganization={isOrganization}
         packageInfo={packageInfo}
+        hasInvalidRequiredVars={hasInvalidRequiredVars}
       />
       <EuiSpacer size="s" />
       <ReadDocumentation url={cspIntegrationDocsNavigation.cspm.gcpGetStartedPath} />

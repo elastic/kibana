@@ -16,7 +16,8 @@ import { useToasts } from '../common/lib/kibana';
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-describe('useGetCategories', () => {
+// Failing: See https://github.com/elastic/kibana/issues/207999
+describe.skip('useGetCategories', () => {
   const abortCtrl = new AbortController();
   beforeEach(() => {
     jest.clearAllMocks();

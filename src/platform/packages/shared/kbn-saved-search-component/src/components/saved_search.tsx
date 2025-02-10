@@ -15,7 +15,7 @@ import type {
   SearchEmbeddableRuntimeState,
   SearchEmbeddableApi,
 } from '@kbn/discover-plugin/public';
-import { SerializedPanelState } from '@kbn/presentation-containers';
+import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { SavedSearchComponentProps } from '../types';
 import { SavedSearchComponentErrorContent } from './error';

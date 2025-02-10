@@ -28,7 +28,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 const getMarkdownContainerCss = (euiTheme: EuiThemeComputed<{}>) => css`
   max-height: 150px;
   overflow-y: auto;
-  color: ${euiTheme.colors.subduedText};
+  color: ${euiTheme.colors.textSubdued};
 `;
 
 const getTruncateCompCss = css`

@@ -45,14 +45,14 @@ describe('initialize edit api', () => {
         .mockReturnValueOnce('/mock-url');
 
       if (dataView) {
-        mockedApi.dataViews.next([dataView]);
+        mockedApi.dataViews$.next([dataView]);
       } else {
-        mockedApi.dataViews.next([dataViewMock]);
+        mockedApi.dataViews$.next([dataViewMock]);
       }
       if (byValue) {
-        mockedApi.savedObjectId.next(undefined);
+        mockedApi.savedObjectId$.next(undefined);
       } else {
-        mockedApi.savedObjectId.next('test-id');
+        mockedApi.savedObjectId$.next('test-id');
       }
       await waitOneTick();
 
@@ -129,7 +129,7 @@ describe('initialize edit api', () => {
     discoverServiceMock.embeddable.getStateTransfer = jest.fn().mockImplementation(() => ({
       navigateToEditor: mockedNavigate,
     }));
-    mockedApi.dataViews.next([dataViewMock]);
+    mockedApi.dataViews$.next([dataViewMock]);
     await waitOneTick();
 
     const { onEdit } = initializeEditApi({

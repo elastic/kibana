@@ -18,14 +18,10 @@ import {
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { normalizeMachineLearningJobIds } from '../../../../../common/detection_engine/utils';
-import {
-  formatScheduleStepData,
-  filterEmptyThreats,
-} from '../../../rule_creation_ui/pages/rule_creation/helpers';
+import { filterEmptyThreats } from '../../../rule_creation_ui/pages/rule_creation/helpers';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
 import { DiffView } from './json_diff/diff_view';
 import * as i18n from './json_diff/translations';
-import { getHumanizedDuration } from '../../../../detections/pages/detection_engine/rules/helpers';
 
 /* Inclding these properties in diff display might be confusing to users. */
 const HIDDEN_PROPERTIES: Array<keyof RuleResponse> = [
@@ -78,20 +74,6 @@ const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
  */
 const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
   const rule = { ...originalRule };
-
-  /*
-    Convert the "from" property value to a humanized duration string, like 'now-1m' or 'now-2h'.
-    Conversion is needed to skip showing the diff for the "from" property when the same
-    duration is represented in different time units. For instance, 'now-1h' and 'now-3600s'
-    indicate a one-hour duration.
-    The same helper is used in the rule editing UI to format "from" before submitting the edits.
-    So, after the rule is saved, the "from" property unit/value might differ from what's in the package.
-  */
-  rule.from = formatScheduleStepData({
-    interval: rule.interval,
-    from: getHumanizedDuration(rule.from, rule.interval),
-    to: rule.to,
-  }).from;
 
   /*
     Default "note" to an empty string if it's not present.

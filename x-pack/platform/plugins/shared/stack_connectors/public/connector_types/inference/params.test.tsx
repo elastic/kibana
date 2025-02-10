@@ -9,8 +9,16 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import ParamsFields from './params';
 import { SUB_ACTION } from '../../../common/inference/constants';
+import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
+
+const mockedIsInferenceEndpointExists = isInferenceEndpointExists as jest.Mock;
+
+jest.mock('@kbn/inference-endpoint-ui-common', () => ({
+  isInferenceEndpointExists: jest.fn(),
+}));
 
 describe('Inference Params Fields renders', () => {
+  mockedIsInferenceEndpointExists.mockResolvedValue(true);
   test('all params fields are rendered', () => {
     const { getByTestId } = render(
       <ParamsFields
@@ -21,7 +29,7 @@ describe('Inference Params Fields renders', () => {
         actionConnector={{
           actionTypeId: '.inference',
           config: {
-            taskType: 'completion',
+            taskType: 'chat_completion',
           },
           id: 'test',
           isPreconfigured: false,
@@ -80,19 +88,10 @@ describe('Inference Params Fields renders', () => {
       );
       expect(editAction).toHaveBeenCalledTimes(2);
       if (provider === 'openai') {
-        expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.UNIFIED_COMPLETION, 0);
+        expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.COMPLETION, 0);
         expect(editAction).toHaveBeenCalledWith(
           'subActionParams',
-          {
-            body: {
-              messages: [
-                {
-                  content: 'Hello world',
-                  role: 'user',
-                },
-              ],
-            },
-          },
+          { input: 'What is Elastic?' },
           0
         );
       }

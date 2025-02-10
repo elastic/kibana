@@ -17,6 +17,8 @@ import { mlPluginMock } from '@kbn/ml-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
+import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
+
 import { mockHistory } from '../react_router/state.mock';
 
 export const mockKibanaValues = {
@@ -60,10 +62,6 @@ export const mockKibanaValues = {
   } as unknown as LensPublicStart,
   ml: mlPluginMock.createStartContract(),
   navigateToUrl: jest.fn(),
-  productAccess: {
-    hasAppSearchAccess: true,
-    hasWorkplaceSearchAccess: true,
-  },
   productFeatures: {
     hasDocumentLevelSecurityEnabled: true,
     hasIncrementalSyncEnabled: true,
@@ -76,6 +74,7 @@ export const mockKibanaValues = {
   setChromeIsVisible: jest.fn(),
   setDocTitle: jest.fn(),
   share: sharePluginMock.createStartContract(),
+  uiActions: uiActionsEnhancedPluginMock.createStartContract(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
   updateSideNavDefinition: jest.fn(),
   user: null,

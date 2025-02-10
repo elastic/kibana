@@ -100,7 +100,7 @@ by a type will be nested under a top-level field that matches the type name.
 For example, the mappings defined by the `search` Saved
 Object type:
 
-https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/saved_search/server/saved_objects/search.ts#L19-L70[.src/platform/plugins/shared/saved_search/server/saved_objects/search.ts]
+{kib-repo}blob/{branch}/src/platform/plugins/shared/saved_search/server/saved_objects/search.ts#L19-L70[search.ts]
 [source,typescript]
 ----
 import { SavedObjectsType } from 'src/core/server';
@@ -166,19 +166,19 @@ Saved Objects support changes using `modelVersions``. The modelVersion API is a 
 
 Model versions are decoupled from the stack version and satisfy the requirements for zero downtime and backward-compatibility.
 
-Each Saved Object type may define model versions for its schema and are bound to a given https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L22-L27[savedObject type]. Changes to a saved object type are
+Each Saved Object type may define model versions for its schema and are bound to a given {kib-repo}blob/{branch}/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L22-L27[savedObject type]. Changes to a saved object type are
 specified by defining a new model.
 
 === Defining model versions
 
 As for old migrations, model versions are bound to a given
-https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L22-L27[savedObject
+{kib-repo}blob/{branch}/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L22-L27[savedObject
 type]
 
 When registering a SO type, a new
-https://github.com/elastic/kibana/blob/9a6a2ccdff619f827b31c40dd9ed30cb27203da7/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L138-L177[modelVersions]
+{kib-repo}blob/{branch}/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L138-L177[modelVersions]
 property is available. This attribute is a map of
-https://github.com/elastic/kibana/blob/9a6a2ccdff619f827b31c40dd9ed30cb27203da7/src/core/packages/saved-objects/server/src/model_version/model_version.ts#L12-L20[SavedObjectsModelVersion]
+{kib-repo}blob/{branch}/src/core/packages/saved-objects/server/src/model_version/model_version.ts#L12-L20[SavedObjectsModelVersion]
 which is the top-level type/container to define model versions.
 
 This map follows a similar `{ [version number] => version definition }`
@@ -223,7 +223,7 @@ const myType: SavedObjectsType = {
 
 === Structure of a model version
 
-https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/src/core/packages/saved-objects/server/src/model_version/model_version.ts#L12-L20[Model
+{kib-repo}blob/{branch}/src/core/packages/saved-objects/server/src/model_version/model_version.ts#L12-L20[Model
 versions] are not just functions as the previous migrations were, but
 structured objects describing how the version behaves and what changed
 since the last one.
@@ -289,7 +289,7 @@ It’s currently composed of two main properties:
 
 ==== changes
 
-https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/src/core/packages/saved-objects/server/src/model_version/model_version.ts#L21-L51[link
+{kib-repo}blob/{branch}/src/core/packages/saved-objects/server/src/model_version/model_version.ts#L21-L51[link
 to the TS doc for `changes`]
 
 Describes the list of changes applied during this version.
@@ -408,7 +408,7 @@ theoretically shouldn’t.*
 
 ==== schemas
 
-https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/src/core/packages/saved-objects/server/src/model_version/schemas.ts#L11-L16[link
+{kib-repo}blob/{branch}/src/core/packages/saved-objects/server/src/model_version/schemas.ts#L11-L16[link
 to the TS doc for `schemas`]
 
 The schemas associated with this version. Schemas are used to validate
@@ -477,7 +477,7 @@ inter-version compatibility themselves in their service layer instead._
 ===== create
 
 This is a direct replacement for
-https://github.com/elastic/kibana/blob/9b330e493216e8dde3166451e4714966f63f5ab7/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L75-L82[the
+{kib-repo}blob/{branch}/src/core/packages/saved-objects/server/src/saved_objects_type.ts#L75-L82[the
 old SavedObjectType.schemas] definition, now directly included in the
 model version definition.
 

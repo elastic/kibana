@@ -43,6 +43,7 @@ import { detectionRulesClientMock } from '../../rule_management/logic/detection_
 import { packageServiceMock } from '@kbn/fleet-plugin/server/services/epm/package_service.mock';
 import type { EndpointInternalFleetServicesInterface } from '../../../../endpoint/services/fleet';
 import { siemMigrationsServiceMock } from '../../../siem_migrations/__mocks__/mocks';
+import { AssetInventoryDataClientMock } from '../../../asset_inventory/asset_inventory_data_client.mock';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -81,6 +82,7 @@ export const createMockClients = () => {
     },
     siemRuleMigrationsClient: siemMigrationsServiceMock.createRulesClient(),
     getInferenceClient: jest.fn(),
+    assetInventoryDataClient: AssetInventoryDataClientMock.create(),
   };
 };
 
@@ -169,6 +171,7 @@ const createSecuritySolutionRequestContextMock = (
     getEntityStoreDataClient: jest.fn(() => clients.entityStoreDataClient),
     getSiemRuleMigrationsClient: jest.fn(() => clients.siemRuleMigrationsClient),
     getInferenceClient: jest.fn(() => clients.getInferenceClient()),
+    getAssetInventoryClient: jest.fn(() => clients.assetInventoryDataClient),
   };
 };
 

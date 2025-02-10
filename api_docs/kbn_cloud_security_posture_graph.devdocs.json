@@ -536,7 +536,7 @@
             "section": "def-public.NodeViewModel",
             "text": "NodeViewModel"
           },
-          ", string>, \"id\" | \"data\" | \"draggable\" | \"width\" | \"height\" | \"selectable\" | \"selected\" | \"parentId\" | \"sourcePosition\" | \"targetPosition\" | \"dragHandle\" | \"deletable\"> & Required<Pick<",
+          ", string>, \"id\" | \"data\" | \"width\" | \"height\" | \"parentId\" | \"sourcePosition\" | \"targetPosition\" | \"dragHandle\"> & Required<Pick<",
           "Node",
           "<",
           {
@@ -546,7 +546,7 @@
             "section": "def-public.NodeViewModel",
             "text": "NodeViewModel"
           },
-          ", string>, \"type\" | \"zIndex\" | \"dragging\">> & { isConnectable: boolean; positionAbsoluteX: number; positionAbsoluteY: number; }"
+          ", string>, \"type\" | \"draggable\" | \"selectable\" | \"selected\" | \"zIndex\" | \"dragging\" | \"deletable\">> & { isConnectable: boolean; positionAbsoluteX: number; positionAbsoluteY: number; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "deprecated": false,

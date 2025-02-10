@@ -28,7 +28,7 @@ import {
 } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
+import { css, Interpolation, Theme } from '@emotion/react';
 import {
   MonacoEditor as ReactMonacoEditor,
   type MonacoEditorProps as ReactMonacoEditorProps,
@@ -157,6 +157,11 @@ export interface CodeEditorProps {
   enableFindAction?: boolean;
 
   dataTestSubj?: string;
+
+  /**
+   * Custom CSS class to apply to the container
+   */
+  classNameCss?: Interpolation<Theme>;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -189,6 +194,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   accessibilityOverlayEnabled = true,
   enableFindAction,
   dataTestSubj,
+  classNameCss,
 }) => {
   const { euiTheme } = useEuiTheme();
 
@@ -490,7 +496,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   return (
     <div
-      css={styles.container}
+      css={[styles.container, classNameCss]}
       onKeyDown={onKeyDown}
       data-test-subj={dataTestSubj ?? 'kibanaCodeEditor'}
       className="kibanaCodeEditor"

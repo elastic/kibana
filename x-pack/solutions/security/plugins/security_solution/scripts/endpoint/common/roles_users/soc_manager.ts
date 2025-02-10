@@ -17,7 +17,7 @@ export const getSocManager: () => Omit<Role, 'name'> = () => {
         ...noResponseActionsRole.kibana[0],
         feature: {
           ...noResponseActionsRole.kibana[0].feature,
-          siem: [
+          siemV2: [
             'minimal_all',
 
             'policy_management_all',
@@ -33,6 +33,8 @@ export const getSocManager: () => Omit<Role, 'name'> = () => {
 
             'workflow_insights_all',
           ],
+          securitySolutionTimeline: ['all'],
+          securitySolutionNotes: ['all'],
         },
       },
     ],

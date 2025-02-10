@@ -86,7 +86,7 @@ describe('FileService', () => {
 
   beforeEach(() => {
     security = securityMock.createSetup();
-    auditLogger = { enabled: true, log: jest.fn() };
+    auditLogger = { enabled: true, log: jest.fn(), includeSavedObjectNames: false };
     (security.audit.asScoped as jest.Mock).mockReturnValue(auditLogger);
     security.audit.withoutRequest = auditLogger;
     blobStorageService = new BlobStorageService(esClient, kbnRoot.logger.get('test-blob-service'));

@@ -30,12 +30,7 @@ import { CANCEL_BUTTON_LABEL } from '../../../../shared/constants';
 import { DataPanel } from '../../../../shared/data_panel/data_panel';
 import { docLinks } from '../../../../shared/doc_links';
 import { RevertConnectorPipelineApilogic } from '../../../api/pipelines/revert_connector_pipeline_api_logic';
-import {
-  getContentExtractionDisabled,
-  isApiIndex,
-  isConnectorIndex,
-  isCrawlerIndex,
-} from '../../../utils/indices';
+import { getContentExtractionDisabled, isApiIndex, isConnectorIndex } from '../../../utils/indices';
 
 import { IndexNameLogic } from '../index_name_logic';
 
@@ -75,7 +70,7 @@ export const SearchIndexPipelines: React.FC = () => {
     if (index) {
       fetchDefaultPipeline(undefined);
       setPipelineState(
-        isConnectorIndex(index) || isCrawlerIndex(index)
+        isConnectorIndex(index)
           ? index.connector?.pipeline ?? defaultPipelineValues
           : defaultPipelineValues
       );

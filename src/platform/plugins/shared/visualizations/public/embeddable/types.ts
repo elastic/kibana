@@ -14,6 +14,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import {
   HasEditCapabilities,
+  HasLibraryTransforms,
   HasSupportedTriggers,
   PublishesDataLoading,
   PublishesDataViews,
@@ -98,13 +99,8 @@ export type VisualizeApi = Partial<HasEditCapabilities> &
   HasInspectorAdapters &
   HasSupportedTriggers &
   PublishesTimeRange &
+  HasLibraryTransforms &
   DefaultEmbeddableApi<VisualizeSerializedState, VisualizeRuntimeState> & {
     updateVis: (vis: DeepPartial<SerializedVis<VisParams>>) => void;
     openInspector: () => OverlayRef | undefined;
-    saveToLibrary: (title: string) => Promise<string>;
-    canLinkToLibrary: () => boolean;
-    canUnlinkFromLibrary: () => boolean;
-    checkForDuplicateTitle: (title: string) => boolean;
-    getByValueState: () => VisualizeSerializedState;
-    getByReferenceState: (id: string) => VisualizeSerializedState;
   };

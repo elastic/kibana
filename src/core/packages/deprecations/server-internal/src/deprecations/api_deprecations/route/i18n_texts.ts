@@ -9,8 +9,10 @@
 
 import { RouterDeprecatedApiDetails } from '@kbn/core-http-server';
 import { CoreDeprecatedApiUsageStats } from '@kbn/core-usage-data-server';
+import type { DeprecationDetailsMessage } from '@kbn/core-deprecations-common';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 
 export const getApiDeprecationTitle = (details: RouterDeprecatedApiDetails) => {
   const { routePath, routeMethod, routeDeprecationOptions } = details;
@@ -37,8 +39,9 @@ export const getApiDeprecationTitle = (details: RouterDeprecatedApiDetails) => {
 
 export const getApiDeprecationMessage = (
   details: RouterDeprecatedApiDetails,
-  apiUsageStats: CoreDeprecatedApiUsageStats
-): string[] => {
+  apiUsageStats: CoreDeprecatedApiUsageStats,
+  docLinks: DocLinksServiceSetup
+): Array<string | DeprecationDetailsMessage> => {
   const { routePath, routeMethod, routeDeprecationOptions } = details;
   if (!routeDeprecationOptions) {
     throw new Error(`Router "deprecated" param is missing for path "${routePath}".`);
@@ -50,7 +53,7 @@ export const getApiDeprecationMessage = (
   const wasResolvedBefore = totalMarkedAsResolved > 0;
   const routeWithMethod = `${routeMethod.toUpperCase()} ${routePath}`;
 
-  const messages = [
+  const messages: Array<string | DeprecationDetailsMessage> = [
     i18n.translate('core.deprecations.apiRouteDeprecation.apiCallsDetailsMessage', {
       defaultMessage:
         'The API "{routeWithMethod}" has been called {apiTotalCalls} times. The last call was on {apiLastCalledAt}.',
@@ -60,6 +63,16 @@ export const getApiDeprecationMessage = (
         apiLastCalledAt: moment(apiLastCalledAt).format('LLLL Z'),
       },
     }),
+    {
+      type: 'markdown',
+      content: i18n.translate('core.deprecations.apiRouteDeprecation.enableDebugLogsMessage', {
+        defaultMessage:
+          'To include information about deprecated API calls in debug logs, edit your Kibana configuration as detailed in [the documentation]({enableDeprecationHttpDebugLogsLink}).',
+        values: {
+          enableDeprecationHttpDebugLogsLink: docLinks.links.logging.enableDeprecationHttpDebugLogs,
+        },
+      }),
+    },
   ];
 
   if (wasResolvedBefore) {

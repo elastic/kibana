@@ -7,6 +7,7 @@
 
 export const wiredStreamConfig = {
   ingest: {
+    lifecycle: { dsl: { data_retention: '7d' } },
     processing: [
       {
         config: {

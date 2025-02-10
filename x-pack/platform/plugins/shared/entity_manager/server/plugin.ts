@@ -166,7 +166,6 @@ export class EntityManagerServerPlugin
   ): EntityManagerServerPluginStart {
     if (this.server) {
       this.server.core = core;
-      this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
       this.server.security = plugins.security;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
     }

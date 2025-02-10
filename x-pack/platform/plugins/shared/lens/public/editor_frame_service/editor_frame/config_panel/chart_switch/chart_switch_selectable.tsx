@@ -47,7 +47,10 @@ export const ChartSwitchSelectable = ({
       height={computeListHeight(props.options as SelectableEntry[])}
       searchProps={{
         compressed: true,
-        autoFocus: true,
+        autoFocus: false, // focused manually below - see https://github.com/elastic/eui/issues/8287
+        inputRef: (ref) => {
+          ref?.focus({ preventScroll: true });
+        },
         className: 'lnsChartSwitch__search',
         'data-test-subj': 'lnsChartSwitchSearch',
         onChange: setSearchTerm,

@@ -9,6 +9,14 @@
 
 import { chunk } from 'lodash';
 import { Key } from 'selenium-webdriver';
+import {
+  BUTTON_TEST_SUBJ,
+  INPUT_TEST_SUBJ,
+  BUTTON_PREV_TEST_SUBJ,
+  BUTTON_NEXT_TEST_SUBJ,
+  COUNTER_TEST_SUBJ,
+  HIGHLIGHT_CLASS_NAME,
+} from '@kbn/data-grid-in-table-search';
 import { WebElementWrapper, CustomCheerioStatic } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
@@ -617,6 +625,13 @@ export class DataGridService extends FtrService {
     await option.click();
   }
 
+  public async changeCustomRowHeightNumber(newValue: number) {
+    await this.testSubjects.setValue(
+      'unifiedDataTableRowHeightSettings_lineCountNumber',
+      newValue.toString()
+    );
+  }
+
   public async getCurrentHeaderRowHeightValue() {
     return await this.getCurrentRowHeightValue('header');
   }
@@ -904,5 +919,67 @@ export class DataGridService extends FtrService {
 
   public async exitComparisonMode() {
     await this.testSubjects.click('unifiedDataTableExitDocumentComparison');
+  }
+
+  public async getCurrentPageNumber() {
+    const currentPage = await this.find.byCssSelector('.euiPaginationButton[aria-current="true"]');
+    return await currentPage.getVisibleText();
+  }
+
+  public async runInTableSearch(searchTerm: string) {
+    if (!(await this.testSubjects.exists(INPUT_TEST_SUBJ))) {
+      await this.testSubjects.click(BUTTON_TEST_SUBJ);
+      await this.retry.waitFor('input to appear', async () => {
+        return await this.testSubjects.exists(INPUT_TEST_SUBJ);
+      });
+    }
+    const prevCounter = await this.testSubjects.getVisibleText(COUNTER_TEST_SUBJ);
+    await this.testSubjects.setValue(INPUT_TEST_SUBJ, searchTerm);
+    await this.retry.waitFor('counter to change', async () => {
+      return (await this.testSubjects.getVisibleText(COUNTER_TEST_SUBJ)) !== prevCounter;
+    });
+  }
+
+  public async exitInTableSearch() {
+    if (!(await this.testSubjects.exists(INPUT_TEST_SUBJ))) {
+      return;
+    }
+    const input = await this.testSubjects.find(INPUT_TEST_SUBJ);
+    await input.pressKeys(this.browser.keys.ESCAPE);
+    await this.retry.waitFor('input to hide', async () => {
+      return (
+        !(await this.testSubjects.exists(INPUT_TEST_SUBJ)) &&
+        (await this.testSubjects.exists(BUTTON_TEST_SUBJ))
+      );
+    });
+  }
+
+  private async jumpToInTableSearchMatch(buttonTestSubj: string) {
+    const prevCounter = await this.testSubjects.getVisibleText(COUNTER_TEST_SUBJ);
+    await this.testSubjects.click(buttonTestSubj);
+    await this.retry.waitFor('counter to change', async () => {
+      return (await this.testSubjects.getVisibleText(COUNTER_TEST_SUBJ)) !== prevCounter;
+    });
+  }
+
+  public async goToPrevInTableSearchMatch() {
+    await this.jumpToInTableSearchMatch(BUTTON_PREV_TEST_SUBJ);
+  }
+
+  public async goToNextInTableSearchMatch() {
+    await this.jumpToInTableSearchMatch(BUTTON_NEXT_TEST_SUBJ);
+  }
+
+  public async getInTableSearchMatchesCounter() {
+    return (await this.testSubjects.getVisibleText(COUNTER_TEST_SUBJ)).trim();
+  }
+
+  public async getInTableSearchCellMatchElements(rowIndex: number, columnName: string) {
+    const cell = await this.getCellElementByColumnName(rowIndex, columnName);
+    return await cell.findAllByCssSelector(`.${HIGHLIGHT_CLASS_NAME}`);
+  }
+
+  public async getInTableSearchCellMatchesCount(rowIndex: number, columnName: string) {
+    return (await this.getInTableSearchCellMatchElements(rowIndex, columnName)).length;
   }
 }

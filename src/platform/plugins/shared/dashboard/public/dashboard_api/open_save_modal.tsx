@@ -18,7 +18,7 @@ import { DashboardSaveOptions } from '../dashboard_container/types';
 import { coreServices, dataService, savedObjectsTaggingService } from '../services/kibana_services';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { DashboardState } from './types';
-import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../dashboard_constants';
+import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../utils/telemetry_constants';
 import { extractTitleAndCount } from '../dashboard_container/embeddable/api/lib/extract_title_and_count';
 import { DashboardSaveModal } from '../dashboard_container/embeddable/api/overlays/save_modal';
 

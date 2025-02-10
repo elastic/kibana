@@ -14,7 +14,7 @@
         "label": "EnterpriseSearchPublicStart",
         "description": [],
         "signature": [
-          "{} | undefined"
+          "{}"
         ],
         "path": "x-pack/solutions/search/plugins/enterprise_search/public/plugin.ts",
         "deprecated": false,
@@ -54,24 +54,9 @@
         "label": "ConfigType",
         "description": [],
         "signature": [
-          "{ readonly host?: string | undefined; readonly customHeaders?: Readonly<{} & {}> | undefined; readonly ssl: Readonly<{ certificateAuthorities?: string | string[] | undefined; } & { verificationMode: \"none\" | \"full\" | \"certificate\"; }>; readonly enabled: boolean; readonly ui: Readonly<{} & { enabled: boolean; }>; readonly accessCheckTimeout: number; readonly accessCheckTimeoutWarning: number; readonly hasConnectors: boolean; readonly hasDefaultIngestPipeline: boolean; readonly hasDocumentLevelSecurityEnabled: boolean; readonly hasIncrementalSyncEnabled: boolean; readonly hasNativeConnectors: boolean; readonly hasWebCrawler: boolean; readonly isCloud: boolean; }"
+          "{ readonly enabled: boolean; readonly hasConnectors: boolean; readonly hasDefaultIngestPipeline: boolean; readonly hasDocumentLevelSecurityEnabled: boolean; readonly hasIncrementalSyncEnabled: boolean; readonly hasNativeConnectors: boolean; readonly hasWebCrawler: boolean; }"
         ],
-        "path": "x-pack/solutions/search/plugins/enterprise_search/server/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "enterpriseSearch",
-        "id": "def-server.CRAWLERS_INDEX",
-        "type": "string",
-        "tags": [],
-        "label": "CRAWLERS_INDEX",
-        "description": [],
-        "signature": [
-          "\".ent-search-actastic-crawler2_configurations_v2\""
-        ],
-        "path": "x-pack/solutions/search/plugins/enterprise_search/server/index.ts",
+        "path": "x-pack/solutions/search/plugins/enterprise_search/server/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -93,31 +78,7 @@
             "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
-          "<{ accessCheckTimeout: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<number>; accessCheckTimeoutWarning: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<number>; customHeaders: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<Readonly<{} & {}> | undefined>; enabled: ",
+          "<{ enabled: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -173,65 +134,9 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<boolean>; host: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<string | undefined>; isCloud: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<boolean>; ssl: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.ObjectType",
-            "text": "ObjectType"
-          },
-          "<{ certificateAuthorities: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<string | string[] | undefined>; verificationMode: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<\"none\" | \"full\" | \"certificate\">; }>; ui: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.ObjectType",
-            "text": "ObjectType"
-          },
-          "<{ enabled: ",
-          {
-            "pluginId": "@kbn/config-schema",
-            "scope": "common",
-            "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-common.Type",
-            "text": "Type"
-          },
-          "<boolean>; }>; }>"
+          "<boolean>; }>"
         ],
-        "path": "x-pack/solutions/search/plugins/enterprise_search/server/index.ts",
+        "path": "x-pack/solutions/search/plugins/enterprise_search/server/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

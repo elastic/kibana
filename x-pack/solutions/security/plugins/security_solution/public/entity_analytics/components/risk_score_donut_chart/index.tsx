@@ -21,12 +21,6 @@ import type { RiskSeverity } from '../../../../common/search_strategy';
 
 const DONUT_HEIGHT = 120;
 
-const fillColor: FillColor = (dataName) => {
-  return Object.hasOwn(RISK_SEVERITY_COLOUR, dataName)
-    ? RISK_SEVERITY_COLOUR[dataName as RiskSeverity]
-    : emptyDonutColor;
-};
-
 const DonutContainer = styled(EuiFlexItem)`
   padding-right: ${({ theme }) => theme.eui.euiSizeXXL};
   padding-left: ${({ theme }) => theme.eui.euiSizeM};
@@ -42,7 +36,13 @@ interface RiskScoreDonutChartProps {
 
 export const RiskScoreDonutChart = ({ severityCount }: RiskScoreDonutChartProps) => {
   const [donutChartData, legendItems, total] = useRiskDonutChartData(severityCount);
-
+  // TODO: Borealis theme migration, when severity palette agreed, update RISK_SEVERITY_COLOUR to use shared hook from security colors:
+  // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
+  const fillColorValue: FillColor = (dataName) => {
+    return Object.hasOwn(RISK_SEVERITY_COLOUR, dataName)
+      ? RISK_SEVERITY_COLOUR[dataName as RiskSeverity]
+      : emptyDonutColor;
+  };
   return (
     <EuiFlexGroup responsive={false} data-test-subj="risk-score-donut-chart">
       <StyledLegendItems grow={false}>
@@ -51,7 +51,7 @@ export const RiskScoreDonutChart = ({ severityCount }: RiskScoreDonutChartProps)
       <DonutContainer grow={false} className="eui-textCenter">
         <DonutChart
           data={donutChartData ?? null}
-          fillColor={fillColor}
+          fillColor={fillColorValue}
           height={DONUT_HEIGHT}
           label={i18n.translate(
             'xpack.securitySolution.entityAnalytics.riskScore.donut_chart.totalLabel',

@@ -57,6 +57,9 @@ describe('Import rules route', () => {
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.detectionRulesClient.createCustomRule.mockResolvedValue(getRulesSchemaMock());
     clients.detectionRulesClient.importRule.mockResolvedValue(getRulesSchemaMock());
+    clients.detectionRulesClient.getRuleCustomizationStatus.mockReturnValue({
+      isRulesCustomizationEnabled: false,
+    });
     clients.actionsClient.getAll.mockResolvedValue([]);
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
@@ -145,10 +148,9 @@ describe('Import rules route', () => {
     describe('with prebuilt rules customization enabled', () => {
       beforeEach(() => {
         clients.detectionRulesClient.importRules.mockResolvedValueOnce([]);
-        server = serverMock.create(); // old server already registered this route
-        config = configMock.withExperimentalFeature(config, 'prebuiltRulesCustomizationEnabled');
-
-        importRulesRoute(server.router, config);
+        clients.detectionRulesClient.getRuleCustomizationStatus.mockReturnValue({
+          isRulesCustomizationEnabled: true,
+        });
       });
 
       test('returns 500 if importing fails', async () => {

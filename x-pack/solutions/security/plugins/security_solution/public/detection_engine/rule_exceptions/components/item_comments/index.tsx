@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useState, useCallback, useMemo, useEffect } from 'react';
-import styled, { css } from 'styled-components';
+import { css } from '@emotion/css';
 import type { EuiCommentProps } from '@elastic/eui';
 import {
   EuiTextArea,
@@ -17,6 +17,8 @@ import {
   EuiAccordion,
   EuiCommentList,
   EuiText,
+  useEuiTheme,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { Comment } from '@kbn/securitysolution-io-ts-list-types';
 import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
@@ -33,23 +35,6 @@ interface ExceptionItemCommentsProps {
   setCommentError: (errorExists: boolean) => void;
 }
 
-const COMMENT_ACCORDION_BUTTON_CLASS_NAME = 'exceptionCommentAccordionButton';
-
-const MyAvatar = styled(EuiAvatar)`
-  ${({ theme }) => css`
-    margin-right: ${theme.eui.euiSizeS};
-  `}
-`;
-
-const CommentAccordion = styled(EuiAccordion)`
-  ${({ theme }) => css`
-    .${COMMENT_ACCORDION_BUTTON_CLASS_NAME} {
-      color: ${theme.eui.euiColorPrimary};
-      padding: ${theme.eui.euiSizeM} 0;
-    }
-  `}
-`;
-
 export const ExceptionItemComments = memo(function ExceptionItemComments({
   exceptionItemComments,
   newCommentValue,
@@ -60,6 +45,14 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
 }: ExceptionItemCommentsProps) {
   const [errorExists, setErrorExists] = useState(false);
   const [shouldShowComments, setShouldShowComments] = useState(false);
+
+  const { euiTheme } = useEuiTheme();
+  const avatarStyles = css({
+    'margin-right': euiTheme.size.s,
+  });
+  const accordionStyles = css({
+    padding: `${euiTheme.size.m} 0`,
+  });
 
   const currentUser = useCurrentUser();
   const fullName = currentUser?.fullName;
@@ -118,18 +111,24 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
   }, [exceptionItemComments]);
   return (
     <div>
-      <CommentAccordion
+      <EuiAccordion
         initialIsOpen={initialIsOpen && !!newCommentValue}
         id={'add-exception-comments-accordion'}
-        buttonClassName={COMMENT_ACCORDION_BUTTON_CLASS_NAME}
+        buttonClassName={accordionStyles}
         buttonContent={accordionTitle ?? commentsAccordionTitle}
         data-test-subj="exceptionItemCommentsAccordion"
         onToggle={(isOpen) => handleTriggerOnClick(isOpen)}
       >
         <EuiCommentList comments={formattedComments} />
+        <EuiSpacer />
         <EuiFlexGroup gutterSize={'none'}>
           <EuiFlexItem grow={false}>
-            <MyAvatar name={avatarName} size="l" data-test-subj="exceptionItemCommentAvatar" />
+            <EuiAvatar
+              className={avatarStyles}
+              name={avatarName}
+              size="l"
+              data-test-subj="exceptionItemCommentAvatar"
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
             <EuiFormRow
@@ -148,7 +147,7 @@ export const ExceptionItemComments = memo(function ExceptionItemComments({
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </CommentAccordion>
+      </EuiAccordion>
     </div>
   );
 });

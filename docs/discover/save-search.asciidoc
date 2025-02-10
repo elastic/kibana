@@ -10,7 +10,7 @@ and can also serve as a foundation for building visualizations.
 [[discover-read-only-access]]
 [float]
 === Read-only access
-If you don't have sufficient privileges to save searches, the following indicator is
+If you don't have sufficient privileges to save Discover sessions, the following indicator is
 displayed and the *Save* button is not visible. For more information, refer to <<xpack-security-authorization>>.
 
 [role="screenshot"]

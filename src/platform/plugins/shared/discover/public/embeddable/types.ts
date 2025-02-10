@@ -13,11 +13,11 @@ import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import {
   EmbeddableApiContext,
   HasEditCapabilities,
-  HasInPlaceLibraryTransforms,
+  HasLibraryTransforms,
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesSavedObjectId,
-  PublishesWritablePanelTitle,
+  PublishesWritableTitle,
   PublishesWritableUnifiedSearch,
   PublishingSubject,
   SerializedTimeRange,
@@ -100,11 +100,11 @@ export type SearchEmbeddableApi = DefaultEmbeddableApi<
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesBlockingError &
-  PublishesWritablePanelTitle &
+  PublishesWritableTitle &
   PublishesSavedSearch &
   PublishesWritableDataViews &
   PublishesWritableUnifiedSearch &
-  HasInPlaceLibraryTransforms &
+  HasLibraryTransforms &
   HasTimeRange &
   HasInspectorAdapters &
   Partial<HasEditCapabilities & PublishesSavedObjectId>;

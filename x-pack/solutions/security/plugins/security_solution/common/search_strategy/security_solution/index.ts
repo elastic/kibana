@@ -75,6 +75,8 @@ import type {
   NetworkTopNFlowRequestOptionsInput,
   NetworkUsersRequestOptions,
   NetworkUsersRequestOptionsInput,
+  ObservedServiceDetailsRequestOptions,
+  ObservedServiceDetailsRequestOptionsInput,
   ObservedUserDetailsRequestOptions,
   ObservedUserDetailsRequestOptionsInput,
   RelatedHostsRequestOptions,
@@ -85,6 +87,7 @@ import type {
   RiskScoreKpiRequestOptionsInput,
   RiskScoreRequestOptions,
   RiskScoreRequestOptionsInput,
+  ServicesQueries,
   ThreatIntelSourceRequestOptions,
   ThreatIntelSourceRequestOptionsInput,
   UserAuthenticationsRequestOptions,
@@ -97,12 +100,14 @@ import type {
   EntityType,
   RiskScoreStrategyResponse,
 } from './risk_score';
+import type { ObservedServiceDetailsStrategyResponse } from './services';
 
 export * from './cti';
 export * from './hosts';
 export * from './risk_score';
 export * from './network';
 export * from './users';
+export * from './services';
 export * from './first_last_seen';
 export * from './related_entities';
 
@@ -110,6 +115,7 @@ export type FactoryQueryTypes =
   | HostsQueries
   | UsersQueries
   | NetworkQueries
+  | ServicesQueries
   | EntityRiskQueries
   | CtiQueries
   | typeof FirstLastSeenQuery
@@ -133,6 +139,8 @@ export type StrategyResponseType<T extends FactoryQueryTypes> = T extends HostsQ
   ? UserAuthenticationsStrategyResponse
   : T extends UsersQueries.users
   ? UsersStrategyResponse
+  : T extends ServicesQueries.observedDetails
+  ? ObservedServiceDetailsStrategyResponse
   : T extends NetworkQueries.details
   ? NetworkDetailsStrategyResponse
   : T extends NetworkQueries.dns
@@ -183,6 +191,8 @@ export type StrategyRequestInputType<T extends FactoryQueryTypes> = T extends Ho
   ? ManagedUserDetailsRequestOptionsInput
   : T extends UsersQueries.users
   ? UsersRequestOptionsInput
+  : T extends ServicesQueries.observedDetails
+  ? ObservedServiceDetailsRequestOptionsInput
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptionsInput
   : T extends NetworkQueries.dns
@@ -233,6 +243,8 @@ export type StrategyRequestType<T extends FactoryQueryTypes> = T extends HostsQu
   ? ManagedUserDetailsRequestOptions
   : T extends UsersQueries.users
   ? UsersRequestOptions
+  : T extends ServicesQueries.observedDetails
+  ? ObservedServiceDetailsRequestOptions
   : T extends NetworkQueries.details
   ? NetworkDetailsRequestOptions
   : T extends NetworkQueries.dns

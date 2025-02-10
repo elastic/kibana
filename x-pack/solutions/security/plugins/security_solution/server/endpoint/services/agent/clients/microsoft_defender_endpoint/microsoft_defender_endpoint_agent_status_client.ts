@@ -12,8 +12,12 @@ import {
 import { keyBy } from 'lodash';
 import type {
   MicrosoftDefenderEndpointAgentListResponse,
+  MicrosoftDefenderEndpointGetActionsParams,
+  MicrosoftDefenderEndpointGetActionsResponse,
   MicrosoftDefenderEndpointMachine,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
+import pMap from 'p-map';
+import { stringify } from '../../../../utils/stringify';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { AgentStatusClientError } from '../errors';
 import { getPendingActionsSummary, NormalizedExternalConnectorClient } from '../../..';
@@ -66,22 +70,79 @@ export class MicrosoftDefenderEndpointAgentStatusClient extends AgentStatusClien
     }
   }
 
+  protected async calculateHostIsolatedState(agentIds: string[]): Promise<Record<string, boolean>> {
+    const response: Record<string, boolean> = {};
+    const errors: string[] = [];
+
+    await pMap(
+      agentIds,
+      async (agentId) => {
+        response[agentId] = false;
+
+        try {
+          // Microsoft's does not seem to have a public API that enables us to get the Isolation state for a machine. To
+          // get around this, we query the list of machine actions for each host and look at the last successful
+          // Isolate or Unisolate action to determine if host is isolated or not.
+          const { data: hostLastSuccessfulMachineAction } = await this.connectorActions.execute<
+            MicrosoftDefenderEndpointGetActionsResponse,
+            MicrosoftDefenderEndpointGetActionsParams
+          >({
+            params: {
+              subAction: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTIONS,
+              subActionParams: {
+                status: 'Succeeded',
+                type: ['Isolate', 'Unisolate'],
+                machineId: agentId,
+                pageSize: 1,
+                sortField: 'lastUpdateDateTimeUtc',
+                sortDirection: 'desc',
+              },
+            },
+          });
+
+          if (hostLastSuccessfulMachineAction?.value?.[0].type === 'Isolate') {
+            response[agentId] = true;
+          }
+        } catch (err) {
+          errors.push(err.message);
+        }
+      },
+      { concurrency: 2 }
+    );
+
+    if (errors.length > 0) {
+      this.log.error(
+        `Attempt to calculate isolate state for Microsoft Defender hosts generated the following errors:\n${errors.join(
+          '\n'
+        )}`
+      );
+    }
+
+    this.log.debug(() => `Microsoft agents isolated state:\n${stringify(response)}`);
+
+    return response;
+  }
+
   public async getAgentStatuses(agentIds: string[]): Promise<AgentStatusRecords> {
     const esClient = this.options.esClient;
     const metadataService = this.options.endpointService.getEndpointMetadataService();
 
     try {
-      const [{ data: msMachineListResponse }, allPendingActions] = await Promise.all([
-        this.connectorActions.execute<MicrosoftDefenderEndpointAgentListResponse>({
-          params: {
-            subAction: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_AGENT_LIST,
-            subActionParams: { id: agentIds },
-          },
-        }),
+      const [{ data: msMachineListResponse }, agentIsolationState, allPendingActions] =
+        await Promise.all([
+          this.connectorActions.execute<MicrosoftDefenderEndpointAgentListResponse>({
+            params: {
+              subAction: MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_AGENT_LIST,
+              subActionParams: { id: agentIds },
+            },
+          }),
 
-        // Fetch pending actions summary
-        getPendingActionsSummary(esClient, metadataService, this.log, agentIds),
-      ]);
+          // Calculate host's current isolation state
+          this.calculateHostIsolatedState(agentIds),
+
+          // Fetch pending actions summary
+          getPendingActionsSummary(esClient, metadataService, this.log, agentIds),
+        ]);
 
       const machinesById = keyBy(msMachineListResponse?.value ?? [], 'id');
       const pendingActionsByAgentId = keyBy(allPendingActions, 'agent_id');
@@ -94,9 +155,7 @@ export class MicrosoftDefenderEndpointAgentStatusClient extends AgentStatusClien
           agentId,
           agentType: this.agentType,
           found: !!thisMachine,
-          // Unfortunately, it does not look like MS Defender has a way to determine
-          // if a host is isolated or not via API, so we just set this to false
-          isolated: false,
+          isolated: agentIsolationState[agentId] ?? false,
           lastSeen: thisMachine?.lastSeen ?? '',
           status: this.getAgentStatusFromMachineHealthStatus(thisMachine?.healthStatus),
           pendingActions: thisAgentPendingActions?.pending_actions ?? {},

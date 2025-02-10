@@ -8,19 +8,19 @@
 import type { AttackDiscovery } from '@kbn/elastic-assistant-common';
 import { isEmpty } from 'lodash/fp';
 
-import { getContinuePrompt } from '../../../helpers/get_continue_prompt';
-
 /**
  * Returns a prompt that combines the initial query, a refine prompt, and partial results
  */
 export const getCombinedRefinePrompt = ({
   attackDiscoveryPrompt,
   combinedRefinements,
+  continuePrompt,
   refinePrompt,
   unrefinedResults,
 }: {
   attackDiscoveryPrompt: string;
   combinedRefinements: string;
+  continuePrompt: string;
   refinePrompt: string;
   unrefinedResults: AttackDiscovery[] | null;
 }): string => {
@@ -38,7 +38,7 @@ ${JSON.stringify(unrefinedResults, null, 2)}
     ? baseQuery // no partial results yet
     : `${baseQuery}
 
-${getContinuePrompt()}
+${continuePrompt}
 
 """
 ${combinedRefinements}
