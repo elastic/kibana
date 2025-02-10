@@ -10,11 +10,11 @@
 import { getAllLogsDataViewSpec } from './get_all_logs_data_view_spec';
 
 describe('getAllLogsDataViewSpec', () => {
-  it('must return "discover-observability-root-profile-all-logs" for the "All logs" data view ID or bookmarks will break', () => {
+  it('must return "discover-observability-solution-all-logs" for the "All logs" data view ID or bookmarks will break', () => {
     const dataView = getAllLogsDataViewSpec({ allLogsIndexPattern: 'logs-*' });
     expect(dataView).toEqual(
       expect.objectContaining({
-        id: 'discover-observability-root-profile-all-logs',
+        id: 'discover-observability-solution-all-logs',
         name: 'All logs',
       })
     );
