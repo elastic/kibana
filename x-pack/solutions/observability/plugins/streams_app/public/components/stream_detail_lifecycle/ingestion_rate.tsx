@@ -25,6 +25,7 @@ import { formatBytes } from './helpers/format_bytes';
 import { useKibana } from '../../hooks/use_kibana';
 import { DataStreamStats } from './hooks/use_data_stream_stats';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
+import { ingestionRateQuery } from './helpers/ingestion_rate_query';
 
 export function IngestionRate({
   definition,
@@ -57,31 +58,7 @@ export function IngestionRate({
             aggregations: { docs_count: { buckets: Array<{ key: string; doc_count: number }> } };
           }>
         >(
-          {
-            params: {
-              index: definition.stream.name,
-              track_total_hits: false,
-              body: {
-                size: 0,
-                query: {
-                  bool: {
-                    filter: [
-                      { range: { '@timestamp': { gte: timeRange.start, lte: timeRange.end } } },
-                    ],
-                  },
-                },
-                aggs: {
-                  docs_count: {
-                    date_histogram: {
-                      field: '@timestamp',
-                      fixed_interval: '2d',
-                      min_doc_count: 0,
-                    },
-                  },
-                },
-              },
-            },
-          },
+          { params: ingestionRateQuery({ ...timeRange, index: definition.stream.name }) },
           { abortSignal: signal }
         )
       );
