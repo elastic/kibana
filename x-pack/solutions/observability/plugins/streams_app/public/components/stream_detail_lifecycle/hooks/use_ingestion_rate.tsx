@@ -70,7 +70,7 @@ export const useIngestionRate = ({
 
       return rawResponse.aggregations.docs_count.buckets.map(({ key, doc_count }) => ({
         key,
-        value: doc_count * stats.bytesPerDay!,
+        value: doc_count * stats.bytesPerDoc,
       }));
     },
     [definition, stats, statsIsLoading, start, end]

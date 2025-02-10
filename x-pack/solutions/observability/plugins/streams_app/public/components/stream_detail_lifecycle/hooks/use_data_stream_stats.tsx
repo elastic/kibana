@@ -39,6 +39,7 @@ export const useDataStreamStats = ({ definition }: { definition?: IngestStreamGe
     return {
       ...result.value?.dataStreamsStats[0],
       bytesPerDay: stats.sizeBytes / daysSinceCreation,
+      bytesPerDoc: stats.totalDocs ? stats.sizeBytes / stats.totalDocs : 0,
     };
   }, [result.value]);
 
