@@ -580,7 +580,7 @@ const AlertsTableContent = typedForwardRef(
 
     return (
       <AlertsTableContextProvider value={renderContext}>
-        {!isLoadingAlerts && alertsCount === 0 && (
+        {!isLoadingAlerts && alertsCount <= 0 && (
           <InspectButtonContainer>
             <EmptyState
               additionalToolbarControls={additionalToolbarControls}
