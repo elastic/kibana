@@ -15,6 +15,8 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 import { DashboardListingPage, DashboardListingPageProps } from './dashboard_listing_page';
 
+jest.mock('../../services/dashboard_content_management_service/lib/find_dashboards', () => ({}));
+
 // Mock child components. The Dashboard listing page mostly passes down props to shared UX components which are tested in their own packages.
 import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
 jest.mock('../../dashboard_listing/dashboard_listing', () => {
@@ -26,9 +28,7 @@ jest.mock('../../dashboard_listing/dashboard_listing', () => {
 
 import { DashboardAppNoDataPage } from '../no_data/dashboard_app_no_data';
 import { dataService } from '../../services/kibana_services';
-import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 
-const dashboardContentManagementService = getDashboardContentManagementService();
 const mockIsDashboardAppInNoDataState = jest.fn().mockResolvedValue(false);
 
 jest.mock('../no_data/dashboard_app_no_data', () => {
@@ -94,10 +94,11 @@ test('When given a title that matches multiple dashboards, filter on the title',
   const title = 'search by title';
   const props = makeDefaultProps();
   props.title = title;
-
-  (dashboardContentManagementService.findDashboards.findByTitle as jest.Mock).mockResolvedValue(
-    undefined
-  );
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  require('../../services/dashboard_content_management_service/lib/find_dashboards').findDashboardIdByTitle =
+    async () => {
+      return undefined;
+    };
 
   let component: ReactWrapper;
 
@@ -117,9 +118,11 @@ test('When given a title that matches one dashboard, redirect to dashboard', asy
   const title = 'search by title';
   const props = makeDefaultProps();
   props.title = title;
-  (dashboardContentManagementService.findDashboards.findByTitle as jest.Mock).mockResolvedValue({
-    id: 'you_found_me',
-  });
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  require('../../services/dashboard_content_management_service/lib/find_dashboards').findDashboardIdByTitle =
+    async () => {
+      return { id: 'you_found_me' };
+    };
 
   let component: ReactWrapper;
 

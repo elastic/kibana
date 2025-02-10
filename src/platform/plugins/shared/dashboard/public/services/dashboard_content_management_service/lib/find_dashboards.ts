@@ -18,7 +18,7 @@ import type {
   DashboardSearchOut,
   DashboardSearchOptions,
 } from '../../../../server/content_management';
-import { getDashboardContentManagementCache } from '..';
+import { getDashboardContentManagementCache } from '../dashboard_content_management_cache';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { contentManagementService } from '../../kibana_services';
 

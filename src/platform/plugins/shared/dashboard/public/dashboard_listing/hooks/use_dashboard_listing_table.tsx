@@ -23,7 +23,6 @@ import {
   SAVED_OBJECT_LOADED_TIME,
 } from '../../utils/telemetry_constants';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
-import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import { getDashboardRecentlyAccessedService } from '../../services/dashboard_recently_accessed_service';
 import { coreServices } from '../../services/kibana_services';
 import { logger } from '../../services/logger';
@@ -35,7 +34,16 @@ import {
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardListingEmptyPrompt } from '../dashboard_listing_empty_prompt';
 import { DashboardSavedObjectUserContent } from '../types';
-import { UpdateDashboardMetaProps } from '../../services/dashboard_content_management_service/lib/update_dashboard_meta';
+import {
+  UpdateDashboardMetaProps,
+  updateDashboardMeta,
+} from '../../services/dashboard_content_management_service/lib/update_dashboard_meta';
+import { checkForDuplicateDashboardTitle } from '../../services/dashboard_content_management_service/lib/check_for_duplicate_dashboard_title';
+import { deleteDashboards } from '../../services/dashboard_content_management_service/lib/delete_dashboards';
+import {
+  findDashboardsByIds,
+  searchDashboards,
+} from '../../services/dashboard_content_management_service/lib/find_dashboards';
 
 type GetDetailViewLink =
   TableListViewTableProps<DashboardSavedObjectUserContent>['getDetailViewLink'];
@@ -107,10 +115,6 @@ export const useDashboardListingTable = ({
   const [hasInitialFetchReturned, setHasInitialFetchReturned] = useState(false);
 
   const dashboardBackupService = useMemo(() => getDashboardBackupService(), []);
-  const dashboardContentManagementService = useMemo(
-    () => getDashboardContentManagementService(),
-    []
-  );
 
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
     dashboardBackupService.getDashboardIdsWithUnsavedChanges()
@@ -132,11 +136,11 @@ export const useDashboardListingTable = ({
 
   const updateItemMeta = useCallback(
     async (props: UpdateDashboardMetaProps) => {
-      await dashboardContentManagementService.updateDashboardMeta(props);
+      await updateDashboardMeta(props);
 
       setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
     },
-    [dashboardBackupService, dashboardContentManagementService]
+    [dashboardBackupService]
   );
 
   const contentEditorValidators: OpenContentEditorParams['customValidators'] = useMemo(
@@ -147,19 +151,17 @@ export const useDashboardListingTable = ({
           fn: async (value: string, id: string) => {
             if (id) {
               try {
-                const [dashboard] =
-                  await dashboardContentManagementService.findDashboards.findByIds([id]);
+                const [dashboard] = await findDashboardsByIds([id]);
                 if (dashboard.status === 'error') {
                   return;
                 }
 
-                const validTitle =
-                  await dashboardContentManagementService.checkForDuplicateDashboardTitle({
-                    title: value,
-                    copyOnSave: false,
-                    lastSavedTitle: dashboard.attributes.title,
-                    isTitleDuplicateConfirmed: false,
-                  });
+                const validTitle = await checkForDuplicateDashboardTitle({
+                  title: value,
+                  copyOnSave: false,
+                  lastSavedTitle: dashboard.attributes.title,
+                  isTitleDuplicateConfirmed: false,
+                });
 
                 if (!validTitle) {
                   throw new Error(dashboardListingErrorStrings.getDuplicateTitleWarning(value));
@@ -172,7 +174,7 @@ export const useDashboardListingTable = ({
         },
       ],
     }),
-    [dashboardContentManagementService]
+    []
   );
 
   const emptyPrompt = useMemo(
@@ -208,34 +210,32 @@ export const useDashboardListingTable = ({
     ) => {
       const searchStartTime = window.performance.now();
 
-      return dashboardContentManagementService.findDashboards
-        .search({
-          search: searchTerm,
-          size: listingLimit,
-          hasReference: references,
-          hasNoReference: referencesToExclude,
-          options: {
-            // include only tags references in the response to save bandwidth
-            includeReferences: ['tag'],
+      return searchDashboards({
+        search: searchTerm,
+        size: listingLimit,
+        hasReference: references,
+        hasNoReference: referencesToExclude,
+        options: {
+          // include only tags references in the response to save bandwidth
+          includeReferences: ['tag'],
+        },
+      }).then(({ total, hits }) => {
+        const searchEndTime = window.performance.now();
+        const searchDuration = searchEndTime - searchStartTime;
+        reportPerformanceMetricEvent(coreServices.analytics, {
+          eventName: SAVED_OBJECT_LOADED_TIME,
+          duration: searchDuration,
+          meta: {
+            saved_object_type: DASHBOARD_CONTENT_ID,
           },
-        })
-        .then(({ total, hits }) => {
-          const searchEndTime = window.performance.now();
-          const searchDuration = searchEndTime - searchStartTime;
-          reportPerformanceMetricEvent(coreServices.analytics, {
-            eventName: SAVED_OBJECT_LOADED_TIME,
-            duration: searchDuration,
-            meta: {
-              saved_object_type: DASHBOARD_CONTENT_ID,
-            },
-          });
-          return {
-            total,
-            hits: hits.map(toTableListViewSavedObject),
-          };
         });
+        return {
+          total,
+          hits: hits.map(toTableListViewSavedObject),
+        };
+      });
     },
-    [listingLimit, dashboardContentManagementService]
+    [listingLimit]
   );
 
   const deleteItems = useCallback(
@@ -243,7 +243,7 @@ export const useDashboardListingTable = ({
       try {
         const deleteStartTime = window.performance.now();
 
-        await dashboardContentManagementService.deleteDashboards(
+        await deleteDashboards(
           dashboardsToDelete.map(({ id }) => {
             dashboardBackupService.clearState(id);
             return id;
@@ -267,7 +267,7 @@ export const useDashboardListingTable = ({
 
       setUnsavedDashboardIds(dashboardBackupService.getDashboardIdsWithUnsavedChanges());
     },
-    [dashboardBackupService, dashboardContentManagementService]
+    [dashboardBackupService]
   );
 
   const editItem = useCallback(

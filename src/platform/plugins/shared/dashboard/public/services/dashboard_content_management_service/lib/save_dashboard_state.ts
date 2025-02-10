@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { getDashboardContentManagementCache } from '..';
+import { getDashboardContentManagementCache } from '../dashboard_content_management_cache';
 import type {
   DashboardCreateIn,
   DashboardCreateOut,

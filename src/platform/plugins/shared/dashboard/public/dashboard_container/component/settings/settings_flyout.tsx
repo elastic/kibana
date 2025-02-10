@@ -33,8 +33,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { DashboardSettings } from '../../../dashboard_api/types';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import { getDashboardContentManagementService } from '../../../services/dashboard_content_management_service';
 import { savedObjectsTaggingService } from '../../../services/kibana_services';
+import { checkForDuplicateDashboardTitle } from '../../../services/dashboard_content_management_service/lib/check_for_duplicate_dashboard_title';
 
 interface DashboardSettingsProps {
   onClose: () => void;
@@ -61,15 +61,13 @@ export const DashboardSettingsFlyout = ({ onClose }: DashboardSettingsProps) => 
 
   const onApply = async () => {
     setIsApplying(true);
-    const validTitle = await getDashboardContentManagementService().checkForDuplicateDashboardTitle(
-      {
-        title: localSettings.title,
-        copyOnSave: false,
-        lastSavedTitle: dashboardApi.title$.value ?? '',
-        onTitleDuplicate,
-        isTitleDuplicateConfirmed,
-      }
-    );
+    const validTitle = await checkForDuplicateDashboardTitle({
+      title: localSettings.title,
+      copyOnSave: false,
+      lastSavedTitle: dashboardApi.title$.value ?? '',
+      onTitleDuplicate,
+      isTitleDuplicateConfirmed,
+    });
 
     if (!isMounted()) return;
 

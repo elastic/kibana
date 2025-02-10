@@ -31,7 +31,7 @@ import {
   lensService,
 } from '../../services/kibana_services';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
-import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
+import { searchDashboards } from '../../services/dashboard_content_management_service/lib/find_dashboards';
 
 function generateId() {
   return uuidv4();
@@ -158,9 +158,7 @@ export const isDashboardAppInNoDataState = async () => {
   if (getDashboardBackupService().dashboardHasUnsavedEdits()) return false;
 
   // consider has data if there is at least one dashboard
-  const { total } = await getDashboardContentManagementService()
-    .findDashboards.search({ search: '', size: 1 })
-    .catch(() => ({ total: 0 }));
+  const { total } = await searchDashboards({ search: '', size: 1 }).catch(() => ({ total: 0 }));
   if (total > 0) return false;
 
   return true;

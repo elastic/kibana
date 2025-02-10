@@ -18,9 +18,11 @@ import {
   DASHBOARD_PANELS_UNSAVED_ID,
   getDashboardBackupService,
 } from '../services/dashboard_backup_service';
-import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { coreServices } from '../services/kibana_services';
 import { DashboardUnsavedListing, DashboardUnsavedListingProps } from './dashboard_unsaved_listing';
+import { DashboardAttributes } from '../../server';
+
+jest.mock('../services/dashboard_content_management_service/lib/find_dashboards', () => ({}));
 
 const makeDefaultProps = (): DashboardUnsavedListingProps => ({
   goToDashboard: jest.fn(),
@@ -43,12 +45,42 @@ function mountWith({ props: incomingProps }: { props?: Partial<DashboardUnsavedL
 
 describe('Unsaved listing', () => {
   const dashboardBackupService = getDashboardBackupService();
-  const dashboardContentManagementService = getDashboardContentManagementService();
+  const findDashboardsByIdsMock = jest.fn();
+
+  beforeEach(() => {
+    findDashboardsByIdsMock.mockReset();
+    findDashboardsByIdsMock.mockResolvedValue([
+      {
+        id: `dashboardUnsavedOne`,
+        status: 'success',
+        attributes: {
+          title: `Dashboard Unsaved One`,
+        } as unknown as DashboardAttributes,
+      },
+      {
+        id: `dashboardUnsavedTwo`,
+        status: 'success',
+        attributes: {
+          title: `Dashboard Unsaved Two`,
+        } as unknown as DashboardAttributes,
+      },
+      {
+        id: `dashboardUnsavedThree`,
+        status: 'success',
+        attributes: {
+          title: `Dashboard Unsaved Three`,
+        } as unknown as DashboardAttributes,
+      },
+    ]);
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../services/dashboard_content_management_service/lib/find_dashboards').findDashboardsByIds =
+      findDashboardsByIdsMock;
+  });
 
   it('Gets information for each unsaved dashboard', async () => {
     mountWith({});
     await waitFor(() => {
-      expect(dashboardContentManagementService.findDashboards.findByIds).toHaveBeenCalledTimes(1);
+      expect(findDashboardsByIdsMock).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -57,9 +89,7 @@ describe('Unsaved listing', () => {
     props.unsavedDashboardIds = ['dashboardUnsavedOne', DASHBOARD_PANELS_UNSAVED_ID];
     mountWith({ props });
     await waitFor(() => {
-      expect(dashboardContentManagementService.findDashboards.findByIds).toHaveBeenCalledWith([
-        'dashboardUnsavedOne',
-      ]);
+      expect(findDashboardsByIdsMock).toHaveBeenCalledWith(['dashboardUnsavedOne']);
     });
   });
 
@@ -104,7 +134,7 @@ describe('Unsaved listing', () => {
   });
 
   it('removes unsaved changes from any dashboard which errors on fetch', async () => {
-    (dashboardContentManagementService.findDashboards.findByIds as jest.Mock).mockResolvedValue([
+    findDashboardsByIdsMock.mockResolvedValue([
       {
         id: 'failCase1',
         status: 'error',

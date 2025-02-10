@@ -184,14 +184,11 @@ export class DashboardPlugin
         new DashboardAppLocatorDefinition({
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
-            const [{ getDashboardContentManagementService }] = await Promise.all([
-              import('./services/dashboard_content_management_service'),
+            const [{ loadDashboardState }] = await Promise.all([
+              import('./services/dashboard_content_management_service/lib/load_dashboard_state'),
               untilPluginStartServicesReady(),
             ]);
-            return (
-              (await getDashboardContentManagementService().loadDashboardState({ id: dashboardId }))
-                .dashboardInput?.filters ?? []
-            );
+            return (await loadDashboardState({ id: dashboardId })).dashboardInput?.filters ?? [];
           },
         })
       );
@@ -351,10 +348,14 @@ export class DashboardPlugin
       dashboardFeatureFlagConfig: this.dashboardFeatureFlagConfig!,
       registerDashboardPanelPlacementSetting,
       findDashboardsService: async () => {
-        const { getDashboardContentManagementService } = await import(
-          './services/dashboard_content_management_service'
-        );
-        return getDashboardContentManagementService().findDashboards;
+        const { findDashboardById, findDashboardIdByTitle, findDashboardsByIds, searchDashboards } =
+          await import('./services/dashboard_content_management_service/lib/find_dashboards');
+        return {
+          search: searchDashboards,
+          findById: findDashboardById,
+          findByIds: findDashboardsByIds,
+          findByTitle: findDashboardIdByTitle,
+        };
       },
     };
   }

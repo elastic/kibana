@@ -21,7 +21,6 @@ import {
 import { UnsavedPanelState } from '../dashboard_container/types';
 import { DASHBOARD_APP_ID } from '../plugin_constants';
 import { PANELS_CONTROL_GROUP_KEY } from '../services/dashboard_backup_service';
-import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
@@ -44,6 +43,7 @@ import {
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
+import { saveDashboardState } from '../services/dashboard_content_management_service/lib/save_dashboard_state';
 
 export function getDashboardApi({
   creationOptions,
@@ -211,7 +211,7 @@ export function getDashboardApi({
       if (isManaged) return;
       const { controlGroupReferences, dashboardState, panelReferences, searchSourceReferences } =
         getState();
-      const saveResult = await getDashboardContentManagementService().saveDashboardState({
+      const saveResult = await saveDashboardState({
         controlGroupReferences,
         dashboardState,
         panelReferences,

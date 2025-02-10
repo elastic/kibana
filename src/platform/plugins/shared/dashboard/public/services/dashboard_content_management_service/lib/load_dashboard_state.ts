@@ -15,7 +15,7 @@ import { Filter, Query } from '@kbn/es-query';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 
 import { cleanFiltersForSerialize } from '../../../utils/clean_filters_for_serialize';
-import { getDashboardContentManagementCache } from '..';
+import { getDashboardContentManagementCache } from '../dashboard_content_management_cache';
 import { convertPanelsArrayToPanelMap, injectReferences } from '../../../../common';
 import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';

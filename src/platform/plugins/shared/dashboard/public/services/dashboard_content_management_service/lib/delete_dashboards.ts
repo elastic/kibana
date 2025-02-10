@@ -9,7 +9,7 @@
 
 import type { DeleteIn, DeleteResult } from '@kbn/content-management-plugin/common';
 import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
-import { getDashboardContentManagementCache } from '..';
+import { getDashboardContentManagementCache } from '../dashboard_content_management_cache';
 import { contentManagementService } from '../../kibana_services';
 
 export const deleteDashboards = async (ids: string[]) => {

@@ -10,7 +10,6 @@
 import { renderHook, act } from '@testing-library/react';
 
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
-import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 import { coreServices } from '../../services/kibana_services';
 import { confirmCreateWithUnsaved } from '../confirm_overlays';
 import { DashboardSavedObjectUserContent } from '../types';
@@ -46,9 +45,10 @@ jest.mock('../_dashboard_listing_strings', () => ({
   },
 }));
 
+jest.mock('../../services/dashboard_content_management_service/lib/delete_dashboards', () => ({}));
+
 describe('useDashboardListingTable', () => {
   const dashboardBackupService = getDashboardBackupService();
-  const dashboardContentManagementService = getDashboardContentManagementService();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -58,9 +58,11 @@ describe('useDashboardListingTable', () => {
     dashboardBackupService.getDashboardIdsWithUnsavedChanges = jest.fn().mockReturnValue([]);
 
     dashboardBackupService.clearState = clearStateMock;
-    dashboardContentManagementService.deleteDashboards = deleteDashboards;
     coreServices.uiSettings.get = getUiSettingsMock;
     coreServices.notifications.toasts.addError = jest.fn();
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require('../../services/dashboard_content_management_service/lib/delete_dashboards').deleteDashboards =
+      deleteDashboards;
   });
 
   test('should return the correct initial hasInitialFetchReturned state', () => {

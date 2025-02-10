@@ -13,7 +13,15 @@ import type { DashboardGetOut } from '../../../server/content_management';
 const DASHBOARD_CACHE_SIZE = 20; // only store a max of 20 dashboards
 const DASHBOARD_CACHE_TTL = 1000 * 60 * 5; // time to live = 5 minutes
 
-export class DashboardContentManagementCache {
+let dashboardContentManagementCache: DashboardContentManagementCache;
+
+export const getDashboardContentManagementCache = () => {
+  if (!dashboardContentManagementCache)
+    dashboardContentManagementCache = new DashboardContentManagementCache();
+  return dashboardContentManagementCache;
+};
+
+class DashboardContentManagementCache {
   private cache: LRUCache<string, DashboardGetOut>;
 
   constructor() {
