@@ -6,22 +6,26 @@
  */
 
 import { groupBy } from 'lodash';
-import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import {
-  getClockSkew,
-  getOrderedWaterfallItems,
-  getWaterfall,
+import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
+import type {
   IWaterfallItem,
   IWaterfallTransaction,
   IWaterfallError,
   IWaterfallSpanOrTransaction,
-  getOrphanTraceItemsCount,
+  IWaterfallNode,
+  IWaterfallNodeFlatten,
+  IWaterfallSpan,
+} from './waterfall_helpers';
+import {
+  getClockSkew,
+  getOrderedWaterfallItems,
+  getWaterfall,
+  getOrphanItemsIds,
   buildTraceTree,
   convertTreeToList,
   updateTraceTreeNode,
-  IWaterfallNode,
-  IWaterfallNodeFlatten,
+  reparentOrphanItems,
 } from './waterfall_helpers';
 import { APMError } from '../../../../../../../../typings/es_schemas/ui/apm_error';
 import {
@@ -714,45 +718,132 @@ describe('waterfall_helpers', () => {
     });
   });
 
-  describe('getOrphanTraceItemsCount', () => {
+  describe('getOrphanItemsIds', () => {
     const myTransactionItem = {
-      processor: { event: 'transaction' },
-      trace: { id: 'myTrace' },
-      transaction: {
-        id: 'myTransactionId1',
-      },
-    } as WaterfallTransaction;
+      doc: {
+        processor: { event: 'transaction' },
+        trace: { id: 'myTrace' },
+        transaction: {
+          id: 'myTransactionId1',
+        },
+      } as WaterfallTransaction,
+      docType: 'transaction',
+      id: 'myTransactionId1',
+    } as IWaterfallTransaction;
 
     it('should return missing items count: 0 if there are no orphan items', () => {
-      const traceItems: Array<WaterfallTransaction | WaterfallSpan> = [
+      const traceItems: IWaterfallSpanOrTransaction[] = [
         myTransactionItem,
         {
-          processor: { event: 'span' },
-          span: {
-            id: 'mySpanId',
-          },
-          parent: {
-            id: 'myTransactionId1',
-          },
-        } as WaterfallSpan,
+          doc: {
+            processor: { event: 'span' },
+            span: {
+              id: 'mySpanId',
+            },
+            parent: {
+              id: 'myTransactionId1',
+            },
+          } as WaterfallSpan,
+          docType: 'span',
+          id: 'mySpanId',
+          parentId: 'myTransactionId1',
+        } as IWaterfallSpan,
       ];
-      expect(getOrphanTraceItemsCount(traceItems)).toBe(0);
+      expect(getOrphanItemsIds(traceItems).length).toBe(0);
     });
 
     it('should return missing items count if there are orphan items', () => {
-      const traceItems: Array<WaterfallTransaction | WaterfallSpan> = [
+      const traceItems: IWaterfallSpanOrTransaction[] = [
         myTransactionItem,
         {
-          processor: { event: 'span' },
-          span: {
-            id: 'myOrphanSpanId',
-          },
-          parent: {
-            id: 'myNotExistingTransactionId1',
-          },
-        } as WaterfallSpan,
+          doc: {
+            processor: { event: 'span' },
+            span: {
+              id: 'myOrphanSpanId',
+            },
+            parent: {
+              id: 'myNotExistingTransactionId1',
+            },
+          } as WaterfallSpan,
+          docType: 'span',
+          id: 'myOrphanSpanId',
+          parentId: 'myNotExistingTransactionId1',
+        } as IWaterfallSpan,
       ];
-      expect(getOrphanTraceItemsCount(traceItems)).toBe(1);
+      expect(getOrphanItemsIds(traceItems).length).toBe(1);
+    });
+  });
+
+  describe('reparentOrphanItems', () => {
+    const myTransactionItem = {
+      doc: {
+        processor: { event: 'transaction' },
+        trace: { id: 'myTrace' },
+        transaction: {
+          id: 'myTransactionId1',
+        },
+      } as WaterfallTransaction,
+      docType: 'transaction',
+      id: 'myTransactionId1',
+    } as IWaterfallTransaction;
+
+    it('should not reparent since no orphan items exist', () => {
+      const traceItems: IWaterfallSpanOrTransaction[] = [
+        myTransactionItem,
+        {
+          doc: {
+            processor: { event: 'span' },
+            span: {
+              id: 'mySpanId',
+            },
+            parent: {
+              id: 'myTransactionId1',
+            },
+          } as WaterfallSpan,
+          docType: 'span',
+          id: 'mySpanId',
+          parentId: 'myTransactionId1',
+        } as IWaterfallSpan,
+      ];
+      expect(reparentOrphanItems([], traceItems, 'myTransactionId1')).toEqual(traceItems);
+    });
+
+    it('should reparent orphan items to root transaction', () => {
+      const traceItems: IWaterfallSpanOrTransaction[] = [
+        myTransactionItem,
+        {
+          doc: {
+            processor: { event: 'span' },
+            span: {
+              id: 'myOrphanSpanId',
+            },
+            parent: {
+              id: 'myNotExistingTransactionId1',
+            },
+          } as WaterfallSpan,
+          docType: 'span',
+          id: 'myOrphanSpanId',
+          parentId: 'myNotExistingTransactionId1',
+        } as IWaterfallSpan,
+      ];
+      expect(reparentOrphanItems(['myOrphanSpanId'], traceItems, 'myTransactionId1')).toEqual([
+        myTransactionItem,
+        {
+          doc: {
+            processor: { event: 'span' },
+            span: {
+              id: 'myOrphanSpanId',
+            },
+            parent: {
+              id: 'myNotExistingTransactionId1',
+            },
+          } as WaterfallSpan,
+          docType: 'span',
+          id: 'myOrphanSpanId',
+          parentId: 'myTransactionId1',
+          isOrphan: true,
+        } as IWaterfallSpan,
+      ]);
     });
   });
 
