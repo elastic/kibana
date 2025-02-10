@@ -12,22 +12,22 @@ import { HttpSetup } from '@kbn/core/public';
 // import { RulesSettingsAlertDeletion } from '@kbn/alerting-types';
 // import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 import { AsApiContract } from '@kbn/actions-types';
-import { RulesSettingsAlertDeletion } from '@kbn/alerting-plugin/common';
+import type { RulesSettingsAlertsDeletion } from '@kbn/alerting-types';
 
 const transformAlertsDeletionSettingsResponse = ({
-  active_alert_deletion_threshold: activeAlertDeletionThreshold,
-  is_active_alert_deletion_enabled: isActiveAlertDeletionEnabled,
-  inactive_alert_deletion_threshold: inactiveAlertDeletionThreshold,
-  is_inactive_alert_deletion_enabled: isInactiveAlertDeletionEnabled,
+  active_alerts_deletion_threshold: activeAlertsDeletionThreshold,
+  is_active_alerts_deletion_enabled: isActiveAlertsDeletionEnabled,
+  inactive_alerts_deletion_threshold: inactiveAlertsDeletionThreshold,
+  is_inactive_alerts_deletion_enabled: isInactiveAlertsDeletionEnabled,
   created_at: createdAt,
   created_by: createdBy,
   updated_at: updatedAt,
   updated_by: updatedBy,
-}: AsApiContract<RulesSettingsAlertDeletion>): RulesSettingsAlertDeletion => ({
-  activeAlertDeletionThreshold,
-  isActiveAlertDeletionEnabled,
-  inactiveAlertDeletionThreshold,
-  isInactiveAlertDeletionEnabled,
+}: AsApiContract<RulesSettingsAlertsDeletion>): RulesSettingsAlertsDeletion => ({
+  activeAlertsDeletionThreshold,
+  isActiveAlertsDeletionEnabled,
+  inactiveAlertsDeletionThreshold,
+  isInactiveAlertsDeletionEnabled,
   createdAt,
   createdBy,
   updatedAt,
@@ -41,10 +41,10 @@ export const fetchAlertsDeletionSettings = async ({ http }: { http: HttpSetup })
   // );
 
   const res = {
-    is_active_alert_deletion_enabled: false,
-    is_inactive_alert_deletion_enabled: false,
-    active_alert_deletion_threshold: 0,
-    inactive_alert_deletion_threshold: 90,
+    is_active_alerts_deletion_enabled: false,
+    is_inactive_alerts_deletion_enabled: false,
+    active_alerts_deletion_threshold: 0,
+    inactive_alerts_deletion_threshold: 90,
     created_at: String(new Date().valueOf),
     updated_at: String(new Date().valueOf),
     created_by: null,

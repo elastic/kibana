@@ -12,11 +12,8 @@ import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/re
 import userEvent, { UserEvent } from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import { IToasts } from '@kbn/core/public';
-import {
-  RulesSettingsAlertDeletion,
-  RulesSettingsFlapping,
-  RulesSettingsQueryDelay,
-} from '@kbn/alerting-plugin/common';
+import { RulesSettingsFlapping, RulesSettingsQueryDelay } from '@kbn/alerting-plugin/common';
+import type { RulesSettingsAlertsDeletion } from '@kbn/alerting-types';
 import { RulesSettingsModal, RulesSettingsModalProps } from './rules_settings_modal';
 import { useKibana } from '../../../common/lib/kibana';
 import { fetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings';
@@ -107,11 +104,11 @@ const mockQueryDelaySetting: RulesSettingsQueryDelay = {
   updatedAt: new Date().toISOString(),
 };
 
-const mockAlertDeletionSetting: RulesSettingsAlertDeletion = {
-  isActiveAlertDeletionEnabled: true,
-  isInactiveAlertDeletionEnabled: true,
-  activeAlertDeletionThreshold: 80,
-  inactiveAlertDeletionThreshold: 30,
+const mockAlertDeletionSetting: RulesSettingsAlertsDeletion = {
+  isActiveAlertsDeletionEnabled: true,
+  isInactiveAlertsDeletionEnabled: true,
+  activeAlertsDeletionThreshold: 80,
+  inactiveAlertsDeletionThreshold: 30,
   createdBy: null,
   updatedBy: null,
   createdAt: new Date().toISOString(),
