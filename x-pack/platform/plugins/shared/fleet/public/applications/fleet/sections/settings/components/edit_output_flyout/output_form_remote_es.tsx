@@ -47,11 +47,11 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
     setIsFirstLoad(false);
     // populate the secret input with the value of the plain input in order to re-save the output with secret storage
     if (useSecretsStorage) {
-      const isServiceTokenSecret = false;
+      let isServiceTokenSecret = false;
       if (inputs.serviceTokenInput.value && !inputs.serviceTokenSecretInput.value) {
         inputs.serviceTokenSecretInput.setValue(inputs.serviceTokenInput.value);
         inputs.serviceTokenInput.clear();
-        setIsConvertedToSecret({ ...isConvertedToSecret, serviceToken: true });
+        isServiceTokenSecret = true;
       }
       let isKibanaAPIKeySecret = false;
       if (inputs.kibanaAPIKeyInput.value && !inputs.kibanaAPIKeySecretInput.value) {
@@ -85,7 +85,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
     inputs.sslKeySecretInput,
   ]);
 
-  const onToggleServiceTokenSecretAndClearValue = (secretEnabled: boolean) => {
+  const onToggleSecretAndClearValue = (secretEnabled: boolean) => {
     if (secretEnabled) {
       inputs.serviceTokenInput.clear();
       inputs.kibanaAPIKeyInput.clear();
@@ -131,7 +131,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
           }
           {...inputs.serviceTokenInput.formRowProps}
           useSecretsStorage={useSecretsStorage}
-          onToggleSecretStorage={onToggleServiceTokenSecretAndClearValue}
+          onToggleSecretStorage={onToggleSecretAndClearValue}
         >
           <EuiFieldText
             fullWidth
@@ -155,7 +155,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
           cancelEdit={inputs.serviceTokenSecretInput.cancelEdit}
           useSecretsStorage={useSecretsStorage}
           isConvertedToSecret={isConvertedToSecret.serviceToken}
-          onToggleSecretStorage={onToggleServiceTokenSecretAndClearValue}
+          onToggleSecretStorage={onToggleSecretAndClearValue}
         >
           <EuiFieldText
             data-test-subj="serviceTokenSecretInput"
@@ -221,7 +221,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
           }
           {...inputs.sslKeyInput.formRowProps}
           useSecretsStorage={useSecretsStorage}
-          onToggleSecretStorage={onToggleServiceTokenSecretAndClearValue}
+          onToggleSecretStorage={onToggleSecretAndClearValue}
         >
           <EuiTextArea
             fullWidth
@@ -244,7 +244,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
           {...inputs.sslKeySecretInput.formRowProps}
           useSecretsStorage={useSecretsStorage}
           isConvertedToSecret={isConvertedToSecret?.sslKey}
-          onToggleSecretStorage={onToggleServiceTokenSecretAndClearValue}
+          onToggleSecretStorage={onToggleSecretAndClearValue}
           cancelEdit={inputs.sslKeySecretInput.cancelEdit}
         >
           <EuiTextArea
@@ -335,7 +335,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
               }
               {...inputs.kibanaAPIKeyInput.formRowProps}
               useSecretsStorage={useSecretsStorage}
-              onToggleSecretStorage={onToggleServiceTokenSecretAndClearValue}
+              onToggleSecretStorage={onToggleSecretAndClearValue}
             >
               <EuiFieldText
                 fullWidth
@@ -359,7 +359,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
               cancelEdit={inputs.kibanaAPIKeySecretInput.cancelEdit}
               useSecretsStorage={useSecretsStorage}
               isConvertedToSecret={isConvertedToSecret.kibanaAPIKey}
-              onToggleSecretStorage={onToggleServiceTokenSecretAndClearValue}
+              onToggleSecretStorage={onToggleSecretAndClearValue}
             >
               <EuiFieldText
                 data-test-subj="kibanaAPIKeySecretInput"
