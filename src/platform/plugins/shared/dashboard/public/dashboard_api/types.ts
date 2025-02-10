@@ -53,10 +53,7 @@ import { Observable, Subject } from 'rxjs';
 import { DashboardPanelMap, DashboardPanelState } from '../../common';
 import type { DashboardAttributes, DashboardOptions } from '../../server/content_management';
 import { DashboardLocatorParams } from '../dashboard_container/types';
-import {
-  LoadDashboardReturn,
-  SaveDashboardReturn,
-} from '../dashboard_content_management/types';
+import { LoadDashboardReturn, SaveDashboardReturn } from '../dashboard_content_management/types';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
