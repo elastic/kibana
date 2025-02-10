@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { act } from 'react-dom/test-utils';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EntityStoreEnablementModal } from './enablement_modal';
 import { TestProviders } from '../../../../common/mock';
@@ -25,11 +24,6 @@ jest.mock('../hooks/use_entity_engine_privileges', () => ({
 const mockUseMissingRiskEnginePrivileges = jest.fn();
 jest.mock('../../../hooks/use_missing_risk_engine_privileges', () => ({
   useMissingRiskEnginePrivileges: () => mockUseMissingRiskEnginePrivileges(),
-}));
-
-const mockUseContractComponents = jest.fn(() => ({}));
-jest.mock('../../../../common/hooks/use_contract_component', () => ({
-  useContractComponents: () => mockUseContractComponents(),
 }));
 
 const mockUseContractComponents = jest.fn(() => ({}));
@@ -89,10 +83,6 @@ const missingRiskEnginePrivileges: RiskEngineMissingPrivilegesResponse = {
   },
 };
 
-const renderComponent = async (props = defaultProps) => {
-  await act(async () => {
-    return render(<EntityStoreEnablementModal {...props} />, { wrapper: TestProviders });
-  });
 const renderComponent = async (props = defaultProps) => {
   await act(async () => {
     return render(<EntityStoreEnablementModal {...props} />, { wrapper: TestProviders });
