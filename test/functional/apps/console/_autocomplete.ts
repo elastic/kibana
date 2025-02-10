@@ -59,6 +59,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
     });
 
+    it('completes inline JSON property without extra quotes', async () => {
+      // 1) Type the request line + inline body (two lines total).
+      await PageObjects.console.enterText('GET index/_search\n{"query": {te');
+
+      // 2) Wait briefly so the editor processes the text
+      await PageObjects.console.sleepForDebouncePeriod();
+
+      // 3) Wait for the autocomplete suggestions to appear
+      await retry.waitFor('autocomplete to be visible', () =>
+        PageObjects.console.isAutocompleteVisible()
+      );
+
+      // 4) Press Enter to accept the first suggestion (likely "term")
+      await PageObjects.console.pressEnter();
+
+      // 5) Now check the text in the editor
+      await retry.try(async () => {
+        const text = await PageObjects.console.getEditorText();
+        // Assert we do NOT invalid autocompletions such as `""term"` or `{term"`
+        expect(text).not.to.contain('""term"');
+        expect(text).not.to.contain('{term"');
+        // and that "term" was inserted
+        expect(text).to.contain('"term"');
+      });
+    });
+
     it('should not show duplicate suggestions', async () => {
       await PageObjects.console.enterText(`POST _ingest/pipeline/_simulate
 {
