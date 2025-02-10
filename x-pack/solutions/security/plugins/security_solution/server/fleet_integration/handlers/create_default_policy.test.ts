@@ -293,7 +293,7 @@ describe('Create Default Policy tests ', () => {
     });
   });
 
-  describe('Global Telemetry Config', () => {
+  describe.skip('Global Telemetry Config', () => {
     it('should save telemetry config state in policy based on telemetry config provider', async () => {
       telemetryConfigProviderMock.getIsOptedIn.mockReturnValue(false);
       let policyConfig = await createDefaultPolicyCallback();

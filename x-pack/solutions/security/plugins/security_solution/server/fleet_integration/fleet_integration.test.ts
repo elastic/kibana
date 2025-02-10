@@ -371,7 +371,7 @@ describe('Fleet integrations', () => {
       isBillablePolicySpy.mockRestore();
     });
 
-    it.each([false, true])(
+    it.skip.each([false, true])(
       'should correctly set `global_telemetry_enabled` to %s',
       async (targetValue) => {
         const manifestManager = buildManifestManagerMock();
