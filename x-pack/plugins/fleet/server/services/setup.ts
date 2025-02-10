@@ -58,6 +58,8 @@ import {
   getPreconfiguredDeleteUnenrolledAgentsSettingFromConfig,
 } from './preconfiguration/delete_unenrolled_agent_setting';
 
+import { updateDeprecatedComponentTemplates } from './setup/update_deprecated_component_templates';
+
 export interface SetupStatus {
   isInitialized: boolean;
   nonFatalErrors: Array<
@@ -299,6 +301,9 @@ async function createSetupSideEffects(
   );
   await ensureAgentPoliciesFleetServerKeysAndPolicies({ soClient, esClient, logger });
   stepSpan?.end();
+
+  logger.debug('Update deprecated _source.mode in component templates');
+  await updateDeprecatedComponentTemplates(esClient);
 
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,
