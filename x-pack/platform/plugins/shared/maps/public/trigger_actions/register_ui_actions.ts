@@ -43,8 +43,12 @@ export function registerUiActions(core: CoreStart, plugins: MapsPluginStartDepen
     const { filterByMapExtentAction } = await import('./context_menu_actions_module');
     return filterByMapExtentAction;
   });
-  plugins.uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, SYNCHRONIZE_MOVEMENT_ACTION, async () => {
-    const { synchronizeMovementAction } = await import('./context_menu_actions_module');
-    return synchronizeMovementAction;
-  });
+  plugins.uiActions.addTriggerActionAsync(
+    CONTEXT_MENU_TRIGGER,
+    SYNCHRONIZE_MOVEMENT_ACTION,
+    async () => {
+      const { synchronizeMovementAction } = await import('./context_menu_actions_module');
+      return synchronizeMovementAction;
+    }
+  );
 }
