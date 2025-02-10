@@ -52,19 +52,6 @@ export const SLOGroupings = ({ slo }: { slo: SLOWithSummaryResponse }) => {
     });
   };
 
-  const clearInstance = () => {
-    const clearedGroupings = groupings;
-    Object.keys(clearedGroupings).forEach((key) => {
-      clearedGroupings[key] = '';
-    });
-    setGroupings(clearedGroupings);
-    const urlSearchParams = new URLSearchParams(searchParams);
-    urlSearchParams.delete('instanceId');
-    history.replace({
-      search: urlSearchParams.toString(),
-    });
-  };
-
   useEffect(() => {
     if (Object.entries(groupings).every(([, value]) => value)) {
       const urlSearchParams = new URLSearchParams(searchParams);
@@ -97,11 +84,6 @@ export const SLOGroupings = ({ slo }: { slo: SLOWithSummaryResponse }) => {
           />
         );
       })}
-      <EuiButton style={{ height: 33 }} onClick={clearInstance}>
-        {i18n.translate('xpack.slo.sloDetails.groupings.clearInstance', {
-          defaultMessage: 'Clear Instance',
-        })}
-      </EuiButton>
     </EuiFlexGroup>
   );
 };
