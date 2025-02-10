@@ -42,7 +42,7 @@ import {
 } from './helpers';
 import { EsqlControlType } from '../types';
 
-interface FieldControlFormProps {
+interface IdentifierControlFormProps {
   search: ISearchGeneric;
   variableType: ESQLVariableType;
   queryString: string;
@@ -55,7 +55,7 @@ interface FieldControlFormProps {
   onCancelControl?: () => void;
 }
 
-export function FieldControlForm({
+export function IdentifierControlForm({
   variableType,
   initialState,
   queryString,
@@ -66,7 +66,7 @@ export function FieldControlForm({
   onCancelControl,
   search,
   closeFlyout,
-}: FieldControlFormProps) {
+}: IdentifierControlFormProps) {
   const suggestedVariableName = useMemo(() => {
     const existingVariables = esqlVariables.filter((variable) => variable.type === variableType);
 
@@ -157,7 +157,7 @@ export function FieldControlForm({
     setFormIsInvalid(!selectedIdentifiers.length || !variableName || variableExists);
   }, [esqlVariables, isControlInEditMode, selectedIdentifiers.length, variableName]);
 
-  const onFieldsChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
+  const onIdentifiersChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
     setSelectedIdentifiers(selectedOptions);
   }, []);
 
@@ -280,9 +280,9 @@ export function FieldControlForm({
             })}
             options={availableIdentifiersOptions}
             selectedOptions={selectedIdentifiers}
-            onChange={onFieldsChange}
+            onChange={onIdentifiersChange}
             onCreateOption={onCreateOption}
-            data-test-subj="esqlFieldsOptions"
+            data-test-subj="esqlIdentifiersOptions"
             fullWidth
             compressed
           />
