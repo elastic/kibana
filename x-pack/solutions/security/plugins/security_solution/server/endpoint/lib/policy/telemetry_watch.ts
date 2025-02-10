@@ -23,6 +23,7 @@ import type { TelemetryConfigProvider } from '../../../../common/telemetry_confi
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
 import type { EndpointAppContextService } from '../../endpoint_app_context_services';
+import { stringify } from '../../utils/stringify';
 
 export class TelemetryConfigWatcher {
   private logger: Logger;
@@ -93,7 +94,9 @@ export class TelemetryConfigWatcher {
         });
       } catch (e) {
         this.logger.warn(
-          `Unable to verify endpoint policies in line with telemetry change: failed to fetch package policies: ${e.message}`
+          `Unable to verify endpoint policies in line with telemetry change: failed to fetch package policies: ${stringify(
+            e
+          )}`
         );
         return;
       }
@@ -131,7 +134,7 @@ export class TelemetryConfigWatcher {
                 (update) => update.id
               )}`
             );
-            this.logger.warn(ee);
+            this.logger.warn(stringify(ee));
           }
         }
       }
