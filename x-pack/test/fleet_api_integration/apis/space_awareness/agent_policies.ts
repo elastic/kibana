@@ -10,7 +10,7 @@ import { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
-import { cleanFleetIndices, expectToRejectWithNotFound } from './helpers';
+import { cleanFleetIndices, expectToRejectWithError, expectToRejectWithNotFound } from './helpers';
 import { setupTestUsers, testUsers } from '../test_users';
 
 export default function (providerContext: FtrProviderContext) {
@@ -31,13 +31,17 @@ export default function (providerContext: FtrProviderContext) {
       username: testUsers.fleet_read_only.username,
       password: testUsers.fleet_read_only.password,
     });
+    const apiClientDefaultSpaceOnly = new SpaceTestApiClient(supertestWithoutAuth, {
+      username: testUsers.fleet_all_int_all_default_space_only.username,
+      password: testUsers.fleet_all_int_all_default_space_only.password,
+    });
 
     let defaultSpacePolicy1: CreateAgentPolicyResponse;
     let spaceTest1Policy1: CreateAgentPolicyResponse;
     let spaceTest1Policy2: CreateAgentPolicyResponse;
 
     before(async () => {
-      await setupTestUsers(getService('security'));
+      await setupTestUsers(getService('security'), true);
       TEST_SPACE_1 = spaces.getDefaultTestSpace();
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.savedObjects.cleanStandardList({
@@ -115,6 +119,28 @@ export default function (providerContext: FtrProviderContext) {
           has_fleet_server: true,
         });
         expect(res.item.id).to.eql(`${TEST_SPACE_1}-fleet-server-policy`);
+      });
+
+      it('should allow to create a policy in another space user has permissions from default space', async () => {
+        const res = await apiClient.createAgentPolicy('default', {
+          space_ids: [TEST_SPACE_1],
+        });
+
+        const policyId = res.item.id;
+        await expectToRejectWithNotFound(() => apiClient.getAgentPolicy(spaceTest1Policy1.item.id));
+
+        const policyFound = await apiClient.getAgentPolicy(policyId, TEST_SPACE_1);
+        expect(policyFound.item.id).to.eql(policyId);
+      });
+
+      it('should not allow to create a policy in another space when user do not have permissions from default space', async () => {
+        await expectToRejectWithError(
+          () =>
+            apiClientDefaultSpaceOnly.createAgentPolicy('default', {
+              space_ids: [TEST_SPACE_1],
+            }),
+          /No enough permissions to create policies in space test1/
+        );
       });
     });
 

@@ -10,13 +10,13 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { callApmApi } from '../../../services/rest/create_call_apm_api';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { ApmPluginStartDeps } from '../../../plugin';
+import type { ApmPluginStartDeps } from '../../../plugin';
 import { Introduction } from './introduction';
 import { InstructionsSet } from './instructions_set';
 import { serverlessInstructions } from './serverless_instructions';
 import { Footer } from './footer';
 import { PrivilegeType } from '../../../../common/privilege_type';
-import { AgentApiKey, InstructionSet } from './instruction_variants';
+import type { AgentApiKey, InstructionSet } from './instruction_variants';
 
 export function Onboarding() {
   const [instructions, setInstructions] = useState<InstructionSet[]>([]);

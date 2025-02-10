@@ -12,12 +12,21 @@ import { getDatasetQualityServerRouteRepository } from './routes';
 import { registerRoutes } from './routes/register_routes';
 import { DatasetQualityRouteHandlerResources } from './routes/types';
 import {
+  DatasetQualityPluginSetup,
   DatasetQualityPluginSetupDependencies,
   DatasetQualityPluginStart,
   DatasetQualityPluginStartDependencies,
 } from './types';
 
-export class DatasetQualityServerPlugin implements Plugin {
+export class DatasetQualityServerPlugin
+  implements
+    Plugin<
+      DatasetQualityPluginSetup,
+      DatasetQualityPluginStart,
+      DatasetQualityPluginSetupDependencies,
+      DatasetQualityPluginStartDependencies
+    >
+{
   private readonly logger: Logger;
   private readonly dataTelemetryService: DataTelemetryService;
 

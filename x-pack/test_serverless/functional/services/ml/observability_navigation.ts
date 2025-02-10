@@ -26,5 +26,11 @@ export function MachineLearningNavigationProviderObservability({
     async navigateToAnomalyDetection() {
       await navigateToArea('anomalyDetection');
     },
+    async navigateToMemoryUsage() {
+      await navigateToArea('memoryUsage');
+    },
+    async navigateToNotifications() {
+      await navigateToArea('notifications');
+    },
   };
 }

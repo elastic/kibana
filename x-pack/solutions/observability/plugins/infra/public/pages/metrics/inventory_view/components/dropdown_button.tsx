@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import type { WithEuiThemeProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
   withEuiTheme,
-  WithEuiThemeProps,
   type EuiThemeComputed,
 } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { KubernetesTour } from './kubernetes_tour';
 
 interface Props {

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
-import { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { mapValues } from 'lodash';
-import { APMIndices } from '..';
+import type { APMIndices } from '..';
 
 export interface ApmDataAccessPrivilegesCheck {
   request: KibanaRequest;

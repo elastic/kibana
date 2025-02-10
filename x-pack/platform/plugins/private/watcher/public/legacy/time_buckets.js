@@ -131,7 +131,7 @@ TimeBuckets.prototype.getDuration = function () {
  * generated.
  *
  * Input can be one of the following:
- *  - Any object from src/plugins/data/public/search/aggs/buckets/_interval_options.ts
+ *  - Any object from src/platform/plugins/shared/data/public/search/aggs/buckets/_interval_options.ts
  *  - "auto"
  *  - Pass a valid moment unit
  *  - a moment.duration object.

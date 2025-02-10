@@ -7,7 +7,7 @@
 
 import React, { lazy, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent } from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiTabbedContent, useEuiTheme } from '@elastic/eui';
 import { AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { ALERT_TABLE_GENERIC_CONFIG_ID } from '../../../constants';
@@ -75,6 +75,8 @@ export function RuleComponent({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const lastReloadRequestTime = useMemo(() => new Date().getTime(), [refreshToken]);
 
+  const { euiTheme } = useEuiTheme();
+
   const alerts = Object.entries(ruleSummary.alerts)
     .map(([alertId, alert]) => alertToListItem(durationEpoch, alertId, alert))
     .sort((leftAlert, rightAlert) => leftAlert.sortPriority - rightAlert.sortPriority);
@@ -89,7 +91,7 @@ export function RuleComponent({
     [muteAlertInstance, requestRefresh, rule, unmuteAlertInstance]
   );
 
-  const healthColor = getRuleHealthColor(rule);
+  const healthColor = getRuleHealthColor(rule, euiTheme);
   const statusMessage = getRuleStatusMessage({
     rule,
     licenseErrorText: ALERT_STATUS_LICENSE_ERROR,

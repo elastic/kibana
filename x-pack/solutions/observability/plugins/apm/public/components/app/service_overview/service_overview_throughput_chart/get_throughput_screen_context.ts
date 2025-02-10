@@ -7,7 +7,7 @@
 
 import { SERVICE_ENVIRONMENT } from '@kbn/observability-shared-plugin/common';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { Environment } from '../../../../../common/environment_rt';
+import type { Environment } from '../../../../../common/environment_rt';
 import {
   PROCESSOR_EVENT,
   SERVICE_NAME,

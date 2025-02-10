@@ -17,8 +17,13 @@
       "search",
       "connectors"
     ],
-    "requiredPlugins": [],
-    "optionalPlugins": [],
-    "requiredBundles": []
+    "requiredPlugins": [
+      "licensing",
+      "taskManager",
+      "fleet"
+    ],
+    "optionalPlugins": [
+      "cloud"
+    ]
   }
 }

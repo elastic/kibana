@@ -11,6 +11,8 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { AnonymizationSettings } from '.';
 import type { Props } from '.';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { of } from 'rxjs';
 
 const props: Props = {
   anonymizationFields: {
@@ -78,6 +80,7 @@ const mockUseAssistantContext = {
   assistantAvailability: {
     hasUpdateAIAssistantAnonymization: true,
     hasManageGlobalKnowledgeBase: true,
+    hasAssistantPrivilege: true,
   },
   baseAllow: ['@timestamp', 'event.category', 'user.name'],
   baseAllowReplacement: ['user.name', 'host.ip'],
@@ -86,6 +89,10 @@ const mockUseAssistantContext = {
   setAllSystemPrompts: jest.fn(),
   setDefaultAllow: jest.fn(),
   setDefaultAllowReplacement: jest.fn(),
+  chrome: {
+    getChromeStyle$: jest.fn(() => of('classic')),
+    navControls: chromeServiceMock.createStartContract().navControls,
+  },
 };
 jest.mock('../../../assistant_context', () => {
   const original = jest.requireActual('../../../assistant_context');

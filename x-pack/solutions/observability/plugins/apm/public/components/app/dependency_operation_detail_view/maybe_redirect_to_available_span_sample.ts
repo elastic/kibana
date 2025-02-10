@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { History } from 'history';
+import type { History } from 'history';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { replace as urlHelpersReplace } from '../../shared/links/url_helpers';
+import type { replace as urlHelpersReplace } from '../../shared/links/url_helpers';
 
 export function maybeRedirectToAvailableSpanSample({
   spanFetchStatus,

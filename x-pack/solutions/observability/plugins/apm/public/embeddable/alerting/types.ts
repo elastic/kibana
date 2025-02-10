@@ -7,7 +7,7 @@
 
 import type { Rule } from '@kbn/alerting-plugin/common';
 import type { TopAlert } from '@kbn/observability-plugin/public';
-import { SerializedTitles } from '@kbn/presentation-publishing';
+import type { SerializedTitles } from '@kbn/presentation-publishing';
 import type { BoolQuery } from '@kbn/es-query';
 
 export interface EmbeddableApmAlertingVizProps extends SerializedTitles {

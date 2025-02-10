@@ -89,6 +89,7 @@ describe('TaskManagerRunner', () => {
       jest
         .spyOn(apm, 'startTransaction')
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .mockImplementation(() => mockApmTrans as any);
     });
     test('makes calls to APM as expected when task markedAsRunning is success', async () => {

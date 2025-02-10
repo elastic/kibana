@@ -9,6 +9,7 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { EntityType } from '../../../../../common/search_strategy';
 import type { RiskScoresPreviewResponse } from '../../../../../common/api/entity_analytics';
 import { RiskScoresPreviewRequest } from '../../../../../common/api/entity_analytics';
 import {
@@ -92,7 +93,7 @@ export const riskScorePreviewRoute = (
             afterKeys,
             debug,
             filter,
-            identifierType,
+            identifierType: identifierType as EntityType,
             index,
             pageSize,
             range,

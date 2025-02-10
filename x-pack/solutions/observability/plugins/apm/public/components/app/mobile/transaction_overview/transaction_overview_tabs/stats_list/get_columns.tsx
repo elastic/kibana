@@ -7,8 +7,8 @@
 import { RIGHT_ALIGNMENT, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ValuesType } from 'utility-types';
-import { APIReturnType } from '../../../../../../services/rest/create_call_apm_api';
+import type { ValuesType } from 'utility-types';
+import type { APIReturnType } from '../../../../../../services/rest/create_call_apm_api';
 import {
   ChartType,
   getTimeSeriesColor,
@@ -20,7 +20,7 @@ import {
   asPercent,
   asTransactionRate,
 } from '../../../../../../../common/utils/formatters';
-import { ITableColumn } from '../../../../../shared/managed_table';
+import type { ITableColumn } from '../../../../../shared/managed_table';
 
 type MobileMainStatisticsByField =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/main_statistics'>;

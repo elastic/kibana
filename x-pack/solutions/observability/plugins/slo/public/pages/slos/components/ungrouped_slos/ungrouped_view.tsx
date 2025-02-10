@@ -10,13 +10,13 @@ import { FindSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { SlosView } from '../slos_view';
-import { SLOView } from '../toggle_slo_view';
+import type { ViewType } from '../../types';
 
 export interface Props {
   sloList: FindSLOResponse | undefined;
   loading: boolean;
   error: boolean;
-  view: SLOView;
+  view: ViewType;
 }
 
 export function UngroupedView({ sloList, loading, error, view }: Props) {

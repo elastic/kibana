@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { History } from 'history';
+import type { History } from 'history';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { fromQuery, toQuery } from '../links/url_helpers';

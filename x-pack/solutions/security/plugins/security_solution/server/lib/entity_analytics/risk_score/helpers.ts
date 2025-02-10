@@ -5,21 +5,23 @@
  * 2.0.
  */
 
+import type { EntityType } from '../../../../common/entity_analytics/types';
+import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import type { RiskScoresCalculationResponse } from '../../../../common/api/entity_analytics';
 import type { AfterKeys, EntityAfterKey } from '../../../../common/api/entity_analytics/common';
-import type { IdentifierType } from '../../../../common/entity_analytics/risk_engine';
 
-export const getFieldForIdentifier = (identifierType: IdentifierType): string =>
-  identifierType === 'host' ? 'host.name' : 'user.name';
+export const getFieldForIdentifier = (identifierType: EntityType): string =>
+  EntityTypeToIdentifierField[identifierType];
 
 export const getAfterKeyForIdentifierType = ({
   afterKeys,
   identifierType,
 }: {
   afterKeys: AfterKeys;
-  identifierType: IdentifierType;
+  identifierType: EntityType;
 }): EntityAfterKey | undefined => afterKeys[identifierType];
 
 export const isRiskScoreCalculationComplete = (result: RiskScoresCalculationResponse): boolean =>
   Object.keys(result.after_keys.host ?? {}).length === 0 &&
-  Object.keys(result.after_keys.user ?? {}).length === 0;
+  Object.keys(result.after_keys.user ?? {}).length === 0 &&
+  Object.keys(result.after_keys.service ?? {}).length === 0;

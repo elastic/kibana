@@ -7,17 +7,13 @@
 
 import type {
   OriginalRule,
+  RuleMigrationResourceBase,
   RuleMigrationResourceData,
-  RuleMigrationResourceType,
 } from '../../model/rule_migration.gen';
 
-export interface RuleResource {
-  type: RuleMigrationResourceType;
-  name: string;
-}
-export type ResourceIdentifier = (input: string) => RuleResource[];
+export type ResourceIdentifier = (input: string) => RuleMigrationResourceBase[];
 
 export interface ResourceIdentifiers {
-  fromOriginalRule: (originalRule: OriginalRule) => RuleResource[];
-  fromResource: (resource: RuleMigrationResourceData) => RuleResource[];
+  fromOriginalRule: (originalRule: OriginalRule) => RuleMigrationResourceBase[];
+  fromResource: (resource: RuleMigrationResourceData) => RuleMigrationResourceBase[];
 }

@@ -30,9 +30,10 @@ import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 import { MLExplorerLink } from '../../../shared/links/machine_learning_links/mlexplorer_link';
 import { MLManageJobsLink } from '../../../shared/links/machine_learning_links/mlmanage_jobs_link';
 import { LoadingStatePrompt } from '../../../shared/loading_state_prompt';
-import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
+import type { ITableColumn } from '../../../shared/managed_table';
+import { ManagedTable } from '../../../shared/managed_table';
 import { MLCallout, shouldDisplayMlCallout } from '../../../shared/ml_callout';
-import { AnomalyDetectionApiResponse } from '.';
+import type { AnomalyDetectionApiResponse } from '.';
 import { JobsListStatus } from './jobs_list_status';
 
 type Jobs = AnomalyDetectionApiResponse['jobs'];

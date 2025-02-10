@@ -89,7 +89,7 @@ const tabToUiMetricMap: { [key: string]: string } = {
 };
 
 export interface Props {
-  template: { name: string; isLegacy?: boolean };
+  template: { name: string; isLegacy?: boolean; type?: string };
   onClose: () => void;
   editTemplate: (name: string, isLegacy?: boolean) => void;
   cloneTemplate: (name: string, isLegacy?: boolean) => void;
@@ -106,8 +106,9 @@ export const TemplateDetailsContent = ({
   const { uiMetricService } = useServices();
   const { error, data: templateDetails, isLoading } = useLoadIndexTemplate(templateName, isLegacy);
   const isCloudManaged = templateDetails?._kbnMeta.type === 'cloudManaged';
+  const templateType = templateDetails?._kbnMeta.type;
   const [templateToDelete, setTemplateToDelete] = useState<
-    Array<{ name: string; isLegacy?: boolean }>
+    Array<{ name: string; isLegacy?: boolean; type?: string }>
   >([]);
   const [activeTab, setActiveTab] = useState<string>(SUMMARY_TAB_ID);
   const [isPopoverOpen, setIsPopOverOpen] = useState<boolean>(false);
@@ -290,6 +291,7 @@ export const TemplateDetailsContent = ({
                             defaultMessage: 'Edit',
                           }),
                           icon: 'pencil',
+                          'data-test-subj': 'editIndexTemplateButton',
                           onClick: () => editTemplate(templateName, isLegacy),
                           disabled: isCloudManaged,
                         },
@@ -305,7 +307,11 @@ export const TemplateDetailsContent = ({
                             defaultMessage: 'Delete',
                           }),
                           icon: 'trash',
-                          onClick: () => setTemplateToDelete([{ name: templateName, isLegacy }]),
+                          onClick: () =>
+                            setTemplateToDelete([
+                              { name: templateName, isLegacy, type: templateType },
+                            ]),
+                          'data-test-subj': 'deleteIndexTemplateButton',
                           disabled: isCloudManaged,
                         },
                       ],

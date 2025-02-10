@@ -5,12 +5,23 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { wrapper } from '../../mocks';
 
 import { useLensAttributes } from '../../use_lens_attributes';
 
-import { kpiUserAuthenticationsAreaLensAttributes } from './kpi_user_authentications_area';
+import { getKpiUserAuthenticationsAreaLensAttributes } from './kpi_user_authentications_area';
+
+jest.mock('uuid', () => ({
+  v4: jest
+    .fn()
+    .mockReturnValueOnce('2b27c80e-a20d-46f1-8fb2-79626ef4563c')
+    .mockReturnValueOnce('33a6163d-0c0a-451d-aa38-8ca6010dd5bf')
+    .mockReturnValueOnce('0eb97c09-a351-4280-97da-944e4bd30dd7')
+    .mockReturnValueOnce('49a42fe6-ebe8-4adb-8eed-1966a5297b7e')
+    .mockReturnValueOnce('4590dafb-4ac7-45aa-8641-47a3ff0b817c')
+    .mockReturnValueOnce('31213ae3-905b-4e88-b987-0cccb1f3209f'),
+}));
 
 jest.mock('../../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
@@ -31,12 +42,12 @@ jest.mock('../../../../utils/route/use_route_spy', () => ({
   ]),
 }));
 
-describe('kpiUserAuthenticationsAreaLensAttributes', () => {
+describe('getKpiUserAuthenticationsAreaLensAttributes', () => {
   it('should render', () => {
     const { result } = renderHook(
       () =>
         useLensAttributes({
-          lensAttributes: kpiUserAuthenticationsAreaLensAttributes,
+          getLensAttributes: getKpiUserAuthenticationsAreaLensAttributes,
           stackByField: 'event.dataset',
         }),
       { wrapper }

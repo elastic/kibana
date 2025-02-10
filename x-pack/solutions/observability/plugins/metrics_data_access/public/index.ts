@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { Plugin } from './plugin';
-import { MetricsDataPluginSetup, MetricsDataPluginStart, RouteState } from './types';
+import type { MetricsDataPluginSetup, MetricsDataPluginStart, RouteState } from './types';
 import { useAssetDetailsRedirect } from './pages/link_to';
 
 export const plugin: PluginInitializer<MetricsDataPluginSetup, MetricsDataPluginStart> = (

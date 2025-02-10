@@ -973,6 +973,30 @@ const getDataStreams = async (
   }));
 };
 
+const MAPPER_EXCEPTION_REASONS_REQUIRING_ROLLOVER = [
+  'subobjects',
+  "[enabled] parameter can't be updated for the object mapping",
+];
+
+function errorNeedRollover(err: any) {
+  if (
+    isResponseError(err) &&
+    err.statusCode === 400 &&
+    err.body?.error?.type === 'illegal_argument_exception'
+  ) {
+    return true;
+  }
+  if (
+    err.body?.error?.type === 'mapper_exception' &&
+    err.body?.error?.reason &&
+    MAPPER_EXCEPTION_REASONS_REQUIRING_ROLLOVER.some((reason) =>
+      err.body?.error?.reason?.includes(reason)
+    )
+  ) {
+    return true;
+  }
+}
+
 const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClient) => {
   try {
     // Do no wrap rollovers in retryTransientEsErrors since it is not idempotent
@@ -1092,17 +1116,7 @@ const updateExistingDataStream = async ({
 
     // if update fails, rollover data stream and bail out
   } catch (err) {
-    subobjectsFieldChanged =
-      subobjectsFieldChanged ||
-      (err.body?.error?.type === 'mapper_exception' &&
-        err.body?.error?.reason?.includes('subobjects'));
-    if (
-      (isResponseError(err) &&
-        err.statusCode === 400 &&
-        err.body?.error?.type === 'illegal_argument_exception') ||
-      // handling the case when subobjects field changed, it should also trigger a rollover
-      subobjectsFieldChanged
-    ) {
+    if (errorNeedRollover(err) || subobjectsFieldChanged) {
       logger.info(`Mappings update for ${dataStreamName} failed due to ${err}`);
       logger.trace(`Attempted mappings: ${mappings}`);
       if (options?.skipDataStreamRollover === true) {
@@ -1149,7 +1163,8 @@ const updateExistingDataStream = async ({
   // Trigger a rollover if the index mode or source type has changed
   if (
     currentIndexMode !== settings?.index?.mode ||
-    currentSourceType !== settings?.index?.source?.mode ||
+    // @ts-expect-error Property 'source.mode' does not exist on type 'IndicesMappingLimitSettings'
+    currentSourceType !== settings?.index?.mapping?.source?.mode ||
     dynamicDimensionMappingsChanged
   ) {
     if (options?.skipDataStreamRollover === true) {

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 
-import { Dataset, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import type { InfraFeatureId } from '../../../common/constants';
-import { RuleRegistrationContext, RulesServiceStartDeps } from './types';
+import type { RuleRegistrationContext, RulesServiceStartDeps } from './types';
 
 export const createRuleDataClient = ({
   ownerFeatureId,

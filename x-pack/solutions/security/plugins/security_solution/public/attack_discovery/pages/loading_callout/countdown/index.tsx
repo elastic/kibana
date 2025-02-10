@@ -15,14 +15,14 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 
-import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getTimerPrefix } from './last_times_popover/helpers';
-
 import { InfoPopoverBody } from '../info_popover_body';
+import { getTimerPrefix } from './last_times_popover/helpers';
+import * as i18n from '../translations';
 
 const TEXT_COLOR = '#343741';
 
@@ -69,7 +69,9 @@ const CountdownComponent: React.FC<Props> = ({ approximateFutureTime, connectorI
   }, [approximateFutureTime]);
 
   const iconInQuestionButton = useMemo(
-    () => <EuiButtonIcon iconType="questionInCircle" onClick={onClick} />,
+    () => (
+      <EuiButtonIcon aria-label={i18n.INFORMATION} iconType="questionInCircle" onClick={onClick} />
+    ),
     [onClick]
   );
 

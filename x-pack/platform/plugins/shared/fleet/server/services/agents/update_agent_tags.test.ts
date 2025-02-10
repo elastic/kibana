@@ -34,7 +34,7 @@ jest.mock('../agent_policy', () => {
   return {
     agentPolicyService: {
       getInactivityTimeouts: jest.fn().mockResolvedValue([]),
-      getByIDs: jest.fn().mockResolvedValue([{ id: 'hosted-agent-policy', is_managed: true }]),
+      getByIds: jest.fn().mockResolvedValue([{ id: 'hosted-agent-policy', is_managed: true }]),
       list: jest.fn().mockResolvedValue({ items: [] }),
     },
   };
@@ -44,7 +44,7 @@ const mockRunAsync = jest.fn().mockResolvedValue({});
 jest.mock('./update_agent_tags_action_runner', () => ({
   ...jest.requireActual('./update_agent_tags_action_runner'),
   UpdateAgentTagsActionRunner: jest.fn().mockImplementation(() => {
-    return { runActionAsyncWithRetry: mockRunAsync };
+    return { runActionAsyncWithRetry: mockRunAsync, runActionAsyncTask: mockRunAsync };
   }),
 }));
 

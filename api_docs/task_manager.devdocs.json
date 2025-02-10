@@ -26,13 +26,7 @@
             "text": "TaskManagerPlugin"
           },
           " implements ",
-          {
-            "pluginId": "@kbn/core-plugins-server",
-            "scope": "server",
-            "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-server.Plugin",
-            "text": "Plugin"
-          },
+          "Plugin",
           "<",
           {
             "pluginId": "taskManager",
@@ -49,7 +43,11 @@
             "section": "def-server.TaskManagerStartContract",
             "text": "TaskManagerStartContract"
           },
-          ", object, object>"
+          ", ",
+          "TaskManagerPluginsSetup",
+          ", ",
+          "TaskManagerPluginsStart",
+          ">"
         ],
         "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
         "deprecated": false,
@@ -77,13 +75,7 @@
                 "label": "initContext",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-plugins-server",
-                    "scope": "server",
-                    "docId": "kibKbnCorePluginsServerPluginApi",
-                    "section": "def-server.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
+                  "PluginInitializerContext",
                   "<unknown>"
                 ],
                 "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
@@ -119,14 +111,10 @@
             "description": [],
             "signature": [
               "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
-                "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreSetup",
-                "text": "CoreSetup"
-              },
+              "CoreSetup",
               "<",
+              "TaskManagerPluginsStart",
+              ", ",
               {
                 "pluginId": "taskManager",
                 "scope": "server",
@@ -134,15 +122,9 @@
                 "section": "def-server.TaskManagerStartContract",
                 "text": "TaskManagerStartContract"
               },
-              ", unknown>, plugins: { usageCollection?: ",
-              {
-                "pluginId": "usageCollection",
-                "scope": "server",
-                "docId": "kibUsageCollectionPluginApi",
-                "section": "def-server.UsageCollectionSetup",
-                "text": "UsageCollectionSetup"
-              },
-              " | undefined; }) => ",
+              ">, plugins: ",
+              "TaskManagerPluginsSetup",
+              ") => ",
               {
                 "pluginId": "taskManager",
                 "scope": "server",
@@ -163,14 +145,10 @@
                 "label": "core",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreSetup",
-                    "text": "CoreSetup"
-                  },
+                  "CoreSetup",
                   "<",
+                  "TaskManagerPluginsStart",
+                  ", ",
                   {
                     "pluginId": "taskManager",
                     "scope": "server",
@@ -178,7 +156,7 @@
                     "section": "def-server.TaskManagerStartContract",
                     "text": "TaskManagerStartContract"
                   },
-                  ", unknown>"
+                  ">"
                 ],
                 "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
                 "deprecated": false,
@@ -192,32 +170,13 @@
                 "tags": [],
                 "label": "plugins",
                 "description": [],
+                "signature": [
+                  "TaskManagerPluginsSetup"
+                ],
                 "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "children": [
-                  {
-                    "parentPluginId": "taskManager",
-                    "id": "def-server.TaskManagerPlugin.setup.$2.usageCollection",
-                    "type": "CompoundType",
-                    "tags": [],
-                    "label": "usageCollection",
-                    "description": [],
-                    "signature": [
-                      {
-                        "pluginId": "usageCollection",
-                        "scope": "server",
-                        "docId": "kibUsageCollectionPluginApi",
-                        "section": "def-server.UsageCollectionSetup",
-                        "text": "UsageCollectionSetup"
-                      },
-                      " | undefined"
-                    ],
-                    "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -231,15 +190,9 @@
             "description": [],
             "signature": [
               "({ savedObjects, elasticsearch, executionContext, docLinks }: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
-                "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ", { cloud }: ",
-              "TaskManagerPluginStart",
+              "TaskManagerPluginsStart",
               ") => ",
               {
                 "pluginId": "taskManager",
@@ -261,13 +214,7 @@
                 "label": "{ savedObjects, elasticsearch, executionContext, docLinks }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-server.CoreStart",
-                    "text": "CoreStart"
-                  }
+                  "CoreStart"
                 ],
                 "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
                 "deprecated": false,
@@ -282,7 +229,7 @@
                 "label": "{ cloud }",
                 "description": [],
                 "signature": [
-                  "TaskManagerPluginStart"
+                  "TaskManagerPluginsStart"
                 ],
                 "path": "x-pack/platform/plugins/shared/task_manager/server/plugin.ts",
                 "deprecated": false,
@@ -1335,6 +1282,27 @@
             "description": [],
             "signature": [
               "number | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.TaskInstance.priority",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "priority",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskPriority",
+                "text": "TaskPriority"
+              },
+              " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
             "deprecated": false,

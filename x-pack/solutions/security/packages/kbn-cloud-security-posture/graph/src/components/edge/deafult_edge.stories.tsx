@@ -23,6 +23,7 @@ import {
 import { isEmpty, isEqual, pick, size, xorWith } from 'lodash';
 import { Story } from '@storybook/react';
 import { DefaultEdge } from '.';
+import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { LabelNode } from '../node';
 import type { EdgeViewModel } from '../types';
 import { SvgDefsMarker } from './markers';
@@ -31,7 +32,7 @@ import '@xyflow/react/dist/style.css';
 import { HandleStyleOverride } from '../node/styles';
 
 export default {
-  title: 'Components/Graph Components/Default Edge',
+  title: 'Components/Graph Components',
   description: 'CDR - Graph visualization',
   argTypes: {
     color: {
@@ -43,6 +44,7 @@ export default {
       control: { type: 'radio' },
     },
   },
+  decorators: [GlobalStylesStorybookDecorator],
 };
 
 const nodeTypes = {

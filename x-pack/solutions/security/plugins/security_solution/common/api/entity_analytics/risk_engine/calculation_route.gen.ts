@@ -43,6 +43,14 @@ export const RiskScoresCalculationResponse = z.object({
        */
       user: z.array(EntityRiskScoreRecord).optional(),
       /**
+       * A list of service risk scores
+       */
+      service: z.array(EntityRiskScoreRecord).optional(),
+      /**
+       * A list of universal risk scores
+       */
+      universal: z.array(EntityRiskScoreRecord).optional(),
+      /**
        * If 'wait_for' the request will wait for the index refresh.
        */
       refresh: z.literal('wait_for').optional(),

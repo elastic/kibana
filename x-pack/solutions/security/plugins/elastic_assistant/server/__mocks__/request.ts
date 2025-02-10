@@ -14,6 +14,9 @@ import {
 import type {
   DefendInsightsGetRequestQuery,
   DefendInsightsPostRequestBody,
+  DeleteKnowledgeBaseEntryRequestParams,
+  KnowledgeBaseEntryUpdateProps,
+  UpdateKnowledgeBaseEntryRequestParams,
 } from '@kbn/elastic-assistant-common';
 import {
   AttackDiscoveryPostRequestBody,
@@ -31,6 +34,7 @@ import {
   ELASTIC_AI_ASSISTANT_EVALUATE_URL,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
@@ -92,6 +96,27 @@ export const getBulkActionKnowledgeBaseEntryRequest = (
     method: 'post',
     path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
     body,
+  });
+
+export const getUpdateKnowledgeBaseEntryRequest = ({
+  params,
+  body,
+}: {
+  params: UpdateKnowledgeBaseEntryRequestParams;
+  body: KnowledgeBaseEntryUpdateProps;
+}) =>
+  requestMock.create({
+    method: 'put',
+    path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
+    params,
+    body,
+  });
+
+export const getDeleteKnowledgeBaseEntryRequest = (params: DeleteKnowledgeBaseEntryRequestParams) =>
+  requestMock.create({
+    method: 'delete',
+    path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
+    params,
   });
 
 export const getGetCapabilitiesRequest = () =>

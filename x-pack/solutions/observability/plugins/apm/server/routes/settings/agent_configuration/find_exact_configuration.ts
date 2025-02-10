@@ -6,10 +6,10 @@
  */
 
 import type { SearchHit } from '@kbn/es-types';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import { SERVICE_ENVIRONMENT, SERVICE_NAME } from '../../../../common/es_fields/apm';
-import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import type { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/apm_system_index_constants';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
 import { getAgentConfigEtagMetrics } from './get_agent_config_etag_metrics';

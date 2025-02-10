@@ -15,11 +15,11 @@ import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
 import { useMetricsDataViewContext } from '../../../../../containers/metrics_source';
 import { LimitOptions } from './limit_options';
-import { HostLimitOptions } from '../../types';
+import type { HostLimitOptions } from '../../types';
 
 export const UnifiedSearchBar = () => {
   const {
-    services: { unifiedSearch, application },
+    services: { unifiedSearch },
   } = useKibanaContextForPlugin();
   const { metricsView } = useMetricsDataViewContext();
   const { searchCriteria, onLimitChange, onPanelFiltersChange, onSubmit } =
@@ -49,17 +49,14 @@ export const UnifiedSearchBar = () => {
               defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
             })}
             onQuerySubmit={handleRefresh}
-            saveQueryMenuVisibility={
-              application?.capabilities?.visualize?.saveQuery
-                ? 'allowed_by_app_privilege'
-                : 'globally_managed'
-            }
+            allowSavingQueries
             showDatePicker
             showFilterBar
             showQueryInput
             showQueryMenu
             useDefaultBehaviors
             isAutoRefreshDisabled
+            isRefreshPaused
           />
         </EuiFlexItem>
         <EuiFlexItem>

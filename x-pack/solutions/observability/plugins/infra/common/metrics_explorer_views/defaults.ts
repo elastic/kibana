@@ -8,11 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import type { NonEmptyString } from '@kbn/io-ts-utils';
 import { Color } from '../color_palette';
-import {
-  MetricsExplorerChartType,
-  MetricsExplorerViewAttributes,
-  MetricsExplorerYAxisMode,
-} from './types';
+import type { MetricsExplorerViewAttributes } from './types';
+import { MetricsExplorerChartType, MetricsExplorerYAxisMode } from './types';
 
 export const staticMetricsExplorerViewId = '0';
 

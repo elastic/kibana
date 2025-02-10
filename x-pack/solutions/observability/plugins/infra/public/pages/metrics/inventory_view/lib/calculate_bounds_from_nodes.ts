@@ -6,8 +6,8 @@
  */
 
 import { first, min, max, isFinite } from 'lodash';
-import { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
-import { InfraWaffleMapBounds } from '../../../../common/inventory/types';
+import type { SnapshotNode } from '../../../../../common/http_api/snapshot_api';
+import type { InfraWaffleMapBounds } from '../../../../common/inventory/types';
 
 export const calculateBoundsFromNodes = (nodes: SnapshotNode[]): InfraWaffleMapBounds => {
   const values = nodes.map((node) => {

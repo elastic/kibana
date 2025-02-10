@@ -103,6 +103,13 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 ),
                 link: 'searchInferenceEndpoints',
               },
+              {
+                id: 'searchSynonyms',
+                title: i18n.translate('xpack.serverlessSearch.nav.relevance.searchSynonyms', {
+                  defaultMessage: 'Synonyms',
+                }),
+                link: 'searchSynonyms',
+              },
             ],
           },
           {

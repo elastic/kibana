@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { ComponentType } from 'react';
+import type { ComponentType } from 'react';
+import React from 'react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { InstancesLatencyDistributionChart, InstancesLatencyDistributionChartProps } from '.';
+import type { InstancesLatencyDistributionChartProps } from '.';
+import { InstancesLatencyDistributionChart } from '.';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 
 export default {

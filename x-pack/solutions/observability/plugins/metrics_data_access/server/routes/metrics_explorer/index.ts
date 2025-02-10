@@ -8,10 +8,10 @@
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import Boom from '@hapi/boom';
 import { METRICS_EXPLORER_API_MAX_METRICS } from '../../../common/constants';
+import type { MetricsExplorerPageInfo } from '../../../common/http_api/metrics_explorer';
 import {
   metricsExplorerRequestBodyRT,
   metricsExplorerResponseRT,
-  MetricsExplorerPageInfo,
 } from '../../../common/http_api/metrics_explorer';
 import { convertRequestToMetricsAPIOptions } from './lib/convert_request_to_metrics_api_options';
 import { createSearchClient } from '../../lib/create_search_client';
@@ -19,7 +19,7 @@ import { findIntervalForMetrics } from './lib/find_interval_for_metrics';
 import { query } from '../../lib/metrics';
 import { queryTotalGroupings } from './lib/query_total_groupings';
 import { transformSeries } from './lib/transform_series';
-import { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
+import type { KibanaFramework } from '../../lib/adapters/framework/kibana_framework_adapter';
 
 export const initMetricExplorerRoute = (framework: KibanaFramework) => {
   const validateBody = createRouteValidationFunction(metricsExplorerRequestBodyRT);

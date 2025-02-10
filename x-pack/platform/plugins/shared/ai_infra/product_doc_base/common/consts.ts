@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+
 export const productDocInstallStatusSavedObjectTypeName = 'product-doc-install-status';
 
 /**
  * The id of the inference endpoint we're creating for our product doc indices.
- * Could be replaced with the default elser 2 endpoint once the default endpoint feature is available.
  */
-export const internalElserInferenceId = 'kibana-internal-elser2';
+export const internalElserInferenceId = defaultInferenceEndpoints.ELSER;

@@ -24,23 +24,29 @@ import React, { useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { paths } from '../../../../../common/locators/paths';
 import { SloDeleteModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { SloDisableConfirmationModal } from '../../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
+import { SloEnableConfirmationModal } from '../../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
 import { SloResetConfirmationModal } from '../../../../components/slo/reset_confirmation_modal/slo_reset_confirmation_modal';
-import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
-import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
+import { SloStateBadge, SloStatusBadge } from '../../../../components/slo/slo_badges';
+import { SloActiveAlertsBadge } from '../../../../components/slo/slo_badges/slo_active_alerts_badge';
 import { sloKeys } from '../../../../hooks/query_key_factory';
 import { useCloneSlo } from '../../../../hooks/use_clone_slo';
+import { useDisableSlo } from '../../../../hooks/use_disable_slo';
+import { useEnableSlo } from '../../../../hooks/use_enable_slo';
 import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historical_summary';
 import { useFetchRulesForSlo } from '../../../../hooks/use_fetch_rules_for_slo';
 import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule_types';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { usePermissions } from '../../../../hooks/use_permissions';
 import { useResetSlo } from '../../../../hooks/use_reset_slo';
 import { useSpace } from '../../../../hooks/use_space';
-import { useKibana } from '../../../../hooks/use_kibana';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import {
   createRemoteSloDeleteUrl,
+  createRemoteSloDisableUrl,
   createRemoteSloEditUrl,
+  createRemoteSloEnableUrl,
   createRemoteSloResetUrl,
 } from '../../../../utils/slo/remote_slo_urls';
 import { SloRemoteBadge } from '../badges/slo_remote_badge';
@@ -70,19 +76,21 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
   const spaceId = useSpace();
 
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
-  const sloIdsAndInstanceIds = sloList.map(
-    (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
-  );
+  const sloIdsAndInstanceIds = sloList.map((slo) => [slo.id, slo.instanceId] as [string, string]);
 
   const { data: permissions } = usePermissions();
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const queryClient = useQueryClient();
 
-  const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
+  const { mutate: resetSlo, isLoading: isResetLoading } = useResetSlo();
+  const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
+  const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
 
   const [sloToAddRule, setSloToAddRule] = useState<SLOWithSummaryResponse | undefined>(undefined);
   const [sloToDelete, setSloToDelete] = useState<SLOWithSummaryResponse | undefined>(undefined);
   const [sloToReset, setSloToReset] = useState<SLOWithSummaryResponse | undefined>(undefined);
+  const [sloToEnable, setSloToEnable] = useState<SLOWithSummaryResponse | undefined>(undefined);
+  const [sloToDisable, setSloToDisable] = useState<SLOWithSummaryResponse | undefined>(undefined);
 
   const handleDeleteConfirm = () => {
     setSloToDelete(undefined);
@@ -92,15 +100,37 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     setSloToDelete(undefined);
   };
 
-  const handleResetConfirm = async () => {
+  const handleResetConfirm = () => {
     if (sloToReset) {
-      await resetSlo({ id: sloToReset.id, name: sloToReset.name });
+      resetSlo({ id: sloToReset.id, name: sloToReset.name });
       setSloToReset(undefined);
     }
   };
 
   const handleResetCancel = () => {
     setSloToReset(undefined);
+  };
+
+  const handleEnableConfirm = async () => {
+    if (sloToEnable) {
+      enableSlo({ id: sloToEnable.id, name: sloToEnable.name });
+      setSloToEnable(undefined);
+    }
+  };
+
+  const handleEnableCancel = () => {
+    setSloToEnable(undefined);
+  };
+
+  const handleDisableConfirm = async () => {
+    if (sloToDisable) {
+      disableSlo({ id: sloToDisable.id, name: sloToDisable.name });
+      setSloToDisable(undefined);
+    }
+  };
+
+  const handleDisableCancel = () => {
+    setSloToDisable(undefined);
   };
 
   const handleSavedRule = async () => {
@@ -150,13 +180,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       }),
       onClick: (slo: SLOWithSummaryResponse) => {
         const sloDetailsUrl = basePath.prepend(
-          paths.sloDetails(
-            slo.id,
-            ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId
-              ? slo.instanceId
-              : undefined,
-            slo.remote?.remoteName
-          )
+          paths.sloDetails(slo.id, slo.instanceId, slo.remote?.remoteName)
         );
         navigateToUrl(sloDetailsUrl);
       },
@@ -215,6 +239,46 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       onClick: (slo: SLOWithSummaryResponse) => {
         const locator = locators.get<RulesParams>(rulesLocatorID);
         locator?.navigate({ params: { sloId: slo.id } }, { replace: false });
+      },
+    },
+    {
+      type: 'icon',
+      icon: (slo: SLOWithSummaryResponse) => (slo.enabled ? 'stop' : 'play'),
+      name: (slo: SLOWithSummaryResponse) =>
+        buildActionName(
+          slo.enabled
+            ? i18n.translate('xpack.slo.item.actions.disable', {
+                defaultMessage: 'Disable',
+              })
+            : i18n.translate('xpack.slo.item.actions.enable', {
+                defaultMessage: 'Enable',
+              })
+        )(slo),
+      description: (slo: SLOWithSummaryResponse) =>
+        slo.enabled
+          ? i18n.translate('xpack.slo.item.actions.disable', {
+              defaultMessage: 'Disable',
+            })
+          : i18n.translate('xpack.slo.item.actions.enable', {
+              defaultMessage: 'Enable',
+            }),
+      'data-test-subj': 'sloActionsManage',
+      enabled: (slo: SLOWithSummaryResponse) =>
+        (permissions?.hasAllWriteRequested && !isRemote(slo)) || hasRemoteKibanaUrl(slo),
+      onClick: (slo: SLOWithSummaryResponse) => {
+        const isEnabled = slo.enabled;
+        const remoteUrl = isEnabled
+          ? createRemoteSloDisableUrl(slo, spaceId)
+          : createRemoteSloEnableUrl(slo, spaceId);
+        if (!!remoteUrl) {
+          window.open(remoteUrl, '_blank');
+        } else {
+          if (isEnabled) {
+            setSloToDisable(slo);
+          } else {
+            setSloToEnable(slo);
+          }
+        }
       },
     },
     {
@@ -290,6 +354,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       render: (_, slo: SLOWithSummaryResponse) => (
         <EuiFlexGroup direction="row" gutterSize="s">
           <SloStatusBadge slo={slo} />
+          <SloStateBadge slo={slo} />
           <SloRemoteBadge slo={slo} />
         </EuiFlexGroup>
       ),
@@ -322,13 +387,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       'data-test-subj': 'sloItem',
       render: (_, slo: SLOWithSummaryResponse) => {
         const sloDetailsUrl = basePath.prepend(
-          paths.sloDetails(
-            slo.id,
-            ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId
-              ? slo.instanceId
-              : undefined,
-            slo.remote?.remoteName
-          )
+          paths.sloDetails(slo.id, slo.instanceId, slo.remote?.remoteName)
         );
         return (
           <EuiToolTip position="top" content={slo.name} display="block">
@@ -380,8 +439,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         const historicalSliData = formatHistoricalData(
           historicalSummaries.find(
             (historicalSummary) =>
-              historicalSummary.sloId === slo.id &&
-              historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
+              historicalSummary.sloId === slo.id && historicalSummary.instanceId === slo.instanceId
           )?.data,
           'sli_value'
         );
@@ -414,8 +472,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         const errorBudgetBurnDownData = formatHistoricalData(
           historicalSummaries.find(
             (historicalSummary) =>
-              historicalSummary.sloId === slo.id &&
-              historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
+              historicalSummary.sloId === slo.id && historicalSummary.instanceId === slo.instanceId
           )?.data,
           'error_budget_remaining'
         );
@@ -487,6 +544,24 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
           onCancel={handleResetCancel}
           onConfirm={handleResetConfirm}
           isLoading={isResetLoading}
+        />
+      ) : null}
+
+      {sloToEnable ? (
+        <SloEnableConfirmationModal
+          slo={sloToEnable}
+          onCancel={handleEnableCancel}
+          onConfirm={handleEnableConfirm}
+          isLoading={isEnableLoading}
+        />
+      ) : null}
+
+      {sloToDisable ? (
+        <SloDisableConfirmationModal
+          slo={sloToDisable}
+          onCancel={handleDisableCancel}
+          onConfirm={handleDisableConfirm}
+          isLoading={isDisableLoading}
         />
       ) : null}
     </>

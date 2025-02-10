@@ -8,6 +8,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { useCallback } from 'react';
+import type { RuleMigrationFilters } from '../../../../common/siem_migrations/types';
 import { SIEM_RULE_MIGRATION_PATH } from '../../../../common/siem_migrations/constants';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
@@ -20,8 +21,7 @@ export const useGetMigrationRules = (params: {
   perPage?: number;
   sortField?: string;
   sortDirection?: 'asc' | 'desc';
-  searchTerm?: string;
-  ids?: string[];
+  filters?: RuleMigrationFilters;
 }) => {
   const { addError } = useAppToasts();
 
@@ -52,20 +52,23 @@ export const useGetMigrationRules = (params: {
  *
  * @returns A rule migrations cache invalidation callback
  */
-export const useInvalidateGetMigrationRules = (migrationId: string) => {
+export const useInvalidateGetMigrationRules = () => {
   const queryClient = useQueryClient();
 
-  const SPECIFIC_MIGRATION_PATH = replaceParams(SIEM_RULE_MIGRATION_PATH, {
-    migration_id: migrationId,
-  });
+  return useCallback(
+    (migrationId: string) => {
+      const SPECIFIC_MIGRATION_PATH = replaceParams(SIEM_RULE_MIGRATION_PATH, {
+        migration_id: migrationId,
+      });
 
-  return useCallback(() => {
-    /**
-     * Invalidate all queries that start with SPECIFIC_MIGRATION_PATH. This
-     * includes the in-memory query cache and paged query cache.
-     */
-    queryClient.invalidateQueries(['GET', SPECIFIC_MIGRATION_PATH], {
-      refetchType: 'active',
-    });
-  }, [SPECIFIC_MIGRATION_PATH, queryClient]);
+      /**
+       * Invalidate all queries that start with SPECIFIC_MIGRATION_PATH. This
+       * includes the in-memory query cache and paged query cache.
+       */
+      queryClient.invalidateQueries(['GET', SPECIFIC_MIGRATION_PATH], {
+        refetchType: 'active',
+      });
+    },
+    [queryClient]
+  );
 };

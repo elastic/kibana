@@ -35,16 +35,14 @@ import { SeverityField } from '../severity_mapping';
 import { RiskScoreField } from '../risk_score_mapping';
 import { EsFieldSelectorField } from '../es_field_selector_field';
 import { useFetchIndex } from '../../../../common/containers/source';
-import {
-  DEFAULT_INDICATOR_SOURCE_PATH,
-  DEFAULT_MAX_SIGNALS,
-} from '../../../../../common/constants';
+import { DEFAULT_MAX_SIGNALS } from '../../../../../common/constants';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useRuleIndices } from '../../../rule_management/logic/use_rule_indices';
 import { EsqlAutocomplete } from '../esql_autocomplete';
 import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useAllEsqlRuleFields } from '../../hooks';
 import { MaxSignals } from '../max_signals';
+import { ThreatMatchIndicatorPathEdit } from '../../../rule_creation/components/threat_match_indicator_path_edit';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -367,20 +365,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
               />
             </EuiFormRow>
             {isThreatMatchRuleValue && (
-              <>
-                <CommonUseField
-                  path="threatIndicatorPath"
-                  componentProps={{
-                    idAria: 'detectionEngineStepAboutThreatIndicatorPath',
-                    'data-test-subj': 'detectionEngineStepAboutThreatIndicatorPath',
-                    euiFieldProps: {
-                      fullWidth: true,
-                      disabled: isLoading,
-                      placeholder: DEFAULT_INDICATOR_SOURCE_PATH,
-                    },
-                  }}
-                />
-              </>
+              <ThreatMatchIndicatorPathEdit path="threatIndicatorPath" disabled={isLoading} />
             )}
             <EuiSpacer size="l" />
             {isEsqlRuleValue ? (

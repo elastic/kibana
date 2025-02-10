@@ -50,7 +50,7 @@ export const canvasWebpack = {
             KIBANA_ROOT,
             'x-pack/platform/plugins/private/canvas/public/components/embeddable_flyout'
           ),
-          resolve(KIBANA_ROOT, 'x-pack/plugins/reporting/public'),
+          resolve(KIBANA_ROOT, 'x-pack/platform/plugins/private/reporting/public'),
         ],
         use: 'null-loader',
       },

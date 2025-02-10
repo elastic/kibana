@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { LocatorPublic } from '@kbn/share-plugin/common/url_service/locators';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
-import { InfraWaffleMapNode } from '../../../../common/inventory/types';
+import type { LocatorPublic } from '@kbn/share-plugin/common/url_service/locators';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { InfraWaffleMapNode } from '../../../../common/inventory/types';
 
 export const navigateToUptime = ({
   uptimeLocator,

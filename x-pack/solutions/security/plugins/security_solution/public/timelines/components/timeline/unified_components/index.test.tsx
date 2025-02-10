@@ -233,7 +233,7 @@ describe('unified timeline', () => {
         });
         expect(
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
-        ).toHaveAttribute('data-gridcell-column-index', '3');
+        ).toHaveAttribute('data-gridcell-column-index', '4');
 
         expect(
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
@@ -268,7 +268,7 @@ describe('unified timeline', () => {
         });
         expect(
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
-        ).toHaveAttribute('data-gridcell-column-index', '3');
+        ).toHaveAttribute('data-gridcell-column-index', '4');
 
         expect(
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
@@ -482,7 +482,7 @@ describe('unified timeline', () => {
         });
         expect(
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)
-        ).toHaveAttribute('data-gridcell-column-index', '3');
+        ).toHaveAttribute('data-gridcell-column-index', '4');
 
         expect(
           container.querySelector(`[data-gridcell-column-id="${field.name}"]`)

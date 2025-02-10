@@ -91,14 +91,14 @@ export class StateContainersExamplesPlugin implements Plugin {
       links: [
         {
           label: 'State containers README',
-          href: 'https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_containers',
+          href: 'https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/kibana_utils/docs/state_containers',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',
         },
         {
           label: 'State sync utils README',
-          href: 'https://github.com/elastic/kibana/tree/main/src/plugins/kibana_utils/docs/state_sync',
+          href: 'https://github.com/elastic/kibana/tree/main/src/platform/plugins/shared/kibana_utils/docs/state_sync',
           iconType: 'logoGithub',
           size: 's',
           target: '_blank',

@@ -32,8 +32,8 @@ interface ConfigWithoutBodyOptions<P, Q, B, Method extends RouteMethod>
  * The will pass a String Buffer to the route handler. The proper way to validate this when validation
  * is enabled to to use `body: schema.buffer()`.
  *
- * @see https://github.com/elastic/kibana/blob/main/docs/development/core/server/kibana-plugin-core-server.routeconfigoptionsbody.md
- * @see https://github.com/elastic/kibana/blob/main/packages/kbn-config-schema/README.md#schemabuffer
+ * @see https://github.com/elastic/kibana/blob/8.0/docs/development/core/server/kibana-plugin-core-server.routeconfigoptionsbody.md
+ * @see https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-config-schema/README.md#schemabuffer
  *
  * Example:
  *  router.put({

@@ -161,7 +161,6 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
           data-test-subj="alertSelectionSearchBar"
           indexPatterns={indexPatterns}
           filters={filters}
-          saveQueryMenuVisibility="hidden"
           showDatePicker={false}
           showFilterBar={true}
           showQueryInput={true}

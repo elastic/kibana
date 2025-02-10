@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { CloudSetupState } from '@kbn/profiling-data-access-plugin/common/cloud_setup';
+import type { CloudSetupState } from '@kbn/profiling-data-access-plugin/common/cloud_setup';
 import { enableResourceManagement, setMaximumBuckets } from '../../lib/setup/cluster_settings';
 import {
   createCollectorPackagePolicy,
   createSymbolizerPackagePolicy,
   removeProfilingFromApmPackagePolicy,
 } from '../../lib/setup/fleet_policies';
-import { ProfilingCloudSetupOptions } from '../../lib/setup/types';
+import type { ProfilingCloudSetupOptions } from '../../lib/setup/types';
 
 export async function setupCloud({
   setupState,

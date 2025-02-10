@@ -35,7 +35,7 @@ export function getConnectorType(): ConnectorTypeModel<
     id: CROWDSTRIKE_CONNECTOR_ID,
     actionTypeTitle: CROWDSTRIKE_TITLE,
     iconClass: lazy(() => import('./logo')),
-    isExperimental: true,
+    isExperimental: false,
     selectMessage: i18n.translate(
       'xpack.stackConnectors.security.crowdstrike.config.selectMessageText',
       {
@@ -60,8 +60,7 @@ export function getConnectorType(): ConnectorTypeModel<
       return { errors };
     },
     actionConnectorFields: lazy(() => import('./crowdstrike_connector')),
-    actionParamsFields: lazy(() => import('./crowdstrike_params_empty')),
-    // TODO: Enable once we add support for automated response actions
-    // actionParamsFields: lazy(() => import('./crowdstrike_params')),
+    actionParamsFields: lazy(() => import('./crowdstrike_params')),
+    subFeature: 'endpointSecurity',
   };
 }

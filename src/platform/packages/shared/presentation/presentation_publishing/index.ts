@@ -7,13 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface EmbeddableApiContext {
-  /**
-   * TODO: once all actions are entirely decoupled from the embeddable system, this key should be renamed to "api"
-   * to reflect the fact that this context could contain any api.
-   */
-  embeddable: unknown;
-}
+export { isEmbeddableApiContext, type EmbeddableApiContext } from './embeddable_api_context';
 
 export {
   getInitialValuesFromComparators,
@@ -70,14 +64,17 @@ export {
   type HasExecutionContext,
 } from './interfaces/has_execution_context';
 export {
-  apiHasInPlaceLibraryTransforms,
-  apiHasLegacyLibraryTransforms,
   apiHasLibraryTransforms,
-  type HasInPlaceLibraryTransforms,
-  type HasLegacyLibraryTransforms,
   type HasLibraryTransforms,
 } from './interfaces/has_library_transforms';
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';
+export {
+  apiHasSerializableState,
+  apiHasSnapshottableState,
+  type HasSerializableState,
+  type HasSnapshottableState,
+  type SerializedPanelState,
+} from './interfaces/has_serializable_state';
 export {
   apiHasSupportedTriggers,
   type HasSupportedTriggers,
@@ -130,24 +127,25 @@ export {
   type ViewMode,
 } from './interfaces/publishes_view_mode';
 export {
-  apiPublishesPanelDescription,
-  apiPublishesWritablePanelDescription,
-  getPanelDescription,
-  type PublishesPanelDescription,
-  type PublishesWritablePanelDescription,
-} from './interfaces/titles/publishes_panel_description';
+  apiPublishesDescription,
+  apiPublishesWritableDescription,
+  getDescription,
+  type PublishesDescription,
+  type PublishesWritableDescription,
+} from './interfaces/titles/publishes_description';
 export {
-  apiPublishesPanelTitle,
-  apiPublishesWritablePanelTitle,
-  getPanelTitle,
-  type PublishesPanelTitle,
-  type PublishesWritablePanelTitle,
-} from './interfaces/titles/publishes_panel_title';
+  apiPublishesTitle,
+  apiPublishesWritableTitle,
+  getTitle,
+  type PublishesTitle,
+  type PublishesWritableTitle,
+} from './interfaces/titles/publishes_title';
 export {
-  initializeTitles,
+  initializeTitleManager,
   stateHasTitles,
+  type TitlesApi,
   type SerializedTitles,
-} from './interfaces/titles/titles_api';
+} from './interfaces/titles/title_manager';
 export {
   useBatchedOptionalPublishingSubjects,
   useBatchedPublishingSubjects,

@@ -114,11 +114,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // assert legend
       expect(debugState?.legend!.items).to.eql([
-        { key: '5,722.775 - 8,529.22', name: '5,722.775 - 8,529.22', color: '#6092c0' },
-        { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#a8bfda' },
-        { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#ebeff5' },
-        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#efb785' },
-        { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#e7664c' },
+        { key: '5,722.775 - 8,529.22', name: '5,722.775 - 8,529.22', color: '#61a2ff' },
+        { key: '8,529.22 - 11,335.665', name: '8,529.22 - 11,335.665', color: '#c8deff' },
+        { key: '11,335.665 - 14,142.11', name: '11,335.665 - 14,142.11', color: '#f6f9fc' },
+        { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#ffccc6' },
+        { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#f6726a' },
       ]);
     });
 

@@ -8,6 +8,8 @@
 import type OpenAI from 'openai';
 import type {
   ChatCompletionAssistantMessageParam,
+  ChatCompletionContentPartImage,
+  ChatCompletionContentPartText,
   ChatCompletionMessageParam,
   ChatCompletionSystemMessageParam,
   ChatCompletionToolMessageParam,
@@ -90,7 +92,23 @@ export function messagesToOpenAI({
         case MessageRole.User:
           const userMessage: ChatCompletionUserMessageParam = {
             role: 'user',
-            content: message.content,
+            content:
+              typeof message.content === 'string'
+                ? message.content
+                : message.content.map((contentPart) => {
+                    if (contentPart.type === 'image') {
+                      return {
+                        type: 'image_url',
+                        image_url: {
+                          url: contentPart.source.data,
+                        },
+                      } satisfies ChatCompletionContentPartImage;
+                    }
+                    return {
+                      text: contentPart.text,
+                      type: 'text',
+                    } satisfies ChatCompletionContentPartText;
+                  }),
           };
           return userMessage;
 

@@ -20,7 +20,7 @@ import { CreateIntegration } from './screens/create';
 import { CustomLanguagesOverview } from './screens/detail/custom_languages_overview';
 
 export const EPMApp: React.FunctionComponent = () => {
-  const { integrationAssistant } = useStartServices();
+  const { automaticImport } = useStartServices();
   useBreadcrumbs('integrations');
 
   return (
@@ -40,7 +40,7 @@ export const EPMApp: React.FunctionComponent = () => {
           </React.Suspense>
         </IntegrationsStateContextProvider>
       </Route>
-      {integrationAssistant && (
+      {automaticImport && (
         <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_create}>
           <CreateIntegration />
         </Route>

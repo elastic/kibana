@@ -7,14 +7,16 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import type { IlmExplainPhaseCounts, IlmPhase } from '../../../../../../types';
 import { getPatternIlmPhaseDescription } from './utils/get_pattern_ilm_phase_description';
 
-const PhaseCountsFlexGroup = styled(EuiFlexGroup)`
-  display: inline-flex;
-`;
+const styles = {
+  phaseCounts: css({
+    display: 'inline-flex',
+  }),
+};
 
 export const phases: IlmPhase[] = ['hot', 'unmanaged', 'warm', 'cold', 'frozen'];
 
@@ -24,7 +26,7 @@ interface Props {
 }
 
 const IlmPhaseCountsComponent: React.FC<Props> = ({ ilmExplainPhaseCounts, pattern }) => (
-  <PhaseCountsFlexGroup data-test-subj="ilmPhaseCounts" gutterSize="s">
+  <EuiFlexGroup css={styles.phaseCounts} data-test-subj="ilmPhaseCounts" gutterSize="s">
     {phases.map((phase) =>
       ilmExplainPhaseCounts[phase] != null && ilmExplainPhaseCounts[phase] > 0 ? (
         <EuiFlexItem key={phase} grow={false}>
@@ -40,7 +42,7 @@ const IlmPhaseCountsComponent: React.FC<Props> = ({ ilmExplainPhaseCounts, patte
         </EuiFlexItem>
       ) : null
     )}
-  </PhaseCountsFlexGroup>
+  </EuiFlexGroup>
 );
 
 IlmPhaseCountsComponent.displayName = 'IlmPhaseCountsComponent';

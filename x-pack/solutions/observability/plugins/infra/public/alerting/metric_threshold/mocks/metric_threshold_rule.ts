@@ -8,7 +8,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { Aggregators } from '../../../../common/alerting/metrics';
-import { MetricThresholdAlert, MetricThresholdRule } from '../components/alert_details_app_section';
+import type {
+  MetricThresholdAlert,
+  MetricThresholdRule,
+} from '../components/alert_details_app_section';
 
 export const buildMetricThresholdRule = (
   rule: Partial<MetricThresholdRule> = {}

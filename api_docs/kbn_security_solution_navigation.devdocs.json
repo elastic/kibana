@@ -231,13 +231,7 @@
         "description": [],
         "signature": [
           "({ core, children, }: React.PropsWithChildren<{ core: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           "; }>) => React.JSX.Element"
         ],
         "path": "x-pack/solutions/security/packages/navigation/src/context.tsx",
@@ -253,13 +247,7 @@
             "description": [],
             "signature": [
               "React.PropsWithChildren<{ core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               "; }>"
             ],
             "path": "x-pack/solutions/security/packages/navigation/src/context.tsx",

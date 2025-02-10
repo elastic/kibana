@@ -21,9 +21,10 @@ ROW a="foo;bar;baz"
 | EVAL last_a = MV_LAST(SPLIT(a, ";"))
 ```
 
+**Retrieving the last element from a multivalued field**
 ```esql
-ROW a="apple;banana;cherry"
-| EVAL last_fruit = MV_LAST(SPLIT(a, ";"))
+FROM bag_of_numbers
+| EVAL last = MV_LAST(numbers)
 ```
 
 ## Notes

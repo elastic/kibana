@@ -9,7 +9,13 @@
 
 import { i18n } from '@kbn/i18n';
 import { distance } from 'fastest-levenshtein';
-import type { AstProviderFn, ESQLAst, EditorError, ESQLMessage } from '@kbn/esql-ast';
+import {
+  type AstProviderFn,
+  type ESQLAst,
+  type EditorError,
+  type ESQLMessage,
+  isIdentifier,
+} from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
 import {
   getFieldsByTypeHelper,
@@ -20,7 +26,6 @@ import {
   getAllFunctions,
   getCommandDefinition,
   isColumnItem,
-  isIdentifier,
   isSourceItem,
   shouldBeQuotedText,
 } from '../shared/helpers';
@@ -69,7 +74,7 @@ export const getCompatibleFunctionDefinitions = (
   command: string,
   option: string | undefined
 ): string[] => {
-  const fnSupportedByCommand = getAllFunctions({ type: ['eval', 'agg'] }).filter(
+  const fnSupportedByCommand = getAllFunctions({ type: ['scalar', 'agg'] }).filter(
     ({ name, supportedCommands, supportedOptions }) =>
       option ? supportedOptions?.includes(option) : supportedCommands.includes(command)
   );

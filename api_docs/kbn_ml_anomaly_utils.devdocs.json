@@ -307,7 +307,7 @@
         "tags": [],
         "label": "getSeverityColor",
         "description": [
-          "\nReturns a severity RGB color (one of critical, major, minor, warning, low or blank)\nfor the supplied normalized anomaly score (a value between 0 and 100)."
+          "\nReturns a severity RGB color (one of critical, major, minor, warning, low or unknown)\nfor the supplied normalized anomaly score (a value between 0 and 100)."
         ],
         "signature": [
           "(normalizedScore: number) => string"
@@ -3615,10 +3615,10 @@
           },
           {
             "parentPluginId": "@kbn/ml-anomaly-utils",
-            "id": "def-common.ML_SEVERITY_COLORS.BLANK",
+            "id": "def-common.ML_SEVERITY_COLORS.UNKNOWN",
             "type": "string",
             "tags": [],
-            "label": "BLANK",
+            "label": "UNKNOWN",
             "description": [
               "/**\n   * Color used in the UI to indicate an anomaly for which the score is unknown.\n   */"
             ],

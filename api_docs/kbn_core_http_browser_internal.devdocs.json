@@ -10,23 +10,11 @@
         "label": "BasePath",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-http-browser-internal",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserInternalPluginApi",
-            "section": "def-public.BasePath",
-            "text": "BasePath"
-          },
+          "BasePath",
           " implements ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.IBasePath",
-            "text": "IBasePath"
-          }
+          "IBasePath"
         ],
-        "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+        "path": "src/core/packages/http/browser-internal/src/base_path.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -37,7 +25,7 @@
             "tags": [],
             "label": "serverBasePath",
             "description": [],
-            "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+            "path": "src/core/packages/http/browser-internal/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -48,7 +36,7 @@
             "tags": [],
             "label": "assetsHrefBase",
             "description": [],
-            "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+            "path": "src/core/packages/http/browser-internal/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -62,7 +50,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+            "path": "src/core/packages/http/browser-internal/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -76,7 +64,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+            "path": "src/core/packages/http/browser-internal/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -87,7 +75,7 @@
                 "tags": [],
                 "label": "{\n    basePath,\n    serverBasePath,\n    assetsHrefBase,\n    publicBaseUrl,\n  }",
                 "description": [],
-                "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+                "path": "src/core/packages/http/browser-internal/src/base_path.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -98,7 +86,7 @@
                     "tags": [],
                     "label": "basePath",
                     "description": [],
-                    "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+                    "path": "src/core/packages/http/browser-internal/src/base_path.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -112,7 +100,7 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+                    "path": "src/core/packages/http/browser-internal/src/base_path.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -126,7 +114,7 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+                    "path": "src/core/packages/http/browser-internal/src/base_path.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -140,7 +128,7 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+                    "path": "src/core/packages/http/browser-internal/src/base_path.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -159,7 +147,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+            "path": "src/core/packages/http/browser-internal/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -175,7 +163,7 @@
             "signature": [
               "(path: string) => string"
             ],
-            "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+            "path": "src/core/packages/http/browser-internal/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -189,7 +177,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+                "path": "src/core/packages/http/browser-internal/src/base_path.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -207,7 +195,7 @@
             "signature": [
               "(path: string) => string"
             ],
-            "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+            "path": "src/core/packages/http/browser-internal/src/base_path.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -221,7 +209,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/http/core-http-browser-internal/src/base_path.ts",
+                "path": "src/core/packages/http/browser-internal/src/base_path.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -246,18 +234,12 @@
         "description": [],
         "signature": [
           "Omit<",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           ", \"staticAssets\"> & { staticAssets: ",
           "InternalStaticAssets",
           "; }"
         ],
-        "path": "packages/core/http/core-http-browser-internal/src/types.ts",
+        "path": "src/core/packages/http/browser-internal/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -271,18 +253,12 @@
         "description": [],
         "signature": [
           "Omit<",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           ", \"staticAssets\"> & { staticAssets: ",
           "InternalStaticAssets",
           "; }"
         ],
-        "path": "packages/core/http/core-http-browser-internal/src/types.ts",
+        "path": "src/core/packages/http/browser-internal/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

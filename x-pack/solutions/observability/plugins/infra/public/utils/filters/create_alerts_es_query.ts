@@ -6,7 +6,8 @@
  */
 import { getTime } from '@kbn/data-plugin/common';
 import { ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
-import { BoolQuery, buildEsQuery, Filter, type TimeRange } from '@kbn/es-query';
+import type { BoolQuery, Filter } from '@kbn/es-query';
+import { buildEsQuery, type TimeRange } from '@kbn/es-query';
 import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import {
   findInventoryFields,

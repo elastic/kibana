@@ -6,9 +6,8 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiToolTip } from '@elastic/eui';
 import {
-  AssistantAvatar,
   DEFEND_INSIGHTS_STORAGE_KEY,
   ConnectorSelectorInline,
   DEFAULT_ASSISTANT_NAMESPACE,
@@ -17,6 +16,8 @@ import {
 import { noop } from 'lodash/fp';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { some } from 'lodash';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
+import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
 import { useSpaceId } from '../../../../../../../common/hooks/use_space_id';
 import { WORKFLOW_INSIGHTS } from '../../../translations';
 import { useKibana } from '../../../../../../../common/lib/kibana';
@@ -43,6 +44,7 @@ export const WorkflowInsightsScanSection = ({
   const { data: aiConnectors } = useLoadConnectors({
     http,
   });
+  const { canWriteWorkflowInsights } = useUserPrivileges().endpointPrivileges;
 
   // Store the selected connector id in local storage so that it persists across page reloads
   const [localStorageWorkflowInsightsConnectorId, setLocalStorageWorkflowInsightsConnectorId] =
@@ -78,11 +80,14 @@ export const WorkflowInsightsScanSection = ({
     if (!connectorExists) {
       return null;
     }
-    return (
+
+    const button = (
       <EuiFlexItem grow={false}>
         <EuiButton
+          data-test-subj="workflowInsightsScanButton"
           size="s"
           isLoading={isScanButtonDisabled}
+          isDisabled={!canWriteWorkflowInsights}
           onClick={() => {
             if (!connectorId || !selectedConnectorActionTypeId) return;
             onScanButtonClick({ connectorId, actionTypeId: selectedConnectorActionTypeId });
@@ -92,7 +97,17 @@ export const WorkflowInsightsScanSection = ({
         </EuiButton>
       </EuiFlexItem>
     );
+
+    if (!canWriteWorkflowInsights) {
+      return (
+        <EuiToolTip content={WORKFLOW_INSIGHTS.scan.noPermissions} position={'top'}>
+          {button}
+        </EuiToolTip>
+      );
+    }
+    return button;
   }, [
+    canWriteWorkflowInsights,
     connectorExists,
     connectorId,
     isScanButtonDisabled,
@@ -106,7 +121,7 @@ export const WorkflowInsightsScanSection = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <AssistantAvatar size={'xs'} />
+              <AssistantIcon />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="s">

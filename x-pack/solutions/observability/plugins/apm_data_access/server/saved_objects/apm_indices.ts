@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { updateApmOssIndexPaths } from './migrations/update_apm_oss_index_paths';
-import { APMIndices } from '..';
+import type { APMIndices } from '..';
 
 export const APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE = 'apm-indices';
 export const APM_INDEX_SETTINGS_SAVED_OBJECT_ID = 'apm-indices';

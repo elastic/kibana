@@ -161,6 +161,10 @@ import type {
   EndpointKillProcessActionResponse,
 } from './endpoint/actions/response_actions/kill_process/kill_process.gen';
 import type {
+  RunScriptActionRequestBodyInput,
+  RunScriptActionResponse,
+} from './endpoint/actions/response_actions/run_script/run_script.gen';
+import type {
   EndpointGetProcessesActionRequestBodyInput,
   EndpointGetProcessesActionResponse,
 } from './endpoint/actions/response_actions/running_procs/running_procs.gen';
@@ -367,8 +371,10 @@ import type {
   GetRuleMigrationRequestQueryInput,
   GetRuleMigrationRequestParamsInput,
   GetRuleMigrationResponse,
+  GetRuleMigrationIntegrationsResponse,
   GetRuleMigrationPrebuiltRulesRequestParamsInput,
   GetRuleMigrationPrebuiltRulesResponse,
+  GetRuleMigrationPrivilegesResponse,
   GetRuleMigrationResourcesRequestQueryInput,
   GetRuleMigrationResourcesRequestParamsInput,
   GetRuleMigrationResourcesResponse,
@@ -381,13 +387,12 @@ import type {
   InstallMigrationRulesRequestParamsInput,
   InstallMigrationRulesRequestBodyInput,
   InstallMigrationRulesResponse,
-  InstallTranslatedMigrationRulesRequestParamsInput,
-  InstallTranslatedMigrationRulesResponse,
   StartRuleMigrationRequestParamsInput,
   StartRuleMigrationRequestBodyInput,
   StartRuleMigrationResponse,
   StopRuleMigrationRequestParamsInput,
   StopRuleMigrationResponse,
+  UpdateRuleMigrationRequestParamsInput,
   UpdateRuleMigrationRequestBodyInput,
   UpdateRuleMigrationResponse,
   UpsertRuleMigrationResourcesRequestParamsInput,
@@ -1456,6 +1461,21 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Retrieves all related integrations
+   */
+  async getRuleMigrationIntegrations() {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationIntegrations`);
+    return this.kbnClient
+      .request<GetRuleMigrationIntegrationsResponse>({
+        path: '/internal/siem_migrations/rules/integrations',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Retrieves all available prebuilt rules (installed and installable)
    */
   async getRuleMigrationPrebuiltRules(props: GetRuleMigrationPrebuiltRulesProps) {
@@ -1466,6 +1486,21 @@ finalize it.
           '/internal/siem_migrations/rules/{migration_id}/prebuilt_rules',
           props.params
         ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Identifies the privileges required for a SIEM rules migration and returns the missing privileges
+   */
+  async getRuleMigrationPrivileges() {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationPrivileges`);
+    return this.kbnClient
+      .request<GetRuleMigrationPrivilegesResponse>({
+        path: '/internal/siem_migrations/rules/missing_privileges',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -1716,24 +1751,6 @@ finalize it.
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
-  /**
-   * Installs all translated migration rules
-   */
-  async installTranslatedMigrationRules(props: InstallTranslatedMigrationRulesProps) {
-    this.log.info(`${new Date().toISOString()} Calling API InstallTranslatedMigrationRules`);
-    return this.kbnClient
-      .request<InstallTranslatedMigrationRulesResponse>({
-        path: replaceParams(
-          '/internal/siem_migrations/rules/{migration_id}/install_translated',
-          props.params
-        ),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
   async internalUploadAssetCriticalityRecords(props: InternalUploadAssetCriticalityRecordsProps) {
     this.log.info(`${new Date().toISOString()} Calling API InternalUploadAssetCriticalityRecords`);
     return this.kbnClient
@@ -1912,7 +1929,7 @@ finalize it.
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
-        method: 'POST',
+        method: 'GET',
 
         query: props.query,
       })
@@ -2033,6 +2050,22 @@ detection engine rules.
         method: 'POST',
         body: props.body,
         query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Run a shell command on an endpoint.
+   */
+  async runScriptAction(props: RunScriptActionProps) {
+    this.log.info(`${new Date().toISOString()} Calling API RunScriptAction`);
+    return this.kbnClient
+      .request<RunScriptActionResponse>({
+        path: '/api/endpoint/action/runscript',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2235,7 +2268,7 @@ detection engine rules.
     this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigration`);
     return this.kbnClient
       .request<UpdateRuleMigrationResponse>({
-        path: '/internal/siem_migrations/rules',
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -2505,9 +2538,6 @@ export interface InstallMigrationRulesProps {
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
 }
-export interface InstallTranslatedMigrationRulesProps {
-  params: InstallTranslatedMigrationRulesRequestParamsInput;
-}
 export interface InternalUploadAssetCriticalityRecordsProps {
   attachment: FormData;
 }
@@ -2549,6 +2579,9 @@ export interface RulePreviewProps {
   query: RulePreviewRequestQueryInput;
   body: RulePreviewRequestBodyInput;
 }
+export interface RunScriptActionProps {
+  body: RunScriptActionRequestBodyInput;
+}
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;
 }
@@ -2584,6 +2617,7 @@ export interface UpdateRuleProps {
   body: UpdateRuleRequestBodyInput;
 }
 export interface UpdateRuleMigrationProps {
+  params: UpdateRuleMigrationRequestParamsInput;
   body: UpdateRuleMigrationRequestBodyInput;
 }
 export interface UpdateWorkflowInsightProps {

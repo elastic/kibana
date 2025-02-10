@@ -13,7 +13,7 @@ import {
   caseUserActions,
   getAlertUserAction,
 } from '../../containers/mock';
-import type { CaseUI } from '../../containers/types';
+import type { CaseUI, UserActionUI } from '../../containers/types';
 import type { CaseViewProps } from './types';
 
 export const alertsHit = [
@@ -99,8 +99,51 @@ export const defaultUpdateCaseState = {
   mutate: jest.fn(),
 };
 
+const generateLatestAttachments = ({
+  userActions,
+  overrides,
+}: {
+  userActions: UserActionUI[];
+  overrides: Array<{ commentId: string; comment: string }>;
+}) => {
+  return userActions
+    .filter(
+      (
+        userAction
+      ): userAction is UserActionUI & {
+        type: 'comment';
+        payload: { comment: { comment: string } };
+      } => userAction.type === 'comment' && Boolean(userAction.commentId)
+    )
+    .map((userAction) => {
+      const override = overrides.find(({ commentId }) => commentId === userAction.commentId);
+      return {
+        comment: override ? override.comment : userAction.payload.comment?.comment,
+        createdAt: userAction.createdAt,
+        createdBy: userAction.createdBy,
+        id: userAction.commentId,
+        owner: userAction.owner,
+        pushed_at: null,
+        pushed_by: null,
+        type: 'user',
+        updated_at: null,
+        updated_by: null,
+        version: userAction.version,
+      };
+    });
+};
+
 export const defaultUseFindCaseUserActions = {
-  data: { total: 4, perPage: 10, page: 1, userActions: [...caseUserActions, getAlertUserAction()] },
+  data: {
+    total: 4,
+    perPage: 10,
+    page: 1,
+    userActions: [...caseUserActions, getAlertUserAction()],
+    latestAttachments: generateLatestAttachments({
+      userActions: [...caseUserActions, getAlertUserAction()],
+      overrides: [{ commentId: 'basic-comment-id', comment: 'Solve this fast!' }],
+    }),
+  },
   refetch: jest.fn(),
   isLoading: false,
   isFetching: false,
@@ -110,7 +153,13 @@ export const defaultUseFindCaseUserActions = {
 export const defaultInfiniteUseFindCaseUserActions = {
   data: {
     pages: [
-      { total: 4, perPage: 10, page: 1, userActions: [...caseUserActions, getAlertUserAction()] },
+      {
+        total: 4,
+        perPage: 10,
+        page: 1,
+        userActions: [...caseUserActions, getAlertUserAction()],
+        latestAttachments: [],
+      },
     ],
   },
   isLoading: false,

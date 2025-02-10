@@ -39,7 +39,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "packages/react/kibana_context/root/eui_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -61,7 +61,7 @@
               },
               ">"
             ],
-            "path": "packages/react/kibana_context/root/eui_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -90,7 +90,7 @@
           },
           ">) => React.JSX.Element"
         ],
-        "path": "packages/react/kibana_context/root/root_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -112,7 +112,7 @@
               },
               ">"
             ],
-            "path": "packages/react/kibana_context/root/root_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -144,7 +144,7 @@
           "EuiProviderProps",
           "<{}>, \"modify\" | \"colorMode\">"
         ],
-        "path": "packages/react/kibana_context/root/eui_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -164,7 +164,7 @@
                 "text": "ThemeServiceStart"
               }
             ],
-            "path": "packages/react/kibana_context/root/eui_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -177,16 +177,10 @@
             "description": [],
             "signature": [
               "Pick<",
-              {
-                "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-public.UserProfileService",
-                "text": "UserProfileService"
-              },
+              "UserProfileService",
               ", \"getUserProfile$\"> | undefined"
             ],
-            "path": "packages/react/kibana_context/root/eui_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -200,7 +194,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/react/kibana_context/root/eui_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/root/eui_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -233,7 +227,7 @@
             "text": "KibanaEuiProviderProps"
           }
         ],
-        "path": "packages/react/kibana_context/root/root_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -247,15 +241,9 @@
               "The `I18nStart` API from `CoreStart`."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-i18n-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-public.I18nStart",
-                "text": "I18nStart"
-              }
+              "I18nStart"
             ],
-            "path": "packages/react/kibana_context/root/root_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -273,7 +261,7 @@
               "AnalyticsServiceStart",
               ", \"reportEvent\"> | undefined"
             ],
-            "path": "packages/react/kibana_context/root/root_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -287,16 +275,10 @@
               "The `ExecutionContextStart` API from `CoreStart`."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-execution-context-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-                "section": "def-public.ExecutionContextSetup",
-                "text": "ExecutionContextSetup"
-              },
+              "ExecutionContextSetup",
               " | undefined"
             ],
-            "path": "packages/react/kibana_context/root/root_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/root/root_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

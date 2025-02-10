@@ -53,13 +53,7 @@
             "text": "DataTableRecord"
           },
           ", core: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ", share?: ",
           {
             "pluginId": "share",
@@ -111,13 +105,7 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/utils.tsx",
             "deprecated": false,
@@ -422,6 +410,53 @@
       },
       {
         "parentPluginId": "@kbn/discover-contextual-components",
+        "id": "def-public.SummaryCellPopover",
+        "type": "Function",
+        "tags": [],
+        "label": "SummaryCellPopover",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "@kbn/discover-contextual-components",
+            "scope": "public",
+            "docId": "kibKbnDiscoverContextualComponentsPluginApi",
+            "section": "def-public.AllSummaryColumnProps",
+            "text": "AllSummaryColumnProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/discover-contextual-components",
+            "id": "def-public.SummaryCellPopover.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/discover-contextual-components",
+                "scope": "public",
+                "docId": "kibKbnDiscoverContextualComponentsPluginApi",
+                "section": "def-public.AllSummaryColumnProps",
+                "text": "AllSummaryColumnProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-contextual-components",
         "id": "def-public.SummaryColumn",
         "type": "Function",
         "tags": [],
@@ -611,7 +646,7 @@
                 "tags": [],
                 "label": "fieldName",
                 "description": [],
-                "path": "packages/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/utils/get_should_show_field_handler.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -640,13 +675,7 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
             "path": "src/platform/packages/shared/kbn-discover-contextual-components/src/data_types/logs/components/summary_column/summary_column.tsx",
             "deprecated": false,

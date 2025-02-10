@@ -6,11 +6,9 @@
  */
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
-import type { IdentifierType } from '../../../../common/entity_analytics/risk_engine';
-import {
-  RiskScoreEntity,
-  riskScoreBaseIndexName,
-} from '../../../../common/entity_analytics/risk_engine';
+import { EntityType } from '../../../../common/entity_analytics/types';
+import { riskScoreBaseIndexName } from '../../../../common/entity_analytics/risk_engine';
+
 import type { IIndexPatternString } from '../utils/create_datastream';
 
 const commonRiskFields: FieldMap = {
@@ -91,7 +89,7 @@ const commonRiskFields: FieldMap = {
   },
 };
 
-const buildIdentityRiskFields = (identifierType: IdentifierType): FieldMap =>
+const buildIdentityRiskFields = (identifierType: EntityType): FieldMap =>
   Object.keys(commonRiskFields).reduce((fieldMap, key) => {
     const identifierKey = `${identifierType}.risk.${key}`;
     fieldMap[identifierKey] = commonRiskFields[key];
@@ -100,6 +98,11 @@ const buildIdentityRiskFields = (identifierType: IdentifierType): FieldMap =>
 
 export const riskScoreFieldMap: FieldMap = {
   '@timestamp': {
+    type: 'date',
+    array: false,
+    required: false,
+  },
+  'event.ingested': {
     type: 'date',
     array: false,
     required: false,
@@ -114,7 +117,7 @@ export const riskScoreFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  ...buildIdentityRiskFields(RiskScoreEntity.host),
+  ...buildIdentityRiskFields(EntityType.host),
   'user.name': {
     type: 'keyword',
     array: false,
@@ -125,7 +128,18 @@ export const riskScoreFieldMap: FieldMap = {
     array: false,
     required: false,
   },
-  ...buildIdentityRiskFields(RiskScoreEntity.user),
+  ...buildIdentityRiskFields(EntityType.user),
+  'service.name': {
+    type: 'keyword',
+    array: false,
+    required: false,
+  },
+  'service.risk': {
+    type: 'object',
+    array: false,
+    required: false,
+  },
+  ...buildIdentityRiskFields(EntityType.service),
 } as const;
 
 export const mappingComponentName = '.risk-score-mappings';
@@ -159,10 +173,24 @@ export const getTransformOptions = ({
   },
   latest: {
     sort: '@timestamp',
-    unique_key: [`host.name`, `user.name`],
+    unique_key: [`host.name`, `user.name`, `service.name`],
   },
   source: {
     index: source,
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              '@timestamp': {
+                // It prevents the transform from processing too much data on reinstall
+                gte: 'now-24h',
+              },
+            },
+          },
+        ],
+      },
+    },
   },
   frequency: '1h', // 1h is the maximum value
   sync: {
@@ -175,8 +203,7 @@ export const getTransformOptions = ({
     unattended: true, // In unattended mode, the transform retries indefinitely in case of an error
   },
   _meta: {
-    version: 2, // When this field is updated we automatically update the transform
-
+    version: 3, // When this field is updated we automatically update the transform
     managed: true, // Metadata that identifies the transform. It has no functionality
     managed_by: 'security-entity-analytics', // Metadata that identifies the transform. It has no functionality
   },

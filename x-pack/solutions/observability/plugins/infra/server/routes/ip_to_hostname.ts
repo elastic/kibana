@@ -7,7 +7,7 @@
 
 import { first } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { InfraBackendLibs } from '../lib/infra_types';
+import type { InfraBackendLibs } from '../lib/infra_types';
 
 interface HostDoc {
   _source: {

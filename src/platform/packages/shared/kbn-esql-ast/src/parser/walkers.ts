@@ -37,7 +37,7 @@ import {
   LogicalBinaryContext,
   LogicalInContext,
   LogicalNotContext,
-  MetadataOptionContext,
+  MetadataContext,
   MvExpandCommandContext,
   NullLiteralContext,
   NumericArrayLiteralContext,
@@ -110,9 +110,9 @@ function terminalNodeToParserRuleContext(node: TerminalNode): ParserRuleContext 
   return context;
 }
 function extractIdentifiers(
-  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataOptionContext
+  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataContext
 ) {
-  if (ctx instanceof MetadataOptionContext) {
+  if (ctx instanceof MetadataContext) {
     return ctx
       .UNQUOTED_SOURCE_list()
       .map((node) => {
@@ -137,7 +137,7 @@ function makeColumnsOutOfIdentifiers(identifiers: ParserRuleContext[]) {
 }
 
 export function collectAllColumnIdentifiers(
-  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataOptionContext
+  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataContext
 ): ESQLAstItem[] {
   const identifiers = extractIdentifiers(ctx);
   return makeColumnsOutOfIdentifiers(identifiers);

@@ -460,13 +460,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/check_privileges.ts",
@@ -1845,13 +1839,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/lib/helpers/create_es_client/create_apm_event_client/index.ts",
@@ -1881,13 +1869,7 @@
             "description": [],
             "signature": [
               "{ includeFrozen: boolean; inspectableEsQueriesMap?: WeakMap<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>, ",
               "InspectResponse",
               "> | undefined; excludedDataTiers?: ",
@@ -2366,13 +2348,7 @@
           "description": [],
           "signature": [
             "(soClient: ",
-            {
-              "pluginId": "@kbn/core-saved-objects-api-server",
-              "scope": "server",
-              "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-              "section": "def-server.SavedObjectsClientContract",
-              "text": "SavedObjectsClientContract"
-            },
+            "SavedObjectsClientContract",
             ") => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>"
           ],
           "path": "x-pack/solutions/observability/plugins/apm_data_access/server/types.ts",
@@ -2387,13 +2363,7 @@
               "label": "soClient",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "@kbn/core-saved-objects-api-server",
-                  "scope": "server",
-                  "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                  "section": "def-server.SavedObjectsClientContract",
-                  "text": "SavedObjectsClientContract"
-                }
+                "SavedObjectsClientContract"
               ],
               "path": "x-pack/solutions/observability/plugins/apm_data_access/server/types.ts",
               "deprecated": false,

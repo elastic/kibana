@@ -9,11 +9,13 @@ import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { startTracingSpan } from '../../../common/performance_tracing';
 import type { MlAnomalyDetectors, MlSystem } from '../../types';
 import { COMPOSITE_AGGREGATION_BATCH_SIZE } from './common';
-import {
+import type {
   CompositeDatasetKey,
+  LogEntryCategoryDatasetStatsBucket,
+} from './queries/latest_log_entry_categories_datasets_stats';
+import {
   createLatestLogEntryCategoriesDatasetsStatsQuery,
   latestLogEntryCategoriesDatasetsStatsResponseRT,
-  LogEntryCategoryDatasetStatsBucket,
 } from './queries/latest_log_entry_categories_datasets_stats';
 
 export async function getLatestLogEntriesCategoriesDatasetsStats(

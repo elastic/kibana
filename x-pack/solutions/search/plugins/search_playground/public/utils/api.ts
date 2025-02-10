@@ -61,6 +61,7 @@ export async function fetchApi({
   return await parseDataStream({
     reader,
     abortControllerRef: abortController != null ? { current: abortController() } : undefined,
+    handleFailure,
     update: onUpdate,
   });
 }
@@ -81,6 +82,7 @@ export async function parseDataStream({
   reader,
   abortControllerRef,
   update,
+  handleFailure,
   generateId = uuidv4,
   getCurrentDate = () => new Date(),
 }: {
@@ -89,6 +91,7 @@ export async function parseDataStream({
     current: AbortController | null;
   };
   update: (mergedMessages: Message[]) => void;
+  handleFailure: (error: string) => void;
   generateId?: () => string;
   getCurrentDate?: () => Date;
 }) {
@@ -113,6 +116,9 @@ export async function parseDataStream({
           createdAt,
         };
       }
+    } else if (type === 'error') {
+      handleFailure(value);
+      break;
     }
 
     let responseMessage = prefixMap.text;

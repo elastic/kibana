@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ProfilingCloudSetupOptions as BaseProfilingCloudSetupOptions } from '@kbn/profiling-data-access-plugin/common';
-import { ProfilingConfig } from '../..';
+import type { ProfilingCloudSetupOptions as BaseProfilingCloudSetupOptions } from '@kbn/profiling-data-access-plugin/common';
+import type { ProfilingConfig } from '../..';
 
 export interface ProfilingCloudSetupOptions extends BaseProfilingCloudSetupOptions {
   config: ProfilingConfig;

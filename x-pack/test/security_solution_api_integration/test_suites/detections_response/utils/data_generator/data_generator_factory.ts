@@ -7,7 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
-import type { BulkResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { indexDocuments } from './index_documents';
 import { generateDocuments } from './generate_documents';
 import { enhanceDocuments, EnhanceDocumentsOptions } from './enhance_documents';

@@ -11,7 +11,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { ApmDocumentType } from '../../../../common/document_type';
-import { ServiceInventoryFieldName, ServiceListItem } from '../../../../common/service_inventory';
+import type { ServiceListItem } from '../../../../common/service_inventory';
+import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -21,8 +22,8 @@ import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
-import { SortFunction } from '../../shared/managed_table';
+import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import type { SortFunction } from '../../shared/managed_table';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
 import { SearchBar } from '../../shared/search_bar/search_bar';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
@@ -92,6 +93,7 @@ function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
       }
     },
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       environment,
       kuery,
@@ -167,6 +169,7 @@ function useServicesDetailedStatisticsFetcher({
     },
     // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [mainStatisticsData.requestId, renderedItems, offset, comparisonEnabled],
     { preservePreviousData: false }
   );

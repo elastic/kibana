@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { Environment } from '../../../common/environment_rt';
-import { IndexLifecyclePhaseSelectOption } from '../../../common/storage_explorer_types';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { RandomSampler } from '../../lib/helpers/get_random_sampler';
-import { ApmPluginRequestHandlerContext } from '../typings';
+import type { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { Environment } from '../../../common/environment_rt';
+import type { IndexLifecyclePhaseSelectOption } from '../../../common/storage_explorer_types';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { RandomSampler } from '../../lib/helpers/get_random_sampler';
+import type { ApmPluginRequestHandlerContext } from '../typings';
 import {
   getStorageDetailsPerIndex,
   getStorageDetailsPerProcessorEvent,

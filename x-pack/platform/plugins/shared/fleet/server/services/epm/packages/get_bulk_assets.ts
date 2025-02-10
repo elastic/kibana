@@ -53,7 +53,10 @@ export async function getBulkAssets(
 
   const res: SimpleSOAssetType[] = resolvedObjects
     .map(({ saved_object: savedObject }) => savedObject)
-    .filter((savedObject) => displayedAssetTypesLookup.has(savedObject.type))
+    .filter(
+      (savedObject) =>
+        savedObject?.error?.statusCode !== 404 && displayedAssetTypesLookup.has(savedObject.type)
+    )
     .map((obj) => {
       // Kibana SOs are registered with an app URL getter, so try to use that
       // for retrieving links to assets whenever possible

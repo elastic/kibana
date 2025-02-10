@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { syntheticsInspectStatusRuleRoute } from './rules/inspect_status_rule';
+import { syntheticsGetLatestTestRunRoute } from './pings/get_latest_test_run';
 import { deleteSyntheticsParamsBulkRoute } from './settings/params/delete_params_bulk';
 import { deleteSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/delete_monitor_bulk';
 import {
@@ -36,15 +38,15 @@ import {
   getSyntheticsEnablementRoute,
 } from './synthetics_service/enablement';
 import { getSyntheticsMonitorRoute } from './monitor_cruds/get_monitor';
-import { deleteSyntheticsMonitorProjectRoute } from './monitor_cruds/delete_monitor_project';
-import { getSyntheticsProjectMonitorsRoute } from './monitor_cruds/get_monitor_project';
+import { deleteSyntheticsMonitorProjectRoute } from './monitor_cruds/project_monitor/delete_monitor_project';
+import { getSyntheticsProjectMonitorsRoute } from './monitor_cruds/project_monitor/get_monitor_project';
 import { runOnceSyntheticsMonitorRoute } from './synthetics_service/run_once_monitor';
 import { getServiceAllowedRoute } from './synthetics_service/get_service_allowed';
 import { testNowMonitorRoute } from './synthetics_service/test_now_monitor';
 import { installIndexTemplatesRoute } from './synthetics_service/install_index_templates';
 import { editSyntheticsMonitorRoute } from './monitor_cruds/edit_monitor';
 import { addSyntheticsMonitorRoute } from './monitor_cruds/add_monitor';
-import { addSyntheticsProjectMonitorRoute } from './monitor_cruds/add_monitor_project';
+import { addSyntheticsProjectMonitorRoute } from './monitor_cruds/project_monitor/add_monitor_project';
 import { syntheticsGetPingsRoute, syntheticsGetPingHeatmapRoute } from './pings';
 import { createGetCurrentStatusRoute } from './overview_status/overview_status';
 import { getHasIntegrationMonitorsRoute } from './fleet/get_has_integration_monitors';
@@ -100,6 +102,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   createPostDynamicSettingsRoute,
   syntheticsGetPingHeatmapRoute,
   createOverviewTrendsRoute,
+  syntheticsInspectStatusRuleRoute,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
@@ -117,4 +120,5 @@ export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] =
   deleteSyntheticsMonitorRoute,
   deleteSyntheticsMonitorBulkRoute,
   deleteSyntheticsParamsBulkRoute,
+  syntheticsGetLatestTestRunRoute,
 ];

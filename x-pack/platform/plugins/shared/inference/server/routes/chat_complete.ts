@@ -85,8 +85,10 @@ const chatCompleteBodySchema: Type<ChatCompleteRequestBody> = schema.object({
     ])
   ),
   functionCalling: schema.maybe(
-    schema.oneOf([schema.literal('native'), schema.literal('simulated')])
+    schema.oneOf([schema.literal('native'), schema.literal('simulated'), schema.literal('auto')])
   ),
+  temperature: schema.maybe(schema.number()),
+  modelName: schema.maybe(schema.string()),
 });
 
 export function registerChatCompleteRoute({

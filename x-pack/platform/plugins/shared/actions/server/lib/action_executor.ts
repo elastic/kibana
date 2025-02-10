@@ -48,12 +48,11 @@ import {
   ValidatorServices,
 } from '../types';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
-import { ActionExecutionSource } from './action_execution_source';
+import { ActionExecutionSource, ActionExecutionSourceType } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
-import { isBidirectionalConnectorType } from './bidirectional_connectors';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -169,6 +168,7 @@ export class ActionExecutor {
           actionTypeId: connectorTypeId,
           actionTypeRegistry,
           authorization,
+          source: source?.type,
         });
       },
       executeLabel: `execute_action`,
@@ -418,7 +418,7 @@ export class ActionExecutor {
         const actionType = actionTypeRegistry.get(actionTypeId);
         const configurationUtilities = actionTypeRegistry.getUtils();
 
-        let validatedParams;
+        let validatedParams: Record<string, unknown>;
         let validatedConfig;
         let validatedSecrets;
         try {
@@ -605,11 +605,14 @@ export class ActionExecutor {
                   prompt_tokens: tokenTracking.prompt_tokens ?? 0,
                   completion_tokens: tokenTracking.completion_tokens ?? 0,
                 });
+
                 analyticsService.reportEvent(GEN_AI_TOKEN_COUNT_EVENT.eventType, {
                   actionTypeId,
                   total_tokens: tokenTracking.total_tokens ?? 0,
                   prompt_tokens: tokenTracking.prompt_tokens ?? 0,
                   completion_tokens: tokenTracking.completion_tokens ?? 0,
+                  aggregateBy: tokenTracking?.telemetry_metadata?.aggregateBy,
+                  pluginId: tokenTracking?.telemetry_metadata?.pluginId,
                   ...(actionTypeId === '.gen-ai' && config?.apiProvider != null
                     ? { provider: config?.apiProvider }
                     : {}),
@@ -719,6 +722,7 @@ interface EnsureAuthorizedToExecuteOpts {
   params: Record<string, unknown>;
   actionTypeRegistry: ActionTypeRegistryContract;
   authorization: ActionsAuthorization;
+  source?: ActionExecutionSourceType;
 }
 
 const ensureAuthorizedToExecute = async ({
@@ -727,24 +731,22 @@ const ensureAuthorizedToExecute = async ({
   params,
   actionTypeRegistry,
   authorization,
+  source,
 }: EnsureAuthorizedToExecuteOpts) => {
   try {
-    if (actionTypeRegistry.isSystemActionType(actionTypeId)) {
-      const additionalPrivileges = actionTypeRegistry.getSystemActionKibanaPrivileges(
+    if (
+      actionTypeRegistry.isSystemActionType(actionTypeId) ||
+      actionTypeRegistry.hasSubFeature(actionTypeId)
+    ) {
+      const additionalPrivileges = actionTypeRegistry.getActionKibanaPrivileges(
         actionTypeId,
-        params
+        params,
+        source
       );
 
       await authorization.ensureAuthorized({
         operation: 'execute',
         additionalPrivileges,
-        actionTypeId,
-      });
-    } else if (isBidirectionalConnectorType(actionTypeId)) {
-      // SentinelOne and Crowdstrike sub-actions require that a user have `all` privilege to Actions and Connectors.
-      // This is a temporary solution until a more robust RBAC approach can be implemented for sub-actions
-      await authorization.ensureAuthorized({
-        operation: 'execute',
         actionTypeId,
       });
     }

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { applyCriticalityToScore } from './helpers';
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import { applyCriticalityToScore, getMappingForFlattenedField } from './helpers';
 
 describe('applyCriticalityToScore', () => {
   describe('integer scores', () => {
@@ -58,6 +58,43 @@ describe('applyCriticalityToScore', () => {
     it('does not exceed a score of 100 with a high previous score and a large modifier', () => {
       const result = applyCriticalityToScore({ modifier: 200, score: 99.88 });
       expect(result).toEqual(99.9993992827436);
+    });
+  });
+
+  describe('getMappingForFlattenedField', () => {
+    const mappingProperty: MappingProperty = { type: 'keyword' };
+    const mapping: Record<string, MappingProperty> = {
+      user: {
+        properties: {
+          asset: {
+            properties: {
+              criticality: mappingProperty,
+            },
+          },
+        },
+      },
+      name: mappingProperty,
+    };
+
+    it('returns the correct mapping for a simple field', () => {
+      const field = 'name';
+
+      const result = getMappingForFlattenedField(field, mapping);
+      expect(result).toEqual(mappingProperty);
+    });
+
+    it('returns the correct mapping for a nested field', () => {
+      const field = 'user.asset.criticality';
+
+      const result = getMappingForFlattenedField(field, mapping);
+      expect(result).toEqual(mappingProperty);
+    });
+
+    it('returns undefined for a non-existent field', () => {
+      const field = 'user.asset.nonExistentField';
+
+      const result = getMappingForFlattenedField(field, mapping);
+      expect(result).toBeUndefined();
     });
   });
 });

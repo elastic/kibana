@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { compact, groupBy } from 'lodash';
-import { ValuesType } from 'utility-types';
+import type { ValuesType } from 'utility-types';
 import { SPAN_TYPE, SPAN_SUBTYPE } from '../../../common/es_fields/apm';
-import {
+import type {
   ConnectionEdge,
   ConnectionElement,
   ConnectionNode,
-  isSpanGroupingSupported,
 } from '../../../common/service_map';
+import { isSpanGroupingSupported } from '../../../common/service_map';
 
 const MINIMUM_GROUP_SIZE = 4;
 
@@ -39,6 +39,7 @@ interface GroupedEdge {
 
 export interface GroupResourceNodesResponse {
   elements: Array<GroupedNode | GroupedEdge | ConnectionElement>;
+  nodesCount: number;
 }
 
 export function groupResourceNodes(responseData: {
@@ -151,5 +152,6 @@ export function groupResourceNodes(responseData: {
 
   return {
     elements: [...ungroupedNodes, ...groupedNodes, ...ungroupedEdges, ...groupedEdges],
+    nodesCount: ungroupedNodes.length,
   };
 }

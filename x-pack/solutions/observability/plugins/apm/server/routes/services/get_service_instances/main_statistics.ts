@@ -6,9 +6,9 @@
  */
 
 import { keyBy, orderBy } from 'lodash';
-import { InstancesSortField } from '../../../../common/instances';
-import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { InstancesSortField } from '../../../../common/instances';
+import type { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { getServiceInstancesSystemMetricStatistics } from './get_service_instances_system_metric_statistics';
 import { getServiceInstancesTransactionStatistics } from './get_service_instances_transaction_statistics';

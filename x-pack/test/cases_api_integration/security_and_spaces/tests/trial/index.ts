@@ -28,7 +28,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
 
     // Trial
     loadTestFile(require.resolve('./cases/push_case'));
-    loadTestFile(require.resolve('./cases/user_actions/get_all_user_actions'));
     loadTestFile(require.resolve('./cases/user_actions/find_user_actions'));
     loadTestFile(require.resolve('./cases/assignees'));
     loadTestFile(require.resolve('./cases/find_cases'));
@@ -50,9 +49,6 @@ export default ({ loadTestFile, getService }: FtrProviderContext): void => {
 
     // Connectors
     loadTestFile(require.resolve('./connectors/cases/cases_connector'));
-
-    // Common
-    loadTestFile(require.resolve('../common'));
 
     // NOTE: These need to be at the end because they could delete the .kibana index and inadvertently remove the users and spaces
     loadTestFile(require.resolve('../common/migrations'));

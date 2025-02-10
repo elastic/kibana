@@ -8,7 +8,7 @@
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { EmbeddableFunctionsSharedComponent, FunctionsProps } from './embeddable_functions';
-import { ProfilingEmbeddablesDependencies } from '../profiling_embeddable_provider';
+import type { ProfilingEmbeddablesDependencies } from '../profiling_embeddable_provider';
 
 const LazyEmbeddableFunctions = dynamic(async () => {
   const Component = await import('./embeddable_functions');

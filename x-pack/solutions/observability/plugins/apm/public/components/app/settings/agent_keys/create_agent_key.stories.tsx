@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Meta, Story } from '@storybook/react';
-import React, { ComponentProps } from 'react';
+import type { Meta, Story } from '@storybook/react';
+import type { ComponentProps } from 'react';
+import React from 'react';
 import { CreateAgentKeyFlyout } from './create_agent_key';
-import { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
+import type { CreateApiKeyResponse } from '../../../../../common/agent_key_types';
 
 type Args = ComponentProps<typeof CreateAgentKeyFlyout>;
 

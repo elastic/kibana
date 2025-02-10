@@ -7,10 +7,11 @@
 
 import React, { useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexGroupProps, useResizeObserver } from '@elastic/eui';
+import type { EuiFlexGroupProps } from '@elastic/eui';
+import { EuiFlexGroup, useResizeObserver } from '@elastic/eui';
 import { SunburstChart } from './sunburst_chart';
 import { useBreakpoints } from '../../../../../hooks/use_breakpoints';
-import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { useFetcher } from '../../../../../hooks/use_fetcher';
 import { MobileProperty } from '../../../../../../common/mobile_types';
 

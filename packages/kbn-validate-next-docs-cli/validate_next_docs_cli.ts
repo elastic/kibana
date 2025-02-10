@@ -34,6 +34,14 @@ run(
       sources.map(async (source): Promise<Source> => {
         const repo = await repos.init(source.location);
 
+        // TODO: Remove this, once https://github.com/elastic/kibana/issues/206077 is resolved
+        if (source.location === 'elastic/kibana-team') {
+          log.info(
+            'Removing internal.kibana.dev from elastic/kibana-team - see https://github.com/elastic/kibana/issues/206077 for more details.'
+          );
+          await repo.run('rm', ['-rf', 'internal.kibana.dev'], { desc: 'rm internal.kibana.dev' });
+        }
+
         return {
           type: 'file',
           location: repo.resolve(),

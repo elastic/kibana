@@ -6,7 +6,7 @@
  */
 
 import { isCCSRemoteIndexName } from '@kbn/es-query';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getApmIndicesCombined } from './indices_stats_helpers';
 
 export function isCrossClusterSearch(apmEventClient: APMEventClient) {

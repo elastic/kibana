@@ -6,7 +6,7 @@
  */
 
 import type { AnalyticsServiceSetup, RootSchema } from '@kbn/core/public';
-import { EntityManagerPublicPluginSetup } from '@kbn/entityManager-plugin/public';
+import type { EntityManagerPublicPluginSetup } from '@kbn/entityManager-plugin/public';
 
 export interface TelemetryServiceSetupParams {
   analytics: AnalyticsServiceSetup;

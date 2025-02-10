@@ -18,6 +18,7 @@ import {
   getDefaultArguments,
 } from '@kbn/langchain/server';
 import { GEMINI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/gemini/constants';
+import { INFERENCE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/inference/constants';
 import { Prompt, QuestionRewritePrompt } from '../../common/prompt';
 
 export const getChatParams = async (
@@ -52,6 +53,29 @@ export const getChatParams = async (
   let llmType;
 
   switch (connector.actionTypeId) {
+    case INFERENCE_CONNECTOR_ID:
+      llmType = 'inference';
+      chatModel = new ActionsClientChatOpenAI({
+        actionsClient,
+        logger,
+        connectorId,
+        model: connector?.config?.defaultModel,
+        llmType,
+        temperature: getDefaultArguments(llmType).temperature,
+        // prevents the agent from retrying on failure
+        // failure could be due to bad connector, we should deliver that result to the client asap
+        maxRetries: 0,
+      });
+      chatPrompt = Prompt(prompt, {
+        citations,
+        context: true,
+        type: 'openai',
+      });
+      questionRewritePrompt = QuestionRewritePrompt({
+        type: 'openai',
+      });
+      break;
+
     case OPENAI_CONNECTOR_ID:
       chatModel = new ActionsClientChatOpenAI({
         actionsClient,

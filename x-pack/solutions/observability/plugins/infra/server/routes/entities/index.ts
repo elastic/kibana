@@ -11,7 +11,7 @@ import { entityCentricExperience } from '@kbn/observability-plugin/common';
 import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import { BUILT_IN_ENTITY_TYPES } from '@kbn/observability-shared-plugin/common';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
-import { InfraBackendLibs } from '../../lib/infra_types';
+import type { InfraBackendLibs } from '../../lib/infra_types';
 import { getDataStreamTypes } from './get_data_stream_types';
 
 export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
@@ -29,13 +29,20 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
           ]),
           entityId: schema.string(),
         }),
+        query: schema.object({ from: schema.string(), to: schema.string() }),
       },
       options: {
         access: 'internal',
       },
     },
     async (requestContext, request, response) => {
-      const { entityId, entityType } = request.params;
+      const { entityId, entityType: entityFilterType } = request.params;
+      const mapTypeToV2 = {
+        [BUILT_IN_ENTITY_TYPES.HOST]: BUILT_IN_ENTITY_TYPES.HOST_V2,
+        [BUILT_IN_ENTITY_TYPES.CONTAINER]: BUILT_IN_ENTITY_TYPES.CONTAINER_V2,
+      };
+      const entityType = mapTypeToV2[entityFilterType];
+      const { from, to } = request.query;
       const [coreContext, infraContext] = await Promise.all([
         requestContext.core,
         requestContext.infra,
@@ -64,9 +71,12 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
           entityId,
           entityManagerClient,
           entityType,
+          entityFilterType,
           infraMetricsClient,
           obsEsClient,
           logger,
+          from,
+          to,
         });
 
         return response.ok({
@@ -74,6 +84,7 @@ export const initEntitiesConfigurationRoutes = (libs: InfraBackendLibs) => {
             sourceDataStreams: sourceDataStreamTypes,
             entityId,
             entityType,
+            entityFilterType,
           },
         });
       } catch (error) {

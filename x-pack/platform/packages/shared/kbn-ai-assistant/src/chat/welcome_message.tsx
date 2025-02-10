@@ -80,7 +80,7 @@ export function WelcomeMessage({
         className={fullHeightClassName}
       >
         <EuiFlexItem grow={false}>
-          <AssistantBeacon backgroundColor="ghost" size="xl" />
+          <AssistantBeacon backgroundColor="emptyShade" size="xl" />
         </EuiFlexItem>
         <EuiFlexItem grow className={centerMaxWidthClassName}>
           <EuiSpacer size={['xl', 'l'].includes(breakpoint!) ? 'l' : 's'} />
@@ -88,8 +88,8 @@ export function WelcomeMessage({
             connectors={connectors}
             onSetupConnectorClick={handleConnectorClick}
           />
-          {knowledgeBase.status.value?.enabled ? (
-            <WelcomeMessageKnowledgeBase connectors={connectors} knowledgeBase={knowledgeBase} />
+          {knowledgeBase.status.value?.enabled && connectors.connectors?.length ? (
+            <WelcomeMessageKnowledgeBase knowledgeBase={knowledgeBase} />
           ) : null}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

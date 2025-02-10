@@ -21,13 +21,13 @@ import { BottomBarActions, useUiTracker } from '@kbn/observability-shared-plugin
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
-import { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
+import type { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
 import {
   filterByAgent,
   settingDefinitions,
   validateSetting,
 } from '../../../../../../../common/agent_configuration/setting_definitions';
-import { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { saveConfig } from './save_config';

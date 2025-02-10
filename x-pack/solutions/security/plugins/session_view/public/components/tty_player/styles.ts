@@ -12,7 +12,7 @@ import { useEuiTheme } from '../../hooks';
 import type { Teletype } from '../../../common';
 
 export const useStyles = (tty?: Teletype, show?: boolean) => {
-  const { euiTheme, euiVars } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
   const cached = useMemo(() => {
     const { size, font, colors, border } = euiTheme;
 
@@ -33,11 +33,11 @@ export const useStyles = (tty?: Teletype, show?: boolean) => {
 
     const header: CSSObject = {
       visibility: show ? 'visible' : 'hidden',
-      backgroundColor: `${euiVars.euiFormBackgroundDisabledColor}`,
+      backgroundColor: `${euiTheme.components.forms.backgroundDisabled}`,
       padding: `${size.m} ${size.base}`,
     };
 
-    const windowBoundsColor = transparentize(colors.ghost, 0.6);
+    const windowBoundsColor = transparentize(colors.ghost, 0.6); // TODO: Borealis migration - replace transparentize with color token, get rid of ghost color
 
     const terminal: CSSObject = {
       minHeight: '100%',
@@ -81,7 +81,7 @@ export const useStyles = (tty?: Teletype, show?: boolean) => {
       terminal,
       scrollPane,
     };
-  }, [euiTheme, show, euiVars.euiFormBackgroundDisabledColor, tty?.rows, tty?.columns]);
+  }, [euiTheme, show, tty?.rows, tty?.columns]);
 
   return cached;
 };

@@ -8,9 +8,9 @@
 import type { FC, ChangeEvent } from 'react';
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { Subscription } from 'rxjs';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 import deepEqual from 'fast-deep-equal';
-import { EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiTextArea, useEuiTheme } from '@elastic/eui';
 import type { DataViewBase } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
 
@@ -24,36 +24,6 @@ import { EQL_ERROR_CODES } from '../../../../common/hooks/eql/api';
 import type { EqlQueryBarFooterProps } from './footer';
 import { EqlQueryBarFooter } from './footer';
 import * as i18n from './translations';
-
-const TextArea = styled(EuiTextArea)`
-  display: block;
-  border: 0;
-  box-shadow: none;
-  border-radius: 0px;
-  min-height: ${({ theme }) => theme.eui.euiFormControlHeight};
-  &:focus {
-    box-shadow: none;
-  }
-`;
-
-const StyledFormRow = styled(EuiFormRow)`
-  border: ${({ theme }) => theme.eui.euiBorderThin};
-  border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-
-  .euiFormRow__labelWrapper {
-    background: ${({ theme }) => theme.eui.euiColorLightestShade};
-    border-top-left-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-    border-top-right-radius: ${({ theme }) => theme.eui.euiBorderRadius};
-    padding: 8px 10px;
-    margin-bottom: 0px;
-    label {
-      color: ${({ theme }) => theme.eui.euiTextSubduedColor};
-      &.euiFormLabel-isInvalid {
-        color: ${({ theme }) => theme.eui.euiColorDangerText};
-      }
-    }
-  }
-`;
 
 export interface EqlQueryBarProps {
   dataTestSubj: string;
@@ -80,11 +50,21 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   onValidityChange,
   onValidatingChange,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { addError } = useAppToasts();
   const { uiSettings } = useKibana().services;
   const filterManager = useRef<FilterManager>(new FilterManager(uiSettings));
   const { isValidating, value: fieldValue, setValue: setFieldValue, isValid, errors } = field;
   const errorMessages = useMemo(() => errors.map((x) => x.message), [errors]);
+
+  const textAreaStyles = useMemo(
+    () => css`
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      min-height: ${euiTheme.size.xl};
+    `,
+    [euiTheme.size.xl]
+  );
 
   // Bubbles up field validity to parent.
   // Using something like form `getErrors` does
@@ -173,7 +153,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   );
 
   return (
-    <StyledFormRow
+    <EuiFormRow
       label={field.label}
       labelAppend={field.labelAppend}
       helpText={field.helpText}
@@ -184,12 +164,14 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
       describedByIds={idAria ? [idAria] : undefined}
     >
       <>
-        <TextArea
+        <EuiTextArea
           data-test-subj="eqlQueryBarTextInput"
+          css={textAreaStyles}
           fullWidth
           isInvalid={!isValid && !isValidating}
           value={fieldValue.query.query as string}
           onChange={handleChange}
+          aria-label={field.label}
         />
         <EqlQueryBarFooter
           errors={errorMessages}
@@ -201,7 +183,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
         />
         {showFilterBar && (
           <>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="xs" />
             <FilterBar
               data-test-subj="eqlFilterBar"
               indexPattern={indexPattern}
@@ -215,6 +197,6 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
           </>
         )}
       </>
-    </StyledFormRow>
+    </EuiFormRow>
   );
 };

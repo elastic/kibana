@@ -66,6 +66,10 @@ jest.mock('@elastic/charts', () => {
   };
 });
 
+const successColor = 'test-success-color';
+const dangerColor = 'test-danger-color';
+const primaryColor = 'test-primary-color';
+
 describe('StorageTreemap', () => {
   describe('when data is provided', () => {
     beforeEach(() => {
@@ -85,7 +89,7 @@ describe('StorageTreemap', () => {
     });
 
     test('it renders the legend with the expected overflow-y style', () => {
-      expect(screen.getByTestId('legend')).toHaveClass('eui-yScroll');
+      expect(screen.getByTestId('legend')).toHaveClass('eui-scrollBar');
     });
 
     test('it uses a theme with the expected `minFontSize` to show more labels at various screen resolutions', () => {
@@ -93,7 +97,14 @@ describe('StorageTreemap', () => {
     });
 
     describe('legend items', () => {
-      const allLegendItems = getLegendItems({ patterns, flattenedBuckets, patternRollups });
+      const allLegendItems = getLegendItems({
+        patterns,
+        flattenedBuckets,
+        patternRollups,
+        successColor,
+        dangerColor,
+        primaryColor,
+      });
 
       describe('pattern legend items', () => {
         const justPatterns = allLegendItems.filter((x) => x.ilmPhase == null);

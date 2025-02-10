@@ -7,15 +7,15 @@
 
 import { EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { History } from 'history';
+import type { History } from 'history';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import {
+import type {
   AgentConfiguration,
   AgentConfigurationIntake,
 } from '../../../../../../common/agent_configuration/configuration_types';
-import { FetcherResult } from '../../../../../hooks/use_fetcher';
+import type { FetcherResult } from '../../../../../hooks/use_fetcher';
 import { fromQuery, toQuery } from '../../../../shared/links/url_helpers';
 import { ServicePage } from './service_page/service_page';
 import { SettingsPage } from './settings_page/settings_page';

@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import {
-  IndexLifecyclePhaseSelectOption,
-  StorageDetailsPerIndex,
-} from '../../../common/storage_explorer';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { StorageDetailsPerIndex } from '../../../common/storage_explorer';
+import { IndexLifecyclePhaseSelectOption } from '../../../common/storage_explorer';
 import {
   getIndicesLifecycleStatus,
   getIndicesStats,

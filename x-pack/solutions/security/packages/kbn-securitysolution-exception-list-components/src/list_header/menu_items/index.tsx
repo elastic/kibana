@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { FC, useMemo } from 'react';
+
 import { HeaderMenu } from '../../header_menu';
-import { headerMenuCss, noLinkedRulesCss } from '../list_header.styles';
 import * as i18n from '../../translations';
 import { Rule } from '../../types';
 import { generateLinkedRulesMenuItems } from '../../generate_linked_rules_menu_item';
+
+const noLinkedRulesCss = css`
+  width: max-content;
+`;
+
 interface MenuItemsProps {
   isReadonly: boolean;
   dataTestSubj?: string;
@@ -45,6 +51,13 @@ const MenuItemsComponent: FC<MenuItemsProps> = ({
       }),
     [dataTestSubj, linkedRules, securityLinkAnchorComponent]
   );
+
+  const { euiTheme } = useEuiTheme();
+  const headerMenuCss = css`
+    border-right: ${euiTheme.border.thin};
+    padding: ${euiTheme.size.xs} ${euiTheme.size.l} ${euiTheme.size.xs} 0;
+  `;
+
   return (
     <EuiFlexGroup
       direction="row"

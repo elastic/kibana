@@ -15,5 +15,7 @@ export default function ({ loadTestFile }: FtrProviderContextWithSpaces) {
     loadTestFile(require.resolve('./timeline_migrations'));
     loadTestFile(require.resolve('./import_timelines'));
     loadTestFile(require.resolve('./install_prepackaged_timelines'));
+    loadTestFile(require.resolve('./timeline_privileges'));
+    loadTestFile(require.resolve('./notes_privileges'));
   });
 }

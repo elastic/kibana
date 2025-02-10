@@ -204,7 +204,7 @@ describe('getFleetServerPolicies', () => {
       page: 1,
       perPage: mockPackagePolicies.length,
     });
-    (mockedAgentPolicyService.getByIDs as jest.Mock).mockResolvedValueOnce(mockFleetServerPolicies);
+    (mockedAgentPolicyService.getByIds as jest.Mock).mockResolvedValueOnce(mockFleetServerPolicies);
     const result = await getFleetServerPolicies(soClient);
     expect(result).toEqual(mockFleetServerPolicies);
   });

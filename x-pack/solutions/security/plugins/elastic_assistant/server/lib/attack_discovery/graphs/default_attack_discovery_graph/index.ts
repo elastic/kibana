@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Replacements } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 import type { CompiledStateGraph } from '@langchain/langgraph';
 import { END, START, StateGraph } from '@langchain/langgraph';
 
+import { CombinedPrompts } from './nodes/helpers/prompts';
 import { NodeType } from './constants';
 import { getGenerateOrEndEdge } from './edges/generate_or_end';
 import { getGenerateOrRefineOrEndEdge } from './edges/generate_or_refine_or_end';
@@ -32,6 +33,7 @@ export interface GetDefaultAttackDiscoveryGraphParams {
   llm: ActionsClientLlm;
   logger?: Logger;
   onNewReplacements?: (replacements: Replacements) => void;
+  prompts: CombinedPrompts;
   replacements?: Replacements;
   size: number;
   start?: string;
@@ -55,6 +57,7 @@ export const getDefaultAttackDiscoveryGraph = ({
   llm,
   logger,
   onNewReplacements,
+  prompts,
   replacements,
   size,
   start,
@@ -64,7 +67,7 @@ export const getDefaultAttackDiscoveryGraph = ({
   'generate' | 'refine' | 'retrieve_anonymized_alerts' | '__start__'
 > => {
   try {
-    const graphState = getDefaultGraphState({ end, filter, start });
+    const graphState = getDefaultGraphState({ end, filter, prompts, start });
 
     // get nodes:
     const retrieveAnonymizedAlertsNode = getRetrieveAnonymizedAlertsNode({
@@ -80,11 +83,13 @@ export const getDefaultAttackDiscoveryGraph = ({
     const generateNode = getGenerateNode({
       llm,
       logger,
+      prompts,
     });
 
     const refineNode = getRefineNode({
       llm,
       logger,
+      prompts,
     });
 
     // get edges:

@@ -47,7 +47,7 @@ export function initializeViewModeManager(
 
   return {
     api: {
-      viewMode: viewMode$,
+      viewMode$,
       setViewMode,
     },
     comparators: {

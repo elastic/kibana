@@ -5,8 +5,9 @@
  * 2.0.
  */
 import datemath from '@elastic/datemath';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { rangeQuery, ScopedAnnotationsClient, termsQuery } from '@kbn/observability-plugin/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
+import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_RULE_PRODUCER,
   ALERT_STATUS,
@@ -15,13 +16,13 @@ import {
 import * as t from 'io-ts';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/common';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-import { Environment } from '../../../../common/environment_rt';
+import type { Environment } from '../../../../common/environment_rt';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { termQuery } from '../../../../common/utils/term_query';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
-import { MlClient } from '../../../lib/helpers/get_ml_client';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { ApmAlertsClient } from '../../../lib/helpers/get_apm_alerts_client';
+import type { MlClient } from '../../../lib/helpers/get_ml_client';
 import { getEnvironments } from '../../environments/get_environments';
 import { getServiceAnnotations } from '../../services/annotations';
 import { getServiceMetadataDetails } from '../../services/get_service_metadata_details';

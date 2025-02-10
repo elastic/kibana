@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { InventoryCloudAccount } from '../../../../../../common/http_api/inventory_meta_api';
-import {
+import type { InventoryCloudAccount } from '../../../../../../common/http_api/inventory_meta_api';
+import type {
   SnapshotCustomMetricInput,
   SnapshotGroupBy,
   SnapshotMetricInput,
 } from '../../../../../../common/http_api/snapshot_api';
-import { InfraGroupByOptions } from '../../../../../common/inventory/types';
-import { WaffleOptionsState, WaffleSortOption } from '../../hooks/use_waffle_options';
+import type { InfraGroupByOptions } from '../../../../../common/inventory/types';
+import type { WaffleOptionsState, WaffleSortOption } from '../../hooks/use_waffle_options';
 
 export interface ToolbarProps extends Omit<WaffleOptionsState, 'boundsOverride' | 'autoBounds'> {
   changeMetric: (payload: SnapshotMetricInput) => void;

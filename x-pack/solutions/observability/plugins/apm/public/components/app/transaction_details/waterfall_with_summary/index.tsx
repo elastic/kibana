@@ -19,10 +19,11 @@ import React, { useEffect, useState } from 'react';
 import { TransactionSummary } from '../../../shared/summary/transaction_summary';
 import { TransactionActionMenu } from '../../../shared/transaction_action_menu/transaction_action_menu';
 import { MaybeViewTraceLink } from './maybe_view_trace_link';
-import { TransactionTab, TransactionTabs } from './transaction_tabs';
-import { Environment } from '../../../../../common/environment_rt';
+import type { TransactionTab } from './transaction_tabs';
+import { TransactionTabs } from './transaction_tabs';
+import type { Environment } from '../../../../../common/environment_rt';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { WaterfallFetchResult } from '../use_waterfall_fetcher';
+import type { WaterfallFetchResult } from '../use_waterfall_fetcher';
 
 interface Props<TSample extends {}> {
   waterfallFetchResult: WaterfallFetchResult['waterfall'];

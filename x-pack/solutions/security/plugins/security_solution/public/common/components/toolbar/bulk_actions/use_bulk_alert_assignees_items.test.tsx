@@ -8,8 +8,7 @@
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { TimelineItem } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/bulk_actions/components/toolbar';
-import { act, fireEvent, render } from '@testing-library/react';
-import { renderHook } from '@testing-library/react-hooks';
+import { act, fireEvent, render, renderHook } from '@testing-library/react';
 
 import { TestProviders } from '../../../mock';
 import type {

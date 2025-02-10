@@ -36,6 +36,12 @@ export function getPreviousAgentStatusForOfflineAgents(
 export function buildKueryForUnenrolledAgents(): string {
   return 'status:unenrolled';
 }
+export function buildKueryForUninstalledAgents(): string {
+  return 'status:uninstalled';
+}
+export function buildKueryForOrphanedAgents(): string {
+  return 'status:orphaned';
+}
 
 export function buildKueryForOnlineAgents(): string {
   return 'status:online';

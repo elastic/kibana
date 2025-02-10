@@ -17,8 +17,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from '@emotion/styled';
 import { CodeEditor } from '@kbn/code-editor';
-import { FormRowOnChange } from '.';
-import { SettingsRow } from '../typings';
+import type { FormRowOnChange } from '.';
+import type { SettingsRow } from '../typings';
 
 const FixedHeightDiv = styled.div`
   height: 300px;

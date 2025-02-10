@@ -69,6 +69,7 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
       responseActionsSentinelOneV1Enabled: true,
       responseActionsSentinelOneGetFileEnabled: true,
       responseActionsCrowdstrikeManualHostIsolationEnabled: true,
+      responseActionsMSDefenderEndpointEnabled: true,
     });
 
     alertDetailItemData = endpointAlertDataMock.generateEndpointAlertDetailsItemData();
@@ -189,6 +190,11 @@ describe('When using `useAlertResponseActionsSupport()` hook', () => {
       case 'crowdstrike':
         appContextMock.setExperimentalFlag({
           responseActionsCrowdstrikeManualHostIsolationEnabled: false,
+        });
+        break;
+      case 'microsoft_defender_endpoint':
+        appContextMock.setExperimentalFlag({
+          responseActionsMSDefenderEndpointEnabled: false,
         });
         break;
       default:

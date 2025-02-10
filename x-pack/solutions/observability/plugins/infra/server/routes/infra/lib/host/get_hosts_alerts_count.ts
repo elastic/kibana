@@ -13,7 +13,7 @@ import {
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
 import { HOST_NAME_FIELD, INFRA_ALERT_CONSUMERS } from '../../../../../common/constants';
-import { GetHostParameters } from '../types';
+import type { GetHostParameters } from '../types';
 
 export async function getHostsAlertsCount({
   alertsClient,

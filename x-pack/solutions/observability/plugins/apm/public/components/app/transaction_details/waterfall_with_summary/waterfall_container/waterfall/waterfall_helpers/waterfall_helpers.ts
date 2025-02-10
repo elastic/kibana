@@ -6,12 +6,13 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import { Dictionary, first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
+import type { Dictionary } from 'lodash';
+import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { CriticalPathSegment } from '../../../../../../../../common/critical_path/types';
+import type { CriticalPathSegment } from '../../../../../../../../common/critical_path/types';
 import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
-import {
+import type {
   WaterfallError,
   WaterfallSpan,
   WaterfallTransaction,
@@ -73,6 +74,7 @@ interface IWaterfallItemBase<TDocument, TDoctype> {
   duration: number;
   legendValues: Record<WaterfallLegendType, string>;
   spanLinksCount: SpanLinksCount;
+  isOrphan?: boolean;
 }
 
 export type IWaterfallError = Omit<
@@ -401,25 +403,27 @@ function getErrorCountByParentId(errorDocs: TraceAPIResponse['traceItems']['erro
   }, {});
 }
 
-export const getOrphanTraceItemsCount = (
-  traceDocs: Array<WaterfallTransaction | WaterfallSpan>
-) => {
-  const waterfallItemsIds = new Set(
-    traceDocs.map((doc) =>
-      doc.processor.event === 'span'
-        ? (doc?.span as WaterfallSpan['span']).id
-        : doc?.transaction?.id
-    )
-  );
+export function getOrphanItemsIds(waterfall: IWaterfallSpanOrTransaction[]) {
+  const waterfallItemsIds = new Set(waterfall.map((item) => item.id));
+  return waterfall
+    .filter((item) => item.parentId && !waterfallItemsIds.has(item.parentId))
+    .map((item) => item.id);
+}
 
-  let missingTraceItemsCounter = 0;
-  traceDocs.some((item) => {
-    if (item.parent?.id && !waterfallItemsIds.has(item.parent.id)) {
-      missingTraceItemsCounter++;
+export function reparentOrphanItems(
+  orphanItemsIds: string[],
+  waterfallItems: IWaterfallSpanOrTransaction[],
+  newParentId?: string
+) {
+  const orphanIdsMap = new Set(orphanItemsIds);
+  return waterfallItems.map((item) => {
+    if (orphanIdsMap.has(item.id)) {
+      item.parentId = newParentId;
+      item.isOrphan = true;
     }
+    return item;
   });
-  return missingTraceItemsCounter;
-};
+}
 
 export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
   const { traceItems, entryTransaction } = apiResponse;
@@ -446,11 +450,18 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     traceItems.spanLinksCountById
   );
 
-  const childrenByParentId = getChildrenGroupedByParentId(reparentSpans(waterfallItems));
-
   const entryWaterfallTransaction = getEntryWaterfallTransaction(
     entryTransaction.transaction.id,
     waterfallItems
+  );
+
+  const orphanItemsIds = getOrphanItemsIds(waterfallItems);
+  const childrenByParentId = getChildrenGroupedByParentId(
+    reparentOrphanItems(
+      orphanItemsIds,
+      reparentSpans(waterfallItems),
+      entryWaterfallTransaction?.id
+    )
   );
 
   const items = getOrderedWaterfallItems(childrenByParentId, entryWaterfallTransaction);
@@ -460,8 +471,6 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
 
   const duration = getWaterfallDuration(items);
   const legends = getLegends(items);
-
-  const orphanTraceItemsCount = getOrphanTraceItemsCount(traceItems.traceDocs);
 
   return {
     entryWaterfallTransaction,
@@ -477,7 +486,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     totalErrorsCount: traceItems.errorDocs.length,
     traceDocsTotal: traceItems.traceDocsTotal,
     maxTraceItems: traceItems.maxTraceItems,
-    orphanTraceItemsCount,
+    orphanTraceItemsCount: orphanItemsIds.length,
   };
 }
 

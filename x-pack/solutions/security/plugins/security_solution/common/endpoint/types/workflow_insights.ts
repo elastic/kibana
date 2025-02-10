@@ -61,6 +61,7 @@ export interface SecurityWorkflowInsight {
   metadata: {
     notes?: Record<string, string>;
     message_variables?: string[];
+    display_name?: string;
   };
 }
 

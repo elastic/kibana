@@ -13,10 +13,11 @@ import type { RequiredFieldInput } from '../../../../../common/api/detection_eng
 import { UseArray, useFormData } from '../../../../shared_imports';
 import type { FormHook, ArrayItem } from '../../../../shared_imports';
 import { RequiredFieldsHelpInfo } from './required_fields_help_info';
-import { RequiredFieldRow } from './required_fields_row';
 import * as defineRuleI18n from '../../../rule_creation_ui/components/step_define_rule/translations';
-import * as i18n from './translations';
+import { OptionalFieldLabel } from '../optional_field_label';
+import { RequiredFieldRow } from './required_fields_row';
 import { getFlattenedArrayFieldNames } from './utils';
+import * as i18n from './translations';
 
 interface RequiredFieldsComponentProps {
   path: string;
@@ -173,7 +174,7 @@ const RequiredFieldsList = ({
         }
         labelAppend={
           <EuiText color="subdued" size="xs">
-            {i18n.OPTIONAL}
+            {OptionalFieldLabel}
           </EuiText>
         }
         hasChildLabel={false}

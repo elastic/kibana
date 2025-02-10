@@ -22,7 +22,7 @@
     "patterns": [
       "_resolve/cluster/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-resolve-cluster-api.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/indices-resolve-cluster-api.html",
     "availability": {
       "stack": true,
       "serverless": false

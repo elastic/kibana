@@ -23,6 +23,7 @@ import type {
   JobsSpacesResponse,
   TrainedModelsSpacesResponse,
   SyncCheckResponse,
+  CanSyncToAllSpacesResponse,
 } from '../../../../common/types/saved_objects';
 
 export const savedObjectsApiProvider = (httpService: HttpService) => ({
@@ -56,11 +57,11 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       version: '1',
     });
   },
-  syncSavedObjects(simulate: boolean = false) {
+  syncSavedObjects(simulate: boolean = false, addToAllSpaces?: boolean) {
     return httpService.http<SyncSavedObjectResponse>({
       path: `${ML_EXTERNAL_BASE_PATH}/saved_objects/sync`,
       method: 'GET',
-      query: { simulate },
+      query: { simulate, addToAllSpaces },
       version: '2023-10-31',
     });
   },
@@ -87,6 +88,15 @@ export const savedObjectsApiProvider = (httpService: HttpService) => ({
       path: `${ML_INTERNAL_BASE_PATH}/saved_objects/can_delete_ml_space_aware_item/${mlSavedObjectType}`,
       method: 'POST',
       body,
+      version: '1',
+    });
+  },
+  canSyncToAllSpaces(mlSavedObjectType?: MlSavedObjectType) {
+    return httpService.http<CanSyncToAllSpacesResponse>({
+      path: `${ML_INTERNAL_BASE_PATH}/saved_objects/can_sync_to_all_spaces${
+        mlSavedObjectType !== undefined ? `/${mlSavedObjectType}` : ''
+      }`,
+      method: 'GET',
       version: '1',
     });
   },

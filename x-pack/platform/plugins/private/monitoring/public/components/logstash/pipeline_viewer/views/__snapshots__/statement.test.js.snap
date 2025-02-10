@@ -5,7 +5,7 @@ exports[`Statement component renders a CollapsibleStatement with else body for n
   className="monPipelineViewer__listItem"
 >
   <div
-    className="monPipelineViewer__spaceContainer"
+    css={[Function]}
   />
   <CollapsibleStatement
     collapse={[MockFunction]}
@@ -25,7 +25,7 @@ exports[`Statement component renders a CollapsibleStatement with else body for n
         size="xs"
       >
         <span
-          className="monPipelineViewer__conditional"
+          css={[Function]}
         >
           else
         </span>
@@ -40,7 +40,7 @@ exports[`Statement component renders a CollapsibleStatement with if body for bra
   className="monPipelineViewer__listItem"
 >
   <div
-    className="monPipelineViewer__spaceContainer"
+    css={[Function]}
   />
   <CollapsibleStatement
     collapse={[MockFunction]}
@@ -60,7 +60,7 @@ exports[`Statement component renders a CollapsibleStatement with if body for bra
         size="xs"
       >
         <span
-          className="monPipelineViewer__conditional"
+          css={[Function]}
         >
           if
         </span>
@@ -85,7 +85,7 @@ exports[`Statement component renders a PluginStatement component for plugin mode
   className="monPipelineViewer__listItem"
 >
   <div
-    className="monPipelineViewer__spaceContainer"
+    css={[Function]}
   />
   <PluginStatement
     onShowVertexDetails={[MockFunction]}
@@ -117,14 +117,14 @@ exports[`Statement component renders spacers for element with depth > 0 1`] = `
   className="monPipelineViewer__listItem"
 >
   <div
-    className="monPipelineViewer__spaceContainer"
+    css={[Function]}
   >
     <div
-      className="monPipelineViewer__spacer"
+      css={[Function]}
       key="spacer_0"
     />
     <div
-      className="monPipelineViewer__spacer"
+      css={[Function]}
       key="spacer_1"
     />
   </div>
@@ -146,7 +146,7 @@ exports[`Statement component renders spacers for element with depth > 0 1`] = `
         size="xs"
       >
         <span
-          className="monPipelineViewer__conditional"
+          css={[Function]}
         >
           else
         </span>

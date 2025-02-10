@@ -6,36 +6,35 @@
  */
 
 import React, { memo } from 'react';
-import styled from 'styled-components';
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/css';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 
 interface TitleBadgeProps {
   title: string;
   badgeString: string;
 }
 
-const StyledFlexItem = styled(EuiFlexItem)`
-  border-right: 1px solid #d3dae6;
-  padding: ${euiThemeVars.euiSizeXS} ${euiThemeVars.euiSizeS} ${euiThemeVars.euiSizeXS} 0;
-`;
-
-const TextContainer = styled(EuiText)`
-  width: max-content;
-`;
-
 export const TitleBadge = memo<TitleBadgeProps>(({ title, badgeString }) => {
+  const { euiTheme } = useEuiTheme();
+  const itemStyles = css`
+    border-right: ${euiTheme.border.thin};
+    padding: ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.size.xs} 0;
+  `;
+  const titleTextStyles = css`
+    width: max-content;
+  `;
+
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
-        <TextContainer grow size="xs">
+        <EuiText className={titleTextStyles} grow size="xs">
           {`${title}:`}
-        </TextContainer>
+        </EuiText>
       </EuiFlexItem>
-      <StyledFlexItem>
+      <EuiFlexItem className={itemStyles}>
         <EuiBadge>{badgeString}</EuiBadge>
-      </StyledFlexItem>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 });

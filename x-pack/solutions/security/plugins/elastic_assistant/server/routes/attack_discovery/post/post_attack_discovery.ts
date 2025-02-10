@@ -9,7 +9,7 @@ import { type IKibanaResponse, IRouter, Logger } from '@kbn/core/server';
 import {
   AttackDiscoveryPostRequestBody,
   AttackDiscoveryPostResponse,
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  API_VERSIONS,
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
@@ -48,7 +48,7 @@ export const postAttackDiscoveryRoute = (
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             body: buildRouteValidationWithZod(AttackDiscoveryPostRequestBody),
@@ -66,6 +66,7 @@ export const postAttackDiscoveryRoute = (
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
+        const savedObjectsClient = assistantContext.savedObjectsClient;
 
         try {
           // get the actions plugin start contract from the request context:
@@ -144,6 +145,7 @@ export const postAttackDiscoveryRoute = (
             latestReplacements,
             logger,
             onNewReplacements,
+            savedObjectsClient,
             size,
             start,
           })
@@ -155,9 +157,12 @@ export const postAttackDiscoveryRoute = (
                 attackDiscoveryId,
                 authenticatedUser,
                 dataClient,
+                hasFilter: !!(filter && Object.keys(filter).length),
+                end,
                 latestReplacements,
                 logger,
                 size,
+                start,
                 startTime,
                 telemetry,
               })

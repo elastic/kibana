@@ -61,7 +61,7 @@ export function useLoadRuleEventLogs(props: UseLoadRuleEventLogsProps) {
     retry: 0,
     refetchOnWindowFocus: false,
   });
-  const hasExceedLogs = useMemo(() => error && error.body.statusCode === 413, [error]);
+  const hasExceedLogs = useMemo(() => error && error.body?.statusCode === 413, [error]);
   return useMemo(
     () => ({
       data,

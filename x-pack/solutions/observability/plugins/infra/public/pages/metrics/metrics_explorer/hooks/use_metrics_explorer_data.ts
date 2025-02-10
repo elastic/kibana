@@ -8,14 +8,15 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { InfraHttpError } from '../../../../types';
+import type { InfraHttpError } from '../../../../types';
 import { useMetricsDataViewContext } from '../../../../containers/metrics_source';
-import {
-  MetricsExplorerResponse,
-  metricsExplorerResponseRT,
-} from '../../../../../common/http_api/metrics_explorer';
+import type { MetricsExplorerResponse } from '../../../../../common/http_api/metrics_explorer';
+import { metricsExplorerResponseRT } from '../../../../../common/http_api/metrics_explorer';
 import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
-import { MetricsExplorerOptions, MetricsExplorerTimestamp } from './use_metrics_explorer_options';
+import type {
+  MetricsExplorerOptions,
+  MetricsExplorerTimestamp,
+} from './use_metrics_explorer_options';
 
 export function useMetricsExplorerData({
   options,

@@ -25,7 +25,7 @@ import styled from '@emotion/styled';
 import useToggle from 'react-use/lib/useToggle';
 import { type Message } from '@kbn/observability-ai-assistant-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { Process } from './types';
+import type { Process } from './types';
 import { ProcessRowCharts } from './process_row_charts';
 
 interface Props {

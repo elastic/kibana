@@ -44,6 +44,7 @@ export function ChatFlyout({
   initialTitle,
   initialMessages,
   initialFlyoutPositionMode,
+  onFlyoutPositionModeChange,
   isOpen,
   onClose,
   navigateToConversation,
@@ -52,6 +53,7 @@ export function ChatFlyout({
   initialTitle: string;
   initialMessages: Message[];
   initialFlyoutPositionMode?: FlyoutPositionMode;
+  onFlyoutPositionModeChange?: (next: FlyoutPositionMode) => void;
   isOpen: boolean;
   onClose: () => void;
   navigateToConversation?: (conversationId?: string) => void;
@@ -137,6 +139,7 @@ export function ChatFlyout({
 
   const handleToggleFlyoutPositionMode = (newFlyoutPositionMode: FlyoutPositionMode) => {
     setFlyoutPositionMode(newFlyoutPositionMode);
+    onFlyoutPositionModeChange?.(newFlyoutPositionMode);
   };
 
   return isOpen ? (

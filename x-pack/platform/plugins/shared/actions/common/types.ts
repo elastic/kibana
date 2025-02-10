@@ -5,16 +5,12 @@
  * 2.0.
  */
 
+import { SUB_FEATURE } from '@kbn/actions-types';
 import { LicenseType } from '@kbn/licensing-plugin/common/types';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
-export {
-  AlertingConnectorFeatureId,
-  CasesConnectorFeatureId,
-  UptimeConnectorFeatureId,
-  SecurityConnectorFeatureId,
-  GenerativeAIForSecurityConnectorFeatureId,
-} from './connector_feature_config';
+export type SubFeature = keyof typeof SUB_FEATURE;
+
 export interface ActionType {
   id: string;
   name: string;
@@ -24,6 +20,7 @@ export interface ActionType {
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
   isSystemActionType: boolean;
+  subFeature?: SubFeature;
 }
 
 export enum InvalidEmailReason {

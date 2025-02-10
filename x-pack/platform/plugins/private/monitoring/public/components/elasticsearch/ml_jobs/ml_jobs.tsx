@@ -53,7 +53,7 @@ export const ElasticsearchMLJobs = ({
         <EuiSpacer size="m" />
         <EuiPanel>
           <EuiMonitoringTable
-            className="mlJobsTable"
+            data-test-subj="mlJobsTable"
             rows={jobs}
             columns={columns}
             sorting={{

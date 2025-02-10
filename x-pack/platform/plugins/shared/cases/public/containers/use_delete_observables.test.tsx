@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { useDeleteObservable } from './use_delete_observables';
 import { deleteObservable } from './api';
 import { useCasesToast } from '../common/use_cases_toast';
@@ -35,7 +35,7 @@ describe('useDeleteObservable', () => {
   it('should call deleteObservable and show success toast on success', async () => {
     (deleteObservable as jest.Mock).mockResolvedValue({});
 
-    const { result, waitFor } = renderHook(() => useDeleteObservable(caseId, observableId), {
+    const { result } = renderHook(() => useDeleteObservable(caseId, observableId), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -52,7 +52,7 @@ describe('useDeleteObservable', () => {
     const error = new Error('Failed to delete observable');
     (deleteObservable as jest.Mock).mockRejectedValue(error);
 
-    const { result, waitFor } = renderHook(() => useDeleteObservable(caseId, observableId), {
+    const { result } = renderHook(() => useDeleteObservable(caseId, observableId), {
       wrapper: appMockRender.AppWrapper,
     });
 

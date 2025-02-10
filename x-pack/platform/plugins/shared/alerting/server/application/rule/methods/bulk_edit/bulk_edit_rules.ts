@@ -513,7 +513,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
 
     // Increment revision if params ended up being modified AND it wasn't already incremented as part of attribute update
     if (
-      shouldIncrementRevision(ruleParams) &&
+      shouldIncrementRevision(ruleParams as Params) &&
       !isParamsUpdateSkipped &&
       rule.attributes.revision === updatedRule.revision
     ) {

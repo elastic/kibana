@@ -150,7 +150,7 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
   const { overridableServices } = props;
 
   const kibanaRenderServices = useMemo(
-    () => pick(coreStart, 'analytics', 'i18n', 'theme'),
+    () => pick(coreStart, 'analytics', 'i18n', 'theme', 'userProfile'),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
@@ -168,6 +168,7 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
         'notifications',
         'theme',
         'uiSettings',
+        'userProfile',
         'i18n',
       ]),
       uiSettingsKeys: UI_SETTINGS,

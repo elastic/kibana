@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
+import type {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '../es_fields/apm';
-import { FILTER_OPTIONS } from './custom_link_filter_options';
+import type { FILTER_OPTIONS } from './custom_link_filter_options';
 
 export interface CustomLinkES {
   id?: string;

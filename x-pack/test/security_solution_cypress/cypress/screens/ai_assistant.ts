@@ -8,7 +8,7 @@
 export const ADD_NEW_CONNECTOR = '[data-test-subj="addNewConnectorButton"]';
 export const ADD_QUICK_PROMPT = '[data-test-subj="addQuickPrompt"]';
 export const ASSISTANT_SETTINGS_BUTTON = 'button[data-test-subj="settings"]';
-export const AI_ASSISTANT_BUTTON = '[data-test-subj="assistantHeaderLink"]';
+export const AI_ASSISTANT_BUTTON = '[data-test-subj="assistantNavLink"]';
 export const ASSISTANT_CHAT_BODY = '[data-test-subj="assistantChat"]';
 export const CHAT_CONTEXT_MENU = '[data-test-subj="chat-context-menu"]';
 export const CHAT_ICON = '[data-test-subj="newChat"]';
@@ -41,7 +41,6 @@ export const QUICK_PROMPT_TITLE_INPUT =
 export const QUICK_PROMPT_BADGE = (b: string) => `[data-test-subj="quickPrompt-${b}"]`;
 export const QUICK_PROMPT_BODY_INPUT = '[data-test-subj="quick-prompt-prompt"]';
 export const SEND_TO_TIMELINE_BUTTON = '[data-test-subj="sendToTimelineEmptyButton"]';
-export const SHOW_ANONYMIZED_BUTTON = '[data-test-subj="showAnonymizedValues"]';
 export const SUBMIT_CHAT = '[data-test-subj="submit-chat"]';
 export const SYSTEM_PROMPT = '[data-test-subj="promptSuperSelect"]';
 export const SYSTEM_PROMPT_BODY_INPUT = '[data-test-subj="systemPromptModalPromptText"]';

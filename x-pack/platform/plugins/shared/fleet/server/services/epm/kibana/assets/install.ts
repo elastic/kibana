@@ -33,6 +33,8 @@ import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
 import { FleetError, KibanaSOReferenceError } from '../../../../errors';
 import { withPackageSpan } from '../../packages/utils';
 
+import { appContextService } from '../../..';
+
 import { tagKibanaAssets } from './tag_assets';
 import { getSpaceAwareSaveobjectsClients } from './saved_objects';
 
@@ -69,6 +71,7 @@ export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedOb
   [KibanaAssetType.visualization]: KibanaSavedObjectType.visualization,
   [KibanaAssetType.lens]: KibanaSavedObjectType.lens,
   [KibanaAssetType.mlModule]: KibanaSavedObjectType.mlModule,
+  [KibanaAssetType.securityAIPrompt]: KibanaSavedObjectType.securityAIPrompt,
   [KibanaAssetType.securityRule]: KibanaSavedObjectType.securityRule,
   [KibanaAssetType.cloudSecurityPostureRuleTemplate]:
     KibanaSavedObjectType.cloudSecurityPostureRuleTemplate,
@@ -133,8 +136,10 @@ export async function installKibanaAssets(options: {
     return [];
   }
 
-  await createDefaultIndexPatterns(savedObjectsImporter);
-  await makeManagedIndexPatternsGlobal(savedObjectsClient);
+  await installManagedIndexPattern({
+    savedObjectsClient,
+    savedObjectsImporter,
+  });
 
   return await installKibanaSavedObjects({
     logger,
@@ -142,6 +147,19 @@ export async function installKibanaAssets(options: {
     kibanaAssets: assetsToInstall,
     assetsChunkSize: MAX_ASSETS_TO_INSTALL_IN_PARALLEL,
   });
+}
+
+export async function installManagedIndexPattern({
+  savedObjectsClient,
+  savedObjectsImporter,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsImporter: SavedObjectsImporterContract;
+}) {
+  if (appContextService.getConfig()?.enableManagedLogsAndMetricsDataviews === true) {
+    await createDefaultIndexPatterns(savedObjectsImporter);
+    await makeManagedIndexPatternsGlobal(savedObjectsClient);
+  }
 }
 
 export async function createDefaultIndexPatterns(

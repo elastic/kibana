@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import {
-  CriteriaWithPagination,
-  EuiBasicTableColumn,
-  EuiInMemoryTable,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiInMemoryTable, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
 import { asDynamicBytes, asInteger } from '@kbn/observability-plugin/common';
-import { StorageDetailsPerIndex } from '../../../../common/storage_explorer';
+import type { StorageDetailsPerIndex } from '../../../../common/storage_explorer';
 import { NOT_AVAILABLE_LABEL } from '../../../../common';
 
 interface Props {

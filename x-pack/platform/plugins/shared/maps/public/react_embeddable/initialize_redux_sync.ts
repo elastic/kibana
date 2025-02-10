@@ -170,7 +170,7 @@ export function initializeReduxSync({
       unsubscribeFromStore();
     },
     api: {
-      dataLoading: dataLoading$,
+      dataLoading$,
       filters$,
       getInspectorAdapters: () => {
         return getInspectorAdapters(store.getState());

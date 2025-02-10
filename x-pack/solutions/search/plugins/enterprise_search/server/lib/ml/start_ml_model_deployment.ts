@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearch/lib/api/types';
 
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
 

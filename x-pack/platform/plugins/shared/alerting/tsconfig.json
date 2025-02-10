@@ -47,7 +47,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/management-plugin",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/ui-theme",
     "@kbn/core-doc-links-server-mocks",
     "@kbn/doc-links",
     "@kbn/core-saved-objects-utils-server",
@@ -75,8 +74,8 @@
     "@kbn/zod",
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/core-security-server-mocks",
-    "@kbn/response-ops-rule-params",
-    "@kbn/core-http-server-utils"
+    "@kbn/core-http-server-utils",
+    "@kbn/response-ops-rule-params"
   ],
   "exclude": [
     "target/**/*"

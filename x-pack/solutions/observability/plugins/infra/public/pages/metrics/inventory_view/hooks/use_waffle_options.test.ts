@@ -7,7 +7,8 @@
 
 import { renderHook, act } from '@testing-library/react';
 
-import { useWaffleOptions, WaffleOptionsState } from './use_waffle_options';
+import type { WaffleOptionsState } from './use_waffle_options';
+import { useWaffleOptions } from './use_waffle_options';
 
 // Mock useUrlState hook
 jest.mock('react-router-dom', () => ({

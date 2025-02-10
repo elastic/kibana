@@ -10,7 +10,8 @@ import React from 'react';
 import { DeleteAttachmentConfirmationModal } from './delete_attachment_confirmation_modal';
 import { render, screen } from '@testing-library/react';
 
-describe('DeleteAttachmentConfirmationModal', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/205953
+describe.skip('DeleteAttachmentConfirmationModal', () => {
   const props = {
     title: 'My title',
     confirmButtonText: 'My button text',

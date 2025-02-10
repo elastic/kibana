@@ -19,7 +19,7 @@ import type {
   DashboardSearchOptions,
 } from '../../../../server/content_management';
 import { getDashboardContentManagementCache } from '..';
-import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
+import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import { contentManagementService } from '../../kibana_services';
 
 export interface SearchDashboardsArgs {

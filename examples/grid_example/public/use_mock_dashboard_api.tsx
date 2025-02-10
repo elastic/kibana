@@ -46,10 +46,12 @@ export const useMockDashboardApi = ({
         from: 'now-24h',
         to: 'now',
       }),
-      viewMode: new BehaviorSubject('edit'),
+      filters$: new BehaviorSubject([]),
+      query$: new BehaviorSubject(''),
+      viewMode$: new BehaviorSubject('edit'),
       panels$,
       rows$: new BehaviorSubject<MockedDashboardRowMap>(savedState.rows),
-      expandedPanelId: expandedPanelId$,
+      expandedPanelId$,
       expandPanel: (id: string) => {
         if (expandedPanelId$.getValue()) {
           expandedPanelId$.next(undefined);

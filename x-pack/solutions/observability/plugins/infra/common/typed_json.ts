@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
+import type { JsonArray, JsonObject, JsonValue } from '@kbn/utility-types';
 
 export type { JsonArray, JsonObject, JsonValue };
 

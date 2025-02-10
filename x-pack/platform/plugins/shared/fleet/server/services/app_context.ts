@@ -52,6 +52,7 @@ import type { MessageSigningServiceInterface } from '..';
 
 import type { BulkActionsResolver } from './agents/bulk_actions_resolver';
 import { type UninstallTokenServiceInterface } from './security/uninstall_token_service';
+import type { FleetUsage } from '../collectors/register';
 
 class AppContextService {
   private encryptedSavedObjects: EncryptedSavedObjectsClient | undefined;
@@ -80,6 +81,7 @@ class AppContextService {
   private messageSigningService: MessageSigningServiceInterface | undefined;
   private uninstallTokenService: UninstallTokenServiceInterface | undefined;
   private taskManagerStart: TaskManagerStartContract | undefined;
+  private fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -105,6 +107,7 @@ class AppContextService {
     this.messageSigningService = appContext.messageSigningService;
     this.uninstallTokenService = appContext.uninstallTokenService;
     this.taskManagerStart = appContext.taskManagerStart;
+    this.fetchUsage = appContext.fetchUsage;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -343,6 +346,10 @@ class AppContextService {
 
   public getUninstallTokenService() {
     return this.uninstallTokenService;
+  }
+
+  public getFetchUsage() {
+    return this.fetchUsage;
   }
 }
 

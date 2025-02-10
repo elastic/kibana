@@ -16,6 +16,8 @@ const fetchSentinelOneLogoSvg = (): Promise<string> =>
   import('./images/sentinelone_logo.svg').then((response) => response.default);
 const fetchCrowdstrikeLogoSvg = (): Promise<string> =>
   import('./images/crowdstrike_logo.svg').then((response) => response.default);
+const fetchMicrosoftDefenderEndpointLogoSvg = (): Promise<string> =>
+  import('./images/microsoft_defender_endpoint.svg').then((response) => response.default);
 
 export interface AgentTypeVendorLogoProps
   extends Pick<EuiIconProps, 'size' | 'data-test-subj' | 'color'> {
@@ -46,6 +48,10 @@ export const AgentTypeVendorLogo = memo<AgentTypeVendorLogoProps>(
 
           case 'crowdstrike':
             fetchCrowdstrikeLogoSvg().then(setSvgToState);
+            break;
+
+          case 'microsoft_defender_endpoint':
+            fetchMicrosoftDefenderEndpointLogoSvg().then(setSvgToState);
             break;
         }
       }

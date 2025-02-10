@@ -18,9 +18,13 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  RuleMigrationResourceData,
-  RuleMigrationTaskStats,
+import {
+  SiemMigrationRetryFilter,
+  SiemMigrationTaskStatus,
+} from '../../../../../common/siem_migrations/constants';
+import {
+  type RuleMigrationResourceBase,
+  type RuleMigrationTaskStats,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RulesDataInput } from './steps/rules/rules_data_input';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
@@ -45,13 +49,15 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
     const [missingResourcesIndexed, setMissingResourcesIndexed] = useState<
       MissingResourcesIndexed | undefined
     >();
+    const isRetry = migrationStats?.status === SiemMigrationTaskStatus.FINISHED;
 
     const { startMigration, isLoading: isStartLoading } = useStartMigration(onClose);
     const onStartMigration = useCallback(() => {
       if (migrationStats?.id) {
-        startMigration(migrationStats.id);
+        const retryFilter = isRetry ? SiemMigrationRetryFilter.NOT_FULLY_TRANSLATED : undefined;
+        startMigration(migrationStats.id, retryFilter);
       }
-    }, [migrationStats, startMigration]);
+    }, [startMigration, migrationStats?.id, isRetry]);
 
     const [dataInputStep, setDataInputStep] = useState<DataInputStep>(DataInputStep.Rules);
 
@@ -60,12 +66,12 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
     }, []);
 
     const onMissingResourcesFetched = useCallback(
-      (missingResources: RuleMigrationResourceData[]) => {
+      (missingResources: RuleMigrationResourceBase[]) => {
         const newMissingResourcesIndexed = missingResources.reduce<MissingResourcesIndexed>(
           (acc, { type, name }) => {
             if (type === 'macro') {
               acc.macros.push(name);
-            } else if (type === 'list') {
+            } else if (type === 'lookup') {
               acc.lookups.push(name);
             }
             return acc;
@@ -153,10 +159,17 @@ export const MigrationDataInputFlyout = React.memo<MigrationDataInputFlyoutProps
                 disabled={!migrationStats?.id}
                 isLoading={isStartLoading}
               >
-                <FormattedMessage
-                  id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.translateButton"
-                  defaultMessage="Translate"
-                />
+                {isRetry ? (
+                  <FormattedMessage
+                    id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.retryTranslateButton"
+                    defaultMessage="Retry translation"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.securitySolution.siemMigrations.rules.dataInputFlyout.translateButton"
+                    defaultMessage="Translate"
+                  />
+                )}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

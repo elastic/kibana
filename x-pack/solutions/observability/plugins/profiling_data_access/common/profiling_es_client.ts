@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import type {
@@ -57,7 +57,7 @@ export interface ProfilingESClient {
     sampleSize?: number;
     indices?: string[];
     stacktraceIdsField?: string;
-    aggregationField?: AggregationField;
+    aggregationFields?: AggregationField[];
     co2PerKWH?: number;
     datacenterPUE?: number;
     pervCPUWattX86?: number;

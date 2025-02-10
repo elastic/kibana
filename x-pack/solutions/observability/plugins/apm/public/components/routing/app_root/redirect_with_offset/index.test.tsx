@@ -7,7 +7,8 @@
 import React from 'react';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { render } from '@testing-library/react';
-import { createMemoryHistory, Location, MemoryHistory } from 'history';
+import type { Location, MemoryHistory } from 'history';
+import { createMemoryHistory } from 'history';
 import qs from 'query-string';
 import { RedirectWithOffset } from '.';
 import { apmRouter } from '../../apm_route_config';

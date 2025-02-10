@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { useMemo, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useMemo } from 'react';
 import { firstValueFrom, from, of } from 'rxjs';
 import { delay } from 'rxjs';
-import { CoreStart } from '@kbn/core/public';
-import { FieldSpec } from '@kbn/data-views-plugin/common';
-import { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { Pick2 } from '../../common/utility_types';
+import type { Pick2 } from '../../common/utility_types';
 
 type MockIndexPattern = Pick<
   DataView,

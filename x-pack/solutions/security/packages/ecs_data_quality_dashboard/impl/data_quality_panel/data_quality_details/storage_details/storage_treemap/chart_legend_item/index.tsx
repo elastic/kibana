@@ -7,19 +7,21 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 const DEFAULT_DATA_TEST_SUBJ = 'chartLegendItem';
 
-export const ChartLegendLink = styled(EuiLink)`
-  width: 100%;
-`;
-export const FixedWidthLegendText = styled(EuiText)<{
-  $width: number | undefined;
-}>`
-  text-align: left;
-  ${({ $width }) => ($width != null ? `width: ${$width}px;` : '')}
-`;
+const getStyles = (width?: number) => {
+  return {
+    chartLegendLink: css({
+      width: '100%',
+    }),
+    fixedWidthLegendText: css({
+      textAlign: 'left',
+      ...(width != null ? { width: `${width}px` } : {}),
+    }),
+  };
+};
 
 interface Props {
   color: string | null;
@@ -37,36 +39,40 @@ const ChartLegendItemComponent: React.FC<Props> = ({
   onClick,
   text,
   textWidth,
-}) => (
-  <ChartLegendLink
-    color="text"
-    data-test-subj={dataTestSubj}
-    disabled={onClick == null}
-    onClick={onClick}
-  >
-    <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>
-        <EuiToolTip content={text}>
-          {color != null ? (
-            <EuiHealth color={color}>
-              <FixedWidthLegendText className="eui-textTruncate" size="xs" $width={textWidth}>
+}) => {
+  const styles = getStyles(textWidth);
+  return (
+    <EuiLink
+      css={styles.chartLegendLink}
+      color="text"
+      data-test-subj={dataTestSubj}
+      disabled={onClick == null}
+      onClick={onClick}
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
+        <EuiFlexItem grow={false}>
+          <EuiToolTip content={text}>
+            {color != null ? (
+              <EuiHealth color={color}>
+                <EuiText css={styles.fixedWidthLegendText} className="eui-textTruncate" size="xs">
+                  {text}
+                </EuiText>
+              </EuiHealth>
+            ) : (
+              <EuiText css={styles.fixedWidthLegendText} className="eui-textTruncate" size="xs">
                 {text}
-              </FixedWidthLegendText>
-            </EuiHealth>
-          ) : (
-            <FixedWidthLegendText className="eui-textTruncate" size="xs" $width={textWidth}>
-              {text}
-            </FixedWidthLegendText>
-          )}
-        </EuiToolTip>
-      </EuiFlexItem>
+              </EuiText>
+            )}
+          </EuiToolTip>
+        </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs">{count}</EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  </ChartLegendLink>
-);
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs">{count}</EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiLink>
+  );
+};
 
 ChartLegendItemComponent.displayName = 'ChartLegendItemComponent';
 

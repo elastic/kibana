@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_client';
-import type { Integration } from '../../types';
+import type { RuleMigrationIntegration } from '../../types';
+import type { RuleMigrationsRetrieverClients } from './rule_migrations_retriever';
 
 export class IntegrationRetriever {
-  constructor(private readonly dataClient: RuleMigrationsDataClient) {}
+  constructor(private readonly clients: RuleMigrationsRetrieverClients) {}
 
-  public async getIntegrations(semanticString: string): Promise<Integration[]> {
-    return this.integrationRetriever(semanticString);
+  public async populateIndex() {
+    return this.clients.data.integrations.populate();
   }
 
-  private integrationRetriever = async (semanticString: string): Promise<Integration[]> => {
-    const integrations = await this.dataClient.integrations.retrieveIntegrations(semanticString);
-
-    return integrations;
-  };
+  public async getIntegrations(semanticString: string): Promise<RuleMigrationIntegration[]> {
+    return this.clients.data.integrations.retrieveIntegrations(semanticString);
+  }
 }

@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import moment from 'moment';
 import type { Logger } from '@kbn/logging';
 import { isCustom } from './metric_expression_params';
-import { MetricExpressionParams } from '../../../../../common/alerting/metrics';
-import { InfraSource } from '../../../../../common/source_configuration/source_configuration';
+import type { MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import type { InfraSource } from '../../../../../common/source_configuration/source_configuration';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import { CUSTOM_EQUATION_I18N, DOCUMENT_COUNT_I18N } from '../../common/messages';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';
-import { checkMissingGroups, MissingGroupsRecord } from './check_missing_group';
-import { AdditionalContext } from '../../common/utils';
+import type { MissingGroupsRecord } from './check_missing_group';
+import { checkMissingGroups } from './check_missing_group';
+import type { AdditionalContext } from '../../common/utils';
 
 export interface EvaluatedRuleParams {
   criteria: MetricExpressionParams[];

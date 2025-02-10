@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 
-import { MetricsDataClient } from './client';
+import type { MetricsDataClient } from './client';
 
 export interface MetricsDataPluginSetup {
   client: MetricsDataClient;

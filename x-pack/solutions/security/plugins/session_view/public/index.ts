@@ -13,3 +13,8 @@ export { ENTRY_SESSION_ENTITY_ID_PROPERTY } from '../common';
 export function plugin() {
   return new SessionViewPlugin();
 }
+
+export { DetailPanelProcessTab } from './components/detail_panel_process_tab';
+export { DetailPanelMetadataTab } from './components/detail_panel_metadata_tab';
+export { DetailPanelAlertTab } from './components/detail_panel_alert_tab';
+export { useFetchSessionViewAlerts } from './components/session_view/hooks';

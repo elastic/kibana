@@ -29,20 +29,7 @@ export const createNavigationTree = ({
             title: i18n.translate('xpack.serverlessObservability.nav.discover', {
               defaultMessage: 'Discover',
             }),
-            link: 'last-used-logs-viewer',
-            // avoid duplicate "Discover" breadcrumbs
-            breadcrumbStatus: 'hidden',
-            renderAs: 'item',
-            children: [
-              {
-                link: 'discover',
-                children: [
-                  {
-                    link: 'observability-logs-explorer',
-                  },
-                ],
-              },
-            ],
+            link: 'discover',
           },
           {
             title: i18n.translate('xpack.serverlessObservability.nav.dashboards', {
@@ -100,7 +87,7 @@ export const createNavigationTree = ({
                   {
                     link: 'apm:services',
                     title: i18n.translate('xpack.serverlessObservability.nav.apm.services', {
-                      defaultMessage: 'Service inventory',
+                      defaultMessage: 'Service Inventory',
                     }),
                   },
                   { link: 'apm:traces' },
@@ -154,7 +141,7 @@ export const createNavigationTree = ({
                     title: i18n.translate(
                       'xpack.serverlessObservability.nav.infrastructureInventory',
                       {
-                        defaultMessage: 'Infrastructure inventory',
+                        defaultMessage: 'Infrastructure Inventory',
                       }
                     ),
                   },

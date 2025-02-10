@@ -14,7 +14,6 @@ import {
   createTargetIndex,
   extractDocumentation,
   indexDocuments,
-  installElser,
   createChunkFiles,
   createArtifact,
   cleanupFolders,
@@ -67,9 +66,6 @@ export const buildArtifacts = async (config: TaskConfig) => {
   // await checkConnectivity({ sourceClient, embeddingClient });
 
   await cleanupFolders({ folders: [config.buildFolder] });
-
-  log.info('Ensuring ELSER is installed on the embedding cluster');
-  await installElser({ client: embeddingClient });
 
   for (const productName of config.productNames) {
     await buildArtifact({

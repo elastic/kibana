@@ -144,7 +144,10 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
 
   const indexPatterns = useDataStream
     ? [`.alerts-${context ? context : 'test'}.alerts-${namespace}`]
-    : [`.internal.alerts-${context ? context : 'test'}.alerts-${namespace}-*`];
+    : [
+        `.internal.alerts-${context ? context : 'test'}.alerts-${namespace}-*`,
+        `.reindexed-v8-internal.alerts-${context ? context : 'test'}.alerts-${namespace}-*`,
+      ];
   return {
     name: `.alerts-${context ? context : 'test'}.alerts-${namespace}-index-template`,
     body: {
@@ -564,7 +567,10 @@ describe('Alerts Service', () => {
               },
             });
             expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
-              index: '.internal.alerts-test.alerts-default-*',
+              index: [
+                '.internal.alerts-test.alerts-default-*',
+                `.reindexed-v8-internal.alerts-test.alerts-default-*`,
+              ],
               name: '.alerts-test.alerts-*',
             });
           }
@@ -627,7 +633,10 @@ describe('Alerts Service', () => {
               },
             });
             expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
-              index: '.internal.alerts-test.alerts-default-*',
+              index: [
+                '.internal.alerts-test.alerts-default-*',
+                `.reindexed-v8-internal.alerts-test.alerts-default-*`,
+              ],
               name: '.alerts-test.alerts-*',
             });
           }
@@ -686,7 +695,10 @@ describe('Alerts Service', () => {
               },
             });
             expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
-              index: '.internal.alerts-test.alerts-default-*',
+              index: [
+                '.internal.alerts-test.alerts-default-*',
+                `.reindexed-v8-internal.alerts-test.alerts-default-*`,
+              ],
               name: '.alerts-test.alerts-*',
             });
           }
@@ -728,7 +740,10 @@ describe('Alerts Service', () => {
               },
             });
             expect(clusterClient.indices.getAlias).toHaveBeenNthCalledWith(1, {
-              index: '.internal.alerts-test.alerts-default-*',
+              index: [
+                '.internal.alerts-test.alerts-default-*',
+                `.reindexed-v8-internal.alerts-test.alerts-default-*`,
+              ],
               name: '.alerts-test.alerts-*',
             });
           }
@@ -792,7 +807,10 @@ describe('Alerts Service', () => {
               },
             });
             expect(clusterClient.indices.getAlias).toHaveBeenNthCalledWith(2, {
-              index: '.internal.alerts-test.alerts-another-namespace-*',
+              index: [
+                '.internal.alerts-test.alerts-another-namespace-*',
+                '.reindexed-v8-internal.alerts-test.alerts-another-namespace-*',
+              ],
               name: '.alerts-test.alerts-*',
             });
           }
@@ -826,7 +844,10 @@ describe('Alerts Service', () => {
             })
           );
           expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
-            index: '.internal.alerts-test.alerts-default-*',
+            index: [
+              '.internal.alerts-test.alerts-default-*',
+              '.reindexed-v8-internal.alerts-test.alerts-default-*',
+            ],
             name: '.alerts-test.alerts-*',
           });
           expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(2);
@@ -871,11 +892,12 @@ describe('Alerts Service', () => {
           const template = {
             name: `.alerts-empty.alerts-default-index-template`,
             body: {
-              index_patterns: [
-                useDataStreamForAlerts
-                  ? `.alerts-empty.alerts-default`
-                  : `.internal.alerts-empty.alerts-default-*`,
-              ],
+              index_patterns: useDataStreamForAlerts
+                ? [`.alerts-empty.alerts-default`]
+                : [
+                    `.internal.alerts-empty.alerts-default-*`,
+                    `.reindexed-v8-internal.alerts-empty.alerts-default-*`,
+                  ],
               composed_of: ['.alerts-framework-mappings'],
               ...(useDataStreamForAlerts ? { data_stream: { hidden: true } } : {}),
               priority: 7,
@@ -931,7 +953,10 @@ describe('Alerts Service', () => {
               },
             });
             expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
-              index: '.internal.alerts-empty.alerts-default-*',
+              index: [
+                '.internal.alerts-empty.alerts-default-*',
+                '.reindexed-v8-internal.alerts-empty.alerts-default-*',
+              ],
               name: '.alerts-empty.alerts-*',
             });
           }
@@ -2055,11 +2080,13 @@ describe('Alerts Service', () => {
           // leverage the outcome of the first retry
           expect(
             logger.info.mock.calls.filter(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (calls: any[]) => calls[0] === `Retrying resource initialization for context "test"`
             ).length
           ).toEqual(1);
           expect(
             logger.info.mock.calls.filter(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (calls: any[]) =>
                 calls[0] === `Resource installation for "test" succeeded after retry`
             ).length
@@ -2132,6 +2159,7 @@ describe('Alerts Service', () => {
           // Should only log the retry once because the second and third retries should be throttled
           expect(
             logger.info.mock.calls.filter(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               (calls: any[]) => calls[0] === `Retrying resource initialization for context "test"`
             ).length
           ).toEqual(1);

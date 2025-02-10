@@ -6,18 +6,18 @@
  */
 
 import { kqlQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
-import { ApmTransactionDocumentType } from '../../../common/document_type';
+import type { ApmTransactionDocumentType } from '../../../common/document_type';
 import {
   SERVICE_NAME,
   TRANSACTION_NAME,
   TRANSACTION_OVERFLOW_COUNT,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
-import { LatencyAggregationType } from '../../../common/latency_aggregation_types';
-import { RollupInterval } from '../../../common/rollup';
+import type { LatencyAggregationType } from '../../../common/latency_aggregation_types';
+import type { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getLatencyAggregation, getLatencyValue } from '../../lib/helpers/latency_aggregation_type';
 import { getDurationFieldForTransactions } from '../../lib/helpers/transactions';
 import {

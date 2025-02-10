@@ -31,6 +31,7 @@ to enable the {kib} server to have screenshotting capabilities.
 * <<securing-reporting>>
 * <<install-reporting-packages>>
 * <<set-reporting-server-host>>
+* <<reporting-elasticsearch-configuration>>
 
 [float]
 [[grant-user-access]]
@@ -109,11 +110,11 @@ PUT <kibana host>:<port>/api/security/role/custom_reporting_user
 		"spaces": ["*"],
 		"base": [],
 		"feature": {
-			"dashboard": ["generate_report",  <1>
+			"dashboard_v2": ["generate_report",  <1>
       "download_csv_report"], <2>
-      "discover": ["generate_report"], <3>
+      "discover_v2": ["generate_report"], <3>
 			"canvas": ["generate_report"], <4>
-			"visualize": ["generate_report"] <5>
+			"visualize_v2": ["generate_report"] <5>
 		}
 	}]
 }
@@ -146,8 +147,8 @@ PUT localhost:5601/api/security/role/custom_reporting_user
     {
       "base": [],
       "feature": {
-        "dashboard": [ "all" ], <1>
-        "discover": [ "all" ], <2>
+        "dashboard_v2": [ "all" ], <1>
+        "discover_v2": [ "all" ], <2>
       },
       "spaces": [ "*" ]
     }
@@ -251,3 +252,10 @@ PDF/PNG reporting to reach {kib} over a local interface, while also allowing the
 outward-facing network interfaces, as it makes the {kib} server accessible from any network interface on the
 machine. Make sure that no firewall rules or other routing rules prevent local services from accessing this
 address.
+
+[float]
+[[reporting-elasticsearch-configuration]]
+=== Ensure {es} allows built-in templates
+Reporting relies on {es} to install a mapping template for the data stream that stores reports. Ensure that {es} allows built-in
+templates to be installed by keeping the `stack.templates.enabled` setting at the default value of `true`. For more information, see
+{ref}/index-management-settings.html#stack-templates-enabled[Index management settings].

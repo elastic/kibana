@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { BaseFlameGraph, createFlameGraph } from '@kbn/profiling-utils';
+import type { BaseFlameGraph } from '@kbn/profiling-utils';
+import { createFlameGraph } from '@kbn/profiling-utils';
 import React from 'react';
 import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import { FlameGraph } from '../../components/flamegraph';
 import { AsyncEmbeddableComponent } from '../async_embeddable_component';
-import {
-  ProfilingEmbeddableProvider,
-  ProfilingEmbeddablesDependencies,
-} from '../profiling_embeddable_provider';
+import type { ProfilingEmbeddablesDependencies } from '../profiling_embeddable_provider';
+import { ProfilingEmbeddableProvider } from '../profiling_embeddable_provider';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 
 export type EmbeddableFlamegraphProps = FlamegraphProps & ProfilingEmbeddablesDependencies;
