@@ -5,6 +5,7 @@ export const conversationContainsContentReferences = (conversation?: Conversatio
     return conversation?.messages.some(message => !isEmpty(message.metadata?.contentReferences)) ?? false
 }
 
+/** Checks if the conversations has replacements, not if the replacements are actually used */
 export const conversationContainsAnonymizedValues = (conversation?: Conversation): boolean => {
     return !isEmpty(conversation?.replacements)
 }
