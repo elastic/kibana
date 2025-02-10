@@ -6,7 +6,7 @@
  */
 
 import { EuiSpacer, EuiWindowEvent } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { useParams } from 'react-router-dom';

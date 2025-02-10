@@ -40,7 +40,7 @@ export function getActions(
     mlTimefilterRefresh$.next(refresh);
   };
   // Navigate to Lens with prefilled chart for data field
-  if (services.application?.capabilities?.visualize?.show === true && lensPlugin !== undefined) {
+  if (services.application?.capabilities?.visualize_v2?.show === true && lensPlugin !== undefined) {
     const canUseLensEditor = lensPlugin?.canUseEditor();
     actions.push({
       name: i18n.translate('xpack.dataVisualizer.index.dataGrid.exploreInLensTitle', {
@@ -69,7 +69,7 @@ export function getActions(
   if (
     services?.uiActions &&
     mapsPlugin &&
-    services.application?.capabilities?.maps?.show === true
+    services.application?.capabilities?.maps_v2?.show === true
   ) {
     actions.push({
       name: i18n.translate('xpack.dataVisualizer.index.dataGrid.exploreInMapsTitle', {

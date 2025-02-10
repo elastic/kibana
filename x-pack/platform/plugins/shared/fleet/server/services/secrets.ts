@@ -333,6 +333,12 @@ function getOutputSecretPaths(
         value: remoteESOutput.secrets.service_token,
       });
     }
+    if (remoteESOutput.secrets?.kibana_api_key) {
+      outputSecretPaths.push({
+        path: 'secrets.kibana_api_key',
+        value: remoteESOutput.secrets.kibana_api_key,
+      });
+    }
     if (remoteESOutput?.secrets?.ssl?.key) {
       outputSecretPaths.push({
         path: 'secrets.ssl.key',
@@ -386,13 +392,17 @@ export function getOutputSecretReferences(output: Output): PolicySecretReference
     });
   }
 
-  if (
-    output.type === 'remote_elasticsearch' &&
-    typeof output?.secrets?.service_token === 'object'
-  ) {
-    outputSecretPaths.push({
-      id: output.secrets.service_token.id,
-    });
+  if (output.type === 'remote_elasticsearch') {
+    if (typeof output?.secrets?.service_token === 'object') {
+      outputSecretPaths.push({
+        id: output.secrets.service_token.id,
+      });
+    }
+    if (typeof output?.secrets?.kibana_api_key === 'object') {
+      outputSecretPaths.push({
+        id: output.secrets.kibana_api_key.id,
+      });
+    }
   }
 
   return outputSecretPaths;

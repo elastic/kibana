@@ -40,5 +40,6 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
     services: {
       query: jest.fn(),
     },
+    isServerless: false,
   };
 }

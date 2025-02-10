@@ -9,9 +9,8 @@
 
 import { Page } from '@playwright/test';
 import { subj } from '@kbn/test-subj-selector';
-import { KibanaUrl, ToolingLog, coreWorkerFixtures } from '../../worker';
+import { KibanaUrl, ScoutLogger, coreWorkerFixtures } from '../../worker';
 import { ScoutPage } from '.';
-import { serviceLoadedMsg } from '../../../utils';
 
 /**
  * Instead of defining each method individually, we use a list of method names and loop through them, creating methods dynamically.
@@ -118,16 +117,16 @@ export function extendPlaywrightPage({
  * ```
  */
 export const scoutPageFixture = coreWorkerFixtures.extend<
-  { page: ScoutPage; log: ToolingLog },
+  { page: ScoutPage; log: ScoutLogger },
   { kbnUrl: KibanaUrl }
 >({
   page: async (
-    { page, kbnUrl, log }: { page: Page; kbnUrl: KibanaUrl; log: ToolingLog },
+    { page, kbnUrl, log }: { page: Page; kbnUrl: KibanaUrl; log: ScoutLogger },
     use: (extendedPage: ScoutPage) => Promise<void>
   ) => {
     const extendedPage = extendPlaywrightPage({ page, kbnUrl });
 
-    log.debug(serviceLoadedMsg(`scoutPage`));
+    log.serviceLoaded('scoutPage');
     await use(extendedPage);
   },
 });

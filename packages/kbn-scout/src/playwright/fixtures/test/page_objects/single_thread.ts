@@ -8,7 +8,6 @@
  */
 
 import { PageObjects, createCorePageObjects } from '../../../page_objects';
-import { serviceLoadedMsg } from '../../../utils';
 import { scoutPageFixture } from '../scout_page';
 
 /**
@@ -24,7 +23,7 @@ export const pageObjectsFixture = scoutPageFixture.extend<{
 }>({
   pageObjects: async ({ page, log }, use) => {
     const corePageObjects = createCorePageObjects(page);
-    log.debug(serviceLoadedMsg(`pageObjects`));
+    log.serviceLoaded('pageObjects');
     await use(corePageObjects);
   },
 });

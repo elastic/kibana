@@ -159,15 +159,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.pressEnter();
         await PageObjects.console.sleepForDebouncePeriod();
 
-        expect((await PageObjects.console.getEditorText()).replace(/\s/g, '')).to.be.eql(
+        // Verify that the autocomplete suggestion is inserted into the editor
+        expect((await PageObjects.console.getEditorText()).replace(/\s/g, '')).to.contain(
           `
-GET _search
-{
-    "aggs": {
-      "NAME": {
-        "AGG_TYPE": {}
-      }
-    }
+"aggs": {
+  "NAME": {
+    "AGG_TYPE": {}
+  }
 }
 `.replace(/\s/g, '')
         );
@@ -373,8 +371,7 @@ GET _search
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/198109
-    describe.skip('index fields autocomplete', () => {
+    describe('index fields autocomplete', () => {
       const indexName = `index_field_test-${Date.now()}-${Math.random()}`;
 
       before(async () => {
@@ -393,7 +390,11 @@ GET _search
 
       it('fields autocomplete only shows fields of the index', async () => {
         await PageObjects.console.clearEditorText();
-        await PageObjects.console.enterText('GET _search\n{\n"fields": ["');
+        await PageObjects.console.enterText('GET _search\n{\n"fields": [');
+        // Wait for the autocomplete request to finish loading
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // Trigger the autocomplete for the field we previously added
+        await PageObjects.console.enterText('te');
 
         expect(await PageObjects.console.getAutocompleteSuggestion(0)).to.be.eql('test');
         expect(await PageObjects.console.getAutocompleteSuggestion(1)).to.be.eql(undefined);

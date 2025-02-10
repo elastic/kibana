@@ -33,14 +33,11 @@ export const GridHeightSmoother = ({
 
       if (!interactionEvent) {
         smoothHeightRef.current.style.minHeight = `${dimensions.height}px`;
-        smoothHeightRef.current.style.userSelect = 'auto';
         return;
       }
-
       smoothHeightRef.current.style.minHeight = `${
         smoothHeightRef.current.getBoundingClientRect().height
       }px`;
-      smoothHeightRef.current.style.userSelect = 'none';
     });
 
     return () => {

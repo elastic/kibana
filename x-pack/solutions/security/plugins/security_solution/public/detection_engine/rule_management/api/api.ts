@@ -31,13 +31,13 @@ import type {
   BulkManualRuleRun,
   CoverageOverviewResponse,
   GetRuleManagementFiltersResponse,
+  BulkActionsDryRunErrCode,
 } from '../../../../common/api/detection_engine/rule_management';
 import {
   RULE_MANAGEMENT_FILTERS_URL,
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
   BulkActionTypeEnum,
 } from '../../../../common/api/detection_engine/rule_management';
-import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_IMPORT_URL,

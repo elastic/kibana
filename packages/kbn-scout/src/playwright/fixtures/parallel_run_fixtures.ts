@@ -13,13 +13,13 @@ import type {
   EsClient,
   KbnClient,
   KibanaUrl,
+  ScoutLogger,
   ScoutSpaceParallelFixture,
   ScoutTestConfig,
-  ToolingLog,
 } from './worker';
 import {
   scoutPageParallelFixture,
-  browserAuthParallelFixture,
+  browserAuthFixture,
   pageObjectsParallelFixture,
   validateTagsFixture,
 } from './test';
@@ -30,7 +30,7 @@ export const scoutParallelFixtures = mergeTests(
   coreWorkerFixtures,
   scoutSpaceParallelFixture,
   // test scope fixtures
-  browserAuthParallelFixture,
+  browserAuthFixture,
   scoutPageParallelFixture,
   pageObjectsParallelFixture,
   validateTagsFixture
@@ -43,7 +43,7 @@ export interface ScoutParallelTestFixtures {
 }
 
 export interface ScoutParallelWorkerFixtures {
-  log: ToolingLog;
+  log: ScoutLogger;
   config: ScoutTestConfig;
   kbnUrl: KibanaUrl;
   kbnClient: KbnClient;

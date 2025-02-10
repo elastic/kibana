@@ -55,7 +55,7 @@
     "@kbn/task-manager-plugin",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-saved-objects-server",
-    "@kbn/observability-alerting-rule-utils"
+    "@kbn/alerting-rule-utils"
   ],
   "exclude": [
     "target/**/*",

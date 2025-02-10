@@ -65,10 +65,14 @@ export interface NewRemoteElasticsearchOutput extends NewBaseOutput {
   service_token?: string | null;
   secrets?: {
     service_token?: OutputSecret;
+    kibana_api_key?: OutputSecret;
     ssl?: {
       key?: OutputSecret;
     };
   };
+  sync_integrations?: boolean;
+  kibana_url?: string | null;
+  kibana_api_key?: string | null;
 }
 
 export interface NewLogstashOutput extends NewBaseOutput {

@@ -14,8 +14,8 @@ import type {
   EsClient,
   KbnClient,
   KibanaUrl,
+  ScoutLogger,
   ScoutTestConfig,
-  ToolingLog,
   UiSettingsFixture,
 } from './worker';
 import {
@@ -48,7 +48,7 @@ export interface ScoutTestFixtures {
 }
 
 export interface ScoutWorkerFixtures {
-  log: ToolingLog;
+  log: ScoutLogger;
   config: ScoutTestConfig;
   kbnUrl: KibanaUrl;
   kbnClient: KbnClient;

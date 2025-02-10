@@ -13,13 +13,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...functionalConfig.getAll(),
-    kbnTestServer: {
-      ...functionalConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...functionalConfig.get('kbnTestServer.serverArgs'),
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify(['siemMigrationsEnabled'])}`,
-      ],
-    },
     testFiles: [require.resolve('..')],
     junit: {
       reportName: 'SIEM Migrations Integration Tests - ESS Env - Trial License',

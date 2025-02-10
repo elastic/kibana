@@ -696,8 +696,13 @@ class OutputService {
         if (!output.service_token && output.secrets?.service_token) {
           data.service_token = output.secrets?.service_token as string;
         }
+
+        if (!output.kibana_api_key && output.secrets?.kibana_api_key) {
+          data.kibana_api_key = output.secrets?.kibana_api_key as string;
+        }
+
         if (!output.ssl?.key && output.secrets?.ssl?.key) {
-          data.ssl = JSON.stringify({ ...output.ssl, ...output.secrets?.ssl });
+          data.ssl = output.secrets?.ssl as string;
         }
       }
     }
@@ -953,6 +958,7 @@ class OutputService {
         updateData.ca_trusted_fingerprint = null;
         updateData.ca_sha256 = null;
         delete (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).service_token;
+        delete (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).kibana_api_key;
       }
 
       if (data.type !== outputType.Logstash) {
@@ -1075,6 +1081,9 @@ class OutputService {
       if (!data.service_token) {
         updateData.service_token = null;
       }
+      if (!data.kibana_api_key) {
+        updateData.kibana_api_key = null;
+      }
     }
 
     if (!data.preset && data.type === outputType.Elasticsearch) {
@@ -1124,8 +1133,11 @@ class OutputService {
         if (!data.service_token && data.secrets?.service_token) {
           updateData.service_token = data.secrets?.service_token as string;
         }
+        if (!data.kibana_api_key && data.secrets?.kibana_api_key) {
+          updateData.kibana_api_key = data.secrets?.kibana_api_key as string;
+        }
         if (!data.ssl?.key && data.secrets?.ssl?.key) {
-          updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets?.ssl });
+          updateData.ssl = data.secrets?.ssl as string;
         }
       }
     }
