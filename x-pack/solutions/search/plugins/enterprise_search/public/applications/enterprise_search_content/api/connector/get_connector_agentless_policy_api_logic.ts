@@ -6,6 +6,7 @@
  */
 
 import { Agent } from '@kbn/fleet-plugin/common';
+
 import { createApiLogic, Actions } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
