@@ -173,7 +173,6 @@ describe('alertRenderer', () => {
           <TestProviders>
             {alertRenderer.renderRow({
               data: dataWithAllFields,
-              isDraggable: false,
               scopeId: TimelineId.test,
             })}
           </TestProviders>
@@ -189,7 +188,6 @@ describe('alertRenderer', () => {
       <TestProviders>
         {alertRenderer.renderRow({
           data: dataWithAllFields,
-          isDraggable: false,
           scopeId: TimelineId.test,
         })}
       </TestProviders>
@@ -204,7 +202,6 @@ describe('alertRenderer', () => {
         <TestProviders>
           {alertRenderer.renderRow({
             data: dataWithAllFields,
-            isDraggable: false,
             scopeId: TimelineId.test,
           })}
         </TestProviders>
@@ -218,7 +215,6 @@ describe('alertRenderer', () => {
         <TestProviders>
           {alertRenderer.renderRow({
             data: omit(WITH_FIELD_NAMES, dataWithAllFields) as Ecs,
-            isDraggable: false,
             scopeId: TimelineId.test,
           })}
         </TestProviders>
@@ -233,7 +229,6 @@ describe('alertRenderer', () => {
       <TestProviders>
         {alertRenderer.renderRow({
           data: dataWithAllFields,
-          isDraggable: false,
           scopeId: TimelineId.test,
         })}
       </TestProviders>
