@@ -7,6 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 
+import type { UpdateIndexOperation } from '../../../common/update_index';
 import type {
   ESUpgradeStatus,
   CloudBackupStatus,
@@ -277,7 +278,7 @@ export class ApiService {
     });
   }
 
-  public async updateIndex(indexName: string, operations: Array<'unfreeze' | 'blockWrite'>) {
+  public async updateIndex(indexName: string, operations: UpdateIndexOperation[]) {
     return await this.sendRequest({
       path: `${API_BASE_PATH}/update_index/${indexName}`,
       method: 'post',

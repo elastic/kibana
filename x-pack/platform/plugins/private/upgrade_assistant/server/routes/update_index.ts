@@ -8,10 +8,10 @@
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
 
-import { mapAnyErrorToKibanaHttpResponse } from './reindex_indices/map_any_error_to_kibana_http_response';
 import { API_BASE_PATH } from '../../common/constants';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
+import { updateIndex } from '../lib/update_index';
 
 export function registerUpdateIndexRoute({ router, lib: { handleEsError } }: RouteDependencies) {
   const BASE_PATH = `${API_BASE_PATH}/update_index`;
@@ -46,27 +46,13 @@ export function registerUpdateIndexRoute({ router, lib: { handleEsError } }: Rou
       const { index } = request.params;
       const { operations } = request.body;
       try {
-        const esClient = client.asCurrentUser;
-        for (const operation of operations) {
-          switch (operation) {
-            case 'blockWrite': {
-              await esClient.indices.addBlock({ index, block: 'write' });
-              break;
-            }
-            case 'unfreeze': {
-              await esClient.indices.unfreeze({ index });
-              break;
-            }
-          }
-        }
-
+        await updateIndex({ esClient: client.asCurrentUser, index, operations });
         return response.ok();
       } catch (err) {
         if (err instanceof errors.ResponseError) {
           return handleEsError({ error: err, response });
         }
-
-        return mapAnyErrorToKibanaHttpResponse(err);
+        throw err;
       }
     })
   );

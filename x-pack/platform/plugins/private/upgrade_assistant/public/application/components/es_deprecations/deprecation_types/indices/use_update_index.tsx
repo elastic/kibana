@@ -6,7 +6,8 @@
  */
 
 import { useCallback, useState } from 'react';
-import { EnrichedDeprecationInfo } from '../../../../../../common/types';
+import type { UpdateIndexOperation } from '../../../../../../common/update_index';
+import type { EnrichedDeprecationInfo } from '../../../../../../common/types';
 import type { ApiService } from '../../../../lib/api';
 
 export interface UpdateIndexState {
@@ -29,7 +30,7 @@ export const useUpdateIndex = ({ indexName, api, correctiveAction }: UseUpdateIn
   });
 
   const updateIndex = useCallback(async () => {
-    const operations: Array<'unfreeze' | 'blockWrite'> =
+    const operations: UpdateIndexOperation[] =
       correctiveAction?.type === 'unfreeze' ? ['unfreeze'] : ['blockWrite', 'unfreeze'];
 
     setUpdateIndexState({ status: 'inProgress', failedBefore: failedState });
