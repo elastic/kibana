@@ -158,7 +158,7 @@ const UpgradeStep = () => {
       <EuiCallOut title={i18nTexts.securitySolnLogsDBCalloutTitle}>
         <FormattedMessage
           id="xpack.upgradeAssistant.overview.securitySolutionLogsDBCalloutBody"
-          defaultMessage="Logsdb is a new index mode ({logsDataStreamDocs}) that is applied to {logsPattern} data streams by default in Elasticsearch 9.0. Logsdb index mode results in significant storage savings (up to 70%) however adds up to X% CPU overhead during data ingestion. In 9.0, logsdb will be applied to newly ingested logs data . If your cluster's hot tier CPU utilization is high (more than Y% on average), it is recommended that you disable this default behavior prior to upgrading to avoid maxing out your hot tier CPU and the downstream issues it may cause. To disable, {indexModeWithSecuritySoln}. This setting can be changed after upgrade if desired."
+          defaultMessage="Logsdb is a new index mode ({logsDataStreamDocs}) that is applied to {logsPattern} data streams by default in Elasticsearch 9.0. Logsdb index mode results in significant storage savings (up to 70%) however adds up to 25% CPU overhead during data ingestion. In 9.0, logsdb will be applied to newly ingested logs data. If your cluster's hot tier CPU utilization is high (more than Y% on average), it is recommended that you disable this default behavior prior to upgrading to avoid maxing out your hot tier CPU and the downstream issues it may cause. To disable, {indexModeWithSecuritySoln}. This setting can be changed after upgrade if desired."
           values={{
             logsPattern: <EuiCode>logs-*-*</EuiCode>,
             logsDataStreamDocs: (
