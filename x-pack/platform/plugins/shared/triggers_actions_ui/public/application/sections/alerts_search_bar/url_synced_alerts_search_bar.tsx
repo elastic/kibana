@@ -14,7 +14,10 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { useKibana } from '../../..';
 import { useAlertSearchBarStateContainer } from './use_alert_search_bar_state_container';
-import { ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY } from './constants';
+import {
+  ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY,
+  RESET_FILTER_CONTROLS_TEST_SUBJ,
+} from './constants';
 import { AlertsSearchBarProps } from './types';
 import AlertsSearchBar from './alerts_search_bar';
 import { buildEsQuery } from './build_es_query';
@@ -52,7 +55,12 @@ const FilterControlsErrorView = memo(({ resetFilters }: { resetFilters: () => vo
   return (
     <EuiCallOut title={FILTER_CONTROLS_ERROR_VIEW_TITLE} color="danger" iconType="error">
       <p>{FILTER_CONTROLS_ERROR_VIEW_DESCRIPTION}</p>
-      <EuiButton onClick={resetFilters} color="danger" fill>
+      <EuiButton
+        onClick={resetFilters}
+        color="danger"
+        fill
+        data-test-subj={RESET_FILTER_CONTROLS_TEST_SUBJ}
+      >
         {RESET_FILTERS_BUTTON_LABEL}
       </EuiButton>
     </EuiCallOut>
