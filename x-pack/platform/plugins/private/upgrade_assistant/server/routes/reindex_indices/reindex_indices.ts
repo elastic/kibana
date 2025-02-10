@@ -91,6 +91,12 @@ export function registerReindexIndicesRoutes(
         access: 'public',
         summary: `Get reindex status`,
       },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es and saved object clients for authorization',
+        },
+      },
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -151,6 +157,12 @@ export function registerReindexIndicesRoutes(
       options: {
         access: 'public',
         summary: `Cancel reindex`,
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es and saved object clients for authorization',
+        },
       },
       validate: {
         params: schema.object({
