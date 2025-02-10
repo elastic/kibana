@@ -34,6 +34,7 @@ import {
   TimeRange,
 } from '@kbn/es-query';
 import { isFunction } from 'lodash';
+import { getSWRBoolean, getSWRDataViewList } from './utils/data_swr_helper';
 import { loadSavedSearch as loadSavedSearchFn } from './utils/load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { FetchStatus } from '../../types';
@@ -54,14 +55,14 @@ import {
 } from './discover_internal_state_container';
 import { DiscoverServices } from '../../../build_services';
 import {
+  DiscoverSavedSearchContainer,
   getDefaultAppState,
   getSavedSearchContainer,
-  DiscoverSavedSearchContainer,
 } from './discover_saved_search_container';
 import { updateFiltersReferences } from './utils/update_filter_references';
 import {
-  getDiscoverGlobalStateContainer,
   DiscoverGlobalStateContainer,
+  getDiscoverGlobalStateContainer,
 } from './discover_global_state_container';
 import type { DiscoverCustomizationContext } from '../../../customizations';
 import {
@@ -71,7 +72,7 @@ import {
 } from '../../../../common/data_sources';
 
 interface DiscoverStateDataRequirements {
-  hasUserDataViewValue?: boolean;
+  hasUserDataViewValue: boolean;
   hasESDataValue?: boolean;
   defaultDataViewExists?: boolean;
   dataViewList?: DataViewListItem[];
@@ -340,67 +341,32 @@ export function getDiscoverStateContainer({
     return dataViewList;
   };
 
-  const loadDataRequirementsHelper = async (sessKey?: string) => {
-    try {
-      const [hasUserDataViewValue, hasESDataValue, defaultDataViewExists, dataViewList] =
-        await Promise.all([
-          services.data.dataViews.hasData.hasUserDataView().catch(() => false),
-          services.data.dataViews.hasData.hasESData().catch(() => false),
-          services.data.dataViews.defaultDataViewExists().catch(() => false),
-          loadDataViewList(),
-        ]);
-      const result = {
-        hasUserDataViewValue,
-        hasESDataValue,
-        defaultDataViewExists,
-        dataViewList,
-      };
-      if (sessKey) {
-        sessionStorage.setItem(sessKey, JSON.stringify(result));
-      }
-
-      return {
-        hasUserDataViewValue,
-        hasESDataValue,
-        defaultDataViewExists,
-      };
-    } catch (error) {
-      return {
-        hasUserDataViewValue: false,
-        hasESDataValue: false,
-        defaultDataViewExists: false,
-      };
-    }
-  };
-
-  const loadDataRequirements = async (useCache: boolean = true) => {
+  const loadDataRequirements = async (
+    useCache: boolean = true
+  ): Promise<DiscoverStateDataRequirements> => {
     const currentUser = await services.core.security.authc.getCurrentUser();
     const currentSpace = await services.spaces?.getActiveSpace();
-    if (useCache) {
-      const sessionKey = `discover:session:dataRequirements:${currentUser.profile_uid}:${currentSpace?.id}`;
+    const { dataViews } = services.data;
 
-      const sessionValue = sessionStorage.getItem(sessionKey);
-      const sessionValueParsed = JSON.parse(sessionValue || '{}') as DiscoverStateDataRequirements;
-      const useSessionValue =
-        sessionValue &&
-        sessionValueParsed &&
-        sessionValueParsed.hasUserDataViewValue &&
-        sessionValueParsed.hasESDataValue &&
-        sessionValueParsed.defaultDataViewExists;
+    const cacheKey = `dsc:${currentUser.profile_uid}:${currentSpace?.id}`;
+    const [hasUserDataViewValue, hasESDataValue, defaultDataViewExists, dataViewList] =
+      await Promise.all([
+        getSWRBoolean(useCache ? `${cacheKey}:hasUserDataView` : '', () =>
+          dataViews.hasData.hasUserDataView()
+        ),
+        getSWRBoolean(useCache ? `${cacheKey}:hasData` : '', () => dataViews.hasData.hasESData()),
+        getSWRBoolean(useCache ? `${cacheKey}:defaultDataView` : '', () =>
+          dataViews.defaultDataViewExists()
+        ),
+        getSWRDataViewList(useCache ? `${cacheKey}:dataViewList` : '', () => loadDataViewList()),
+      ]);
 
-      if (useSessionValue) {
-        // just use the value stored in the session if data/dataviews are available
-        if (sessionValueParsed.dataViewList) {
-          internalStateContainer.transitions.setSavedDataViews(sessionValueParsed.dataViewList);
-        }
-        // refresh the values in the background
-        loadDataRequirementsHelper(sessionKey);
-        // return the value in browser session
-        return sessionValueParsed;
-      }
-    }
-
-    return loadDataRequirementsHelper();
+    return {
+      hasUserDataViewValue,
+      hasESDataValue,
+      defaultDataViewExists,
+      dataViewList,
+    };
   };
 
   /**
