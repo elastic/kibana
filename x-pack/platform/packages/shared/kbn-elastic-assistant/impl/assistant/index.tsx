@@ -51,7 +51,10 @@ import { ConversationSidePanel } from './conversations/conversation_sidepanel';
 import { SelectedPromptContexts } from './prompt_editor/selected_prompt_contexts';
 import { AssistantHeader } from './assistant_header';
 import { AnonymizedValuesAndCitationsTour } from '../tour/anonymized_values_and_citations_tour';
-import { conversationContainsAnonymizedValues, conversationContainsContentReferences } from './conversations/utils';
+import {
+  conversationContainsAnonymizedValues,
+  conversationContainsContentReferences,
+} from './conversations/utils';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
 
@@ -228,12 +231,12 @@ const AssistantComponent: React.FC<Props> = ({
   const onKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (event.altKey && event.code === 'KeyC') {
-        if(!conversationContainsContentReferences(currentConversation)) return
+        if (!conversationContainsContentReferences(currentConversation)) return;
         event.preventDefault();
         setContentReferencesVisible(!contentReferencesVisible);
       }
       if (event.altKey && event.code === 'KeyA') {
-        if(!conversationContainsAnonymizedValues(currentConversation)) return
+        if (!conversationContainsAnonymizedValues(currentConversation)) return;
         event.preventDefault();
         setShowAnonymizedValues(!showAnonymizedValues);
       }
@@ -243,7 +246,7 @@ const AssistantComponent: React.FC<Props> = ({
       contentReferencesVisible,
       setShowAnonymizedValues,
       showAnonymizedValues,
-      currentConversation
+      currentConversation,
     ]
   );
 

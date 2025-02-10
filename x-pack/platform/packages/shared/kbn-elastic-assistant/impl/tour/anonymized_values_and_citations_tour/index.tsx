@@ -13,7 +13,10 @@ import { Conversation } from '../../assistant_context/types';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../const';
 import { anonymizedValuesAndCitationsTourStep1 } from './step_config';
 import { TourState } from '../knowledge_base';
-import { conversationContainsAnonymizedValues, conversationContainsContentReferences } from '../../assistant/conversations/utils';
+import {
+  conversationContainsAnonymizedValues,
+  conversationContainsContentReferences,
+} from '../../assistant/conversations/utils';
 
 interface Props {
   conversation: Conversation | undefined;
