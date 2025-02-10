@@ -59,12 +59,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
     });
 
-    it('completes inline JSON property without extra quotes', async () => {
+    it('correctly autocompletes inline JSON', async () => {
       // 1) Type the request line + inline body (two lines total).
-      await PageObjects.console.enterText('GET index/_search\n{"query": {te');
+      await PageObjects.console.enterText('GET index/_search\n{"query": {t');
 
-      // 2) Wait briefly so the editor processes the text
+      // 2) Trigger autocomplete
       await PageObjects.console.sleepForDebouncePeriod();
+      await PageObjects.console.promptAutocomplete('e');
+
 
       // 3) Wait for the autocomplete suggestions to appear
       await retry.waitFor('autocomplete to be visible', () =>
