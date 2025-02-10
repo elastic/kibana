@@ -25,6 +25,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { KnowledgeBaseTour } from '../../../tour/knowledge_base';
 import { AnonymizationSettingsManagement } from '../../../data_anonymization/settings/anonymization_settings_management';
 import { Conversation, useAssistantContext } from '../../../..';
@@ -32,8 +33,10 @@ import * as i18n from '../../assistant_header/translations';
 import { AlertsSettingsModal } from '../alerts_settings/alerts_settings_modal';
 import { KNOWLEDGE_BASE_TAB } from '../const';
 import { AI_ASSISTANT_MENU } from './translations';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { conversationContainsAnonymizedValues, conversationContainsContentReferences } from '../../conversations/utils';
+import {
+  conversationContainsAnonymizedValues,
+  conversationContainsContentReferences,
+} from '../../conversations/utils';
 
 interface Params {
   isDisabled?: boolean;
@@ -43,9 +46,15 @@ interface Params {
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
-const ConditionalWrap = ({ condition, wrap, children }: { condition: boolean, wrap: (children: React.ReactElement) => React.ReactElement, children: React.ReactElement }) => (
-  condition ? wrap(children) : children
-);
+const ConditionalWrap = ({
+  condition,
+  wrap,
+  children,
+}: {
+  condition: boolean;
+  wrap: (children: React.ReactElement) => React.ReactElement;
+  children: React.ReactElement;
+}) => (condition ? wrap(children) : children);
 
 export const SettingsContextMenu: React.FC<Params> = React.memo(
   ({ isDisabled = false, onChatCleared, selectedConversation }: Params) => {
@@ -132,7 +141,10 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       [selectedConversation]
     );
 
-    const selectedConversationHasAnonymizedValues = useMemo(() => conversationContainsAnonymizedValues(selectedConversation), [selectedConversation]);
+    const selectedConversationHasAnonymizedValues = useMemo(
+      () => conversationContainsAnonymizedValues(selectedConversation),
+      [selectedConversation]
+    );
 
     const items = useMemo(
       () => [
@@ -191,25 +203,30 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
             <h3>{i18n.CHAT_OPTIONS}</h3>
           </EuiTitle>
           <EuiHorizontalRule margin="none" />
-            <EuiContextMenuItem
-              aria-label={'anonymize-values'}
-              key={'anonymize-values'}
-              data-test-subj={'anonymize-values'}
-            >
-            <EuiFlexGroup direction="row" gutterSize='s' alignItems="center">
+          <EuiContextMenuItem
+            aria-label={'anonymize-values'}
+            key={'anonymize-values'}
+            data-test-subj={'anonymize-values'}
+          >
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
-                <ConditionalWrap condition={!selectedConversationHasAnonymizedValues} wrap={(children) => (
-                  <EuiToolTip
-                    position="top"
-                    key={'disabled-anonymize-values-tooltip'}
-                    content={<FormattedMessage
-                      id="xpack.elasticAssistant.assistant.settings.anonymizeValues.disabled.tooltip"
-                      defaultMessage="This conversation does not contain anonymized fields."
-                    />}
-                  >
-                    {children}
-                  </EuiToolTip>
-                )}>
+                <ConditionalWrap
+                  condition={!selectedConversationHasAnonymizedValues}
+                  wrap={(children) => (
+                    <EuiToolTip
+                      position="top"
+                      key={'disabled-anonymize-values-tooltip'}
+                      content={
+                        <FormattedMessage
+                          id="xpack.elasticAssistant.assistant.settings.anonymizeValues.disabled.tooltip"
+                          defaultMessage="This conversation does not contain anonymized fields."
+                        />
+                      }
+                    >
+                      {children}
+                    </EuiToolTip>
+                  )}
+                >
                   <EuiSwitch
                     label={i18n.ANONYMIZE_VALUES}
                     checked={showAnonymizedValues}
@@ -223,14 +240,16 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
                 <EuiToolTip
                   position="top"
                   key={'anonymize-values-tooltip'}
-                  content={<FormattedMessage
-                    id="xpack.elasticAssistant.assistant.settings.anonymizeValues.tooltip"
-                    defaultMessage="Toggle to reveal or obfuscate field values in your chat stream. The data sent to the LLM is still anonymized based on settings in the Anonymization panel. Keyboard shortcut: <bold>{keyboardShortcut}</bold>"
-                    values={{
-                      keyboardShortcut: isMac ? '⌥ + a' : 'Alt + a',
-                      bold: (str) => <strong>{str}</strong>,
-                    }}
-                  />}
+                  content={
+                    <FormattedMessage
+                      id="xpack.elasticAssistant.assistant.settings.anonymizeValues.tooltip"
+                      defaultMessage="Toggle to reveal or obfuscate field values in your chat stream. The data sent to the LLM is still anonymized based on settings in the Anonymization panel. Keyboard shortcut: <bold>{keyboardShortcut}</bold>"
+                      values={{
+                        keyboardShortcut: isMac ? '⌥ + a' : 'Alt + a',
+                        bold: (str) => <strong>{str}</strong>,
+                      }}
+                    />
+                  }
                 >
                   <EuiIcon tabIndex={0} type="iInCircle" />
                 </EuiToolTip>
@@ -239,21 +258,30 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           </EuiContextMenuItem>
 
           {contentReferencesEnabled && (
-              <EuiContextMenuItem
-                aria-label={'show-citations'}
-                key={'show-citations'}
-                data-test-subj={'show-citations'}
-              >
-              <EuiFlexGroup direction="row" gutterSize='s' alignItems="center">
+            <EuiContextMenuItem
+              aria-label={'show-citations'}
+              key={'show-citations'}
+              data-test-subj={'show-citations'}
+            >
+              <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <ConditionalWrap condition={!selectedConversationHasCitations} wrap={(children) => (<EuiToolTip
-                    position="top"
-                    key={'disabled-anonymize-values-tooltip'}
-                    content={<FormattedMessage
-                      id="xpack.elasticAssistant.assistant.settings.showCitationsLabel.disabled.tooltip"
-                      defaultMessage="This conversation does not contain citations."
-                    />}
-                  >{children}</EuiToolTip>)}>
+                  <ConditionalWrap
+                    condition={!selectedConversationHasCitations}
+                    wrap={(children) => (
+                      <EuiToolTip
+                        position="top"
+                        key={'disabled-anonymize-values-tooltip'}
+                        content={
+                          <FormattedMessage
+                            id="xpack.elasticAssistant.assistant.settings.showCitationsLabel.disabled.tooltip"
+                            defaultMessage="This conversation does not contain citations."
+                          />
+                        }
+                      >
+                        {children}
+                      </EuiToolTip>
+                    )}
+                  >
                     <EuiSwitch
                       label={i18n.SHOW_CITATIONS}
                       checked={contentReferencesVisible}
@@ -267,14 +295,16 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
                   <EuiToolTip
                     position="top"
                     key={'show-citations-tooltip'}
-                    content={<FormattedMessage
-                      id="xpack.elasticAssistant.assistant.settings.showCitationsLabel.tooltip"
-                      defaultMessage="Keyboard shortcut: <bold>{keyboardShortcut}</bold>"
-                      values={{
-                        keyboardShortcut: isMac ? '⌥ + c' : 'Alt + c',
-                        bold: (str) => <strong>{str}</strong>,
-                      }}
-                    />}
+                    content={
+                      <FormattedMessage
+                        id="xpack.elasticAssistant.assistant.settings.showCitationsLabel.tooltip"
+                        defaultMessage="Keyboard shortcut: <bold>{keyboardShortcut}</bold>"
+                        values={{
+                          keyboardShortcut: isMac ? '⌥ + c' : 'Alt + c',
+                          bold: (str) => <strong>{str}</strong>,
+                        }}
+                      />
+                    }
                   >
                     <EuiIcon tabIndex={0} type="iInCircle" />
                   </EuiToolTip>
