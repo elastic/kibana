@@ -25,7 +25,7 @@ export interface GridPanelProps {
     panelId: string,
     setDragHandles?: (refs: Array<HTMLElement | null>) => void
   ) => React.ReactNode;
-  hasCustomDragHandle: boolean;
+  useCustomDragHandle: boolean;
   gridLayoutStateManager: GridLayoutStateManager;
 }
 
@@ -34,7 +34,7 @@ export const GridPanel = React.memo(
     panelId,
     rowIndex,
     renderPanelContents,
-    hasCustomDragHandle,
+    useCustomDragHandle,
     gridLayoutStateManager,
   }: GridPanelProps) => {
     const { euiTheme } = useEuiTheme();
@@ -167,8 +167,6 @@ export const GridPanel = React.memo(
       return renderPanelContents(panelId, dragHandleApi.setDragHandles);
     }, [panelId, renderPanelContents, dragHandleApi]);
 
-    console.log('render');
-
     return (
       <div
         ref={(element) => {
@@ -180,7 +178,7 @@ export const GridPanel = React.memo(
         css={initialStyles}
         className="kbnGridPanel"
       >
-        {!hasCustomDragHandle && <DefaultDragHandle dragHandleApi={dragHandleApi} />}
+        {!useCustomDragHandle && <DefaultDragHandle dragHandleApi={dragHandleApi} />}
         {panelContents}
         <ResizeHandle
           gridLayoutStateManager={gridLayoutStateManager}

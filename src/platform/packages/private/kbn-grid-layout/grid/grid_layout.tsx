@@ -21,20 +21,18 @@ import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
 import { resolveGridRow } from './utils/resolve_grid_row';
 
-interface UseCustomDragHandle {
-  hasCustomDragHandle: true;
-  renderPanelContents: (
-    panelId: string,
-    setDragHandles: (refs: Array<HTMLElement | null>) => void
-  ) => React.ReactNode;
-}
-
-interface UseDefaultDragHandle {
-  hasCustomDragHandle?: false;
-  renderPanelContents: (panelId: string) => React.ReactNode;
-}
-
-type DragHandleProps = UseCustomDragHandle | UseDefaultDragHandle;
+type CustomDragHandleProps =
+  | {
+      useCustomDragHandle: true;
+      renderPanelContents: (
+        panelId: string,
+        setDragHandles: (refs: Array<HTMLElement | null>) => void
+      ) => React.ReactNode;
+    }
+  | {
+      useCustomDragHandle?: false;
+      renderPanelContents: (panelId: string) => React.ReactNode;
+    };
 
 export type GridLayoutProps = {
   layout: GridLayoutData;
@@ -43,7 +41,7 @@ export type GridLayoutProps = {
   expandedPanelId?: string;
   accessMode?: GridAccessMode;
   className?: string; // this makes it so that custom CSS can be passed via Emotion
-} & DragHandleProps;
+} & CustomDragHandleProps;
 
 export const GridLayout = ({
   layout,
@@ -53,7 +51,7 @@ export const GridLayout = ({
   expandedPanelId,
   accessMode = 'EDIT',
   className,
-  hasCustomDragHandle = false,
+  useCustomDragHandle = false,
 }: GridLayoutProps) => {
   const layoutRef = useRef<HTMLDivElement | null>(null);
   const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
@@ -166,7 +164,7 @@ export const GridLayout = ({
             <GridRow
               key={rowIndex}
               rowIndex={rowIndex}
-              hasCustomDragHandle={hasCustomDragHandle}
+              useCustomDragHandle={useCustomDragHandle}
               renderPanelContents={renderPanelContents}
               gridLayoutStateManager={gridLayoutStateManager}
             />

@@ -132,6 +132,7 @@ export const DashboardGrid = ({
           rowHeight: DASHBOARD_GRID_HEIGHT,
           columnCount: DASHBOARD_GRID_COLUMN_COUNT,
         }}
+        useCustomDragHandle={true}
         renderPanelContents={renderPanelContents}
         onLayoutChange={onLayoutChange}
         expandedPanelId={expandedPanelId}
