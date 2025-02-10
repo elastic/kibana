@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { BehaviorSubject, throwError, of } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { SavedObjectsApiService } from '../services/ml_api_service/saved_objects';
@@ -19,7 +18,8 @@ import { i18n } from '@kbn/i18n';
 import type { MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/types';
 
 // Helper that resolves on the next microtask tick
-const flushPromises = () => new Promise<void>((resolve) => setImmediate(resolve));
+const flushPromises = () =>
+  new Promise((resolve) => jest.requireActual('timers').setImmediate(resolve));
 
 describe('TrainedModelsService', () => {
   let mockTrainedModelsApiService: jest.Mocked<TrainedModelsApiService>;
@@ -33,6 +33,7 @@ describe('TrainedModelsService', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers();
 
     scheduledDeploymentsSubject = new BehaviorSubject<StartAllocationParams[]>([]);
     mockSetScheduledDeployments = jest.fn((deployments: StartAllocationParams[]) => {
@@ -70,9 +71,10 @@ describe('TrainedModelsService', () => {
 
   afterEach(() => {
     trainedModelsService.destroy();
+    jest.useRealTimers();
   });
 
-  it('initializes and fetched models successfully', () => {
+  it('initializes and fetches models successfully', () => {
     const mockModels: TrainedModelUIItem[] = [
       {
         model_id: 'test-model-1',
@@ -103,8 +105,9 @@ describe('TrainedModelsService', () => {
     mockTrainedModelsApiService.getTrainedModelsList.mockRejectedValueOnce(error);
 
     trainedModelsService.fetchModels();
-    // Wait for debounceTime to finish
-    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // Advance timers enough to pass the debounceTime(100)
+    jest.advanceTimersByTime(100);
     await flushPromises();
 
     expect(mockDisplayErrorToast).toHaveBeenCalledWith(
@@ -125,6 +128,7 @@ describe('TrainedModelsService', () => {
     expect(mockTrainedModelsApiService.installElasticTrainedModelConfig).toHaveBeenCalledWith(
       'my-model'
     );
+    expect(mockTrainedModelsApiService.installElasticTrainedModelConfig).toHaveBeenCalledTimes(1);
   });
 
   it('handles download model error', async () => {
@@ -173,28 +177,25 @@ describe('TrainedModelsService', () => {
   });
 
   it('deploys a model successfully', async () => {
-    mockTrainedModelsApiService.getTrainedModelsList.mockResolvedValueOnce([
-      {
-        model_id: 'deploy-model',
-        state: MODEL_STATE.DOWNLOADED,
-        type: ['pytorch'],
-      } as unknown as TrainedModelUIItem,
-    ]);
+    const mockModel = {
+      model_id: 'deploy-model',
+      state: MODEL_STATE.DOWNLOADED,
+      type: ['pytorch'],
+    } as unknown as TrainedModelUIItem;
 
-    jest.spyOn(trainedModelsService as any, 'waitForModelReady').mockReturnValue(of(true));
+    mockTrainedModelsApiService.getTrainedModelsList.mockResolvedValueOnce([mockModel]);
 
     mockTrainedModelsApiService.startModelAllocation.mockReturnValueOnce(of({ acknowledge: true }));
 
-    trainedModelsService.fetchModels();
-    await flushPromises();
-
+    // Start deployment
     trainedModelsService.startModelDeployment('deploy-model', {
       priority: 'low',
       threads_per_allocation: 1,
       deployment_id: 'my-deployment-id',
     });
-    // Wait for debounceTime to finish
-    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // Advance timers enough to pass the debounceTime(100)
+    jest.advanceTimersByTime(100);
     await flushPromises();
 
     expect(mockTrainedModelsApiService.startModelAllocation).toHaveBeenCalledWith({
@@ -218,31 +219,28 @@ describe('TrainedModelsService', () => {
   });
 
   it('handles startModelDeployment error', async () => {
-    mockTrainedModelsApiService.getTrainedModelsList.mockResolvedValueOnce([
-      {
-        model_id: 'error-model',
-        state: MODEL_STATE.DOWNLOADED,
-        type: ['pytorch'],
-      } as unknown as TrainedModelUIItem,
-    ]);
+    const mockModel = {
+      model_id: 'error-model',
+      state: MODEL_STATE.DOWNLOADED,
+      type: ['pytorch'],
+    } as unknown as TrainedModelUIItem;
 
-    jest.spyOn(trainedModelsService as any, 'waitForModelReady').mockReturnValue(of(true));
+    mockTrainedModelsApiService.getTrainedModelsList.mockResolvedValueOnce([mockModel]);
 
     const deploymentError = new Error('Deployment error');
+
     mockTrainedModelsApiService.startModelAllocation.mockReturnValueOnce(
       throwError(() => deploymentError) as unknown as Observable<{ acknowledge: boolean }>
     );
-
-    trainedModelsService.fetchModels();
-    await flushPromises();
 
     trainedModelsService.startModelDeployment('error-model', {
       priority: 'low',
       threads_per_allocation: 1,
       deployment_id: 'my-deployment-id',
     });
-    // Wait for debounceTime to finish
-    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // Advance timers enough to pass the debounceTime(100)
+    jest.advanceTimersByTime(100);
     await flushPromises();
 
     expect(mockDisplayErrorToast).toHaveBeenCalledWith(
@@ -255,18 +253,7 @@ describe('TrainedModelsService', () => {
   });
 
   it('updates model deployment successfully', async () => {
-    mockTrainedModelsApiService.getTrainedModelsList.mockResolvedValueOnce([
-      {
-        model_id: 'update-model',
-        state: MODEL_STATE.DOWNLOADED,
-        type: ['pytorch'],
-      } as unknown as TrainedModelUIItem,
-    ]);
-
     mockTrainedModelsApiService.updateModelDeployment.mockResolvedValueOnce({ acknowledge: true });
-
-    trainedModelsService.fetchModels();
-    await flushPromises();
 
     trainedModelsService.updateModelDeployment('update-model', 'my-deployment-id', {
       adaptive_allocations: {
@@ -301,19 +288,8 @@ describe('TrainedModelsService', () => {
   });
 
   it('handles updateModelDeployment error', async () => {
-    mockTrainedModelsApiService.getTrainedModelsList.mockResolvedValueOnce([
-      {
-        model_id: 'update-model',
-        state: MODEL_STATE.DOWNLOADED,
-        type: ['pytorch'],
-      } as unknown as TrainedModelUIItem,
-    ]);
-
     const updateError = new Error('Update error');
     mockTrainedModelsApiService.updateModelDeployment.mockRejectedValueOnce(updateError);
-
-    trainedModelsService.fetchModels();
-    await flushPromises();
 
     trainedModelsService.updateModelDeployment('update-model', 'my-deployment-id', {
       adaptive_allocations: {
