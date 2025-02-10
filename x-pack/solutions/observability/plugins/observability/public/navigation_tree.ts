@@ -510,6 +510,10 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             ],
           },
           {
+            id: 'monitoring',
+            link: 'monitoring',
+          },
+          {
             link: 'integrations',
           },
           {
