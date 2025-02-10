@@ -9,8 +9,16 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import ParamsFields from './params';
 import { SUB_ACTION } from '../../../common/inference/constants';
+import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
+
+const mockedIsInferenceEndpointExists = isInferenceEndpointExists as jest.Mock;
+
+jest.mock('@kbn/inference-endpoint-ui-common', () => ({
+  isInferenceEndpointExists: jest.fn(),
+}));
 
 describe('Inference Params Fields renders', () => {
+  mockedIsInferenceEndpointExists.mockResolvedValue(true);
   test('all params fields are rendered', () => {
     const { getByTestId } = render(
       <ParamsFields
