@@ -7,7 +7,6 @@
 
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { isEmpty } from 'lodash/fp';
-import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import { getEcsMappingNode } from './nodes/ecs_mapping';
 import { getFixQueryErrorsNode } from './nodes/fix_query_errors';
 import { getInlineQueryNode } from './nodes/inline_query';
@@ -85,15 +84,14 @@ const translatableRouter = (state: TranslateRuleState) => {
 
 const validationRouter = (state: TranslateRuleState) => {
   if (
-    state.validation_errors.iterations <= MAX_VALIDATION_ITERATIONS &&
-    state.translation_result === RuleTranslationResult.FULL
+    (state.validation_errors.iterations <= MAX_VALIDATION_ITERATIONS &&
+      state.validation_errors?.esql_errors) ||
+    !state.translation_finalized
   ) {
     if (!isEmpty(state.validation_errors?.esql_errors)) {
       return 'fixQueryErrors';
     }
-    if (!state.translation_finalized) {
-      return 'ecsMapping';
-    }
+    return 'ecsMapping';
   }
   return 'translationResult';
 };

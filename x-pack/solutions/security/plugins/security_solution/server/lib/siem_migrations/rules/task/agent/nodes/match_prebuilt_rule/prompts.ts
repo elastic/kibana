@@ -41,15 +41,11 @@ Here are some context for you to reference for your task, read it carefully as y
 - If the Splunk rule is a much more complex usecase with custom logic not covered by the prebuilt rules, reply with an empty string in the match field.
 - If there is only one match, answer with the name of the rule in the "match" key. Do not reply with anything else.
 - If there are multiple matches, answer with the most specific of them, for example: "Linux User Account Creation" is more specific than "User Account Creation".
-- Finally, write a "summary" in markdown format with the reasoning behind the decision. Starting with "## Prebuilt Rule Matching Summary" followed by a newline.
+- Finally, write a "summary" in markdown format with the reasoning behind the decision. Starting with "## Prebuilt Rule Matching Summary" followed by a newline. Make sure the content is valid JSON by escaping any necessary special characters.
 - Make sure the JSON object is formatted correctly and the values properly escaped.
 </expected_output>
 
 <example_response>
-U: <splunk_rule>
-Title: Linux Auditd Add User Account Type
-Description: The following analytic detects the suspicious add user account type.
-</splunk_rule>
 A: Please find the resulting JSON response below:
 \`\`\`json
 {{

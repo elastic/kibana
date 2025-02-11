@@ -70,6 +70,7 @@ export const getMatchPrebuiltRuleNode = ({
     const splunkRule = {
       title: state.original_rule.title,
       description: state.original_rule.description,
+      query: state.original_rule.query,
     };
 
     /*
