@@ -14,7 +14,7 @@ import { getUnifiedDocViewerServices } from '../../../plugin';
 
 interface TransactionNameLinkProps {
   serviceName: string;
-  transactionName?: string;
+  transactionName: string;
 }
 
 const TRANSACTION_DETAILS_BY_NAME_LOCATOR = 'TransactionDetailsByNameLocator';
