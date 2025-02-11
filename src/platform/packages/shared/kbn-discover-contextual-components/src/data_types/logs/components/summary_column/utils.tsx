@@ -19,13 +19,13 @@ import {
   DURATION_FIELDS,
   EVENT_OUTCOME_FIELD,
   FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT,
+  RESOURCE_FIELDS,
   SERVICE_NAME_FIELD,
   SPAN_DURATION_FIELD,
   TRANSACTION_DURATION_FIELD,
   TRACE_FIELDS,
   DataTableRecord,
   getFieldValue,
-  RESOURCE_FIELDS,
 } from '@kbn/discover-utils';
 import {
   LogDocument,
@@ -39,7 +39,6 @@ import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
 import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
-import { EventOutcomeBadgeWithActions } from '../event_outcome_badge';
 
 /**
  * Takes a `DataTableRecord` compatible document, and then with an array
@@ -96,16 +95,13 @@ const getResourceBadgeComponent = (
   core: CoreStart,
   share?: SharePluginStart
 ): React.ComponentType<FieldBadgeWithActionsProps> => {
-  switch (name) {
-    case SERVICE_NAME_FIELD:
-      return (props: FieldBadgeWithActionsProps) => (
-        <ServiceNameBadgeWithActions {...props} share={share} core={core} />
-      );
-    case EVENT_OUTCOME_FIELD:
-      return EventOutcomeBadgeWithActions;
-    default:
-      return FieldBadgeWithActions;
+  if (name === SERVICE_NAME_FIELD) {
+    return (props: FieldBadgeWithActionsProps) => (
+      <ServiceNameBadgeWithActions {...props} share={share} core={core} />
+    );
   }
+
+  return FieldBadgeWithActions;
 };
 
 const getResourceBadgeIcon = (
@@ -151,6 +147,23 @@ const getResourceBadgeIcon = (
   }
 };
 
+const getFormattedValue = (
+  name: keyof TraceFields,
+  rawValue: string,
+  dataView: DataView
+): string => {
+  const field = dataView.getFieldByName(name);
+  const formatter = field && dataView.getFormatterForField(field);
+
+  if (formatter) {
+    return formatter.convert(rawValue);
+  } else if (DURATION_FIELDS.includes(name)) {
+    return `${rawValue}µs`;
+  }
+
+  return `${rawValue}`;
+};
+
 export const isTraceDocument = (row: DataTableRecord): row is TraceDocument =>
   getFieldValue(row, DATASTREAM_TYPE_FIELD) === 'traces';
 
@@ -163,19 +176,12 @@ export const createTraceFields = (
   const traceFields = getUnformattedFields(row, TRACE_FIELDS);
   const availableFields = getAvailableTraceFields(traceFields);
 
-  return availableFields.map((name) => {
-    const field = dataView.getFieldByName(name);
-    const formatter = field && dataView.getFormatterForField(field);
-    const rawValue = traceFields[name];
-    const formattedField = formatter ? formatter.convert(rawValue) : `${rawValue}`;
-
-    return {
-      name,
-      value: DURATION_FIELDS.includes(name) ? `${formattedField}µs` : formattedField,
-      ResourceBadge: getResourceBadgeComponent(name, core, share),
-      Icon: getResourceBadgeIcon(name, traceFields),
-    };
-  });
+  return availableFields.map((name) => ({
+    name,
+    value: getFormattedValue(name, traceFields[name], dataView),
+    ResourceBadge: getResourceBadgeComponent(name, core, share),
+    Icon: getResourceBadgeIcon(name, traceFields),
+  }));
 };
 
 export const createResourceFields = (

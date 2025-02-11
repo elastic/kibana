@@ -28,7 +28,7 @@ export interface TraceDocument extends DataTableRecord {
     'event.original'?: string;
     'host.name'?: string;
     'service.name'?: string;
-    'trace.id'?: string;
+    'trace.id': string;
     'agent.name'?: string;
     'orchestrator.cluster.name'?: string;
     'orchestrator.cluster.id'?: string;

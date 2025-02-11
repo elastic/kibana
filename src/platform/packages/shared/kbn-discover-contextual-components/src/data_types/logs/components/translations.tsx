@@ -25,27 +25,6 @@ export const traceLabel = i18n.translate('discover.logs.dataTable.header.popover
   defaultMessage: 'Trace',
 });
 
-export const eventOutcomeSuccessLabel = i18n.translate(
-  'discover.logs.dataTable.trace.event.outcome.success',
-  {
-    defaultMessage: 'Success',
-  }
-);
-
-export const eventOutcomeFailureLabel = i18n.translate(
-  'discover.logs.dataTable.trace.event.outcome.failure',
-  {
-    defaultMessage: 'Failure',
-  }
-);
-
-export const eventOutcomeUnknownLabel = i18n.translate(
-  'discover.logs.dataTable.trace.event.outcome.unknown',
-  {
-    defaultMessage: 'Unknown',
-  }
-);
-
 export const actionFilterForText = (text: string) =>
   i18n.translate('discover.logs.flyoutDetail.value.hover.filterFor', {
     defaultMessage: 'Filter for this {value}',
