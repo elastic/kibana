@@ -7,10 +7,10 @@
 
 export { validateStartDate } from './validate_start_date/latest';
 export { validateEndDate } from './validate_end_date/latest';
-export { validateEvery } from './validate_every/latest';
+export { validateIntervalAndFrequency } from './validate_interval_frequency/latest';
 export { validateOnWeekDay } from './validate_on_weekday/latest';
 
 export { validateStartDate as validateStartDateV1 } from './validate_start_date/v1';
 export { validateEndDate as validateEndDateV1 } from './validate_end_date/v1';
 export { validateOnWeekDay as validateOnWeekDayV1 } from './validate_on_weekday/v1';
-export { validateEvery as validateEveryV1 } from './validate_every/v1';
+export { validateIntervalAndFrequency as validateIntervalAndFrequencyV1 } from './validate_interval_frequency/v1';

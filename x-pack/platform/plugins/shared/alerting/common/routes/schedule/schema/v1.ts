@@ -9,19 +9,26 @@ import { schema } from '@kbn/config-schema';
 import {
   validateStartDateV1,
   validateEndDateV1,
-  validateEveryV1,
+  validateIntervalAndFrequencyV1,
   validateOnWeekDayV1,
 } from '../validation';
 
 export const scheduleRequestSchema = schema.object({
-  duration: schema.number(),
+  duration: schema.number({
+    validate: (duration: number) => {
+      if (!Number.isInteger(duration) || duration === 0) {
+        return 'Invalid schedule duration. The duration must be either -1 (for indefinite) or a positive integer greater than 0.';
+      }
+    },
+    min: -1,
+  }),
   start: schema.string({
     validate: validateStartDateV1,
   }),
   recurring: schema.maybe(
     schema.object({
       end: schema.maybe(schema.string({ validate: validateEndDateV1 })),
-      every: schema.maybe(schema.string({ validate: validateEveryV1 })),
+      every: schema.maybe(schema.string({ validate: validateIntervalAndFrequencyV1 })),
       onWeekDay: schema.maybe(
         schema.arrayOf(schema.string(), { minSize: 1, validate: validateOnWeekDayV1 })
       ),
@@ -31,7 +38,7 @@ export const scheduleRequestSchema = schema.object({
         schema.number({
           validate: (occurrences: number) => {
             if (!Number.isInteger(occurrences)) {
-              return 'schedule occurrences must be an integer greater than 0';
+              return 'schedule occurrences must be a positive integer';
             }
           },
           min: 1,

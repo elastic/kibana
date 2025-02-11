@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import { ISO_DATE_PATTERN } from '../../constants';
+
 export const validateStartDate = (date: string) => {
   const parsedValue = Date.parse(date);
-  if (isNaN(parsedValue)) return `Invalid date: ${date}`;
+
+  if (isNaN(parsedValue)) return `Invalid snooze start date: ${date}`;
+  if (!ISO_DATE_PATTERN.test(date))
+    return `Invalid start date format: ${date}. Use ISO 8601 YYYY-MM-DDTHH:mm:ss.sssZ`;
   return;
 };
