@@ -48,8 +48,8 @@ import {
   connectorStatusToText,
 } from '../../utils/connector_status_helpers';
 
-import { ConnectorDetailTabId } from './connector_detail';
 import { AgentlessConnectorStatusBadge } from './agentless_status_badge';
+import { ConnectorDetailTabId } from './connector_detail';
 
 export interface ConnectorStatsProps {
   connector: Connector;
