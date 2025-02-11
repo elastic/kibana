@@ -7,15 +7,9 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { AssistantSettingsManagement } from '@kbn/elastic-assistant/impl/assistant/settings/assistant_settings_management';
-import type { Conversation } from '@kbn/elastic-assistant';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { i18n } from '@kbn/i18n';
-import {
-  formatPersistedConversations,
-  useAssistantContext,
-  useFetchCurrentUserConversations,
-} from '@kbn/elastic-assistant';
-import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
+import { useAssistantContext, useFetchCurrentUserConversations } from '@kbn/elastic-assistant';
 import { SECURITY_AI_SETTINGS } from '@kbn/elastic-assistant/impl/assistant/settings/translations';
 import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
 import type { SettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
@@ -38,14 +32,8 @@ export const ManagementSettings = React.memo(() => {
     serverless,
   } = useKibana().services;
 
-  const onFetchedConversations = useCallback(
-    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
-      formatPersistedConversations(conversationsData),
-    []
-  );
   const { data: conversations } = useFetchCurrentUserConversations({
     http,
-    onFetch: onFetchedConversations,
     isAssistantEnabled,
   });
 

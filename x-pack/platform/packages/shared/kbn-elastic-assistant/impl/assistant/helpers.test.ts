@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  getDefaultConnector,
-  getOptionalRequestParams,
-  formatPersistedConversations,
-} from './helpers';
+import { getDefaultConnector, getOptionalRequestParams } from './helpers';
 import { AIConnector } from '../connectorland/connector_selector';
 
 describe('helpers', () => {
@@ -80,56 +76,6 @@ describe('helpers', () => {
       expect(result).toEqual({
         alertsIndexPattern: 'indexPattern',
         size: 10,
-      });
-    });
-  });
-
-  describe('formatPersistedConversations', () => {
-    const messages = [
-      { content: 'Message 1', role: 'user' as const, timestamp: '2024-02-14T22:29:43.862Z' },
-      { content: 'Message 2', role: 'user' as const, timestamp: '2024-02-14T22:29:43.862Z' },
-    ];
-    const defaultProps = {
-      messages,
-      category: 'assistant',
-      theme: {},
-      apiConfig: { actionTypeId: '.gen-ai', connectorId: '123' },
-      replacements: {},
-    };
-    const conversationArray = [
-      {
-        ...defaultProps,
-        title: 'Conversation 1',
-        id: 'conversation_1',
-      },
-      {
-        ...defaultProps,
-        title: 'Conversation 2',
-        id: 'conversation_2',
-      },
-    ];
-
-    const conversationsData = {
-      page: 1,
-      perPage: 10,
-      total: 2,
-      data: conversationArray,
-    };
-
-    it('should format user conversations', () => {
-      const result = formatPersistedConversations(conversationsData);
-
-      expect(result).toEqual({
-        conversation_1: {
-          ...defaultProps,
-          title: 'Conversation 1',
-          id: 'conversation_1',
-        },
-        conversation_2: {
-          ...defaultProps,
-          title: 'Conversation 2',
-          id: 'conversation_2',
-        },
       });
     });
   });

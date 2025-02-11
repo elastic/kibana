@@ -12,11 +12,10 @@ import { useAssistantContext } from '../../assistant_context';
 import { getUniquePromptContextId } from '../../assistant_context/helpers';
 import type { PromptContext } from '../prompt_context/types';
 import { useConversation } from '../use_conversation';
-import { getDefaultConnector, formatPersistedConversations } from '../helpers';
+import { getDefaultConnector } from '../helpers';
 import { getGenAiConfig } from '../../connectorland/helpers';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
-import { FetchConversationsResponse, useFetchCurrentUserConversations } from '../api';
-import { Conversation } from '../../assistant_context/types';
+import { useFetchCurrentUserConversations } from '../api';
 
 interface UseAssistantOverlay {
   showAssistantOverlay: (show: boolean, silent?: boolean) => void;
@@ -93,14 +92,8 @@ export const useAssistantOverlay = (
 
   const { createConversation } = useConversation();
 
-  const onFetchedConversations = useCallback(
-    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
-      formatPersistedConversations(conversationsData),
-    []
-  );
   const { data: conversations, isLoading } = useFetchCurrentUserConversations({
     http,
-    onFetch: onFetchedConversations,
     isAssistantEnabled,
   });
   // memoize the props so that we can use them in the effect below:
