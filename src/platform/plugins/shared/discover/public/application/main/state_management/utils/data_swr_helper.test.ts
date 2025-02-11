@@ -58,6 +58,12 @@ describe('getSWRBoolean', () => {
     expect(valueFn).toHaveBeenCalled();
   });
 
+  it('should set localstorage key to 1, if the valueFn returns true ', async () => {
+    const result = await getSWRBoolean(cacheKey, valueFn);
+    expect(result).toBe(true);
+    expect(localStorage.getItem(cacheKey)).toBe('1');
+  });
+
   it('should call valueFn and return its result if no cached value', async () => {
     const result = await getSWRBoolean(cacheKey, valueFn);
     expect(result).toBe(true);

@@ -20,18 +20,21 @@ export const getSWRBoolean = async (
   const storage = localStorage;
   try {
     const cachedValue = cacheKey ? storage.getItem(cacheKey) : null;
+
+    const result = valueFn()
+      .then((value) => {
+        if (value) {
+          storage.setItem(cacheKey, '1');
+        } else {
+          storage.removeItem(cacheKey);
+        }
+        return value;
+      })
+      .catch(() => false);
     if (cachedValue) {
-      valueFn()
-        .then((value) => {
-          if (value) {
-            storage.setItem(cacheKey, '1');
-          } else {
-            storage.removeItem(cacheKey);
-          }
-        })
-        .catch(() => false);
-      return true;
+      return Boolean(cachedValue);
     }
+    return result;
   } catch {
     // empty
   }

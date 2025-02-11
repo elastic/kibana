@@ -348,7 +348,7 @@ export function getDiscoverStateContainer({
     const currentSpace = await services.spaces?.getActiveSpace();
     const { dataViews } = services.data;
 
-    const cacheKey = `dsc:${currentUser.profile_uid}:${currentSpace?.id}`;
+    const cacheKey = `discover:cache:${currentUser.profile_uid}:${currentSpace?.id}`;
     const [hasUserDataViewValue, hasESDataValue, defaultDataViewExists, dataViewList] =
       await Promise.all([
         getSWRBoolean(useCache ? `${cacheKey}:hasUserDataView` : '', () =>
