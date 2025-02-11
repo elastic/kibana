@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
-import { satisfies } from 'semver';
 import { Condition, conditionSchema } from '../conditions';
 import { createIsNarrowSchema } from '../../../helpers';
 
