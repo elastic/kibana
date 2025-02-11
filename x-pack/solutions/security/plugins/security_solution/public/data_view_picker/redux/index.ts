@@ -29,7 +29,8 @@ export interface ScopedDataViewSelectionState {
 }
 
 export interface SharedDataViewSelectionState {
-  dataViews: Record<string, DataViewSpec>;
+  dataViews: DataViewSpec[];
+  adhocDataViews: DataViewSpec[];
   status: 'pristine' | 'loading' | 'error' | 'ready';
 }
 
@@ -39,7 +40,8 @@ export const initialScopeState: ScopedDataViewSelectionState = {
 };
 
 export const initialSharedState: SharedDataViewSelectionState = {
-  dataViews: {},
+  dataViews: [],
+  adhocDataViews: [],
   status: 'pristine',
 };
 
@@ -77,15 +79,10 @@ export const shared = createSlice({
   initialState: initialSharedState,
   reducers: {
     setDataViews: (state, action: PayloadAction<DataViewSpec[]>) => {
-      state.dataViews = action.payload.reduce((viewsMap, dataView) => {
-        if (!dataView.id) {
-          return viewsMap;
-        }
-
-        viewsMap[dataView.id] = dataView;
-
-        return viewsMap;
-      }, {} as Record<string, DataViewSpec>);
+      state.dataViews = action.payload;
+    },
+    addAdhocDataView: (state, action: PayloadAction<DataViewSpec>) => {
+      state.adhocDataViews.push(action.payload);
     },
     init: (state) => {
       state.status = 'loading';
@@ -134,7 +131,7 @@ export const sourcererAdapterSelector = (scope: DataViewPickerScopeName) =>
     };
   });
 
-// export const sharedStateSelector = createSelector(
-//  [(state: RootState) => state.dataViewPicker],
-//  (dataViewPicker) => dataViewPicker.shared
-// );
+export const sharedStateSelector = createSelector(
+  [(state: RootState) => state.dataViewPicker],
+  (dataViewPicker) => dataViewPicker.shared
+);

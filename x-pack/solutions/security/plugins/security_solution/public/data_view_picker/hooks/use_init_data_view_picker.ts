@@ -63,6 +63,7 @@ const createDataViewSelectedListener = (dependencies: { dataViews: DataViewsServ
             title: action.payload.patterns?.join(','),
           });
           dataViewSpec = adhocDataView.toSpec();
+          listenerApi.dispatch(shared.actions.addAdhocDataView(dataViewSpec));
         }
       } catch (error: unknown) {
         adhocError = error;

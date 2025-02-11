@@ -6,13 +6,14 @@
  */
 
 import { DataViewPicker as USDataViewPicker } from '@kbn/unified-search-plugin/public';
-import React, { useCallback, useRef, useMemo, memo } from 'react';
-import { useDispatch } from 'react-redux';
+import React, { useCallback, useRef, useMemo, memo, useState, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerScopeName } from '../../constants';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
-import { selectDataViewAsync } from '../../redux';
+import { selectDataViewAsync, sharedStateSelector } from '../../redux';
 import { useDataView } from '../../hooks/use_data_view';
 
 export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) => {
@@ -86,6 +87,19 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
     };
   }, [dataView]);
 
+  const { adhocDataViews: adhocDataViewSpecs } = useSelector(sharedStateSelector);
+
+  const [adhocDataViews, setAdhocDataViews] = useState<DataView[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const dataViews = await Promise.all(
+        adhocDataViewSpecs.map((dvSpec) => data.dataViews.create(dvSpec))
+      );
+      setAdhocDataViews(dataViews);
+    })();
+  }, [data.dataViews, adhocDataViewSpecs]);
+
   return (
     <USDataViewPicker
       currentDataViewId={dataViewId || DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID}
@@ -94,6 +108,7 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
       onEditDataView={handleEditDataView}
       onAddField={addField}
       onDataViewCreated={createNewDataView}
+      adHocDataViews={adhocDataViews}
     />
   );
 });
