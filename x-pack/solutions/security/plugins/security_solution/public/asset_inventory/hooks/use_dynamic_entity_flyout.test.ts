@@ -16,7 +16,7 @@ import {
   HostPanelKey,
   ServicePanelKey,
 } from '../../flyout/entity_details/shared/constants';
-import type { UniversalEntityEcs } from '@kbn/securitysolution-ecs/src/universal_entity';
+import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
@@ -149,7 +149,7 @@ describe('useDynamicEntityFlyout', () => {
     );
 
     act(() => {
-      result.current.openDynamicFlyout({ entity: { type: 'user' } as UniversalEntityEcs });
+      result.current.openDynamicFlyout({ entity: { type: 'user' } as EntityEcs });
     });
 
     expect(toastsMock.addDanger).toHaveBeenCalledWith(
@@ -161,7 +161,7 @@ describe('useDynamicEntityFlyout', () => {
     expect(onFlyoutCloseMock).toHaveBeenCalled();
 
     act(() => {
-      result.current.openDynamicFlyout({ entity: { type: 'host' } as UniversalEntityEcs });
+      result.current.openDynamicFlyout({ entity: { type: 'host' } as EntityEcs });
     });
 
     expect(toastsMock.addDanger).toHaveBeenCalledWith(
@@ -173,7 +173,7 @@ describe('useDynamicEntityFlyout', () => {
     expect(onFlyoutCloseMock).toHaveBeenCalled();
 
     act(() => {
-      result.current.openDynamicFlyout({ entity: { type: 'service' } as UniversalEntityEcs });
+      result.current.openDynamicFlyout({ entity: { type: 'service' } as EntityEcs });
     });
 
     expect(toastsMock.addDanger).toHaveBeenCalledWith(

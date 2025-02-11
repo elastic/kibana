@@ -12,13 +12,13 @@ import {
   UNIVERSAL_ENTITY_FLYOUT_OPENED,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
-import type { UniversalEntityEcs } from '@kbn/securitysolution-ecs/src/universal_entity';
+import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 import { UniversalEntityFlyoutHeader } from './header';
 import { UniversalEntityFlyoutContent } from './content';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 
 export interface UniversalEntityPanelProps {
-  entity: UniversalEntityEcs;
+  entity: EntityEcs;
   /** this is because FlyoutPanelProps defined params as Record<string, unknown> {@link FlyoutPanelProps#params} */
   [key: string]: unknown;
 }

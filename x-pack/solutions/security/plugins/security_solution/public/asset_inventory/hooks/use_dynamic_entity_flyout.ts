@@ -6,7 +6,7 @@
  */
 
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { UniversalEntityEcs } from '@kbn/securitysolution-ecs/src/universal_entity';
+import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 import {
   ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS,
   ASSET_INVENTORY_EXPAND_FLYOUT_ERROR,
@@ -24,7 +24,7 @@ import {
 import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_expandable_flyout_close';
 
 interface InventoryFlyoutProps {
-  entity: UniversalEntityEcs;
+  entity: EntityEcs;
   scopeId?: string;
   contextId?: string;
 }
@@ -38,7 +38,7 @@ interface SecurityFlyoutPanelsCommonParams {
 type FlyoutParams =
   | {
       id: typeof UniversalEntityPanelKey;
-      params: { entity: UniversalEntityEcs };
+      params: { entity: EntityEcs };
     }
   | { id: typeof UserPanelKey; params: { userName: string } & SecurityFlyoutPanelsCommonParams }
   | { id: typeof HostPanelKey; params: { hostName: string } & SecurityFlyoutPanelsCommonParams }
@@ -52,7 +52,7 @@ const getFlyoutParamsByEntity = ({
   scopeId,
   contextId,
 }: InventoryFlyoutProps): FlyoutParams => {
-  const entitiesFlyoutParams: Record<UniversalEntityEcs['type'], FlyoutParams> = {
+  const entitiesFlyoutParams: Record<EntityEcs['type'], FlyoutParams> = {
     universal: { id: UniversalEntityPanelKey, params: { entity } },
     user: { id: UserPanelKey, params: { userName: entity.name, scopeId, contextId } },
     host: { id: HostPanelKey, params: { hostName: entity.name, scopeId, contextId } },

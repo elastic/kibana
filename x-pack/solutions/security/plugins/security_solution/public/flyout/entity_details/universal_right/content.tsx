@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import type { UniversalEntityEcs } from '@kbn/securitysolution-ecs/src/universal_entity';
+import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 
 interface UniversalEntityFlyoutContentProps {
-  entity: UniversalEntityEcs;
+  entity: EntityEcs;
 }
 
 export const UniversalEntityFlyoutContent = ({ entity }: UniversalEntityFlyoutContentProps) => {

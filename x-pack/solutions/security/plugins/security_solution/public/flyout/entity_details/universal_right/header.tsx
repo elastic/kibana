@@ -8,14 +8,14 @@
 import { EuiSpacer, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
 
-import type { UniversalEntityEcs } from '@kbn/securitysolution-ecs/src/universal_entity';
+import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 import { EntityIconByType } from '../../../entity_analytics/components/entity_store/helpers';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
 import { FlyoutTitle } from '../../shared/components/flyout_title';
 
 interface UniversalEntityFlyoutHeaderProps {
-  entity: UniversalEntityEcs;
+  entity: EntityEcs;
 }
 
 export const UniversalEntityFlyoutHeader = ({ entity }: UniversalEntityFlyoutHeaderProps) => {

@@ -39,7 +39,7 @@ import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/react';
 
-import type { UniversalEntityEcs } from '@kbn/securitysolution-ecs/src/universal_entity';
+import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
 import { EmptyComponent } from '../../common/lib/cell_actions/helpers';
 import { useDynamicEntityFlyout } from '../hooks/use_dynamic_entity_flyout';
 import { type CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
@@ -142,7 +142,7 @@ export interface AllAssetsProps {
 }
 
 // TODO: Asset Inventory - adjust and remove type casting once we have real universal entity data
-const getEntity = (row: DataTableRecord): UniversalEntityEcs => {
+const getEntity = (row: DataTableRecord): EntityEcs => {
   return {
     id: (row.flattened['asset.name'] as string) || '',
     name: (row.flattened['asset.name'] as string) || '',

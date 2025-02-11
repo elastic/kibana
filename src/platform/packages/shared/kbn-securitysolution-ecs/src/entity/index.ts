@@ -8,7 +8,7 @@
  */
 
 // TODO: Asset Inventory - This file is a placeholder for the ECS schema that will be used in the Asset Inventory app
-export interface UniversalEntityEcs {
+export interface EntityEcs {
   id: string;
   name: string;
   type: 'universal' | 'user' | 'host' | 'service';
