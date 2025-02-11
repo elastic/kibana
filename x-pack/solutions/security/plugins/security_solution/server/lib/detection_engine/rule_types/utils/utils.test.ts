@@ -71,7 +71,7 @@ import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { GenericBulkCreateResponse } from '../factories';
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
-import { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { FieldCapsResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
