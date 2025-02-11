@@ -7,14 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiText } from '@elastic/eui';
-import { asDuration } from '../../../../utils';
-
-interface DurationProps {
-  duration: number;
-}
-
-export function Duration({ duration }: DurationProps) {
-  return <EuiText size="xs">{asDuration(duration)}</EuiText>;
-}
+export * from './formatters';
