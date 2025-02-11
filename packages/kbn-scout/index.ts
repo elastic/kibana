@@ -36,3 +36,10 @@ export type {
   ScoutServerConfig,
   ScoutTestConfig,
 } from './src/types';
+export {
+  kbnSuperTestWithAuthClient,
+  getEsArchiver,
+  getEsClient,
+  getKbnClient,
+  getLogger,
+} from './src/common';

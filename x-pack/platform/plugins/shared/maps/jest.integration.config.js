@@ -7,21 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ServerlessProjectType } from '@kbn/es';
-
-export interface ScoutTestConfig {
-  serverless: boolean;
-  projectType?: ServerlessProjectType;
-  isCloud: boolean;
-  license: string;
-  cloudUsersFilePath?: string;
-  hosts: {
-    kibana: string;
-    elasticsearch: string;
-  };
-  auth: {
-    username: string;
-    password: string;
-  };
-  metadata?: any;
-}
+module.exports = {
+  preset: '@kbn/test/jest_integration_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/maps'],
+  testMatch: ['**/api_tests**/*.test.{js,mjs,ts,tsx}'],
+};
