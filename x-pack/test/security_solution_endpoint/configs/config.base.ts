@@ -56,7 +56,7 @@ export const generateConfig = async ({
 
   return {
     ...baseConfig.getAll(),
-    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     pageObjects,
     testFiles,
     dockerServers: createEndpointDockerConfig(),
