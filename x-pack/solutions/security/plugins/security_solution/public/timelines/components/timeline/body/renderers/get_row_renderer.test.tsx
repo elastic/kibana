@@ -64,7 +64,6 @@ describe('get_column_renderer', () => {
     const rowRenderer = getRowRenderer({ data: nonSuricata, rowRenderers: defaultRowRenderers });
     const row = rowRenderer?.renderRow({
       data: nonSuricata,
-      isDraggable: true,
       scopeId: TimelineId.test,
     });
 
@@ -76,7 +75,6 @@ describe('get_column_renderer', () => {
     const rowRenderer = getRowRenderer({ data: nonSuricata, rowRenderers: defaultRowRenderers });
     const row = rowRenderer?.renderRow({
       data: nonSuricata,
-      isDraggable: true,
       scopeId: TimelineId.test,
     });
 
@@ -92,7 +90,6 @@ describe('get_column_renderer', () => {
     const rowRenderer = getRowRenderer({ data: suricata, rowRenderers: defaultRowRenderers });
     const row = rowRenderer?.renderRow({
       data: suricata,
-      isDraggable: true,
       scopeId: TimelineId.test,
     });
     const wrapper = await getWrapper(
@@ -110,7 +107,6 @@ describe('get_column_renderer', () => {
     const rowRenderer = getRowRenderer({ data: suricata, rowRenderers: defaultRowRenderers });
     const row = rowRenderer?.renderRow({
       data: suricata,
-      isDraggable: true,
       scopeId: TimelineId.test,
     });
     const wrapper = await getWrapper(
@@ -128,7 +124,6 @@ describe('get_column_renderer', () => {
     const rowRenderer = getRowRenderer({ data: zeek, rowRenderers: defaultRowRenderers });
     const row = rowRenderer?.renderRow({
       data: zeek,
-      isDraggable: true,
       scopeId: TimelineId.test,
     });
     const wrapper = await getWrapper(
@@ -146,7 +141,6 @@ describe('get_column_renderer', () => {
     const rowRenderer = getRowRenderer({ data: system, rowRenderers: defaultRowRenderers });
     const row = rowRenderer?.renderRow({
       data: system,
-      isDraggable: true,
       scopeId: TimelineId.test,
     });
     const wrapper = await getWrapper(
@@ -164,7 +158,6 @@ describe('get_column_renderer', () => {
     const rowRenderer = getRowRenderer({ data: auditd, rowRenderers: defaultRowRenderers });
     const row = rowRenderer?.renderRow({
       data: auditd,
-      isDraggable: true,
       scopeId: TimelineId.test,
     });
     const wrapper = await getWrapper(
@@ -203,9 +196,7 @@ describe('getRowRenderer', () => {
 
         render(
           <TestProviders>
-            <>
-              {renderer?.renderRow({ data: auditd, isDraggable: false, scopeId: TimelineId.test })}
-            </>
+            <>{renderer?.renderRow({ data: auditd, scopeId: TimelineId.test })}</>
           </TestProviders>
         );
       });
@@ -247,7 +238,7 @@ describe('getRowRenderer', () => {
 
         render(
           <TestProviders>
-            <>{renderer?.renderRow({ data, isDraggable: false, scopeId: TimelineId.test })}</>
+            <>{renderer?.renderRow({ data, scopeId: TimelineId.test })}</>
           </TestProviders>
         );
       });
@@ -282,7 +273,7 @@ describe('getRowRenderer', () => {
 
         render(
           <TestProviders>
-            <>{renderer?.renderRow({ data, isDraggable: false, scopeId: TimelineId.test })}</>
+            <>{renderer?.renderRow({ data, scopeId: TimelineId.test })}</>
           </TestProviders>
         );
       });

@@ -26,7 +26,6 @@ export const reasonColumnRenderer: ColumnRenderer = {
     eventId,
     field,
     isDetails,
-    isDraggable = true,
     linkValues,
     rowRenderers = [],
     scopeId,
@@ -38,7 +37,6 @@ export const reasonColumnRenderer: ColumnRenderer = {
     eventId: string;
     field: ColumnHeaderOptions;
     isDetails?: boolean;
-    isDraggable?: boolean;
     linkValues?: string[] | null | undefined;
     rowRenderers?: RowRenderer[];
     scopeId: string;
@@ -61,7 +59,6 @@ export const reasonColumnRenderer: ColumnRenderer = {
         eventId,
         field,
         isDetails,
-        isDraggable,
         linkValues,
         scopeId,
         truncate,
@@ -87,7 +84,6 @@ const ReasonCell: React.FC<{
       rowRenderer &&
       rowRenderer.renderRow({
         data: ecsData,
-        isDraggable: false,
         scopeId,
       })
     );

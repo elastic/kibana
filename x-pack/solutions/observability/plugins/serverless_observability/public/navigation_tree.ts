@@ -87,7 +87,7 @@ export const createNavigationTree = ({
                   {
                     link: 'apm:services',
                     title: i18n.translate('xpack.serverlessObservability.nav.apm.services', {
-                      defaultMessage: 'Service inventory',
+                      defaultMessage: 'Service Inventory',
                     }),
                   },
                   { link: 'apm:traces' },
@@ -141,7 +141,7 @@ export const createNavigationTree = ({
                     title: i18n.translate(
                       'xpack.serverlessObservability.nav.infrastructureInventory',
                       {
-                        defaultMessage: 'Infrastructure inventory',
+                        defaultMessage: 'Infrastructure Inventory',
                       }
                     ),
                   },
