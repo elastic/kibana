@@ -9,8 +9,7 @@ exports[`plain_column_renderer rendering renders correctly against snapshot 1`] 
     fieldName="event.category"
     fieldType="string"
     isAggregatable={true}
-    isDraggable={true}
-    key="plain-column-renderer-formatted-field-value-test-event.category-1-event.category-Access-0"
+    key="plain-column-renderer-formatted-field-value-test-event.category-1-event.category"
     value="Access"
   />
 </span>

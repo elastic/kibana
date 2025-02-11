@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
+import { DiagnosticResult, errors } from '@elastic/elasticsearch';
 import {
   IndicesDataStream,
   QueryDslQueryContainer,
@@ -15,15 +15,19 @@ import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import {
   Condition,
+  GroupStreamDefinition,
   IngestStreamLifecycle,
   StreamDefinition,
   StreamUpsertRequest,
   UnwiredStreamDefinition,
   WiredStreamDefinition,
+  asIngestStreamDefinition,
   assertsSchema,
   getAncestors,
   getParentId,
   isChildOf,
+  isGroupStreamDefinition,
+  isIngestStreamDefinition,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
@@ -31,9 +35,12 @@ import {
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
   streamDefinitionSchema,
+  findInheritedLifecycle,
+  findInheritingStreams,
 } from '@kbn/streams-schema';
 import { cloneDeep, keyBy, omit, orderBy } from 'lodash';
 import { AssetClient } from './assets/asset_client';
+import { ForbiddenMemberTypeError } from './errors/forbidden_member_type_error';
 import {
   syncUnwiredStreamDefinitionObjects,
   syncWiredStreamDefinitionObjects,
@@ -45,7 +52,7 @@ import {
   validateStreamLifecycle,
   validateStreamTypeChanges,
 } from './helpers/validate_stream';
-import { rootStreamDefinition } from './root_stream_definition';
+import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
 import { StreamsStorageClient } from './service';
 import {
   checkAccess,
@@ -58,7 +65,7 @@ import { updateDataStreamsLifecycle } from './data_streams/manage_data_streams';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
 import { SecurityError } from './errors/security_error';
-import { findInheritedLifecycle, findInheritingStreams } from './helpers/lifecycle';
+import { NameTakenError } from './errors/name_taken_error';
 import { MalformedStreamError } from './errors/malformed_stream_error';
 
 interface AcknowledgeResponse<TResult extends Result> {
@@ -73,8 +80,6 @@ export type SyncStreamResponse = AcknowledgeResponse<'updated' | 'created'>;
 export type ForkStreamResponse = AcknowledgeResponse<'created'>;
 export type ResyncStreamsResponse = AcknowledgeResponse<'updated'>;
 export type UpsertStreamResponse = AcknowledgeResponse<'updated' | 'created'>;
-
-const LOGS_ROOT_STREAM_NAME = 'logs';
 
 function isElasticsearch404(error: unknown): error is errors.ResponseError & { statusCode: 404 } {
   return isResponseError(error) && error.statusCode === 404;
@@ -306,6 +311,10 @@ export class StreamsClient {
     result: 'created' | 'updated';
     parentDefinition?: WiredStreamDefinition;
   }> {
+    if (isWiredStreamDefinition(definition)) {
+      await this.assertNoHierarchicalConflicts(definition.name);
+    }
+
     const existingDefinition = await this.getStream(definition.name).catch((error) => {
       if (isDefinitionNotFoundError(error)) {
         return undefined;
@@ -319,6 +328,10 @@ export class StreamsClient {
     if (existingDefinition) {
       // Only allow wired-to-wired and ingest-to-ingest updates
       validateStreamTypeChanges(existingDefinition, definition);
+    }
+
+    if (isGroupStreamDefinition(definition)) {
+      await this.assertValidGroupMembers({ definition });
     }
 
     if (isRootStreamDefinition(definition)) {
@@ -363,6 +376,47 @@ export class StreamsClient {
       result,
       parentDefinition,
     };
+  }
+
+  private async assertNoHierarchicalConflicts(definitionName: string) {
+    const streamNames = [...getAncestors(definitionName), definitionName];
+    const hasConflict = await Promise.all(
+      streamNames.map((streamName) => this.isStreamNameTaken(streamName))
+    );
+    const conflicts = streamNames.filter((_, index) => hasConflict[index]);
+
+    if (conflicts.length !== 0) {
+      throw new NameTakenError(
+        `Cannot create stream "${definitionName}" due to hierarchical conflicts caused by existing unwired stream definition, index or data stream: [${conflicts.join(
+          ', '
+        )}]`
+      );
+    }
+  }
+
+  private async isStreamNameTaken(streamName: string): Promise<boolean> {
+    try {
+      const definition = await this.getStream(streamName);
+      return isUnwiredStreamDefinition(definition);
+    } catch (error) {
+      if (!isDefinitionNotFoundError(error)) {
+        throw error;
+      }
+    }
+
+    try {
+      await this.dependencies.scopedClusterClient.asCurrentUser.indices.get({
+        index: streamName,
+      });
+
+      return true;
+    } catch (error) {
+      if (isElasticsearch404(error)) {
+        return false;
+      }
+
+      throw error;
+    }
   }
 
   /**
@@ -423,7 +477,7 @@ export class StreamsClient {
       }
       if (!isChildOf(definition.name, item.destination)) {
         throw new MalformedStreamIdError(
-          `The ID (${item.destination}) from the child stream must start with the parent's id (${definition.name}), followed by a dot and a name`
+          `The ID (${item.destination}) from the child stream must start with the parent's name (${definition.name}), followed by a dot and a name`
         );
       }
       await this.validateAndUpsertStream({
@@ -442,6 +496,29 @@ export class StreamsClient {
     }
 
     return { parentDefinition };
+  }
+
+  /**
+   * Validates the members of the group streams to ensure they are NOT
+   * GroupStreamDefinitions
+   */
+  async assertValidGroupMembers({ definition }: { definition: GroupStreamDefinition }) {
+    const { members } = definition.group;
+
+    if (members.includes(definition.name)) {
+      throw new ForbiddenMemberTypeError('Group streams can not include themselves as a member');
+    }
+
+    await Promise.all(
+      members.map(async (name) => {
+        const memberStream = await this.getStream(name);
+        if (isGroupStreamDefinition(memberStream)) {
+          throw new ForbiddenMemberTypeError(
+            `Group streams can not be a member of a group, please remove [${name}]`
+          );
+        }
+      })
+    );
   }
 
   /**
@@ -465,7 +542,7 @@ export class StreamsClient {
     name: string;
     if: Condition;
   }): Promise<ForkStreamResponse> {
-    const parentDefinition = await this.getStream(parent);
+    const parentDefinition = asIngestStreamDefinition(await this.getStream(parent));
 
     const childDefinition: WiredStreamDefinition = {
       name,
@@ -480,7 +557,7 @@ export class StreamsClient {
     }
     if (!isChildOf(parentDefinition.name, childDefinition.name)) {
       throw new MalformedStreamIdError(
-        `The ID (${name}) from the new stream must start with the parent's id (${parentDefinition.name}), followed by a dot and a name`
+        `The ID (${name}) from the new stream must start with the parent's name (${parentDefinition.name}), followed by a dot and a name`
       );
     }
 
@@ -502,55 +579,109 @@ export class StreamsClient {
   }
 
   /**
+   * Make sure there is a stream definition for a given stream.
+   * If the data stream exists but the stream definition does not, it creates an empty stream definition.
+   * If the stream definition exists, it is a noop.
+   * If the data stream does not exist or the user does not have access, it throws.
+   */
+  async ensureStream(name: string): Promise<void> {
+    const [streamDefinition, dataStream] = await Promise.all([
+      this.getStoredStreamDefinition(name).catch((error) => {
+        if (isElasticsearch404(error)) {
+          return undefined;
+        }
+        throw error;
+      }),
+      this.getDataStream(name),
+    ]);
+    if (dataStream && !streamDefinition) {
+      await this.updateStoredStream(this.getDataStreamAsIngestStream(dataStream));
+    }
+  }
+
+  /**
    * Returns a stream definition for the given name:
    * - if a wired stream definition exists
    * - if an ingest stream definition exists
-   * - if a data stream exists (creates an ingest
-   * definition on the fly)
+   * - if a data stream exists (creates an ingest definition on the fly)
+   * - if a group stream definition exists
    *
    * Throws when:
    * - no definition is found
    * - the user does not have access to the stream
    */
   async getStream(name: string): Promise<StreamDefinition> {
-    const definition = await Promise.all([
+    try {
+      const response = await this.dependencies.storageClient.get({ id: name });
+
+      const streamDefinition = response._source;
+      assertsSchema(streamDefinitionSchema, streamDefinition);
+
+      if (isIngestStreamDefinition(streamDefinition)) {
+        const privileges = await checkAccess({
+          name,
+          scopedClusterClient: this.dependencies.scopedClusterClient,
+        });
+        if (!privileges.read) {
+          throw new DefinitionNotFoundError(`Stream definition for ${name} not found`);
+        }
+      }
+      return streamDefinition;
+    } catch (error) {
+      try {
+        if (isElasticsearch404(error)) {
+          const dataStream = await this.getDataStream(name);
+          return this.getDataStreamAsIngestStream(dataStream);
+        }
+        throw error;
+      } catch (e) {
+        if (isElasticsearch404(e)) {
+          throw new DefinitionNotFoundError(`Cannot find stream ${name}`);
+        }
+        throw e;
+      }
+    }
+  }
+
+  private async getStoredStreamDefinition(name: string): Promise<StreamDefinition> {
+    return await Promise.all([
       this.dependencies.storageClient.get({ id: name }).then((response) => {
         const source = response._source;
         assertsSchema(streamDefinitionSchema, source);
         return source;
       }),
-      checkAccess({ id: name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
+      checkAccess({ name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
         (privileges) => {
           if (!privileges.read) {
             throw new DefinitionNotFoundError(`Stream definition for ${name} not found`);
           }
         }
       ),
-    ])
-      .then(([wiredDefinition]) => {
-        return wiredDefinition;
-      })
-      .catch(async (error) => {
-        if (isElasticsearch404(error)) {
-          const dataStream = await this.getDataStream(name);
-          return await this.getDataStreamAsIngestStream(dataStream);
-        }
-        throw error;
-      })
-      .catch(async (error) => {
-        if (isElasticsearch404(error)) {
-          throw new DefinitionNotFoundError(`Cannot find stream ${name}`);
-        }
-        throw error;
-      });
-
-    return definition;
+    ]).then(([wiredDefinition]) => {
+      return wiredDefinition;
+    });
   }
 
   async getDataStream(name: string): Promise<IndicesDataStream> {
     return this.dependencies.scopedClusterClient.asCurrentUser.indices
       .getDataStream({ name })
       .then((response) => {
+        if (response.data_streams.length === 0) {
+          throw new errors.ResponseError({
+            meta: {
+              aborted: false,
+              attempts: 1,
+              connection: null,
+              context: null,
+              name: 'resource_not_found_exception',
+              request: {} as unknown as DiagnosticResult['meta']['request'],
+            },
+            warnings: [],
+            body: 'resource_not_found_exception',
+            statusCode: 404,
+          });
+        }
+
         const dataStream = response.data_streams[0];
         return dataStream;
       });
@@ -560,9 +691,7 @@ export class StreamsClient {
    * Creates an on-the-fly ingest stream definition
    * from a concrete data stream.
    */
-  private async getDataStreamAsIngestStream(
-    dataStream: IndicesDataStream
-  ): Promise<UnwiredStreamDefinition> {
+  private getDataStreamAsIngestStream(dataStream: IndicesDataStream): UnwiredStreamDefinition {
     const definition: UnwiredStreamDefinition = {
       name: dataStream.name,
       ingest: {
@@ -656,11 +785,14 @@ export class StreamsClient {
     });
 
     const privileges = await checkAccessBulk({
-      ids: streams.map((stream) => stream.name),
+      names: streams
+        .filter((stream) => !isGroupStreamDefinition(stream))
+        .map((stream) => stream.name),
       scopedClusterClient,
     });
 
     return streams.filter((stream) => {
+      if (isGroupStreamDefinition(stream)) return true;
       return privileges[stream.name]?.read === true;
     });
   }
@@ -673,13 +805,13 @@ export class StreamsClient {
   private async deleteStreamFromDefinition(definition: StreamDefinition): Promise<void> {
     const { assetClient, logger, scopedClusterClient } = this.dependencies;
 
-    if (!isWiredStreamDefinition(definition)) {
+    if (isUnwiredStreamDefinition(definition)) {
       await deleteUnmanagedStreamObjects({
         scopedClusterClient,
-        id: definition.name,
+        name: definition.name,
         logger,
       });
-    } else {
+    } else if (isWiredStreamDefinition(definition)) {
       const parentId = getParentId(definition.name);
 
       // need to update parent first to cut off documents streaming down
@@ -700,7 +832,7 @@ export class StreamsClient {
         await this.deleteStream(item.destination);
       }
 
-      await deleteStreamObjects({ scopedClusterClient, id: definition.name, logger });
+      await deleteStreamObjects({ scopedClusterClient, name: definition.name, logger });
     }
 
     await assetClient.syncAssetList({
@@ -741,15 +873,20 @@ export class StreamsClient {
    * Also verifies whether the user has access to the stream.
    */
   async deleteStream(name: string): Promise<DeleteStreamResponse> {
-    const [definition, access] = await Promise.all([
-      this.getStream(name).catch((error) => {
-        if (isDefinitionNotFoundError(error)) {
-          return undefined;
-        }
-        throw error;
-      }),
-      checkAccess({ id: name, scopedClusterClient: this.dependencies.scopedClusterClient }),
-    ]);
+    const definition = await this.getStream(name).catch((error) => {
+      if (isDefinitionNotFoundError(error)) {
+        return undefined;
+      }
+      throw error;
+    });
+
+    const access =
+      definition && isGroupStreamDefinition(definition)
+        ? { write: true, read: true }
+        : await checkAccess({
+            name,
+            scopedClusterClient: this.dependencies.scopedClusterClient,
+          });
 
     if (!access.write) {
       throw new SecurityError(`Cannot delete stream, insufficient privileges`);
@@ -759,9 +896,11 @@ export class StreamsClient {
       return { acknowledged: true, result: 'noop' };
     }
 
-    const parentId = getParentId(name);
-    if (isWiredStreamDefinition(definition) && !parentId) {
-      throw new MalformedStreamIdError('Cannot delete root stream');
+    if (isWiredStreamDefinition(definition)) {
+      const parentId = getParentId(name);
+      if (!parentId) {
+        throw new MalformedStreamIdError('Cannot delete root stream');
+      }
     }
 
     await this.deleteStreamFromDefinition(definition);
@@ -772,13 +911,7 @@ export class StreamsClient {
   private async updateStoredStream(definition: StreamDefinition) {
     return this.dependencies.storageClient.index({
       id: definition.name,
-      document: omit(
-        definition,
-        'elasticsearch_assets',
-        'dashboards',
-        'inherited_fields',
-        'lifecycle'
-      ),
+      document: definition,
     });
   }
 

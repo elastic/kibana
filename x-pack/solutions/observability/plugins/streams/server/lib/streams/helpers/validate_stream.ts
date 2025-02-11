@@ -9,6 +9,7 @@ import {
   StreamDefinition,
   WiredStreamDefinition,
   isIlmLifecycle,
+  isIngestStreamDefinition,
   isInheritLifecycle,
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
@@ -97,6 +98,9 @@ export function validateStreamChildrenChanges(
 }
 
 export function validateStreamLifecycle(definition: StreamDefinition, isServerless: boolean) {
+  if (!isIngestStreamDefinition(definition)) {
+    return;
+  }
   const lifecycle = definition.ingest.lifecycle;
 
   if (isServerless && isIlmLifecycle(lifecycle)) {

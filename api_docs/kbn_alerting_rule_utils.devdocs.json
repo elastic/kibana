@@ -1,0 +1,113 @@
+{
+  "id": "@kbn/alerting-rule-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/alerting-rule-utils",
+        "id": "def-common.getEcsGroups",
+        "type": "Function",
+        "tags": [],
+        "label": "getEcsGroups",
+        "description": [],
+        "signature": [
+          "(groups?: ",
+          {
+            "pluginId": "@kbn/alerting-rule-utils",
+            "scope": "common",
+            "docId": "kibKbnAlertingRuleUtilsPluginApi",
+            "section": "def-common.Group",
+            "text": "Group"
+          },
+          "[]) => Record<string, string>"
+        ],
+        "path": "x-pack/platform/packages/shared/alerting_rule_utils/src/get_ecs_groups.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-rule-utils",
+            "id": "def-common.getEcsGroups.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "groups",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerting-rule-utils",
+                "scope": "common",
+                "docId": "kibKbnAlertingRuleUtilsPluginApi",
+                "section": "def-common.Group",
+                "text": "Group"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/alerting_rule_utils/src/get_ecs_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/alerting-rule-utils",
+        "id": "def-common.Group",
+        "type": "Interface",
+        "tags": [],
+        "label": "Group",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/alerting_rule_utils/src/get_ecs_groups.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/alerting-rule-utils",
+            "id": "def-common.Group.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/alerting_rule_utils/src/get_ecs_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerting-rule-utils",
+            "id": "def-common.Group.value",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/alerting_rule_utils/src/get_ecs_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

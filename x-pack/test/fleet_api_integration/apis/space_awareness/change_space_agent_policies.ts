@@ -58,7 +58,9 @@ export default function (providerContext: FtrProviderContext) {
   const spaces = getService('spaces');
   let TEST_SPACE_1: string;
 
-  describe('change space agent policies', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/209008
+  // Failing: See https://github.com/elastic/kibana/issues/209008
+  describe.skip('change space agent policies', function () {
     skipIfNoDockerRegistry(providerContext);
     const apiClient = new SpaceTestApiClient(supertest);
 

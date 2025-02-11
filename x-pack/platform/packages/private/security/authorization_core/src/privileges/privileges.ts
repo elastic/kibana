@@ -17,7 +17,7 @@ import {
   isMinimalPrivilegeId,
 } from '@kbn/security-authorization-core-common';
 import type { RawKibanaPrivileges, SecurityLicense } from '@kbn/security-plugin-types-common';
-import { ApiOperation } from '@kbn/security-plugin-types-server';
+import { ApiOperation } from '@kbn/security-plugin-types-common';
 
 import { featurePrivilegeBuilderFactory } from './feature_privilege_builder';
 import type { Actions } from '../actions';

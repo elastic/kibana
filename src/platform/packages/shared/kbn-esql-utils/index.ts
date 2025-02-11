@@ -39,6 +39,7 @@ export {
   queryCannotBeSampled,
   mapVariableToColumn,
   getValuesFromQueryField,
+  getESQLQueryVariables,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

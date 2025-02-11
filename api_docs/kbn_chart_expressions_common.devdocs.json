@@ -98,7 +98,7 @@
         "tags": [],
         "label": "getColorCategories",
         "description": [
-          "\nGet the stringified version of all the categories that needs to be colored in the chart.\nMultifield keys will return as array of string and simple fields (numeric, string) will be returned as a plain unformatted string."
+          "\nGet the stringified version of all the categories that needs to be colored in the chart.\nMultifield keys will return as array of string and simple fields (numeric, string) will be returned as a plain unformatted string.\n\nNote: This does **NOT** support transposed columns"
         ],
         "signature": [
           "(rows: ",
@@ -109,7 +109,7 @@
             "section": "def-common.DatatableRow",
             "text": "DatatableRow"
           },
-          "[], accessor: string | undefined, isTransposed: boolean | undefined, exclude: any[] | undefined) => (string | string[])[]"
+          "[], accessor: string | undefined, exclude: any[] | undefined) => (string | string[])[]"
         ],
         "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
         "deprecated": false,
@@ -155,21 +155,6 @@
           {
             "parentPluginId": "@kbn/chart-expressions-common",
             "id": "def-common.getColorCategories.$3",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isTransposed",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/chart-expressions-common",
-            "id": "def-common.getColorCategories.$4",
             "type": "Array",
             "tags": [],
             "label": "exclude",
