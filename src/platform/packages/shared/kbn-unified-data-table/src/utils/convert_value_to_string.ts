@@ -9,8 +9,9 @@
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import { formatFieldValue } from '@kbn/discover-utils';
 
 interface ConvertedResult {
@@ -26,6 +27,7 @@ export const convertValueToString = ({
   columnId,
   dataView,
   fieldFormats,
+  columnsMeta,
   options,
 }: {
   rowIndex: number;
@@ -33,6 +35,7 @@ export const convertValueToString = ({
   columnId: string;
   dataView: DataView;
   fieldFormats: FieldFormatsStart;
+  columnsMeta: DataTableColumnsMeta | undefined;
   options?: {
     compatibleWithCSV?: boolean; // values as one-liner + escaping formulas + adding wrapping quotes
   };
@@ -45,7 +48,11 @@ export const convertValueToString = ({
   }
   const rowFlattened = rows[rowIndex].flattened;
   const value = rowFlattened?.[columnId];
-  const field = dataView.fields.getByName(columnId);
+  const field = getDataViewFieldOrCreateFromColumnMeta({
+    fieldName: columnId,
+    dataView,
+    columnMeta: columnsMeta?.[columnId],
+  });
   const valuesArray = Array.isArray(value) ? value : [value];
   const disableMultiline = options?.compatibleWithCSV ?? false;
   const enableEscapingForValue = options?.compatibleWithCSV ?? false;
