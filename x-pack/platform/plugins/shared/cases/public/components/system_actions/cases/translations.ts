@@ -60,3 +60,9 @@ export const DEFAULT_EMPTY_TEMPLATE_NAME = i18n.translate(
     defaultMessage: 'No template selected',
   }
 );
+export const GROUP_BY_ALERT_OPTIONAL_LABEL = i18n.translate(
+  'xpack.cases.systemActions.casesConnector.groupByAlertOptionalField',
+  {
+    defaultMessage: 'Optional',
+  }
+);
