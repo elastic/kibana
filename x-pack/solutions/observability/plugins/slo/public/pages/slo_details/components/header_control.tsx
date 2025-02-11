@@ -13,7 +13,7 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
@@ -402,7 +402,7 @@ export function HeaderControl({ slo }: Props) {
       />
 
       {isRuleFlyoutVisible ? (
-        <RuleFormFlyoutLazy
+        <RuleFormFlyout
           plugins={{ ...services, actionTypeRegistry, ruleTypeRegistry }}
           consumer={sloFeatureId}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}

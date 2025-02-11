@@ -197,9 +197,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
 
   return (
     <QueryClientProvider client={queryClient}>
-      <RuleFormScreenContextProvider>
-        <div className="ruleForm__container">{ruleFormComponent}</div>
-      </RuleFormScreenContextProvider>
+      <RuleFormScreenContextProvider>{ruleFormComponent}</RuleFormScreenContextProvider>
     </QueryClientProvider>
   );
 };

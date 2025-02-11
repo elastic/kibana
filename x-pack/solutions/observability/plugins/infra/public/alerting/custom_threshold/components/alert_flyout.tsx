@@ -9,7 +9,7 @@ import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { useContext, useMemo } from 'react';
 import type { InfraClientStartDeps } from '../../../types';
 import { TriggerActionsContext } from '../../../containers/triggers_actions_context';
@@ -30,7 +30,7 @@ export function AlertFlyout({ onClose }: Props) {
     const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUI;
 
     return (
-      <RuleFormFlyoutLazy
+      <RuleFormFlyout
         plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
         consumer={'infrastructure'}
         onCancel={onClose}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import React, { useCallback, useContext, useMemo } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -34,7 +34,7 @@ export const AlertFlyout = (props: Props) => {
       if (!triggersActionsUI) return null;
       const { ruleTypeRegistry, actionTypeRegistry } = triggersActionsUI;
       return (
-        <RuleFormFlyoutLazy
+        <RuleFormFlyout
           plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
           consumer="infrastructure"
           onCancel={onCloseFlyout}

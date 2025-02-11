@@ -81,8 +81,8 @@ const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 const mockLocator = jest.fn();
 
-jest.mock('@kbn/response-ops-rule-form/lazy', () => ({
-  RuleFormFlyoutLazy: jest.fn(() => <div data-test-subj="add-rule-flyout">Add rule flyout</div>),
+jest.mock('@kbn/response-ops-rule-form/flyout', () => ({
+  RuleFormFlyout: jest.fn(() => <div data-test-subj="add-rule-flyout">Add rule flyout</div>),
 }));
 
 const mockKibana = () => {

@@ -8,7 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
-import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import {
@@ -349,7 +349,7 @@ export function HeaderActions({
         </EuiFlexItem>
       </EuiFlexGroup>
       {rule && ruleConditionsFlyoutOpen ? (
-        <RuleFormFlyoutLazy
+        <RuleFormFlyout
           plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
           id={rule.id}
           onCancel={() => {

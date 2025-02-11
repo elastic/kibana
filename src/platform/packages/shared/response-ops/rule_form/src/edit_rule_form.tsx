@@ -189,46 +189,44 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
   const RuleFormUIComponent = isFlyout ? RuleFlyout : RulePage;
 
   return (
-    <div data-test-subj="editRuleForm">
-      <RuleFormStateProvider
-        initialRuleFormState={{
-          connectors,
-          connectorTypes,
-          aadTemplateFields,
-          formData: {
-            ...getDefaultFormData({
-              ruleTypeId: fetchedFormData.ruleTypeId,
-              name: fetchedFormData.name,
-              consumer: fetchedFormData.consumer,
-              actions: fetchedFormData.actions,
-            }),
-            ...fetchedFormData,
-            actions: actionsWithFrequency,
-          },
-          id,
-          metadata: initialMetadata,
-          plugins,
-          minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
-          selectedRuleType: ruleType,
-          selectedRuleTypeModel: ruleTypeModel,
-          availableRuleTypes: getAvailableRuleTypes({
+    <RuleFormStateProvider
+      initialRuleFormState={{
+        connectors,
+        connectorTypes,
+        aadTemplateFields,
+        formData: {
+          ...getDefaultFormData({
+            ruleTypeId: fetchedFormData.ruleTypeId,
+            name: fetchedFormData.name,
             consumer: fetchedFormData.consumer,
-            ruleTypes,
-            ruleTypeRegistry,
-          }).map(({ ruleType: rt }) => rt),
-          flappingSettings,
-          validConsumers: DEFAULT_VALID_CONSUMERS,
-          showMustacheAutocompleteSwitch,
-        }}
-      >
-        <RuleFormUIComponent
-          isEdit={true}
-          isSaving={isSaving}
-          onSave={onSave}
-          onCancel={onCancel}
-          onChangeMetaData={onChangeMetaData}
-        />
-      </RuleFormStateProvider>
-    </div>
+            actions: fetchedFormData.actions,
+          }),
+          ...fetchedFormData,
+          actions: actionsWithFrequency,
+        },
+        id,
+        metadata: initialMetadata,
+        plugins,
+        minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
+        selectedRuleType: ruleType,
+        selectedRuleTypeModel: ruleTypeModel,
+        availableRuleTypes: getAvailableRuleTypes({
+          consumer: fetchedFormData.consumer,
+          ruleTypes,
+          ruleTypeRegistry,
+        }).map(({ ruleType: rt }) => rt),
+        flappingSettings,
+        validConsumers: DEFAULT_VALID_CONSUMERS,
+        showMustacheAutocompleteSwitch,
+      }}
+    >
+      <RuleFormUIComponent
+        isEdit
+        isSaving={isSaving}
+        onSave={onSave}
+        onCancel={onCancel}
+        onChangeMetaData={onChangeMetaData}
+      />
+    </RuleFormStateProvider>
   );
 };

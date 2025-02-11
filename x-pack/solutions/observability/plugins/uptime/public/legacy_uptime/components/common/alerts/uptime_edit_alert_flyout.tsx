@@ -12,7 +12,7 @@ import type {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -46,7 +46,7 @@ export const UptimeEditAlertFlyoutComponent = ({
 
   const EditAlertFlyout = useMemo(
     () => (
-      <RuleFormFlyoutLazy
+      <RuleFormFlyout
         id={initialAlert.id}
         onCancel={onClose}
         onSubmit={onClose}

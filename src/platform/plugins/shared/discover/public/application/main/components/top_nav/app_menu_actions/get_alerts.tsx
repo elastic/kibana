@@ -22,7 +22,7 @@ import {
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
 import { RuleTypeMetaData } from '@kbn/alerting-plugin/common';
-import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { DiscoverStateContainer } from '../../../state_management/discover_state';
 import { AppMenuDiscoverParams } from './types';
 import { DiscoverServices } from '../../../../../build_services';
@@ -39,7 +39,7 @@ interface EsQueryAlertMetaData extends RuleTypeMetaData {
   adHocDataViewList: DataView[];
 }
 
-const RuleFormFlyoutWithType = RuleFormFlyoutLazy<EsQueryAlertMetaData>;
+const RuleFormFlyoutWithType = RuleFormFlyout<EsQueryAlertMetaData>;
 
 const CreateAlertFlyout: React.FC<{
   discoverParams: AppMenuDiscoverParams;

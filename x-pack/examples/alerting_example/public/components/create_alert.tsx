@@ -11,7 +11,7 @@ import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { CoreStart } from '@kbn/core/public';
-import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiIcon, EuiFlexItem, EuiCard, EuiFlexGroup } from '@elastic/eui';
 
@@ -49,7 +49,7 @@ export const CreateAlert = ({
       </EuiFlexItem>
       <EuiFlexItem>
         {ruleFlyoutVisible ? (
-          <RuleFormFlyoutLazy
+          <RuleFormFlyout
             plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
             consumer={ALERTING_EXAMPLE_APP_ID}
             onCancel={onCloseAlertFlyout}

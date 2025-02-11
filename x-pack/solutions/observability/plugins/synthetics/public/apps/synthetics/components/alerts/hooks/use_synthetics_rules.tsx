@@ -8,7 +8,7 @@
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { selectDynamicSettings } from '../../../state/settings';
@@ -84,7 +84,7 @@ export const useSyntheticsRules = (isOpen: boolean) => {
       return null;
     }
     return (
-      <RuleFormFlyoutLazy
+      <RuleFormFlyout
         plugins={{ ...plugins, ruleTypeRegistry, actionTypeRegistry }}
         onCancel={onClose}
         onSubmit={onClose}
@@ -107,7 +107,7 @@ export const useSyntheticsRules = (isOpen: boolean) => {
       return null;
     }
     return (
-      <RuleFormFlyoutLazy
+      <RuleFormFlyout
         plugins={{ ...plugins, ruleTypeRegistry, actionTypeRegistry }}
         onCancel={onClose}
         onSubmit={onClose}

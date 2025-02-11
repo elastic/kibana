@@ -31,11 +31,7 @@ import {
   getInitialSchedule,
   parseRuleCircuitBreakerErrorMessage,
 } from './utils';
-import {
-  RULE_CREATE_SUCCESS_TEXT,
-  RULE_CREATE_ERROR_TEXT,
-  DEFAULT_RULE_NAME,
-} from './translations';
+import { RULE_CREATE_SUCCESS_TEXT, RULE_CREATE_ERROR_TEXT } from './translations';
 
 export interface CreateRuleFormProps {
   ruleTypeId: string;
@@ -174,60 +170,58 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
   const RuleFormUIComponent = isFlyout ? RuleFlyout : RulePage;
 
   return (
-    <div data-test-subj="createRuleForm">
-      <RuleFormStateProvider
-        initialRuleFormState={{
-          formData: {
-            ...getDefaultFormData({
-              ruleTypeId,
-              name: DEFAULT_RULE_NAME(ruleType.name),
-              consumer: getInitialConsumer({
-                consumer,
-                ruleType,
-                shouldUseRuleProducer,
-              }),
-              schedule: getInitialSchedule({
-                ruleType,
-                minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
-              }),
-              actions: [],
+    <RuleFormStateProvider
+      initialRuleFormState={{
+        formData: {
+          ...getDefaultFormData({
+            ruleTypeId,
+            name: `${ruleType.name} rule`,
+            consumer: getInitialConsumer({
+              consumer,
+              ruleType,
+              shouldUseRuleProducer,
             }),
-            ...initialValues,
-          },
-          metadata: initialMetadata,
-          plugins,
-          connectors,
-          connectorTypes,
-          aadTemplateFields,
-          minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
-          selectedRuleTypeModel: ruleTypeModel,
-          selectedRuleType: ruleType,
-          availableRuleTypes: getAvailableRuleTypes({
-            consumer,
-            ruleTypes,
-            ruleTypeRegistry,
-          }).map(({ ruleType: rt }) => rt),
-          validConsumers,
-          flappingSettings,
-          canShowConsumerSelection,
-          showMustacheAutocompleteSwitch,
-          multiConsumerSelection: getInitialMultiConsumer({
-            multiConsumerSelection,
-            validConsumers,
-            ruleType,
-            ruleTypes,
-            isServerless,
+            schedule: getInitialSchedule({
+              ruleType,
+              minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
+            }),
+            actions: [],
           }),
-        }}
-      >
-        <RuleFormUIComponent
-          isEdit={false}
-          isSaving={isSaving}
-          onCancel={onCancel}
-          onSave={onSave}
-          onChangeMetaData={onChangeMetaData}
-        />
-      </RuleFormStateProvider>
-    </div>
+          ...initialValues,
+        },
+        metadata: initialMetadata,
+        plugins,
+        connectors,
+        connectorTypes,
+        aadTemplateFields,
+        minimumScheduleInterval: uiConfig?.minimumScheduleInterval,
+        selectedRuleTypeModel: ruleTypeModel,
+        selectedRuleType: ruleType,
+        availableRuleTypes: getAvailableRuleTypes({
+          consumer,
+          ruleTypes,
+          ruleTypeRegistry,
+        }).map(({ ruleType: rt }) => rt),
+        validConsumers,
+        flappingSettings,
+        canShowConsumerSelection,
+        showMustacheAutocompleteSwitch,
+        multiConsumerSelection: getInitialMultiConsumer({
+          multiConsumerSelection,
+          validConsumers,
+          ruleType,
+          ruleTypes,
+          isServerless,
+        }),
+      }}
+    >
+      <RuleFormUIComponent
+        isEdit={false}
+        isSaving={isSaving}
+        onCancel={onCancel}
+        onSave={onSave}
+        onChangeMetaData={onChangeMetaData}
+      />
+    </RuleFormStateProvider>
   );
 };

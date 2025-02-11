@@ -10,7 +10,7 @@ import { useParams, useLocation } from 'react-router-dom';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
-import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import type { BoolQuery } from '@kbn/es-query';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
@@ -268,7 +268,7 @@ export function RuleDetailsPage() {
       />
 
       {isEditRuleFlyoutVisible && (
-        <RuleFormFlyoutLazy
+        <RuleFormFlyout
           plugins={{ ...services, actionTypeRegistry, ruleTypeRegistry }}
           id={rule.id}
           onCancel={handleCloseRuleFlyout}

@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './rule_form_flyout_lazy';
+export * from './rule_form_flyout';

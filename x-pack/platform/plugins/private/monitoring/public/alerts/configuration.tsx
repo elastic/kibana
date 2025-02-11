@@ -7,7 +7,7 @@
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSwitch } from '@elastic/eui';
 import { BASE_ALERTING_API_PATH } from '@kbn/alerting-plugin/common';
-import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -112,7 +112,7 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
     () =>
       showFlyout &&
       isValidRuleFormPlugins(services) && (
-        <RuleFormFlyoutLazy
+        <RuleFormFlyout
           plugins={{ ruleTypeRegistry, actionTypeRegistry, ...services }}
           id={alert.id}
           onSubmit={onClose}

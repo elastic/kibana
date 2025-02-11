@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { createContext, useContext, useMemo } from 'react';
-import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { memoize } from 'lodash';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
@@ -54,11 +54,11 @@ export const TransformAlertFlyout: FC<TransformAlertFlyoutProps> = ({
     };
 
     if (initialAlert) {
-      return <RuleFormFlyoutLazy {...commonProps} id={initialAlert.id} />;
+      return <RuleFormFlyout {...commonProps} id={initialAlert.id} />;
     }
 
     return (
-      <RuleFormFlyoutLazy
+      <RuleFormFlyout
         {...commonProps}
         consumer={'stackAlerts'}
         ruleTypeId={TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH}

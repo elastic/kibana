@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { rulesLocatorID, sloFeatureId } from '@kbn/observability-plugin/common';
 import { RulesParams } from '@kbn/observability-plugin/public';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
@@ -517,7 +517,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         tableLayout="auto"
       />
       {sloToAddRule ? (
-        <RuleFormFlyoutLazy
+        <RuleFormFlyout
           plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
           consumer={sloFeatureId}
           filteredRuleTypes={filteredRuleTypes}

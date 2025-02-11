@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -44,7 +44,7 @@ export const UptimeAlertsFlyoutWrapperComponent = ({
   );
   const AddAlertFlyout = useMemo(
     () => (
-      <RuleFormFlyoutLazy
+      <RuleFormFlyout
         plugins={{ ...plugins, ruleTypeRegistry, actionTypeRegistry }}
         consumer="uptime"
         onCancel={onCloseAlertFlyout}

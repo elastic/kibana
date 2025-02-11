@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 import { APM_SERVER_FEATURE_ID } from '../../../../../common/rules/apm_rule_types';
 import { getInitialAlertValues } from '../../utils/get_initial_alert_values';
@@ -58,7 +58,7 @@ export function AlertingFlyout(props: Props) {
     () =>
       ruleType &&
       isValidRuleFormPlugins(services) && (
-        <RuleFormFlyoutLazy
+        <RuleFormFlyout
           plugins={{ ...services, ruleTypeRegistry, actionTypeRegistry }}
           consumer={APM_SERVER_FEATURE_ID}
           onCancel={onCloseAddFlyout}

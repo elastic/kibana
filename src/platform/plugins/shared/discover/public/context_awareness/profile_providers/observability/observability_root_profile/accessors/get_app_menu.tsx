@@ -11,7 +11,7 @@ import React from 'react';
 import { AppMenuActionId, AppMenuActionType, AppMenuRegistry } from '@kbn/discover-utils';
 import { DATA_QUALITY_LOCATOR_ID, DataQualityLocatorParams } from '@kbn/deeplinks-observability';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { isOfQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { AppMenuExtensionParams } from '../../../..';
@@ -98,7 +98,7 @@ const registerCustomThresholdRuleAction = (
         const { filters, query } = data.query.getState();
 
         return (
-          <RuleFormFlyoutLazy
+          <RuleFormFlyout
             plugins={{ data, ruleTypeRegistry, actionTypeRegistry, ...services }}
             consumer={'logs'}
             ruleTypeId={OBSERVABILITY_THRESHOLD_RULE_TYPE_ID}

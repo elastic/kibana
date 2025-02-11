@@ -37,6 +37,7 @@ interface RuleFlyoutBodyProps {
   isSaving?: boolean;
   onCancel: () => void;
   onSave: (formData: RuleFormData) => void;
+  onInteraction: () => void;
   onShowRequest: () => void;
   onChangeMetaData?: (metadata?: RuleFormState['metadata']) => void;
   initialStep?: RuleFormStepId;
@@ -48,6 +49,7 @@ export const RuleFlyoutBody = ({
   initialStep,
   onCancel,
   onSave,
+  onInteraction,
   onShowRequest,
   onChangeMetaData = () => {},
 }: RuleFlyoutBodyProps) => {
@@ -147,7 +149,7 @@ export const RuleFlyoutBody = ({
         </EuiTitle>
         {isEdit && <RuleFlyoutEditTabs steps={steps} />}
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody onClick={onInteraction} onKeyDown={onInteraction}>
         {!isEdit && <EuiStepsHorizontal size="xs" steps={steps} />}
         {hasActionsDisabled && (
           <>

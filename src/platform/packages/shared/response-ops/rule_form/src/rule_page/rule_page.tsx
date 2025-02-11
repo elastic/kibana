@@ -90,6 +90,8 @@ export const RulePage = (props: RulePageProps) => {
         css={styles}
         onClick={onInteraction}
         onKeyDown={onInteraction}
+        className="ruleForm__container"
+        data-test-subj="ruleForm"
       >
         <EuiPageTemplate.Header>
           <EuiFlexGroup

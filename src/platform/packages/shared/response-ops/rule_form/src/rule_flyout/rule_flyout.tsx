@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlyout, EuiPortal } from '@elastic/eui';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useRuleFlyoutUIContext } from '../../lib';
 import type { RuleFormData, RuleTypeMetaData } from '../types';
 import { RuleFormStepId } from '../constants';
 import { RuleFlyoutBody } from './rule_flyout_body';
@@ -24,6 +24,10 @@ interface RuleFlyoutProps {
   onSave: (formData: RuleFormData) => void;
   onChangeMetaData?: (metadata?: RuleTypeMetaData) => void;
 }
+
+// This component is only responsible for the CONTENT of the EuiFlyout. See `flyout/rule_form_flyout.tsx` for the
+// EuiFlyout itself. This separation is necessary so that the flyout code can be lazy-loaded and still present its loading
+// state and finished state within the same EuiFlyout.
 
 export const RuleFlyout = ({
   onSave,
@@ -68,6 +72,7 @@ export const RuleFlyout = ({
   );
 
   const { touched, onInteraction } = useRuleFormState();
+  const { setOnClickClose, setHideCloseButton } = useRuleFlyoutUIContext();
 
   const onClickCloseOrCancelButton = useCallback(() => {
     if (touched) {
@@ -77,38 +82,32 @@ export const RuleFlyout = ({
     }
   }, [touched, setIsConfirmCloseModalVisible, onClose]);
 
+  useEffect(() => {
+    setOnClickClose(() => onClickCloseOrCancelButton);
+    setHideCloseButton(hideCloseButton);
+  }, [setOnClickClose, setHideCloseButton, onClickCloseOrCancelButton, hideCloseButton]);
+
   return (
-    <EuiPortal>
-      <EuiFlyout
-        ownFocus
-        onClose={onClickCloseOrCancelButton}
-        aria-labelledby="flyoutTitle"
-        size="m"
-        maxWidth={500}
-        className="ruleFormFlyout__container"
-        hideCloseButton={hideCloseButton}
-        onClick={onInteraction}
-        onKeyDown={onInteraction}
-      >
-        {isShowRequestScreenVisible ? (
-          <RuleFlyoutShowRequest isEdit={isEdit} onClose={onCloseShowRequest} />
-        ) : isConnectorsScreenVisible ? (
-          <RuleFlyoutSelectConnector onClose={onCloseConnectorsScreen} />
-        ) : (
-          <RuleFlyoutBody
-            onSave={onSave}
-            onCancel={onClickCloseOrCancelButton}
-            isEdit={isEdit}
-            isSaving={isSaving}
-            onShowRequest={onOpenShowRequest}
-            initialStep={initialStep}
-            onChangeMetaData={onChangeMetaData}
-          />
-        )}
-        {isConfirmCloseModalVisible && (
-          <ConfirmRuleClose onCancel={onCancelClose} onConfirm={onClose} />
-        )}
-      </EuiFlyout>
-    </EuiPortal>
+    <>
+      {isShowRequestScreenVisible ? (
+        <RuleFlyoutShowRequest isEdit={isEdit} onClose={onCloseShowRequest} />
+      ) : isConnectorsScreenVisible ? (
+        <RuleFlyoutSelectConnector onClose={onCloseConnectorsScreen} />
+      ) : (
+        <RuleFlyoutBody
+          onSave={onSave}
+          onInteraction={onInteraction}
+          onCancel={onClickCloseOrCancelButton}
+          isEdit={isEdit}
+          isSaving={isSaving}
+          onShowRequest={onOpenShowRequest}
+          initialStep={initialStep}
+          onChangeMetaData={onChangeMetaData}
+        />
+      )}
+      {isConfirmCloseModalVisible && (
+        <ConfirmRuleClose onCancel={onCancelClose} onConfirm={onClose} />
+      )}
+    </>
   );
 };

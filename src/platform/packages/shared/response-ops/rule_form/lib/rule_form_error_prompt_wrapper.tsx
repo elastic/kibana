@@ -13,14 +13,16 @@ import { EuiPageTemplate } from '@elastic/eui';
 interface RuleFormErrorPromptWrapperProps {
   hasBorder?: boolean;
   hasShadow?: boolean;
+  isFlyout?: boolean;
 }
 
 export const RuleFormErrorPromptWrapper: React.FC<
   React.PropsWithChildren<RuleFormErrorPromptWrapperProps>
-> = ({ children, hasBorder, hasShadow }) => {
+> = ({ children, hasBorder, hasShadow, isFlyout }) => {
   const styles = {
     backgroundColor: 'transparent',
   };
+
   return (
     <EuiPageTemplate offset={0} css={styles}>
       <EuiPageTemplate.EmptyPrompt paddingSize="none" hasBorder={hasBorder} hasShadow={hasShadow}>

@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { RuleFormFlyoutLazy } from '@kbn/response-ops-rule-form/lazy';
+import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import type { JobId } from '../../common/types/anomaly_detection_jobs';
@@ -61,11 +61,11 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
     };
 
     if (initialAlert) {
-      return <RuleFormFlyoutLazy {...commonProps} id={initialAlert.id} />;
+      return <RuleFormFlyout {...commonProps} id={initialAlert.id} />;
     }
 
     return (
-      <RuleFormFlyoutLazy
+      <RuleFormFlyout
         {...commonProps}
         consumer={PLUGIN_ID}
         ruleTypeId={ML_ALERT_TYPES.ANOMALY_DETECTION}
