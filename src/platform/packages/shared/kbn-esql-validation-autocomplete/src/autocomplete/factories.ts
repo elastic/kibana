@@ -585,13 +585,14 @@ export function getDateLiterals(options?: {
 
 export function getControlSuggestionIfSupported(
   supportsControls: boolean,
+  type: ESQLVariableType,
   getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined
 ) {
   if (!supportsControls) {
     return [];
   }
   if (supportsControls) {
-    const variableType = ESQLVariableType.FUNCTIONS;
+    const variableType = type;
     const variables = getVariablesByType?.(variableType) ?? [];
     const controlSuggestion = getControlSuggestion(
       variableType,

@@ -47,6 +47,7 @@ export async function suggest(
   );
   const controlSuggestions = getControlSuggestionIfSupported(
     Boolean(supportsControls),
+    ESQLVariableType.FUNCTIONS,
     getVariablesByType
   );
 
