@@ -11,10 +11,11 @@ import { useCallback, useEffect, useRef } from 'react';
 
 import { useGridLayoutEvents } from '../../use_grid_layout_events';
 import { UserInteractionEvent } from '../../use_grid_layout_events/types';
+import { useGridLayoutContext } from '../../use_grid_layout_context';
 
 export interface DragHandleApi {
   startDrag: (e: UserInteractionEvent) => void;
-  setDragHandles: (refs: Array<HTMLElement | null>) => void;
+  setDragHandles?: (refs: Array<HTMLElement | null>) => void;
 }
 
 export const useDragHandleApi = ({
@@ -24,6 +25,8 @@ export const useDragHandleApi = ({
   panelId: string;
   rowIndex: number;
 }): DragHandleApi => {
+  const { useCustomDragHandle } = useGridLayoutContext();
+
   const startInteraction = useGridLayoutEvents({
     interactionType: 'drag',
     panelId,
@@ -59,5 +62,8 @@ export const useDragHandleApi = ({
     []
   );
 
-  return { startDrag: startInteraction, setDragHandles };
+  return {
+    startDrag: startInteraction,
+    setDragHandles: useCustomDragHandle ? setDragHandles : undefined,
+  };
 };

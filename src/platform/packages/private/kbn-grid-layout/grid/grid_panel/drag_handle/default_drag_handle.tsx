@@ -22,6 +22,7 @@ export const DefaultDragHandle = React.memo(
           defaultMessage: 'Drag to move',
         })}
         className="kbnGridPanel__dragHandle"
+        data-test-subj="kbnGridPanel--dragHandle"
         css={styles}
       >
         <EuiIcon type="grabOmnidirectional" />

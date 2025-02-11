@@ -8,11 +8,18 @@
  */
 
 import { createContext, useContext } from 'react';
-import { UseCustomDragHandle, GridLayoutStateManager } from './types';
+import { GridLayoutStateManager } from './types';
 
-export type GridLayoutContextType = {
+export interface GridLayoutContextType<UseCustomDragHandle extends boolean = boolean> {
   gridLayoutStateManager: GridLayoutStateManager;
-} & UseCustomDragHandle;
+  useCustomDragHandle: UseCustomDragHandle;
+  renderPanelContents: (
+    panelId: string,
+    setDragHandles: UseCustomDragHandle extends true
+      ? (refs: Array<HTMLElement | null>) => void
+      : undefined
+  ) => React.ReactNode;
+}
 
 export const GridLayoutContext = createContext<GridLayoutContextType | undefined>(undefined);
 
