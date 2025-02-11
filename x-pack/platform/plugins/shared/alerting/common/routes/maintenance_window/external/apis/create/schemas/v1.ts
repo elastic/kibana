@@ -30,6 +30,15 @@ export const bodySchema = schema.object({
         'The name of the maintenance window. While this name does not have to be unique, a distinctive name can help you identify a specific maintenance window.',
     },
   }),
+  enabled: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Whether the current maintenance window is enabled. Disabled maintenance windows do not suppress notifications.',
+      },
+      defaultValue: true,
+    })
+  ),
   scope: schema.maybe(
     schema.object({
       query: schema.object({

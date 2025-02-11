@@ -19,11 +19,13 @@ export const transformCreateBody = (
   return {
     title: createBody.title,
     duration: createBody.duration,
+    enabled: createBody.enabled,
+    scopedQuery: kql ? { kql, filters: [] } : null,
+
     // TODO schedule schema
     rRule: {
       dtstart: createBody.start,
       tzid: 'UTC',
     },
-    scopedQuery: kql ? { kql, filters: [] } : null,
   };
 };

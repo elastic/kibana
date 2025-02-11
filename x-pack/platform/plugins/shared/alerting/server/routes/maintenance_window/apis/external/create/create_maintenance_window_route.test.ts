@@ -35,6 +35,7 @@ const mockMaintenanceWindow = {
 const createParams = {
   title: 'test-maintenance-window',
   start: '2026-02-07T09:17:06.790Z',
+  enabled: false,
   duration: 60 * 60 * 1000, // 1 hr
   scope: { query: { kql: "_id: '1234'" } },
 } as CreateMaintenanceWindowRequestBody;
@@ -78,7 +79,21 @@ describe('createMaintenanceWindowRoute', () => {
     await handler(context, req, res);
 
     expect(maintenanceWindowClient.create).toHaveBeenLastCalledWith({
-      data: transformCreateBody(createParams),
+      data: {
+        title: 'test-maintenance-window',
+        enabled: false,
+        scopedQuery: {
+          filters: [],
+          kql: "_id: '1234'",
+        },
+
+        // TODO schedule schema
+        duration: 60 * 60 * 1000, // 1 hr
+        rRule: {
+          dtstart: '2026-02-07T09:17:06.790Z',
+          tzid: 'UTC',
+        },
+      },
     });
     expect(res.ok).toHaveBeenLastCalledWith({
       body: transformMaintenanceWindowToResponseV1(mockMaintenanceWindow),

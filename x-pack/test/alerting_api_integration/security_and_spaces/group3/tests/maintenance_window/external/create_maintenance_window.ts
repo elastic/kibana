@@ -21,6 +21,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
       title: 'test-maintenance-window',
       start: '2026-02-07T09:17:06.790Z',
       duration: 60 * 60 * 1000, // 1 hr
+      enabled: false,
       scope: { query: { kql: "_id: '1234'" } },
       // TODO schedule schema
       // every possible field should be passed
@@ -68,7 +69,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(200);
               expect(response.body.title).to.eql('test-maintenance-window');
               expect(response.body.status).to.eql('upcoming');
-              expect(response.body.enabled).to.eql(true);
+              expect(response.body.enabled).to.eql(false);
               expect(response.body.scope.query.kql).to.eql("_id: '1234'");
 
               expect(response.body.created_by).to.eql(scenario.user.username);
