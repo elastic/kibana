@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Connector, ConnectorStatus, ElasticsearchIndex } from '@kbn/search-connectors';
+import { EuiIconPlugs } from '@kbn/search-shared-ui';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -94,8 +95,9 @@ const configureLabel = i18n.translate(
 export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, indexData }) => {
   const { connectorTypes } = useValues(KibanaLogic);
   const connectorDefinition = connectorTypes.find((c) => c.serviceType === connector.service_type);
+  const columns = connector.is_native ? 2 : 3;
   return (
-    <EuiFlexGrid columns={3} direction="row">
+    <EuiFlexGrid columns={columns} direction="row">
       <EuiFlexItem>
         <StatCard
           title={i18n.translate(
@@ -207,18 +209,14 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
                     <EuiBadge>{connector.index_name}</EuiBadge>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiFlexGroup alignItems="center" gutterSize="xs">
-                      <EuiFlexItem grow={false}>
-                        <EuiHealth color="success" />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="s">
-                          {i18n.translate('xpack.enterpriseSearch.content.conectors.indexHealth', {
-                            defaultMessage: 'Healthy',
-                          })}
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    {/* TODO: Are we not getting the real Index health status?  */}
+                    <EuiHealth color="success">
+                      <EuiText size="s">
+                        {i18n.translate('xpack.enterpriseSearch.content.conectors.indexHealth', {
+                          defaultMessage: 'Healthy',
+                        })}
+                      </EuiText>
+                    </EuiHealth>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               ) : (
@@ -315,6 +313,88 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
           }
         />
       </EuiFlexItem>
+      {connector.is_native && (
+        <EuiFlexItem>
+          <StatCard
+            title={i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.fleetTitle', {
+              defaultMessage: 'Fleet',
+            })}
+            content={
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  {/* TODO: Get related Integration name from Fleet */}
+                  <EuiBadge iconType={EuiIconPlugs}>Elastic connectors integration</EuiBadge>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {/* TODO: Update status from Fleet host health related connector */}
+                  <EuiHealth color="success">
+                    <EuiText size="s">
+                      {i18n.translate('xpack.enterpriseSearch.content.conectors.hostHealth', {
+                        defaultMessage: 'Healthy',
+                      })}
+                    </EuiText>
+                  </EuiHealth>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            footer={
+              <EuiFlexGroup justifyContent="spaceBetween">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmptyTo
+                    isDisabled={!connector.index_name}
+                    size="s"
+                    // TODO: Update path to Fleet's Hosts overview
+                    to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+                      connectorId: connector.id,
+                      tabId: ConnectorDetailTabId.PIPELINES,
+                    })}
+                  >
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.connectors.connectorStats.hostOverview',
+                      {
+                        defaultMessage: 'Host overview',
+                      }
+                    )}
+                  </EuiButtonEmptyTo>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmptyTo
+                    isDisabled={!connector.index_name}
+                    size="s"
+                    // TODO: Update path to Fleet's Logs
+                    to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+                      connectorId: connector.id,
+                      tabId: ConnectorDetailTabId.PIPELINES,
+                    })}
+                  >
+                    {i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.logs', {
+                      defaultMessage: 'Logs',
+                    })}
+                  </EuiButtonEmptyTo>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmptyTo
+                    isDisabled={!connector.index_name}
+                    size="s"
+                    // TODO: Update path to Fleet's Policies
+                    to={generateEncodedPath(CONNECTOR_DETAIL_TAB_PATH, {
+                      connectorId: connector.id,
+                      tabId: ConnectorDetailTabId.PIPELINES,
+                    })}
+                  >
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.connectors.connectorStats.managePolicy',
+                      {
+                        defaultMessage: 'Manage policy',
+                      }
+                    )}
+                  </EuiButtonEmptyTo>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGrid>
   );
 };
