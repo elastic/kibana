@@ -10,6 +10,7 @@ import { useValues } from 'kea';
 
 import {
   EuiBadge,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCode,
   EuiCopy,
@@ -22,26 +23,37 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { Connector, ConnectorStatus, ElasticsearchIndex } from '@kbn/search-connectors';
+import { EuiIconPlugs } from '@kbn/search-shared-ui';
 
+import { KibanaDeps } from '../../../../../common/types';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
+import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiButtonEmptyTo, EuiButtonTo } from '../../../shared/react_router_helpers';
-import { CONNECTOR_DETAIL_TAB_PATH } from '../../routes';
+import { GetConnectorAgentlessPolicyApiResponse } from '../../api/connector/get_connector_agentless_policy_api_logic';
+import {
+  CONNECTOR_DETAIL_TAB_PATH,
+  CONNECTOR_INTEGRATION_DETAIL_PATH,
+  FLEET_AGENT_DETAIL_PATH,
+  FLEET_POLICY_DETAIL_PATH,
+} from '../../routes';
 import {
   connectorStatusToColor,
   connectorStatusToText,
 } from '../../utils/connector_status_helpers';
 
+import { AgentlessConnectorStatusBadge } from './agentless_status_badge';
 import { ConnectorDetailTabId } from './connector_detail';
 
 export interface ConnectorStatsProps {
   connector: Connector;
   indexData?: ElasticsearchIndex;
+  agentlessOverview?: GetConnectorAgentlessPolicyApiResponse;
 }
 
 export interface StatCardProps {
@@ -91,11 +103,77 @@ const configureLabel = i18n.translate(
   }
 );
 
-export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, indexData }) => {
+const noAgentLabel = i18n.translate(
+  'xpack.enterpriseSearch.connectors.connectorStats.noAgentFound',
+  {
+    defaultMessage: 'No agent found',
+  }
+);
+
+const noPolicyLabel = i18n.translate(
+  'xpack.enterpriseSearch.connectors.connectorStats.noPolicyFound',
+  {
+    defaultMessage: 'No policy found',
+  }
+);
+
+export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
+  connector,
+  indexData,
+  agentlessOverview,
+}) => {
   const { connectorTypes } = useValues(KibanaLogic);
+  const {
+    services: { discover },
+  } = useKibana<KibanaDeps>();
+  const { http } = useValues(HttpLogic);
   const connectorDefinition = connectorTypes.find((c) => c.serviceType === connector.service_type);
+  const columns = connector.is_native ? 2 : 3;
+
+  const agnetlessPolicyExists = !!agentlessOverview?.policy;
+  const agentlessAgentExists = !!agentlessOverview?.agent;
+
+  const navigateToDiscoverPayload = agentlessAgentExists
+    ? {
+        dataViewId: 'logs-*',
+        filters: [
+          {
+            meta: {
+              key: 'labels.connector_id',
+              index: 'logs-*',
+              type: 'phrase',
+              params: connector.id,
+            },
+            query: {
+              match_phrase: {
+                'labels.connector_id': connector.id,
+              },
+            },
+          },
+          {
+            meta: {
+              key: 'elastic_agent.id',
+              index: 'logs-*',
+              type: 'phrase',
+              params: connector.id,
+            },
+            query: {
+              match_phrase: {
+                'elastic_agent.id': agentlessOverview.agent.id,
+              },
+            },
+          },
+        ],
+        timeRange: {
+          from: 'now-6h',
+          to: 'now',
+        },
+        columns: ['message', 'log.level', 'labels.sync_job_id'],
+      }
+    : {};
+
   return (
-    <EuiFlexGrid columns={3} direction="row">
+    <EuiFlexGrid columns={columns} direction="row">
       <EuiFlexItem>
         <StatCard
           title={i18n.translate(
@@ -207,18 +285,14 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
                     <EuiBadge>{connector.index_name}</EuiBadge>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiFlexGroup alignItems="center" gutterSize="xs">
-                      <EuiFlexItem grow={false}>
-                        <EuiHealth color="success" />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiText size="s">
-                          {i18n.translate('xpack.enterpriseSearch.content.conectors.indexHealth', {
-                            defaultMessage: 'Healthy',
-                          })}
-                        </EuiText>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    {/* TODO: Are we not getting the real Index health status?  */}
+                    <EuiHealth color="success">
+                      <EuiText size="s">
+                        {i18n.translate('xpack.enterpriseSearch.content.conectors.indexHealth', {
+                          defaultMessage: 'Healthy',
+                        })}
+                      </EuiText>
+                    </EuiHealth>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               ) : (
@@ -315,6 +389,110 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
           }
         />
       </EuiFlexItem>
+      {connector.is_native && (
+        <EuiFlexItem>
+          <StatCard
+            title={i18n.translate(
+              'xpack.enterpriseSearch.connectors.connectorStats.integrationTitle',
+              {
+                defaultMessage: 'Integration',
+              }
+            )}
+            content={
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    isDisabled={!connector.service_type}
+                    iconType={EuiIconPlugs}
+                    color="text"
+                    href={http.basePath.prepend(
+                      generateEncodedPath(CONNECTOR_INTEGRATION_DETAIL_PATH, {
+                        serviceType: connector.service_type || '',
+                      })
+                    )}
+                  >
+                    Elastic Connectors
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {agentlessAgentExists ? (
+                    <AgentlessConnectorStatusBadge status={agentlessOverview?.agent.status} />
+                  ) : (
+                    <EuiBadge color="warning">{noAgentLabel}</EuiBadge>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+            footer={
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    data-test-subj="connectorStatsViewLogsButton"
+                    aria-label={i18n.translate(
+                      'xpack.enterpriseSearch.connectors.connectorStats.viewLogsButtonLabel',
+                      { defaultMessage: 'View logs' }
+                    )}
+                    disabled={!agentlessAgentExists}
+                    iconType="discoverApp"
+                    onClick={() => {
+                      discover.locator?.navigate(navigateToDiscoverPayload);
+                    }}
+                  >
+                    {i18n.translate(
+                      'xpack.enterpriseSearch.connectors.connectorStats.viewLogsButtonLabel',
+                      { defaultMessage: 'View logs' }
+                    )}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {agentlessAgentExists && (
+                    <EuiButtonEmpty
+                      isDisabled={!agentlessOverview || !agentlessOverview.agent.id}
+                      size="s"
+                      href={http.basePath.prepend(
+                        generateEncodedPath(FLEET_AGENT_DETAIL_PATH, {
+                          agentId: agentlessOverview.agent.id,
+                        })
+                      )}
+                    >
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.connectors.connectorStats.hostOverview',
+                        {
+                          defaultMessage: 'Host overview',
+                        }
+                      )}
+                    </EuiButtonEmpty>
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  {agnetlessPolicyExists ? (
+                    <EuiButtonEmpty
+                      isDisabled={!agentlessOverview || !agentlessOverview.policy.id}
+                      size="s"
+                      href={http.basePath.prepend(
+                        generateEncodedPath(FLEET_POLICY_DETAIL_PATH, {
+                          policyId: agentlessOverview.policy.id,
+                        })
+                      )}
+                    >
+                      {i18n.translate(
+                        'xpack.enterpriseSearch.connectors.connectorStats.managePolicy',
+                        {
+                          defaultMessage: 'Manage policy',
+                        }
+                      )}
+                    </EuiButtonEmpty>
+                  ) : (
+                    <EuiText size="s" color="warning">
+                      {noPolicyLabel}
+                    </EuiText>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          />
+        </EuiFlexItem>
+      )}
     </EuiFlexGrid>
   );
 };

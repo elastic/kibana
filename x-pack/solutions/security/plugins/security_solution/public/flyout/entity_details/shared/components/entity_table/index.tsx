@@ -13,7 +13,6 @@ import type { BasicEntityData, EntityTableRows } from './types';
 interface EntityTableProps<T extends BasicEntityData> {
   contextID: string;
   scopeId: string;
-  isDraggable: boolean;
   data: T;
   entityFields: EntityTableRows<T>;
 }
@@ -21,7 +20,6 @@ interface EntityTableProps<T extends BasicEntityData> {
 export const EntityTable = <T extends BasicEntityData>({
   contextID,
   scopeId,
-  isDraggable,
   data,
   entityFields,
 }: EntityTableProps<T>) => {
@@ -31,8 +29,8 @@ export const EntityTable = <T extends BasicEntityData>({
   );
 
   const entityTableColumns = useMemo(
-    () => getEntityTableColumns<T>(contextID, scopeId, isDraggable, data),
-    [contextID, scopeId, isDraggable, data]
+    () => getEntityTableColumns<T>(contextID, scopeId, data),
+    [contextID, scopeId, data]
   );
   return (
     <BasicTable
