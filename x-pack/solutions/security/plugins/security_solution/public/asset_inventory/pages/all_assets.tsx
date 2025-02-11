@@ -60,7 +60,13 @@ import {
   type URLQuery,
 } from '../hooks/use_asset_inventory_data_table';
 import { useFetchData } from '../hooks/use_fetch_data';
-import { DEFAULT_VISIBLE_ROWS_PER_PAGE, MAX_ASSETS_TO_LOAD } from '../constants';
+import {
+  DEFAULT_VISIBLE_ROWS_PER_PAGE,
+  MAX_ASSETS_TO_LOAD,
+  LOCAL_STORAGE_DATA_TABLE_DEFAULT_COLUMN_IDS,
+  LOCAL_STORAGE_DATA_TABLE_DEFAULT_COLUMN_SETTINGS,
+  LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
+} from '../constants';
 
 const gridStyle: EuiDataGridStyle = {
   border: 'horizontal',
@@ -72,9 +78,6 @@ const gridStyle: EuiDataGridStyle = {
 const title = i18n.translate('xpack.securitySolution.assetInventory.allAssets.tableRowTypeLabel', {
   defaultMessage: 'assets',
 });
-
-const columnsLocalStorageKey = 'assetInventoryColumns';
-const LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY = 'assetInventory:dataTable:pageSize';
 
 const columnHeaders: Record<string, string> = {
   'asset.risk': i18n.translate('xpack.securitySolution.assetInventory.allAssets.risk', {
@@ -162,7 +165,6 @@ const AllAssets = ({
   const { euiTheme } = useEuiTheme();
   const assetInventoryDataTable = useAssetInventoryDataTable({
     paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
-    columnsLocalStorageKey,
     defaultQuery: getDefaultQuery,
     nonPersistedFilters,
   });
@@ -221,12 +223,12 @@ const AllAssets = ({
   const rows = getRowsFromPages(rowsData?.pages);
 
   const [columns, setColumns] = useLocalStorage(
-    columnsLocalStorageKey,
+    LOCAL_STORAGE_DATA_TABLE_DEFAULT_COLUMN_IDS,
     defaultColumns.map((c) => c.id)
   );
 
   const [persistedSettings, setPersistedSettings] = useLocalStorage<UnifiedDataTableSettings>(
-    `${columnsLocalStorageKey}:settings`,
+    LOCAL_STORAGE_DATA_TABLE_DEFAULT_COLUMN_SETTINGS,
     {
       columns: defaultColumns.reduce((columnSettings, column) => {
         const columnDefaultSettings = column.width ? { width: column.width } : {};
