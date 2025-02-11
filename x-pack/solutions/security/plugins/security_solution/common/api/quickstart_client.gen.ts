@@ -379,6 +379,7 @@ import type {
   GetRuleMigrationIntegrationsResponse,
   GetRuleMigrationPrebuiltRulesRequestParamsInput,
   GetRuleMigrationPrebuiltRulesResponse,
+  GetRuleMigrationPrivilegesResponse,
   GetRuleMigrationResourcesRequestQueryInput,
   GetRuleMigrationResourcesRequestParamsInput,
   GetRuleMigrationResourcesResponse,
@@ -396,6 +397,7 @@ import type {
   StartRuleMigrationResponse,
   StopRuleMigrationRequestParamsInput,
   StopRuleMigrationResponse,
+  UpdateRuleMigrationRequestParamsInput,
   UpdateRuleMigrationRequestBodyInput,
   UpdateRuleMigrationResponse,
   UpsertRuleMigrationResourcesRequestParamsInput,
@@ -1497,6 +1499,21 @@ finalize it.
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Identifies the privileges required for a SIEM rules migration and returns the missing privileges
+   */
+  async getRuleMigrationPrivileges() {
+    this.log.info(`${new Date().toISOString()} Calling API GetRuleMigrationPrivileges`);
+    return this.kbnClient
+      .request<GetRuleMigrationPrivilegesResponse>({
+        path: '/internal/siem_migrations/rules/missing_privileges',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Retrieves resources for an existing SIEM rules migration
    */
   async getRuleMigrationResources(props: GetRuleMigrationResourcesProps) {
@@ -1948,7 +1965,7 @@ finalize it.
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
-        method: 'POST',
+        method: 'GET',
 
         query: props.query,
       })
@@ -2287,7 +2304,7 @@ detection engine rules.
     this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigration`);
     return this.kbnClient
       .request<UpdateRuleMigrationResponse>({
-        path: '/internal/siem_migrations/rules',
+        path: replaceParams('/internal/siem_migrations/rules/{migration_id}', props.params),
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
@@ -2639,6 +2656,7 @@ export interface UpdateRuleProps {
   body: UpdateRuleRequestBodyInput;
 }
 export interface UpdateRuleMigrationProps {
+  params: UpdateRuleMigrationRequestParamsInput;
   body: UpdateRuleMigrationRequestBodyInput;
 }
 export interface UpdateWorkflowInsightProps {

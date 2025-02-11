@@ -38,7 +38,7 @@ export class StreamsAppPlugin
 {
   logger: Logger;
 
-  constructor(context: PluginInitializerContext<ConfigSchema>) {
+  constructor(private readonly context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
   }
   setup(
@@ -126,6 +126,7 @@ export class StreamsAppPlugin
           pluginsStart,
           services,
           appMountParameters,
+          isServerless: this.context.env.packageInfo.buildFlavor === 'serverless',
         });
       },
     });

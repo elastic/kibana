@@ -221,12 +221,13 @@ export type UpdateAlertsMaintenanceWindowIdByScopedQueryParams =
 export type GetAlertsQueryParams = Omit<
   GetSummarizedAlertsParams,
   'formatAlert' | 'isLifecycleAlert' | 'spaceId'
->;
+> & { maxAlertLimit: number };
 
 export interface GetLifecycleAlertsQueryByExecutionUuidParams {
   executionUuid: string;
   ruleId: string;
   excludedAlertInstanceIds: string[];
+  maxAlertLimit: number;
   alertsFilter?: AlertsFilter | null;
 }
 
@@ -239,6 +240,7 @@ export interface GetQueryByScopedQueriesParams {
   ruleId: string;
   executionUuid: string;
   maintenanceWindows: MaintenanceWindow[];
+  maxAlertLimit: number;
   action?: string;
 }
 
@@ -246,6 +248,7 @@ export interface GetMaintenanceWindowAlertsQueryParams {
   ruleId: string;
   maintenanceWindows: MaintenanceWindow[];
   executionUuid: string;
+  maxAlertLimit: number;
   action?: string;
 }
 
@@ -254,6 +257,7 @@ export interface GetLifecycleAlertsQueryByTimeRangeParams {
   end: Date;
   ruleId: string;
   excludedAlertInstanceIds: string[];
+  maxAlertLimit: number;
   alertsFilter?: AlertsFilter | null;
 }
 

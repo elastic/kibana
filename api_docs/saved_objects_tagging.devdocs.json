@@ -715,7 +715,7 @@
           {
             "parentPluginId": "savedObjectsTagging",
             "id": "def-common.getTagsCapabilities.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "capabilities",
             "description": [],

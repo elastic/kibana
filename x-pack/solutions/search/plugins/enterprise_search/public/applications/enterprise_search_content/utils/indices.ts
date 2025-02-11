@@ -22,7 +22,7 @@ import {
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 import { ElasticsearchIndexWithIngestion } from '../../../../common/types/indices';
 
-import { ApiViewIndex, CrawlerViewIndex, ElasticsearchViewIndex } from '../types';
+import { ApiViewIndex, ElasticsearchViewIndex } from '../types';
 
 export function isConnectorIndex(
   index: ElasticsearchIndexWithIngestion | null | undefined
@@ -104,7 +104,6 @@ export function getContentExtractionDisabled(index?: ElasticsearchIndexWithInges
 }
 
 export function indexToViewIndex(index: ElasticsearchIndex): ConnectorViewIndex;
-export function indexToViewIndex(index: ElasticsearchIndex): CrawlerViewIndex;
 export function indexToViewIndex(index: ElasticsearchIndex): ApiViewIndex {
   const extraFields = {
     ingestionMethod: getIngestionMethod(index),
