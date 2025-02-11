@@ -62,6 +62,7 @@ export class DashboardPlugin
       createDashboardSavedObjectType({
         migrationDeps: {
           embeddable: plugins.embeddable,
+          controls: plugins.controls,
         },
       })
     );
