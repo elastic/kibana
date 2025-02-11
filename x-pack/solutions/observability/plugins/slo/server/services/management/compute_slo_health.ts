@@ -41,7 +41,7 @@ interface SummaryAggResults {
 
 const BATCH_SIZE = 100;
 
-export class ComputeHealth {
+export class ComputeSLOHealth {
   constructor(
     private readonly esClient: ElasticsearchClient,
     private readonly soClient: SavedObjectsClient,

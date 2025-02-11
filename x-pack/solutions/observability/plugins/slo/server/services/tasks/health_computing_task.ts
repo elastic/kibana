@@ -19,7 +19,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { SLOConfig } from '../../types';
-import { ComputeHealth } from '../management/compute_health';
+import { ComputeSLOHealth } from '../management/compute_slo_health';
 
 export const TYPE = 'slo:compute-health-task';
 export const VERSION = '1.0.0';
@@ -121,7 +121,7 @@ export class HealthComputingTask {
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 
     try {
-      const computeHealth = new ComputeHealth(esClient, soClient, this.logger);
+      const computeHealth = new ComputeSLOHealth(esClient, soClient, this.logger);
       await computeHealth.execute();
     } catch (err) {
       if (err instanceof errors.RequestAbortedError) {

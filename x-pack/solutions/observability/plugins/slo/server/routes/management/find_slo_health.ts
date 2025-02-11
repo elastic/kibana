@@ -6,7 +6,7 @@
  */
 
 import { findSLOHealthParamsSchema } from '@kbn/slo-schema';
-import { FindSLOHealth } from '../../services/management/find_health';
+import { FindSLOHealth } from '../../services/management/find_slo_health';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from '../slo/utils/assert_platinum_license';
 import { getSpaceId } from '../slo/utils/get_space_id';
