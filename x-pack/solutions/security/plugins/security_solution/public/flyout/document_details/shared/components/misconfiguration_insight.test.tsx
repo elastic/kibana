@@ -18,19 +18,28 @@ import { HostPreviewPanelKey } from '../../../entity_details/host_right';
 import { HOST_PREVIEW_BANNER } from '../../right/components/host_entity_overview';
 import { UserPreviewPanelKey } from '../../../entity_details/user_right';
 import { USER_PREVIEW_BANNER } from '../../right/components/user_entity_overview';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
+jest.mock('../../../../common/hooks/use_experimental_features');
 
 const hostName = 'test host';
 const userName = 'test user';
 const testId = 'test';
 
+const openDetailsPanel = jest.fn();
+
 const renderMisconfigurationsInsight = (fieldName: 'host.name' | 'user.name', value: string) => {
   return render(
     <TestProviders>
       <DocumentDetailsContext.Provider value={mockContextValue}>
-        <MisconfigurationsInsight name={value} fieldName={fieldName} data-test-subj={testId} />
+        <MisconfigurationsInsight
+          name={value}
+          fieldName={fieldName}
+          data-test-subj={testId}
+          openDetailsPanel={openDetailsPanel}
+        />
       </DocumentDetailsContext.Provider>
     </TestProviders>
   );
@@ -39,6 +48,7 @@ const renderMisconfigurationsInsight = (fieldName: 'host.name' | 'user.name', va
 describe('MisconfigurationsInsight', () => {
   beforeEach(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
   });
 
   it('renders', () => {
@@ -48,6 +58,16 @@ describe('MisconfigurationsInsight', () => {
     const { getByTestId } = renderMisconfigurationsInsight('host.name', hostName);
     expect(getByTestId(testId)).toBeInTheDocument();
     expect(getByTestId(`${testId}-distribution-bar`)).toBeInTheDocument();
+  });
+
+  it('open entity details panel when clicking on the count if new navigation is enabled', () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    (useMisconfigurationPreview as jest.Mock).mockReturnValue({
+      data: { count: { passed: 1, failed: 2 } },
+    });
+    const { getByTestId } = renderMisconfigurationsInsight('host.name', hostName);
+    getByTestId(`${testId}-count`).click();
+    expect(openDetailsPanel).toHaveBeenCalled();
   });
 
   it('renders null if no misconfiguration data found', () => {
