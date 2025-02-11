@@ -82,6 +82,10 @@ export const shared = createSlice({
       state.dataViews = action.payload;
     },
     addAdhocDataView: (state, action: PayloadAction<DataViewSpec>) => {
+      if (state.adhocDataViews.find((dv) => dv.title === action.payload.title)) {
+        return;
+      }
+
       state.adhocDataViews.push(action.payload);
     },
     init: (state) => {
