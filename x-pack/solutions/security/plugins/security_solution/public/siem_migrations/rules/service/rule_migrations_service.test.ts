@@ -25,6 +25,7 @@ import {
   getIntegrations,
 } from '../api';
 import type { CreateRuleMigrationRequestBody } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import {
   SiemMigrationRetryFilter,
   SiemMigrationTaskStatus,
@@ -84,6 +85,7 @@ describe('SiemRulesMigrationsService', () => {
   let mockCore: CoreStart;
   let mockPlugins: StartPluginsDependencies;
   let mockNotifications: CoreStart['notifications'];
+  const mockTelemetry = createTelemetryServiceMock();
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -110,9 +112,18 @@ describe('SiemRulesMigrationsService', () => {
     (getRuleMigrationsStatsAll as jest.Mock).mockResolvedValue([]);
 
     // Instantiate the service – note that the constructor calls getActiveSpace and startPolling
-    service = new SiemRulesMigrationsService(mockCore, mockPlugins);
+    service = new SiemRulesMigrationsService(mockCore, mockPlugins, mockTelemetry);
     // Wait for any async operations in the constructor to complete
     await Promise.resolve();
+  });
+
+  describe('latestStats$', () => {
+    it('should be initialized to null', async () => {
+      // Instantiate the service – note that the constructor calls getActiveSpace and startPolling
+      const testService = new SiemRulesMigrationsService(mockCore, mockPlugins, mockTelemetry);
+      expect(await firstValueFrom(testService.getLatestStats$())).toBeNull();
+      await Promise.resolve();
+    });
   });
 
   describe('createRuleMigration', () => {
@@ -251,7 +262,6 @@ describe('SiemRulesMigrationsService', () => {
       expect(result[0].number).toBe(1);
       expect(result[1].number).toBe(2);
 
-      // Subscribe to the latestStats$ observable and check it was updated
       const latestStats = await firstValueFrom(service.getLatestStats$());
       expect(latestStats).toEqual(result);
     });
