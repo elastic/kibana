@@ -17,23 +17,30 @@ import {
   InfraSynthtraceKibanaClient,
 } from '@kbn/apm-synthtrace';
 import { Readable } from 'stream';
-import { ApmFields, Serializable, SynthtraceGenerator } from '@kbn/apm-synthtrace-client';
+import {
+  ApmFields,
+  Fields,
+  InfraDocument,
+  OtelDocument,
+  Serializable,
+  SynthtraceGenerator,
+} from '@kbn/apm-synthtrace-client';
 import Url from 'url';
 import { coreWorkerFixtures } from '../../worker';
 
-type SynthtraceEvents = SynthtraceGenerator<ApmFields> | Array<Serializable<ApmFields>>;
+type SynthtraceEvents<T extends Fields> = SynthtraceGenerator<T> | Array<Serializable<T>>;
 
 export interface SynthtraceFixture {
   apmSynthtraceEsClient: {
-    index: (events: SynthtraceEvents) => Promise<void>;
+    index: (events: SynthtraceEvents<ApmFields>) => Promise<void>;
     clean: ApmSynthtraceEsClient['clean'];
   };
   infraSynthtraceEsClient: {
-    index: (events: SynthtraceEvents) => Promise<void>;
+    index: (events: SynthtraceEvents<InfraDocument>) => Promise<void>;
     clean: InfraSynthtraceEsClient['clean'];
   };
   otelSynthtraceEsClient: {
-    index: (events: SynthtraceEvents) => Promise<void>;
+    index: (events: SynthtraceEvents<OtelDocument>) => Promise<void>;
     clean: OtelSynthtraceEsClient['clean'];
   };
 }
@@ -68,7 +75,7 @@ export const synthtraceFixture = coreWorkerFixtures.extend<SynthtraceFixture>({
       synthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
     );
 
-    const index = async (events: SynthtraceEvents) =>
+    const index = async (events: SynthtraceEvents<ApmFields>) =>
       await synthtraceEsClient.index(
         Readable.from(Array.from(events).flatMap((event) => event.serialize()))
       );
@@ -103,7 +110,7 @@ export const synthtraceFixture = coreWorkerFixtures.extend<SynthtraceFixture>({
       synthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
     );
 
-    const index = async (events: SynthtraceEvents) =>
+    const index = async (events: SynthtraceEvents<InfraDocument>) =>
       await synthtraceEsClient.index(
         Readable.from(Array.from(events).flatMap((event) => event.serialize()))
       );
@@ -128,7 +135,7 @@ export const synthtraceFixture = coreWorkerFixtures.extend<SynthtraceFixture>({
       synthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
     );
 
-    const index = async (events: SynthtraceEvents) =>
+    const index = async (events: SynthtraceEvents<OtelDocument>) =>
       await synthtraceEsClient.index(
         Readable.from(Array.from(events).flatMap((event) => event.serialize()))
       );
