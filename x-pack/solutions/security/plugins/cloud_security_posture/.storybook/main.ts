@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-// import { defaultConfig, mergeWebpackFinal } from '@kbn/storybook';
-// import type { Configuration } from 'webpack';
-// import { resolve } from 'path';
+import { resolve } from 'path';
+import { defaultConfig, mergeWebpackFinal } from '@kbn/storybook';
 
-import { defaultConfig, StorybookConfig } from '@kbn/storybook';
-import def from 'ajv/dist/vocabularies/discriminator';
+const aliases = {
+  resolve: {
+    alias: {
+      // Mocking use_fleet_status.tsx
+      '../../../../../../../../hooks': resolve(__dirname, './mocks.ts'),
+    },
+  },
+};
 
-const cspmStorybookConfig: StorybookConfig = {
+module.exports = {
   ...defaultConfig,
   stories: ['../public/**/*.stories.tsx'],
   addons: [...(defaultConfig.addons || []), '@storybook/addon-interactions'],
@@ -20,6 +25,5 @@ const cspmStorybookConfig: StorybookConfig = {
     ...defaultConfig.features,
     interactionsDebugger: true,
   },
+  ...mergeWebpackFinal(aliases),
 };
-
-module.exports = cspmStorybookConfig;

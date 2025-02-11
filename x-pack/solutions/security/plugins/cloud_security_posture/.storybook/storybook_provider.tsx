@@ -7,13 +7,15 @@
 
 import { euiLightVars } from '@kbn/ui-theme';
 import type { FC, PropsWithChildren } from 'react';
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import { Subject } from 'rxjs';
 import { ThemeProvider } from '@emotion/react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ReactQueryClientProvider } from '@kbn/security-solution-plugin/public/common/containers/query_client/query_client_provider';
 import { CoreStart } from '@kbn/core/server';
+import { ConfigContext, FleetStatusProvider } from '@kbn/fleet-plugin/public/hooks';
+import { FleetConfigType } from '@kbn/fleet-plugin/common/types';
 
 const uiSettings = {
   get: (setting: string) => {
@@ -133,3 +135,67 @@ export const StorybookProviders: FC<PropsWithChildren<unknown>> = ({ children })
     </I18nProvider>
   );
 };
+
+export const StorybookFleetProvider = ({ children }: { children: React.ReactNode }) => {
+  const [forceDisplayInstructions, setForceDisplayInstructions] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isReady, setIsReady] = useState(true);
+  const [missingRequirements, setMissingRequirements] = useState([]);
+  const [missingOptionalFeatures, setMissingOptionalFeatures] = useState([]);
+  const [isSecretsStorageEnabled, setIsSecretsStorageEnabled] = useState(true);
+  const [isSpaceAwarenessEnabled, setIsSpaceAwarenessEnabled] = useState(true);
+  const [spaceId, setSpaceId] = useState<string | undefined>(undefined);
+
+  const refetch = useCallback(() => {
+    setIsLoading(true);
+    setIsReady(true);
+    setMissingRequirements([]);
+    setMissingOptionalFeatures([]);
+    setIsSecretsStorageEnabled(true);
+    setIsSpaceAwarenessEnabled(true);
+    setSpaceId(undefined);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 1000);
+  }, []);
+
+  const state = {
+    enabled: true,
+    isLoading,
+    isReady,
+    missingRequirements,
+    missingOptionalFeatures,
+    isSecretsStorageEnabled,
+    isSpaceAwarenessEnabled,
+    spaceId,
+  };
+
+  const fleetConfig: FleetConfigType = {
+    enabled: true,
+    agents: {
+      enabled: true,
+      elasticsearch: {
+        hosts: ['http://localhost:9200'],
+      },
+    },
+  };
+
+  return (
+    <StorybookProviders>
+      <ConfigContext.Provider value={fleetConfig}>
+        <FleetStatusProvider
+          defaultFleetStatus={{
+            ...state,
+            refetch,
+            forceDisplayInstructions,
+            setForceDisplayInstructions,
+          }}
+        >
+          {children}
+        </FleetStatusProvider>
+      </ConfigContext.Provider>
+    </StorybookProviders>
+  );
+};
+
+StorybookFleetProvider.displayName = 'StorybookFleetProvider';
