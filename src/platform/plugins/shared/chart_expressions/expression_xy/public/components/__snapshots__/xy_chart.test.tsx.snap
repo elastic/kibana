@@ -82,7 +82,7 @@ Array [
     id="range_annotation"
     key="range_annotation"
     outside={false}
-    outsideDimension={14}
+    outsideDimension={NaN}
     style={
       Object {
         "fill": "#F04E981A",
@@ -1163,19 +1163,18 @@ exports[`XYChart component it renders area 1`] = `
           style={
             Object {
               "axisTitle": Object {
-                "padding": undefined,
                 "visible": true,
               },
               "tickLabel": Object {
                 "fill": undefined,
-                "padding": undefined,
-                "rotation": 0,
+                "visible": true,
+              },
+              "tickLine": Object {
                 "visible": true,
               },
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <Component
@@ -2721,19 +2720,18 @@ exports[`XYChart component it renders bar 1`] = `
           style={
             Object {
               "axisTitle": Object {
-                "padding": undefined,
                 "visible": true,
               },
               "tickLabel": Object {
                 "fill": undefined,
-                "padding": undefined,
-                "rotation": 0,
+                "visible": true,
+              },
+              "tickLine": Object {
                 "visible": true,
               },
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <Component
@@ -4279,19 +4277,18 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           style={
             Object {
               "axisTitle": Object {
-                "padding": undefined,
                 "visible": true,
               },
               "tickLabel": Object {
                 "fill": undefined,
-                "padding": undefined,
-                "rotation": 0,
+                "visible": true,
+              },
+              "tickLine": Object {
                 "visible": true,
               },
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <Component
@@ -5837,19 +5834,18 @@ exports[`XYChart component it renders line 1`] = `
           style={
             Object {
               "axisTitle": Object {
-                "padding": undefined,
                 "visible": true,
               },
               "tickLabel": Object {
                 "fill": undefined,
-                "padding": undefined,
-                "rotation": 0,
+                "visible": true,
+              },
+              "tickLine": Object {
                 "visible": true,
               },
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <Component
@@ -7395,19 +7391,18 @@ exports[`XYChart component it renders stacked area 1`] = `
           style={
             Object {
               "axisTitle": Object {
-                "padding": undefined,
                 "visible": true,
               },
               "tickLabel": Object {
                 "fill": undefined,
-                "padding": undefined,
-                "rotation": 0,
+                "visible": true,
+              },
+              "tickLine": Object {
                 "visible": true,
               },
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <Component
@@ -8953,19 +8948,18 @@ exports[`XYChart component it renders stacked bar 1`] = `
           style={
             Object {
               "axisTitle": Object {
-                "padding": undefined,
                 "visible": true,
               },
               "tickLabel": Object {
                 "fill": undefined,
-                "padding": undefined,
-                "rotation": 0,
+                "visible": true,
+              },
+              "tickLine": Object {
                 "visible": true,
               },
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <Component
@@ -10511,19 +10505,18 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           style={
             Object {
               "axisTitle": Object {
-                "padding": undefined,
                 "visible": true,
               },
               "tickLabel": Object {
                 "fill": undefined,
-                "padding": undefined,
-                "rotation": 0,
+                "visible": true,
+              },
+              "tickLine": Object {
                 "visible": true,
               },
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <Component
@@ -12102,19 +12095,18 @@ exports[`XYChart component split chart should render split chart if both, splitR
           style={
             Object {
               "axisTitle": Object {
-                "padding": undefined,
                 "visible": true,
               },
               "tickLabel": Object {
                 "fill": undefined,
-                "padding": undefined,
-                "rotation": 0,
+                "visible": true,
+              },
+              "tickLine": Object {
                 "visible": true,
               },
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <SplitChart
@@ -13904,19 +13896,18 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           style={
             Object {
               "axisTitle": Object {
-                "padding": undefined,
                 "visible": true,
               },
               "tickLabel": Object {
                 "fill": undefined,
-                "padding": undefined,
-                "rotation": 0,
+                "visible": true,
+              },
+              "tickLine": Object {
                 "visible": true,
               },
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <SplitChart
@@ -15699,19 +15690,18 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           style={
             Object {
               "axisTitle": Object {
-                "padding": undefined,
                 "visible": true,
               },
               "tickLabel": Object {
                 "fill": undefined,
-                "padding": undefined,
-                "rotation": 0,
+                "visible": true,
+              },
+              "tickLine": Object {
                 "visible": true,
               },
             }
           }
           tickFormat={[Function]}
-          timeAxisLayerCount={0}
           title="c"
         />
         <SplitChart

@@ -147,7 +147,6 @@ describe('XYChart component', () => {
       syncColors: false,
       syncTooltips: false,
       syncCursor: true,
-      useLegacyTimeAxis: false,
       eventAnnotationService: eventAnnotationServiceMock,
       renderComplete: jest.fn(),
       timeFormat: 'MMM D, YYYY @ HH:mm:ss.SSS',

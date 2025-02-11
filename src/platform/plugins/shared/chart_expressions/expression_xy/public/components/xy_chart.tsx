@@ -46,7 +46,6 @@ import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
 import { ChartsPluginSetup, ChartsPluginStart, useActiveCursor } from '@kbn/charts-plugin/public';
-import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import {
   getAccessorByDimension,
   getColumnByAccessor,
@@ -136,7 +135,6 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   paletteService: PaletteRegistry;
   formatFactory: FormatFactory;
   timeZone: string;
-  useLegacyTimeAxis: boolean;
   minInterval: number | undefined;
   interactive?: boolean;
   onClickValue: (data: FilterEvent['data']) => void;
@@ -213,7 +211,6 @@ export function XYChart({
   syncColors,
   syncTooltips,
   syncCursor,
-  useLegacyTimeAxis,
   renderComplete,
   uiState,
   timeFormat,
@@ -678,51 +675,24 @@ export function XYChart({
     floatingColumns: legend?.floatingColumns ?? 1,
   };
 
-  const isHistogramModeEnabled = dataLayers.some(
-    ({ isHistogram, seriesType, isStacked }) =>
-      isHistogram && (isStacked || seriesType !== SeriesTypes.BAR || !chartHasMoreThanOneBarSeries)
-  );
-
-  const shouldUseNewTimeAxis =
-    isTimeViz && isHistogramModeEnabled && !useLegacyTimeAxis && !shouldRotate;
-
   const defaultXAxisPosition = shouldRotate ? Position.Left : Position.Bottom;
 
   const gridLineStyle = {
     visible: xAxisConfig?.showGridLines,
     strokeWidth: 1,
   };
-  const xAxisStyle: RecursivePartial<AxisStyle> = shouldUseNewTimeAxis
-    ? {
-        ...MULTILAYER_TIME_AXIS_STYLE,
-        tickLabel: {
-          ...MULTILAYER_TIME_AXIS_STYLE.tickLabel,
-          visible: Boolean(xAxisConfig?.showLabels),
-          fill: xAxisConfig?.labelColor,
-        },
-        tickLine: {
-          ...MULTILAYER_TIME_AXIS_STYLE.tickLine,
-          visible: Boolean(xAxisConfig?.showLabels),
-        },
-        axisTitle: {
-          visible: xAxisConfig?.showTitle,
-        },
-      }
-    : {
-        tickLabel: {
-          visible: xAxisConfig?.showLabels,
-          rotation: xAxisConfig?.labelsOrientation,
-          padding: linesPaddings.bottom != null ? { inner: linesPaddings.bottom } : undefined,
-          fill: xAxisConfig?.labelColor,
-        },
-        axisTitle: {
-          visible: xAxisConfig?.showTitle,
-          padding:
-            !xAxisConfig?.showLabels && linesPaddings.bottom != null
-              ? { inner: linesPaddings.bottom }
-              : undefined,
-        },
-      };
+  const xAxisStyle: RecursivePartial<AxisStyle> = {
+    tickLabel: {
+      visible: Boolean(xAxisConfig?.showLabels),
+      fill: xAxisConfig?.labelColor,
+    },
+    tickLine: {
+      visible: Boolean(xAxisConfig?.showLabels),
+    },
+    axisTitle: {
+      visible: xAxisConfig?.showTitle,
+    },
+  };
   const isSplitChart = splitColumnAccessor || splitRowAccessor;
   const splitTable = isSplitChart ? dataLayers[0].table : undefined;
   const splitColumnId =
@@ -939,7 +909,6 @@ export function XYChart({
               style={xAxisStyle}
               showOverlappingLabels={xAxisConfig?.showOverlappingLabels}
               showDuplicatedTicks={xAxisConfig?.showDuplicates}
-              timeAxisLayerCount={shouldUseNewTimeAxis ? 2 : 0}
               {...getOverridesFor(overrides, 'axisX')}
             />
             {isSplitChart && splitTable && (
@@ -1050,9 +1019,6 @@ export function XYChart({
                 outsideDimension={
                   rangeAnnotations.length && shouldHideDetails
                     ? OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION
-                    : shouldUseNewTimeAxis
-                    ? Number(MULTILAYER_TIME_AXIS_STYLE.tickLine?.padding ?? 0) +
-                      chartBaseTheme.axes.tickLabel.fontSize
                     : Math.max(chartBaseTheme.axes.tickLine.size, OUTSIDE_RECT_ANNOTATION_WIDTH)
                 }
               />
