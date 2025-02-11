@@ -7,84 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Tab } from '../tab';
 import type { TabItem } from '../../types';
 
-let TMP_COUNTER = 0;
-
 export interface TabsBarProps {
-  initialItems: TabItem[];
-  initialSelectedItemId?: string;
-  'data-test-subj'?: string;
-  onSelected?: (item: TabItem) => void;
-  onClosed?: (item: TabItem) => void;
-}
-
-export interface TabsBarState {
   items: TabItem[];
   selectedItem: TabItem | null;
+  'data-test-subj'?: string;
+  onAdd: () => void;
+  onSelect: (item: TabItem) => void;
+  onClose: (item: TabItem) => void;
 }
 
 export const TabsBar: React.FC<TabsBarProps> = ({
-  initialItems,
-  initialSelectedItemId,
+  items,
+  selectedItem,
   'data-test-subj': dataTestSubj,
-  onSelected,
-  onClosed,
+  onAdd,
+  onSelect,
+  onClose,
 }) => {
-  const [state, setState] = useState<TabsBarState>(() => {
-    return {
-      items: initialItems,
-      selectedItem:
-        (initialSelectedItemId && initialItems.find((item) => item.id === initialSelectedItemId)) ||
-        initialItems[0],
-    };
-  });
-  const { items, selectedItem } = state;
-
-  const onSelect = useCallback(
-    (item: TabItem) => {
-      setState((prevState) => ({
-        ...prevState,
-        selectedItem: item,
-      }));
-      onSelected?.(item);
-    },
-    [setState, onSelected]
-  );
-
-  const onClose = useCallback(
-    (item: TabItem) => {
-      setState((prevState) => ({
-        items: prevState.items.filter((prevItem) => prevItem.id !== item.id),
-        selectedItem:
-          prevState.selectedItem?.id !== item.id
-            ? prevState.selectedItem
-            : prevState.items[prevState.items.length - 1] || null,
-      }));
-      onClosed?.(item);
-    },
-    [setState, onClosed]
-  );
-
-  const onAdd = useCallback(() => {
-    setState((prevState) => {
-      const nextName = TMP_COUNTER++;
-      const newItem = {
-        id: `tab-${nextName}`,
-        label: `Undefined ${nextName}`,
-      };
-
-      return {
-        items: [...prevState.items, newItem],
-        selectedItem: newItem,
-      };
-    });
-  }, [setState]);
-
   return (
     <EuiFlexGroup
       role="tablist"

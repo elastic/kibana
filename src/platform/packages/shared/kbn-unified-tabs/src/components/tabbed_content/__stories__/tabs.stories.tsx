@@ -10,18 +10,24 @@
 import React from 'react';
 import type { ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
-import { TabsBar, type TabsBarProps } from '../tabs_bar';
+import { TabbedContent, type TabbedContentProps } from '../tabbed_content';
 import { STORYBOOK_TITLE } from '../../storybook_constants';
 
 export default {
-  title: `${STORYBOOK_TITLE}/Tabs Bar`,
+  title: `${STORYBOOK_TITLE}/Tabs`,
 };
 
-const TabsBarTemplate: ComponentStory<React.FC<TabsBarProps>> = (args) => (
-  <TabsBar {...args} onSelected={action('onSelected')} onClosed={action('onClosed')} />
+const TabbedContentTemplate: ComponentStory<React.FC<TabbedContentProps>> = (args) => (
+  <TabbedContent
+    {...args}
+    onAdded={action('onSelected')}
+    onSelected={action('onSelected')}
+    onClosed={action('onClosed')}
+    renderContent={(item) => <div>Content for tab: {item.label}</div>}
+  />
 );
 
-export const Default = TabsBarTemplate.bind({});
+export const Default = TabbedContentTemplate.bind({});
 Default.args = {
   initialItems: [
     {
@@ -31,7 +37,7 @@ Default.args = {
   ],
 };
 
-export const WithMultipleTabs = TabsBarTemplate.bind({});
+export const WithMultipleTabs = TabbedContentTemplate.bind({});
 WithMultipleTabs.args = {
   initialItems: [
     {

@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TabbedContent, type TabbedContentProps } from './components/tabbed_content';
+export { TabbedContent, type TabbedContentProps } from './tabbed_content';
