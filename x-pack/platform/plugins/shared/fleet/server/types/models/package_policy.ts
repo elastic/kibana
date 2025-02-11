@@ -182,9 +182,9 @@ export const PackagePolicyBaseSchema = {
       })
     )
   ),
-  // TODO add validations
   additional_datastreams_permissions: schema.maybe(
     schema.arrayOf(schema.string(), {
+      validate: validateAdditionalDatastreamsPermissions,
       meta: {
         description: 'Additionnal datstream permissions, that will be added to the agent policy.',
       },
@@ -296,6 +296,17 @@ export const SimplifiedPackagePolicyInputsSchema = schema.maybe(
   )
 );
 
+const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
+  /^(logs)|(metrics)|(traces)|(synthetics)|(profiling)-(.*)$/;
+
+function validateAdditionalDatastreamsPermissions(values: string[]) {
+  for (const val of values) {
+    if (!val.match(VALIDATE_DATASTREAMS_PERMISSION_REGEX)) {
+      return `${val} is not a valid datastream permissions, it should match logs|metrics|traces|synthetics|profiling)-*`;
+    }
+  }
+}
+
 export const SimplifiedPackagePolicyBaseSchema = schema.object({
   id: schema.maybe(schema.string()),
   name: schema.string(),
@@ -314,9 +325,9 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
       })
     )
   ),
-  // TODO add validation
   additional_datastreams_permissions: schema.maybe(
     schema.arrayOf(schema.string(), {
+      validate: validateAdditionalDatastreamsPermissions,
       meta: {
         description: 'Additionnal datstream permissions, that will be added to the agent policy.',
       },
