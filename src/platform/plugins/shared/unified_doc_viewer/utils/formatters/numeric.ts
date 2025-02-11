@@ -40,7 +40,6 @@ export function asDecimalOrInteger(value: Maybe<number>, threshold = 10) {
     return NOT_AVAILABLE_LABEL;
   }
 
-  // exact 0 or above threshold should not have decimal
   if (value === 0 || value >= threshold) {
     return asInteger(value);
   }

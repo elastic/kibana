@@ -37,7 +37,6 @@ type TimeFormatterBuilder = (
 export const toMicroseconds = (value: number, timeUnit: TimeUnit) =>
   moment.duration(value, timeUnit).asMilliseconds() * 1000;
 
-// Threshold defines the value from which upwards there should be no decimal places.
 function getUnitLabelAndConvertedValue(
   unitKey: DurationTimeUnit,
   value: number,
@@ -89,9 +88,6 @@ function getUnitLabelAndConvertedValue(
   }
 }
 
-/**
- * Converts a microseconds value into the unit defined.
- */
 function convertTo({
   unit,
   microseconds,
@@ -153,9 +149,6 @@ const getDurationFormatter: TimeFormatterBuilder = memoize(
   (max, threshold) => `${max}_${threshold}`
 );
 
-/**
- * Converts value and returns it formatted - 00 unit
- */
 export function asDuration(
   value: Maybe<number>,
   { defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
