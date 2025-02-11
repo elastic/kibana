@@ -35,7 +35,11 @@ describe('Update Insights Route Handler', () => {
 
     registerUpdateInsightsRoute(router, mockEndpointContext);
 
-    callRoute = async (params, body, authz = { canWriteWorkflowInsights: true }) => {
+    callRoute = async (
+      params,
+      body,
+      authz = { canWriteWorkflowInsights: true, canReadWorkflowInsights: true }
+    ) => {
       const mockContext = {
         core: {
           security: {
