@@ -37,7 +37,7 @@ export const RuleFormFlyoutWithContext = <MetaData extends RuleTypeMetaData>(
       ownFocus
       onClose={onClose}
       aria-labelledby="flyoutTitle"
-      size={500}
+      size={620}
       className="ruleFormFlyout__container"
       hideCloseButton={hideCloseButton}
     >
