@@ -12,18 +12,19 @@ import { calculateObjectDiff, flattenObject } from '@kbn/object-utils';
 import {
   ProcessorDefinition,
   ProcessorDefinitionWithId,
-  RecursiveRecord,
+  FlattenRecord,
+  flattenRecord,
   getInheritedFieldsFromAncestors,
   getProcessorType,
   isWiredStreamDefinition,
   namedFieldDefinitionConfigSchema,
   processorWithIdDefinitionSchema,
-  recursiveRecord,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { isEmpty, mapValues, omit, uniq } from 'lodash';
 import {
   ClusterComponentTemplateNode,
+  ErrorCauseKeys,
   IngestPipelineConfig,
   IngestProcessorContainer,
   IngestSimulateDocument,
@@ -39,13 +40,12 @@ import { createServerRoute } from '../../create_server_route';
 import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';
 import { SimulationFailedError } from '../../../lib/streams/errors/simulation_failed_error';
 import { DetectedMappingFailureError } from '../../../lib/streams/errors/detected_mapping_failure_error';
-import { NonAdditiveProcessorError } from '../../../lib/streams/errors/non_additive_processor_error';
 
 const paramsSchema = z.object({
   path: z.object({ name: z.string() }),
   body: z.object({
     processing: z.array(processorWithIdDefinitionSchema),
-    documents: z.array(recursiveRecord),
+    documents: z.array(flattenRecord),
     detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
   }),
 });
@@ -93,18 +93,23 @@ export const simulateProcessorRoute = createServerRoute({
       params.body.processing
     );
 
-    return prepareSimulationResponse(
+    const res = await prepareSimulationResponse(
       normalizedDocs,
       processorsMetrics,
       streamsClient,
       params.path.name
     );
+
+    return res;
   },
 });
 
 /* processing/_simulate API helpers */
 
-const prepareSimulationDocs = (documents: RecursiveRecord[], streamName: string): IngestSimulateDocument[] => {
+const prepareSimulationDocs = (
+  documents: FlattenRecord[],
+  streamName: string
+): IngestSimulateDocument[] => {
   return documents.map((doc, id) => ({
     _index: streamName,
     _id: id.toString(),
@@ -176,9 +181,9 @@ const prepareIngestSimulationBody = (
 ) => {
   const { path, body } = params;
   const { detected_fields } = body;
-  
+
   const { docs, processors } = simulationData;
-  
+
   // TODO: update type once Kibana updates to elasticsearch-js 8.17
   const simulationBody: {
     docs: IngestSimulateDocument[];
@@ -245,7 +250,9 @@ const conditionallyExecuteIngestSimulation = async (
 
   const simulationBody = prepareIngestSimulationBody(simulationData, params);
 
-  let simulationResult: ;
+  let simulationResult: {
+    docs: Array<{ doc: IngestSimulateDocument & { error?: ErrorCauseKeys } }>;
+  };
 
   try {
     // TODO: We should be using scopedClusterClient.asCurrentUser.simulate.ingest() once Kibana updates to elasticsearch-js 8.17
@@ -264,7 +271,7 @@ const conditionallyExecuteIngestSimulation = async (
 
   if (entryWithError) {
     throw new DetectedMappingFailureError(
-      `The detected field types might not be compatible with these documents. ${entryWithError.doc.error.reason}`
+      `The detected field types might not be compatible with these documents. ${entryWithError.doc.error?.reason}`
     );
   }
 
@@ -282,7 +289,7 @@ interface NormalizedSimulationDoc {
   detected_fields: Array<{ processor_id: string; field: string }>;
   errors: SimulatedDocError[];
   status: DocSimulationStatus;
-  value: RecursiveRecord;
+  value: FlattenRecord;
 }
 
 interface ProcessorMetrics {
@@ -332,7 +339,7 @@ const getDocumentStatus = (doc: IngestSimulateSimulateDocumentResult): DocSimula
 
 const parsePipelineSimulationResult = (
   simulationResult: IngestSimulateResponse,
-  sampleDocs: Array<{ _source: RecursiveRecord }>,
+  sampleDocs: Array<{ _source: FlattenRecord }>,
   processing: ProcessorDefinitionWithId[]
 ): {
   normalizedDocs: NormalizedSimulationDoc[];
@@ -384,7 +391,7 @@ const parsePipelineSimulationResult = (
 
 const computeSimulationDocDiff = (
   docResult: IngestSimulateSimulateDocumentResult,
-  sample: RecursiveRecord
+  sample: FlattenRecord
 ) => {
   const successfulProcessors = docResult.processor_results!.filter(isSuccessfulProcessor);
 
@@ -392,7 +399,7 @@ const computeSimulationDocDiff = (
     { processor_id: 'sample', value: sample },
     ...successfulProcessors.map((proc) => ({
       processor_id: proc.tag,
-      value: omit(proc.doc._source, ['_errors', 'ingest']),
+      value: omit(proc.doc._source, ['_errors']),
     })),
   ];
 
@@ -430,24 +437,6 @@ const computeSimulationDocDiff = (
 
   return diffResult;
 };
-
-// const assertSimulationResult = (simulationDiffs: ReturnType<typeof prepareSimulationDiffs>) => {
-//   // Assert mappings are compatible with the documents
-//   const entryWithError = simulationResult.docs.find(isMappingFailure);
-//   if (entryWithError) {
-//     throw new DetectedMappingFailureError(
-//       `The detected field types might not be compatible with these documents. ${entryWithError.doc.error.reason}`
-//     );
-//   }
-//   // Assert that the processors are purely additive to the documents
-//   const updatedFields = computeUpdatedFields(simulationDiffs);
-
-//   if (!isEmpty(updatedFields)) {
-//     throw new NonAdditiveProcessorError(
-//       `The processor is not additive to the documents. It might update fields [${updatedFields.join()}]`
-//     );
-//   }
-// };
 
 const prepareSimulationResponse = async (
   normalizedDocs: NormalizedSimulationDoc[],

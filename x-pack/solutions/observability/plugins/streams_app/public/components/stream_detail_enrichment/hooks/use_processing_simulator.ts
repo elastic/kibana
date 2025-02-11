@@ -15,10 +15,12 @@ import {
   processorDefinitionSchema,
   isSchema,
   RecursiveRecord,
+  FlattenRecord,
 } from '@kbn/streams-schema';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
+import { flattenObject } from '@kbn/object-utils';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
@@ -117,15 +119,15 @@ export const useProcessingSimulator = ({
 
   const {
     loading: isLoadingSamples,
-    value: samples,
+    value: sampleDocs,
     refresh: refreshSamples,
   } = useStreamsAppFetch(
-    ({ signal }) => {
+    async ({ signal }) => {
       if (!definition) {
-        return { documents: [] };
+        return [];
       }
 
-      return streamsRepositoryClient.fetch('POST /api/streams/{name}/_sample', {
+      const samplesBody = await streamsRepositoryClient.fetch('POST /api/streams/{name}/_sample', {
         signal,
         params: {
           path: { name: definition.stream.name },
@@ -137,12 +139,12 @@ export const useProcessingSimulator = ({
           },
         },
       });
+
+      return samplesBody.documents.map((doc) => flattenObject(doc)) as FlattenRecord[];
     },
     [definition, streamsRepositoryClient, start, end, samplingCondition],
     { disableToastOnError: true }
   );
-
-  const sampleDocs = samples?.documents;
 
   const {
     loading: isLoadingSimulation,
