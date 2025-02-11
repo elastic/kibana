@@ -9,6 +9,7 @@ import {
   InheritedFieldDefinition,
   StreamGetResponse,
   WiredStreamGetResponse,
+  findInheritedLifecycle,
   isGroupStreamDefinition,
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
@@ -19,7 +20,6 @@ import {
   getDataStreamLifecycle,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
-import { findInheritedLifecycle } from '../../../lib/streams/helpers/lifecycle';
 
 export async function readStream({
   name,
