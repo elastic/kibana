@@ -306,7 +306,6 @@ export const getNavigationTreeDefinition = ({
                     },
                   ],
                   id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
-                  link: 'management',
                   renderAs: 'panelOpener',
                   spaceBefore: null,
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.mngt', {
