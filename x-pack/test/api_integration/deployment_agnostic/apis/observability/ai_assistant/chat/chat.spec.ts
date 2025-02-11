@@ -56,7 +56,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         params: {
           body: {
             name: 'my_api_call',
-            system: 'You are a helpful assistant',
+            systemMessage: 'You are a helpful assistant',
             messages,
             connectorId: 'does not exist',
             functions: [],
@@ -149,7 +149,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           params: {
             body: {
               name: 'my_api_call',
-              system: 'You are a helpful assistant',
+              systemMessage: 'You are a helpful assistant',
               messages,
               connectorId,
               functions: [],
