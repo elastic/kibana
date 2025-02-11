@@ -44,15 +44,8 @@ const statsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/stats',
   params: t.type({
     query: t.intersection([
-      t.union([
-        t.partial({ types: typesRt }),
-        t.partial({
-          datasetQuery: t.string,
-        }),
-      ]),
-      t.partial({
-        includeCreationDate: t.boolean,
-      }),
+      t.union([t.type({ types: typesRt }), t.type({ datasetQuery: t.string })]),
+      t.partial({ includeCreationDate: t.boolean }),
     ]),
   }),
   options: {
