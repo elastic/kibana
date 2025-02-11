@@ -151,10 +151,3 @@ export const REQUIRED_LABEL = i18n.translate(
     defaultMessage: 'Required',
   }
 );
-
-export const OPTIONAL_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.fieldOptionalLabel',
-  {
-    defaultMessage: 'Optional',
-  }
-);

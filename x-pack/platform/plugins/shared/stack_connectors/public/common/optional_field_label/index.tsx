@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 export const OptionalFieldLabel = (
   <EuiText color="subdued" size="xs" data-test-subj="form-optional-field-label">
-    {i18n.translate('xpack.stackConnectors.public.common.optionalFieldLabel.Optional', {
+    {i18n.translate('xpack.stackConnectors.public.common.optionalFieldLabel', {
       defaultMessage: 'Optional',
     })}
   </EuiText>
