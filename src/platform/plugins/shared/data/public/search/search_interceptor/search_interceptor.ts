@@ -622,6 +622,7 @@ export class SearchInterceptor {
     this.deps.toasts.addDanger({
       title: 'Timed out',
       text: toMountPoint(e.getErrorMessage(this.application), this.startRenderServices),
+      toastLifeTimeMs: 1000 * 60 * 60,
     });
   };
 
