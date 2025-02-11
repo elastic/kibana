@@ -141,7 +141,7 @@ export function SloHealthPanel() {
       render: (item: SLOHealthResponse) => {
         return (
           <HealthWrapper status={item.health.delay}>
-            {i18n.translate('xpack.slo.healthPanel.durationInMilliseconds', {
+            {i18n.translate('xpack.slo.healthPanel.durationInSeconds', {
               defaultMessage: '{duration} s',
               values: {
                 duration: numeral(item.data.delay).format('0.[00]'),
@@ -166,7 +166,7 @@ export function SloHealthPanel() {
       render: (item: SLOHealthResponse) => {
         return (
           <HealthWrapper status={item.health.staleTime}>
-            {i18n.translate('xpack.slo.healthPanel.durationInMilliseconds', {
+            {i18n.translate('xpack.slo.healthPanel.durationInSeconds', {
               defaultMessage: '{duration} s',
               values: {
                 duration: numeral(item.data.staleTime).format('0.[00]'),
