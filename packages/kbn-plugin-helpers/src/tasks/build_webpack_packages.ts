@@ -40,6 +40,8 @@ export async function buildWebpackPackages({ log, quiet, dist }: TaskContext) {
 }
 
 export async function buildWebpackBundlesWithMoon({ log, quiet, dist }: TaskContext) {
+  log.info('building required artifacts for the optimizer');
+
   const packageNames = ['@kbn/ui-shared-deps-npm', '@kbn/ui-shared-deps-src', '@kbn/monaco'];
 
   const stdioOptions: Array<'ignore' | 'pipe' | 'inherit'> = quiet
@@ -47,7 +49,7 @@ export async function buildWebpackBundlesWithMoon({ log, quiet, dist }: TaskCont
     : ['inherit', 'inherit', 'inherit'];
 
   const moonTargets = packageNames.map((n) => `${n}:build`);
-  await execa('moon', moonTargets.concat(dist ? ['--dist'] : []), {
+  await execa('moon', moonTargets.concat(dist ? ['--', '--dist'] : []), {
     cwd: REPO_ROOT,
     stdio: stdioOptions,
   });
