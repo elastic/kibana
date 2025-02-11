@@ -399,13 +399,7 @@ const AllAssets = ({
             />
           </h1>
         </EuiTitle>
-        {dataView ? (
-          <Filters
-            dataView={dataView}
-            dataViewSpec={dataView.toSpec()}
-            onFiltersChange={() => {}}
-          />
-        ) : null}
+        <Filters onFiltersChange={() => {}} />
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <div
             data-test-subj={rest['data-test-subj']}
