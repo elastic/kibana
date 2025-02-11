@@ -9,16 +9,16 @@
 
 import React from 'react';
 
-import { EuiCard, EuiIcon } from '@elastic/eui';
+import { EuiCard, EuiCardProps, EuiIcon, IconType } from '@elastic/eui';
 
 interface SynopsisProps {
   id: string;
   description: string;
   iconUrl?: string;
-  iconType?: string;
+  iconType?: IconType;
   title: string;
   url?: string;
-  onClick?: () => void;
+  onClick?: EuiCardProps['onClick'];
   isBeta?: boolean;
 }
 export function Synopsis({
