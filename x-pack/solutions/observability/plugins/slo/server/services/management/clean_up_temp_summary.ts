@@ -29,7 +29,11 @@ export interface AggResults {
 }
 
 export class CleanUpTempSummary {
-  constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {}
+  constructor(
+    private readonly esClient: ElasticsearchClient,
+    private readonly logger: Logger,
+    private readonly abortController: AbortController
+  ) {}
 
   public async execute(): Promise<void> {
     const openCircuitBreaker = await this.shouldOpenCircuitBreaker();
@@ -52,55 +56,61 @@ export class CleanUpTempSummary {
   }
 
   private async shouldOpenCircuitBreaker() {
-    const results = await this.esClient.count({ index: SUMMARY_TEMP_INDEX_NAME });
+    const results = await this.esClient.count(
+      { index: SUMMARY_TEMP_INDEX_NAME },
+      { signal: this.abortController.signal }
+    );
     return results.count === 0;
   }
 
   private async findDuplicateTemporaryDocuments(searchAfterKey: AggBucketKey | undefined) {
     this.logger.info('Searching for duplicate temporary documents');
-    const results = await this.esClient.search<unknown, AggResults>({
-      index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      size: 0,
-      aggs: {
-        duplicate_ids: {
-          composite: {
-            size: 10000,
-            after: searchAfterKey,
-            sources: [
-              {
-                spaceId: {
-                  terms: {
-                    field: 'spaceId',
+    const results = await this.esClient.search<unknown, AggResults>(
+      {
+        index: SUMMARY_DESTINATION_INDEX_PATTERN,
+        size: 0,
+        aggs: {
+          duplicate_ids: {
+            composite: {
+              size: 10000,
+              after: searchAfterKey,
+              sources: [
+                {
+                  spaceId: {
+                    terms: {
+                      field: 'spaceId',
+                    },
                   },
                 },
-              },
-              {
-                id: {
-                  terms: {
-                    field: 'slo.id',
+                {
+                  id: {
+                    terms: {
+                      field: 'slo.id',
+                    },
                   },
                 },
-              },
-            ],
-          },
-          aggs: {
-            cardinality_istempdoc: {
-              cardinality: {
-                field: 'isTempDoc',
-              },
+              ],
             },
-            find_duplicates: {
-              bucket_selector: {
-                buckets_path: {
-                  cardinality: 'cardinality_istempdoc',
+            aggs: {
+              cardinality_istempdoc: {
+                cardinality: {
+                  field: 'isTempDoc',
                 },
-                script: 'params.cardinality == 2',
+              },
+              find_duplicates: {
+                bucket_selector: {
+                  buckets_path: {
+                    cardinality: 'cardinality_istempdoc',
+                  },
+                  script: 'params.cardinality == 2',
+                },
               },
             },
           },
         },
       },
-    });
+      { signal: this.abortController.signal }
+    );
 
     const buckets = (results.aggregations?.duplicate_ids.buckets ?? []).map((bucket) => bucket.key);
     const nextSearchAfterKey = results.aggregations?.duplicate_ids.after_key;
@@ -112,39 +122,42 @@ export class CleanUpTempSummary {
 
   private async deleteDuplicateTemporaryDocuments(buckets: AggBucketKey[]) {
     this.logger.info(`Deleting ${buckets.length} duplicate temporary documents`);
-    await this.esClient.deleteByQuery({
-      index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      wait_for_completion: false,
-      body: {
-        query: {
-          bool: {
-            should: buckets.map((bucket) => {
-              return {
-                bool: {
-                  must: [
-                    {
-                      term: {
-                        isTempDoc: true,
+    await this.esClient.deleteByQuery(
+      {
+        index: SUMMARY_DESTINATION_INDEX_PATTERN,
+        wait_for_completion: false,
+        body: {
+          query: {
+            bool: {
+              should: buckets.map((bucket) => {
+                return {
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          isTempDoc: true,
+                        },
                       },
-                    },
-                    {
-                      term: {
-                        'slo.id': bucket.id,
+                      {
+                        term: {
+                          'slo.id': bucket.id,
+                        },
                       },
-                    },
-                    {
-                      term: {
-                        spaceId: bucket.spaceId,
+                      {
+                        term: {
+                          spaceId: bucket.spaceId,
+                        },
                       },
-                    },
-                  ],
-                },
-              };
-            }),
-            minimum_should_match: 1,
+                    ],
+                  },
+                };
+              }),
+              minimum_should_match: 1,
+            },
           },
         },
       },
-    });
+      { signal: this.abortController.signal }
+    );
   }
 }

@@ -33,7 +33,11 @@ describe('CleanUpTempSummary', () => {
   beforeEach(() => {
     jest.useFakeTimers().setSystemTime(new Date('2025-02-10T15:00:00.000Z'));
     esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-    service = new CleanUpTempSummary(esClientMock, loggingSystemMock.createLogger());
+    service = new CleanUpTempSummary(
+      esClientMock,
+      loggingSystemMock.createLogger(),
+      new AbortController()
+    );
   });
 
   afterAll(() => {

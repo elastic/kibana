@@ -112,7 +112,11 @@ export class TempSummaryCleanupTask {
     const esClient = coreStart.elasticsearch.client.asInternalUser;
 
     try {
-      const cleanUpTempSummary = new CleanUpTempSummary(esClient, this.logger);
+      const cleanUpTempSummary = new CleanUpTempSummary(
+        esClient,
+        this.logger,
+        this.abortController
+      );
       await cleanUpTempSummary.execute();
     } catch (err) {
       if (err instanceof errors.RequestAbortedError) {
