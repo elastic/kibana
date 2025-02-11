@@ -138,7 +138,8 @@ export const chromeStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
 
   .header__breadcrumbsWithExtensionContainer {
     overflow: hidden; // enables text-ellipsis in the last breadcrumb
-    .euiHeaderBreadcrumbs {
+    .euiHeaderBreadcrumbs,
+    .euiBreadcrumbs {
       // stop breadcrumbs from growing.
       // this makes the extension appear right next to the last breadcrumb
       flex-grow: 0;
@@ -147,7 +148,7 @@ export const chromeStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
       overflow: hidden; // enables text-ellipsis in the last breadcrumb
     }
   }
-  .header__breadcrumbsAppendExtension {
+  .header__breadcrumbsAppendExtension--last {
     flex-grow: 1;
   }
 `;

@@ -1359,21 +1359,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID",
-        "type": "string",
-        "tags": [],
-        "label": "OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID",
-        "description": [],
-        "signature": [
-          "\"observability:logsExplorer:allowedDataViews\""
-        ],
-        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID",
         "type": "string",
         "tags": [],

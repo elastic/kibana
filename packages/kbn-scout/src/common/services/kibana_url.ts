@@ -49,6 +49,10 @@ export class KibanaUrl {
     return url.href;
   }
 
+  domain() {
+    return this.#baseUrl.hostname;
+  }
+
   /**
    * Get the URL for an app
    * @param appName name of the app to get the URL for
