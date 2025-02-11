@@ -106,7 +106,7 @@ export function storedPackagePoliciesToAgentPermissions(
 
     const dataStreams = getNormalizedDataStreams(pkg);
     if (!dataStreams || dataStreams.length === 0) {
-      return [packagePolicy.name, undefined];
+      return [packagePolicy.id, maybeAddAdditionnalPackagePoliciesPermissions(packagePolicy)];
     }
 
     let dataStreamsForPermissions: DataStreamMeta[];
@@ -274,13 +274,21 @@ function maybeAddAgentlessPermissions(
 
 function maybeAddAdditionnalPackagePoliciesPermissions(
   packagePolicy: PackagePolicy,
-  existing: SecurityRoleDescriptor
-): SecurityRoleDescriptor {
+  existing?: SecurityRoleDescriptor
+): SecurityRoleDescriptor | undefined {
   if (
     !packagePolicy.additional_datastreams_permissions ||
     !packagePolicy.additional_datastreams_permissions.length
   ) {
     return existing;
+  }
+
+  if (!existing) {
+    existing = {};
+  }
+
+  if (!existing.indices) {
+    existing.indices = [];
   }
 
   existing.indices!.push({
