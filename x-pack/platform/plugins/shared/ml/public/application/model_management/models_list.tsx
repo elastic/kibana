@@ -35,7 +35,7 @@ import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { useEuiMaxBreakpoint } from '@elastic/eui';
@@ -116,6 +116,8 @@ export const ModelsList: FC<Props> = ({
     },
   } = useMlKibana();
 
+  const isInitialized = useRef<boolean>(false);
+
   const canManageSpacesAndSavedObjects = useCanManageSpacesAndSavedObjects();
 
   const trainedModelsService = useInitTrainedModelsService(canManageSpacesAndSavedObjects);
@@ -125,10 +127,6 @@ export const ModelsList: FC<Props> = ({
   const scheduledDeployments = useObservable(
     trainedModelsService.scheduledDeployments$,
     trainedModelsService.scheduledDeployments
-  );
-  const initialDataLoaded = useObservable(
-    trainedModelsService.initialDataLoaded$,
-    trainedModelsService.initialDataLoaded
   );
 
   // Navigation blocker when there are active operations
@@ -184,6 +182,15 @@ export const ModelsList: FC<Props> = ({
     trainedModelsService.fetchModels();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(
+    function checkInit() {
+      if (!isInitialized.current && !isLoading) {
+        isInitialized.current = true;
+      }
+    },
+    [isLoading]
+  );
 
   useEffect(
     function updateExpandedRows() {
@@ -561,7 +568,7 @@ export const ModelsList: FC<Props> = ({
     }
   }, [items, pageState.showAll]);
 
-  if (!initialDataLoaded) {
+  if (!isInitialized.current) {
     return null;
   }
 
