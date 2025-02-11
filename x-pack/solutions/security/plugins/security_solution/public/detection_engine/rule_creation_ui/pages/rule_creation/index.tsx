@@ -19,6 +19,7 @@ import {
 import React, { memo, useCallback, useRef, useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
   isMlRule,
@@ -731,6 +732,7 @@ const CreateRulePageComponent: React.FC = () => {
           }}
         >
           <StepRuleActions
+            ruleTypeId={ruleTypeMappings[ruleType]}
             isLoading={isCreateRuleLoading || loading || isStartingJobs}
             actionMessageParams={actionMessageParams}
             summaryActionMessageParams={actionMessageParams}
@@ -785,6 +787,7 @@ const CreateRulePageComponent: React.FC = () => {
       isCreateRuleLoading,
       isStartingJobs,
       loading,
+      ruleType,
       submitRuleDisabled,
       submitRuleEnabled,
     ]
