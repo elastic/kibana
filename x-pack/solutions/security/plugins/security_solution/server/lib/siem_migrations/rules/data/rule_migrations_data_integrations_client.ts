@@ -42,7 +42,9 @@ export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBase
         elser_embedding: [
           pkg.title,
           pkg.description,
-          ...(pkg.data_streams?.map((stream) => stream.title) || []),
+          ...(pkg.data_streams
+            ?.filter((stream) => stream.type === 'logs')
+            .map((stream) => stream.title) || []),
         ].join(' - '),
       }));
       await this.esClient
