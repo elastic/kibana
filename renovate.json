@@ -1411,7 +1411,8 @@
       "matchDepNames": [
         "prettier",
         "eslint-plugin-prettier",
-        "eslint-config-prettier"
+        "eslint-config-prettier",
+        "@types/prettier"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -3384,8 +3385,13 @@
       "matchBaseBranches": [
         "main"
       ],
+      "matchDepNames": [
+        "@pmmmwh/react-refresh-webpack-plugin",
+        "fix-esm",
+        "react-refresh"
+      ],
       "matchDepPatterns": [
-        "^@storybook"
+        "storybook"
       ],
       "labels": [
         "Team:Operations",
