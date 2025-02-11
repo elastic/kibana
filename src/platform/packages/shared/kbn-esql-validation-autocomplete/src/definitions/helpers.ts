@@ -60,11 +60,13 @@ export function getCommandSignature(
   typeName?: string,
   { withTypes }: { withTypes: boolean } = { withTypes: true }
 ) {
+  const commandName = typeName
+    ? `${typeName.toUpperCase()} ${name.toUpperCase()}`
+    : name.toUpperCase();
   return {
-    declaration: `${typeName?.toUpperCase()} ${name.toUpperCase()} ${printCommandArguments(
-      signature,
-      withTypes
-    )} ${(options || []).map(
+    declaration: `${commandName} ${printCommandArguments(signature, withTypes)} ${(
+      options || []
+    ).map(
       (option) =>
         `${
           option.wrapped ? option.wrapped[0] : ''
