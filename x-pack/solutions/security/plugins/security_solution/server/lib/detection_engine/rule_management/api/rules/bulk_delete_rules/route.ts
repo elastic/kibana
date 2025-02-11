@@ -124,10 +124,12 @@ export const bulkDeleteRulesRoute = (
     access: 'public',
     path: DETECTION_ENGINE_RULES_BULK_DELETE,
     options: {
-      tags: ['access:securitySolution'],
       timeout: {
         idleSocket: RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS,
       },
+    },
+    security: {
+      authz: { requiredPrivileges: ['securitySolution'] },
     },
   };
   router.versioned.delete(routeConfig).addVersion(
