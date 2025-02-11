@@ -88,13 +88,12 @@ export const getFieldConfiguration = (
           defaultMessage: 'Dependency',
         }
       ),
-      content: (value) =>
-        value ? (
-          <DependencyNameLink
-            dependencyName={value}
-            environment={attributes[SERVICE_ENVIRONMENT_FIELD]}
-          />
-        ) : null,
+      content: (value) => (
+        <DependencyNameLink
+          dependencyName={value}
+          environment={attributes[SERVICE_ENVIRONMENT_FIELD]}
+        />
+      ),
       value: attributes[SPAN_DESTINATION_SERVICE_RESOURCE_FIELD],
       fieldMetadata: {
         flat_name: 'span.destination.service.resource ',
@@ -125,14 +124,14 @@ export const getFieldConfiguration = (
       title: i18n.translate('discover.docViews.tracesOverview.details.spanType.title', {
         defaultMessage: 'Type',
       }),
-      content: (value) => (value ? <EuiBadge color="hollow">{value}</EuiBadge> : null),
+      content: (value) => <EuiBadge color="hollow">{value}</EuiBadge>,
       value: attributes[SPAN_TYPE_FIELD],
     },
     [SPAN_SUBTYPE_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.spanSubtype.title', {
         defaultMessage: 'Subtype',
       }),
-      content: (value) => (value ? <EuiBadge color="hollow">{value}</EuiBadge> : null),
+      content: (value) => <EuiBadge color="hollow">{value}</EuiBadge>,
       value: attributes[SPAN_SUBTYPE_FIELD],
     },
     [HTTP_RESPONSE_STATUS_CODE_FIELD]: {
@@ -142,21 +141,21 @@ export const getFieldConfiguration = (
           defaultMessage: 'Status code',
         }
       ),
-      content: (value) => (value ? <HttpStatusCode code={value} /> : null),
+      content: (value) => <HttpStatusCode code={value} />,
       value: attributes[HTTP_RESPONSE_STATUS_CODE_FIELD],
     },
     [USER_AGENT_NAME_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.userAgent.title', {
         defaultMessage: 'User agent',
       }),
-      content: (value) => (value ? <EuiText size="xs">{value}</EuiText> : null),
+      content: (value) => <EuiText size="xs">{value}</EuiText>,
       value: attributes[USER_AGENT_NAME_FIELD],
     },
     [USER_AGENT_VERSION_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.userAgentVersion.title', {
         defaultMessage: 'User agent version',
       }),
-      content: (value) => (value ? <EuiText size="xs">{value}</EuiText> : null),
+      content: (value) => <EuiText size="xs">{value}</EuiText>,
       value: attributes[USER_AGENT_VERSION_FIELD],
     },
   };
