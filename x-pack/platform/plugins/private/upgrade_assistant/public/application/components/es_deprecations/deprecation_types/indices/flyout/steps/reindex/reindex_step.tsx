@@ -28,6 +28,8 @@ import type { ReindexState } from '../../../use_reindex';
 import { ReindexProgress } from './progress';
 import { useAppContext } from '../../../../../../../app_context';
 import { FrozenCallOut } from '../frozen_callout';
+import { FetchFailedCallOut } from '../fetch_failed_callout';
+import { ReindexingFailedCallOut } from '../reindexing_failed_callout';
 
 const buttonLabel = (status?: ReindexStatus) => {
   switch (status) {
@@ -112,7 +114,6 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
             />
           </Fragment>
         )}
-
         {nodes && nodes.length > 0 && (
           <>
             <EuiCallOut
@@ -153,33 +154,10 @@ export const ReindexFlyoutStep: React.FunctionComponent<{
             <EuiSpacer />
           </>
         )}
-
-        {(hasFetchFailed || hasReindexingFailed) && (
-          <>
-            <EuiCallOut
-              color="danger"
-              iconType="warning"
-              data-test-subj={hasFetchFailed ? 'fetchFailedCallout' : 'reindexingFailedCallout'}
-              title={
-                hasFetchFailed ? (
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.fetchFailedCalloutTitle"
-                    defaultMessage="Reindex status not available"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingFailedCalloutTitle"
-                    defaultMessage="Reindexing error"
-                  />
-                )
-              }
-            >
-              {reindexState.errorMessage}
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
+        {hasFetchFailed && <FetchFailedCallOut errorMessage={reindexState.errorMessage!} />}
+        {!hasFetchFailed && hasReindexingFailed && (
+          <ReindexingFailedCallOut errorMessage={reindexState.errorMessage!} />
         )}
-
         <EuiText>
           <p>
             <FormattedMessage

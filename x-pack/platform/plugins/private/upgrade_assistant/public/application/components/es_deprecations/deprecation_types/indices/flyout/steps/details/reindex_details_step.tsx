@@ -30,6 +30,8 @@ import { useAppContext } from '../../../../../../../app_context';
 import { getReindexButtonLabel } from './messages';
 import { FrozenCallOut } from '../frozen_callout';
 import type { UpdateIndexState } from '../../../use_update_index';
+import { FetchFailedCallOut } from '../fetch_failed_callout';
+import { ReindexingFailedCallOut } from '../reindexing_failed_callout';
 
 /**
  * Displays a flyout that shows the details / corrective action for a "reindex" deprecation for a given index.
@@ -120,30 +122,9 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
           </>
         )}
 
-        {(hasFetchFailed || hasReindexingFailed) && (
-          <>
-            <EuiCallOut
-              color="danger"
-              iconType="warning"
-              data-test-subj={hasFetchFailed ? 'fetchFailedCallout' : 'reindexingFailedCallout'}
-              title={
-                hasFetchFailed ? (
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.fetchFailedCalloutTitle"
-                    defaultMessage="Data stream reindex status not available"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingFailedCalloutTitle"
-                    defaultMessage="Data stream reindexing error"
-                  />
-                )
-              }
-            >
-              {reindexState.errorMessage}
-            </EuiCallOut>
-            <EuiSpacer />
-          </>
+        {hasFetchFailed && <FetchFailedCallOut errorMessage={reindexState.errorMessage!} />}
+        {!hasFetchFailed && hasReindexingFailed && (
+          <ReindexingFailedCallOut errorMessage={reindexState.errorMessage!} />
         )}
 
         {meta.isFrozen && <FrozenCallOut />}
