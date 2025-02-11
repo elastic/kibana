@@ -231,9 +231,9 @@ export const checkForFrozenIndices = async ({
       }
     }
     if (frozenIndices.length > 0) {
-      return `This rule found frozen indices that could not be excluded by the time range filter: ${frozenIndices.join(
-        ', '
-      )}`;
+      return `This rule found frozen indices that could not be excluded by the time range filter: ${frozenIndices
+        .sort()
+        .join(', ')}`;
     }
   }
 };
