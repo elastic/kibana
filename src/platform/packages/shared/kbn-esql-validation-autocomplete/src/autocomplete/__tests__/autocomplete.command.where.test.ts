@@ -136,6 +136,17 @@ describe('WHERE <expression>', () => {
       }
     });
 
+    test('filters suggestions based on previous commands', async () => {
+      const { assertSuggestions } = await setup();
+
+      await assertSuggestions('from a | where / | limit 3', [
+        ...getFieldNamesByType('any')
+          .map((field) => `${field} `)
+          .map(attachTriggerCommand),
+        ...allEvalFns,
+      ]);
+    });
+
     test('suggests operators after a field name', async () => {
       const { assertSuggestions } = await setup();
 
