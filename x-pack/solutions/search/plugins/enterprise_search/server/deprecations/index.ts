@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { Connector, fetchConnectors } from '@kbn/search-connectors';
 
 import { ConfigType } from '..';
+import { getPreEightEnterpriseSearchIndices } from './pre_eight_index_deprecator';
 
 const NATIVE_SERVICE_TYPES = [
   'azure_blob_storage',
@@ -59,11 +60,12 @@ export const getRegisteredDeprecations = (
         true // only counts if the Fleet Server is active
       );
       const entSearchDetails = getEnterpriseSearchNodeDeprecation(config, cloud, docsUrl);
-      const [crawlerDetails, nativeConnectorsDetails] = await Promise.all([
+      const [crawlerDetails, nativeConnectorsDetails, entSearchIndexIncompatibility] = await Promise.all([
         await getCrawlerDeprecations(ctx, docsUrl),
         await getNativeConnectorDeprecations(ctx, hasAgentless, hasFleetServer, cloud, docsUrl),
+        await getEnterpriseSearchPre7IndexDeprecations(ctx, config, cloud, docsUrl),
       ]);
-      return [...entSearchDetails, ...crawlerDetails, ...nativeConnectorsDetails];
+      return [...entSearchDetails, ...crawlerDetails, ...nativeConnectorsDetails, ...entSearchIndexIncompatibility];
     },
   };
 };
@@ -413,4 +415,84 @@ export async function getNativeConnectorDeprecations(
 
     return deprecations;
   }
+}
+
+/**
+ * If there are any Enterprise Search indices that were created with Elasticsearch 7.x, they must be removed
+ * or set to read-only
+ */
+export async function getEnterpriseSearchPre7IndexDeprecations(
+  ctx: GetDeprecationsContext,
+  config: ConfigType,
+  cloud: CloudSetup,
+  docsUrl: string
+): Promise<DeprecationsDetails[]> {
+  const deprecations: DeprecationsDetails[] = [];
+
+  if (!config.host) {
+    return deprecations;
+  }
+
+  // TODO - find out : is this applicable only on cloud?
+  // const isCloud = !!cloud?.cloudId;
+
+  const entSearchIndices = await getPreEightEnterpriseSearchIndices(ctx.esClient.asInternalUser);
+  if (!entSearchIndices || entSearchIndices.length === 0) {
+    return deprecations;
+  }
+
+  let deprecatedIndicesCount = entSearchIndices.length;
+  let indicesList = '';
+  for (const index of entSearchIndices) {
+    indicesList += `- ${index}\n`;
+  }
+
+  deprecations.push({
+    level: 'critical',
+    deprecationType: 'feature',
+    title: i18n.translate(
+      'xpack.enterpriseSearch.deprecations.incompatibleEnterpriseSearchIndexes.title',
+      {
+        defaultMessage: 'Pre 8.x Enterprise Search indices compatibility',
+      }
+    ),
+    message: {
+      type: 'markdown',
+      content: i18n.translate(
+        'xpack.enterpriseSearch.deprecations.incompatibleEnterpriseSearchIndexes.message',
+        {
+          defaultMessage:
+          'There are {deprecatedIndicesCount} incompatible Enterprise Search indices.\n\n' +
+          'The following indices are found to be incompatible for upgrade:\n' +
+          '<details>\n' +
+          '<summary>Click to view incompatible indices</summary>\n' +
+          '{indicesList}\n' +
+          '</details>\n' +
+          'These indices must be either set to read-only or deleted before upgrading. ' +
+          'Setting these indices to a lossless operation, and can be attempted with the "quick resolve" button below.\n\n' +
+          'Alternatively, manually deleting these indices will also unblock your upgrade.',
+}
+      ),
+    },
+    documentationUrl: docsUrl,
+    correctiveActions: {
+      manualSteps: [
+        i18n.translate(
+          'xpack.enterpriseSearch.deprecations.incompatibleEnterpriseSearchIndexes.deleteIndices',
+          {
+            defaultMessage: 'Delete all incompatible indices shows in the list above',
+          }
+        ),
+      ],
+      api: {
+        method: 'POST',
+        path: '/internal/enterprise_search/deprecations/set_enterprise_search_indices_read_only',
+        body: {
+          deprecationDetails: { domainId: 'enterpriseSearch' },
+        }
+      },
+    },    
+  });
+
+  return deprecations;
 }
