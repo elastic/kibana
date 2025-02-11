@@ -10,7 +10,6 @@ import { useValues } from 'kea';
 
 import {
   EuiBadge,
-  EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiCode,
@@ -419,7 +418,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                   {agentlessAgentExists ? (
                     <AgentlessConnectorStatusBadge status={agentlessOverview?.agent.status} />
                   ) : (
-                    <EuiBadge color="default">{noAgentLabel}</EuiBadge>
+                    <EuiBadge color="warning">{noAgentLabel}</EuiBadge>
                   )}
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -427,7 +426,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
             footer={
               <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiButton
+                  <EuiButtonEmpty
                     data-test-subj="connectorStatsViewLogsButton"
                     aria-label={i18n.translate(
                       'xpack.enterpriseSearch.connectors.connectorStats.viewLogsButtonLabel',
@@ -443,10 +442,10 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                       'xpack.enterpriseSearch.connectors.connectorStats.viewLogsButtonLabel',
                       { defaultMessage: 'View logs' }
                     )}
-                  </EuiButton>
+                  </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  {agentlessAgentExists ? (
+                  {agentlessAgentExists && (
                     <EuiButtonEmpty
                       isDisabled={!agentlessOverview || !agentlessOverview.agent.id}
                       size="s"
@@ -463,10 +462,6 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                         }
                       )}
                     </EuiButtonEmpty>
-                  ) : (
-                    <EuiText size="s" color="warning">
-                      {noAgentLabel}
-                    </EuiText>
                   )}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
