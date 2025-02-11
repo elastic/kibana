@@ -38,6 +38,9 @@ exports[`CleanUpTempSummary deletes the duplicated temp documents 1`] = `
         "index": ".slo-observability.summary-v3*",
         "wait_for_completion": false,
       },
+      Object {
+        "signal": AbortSignal {},
+      },
     ],
     Array [
       Object {
@@ -73,6 +76,9 @@ exports[`CleanUpTempSummary deletes the duplicated temp documents 1`] = `
         },
         "index": ".slo-observability.summary-v3*",
         "wait_for_completion": false,
+      },
+      Object {
+        "signal": AbortSignal {},
       },
     ],
   ],
