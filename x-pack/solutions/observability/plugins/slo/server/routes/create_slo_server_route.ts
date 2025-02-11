@@ -5,10 +5,16 @@
  * 2.0.
  */
 import { createServerRouteFactory } from '@kbn/server-route-repository';
-import { Boom, forbidden, notFound, conflict, badRequest } from '@hapi/boom';
+import { Boom, forbidden, notFound, conflict, badRequest, tooManyRequests } from '@hapi/boom';
 import { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
 import { SLORouteHandlerResources } from './types';
-import { SLOError, SLONotFound, SLOIdConflict, SecurityException } from '../errors';
+import {
+  SLOError,
+  SLONotFound,
+  SLOIdConflict,
+  SecurityException,
+  TooManyRequestsException,
+} from '../errors';
 
 function handleSLOError(error: SLOError): Boom {
   if (error instanceof SLONotFound) {
@@ -21,6 +27,10 @@ function handleSLOError(error: SLOError): Boom {
 
   if (error instanceof SecurityException) {
     return forbidden(error.message);
+  }
+
+  if (error instanceof TooManyRequestsException) {
+    return tooManyRequests(error.message);
   }
 
   return badRequest(error.message);

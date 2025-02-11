@@ -22,3 +22,4 @@ export class IllegalArgumentError extends SLOError {}
 export class InvalidTransformError extends SLOError {}
 
 export class SecurityException extends SLOError {}
+export class TooManyRequestsException extends SLOError {}

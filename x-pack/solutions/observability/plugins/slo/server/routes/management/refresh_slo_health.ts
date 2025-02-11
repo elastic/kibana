@@ -21,7 +21,7 @@ export const refreshSLOHealthRoute = createSloServerRoute({
     },
   },
   params: refreshSLOHealthParamsSchema,
-  handler: async ({ context, request, params, logger, plugins }) => {
+  handler: async ({ context, request, logger, plugins }) => {
     await assertPlatinumLicense(plugins);
     const [spaceId, coreContext] = await Promise.all([getSpaceId(plugins, request), context.core]);
     const esClient = coreContext.elasticsearch.client.asCurrentUser;

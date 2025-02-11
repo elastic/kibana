@@ -11,6 +11,11 @@ const refreshSLOHealthParamsSchema = t.partial({
   query: t.type({}),
 });
 
-export type RefreshSLOHealthParams = t.TypeOf<typeof refreshSLOHealthParamsSchema.props.query>;
+const refreshSLOHealthResponseSchema = t.type({
+  processed: t.number,
+});
 
-export { refreshSLOHealthParamsSchema };
+export type RefreshSLOHealthParams = t.TypeOf<typeof refreshSLOHealthParamsSchema.props.query>;
+export type RefreshSLOHealthResponse = t.OutputOf<typeof refreshSLOHealthResponseSchema>;
+
+export { refreshSLOHealthParamsSchema, refreshSLOHealthResponseSchema };

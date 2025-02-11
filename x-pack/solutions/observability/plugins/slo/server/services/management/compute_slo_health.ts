@@ -50,7 +50,7 @@ export class ComputeSLOHealth {
     private readonly abortController: AbortController = new AbortController()
   ) {}
 
-  public async execute(spaceId?: string): Promise<void> {
+  public async execute(spaceId?: string): Promise<{ processed: number }> {
     this.logger.info(`Computing SLOs health for spaceId [${spaceId ?? '*'}]`);
 
     const finder = await this.soClient.createPointInTimeFinder<StoredSLODefinition>({
@@ -59,6 +59,7 @@ export class ComputeSLOHealth {
       namespaces: [spaceId ?? '*'],
     });
     const createdAt = new Date();
+    let processedCount = 0;
 
     for await (const response of finder.find()) {
       function getSpaceId(id: string): string {
@@ -125,7 +126,7 @@ export class ComputeSLOHealth {
         );
 
         return {
-          id: generateDocId(sloDefinitionToSpaceMap, sloDefinition),
+          id: this.generateDocId(sloDefinitionToSpaceMap, sloDefinition),
           name: sloDefinition.name,
           description: sloDefinition.description,
           tags: sloDefinition.tags,
@@ -156,6 +157,7 @@ export class ComputeSLOHealth {
       });
 
       this.logger.debug(`Indexing ${health.length} health documents`);
+
       await this.esClient.bulk(
         {
           index: HEALTH_INDEX_NAME,
@@ -163,9 +165,11 @@ export class ComputeSLOHealth {
         },
         { signal: this.abortController.signal }
       );
-    }
-    await finder.close();
 
+      processedCount += health.length;
+    }
+
+    await finder.close();
     await this.esClient.deleteByQuery(
       {
         index: HEALTH_INDEX_NAME,
@@ -183,12 +187,14 @@ export class ComputeSLOHealth {
       { signal: this.abortController.signal }
     );
 
-    function generateDocId(
-      sloDefinitionToSpaceMap: Record<string, string>,
-      sloDefinition: SLODefinition
-    ): string {
-      return `${sloDefinitionToSpaceMap[sloDefinition.id]}-${sloDefinition.id}`;
-    }
+    return { processed: processedCount };
+  }
+
+  private generateDocId(
+    sloDefinitionToSpaceMap: Record<string, string>,
+    sloDefinition: SLODefinition
+  ): string {
+    return `${sloDefinitionToSpaceMap[sloDefinition.id]}-${sloDefinition.id}`;
   }
 
   private toTransformStats(
