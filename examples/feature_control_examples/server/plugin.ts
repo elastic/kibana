@@ -69,8 +69,10 @@ export class FeatureControlsPluginExample
       {
         path: '/internal/my_plugin/sensitive_action',
         validate: false,
-        options: {
-          tags: ['access:my_closed_example_api'],
+        security: {
+          authz: {
+            requiredPrivileges: ['my_closed_example_api'],
+          },
         },
       },
       async (context, request, response) => {

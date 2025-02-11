@@ -21,5 +21,38 @@ export const configSchema = schema.object({
 export type ConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<ConfigType> = {
+  deprecations: ({ renameFromRoot }) => [
+    renameFromRoot('enterpriseSearch.enabled', 'xpack.search.enabled', { level: 'critical' }),
+    renameFromRoot('enterpriseSearch.hasConnectors', 'xpack.search.hasConnectors', {
+      level: 'critical',
+    }),
+    renameFromRoot(
+      'enterpriseSearch.hasDefaultIngestPipeline',
+      'xpack.search.hasDefaultIngestPipeline',
+      {
+        level: 'critical',
+      }
+    ),
+    renameFromRoot(
+      'enterpriseSearch.hasDocumentLevelSecurityEnabled',
+      'xpack.search.hasDocumentLevelSecurityEnabled',
+      {
+        level: 'critical',
+      }
+    ),
+    renameFromRoot(
+      'enterpriseSearch.hasIncrementalSyncEnabled',
+      'xpack.search.hasIncrementalSyncEnabled',
+      {
+        level: 'critical',
+      }
+    ),
+    renameFromRoot('enterpriseSearch.hasNativeConnectors', 'xpack.search.hasNativeConnectors', {
+      level: 'critical',
+    }),
+    renameFromRoot('enterpriseSearch.hasWebCrawler', 'xpack.search.hasWebCrawler', {
+      level: 'critical',
+    }),
+  ],
   schema: configSchema,
 };

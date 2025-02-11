@@ -7,7 +7,7 @@
 
 import { FlyoutPanelProps } from '../types';
 import { panelsReducer, uiReducer } from './reducers';
-import { initialPanelsState, PanelsState, initialUiState, UiState } from './state';
+import { initialPanelsState, initialUiState, PanelsState, UiState } from './state';
 import {
   changePushVsOverlayAction,
   changeUserCollapsedWidthAction,
@@ -874,21 +874,34 @@ describe('uiReducer', () => {
     it('should set value state is empty', () => {
       const state: UiState = initialUiState;
       const action = setDefaultWidthsAction({
-        right: 200,
-        left: 600,
-        preview: 200,
+        rightOverlay: 300,
+        leftOverlay: 900,
+        previewOverlay: 300,
+        rightPush: 200,
+        leftPush: 600,
+        previewPush: 200,
       });
       const newState: UiState = uiReducer(state, action);
 
       expect(newState).toEqual({
         ...state,
         defaultWidths: {
-          rightWidth: 200,
-          leftWidth: 600,
-          previewWidth: 200,
-          rightPercentage: 25,
-          leftPercentage: 75,
-          previewPercentage: 25,
+          overlay: {
+            rightWidth: 300,
+            leftWidth: 900,
+            previewWidth: 300,
+            rightPercentage: 25,
+            leftPercentage: 75,
+            previewPercentage: 25,
+          },
+          push: {
+            rightWidth: 200,
+            leftWidth: 600,
+            previewWidth: 200,
+            rightPercentage: 25,
+            leftPercentage: 75,
+            previewPercentage: 25,
+          },
         },
       });
     });
@@ -897,30 +910,53 @@ describe('uiReducer', () => {
       const state: UiState = {
         ...initialUiState,
         defaultWidths: {
-          rightWidth: 200,
-          leftWidth: 600,
-          previewWidth: 200,
-          rightPercentage: 25,
-          leftPercentage: 75,
-          previewPercentage: 25,
+          overlay: {
+            rightWidth: 300,
+            leftWidth: 900,
+            previewWidth: 300,
+            rightPercentage: 25,
+            leftPercentage: 75,
+            previewPercentage: 25,
+          },
+          push: {
+            rightWidth: 200,
+            leftWidth: 600,
+            previewWidth: 200,
+            rightPercentage: 25,
+            leftPercentage: 75,
+            previewPercentage: 25,
+          },
         },
       };
       const action = setDefaultWidthsAction({
-        right: 500,
-        left: 500,
-        preview: 500,
+        rightOverlay: 500,
+        leftOverlay: 500,
+        previewOverlay: 500,
+        rightPush: 500,
+        leftPush: 500,
+        previewPush: 500,
       });
       const newState: UiState = uiReducer(state, action);
 
       expect(newState).toEqual({
         ...state,
         defaultWidths: {
-          rightWidth: 500,
-          leftWidth: 500,
-          previewWidth: 500,
-          rightPercentage: 50,
-          leftPercentage: 50,
-          previewPercentage: 50,
+          overlay: {
+            rightWidth: 500,
+            leftWidth: 500,
+            previewWidth: 500,
+            rightPercentage: 50,
+            leftPercentage: 50,
+            previewPercentage: 50,
+          },
+          push: {
+            rightWidth: 500,
+            leftWidth: 500,
+            previewWidth: 500,
+            rightPercentage: 50,
+            leftPercentage: 50,
+            previewPercentage: 50,
+          },
         },
       });
     });
