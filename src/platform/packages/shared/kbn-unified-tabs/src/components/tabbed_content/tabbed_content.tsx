@@ -7,20 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { htmlIdGenerator } from '@elastic/eui';
 import { TabsBar } from '../tabs_bar';
+import { getTabAttributes } from '../../utils/get_tab_attributes';
 import { TabItem } from '../../types';
-
-let TMP_COUNTER = 0;
 
 export interface TabbedContentProps {
   initialItems: TabItem[];
   initialSelectedItemId?: string;
   'data-test-subj'?: string;
   renderContent: (selectedItem: TabItem) => React.ReactNode;
-  onAdded?: (item: TabItem) => void;
-  onSelected?: (item: TabItem) => void;
-  onClosed?: (item: TabItem) => void;
+  createItem: () => TabItem;
+  onChanged: (state: TabbedContentState) => void;
 }
 
 export interface TabbedContentState {
@@ -32,10 +31,10 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   initialItems,
   initialSelectedItemId,
   renderContent,
-  onAdded,
-  onSelected,
-  onClosed,
+  createItem,
+  onChanged,
 }) => {
+  const [tabContentId] = useState(() => htmlIdGenerator()());
   const [state, setState] = useState<TabbedContentState>(() => {
     return {
       items: initialItems,
@@ -52,9 +51,8 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
         ...prevState,
         selectedItem: item,
       }));
-      onSelected?.(item);
     },
-    [setState, onSelected]
+    [setState]
   );
 
   const onClose = useCallback(
@@ -66,36 +64,44 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
             ? prevState.selectedItem
             : prevState.items[prevState.items.length - 2] || null,
       }));
-      onClosed?.(item);
     },
-    [setState, onClosed]
+    [setState]
   );
 
   const onAdd = useCallback(() => {
-    const nextName = TMP_COUNTER++;
-    const newItem = {
-      id: `tab-${nextName}`,
-      label: `Undefined ${nextName}`,
-    };
+    const newItem = createItem();
     setState((prevState) => {
       return {
         items: [...prevState.items, newItem],
         selectedItem: newItem,
       };
     });
-    onAdded?.(newItem);
-  }, [setState, onAdded]);
+  }, [setState, createItem]);
+
+  useEffect(() => {
+    onChanged(state);
+  }, [state, onChanged]);
 
   return (
     <>
       <TabsBar
         items={items}
         selectedItem={selectedItem}
+        tabContentId={tabContentId}
         onAdd={onAdd}
         onSelect={onSelect}
         onClose={onClose}
       />
-      {selectedItem ? renderContent(selectedItem) : null}
+      {selectedItem ? (
+        <div
+          data-test-subj="unifiedTabs_selectedTabContent"
+          role="tabpanel"
+          id={tabContentId}
+          aria-labelledby={getTabAttributes(selectedItem, tabContentId).id}
+        >
+          {renderContent(selectedItem)}
+        </div>
+      ) : null}
     </>
   );
 };

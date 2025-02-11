@@ -16,7 +16,7 @@ import type { TabItem } from '../../types';
 export interface TabsBarProps {
   items: TabItem[];
   selectedItem: TabItem | null;
-  'data-test-subj'?: string;
+  tabContentId: string;
   onAdd: () => void;
   onSelect: (item: TabItem) => void;
   onClose: (item: TabItem) => void;
@@ -25,7 +25,7 @@ export interface TabsBarProps {
 export const TabsBar: React.FC<TabsBarProps> = ({
   items,
   selectedItem,
-  'data-test-subj': dataTestSubj,
+  tabContentId,
   onAdd,
   onSelect,
   onClose,
@@ -33,7 +33,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   return (
     <EuiFlexGroup
       role="tablist"
-      data-test-subj={dataTestSubj}
+      data-test-subj="unifiedTabs_tabsBar"
       responsive={false}
       alignItems="center"
     >
@@ -42,7 +42,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
           <Tab
             item={item}
             isSelected={selectedItem?.id === item.id}
-            data-test-subj={`${dataTestSubj || 'unifiedTabsBar'}_tab_${item.id}`}
+            tabContentId={tabContentId}
             onSelect={onSelect}
             onClose={onClose}
           />
@@ -50,6 +50,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
       ))}
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
+          data-test-subj="unifiedTabs_tabsBar_newTabBtn"
           iconType="plus"
           color="text"
           title={i18n.translate('unifiedTabs.createTabButton', {

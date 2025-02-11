@@ -9,40 +9,42 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { getTabAttributes } from '../../utils/get_tab_attributes';
 import type { TabItem } from '../../types';
 
 export interface TabProps {
   item: TabItem;
-  isSelected?: boolean;
-  'data-test-subj'?: string;
+  isSelected: boolean;
+  tabContentId: string;
   onSelect: (item: TabItem) => void;
   onClose: (item: TabItem) => void;
 }
 
-export const Tab: React.FC<TabProps> = ({
-  item,
-  isSelected,
-  'data-test-subj': dataTestSubj,
-  onSelect,
-  onClose,
-}) => {
+export const Tab: React.FC<TabProps> = ({ item, isSelected, tabContentId, onSelect, onClose }) => {
   return (
-    <EuiFlexGroup data-test-subj={dataTestSubj} responsive={false} alignItems="center">
+    <EuiFlexGroup
+      data-test-subj={`unifiedTabs_tab_${item.id}`}
+      responsive={false}
+      alignItems="center"
+    >
       <EuiFlexItem grow={false}>
-        <EuiButton
+        <button
+          {...getTabAttributes(item, tabContentId)}
+          data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
           role="tab"
+          type="button"
           aria-selected={isSelected}
-          size="s"
-          color={isSelected ? 'primary' : 'text'}
+          tabIndex={isSelected ? 0 : -1}
           onClick={isSelected ? undefined : () => onSelect(item)}
         >
-          {item.label}
-        </EuiButton>
+          <EuiText color={isSelected ? 'default' : 'subdued'}>{item.label}</EuiText>
+        </button>
       </EuiFlexItem>
       {isSelected && (
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
+            data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
             iconType="cross"
             color="text"
             title={i18n.translate('unifiedTabs.closeTabButton', {
