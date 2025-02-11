@@ -10,7 +10,6 @@ import { useValues } from 'kea';
 
 import {
   EuiBadge,
-  EuiBadgeProps,
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -25,14 +24,12 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { Agent } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { Connector, ConnectorStatus, ElasticsearchIndex } from '@kbn/search-connectors';
 import { EuiIconPlugs } from '@kbn/search-shared-ui';
-import { euiLightVars as euiVars } from '@kbn/ui-theme';
 
 import { KibanaDeps } from '../../../../../common/types';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
@@ -52,6 +49,7 @@ import {
 } from '../../utils/connector_status_helpers';
 
 import { ConnectorDetailTabId } from './connector_detail';
+import { AgentlessConnectorStatusBadge } from './agentless_status_badge';
 
 export interface ConnectorStatsProps {
   connector: Connector;
@@ -63,92 +61,6 @@ export interface StatCardProps {
   content: ReactNode;
   footer: ReactNode;
   title: string;
-}
-
-function getStatusComponent({
-  status,
-  ...restOfProps
-}: {
-  status: Agent['status'];
-} & EuiBadgeProps): React.ReactElement {
-  switch (status) {
-    case 'error':
-    case 'degraded':
-      return (
-        <EuiBadge color="warning" {...restOfProps}>
-          <FormattedMessage
-            id="xpack.fleet.agentHealth.unhealthyStatusText"
-            defaultMessage="Unhealthy"
-          />
-        </EuiBadge>
-      );
-    case 'inactive':
-      return (
-        <EuiBadge color={euiVars.euiColorDarkShade} {...restOfProps}>
-          <FormattedMessage
-            id="xpack.fleet.agentHealth.inactiveStatusText"
-            defaultMessage="Inactive"
-          />
-        </EuiBadge>
-      );
-    case 'offline':
-      return (
-        <EuiBadge color="default" {...restOfProps}>
-          <FormattedMessage
-            id="xpack.fleet.agentHealth.offlineStatusText"
-            defaultMessage="Offline"
-          />
-        </EuiBadge>
-      );
-    case 'uninstalled':
-      return (
-        <EuiBadge color="default" {...restOfProps}>
-          <FormattedMessage
-            id="xpack.fleet.agentHealth.uninstalledStatusText"
-            defaultMessage="Uninstalled"
-          />
-        </EuiBadge>
-      );
-    case 'orphaned':
-      return (
-        <EuiBadge color="warning" {...restOfProps}>
-          <FormattedMessage
-            id="xpack.fleet.agentHealth.orphanedStatusText"
-            defaultMessage="Orphaned"
-          />
-        </EuiBadge>
-      );
-
-    case 'unenrolling':
-    case 'enrolling':
-    case 'updating':
-      return (
-        <EuiBadge color="primary" {...restOfProps}>
-          <FormattedMessage
-            id="xpack.fleet.agentHealth.updatingStatusText"
-            defaultMessage="Updating"
-          />
-        </EuiBadge>
-      );
-    case 'unenrolled':
-      return (
-        <EuiBadge color={euiVars.euiColorDisabled} {...restOfProps}>
-          <FormattedMessage
-            id="xpack.fleet.agentHealth.unenrolledStatusText"
-            defaultMessage="Unenrolled"
-          />
-        </EuiBadge>
-      );
-    default:
-      return (
-        <EuiBadge color="success" {...restOfProps}>
-          <FormattedMessage
-            id="xpack.fleet.agentHealth.healthyStatusText"
-            defaultMessage="Healthy"
-          />
-        </EuiBadge>
-      );
-  }
 }
 
 export const StatCard: React.FC<StatCardProps> = ({ title, content, footer }) => {
@@ -222,10 +134,44 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
   const agnetlessPolicyExists = !!agentlessOverview?.policy;
   const agentlessAgentExists = !!agentlessOverview?.agent;
 
-  const logsTimeRangeLast6hrs = {
-    from: 'now-6h',
-    to: 'now',
-  };
+  const navigateToDiscoverPayload = agentlessAgentExists
+    ? {
+        dataViewId: 'logs-*',
+        filters: [
+          {
+            meta: {
+              key: 'labels.connector_id',
+              index: 'logs-*',
+              type: 'phrase',
+              params: connector.id,
+            },
+            query: {
+              match_phrase: {
+                'labels.connector_id': connector.id,
+              },
+            },
+          },
+          {
+            meta: {
+              key: 'elastic_agent.id',
+              index: 'logs-*',
+              type: 'phrase',
+              params: connector.id,
+            },
+            query: {
+              match_phrase: {
+                'elastic_agent.id': agentlessOverview.agent.id,
+              },
+            },
+          },
+        ],
+        timeRange: {
+          from: 'now-6h',
+          to: 'now',
+        },
+        columns: ['message', 'log.level', 'labels.sync_job_id'],
+      }
+    : {};
 
   return (
     <EuiFlexGrid columns={columns} direction="row">
@@ -471,9 +417,7 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   {agentlessAgentExists ? (
-                    getStatusComponent({
-                      status: agentlessOverview.agent.status,
-                    })
+                    <AgentlessConnectorStatusBadge status={agentlessOverview?.agent.status} />
                   ) : (
                     <EuiBadge color="default">{noAgentLabel}</EuiBadge>
                   )}
@@ -487,47 +431,12 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({
                     data-test-subj="connectorStatsViewLogsButton"
                     aria-label={i18n.translate(
                       'xpack.enterpriseSearch.connectors.connectorStats.viewLogsButtonLabel',
-                      { defaultMessage: 'View in Discover' }
+                      { defaultMessage: 'View logs' }
                     )}
                     disabled={!agentlessAgentExists}
                     iconType="discoverApp"
                     onClick={() => {
-                      if (!agentlessAgentExists) {
-                        return;
-                      }
-                      discover.locator?.navigate({
-                        dataViewId: 'logs-*',
-                        filters: [
-                          {
-                            meta: {
-                              key: 'labels.connector_id',
-                              index: 'logs-*',
-                              type: 'phrase',
-                              params: connector.id,
-                            },
-                            query: {
-                              match_phrase: {
-                                'labels.connector_id': connector.id,
-                              },
-                            },
-                          },
-                          {
-                            meta: {
-                              key: 'elastic_agent.id',
-                              index: 'logs-*',
-                              type: 'phrase',
-                              params: connector.id,
-                            },
-                            query: {
-                              match_phrase: {
-                                'elastic_agent.id': agentlessOverview.agent.id,
-                              },
-                            },
-                          },
-                        ],
-                        timeRange: logsTimeRangeLast6hrs,
-                        columns: ['message', 'log.level', 'labels.sync_job_id'],
-                      });
+                      discover.locator?.navigate(navigateToDiscoverPayload);
                     }}
                   >
                     {i18n.translate(
