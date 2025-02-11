@@ -349,13 +349,13 @@ export class KibanaClient {
     async function chat(
       name: string,
       {
-        system,
+        systemMessage,
         messages,
         functions,
         functionCall,
         connectorIdOverride,
       }: {
-        system: string;
+        systemMessage: string;
         messages: Message[];
         functions: FunctionDefinition[];
         functionCall?: string;
@@ -369,7 +369,7 @@ export class KibanaClient {
         const params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat'>['params']['body'] =
           {
             name,
-            system,
+            systemMessage,
             messages,
             connectorId: connectorIdOverride || connectorId,
             functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
@@ -406,14 +406,14 @@ export class KibanaClient {
     const results: EvaluationResult[] = [];
 
     return {
-      chat: async (message, system) => {
+      chat: async (message, systemMessage) => {
         const messages = [
           ...this.getMessages(message).map((msg) => ({
             message: msg,
             '@timestamp': new Date().toISOString(),
           })),
         ];
-        return chat('chat', { system, messages, functions: [] });
+        return chat('chat', { systemMessage, messages, functions: [] });
       },
       complete: async ({
         messages: messagesArg,
@@ -518,7 +518,7 @@ export class KibanaClient {
       evaluate: async ({ messages, conversationId, errors }, criteria) => {
         const message = await chat('evaluate', {
           connectorIdOverride: evaluationConnectorId,
-          system: `You are a critical assistant for evaluating conversations with the Elastic Observability AI Assistant,
+          systemMessage: `You are a critical assistant for evaluating conversations with the Elastic Observability AI Assistant,
                 which helps our users make sense of their Observability data.
 
                 Your goal is to verify whether a conversation between the user and the assistant matches the given criteria.
