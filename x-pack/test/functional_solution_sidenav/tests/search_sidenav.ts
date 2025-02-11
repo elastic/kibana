@@ -66,7 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await solutionNavigation.sidenav.openSection('project_settings_project_nav');
         await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
         await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Stack Management' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Content' });
 
         // navigate back to the home page using header logo
         await solutionNavigation.clickLogo();
