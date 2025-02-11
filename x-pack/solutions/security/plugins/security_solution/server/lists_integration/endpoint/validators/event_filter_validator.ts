@@ -59,6 +59,8 @@ export class EventFilterValidator extends BaseValidator {
       await this.validateByPolicyItem(item);
     }
 
+    await this.setOwnerSpaceId(item);
+
     return item;
   }
 

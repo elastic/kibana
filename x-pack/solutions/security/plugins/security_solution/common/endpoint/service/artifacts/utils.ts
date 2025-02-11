@@ -8,7 +8,6 @@
 import type {
   ExceptionListItemSchema,
   CreateExceptionListItemSchema,
-  UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { v4 as uuidv4 } from 'uuid';
 import type { EffectedPolicySelection } from '../../../../public/management/components/effected_policy_select';
@@ -150,7 +149,7 @@ export const buildSpaceOwnerIdTag = (spaceId: string): string => {
  * @param spaceId
  */
 export const setArtifactOwnerSpaceId = (
-  item: ExceptionListItemSchema | CreateExceptionListItemSchema | UpdateExceptionListItemSchema,
+  item: Pick<ExceptionListItemSchema, 'tags'>,
   spaceId: string
 ): void => {
   if (spaceId.trim() === '') {

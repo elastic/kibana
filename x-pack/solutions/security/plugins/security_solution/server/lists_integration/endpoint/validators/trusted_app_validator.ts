@@ -207,6 +207,8 @@ export class TrustedAppValidator extends BaseValidator {
     await this.validateCanCreateByPolicyArtifacts(item);
     await this.validateByPolicyItem(item);
 
+    await this.setOwnerSpaceId(item);
+
     return item;
   }
 

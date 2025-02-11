@@ -27,6 +27,9 @@ export class EndpointExceptionsValidator extends BaseValidator {
 
   async validatePreCreateItem(item: CreateExceptionListItemOptions) {
     await this.validateHasWritePrivilege();
+
+    await this.setOwnerSpaceId(item);
+
     return item;
   }
 
