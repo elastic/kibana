@@ -195,6 +195,10 @@ export interface CommandBaseDefinition<CommandName extends string> {
   alias?: string;
   description: string;
   /**
+   * Displays a Technical preview label in the autocomplete
+   */
+  preview?: boolean;
+  /**
    * Whether to show or hide in autocomplete suggestion list
    */
   hidden?: boolean;
