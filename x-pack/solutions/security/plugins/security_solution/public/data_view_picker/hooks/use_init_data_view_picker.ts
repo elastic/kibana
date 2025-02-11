@@ -42,14 +42,18 @@ const createDataViewSelectedListener = (dependencies: { dataViews: DataViewsServ
     ) => {
       console.log('selectDataViewAsync', action);
 
-      try {
-        let dataViewSpec: DataViewSpec;
+      let dataViewSpec: DataViewSpec;
 
+      try {
         if (action.payload.id) {
           const dataViewById = await dependencies.dataViews.get(action.payload.id);
           dataViewSpec = dataViewById.toSpec();
         }
+      } catch (error: unknown) {
+        console.error(error);
+      }
 
+      try {
         if (!dataViewSpec) {
           const adhocDataView = await dependencies.dataViews.create({
             id: 'adhoc',
@@ -57,13 +61,11 @@ const createDataViewSelectedListener = (dependencies: { dataViews: DataViewsServ
           });
           dataViewSpec = adhocDataView.toSpec();
         }
-
-        listenerApi.dispatch(
-          scopes[action.payload.scope].actions.setSelectedDataView(dataViewSpec)
-        );
       } catch (error: unknown) {
         console.error(error);
       }
+
+      listenerApi.dispatch(scopes[action.payload.scope].actions.setSelectedDataView(dataViewSpec));
     },
   } as any;
 };
