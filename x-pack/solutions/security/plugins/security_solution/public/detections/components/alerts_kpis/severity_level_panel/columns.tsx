@@ -65,5 +65,5 @@ export const getSeverityTableColumns = (): Array<EuiBasicTableColumn<SeverityDat
         extraActionsColor="text"
       />
     ),
-  }
+  },
 ];
