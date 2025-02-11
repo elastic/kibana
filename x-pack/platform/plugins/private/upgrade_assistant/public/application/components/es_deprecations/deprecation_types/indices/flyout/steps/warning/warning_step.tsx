@@ -179,13 +179,13 @@ export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> 
             <EuiButton fill color="primary" onClick={confirm} disabled={blockAdvance}>
               {flow === 'reindex' && (
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.reindex.startButtonLabel"
-                  defaultMessage="Start reindexing"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.reindex.continueButtonLabel"
+                  defaultMessage="Continue reindexing"
                 />
               )}
               {flow === 'readonly' && (
                 <FormattedMessage
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.readonly.startButtonLabel"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.readonly.continueButtonLabel"
                   defaultMessage="Mark as read-only"
                 />
               )}

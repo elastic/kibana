@@ -86,7 +86,7 @@ const i18nTexts = {
     'xpack.upgradeAssistant.esDeprecations.indices.updateTooltipLabel',
     {
       defaultMessage:
-        'Resolve this issue by updating this index. This issue can be resolved automatically either by making the index read-only (recommended for large indices) or by reindexing into a new, compatible index.',
+        'Resolve this issue by updating this index. This issue can be resolved automatically either by marking the index as read-only (recommended for large indices) or by reindexing into a new, compatible index.',
     }
   ),
   unfreezeText: i18n.translate('xpack.upgradeAssistant.esDeprecations.indices.unfreezeLabel', {

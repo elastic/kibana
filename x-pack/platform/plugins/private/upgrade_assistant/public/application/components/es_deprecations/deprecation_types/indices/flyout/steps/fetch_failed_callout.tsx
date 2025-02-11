@@ -23,7 +23,7 @@ export const FetchFailedCallOut: React.FunctionComponent<Props> = (props) => {
         data-test-subj="fetchFailedCallout"
         title={
           <FormattedMessage
-            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.fetchFailedCalloutTitle"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.fetchFailedCalloutTitle"
             defaultMessage="Reindex status not available"
           />
         }

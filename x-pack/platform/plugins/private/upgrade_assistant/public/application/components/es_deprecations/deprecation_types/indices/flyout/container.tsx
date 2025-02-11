@@ -69,9 +69,6 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
     }
   }, [reindexStatus]);
 
-  // useMemo(() => reindexStatusToFlyoutStep(), [reindexStatusToFlyoutStep]);
-  // useMemo(() => updateStatusToFlyoutStep(), [updateStatusToFlyoutStep]);
-
   const onStartReindex = useCallback(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_START_CLICK);
     startReindex();
