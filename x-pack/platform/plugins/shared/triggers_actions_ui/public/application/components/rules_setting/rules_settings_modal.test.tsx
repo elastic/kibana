@@ -41,13 +41,16 @@ jest.mock('../../../common/get_experimental_features', () => ({
   getIsExperimentalFeatureEnabled: jest.fn(),
 }));
 
-jest.mock('@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_deletion_settings', () => ({
-  fetchAlertDeletionSettings: jest.fn(),
-}));
+jest.mock(
+  '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_deletion_settings/fetch_alerts_deletion_settings',
+  () => ({
+    fetchAlertsDeletionSettings: jest.fn(),
+  })
+);
 jest.mock(
   '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_deletion_settings/update_alerts_deletion_settings',
   () => ({
-    updateAlertDeletionSettings: jest.fn(),
+    updateAlertsDeletionSettings: jest.fn(),
   })
 );
 
@@ -534,11 +537,11 @@ describe('rules_settings_modal', () => {
       expect(modalProps.onClose).toHaveBeenCalledTimes(1);
       expect(updateAlertsDeletionSettingsMock).toHaveBeenCalledWith(
         expect.objectContaining({
-          alertDeletionSettings: {
-            isActiveAlertDeletionEnabled: true,
-            isInactiveAlertDeletionEnabled: true,
-            activeAlertDeletionThreshold: 5,
-            inactiveAlertDeletionThreshold: 92,
+          alertsDeletionSettings: {
+            isActiveAlertsDeletionEnabled: true,
+            isInactiveAlertsDeletionEnabled: true,
+            activeAlertsDeletionThreshold: 5,
+            inactiveAlertsDeletionThreshold: 92,
           },
         })
       );

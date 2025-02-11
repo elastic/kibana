@@ -38,7 +38,7 @@ describe('RulesSettingsAlertsDeletionSection', () => {
   test('should disable the active alert threshold input when the active alert switch is disabled', async () => {
     const settings = {
       ...initialSettings,
-      isActiveAlertDeletionEnabled: false,
+      isActiveAlertsDeletionEnabled: false,
     };
 
     render(
@@ -72,7 +72,7 @@ describe('RulesSettingsAlertsDeletionSection', () => {
   test('should disable the inactive alert threshold input when the inactive alert switch is disabled', async () => {
     const settings = {
       ...initialSettings,
-      isInactiveAlertDeletionEnabled: false,
+      isInactiveAlertsDeletionEnabled: false,
     };
 
     render(
