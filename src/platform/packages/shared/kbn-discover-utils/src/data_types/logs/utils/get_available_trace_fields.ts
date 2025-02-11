@@ -10,15 +10,14 @@
 import { TraceFields } from '../../..';
 import * as constants from '../constants';
 
-export const getAvailableTraceFields = (traceDoc: TraceFields) => {
-  const availableTraceFields = [
-    constants.SERVICE_NAME_FIELD,
-    constants.EVENT_OUTCOME_FIELD,
-    constants.TRANSACTION_NAME_FIELD,
-    constants.TRANSACTION_DURATION_FIELD,
-    constants.SPAN_NAME_FIELD,
-    constants.SPAN_DURATION_FIELD,
-  ] as const;
+const AVAILABLE_TRACE_FIELDS = [
+  constants.SERVICE_NAME_FIELD,
+  constants.EVENT_OUTCOME_FIELD,
+  constants.TRANSACTION_NAME_FIELD,
+  constants.TRANSACTION_DURATION_FIELD,
+  constants.SPAN_NAME_FIELD,
+  constants.SPAN_DURATION_FIELD,
+] as const;
 
-  return availableTraceFields.filter((fieldName) => Boolean(traceDoc[fieldName]));
-};
+export const getAvailableTraceFields = (traceDoc: TraceFields) =>
+  AVAILABLE_TRACE_FIELDS.filter((fieldName) => Boolean(traceDoc[fieldName]));
