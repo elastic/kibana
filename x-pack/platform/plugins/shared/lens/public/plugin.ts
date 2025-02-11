@@ -628,7 +628,7 @@ export class LensPlugin {
   }
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies): LensPublicStart {
-    this.hasDiscoverAccess = core.application.capabilities.discover.show as boolean;
+    this.hasDiscoverAccess = core.application.capabilities.discover_v2.show as boolean;
     this.dataViewsService = startDependencies.dataViews;
     // unregisters the Visualize action and registers the lens one
     if (startDependencies.uiActions.hasAction(ACTION_VISUALIZE_FIELD)) {
@@ -731,7 +731,7 @@ export class LensPlugin {
         });
       },
       canUseEditor: () => {
-        return Boolean(core.application.capabilities.visualize?.show);
+        return Boolean(core.application.capabilities.visualize_v2?.show);
       },
       getXyVisTypes: async () => {
         const { visualizationSubtypes } = await import('./visualizations/xy/types');

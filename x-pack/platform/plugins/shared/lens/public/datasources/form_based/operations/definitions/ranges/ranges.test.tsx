@@ -577,45 +577,44 @@ describe('ranges', () => {
           />
         );
 
-        // This series of act closures are made to make it work properly the update flush
+        instance.find(EuiButtonEmpty).simulate('click');
+
         act(() => {
-          instance.find(EuiButtonEmpty).simulate('click');
+          instance.update();
         });
 
-        act(() => {
-          // need another wrapping for this in order to work
-          instance.update();
+        expect(instance.find(RangePopover)).toHaveLength(2);
 
-          expect(instance.find(RangePopover)).toHaveLength(2);
-
-          // edit the range and check
-          instance
-            .find('RangePopover input[type="number"]')
-            .first()
-            .simulate('change', {
-              target: {
-                value: '50',
-              },
-            });
-
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-
-          expect(updateLayerSpy).toHaveBeenCalledWith({
-            ...layer,
-            columns: {
-              ...layer.columns,
-              col1: {
-                ...layer.columns.col1,
-                params: {
-                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
-                  ranges: [
-                    { from: 0, to: DEFAULT_INTERVAL, label: '' },
-                    { from: 50, to: Infinity, label: '' },
-                  ],
-                },
-              },
+        // edit the range and check
+        instance
+          .find('RangePopover input[type="number"]')
+          .first()
+          .simulate('change', {
+            target: {
+              value: '50',
             },
           });
+        jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+
+        act(() => {
+          instance.update();
+        });
+
+        expect(updateLayerSpy).toHaveBeenCalledWith({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col1: {
+              ...layer.columns.col1,
+              params: {
+                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
+                ranges: [
+                  { from: 0, to: DEFAULT_INTERVAL, label: '' },
+                  { from: 50, to: Infinity, label: '' },
+                ],
+              },
+            },
+          },
         });
       });
 
@@ -632,45 +631,43 @@ describe('ranges', () => {
           />
         );
 
-        // This series of act closures are made to make it work properly the update flush
+        instance.find(EuiButtonEmpty).simulate('click');
         act(() => {
-          instance.find(EuiButtonEmpty).simulate('click');
-        });
-
-        act(() => {
-          // need another wrapping for this in order to work
           instance.update();
+        });
+        expect(instance.find(RangePopover)).toHaveLength(2);
 
-          expect(instance.find(RangePopover)).toHaveLength(2);
-
-          // edit the label and check
-          instance
-            .find('RangePopover input[type="text"]')
-            .first()
-            .simulate('change', {
-              target: {
-                value: 'customlabel',
-              },
-            });
-
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-
-          expect(updateLayerSpy).toHaveBeenCalledWith({
-            ...layer,
-            columns: {
-              ...layer.columns,
-              col1: {
-                ...layer.columns.col1,
-                params: {
-                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
-                  ranges: [
-                    { from: 0, to: DEFAULT_INTERVAL, label: '' },
-                    { from: DEFAULT_INTERVAL, to: Infinity, label: 'customlabel' },
-                  ],
-                },
-              },
+        // edit the label and check
+        instance
+          .find('RangePopover input[type="text"]')
+          .first()
+          .simulate('change', {
+            target: {
+              value: 'customlabel',
             },
           });
+
+        jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+
+        act(() => {
+          instance.update();
+        });
+
+        expect(updateLayerSpy).toHaveBeenCalledWith({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col1: {
+              ...layer.columns.col1,
+              params: {
+                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
+                ranges: [
+                  { from: 0, to: DEFAULT_INTERVAL, label: '' },
+                  { from: DEFAULT_INTERVAL, to: Infinity, label: 'customlabel' },
+                ],
+              },
+            },
+          },
         });
       });
 
@@ -687,37 +684,37 @@ describe('ranges', () => {
           />
         );
 
-        // This series of act closures are made to make it work properly the update flush
+        instance.find(RangePopover).find(EuiLink).find('button').simulate('click');
         act(() => {
-          instance.find(RangePopover).find(EuiLink).find('button').simulate('click');
+          instance.update();
         });
 
-        act(() => {
-          // need another wrapping for this in order to work
-          instance.update();
-          instance
-            .find('RangePopover input[type="number"]')
-            .last()
-            .simulate('change', {
-              target: {
-                value: '50',
-              },
-            });
-          jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
-
-          expect(updateLayerSpy).toHaveBeenCalledWith({
-            ...layer,
-            columns: {
-              ...layer.columns,
-              col1: {
-                ...layer.columns.col1,
-                params: {
-                  ...(layer.columns.col1 as RangeIndexPatternColumn).params,
-                  ranges: [{ from: 0, to: 50, label: '' }],
-                },
-              },
+        instance
+          .find('RangePopover input[type="number"]')
+          .last()
+          .simulate('change', {
+            target: {
+              value: '50',
             },
           });
+        jest.advanceTimersByTime(TYPING_DEBOUNCE_TIME * 4);
+
+        act(() => {
+          instance.update();
+        });
+
+        expect(updateLayerSpy).toHaveBeenCalledWith({
+          ...layer,
+          columns: {
+            ...layer.columns,
+            col1: {
+              ...layer.columns.col1,
+              params: {
+                ...(layer.columns.col1 as RangeIndexPatternColumn).params,
+                ranges: [{ from: 0, to: 50, label: '' }],
+              },
+            },
+          },
         });
       });
 

@@ -13,6 +13,7 @@ import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 const configSchema = schema.object({
   // `deprecation.skip_deprecated_settings` is consistent with the equivalent ES feature and config property
   skip_deprecated_settings: schema.arrayOf(schema.string(), { defaultValue: [] }),
+  enable_http_debug_logs: schema.boolean({ defaultValue: false }),
 });
 
 export type DeprecationConfigType = TypeOf<typeof configSchema>;

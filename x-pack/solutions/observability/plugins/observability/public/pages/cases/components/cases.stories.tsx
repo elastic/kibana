@@ -26,6 +26,7 @@ const defaultProps: CasesProps = {
     settings: true,
     reopenCase: true,
     createComment: true,
+    assign: true,
   },
 };
 

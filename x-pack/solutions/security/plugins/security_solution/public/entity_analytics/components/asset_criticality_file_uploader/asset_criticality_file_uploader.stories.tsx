@@ -17,7 +17,7 @@ import { AssetCriticalityResultStep } from './components/result_step';
 import { AssetCriticalityValidationStep } from './components/validation_step';
 import { AssetCriticalityFilePickerStep } from './components/file_picker_step';
 
-const validLinesAsText = `user,user-001,low_impact\nuser-002,medium_impact\nuser,user-003,medium_impact\nhost,host-001,extreme_impact\nhost,host-002,extreme_impact`;
+const validLinesAsText = `user,user-001,low_impact\nuser-002,medium_impact\nuser,user-003,medium_impact\nhost,host-001,extreme_impact\nhost,host-002,extreme_impact\nservice,service-001,extreme_impact`;
 const invalidLinesAsText = `user,user-001,wow_impact\ntest,user-002,medium_impact\nuser,user-003,medium_impact,extra_column`;
 
 export default {
@@ -91,7 +91,7 @@ export const ValidationStep: StoryFn = () => {
                 size: 100,
                 validLines: {
                   text: validLinesAsText,
-                  count: 5,
+                  count: 6,
                 },
                 invalidLines: {
                   text: invalidLinesAsText,
@@ -129,7 +129,7 @@ export const ValidationStep: StoryFn = () => {
                 size: 100,
                 validLines: {
                   text: validLinesAsText,
-                  count: 5,
+                  count: 6,
                 },
                 invalidLines: {
                   text: invalidLinesAsText,
@@ -198,7 +198,7 @@ export const ResultsStep: StoryFn = () => {
                   { message: 'error message 3', index: 5 },
                 ],
                 stats: {
-                  total: 5,
+                  total: 6,
                   successful: 2,
                   failed: 3,
                 },

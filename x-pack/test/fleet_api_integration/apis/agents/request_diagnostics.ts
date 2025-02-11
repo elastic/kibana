@@ -122,7 +122,7 @@ export default function (providerContext: FtrProviderContext) {
             clearInterval(intervalId);
             resolve({});
           }
-        }, 1000);
+        }, 3000);
       }).catch((e) => {
         throw e;
       });

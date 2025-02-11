@@ -22,6 +22,7 @@ import { CaseViewTabs } from './case_view_tabs';
 import { caseData, defaultGetCase } from './mocks';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCaseObservables } from './use_case_observables';
+import * as similarCasesHook from '../../containers/use_get_similar_cases';
 
 jest.mock('../../containers/use_get_case');
 jest.mock('../../common/navigation/hooks');
@@ -241,6 +242,8 @@ describe('CaseViewTabs', () => {
   });
 
   it('should not show observable tabs in non-platinum tiers', async () => {
+    const spyOnUseGetSimilarCases = jest.spyOn(similarCasesHook, 'useGetSimilarCases');
+
     appMockRenderer = createAppMockRenderer();
 
     appMockRenderer.render(
@@ -249,6 +252,11 @@ describe('CaseViewTabs', () => {
 
     expect(screen.queryByTestId('case-view-tab-title-observables')).not.toBeInTheDocument();
     expect(screen.queryByTestId('case-view-tab-title-similar_cases')).not.toBeInTheDocument();
+
+    // NOTE: we are still calling the hook but the fetching is disabled (based on the license)
+    expect(spyOnUseGetSimilarCases).toHaveBeenLastCalledWith(
+      expect.objectContaining({ enabled: false })
+    );
   });
 
   describe('show observable tabs in platinum tier or higher', () => {
@@ -257,6 +265,19 @@ describe('CaseViewTabs', () => {
         license: { type: 'platinum' },
       });
       appMockRenderer = createAppMockRenderer({ license });
+    });
+
+    it('should show observable tabs in platinum+ tiers', async () => {
+      const spyOnUseGetSimilarCases = jest.spyOn(similarCasesHook, 'useGetSimilarCases');
+
+      appMockRenderer.render(
+        <CaseViewTabs {...casePropsWithAlerts} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />
+      );
+
+      // NOTE: ensure we are calling the hook but the fetching is enabled (based on the license)
+      expect(spyOnUseGetSimilarCases).toHaveBeenLastCalledWith(
+        expect.objectContaining({ enabled: true })
+      );
     });
 
     it('should show the observables tab', async () => {

@@ -15,24 +15,6 @@ import { Compiler, Stats } from 'webpack';
 
 export class IgnoreNotFoundExportPlugin {
   apply(compiler: Compiler) {
-    // const messageRegExp = /export '.*'( \(reexported as '.*'\))? was not found in/;
-    //
-    // function doneHook(stats: Stats) {
-    //   stats.compilation.warnings = stats.compilation.warnings.filter(function (warn) {
-    //     if (warn instanceof ModuleDependencyWarning && messageRegExp.test(warn.message)) {
-    //       return false;
-    //     }
-    //     return true;
-    //   });
-    // }
-    //
-    // if (compiler.hooks) {
-    //   compiler.hooks.done.tap('IgnoreNotFoundExportPlugin', doneHook);
-    // } else {
-    //   compiler.plugin('done', doneHook);
-    // }
-    //
-    // TODO: remove the upper part as this converts to webpack v5
     const messageRegExp = /export '.*'( \(reexported as '.*'\))? was not found in/;
     const doneHook = (stats: Stats) =>
       (stats.compilation.warnings = stats.compilation.warnings.filter(

@@ -150,7 +150,7 @@ describe('Config schema', () => {
 
     it('should not add a depreciations when enabling an existing experimental feature', () => {
       const res = applyConfigDeprecations({
-        enableExperimental: ['displayAgentMetrics'],
+        enableExperimental: ['useSpaceAwareness'],
       });
 
       expect(res.messages).toMatchInlineSnapshot(`Array []`);

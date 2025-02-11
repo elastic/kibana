@@ -56,7 +56,7 @@ describe('FlyoutService', () => {
     it('renders a flyout to the DOM', () => {
       expect(mockReactDomRender).not.toHaveBeenCalled();
       flyouts.open(mountText('Flyout content'));
-      expect(mockReactDomRender.mock.calls).toMatchSnapshot();
+      expect(JSON.stringify(mockReactDomRender.mock.calls)).toMatchSnapshot();
       const modalContent = mount(mockReactDomRender.mock.calls[0][0]);
       expect(modalContent.html()).toMatchSnapshot();
     });
@@ -67,7 +67,7 @@ describe('FlyoutService', () => {
       });
       it('replaces the current flyout with a new one', () => {
         flyouts.open(mountText('Flyout content 2'));
-        expect(mockReactDomRender.mock.calls).toMatchSnapshot();
+        expect(JSON.stringify(mockReactDomRender.mock.calls)).toMatchSnapshot();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
         const modalContent = mount(mockReactDomRender.mock.calls[1][0]);
         expect(modalContent.html()).toMatchSnapshot();

@@ -100,6 +100,42 @@ exports.EcsCustomPropertyMappings = {
                 type: 'keyword',
                 ignore_above: 1024,
               },
+              gap: {
+                properties: {
+                  status: {
+                    type: 'keyword',
+                    ignore_above: 1024,
+                  },
+                  range: {
+                    type: 'date_range',
+                    format: 'strict_date_optional_time||epoch_millis',
+                  },
+                  filled_intervals: {
+                    type: 'date_range',
+                    format: 'strict_date_optional_time||epoch_millis',
+                  },
+                  unfilled_intervals: {
+                    format: 'strict_date_optional_time||epoch_millis',
+                    type: 'date_range',
+                  },
+                  in_progress_intervals: {
+                    format: 'strict_date_optional_time||epoch_millis',
+                    type: 'date_range',
+                  },
+                  total_gap_duration_ms: {
+                    type: 'long',
+                  },
+                  filled_duration_ms: {
+                    type: 'long',
+                  },
+                  unfilled_duration_ms: {
+                    type: 'long',
+                  },
+                  in_progress_duration_ms: {
+                    type: 'long',
+                  },
+                },
+              },
               execution: {
                 properties: {
                   uuid: {
@@ -166,6 +202,10 @@ exports.EcsCustomPropertyMappings = {
                       },
                       execution_gap_duration_s: {
                         type: 'long',
+                      },
+                      gap_range: {
+                        type: 'date_range',
+                        format: 'strict_date_optional_time||epoch_millis',
                       },
                       rule_type_run_duration_ms: {
                         type: 'long',
@@ -342,4 +382,7 @@ exports.EcsEventLogMultiValuedProperties = [
   'rule.author',
   'kibana.space_ids',
   'kibana.alert.maintenance_window_ids',
+  'kibana.alert.rule.gap.in_progress_intervals',
+  'kibana.alert.rule.gap.filled_intervals',
+  'kibana.alert.rule.gap.unfilled_intervals',
 ];

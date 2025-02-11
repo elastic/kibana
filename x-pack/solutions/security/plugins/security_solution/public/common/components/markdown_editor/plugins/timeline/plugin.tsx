@@ -77,15 +77,17 @@ const TimelineEditor = memo(TimelineEditorComponent);
 
 export const plugin = ({
   interactionsUpsellingMessage,
+  canSeeTimeline,
 }: {
   interactionsUpsellingMessage?: string;
+  canSeeTimeline: boolean;
 }): EuiMarkdownEditorUiPlugin => {
   return {
     name: ID,
     button: {
       label: interactionsUpsellingMessage ?? i18n.INSERT_TIMELINE,
       iconType: 'timeline',
-      isDisabled: !!interactionsUpsellingMessage,
+      isDisabled: !canSeeTimeline || !!interactionsUpsellingMessage,
     },
     helpText: (
       <EuiCodeBlock language="md" paddingSize="s" fontSize="l">

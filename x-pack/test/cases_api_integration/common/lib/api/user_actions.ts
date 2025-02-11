@@ -7,51 +7,29 @@
 
 import {
   getCaseFindUserActionsUrl,
-  getCaseUserActionUrl,
   getCaseUserActionStatsUrl,
   getCaseUsersUrl,
 } from '@kbn/cases-plugin/common/api';
 import {
-  CaseUserActionDeprecatedResponse,
-  CaseUserActionsDeprecatedResponse,
   CaseUserActionStatsResponse,
   GetCaseUsersResponse,
   UserActionFindRequest,
   UserActionFindResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import type SuperTest from 'supertest';
+import { UserAction } from '@kbn/cases-plugin/common/types/domain';
 import { User } from '../authentication/types';
 
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix } from './helpers';
 import { removeServerGeneratedPropertiesFromObject } from './omit';
 
-export const removeServerGeneratedPropertiesFromUserAction = (
-  attributes: CaseUserActionDeprecatedResponse
-) => {
-  const keysToRemove: Array<keyof CaseUserActionDeprecatedResponse> = ['action_id', 'created_at'];
-  return removeServerGeneratedPropertiesFromObject<
-    CaseUserActionDeprecatedResponse,
-    (typeof keysToRemove)[number]
-  >(attributes, keysToRemove);
-};
-
-export const getCaseUserActions = async ({
-  supertest,
-  caseID,
-  expectedHttpCode = 200,
-  auth = { user: superUser, space: null },
-}: {
-  supertest: SuperTest.Agent;
-  caseID: string;
-  expectedHttpCode?: number;
-  auth?: { user: User; space: string | null };
-}): Promise<CaseUserActionsDeprecatedResponse> => {
-  const { body: userActions } = await supertest
-    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseUserActionUrl(caseID)}`)
-    .auth(auth.user.username, auth.user.password)
-    .expect(expectedHttpCode);
-  return userActions;
+export const removeServerGeneratedPropertiesFromUserAction = (attributes: UserAction) => {
+  const keysToRemove: Array<keyof UserAction> = ['id', 'created_at', 'version'];
+  return removeServerGeneratedPropertiesFromObject<UserAction, (typeof keysToRemove)[number]>(
+    attributes,
+    keysToRemove
+  );
 };
 
 export const findCaseUserActions = async ({

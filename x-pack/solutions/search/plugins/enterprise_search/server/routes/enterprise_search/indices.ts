@@ -35,8 +35,6 @@ import type {
   MlInferenceHistoryResponse,
 } from '../../../common/types/pipelines';
 
-import { fetchCrawlerByIndexName, fetchCrawlers } from '../../lib/crawler/fetch_crawlers';
-
 import { createIndex } from '../../lib/indices/create_index';
 import { deleteAccessControlIndex } from '../../lib/indices/delete_access_control_index';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';
@@ -61,7 +59,7 @@ import { getIndexPipelineParameters } from '../../lib/pipelines/get_index_pipeli
 import { getPipeline } from '../../lib/pipelines/get_pipeline';
 import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
 import { revertCustomPipeline } from '../../lib/pipelines/revert_custom_pipeline';
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../types';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
@@ -72,12 +70,7 @@ import {
 } from '../../utils/identify_exceptions';
 import { getPrefixedInferencePipelineProcessorName } from '../../utils/ml_inference_pipeline_utils';
 
-export function registerIndexRoutes({
-  router,
-  enterpriseSearchRequestHandler,
-  log,
-  ml,
-}: RouteDependencies) {
+export function registerIndexRoutes({ router, log, ml }: RouteDependencies) {
   router.get(
     { path: '/internal/enterprise_search/search_indices', validate: false },
     elasticsearchErrorHandler(log, async (context, _, response) => {
@@ -127,11 +120,9 @@ export function registerIndexRoutes({
         size
       );
       const connectors = await fetchConnectors(client.asCurrentUser, indexNames);
-      const crawlers = await fetchCrawlers(client, indexNames);
       const enrichedIndices = indices.map((index) => ({
         ...index,
         connector: connectors.find((connector) => connector.index_name === index.name),
-        crawler: crawlers.find((crawler) => crawler.index_name === index.name),
       }));
 
       return response.ok({
@@ -198,18 +189,7 @@ export function registerIndexRoutes({
       const { client } = (await context.core).elasticsearch;
 
       try {
-        const crawler = await fetchCrawlerByIndexName(client, indexName);
         const connector = await fetchConnectorByIndexName(client.asCurrentUser, indexName);
-
-        if (crawler) {
-          const crawlerRes = await enterpriseSearchRequestHandler.createRequest({
-            path: `/api/ent/v1/internal/indices/${indexName}`,
-          })(context, request, response);
-
-          if (crawlerRes.status !== 200) {
-            throw new Error(crawlerRes.payload.message);
-          }
-        }
 
         if (connector) {
           if (connector.service_type === CRAWLER_SERVICE_TYPE) {
@@ -581,22 +561,6 @@ export function registerIndexRoutes({
             'xpack.enterpriseSearch.server.routes.createApiIndex.indexExistsError',
             {
               defaultMessage: 'This index already exists',
-            }
-          ),
-          response,
-          statusCode: 409,
-        });
-      }
-
-      const crawler = await fetchCrawlerByIndexName(client, request.body.index_name);
-
-      if (crawler) {
-        return createError({
-          errorCode: ErrorCode.CRAWLER_ALREADY_EXISTS,
-          message: i18n.translate(
-            'xpack.enterpriseSearch.server.routes.createApiIndex.crawlerExistsError',
-            {
-              defaultMessage: 'A crawler for this index already exists',
             }
           ),
           response,

@@ -19,7 +19,7 @@ Here is a basic example for using the `data.search` service from a custom plugin
 
 ```ts
 import { CoreStart, Plugin } from '@kbn/core/public';
-import { DataPublicPluginStart, isCompleteResponse, isErrorResponse } from import { DataPublicPluginStart, isCompleteResponse, isErrorResponse } from '../../src/plugins/data';
+import { DataPublicPluginStart, isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/public';
 
 export interface MyPluginStartDependencies {
   data: DataPublicPluginStart;
@@ -103,7 +103,7 @@ data.search.search(req).subscribe({
 The search service `search` method supports a second argument called `options`. One of these options provides an `abortSignal` to stop searches from running to completion, if the result is no longer needed.
 
 ```ts
-import { AbortError } from '../../src/data/public';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 
 const abortController = new AbortController();
 data.search

@@ -127,13 +127,21 @@ describe('When the tabular page is loaded', () => {
   it('should only disable delete action for preconfigured endpoints', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
-    const deleteActions = screen.getAllByTestId(/inferenceUIDeleteAction/);
+    screen.getAllByTestId('euiCollapsedItemActionsButton')[0].click();
 
-    expect(deleteActions[0]).toBeDisabled();
-    expect(deleteActions[1]).toBeDisabled();
-    expect(deleteActions[2]).toBeEnabled();
-    expect(deleteActions[3]).toBeEnabled();
-    expect(deleteActions[4]).toBeEnabled();
+    const deleteAction = screen.getByTestId(/inferenceUIDeleteAction/);
+
+    expect(deleteAction).toBeDisabled();
+  });
+
+  it('should not disable delete action for other endpoints', () => {
+    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
+
+    screen.getAllByTestId('euiCollapsedItemActionsButton')[4].click();
+
+    const deleteAction = screen.getByTestId(/inferenceUIDeleteAction/);
+
+    expect(deleteAction).toBeEnabled();
   });
 
   it('should show preconfigured badge only for preconfigured endpoints', () => {

@@ -16,7 +16,7 @@ describe('getDiscoverLocatorParams', () => {
   it('should return saved search id if input has savedObjectId', () => {
     expect(
       getDiscoverLocatorParams({
-        savedObjectId: new BehaviorSubject<string | undefined>('savedObjectId'),
+        savedObjectId$: new BehaviorSubject<string | undefined>('savedObjectId'),
         savedSearch$: new BehaviorSubject<SavedSearch>(savedSearchMock),
       })
     ).toEqual({

@@ -6,16 +6,22 @@
  */
 
 import React from 'react';
-import { StoryFn } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import { ThemeProvider, css } from '@emotion/react';
 import { action } from '@storybook/addon-actions';
 import { Actions as ActionsComponent, type ActionsProps } from './actions';
+import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 
 export default {
   title: 'Components/Graph Components/Additional Components',
   description: 'CDR - Graph visualization',
-  argTypes: {},
-};
+  argTypes: {
+    searchWarningMessage: {
+      control: 'object',
+    },
+  },
+  decorators: [GlobalStylesStorybookDecorator],
+} as Meta;
 
 const Template: StoryFn<ActionsProps> = (props) => {
   return (
@@ -38,4 +44,5 @@ Actions.args = {
   showToggleSearch: true,
   searchFilterCounter: 0,
   showInvestigateInTimeline: true,
+  searchToggled: false,
 };

@@ -12,8 +12,6 @@ import { KbnImportReq } from '@kbn/repo-packages';
 
 // @ts-ignore not typed by @types/webpack
 import Module from 'webpack/lib/Module';
-// @ts-ignore not typed by @types/webpack
-// import StaticExportsDependency from 'webpack/lib/dependencies/StaticExportsDependency';
 import { RawSource } from 'webpack-sources';
 import { BundleRemote } from '../common';
 
@@ -47,7 +45,6 @@ export class BundleRemoteModule extends Module {
   }
 
   build(_: any, __: any, ___: any, ____: any, callback: () => void) {
-    // this.built = true;
     this.buildMeta = {
       async: false,
       exportsType: undefined,

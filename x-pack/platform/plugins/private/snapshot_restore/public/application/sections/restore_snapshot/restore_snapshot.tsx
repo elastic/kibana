@@ -128,6 +128,7 @@ export const RestoreSnapshot: React.FunctionComponent<RouteComponentProps<MatchP
           />
         }
         error={saveError}
+        data-test-subj="restoreSnapshotError"
       />
     ) : null;
   };

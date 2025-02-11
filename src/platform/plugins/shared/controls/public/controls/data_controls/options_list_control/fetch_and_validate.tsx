@@ -33,7 +33,7 @@ export function fetchAndValidate$({
   api,
   stateManager,
 }: {
-  api: Pick<OptionsListControlApi, 'dataViews' | 'field$' | 'setBlockingError' | 'parentApi'> &
+  api: Pick<OptionsListControlApi, 'dataViews$' | 'field$' | 'setBlockingError' | 'parentApi'> &
     Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
       controlFetch$: Observable<ControlFetchContext>;
       loadingSuggestions$: BehaviorSubject<boolean>;
@@ -49,7 +49,7 @@ export function fetchAndValidate$({
   let abortController: AbortController | undefined;
 
   return combineLatest([
-    api.dataViews,
+    api.dataViews$,
     api.field$,
     api.controlFetch$,
     api.parentApi.allowExpensiveQueries$,
@@ -58,7 +58,10 @@ export function fetchAndValidate$({
     stateManager.sort,
     stateManager.searchTechnique,
     // cannot use requestSize directly, because we need to be able to reset the size to the default without refetching
-    api.loadMoreSubject.pipe(debounceTime(100)), // debounce load more so "loading" state briefly shows
+    api.loadMoreSubject.pipe(
+      startWith(null), // start with null so that `combineLatest` subscription fires
+      debounceTime(100) // debounce load more so "loading" state briefly shows
+    ),
     apiPublishesReload(api.parentApi)
       ? api.parentApi.reload$.pipe(
           tap(() => requestCache.clearCache()),

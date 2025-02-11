@@ -100,7 +100,7 @@ function isService(el: cytoscape.NodeSingular) {
 const getStyle = (
   euiTheme: EuiThemeComputed,
   isTraceExplorerEnabled: boolean
-): cytoscape.Stylesheet[] => {
+): cytoscape.StylesheetJson => {
   const lineColor = euiTheme.colors.mediumShade;
   return [
     {

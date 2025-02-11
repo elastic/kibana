@@ -25,6 +25,7 @@ export function createChatCompleteApi({ http }: { http: HttpStart }) {
     toolChoice,
     tools,
     temperature,
+    modelName,
     functionCalling,
     stream,
   }: ChatCompleteOptions<ToolOptions, boolean>): ChatCompleteCompositeResponse<
@@ -38,6 +39,7 @@ export function createChatCompleteApi({ http }: { http: HttpStart }) {
       toolChoice,
       tools,
       temperature,
+      modelName,
       functionCalling,
     };
 

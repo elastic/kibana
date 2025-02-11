@@ -42,7 +42,7 @@ export default {
               {
                 core: {
                   application: {
-                    capabilities: { dashboard: { show: canShowDashboard } },
+                    capabilities: { dashboard_v2: { show: canShowDashboard } },
                   },
                   http: { basePath: { get: () => '' } },
                 },

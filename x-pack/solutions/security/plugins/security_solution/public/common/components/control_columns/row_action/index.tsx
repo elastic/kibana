@@ -26,6 +26,7 @@ import { useTourContext } from '../../guided_onboarding_tour';
 import { AlertsCasesTourSteps, SecurityStepId } from '../../guided_onboarding_tour/tour_config';
 import { NotesEventTypes, DocumentEventTypes } from '../../../lib/telemetry';
 import { getMappedNonEcsValue } from '../../../utils/get_mapped_non_ecs_value';
+import { useUserPrivileges } from '../../user_privileges';
 
 export type RowActionProps = EuiDataGridCellValueElementProps & {
   columnHeaders: ColumnHeaderOptions[];
@@ -97,6 +98,11 @@ const RowActionComponent = ({
   const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
     'securitySolutionNotesDisabled'
   );
+  const {
+    notesPrivileges: { read: canReadNotes },
+    timelinePrivileges: { read: canReadTimelines },
+  } = useUserPrivileges();
+  const showNotes = canReadNotes && !securitySolutionNotesDisabled;
 
   const handleOnEventDetailPanelOpened = useCallback(() => {
     openFlyout({
@@ -181,7 +187,8 @@ const RowActionComponent = ({
           setEventsLoading={setEventsLoading}
           setEventsDeleted={setEventsDeleted}
           refetch={refetch}
-          showNotes={!securitySolutionNotesDisabled}
+          showNotes={showNotes}
+          disableTimelineAction={!canReadTimelines}
         />
       )}
     </>

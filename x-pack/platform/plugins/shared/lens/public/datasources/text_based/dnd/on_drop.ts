@@ -30,12 +30,13 @@ export const onDrop = (props: DatasourceDimensionDropHandlerProps<TextBasedPriva
 
   const layer = state.layers[target.layerId];
   const allColumns = retrieveLayerColumnsFromCache(layer.columns, layer.query);
-  const sourceField = allColumns.find((f) => f.columnId === source.id);
+  const sourceField = allColumns.find((f) => f.columnId === source.id || f.variable === source.id);
   const targetField = allColumns.find((f) => f.columnId === target.columnId);
   const newColumn = {
     columnId: target.columnId,
-    fieldName: sourceField?.fieldName ?? '',
+    fieldName: sourceField?.variable ? `?${sourceField.variable}` : sourceField?.fieldName ?? '',
     meta: sourceField?.meta,
+    variable: sourceField?.variable,
   };
   let columns: TextBasedLayerColumn[] | undefined;
 

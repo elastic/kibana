@@ -6,11 +6,45 @@
 - [1. Summary](#1-summary)
 - [2. Motivation](#2-motivation)
 - [3. Detailed design](#3-detailed-design)
+  - [3.1 Saved Objects Service](#31-saved-objects-service)
+    - [3.1.1 Type registry](#311-type-registry)
+    - [3.1.2 Schema](#312-schema)
+    - [3.1.3 Saved Objects Client: Security wrapper](#313-saved-objects-client-security-wrapper)
+      - [Attaching Access Controls](#attaching-access-controls)
+      - [Authorization changes](#authorization-changes)
+  - [3.2 Saved Objects API](#32-saved-objects-api)
+    - [`get` / `bulk_get`](#get--bulk_get)
+      - [Performance considerations](#performance-considerations)
+    - [`create` / `bulk_create`](#create--bulk_create)
+      - [Performance considerations](#performance-considerations-1)
+    - [`update` / `bulk_update`](#update--bulk_update)
+      - [Performance considerations](#performance-considerations-2)
+    - [`delete`](#delete)
+      - [Performance considerations](#performance-considerations-3)
+    - [`find`](#find)
+      - [Performance considerations](#performance-considerations-4)
+    - [`addToNamespaces` / `deleteFromNamespaces`](#addtonamespaces--deletefromnamespaces)
+      - [Performance considerations](#performance-considerations-5)
+  - [3.3 Behavior with various plugin configurations](#33-behavior-with-various-plugin-configurations)
+    - [Alternative](#alternative)
+  - [3.4 Impacts on telemetry](#34-impacts-on-telemetry)
 - [4. Drawbacks](#4-drawbacks)
 - [5. Alternatives](#5-alternatives)
+  - [5.1 Document level security](#51-document-level-security)
+  - [5.2 Re-using the repository's pre-flight checks](#52-re-using-the-repositorys-pre-flight-checks)
+    - [5.2.1 Move audit logging code into the repository](#521-move-audit-logging-code-into-the-repository)
+    - [5.2.2 Pluggable authorization](#522-pluggable-authorization)
+    - [5.2.3 Repository callbacks](#523-repository-callbacks)
+    - [5.2.4 Pass down preflight objects](#524-pass-down-preflight-objects)
 - [6. Adoption strategy](#6-adoption-strategy)
 - [7. How we teach this](#7-how-we-teach-this)
 - [8. Unresolved questions](#8-unresolved-questions)
+  - [8.1 `accessControl.owner`](#81-accesscontrolowner)
+  - [8.2 Authorization for private objects](#82-authorization-for-private-objects)
+  - [8.3 Behavior when security is disabled](#83-behavior-when-security-is-disabled)
+- [9. Resolved Questions](#9-resolved-questions)
+  - [9.2 Authorization for private objects](#92-authorization-for-private-objects)
+  - [9.3 Behavior when security is disabled](#93-behavior-when-security-is-disabled)
 
 # 1. Summary
 
@@ -38,7 +72,7 @@ Public (non-private) saved object types are not impacted by this RFC. This propo
 ## 3.1 Saved Objects Service
 
 ### 3.1.1 Type registry
-The [saved objects type registry](https://github.com/elastic/kibana/blob/701697cc4a34d07c0508c3bdf01dca6f9d40a636/src/core/server/saved_objects/saved_objects_type_registry.ts) will allow consumers to register "private" saved object types via a new `accessClassification` property:
+The [saved objects type registry](https://github.com/elastic/kibana/blob/main/src/core/packages/saved-objects/base-server-internal/src/saved_objects_type_registry.ts) will allow consumers to register "private" saved object types via a new `accessClassification` property:
 
 ```ts
 /**
@@ -103,7 +137,7 @@ export interface SavedObject<T = unknown> {
 
 ### 3.1.3 Saved Objects Client: Security wrapper
 
-The [security wrapper](https://github.com/elastic/kibana/blob/701697cc4a34d07c0508c3bdf01dca6f9d40a636/x-pack/plugins/security/server/saved_objects/secure_saved_objects_client_wrapper.ts) authorizes and audits operations against saved objects.
+The [security wrapper](https://github.com/elastic/kibana/blob/8.6/x-pack/plugins/security/server/saved_objects/secure_saved_objects_client_wrapper.ts) authorizes and audits operations against saved objects.
 
 There are two primary changes to this wrapper:
 
@@ -170,7 +204,7 @@ This overhead does not impact deleting "public" objects. We only need to retriev
 
 
 ### `find`
-The security wrapper will supply or augment a [KQL `filter`](https://github.com/elastic/kibana/blob/701697cc4a34d07c0508c3bdf01dca6f9d40a636/src/core/server/saved_objects/types.ts#L118) which describes the objects the current user is authorized to see.
+The security wrapper will supply or augment a [KQL `filter`](https://github.com/elastic/kibana/blob/main/src/core/packages/saved-objects/api-server/src/apis/find.ts#L117) which describes the objects the current user is authorized to see.
 
 ```ts
 // Sample KQL filter

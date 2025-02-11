@@ -66,7 +66,7 @@ export const DecorateWithKibanaContext: Decorator = (story) => {
         },
       },
       setBreadcrumbs: () => {},
-      setBreadcrumbsAppendExtension: () => {},
+      setBreadcrumbsAppendExtension: () => () => {},
     },
     data: {
       search: {

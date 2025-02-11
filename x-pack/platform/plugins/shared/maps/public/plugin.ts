@@ -251,13 +251,13 @@ export class MapsPlugin
     setLicensingPluginStart(plugins.licensing);
     setStartServices(core, plugins);
 
-    if (core.application.capabilities.maps.show) {
+    if (core.application.capabilities.maps_v2.show) {
       plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);
     }
     plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, filterByMapExtentAction);
     plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, synchronizeMovementAction);
 
-    if (!core.application.capabilities.maps.save) {
+    if (!core.application.capabilities.maps_v2.save) {
       plugins.visualizations.unRegisterAlias(APP_ID);
     }
 

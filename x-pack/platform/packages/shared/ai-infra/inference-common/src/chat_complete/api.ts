@@ -9,6 +9,7 @@ import type { Observable } from 'rxjs';
 import type { ToolCallsOf, ToolOptions } from './tools';
 import type { Message } from './messages';
 import type { ChatCompletionEvent, ChatCompletionTokenCount } from './events';
+import type { ChatCompleteMetadata } from './metadata';
 
 /**
  * Request a completion from the LLM based on a prompt or conversation.
@@ -95,13 +96,24 @@ export type ChatCompleteOptions<
    */
   temperature?: number;
   /**
-   * Function calling mode, defaults to "native".
+   * The model name identifier to use. Can be defined to use another model than the
+   * default one, when using connectors / providers exposing multiple models.
+   *
+   * Defaults to the default model as defined by the used connector.
+   */
+  modelName?: string;
+  /**
+   * Function calling mode, defaults to "auto".
    */
   functionCalling?: FunctionCallingMode;
   /**
    * Optional signal that can be used to forcefully abort the request.
    */
   abortSignal?: AbortSignal;
+  /**
+   * Optional metadata related to call execution.
+   */
+  metadata?: ChatCompleteMetadata;
 } & TToolOptions;
 
 /**
@@ -145,7 +157,8 @@ export interface ChatCompleteResponse<TToolOptions extends ToolOptions = ToolOpt
 
 /**
  * Define the function calling mode when using inference APIs.
- * - native will use the LLM's native function calling (requires the LLM to have native support)
- * - simulated: will emulate function calling with function calling instructions
+ * - "native": will use the LLM's native function calling (requires the LLM to have native support)
+ * - "simulated": will emulate function calling with function calling instructions
+ * - "auto": will use "native" for providers we know are supporting native function call, "simulated" otherwise
  */
-export type FunctionCallingMode = 'native' | 'simulated';
+export type FunctionCallingMode = 'native' | 'simulated' | 'auto';

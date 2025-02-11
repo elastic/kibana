@@ -8,15 +8,17 @@
 import { Client, errors } from '@elastic/elasticsearch';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
-import pRetry from 'p-retry';
 import type { Agent as SuperTestAgent } from 'supertest';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-
 import { ObservabilityApmAlert } from '@kbn/alerts-as-data-utils';
+import { retryForSuccess } from '@kbn/ftr-common-functional-services';
+import { ToolingLog } from '@kbn/tooling-log';
 import {
   APM_ACTION_VARIABLE_INDEX,
   APM_ALERTS_INDEX,
 } from '../../../../api_integration/deployment_agnostic/apis/observability/apm/alerts/helpers/alerting_helper';
+
+const debugLog = ToolingLog.bind(ToolingLog, { level: 'debug', writeTo: process.stdout });
 
 export async function createApmRule<T extends ApmRuleType>({
   supertest,
@@ -59,8 +61,10 @@ export async function runRuleSoon({
   ruleId: string;
   supertest: SuperTestAgent;
 }): Promise<Record<string, any>> {
-  return pRetry(
-    async () => {
+  return await retryForSuccess(new debugLog({ context: 'runRuleSoon' }), {
+    timeout: 20_000,
+    methodName: 'runRuleSoon',
+    block: async () => {
       try {
         const response = await supertest
           .post(`/internal/alerting/rule/${ruleId}/_run_soon`)
@@ -74,8 +78,8 @@ export async function runRuleSoon({
         throw new Error(`[Rule] Running a rule ${ruleId} failed: ${error}`);
       }
     },
-    { retries: 10 }
-  );
+    retryCount: 10,
+  });
 }
 
 export async function deleteAlertsByRuleId({ es, ruleId }: { es: Client; ruleId: string }) {

@@ -43,20 +43,8 @@ export class BundleRemoteUsedExportsPlugin {
             KbnPluginMainEntryGlob.match(normalizedModuleResource) ||
             KbnPluginExtraFileEntryGlob.match(normalizedModuleResource)
           ) {
-            // if (module && module.resource && (module.resource.endsWith(Path.join('public', 'index.ts')) || module.resource.endsWith(Path.join('public', 'index.js')))) {
             // Get all exports of the module
             const exportsInfo = moduleGraph.getExportsInfo(module);
-
-            // Array.from(exportsInfo.exports).forEach((exportInfo) => {
-            //   if (exportInfo.name) {
-            //     // Mark the export as used
-            //     moduleGraph.getExportsInfo(module).setUsedInUnknownWay(exportInfo.name);
-            //     moduleGraph.addExtraReason(
-            //       module,
-            //       `BundleRemoteUsedExportsPlugin/${exportInfo.name}`
-            //     );
-            //   }
-            // });
 
             // If the module uses export *, mark it as used in unknown way
             if (module.buildMeta && module.buildMeta.exportsType === 'namespace') {

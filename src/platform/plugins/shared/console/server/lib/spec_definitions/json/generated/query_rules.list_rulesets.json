@@ -14,7 +14,7 @@
     "patterns": [
       "_query_rules"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/list-query-rulesets.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/list-query-rulesets.html",
     "availability": {
       "stack": true,
       "serverless": true

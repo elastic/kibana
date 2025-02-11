@@ -15,7 +15,8 @@
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/i18n",
-    "@kbn/safer-lodash-set"
+    "@kbn/safer-lodash-set",
+    "@kbn/esql-validation-autocomplete"
   ],
   "exclude": [
     "target/**/*",

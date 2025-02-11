@@ -110,8 +110,6 @@ module.exports = {
     extensions: ['.js', '.ts', '.tsx'],
     mainFields: ['browser', 'module', 'main'],
     conditionNames: ['browser', 'module', 'import', 'require', 'default'],
-    // mainFields: ['browser', 'main', 'module'],
-    // // conditionNames: ['require', 'node', 'module', 'import', 'default'],
     alias: {
       '@elastic/eui$': '@elastic/eui/optimize/es',
       '@elastic/eui/lib/components/provider/nested$':

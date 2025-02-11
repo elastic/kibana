@@ -16,7 +16,7 @@ import {
 import { ApmTransactionErrorRateTransformGenerator } from './apm_transaction_error_rate';
 
 const SPACE_ID = 'custom-space';
-const generator = new ApmTransactionErrorRateTransformGenerator(SPACE_ID, dataViewsService);
+const generator = new ApmTransactionErrorRateTransformGenerator(SPACE_ID, dataViewsService, false);
 
 describe('APM Transaction Error Rate Transform Generator', () => {
   it('returns the expected transform params with every specified indicator params', async () => {

@@ -1,0 +1,15 @@
+{
+  "author": "Elastic",
+  "name": "@kbn/apm-ftr-e2e",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Elastic License 2.0",
+  "scripts": {
+    "cypress": "node ../../../../security/plugins/security_solution/scripts/start_cypress_parallel --config-file ../observability/plugins/apm/ftr_e2e/cypress.config.ts --ftr-config-file ../../../../../test/apm_cypress/cli_config",
+    "cypress:open": "yarn cypress open",
+    "cypress:run": "yarn cypress run",
+    "cypress:run:headed": "yarn cypress run --headed",
+    "junit:merge": "../../../../../../node_modules/.bin/mochawesome-merge ../../../../../../target/kibana-apm/cypress/results/mochawesome*.json > ../../../../../../target/kibana-apm/cypress/results/output.json && ../../../../../../node_modules/.bin/marge ../../../../../../target/kibana-apm/cypress/results/output.json --reportDir ../../../../../../target/kibana-apm/cypress/results && yarn junit:transform && mkdir -p ../../../../../../target/junit && cp ../../../../../../target/kibana-apm/cypress/results/*.xml ../../../../../../target/junit/",
+    "junit:transform": "node ../../../../security/plugins/security_solution/scripts/junit_transformer --pathPattern '../../../../../../target/kibana-apm/cypress/results/*.xml' --rootDirectory ../../../../../../ --reportName 'APM Cypress' --writeInPlace"
+  }
+}

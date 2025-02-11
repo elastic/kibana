@@ -28,6 +28,7 @@ export enum ServiceProviderKeys {
   anthropic = 'anthropic',
   watsonxai = 'watsonxai',
   'alibabacloud-ai-search' = 'alibabacloud-ai-search',
+  elastic = 'elastic',
 }
 
 export const INFERENCE_CONNECTOR_ID = '.inference';

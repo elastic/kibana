@@ -6,11 +6,6 @@
       ],
       "h": [],
       "help": "__flag__",
-      "master_timeout": [
-        "30s",
-        "-1",
-        "0"
-      ],
       "s": [],
       "v": "__flag__",
       "error_trace": "__flag__",
@@ -23,6 +18,11 @@
         "closed",
         "hidden",
         "none"
+      ],
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
       ]
     },
     "methods": [

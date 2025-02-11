@@ -456,7 +456,7 @@ FROM index`;
         name: 'join',
         args: [
           {
-            type: 'identifier',
+            type: 'source',
             name: 'abc',
             formatting: {
               top: [
@@ -591,7 +591,7 @@ FROM index`;
         name: 'join',
         args: [
           {
-            type: 'identifier',
+            type: 'source',
             name: 'abc',
             formatting: {
               left: [
@@ -846,7 +846,7 @@ FROM index`;
         name: 'join',
         args: [
           {
-            type: 'identifier',
+            type: 'source',
             name: 'abc',
             formatting: {
               right: [

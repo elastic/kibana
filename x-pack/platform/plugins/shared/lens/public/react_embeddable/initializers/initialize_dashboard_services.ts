@@ -7,14 +7,13 @@
 
 import { noop } from 'lodash';
 import {
-  HasInPlaceLibraryTransforms,
   HasLibraryTransforms,
-  PublishesWritablePanelTitle,
-  PublishesWritablePanelDescription,
+  PublishesWritableTitle,
+  PublishesWritableDescription,
   SerializedTitles,
   StateComparators,
   getUnchangingComparator,
-  initializeTitles,
+  initializeTitleManager,
 } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-containers';
 import { buildObservableVariable, isTextBasedLanguage } from '../helper';
@@ -28,6 +27,7 @@ import type {
   IntegrationCallbacks,
   LensInternalApi,
   LensApi,
+  LensSerializedState,
 } from '../types';
 import { apiHasLensComponentProps } from '../type_guards';
 import { StateManagementConfig } from './initialize_state_management';
@@ -36,10 +36,9 @@ import { StateManagementConfig } from './initialize_state_management';
 type SerializedProps = SerializedTitles & LensPanelProps & LensOverrides & LensSharedProps;
 
 export interface DashboardServicesConfig {
-  api: PublishesWritablePanelTitle &
-    PublishesWritablePanelDescription &
-    HasInPlaceLibraryTransforms &
-    HasLibraryTransforms<LensRuntimeState> &
+  api: PublishesWritableTitle &
+    PublishesWritableDescription &
+    HasLibraryTransforms<LensSerializedState, LensSerializedState> &
     Pick<LensApi, 'parentApi'> &
     Pick<IntegrationCallbacks, 'updateOverrides' | 'getTriggerCompatibleActions'>;
   serialize: () => SerializedProps;
@@ -58,15 +57,15 @@ export function initializeDashboardServices(
   internalApi: LensInternalApi,
   stateConfig: StateManagementConfig,
   parentApi: unknown,
+  titleManager: ReturnType<typeof initializeTitleManager>,
   { attributeService, uiActions }: LensEmbeddableStartServices
 ): DashboardServicesConfig {
-  const { titlesApi, serializeTitles, titleComparators } = initializeTitles(initialState);
   // For some legacy reason the title and description default value is picked differently
   // ( based on existing FTR tests ).
-  const [defaultPanelTitle$] = buildObservableVariable<string | undefined>(
+  const [defaultTitle$] = buildObservableVariable<string | undefined>(
     initialState.title || internalApi.attributes$.getValue().title
   );
-  const [defaultPanelDescription$] = buildObservableVariable<string | undefined>(
+  const [defaultDescription$] = buildObservableVariable<string | undefined>(
     initialState.savedObjectId
       ? internalApi.attributes$.getValue().description || initialState.description
       : initialState.description
@@ -83,13 +82,13 @@ export function initializeDashboardServices(
   return {
     api: {
       parentApi: apiIsPresentationContainer(parentApi) ? parentApi : undefined,
-      defaultPanelTitle: defaultPanelTitle$,
-      defaultPanelDescription: defaultPanelDescription$,
-      ...titlesApi,
-      libraryId$: stateConfig.api.savedObjectId,
+      defaultTitle$,
+      defaultDescription$,
+      ...titleManager.api,
       updateOverrides: internalApi.updateOverrides,
       getTriggerCompatibleActions: uiActions.getTriggerCompatibleActions,
-      // The functions below brings the HasInPlaceLibraryTransforms compliance (new interface)
+
+      // The functions below fulfill the HasLibraryTransforms interface
       saveToLibrary: async (title: string) => {
         const { attributes } = getLatestState();
         const savedObjectId = await attributeService.saveToLibrary(
@@ -122,28 +121,14 @@ export function initializeDashboardServices(
       canLinkToLibrary: async () =>
         !getLatestState().savedObjectId && !isTextBasedLanguage(getLatestState()),
       canUnlinkFromLibrary: async () => Boolean(getLatestState().savedObjectId),
-      unlinkFromLibrary: () => {
-        // broadcast the change to the main state serializer
-        stateConfig.api.updateSavedObjectId(undefined);
-
-        if ((titlesApi.panelTitle.getValue() ?? '').length === 0) {
-          titlesApi.setPanelTitle(defaultPanelTitle$.getValue());
-        }
-        if ((titlesApi.panelDescription.getValue() ?? '').length === 0) {
-          titlesApi.setPanelDescription(defaultPanelDescription$.getValue());
-        }
-        defaultPanelTitle$.next(undefined);
-        defaultPanelDescription$.next(undefined);
+      getSerializedStateByReference: (newId: string) => {
+        const currentState = getLatestState();
+        currentState.savedObjectId = newId;
+        return attributeService.extractReferences(currentState);
       },
-      getByValueRuntimeSnapshot: (): Omit<LensRuntimeState, 'savedObjectId'> => {
-        const { savedObjectId, ...rest } = getLatestState();
-        return rest;
-      },
-      // The functions below brings the HasLibraryTransforms compliance (old interface)
-      getByReferenceState: () => getLatestState(),
-      getByValueState: (): Omit<LensRuntimeState, 'savedObjectId'> => {
-        const { savedObjectId, ...rest } = getLatestState();
-        return rest;
+      getSerializedStateByValue: () => {
+        const { savedObjectId, ...byValueRuntimeState } = getLatestState();
+        return attributeService.extractReferences(byValueRuntimeState);
       },
     },
     serialize: () => {
@@ -158,7 +143,7 @@ export function initializeDashboardServices(
           }
         : {};
       return {
-        ...serializeTitles(),
+        ...titleManager.serialize(),
         style,
         className,
         ...settings,
@@ -168,7 +153,7 @@ export function initializeDashboardServices(
       };
     },
     comparators: {
-      ...titleComparators,
+      ...titleManager.comparators,
       id: getUnchangingComparator<SerializedTitles & LensPanelProps, 'id'>(),
       palette: getUnchangingComparator<SerializedTitles & LensPanelProps, 'palette'>(),
       renderMode: getUnchangingComparator<SerializedTitles & LensPanelProps, 'renderMode'>(),

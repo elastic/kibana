@@ -14,16 +14,17 @@ const mockConnector: Connector = {
   api_key_secret_id: '',
   configuration: {},
   custom_scheduling: {},
+  deleted: false,
+  description: null,
+  error: null,
   features: {
-    incremental_sync: {
-      enabled: true,
-    },
     document_level_security: {
       enabled: true,
     },
+    incremental_sync: {
+      enabled: true,
+    },
   },
-  description: null,
-  error: null,
   filtering: [],
   id: '',
   index_name: null,

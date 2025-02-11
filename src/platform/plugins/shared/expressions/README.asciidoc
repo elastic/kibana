@@ -43,20 +43,3 @@ filters
 
 [role="screenshot"]
 image::https://user-images.githubusercontent.com/9773803/74162514-3250a880-4c21-11ea-9e68-86f66862a183.png[]
-
-////
-// Commenting out due to broken links
-=== API documentation
-
-==== Server API
-https://github.com/elastic/kibana/blob/main/docs/development/platform/plugins/shared/expressions/server/kibana-plugin-plugins-expressions-server.expressionsserversetup.md[Server Setup contract]
-https://github.com/elastic/kibana/blob/main/docs/development/platform/plugins/shared/expressions/server/kibana-plugin-plugins-expressions-server.expressionsserverstart.md[Server Start contract]
-
-==== Browser API
-https://github.com/elastic/kibana/blob/main/docs/development/platform/plugins/shared/expressions/public/kibana-plugin-plugins-expressions-public.expressionsservicesetup.md[Browser Setup contract]
-https://github.com/elastic/kibana/blob/main/docs/development/platform/plugins/shared/expressions/public/kibana-plugin-plugins-expressions-public.expressionsstart.md[Browser Start contract]
-
-
-==== Other documentation
-https://www.elastic.co/guide/en/kibana/current/canvas-function-arguments.html[See Canvas documentation about expressions]
-////

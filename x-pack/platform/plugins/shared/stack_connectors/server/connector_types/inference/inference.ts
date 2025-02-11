@@ -187,7 +187,7 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
     const response = await this.esClient.transport.request<UnifiedChatCompleteResponse>(
       {
         method: 'POST',
-        path: `_inference/completion/${this.inferenceId}/_unified`,
+        path: `_inference/chat_completion/${this.inferenceId}/_stream`,
         body: { ...params.body, n: undefined }, // exclude n param for now, constant is used on the inference API side
       },
       {
@@ -196,7 +196,6 @@ export class InferenceConnector extends SubActionConnector<Config, Secrets> {
         signal: params.signal,
       }
     );
-
     // errors should be thrown as it will not be a stream response
     if (response.statusCode >= 400) {
       const error = await streamToString(response.body as unknown as Readable);

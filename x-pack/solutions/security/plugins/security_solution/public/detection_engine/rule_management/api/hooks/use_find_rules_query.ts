@@ -18,6 +18,10 @@ export interface FindRulesQueryArgs {
   filterOptions?: FilterOptions;
   sortingOptions?: SortingOptions;
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
+  gapsRange?: {
+    start: string;
+    end: string;
+  };
 }
 
 const FIND_RULES_QUERY_KEY = ['GET', DETECTION_ENGINE_RULES_URL_FIND];

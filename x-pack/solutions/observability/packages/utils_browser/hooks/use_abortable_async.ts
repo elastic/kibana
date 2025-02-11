@@ -58,12 +58,17 @@ export function useAbortableAsync<T>(
     const controller = new AbortController();
     controllerRef.current = controller;
 
+    function isRequestStale() {
+      return controllerRef.current !== controller;
+    }
+
     if (clearValueOnNext) {
       setValue(undefined);
       setError(undefined);
     }
 
     function handleError(err: Error) {
+      if (isRequestStale()) return;
       setError(err);
       if (unsetValueOnError) {
         setValue(undefined);
@@ -78,11 +83,15 @@ export function useAbortableAsync<T>(
         setLoading(true);
         response
           .then((nextValue) => {
+            if (isRequestStale()) return;
             setError(undefined);
             setValue(nextValue);
           })
           .catch(handleError)
-          .finally(() => setLoading(false));
+          .finally(() => {
+            if (isRequestStale()) return;
+            setLoading(false);
+          });
       } else {
         setError(undefined);
         setValue(response);

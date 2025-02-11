@@ -10,7 +10,7 @@ import { TimeRange } from '@kbn/es-query';
 import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import {
   apiIsOfType,
-  apiPublishesPanelTitle,
+  apiPublishesTitle,
   apiPublishesUnifiedSearch,
   HasEditCapabilities,
   HasLibraryTransforms,
@@ -35,7 +35,7 @@ import { EventHandlers } from '../reducers/non_serializable_instances';
 
 export type MapSerializedState = SerializedTitles &
   Partial<DynamicActionsSerializedState> & {
-    // by-valye
+    // by-value
     attributes?: MapAttributes;
     // by-reference
     savedObjectId?: string;
@@ -61,7 +61,7 @@ export type MapApi = DefaultEmbeddableApi<MapSerializedState> &
   PublishesDataLoading &
   PublishesDataViews &
   PublishesUnifiedSearch &
-  HasLibraryTransforms<MapSerializedState> & {
+  HasLibraryTransforms<MapSerializedState, MapSerializedState> & {
     getLayerList: () => ILayer[];
     reload: () => void;
     setEventHandlers: (eventHandlers: EventHandlers) => void;
@@ -75,7 +75,7 @@ export const isMapApi = (api: unknown): api is MapApi => {
     api &&
       apiIsOfType(api, 'map') &&
       typeof (api as MapApi).getLayerList === 'function' &&
-      apiPublishesPanelTitle(api) &&
+      apiPublishesTitle(api) &&
       apiPublishesUnifiedSearch(api)
   );
 };

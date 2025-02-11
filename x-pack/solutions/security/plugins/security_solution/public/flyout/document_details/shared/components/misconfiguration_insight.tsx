@@ -6,14 +6,14 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { EuiFlexItem, type EuiFlexGroupProps, useEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, type EuiFlexGroupProps, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import {
-  MISCONFIGURATION_INSIGHT,
   uiMetricService,
+  type CloudSecurityUiCounters,
 } from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { InsightDistributionBar } from './insight_distribution_bar';
@@ -42,7 +42,7 @@ interface MisconfigurationsInsightProps {
   /**
    * used to track the instance of this component, prefer kebab-case
    */
-  telemetrySuffix?: string;
+  telemetryKey?: CloudSecurityUiCounters;
 }
 
 /*
@@ -53,8 +53,9 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
   fieldName,
   direction,
   'data-test-subj': dataTestSubj,
-  telemetrySuffix,
+  telemetryKey,
 }) => {
+  const renderingId = useGeneratedHtmlId();
   const { scopeId, isPreview } = useDocumentDetailsContext();
   const { euiTheme } = useEuiTheme();
   const { data } = useMisconfigurationPreview({
@@ -65,12 +66,10 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
   });
 
   useEffect(() => {
-    uiMetricService.trackUiMetric(
-      METRIC_TYPE.COUNT,
-      `${MISCONFIGURATION_INSIGHT}-${telemetrySuffix}`
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    if (telemetryKey) {
+      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, telemetryKey);
+    }
+  }, [telemetryKey, renderingId]);
 
   const passedFindings = data?.count.passed || 0;
   const failedFindings = data?.count.failed || 0;

@@ -1286,6 +1286,27 @@
             "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "taskManager",
+            "id": "def-server.TaskInstance.priority",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "priority",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "server",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-server.TaskPriority",
+                "text": "TaskPriority"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/task_manager/server/task.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

@@ -162,6 +162,7 @@ export const RelatedCaseRt = rt.strict({
 
 export const SimilarityRt = rt.strict({
   typeKey: rt.string,
+  typeLabel: rt.string,
   value: rt.string,
 });
 

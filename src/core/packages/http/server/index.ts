@@ -124,6 +124,7 @@ export type {
   InternalRouteSecurity,
   RouteDeprecationInfo,
   PostValidationMetadata,
+  AnyKibanaRequest,
 } from './src/router';
 export {
   validBodyOutput,

@@ -11,8 +11,13 @@ import { useEuiTheme } from '../../../hooks';
 
 import { TTYPlayerLineMarkerType } from '.';
 
+const isAmsterdam = (euiThemeName: string) => {
+  return euiThemeName?.toLowerCase().includes('amsterdam');
+};
+
 export const useStyles = (progress: number) => {
   const { euiTheme, euiVars } = useEuiTheme();
+  const themeName = euiTheme.themeName;
   const cached = useMemo(() => {
     const { border } = euiTheme;
 
@@ -36,7 +41,9 @@ export const useStyles = (progress: number) => {
       if (selected) {
         return euiVars.terminalOutputMarkerAccent;
       }
-      return euiVars.euiColorVis1;
+      return isAmsterdam(themeName)
+        ? euiTheme.colors.vis.euiColorVis1
+        : euiTheme.colors.vis.euiColorVis2;
     };
 
     const marker = (type: TTYPlayerLineMarkerType, selected: boolean): CSSObject => ({
@@ -84,16 +91,18 @@ export const useStyles = (progress: number) => {
       "input[type='range']::-webkit-slider-thumb": customThumb,
       "input[type='range']::-moz-range-thumb": customThumb,
       '.euiRangeHighlight__progress': {
-        backgroundColor: euiVars.euiColorVis0_behindText,
+        backgroundColor: euiTheme.colors.vis.euiColorVis0,
         width: progress + '%!important',
         borderBottomRightRadius: 0,
         borderTopRightRadius: 0,
       },
       '.euiRangeSlider:focus ~ .euiRangeHighlight .euiRangeHighlight__progress': {
-        backgroundColor: euiVars.euiColorVis0_behindText,
+        backgroundColor: euiTheme.colors.vis.euiColorVis0,
       },
       '.euiRangeSlider:focus:not(:focus-visible) ~ .euiRangeHighlight .euiRangeHighlight__progress':
-        { backgroundColor: euiVars.euiColorVis0_behindText },
+        {
+          backgroundColor: euiTheme.colors.vis.euiColorVis0,
+        },
       '.euiRangeTrack::after': {
         background: euiVars.terminalOutputSliderBackground,
       },
@@ -119,13 +128,12 @@ export const useStyles = (progress: number) => {
     };
   }, [
     euiTheme,
-    euiVars.euiColorVis0_behindText,
-    euiVars.euiColorVis1,
     euiVars.terminalOutputBackground,
     euiVars.terminalOutputMarkerAccent,
     euiVars.terminalOutputMarkerWarning,
     euiVars.terminalOutputSliderBackground,
     progress,
+    themeName,
   ]);
 
   return cached;

@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import React from 'react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useLocation } from 'react-router-dom';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { render } from '@testing-library/react';
-import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { RuleTypeModalProps } from '@kbn/response-ops-rule-form/src/rule_type_modal/components/rule_type_modal';
 import * as pluginContext from '../../hooks/use_plugin_context';
 import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
@@ -21,6 +23,12 @@ import { RulesPage } from './rules';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
+const mockApplication = {
+  navigateToApp: jest.fn(),
+  navigateToUrl: jest.fn(),
+};
+
+const queryClient = new QueryClient();
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -34,6 +42,11 @@ jest.mock('../../utils/kibana_react', () => ({
     services: {
       ...mockUseKibanaReturnValue.services,
       observabilityAIAssistant: mockObservabilityAIAssistant,
+      application: {
+        ...mockUseKibanaReturnValue.services.application,
+        navigateToApp: mockApplication.navigateToApp,
+        navigateToUrl: mockApplication.navigateToUrl,
+      },
     },
   })),
 }));
@@ -46,6 +59,15 @@ jest.mock('@kbn/observability-shared-plugin/public');
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
   useLoadRuleTypesQuery: jest.fn(),
+}));
+
+jest.mock('@kbn/response-ops-rule-form/src/rule_type_modal', () => ({
+  RuleTypeModal: ({ onSelectRuleType }: RuleTypeModalProps) => (
+    <div data-test-subj="ruleTypeModal">
+      RuleTypeModal
+      <button onClick={() => onSelectRuleType('1')}>Rule type 1</button>
+    </div>
+  ),
 }));
 
 const useLocationMock = useLocation as jest.Mock;
@@ -130,13 +152,17 @@ describe('RulesPage with all capabilities', () => {
 
     useLoadRuleTypesQuery.mockReturnValue({
       ruleTypesState: {
+        isLoading: false,
+        isInitialLoading: false,
         data: ruleTypeIndex,
       },
     });
 
     return render(
       <IntlProvider locale="en">
-        <RulesPage />
+        <QueryClientProvider client={queryClient}>
+          <RulesPage />
+        </QueryClientProvider>
       </IntlProvider>
     );
   }
@@ -154,6 +180,21 @@ describe('RulesPage with all capabilities', () => {
   it('renders a create rule button which is not disabled', async () => {
     const wrapper = await setup();
     expect(wrapper.getByTestId('createRuleButton')).not.toBeDisabled();
+  });
+
+  it('navigates to create rule form correctly', async () => {
+    const wrapper = await setup();
+    expect(wrapper.getByTestId('createRuleButton')).toBeInTheDocument();
+
+    fireEvent.click(wrapper.getByTestId('createRuleButton'));
+    expect(await wrapper.findByTestId('ruleTypeModal')).toBeInTheDocument();
+
+    fireEvent.click(await wrapper.findByText('Rule type 1'));
+    await waitFor(() => {
+      expect(mockApplication.navigateToUrl).toHaveBeenCalledWith(
+        '/app/observability/alerts/rules/create/1'
+      );
+    });
   });
 });
 

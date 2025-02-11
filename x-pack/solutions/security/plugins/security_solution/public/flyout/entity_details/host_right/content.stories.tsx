@@ -38,7 +38,6 @@ export const Default = {
       riskScoreState={riskScoreData}
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       hostName={'test-host-name'}
       onAssetCriticalityChange={() => {}}
@@ -69,7 +68,6 @@ export const NoObservedData = {
       riskScoreState={riskScoreData}
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       hostName={'test-host-name'}
       onAssetCriticalityChange={() => {}}
@@ -100,7 +98,6 @@ export const Loading = {
       riskScoreState={riskScoreData}
       contextID={'test-host-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       hostName={'test-host-name'}
       onAssetCriticalityChange={() => {}}

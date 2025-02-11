@@ -22,7 +22,7 @@ export class EmitStatsPlugin {
       {
         name: 'EmitStatsPlugin',
         // run at the very end, ensure that it's after clean-webpack-plugin
-        // stage: webpack.Compilation.PROCESS_ASSETS_STAGE_REPORT,
+        stage: 10,
       },
       (stats) => {
         Fs.writeFileSync(

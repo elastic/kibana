@@ -625,16 +625,35 @@ export class SessionIndex {
     );
   }
 
+  private async attachAliasToIndex() {
+    // Prior to https://github.com/elastic/kibana/pull/134900, sessions would be written directly against the session index.
+    // Now, we write sessions against a new session index alias. This call ensures that the alias exists, and is attached to the index.
+    // This operation is safe to repeat, even if the alias already exists. This seems safer than retrieving the index details, and inspecting
+    // it to see if the alias already exists.
+    try {
+      await this.options.elasticsearchClient.indices.putAlias({
+        index: this.indexName,
+        name: this.aliasName,
+      });
+    } catch (err) {
+      this.options.logger.error(`Failed to attach alias to session index: ${err.message}`);
+      throw err;
+    }
+  }
+
   /**
    * Creates the session index if it doesn't already exist.
    */
   private async ensureSessionIndexExists() {
     // Check if required index exists.
+    // It is possible for users to migrate from older versions of Kibana where the session index was created without
+    // an alias (pre-8.4). In this case, we need to check if the index exists under the alias name, or the index name.
+    // If the index exists under the alias name, we can assume that the alias is already attached.
     let indexExists = false;
     try {
-      indexExists = await this.options.elasticsearchClient.indices.exists({
-        index: this.indexName,
-      });
+      indexExists =
+        (await this.options.elasticsearchClient.indices.exists({ index: this.aliasName })) ||
+        (await this.options.elasticsearchClient.indices.exists({ index: this.indexName }));
     } catch (err) {
       this.options.logger.error(`Failed to check if session index exists: ${err.message}`);
       throw err;
@@ -662,6 +681,8 @@ export class SessionIndex {
         }
       }
 
+      await this.attachAliasToIndex();
+
       return;
     }
 
@@ -669,26 +690,13 @@ export class SessionIndex {
       'Session index already exists. Attaching alias to the index and ensuring up-to-date mappings...'
     );
 
-    // Prior to https://github.com/elastic/kibana/pull/134900, sessions would be written directly against the session index.
-    // Now, we write sessions against a new session index alias. This call ensures that the alias exists, and is attached to the index.
-    // This operation is safe to repeat, even if the alias already exists. This seems safer than retrieving the index details, and inspecting
-    // it to see if the alias already exists.
-    try {
-      await this.options.elasticsearchClient.indices.putAlias({
-        index: this.indexName,
-        name: this.aliasName,
-      });
-    } catch (err) {
-      this.options.logger.error(`Failed to attach alias to session index: ${err.message}`);
-      throw err;
-    }
+    await this.attachAliasToIndex();
 
     let indexMappingsVersion: string | undefined;
     try {
       const indexMappings = await this.options.elasticsearchClient.indices.getMapping({
-        index: this.indexName,
+        index: this.aliasName,
       });
-
       indexMappingsVersion =
         indexMappings[this.indexName]?.mappings?._meta?.[
           SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME
@@ -706,7 +714,7 @@ export class SessionIndex {
       );
       try {
         await this.options.elasticsearchClient.indices.putMapping({
-          index: this.indexName,
+          index: this.aliasName,
           ...sessionIndexSettings.mappings,
         });
         this.options.logger.debug('Successfully updated session index mappings.');
@@ -828,9 +836,6 @@ export class SessionIndex {
         {
           index: this.aliasName,
           keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
-          // @ts-expect-error client support this option, but it is not documented and typed yet.
-          // once support added we should remove this expected type error
-          // https://github.com/elastic/elasticsearch-specification/issues/3144
           allow_partial_search_results: true,
         },
         { ignore: [404], meta: true }
@@ -843,9 +848,6 @@ export class SessionIndex {
           {
             index: this.aliasName,
             keep_alive: SESSION_INDEX_CLEANUP_KEEP_ALIVE,
-            // @ts-expect-error client support this option, but it is not documented and typed yet.
-            // once support added we should remove this expected type error
-            // https://github.com/elastic/elasticsearch-specification/issues/3144
             allow_partial_search_results: true,
           },
           { meta: true }

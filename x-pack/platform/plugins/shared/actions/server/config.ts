@@ -32,6 +32,7 @@ const preconfiguredActionSchema = schema.object({
   actionTypeId: schema.string({ minLength: 1 }),
   config: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
   secrets: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  exposeConfig: schema.maybe(schema.boolean({ defaultValue: false })),
 });
 
 const customHostSettingsSchema = schema.object({

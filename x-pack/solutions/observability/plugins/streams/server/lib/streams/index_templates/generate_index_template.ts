@@ -5,34 +5,42 @@
  * 2.0.
  */
 
+import { getAncestorsAndSelf } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { getProcessingPipelineName } from '../ingest_pipelines/name';
 import { getIndexTemplateName } from './name';
 
-export function generateIndexTemplate(id: string) {
-  const composedOf = id.split('.').reduce((acc, _, index, array) => {
-    const parent = array.slice(0, index + 1).join('.');
-    return [...acc, `${parent}@stream.layer`];
+export function generateIndexTemplate(name: string, isServerless: boolean) {
+  const composedOf = getAncestorsAndSelf(name).reduce((acc, ancestorName) => {
+    return [...acc, `${ancestorName}@stream.layer`];
   }, [] as string[]);
 
   return {
-    name: getIndexTemplateName(id),
-    index_patterns: [id],
+    name: getIndexTemplateName(name),
+    index_patterns: [name],
     composed_of: composedOf,
     priority: 200,
     version: ASSET_VERSION,
     _meta: {
       managed: true,
-      description: `The index template for ${id} stream`,
+      description: `The index template for ${name} stream`,
     },
     data_stream: {
       hidden: false,
-      failure_store: true,
+      failure_store: isServerless ? undefined : true, // TODO: Enable failure store for serverless once it is rolled out
     },
     template: {
       settings: {
         index: {
-          default_pipeline: getProcessingPipelineName(id),
+          default_pipeline: getProcessingPipelineName(name),
+        },
+      },
+      mappings: {
+        properties: {
+          'stream.name': {
+            type: 'constant_keyword' as const,
+            value: name,
+          },
         },
       },
     },

@@ -39,7 +39,6 @@ export const Default = {
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
@@ -63,7 +62,6 @@ export const IntegrationDisabled = {
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
@@ -87,7 +85,6 @@ export const NoManagedData = {
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
@@ -131,7 +128,6 @@ export const NoObservedData = {
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}
@@ -179,7 +175,6 @@ export const Loading = {
       riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
-      isDraggable={false}
       openDetailsPanel={() => {}}
       userName={'test-user-name'}
       onAssetCriticalityChange={() => {}}

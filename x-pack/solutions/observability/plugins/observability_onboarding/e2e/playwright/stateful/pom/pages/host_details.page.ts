@@ -5,34 +5,23 @@
  * 2.0.
  */
 
-import { expect, Page } from '@playwright/test';
+import { expect, type Page, type Locator } from '@playwright/test';
 
 export class HostDetailsPage {
   page: Page;
 
-  public readonly hostDetailsLogsTab = () => this.page.getByTestId('infraAssetDetailsLogsTab');
-
-  private readonly hostDetailsLogsStream = () => this.page.getByTestId('logStream');
-
-  public readonly noData = () => this.page.getByTestId('kbnNoDataPage');
+  private readonly cpuPercentageValue: Locator;
 
   constructor(page: Page) {
     this.page = page;
+
+    this.cpuPercentageValue = this.page
+      .getByTestId('infraAssetDetailsKPIcpuUsage')
+      .locator('.echMetricText__value');
   }
 
-  public async clickHostDetailsLogsTab() {
-    await this.hostDetailsLogsTab().click();
-  }
-
-  public async assertHostDetailsLogsStream() {
-    await expect(
-      this.hostDetailsLogsStream(),
-      'Host details log stream should be visible'
-      /**
-       * Using toBeAttached() instead of toBeVisible() because the element
-       * we're selecting here has a bit weird layout with 0 height and
-       * overflowing child elements. 0 height makes toBeVisible() fail.
-       */
-    ).toBeAttached();
+  public async assertCpuPercentageNotEmpty() {
+    await expect(this.cpuPercentageValue).toBeVisible();
+    expect(await this.cpuPercentageValue.textContent()).toMatch(/\d+%$/);
   }
 }

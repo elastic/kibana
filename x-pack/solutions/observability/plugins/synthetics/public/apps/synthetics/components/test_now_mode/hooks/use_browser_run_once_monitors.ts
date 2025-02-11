@@ -189,6 +189,7 @@ export const useBrowserRunOnceMonitors = ({
     return Promise.resolve(null);
     // FIXME: Dario thinks there is a better way to do this but
     // he's getting tired and maybe the Synthetics folks can fix it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkGroupCheckSum, setCheckGroupResults, lastRefresh]);
 
   // Whenever a new found document is fetched, update lastUpdated

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
 
 import {
   ASSIGNEES_ADD_BUTTON_TEST_ID,
@@ -132,12 +132,12 @@ describe('<Assignees />', () => {
     const { getByTestId, getByText } = renderAssignees('test-event', assignees);
 
     // Update assignees
-    getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID).click();
-    getByText('User 1').click();
-    getByText('User 3').click();
+    fireEvent.click(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID));
+    fireEvent.click(getByText('User 1'));
+    fireEvent.click(getByText('User 3'));
 
     // Apply assignees
-    getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID).click();
+    fireEvent.click(getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
 
     expect(setAlertAssigneesMock).toHaveBeenCalledWith(
       {

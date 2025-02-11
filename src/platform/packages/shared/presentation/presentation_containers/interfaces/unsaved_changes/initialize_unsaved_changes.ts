@@ -21,8 +21,8 @@ import {
   PublishingSubject,
   runComparators,
   StateComparators,
+  HasSnapshottableState,
 } from '@kbn/presentation-publishing';
-import { HasSnapshottableState } from '../serialized_state';
 import { apiHasSaveNotification } from '../has_save_notification';
 
 export const COMPARATOR_SUBJECTS_DEBOUNCE = 100;
@@ -62,7 +62,7 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
     comparatorKeys.push(key);
   }
 
-  const unsavedChanges = new BehaviorSubject<Partial<RuntimeState> | undefined>(
+  const unsavedChanges$ = new BehaviorSubject<Partial<RuntimeState> | undefined>(
     runComparators(
       comparators,
       comparatorKeys,
@@ -84,7 +84,7 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
         combineLatestWith(lastSavedState$)
       )
       .subscribe(([latestState, lastSavedState]) => {
-        unsavedChanges.next(
+        unsavedChanges$.next(
           runComparators(comparators, comparatorKeys, lastSavedState, latestState)
         );
       })
@@ -92,7 +92,7 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
 
   return {
     api: {
-      unsavedChanges,
+      unsavedChanges$,
       resetUnsavedChanges: () => {
         const lastSaved = lastSavedState$.getValue();
 

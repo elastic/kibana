@@ -18,7 +18,6 @@ import { useLink } from '../../../../hooks';
 import { useAuthz } from '../../../../../../hooks/use_authz';
 import { ContextMenuActions } from '../../../../components';
 import { isAgentUpgradeable } from '../../../../services';
-import { ExperimentalFeaturesService } from '../../../../services';
 
 export const TableRowActions: React.FunctionComponent<{
   agent: Agent;
@@ -44,8 +43,6 @@ export const TableRowActions: React.FunctionComponent<{
 
   const isUnenrolling = agent.status === 'unenrolling';
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { diagnosticFileUploadEnabled, agentTamperProtectionEnabled } =
-    ExperimentalFeaturesService.get();
   const menuItems = [
     <EuiContextMenuItem
       icon="inspect"
@@ -138,12 +135,7 @@ export const TableRowActions: React.FunctionComponent<{
       );
     }
 
-    if (
-      authz.fleet.allAgents &&
-      agentTamperProtectionEnabled &&
-      agent.policy_id &&
-      !agentPolicy?.supports_agentless
-    ) {
+    if (authz.fleet.allAgents && agent.policy_id && !agentPolicy?.supports_agentless) {
       menuItems.push(
         <EuiContextMenuItem
           icon="minusInCircle"
@@ -164,7 +156,7 @@ export const TableRowActions: React.FunctionComponent<{
     }
   }
 
-  if (authz.fleet.readAgents && diagnosticFileUploadEnabled) {
+  if (authz.fleet.readAgents) {
     menuItems.push(
       <EuiContextMenuItem
         key="requestAgentDiagnosticsBtn"

@@ -38,7 +38,6 @@ import {
   getExecutionContextService,
   getCoreChrome,
   getIndexPatternService,
-  getMapsCapabilities,
   getNavigation,
   getSpacesApi,
   getTimeFilter,
@@ -534,9 +533,7 @@ export class MapApp extends React.Component<Props, State> {
         showSearchBar={true}
         showFilterBar={true}
         showDatePicker={true}
-        saveQueryMenuVisibility={
-          getMapsCapabilities().saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
-        }
+        allowSavingQueries
         savedQuery={this.state.savedQuery}
         onSaved={this._updateStateFromSavedQuery}
         onSavedQueryUpdated={this._updateStateFromSavedQuery}

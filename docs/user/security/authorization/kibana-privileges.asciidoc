@@ -65,8 +65,8 @@ PUT /api/security/role/my_kibana_role
     {
       "base": [],
       "feature": {
-        "visualize": ["all"],
-        "dashboard": ["read", "url_create"]
+        "visualize_v2": ["all"],
+        "dashboard_v2": ["read", "url_create"]
       },
       "spaces": ["marketing"]
     }

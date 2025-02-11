@@ -23,8 +23,8 @@ export const getLensOperationFromRuleMetric = (metric: GenericMetric): LensOpera
   if (aggType === Aggregators.RATE) {
     return {
       operation: 'counter_rate',
-      operationWithField: `counter_rate(max(${field}), kql='${escapedFilter}')`,
-      sourceField: field || '',
+      operationWithField: `counter_rate(max("${field}"), kql='${escapedFilter}')`,
+      sourceField: `"${field}"` || '',
     };
   }
 
@@ -34,7 +34,7 @@ export const getLensOperationFromRuleMetric = (metric: GenericMetric): LensOpera
   if (aggType === Aggregators.COUNT) operation = 'count';
 
   if (field) {
-    operationArgs.push(field);
+    operationArgs.push(`"${field}"`);
   }
 
   if (aggType === Aggregators.P95) {
@@ -49,7 +49,7 @@ export const getLensOperationFromRuleMetric = (metric: GenericMetric): LensOpera
   return {
     operation,
     operationWithField: `${operation}(${operationArgs.join(', ')})`,
-    sourceField: field || '',
+    sourceField: `"${field}"` || '',
   };
 };
 

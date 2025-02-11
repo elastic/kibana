@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 
-import type { UserActionUI } from '../../containers/types';
+import type { AttachmentUI, UserActionUI } from '../../containers/types';
 import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
@@ -25,16 +25,23 @@ export const useLastPageUserActions = ({
   const { data: lastPageUserActionsData, isLoading: isLoadingLastPageUserActions } =
     useFindCaseUserActions(caseId, { ...userActivityQueryParams, page: lastPage }, lastPage > 1);
 
-  const lastPageUserActions = useMemo<UserActionUI[]>(() => {
+  const { userActions, latestAttachments } = useMemo<{
+    userActions: UserActionUI[];
+    latestAttachments: AttachmentUI[];
+  }>(() => {
     if (isLoadingLastPageUserActions || !lastPageUserActionsData) {
-      return [];
+      return { userActions: [], latestAttachments: [] };
     }
 
-    return lastPageUserActionsData.userActions;
+    return {
+      userActions: lastPageUserActionsData.userActions,
+      latestAttachments: lastPageUserActionsData.latestAttachments,
+    };
   }, [lastPageUserActionsData, isLoadingLastPageUserActions]);
 
   return {
     isLoadingLastPageUserActions,
-    lastPageUserActions,
+    lastPageUserActions: userActions,
+    lastPageAttachments: latestAttachments,
   };
 };

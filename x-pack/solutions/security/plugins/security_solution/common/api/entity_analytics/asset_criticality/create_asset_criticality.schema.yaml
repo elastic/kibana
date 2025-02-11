@@ -19,6 +19,10 @@ paths:
         content:
           application/json:
             schema:
+              example:
+                id_field: 'host.name'
+                id_value: 'my_host'
+                criticality_level: 'high_impact'
               allOf:
                 - $ref: './common.schema.yaml#/components/schemas/CreateAssetCriticalityRecord'
                 - type: object

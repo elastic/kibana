@@ -28,7 +28,7 @@ import { registerServerRoutes } from './routes/register_routes';
 import { SLORoutesDependencies } from './routes/types';
 import { SO_SLO_TYPE, slo } from './saved_objects';
 import { SO_SLO_SETTINGS_TYPE, sloSettings } from './saved_objects/slo_settings';
-import { DefaultResourceInstaller, DefaultSLOInstaller } from './services';
+import { DefaultResourceInstaller } from './services';
 import { SloOrphanSummaryCleanupTask } from './services/tasks/orphan_summary_cleanup_task';
 import type {
   SLOConfig,
@@ -157,8 +157,7 @@ export class SLOPlugin
       .then(async ([coreStart, pluginStart]) => {
         const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
         const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
-        const sloInstaller = new DefaultSLOInstaller(sloResourceInstaller, this.logger);
-        await sloInstaller.install();
+        await sloResourceInstaller.ensureCommonResourcesInstalled();
       })
       .catch(() => {
         // noop - error already logged from the installer

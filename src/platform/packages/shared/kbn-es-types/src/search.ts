@@ -691,5 +691,7 @@ export interface ESQLSearchParams {
   locale?: string;
   include_ccs_metadata?: boolean;
   dropNullColumns?: boolean;
-  params?: estypes.ScalarValue[] | Array<Record<string, string | undefined>>;
+  params?:
+    | estypes.ScalarValue[]
+    | Array<Record<string, string | number | Record<string, string | number> | undefined>>;
 }

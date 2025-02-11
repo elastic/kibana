@@ -9,33 +9,34 @@ import { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import type { Document } from '@langchain/core/documents';
 import type { StateGraphArgs } from '@langchain/langgraph';
 
+import { AttackDiscoveryPrompts } from '../nodes/helpers/prompts';
 import {
   DEFAULT_MAX_GENERATION_ATTEMPTS,
   DEFAULT_MAX_HALLUCINATION_FAILURES,
   DEFAULT_MAX_REPEATED_GENERATIONS,
 } from '../constants';
-import { getDefaultAttackDiscoveryPrompt } from '../nodes/helpers/get_default_attack_discovery_prompt';
-import { getDefaultRefinePrompt } from '../nodes/refine/helpers/get_default_refine_prompt';
 import type { GraphState } from '../types';
 
 export interface Options {
   end?: string;
   filter?: Record<string, unknown> | null;
+  prompts: AttackDiscoveryPrompts;
   start?: string;
 }
 
 export const getDefaultGraphState = ({
   end,
   filter,
+  prompts,
   start,
-}: Options | undefined = {}): StateGraphArgs<GraphState>['channels'] => ({
+}: Options): StateGraphArgs<GraphState>['channels'] => ({
   attackDiscoveries: {
     value: (x: AttackDiscovery[] | null, y?: AttackDiscovery[] | null) => y ?? x,
     default: () => null,
   },
   attackDiscoveryPrompt: {
     value: (x: string, y?: string) => y ?? x,
-    default: () => getDefaultAttackDiscoveryPrompt(),
+    default: () => prompts.default,
   },
   anonymizedAlerts: {
     value: (x: Document[], y?: Document[]) => y ?? x,
@@ -48,6 +49,10 @@ export const getDefaultGraphState = ({
   combinedRefinements: {
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
+  },
+  continuePrompt: {
+    value: (x: string, y?: string) => y ?? x,
+    default: () => prompts.continue,
   },
   end: {
     value: (x?: string | null, y?: string | null) => y ?? x,
@@ -75,7 +80,7 @@ export const getDefaultGraphState = ({
   },
   refinePrompt: {
     value: (x: string, y?: string) => y ?? x,
-    default: () => getDefaultRefinePrompt(),
+    default: () => prompts.refine,
   },
   maxGenerationAttempts: {
     value: (x: number, y?: number) => y ?? x,

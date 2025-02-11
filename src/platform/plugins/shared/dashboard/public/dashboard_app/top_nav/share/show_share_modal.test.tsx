@@ -9,14 +9,14 @@
 
 import { Capabilities } from '@kbn/core/public';
 import { convertPanelMapToPanelsArray, DashboardContainerInput } from '../../../../common';
-import { DashboardLocatorParams } from '../../../dashboard_container';
+import { DashboardLocatorParams } from '../../../dashboard_container/types';
 
 import { shareService } from '../../../services/kibana_services';
 import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
 
 describe('showPublicUrlSwitch', () => {
-  test('returns false if "dashboard" app is not available', () => {
+  test('returns false if "dashboard_v2" app is not available', () => {
     const anonymousUserCapabilities: Capabilities = {
       catalogue: {},
       management: {},
@@ -27,12 +27,12 @@ describe('showPublicUrlSwitch', () => {
     expect(result).toBe(false);
   });
 
-  test('returns false if "dashboard" app is not accessible', () => {
+  test('returns false if "dashboard_v2" app is not accessible', () => {
     const anonymousUserCapabilities: Capabilities = {
       catalogue: {},
       management: {},
       navLinks: {},
-      dashboard: {
+      dashboard_v2: {
         show: false,
       },
     };
@@ -41,12 +41,12 @@ describe('showPublicUrlSwitch', () => {
     expect(result).toBe(false);
   });
 
-  test('returns true if "dashboard" app is not available an accessible', () => {
+  test('returns true if "dashboard_v2" app is not available an accessible', () => {
     const anonymousUserCapabilities: Capabilities = {
       catalogue: {},
       management: {},
       navLinks: {},
-      dashboard: {
+      dashboard_v2: {
         show: true,
       },
     };

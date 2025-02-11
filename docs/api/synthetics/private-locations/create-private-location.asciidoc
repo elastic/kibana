@@ -37,6 +37,10 @@ The request body should contain the following attributes:
 - `lat` (Required, number): The latitude of the location.
 - `lon` (Required, number): The longitude of the location.
 
+`spaces`::
+(Optional, array of strings) An array of space IDs where the private location is available. If not provided, the private location is available in all spaces, the API will throw an error if user
+does not have access to all spaces. In that case you can provide the space ID where the private location should be available.
+
 [[private-location-create-example]]
 ==== Example
 
@@ -53,6 +57,7 @@ POST /api/private_locations
     "lat": 40.7128,
     "lon": -74.0060
   }
+  "spaces": ["default"]
 }
 --------------------------------------------------
 

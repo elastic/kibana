@@ -17,7 +17,8 @@ export const Default = () => (
   <RuleScheduleReadOnly
     ruleSchedule={{
       interval: '5m',
-      lookback: '60s',
+      from: 'now-360s',
+      to: 'now',
     }}
   />
 );

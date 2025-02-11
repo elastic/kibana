@@ -5,47 +5,47 @@
  * 2.0.
  */
 
-import { expect, Page } from '@playwright/test';
+import { expect, type Page, type Locator } from '@playwright/test';
 
 export class KubernetesEAFlowPage {
   page: Page;
 
+  private readonly receivedDataIndicatorKubernetes: Locator;
+  private readonly kubernetesAgentExploreDataActionLink: Locator;
+  private readonly codeBlock: Locator;
+  private readonly copyToClipboardButton: Locator;
+
   constructor(page: Page) {
     this.page = page;
-  }
 
-  private readonly receivedDataIndicatorKubernetes = () =>
-    this.page
+    this.receivedDataIndicatorKubernetes = this.page
       .getByTestId('observabilityOnboardingKubernetesPanelDataProgressIndicator')
       .getByText('We are monitoring your cluster');
-
-  private readonly kubernetesAgentExploreDataActionLink = () =>
-    this.page.getByTestId(
+    this.kubernetesAgentExploreDataActionLink = this.page.getByTestId(
       'observabilityOnboardingDataIngestStatusActionLink-kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c'
     );
-
-  private readonly codeBlock = () =>
-    this.page.getByTestId('observabilityOnboardingKubernetesPanelCodeSnippet');
-
-  private readonly copyToClipboardButton = () =>
-    this.page.getByTestId('observabilityOnboardingCopyToClipboardButton');
+    this.codeBlock = this.page.getByTestId('observabilityOnboardingKubernetesPanelCodeSnippet');
+    this.copyToClipboardButton = this.page.getByTestId(
+      'observabilityOnboardingCopyToClipboardButton'
+    );
+  }
 
   public async assertVisibilityCodeBlock() {
-    await expect(this.codeBlock(), 'Code block should be visible').toBeVisible();
+    await expect(this.codeBlock, 'Code block should be visible').toBeVisible();
   }
 
   public async copyToClipboard() {
-    await this.copyToClipboardButton().click();
+    await this.copyToClipboardButton.click();
   }
 
   public async assertReceivedDataIndicatorKubernetes() {
     await expect(
-      this.receivedDataIndicatorKubernetes(),
+      this.receivedDataIndicatorKubernetes,
       'Received data indicator should be visible'
     ).toBeVisible();
   }
 
   public async clickKubernetesAgentCTA() {
-    await this.kubernetesAgentExploreDataActionLink().click();
+    await this.kubernetesAgentExploreDataActionLink.click();
   }
 }

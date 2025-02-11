@@ -6,17 +6,17 @@
 - The scope of a sourcerer component will be default unless the path is added to the `detectionsPaths` array, in which case the scope can be detections in `../sourcerer/containers/index.tsx`
 
 ## Default Sourcerer
-![](../../images/default.png)
+![](../../common/images/default.png)
 - The data view is shown in the dropdown. All index aliases that have existing indices are selected by default. Index aliases that do NOT have existing indices are shown in the dropdown as deactivated
 
 ## Detections Sourcerer
-![](../../images/alerts.png)
+![](../../common/images/alerts.png)
 - The detections sourcerer is locked to the signals index, and has an "Alerts" flag
 
 ## Timeline Sourcerer
-![](../../images/timeline.png)
+![](../../common/images/timeline.png)
 - The timeline sourcerer is almost exactly like the default sourcerer, but it has a checkbox to "Show only detection alerts" which will automatically select the default data view with the alerts index locked in:
-![](../../images/timeline-alerts.png)
+![](../../common/images/timeline-alerts.png)
 
 ## Sourcerer Quirks
  - Signals index is not always defined yet, so we `pollForSignalIndex` on mount of detections sourcerer and timeline sourcerer
@@ -24,7 +24,7 @@
  - When `selectedPatterns` changes, we updated the `onUpdateDetectionAlertsChecked` boolean
  - Reset button sets to the active `patternList` on the default security data view
  - The "Modified" label gets applied when the data view `selectedPatterns` diverge from the `patternList`. It does not appear when changing data views and using that data views patternList in full. It does not appear until Save is pressed!
-   ![](../../images/timeline_alerts.png)
+   ![](../../common/images/timeline_alerts.png)
 
 ## Legacy Timeline Sourcerer
  - "Update available" workflow for pre-8.0 timelines and timelines that have indices that got deleted from the default data view
