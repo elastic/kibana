@@ -173,13 +173,16 @@ export function AddProcessorPanel({
       >
         <EuiSpacer size="s" />
         <FormProvider {...methods}>
+          <ProcessorInfoHeader metrics={processorMetrics} />
           <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
-            <ProcessorInfoHeader metrics={processorMetrics} />
             <ProcessorTypeSelector />
             <EuiSpacer size="m" />
             {type === 'grok' && <GrokProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
           </EuiForm>
+          {processorMetrics && !isEmpty(processorMetrics.errors) && (
+            <ProcessorErrors errors={processorMetrics.errors} />
+          )}
         </FormProvider>
       </EuiAccordion>
     </EuiPanel>
@@ -354,8 +357,8 @@ export function EditProcessorPanel({
       >
         <EuiSpacer size="s" />
         <FormProvider {...methods}>
+          <ProcessorInfoHeader metrics={processorMetrics} />
           <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
-            <ProcessorInfoHeader metrics={processorMetrics} />
             <ProcessorTypeSelector disabled />
             <EuiSpacer size="m" />
             {type === 'grok' && <GrokProcessorForm />}
@@ -369,6 +372,9 @@ export function EditProcessorPanel({
               {deleteProcessorLabel}
             </EuiButton>
           </EuiForm>
+          {processorMetrics && !isEmpty(processorMetrics.errors) && (
+            <ProcessorErrors errors={processorMetrics.errors} />
+          )}
         </FormProvider>
       </EuiAccordion>
     </EuiPanel>
@@ -381,19 +387,22 @@ const ProcessorInfoHeader = ({ metrics }: { metrics?: ProcessorMetrics }) => {
 
   return (
     <EuiFlexGroup
-      gutterSize="s"
-      direction="column"
       css={css`
         margin-bottom: ${euiTheme.size.m};
       `}
     >
       <ProcessorMetricBadges {...metrics} />
-      {!isEmpty(metrics.errors) && <ProcessorErrors errors={metrics.errors} />}
     </EuiFlexGroup>
   );
 };
 
+const errorTitle = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.enrichment.processorErrors.title',
+  { defaultMessage: "Processor configuration invalid or doesn't match." }
+);
+
 const ProcessorErrors = ({ errors }: { errors: ProcessorMetrics['errors'] }) => {
+  const { euiTheme } = useEuiTheme();
   const [isErrorListExpanded, toggleErrorListExpanded] = useToggle(false);
 
   const visibleErrors = isErrorListExpanded ? errors : errors.slice(0, 2);
@@ -401,9 +410,18 @@ const ProcessorErrors = ({ errors }: { errors: ProcessorMetrics['errors'] }) => 
   const shouldDisplayErrorToggle = remainingCount > 0;
 
   return (
-    <EuiFlexGroup gutterSize="xs" direction="column" alignItems="flexStart">
+    <EuiFlexGroup
+      gutterSize="xs"
+      direction="column"
+      alignItems="flexStart"
+      css={css`
+        margin-top: ${euiTheme.size.m};
+      `}
+    >
       {visibleErrors.map((error, id) => (
-        <EuiCallOut key={id} color="danger" iconType="warning" size="s" title={error} />
+        <EuiCallOut key={id} color="danger" iconType="warning" size="s" title={errorTitle}>
+          {error}
+        </EuiCallOut>
       ))}
       {shouldDisplayErrorToggle && !isErrorListExpanded && (
         <EuiButtonEmpty

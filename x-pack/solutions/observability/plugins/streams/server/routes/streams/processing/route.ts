@@ -370,7 +370,7 @@ const parsePipelineSimulationResult = (
       const procId = error.processor_id;
       const metrics = processorsMap.get(procId)!; // Safe to use ! here since we initialize the map with all processor ids
 
-      metrics.errors.push(extractGrokErrorMessage(error.message));
+      metrics.errors.push(error.message);
       metrics.failure_rate++;
 
       processorsMap.set(procId, metrics);
@@ -512,15 +512,6 @@ const isSuccessfulProcessor = (
 
 // TODO: update type once Kibana updates to elasticsearch-js 8.17
 const isMappingFailure = (entry: any) => entry.doc?.error?.type === 'document_parsing_exception';
-
-const baseGrokMatchError = 'Provided Grok expressions do not match field value';
-
-const extractGrokErrorMessage = (message: string) => {
-  const baseRegex = new RegExp(`${baseGrokMatchError}: (?:.*)`);
-  const isMatch = baseRegex.test(message);
-
-  return isMatch ? baseGrokMatchError : message;
-};
 
 type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKey]-?: TObj[TProp] };
 
