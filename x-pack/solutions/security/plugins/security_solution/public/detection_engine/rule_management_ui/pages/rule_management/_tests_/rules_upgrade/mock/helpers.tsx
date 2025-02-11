@@ -10,9 +10,6 @@ import { render, act, fireEvent, within, screen } from '@testing-library/react';
 import {
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
-} from '../../../../../../../../common/api/detection_engine';
-import type {
-  RuleUpgradeStatsForReview,
   ThreeWayDiffConflict,
 } from '../../../../../../../../common/api/detection_engine';
 import { reviewRuleUpgrade } from '../../../../../../rule_management/api/api';
@@ -90,13 +87,6 @@ interface MockRuleUpgradeReviewDataParams {
   conflict: ThreeWayDiffConflict;
 }
 
-const RULE_UPGRADE_PREVIEW_STATS_MOCK: RuleUpgradeStatsForReview = {
-  num_rules_to_upgrade_total: 1,
-  num_rules_with_conflicts: 0,
-  num_rules_with_non_solvable_conflicts: 0,
-  tags: [],
-};
-
 export function mockRuleUpgradeReviewData({
   ruleType,
   fieldName,
@@ -105,7 +95,15 @@ export function mockRuleUpgradeReviewData({
   conflict,
 }: MockRuleUpgradeReviewDataParams): void {
   (reviewRuleUpgrade as jest.Mock).mockResolvedValue({
-    stats: RULE_UPGRADE_PREVIEW_STATS_MOCK,
+    stats: {
+      num_rules_to_upgrade_total: 1,
+      num_rules_with_conflicts:
+        conflict === ThreeWayDiffConflict.SOLVABLE || conflict === ThreeWayDiffConflict.NON_SOLVABLE
+          ? 1
+          : 0,
+      num_rules_with_non_solvable_conflicts: conflict === ThreeWayDiffConflict.NON_SOLVABLE ? 1 : 0,
+      tags: [],
+    },
     rules: [
       {
         id: 'test-rule',
@@ -143,8 +141,42 @@ export function mockRuleUpgradeReviewData({
             },
           },
         },
-        revision: 0,
+        revision: 1,
       },
     ],
+  });
+}
+
+export function switchToFieldEdit(wrapper: HTMLElement): void {
+  act(() => {
+    fireEvent.click(within(wrapper).getByRole('button', { name: 'Edit' }));
+  });
+}
+
+export function cancelFieldEdit(wrapper: HTMLElement): void {
+  act(() => {
+    fireEvent.click(within(wrapper).getByRole('button', { name: 'Cancel' }));
+  });
+}
+
+interface SetResolvedNameOptions {
+  saveButtonText: string;
+}
+
+export async function setResolvedName(
+  wrapper: HTMLElement,
+  value: string,
+  options: SetResolvedNameOptions = {
+    saveButtonText: 'Save',
+  }
+): Promise<void> {
+  await act(async () => {
+    fireEvent.change(within(wrapper).getByTestId('input'), {
+      target: { value },
+    });
+  });
+
+  await act(async () => {
+    fireEvent.click(within(wrapper).getByRole('button', { name: options.saveButtonText }));
   });
 }
