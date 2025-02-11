@@ -48,12 +48,14 @@ interface InferenceServicesProps {
   http: HttpSetup;
   toasts: IToasts;
   isEdit?: boolean;
+  isPreconfigured?: boolean;
 }
 
 export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   http,
   toasts,
   isEdit,
+  isPreconfigured,
 }) => {
   const { data: providers, isLoading } = useProviders(http, toasts);
   const [updatedProviders, setUpdatedProviders] = useState<InferenceProvider[] | undefined>(
@@ -412,6 +414,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             items={requiredProviderFormFields}
             setConfigEntry={onSetProviderConfigEntry}
             isEdit={isEdit}
+            isPreconfigured={isPreconfigured}
           />
           <EuiSpacer size="m" />
           <AdditionalOptionsFields
