@@ -14,7 +14,7 @@ import type {
   StatsGetterConfig,
 } from '@kbn/telemetry-collection-manager-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { ApiOperation } from '@kbn/security-plugin-types-server';
+import { ApiOperation } from '@kbn/security-plugin-types-common';
 import { RequestHandler } from '@kbn/core-http-server';
 import { FetchSnapshotTelemetry } from '../../common/routes';
 import { UsageStatsBody, v2 } from '../../common/types';

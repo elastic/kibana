@@ -18,6 +18,7 @@ import { Logger } from '@kbn/logging';
 import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
 import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
 import { GeminiPartText } from '@langchain/google-common/dist/types';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import {
   convertResponseBadFinishReasonToErrorMsg,
   convertResponseContentToChatGenerationChunk,
@@ -34,12 +35,14 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   signal?: AbortSignal;
   model?: string;
   maxTokens?: number;
+  telemetryMetadata?: TelemetryMetadata;
 }
 
 export class ActionsClientChatVertexAI extends ChatVertexAI {
   #actionsClient: PublicMethodsOf<ActionsClient>;
   #connectorId: string;
   #model?: string;
+  telemetryMetadata?: TelemetryMetadata;
   constructor({ actionsClient, connectorId, ...props }: CustomChatModelInput) {
     super({
       ...props,
@@ -62,7 +65,8 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
       client,
       false,
       actionsClient,
-      connectorId
+      connectorId,
+      props?.telemetryMetadata
     );
   }
 
@@ -89,6 +93,7 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
           subAction: 'invokeStream',
           subActionParams: {
             model: this.#model,
+            telemetryMetadata: this.telemetryMetadata,
             messages: data?.contents,
             tools: data?.tools,
             temperature: this.temperature,

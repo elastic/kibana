@@ -8,8 +8,8 @@
 import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
 import {
   InferenceConnector,
-  InferenceConnectorType,
   isSupportedConnectorType,
+  connectorToInference,
 } from '@kbn/inference-common';
 import type { InferenceServerStart, InferenceStartDependencies } from '../types';
 
@@ -44,14 +44,7 @@ export function registerConnectorsRoute({
 
       const connectors: InferenceConnector[] = allConnectors
         .filter((connector) => isSupportedConnectorType(connector.actionTypeId))
-        .map((connector) => {
-          return {
-            connectorId: connector.id,
-            name: connector.name,
-            type: connector.actionTypeId as InferenceConnectorType,
-            config: connector.config ?? {},
-          };
-        });
+        .map(connectorToInference);
 
       return response.ok({ body: { connectors } });
     }

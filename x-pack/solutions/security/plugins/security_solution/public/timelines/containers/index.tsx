@@ -6,7 +6,7 @@
  */
 
 import deepEqual from 'fast-deep-equal';
-import { isEmpty, noop } from 'lodash/fp';
+import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
@@ -163,7 +163,6 @@ export const useTimelineEventsHandler = ({
   const [{ pageName }] = useRouteSpy();
   const dispatch = useDispatch();
   const { data } = useKibana().services;
-  const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState<DataLoadingState>(DataLoadingState.loaded);
@@ -215,13 +214,6 @@ export const useTimelineEventsHandler = ({
     };
   }, []);
 
-  const refetchGrid = useCallback(() => {
-    if (refetch.current != null) {
-      refetch.current();
-    }
-    loadBatchHandler(0);
-  }, [loadBatchHandler]);
-
   useEffect(() => {
     // when batch size changes, refetch DataGrid
     setActiveBatch(0);
@@ -233,7 +225,7 @@ export const useTimelineEventsHandler = ({
       dsl: [],
       response: [],
     },
-    refetch: refetchGrid,
+    refetch: () => {},
     totalCount: -1,
     pageInfo: {
       activePage: 0,
@@ -353,6 +345,31 @@ export const useTimelineEventsHandler = ({
     [pageName, skip, id, activeBatch, startTracking, data.search, dataViewId]
   );
 
+  const refetchGrid = useCallback(() => {
+    /*
+     *
+     * Trigger search with a new request object to fetch the latest data.
+     *
+     */
+    const newTimelineRequest: typeof timelineRequest = {
+      ...timelineRequest,
+      factoryQueryType: TimelineEventsQueries.all,
+      language,
+      sort,
+      fieldRequested: timelineRequest?.fieldRequested ?? fields,
+      fields: timelineRequest?.fieldRequested ?? fields,
+      pagination: {
+        activePage: 0,
+        querySize: limit,
+      },
+    };
+
+    setTimelineRequest(newTimelineRequest);
+
+    timelineSearch(newTimelineRequest);
+    setActiveBatch(0);
+  }, [timelineRequest, timelineSearch, limit, language, sort, fields]);
+
   useEffect(() => {
     if (indexNames.length === 0) {
       return;
@@ -411,7 +428,7 @@ export const useTimelineEventsHandler = ({
          * For example, newly requested fields
          *
          * */
-        activePage: activeBatch,
+        activePage: newActiveBatch,
         querySize: limit,
       };
 
@@ -475,7 +492,7 @@ export const useTimelineEventsHandler = ({
           dsl: [],
           response: [],
         },
-        refetch: refetchGrid,
+        refetch: () => {},
         totalCount: -1,
         pageInfo: {
           activePage: 0,
@@ -486,7 +503,7 @@ export const useTimelineEventsHandler = ({
         refreshedAt: 0,
       });
     }
-  }, [filterQuery, id, refetchGrid, loadNextBatch]);
+  }, [filterQuery, id, loadNextBatch]);
 
   const timelineSearchHandler = useCallback(
     async (onNextHandler?: OnNextResponseHandler) => {
@@ -560,7 +577,7 @@ export const useTimelineEvents = ({
 
     setEventsPerPage((prev) => {
       let result = [...prev];
-      if (querySize === limit) {
+      if (querySize === limit && activePage > 0) {
         result[activePage] = timelineResponse.events;
       } else {
         result = [timelineResponse.events];
