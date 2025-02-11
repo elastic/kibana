@@ -9,10 +9,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-const managementBreadcrumbText = i18n.translate('management.breadcrumb', {
+const managementBreadcrumbText = i18n.translate('management.stackManagement.breadcrumb', {
   defaultMessage: 'Stack Management',
 });
-const contentBreadcrumbText = i18n.translate('content.breadcrumb', {
+const contentBreadcrumbText = i18n.translate('management.content.breadcrumb', {
   defaultMessage: 'Content',
 });
 
