@@ -5,60 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render, act, fireEvent, within, screen } from '@testing-library/react';
-import { RulesPage } from '../..';
-import type { RuleUpgradeStatsForReview } from '../../../../../../../common/api/detection_engine';
+import { act, within } from '@testing-library/react';
 import {
   DataSourceType,
   KqlQueryType,
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
-  ThreeWayMergeOutcome,
 } from '../../../../../../../common/api/detection_engine';
-import { reviewRuleUpgrade } from '../../../../../rule_management/api/api';
-import { TestRuleUpgradeProviders } from './mock/test_rule_upgrade_provides';
-
-// Enable Prebuilt Rules Customization feature
-jest.mock('../../../../../../../common/experimental_features', () => {
-  const actual = jest.requireActual('../../../../../../../common/experimental_features');
-
-  return {
-    ...actual,
-    allowedExperimentalValues: {
-      ...actual.allowedExperimentalValues,
-      prebuiltRulesCustomizationEnabled: true,
-    },
-  };
-});
-jest.mock('../../../../../../detections/components/user_info');
-jest.mock('../../../../../../detections/containers/detection_engine/lists/use_lists_config');
-jest.mock('../../../../../rule_management/api/api', () => ({
-  getPrebuiltRulesStatus: jest.fn().mockResolvedValue({
-    stats: {
-      num_prebuilt_rules_installed: 1,
-      num_prebuilt_rules_to_install: 0,
-      num_prebuilt_rules_to_upgrade: 1,
-      num_prebuilt_rules_total_in_package: 1,
-    },
-  }),
-  reviewRuleUpgrade: jest.fn().mockResolvedValue({
-    stats: {
-      num_rules_to_upgrade_total: 1,
-      num_rules_with_conflicts: 0,
-      num_rules_with_non_solvable_conflicts: 0,
-      tags: [],
-    },
-    rules: [],
-  }),
-}));
-
-const RULE_UPGRADE_PREVIEW_STATS_MOCK: RuleUpgradeStatsForReview = {
-  num_rules_to_upgrade_total: 1,
-  num_rules_with_conflicts: 0,
-  num_rules_with_non_solvable_conflicts: 0,
-  tags: [],
-};
+import {
+  mockRuleUpgradeReviewData,
+  renderRuleUpgradeFlyout,
+  toggleFieldAccordion,
+} from './mock/helpers';
 
 describe('Rule upgrade preview', () => {
   beforeAll(() => {
@@ -519,58 +477,29 @@ describe('Rule upgrade preview', () => {
     '$fieldName ($ruleType rule)',
     ({ ruleType, fieldName, humanizedFieldName, initial, customized, upgrade }) => {
       it('previews non-customized field w/ an upgrade (AAB)', async () => {
-        (reviewRuleUpgrade as jest.Mock).mockResolvedValue({
-          stats: RULE_UPGRADE_PREVIEW_STATS_MOCK,
-          rules: [
-            {
-              id: 'test-rule',
-              rule_id: 'test-rule',
-              current_rule: {
-                rule_id: 'test-rule',
-                type: ruleType,
-                rule_source: {
-                  type: 'external',
-                  is_customized: false,
-                },
-              },
-              target_rule: {
-                rule_id: 'test-rule',
-                type: ruleType,
-              },
-              diff: {
-                num_fields_with_updates: 2, // tested field + version field
-                num_fields_with_conflicts: 0,
-                num_fields_with_non_solvable_conflicts: 0,
-                fields: {
-                  [fieldName]: {
-                    base_version: initial,
-                    current_version: initial,
-                    target_version: upgrade,
-                    merged_version: upgrade,
-                    diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-                    merge_outcome: ThreeWayMergeOutcome.Target,
-                    has_base_version: true,
-                    has_update: true,
-                    conflict: ThreeWayDiffConflict.NONE,
-                  },
-                },
-              },
-              revision: 0,
-            },
-          ],
+        mockRuleUpgradeReviewData({
+          ruleType,
+          fieldName,
+          fieldVersions: {
+            base: initial,
+            current: initial,
+            target: upgrade,
+            merged: upgrade,
+          },
+          diffOutcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+          conflict: ThreeWayDiffConflict.NONE,
         });
 
-        const { getByTestId } = render(<RulesPage />, {
-          wrapper: TestRuleUpgradeProviders,
-        });
-
-        await openRuleUpgradeFlyout();
+        const { getByTestId } = await renderRuleUpgradeFlyout();
 
         const fieldUpgradeWrapper = getByTestId(`${fieldName}-upgradeWrapper`);
 
-        expect(fieldUpgradeWrapper).toHaveTextContent(humanizedFieldName);
-        expect(fieldUpgradeWrapper).toHaveTextContent('No conflicts');
-        expect(within(fieldUpgradeWrapper).getByTitle('Ready for update')).toBeVisible();
+        expectFieldUpgradeState(fieldUpgradeWrapper, {
+          humanizedFieldName,
+          upgradeStateSummary: 'No conflicts',
+          upgradeStateBadge: 'Ready for update',
+          isModified: false,
+        });
 
         toggleFieldAccordion(fieldUpgradeWrapper);
 
@@ -581,58 +510,28 @@ describe('Rule upgrade preview', () => {
       });
 
       it('previews customized field w/o an upgrade (ABA)', async () => {
-        (reviewRuleUpgrade as jest.Mock).mockResolvedValue({
-          stats: RULE_UPGRADE_PREVIEW_STATS_MOCK,
-          rules: [
-            {
-              id: 'test-rule',
-              rule_id: 'test-rule',
-              current_rule: {
-                rule_id: 'test-rule',
-                type: ruleType,
-                rule_source: {
-                  type: 'external',
-                  is_customized: true,
-                },
-              },
-              target_rule: {
-                rule_id: 'test-rule',
-                type: ruleType,
-              },
-              diff: {
-                num_fields_with_updates: 1, // version field
-                num_fields_with_conflicts: 0,
-                num_fields_with_non_solvable_conflicts: 0,
-                fields: {
-                  [fieldName]: {
-                    base_version: initial,
-                    current_version: customized,
-                    target_version: initial,
-                    merged_version: customized,
-                    diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
-                    merge_outcome: ThreeWayMergeOutcome.Current,
-                    has_base_version: true,
-                    has_update: false,
-                    conflict: ThreeWayDiffConflict.NONE,
-                  },
-                },
-              },
-              revision: 0,
-            },
-          ],
+        mockRuleUpgradeReviewData({
+          ruleType,
+          fieldName,
+          fieldVersions: {
+            base: initial,
+            current: customized,
+            target: upgrade,
+            merged: customized,
+          },
+          diffOutcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
+          conflict: ThreeWayDiffConflict.NONE,
         });
 
-        const { getByTestId } = render(<RulesPage />, {
-          wrapper: TestRuleUpgradeProviders,
-        });
-
-        await openRuleUpgradeFlyout();
+        const { getByTestId } = await renderRuleUpgradeFlyout();
 
         const fieldUpgradeWrapper = getByTestId(`${fieldName}-upgradeWrapper`);
 
-        expect(fieldUpgradeWrapper).toHaveTextContent(humanizedFieldName);
-        expect(fieldUpgradeWrapper).toHaveTextContent('No update');
-        expect(within(fieldUpgradeWrapper).getByTitle('Modified')).toBeVisible();
+        expectFieldUpgradeState(fieldUpgradeWrapper, {
+          humanizedFieldName,
+          upgradeStateSummary: 'No update',
+          isModified: true,
+        });
 
         toggleFieldAccordion(fieldUpgradeWrapper);
 
@@ -643,58 +542,28 @@ describe('Rule upgrade preview', () => {
       });
 
       it('previews customized field w/ the matching upgrade (ABB)', async () => {
-        (reviewRuleUpgrade as jest.Mock).mockResolvedValue({
-          stats: RULE_UPGRADE_PREVIEW_STATS_MOCK,
-          rules: [
-            {
-              id: 'test-rule',
-              rule_id: 'test-rule',
-              current_rule: {
-                rule_id: 'test-rule',
-                type: ruleType,
-                rule_source: {
-                  type: 'external',
-                  is_customized: true,
-                },
-              },
-              target_rule: {
-                rule_id: 'test-rule',
-                type: ruleType,
-              },
-              diff: {
-                num_fields_with_updates: 1, // version field
-                num_fields_with_conflicts: 0,
-                num_fields_with_non_solvable_conflicts: 0,
-                fields: {
-                  [fieldName]: {
-                    base_version: initial,
-                    current_version: upgrade,
-                    target_version: upgrade,
-                    merged_version: upgrade,
-                    diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
-                    merge_outcome: ThreeWayMergeOutcome.Current,
-                    has_base_version: true,
-                    has_update: false,
-                    conflict: ThreeWayDiffConflict.NONE,
-                  },
-                },
-              },
-              revision: 0,
-            },
-          ],
+        mockRuleUpgradeReviewData({
+          ruleType,
+          fieldName,
+          fieldVersions: {
+            base: initial,
+            current: upgrade,
+            target: upgrade,
+            merged: upgrade,
+          },
+          diffOutcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
+          conflict: ThreeWayDiffConflict.NONE,
         });
 
-        const { getByTestId } = render(<RulesPage />, {
-          wrapper: TestRuleUpgradeProviders,
-        });
-
-        await openRuleUpgradeFlyout();
+        const { getByTestId } = await renderRuleUpgradeFlyout();
 
         const fieldUpgradeWrapper = getByTestId(`${fieldName}-upgradeWrapper`);
 
-        expect(fieldUpgradeWrapper).toHaveTextContent(humanizedFieldName);
-        expect(fieldUpgradeWrapper).toHaveTextContent('Matching update');
-        expect(within(fieldUpgradeWrapper).getByTitle('Modified')).toBeVisible();
+        expectFieldUpgradeState(fieldUpgradeWrapper, {
+          humanizedFieldName,
+          upgradeStateSummary: 'Matching update',
+          isModified: true,
+        });
 
         toggleFieldAccordion(fieldUpgradeWrapper);
 
@@ -705,58 +574,30 @@ describe('Rule upgrade preview', () => {
       });
 
       it('previews customized field w/ an upgrade resulting in a solvable conflict (ABC)', async () => {
-        (reviewRuleUpgrade as jest.Mock).mockResolvedValue({
-          stats: RULE_UPGRADE_PREVIEW_STATS_MOCK,
-          rules: [
-            {
-              id: 'test-rule',
-              rule_id: 'test-rule',
-              current_rule: {
-                rule_id: 'test-rule',
-                type: ruleType,
-                rule_source: {
-                  type: 'external',
-                  is_customized: true,
-                },
-              },
-              target_rule: {
-                rule_id: 'test-rule',
-                type: ruleType,
-              },
-              diff: {
-                num_fields_with_updates: 2, // tested field + version field
-                num_fields_with_conflicts: 1,
-                num_fields_with_non_solvable_conflicts: 0,
-                fields: {
-                  [fieldName]: {
-                    base_version: initial,
-                    current_version: customized,
-                    target_version: upgrade,
-                    merged_version: customized,
-                    diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-                    merge_outcome: ThreeWayMergeOutcome.Merged,
-                    has_base_version: true,
-                    has_update: true,
-                    conflict: ThreeWayDiffConflict.SOLVABLE,
-                  },
-                },
-              },
-              revision: 0,
-            },
-          ],
+        mockRuleUpgradeReviewData({
+          ruleType,
+          fieldName,
+          fieldVersions: {
+            base: initial,
+            current: customized,
+            target: upgrade,
+            merged: customized,
+          },
+          diffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+          conflict: ThreeWayDiffConflict.SOLVABLE,
         });
 
-        const { getByTestId } = render(<RulesPage />, {
-          wrapper: TestRuleUpgradeProviders,
-        });
-
-        await openRuleUpgradeFlyout();
+        const { getByTestId } = await renderRuleUpgradeFlyout();
 
         const fieldUpgradeWrapper = getByTestId(`${fieldName}-upgradeWrapper`);
 
-        expect(fieldUpgradeWrapper).toHaveTextContent(humanizedFieldName);
-        expect(fieldUpgradeWrapper).toHaveTextContent('Solved conflict');
-        expect(within(fieldUpgradeWrapper).getByTitle('Modified')).toBeVisible();
+        expectFieldUpgradeState(fieldUpgradeWrapper, {
+          humanizedFieldName,
+          upgradeStateSummary: 'Solved conflict',
+          upgradeStateBadge: 'Review required',
+          isModified: true,
+        });
+
         expect(
           within(fieldUpgradeWrapper).getByTestId(`${fieldName}-comparisonSide`)
         ).toBeVisible();
@@ -764,64 +605,37 @@ describe('Rule upgrade preview', () => {
       });
 
       it('previews customized field w/ an upgrade resulting in a non-solvable conflict (ABC)', async () => {
-        (reviewRuleUpgrade as jest.Mock).mockResolvedValue({
-          stats: RULE_UPGRADE_PREVIEW_STATS_MOCK,
-          rules: [
-            {
-              id: 'test-rule',
-              rule_id: 'test-rule',
-              current_rule: {
-                rule_id: 'test-rule',
-                type: ruleType,
-                rule_source: {
-                  type: 'external',
-                  is_customized: true,
-                },
-              },
-              target_rule: {
-                rule_id: 'test-rule',
-                type: ruleType,
-              },
-              diff: {
-                num_fields_with_updates: 2, // tested field + version field
-                num_fields_with_conflicts: 1,
-                num_fields_with_non_solvable_conflicts: 1,
-                fields: {
-                  [fieldName]: {
-                    base_version: initial,
-                    current_version: customized,
-                    target_version: upgrade,
-                    merged_version: customized,
-                    diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-                    merge_outcome: ThreeWayMergeOutcome.Current,
-                    has_base_version: true,
-                    has_update: true,
-                    conflict: ThreeWayDiffConflict.NON_SOLVABLE,
-                  },
-                },
-              },
-              revision: 0,
-            },
-          ],
+        mockRuleUpgradeReviewData({
+          ruleType,
+          fieldName,
+          fieldVersions: {
+            base: initial,
+            current: customized,
+            target: upgrade,
+            merged: customized,
+          },
+          diffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+          conflict: ThreeWayDiffConflict.NON_SOLVABLE,
         });
 
-        const { getByTestId } = render(<RulesPage />, {
-          wrapper: TestRuleUpgradeProviders,
-        });
-
-        await openRuleUpgradeFlyout();
+        const { getByTestId } = await renderRuleUpgradeFlyout();
 
         // Some fields have async validation.
-        // We have to run pending timers to make sure validation runs without issues.
+        // We have to run pending timers to avoid flakiness and make sure
+        // validation runs without issues.
         await act(async () => {
           await jest.runOnlyPendingTimersAsync();
         });
 
         const fieldUpgradeWrapper = getByTestId(`${fieldName}-upgradeWrapper`);
 
-        expect(fieldUpgradeWrapper).toHaveTextContent(humanizedFieldName);
-        expect(fieldUpgradeWrapper).toHaveTextContent('Action required');
-        expect(within(fieldUpgradeWrapper).getByTitle('Modified')).toBeVisible();
+        expectFieldUpgradeState(fieldUpgradeWrapper, {
+          humanizedFieldName,
+          upgradeStateSummary: 'Unsolved conflict',
+          upgradeStateBadge: 'Action required',
+          isModified: true,
+        });
+
         expect(
           within(fieldUpgradeWrapper).getByTestId(`${fieldName}-comparisonSide`)
         ).toBeVisible();
@@ -831,16 +645,39 @@ describe('Rule upgrade preview', () => {
   );
 });
 
-async function openRuleUpgradeFlyout(): Promise<void> {
-  await act(async () => {
-    fireEvent.click(await screen.findByTestId('ruleName'));
-  });
+interface ExpectFieldUpgradeStateParams {
+  /**
+   * Human readable name shown in UI
+   */
+  humanizedFieldName: string;
+  /**
+   * Field upgrade state summary text like "No conflict" or "Solvable conflict"
+   */
+  upgradeStateSummary: string;
+  /**
+   * Field upgrade state badge text like "Ready to Update" and "Review required"
+   */
+  upgradeStateBadge?: string;
+  /**
+   * Whether field's "Modified" badge is shown
+   */
+  isModified: boolean;
 }
 
-function toggleFieldAccordion(fieldWrapper: HTMLElement): void {
-  act(() => {
-    const accordionButton = within(fieldWrapper).getAllByRole('button')[0];
+function expectFieldUpgradeState(
+  wrapper: HTMLElement,
+  params: ExpectFieldUpgradeStateParams
+): void {
+  expect(wrapper).toHaveTextContent(params.humanizedFieldName);
+  expect(wrapper).toHaveTextContent(params.upgradeStateSummary);
 
-    fireEvent.click(accordionButton);
-  });
+  if (params.upgradeStateBadge) {
+    expect(within(wrapper).getByTitle(params.upgradeStateBadge)).toBeVisible();
+  }
+
+  if (params.isModified) {
+    expect(within(wrapper).getByTitle('Modified')).toBeVisible();
+  } else {
+    expect(within(wrapper).queryByTitle('Modified')).not.toBeInTheDocument();
+  }
 }
