@@ -111,7 +111,7 @@ describe('helpers', () => {
 
     const conversationsData = {
       page: 1,
-      per_page: 10,
+      perPage: 10,
       total: 2,
       data: conversationArray,
     };

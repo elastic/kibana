@@ -13,14 +13,13 @@ import type { IHttpFetchError } from '@kbn/core/public';
 
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 
-import { DefinedUseQueryResult, UseQueryResult } from '@tanstack/react-query';
+import { UseQueryResult } from '@tanstack/react-query';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { TestProviders } from '../mock/test_providers/test_providers';
-import { useFetchCurrentUserConversations } from './api';
-import { Conversation } from '../assistant_context/types';
+import { FetchCurrentUserConversations, useFetchCurrentUserConversations } from './api';
 import * as all from './chat_send/use_chat_send';
 import { useConversation } from './use_conversation';
 import { AIConnector } from '../connectorland/connector_selector';
@@ -86,7 +85,26 @@ const mockUseConversation = {
 };
 
 const refetchResults = jest.fn();
-
+const defaultFetchUserConversations = {
+  data: mockData,
+  isLoading: false,
+  refetch: refetchResults.mockResolvedValue({
+    isLoading: false,
+    data: {
+      pages: [
+        {
+          page: 1,
+          perPage: 28,
+          total: 150,
+          data: Object.values(mockData),
+        },
+      ],
+    },
+  }),
+  isFetched: true,
+  isFetching: false,
+  setPaginationObserver: jest.fn(),
+};
 describe('Assistant', () => {
   let persistToLocalStorage: jest.Mock;
   let persistToSessionStorage: jest.Mock;
@@ -111,21 +129,9 @@ describe('Assistant', () => {
       data: connectors,
     } as unknown as UseQueryResult<AIConnector[], IHttpFetchError>);
 
-    jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
-      data: mockData,
-      isLoading: false,
-      refetch: refetchResults.mockResolvedValue({
-        isLoading: false,
-        data: {
-          ...mockData,
-          welcome_id: {
-            ...mockData.welcome_id,
-            apiConfig: { newProp: true },
-          },
-        },
-      }),
-      isFetched: true,
-    } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
+    jest
+      .mocked(useFetchCurrentUserConversations)
+      .mockReturnValue(defaultFetchUserConversations as unknown as FetchCurrentUserConversations);
     jest
       .mocked(useLocalStorage)
       .mockReturnValue([undefined, persistToLocalStorage] as unknown as ReturnType<
@@ -199,20 +205,25 @@ describe('Assistant', () => {
         getConversation,
       });
       jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+        ...defaultFetchUserConversations,
         data: {
           ...mockData,
           electric_sheep_id: conversation,
         },
-        isLoading: false,
-        refetch: jest.fn().mockResolvedValue({
+        refetch: refetchResults.mockResolvedValue({
           isLoading: false,
           data: {
-            ...mockData,
-            electric_sheep_id: conversation,
+            pages: [
+              {
+                page: 1,
+                perPage: 28,
+                total: 150,
+                data: [...Object.values(mockData), conversation],
+              },
+            ],
           },
         }),
-        isFetched: true,
-      } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
+      } as unknown as FetchCurrentUserConversations);
 
       const { findByText } = await renderAssistant();
 
@@ -233,20 +244,28 @@ describe('Assistant', () => {
     it('should fetch current conversation when id has value', async () => {
       const refetch = jest.fn();
       jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+        ...defaultFetchUserConversations,
         data: {
           ...mockData,
           electric_sheep_id: { ...mockData.electric_sheep_id, title: 'updated title' },
         },
-        isLoading: false,
-        refetch: refetch.mockResolvedValue({
+        refetch: refetchResults.mockResolvedValue({
           isLoading: false,
           data: {
-            ...mockData,
-            electric_sheep_id: { ...mockData.electric_sheep_id, title: 'updated title' },
+            pages: [
+              {
+                page: 1,
+                perPage: 28,
+                total: 150,
+                data: [
+                  mockData.welcome_id,
+                  { ...mockData.electric_sheep_id, title: 'updated title' },
+                ],
+              },
+            ],
           },
         }),
-        isFetched: true,
-      } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
+      } as unknown as FetchCurrentUserConversations);
       await renderAssistant();
 
       const previousConversationButton = await screen.findByText('updated title');
@@ -257,43 +276,6 @@ describe('Assistant', () => {
       expect(refetch).toHaveBeenCalled();
 
       expect(persistToLocalStorage).toHaveBeenLastCalledWith('electric_sheep_id');
-    });
-    it.skip('should refetch all conversations when id is empty', async () => {
-      const chatSendSpy = jest.spyOn(all, 'useChatSend');
-      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
-        data: {
-          ...mockData,
-          'electric sheep': { ...mockData.electric_sheep_id, id: '', apiConfig: { newProp: true } },
-        },
-        isLoading: false,
-        refetch: jest.fn().mockResolvedValue({
-          isLoading: false,
-          data: {
-            ...mockData,
-            'electric sheep': {
-              ...mockData.electric_sheep_id,
-              id: '',
-              apiConfig: { newProp: true },
-            },
-          },
-        }),
-        isFetched: true,
-      } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
-      await renderAssistant();
-
-      const previousConversationButton = screen.getByLabelText('Previous conversation');
-      await act(async () => {
-        fireEvent.click(previousConversationButton);
-      });
-      expect(chatSendSpy).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          currentConversation: {
-            ...mockData.electric_sheep_id,
-            id: '',
-            apiConfig: { newProp: true },
-          },
-        })
-      );
     });
   });
 

@@ -16,6 +16,7 @@ import {
   EuiText,
   EuiSpacer,
   useEuiTheme,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
@@ -34,10 +35,12 @@ interface Props {
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
+  isFetchingCurrentUserConversations: boolean;
   conversations: Record<string, Conversation>;
   onConversationDeleted: (conversationId: string) => void;
   onConversationCreate: () => void;
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
+  setPaginationObserver: (ref: HTMLDivElement) => void;
 }
 
 const getCurrentConversationIndex = (
@@ -79,9 +82,11 @@ export const ConversationSidePanel = React.memo<Props>(
     onConversationSelected,
     shouldDisableKeyboardShortcut = () => false,
     isDisabled = false,
+    isFetchingCurrentUserConversations,
     conversations,
     onConversationDeleted,
     onConversationCreate,
+    setPaginationObserver,
   }) => {
     const euiTheme = useEuiTheme();
 
@@ -97,6 +102,8 @@ export const ConversationSidePanel = React.memo<Props>(
       () => Object.values(conversationsCategorizedByDate).flatMap((p) => p),
       [conversationsCategorizedByDate]
     );
+
+    const lastConversationId = conversationList[conversationList.length - 1]?.id;
 
     const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
 
@@ -176,7 +183,6 @@ export const ConversationSidePanel = React.memo<Props>(
     }, [deleteConversationItem, onDelete]);
 
     useEvent('keydown', onKeyDown);
-
     return (
       <>
         <EuiFlexGroup
@@ -207,36 +213,62 @@ export const ConversationSidePanel = React.memo<Props>(
                         padding: 0;
                       `}
                     >
-                      {convoList.map((conversation) => (
-                        <EuiListGroupItem
-                          key={conversation.id + conversation.title}
-                          onClick={() =>
-                            onConversationSelected({
-                              cId: conversation.id,
-                              cTitle: conversation.title,
-                            })
+                      {convoList.map((conversation) => {
+                        const internalSetObserver = (ref: HTMLDivElement | null) => {
+                          if (conversation.id === lastConversationId && ref) {
+                            setPaginationObserver(ref);
                           }
-                          label={conversation.title}
-                          data-test-subj={`conversation-select-${conversation.title}`}
-                          isActive={
-                            !isEmpty(conversation.id)
-                              ? conversation.id === currentConversation?.id
-                              : conversation.title === currentConversation?.title
-                          }
-                          extraAction={{
-                            color: 'danger',
-                            onClick: () => setDeleteConversationItem(conversation),
-                            iconType: 'trash',
-                            iconSize: 's',
-                            'aria-label': i18n.DELETE_CONVERSATION_ARIA_LABEL,
-                            'data-test-subj': 'delete-option',
-                          }}
-                        />
-                      ))}
+                        };
+                        return (
+                          <span key={conversation.id + conversation.title}>
+                            <EuiListGroupItem
+                              size="xs"
+                              onClick={() =>
+                                onConversationSelected({
+                                  cId: conversation.id,
+                                  cTitle: conversation.title,
+                                })
+                              }
+                              label={conversation.title}
+                              data-test-subj={`conversation-select-${conversation.title}`}
+                              isActive={
+                                !isEmpty(conversation.id)
+                                  ? conversation.id === currentConversation?.id
+                                  : conversation.title === currentConversation?.title
+                              }
+                              extraAction={{
+                                color: 'danger',
+                                onClick: () => setDeleteConversationItem(conversation),
+                                iconType: 'trash',
+                                iconSize: 's',
+                                'aria-label': i18n.DELETE_CONVERSATION_ARIA_LABEL,
+                                'data-test-subj': 'delete-option',
+                              }}
+                            />
+                            {conversation.id === lastConversationId && (
+                              <div
+                                ref={internalSetObserver}
+                                css={css`
+                                  height: 1px;
+                                `}
+                              />
+                            )}
+                          </span>
+                        );
+                      })}
                     </EuiListGroup>
                     <EuiSpacer size="s" />
                   </EuiFlexItem>
                 ) : null
+              )}
+              {isFetchingCurrentUserConversations && (
+                <EuiLoadingSpinner
+                  size="m"
+                  css={css`
+                    display: block;
+                    margin: 0 auto;
+                  `}
+                />
               )}
             </EuiPanel>
           </EuiFlexItem>

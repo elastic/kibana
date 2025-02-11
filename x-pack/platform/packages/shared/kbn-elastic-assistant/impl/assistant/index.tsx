@@ -116,8 +116,10 @@ const AssistantComponent: React.FC<Props> = ({
     isFetchedAnonymizationFields,
     isFetchedCurrentUserConversations,
     isFetchedPrompts,
+    isFetchingCurrentUserConversations,
     isLoadingAnonymizationFields,
     isLoadingCurrentUserConversations,
+    setPaginationObserver,
     refetchPrompts,
     refetchCurrentUserConversations,
     setIsStreaming,
@@ -460,7 +462,9 @@ const AssistantComponent: React.FC<Props> = ({
               conversations={conversations}
               onConversationDeleted={handleOnConversationDeleted}
               onConversationCreate={handleCreateConversation}
+              isFetchingCurrentUserConversations={isFetchingCurrentUserConversations}
               refetchCurrentUserConversations={refetchCurrentUserConversations}
+              setPaginationObserver={setPaginationObserver}
             />
           </EuiFlexItem>
         )}

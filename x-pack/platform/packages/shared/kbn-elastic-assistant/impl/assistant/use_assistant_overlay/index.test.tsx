@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { DefinedUseQueryResult } from '@tanstack/react-query';
-
 import { useAssistantOverlay } from '.';
 import { waitFor, renderHook, act } from '@testing-library/react';
-import { useFetchCurrentUserConversations } from '../api';
-import { Conversation } from '../../assistant_context/types';
+import { FetchCurrentUserConversations, useFetchCurrentUserConversations } from '../api';
 import { mockConnectors } from '../../mock/connectors';
 
 const mockUseAssistantContext = {
@@ -76,15 +73,20 @@ describe('useAssistantOverlay', () => {
       refetch: jest.fn().mockResolvedValue({
         isLoading: false,
         data: {
-          ...mockData,
-          welcome_id: {
-            ...mockData.welcome_id,
-            apiConfig: { newProp: true },
-          },
+          pages: [
+            {
+              page: 1,
+              perPage: 28,
+              total: 150,
+              data: Object.values(mockData),
+            },
+          ],
         },
       }),
       isFetched: true,
-    } as unknown as DefinedUseQueryResult<Record<string, Conversation>, unknown>);
+      isFetching: false,
+      setPaginationObserver: jest.fn(),
+    } as unknown as FetchCurrentUserConversations);
   });
 
   it('calls registerPromptContext with the expected context', async () => {

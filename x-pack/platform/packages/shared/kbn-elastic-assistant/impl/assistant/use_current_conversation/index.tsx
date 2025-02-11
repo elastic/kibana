@@ -6,8 +6,10 @@
  */
 
 import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
-import { QueryObserverResult } from '@tanstack/react-query';
+import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
 import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { InfiniteData } from '@tanstack/query-core/src/types';
+import { FetchConversationsResponse } from '../api';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { getDefaultSystemPrompt } from '../use_conversation/helpers';
 import { useConversation } from '../use_conversation';
@@ -20,9 +22,9 @@ export interface Props {
   conversations: Record<string, Conversation>;
   defaultConnector?: AIConnector;
   mayUpdateConversations: boolean;
-  refetchCurrentUserConversations: () => Promise<
-    QueryObserverResult<Record<string, Conversation>, unknown>
-  >;
+  refetchCurrentUserConversations: <TPageData>(
+    options?: RefetchOptions & RefetchQueryFilters<TPageData>
+  ) => Promise<QueryObserverResult<InfiniteData<FetchConversationsResponse>, unknown>>;
 }
 
 interface UseCurrentConversation {
