@@ -12,7 +12,7 @@ import { SidePanelContentManager } from './side_panel_content_manager';
 import { useWithSidePanel } from '../../hooks/state_selectors/use_with_side_panel';
 
 const StyledEuiFlexItemWhite = styled(EuiFlexItem)`
-  background-color: ${({ theme: { euiTheme } }) => euiTheme.colors.emptyShade} !important;
+  background-color: ${({ theme: { euiTheme } }) => euiTheme.colors.backgroundBasePlain};
   border-radius: ${({ theme: { euiTheme } }) => `0 ${euiTheme.size.xs} ${euiTheme.size.xs} 0`};
   box-shadow: 0 ${({ theme: { euiTheme } }) => euiTheme.size.xs}
     ${({ theme: { euiTheme } }) => euiTheme.size.xs}

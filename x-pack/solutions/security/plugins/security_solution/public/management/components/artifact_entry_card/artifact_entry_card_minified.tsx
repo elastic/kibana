@@ -34,7 +34,7 @@ const CardContainerPanel = styled(EuiSplitPanel.Outer)`
 `;
 
 const CustomSplitInnerPanel = styled(EuiSplitPanel.Inner)`
-  background-color: ${({ theme }) => theme.euiTheme.colors.lightestShade} !important;
+  background-color: ${({ theme }) => theme.euiTheme.colors.backgroundBasePrimary};
 `;
 
 export interface ArtifactEntryCardMinifiedProps extends CommonProps {
