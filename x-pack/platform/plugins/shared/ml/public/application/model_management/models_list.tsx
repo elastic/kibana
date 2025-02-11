@@ -126,6 +126,10 @@ export const ModelsList: FC<Props> = ({
     trainedModelsService.scheduledDeployments$,
     trainedModelsService.scheduledDeployments
   );
+  const initialDataLoaded = useObservable(
+    trainedModelsService.initialDataLoaded$,
+    trainedModelsService.initialDataLoaded
+  );
 
   // Navigation blocker when there are active operations
   useUnsavedChangesPrompt({
@@ -556,6 +560,10 @@ export const ModelsList: FC<Props> = ({
       return items.filter((item) => !isModelDownloadItem(item) || item.recommended);
     }
   }, [items, pageState.showAll]);
+
+  if (!initialDataLoaded) {
+    return null;
+  }
 
   return (
     <>

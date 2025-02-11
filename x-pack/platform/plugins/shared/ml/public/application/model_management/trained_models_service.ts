@@ -81,6 +81,7 @@ export class TrainedModelsService {
   private savedObjectsApiService!: SavedObjectsApiService;
   private canManageSpacesAndSavedObjects!: boolean;
   private isInitialized = false;
+  private readonly _initialDataLoaded$ = new BehaviorSubject<boolean>(false);
 
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
 
@@ -116,9 +117,17 @@ export class TrainedModelsService {
 
   public readonly isLoading$ = this._isLoading$.pipe(distinctUntilChanged());
 
+  public readonly initialDataLoaded$: Observable<boolean> = this._initialDataLoaded$.pipe(
+    distinctUntilChanged(isEqual)
+  );
+
   public readonly modelItems$: Observable<TrainedModelUIItem[]> = this._modelItems$.pipe(
     distinctUntilChanged(isEqual)
   );
+
+  public get initialDataLoaded(): boolean {
+    return this._initialDataLoaded$.getValue();
+  }
 
   public get scheduledDeployments$(): Observable<StartAllocationParams[]> {
     return this._scheduledDeployments$;
@@ -376,6 +385,7 @@ export class TrainedModelsService {
           const updatedItems = this.mergeModelItems(items, spaces);
           this._modelItems$.next(updatedItems);
           this.startDownloadStatusPolling();
+          this._initialDataLoaded$.next(true);
         })
     );
   }
@@ -590,6 +600,7 @@ export class TrainedModelsService {
     this._modelItems$.next([]);
     this.downloadStatus$.next({});
     this._scheduledDeployments$.next([]);
+    this._initialDataLoaded$.next(false);
 
     // Clear callbacks
     this.setScheduledDeployments = undefined;
