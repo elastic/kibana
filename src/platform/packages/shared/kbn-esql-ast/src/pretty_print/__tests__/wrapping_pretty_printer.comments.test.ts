@@ -505,7 +505,7 @@ ROW 1
         // 2
         /* 3 */
         // 4
-        /* 5 */ a /* 6 */ AS /* 7 */ b
+        /* 5 */ a /* 6 */ /* 7 */
         ON c`;
       const text = reprint(query).text;
       expect('\n' + text).toBe(`
@@ -515,14 +515,13 @@ FROM index
       // 2
       /* 3 */
       // 4
-      /* 5 */ a /* 6 */ AS
-        /* 7 */ b
+      /* 5 */ a /* 6 */ /* 7 */
         ON c`);
     });
 
     test('JOIN "ON" option argument comments', () => {
       const query = `
-        FROM index | RIGHT JOIN a AS b ON
+        FROM index | RIGHT JOIN a ON
         // c.1
         /* c.2 */ c /* c.3 */,
         // d.1
@@ -531,7 +530,7 @@ FROM index
       expect('\n' + text).toBe(`
 FROM index
   | RIGHT JOIN
-      a AS b
+      a
         ON
           // c.1
           /* c.2 */ c, /* c.3 */

@@ -7,10 +7,10 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
+import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
 import { getEsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base_caller';
 import type { GraphNode } from '../../types';
 import { ESQL_SYNTAX_TRANSLATION_PROMPT } from './prompts';
-import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
 
 interface GetTranslateRuleNodeParams {
   inferenceClient: InferenceClient;

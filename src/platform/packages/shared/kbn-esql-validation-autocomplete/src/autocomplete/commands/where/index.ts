@@ -53,7 +53,8 @@ export async function suggest(
    */
   const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
 
-  switch (getPosition(innerText, command)) {
+  const position = getPosition(innerText, command);
+  switch (position) {
     /**
      * After a column name
      */
@@ -192,15 +193,38 @@ export async function suggest(
     suggestions.push(pipeCompleteItem);
   }
 
-  return suggestions.map<SuggestionRawDefinition>((s) => {
-    const overlap = getOverlapRange(innerText, s.text);
-    const offset = overlap.start === overlap.end ? 1 : 0;
-    return {
-      ...s,
-      rangeToReplace: {
-        start: overlap.start + offset,
-        end: overlap.end + offset,
-      },
-    };
-  });
+  /**
+   * Attach replacement ranges if there's a prefix.
+   *
+   * Can't rely on Monaco because
+   * - it counts "." as a word separator
+   * - it doesn't handle multi-word completions (like "is null")
+   *
+   * TODO - think about how to generalize this.
+   */
+  const hasNonWhitespacePrefix = !/\s/.test(innerText[innerText.length - 1]);
+  if (hasNonWhitespacePrefix) {
+    // get index of first char of final word
+    const lastWhitespaceIndex = innerText.search(/\S(?=\S*$)/);
+    suggestions.forEach((s) => {
+      if (['IS NULL', 'IS NOT NULL'].includes(s.text)) {
+        // this suggestion has spaces in it (e.g. "IS NOT NULL")
+        // so we need to see if there's an overlap
+        const overlap = getOverlapRange(innerText, s.text);
+        if (overlap.start < overlap.end) {
+          // there's an overlap so use that
+          s.rangeToReplace = overlap;
+          return;
+        }
+      }
+
+      // no overlap, so just replace from the last whitespace
+      s.rangeToReplace = {
+        start: lastWhitespaceIndex + 1,
+        end: innerText.length,
+      };
+    });
+  }
+
+  return suggestions;
 }

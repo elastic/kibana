@@ -50,6 +50,9 @@ interface OwnProps {
 }
 
 type Props = OwnProps;
+
+export const AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID = 'aiAssistantSettingsMenuContainer';
+
 /**
  * Renders the header of the Elastic AI Assistant.
  * Provide a user interface for selecting and managing conversations,
@@ -170,7 +173,7 @@ export const AssistantHeader: React.FC<Props> = ({
                   onConnectorSelected={onConversationChange}
                 />
               </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem id={AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID}>
                 <SettingsContextMenu isDisabled={isDisabled} onChatCleared={onChatCleared} />
               </EuiFlexItem>
             </EuiFlexGroup>

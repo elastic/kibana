@@ -20,6 +20,8 @@ import {
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { IRouter, Logger } from '@kbn/core/server';
 
+import { getPrompt } from '@kbn/security-ai-prompts';
+import { localToolPrompts, promptGroupId } from '../../lib/prompt/tool_prompts';
 import { buildResponse } from '../../lib/build_response';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
@@ -71,6 +73,7 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
         const resp = buildResponse(response);
 
         const ctx = await context.resolve(['licensing', 'elasticAssistant']);
+        const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
 
         const assistantContext = ctx.elasticAssistant;
 
@@ -159,7 +162,15 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             request,
           });
 
-          const toolInstance = assistantTool.getTool(assistantToolParams);
+          const description = await getPrompt({
+            actionsClient,
+            connectorId: apiConfig.connectorId,
+            localPrompts: localToolPrompts,
+            promptId: assistantTool.name,
+            promptGroupId,
+            savedObjectsClient,
+          });
+          const toolInstance = assistantTool.getTool({ ...assistantToolParams, description });
 
           const { currentInsight, defendInsightId } = await createDefendInsight(
             endpointIds,

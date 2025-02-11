@@ -6,7 +6,7 @@
  */
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { Conversation } from '../..';
+import { ClientMessage, Conversation } from '../..';
 
 export const alertConvo: Conversation = {
   id: '',
@@ -33,6 +33,20 @@ export const alertConvo: Conversation = {
   },
 };
 
+export const messageWithContentReferences: ClientMessage = {
+  content: 'You have 1 alert.{reference(abcde)}',
+  role: 'user',
+  timestamp: '2023-03-19T18:59:18.174Z',
+  metadata: {
+    contentReferences: {
+      abcde: {
+        id: 'abcde',
+        type: 'SecurityAlertsPage',
+      },
+    },
+  },
+};
+
 export const emptyWelcomeConvo: Conversation = {
   id: '',
   title: 'Welcome',
@@ -45,6 +59,11 @@ export const emptyWelcomeConvo: Conversation = {
     actionTypeId: '.gen-ai',
     provider: OpenAiProviderType.OpenAi,
   },
+};
+
+export const conversationWithContentReferences: Conversation = {
+  ...emptyWelcomeConvo,
+  messages: [messageWithContentReferences],
 };
 
 export const welcomeConvo: Conversation = {
