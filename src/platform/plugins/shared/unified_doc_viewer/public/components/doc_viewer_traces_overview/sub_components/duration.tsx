@@ -16,8 +16,5 @@ interface DurationProps {
 }
 
 export function Duration({ duration }: DurationProps) {
-  if (!duration) return null;
-  // TODO add % relative to the trace
-
   return <EuiText size="xs">{asDuration(duration)}</EuiText>;
 }
