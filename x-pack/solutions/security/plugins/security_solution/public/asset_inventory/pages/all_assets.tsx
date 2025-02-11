@@ -51,6 +51,7 @@ import { AssetInventorySearchBar } from '../components/search_bar';
 import { RiskBadge } from '../components/risk_badge';
 import { Filters } from '../components/filters/filters';
 import { EmptyState } from '../components/empty_state';
+import { TopAssetsBarChart } from '../components/top_assets_bar_chart';
 
 import { useDataViewContext } from '../hooks/data_view_context';
 import { useStyles } from '../hooks/use_styles';
@@ -447,6 +448,9 @@ const AllAssets = ({
             setUrlQuery({ filters: newFilters });
           }}
         />
+        {dataView && loadingState === DataLoadingState.loaded && totalHits > 0 ? (
+          <TopAssetsBarChart entities={rows} />
+        ) : null}
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <div
             data-test-subj={rest['data-test-subj']}
