@@ -5,21 +5,26 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, memo } from 'react';
 import { BoolQuery } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { AlertsFeatureIdsFilter } from '../../lib/search_filters';
 import { useKibana } from '../../..';
 import { useAlertSearchBarStateContainer } from './use_alert_search_bar_state_container';
-import { ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY } from './constants';
+import {
+  ALERTS_SEARCH_BAR_PARAMS_URL_STORAGE_KEY,
+  RESET_FILTER_CONTROLS_TEST_SUBJ,
+} from './constants';
 import { AlertsSearchBarProps } from './types';
 import AlertsSearchBar from './alerts_search_bar';
 import { nonNullable } from '../../../../common/utils';
 import { buildEsQuery } from './build_es_query';
+import { ErrorBoundary } from '../common/components/error_boundary';
 
 const INVALID_QUERY_STRING_TOAST_TITLE = i18n.translate(
   'xpack.triggersActionsUI.urlSyncedAlertsSearchBar.invalidQueryTitle',
@@ -27,6 +32,43 @@ const INVALID_QUERY_STRING_TOAST_TITLE = i18n.translate(
     defaultMessage: 'Invalid query string',
   }
 );
+
+const FILTER_CONTROLS_ERROR_VIEW_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.urlSyncedAlertsSearchBar.filterControlsErrorTitle',
+  {
+    defaultMessage: 'Cannot render alert filters',
+  }
+);
+
+const FILTER_CONTROLS_ERROR_VIEW_DESCRIPTION = i18n.translate(
+  'xpack.triggersActionsUI.urlSyncedAlertsSearchBar.filterControlsErrorDescription',
+  {
+    defaultMessage: 'Try resetting them to fix the issue.',
+  }
+);
+
+const RESET_FILTERS_BUTTON_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.urlSyncedAlertsSearchBar.resetFiltersButtonLabel',
+  {
+    defaultMessage: 'Reset filters',
+  }
+);
+
+const FilterControlsErrorView = memo(({ resetFilters }: { resetFilters: () => void }) => {
+  return (
+    <EuiCallOut title={FILTER_CONTROLS_ERROR_VIEW_TITLE} color="danger" iconType="error">
+      <p>{FILTER_CONTROLS_ERROR_VIEW_DESCRIPTION}</p>
+      <EuiButton
+        onClick={resetFilters}
+        color="danger"
+        fill
+        data-test-subj={RESET_FILTER_CONTROLS_TEST_SUBJ}
+      >
+        {RESET_FILTERS_BUTTON_LABEL}
+      </EuiButton>
+    </EuiCallOut>
+  );
+});
 
 export interface UrlSyncedAlertsSearchBarProps
   extends Omit<
@@ -142,6 +184,11 @@ export const UrlSyncedAlertsSearchBar = ({
     [spaceId]
   );
 
+  const resetFilters = useCallback(() => {
+    new Storage(window.localStorage).remove(filterControlsStorageKey);
+    window.location.reload();
+  }, [filterControlsStorageKey]);
+
   return (
     <>
       <AlertsSearchBar
@@ -157,25 +204,27 @@ export const UrlSyncedAlertsSearchBar = ({
         {...rest}
       />
       {showFilterControls && (
-        <AlertFilterControls
-          dataViewSpec={{
-            id: 'unified-alerts-dv',
-            title: '.alerts-*',
-          }}
-          spaceId={spaceId}
-          chainingSystem="HIERARCHICAL"
-          controlsUrlState={filterControls}
-          filters={controlFilters}
-          onFiltersChange={onControlFiltersChange}
-          storageKey={filterControlsStorageKey}
-          services={{
-            http,
-            notifications,
-            dataViews,
-            storage: Storage,
-          }}
-          ControlGroupRenderer={ControlGroupRenderer}
-        />
+        <ErrorBoundary fallback={() => <FilterControlsErrorView resetFilters={resetFilters} />}>
+          <AlertFilterControls
+            dataViewSpec={{
+              id: 'unified-alerts-dv',
+              title: '.alerts-*',
+            }}
+            spaceId={spaceId}
+            chainingSystem="HIERARCHICAL"
+            controlsUrlState={filterControls}
+            filters={controlFilters}
+            onFiltersChange={onControlFiltersChange}
+            storageKey={filterControlsStorageKey}
+            ControlGroupRenderer={ControlGroupRenderer}
+            services={{
+              http,
+              notifications,
+              dataViews,
+              storage: Storage,
+            }}
+          />
+        </ErrorBoundary>
       )}
     </>
   );
