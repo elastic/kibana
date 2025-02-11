@@ -8,7 +8,10 @@
 import type { IKibanaResponse, IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { Logger } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  InferenceInferenceEndpointInfo,
+  InferenceTaskType,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { InferenceServicesGetResponse } from '../types';
 import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '../../common';
@@ -91,26 +94,19 @@ export const getInferenceServicesRoute = (
 
           const { config, secrets } = request.body;
 
-          const inferenceBody = {
-            service: config.provider,
-            service_settings: {
-              ...unflattenObject(config?.providerConfig ?? {}),
-              ...unflattenObject(secrets?.providerSecrets ?? {}),
-            },
+          const serviceSettings = {
+            ...unflattenObject(config?.providerConfig ?? {}),
+            ...unflattenObject(secrets?.providerSecrets ?? {}),
           };
 
-          const result = await esClient.transport.request<InferenceInferenceEndpointInfo>(
-            {
-              method: 'PUT',
-              path: `/_inference/${config.taskType}/${config.inferenceId}`,
-              body: JSON.stringify(inferenceBody),
+          const result = await esClient.inference.put({
+            inference_id: config?.inferenceId ?? '',
+            task_type: config?.taskType as InferenceTaskType,
+            inference_config: {
+              service: config?.provider,
+              service_settings: serviceSettings,
             },
-            {
-              headers: {
-                'content-type': 'application/json',
-              },
-            }
-          );
+          });
 
           return response.ok({
             body: result,
