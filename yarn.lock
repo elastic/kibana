@@ -6664,6 +6664,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/platform-flyout-examples-plugin@link:examples/platform_flyout_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/plugin-check@link:packages/kbn-plugin-check":
   version "0.0.0"
   uid ""

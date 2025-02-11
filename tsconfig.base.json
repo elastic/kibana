@@ -1402,6 +1402,8 @@
       "@kbn/performance-testing-dataset-extractor/*": ["packages/kbn-performance-testing-dataset-extractor/*"],
       "@kbn/picomatcher": ["packages/kbn-picomatcher"],
       "@kbn/picomatcher/*": ["packages/kbn-picomatcher/*"],
+      "@kbn/platform-flyout-examples-plugin": ["examples/platform_flyout_example"],
+      "@kbn/platform-flyout-examples-plugin/*": ["examples/platform_flyout_example/*"],
       "@kbn/plugin-check": ["packages/kbn-plugin-check"],
       "@kbn/plugin-check/*": ["packages/kbn-plugin-check/*"],
       "@kbn/plugin-generator": ["packages/kbn-plugin-generator"],
