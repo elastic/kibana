@@ -59,7 +59,7 @@ const createDataViewSelectedListener = (dependencies: { dataViews: DataViewsServ
       try {
         if (!dataViewSpec) {
           const adhocDataView = await dependencies.dataViews.create({
-            id: 'adhoc',
+            id: 'adhoc' + action.payload.patterns?.join(','),
             title: action.payload.patterns?.join(','),
           });
           dataViewSpec = adhocDataView.toSpec();
