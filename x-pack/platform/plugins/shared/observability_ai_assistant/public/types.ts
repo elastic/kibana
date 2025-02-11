@@ -49,7 +49,7 @@ export interface ObservabilityAIAssistantChatService {
   chat: (
     name: string,
     options: {
-      system: string;
+      systemMessage: string;
       messages: Message[];
       connectorId: string;
       functions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;

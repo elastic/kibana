@@ -282,13 +282,13 @@ class ChatService {
 
   public chat: ObservabilityAIAssistantChatService['chat'] = (
     name: string,
-    { connectorId, system, messages, functionCall, functions, signal }
+    { connectorId, systemMessage, messages, functionCall, functions, signal }
   ) => {
     return this.callStreamingApi('POST /internal/observability_ai_assistant/chat', {
       params: {
         body: {
           name,
-          system,
+          systemMessage,
           messages,
           connectorId,
           functionCall,
