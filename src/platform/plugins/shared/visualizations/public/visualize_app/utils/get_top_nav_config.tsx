@@ -399,6 +399,11 @@ export const getTopNavConfig = (
               title: i18n.translate('visualizations.share.shareModal.title', {
                 defaultMessage: 'Share this visualization',
               }),
+              config: {
+                embed: {
+                  computeAnonymousCapabilities: showPublicUrlSwitch,
+                },
+              },
             },
             sharingData: {
               title:
@@ -414,7 +419,6 @@ export const getTopNavConfig = (
               },
             },
             isDirty: hasUnappliedChanges || hasUnsavedChanges,
-            showPublicUrlSwitch,
             toasts: toastNotifications,
           });
         }
