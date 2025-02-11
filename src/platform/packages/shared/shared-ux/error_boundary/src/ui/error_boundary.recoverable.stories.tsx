@@ -48,7 +48,7 @@ export const ErrorInCallout: StoryFn = () => {
   );
 };
 
-export const SectionErrorInCallout: Story = () => {
+export const SectionErrorInCallout: StoryFn = () => {
   const services = storybookMock.getServices();
 
   return (
