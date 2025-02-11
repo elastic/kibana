@@ -7,7 +7,7 @@
 
 import { createServerRouteFactory } from '@kbn/server-route-repository';
 import { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
-import { badRequest, forbidden, internal, notFound } from '@hapi/boom';
+import { badRequest, conflict, forbidden, internal, notFound } from '@hapi/boom';
 import { errors } from '@elastic/elasticsearch';
 import { StreamsRouteHandlerResources } from './types';
 import { StatusError } from '../lib/streams/errors/status_error';
@@ -32,6 +32,9 @@ export const createServerRoute: CreateServerRouteFactory<
 
             case 404:
               throw notFound(error);
+
+            case 409:
+              throw conflict(error);
 
             case 500:
               throw internal(error);

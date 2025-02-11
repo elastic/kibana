@@ -13,6 +13,8 @@ import { i18n } from '@kbn/i18n';
 import { PLUGIN_ROUTE_ROOT } from '../../../common/api_routes';
 import { useKibana } from '../../hooks/use_kibana';
 import { SynonymsSetRuleTable } from './synonyms_set_rule_table';
+import { ConnectToApiButton } from '../connect_to_api/connect_to_api_button';
+import { ConnectToApiFlyout } from '../connect_to_api/connect_to_api_flyout';
 
 export const SynonymsSetDetail = () => {
   const { synonymsSetId = '' } = useParams<{
@@ -26,6 +28,7 @@ export const SynonymsSetDetail = () => {
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
     [consolePlugin]
   );
+  const [isApiConnectModalVisible, setIsApiConnectModalVisible] = React.useState(false);
 
   return (
     <KibanaPageTemplate
@@ -58,9 +61,24 @@ export const SynonymsSetDetail = () => {
             },
           },
         ]}
+        rightSideItems={[
+          <ConnectToApiButton
+            onClick={() => {
+              setIsApiConnectModalVisible(true);
+            }}
+          />,
+        ]}
       />
       <KibanaPageTemplate.Section restrictWidth>
         {synonymsSetId && <SynonymsSetRuleTable synonymsSetId={synonymsSetId} />}
+        {isApiConnectModalVisible && (
+          <ConnectToApiFlyout
+            rulesetId={synonymsSetId}
+            onClose={() => {
+              setIsApiConnectModalVisible(false);
+            }}
+          />
+        )}
       </KibanaPageTemplate.Section>
       {embeddableConsole}
     </KibanaPageTemplate>

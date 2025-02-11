@@ -438,6 +438,7 @@ export const RemoteClusterForm: React.FC<Props> = ({
         cluster={getCluster()}
         nextButtonTestSubj={'remoteClusterFormNextButton'}
         backButtonTestSubj={'remoteClusterFormBackButton'}
+        previousClusterMode={cluster?.mode}
       />
     </>
   );

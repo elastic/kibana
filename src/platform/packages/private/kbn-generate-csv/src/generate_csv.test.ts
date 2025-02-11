@@ -10,7 +10,6 @@
 import { identity, range } from 'lodash';
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
-import { add, type Duration } from 'date-fns';
 
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -38,6 +37,7 @@ import {
   UI_SETTINGS_DATEFORMAT_TZ,
 } from '../constants';
 import { CsvGenerator } from './generate_csv';
+import moment from 'moment';
 
 type CsvConfigType = ReportingConfigType['csv'];
 
@@ -576,9 +576,9 @@ describe('CsvGenerator', () => {
   });
 
   describe('export behavior when scroll duration config is auto', () => {
-    const getTaskInstanceFields = (intervalFromNow: Duration) => {
+    const getTaskInstanceFields = (intervalFromNow: { seconds: number }) => {
       const now = new Date(Date.now());
-      return { startedAt: now, retryAt: add(now, intervalFromNow) };
+      return { startedAt: now, retryAt: moment(now).add(intervalFromNow).toDate() };
     };
 
     let mockConfigWithAutoScrollDuration: ReportingConfigType['csv'];
