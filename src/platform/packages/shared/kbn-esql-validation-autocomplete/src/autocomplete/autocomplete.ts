@@ -9,7 +9,6 @@
 
 import { uniq, uniqBy } from 'lodash';
 import {
-  Walker,
   type AstProviderFn,
   type ESQLAst,
   type ESQLAstItem,
