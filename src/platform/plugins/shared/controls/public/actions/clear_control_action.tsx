@@ -91,9 +91,9 @@ export class ClearControlAction
   }
 
   public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
-    if (!isClearableControl(embeddable)) throw new IncompatibleActionError();
-
-    return embeddable.hasSelections$.pipe(map(() => undefined));
+    return isClearableControl(embeddable)
+      ? embeddable.hasSelections$.pipe(map(() => undefined))
+      : undefined;
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {

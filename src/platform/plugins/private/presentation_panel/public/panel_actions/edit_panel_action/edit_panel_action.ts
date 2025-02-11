@@ -23,8 +23,8 @@ import {
   FrequentCompatibilityChangeAction,
   IncompatibleActionError,
 } from '@kbn/ui-actions-plugin/public';
-import { ACTION_EDIT_PANEL } from './constants';
 import { map } from 'rxjs';
+import { ACTION_EDIT_PANEL } from './constants';
 
 export type EditPanelActionApi = CanAccessViewMode & HasEditCapabilities;
 
@@ -51,9 +51,7 @@ export class EditPanelAction
     });
   }
 
-  public getCompatibilityChangesSubject(
-    { embeddable }: EmbeddableApiContext,
-  ) {
+  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
     return isApiCompatible(embeddable)
       ? getViewModeSubject(embeddable)?.pipe(map(() => undefined))
       : undefined;

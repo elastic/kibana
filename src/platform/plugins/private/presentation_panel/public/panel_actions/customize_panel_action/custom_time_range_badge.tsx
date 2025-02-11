@@ -18,9 +18,9 @@ import React from 'react';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { apiPublishesTimeRange, EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { map } from 'rxjs';
 import { ACTION_CUSTOMIZE_PANEL, CUSTOM_TIME_RANGE_BADGE } from './constants';
 import { core, uiActions } from '../../kibana_services';
-import { map } from 'rxjs';
 
 export class CustomTimeRangeBadge
   implements Action<EmbeddableApiContext>, FrequentCompatibilityChangeAction<EmbeddableApiContext>
@@ -59,9 +59,7 @@ export class CustomTimeRangeBadge
     return apiPublishesTimeRange(embeddable);
   }
 
-  public getCompatibilityChangesSubject(
-    { embeddable }: EmbeddableApiContext,
-  ) {
+  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
     return apiPublishesTimeRange(embeddable)
       ? embeddable.timeRange$.pipe(map(() => undefined))
       : undefined;

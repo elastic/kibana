@@ -42,7 +42,7 @@ describe('Expand panel action', () => {
 
   it('getCompatibilityChangesSubject emits when expandedPanelId changes', (done) => {
     const subject = action.getCompatibilityChangesSubject(context);
-    subject.pipe(take(1)).subscribe(() => {
+    subject?.pipe(take(1)).subscribe(() => {
       done();
     });
     expandedPanelId$.next('superPanelId');

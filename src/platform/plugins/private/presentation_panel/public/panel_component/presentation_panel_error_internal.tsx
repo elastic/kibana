@@ -90,7 +90,7 @@ export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanel
       if (canceled) return;
       setIsEditable(initiallyCompatible);
       const compatibilitySubscription = editPanelAction
-        ?.getCompatibilityChangesSubject(context)
+        ?.getCompatibilityChangesSubject?.(context)
         ?.pipe(
           switchMap(async () => {
             return await editPanelAction.isCompatible(context);
