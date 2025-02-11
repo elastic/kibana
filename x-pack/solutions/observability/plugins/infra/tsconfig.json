@@ -107,7 +107,7 @@
     "@kbn/event-annotation-common",
     "@kbn/logs-data-access-plugin",
     "@kbn/core-analytics-browser",
-    "@kbn/observability-alerting-rule-utils",
+    "@kbn/alerting-rule-utils",
     "@kbn/core-application-browser",
     "@kbn/shared-ux-page-no-data-types",
     "@kbn/xstate-utils",
