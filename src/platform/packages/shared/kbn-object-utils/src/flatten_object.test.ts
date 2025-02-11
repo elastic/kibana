@@ -10,7 +10,7 @@
 import { flattenObject } from './flatten_object';
 
 describe('flattenObject', () => {
-  it('should flat gamma object properties', () => {
+  it('should flat nested object properties', () => {
     const flattened = flattenObject({
       alpha: {
         gamma: {
@@ -21,6 +21,27 @@ describe('flattenObject', () => {
         },
       },
       beta: 3,
+    });
+
+    expect(flattened).toEqual({
+      'alpha.gamma.sigma': 1,
+      'alpha.delta.sigma': 2,
+      beta: 3,
+    });
+  });
+
+  it('should flat more nested properties as last ones (more nested ovverride already flattened)', () => {
+    const flattened = flattenObject({
+      alpha: {
+        gamma: {
+          sigma: 1,
+        },
+        delta: {
+          sigma: 2,
+        },
+      },
+      beta: 3,
+      'alpha.gamma.sigma': 4,
     });
 
     expect(flattened).toEqual({
