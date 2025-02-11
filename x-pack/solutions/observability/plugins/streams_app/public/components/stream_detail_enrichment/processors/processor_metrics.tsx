@@ -7,9 +7,18 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { EuiBadge, EuiBadgeGroup } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiBadgeGroup,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiFlexGroup,
+  useEuiTheme,
+} from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import useToggle from 'react-use/lib/useToggle';
+import { css } from '@emotion/react';
 import { ProcessorMetrics } from '../hooks/use_processing_simulator';
 
 type ProcessorMetricBadgesProps = ProcessorMetrics;
@@ -49,5 +58,63 @@ export const ProcessorMetricBadges = ({
         </EuiBadge>
       )}
     </EuiBadgeGroup>
+  );
+};
+
+const errorTitle = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.enrichment.processorErrors.title',
+  { defaultMessage: "Processor configuration invalid or doesn't match." }
+);
+
+export const ProcessorErrors = ({ errors }: { errors: ProcessorMetrics['errors'] }) => {
+  const { euiTheme } = useEuiTheme();
+  const [isErrorListExpanded, toggleErrorListExpanded] = useToggle(false);
+
+  const visibleErrors = isErrorListExpanded ? errors : errors.slice(0, 2);
+  const remainingCount = errors.length - 2;
+  const shouldDisplayErrorToggle = remainingCount > 0;
+
+  return (
+    <EuiFlexGroup
+      gutterSize="xs"
+      direction="column"
+      alignItems="flexStart"
+      css={css`
+        margin-top: ${euiTheme.size.m};
+      `}
+    >
+      {visibleErrors.map((error, id) => (
+        <EuiCallOut key={id} color="danger" iconType="warning" size="s" title={errorTitle}>
+          {error}
+        </EuiCallOut>
+      ))}
+      {shouldDisplayErrorToggle && !isErrorListExpanded && (
+        <EuiButtonEmpty
+          data-test-subj="streamsAppProcessorErrorsShowMoreButton"
+          onClick={toggleErrorListExpanded}
+          size="xs"
+        >
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processorErrors.showMore',
+            {
+              defaultMessage: 'Show {remainingCount} similar errors...',
+              values: { remainingCount },
+            }
+          )}
+        </EuiButtonEmpty>
+      )}
+      {shouldDisplayErrorToggle && isErrorListExpanded && (
+        <EuiButtonEmpty
+          data-test-subj="streamsAppProcessorErrorsShowLessButton"
+          onClick={toggleErrorListExpanded}
+          size="xs"
+        >
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processorErrors.showLess',
+            { defaultMessage: 'Show less errors' }
+          )}
+        </EuiButtonEmpty>
+      )}
+    </EuiFlexGroup>
   );
 };

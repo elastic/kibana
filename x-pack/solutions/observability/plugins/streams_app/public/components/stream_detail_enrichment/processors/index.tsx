@@ -42,7 +42,7 @@ import {
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 import { UseDefinitionReturn } from '../hooks/use_definition';
 import { ProcessorMetrics, UseProcessingSimulatorReturn } from '../hooks/use_processing_simulator';
-import { ProcessorMetricBadges } from './processor_metrics';
+import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
 
 export interface ProcessorPanelProps {
   definition: IngestStreamGetResponse;
@@ -173,7 +173,7 @@ export function AddProcessorPanel({
       >
         <EuiSpacer size="s" />
         <FormProvider {...methods}>
-          <ProcessorInfoHeader metrics={processorMetrics} />
+          <ProcessorMetricsHeader metrics={processorMetrics} />
           <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
             <ProcessorTypeSelector />
             <EuiSpacer size="m" />
@@ -357,7 +357,7 @@ export function EditProcessorPanel({
       >
         <EuiSpacer size="s" />
         <FormProvider {...methods}>
-          <ProcessorInfoHeader metrics={processorMetrics} />
+          <ProcessorMetricsHeader metrics={processorMetrics} />
           <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
             <ProcessorTypeSelector disabled />
             <EuiSpacer size="m" />
@@ -381,76 +381,14 @@ export function EditProcessorPanel({
   );
 }
 
-const ProcessorInfoHeader = ({ metrics }: { metrics?: ProcessorMetrics }) => {
-  const { euiTheme } = useEuiTheme();
+const ProcessorMetricsHeader = ({ metrics }: { metrics?: ProcessorMetrics }) => {
   if (!metrics) return null;
 
   return (
-    <EuiFlexGroup
-      css={css`
-        margin-bottom: ${euiTheme.size.m};
-      `}
-    >
+    <>
       <ProcessorMetricBadges {...metrics} />
-    </EuiFlexGroup>
-  );
-};
-
-const errorTitle = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.processorErrors.title',
-  { defaultMessage: "Processor configuration invalid or doesn't match." }
-);
-
-const ProcessorErrors = ({ errors }: { errors: ProcessorMetrics['errors'] }) => {
-  const { euiTheme } = useEuiTheme();
-  const [isErrorListExpanded, toggleErrorListExpanded] = useToggle(false);
-
-  const visibleErrors = isErrorListExpanded ? errors : errors.slice(0, 2);
-  const remainingCount = errors.length - 2;
-  const shouldDisplayErrorToggle = remainingCount > 0;
-
-  return (
-    <EuiFlexGroup
-      gutterSize="xs"
-      direction="column"
-      alignItems="flexStart"
-      css={css`
-        margin-top: ${euiTheme.size.m};
-      `}
-    >
-      {visibleErrors.map((error, id) => (
-        <EuiCallOut key={id} color="danger" iconType="warning" size="s" title={errorTitle}>
-          {error}
-        </EuiCallOut>
-      ))}
-      {shouldDisplayErrorToggle && !isErrorListExpanded && (
-        <EuiButtonEmpty
-          data-test-subj="streamsAppProcessorErrorsShowMoreButton"
-          onClick={toggleErrorListExpanded}
-          size="xs"
-        >
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processorErrors.showMore',
-            {
-              defaultMessage: 'Show {remainingCount} similar errors...',
-              values: { remainingCount },
-            }
-          )}
-        </EuiButtonEmpty>
-      )}
-      {shouldDisplayErrorToggle && isErrorListExpanded && (
-        <EuiButtonEmpty
-          data-test-subj="streamsAppProcessorErrorsShowLessButton"
-          onClick={toggleErrorListExpanded}
-          size="xs"
-        >
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processorErrors.showLess',
-            { defaultMessage: 'Show less errors' }
-          )}
-        </EuiButtonEmpty>
-      )}
-    </EuiFlexGroup>
+      <EuiSpacer size="m" />
+    </>
   );
 };
 
