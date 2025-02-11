@@ -70,7 +70,6 @@ interface StatusCheck {
   };
 }
 interface InstructionSet {
-  // id: string;
   title: string;
   instructionVariants: InstructionVariantShape[];
   callOut?: {
