@@ -37,6 +37,10 @@ export interface PackagePolicyMetadata {
   package_name: string;
   agent_policy_ids: string[];
   connector_settings: PackageConnectorSettings;
+}
+
+// Agent metadata is only returned when there is an agent associated with the policy
+export interface PackagePolicyAndAgentMetadata extends PackagePolicyMetadata {
   agent_metadata?: AgentMetadata;
 }
 
@@ -266,7 +270,7 @@ export class AgentlessConnectorsInfraService {
     connectorId,
   }: {
     connectorId: string;
-  }): Promise<PackagePolicyMetadata | null> => {
+  }): Promise<PackagePolicyAndAgentMetadata | null> => {
     const allPolicies = await this.getConnectorPackagePolicies();
 
     const policies = getPoliciesByConnectorId(allPolicies, connectorId);
@@ -289,6 +293,12 @@ export class AgentlessConnectorsInfraService {
         // If no agents assigned to policy, just return the policy
         return policy;
       } else {
+        if (listAgentsResponse.agents.length > 1) {
+          this.logger.warn(
+            `More than one agent assigned to policy ${policyId} that manages connector with id ${connectorId}`
+          );
+        }
+
         // Return the first (and only) agentless host associated with this policy
         return {
           ...policy,
