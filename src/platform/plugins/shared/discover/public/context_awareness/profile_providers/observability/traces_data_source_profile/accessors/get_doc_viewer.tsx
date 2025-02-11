@@ -27,7 +27,7 @@ export const getDocViewer =
       };
     }
     const parentId = params.record.flattened['parent.id'];
-    const documentName = parentId ? 'Span' : 'Transaction'; 
+    const documentName = parentId ? 'Span' : 'Transaction';
 
     return {
       title: `Record #${recordId}`,
