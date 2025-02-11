@@ -2069,10 +2069,8 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@69.2.2":
-  version "69.2.2"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-69.2.2.tgz#14a7f9251ddb54187d27f0eb47b378553dfb5847"
-  integrity sha512-x65An5hDytnxR6/ZAWbDdbarpL7Lg3Muxq+xddP8/6lFL8OzTnb060bvrkhUcz3LPk8z6tkBzuX2t++w891vSw==
+"@elastic/charts@file:../elastic-charts/packages/charts":
+  version "69.1.0"
   dependencies:
     "@popperjs/core" "^2.11.8"
     "@reduxjs/toolkit" "1.9.7"
@@ -2088,9 +2086,10 @@
     immer "^9.0.21"
     luxon "^1.25.0"
     prop-types "^15.7.2"
-    re-reselect "^4.0.1"
+    re-reselect "^3.4.0"
     react-redux "^7.2.8"
     redux "^4.2.1"
+    reselect "^4.1.8"
     ts-debounce "^4.0.0"
     utility-types "^3.10.0"
     uuid "^9"
