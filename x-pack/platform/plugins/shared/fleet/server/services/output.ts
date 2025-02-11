@@ -678,16 +678,13 @@ class OutputService {
 
       if (outputWithSecrets.secrets) data.secrets = outputWithSecrets.secrets;
     } else {
-      if (output.type === outputType.Logstash && data.type === outputType.Logstash) {
-        if (!output.ssl?.key && output.secrets?.ssl?.key) {
-          data.ssl = JSON.stringify({ ...output.ssl, ...output.secrets.ssl });
-        }
-      } else if (output.type === outputType.Kafka && data.type === outputType.Kafka) {
+      if (!output.ssl?.key && output.secrets?.ssl?.key) {
+        data.ssl = output.secrets?.ssl as string;
+      }
+
+      if (output.type === outputType.Kafka && data.type === outputType.Kafka) {
         if (!output.password && output.secrets?.password) {
           data.password = output.secrets?.password as string;
-        }
-        if (!output.ssl?.key && output.secrets?.ssl?.key) {
-          data.ssl = JSON.stringify({ ...output.ssl, ...output.secrets.ssl });
         }
       } else if (
         output.type === outputType.RemoteElasticsearch &&
@@ -699,10 +696,6 @@ class OutputService {
 
         if (!output.kibana_api_key && output.secrets?.kibana_api_key) {
           data.kibana_api_key = output.secrets?.kibana_api_key as string;
-        }
-
-        if (!output.ssl?.key && output.secrets?.ssl?.key) {
-          data.ssl = output.secrets?.ssl as string;
         }
       }
     }
@@ -1115,16 +1108,12 @@ class OutputService {
       updateData.secrets = secretsRes.outputUpdate.secrets;
       secretsToDelete = secretsRes.secretsToDelete;
     } else {
-      if (data.type === outputType.Logstash && updateData.type === outputType.Logstash) {
-        if (!data.ssl?.key && data.secrets?.ssl?.key) {
-          updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
-        }
-      } else if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
+      if (!data.ssl?.key && data.secrets?.ssl?.key) {
+        updateData.ssl = data.secrets?.ssl as string;
+      }
+      if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
         if (!data.password && data.secrets?.password) {
           updateData.password = data.secrets?.password as string;
-        }
-        if (!data.ssl?.key && data.secrets?.ssl?.key) {
-          updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
         }
       } else if (
         data.type === outputType.RemoteElasticsearch &&
@@ -1135,9 +1124,6 @@ class OutputService {
         }
         if (!data.kibana_api_key && data.secrets?.kibana_api_key) {
           updateData.kibana_api_key = data.secrets?.kibana_api_key as string;
-        }
-        if (!data.ssl?.key && data.secrets?.ssl?.key) {
-          updateData.ssl = data.secrets?.ssl as string;
         }
       }
     }
