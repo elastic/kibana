@@ -145,6 +145,13 @@ describe('WHERE <expression>', () => {
           .map(attachTriggerCommand),
         ...allEvalFns,
       ]);
+
+      await assertSuggestions('from a | limit 3 | where / ', [
+        ...getFieldNamesByType('any')
+          .map((field) => `${field} `)
+          .map(attachTriggerCommand),
+        ...allEvalFns.filter((fn) => fn.label !== 'QSTR' && fn.label !== 'MATCH'),
+      ]);
     });
 
     test('suggests operators after a field name', async () => {
