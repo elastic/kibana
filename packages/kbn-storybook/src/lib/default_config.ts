@@ -214,6 +214,7 @@ export const defaultConfig: StorybookConfig = {
   <meta name="emotion" />
   <script>
     window.__kbnPublicPath__ = { 'kbn-ui-shared-deps-npm': '', 'kbn-ui-shared-deps-src': '' };
+    window.__kbnHardenPrototypes__ = false;
   </script>
   <script src="kbn-ui-shared-deps-npm.dll.js"></script>
   <script src="kbn-ui-shared-deps-src.js"></script>
