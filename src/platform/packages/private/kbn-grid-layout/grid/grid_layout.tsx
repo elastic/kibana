@@ -9,7 +9,7 @@
 
 import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { combineLatest, distinctUntilChanged, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
@@ -134,22 +134,6 @@ export const GridLayout = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  /**
-   * Memoize row children components to prevent unnecessary re-renders
-   */
-  const children = useMemo(() => {
-    return Array.from({ length: rowCount }, (_, rowIndex) => {
-      return (
-        <GridRow
-          key={rowIndex}
-          rowIndex={rowIndex}
-          renderPanelContents={renderPanelContents}
-          gridLayoutStateManager={gridLayoutStateManager}
-        />
-      );
-    });
-  }, [rowCount, gridLayoutStateManager, renderPanelContents]);
-
   return (
     <GridHeightSmoother gridLayoutStateManager={gridLayoutStateManager}>
       <div
@@ -158,72 +142,83 @@ export const GridLayout = ({
           setDimensionsRef(divElement);
         }}
         className={classNames('kbnGrid', className)}
-        css={css`
-          padding: calc(var(--kbnGridGutterSize) * 1px);
-
-          // disable pointer events and user select on drag + resize
-          &:has(.kbnGridPanel--active) {
-            user-select: none;
-            pointer-events: none;
-          }
-
-          &:has(.kbnGridPanel--expanded) {
-            ${expandedPanelStyles}
-          }
-          &.kbnGrid--mobileView {
-            ${singleColumnStyles}
-          }
-        `}
+        css={[
+          styles.layoutPadding,
+          styles.hasActivePanel,
+          styles.singleColumn,
+          styles.hasExpandedPanel,
+        ]}
       >
-        {children}
+        {Array.from({ length: rowCount }, (_, rowIndex) => {
+          return (
+            <GridRow
+              key={rowIndex}
+              rowIndex={rowIndex}
+              renderPanelContents={renderPanelContents}
+              gridLayoutStateManager={gridLayoutStateManager}
+            />
+          );
+        })}
       </div>
     </GridHeightSmoother>
   );
 };
 
-const singleColumnStyles = css`
-  .kbnGridRow {
-    grid-template-columns: 100%;
-    grid-template-rows: auto;
-    grid-auto-flow: row;
-    grid-auto-rows: auto;
-  }
-
-  .kbnGridPanel {
-    grid-area: unset !important;
-  }
-`;
-
-const expandedPanelStyles = css`
-  height: 100%;
-
-  & .kbnGridRowContainer:has(.kbnGridPanel--expanded) {
-    // targets the grid row container that contains the expanded panel
-    .kbnGridRowHeader {
-      height: 0px; // used instead of 'display: none' due to a11y concerns
-    }
-    .kbnGridRow {
-      display: block !important; // overwrite grid display
-      height: 100%;
-      .kbnGridPanel {
-        &.kbnGridPanel--expanded {
-          height: 100% !important;
-        }
-        &:not(.kbnGridPanel--expanded) {
-          // hide the non-expanded panels
-          position: absolute;
-          top: -9999px;
-          left: -9999px;
-          visibility: hidden; // remove hidden panels and their contents from tab order for a11y
-        }
-      }
-    }
-  }
-
-  & .kbnGridRowContainer:not(:has(.kbnGridPanel--expanded)) {
-    // targets the grid row containers that **do not** contain the expanded panel
-    position: absolute;
-    top: -9999px;
-    left: -9999px;
-  }
-`;
+const styles = {
+  layoutPadding: css({
+    padding: 'calc(var(--kbnGridGutterSize) * 1px)',
+  }),
+  hasActivePanel: css({
+    '&:has(.kbnGridPanel--active)': {
+      // disable pointer events and user select on drag + resize
+      userSelect: 'none',
+      pointerEvents: 'none',
+    },
+  }),
+  singleColumn: css({
+    '&.kbnGrid--mobileView': {
+      '.kbnGridRow': {
+        gridTemplateAreas: '100%',
+        gridTemplateRows: 'auto',
+        gridAutoFlow: 'row',
+        gridAutoRows: 'auto',
+      },
+      '.kbnGridPanel': {
+        gridArea: 'unset !important',
+      },
+    },
+  }),
+  hasExpandedPanel: css({
+    '&:has(.kbnGridPanel--expanded)': {
+      height: '100%',
+      // targets the grid row container that contains the expanded panel
+      '& .kbnGridRowContainer:has(.kbnGridPanel--expanded)': {
+        '.kbnGridRowHeader': {
+          height: '0px', // used instead of 'display: none' due to a11y concerns
+        },
+        '.kbnGridRow': {
+          display: 'block !important', // overwrite grid display
+          height: '100%',
+          '.kbnGridPanel': {
+            '&.kbnGridPanel--expanded': {
+              height: '100% !important',
+            },
+            // hide the non-expanded panels
+            '&:not(.kbnGridPanel--expanded)': {
+              position: 'absolute',
+              top: '-9999px',
+              left: '-9999px',
+              visibility: 'hidden', // remove hidden panels and their contents from tab order for a11y
+            },
+          },
+        },
+      },
+      // targets the grid row containers that **do not** contain the expanded panel
+      '& .kbnGridRowContainer:not(:has(.kbnGridPanel--expanded))': {
+        position: 'absolute',
+        top: '-9999px',
+        left: '-9999px',
+      },
+    },
+  }),
+};

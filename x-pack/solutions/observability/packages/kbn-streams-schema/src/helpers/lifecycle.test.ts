@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { WiredStreamDefinition } from '@kbn/streams-schema';
+import { WiredStreamDefinition } from '../models/ingest/base';
 import { findInheritedLifecycle, findInheritingStreams } from './lifecycle';
 
 describe('Lifecycle helpers', () => {
