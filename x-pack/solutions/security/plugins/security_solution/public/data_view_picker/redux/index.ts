@@ -122,8 +122,11 @@ export interface RootState {
 
 export const sourcererAdapterSelector = (scope: DataViewPickerScopeName) =>
   createSelector([(state: RootState) => state.dataViewPicker], (dataViewPicker) => {
+    const scopedState = dataViewPicker[scope];
+
     return {
-      ...dataViewPicker[scope],
+      ...scopedState,
+      dataView: scopedState.dataView ? scopedState.dataView : { title: '', id: '' },
       indicesExist: !!dataViewPicker[scope]?.dataView?.title?.split(',')?.length,
     };
   });

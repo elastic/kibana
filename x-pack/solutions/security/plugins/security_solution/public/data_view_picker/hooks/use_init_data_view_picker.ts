@@ -9,10 +9,11 @@ import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
 import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import { addListener, removeListener } from '@reduxjs/toolkit';
-import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { DataViewSpec, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import { shared, scopes, type RootState, selectDataViewAsync } from '../redux';
 import { useKibana } from '../../common/lib/kibana';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewPickerScopeName } from '../constants';
+import { getDataViewStateFromIndexFields } from '../../common/containers/source/use_data_view';
 
 const createDataViewsLoadingListener = (dependencies: { dataViews: DataViewsServicePublic }) => {
   return {
@@ -43,22 +44,22 @@ const createDataViewSelectedListener = (dependencies: { dataViews: DataViewsServ
       console.log('selectDataViewAsync', action);
 
       try {
+        let dataViewSpec: DataViewSpec;
+
         if (action.payload.id) {
           const dataViewById = await dependencies.dataViews.get(action.payload.id);
-          const dataViewSpec = dataViewById.toSpec();
-          listenerApi.dispatch(
-            scopes[action.payload.scope].actions.setSelectedDataView(dataViewSpec)
-          );
+          dataViewSpec = dataViewById.toSpec();
         } else {
           const adhocDataView = await dependencies.dataViews.create({
             id: 'adhoc',
             title: action.payload.patterns?.join(','),
           });
-          const dataViewSpec = adhocDataView.toSpec();
-          listenerApi.dispatch(
-            scopes[action.payload.scope].actions.setSelectedDataView(dataViewSpec)
-          );
+          dataViewSpec = adhocDataView.toSpec();
         }
+
+        listenerApi.dispatch(
+          scopes[action.payload.scope].actions.setSelectedDataView(dataViewSpec)
+        );
       } catch (error: unknown) {
         console.error(error);
       }

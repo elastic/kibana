@@ -56,6 +56,8 @@ import { useStartTransaction } from '../../../common/lib/apm/use_start_transacti
 import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
 import { timelineDefaults } from '../../store/defaults';
+import { useSelectedPatterns } from '@kbn/security-solution-plugin/public/data_view_picker/hooks/use_selected_patterns';
+import { useDataView } from '@kbn/security-solution-plugin/public/data_view_picker/hooks/use_data_view';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -157,7 +159,8 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       (state) => getTimeline(state, TimelineId.active)?.savedObjectId ?? ''
     );
 
-    const { dataViewId, selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
+    const { dataViewId } = useDataView(SourcererScopeName.timeline);
+    const selectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
     const {
       customTemplateTimelineCount,

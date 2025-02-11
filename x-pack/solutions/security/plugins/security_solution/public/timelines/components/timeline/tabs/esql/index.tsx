@@ -12,15 +12,14 @@ import type { CustomizationCallback } from '@kbn/discover-plugin/public/customiz
 import { createGlobalStyle } from 'styled-components';
 import type { ScopedHistory } from '@kbn/core/public';
 import type { Subscription } from 'rxjs';
-import type { DataView } from '@kbn/data-views-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 import { isEqualWith } from 'lodash';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { useDispatch } from 'react-redux';
+import { useDataView } from '../../../../../data_view_picker/hooks/use_data_view';
 import { updateSavedSearchId } from '../../../../store/actions';
 import { useDiscoverInTimelineContext } from '../../../../../common/components/discover_in_timeline/use_discover_in_timeline_context';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useDiscoverState } from './use_discover_state';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
@@ -46,12 +45,7 @@ interface DiscoverTabContentProps {
 export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) => {
   const history = useHistory();
   const {
-    services: {
-      customDataService: discoverDataService,
-      discover,
-      dataViews: dataViewService,
-      savedSearch: savedSearchService,
-    },
+    services: { customDataService: discoverDataService, discover, savedSearch: savedSearchService },
   } = useKibana();
   const {
     timelinePrivileges: { crud: canSaveTimeline },
@@ -59,9 +53,8 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
 
   const dispatch = useDispatch();
 
-  const { dataViewId } = useSourcererDataView(SourcererScopeName.detections);
+  const { dataView } = useDataView(SourcererScopeName.detections);
 
-  const [dataView, setDataView] = useState<DataView | undefined>();
   const [discoverTimerange, setDiscoverTimerange] = useState<TimeRange>();
 
   const discoverAppStateSubscription = useRef<Subscription>();
@@ -159,11 +152,6 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     savedSearchByIdStatus,
     canSaveTimeline,
   ]);
-
-  useEffect(() => {
-    if (!dataViewId) return;
-    dataViewService.get(dataViewId).then(setDataView);
-  }, [dataViewId, dataViewService]);
 
   useEffect(() => {
     const unSubscribeAll = () => {
