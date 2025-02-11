@@ -282,7 +282,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
     });
 
     render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
-      wrapper: Wrapper,
+      wrapper,
     });
 
     await waitFor(() => {
