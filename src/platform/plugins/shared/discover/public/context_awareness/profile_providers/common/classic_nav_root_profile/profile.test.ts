@@ -9,56 +9,45 @@
 
 import { SolutionType } from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';
-import { createObservabilityRootProfileProvider } from './profile';
+import { createClassicNavRootProfileProvider } from './profile';
 
 const mockServices = createContextAwarenessMocks().profileProviderServices;
 
-describe('observabilityRootProfileProvider', () => {
-  const observabilityRootProfileProvider = createObservabilityRootProfileProvider(mockServices);
+describe('classicNavRootProfileProvider', () => {
+  const classicNavRootProfileProvider = createClassicNavRootProfileProvider(mockServices);
   const RESOLUTION_MATCH = {
     isMatch: true,
-    context: expect.objectContaining({ solutionType: SolutionType.Observability }),
+    context: expect.objectContaining({ solutionType: SolutionType.Default }),
   };
   const RESOLUTION_MISMATCH = {
     isMatch: false,
   };
 
-  it('should match when the solution project is observability', async () => {
-    expect(
-      await observabilityRootProfileProvider.resolve({
-        solutionNavId: SolutionType.Observability,
-      })
-    ).toEqual(RESOLUTION_MATCH);
+  it('should match when the solution nav ID is null or undefined', async () => {
+    expect(await classicNavRootProfileProvider.resolve({ solutionNavId: null })).toEqual(
+      RESOLUTION_MATCH
+    );
+    expect(await classicNavRootProfileProvider.resolve({ solutionNavId: undefined })).toEqual(
+      RESOLUTION_MATCH
+    );
   });
 
-  it('should NOT match when the solution project anything but observability', async () => {
+  it('should NOT match when the solution nav ID is any string', async () => {
     expect(
-      await observabilityRootProfileProvider.resolve({
-        solutionNavId: SolutionType.Default,
-      })
-    ).toEqual(RESOLUTION_MISMATCH);
-    expect(
-      await observabilityRootProfileProvider.resolve({
-        solutionNavId: SolutionType.Search,
-      })
-    ).toEqual(RESOLUTION_MISMATCH);
-    expect(
-      await observabilityRootProfileProvider.resolve({
-        solutionNavId: SolutionType.Security,
+      await classicNavRootProfileProvider.resolve({
+        solutionNavId: 'any string',
       })
     ).toEqual(RESOLUTION_MISMATCH);
   });
 
   describe('getDefaultAdHocDataViews', () => {
     it('should return an "All logs" default data view', async () => {
-      const result = await observabilityRootProfileProvider.resolve({
-        solutionNavId: SolutionType.Observability,
-      });
+      const result = await classicNavRootProfileProvider.resolve({ solutionNavId: undefined });
       if (!result.isMatch) {
         throw new Error('Expected result to match');
       }
       expect(result.context.allLogsIndexPattern).toEqual('logs-*');
-      const defaultDataViews = observabilityRootProfileProvider.profile.getDefaultAdHocDataViews?.(
+      const defaultDataViews = classicNavRootProfileProvider.profile.getDefaultAdHocDataViews?.(
         () => [],
         { context: result.context }
       )();
@@ -76,14 +65,12 @@ describe('observabilityRootProfileProvider', () => {
       jest
         .spyOn(mockServices.logsContextService, 'getAllLogsIndexPattern')
         .mockReturnValueOnce(undefined);
-      const result = await observabilityRootProfileProvider.resolve({
-        solutionNavId: SolutionType.Observability,
-      });
+      const result = await classicNavRootProfileProvider.resolve({ solutionNavId: undefined });
       if (!result.isMatch) {
         throw new Error('Expected result to match');
       }
       expect(result.context.allLogsIndexPattern).toEqual(undefined);
-      const defaultDataViews = observabilityRootProfileProvider.profile.getDefaultAdHocDataViews?.(
+      const defaultDataViews = classicNavRootProfileProvider.profile.getDefaultAdHocDataViews?.(
         () => [],
         { context: result.context }
       )();
