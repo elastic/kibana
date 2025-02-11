@@ -170,7 +170,7 @@ export interface Signature {
 }
 
 export interface FunctionDefinition {
-  type: 'builtin' | 'agg' | 'eval' | 'operator';
+  type: 'builtin' | 'agg' | 'scalar' | 'operator';
   preview?: boolean;
   ignoreAsSuggestion?: boolean;
   name: string;
@@ -194,6 +194,10 @@ export interface CommandBaseDefinition<CommandName extends string> {
 
   alias?: string;
   description: string;
+  /**
+   * Displays a Technical preview label in the autocomplete
+   */
+  preview?: boolean;
   /**
    * Whether to show or hide in autocomplete suggestion list
    */
