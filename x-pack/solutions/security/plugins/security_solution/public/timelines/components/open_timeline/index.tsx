@@ -9,6 +9,7 @@ import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { encode } from '@kbn/rison';
 
+import { useSelectedPatterns } from '../../../data_view_picker/hooks/use_selected_patterns';
 import {
   RULE_FROM_EQL_URL_PARAM,
   RULE_FROM_TIMELINE_URL_PARAM,
@@ -51,13 +52,11 @@ import { useTimelineStatus } from './use_timeline_status';
 import { deleteTimelinesByIds } from '../../containers/api';
 import type { Direction } from '../../../../common/search_strategy';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useStartTransaction } from '../../../common/lib/apm/use_start_transaction';
 import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
 import { timelineDefaults } from '../../store/defaults';
-import { useSelectedPatterns } from '@kbn/security-solution-plugin/public/data_view_picker/hooks/use_selected_patterns';
-import { useDataView } from '@kbn/security-solution-plugin/public/data_view_picker/hooks/use_data_view';
+import { useDataView } from '../../../data_view_picker/hooks/use_data_view';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -159,7 +158,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       (state) => getTimeline(state, TimelineId.active)?.savedObjectId ?? ''
     );
 
-    const { dataViewId } = useDataView(SourcererScopeName.timeline);
+    const { dataView } = useDataView(SourcererScopeName.timeline);
     const selectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
     const {
@@ -250,7 +249,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
             dispatchCreateNewTimeline({
               id: TimelineId.active,
               columns: defaultUdtHeaders,
-              dataViewId,
+              dataViewId: dataView.id ?? '',
               indexNames: selectedPatterns,
               show: false,
               excludedRowRendererIds: timelineDefaults.excludedRowRendererIds,
@@ -261,7 +260,7 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
         await deleteTimelinesByIds(timelineIds, searchIds);
         refetch();
       },
-      [startTransaction, timelineSavedObjectId, refetch, dispatch, dataViewId, selectedPatterns]
+      [startTransaction, timelineSavedObjectId, refetch, dispatch, dataView.id, selectedPatterns]
     );
 
     const onDeleteOneTimeline: OnDeleteOneTimeline = useCallback(

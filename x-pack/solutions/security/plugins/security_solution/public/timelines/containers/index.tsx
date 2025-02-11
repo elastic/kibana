@@ -545,6 +545,23 @@ export const useTimelineEvents = ({
   skip = false,
   timerangeKind,
 }: UseTimelineEventsProps): [DataLoadingState, TimelineArgs] => {
+  console.log('useTimelineEvents', {
+    dataViewId,
+    endDate,
+    eqlOptions,
+    id,
+    indexNames,
+    fields,
+    filterQuery,
+    runtimeMappings,
+    startDate,
+    language,
+    limit,
+    sort,
+    skip,
+    timerangeKind,
+  });
+
   const [eventsPerPage, setEventsPerPage] = useState<TimelineItem[][]>([[]]);
   const [dataLoadingState, timelineResponse, timelineSearchHandler] = useTimelineEventsHandler({
     dataViewId,
