@@ -126,7 +126,7 @@ export class ComputeSLOHealth {
         );
 
         return {
-          id: this.generateDocId(sloDefinitionToSpaceMap, sloDefinition),
+          id: sloDefinition.id,
           name: sloDefinition.name,
           description: sloDefinition.description,
           tags: sloDefinition.tags,
@@ -161,7 +161,10 @@ export class ComputeSLOHealth {
       await this.esClient.bulk(
         {
           index: HEALTH_INDEX_NAME,
-          operations: health.flatMap((doc) => [{ index: { _id: doc.id } }, doc]),
+          operations: health.flatMap((doc) => [
+            { index: { _id: `${doc.spaceId}-${doc.id}` } },
+            doc,
+          ]),
         },
         { signal: this.abortController.signal }
       );
@@ -188,13 +191,6 @@ export class ComputeSLOHealth {
     );
 
     return { processed: processedCount };
-  }
-
-  private generateDocId(
-    sloDefinitionToSpaceMap: Record<string, string>,
-    sloDefinition: SLODefinition
-  ): string {
-    return `${sloDefinitionToSpaceMap[sloDefinition.id]}-${sloDefinition.id}`;
   }
 
   private toTransformStats(
