@@ -37,10 +37,12 @@ export class TempSummaryCleanupTask {
     this.logger = logFactory.get(this.taskId);
     this.config = config;
 
+    this.logger.info('Registering task with [2m] timeout');
+
     taskManager.registerTaskDefinitions({
       [TYPE]: {
         title: 'SLO temp summary cleanup task',
-        timeout: '5m',
+        timeout: '2m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
@@ -64,10 +66,11 @@ export class TempSummaryCleanupTask {
     }
 
     if (!this.config.tempSummaryCleanupTaskEnabled) {
+      this.logger.info('Unscheduling task');
       return await taskManager.removeIfExists(this.taskId);
     }
 
-    this.logger.info(`Started with 1h interval`);
+    this.logger.info('Scheduling task with [1h] interval');
     this.wasStarted = true;
 
     try {
