@@ -5,9 +5,10 @@
  * 2.0.
  */
 import React from 'react';
+
 import { EuiBadge, EuiBadgeProps } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { Agent } from '@kbn/fleet-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { euiLightVars as euiVars } from '@kbn/ui-theme';
 
 export const AgentlessConnectorStatusBadge = ({
