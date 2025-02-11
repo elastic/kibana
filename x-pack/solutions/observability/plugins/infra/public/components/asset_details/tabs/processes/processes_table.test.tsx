@@ -9,6 +9,8 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ProcessesTable } from './processes_table';
+import type { ProcessListAPIResponse } from '../../../../../common/http_api';
+import type { SortBy } from '../../hooks/use_process_list';
 
 const processListData = [
   {
@@ -59,7 +61,15 @@ const processListData = [
   },
 ];
 
-const renderProcessesTable = ({ isLoading = false, processList, error = undefined }) =>
+const renderProcessesTable = ({
+  isLoading = false,
+  processList,
+  error = undefined,
+}: {
+  isLoading?: boolean;
+  processList: ProcessListAPIResponse['processList'];
+  error?: string;
+}) =>
   render(
     <IntlProvider locale="en">
       <ProcessesTable
@@ -72,6 +82,7 @@ const renderProcessesTable = ({ isLoading = false, processList, error = undefine
         }}
         error={error}
         clearSearchBar={() => {}}
+        setSortBy={(s: SortBy) => {}}
       />
     </IntlProvider>
   );

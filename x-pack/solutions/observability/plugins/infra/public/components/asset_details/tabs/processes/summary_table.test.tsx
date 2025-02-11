@@ -9,8 +9,13 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { SummaryTable } from './summary_table';
+import type { ProcessListAPIResponse } from '../../../../../common/http_api';
 
-const renderSummaryTable = ({ processSummary }) =>
+const renderSummaryTable = ({
+  processSummary,
+}: {
+  processSummary: ProcessListAPIResponse['summary'];
+}) =>
   render(
     <IntlProvider locale="en">
       <SummaryTable processSummary={processSummary} isLoading={false} />
