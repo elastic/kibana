@@ -1,0 +1,15 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FieldNameWithIcon renders an icon when type is passed 1`] = `
+<EuiFlexGroup
+  alignItems="center"
+  gutterSize="s"
+>
+  <FieldIcon
+    type="keyword"
+  />
+  agent.name
+</EuiFlexGroup>
+`;
+
+exports[`FieldNameWithIcon renders only the name when the type is not passed 1`] = `"agent.name"`;

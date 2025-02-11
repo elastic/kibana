@@ -48,6 +48,8 @@
       "@kbn/alerting-fixture-plugin/*": ["x-pack/test/functional_with_es_ssl/plugins/alerts/*"],
       "@kbn/alerting-plugin": ["x-pack/platform/plugins/shared/alerting"],
       "@kbn/alerting-plugin/*": ["x-pack/platform/plugins/shared/alerting/*"],
+      "@kbn/alerting-rule-utils": ["x-pack/platform/packages/shared/alerting_rule_utils"],
+      "@kbn/alerting-rule-utils/*": ["x-pack/platform/packages/shared/alerting_rule_utils/*"],
       "@kbn/alerting-state-types": ["x-pack/platform/packages/private/kbn-alerting-state-types"],
       "@kbn/alerting-state-types/*": ["x-pack/platform/packages/private/kbn-alerting-state-types/*"],
       "@kbn/alerting-types": ["src/platform/packages/shared/kbn-alerting-types"],
@@ -1186,8 +1188,8 @@
       "@kbn/logging-mocks/*": ["src/platform/packages/shared/kbn-logging-mocks/*"],
       "@kbn/logs-data-access-plugin": ["x-pack/platform/plugins/shared/logs_data_access"],
       "@kbn/logs-data-access-plugin/*": ["x-pack/platform/plugins/shared/logs_data_access/*"],
-      "@kbn/logs-explorer-plugin": ["x-pack/solutions/observability/plugins/logs_explorer"],
-      "@kbn/logs-explorer-plugin/*": ["x-pack/solutions/observability/plugins/logs_explorer/*"],
+      "@kbn/logs-overview": ["x-pack/platform/packages/shared/logs_overview"],
+      "@kbn/logs-overview/*": ["x-pack/platform/packages/shared/logs_overview/*"],
       "@kbn/logs-shared-plugin": ["x-pack/platform/plugins/shared/logs_shared"],
       "@kbn/logs-shared-plugin/*": ["x-pack/platform/plugins/shared/logs_shared/*"],
       "@kbn/logstash-plugin": ["x-pack/platform/plugins/private/logstash"],
@@ -1342,8 +1344,6 @@
       "@kbn/observability-ai-server/*": ["x-pack/solutions/observability/packages/observability_ai/observability_ai_server/*"],
       "@kbn/observability-alert-details": ["x-pack/solutions/observability/packages/alert_details"],
       "@kbn/observability-alert-details/*": ["x-pack/solutions/observability/packages/alert_details/*"],
-      "@kbn/observability-alerting-rule-utils": ["x-pack/platform/packages/shared/observability/alerting_rule_utils"],
-      "@kbn/observability-alerting-rule-utils/*": ["x-pack/platform/packages/shared/observability/alerting_rule_utils/*"],
       "@kbn/observability-alerting-test-data": ["x-pack/solutions/observability/packages/alerting_test_data"],
       "@kbn/observability-alerting-test-data/*": ["x-pack/solutions/observability/packages/alerting_test_data/*"],
       "@kbn/observability-fixtures-plugin": ["x-pack/test/cases_api_integration/common/plugins/observability"],
@@ -1352,8 +1352,6 @@
       "@kbn/observability-get-padded-alert-time-range-util/*": ["x-pack/solutions/observability/packages/get_padded_alert_time_range_util/*"],
       "@kbn/observability-logs-explorer-plugin": ["x-pack/solutions/observability/plugins/observability_logs_explorer"],
       "@kbn/observability-logs-explorer-plugin/*": ["x-pack/solutions/observability/plugins/observability_logs_explorer/*"],
-      "@kbn/observability-logs-overview": ["x-pack/platform/packages/shared/observability/logs_overview"],
-      "@kbn/observability-logs-overview/*": ["x-pack/platform/packages/shared/observability/logs_overview/*"],
       "@kbn/observability-onboarding-plugin": ["x-pack/solutions/observability/plugins/observability_onboarding"],
       "@kbn/observability-onboarding-plugin/*": ["x-pack/solutions/observability/plugins/observability_onboarding/*"],
       "@kbn/observability-plugin": ["x-pack/solutions/observability/plugins/observability"],
@@ -1726,8 +1724,6 @@
       "@kbn/serverless-observability/*": ["x-pack/solutions/observability/plugins/serverless_observability/*"],
       "@kbn/serverless-observability-settings": ["src/platform/packages/shared/serverless/settings/observability_project"],
       "@kbn/serverless-observability-settings/*": ["src/platform/packages/shared/serverless/settings/observability_project/*"],
-      "@kbn/serverless-project-switcher": ["src/platform/packages/private/serverless/project_switcher"],
-      "@kbn/serverless-project-switcher/*": ["src/platform/packages/private/serverless/project_switcher/*"],
       "@kbn/serverless-search": ["x-pack/solutions/search/plugins/serverless_search"],
       "@kbn/serverless-search/*": ["x-pack/solutions/search/plugins/serverless_search/*"],
       "@kbn/serverless-search-settings": ["src/platform/packages/shared/serverless/settings/search_project"],
@@ -1948,8 +1944,8 @@
       "@kbn/third-party-vis-lens-example-plugin/*": ["x-pack/examples/third_party_vis_lens_example/*"],
       "@kbn/threat-intelligence-plugin": ["x-pack/solutions/security/plugins/threat_intelligence"],
       "@kbn/threat-intelligence-plugin/*": ["x-pack/solutions/security/plugins/threat_intelligence/*"],
-      "@kbn/timelines-plugin": ["x-pack/solutions/security/plugins/timelines"],
-      "@kbn/timelines-plugin/*": ["x-pack/solutions/security/plugins/timelines/*"],
+      "@kbn/timelines-plugin": ["x-pack/platform/plugins/shared/timelines"],
+      "@kbn/timelines-plugin/*": ["x-pack/platform/plugins/shared/timelines/*"],
       "@kbn/timelion-grammar": ["src/platform/packages/private/kbn-timelion-grammar"],
       "@kbn/timelion-grammar/*": ["src/platform/packages/private/kbn-timelion-grammar/*"],
       "@kbn/timerange": ["src/platform/packages/shared/kbn-timerange"],
@@ -2098,7 +2094,9 @@
       "@kbn/zod-helpers/*": ["src/platform/packages/shared/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"]
+      "@emotion/core": [
+        "typings/@emotion"
+      ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
