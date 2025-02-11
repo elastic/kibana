@@ -15,11 +15,14 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Prompt } from '@kbn/observability-shared-plugin/public';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
+import type { LogView, LogViewAttributes, LogViewStatus } from '@kbn/logs-shared-plugin/common';
+import useAsyncFn from 'react-use/lib/useAsyncFn';
+import { SourceErrorPage } from '../../../components/source_error_page';
 import { LogsDeprecationCallout } from '../../../components/logs_deprecation_callout';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
@@ -50,14 +53,17 @@ export const LogsSettingsPage = () => {
   ]);
 
   const {
-    logView,
     hasFailedLoadingLogView,
+    isInlineLogView,
     isLoading,
     isUninitialized,
-    update,
+    latestLoadLogViewFailures,
+    logView,
+    logViewStatus,
     resolvedLogView,
-    isInlineLogView,
+    retry,
     revertToDefaultLogView,
+    update,
   } = useLogViewContext();
 
   const availableFields = useMemo(
@@ -65,6 +71,50 @@ export const LogsSettingsPage = () => {
     [resolvedLogView]
   );
 
+  const isWriteable: boolean = useMemo(
+    () => shouldAllowEdit && logView != null && logView.origin !== 'internal',
+    [shouldAllowEdit, logView]
+  );
+
+  if ((isLoading || isUninitialized) && logView == null) {
+    return <SourceLoadingPage />;
+  } else if (hasFailedLoadingLogView || logView == null) {
+    return <SourceErrorPage errorMessage={latestLoadLogViewFailures[0].message} retry={retry} />;
+  } else {
+    return (
+      <LogsSettingsPageContent
+        availableFields={availableFields}
+        isInlineLogView={isInlineLogView}
+        isLoading={isLoading}
+        isWriteable={isWriteable}
+        logView={logView}
+        logViewStatus={logViewStatus}
+        revertToDefaultLogView={revertToDefaultLogView}
+        onUpdateLogViewAttributes={update}
+      />
+    );
+  }
+};
+
+const LogsSettingsPageContent = ({
+  availableFields,
+  isInlineLogView,
+  isLoading,
+  isWriteable,
+  logView,
+  logViewStatus,
+  revertToDefaultLogView,
+  onUpdateLogViewAttributes,
+}: {
+  availableFields: string[];
+  isInlineLogView: boolean;
+  isLoading: boolean;
+  isWriteable: boolean;
+  logView: LogView;
+  logViewStatus: LogViewStatus;
+  revertToDefaultLogView: () => void;
+  onUpdateLogViewAttributes: (logViewAttributes: Partial<LogViewAttributes>) => Promise<void>;
+}) => {
   const {
     sourceConfigurationFormElement,
     formState,
@@ -73,22 +123,10 @@ export const LogsSettingsPage = () => {
     nameFormElement,
   } = useLogSourceConfigurationFormState(logView?.attributes);
 
-  const persistUpdates = useCallback(async () => {
-    await update(formState);
+  const [, persistUpdates] = useAsyncFn(async () => {
+    await onUpdateLogViewAttributes(formState);
     sourceConfigurationFormElement.resetValue();
-  }, [update, sourceConfigurationFormElement, formState]);
-
-  const isWriteable = useMemo(
-    () => shouldAllowEdit && logView && logView.origin !== 'internal',
-    [shouldAllowEdit, logView]
-  );
-
-  if ((isLoading || isUninitialized) && !resolvedLogView) {
-    return <SourceLoadingPage />;
-  }
-  if (hasFailedLoadingLogView) {
-    return null;
-  }
+  }, [onUpdateLogViewAttributes, sourceConfigurationFormElement, formState]);
 
   return (
     <EuiErrorBoundary>
@@ -124,6 +162,7 @@ export const LogsSettingsPage = () => {
             isLoading={isLoading}
             isReadOnly={!isWriteable}
             indicesFormElement={logIndicesFormElement}
+            logViewStatus={logViewStatus}
           />
         </EuiPanel>
         <EuiSpacer />
