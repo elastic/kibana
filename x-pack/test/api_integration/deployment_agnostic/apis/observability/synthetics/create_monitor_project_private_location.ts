@@ -74,6 +74,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         testPolicyId,
       ]);
       testPrivateLocationName = testPrivateLocations[0].label;
+      await supertestWithAuth
+        .post(SYNTHETICS_API_URLS.PARAMS)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send({ key: 'testGlobalParam', value: 'testGlobalParamValue' })
+        .expect(200);
     });
 
     after(async () => {
