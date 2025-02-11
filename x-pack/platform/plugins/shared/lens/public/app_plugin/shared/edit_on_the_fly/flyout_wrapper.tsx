@@ -107,9 +107,6 @@ export const FlyoutWrapper = ({
           title={i18n.translate('xpack.lens.config.readOnly', {
             defaultMessage: 'Read-only: Changes will be reverted on close',
           })}
-          aria-label={i18n.translate('xpack.lens.config.readOnly', {
-            defaultMessage: 'Read-only: Changes will be reverted on close',
-          })}
           color="warning"
           iconType="warning"
           size="s"
@@ -168,9 +165,6 @@ export const FlyoutWrapper = ({
                 <EuiButton
                   onClick={onApply}
                   fill
-                  aria-label={i18n.translate('xpack.lens.config.applyFlyoutAriaLabel', {
-                    defaultMessage: 'Apply changes',
-                  })}
                   disabled={Boolean(isNewPanel) ? false : !isSaveable}
                   iconType="check"
                   data-test-subj="applyFlyoutButton"

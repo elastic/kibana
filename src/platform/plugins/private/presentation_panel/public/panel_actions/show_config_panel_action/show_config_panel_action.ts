@@ -55,7 +55,7 @@ export class ShowConfigPanelAction
           },
         })
       : i18n.translate('presentationPanel.action.showConfigPanel.displayName', {
-          defaultMessage: 'Show {value} configuration',
+          defaultMessage: 'View {value} configuration',
           values: {
             value: embeddable.getTypeDisplayName(),
           },
