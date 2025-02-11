@@ -12,7 +12,7 @@ import {
 
 import { transformElasticToList } from './transform_elastic_to_list';
 describe('transformElasticToList', () => {
-  test('display  timestamp in string format', () => {
+  test('does not change timestamp in string format', () => {
     const response = getSearchListMock({
       ...getSearchEsListMock(),
       '@timestamp': '2020-04-20T15:25:31.830Z',
