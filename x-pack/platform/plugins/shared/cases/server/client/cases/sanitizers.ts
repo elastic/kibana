@@ -8,7 +8,7 @@
 import { isEmpty } from 'lodash';
 import type { CaseUserProfile } from '../../../common/types/domain/user/v1';
 
-export const emptyCaseAssigneesSanitizerV1 = <T extends { assignees?: CaseUserProfile[] }>(
+export const emptyCaseAssigneesSanitizer = <T extends { assignees?: CaseUserProfile[] }>(
   theCase: T
 ): T => {
   if (isEmpty(theCase.assignees)) {
@@ -17,20 +17,18 @@ export const emptyCaseAssigneesSanitizerV1 = <T extends { assignees?: CaseUserPr
 
   return {
     ...theCase,
-    ...{
-      assignees: theCase.assignees?.filter(({ uid }) => !isEmpty(uid)),
-    },
+    assignees: theCase.assignees?.filter(({ uid }) => !isEmpty(uid)),
   };
 };
 
-export const emptyCasesAssigneesSanitizerV1 = <T extends { assignees?: CaseUserProfile[] }>({
+export const emptyCasesAssigneesSanitizer = <T extends { assignees?: CaseUserProfile[] }>({
   cases,
 }: {
   cases: T[];
 }): { cases: T[] } => {
   return {
     cases: cases.map((theCase) => {
-      return emptyCaseAssigneesSanitizerV1(theCase);
+      return emptyCaseAssigneesSanitizer(theCase);
     }),
   };
 };

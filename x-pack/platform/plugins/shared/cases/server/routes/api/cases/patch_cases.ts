@@ -11,7 +11,6 @@ import { createCasesRoute } from '../create_cases_route';
 import type { caseApiV1 } from '../../../../common/types/api';
 import type { caseDomainV1 } from '../../../../common/types/domain';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
-import { emptyCasesAssigneesSanitizerV1 } from '../../../services/cases/sanitizers';
 
 export const patchCaseRoute = createCasesRoute({
   method: 'patch',
@@ -26,8 +25,7 @@ export const patchCaseRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
-      const rawCases = request.body as caseApiV1.CasesPatchRequest;
-      const cases = emptyCasesAssigneesSanitizerV1(rawCases);
+      const cases = request.body as caseApiV1.CasesPatchRequest;
 
       const res: caseDomainV1.Cases = await casesClient.cases.bulkUpdate(cases);
 

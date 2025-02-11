@@ -11,7 +11,6 @@ import { createCasesRoute } from '../create_cases_route';
 import type { caseApiV1 } from '../../../../common/types/api';
 import type { caseDomainV1 } from '../../../../common/types/domain';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
-import { emptyCaseAssigneesSanitizerV1 } from '../../../services/cases/sanitizers';
 
 export const postCaseRoute = createCasesRoute({
   method: 'post',
@@ -26,10 +25,9 @@ export const postCaseRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
-      const rawCase = request.body as caseApiV1.CasePostRequest;
-      const theCase = emptyCaseAssigneesSanitizerV1(rawCase);
+      const theCase = request.body as caseApiV1.CasePostRequest;
 
-      const res: caseDomainV1.Case = await casesClient.cases.create(theCase);
+      const res: caseDomainV1.Case = await casesClient.cases.create({ ...theCase });
 
       return response.ok({
         body: res,
