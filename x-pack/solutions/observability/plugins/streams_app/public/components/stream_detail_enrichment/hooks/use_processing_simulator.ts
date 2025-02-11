@@ -26,7 +26,9 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
 import { processorConverter } from '../utils';
 
-type Simulation = APIReturnType<'POST /api/streams/{name}/processing/_simulate'>;
+export type Simulation = APIReturnType<'POST /api/streams/{name}/processing/_simulate'>;
+export type ProcessorMetrics =
+  Simulation['processor_metrics'][keyof Simulation['processor_metrics']];
 
 export interface TableColumn {
   name: string;
@@ -151,9 +153,10 @@ export const useProcessingSimulator = ({
     value: simulation,
     error: simulationError,
   } = useStreamsAppFetch(
-    ({ signal }) => {
+    ({ signal }): Promise<Simulation> => {
       if (!definition || isEmpty<RecursiveRecord[]>(sampleDocs) || isEmpty(liveDraftProcessors)) {
-        return Promise.resolve(null);
+        // This is a hack to avoid loosing the previous value of the simulation once the conditions are not met. The state management refactor will fix this.
+        return Promise.resolve(simulation!);
       }
 
       const processing = liveDraftProcessors.map(processorConverter.toAPIDefinition);
@@ -164,7 +167,8 @@ export const useProcessingSimulator = ({
 
       // Each processor should meet the minimum schema requirements to run the simulation
       if (!hasValidProcessors) {
-        return Promise.resolve(null);
+        // This is a hack to avoid loosing the previous value of the simulation once the conditions are not met. The state management refactor will fix this.
+        return Promise.resolve(simulation!);
       }
 
       return streamsRepositoryClient.fetch('POST /api/streams/{name}/processing/_simulate', {

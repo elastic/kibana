@@ -95,7 +95,7 @@ export function StreamDetailEnrichmentContent({
           {(EuiResizablePanel, EuiResizableButton) => (
             <>
               <EuiResizablePanel
-                initialSize={25}
+                initialSize={30}
                 minSize="400px"
                 tabIndex={0}
                 paddingSize="none"
@@ -109,13 +109,14 @@ export function StreamDetailEnrichmentContent({
                   onWatchProcessor={watchProcessor}
                   onAddProcessor={addProcessor}
                   onReorderProcessor={reorderProcessors}
+                  simulation={simulation}
                 />
               </EuiResizablePanel>
 
               <EuiResizableButton indicator="border" accountForScrollbars="both" />
 
               <EuiResizablePanel
-                initialSize={75}
+                initialSize={70}
                 minSize="300px"
                 tabIndex={0}
                 paddingSize="s"
@@ -154,6 +155,7 @@ interface ProcessorsEditorProps {
   onReorderProcessor: UseDefinitionReturn['reorderProcessors'];
   onUpdateProcessor: UseDefinitionReturn['updateProcessor'];
   onWatchProcessor: UseProcessingSimulatorReturn['watchProcessor'];
+  simulation: UseProcessingSimulatorReturn['simulation'];
 }
 
 const ProcessorsEditor = React.memo(
@@ -165,6 +167,7 @@ const ProcessorsEditor = React.memo(
     onReorderProcessor,
     onUpdateProcessor,
     onWatchProcessor,
+    simulation,
   }: ProcessorsEditorProps) => {
     const { euiTheme } = useEuiTheme();
 
@@ -228,6 +231,7 @@ const ProcessorsEditor = React.memo(
                   onDeleteProcessor={onDeleteProcessor}
                   onUpdateProcessor={onUpdateProcessor}
                   onWatchProcessor={onWatchProcessor}
+                  processorMetrics={simulation?.processor_metrics[processor.id]}
                 />
               ))}
             </SortableList>
@@ -237,6 +241,7 @@ const ProcessorsEditor = React.memo(
             definition={definition}
             onAddProcessor={onAddProcessor}
             onWatchProcessor={onWatchProcessor}
+            processorMetrics={simulation?.processor_metrics.draft}
           />
         </EuiPanel>
       </>

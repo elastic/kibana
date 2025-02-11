@@ -7,6 +7,7 @@
 
 import {
   EuiButton,
+  EuiCallOut,
   EuiForm,
   EuiSpacer,
   EuiButtonEmpty,
@@ -22,11 +23,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ProcessorType, IngestStreamGetResponse } from '@kbn/streams-schema';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useForm, SubmitHandler, FormProvider, useWatch } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
+import useToggle from 'react-use/lib/useToggle';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
 import { ProcessorTypeSelector } from './processor_type_selector';
@@ -39,10 +41,12 @@ import {
 } from '../utils';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 import { UseDefinitionReturn } from '../hooks/use_definition';
-import { UseProcessingSimulatorReturn } from '../hooks/use_processing_simulator';
+import { ProcessorMetrics, UseProcessingSimulatorReturn } from '../hooks/use_processing_simulator';
+import { ProcessorMetricBadges } from './processor_metrics';
 
 export interface ProcessorPanelProps {
   definition: IngestStreamGetResponse;
+  processorMetrics?: ProcessorMetrics;
   onWatchProcessor: UseProcessingSimulatorReturn['watchProcessor'];
 }
 
@@ -57,7 +61,11 @@ export interface EditProcessorPanelProps extends ProcessorPanelProps {
   onUpdateProcessor: UseDefinitionReturn['updateProcessor'];
 }
 
-export function AddProcessorPanel({ onAddProcessor, onWatchProcessor }: AddProcessorPanelProps) {
+export function AddProcessorPanel({
+  onAddProcessor,
+  onWatchProcessor,
+  processorMetrics,
+}: AddProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
 
   const [hasChanges, setHasChanges] = useState(false);
@@ -166,6 +174,7 @@ export function AddProcessorPanel({ onAddProcessor, onWatchProcessor }: AddProce
         <EuiSpacer size="s" />
         <FormProvider {...methods}>
           <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
+            <ProcessorInfoHeader metrics={processorMetrics} />
             <ProcessorTypeSelector />
             <EuiSpacer size="m" />
             {type === 'grok' && <GrokProcessorForm />}
@@ -195,6 +204,7 @@ export function EditProcessorPanel({
   onUpdateProcessor,
   onWatchProcessor,
   processor,
+  processorMetrics,
 }: EditProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -317,7 +327,8 @@ export function EditProcessorPanel({
               </EuiButton>
             </EuiFlexGroup>
           ) : (
-            <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
+              {processorMetrics && <ProcessorMetricBadges {...processorMetrics} />}
               {isUnsaved && (
                 <EuiBadge>
                   {i18n.translate(
@@ -344,6 +355,7 @@ export function EditProcessorPanel({
         <EuiSpacer size="s" />
         <FormProvider {...methods}>
           <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
+            <ProcessorInfoHeader metrics={processorMetrics} />
             <ProcessorTypeSelector disabled />
             <EuiSpacer size="m" />
             {type === 'grok' && <GrokProcessorForm />}
@@ -362,6 +374,67 @@ export function EditProcessorPanel({
     </EuiPanel>
   );
 }
+
+const ProcessorInfoHeader = ({ metrics }: { metrics?: ProcessorMetrics }) => {
+  const { euiTheme } = useEuiTheme();
+  if (!metrics) return null;
+
+  return (
+    <EuiFlexGroup
+      gutterSize="s"
+      direction="column"
+      css={css`
+        margin-bottom: ${euiTheme.size.m};
+      `}
+    >
+      <ProcessorMetricBadges {...metrics} />
+      {!isEmpty(metrics.errors) && <ProcessorErrors errors={metrics.errors} />}
+    </EuiFlexGroup>
+  );
+};
+
+const ProcessorErrors = ({ errors }: { errors: ProcessorMetrics['errors'] }) => {
+  const [isErrorListExpanded, toggleErrorListExpanded] = useToggle(false);
+
+  const visibleErrors = isErrorListExpanded ? errors : errors.slice(0, 2);
+  const remainingCount = errors.length - 2;
+  const shouldDisplayErrorToggle = remainingCount > 0;
+
+  return (
+    <EuiFlexGroup gutterSize="xs" direction="column" alignItems="flexStart">
+      {visibleErrors.map((error, id) => (
+        <EuiCallOut key={id} color="danger" iconType="warning" size="s" title={error} />
+      ))}
+      {shouldDisplayErrorToggle && !isErrorListExpanded && (
+        <EuiButtonEmpty
+          data-test-subj="streamsAppProcessorErrorsShowMoreButton"
+          onClick={toggleErrorListExpanded}
+          size="xs"
+        >
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processorErrors.showMore',
+            {
+              defaultMessage: 'Show {remainingCount} similar errors...',
+              values: { remainingCount },
+            }
+          )}
+        </EuiButtonEmpty>
+      )}
+      {shouldDisplayErrorToggle && isErrorListExpanded && (
+        <EuiButtonEmpty
+          data-test-subj="streamsAppProcessorErrorsShowLessButton"
+          onClick={toggleErrorListExpanded}
+          size="xs"
+        >
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processorErrors.showLess',
+            { defaultMessage: 'Show less errors' }
+          )}
+        </EuiButtonEmpty>
+      )}
+    </EuiFlexGroup>
+  );
+};
 
 const deleteProcessorLabel = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.deleteProcessorLabel',
