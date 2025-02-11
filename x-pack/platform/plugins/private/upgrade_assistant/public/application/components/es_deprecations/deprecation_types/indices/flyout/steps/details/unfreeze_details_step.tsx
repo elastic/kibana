@@ -150,7 +150,7 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
             <p>
               <FormattedMessage
                 id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.readonlyCompatibleIndexText"
-                defaultMessage="This index was created in ES 7.x. The index has been flagged as read-only, which allows for N-2 compatibility with the next major version."
+                defaultMessage="This index was created in ES 7.x. It has been marked as read-only, which enables compatibility with the next major version."
               />
             </p>
           )}

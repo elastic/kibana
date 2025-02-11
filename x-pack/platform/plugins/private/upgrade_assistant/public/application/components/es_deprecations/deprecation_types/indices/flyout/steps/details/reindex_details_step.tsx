@@ -146,9 +146,9 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
           </>
         )}
 
-        {reindexState.meta.isFrozen && <FrozenCallOut />}
+        {meta.isFrozen && <FrozenCallOut />}
         <EuiText>
-          {reindexState.meta.isReadonly && (
+          {meta.isReadonly && (
             <Fragment>
               <p>
                 <FormattedMessage
@@ -164,7 +164,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
               </p>
             </Fragment>
           )}
-          {!reindexState.meta.isReadonly && (
+          {!meta.isReadonly && (
             <Fragment>
               <p>
                 <FormattedMessage
@@ -218,7 +218,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                       <EuiText size="m">
                         <FormattedMessage
                           id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.deleteText"
-                          defaultMessage="If you no longer need this data, you can also proceed by deleting this index. {indexManagementLinkHtml}."
+                          defaultMessage="If you no longer need this data, you can also proceed by deleting this index. {indexManagementLinkHtml}"
                           values={{
                             indexManagementLinkHtml: (
                               <EuiLink
@@ -256,23 +256,20 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
-              {!reindexState.meta.isReadonly &&
-                !hasFetchFailed &&
-                !isCompleted &&
-                hasRequiredPrivileges && (
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      onClick={startReadonly}
-                      disabled={loading || inProgress}
-                      data-test-subj="startIndexReadonlyButton"
-                    >
-                      <FormattedMessage
-                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.startIndexReadonlyButton"
-                        defaultMessage="Mark as read-only"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                )}
+              {!meta.isReadonly && !hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    onClick={startReadonly}
+                    disabled={loading || inProgress}
+                    data-test-subj="startIndexReadonlyButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.startIndexReadonlyButton"
+                      defaultMessage="Mark as read-only"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
               {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
                 <EuiFlexItem grow={false}>
                   <EuiButton

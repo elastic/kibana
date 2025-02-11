@@ -187,7 +187,6 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
         return (
           <UpdateIndexFlyoutStep
             action={flyoutStep}
-            indexName={index!}
             meta={reindexState.meta}
             retry={onUnfreezeRetry}
             updateIndexState={updateIndexState}
@@ -198,7 +197,6 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
         return (
           <UpdateIndexFlyoutStep
             action={flyoutStep}
-            indexName={index!}
             meta={reindexState.meta}
             retry={onMakeReadonlyRetry}
             updateIndexState={updateIndexState}
@@ -214,7 +212,6 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
     reindexState,
     startReindexWithWarnings,
     onStopReindex,
-    index,
     onUnfreezeRetry,
     onMakeReadonlyRetry,
     onUnfreeze,

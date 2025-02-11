@@ -30,7 +30,6 @@ interface UpdateIndexFlyoutStepProps {
   action: 'unfreeze' | 'makeReadonly';
   closeFlyout: () => void;
   meta: ReindexState['meta'];
-  indexName: string;
   updateIndexState: UpdateIndexState;
   retry: () => void;
 }
@@ -50,10 +49,10 @@ export const UpdateIndexFlyoutStep: React.FunctionComponent<UpdateIndexFlyoutSte
   action,
   closeFlyout,
   meta,
-  indexName,
   updateIndexState,
   retry,
 }) => {
+  const { isFrozen, indexName } = meta;
   const { status, failedBefore, reason } = updateIndexState;
   const title =
     action === 'makeReadonly' ? (
@@ -85,7 +84,7 @@ export const UpdateIndexFlyoutStep: React.FunctionComponent<UpdateIndexFlyoutSte
   return (
     <Fragment>
       <EuiFlyoutBody>
-        {meta.isFrozen && <FrozenCallOut />}
+        {isFrozen && <FrozenCallOut />}
         <EuiTitle size="xs">
           <h3>
             {(status === 'inProgress' || status === 'incomplete') && (
