@@ -264,6 +264,7 @@ export function DiscoverMainRoute({
       setError(undefined);
 
       await initializeProfileDataViews();
+      debugger
 
       if (savedSearchId) {
         await loadSavedSearch();

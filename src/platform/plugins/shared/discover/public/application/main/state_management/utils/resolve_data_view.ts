@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { NoDataViewError } from './load_saved_search';
 import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
 import { DiscoverServices } from '../../../../build_services';
 
@@ -151,6 +152,11 @@ function resolveDataView({
 
       return ownDataView;
     }
+
+    if (!loadedDataView) {
+      throw new NoDataViewError();
+    }
+
     if (loadedDataView) {
       toastNotifications.addWarning({
         title: warningTitle,
