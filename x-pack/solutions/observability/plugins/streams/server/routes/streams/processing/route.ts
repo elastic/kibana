@@ -10,11 +10,12 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import { calculateObjectDiff, flattenObject } from '@kbn/object-utils';
 import {
-  FieldDefinitionConfig,
   ProcessorDefinition,
   ProcessorDefinitionWithId,
   RecursiveRecord,
+  getInheritedFieldsFromAncestors,
   getProcessorType,
+  isWiredStreamDefinition,
   namedFieldDefinitionConfigSchema,
   processorWithIdDefinitionSchema,
   recursiveRecord,
@@ -22,12 +23,16 @@ import {
 import { z } from '@kbn/zod';
 import { isEmpty, mapValues, omit, uniq } from 'lodash';
 import {
+  ClusterComponentTemplateNode,
+  IngestPipelineConfig,
   IngestProcessorContainer,
+  IngestSimulateDocument,
   IngestSimulatePipelineSimulation,
   IngestSimulateRequest,
   IngestSimulateResponse,
   IngestSimulateSimulateDocumentResult,
 } from '@elastic/elasticsearch/lib/api/types';
+import { StreamsClient } from '../../../lib/streams/client';
 import { formatToIngestProcessors } from '../../../lib/streams/helpers/processing';
 import { checkAccess } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
@@ -61,7 +66,7 @@ export const simulateProcessorRoute = createServerRoute({
   },
   params: paramsSchema,
   handler: async ({ params, request, getScopedClients }) => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
 
     const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
     if (!read) {
@@ -72,10 +77,15 @@ export const simulateProcessorRoute = createServerRoute({
 
     const pipelineSimulationBody = preparePipelineSimulationBody(simulationData);
 
-    const pipelineSimulationResult = await executePipelineSimulation(
-      scopedClusterClient,
-      pipelineSimulationBody
-    );
+    /**
+     * Run both pipeline and ingest simulations in parallel.
+     * - The pipeline simulation is used to extract the normalized documents and the processor metrics. This always runs.
+     * - The ingest simulation is used to fail fast on mapping failures. This runs only if `detected_fields` is provided.
+     */
+    const [pipelineSimulationResult] = await Promise.all([
+      executePipelineSimulation(scopedClusterClient, pipelineSimulationBody),
+      conditionallyExecuteIngestSimulation(scopedClusterClient, simulationData, params),
+    ]);
 
     const { normalizedDocs, processorsMetrics } = parsePipelineSimulationResult(
       pipelineSimulationResult,
@@ -83,15 +93,20 @@ export const simulateProcessorRoute = createServerRoute({
       params.body.processing
     );
 
-    return prepareSimulationResponse(normalizedDocs, processorsMetrics);
+    return prepareSimulationResponse(
+      normalizedDocs,
+      processorsMetrics,
+      streamsClient,
+      params.path.name
+    );
   },
 });
 
 /* processing/_simulate API helpers */
 
-const prepareSimulationDocs = (documents: RecursiveRecord[], streamId: string) => {
+const prepareSimulationDocs = (documents: RecursiveRecord[], streamName: string): IngestSimulateDocument[] => {
   return documents.map((doc, id) => ({
-    _index: streamId,
+    _index: streamName,
     _id: id.toString(),
     _source: doc,
   }));
@@ -155,17 +170,21 @@ const preparePipelineSimulationBody = (
   };
 };
 
-// TODO: update type once Kibana updates to elasticsearch-js 8.17
 const prepareIngestSimulationBody = (
   simulationData: ReturnType<typeof prepareSimulationData>,
   params: ProcessingSimulateParams
 ) => {
   const { path, body } = params;
   const { detected_fields } = body;
-
+  
   const { docs, processors } = simulationData;
-
-  const simulationBody: any = {
+  
+  // TODO: update type once Kibana updates to elasticsearch-js 8.17
+  const simulationBody: {
+    docs: IngestSimulateDocument[];
+    pipeline_substitutions: Record<string, IngestPipelineConfig>;
+    component_template_substitutions?: Record<string, ClusterComponentTemplateNode>;
+  } = {
     docs,
     pipeline_substitutions: {
       [`${path.name}@stream.processing`]: {
@@ -190,6 +209,19 @@ const prepareIngestSimulationBody = (
   return simulationBody;
 };
 
+const getStreamFields = async (streamsClient: StreamsClient, streamName: string) => {
+  const [stream, ancestors] = await Promise.all([
+    streamsClient.getStream(streamName),
+    streamsClient.getAncestors(streamName),
+  ]);
+
+  if (isWiredStreamDefinition(stream)) {
+    return { ...stream.ingest.wired.fields, ...getInheritedFieldsFromAncestors(ancestors) };
+  }
+
+  return {};
+};
+
 const executePipelineSimulation = async (
   scopedClusterClient: IScopedClusterClient,
   simulationBody: IngestSimulateRequest
@@ -198,25 +230,45 @@ const executePipelineSimulation = async (
     return await scopedClusterClient.asCurrentUser.ingest.simulate(simulationBody);
   } catch (error) {
     // This catch high level errors that might occur during the simulation, such invalid grok syntax
+    // I'm rethrowing the error to normalize the ES error as it has a different structure than the other errors.
     throw new SimulationFailedError(error);
   }
 };
 
 // TODO: update type once Kibana updates to elasticsearch-js 8.17
-const executeIngestSimulation = async (
+const conditionallyExecuteIngestSimulation = async (
   scopedClusterClient: IScopedClusterClient,
-  simulationBody: ReturnType<typeof prepareIngestSimulationBody>
+  simulationData: ReturnType<typeof prepareSimulationData>,
+  params: ProcessingSimulateParams
 ): Promise<any> => {
+  if (!params.body.detected_fields) return null;
+
+  const simulationBody = prepareIngestSimulationBody(simulationData, params);
+
+  let simulationResult: ;
+
   try {
     // TODO: We should be using scopedClusterClient.asCurrentUser.simulate.ingest() once Kibana updates to elasticsearch-js 8.17
-    return await scopedClusterClient.asCurrentUser.transport.request({
+    simulationResult = await scopedClusterClient.asCurrentUser.transport.request({
       method: 'POST',
       path: `_ingest/_simulate`,
       body: simulationBody,
     });
   } catch (error) {
+    // This catch high level errors that might occur during the simulation, such invalid grok syntax
+    // I'm rethrowing the error to normalize the ES error as it has a different structure than the other errors.
     throw new SimulationFailedError(error);
   }
+
+  const entryWithError = simulationResult.docs.find(isMappingFailure);
+
+  if (entryWithError) {
+    throw new DetectedMappingFailureError(
+      `The detected field types might not be compatible with these documents. ${entryWithError.doc.error.reason}`
+    );
+  }
+
+  return simulationResult;
 };
 
 interface SimulatedDocError {
@@ -397,11 +449,13 @@ const computeSimulationDocDiff = (
 //   }
 // };
 
-const prepareSimulationResponse = (
+const prepareSimulationResponse = async (
   normalizedDocs: NormalizedSimulationDoc[],
-  processorMetrics: Record<string, ProcessorMetrics>
+  processorMetrics: Record<string, ProcessorMetrics>,
+  streamsClient: StreamsClient,
+  streamName: string
 ) => {
-  const detectedFields = computeDetectedFields(processorMetrics);
+  const detectedFields = await computeDetectedFields(processorMetrics, streamsClient, streamName);
   const successRate = computeSuccessRate(normalizedDocs);
   const failureRate = 1 - successRate;
 
@@ -414,17 +468,30 @@ const prepareSimulationResponse = (
   };
 };
 
-const computeDetectedFields = (
-  processorMetrics: Record<string, ProcessorMetrics>
-): Array<{
-  name: string;
-  type: FieldDefinitionConfig['type'] | 'unmapped';
-}> => {
+const computeDetectedFields = async (
+  processorMetrics: Record<string, ProcessorMetrics>,
+  streamsClient: StreamsClient,
+  streamName: string
+) => {
   const fields = Object.values(processorMetrics).flatMap((metrics) => metrics.detected_fields);
 
   const uniqueFields = uniq(fields);
 
-  return uniqueFields.map((name) => ({ name, type: 'unmapped' }));
+  // Short-circuit to avoid fetching streams field if none is detected
+  if (isEmpty(uniqueFields)) {
+    return [];
+  }
+
+  const streamFields = await getStreamFields(streamsClient, streamName);
+
+  return uniqueFields.map((name) => {
+    const existingField = streamFields[name];
+    if (existingField) {
+      return { name, ...existingField };
+    }
+
+    return { name };
+  });
 };
 
 const computeSuccessRate = (docs: NormalizedSimulationDoc[]) => {
@@ -453,6 +520,9 @@ const isSuccessfulProcessor = (
   processor: IngestSimulatePipelineSimulation
 ): processor is WithRequired<IngestSimulatePipelineSimulation, 'doc' | 'tag'> =>
   processor.status === 'success' && !!processor.tag;
+
+// TODO: update type once Kibana updates to elasticsearch-js 8.17
+const isMappingFailure = (entry: any) => entry.doc?.error?.type === 'document_parsing_exception';
 
 const baseGrokMatchError = 'Provided Grok expressions do not match field value';
 
