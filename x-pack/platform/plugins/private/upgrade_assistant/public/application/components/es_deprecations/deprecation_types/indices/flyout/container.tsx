@@ -63,11 +63,21 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
         break;
       }
       default: {
-        setFlyoutStep('details');
-        break;
+        switch (updateIndexStatus) {
+          case 'inProgress':
+          case 'complete':
+          case 'failed': {
+            setFlyoutStep(correctiveAction?.type === 'unfreeze' ? 'unfreeze' : 'makeReadonly');
+            break;
+          }
+          default: {
+            setFlyoutStep('details');
+            break;
+          }
+        }
       }
     }
-  }, [reindexStatus]);
+  }, [correctiveAction?.type, reindexStatus, updateIndexStatus]);
 
   const onStartReindex = useCallback(() => {
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_START_CLICK);
