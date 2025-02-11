@@ -62,7 +62,11 @@ export function metricsRoute(params: MetricsRouteParams) {
         tags: ['security:acceptJWT'],
       },
       // Uncomment when we determine that we can restrict API usage to Global admins based on telemetry
-      // options: { tags: ['access:taskManager'] },
+      // security: {
+      //   authz: {
+      //     requiredPrivileges: ['taskManager'],
+      //   },
+      // },
       validate: {
         query: QuerySchema,
       },

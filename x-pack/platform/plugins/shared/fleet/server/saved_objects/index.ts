@@ -402,6 +402,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           output_id: { type: 'keyword', index: false },
           name: { type: 'keyword' },
@@ -610,6 +611,14 @@ export const getSavedObjectTypes = (
             {
               type: 'data_backfill',
               backfillFn: backfillOutputPolicyToV7,
+            },
+          ],
+        },
+        '8': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {},
             },
           ],
         },

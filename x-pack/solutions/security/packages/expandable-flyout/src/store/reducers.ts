@@ -8,22 +8,22 @@
 import { createReducer } from '@reduxjs/toolkit';
 import deepEqual from 'react-fast-compare';
 import {
-  openPanelsAction,
-  openLeftPanelAction,
-  openRightPanelAction,
-  closePanelsAction,
-  closeLeftPanelAction,
-  closePreviewPanelAction,
-  closeRightPanelAction,
-  previousPreviewPanelAction,
-  openPreviewPanelAction,
-  urlChangedAction,
   changePushVsOverlayAction,
-  setDefaultWidthsAction,
   changeUserCollapsedWidthAction,
   changeUserExpandedWidthAction,
   changeUserSectionWidthsAction,
+  closeLeftPanelAction,
+  closePanelsAction,
+  closePreviewPanelAction,
+  closeRightPanelAction,
+  openLeftPanelAction,
+  openPanelsAction,
+  openPreviewPanelAction,
+  openRightPanelAction,
+  previousPreviewPanelAction,
   resetAllUserChangedWidthsAction,
+  setDefaultWidthsAction,
+  urlChangedAction,
 } from './actions';
 import { initialPanelsState, initialUiState } from './state';
 
@@ -167,14 +167,30 @@ export const uiReducer = createReducer(initialUiState, (builder) => {
     state.pushVsOverlay = type;
   });
 
-  builder.addCase(setDefaultWidthsAction, (state, { payload: { right, left, preview } }) => {
-    state.defaultWidths.rightWidth = right;
-    state.defaultWidths.leftWidth = left;
-    state.defaultWidths.previewWidth = preview;
-    state.defaultWidths.rightPercentage = (right / (right + left)) * 100;
-    state.defaultWidths.leftPercentage = (left / (right + left)) * 100;
-    state.defaultWidths.previewPercentage = (right / (right + left)) * 100;
-  });
+  builder.addCase(
+    setDefaultWidthsAction,
+    (
+      state,
+      { payload: { rightOverlay, leftOverlay, previewOverlay, rightPush, leftPush, previewPush } }
+    ) => {
+      state.defaultWidths.overlay.rightWidth = rightOverlay;
+      state.defaultWidths.overlay.leftWidth = leftOverlay;
+      state.defaultWidths.overlay.previewWidth = previewOverlay;
+      state.defaultWidths.overlay.rightPercentage =
+        (rightOverlay / (rightOverlay + leftOverlay)) * 100;
+      state.defaultWidths.overlay.leftPercentage =
+        (leftOverlay / (rightOverlay + leftOverlay)) * 100;
+      state.defaultWidths.overlay.previewPercentage =
+        (previewOverlay / (previewOverlay + leftOverlay)) * 100;
+
+      state.defaultWidths.push.rightWidth = rightPush;
+      state.defaultWidths.push.leftWidth = leftPush;
+      state.defaultWidths.push.previewWidth = previewPush;
+      state.defaultWidths.push.rightPercentage = (rightPush / (rightPush + leftPush)) * 100;
+      state.defaultWidths.push.leftPercentage = (leftPush / (rightPush + leftPush)) * 100;
+      state.defaultWidths.push.previewPercentage = (previewPush / (previewPush + leftPush)) * 100;
+    }
+  );
 
   builder.addCase(changeUserCollapsedWidthAction, (state, { payload: { width } }) => {
     state.userFlyoutWidths.collapsedWidth = width;

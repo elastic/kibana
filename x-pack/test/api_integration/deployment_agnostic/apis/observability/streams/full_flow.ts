@@ -94,10 +94,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           it('returns a 404 for logs', async () => {
             await apiClient
-              .fetch('GET /api/streams/{id}', {
+              .fetch('GET /api/streams/{name}', {
                 params: {
                   path: {
-                    id: 'logs',
+                    name: 'logs',
                   },
                 },
               })
@@ -139,6 +139,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message: 'test',
           'log.level': 'info',
           'log.logger': 'nginx',
+          'stream.name': 'logs',
         });
       });
 
@@ -176,6 +177,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message: 'test',
           'log.level': 'info',
           'log.logger': 'nginx',
+          'stream.name': 'logs.nginx',
         });
       });
 
@@ -209,6 +211,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message: 'test',
           'log.level': 'info',
           'log.logger': 'nginx',
+          'stream.name': 'logs.nginx.access',
         });
       });
 
@@ -242,6 +245,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message: 'test',
           'log.level': 'error',
           'log.logger': 'nginx',
+          'stream.name': 'logs.nginx',
         });
       });
 

@@ -12,6 +12,13 @@ import * as stories from './service_overview.stories';
 import * as useAdHocApmDataView from '../../../hooks/use_adhoc_apm_data_view';
 import { renderWithTheme } from '../../../utils/test_helpers';
 
+// Mock the usePerformanceContext hook
+jest.mock('@kbn/ebt-tools', () => ({
+  usePerformanceContext: () => ({
+    onPageReady: jest.fn(),
+  }),
+}));
+
 const { Example } = composeStories(stories);
 
 describe('ServiceOverview', () => {
