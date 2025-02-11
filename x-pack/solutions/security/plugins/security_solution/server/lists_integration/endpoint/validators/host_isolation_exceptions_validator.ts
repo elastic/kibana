@@ -12,6 +12,7 @@ import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
+import { hasArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
 import { BaseValidator, BasicEndpointExceptionDataSchema } from './base_validator';
 import { EndpointArtifactExceptionValidationError } from './errors';
 import type { ExceptionItemLikeOptions } from '../types';
@@ -92,6 +93,10 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
     await this.validateHasWritePrivilege();
     await this.validateHostIsolationData(updatedItem);
     await this.validateByPolicyItem(updatedItem);
+
+    if (!hasArtifactOwnerSpaceId(_updatedItem)) {
+      await this.setOwnerSpaceId(_updatedItem);
+    }
 
     return _updatedItem;
   }

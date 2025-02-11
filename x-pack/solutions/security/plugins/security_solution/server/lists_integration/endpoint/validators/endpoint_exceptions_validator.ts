@@ -10,6 +10,7 @@ import type {
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { hasArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
 import { BaseValidator } from './base_validator';
 
 export class EndpointExceptionsValidator extends BaseValidator {
@@ -35,6 +36,11 @@ export class EndpointExceptionsValidator extends BaseValidator {
 
   async validatePreUpdateItem(item: UpdateExceptionListItemOptions) {
     await this.validateHasWritePrivilege();
+
+    if (!hasArtifactOwnerSpaceId(item)) {
+      await this.setOwnerSpaceId(item);
+    }
+
     return item;
   }
 

@@ -198,7 +198,14 @@ export class BaseValidator {
     return false;
   }
 
-  protected async setOwnerSpaceId(item: ExceptionItemLikeOptions): Promise<void> {
+  /**
+   * Update the artifact item (if necessary) with a `ownerSpaceId` tag using the HTTP request's active space
+   * @param item
+   * @protected
+   */
+  protected async setOwnerSpaceId(
+    item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
+  ): Promise<void> {
     if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
       if (!this.request) {
         throw new EndpointArtifactExceptionValidationError(

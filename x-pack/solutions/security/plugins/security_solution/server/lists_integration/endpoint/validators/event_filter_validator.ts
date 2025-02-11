@@ -14,6 +14,7 @@ import type {
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
 
+import { hasArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
 import type { ExceptionItemLikeOptions } from '../types';
 
 import { BaseValidator } from './base_validator';
@@ -85,6 +86,11 @@ export class EventFilterValidator extends BaseValidator {
     }
 
     await this.validateByPolicyItem(updatedItem);
+
+    if (!hasArtifactOwnerSpaceId(_updatedItem)) {
+      await this.setOwnerSpaceId(_updatedItem);
+    }
+
     return _updatedItem;
   }
 

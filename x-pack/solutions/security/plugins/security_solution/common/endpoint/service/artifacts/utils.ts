@@ -149,7 +149,7 @@ export const buildSpaceOwnerIdTag = (spaceId: string): string => {
  * @param spaceId
  */
 export const setArtifactOwnerSpaceId = (
-  item: Pick<ExceptionListItemSchema, 'tags'>,
+  item: Partial<Pick<ExceptionListItemSchema, 'tags'>>,
   spaceId: string
 ): void => {
   if (spaceId.trim() === '') {
@@ -163,4 +163,14 @@ export const setArtifactOwnerSpaceId = (
 
     item.tags.push(buildSpaceOwnerIdTag(spaceId));
   }
+};
+
+/**
+ * Checks to see if the artifact item has at least 1 owner space id tag
+ * @param item
+ */
+export const hasArtifactOwnerSpaceId = (
+  item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
+): boolean => {
+  return (item.tags ?? []).some((tag) => tag.startsWith(OWNER_SPACE_ID_TAG_PREFIX));
 };
