@@ -8,93 +8,100 @@
 import { expect } from '@kbn/scout-oblt';
 import { assertionMessages, generateIntegrationName, test } from '../../fixtures';
 
-test.describe('Onboarding app - Custom logs configuration', { tag: ['@ess', '@svlOblt'] }, () => {
-  const logsFilePath = `${generateIntegrationName('mylogs')}.log`;
+test.describe(
+  'Observability Onboarding - Custom logs configuration',
+  { tag: ['@ess', '@svlOblt'] },
+  () => {
+    const logsFilePath = `${generateIntegrationName('mylogs')}.log`;
 
-  test.beforeEach(async ({ browserAuth, pageObjects: { customLogs } }) => {
-    await browserAuth.loginAsAdmin();
-    await customLogs.goto();
-  });
+    test.beforeEach(async ({ browserAuth, pageObjects: { customLogs } }) => {
+      await browserAuth.loginAsAdmin();
+      await customLogs.goto();
+    });
 
-  test('should navigate to the onboarding home page when the back button clicked', async ({
-    pageObjects: { customLogs },
-    page,
-  }) => {
-    await customLogs.clickBackButton();
-    expect(page.url()).toContain('/app/observabilityOnboarding');
-  });
+    test('should navigate to the onboarding home page when the back button clicked', async ({
+      pageObjects: { customLogs },
+      page,
+    }) => {
+      await customLogs.clickBackButton();
+      expect(page.url()).toContain('/app/observabilityOnboarding');
+    });
 
-  test(`should allow multiple entries for Log File Path`, async ({
-    pageObjects: { customLogs },
-  }) => {
-    await expect(
-      customLogs.getLogFilePathInputField(0),
-      'Log File Path should be empty'
-    ).toHaveValue('');
-    await expect(
-      customLogs.continueButton,
-      'Continue button should be disabled when Log File Path is not set'
-    ).toBeDisabled();
-    await customLogs.addLogFilePathButton.click();
-    await expect(customLogs.logFilePathList).toHaveCount(2);
+    test(`should allow multiple entries for Log File Path`, async ({
+      pageObjects: { customLogs },
+    }) => {
+      await expect(
+        customLogs.getLogFilePathInputField(0),
+        'Log File Path should be empty'
+      ).toHaveValue('');
+      await expect(
+        customLogs.continueButton,
+        'Continue button should be disabled when Log File Path is not set'
+      ).toBeDisabled();
+      await customLogs.addLogFilePathButton.click();
+      await expect(customLogs.logFilePathList).toHaveCount(2);
 
-    await customLogs.logFilePathDeleteButton(1).click();
-    await expect(customLogs.logFilePathList).toHaveCount(1);
-  });
+      await customLogs.logFilePathDeleteButton(1).click();
+      await expect(customLogs.logFilePathList).toHaveCount(1);
+    });
 
-  test(`should allow updating Advanced Settings`, async ({ pageObjects: { customLogs } }) => {
-    await customLogs.getLogFilePathInputField(0).fill(logsFilePath);
-    await expect(customLogs.advancedSettingsContent).not.toBeVisible();
-    await customLogs.clickAdvancedSettingsButton();
-    await expect(
-      customLogs.advancedSettingsContent,
-      'Advanced Settings should be opened'
-    ).toBeVisible();
-    await expect(customLogs.namespaceInput).toHaveValue('default');
+    test(`should allow updating Advanced Settings`, async ({ pageObjects: { customLogs } }) => {
+      await customLogs.getLogFilePathInputField(0).fill(logsFilePath);
+      await expect(customLogs.advancedSettingsContent).not.toBeVisible();
+      await customLogs.clickAdvancedSettingsButton();
+      await expect(
+        customLogs.advancedSettingsContent,
+        'Advanced Settings should be opened'
+      ).toBeVisible();
+      await expect(customLogs.namespaceInput).toHaveValue('default');
 
-    await customLogs.namespaceInput.fill('');
-    await expect(
-      customLogs.continueButton,
-      'Continue button should be disabled when Namespace is empty'
-    ).toBeDisabled();
+      await customLogs.namespaceInput.fill('');
+      await expect(
+        customLogs.continueButton,
+        'Continue button should be disabled when Namespace is empty'
+      ).toBeDisabled();
 
-    await customLogs.namespaceInput.fill('default');
-    await expect(customLogs.customConfigInput).toHaveValue('');
-    await expect(customLogs.continueButton).not.toBeDisabled();
+      await customLogs.namespaceInput.fill('default');
+      await expect(customLogs.customConfigInput).toHaveValue('');
+      await expect(customLogs.continueButton).not.toBeDisabled();
 
-    await customLogs.clickAdvancedSettingsButton();
-    await expect(
-      customLogs.advancedSettingsContent,
-      'Advanced Settings should be closed'
-    ).not.toBeVisible();
-  });
+      await customLogs.clickAdvancedSettingsButton();
+      await expect(
+        customLogs.advancedSettingsContent,
+        'Advanced Settings should be closed'
+      ).not.toBeVisible();
+    });
 
-  test('should validate Integration Name field', async ({ pageObjects: { customLogs }, page }) => {
-    await customLogs.getLogFilePathInputField(0).fill(logsFilePath);
+    test('should validate Integration Name field', async ({
+      pageObjects: { customLogs },
+      page,
+    }) => {
+      await customLogs.getLogFilePathInputField(0).fill(logsFilePath);
 
-    await customLogs.integrationNameInput.fill('');
-    await expect(customLogs.continueButton).toBeDisabled();
+      await customLogs.integrationNameInput.fill('');
+      await expect(customLogs.continueButton).toBeDisabled();
 
-    await customLogs.integrationNameInput.fill('hello$world');
-    await expect(customLogs.integrationNameInput).toHaveValue('hello_world');
+      await customLogs.integrationNameInput.fill('hello$world');
+      await expect(customLogs.integrationNameInput).toHaveValue('hello_world');
 
-    await customLogs.integrationNameInput.fill('H3llowOrld');
-    await expect(
-      page.getByText(assertionMessages.FIELD_VALIDATION.INTEGRATION_NAME_LOWERCASE)
-    ).toBeVisible();
-  });
+      await customLogs.integrationNameInput.fill('H3llowOrld');
+      await expect(
+        page.getByText(assertionMessages.FIELD_VALIDATION.INTEGRATION_NAME_LOWERCASE)
+      ).toBeVisible();
+    });
 
-  test('should validate DataSet Name field', async ({ pageObjects: { customLogs }, page }) => {
-    await customLogs.getLogFilePathInputField(0).fill(logsFilePath);
-    await customLogs.datasetNameInput.fill('');
-    await expect(customLogs.continueButton).toBeDisabled();
+    test('should validate DataSet Name field', async ({ pageObjects: { customLogs }, page }) => {
+      await customLogs.getLogFilePathInputField(0).fill(logsFilePath);
+      await customLogs.datasetNameInput.fill('');
+      await expect(customLogs.continueButton).toBeDisabled();
 
-    await customLogs.datasetNameInput.fill('hello$world');
-    await expect(customLogs.datasetNameInput).toHaveValue('hello_world');
+      await customLogs.datasetNameInput.fill('hello$world');
+      await expect(customLogs.datasetNameInput).toHaveValue('hello_world');
 
-    await customLogs.datasetNameInput.fill('H3llowOrld');
-    await expect(
-      page.getByText(assertionMessages.FIELD_VALIDATION.DATASET_NAME_LOWERCASE)
-    ).toBeVisible();
-  });
-});
+      await customLogs.datasetNameInput.fill('H3llowOrld');
+      await expect(
+        page.getByText(assertionMessages.FIELD_VALIDATION.DATASET_NAME_LOWERCASE)
+      ).toBeVisible();
+    });
+  }
+);

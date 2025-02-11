@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout-oblt';
 import { generateIntegrationName, test } from '../../fixtures';
 
 test.describe(
-  'OBservability Onboarding - Custom Integration Error',
+  'Observability Onboarding - Custom Integration Error',
   { tag: ['@ess', '@svlOblt'] },
   () => {
     const integrationName = generateIntegrationName('mylogs');
