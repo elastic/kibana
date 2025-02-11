@@ -200,6 +200,7 @@ const AlertsTreemapComponent: React.FC<Props> = ({
                 height={minChartHeight}
                 legendItems={legendItems}
                 minWidth={DEFAULT_LEGEND_WIDTH}
+                isInlineActions
               />
             )}
           </LegendContainer>
