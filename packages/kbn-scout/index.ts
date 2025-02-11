@@ -13,19 +13,21 @@ export {
   test,
   spaceTest,
   tags,
+  browserAuthFixture,
+  scoutSpaceParallelFixture,
   createPlaywrightConfig,
   createLazyPageObject,
   ingestTestDataHook,
 } from './src/playwright';
 export type {
-  ScoutPlaywrightOptions,
-  ScoutTestOptions,
-  ScoutPage,
-  PageObjects,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
   ScoutParallelTestFixtures,
   ScoutParallelWorkerFixtures,
+  BrowserAuthFixture,
+  ScoutPage,
+  PageObjects,
+  ScoutSpaceParallelFixture,
 } from './src/playwright';
 
 export type {
