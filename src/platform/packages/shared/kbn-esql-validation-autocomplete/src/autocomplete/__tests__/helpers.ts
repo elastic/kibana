@@ -159,8 +159,6 @@ export function getFunctionSignaturesByReturnType(
   const list = [];
   if (agg) {
     list.push(...aggregationFunctionDefinitions);
-    // right now all grouping functions are agg functions too
-    list.push(...groupingFunctionDefinitions);
   }
   if (grouping) {
     list.push(...groupingFunctionDefinitions);
