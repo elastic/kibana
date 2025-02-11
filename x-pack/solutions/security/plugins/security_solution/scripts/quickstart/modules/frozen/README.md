@@ -120,3 +120,48 @@ POST _ilm/move/.ds-my-data-stream-2024.10.22-000001
 // Wait for `phase`, `action`, `step`, to be `frozen`, `complete`, `complete` respectively
 GET my-data-stream/_ilm/explain
 ```
+
+## Creating Frozen Data Locally
+
+See https://docs.elastic.dev/security-soution/analyst-experience-team/eng-prod/how-to/configure-local-frozen-tier
+
+Instead of creating a cluster on cloud, start ES using `yarn es snapshot --license trial -E path.repo=~/es_frozen -E xpack.searchable.snapshot.shared_cache.size=20GB` and Kibana normally with `yarn start`. See https://www.elastic.co/guide/en/elasticsearch/reference/current/snapshots-filesystem-repository.html for details on local snapshot repos. See https://www.elastic.co/guide/en/elasticsearch/reference/current/searchable-snapshots.html#searchable-snapshot-mount-storage-options for details on `xpack.searchable.snapshot.shared_cache.size`.
+
+After ES starts with `path.repo` set, create a snapshot repository called `my_frozen`:
+
+```
+PUT _snapshot/my_frozen
+{
+  "type": "fs",
+  "settings": {
+    "location": "my_frozen"
+  }
+}
+```
+
+Follow the same steps as for cloud above, but modify the ILM policy to reference the local snapshot repository instead of `found-snapshots`:
+
+```
+PUT _ilm/policy/my-lifecycle-policy
+{
+  "policy": {
+    "phases": {
+      "hot": {
+        "actions": {
+          "rollover": {
+            "max_primary_shard_size": "50gb"
+          }
+        }
+      },
+      "frozen": {
+        "min_age": "1d",
+        "actions": {
+          "searchable_snapshot": {
+            "snapshot_repository": "my_frozen"
+          }
+        }
+      }
+    }
+  }
+}
+```
