@@ -8,7 +8,6 @@
 import { useParams } from 'react-router-dom';
 import React, { useMemo } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ROUTE_ROOT } from '../../../common/api_routes';
 import { useKibana } from '../../hooks/use_kibana';
@@ -47,7 +46,6 @@ export const SynonymsSetDetail = () => {
           {
             text: (
               <>
-                <EuiIcon size="s" type="arrowLeft" />
                 {i18n.translate('xpack.searchSynonyms.viewAll', {
                   defaultMessage: 'View all',
                 })}
