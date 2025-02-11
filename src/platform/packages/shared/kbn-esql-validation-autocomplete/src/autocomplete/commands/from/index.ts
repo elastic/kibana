@@ -7,21 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ESQLCommandOption } from '@kbn/esql-ast';
+import { isMarkerNode } from '../../../shared/context';
 import { metadataOption } from '../../../definitions/options';
 import type { SuggestionRawDefinition } from '../../types';
 import { getOverlapRange, handleFragment, removeQuoteForSuggestedSources } from '../../helper';
 import { CommandSuggestParams } from '../../../definitions/types';
-import { isRestartingExpression, sourceExists } from '../../../shared/helpers';
+import {
+  isColumnItem,
+  isOptionItem,
+  isRestartingExpression,
+  isSingleItem,
+  sourceExists,
+} from '../../../shared/helpers';
 import {
   TRIGGER_SUGGESTION_COMMAND,
+  buildFieldsDefinitions,
   buildOptionDefinition,
   buildSourcesDefinitions,
 } from '../../factories';
 import { ESQLSourceResult } from '../../../shared/types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
+import { METADATA_FIELDS } from '../../../shared/constants';
 
 export async function suggest({
   innerText,
+  command,
   getSources,
   getRecommendedQueriesSuggestions,
   getSourcesFromQuery,
@@ -43,6 +54,14 @@ export async function suggest({
     );
   };
 
+  const metadataNode = command.args.find((arg) => isOptionItem(arg) && arg.name === 'metadata') as
+    | ESQLCommandOption
+    | undefined;
+
+  if (metadataNode) {
+    return suggestForMetadata(metadataNode, innerText);
+  }
+
   const metadataOverlap = getOverlapRange(innerText, 'METADATA');
 
   // FROM /
@@ -59,7 +78,7 @@ export async function suggest({
   // FROM something MET/
   else if (
     indexes.length > 0 &&
-    /^FROM \S+\s+/i.test(innerText) &&
+    /^FROM\s+\S+\s+/i.test(innerText) &&
     metadataOverlap.start !== metadataOverlap.end
   ) {
     suggestions.push(buildOptionDefinition(metadataOption));
@@ -140,4 +159,60 @@ function getSourceSuggestions(sources: ESQLSourceResult[]) {
         return { name, isIntegration: Boolean(dataStreams && dataStreams.length), title, type };
       })
   );
+}
+
+async function suggestForMetadata(metadata: ESQLCommandOption, innerText: string) {
+  const existingFields = new Set(metadata.args.filter(isColumnItem).map(({ name }) => name));
+  const filteredMetaFields = METADATA_FIELDS.filter((name) => !existingFields.has(name));
+  const suggestions: SuggestionRawDefinition[] = [];
+  // FROM something METADATA /
+  // FROM something METADATA field/
+  // FROM something METADATA field, /
+  if (
+    metadata.args.filter((arg) => isSingleItem(arg) && !isMarkerNode(arg)).length === 0 ||
+    isRestartingExpression(innerText)
+  ) {
+    suggestions.push(
+      ...(await handleFragment(
+        innerText,
+        (fragment) => METADATA_FIELDS.includes(fragment),
+        (_fragment, rangeToReplace) =>
+          buildFieldsDefinitions(filteredMetaFields).map((suggestion) => ({
+            ...suggestion,
+            rangeToReplace,
+          })),
+        (fragment, rangeToReplace) => {
+          const _suggestions = [
+            {
+              ...pipeCompleteItem,
+              text: fragment + ' | ',
+              filterText: fragment,
+              command: TRIGGER_SUGGESTION_COMMAND,
+              rangeToReplace,
+            },
+          ];
+          if (filteredMetaFields.length > 1) {
+            _suggestions.push({
+              ...commaCompleteItem,
+              text: fragment + ', ',
+              filterText: fragment,
+              command: TRIGGER_SUGGESTION_COMMAND,
+              rangeToReplace,
+            });
+          }
+          return _suggestions;
+        }
+      ))
+    );
+  } else {
+    // METADATA field /
+    if (existingFields.size > 0) {
+      if (filteredMetaFields.length > 0) {
+        suggestions.push(commaCompleteItem);
+      }
+      suggestions.push(pipeCompleteItem);
+    }
+  }
+
+  return suggestions;
 }

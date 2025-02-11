@@ -8,14 +8,15 @@
  */
 
 import { uniq, uniqBy } from 'lodash';
-import type {
-  AstProviderFn,
-  ESQLAst,
-  ESQLAstItem,
-  ESQLCommand,
-  ESQLCommandOption,
-  ESQLFunction,
-  ESQLSingleAstItem,
+import {
+  Walker,
+  type AstProviderFn,
+  type ESQLAst,
+  type ESQLAstItem,
+  type ESQLCommand,
+  type ESQLCommandOption,
+  type ESQLFunction,
+  type ESQLSingleAstItem,
 } from '@kbn/esql-ast';
 import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
 import type { EditorContext, ItemKind, SuggestionRawDefinition, GetColumnsByTypeFn } from './types';
@@ -63,7 +64,6 @@ import {
 import {
   buildFieldsDefinitions,
   buildPoliciesDefinitions,
-  buildSourcesDefinitions,
   getNewVariableSuggestion,
   buildNoPoliciesAvailableDefinition,
   getFunctionSuggestions,
@@ -80,7 +80,7 @@ import {
   getOperatorSuggestions,
   getSuggestionsAfterNot,
 } from './factories';
-import { EDITOR_MARKER, FULL_TEXT_SEARCH_FUNCTIONS, METADATA_FIELDS } from '../shared/constants';
+import { EDITOR_MARKER, FULL_TEXT_SEARCH_FUNCTIONS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
 import {
   buildQueryUntilPreviousCommand,
@@ -215,7 +215,8 @@ export async function suggest(
 
   if (
     astContext.type === 'expression' ||
-    (astContext.type === 'option' && astContext.command?.name === 'join')
+    (astContext.type === 'option' && astContext.command?.name === 'join') ||
+    (astContext.type === 'option' && astContext.command?.name === 'from')
   ) {
     return getSuggestionsWithinCommandExpression(
       innerText,
@@ -1412,53 +1413,6 @@ async function getOptionArgsSuggestions(
       optionDef
     ) {
       suggestions.push(colonCompleteItem, semiColonCompleteItem);
-    }
-  }
-
-  if (option.name === 'metadata') {
-    const existingFields = new Set(option.args.filter(isColumnItem).map(({ name }) => name));
-    const filteredMetaFields = METADATA_FIELDS.filter((name) => !existingFields.has(name));
-    if (isNewExpression) {
-      suggestions.push(
-        ...(await handleFragment(
-          innerText,
-          (fragment) => METADATA_FIELDS.includes(fragment),
-          (_fragment, rangeToReplace) =>
-            buildFieldsDefinitions(filteredMetaFields).map((suggestion) => ({
-              ...suggestion,
-              rangeToReplace,
-            })),
-          (fragment, rangeToReplace) => {
-            const _suggestions = [
-              {
-                ...pipeCompleteItem,
-                text: fragment + ' | ',
-                filterText: fragment,
-                command: TRIGGER_SUGGESTION_COMMAND,
-                rangeToReplace,
-              },
-            ];
-            if (filteredMetaFields.length > 1) {
-              _suggestions.push({
-                ...commaCompleteItem,
-                text: fragment + ', ',
-                filterText: fragment,
-                command: TRIGGER_SUGGESTION_COMMAND,
-                rangeToReplace,
-              });
-            }
-            return _suggestions;
-          }
-        ))
-      );
-    } else {
-      if (existingFields.size > 0) {
-        // METADATA field <suggest>
-        if (filteredMetaFields.length > 0) {
-          suggestions.push(commaCompleteItem);
-        }
-        suggestions.push(pipeCompleteItem);
-      }
     }
   }
 

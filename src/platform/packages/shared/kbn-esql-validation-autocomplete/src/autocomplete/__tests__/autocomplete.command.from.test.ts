@@ -64,7 +64,7 @@ describe('autocomplete.suggest', () => {
     describe('... METADATA <fields>', () => {
       const metadataFieldsAndIndex = metadataFields.filter((field) => field !== '_index');
 
-      test('on <kbd>SPACE</kbd> without comma ",", suggests adding metadata', async () => {
+      test('on <// FROM something METADATA field1, /kbd>SPACE</kbd> without comma ",", suggests adding metadata', async () => {
         const recommendedQueries = getRecommendedQueries({
           fromCommand: '',
           timeField: 'dateField',
@@ -96,6 +96,13 @@ describe('autocomplete.suggest', () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('from a, b METADATA /', metadataFields);
+      });
+
+      test('metadata field prefixes', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('from a, b METADATA _/', metadataFields);
+        await assertSuggestions('from a, b METADATA _sour/', metadataFields);
       });
 
       test('on <kbd>SPACE</kbd> after "METADATA" column suggests command and pipe operators', async () => {
