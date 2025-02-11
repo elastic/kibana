@@ -175,7 +175,7 @@ describe('TemplateForm', () => {
       </>
     );
 
-    await waitFor(async () => {
+    await waitFor(() => {
       expect(formState).not.toBeUndefined();
     });
 
@@ -193,6 +193,7 @@ describe('TemplateForm', () => {
     await user.paste('bar');
     await user.keyboard('{enter}');
     const submitSpy = jest.spyOn(formState!, 'submit');
+
     fireEvent.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
