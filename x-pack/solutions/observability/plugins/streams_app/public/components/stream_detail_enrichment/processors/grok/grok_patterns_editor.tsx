@@ -87,7 +87,7 @@ export const GrokPatternsEditor = () => {
           </SortableList>
         </EuiPanel>
       </EuiFormRow>
-      <EuiFlexGroup justifyContent="flexStart" gutterSize="s">
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
         <EuiFlexItem grow={false}>
           <GrokAiSuggestions />
         </EuiFlexItem>

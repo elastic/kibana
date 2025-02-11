@@ -17,7 +17,7 @@ interface SimulationPlaygroundProps {
   columns: TableColumn[];
   isLoading: UseProcessingSimulatorReturn['isLoading'];
   simulation: UseProcessingSimulatorReturn['simulation'];
-  samples: UseProcessingSimulatorReturn['samples'];
+  filteredSamples: UseProcessingSimulatorReturn['filteredSamples'];
   selectedDocsFilter: UseProcessingSimulatorReturn['selectedDocsFilter'];
   setSelectedDocsFilter: UseProcessingSimulatorReturn['setSelectedDocsFilter'];
   onRefreshSamples: UseProcessingSimulatorReturn['refreshSamples'];
@@ -29,7 +29,7 @@ export const SimulationPlayground = (props: SimulationPlaygroundProps) => {
     columns,
     isLoading,
     simulation,
-    samples,
+    filteredSamples,
     onRefreshSamples,
     setSelectedDocsFilter,
     selectedDocsFilter,
@@ -75,7 +75,7 @@ export const SimulationPlayground = (props: SimulationPlaygroundProps) => {
           columns={columns}
           isLoading={isLoading}
           simulation={simulation}
-          samples={samples}
+          filteredSamples={filteredSamples}
           onRefreshSamples={onRefreshSamples}
           selectedDocsFilter={selectedDocsFilter}
           setSelectedDocsFilter={setSelectedDocsFilter}

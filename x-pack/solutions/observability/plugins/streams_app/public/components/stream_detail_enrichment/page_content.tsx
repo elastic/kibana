@@ -67,7 +67,7 @@ export function StreamDetailEnrichmentContent({
     hasLiveChanges,
     isLoading,
     refreshSamples,
-    samples,
+    filteredSamples,
     simulation,
     tableColumns,
     watchProcessor,
@@ -134,7 +134,7 @@ export function StreamDetailEnrichmentContent({
                     definition={definition}
                     columns={tableColumns}
                     simulation={simulation}
-                    samples={samples}
+                    filteredSamples={filteredSamples}
                     onRefreshSamples={refreshSamples}
                     isLoading={isLoading}
                     selectedDocsFilter={selectedDocsFilter}

@@ -66,7 +66,7 @@ const RefreshButton = ({
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.refreshSuggestions',
             {
-              defaultMessage: '✨ Generate patterns',
+              defaultMessage: 'Generate patterns',
             }
           )}
         </EuiButton>
@@ -126,12 +126,10 @@ function InnerGrokAiSuggestions({
   definition,
   refreshSimulation,
   filteredSamples,
-  extraButtons,
 }: {
   definition: IngestStreamGetResponse;
   refreshSimulation: UseProcessingSimulatorReturn['refreshSimulation'];
   filteredSamples: SampleDocument[];
-  extraButtons?: React.ReactNode;
 }) {
   const { dependencies } = useKibana();
   const {
@@ -314,7 +312,6 @@ function InnerGrokAiSuggestions({
           selectConnector={genAiConnectors?.selectConnector}
           currentConnector={currentConnector}
         />
-        {extraButtons}
       </EuiFlexGroup>
     </EuiFlexGroup>
   );
