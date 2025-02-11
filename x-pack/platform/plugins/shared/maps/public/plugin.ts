@@ -247,26 +247,7 @@ export class MapsPlugin
     setLicensingPluginStart(plugins.licensing);
     setStartServices(core, plugins);
 
-<<<<<<< HEAD
-    if (core.application.capabilities.maps.show) {
-      plugins.uiActions.addTriggerAction(VISUALIZE_GEO_FIELD_TRIGGER, visualizeGeoFieldAction);
-    }
-    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, filterByMapExtentAction);
-    plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, synchronizeMovementAction);
-
-    plugins.uiActions.registerActionAsync('addMapPanelAction', async () => {
-      const { getAddMapPanelAction } = await import('./trigger_actions/add_map_panel_action');
-      return getAddMapPanelAction(plugins);
-    });
-    plugins.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addMapPanelAction');
-    if (plugins.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
-      // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
-      // the create action if the Canvas-specific trigger does indeed exist.
-      plugins.uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', 'addMapPanelAction');
-    }
-=======
     registerUiActions(core, plugins);
->>>>>>> 8a30b862cc1 ([maps] lazy load map actions (#210252))
 
     if (!core.application.capabilities.maps.save) {
       plugins.visualizations.unRegisterAlias(APP_ID);
