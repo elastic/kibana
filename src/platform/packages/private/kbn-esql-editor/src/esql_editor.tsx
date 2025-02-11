@@ -126,6 +126,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   const variablesService = kibana.services?.esql?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(query.esql ?? '');
+  const [codeSubmitted, setCodeSubmitted] = useState<string>(query.esql ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
   const [editorHeight, setEditorHeight] = useState(
@@ -177,6 +178,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         setCodeStateOnSubmission(currentValue);
       }
       onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
+      setCodeSubmitted(currentValue ?? '');
     }
   }, [isQueryLoading, isLoading, allowQueryCancellation, abortController, onTextLangQuerySubmit]);
 
@@ -212,11 +214,12 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   useEffect(() => {
     if (editor1.current) {
-      if (code !== query.esql) {
+      const hasSubmittedQueryChanged = query.esql !== codeSubmitted;
+      if (code !== query.esql && hasSubmittedQueryChanged) {
         setCode(query.esql);
       }
     }
-  }, [code, query.esql]);
+  }, [code, query.esql, codeSubmitted]);
 
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
