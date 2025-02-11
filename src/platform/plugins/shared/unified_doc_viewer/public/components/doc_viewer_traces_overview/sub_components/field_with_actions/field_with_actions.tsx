@@ -37,17 +37,26 @@ export function FieldWithActions({
   children,
   ...props
 }: FieldWithActionsProps) {
-  const hasFieldDescription = !!fieldMetadata?.short;
+  const hasFieldDescription = !!fieldMetadata?.flat_name;
 
   return formattedValue && value ? (
     <div {...props}>
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
-          <EuiTitle size="xxxs">
-            <h3>{label}</h3>
-          </EuiTitle>
-          {hasFieldDescription ? <FieldDescription fieldMetadata={fieldMetadata} /> : null}
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xxxs">
+                <h3>{label}</h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            {hasFieldDescription && (
+              <EuiFlexItem grow={false}>
+                <FieldDescription fieldMetadata={fieldMetadata} />
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
         </EuiFlexItem>
+
         <EuiFlexItem grow={2}>
           <FieldHoverActionPopover title={value} value={value} field={field}>
             <EuiFlexGroup

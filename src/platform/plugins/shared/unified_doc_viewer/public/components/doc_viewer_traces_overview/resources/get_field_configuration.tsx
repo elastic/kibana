@@ -28,6 +28,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiBadge, EuiText } from '@elastic/eui';
+import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { ServiceNameLink } from '../sub_components/service_name_link';
 import { TraceIdLink } from '../sub_components/trace_id_link';
 import { TransactionNameLink } from '../sub_components/transaction_name_link';
@@ -38,7 +39,15 @@ import { HttpStatusCode } from '../sub_components/http_status_code';
 
 export const getFieldConfiguration = (
   attributes: TraceDocumentOverview
-): Record<string, { title: string; content: (value: any) => React.ReactNode; value: any }> => {
+): Record<
+  string,
+  {
+    title: string;
+    content: (value: any) => React.ReactNode;
+    value: any;
+    fieldMetadata?: PartialFieldMetadataPlain;
+  }
+> => {
   return {
     [SPAN_NAME_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.spanName.title', {
@@ -87,6 +96,9 @@ export const getFieldConfiguration = (
           />
         ) : null,
       value: attributes[SPAN_DESTINATION_SERVICE_RESOURCE_FIELD],
+      fieldMetadata: {
+        flat_name: 'span.destination.service.resource ',
+      },
     },
     [TIMESTAMP_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.timestamp.title', {

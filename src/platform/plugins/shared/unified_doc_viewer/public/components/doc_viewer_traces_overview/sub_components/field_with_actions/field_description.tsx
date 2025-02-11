@@ -7,22 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiIconTip } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
-import { FieldIcon } from '@kbn/react-field';
 import React from 'react';
 
 export function FieldDescription({ fieldMetadata }: { fieldMetadata: PartialFieldMetadataPlain }) {
-  const { flat_name: fieldName, short, type } = fieldMetadata;
+  const { flat_name: fieldName } = fieldMetadata;
 
-  const title = (
-    <EuiFlexGroup alignItems="center" gutterSize="s">
-      {type && <FieldIcon type={type} size="s" />}
-      {fieldName}
-    </EuiFlexGroup>
-  );
-
-  return <EuiIconTip title={title} content={short} color="subdued" />;
+  return <EuiIconTip content={fieldName} color="subdued" />;
 }
 
 // eslint-disable-next-line import/no-default-export

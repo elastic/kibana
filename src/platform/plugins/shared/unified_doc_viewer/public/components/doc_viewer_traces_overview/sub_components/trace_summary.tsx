@@ -39,6 +39,7 @@ export function TraceSummary({ fieldConfiguration, fieldId }: TraceSummaryProps)
         field={fieldId}
         value={fieldConfiguration.value}
         formattedValue={fieldConfiguration.value}
+        fieldMetadata={fieldConfiguration.fieldMetadata}
       >
         {() => <div>{fieldConfiguration.content(fieldConfiguration.value)}</div>}
       </FieldWithActions>
