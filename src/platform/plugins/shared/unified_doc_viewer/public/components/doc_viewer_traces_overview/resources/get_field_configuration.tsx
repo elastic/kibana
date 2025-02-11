@@ -38,24 +38,21 @@ import { HttpStatusCode } from '../sub_components/http_status_code';
 
 export const getFieldConfiguration = (
   attributes: TraceDocumentOverview
-): Record<string, { title: string; content: React.ReactNode; value: any }> => {
+): Record<string, { title: string; content: (value: any) => React.ReactNode; value: any }> => {
   return {
     [SPAN_NAME_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.spanName.title', {
         defaultMessage: 'Span name',
       }),
-      content: <EuiText size="xs">{attributes[SPAN_NAME_FIELD]}</EuiText>,
+      content: (value) => <EuiText size="xs">{value}</EuiText>,
       value: attributes[SPAN_NAME_FIELD],
     },
     [TRANSACTION_NAME_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.transactionName.title', {
         defaultMessage: 'Transaction name',
       }),
-      content: (
-        <TransactionNameLink
-          serviceName={attributes[SERVICE_NAME_FIELD]}
-          transactionName={attributes[TRANSACTION_NAME_FIELD]}
-        />
+      content: (value) => (
+        <TransactionNameLink serviceName={attributes[SERVICE_NAME_FIELD]} transactionName={value} />
       ),
       value: attributes[TRANSACTION_NAME_FIELD],
     },
@@ -63,11 +60,8 @@ export const getFieldConfiguration = (
       title: i18n.translate('discover.docViews.tracesOverview.details.service.title', {
         defaultMessage: 'Service',
       }),
-      content: (
-        <ServiceNameLink
-          serviceName={attributes[SERVICE_NAME_FIELD]}
-          agentName={attributes[AGENT_NAME_FIELD]}
-        />
+      content: (value) => (
+        <ServiceNameLink serviceName={value} agentName={attributes[AGENT_NAME_FIELD]} />
       ),
       value: attributes[SERVICE_NAME_FIELD],
     },
@@ -75,7 +69,7 @@ export const getFieldConfiguration = (
       title: i18n.translate('discover.docViews.tracesOverview.details.traceId.title', {
         defaultMessage: 'Trace ID',
       }),
-      content: <TraceIdLink traceId={attributes[TRACE_ID_FIELD]} />,
+      content: (value) => <TraceIdLink traceId={value} />,
       value: attributes[TRACE_ID_FIELD],
     },
     [SPAN_DESTINATION_SERVICE_RESOURCE_FIELD]: {
@@ -85,55 +79,48 @@ export const getFieldConfiguration = (
           defaultMessage: 'Dependency',
         }
       ),
-      content: attributes[SPAN_DESTINATION_SERVICE_RESOURCE_FIELD] ? (
-        <DependencyNameLink
-          dependencyName={attributes[SPAN_DESTINATION_SERVICE_RESOURCE_FIELD]}
-          environment={attributes[SERVICE_ENVIRONMENT_FIELD]}
-        />
-      ) : null,
+      content: (value) =>
+        value ? (
+          <DependencyNameLink
+            dependencyName={value}
+            environment={attributes[SERVICE_ENVIRONMENT_FIELD]}
+          />
+        ) : null,
       value: attributes[SPAN_DESTINATION_SERVICE_RESOURCE_FIELD],
     },
     [TIMESTAMP_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.timestamp.title', {
         defaultMessage: 'Start time',
       }),
-      content: <Timestamp timestamp={attributes[TIMESTAMP_FIELD]} />,
+      content: (value) => <Timestamp timestamp={value} />,
       value: attributes[TIMESTAMP_FIELD],
     },
     [SPAN_DURATION_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.spanDuration.title', {
         defaultMessage: 'Duration',
       }),
-      content: <Duration duration={attributes[SPAN_DURATION_FIELD] ?? 0} />,
+      content: (value) => <Duration duration={value ?? 0} />,
       value: attributes[SPAN_DURATION_FIELD] ?? 0,
     },
     [TRANSACTION_DURATION_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.transactionDuration.title', {
         defaultMessage: 'Duration',
       }),
-      content: <Duration duration={attributes[TRANSACTION_DURATION_FIELD] ?? 0} />,
+      content: (value) => <Duration duration={value ?? 0} />,
       value: attributes[TRANSACTION_DURATION_FIELD] ?? 0,
     },
     [SPAN_TYPE_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.spanType.title', {
         defaultMessage: 'Type',
       }),
-      content: attributes[SPAN_TYPE_FIELD] ? (
-        <div>
-          <EuiBadge color="hollow">{attributes[SPAN_TYPE_FIELD]}</EuiBadge>
-        </div>
-      ) : null,
+      content: (value) => (value ? <EuiBadge color="hollow">{value}</EuiBadge> : null),
       value: attributes[SPAN_TYPE_FIELD],
     },
     [SPAN_SUBTYPE_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.spanSubtype.title', {
         defaultMessage: 'Subtype',
       }),
-      content: attributes[SPAN_SUBTYPE_FIELD] ? (
-        <div>
-          <EuiBadge color="hollow">{attributes[SPAN_SUBTYPE_FIELD]}</EuiBadge>
-        </div>
-      ) : null,
+      content: (value) => (value ? <EuiBadge color="hollow">{value}</EuiBadge> : null),
       value: attributes[SPAN_SUBTYPE_FIELD],
     },
     [HTTP_RESPONSE_STATUS_CODE_FIELD]: {
@@ -143,27 +130,21 @@ export const getFieldConfiguration = (
           defaultMessage: 'Status code',
         }
       ),
-      content: attributes[HTTP_RESPONSE_STATUS_CODE_FIELD] ? (
-        <HttpStatusCode code={attributes[HTTP_RESPONSE_STATUS_CODE_FIELD]} />
-      ) : null,
+      content: (value) => (value ? <HttpStatusCode code={value} /> : null),
       value: attributes[HTTP_RESPONSE_STATUS_CODE_FIELD],
     },
     [USER_AGENT_NAME_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.userAgent.title', {
         defaultMessage: 'User agent',
       }),
-      content: attributes[USER_AGENT_NAME_FIELD] ? (
-        <EuiText size="xs">{attributes[USER_AGENT_NAME_FIELD]}</EuiText>
-      ) : null,
+      content: (value) => (value ? <EuiText size="xs">{value}</EuiText> : null),
       value: attributes[USER_AGENT_NAME_FIELD],
     },
     [USER_AGENT_VERSION_FIELD]: {
       title: i18n.translate('discover.docViews.tracesOverview.details.userAgentVersion.title', {
         defaultMessage: 'User agent version',
       }),
-      content: attributes[USER_AGENT_VERSION_FIELD] ? (
-        <EuiText size="xs">{attributes[USER_AGENT_VERSION_FIELD]}</EuiText>
-      ) : null,
+      content: (value) => (value ? <EuiText size="xs">{value}</EuiText> : null),
       value: attributes[USER_AGENT_VERSION_FIELD],
     },
   };
