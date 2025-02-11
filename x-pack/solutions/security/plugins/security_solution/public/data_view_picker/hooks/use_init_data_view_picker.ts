@@ -13,7 +13,6 @@ import type { DataViewSpec, DataViewsServicePublic } from '@kbn/data-views-plugi
 import { shared, scopes, type RootState, selectDataViewAsync } from '../redux';
 import { useKibana } from '../../common/lib/kibana';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewPickerScopeName } from '../constants';
-import { getDataViewStateFromIndexFields } from '../../common/containers/source/use_data_view';
 
 const createDataViewsLoadingListener = (dependencies: { dataViews: DataViewsServicePublic }) => {
   return {
@@ -49,7 +48,9 @@ const createDataViewSelectedListener = (dependencies: { dataViews: DataViewsServ
         if (action.payload.id) {
           const dataViewById = await dependencies.dataViews.get(action.payload.id);
           dataViewSpec = dataViewById.toSpec();
-        } else {
+        }
+
+        if (!dataViewSpec) {
           const adhocDataView = await dependencies.dataViews.create({
             id: 'adhoc',
             title: action.payload.patterns?.join(','),
