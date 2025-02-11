@@ -93,7 +93,10 @@ const statsRoute = createDatasetQualityServerRoute({
           }),
 
       params.query.includeCreationDate
-        ? getDataStreamsCreationDate({ esClient, dataStreams: dataStreamsNames })
+        ? getDataStreamsCreationDate({
+            esClient: esClientAsSecondaryAuthUser,
+            dataStreams: dataStreamsNames,
+          })
         : ({} as Record<string, number | undefined>),
     ]);
 
