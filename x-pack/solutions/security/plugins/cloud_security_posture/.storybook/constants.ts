@@ -6,11 +6,11 @@
  */
 
 /** The title of the Storybook. */
-export const TITLE = 'Cloud Security Posture Package Storybook';
+export const TITLE = 'Cloud Security Posture  Storybook';
 
 /** The remote URL of the root from which Storybook loads stories for Cloud Security Solution. */
 export const URL =
-  'https://github.com/elastic/kibana/tree/main/x-pack/packages/kbn-cloud-security-posture';
+  'https://github.com/elastic/kibana/tree/main/x-pack/solutions/plugins/cloud-security-posture';
 
 export const WEB_STORAGE_CLEAR_ACTION = 'web_storage:clear' as const;
 export const WEB_STORAGE_GET_ITEM_ACTION = 'web_storage:getItem' as const;
