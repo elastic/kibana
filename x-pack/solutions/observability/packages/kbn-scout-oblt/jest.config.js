@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export { OnboardingHomePage } from './onboarding_home';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/observability/packages/kbn-scout-oblt'],
+};
