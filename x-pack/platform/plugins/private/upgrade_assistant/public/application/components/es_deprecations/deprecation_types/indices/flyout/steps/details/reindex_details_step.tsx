@@ -54,8 +54,6 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   const { status: updateIndexStatus } = updateIndexState;
   const { indexName } = meta;
   const loading = loadingState === LoadingState.Loading;
-  const inProgress =
-    reindexStatus === ReindexStatus.inProgress || updateIndexStatus === 'inProgress';
   const isCompleted = reindexStatus === ReindexStatus.completed || updateIndexStatus === 'complete';
   const hasFetchFailed = reindexStatus === ReindexStatus.fetchFailed;
   const hasReindexingFailed = reindexStatus === ReindexStatus.failed;
@@ -123,11 +121,13 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
         )}
 
         {hasFetchFailed && <FetchFailedCallOut errorMessage={reindexState.errorMessage!} />}
+
         {!hasFetchFailed && hasReindexingFailed && (
           <ReindexingFailedCallOut errorMessage={reindexState.errorMessage!} />
         )}
 
         {meta.isFrozen && <FrozenCallOut />}
+
         <EuiText>
           {meta.isReadonly && (
             <Fragment>
@@ -241,7 +241,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     onClick={startReadonly}
-                    disabled={loading || inProgress}
+                    disabled={loading}
                     data-test-subj="startIndexReadonlyButton"
                   >
                     <FormattedMessage
@@ -259,8 +259,8 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                     iconType={reindexStatus === ReindexStatus.cancelled ? 'play' : undefined}
                     onClick={startReindex}
                     isLoading={loading}
-                    disabled={loading || inProgress}
-                    data-test-subj="startIndexReindexingButton"
+                    disabled={loading}
+                    data-test-subj="startReindexingButton"
                   >
                     {getReindexButtonLabel(reindexStatus)}
                   </EuiButton>

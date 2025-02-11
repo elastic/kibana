@@ -11,6 +11,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -26,7 +27,6 @@ import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex';
 import { useAppContext } from '../../../../../../../app_context';
 import { getReindexButtonLabel } from './messages';
-import { FrozenCallOut } from '../frozen_callout';
 import type { UpdateIndexState } from '../../../use_update_index';
 import { FetchFailedCallOut } from '../fetch_failed_callout';
 import { ReindexingFailedCallOut } from '../reindexing_failed_callout';
@@ -52,8 +52,6 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
   const { status: updateIndexStatus } = updateIndexState;
   const { indexName } = meta;
   const loading = loadingState === LoadingState.Loading;
-  const inProgress =
-    reindexStatus === ReindexStatus.inProgress || updateIndexStatus === 'inProgress';
   const isCompleted = reindexStatus === ReindexStatus.completed || updateIndexStatus === 'complete';
   const hasFetchFailed = reindexStatus === ReindexStatus.fetchFailed;
   const hasReindexingFailed = reindexStatus === ReindexStatus.failed;
@@ -121,52 +119,70 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
         )}
 
         {hasFetchFailed && <FetchFailedCallOut errorMessage={reindexState.errorMessage!} />}
+
         {!hasFetchFailed && hasReindexingFailed && (
           <ReindexingFailedCallOut errorMessage={reindexState.errorMessage!} />
         )}
 
-        {reindexState.meta.isFrozen && <FrozenCallOut />}
         <EuiText>
-          {reindexState.meta.isReadonly && (
-            <p>
-              <FormattedMessage
-                id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.readonlyCompatibleIndexText"
-                defaultMessage="This index was created in ES 7.x. It has been marked as read-only, which enables compatibility with the next major version."
-              />
-            </p>
-          )}
-          <ul>
-            <FormattedMessage
-              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.mustUnfreezeText"
-              tagName="li"
-              defaultMessage="In order to address this issue, you must unfreeze this index and keep it as read-only. This will enable compatibility with the next major version."
-            />
-            <FormattedMessage
-              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.canReindexText"
-              tagName="li"
-              defaultMessage="Alternatively, you might opt for reindexing this index. The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
-            />
-          </ul>
           <p>
             <FormattedMessage
-              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.deleteText"
-              defaultMessage="If you no longer need this data, you can also proceed by deleting this index. {indexManagementLinkHtml}"
-              values={{
-                indexManagementLinkHtml: (
-                  <EuiLink
-                    href={`${http.basePath.prepend(
-                      `/app/management/data/index_management/indices/index_details?indexName=${indexName}`
-                    )}`}
-                  >
-                    <FormattedMessage
-                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.indexMgmtLink"
-                      defaultMessage="Go to index management"
-                    />
-                  </EuiLink>
-                ),
-              }}
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.frozenIndexText"
+              defaultMessage="This index is frozen. Frozen indices will no longer be supported after the upgrade. Choose one of the following options:"
             />
           </p>
+          <EuiDescriptionList
+            rowGutterSize="m"
+            listItems={[
+              {
+                title: 'Option 1: Unfreeze index',
+                description: (
+                  <EuiText size="m">
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.mustUnfreezeText"
+                      defaultMessage="In order to address this issue, you must unfreeze this index and keep it as read-only. This will enable compatibility with the next major version."
+                    />
+                  </EuiText>
+                ),
+              },
+              {
+                title: 'Option 2: Reindex data',
+                description: (
+                  <EuiText size="m">
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.readOnlyText"
+                      defaultMessage="Alternatively, you might opt for reindexing this index. The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
+                    />
+                  </EuiText>
+                ),
+              },
+              {
+                title: 'Option 3: Delete this index',
+                description: (
+                  <EuiText size="m">
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.deleteText"
+                      defaultMessage="If you no longer need this data, you can also proceed by deleting this index. {indexManagementLinkHtml}"
+                      values={{
+                        indexManagementLinkHtml: (
+                          <EuiLink
+                            href={`${http.basePath.prepend(
+                              `/app/management/data/index_management/indices/index_details?indexName=${indexName}`
+                            )}`}
+                          >
+                            <FormattedMessage
+                              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.indexMgmtLink"
+                              defaultMessage="Go to index management"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </EuiText>
+                ),
+              },
+            ]}
+          />
         </EuiText>
         <EuiSpacer />
       </EuiFlyoutBody>
@@ -189,8 +205,8 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
                     iconType={reindexStatus === ReindexStatus.cancelled ? 'play' : undefined}
                     onClick={startReindex}
                     isLoading={loading}
-                    disabled={loading || inProgress}
-                    data-test-subj="startIndexReindexingButton"
+                    disabled={loading}
+                    data-test-subj="startReindexingButton"
                   >
                     {getReindexButtonLabel(reindexStatus)}
                   </EuiButton>
@@ -201,12 +217,13 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
                   <EuiButton
                     fill
                     onClick={unfreeze}
-                    disabled={loading || inProgress}
+                    disabled={loading}
                     data-test-subj="startIndexReadonlyButton"
                   >
                     <FormattedMessage
                       id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreezeIndexButton"
                       defaultMessage="Unfreeze"
+                      data-test-subj="startIndexReadonlyButton"
                     />
                   </EuiButton>
                 </EuiFlexItem>

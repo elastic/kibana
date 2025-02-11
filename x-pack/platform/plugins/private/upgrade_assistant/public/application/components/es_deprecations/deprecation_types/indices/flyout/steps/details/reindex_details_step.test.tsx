@@ -47,6 +47,7 @@ describe('ReindexDetailsFlyoutStep', () => {
       isReadonly: false,
       reindexName: 'some_index-reindexed-for-9',
     },
+    hasRequiredPrivileges: true,
     reindexTaskPercComplete: null,
     errorMessage: null,
   };
@@ -165,7 +166,39 @@ describe('ReindexDetailsFlyoutStep', () => {
             >
               <EuiFlexGroup
                 gutterSize="s"
-              />
+              >
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <EuiButton
+                    data-test-subj="startIndexReadonlyButton"
+                    disabled={false}
+                    onClick={[MockFunction]}
+                  >
+                    <MemoizedFormattedMessage
+                      defaultMessage="Mark as read-only"
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.startIndexReadonlyButton"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <EuiButton
+                    color="primary"
+                    data-test-subj="startReindexingButton"
+                    disabled={false}
+                    fill={true}
+                    isLoading={false}
+                    onClick={[MockFunction]}
+                  >
+                    <MemoizedFormattedMessage
+                      defaultMessage="Start reindexing"
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexButton.runReindexLabel"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>
@@ -229,7 +262,25 @@ describe('ReindexDetailsFlyoutStep', () => {
             >
               <EuiFlexGroup
                 gutterSize="s"
-              />
+              >
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <EuiButton
+                    color="primary"
+                    data-test-subj="startReindexingButton"
+                    disabled={false}
+                    fill={true}
+                    isLoading={false}
+                    onClick={[MockFunction]}
+                  >
+                    <MemoizedFormattedMessage
+                      defaultMessage="Start reindexing"
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexButton.runReindexLabel"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlyoutFooter>

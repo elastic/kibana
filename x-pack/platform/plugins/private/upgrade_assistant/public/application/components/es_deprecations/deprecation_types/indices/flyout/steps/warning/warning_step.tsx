@@ -176,20 +176,35 @@ export const WarningFlyoutStep: React.FunctionComponent<WarningFlyoutStepProps> 
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill color="primary" onClick={confirm} disabled={blockAdvance}>
-              {flow === 'reindex' && (
+            {flow === 'reindex' && (
+              <EuiButton
+                fill
+                color="primary"
+                onClick={confirm}
+                disabled={blockAdvance}
+                data-test-subj="startReindexingButton"
+              >
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.reindex.continueButtonLabel"
                   defaultMessage="Continue reindexing"
                 />
-              )}
-              {flow === 'readonly' && (
+              </EuiButton>
+            )}
+            {flow === 'readonly' && (
+              <EuiButton
+                fill
+                color="primary"
+                onClick={confirm}
+                disabled={blockAdvance}
+                data-test-subj="startIndexReadonlyButton"
+              >
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.readonly.continueButtonLabel"
+                  data-test-subj="startIndexReadonlyButton"
                   defaultMessage="Mark as read-only"
                 />
-              )}
-            </EuiButton>
+              </EuiButton>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
