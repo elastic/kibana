@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnalyticsServiceSetup } from '@kbn/core/public';
+import type { AnalyticsServiceSetup, Logger, EventTypeOpts } from '@kbn/core/server';
 import {
   SIEM_MIGRATIONS_INTEGRATIONS_MATCH,
   SIEM_MIGRATIONS_MIGRATION_FAILURE,
@@ -43,17 +43,24 @@ interface SiemMigrationEvent {
 export class SiemMigrationTelemetryClient {
   constructor(
     private readonly telemetry: AnalyticsServiceSetup,
+    private readonly logger: Logger,
     private readonly migrationId: string,
-    private readonly modelName: string | undefined
-  ) {
-    this.modelName = modelName || '';
+    private readonly modelName: string = ''
+  ) {}
+
+  private reportEvent<T extends object>(eventTypeOpts: EventTypeOpts<T>, data: T): void {
+    try {
+      this.telemetry.reportEvent(eventTypeOpts.eventType, data);
+    } catch (e) {
+      this.logger.error(`Error reporting event ${eventTypeOpts.eventType}: ${e.message}`);
+    }
   }
 
   public reportIntegrationsMatch({
     preFilterIntegrations,
     postFilterIntegration,
   }: IntegrationMatchEvent): void {
-    this.telemetry.reportEvent(SIEM_MIGRATIONS_INTEGRATIONS_MATCH.eventType, {
+    this.reportEvent(SIEM_MIGRATIONS_INTEGRATIONS_MATCH, {
       model: this.modelName,
       migrationId: this.migrationId,
       preFilterIntegrationNames: preFilterIntegrations.map((integration) => integration.id) || [],
@@ -66,12 +73,12 @@ export class SiemMigrationTelemetryClient {
     preFilterRules,
     postFilterRule,
   }: PrebuiltRuleMatchEvent): void {
-    this.telemetry.reportEvent(SIEM_MIGRATIONS_PREBUILT_RULES_MATCH.eventType, {
+    this.reportEvent(SIEM_MIGRATIONS_PREBUILT_RULES_MATCH, {
       model: this.modelName,
       migrationId: this.migrationId,
       preFilterRuleNames: preFilterRules.map((rule) => rule.rule_id) || [],
       preFilterRuleCount: preFilterRules.length,
-      postFilterRuleNames: postFilterRule ? postFilterRule.rule_id : '',
+      postFilterRuleName: postFilterRule ? postFilterRule.rule_id : '',
       postFilterRuleCount: postFilterRule ? 1 : 0,
     });
   }
@@ -84,7 +91,7 @@ export class SiemMigrationTelemetryClient {
       const duration = Date.now() - startTime;
 
       if (error) {
-        this.telemetry.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE.eventType, {
+        this.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE, {
           migrationId: this.migrationId,
           error: error.message,
           model: this.modelName,
@@ -92,9 +99,9 @@ export class SiemMigrationTelemetryClient {
         return;
       }
 
-      this.telemetry.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS.eventType, {
+      this.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS, {
         migrationId: this.migrationId,
-        translationResult: migrationResult?.translation_result,
+        translationResult: migrationResult?.translation_result || '',
         duration,
         model: this.modelName,
         prebuiltMatch: migrationResult?.elastic_rule?.prebuilt_rule_id ? true : false,
@@ -106,14 +113,14 @@ export class SiemMigrationTelemetryClient {
 
     return ({ error, stats }) => {
       const duration = Date.now() - startTime;
-      const total = stats?.completed + stats?.failed;
+      const total = stats ? stats.completed + stats.failed : 0;
 
       if (error) {
-        this.telemetry.reportEvent(SIEM_MIGRATIONS_MIGRATION_FAILURE.eventType, {
+        this.reportEvent(SIEM_MIGRATIONS_MIGRATION_FAILURE, {
           migrationId: this.migrationId,
           model: this.modelName || '',
-          completed: stats?.completed,
-          failed: stats?.failed,
+          completed: stats ? stats.completed : 0,
+          failed: stats ? stats.failed : 0,
           total,
           duration,
           error: error.message,
@@ -121,11 +128,11 @@ export class SiemMigrationTelemetryClient {
         return;
       }
 
-      this.telemetry.reportEvent(SIEM_MIGRATIONS_MIGRATION_SUCCESS.eventType, {
+      this.reportEvent(SIEM_MIGRATIONS_MIGRATION_SUCCESS, {
         migrationId: this.migrationId,
         model: this.modelName || '',
-        completed: stats?.completed,
-        failed: stats?.failed,
+        completed: stats ? stats.completed : 0,
+        failed: stats ? stats.failed : 0,
         total,
         duration,
       });
