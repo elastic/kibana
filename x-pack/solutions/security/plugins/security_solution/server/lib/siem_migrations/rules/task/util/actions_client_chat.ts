@@ -49,7 +49,7 @@ export class ActionsClientChat {
     private readonly logger: Logger
   ) {}
 
-  public async createModel(params?: ChatModelParams): Promise<ChatModel> {
+  public async createModel(params?: ChatModelParams, migrationId?: string): Promise<ChatModel> {
     const connector = await this.actionsClient.get({ id: this.connectorId });
     if (!connector) {
       throw new Error(`Connector not found: ${this.connectorId}`);

@@ -63,7 +63,7 @@ export const getMatchPrebuiltRuleNode = ({
       return {
         name: rule.name,
         description: rule.description,
-        query: rule?.query,
+        query: rule.target?.type !== 'machine_learning' ? rule.target?.query : '',
       };
     });
 
