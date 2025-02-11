@@ -104,7 +104,7 @@ export const LinkContent = ({
     copyToClipboard(urlToCopy.current);
     setTextCopied(() => {
       if (copiedTextToolTipCleanupIdRef.current) {
-        clearInterval(copiedTextToolTipCleanupIdRef.current);
+        clearTimeout(copiedTextToolTipCleanupIdRef.current);
       }
 
       // set up timer to revert copied state to false after specified duration

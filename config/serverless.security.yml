@@ -1,7 +1,7 @@
 # Security Project config
 
 ## Disable plugins
-enterpriseSearch.enabled: false
+xpack.search.enabled: false
 xpack.apm.enabled: false
 xpack.infra.enabled: false
 xpack.observabilityLogsExplorer.enabled: false

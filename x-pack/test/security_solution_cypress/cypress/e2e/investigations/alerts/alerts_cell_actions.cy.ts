@@ -14,14 +14,13 @@ import {
   ALERT_TABLE_SEVERITY_VALUES,
   PROVIDER_BADGE,
 } from '../../../screens/timeline';
-
 import {
-  scrollAlertTableColumnIntoViewAndTest,
   addAlertPropertyToTimeline,
-  filterForAlertProperty,
-  showTopNAlertProperty,
   clickExpandActions,
+  filterForAlertProperty,
   filterOutAlertProperty,
+  scrollAlertTableColumnIntoViewAndTest,
+  showTopNAlertProperty,
 } from '../../../tasks/alerts';
 import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -29,10 +28,10 @@ import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
-  removeKqlFilter,
   fillAddFilterForm,
   fillKqlQueryBar,
   openAddFilterPopover,
+  removeKqlFilter,
 } from '../../../tasks/search_bar';
 import { openActiveTimeline } from '../../../tasks/timeline';
 
@@ -63,7 +62,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
             filterForAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
             cy.get(FILTER_BADGE)
               .first()
-              .should('have.text', `kibana.alert.severity: ${severityVal}`);
+              .should('have.text', `kibana.alert.severity: ${severityVal.toLowerCase()}`);
           });
         removeKqlFilter();
       });
@@ -103,7 +102,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
             filterOutAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
             cy.get(FILTER_BADGE)
               .first()
-              .should('have.text', `NOT kibana.alert.severity: ${severityVal}`);
+              .should('have.text', `NOT kibana.alert.severity: ${severityVal.toLowerCase()}`);
           });
       });
     }
@@ -132,7 +131,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
           openActiveTimeline();
           cy.get(PROVIDER_BADGE)
             .first()
-            .should('have.text', `kibana.alert.severity: "${severityVal}"`);
+            .should('have.text', `kibana.alert.severity: "${severityVal.toLowerCase()}"`);
         });
     });
   });
