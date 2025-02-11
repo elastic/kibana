@@ -119,13 +119,13 @@ export const SessionView = ({
   }, [displayOptions?.verboseMode, searchResults, searchQuery]);
 
   const onProcessSelected = useCallback(
-    (process: Process | null, userAction = false) => {
+    (process: Process | null, isManualSelection = false) => {
       setSelectedProcess(process);
 
       // used when SessionView is displayed in the expandable flyout
       // This refreshes the detailed panel rendered in the flyout preview panel
-      // the userAction prevents the detailed panel to render on first load of the SessionView component
-      if (openDetailsInExpandableFlyout && userAction) {
+      // the isManualSelection prevents the detailed panel to render on first load of the SessionView component
+      if (openDetailsInExpandableFlyout && isManualSelection) {
         openDetailsInExpandableFlyout(process);
       }
     },

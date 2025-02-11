@@ -43,7 +43,7 @@ export interface ProcessDeps {
   process: Process;
   isSessionLeader?: boolean;
   depth?: number;
-  onProcessSelected?: (process: Process, userAction?: boolean) => void;
+  onProcessSelected?: (process: Process, isManualSelection?: boolean) => void;
   jumpToEntityId?: string;
   investigatedAlertId?: string;
   selectedProcess?: Process | null;
@@ -57,6 +57,7 @@ export interface ProcessDeps {
   loadNextButton?: ReactElement | null;
   loadPreviousButton?: ReactElement | null;
   handleCollapseProcessTree?: () => void;
+
   trackEvent(name: SessionViewTelemetryKey): void;
 }
 
