@@ -73,21 +73,25 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   const onAdd = useCallback(() => {
     setState((prevState) => {
       const nextName = TMP_COUNTER++;
+      const newItem = {
+        id: `tab-${nextName}`,
+        label: `Undefined ${nextName}`,
+      };
+
       return {
-        items: [
-          ...prevState.items,
-          {
-            id: `tab-${nextName}`,
-            label: `Undefined ${nextName}`,
-          },
-        ],
-        selectedItem: prevState.selectedItem,
+        items: [...prevState.items, newItem],
+        selectedItem: newItem,
       };
     });
   }, [setState]);
 
   return (
-    <EuiFlexGroup role="tablist" data-test-subj={dataTestSubj} responsive={false}>
+    <EuiFlexGroup
+      role="tablist"
+      data-test-subj={dataTestSubj}
+      responsive={false}
+      alignItems="center"
+    >
       {items.map((item) => (
         <EuiFlexItem key={item.id} grow={false}>
           <Tab
@@ -101,7 +105,8 @@ export const TabsBar: React.FC<TabsBarProps> = ({
       ))}
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
-          iconType="listAdd"
+          iconType="plus"
+          color="text"
           title={i18n.translate('unifiedTabs.createTabButton', {
             defaultMessage: 'New',
           })}

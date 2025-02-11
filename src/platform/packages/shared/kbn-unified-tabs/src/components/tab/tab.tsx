@@ -28,7 +28,7 @@ export const Tab: React.FC<TabProps> = ({
   onClose,
 }) => {
   return (
-    <EuiFlexGroup data-test-subj={dataTestSubj} responsive={false}>
+    <EuiFlexGroup data-test-subj={dataTestSubj} responsive={false} alignItems="center">
       <EuiFlexItem grow={false}>
         <EuiButton
           role="tab"
@@ -44,6 +44,7 @@ export const Tab: React.FC<TabProps> = ({
         <EuiFlexItem grow={false}>
           <EuiButtonIcon
             iconType="cross"
+            color="text"
             title={i18n.translate('unifiedTabs.closeTabButton', {
               defaultMessage: 'Close',
             })}
