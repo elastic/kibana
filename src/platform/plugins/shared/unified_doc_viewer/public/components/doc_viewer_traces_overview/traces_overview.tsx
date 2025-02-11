@@ -15,6 +15,7 @@ import { getTraceDocumentOverview } from '@kbn/discover-utils';
 import { spanFieldIds, transactionFieldIds } from './resources/field_ids';
 import { getFieldConfiguration } from './resources/get_field_configuration';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
+import { TransactionProvider } from '../../hooks/use_transaction';
 import { FieldWithActions } from './sub_components/field_with_actions/field_with_actions';
 export type TracesOverviewProps = DocViewRenderProps;
 
@@ -36,6 +37,7 @@ export function TracesOverview({
   )}`;
 
   return (
+    <TransactionProvider traceId={parsedDoc['trace.id']} indexPattern={dataView.getIndexPattern()}>
     <FieldActionsProvider
       columns={columns}
       filter={filter}
@@ -71,5 +73,6 @@ export function TracesOverview({
         })}
       </EuiPanel>
     </FieldActionsProvider>
+    </TransactionProvider>
   );
 }
