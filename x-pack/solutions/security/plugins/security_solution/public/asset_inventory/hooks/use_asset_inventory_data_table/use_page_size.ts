@@ -6,22 +6,16 @@
  */
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-const DEFAULT_VISIBLE_ROWS_PER_PAGE = 10; // generic default # of table rows to show (currently we only have a list of policies)
-
 /**
  * @description handles persisting the users table row size selection
  */
-export const usePageSize = (localStorageKey: string) => {
+export const usePageSize = (localStorageKey: string, defaultVisibleRowsPerPage = 25) => {
   const [persistedPageSize, setPersistedPageSize] = useLocalStorage(
     localStorageKey,
-    DEFAULT_VISIBLE_ROWS_PER_PAGE
+    defaultVisibleRowsPerPage
   );
 
-  let pageSize = DEFAULT_VISIBLE_ROWS_PER_PAGE;
-
-  if (persistedPageSize) {
-    pageSize = persistedPageSize;
-  }
+  const pageSize = persistedPageSize ? persistedPageSize : defaultVisibleRowsPerPage;
 
   return { pageSize, setPageSize: setPersistedPageSize };
 };

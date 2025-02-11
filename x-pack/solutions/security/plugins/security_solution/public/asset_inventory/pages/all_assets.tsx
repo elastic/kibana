@@ -61,7 +61,6 @@ import {
 } from '../hooks/use_asset_inventory_data_table';
 import { useFetchData } from '../hooks/use_fetch_data';
 import {
-  DEFAULT_VISIBLE_ROWS_PER_PAGE,
   MAX_ASSETS_TO_LOAD,
   LOCAL_STORAGE_DATA_TABLE_DEFAULT_COLUMN_IDS,
   LOCAL_STORAGE_DATA_TABLE_DEFAULT_COLUMN_SETTINGS,
@@ -217,7 +216,7 @@ const AllAssets = ({
     query,
     sort: [['@timestamp', 'desc']],
     enabled: !queryError,
-    pageSize: DEFAULT_VISIBLE_ROWS_PER_PAGE,
+    pageSize,
   });
 
   const rows = getRowsFromPages(rowsData?.pages);
