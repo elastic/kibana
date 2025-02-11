@@ -1850,7 +1850,7 @@
             "label": "renderRow",
             "description": [],
             "signature": [
-              "({ contextId, data, isDraggable, scopeId, }: { contextId?: string | undefined; data: ",
+              "({ contextId, data, scopeId, }: { contextId?: string | undefined; data: ",
               {
                 "pluginId": "@kbn/securitysolution-ecs",
                 "scope": "common",
@@ -1858,7 +1858,7 @@
                 "section": "def-common.EcsSecurityExtension",
                 "text": "EcsSecurityExtension"
               },
-              "; isDraggable: boolean; scopeId: string; }) => React.ReactNode"
+              "; scopeId: string; }) => React.ReactNode"
             ],
             "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
             "deprecated": false,
@@ -1869,7 +1869,7 @@
                 "id": "def-common.DeprecatedRowRenderer.renderRow.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    contextId,\n    data,\n    isDraggable,\n    scopeId,\n  }",
+                "label": "{\n    contextId,\n    data,\n    scopeId,\n  }",
                 "description": [],
                 "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
                 "deprecated": false,
@@ -1905,17 +1905,6 @@
                         "text": "EcsSecurityExtension"
                       }
                     ],
-                    "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  },
-                  {
-                    "parentPluginId": "timelines",
-                    "id": "def-common.DeprecatedRowRenderer.renderRow.$1.isDraggable",
-                    "type": "boolean",
-                    "tags": [],
-                    "label": "isDraggable",
-                    "description": [],
                     "path": "x-pack/platform/plugins/shared/timelines/common/types/timeline/rows/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
@@ -3888,6 +3877,22 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/add_data_provider_popover.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/add_data_provider_popover.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/empty.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/empty.tsx"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_actions.tsx"
           },
           {
@@ -3905,22 +3910,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_badge.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/add_data_provider_popover.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/add_data_provider_popover.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/empty.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/empty.tsx"
           },
           {
             "plugin": "securitySolution",
