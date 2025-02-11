@@ -92,7 +92,6 @@ async function updateRoutingAllocations(
   });
 }
 
-// FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/158318
 describe('incompatible_cluster_routing_allocation', () => {
   let client: ElasticsearchClient;
   let root: Root;
