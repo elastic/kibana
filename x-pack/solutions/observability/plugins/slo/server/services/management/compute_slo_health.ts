@@ -6,7 +6,7 @@
  */
 
 import { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger, SavedObjectsClient } from '@kbn/core/server';
+import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { TransformHealthStatus, TransformStats, TransformStatsState } from '@kbn/slo-schema';
 import { Dictionary, find, flatMap, groupBy } from 'lodash';
 import moment from 'moment';
@@ -25,6 +25,7 @@ import { toSLODefinition } from '../slo_repository';
 interface SummaryAggBucketKey {
   sloId: string;
   sloRevision: string;
+  spaceId: string;
 }
 
 interface SummaryAggBucket {
@@ -44,40 +45,50 @@ const BATCH_SIZE = 100;
 export class ComputeSLOHealth {
   constructor(
     private readonly esClient: ElasticsearchClient,
-    private readonly soClient: SavedObjectsClient,
+    private readonly soClient: SavedObjectsClientContract,
     private readonly logger: Logger
   ) {}
 
-  public async execute(): Promise<void> {
-    this.logger.info('Computing SLOs health...');
+  public async execute(spaceId?: string): Promise<void> {
+    this.logger.info(`Computing SLOs health for spaceId [${spaceId ?? '*'}]...`);
 
     const finder = await this.soClient.createPointInTimeFinder<StoredSLODefinition>({
       type: SO_SLO_TYPE,
       perPage: BATCH_SIZE,
-      namespaces: ['*'],
+      namespaces: [spaceId ?? '*'],
     });
     const createdAt = new Date();
 
     for await (const response of finder.find()) {
-      function getSLOSpaceId(id: string) {
+      function getSpaceId(id: string): string {
         return (
           response.saved_objects.find((so) => so.attributes.id === id)?.namespaces?.[0] ?? 'default'
         );
       }
 
       const sloDefinitions = response.saved_objects
-        .map((so) => toSLODefinition(so, this.logger))
+        .map((savedObject) => toSLODefinition(savedObject, this.logger))
         .filter(Boolean) as SLODefinition[];
 
       this.logger.debug(
         `Processing ${sloDefinitions.length} SLO Definitions from ${response.saved_objects.length} Saved Objects`
       );
-
       if (sloDefinitions.length === 0) {
         continue;
       }
 
-      const { transformStats, summaryResults } = await this.getData(sloDefinitions);
+      const sloDefinitionToSpaceMap = sloDefinitions.reduce<Record<string, string>>(
+        (acc, sloDefinition) => {
+          acc[sloDefinition.id] = getSpaceId(sloDefinition.id);
+          return acc;
+        },
+        {}
+      );
+
+      const { transformStats, summaryResults } = await this.getData(
+        sloDefinitions,
+        sloDefinitionToSpaceMap
+      );
       const transformStatsById = groupBy(transformStats.transforms, 'id');
 
       const health: SLOHealth[] = sloDefinitions.map((sloDefinition) => {
@@ -91,14 +102,16 @@ export class ComputeSLOHealth {
 
         const summaryResult = find(
           summaryResults.aggregations?.bySlo.buckets,
-          (bucket) => bucket.key.sloId === sloDefinition.id
+          (bucket) =>
+            bucket.key.sloId === sloDefinition.id &&
+            bucket.key.spaceId === sloDefinitionToSpaceMap[sloDefinition.id]
         );
 
         const summaryUpdatedAt = new Date(summaryResult?.summaryUpdatedAt.value ?? 0);
         const lastRollupIngestedAt = new Date(summaryResult?.lastRollupIngestedAt.value ?? 0);
 
-        const delay = moment(summaryUpdatedAt).diff(lastRollupIngestedAt, 'ms');
-        const staleTime = moment().diff(summaryUpdatedAt, 'ms');
+        const delay = moment(summaryUpdatedAt).diff(lastRollupIngestedAt, 's');
+        const staleTime = moment().diff(summaryUpdatedAt, 's');
         const isOutdatedVersion = sloDefinition.version < SLO_MODEL_VERSION;
 
         const overallStatus = this.computeStatus(
@@ -111,14 +124,14 @@ export class ComputeSLOHealth {
         );
 
         return {
-          id: sloDefinition.id,
+          id: generateDocId(sloDefinitionToSpaceMap, sloDefinition),
           name: sloDefinition.name,
           description: sloDefinition.description,
           tags: sloDefinition.tags,
           revision: sloDefinition.revision,
           version: sloDefinition.version,
           instances: summaryResult?.doc_count ?? 0,
-          spaceId: getSLOSpaceId(sloDefinition.id),
+          spaceId: sloDefinitionToSpaceMap[sloDefinition.id],
           createdAt: createdAt.toISOString(),
           status: overallStatus,
           health: {
@@ -164,6 +177,13 @@ export class ComputeSLOHealth {
         },
       },
     });
+
+    function generateDocId(
+      sloDefinitionToSpaceMap: Record<string, string>,
+      sloDefinition: SLODefinition
+    ): string {
+      return `${sloDefinitionToSpaceMap[sloDefinition.id]}-${sloDefinition.id}`;
+    }
   }
 
   private toTransformStats(
@@ -259,7 +279,10 @@ export class ComputeSLOHealth {
     return transform.health.status === 'green' && ['started', 'indexing'].includes(transform.state);
   }
 
-  private async getData(sloDefinitions: SLODefinition[]) {
+  private async getData(
+    sloDefinitions: SLODefinition[],
+    sloDefinitionToSpaceMap: Record<string, string>
+  ) {
     const transformIds = flatMap(sloDefinitions, (definition) => [
       getSLOTransformId(definition.id, definition.revision),
       getSLOSummaryTransformId(definition.id, definition.revision),
@@ -281,6 +304,7 @@ export class ComputeSLOHealth {
                 must: [
                   { term: { 'slo.id': sloDefinition.id } },
                   { term: { 'slo.revision': sloDefinition.revision } },
+                  { term: { spaceId: sloDefinitionToSpaceMap[sloDefinition.id] } },
                 ],
               },
             })),
@@ -294,6 +318,7 @@ export class ComputeSLOHealth {
               sources: [
                 { sloId: { terms: { field: 'slo.id' } } },
                 { sloRevision: { terms: { field: 'slo.revision' } } },
+                { spaceId: { terms: { field: 'spaceId' } } },
               ],
             },
             aggregations: {

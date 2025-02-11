@@ -18,7 +18,7 @@ import {
 import numeral from '@elastic/numeral';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { FindSLOHealthSortBy, SLOHealthResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, FindSLOHealthSortBy, SLOHealthResponse } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { sloPaths } from '../../../../../common';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -77,7 +77,7 @@ export function SloHealthPanel() {
         return (
           <EuiLink
             data-test-subj="sloDetailsLink"
-            href={http.basePath.prepend(sloPaths.sloDetails(item.id))}
+            href={http.basePath.prepend(sloPaths.sloDetails(item.id, ALL_VALUE))}
             target="_blank"
           >
             {item.name}
@@ -128,7 +128,7 @@ export function SloHealthPanel() {
     },
     {
       name: (
-        <EuiToolTip content="Time between the latest rolled-up SLI document and the latest summary update. A short delay is expected. If the delay is too high or keep increasing, the rollup transform should be checked.">
+        <EuiToolTip content="Time in seconds between the latest rolled-up SLI document and the latest summary update. A short delay is expected. If the delay is too high or keep increasing, the rollup transform should be checked.">
           <EuiFlexGroup alignItems="center" gutterSize="xs">
             {i18n.translate('xpack.slo.sloHealthPanel.columns.delayLabel', {
               defaultMessage: 'Delay',
@@ -142,7 +142,7 @@ export function SloHealthPanel() {
         return (
           <HealthWrapper status={item.health.delay}>
             {i18n.translate('xpack.slo.healthPanel.durationInMilliseconds', {
-              defaultMessage: '{duration} ms',
+              defaultMessage: '{duration} s',
               values: {
                 duration: numeral(item.data.delay).format('0.[00]'),
               },
@@ -153,7 +153,7 @@ export function SloHealthPanel() {
     },
     {
       name: (
-        <EuiToolTip content="Elapsted time since the latest summary update. If the time is too high or keep increasing, the rollup or summary transform should be checked.">
+        <EuiToolTip content="Elapsted time in seconds since the latest summary update. If the time is too high or keep increasing, the rollup or summary transform should be checked.">
           <EuiFlexGroup alignItems="center" gutterSize="xs">
             {i18n.translate('xpack.slo.sloHealthPanel.columns.staleTimeLabel', {
               defaultMessage: 'Stale time',
@@ -167,7 +167,7 @@ export function SloHealthPanel() {
         return (
           <HealthWrapper status={item.health.staleTime}>
             {i18n.translate('xpack.slo.healthPanel.durationInMilliseconds', {
-              defaultMessage: '{duration} ms',
+              defaultMessage: '{duration} s',
               values: {
                 duration: numeral(item.data.staleTime).format('0.[00]'),
               },

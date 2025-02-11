@@ -28,6 +28,7 @@ import { putSloSettings } from './put_slo_settings';
 import { resetSLORoute } from './reset_slo';
 import { getSLOsOverview } from './get_slos_overview';
 import { findSLOHealthRoute } from '../management/find_slo_health';
+import { refreshSLOHealthRoute } from '../management/refresh_slo_health';
 
 export const getSloRouteRepository = (isServerless?: boolean) => {
   return {
@@ -55,5 +56,6 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...getSLOsOverview,
     // SLO Management
     ...findSLOHealthRoute,
+    ...refreshSLOHealthRoute,
   };
 };

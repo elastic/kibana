@@ -24,3 +24,4 @@ export * from './get_suggestions';
 export * from './get_slo_health';
 
 export * from './management/find';
+export * from './management/refresh_slo_health';
