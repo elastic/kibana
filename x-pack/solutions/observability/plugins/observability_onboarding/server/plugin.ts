@@ -38,7 +38,6 @@ export class ObservabilityOnboardingPlugin
     >
 {
   private readonly logger: Logger;
-  private isDev: boolean;
   esLegacyConfigService = new EsLegacyConfigService();
 
   constructor(
@@ -95,7 +94,7 @@ export class ObservabilityOnboardingPlugin
       logger: this.logger,
       repository: getObservabilityOnboardingServerRouteRepository(),
       dependencies,
-      runDevModeChecks: this.isDev,
+      runDevModeChecks: this.initContext.env.mode.dev,
     });
 
     plugins.customIntegrations.registerCustomIntegration({
