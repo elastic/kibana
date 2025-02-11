@@ -25,6 +25,9 @@ export const useLayoutStyles = () => {
     };
 
     return css`
+      --dashboardActivePanelBorderStyle: ${euiTheme.border.width.thick} solid
+        ${euiTheme.colors.vis.euiColorVis0};
+
       &.kbnGrid {
         // remove margin top + bottom on grid in favour of padding in row
         padding-bottom: 0px;
@@ -50,7 +53,7 @@ export const useLayoutStyles = () => {
       }
 
       .kbnGridPanel--resizeHandle {
-        z-index: ${euiTheme.levels.mask};
+        z-index: ${euiTheme.levels.maskBelowHeader};
 
         // applying mask via ::after allows for focus borders to show
         &:after {
@@ -74,12 +77,12 @@ export const useLayoutStyles = () => {
       }
 
       .kbnGridPanel--active {
-        .embPanel {
-          outline: ${euiTheme.border.width.thick} solid ${euiTheme.colors.accentSecondary} !important;
-        }
+        // overwrite the border style on panels + hover actions for active panels
+        --hoverActionsBorderStyle: var(--dashboardActivePanelBorderStyle);
+
+        // prevent the hover actions transition when active to prevent "blip" on resize
         .embPanel__hoverActions {
-          border: ${euiTheme.border.width.thick} solid ${euiTheme.colors.accentSecondary} !important;
-          border-bottom: 0px solid !important;
+          transition: none;
         }
       }
     `;

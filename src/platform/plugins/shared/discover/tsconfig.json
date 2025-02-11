@@ -50,7 +50,6 @@
     "@kbn/test-jest-helpers",
     "@kbn/shared-ux-page-analytics-no-data",
     "@kbn/alerting-plugin",
-    "@kbn/ui-theme",
     "@kbn/config-schema",
     "@kbn/storybook",
     "@kbn/shared-ux-router",
@@ -99,9 +98,8 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/discover-contextual-components",
     "@kbn/esql-ast",
-    "@kbn/discover-shared-plugin"
+    "@kbn/discover-shared-plugin",
+    "@kbn/ui-theme"
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }

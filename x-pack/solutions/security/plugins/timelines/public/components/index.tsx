@@ -6,4 +6,3 @@
  */
 
 export * from './last_updated';
-export * from './loading';

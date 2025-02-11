@@ -21,7 +21,7 @@ import type {
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { getNamedParams, mapVariableToColumn } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery, getNamedParams, mapVariableToColumn } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
 import { catchError, defer, map, Observable, switchMap, tap, throwError } from 'rxjs';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
@@ -62,6 +62,7 @@ interface Arguments {
    */
   titleForInspector?: string;
   descriptionForInspector?: string;
+  ignoreGlobalFilters?: boolean;
 }
 
 export type EsqlExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -144,10 +145,24 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           defaultMessage: 'The description to show in Inspector.',
         }),
       },
+      ignoreGlobalFilters: {
+        types: ['boolean'],
+        default: false,
+        help: i18n.translate('data.search.esql.ignoreGlobalFilters.help', {
+          defaultMessage: 'Whether to ignore or use global query and filters',
+        }),
+      },
     },
     fn(
       input,
-      { query, /* timezone, */ timeField, locale, titleForInspector, descriptionForInspector },
+      {
+        query,
+        /* timezone, */ timeField,
+        locale,
+        titleForInspector,
+        descriptionForInspector,
+        ignoreGlobalFilters,
+      },
       { abortSignal, inspectorAdapters, getKibanaRequest }
     ) {
       return defer(() =>
@@ -206,7 +221,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               : undefined;
 
             const filters = [
-              ...(input.filters ?? []),
+              ...(ignoreGlobalFilters ? [] : input.filters ?? []),
               ...(timeFilter ? [timeFilter] : []),
               ...(delayFilter ? [delayFilter] : []),
             ];
@@ -315,6 +330,8 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           const lookup = new Set(
             hasEmptyColumns ? body.columns?.map(({ name }) => name) || [] : []
           );
+          const indexPattern = getIndexPatternFromESQLQuery(query);
+
           const allColumns =
             (body.all_columns ?? body.columns)?.map(({ name, type }) => ({
               id: name,
@@ -327,8 +344,11 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                     ? {
                         appliedTimeRange: input?.timeRange,
                         params: {},
+                        indexPattern,
                       }
-                    : {},
+                    : {
+                        indexPattern,
+                      },
               },
               isNull: hasEmptyColumns ? !lookup.has(name) : false,
             })) ?? [];
@@ -351,6 +371,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             type: 'datatable',
             meta: {
               type: ESQL_TABLE_TYPE,
+              query,
+              statistics: {
+                totalCount: body.values.length,
+              },
             },
             columns: updatedWithVariablesColumns,
             rows,

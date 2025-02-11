@@ -110,6 +110,11 @@ export class StatusRuleExecutor {
       ruleParams: this.params,
     });
 
+    if (this.params.kqlQuery && isEmpty(configIds)) {
+      this.debug(`No monitor found with the given KQL query ${this.params.kqlQuery}`);
+      return processMonitors([]);
+    }
+
     const { filtersStr } = parseArrayFilters({
       configIds,
       filter: baseFilter,

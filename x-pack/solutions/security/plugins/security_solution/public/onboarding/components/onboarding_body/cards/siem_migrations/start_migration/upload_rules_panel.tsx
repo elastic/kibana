@@ -15,6 +15,7 @@ import {
   EuiButtonEmpty,
   EuiPanel,
 } from '@elastic/eui';
+import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import { RuleMigrationsReadMore } from '../../../../../../siem_migrations/rules/components/migration_status_panels/read_more';
 import { SiemMigrationsIcon } from '../../../../../../siem_migrations/common/icon';
 import * as i18n from './translations';
@@ -29,10 +30,13 @@ export interface UploadRulesPanelProps {
 export const UploadRulesPanel = React.memo<UploadRulesPanelProps>(
   ({ isUploadMore = false, isDisabled = false }) => {
     const styles = useStyles(isUploadMore);
+    const { telemetry } = useKibana().services.siemMigrations.rules;
     const { openFlyout } = useRuleMigrationDataInputContext();
+
     const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
       openFlyout();
-    }, [openFlyout]);
+      telemetry.reportSetupMigrationOpen({ isFirstMigration: !isUploadMore });
+    }, [openFlyout, telemetry, isUploadMore]);
 
     return (
       <EuiPanel hasShadow={false} hasBorder paddingSize={isUploadMore ? 'm' : 'l'}>

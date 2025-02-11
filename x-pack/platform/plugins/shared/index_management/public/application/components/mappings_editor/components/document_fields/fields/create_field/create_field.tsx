@@ -11,6 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiOutsideClickDetector,
+  EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -18,7 +19,7 @@ import { TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
 import classNames from 'classnames';
 import React, { useEffect, useRef } from 'react';
-import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
+import { TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
 import { getFieldByPathName, isSemanticTextField } from '../../../../lib/utils';
 import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
@@ -281,6 +282,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
   return (
     <>
+      <EuiSpacer size="s" />
       <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
         <Form
           form={form}
@@ -288,20 +290,15 @@ export const CreateField = React.memo(function CreateFieldComponent({
           onSubmit={submitForm}
           data-test-subj="createFieldForm"
         >
-          <div
+          <EuiPanel
+            color="subdued"
+            paddingSize="m"
             className={classNames('mappingsEditor__createFieldWrapper', {
               'mappingsEditor__createFieldWrapper--toggle':
                 Boolean(maxNestedDepth) && maxNestedDepth! > 0,
               'mappingsEditor__createFieldWrapper--multiField': isMultiField,
             })}
-            style={{
-              paddingLeft: `${
-                isMultiField
-                  ? paddingLeft! - EUI_SIZE * 1.5 // As there are no "L" bullet list we need to substract some indent
-                  : paddingLeft
-              }px`,
-            }}
-            ref={createFieldFormRef}
+            panelRef={createFieldFormRef}
             tabIndex={0}
           >
             <div className="mappingsEditor__createFieldContent">
@@ -312,7 +309,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
               {isSemanticText && <SelectInferenceId />}
               {renderFormActions()}
             </div>
-          </div>
+          </EuiPanel>
         </Form>
       </EuiOutsideClickDetector>
     </>

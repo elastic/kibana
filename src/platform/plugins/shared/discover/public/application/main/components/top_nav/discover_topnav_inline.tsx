@@ -8,9 +8,8 @@
  */
 
 import React from 'react';
-import { EuiHeader, EuiHeaderSection, EuiHeaderSectionItem } from '@elastic/eui';
+import { EuiHeader, EuiHeaderSection, EuiHeaderSectionItem, useEuiTheme } from '@elastic/eui';
 import { TopNavMenuBadges, TopNavMenuItems } from '@kbn/navigation-plugin/public';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { LogsExplorerTabs } from '../../../../components/logs_explorer_tabs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { useDiscoverTopNav } from './use_discover_topnav';
@@ -23,6 +22,7 @@ export const DiscoverTopNavInline = ({
   stateContainer: DiscoverStateContainer;
   hideNavMenuItems?: boolean;
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { customizationContext } = stateContainer;
   const services = useDiscoverServices();
   const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
@@ -36,7 +36,7 @@ export const DiscoverTopNavInline = ({
 
   return (
     <EuiHeader
-      css={{ boxShadow: 'none', backgroundColor: euiThemeVars.euiPageBackgroundColor }}
+      css={{ boxShadow: 'none', backgroundColor: euiTheme.colors.body }}
       data-test-subj="discoverTopNavInline"
     >
       {customizationContext.inlineTopNav.showLogsExplorerTabs && (

@@ -42,11 +42,7 @@ export interface NetworkDetailsProps {
 /**
  * Component rendering all the network details for the expandable flyout
  */
-export const NetworkDetails = ({
-  ip,
-  flowTarget,
-  isDraggable,
-}: NetworkDetailsProps & { isDraggable?: boolean }) => {
+export const NetworkDetails = ({ ip, flowTarget }: NetworkDetailsProps) => {
   const dispatch = useDispatch();
   const { to, from, isInitializing } = useGlobalTime();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
@@ -113,7 +109,6 @@ export const NetworkDetails = ({
       loading={loading}
       isInDetailsSidePanel
       isLoadingAnomaliesData={isLoadingAnomaliesData}
-      isDraggable={isDraggable}
       type={type}
       flowTarget={flowTarget}
       startDate={from}

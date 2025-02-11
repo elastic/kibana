@@ -24,11 +24,13 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
   transition: background-color 0.7s ease;
   width: 100%;
   height: ${({ height }) => height};
+
   .flyout-overlay {
     .euiPanel {
       background-color: ${(props) => props.theme.eui.euiFormBackgroundColor};
     }
   }
+
   ${(props) =>
     props.isDraggingOver
       ? `
@@ -80,6 +82,7 @@ const ReactDndDropTarget = styled.div<{ isDraggingOver: boolean; height: string 
     .drop-and-provider-timeline {
       display: none;
     }
+
     & + div {
       /* Override dragNdrop beautiful so we do not have our droppable moving around for no good reason */
       display: none !important;

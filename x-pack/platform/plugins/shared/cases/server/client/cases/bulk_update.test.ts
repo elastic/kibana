@@ -20,7 +20,7 @@ import {
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { Operations } from '../../authorization';
-import { bulkUpdate } from './bulk_update';
+import { bulkUpdate, getOperationsToAuthorize } from './bulk_update';
 
 describe('update', () => {
   const cases = {
@@ -314,6 +314,90 @@ describe('update', () => {
       ).rejects.toThrow(
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the field assignees is too long. Array must be of length <= 10.'
       );
+    });
+
+    it('returns only updateCase operation when no reopened cases or changed assignees', () => {
+      const operations = getOperationsToAuthorize({
+        reopenedCases: [],
+        changedAssignees: [],
+        allCases: cases.cases,
+      });
+      expect(operations).toEqual([Operations.updateCase]);
+    });
+
+    it('returns only assignCase operation when all cases are assignee changes', () => {
+      const operations = getOperationsToAuthorize({
+        reopenedCases: [],
+        changedAssignees: cases.cases,
+        allCases: cases.cases,
+      });
+      expect(operations).toEqual([Operations.assignCase]);
+    });
+
+    it('returns only reopenCase operation when all cases are being reopened', () => {
+      const operations = getOperationsToAuthorize({
+        reopenedCases: cases.cases,
+        changedAssignees: [],
+        allCases: cases.cases,
+      });
+      expect(operations).toEqual([Operations.reopenCase]);
+    });
+
+    it('returns assignCase and updateCase when some cases have non-assignee changes', () => {
+      const case2 = { id: 'case-2', version: '1' };
+      const operations = getOperationsToAuthorize({
+        reopenedCases: [],
+        changedAssignees: cases.cases,
+        allCases: [...cases.cases, case2],
+      });
+      expect(operations).toEqual([Operations.assignCase, Operations.updateCase]);
+    });
+
+    it('returns reopenCase and updateCase when some cases have non-reopen changes', () => {
+      const case2 = { id: 'case-2', version: '1' };
+      const operations = getOperationsToAuthorize({
+        reopenedCases: cases.cases,
+        changedAssignees: [],
+        allCases: [...cases.cases, case2],
+      });
+      expect(operations).toEqual([Operations.reopenCase, Operations.updateCase]);
+    });
+
+    it('returns all operations when cases have mixed changes', () => {
+      const case2 = { id: 'case-2', version: '1' };
+      const case3 = { id: 'case-3', version: '1' };
+      const operations = getOperationsToAuthorize({
+        reopenedCases: cases.cases,
+        changedAssignees: [case2],
+        allCases: [...cases.cases, case2, case3],
+      });
+      expect(operations).toEqual([
+        Operations.reopenCase,
+        Operations.assignCase,
+        Operations.updateCase,
+      ]);
+    });
+
+    it('handles empty casesToAuthorize array', () => {
+      const operations = getOperationsToAuthorize({
+        reopenedCases: [],
+        changedAssignees: [],
+        allCases: [],
+      });
+      expect(operations).toEqual([]);
+    });
+
+    it('returns only combined operations when all cases have both reopen and assignee changes', () => {
+      const operations = getOperationsToAuthorize({
+        reopenedCases: cases.cases,
+        changedAssignees: cases.cases,
+        allCases: cases.cases,
+      });
+      expect(operations).toEqual([
+        Operations.reopenCase,
+        Operations.assignCase,
+        Operations.updateCase,
+      ]);
     });
   });
 
@@ -1514,6 +1598,59 @@ describe('update', () => {
       );
     });
 
+    it('throws an error if the case is not found', async () => {
+      clientArgsMock.services.caseService.getCases.mockResolvedValue({ saved_objects: [] });
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                status: CaseStatuses.open,
+              },
+            ],
+          },
+          clientArgsMock,
+          casesClientMock
+        )
+      ).rejects.toThrow(
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: These cases mock-id-1 do not exist. Please check you have the correct ids.'
+      );
+    });
+
+    it('throws an error if the case is not found and the SO clients returns an SO object', async () => {
+      clientArgsMock.services.caseService.getCases.mockResolvedValue({
+        saved_objects: [
+          {
+            type: 'cases',
+            id: 'mock-id-1',
+            references: [],
+            error: { error: 'Non found', message: 'Non found', statusCode: 404 },
+          },
+        ],
+      });
+
+      await expect(
+        bulkUpdate(
+          {
+            cases: [
+              {
+                id: mockCases[0].id,
+                version: mockCases[0].version ?? '',
+                status: CaseStatuses.open,
+              },
+            ],
+          },
+          clientArgsMock,
+          casesClientMock
+        )
+      ).rejects.toThrow(
+        'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: These cases mock-id-1 do not exist. Please check you have the correct ids.'
+      );
+    });
+
     describe('Validate max user actions per page', () => {
       beforeEach(() => {
         jest.clearAllMocks();
@@ -1674,7 +1811,7 @@ describe('update', () => {
         });
       });
 
-      it('checks authorization for both reopenCase and updateCase operations when reopening a case', async () => {
+      it('checks authorization for only reopenCase', async () => {
         // Mock a closed case
         const closedCase = {
           ...mockCases[0],
@@ -1683,6 +1820,7 @@ describe('update', () => {
             status: CaseStatuses.closed,
           },
         };
+
         clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: [closedCase] });
 
         clientArgs.services.caseService.patchCases.mockResolvedValue({
@@ -1703,7 +1841,10 @@ describe('update', () => {
           casesClientMock
         );
 
-        expect(clientArgs.authorization.ensureAuthorized).not.toThrow();
+        expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
+          entities: [{ id: closedCase.id, owner: closedCase.attributes.owner }],
+          operation: [Operations.reopenCase],
+        });
       });
 
       it('throws when user is not authorized to update case', async () => {
@@ -1726,38 +1867,6 @@ describe('update', () => {
           )
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Unauthorized"`
-        );
-      });
-
-      it('throws when user is not authorized to reopen case', async () => {
-        const closedCase = {
-          ...mockCases[0],
-          attributes: {
-            ...mockCases[0].attributes,
-            status: CaseStatuses.closed,
-          },
-        };
-        clientArgs.services.caseService.getCases.mockResolvedValue({ saved_objects: [closedCase] });
-
-        const error = new Error('Unauthorized to reopen case');
-        clientArgs.authorization.ensureAuthorized.mockRejectedValueOnce(error); // Reject reopenCase
-
-        await expect(
-          bulkUpdate(
-            {
-              cases: [
-                {
-                  id: closedCase.id,
-                  version: closedCase.version ?? '',
-                  status: CaseStatuses.open,
-                },
-              ],
-            },
-            clientArgs,
-            casesClientMock
-          )
-        ).rejects.toThrowErrorMatchingInlineSnapshot(
-          `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Unauthorized to reopen case"`
         );
       });
     });

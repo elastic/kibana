@@ -40,4 +40,5 @@ type Generate<TFields> = (options: {
 export type Scenario<TFields> = (options: RunOptions & { logger: Logger }) => Promise<{
   bootstrap?: (options: EsClients & KibanaClients) => Promise<void>;
   generate: Generate<TFields>;
+  teardown?: (options: EsClients & KibanaClients) => Promise<void>;
 }>;
