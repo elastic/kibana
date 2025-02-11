@@ -5,18 +5,19 @@
  * 2.0.
  */
 import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiLink,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiProgress,
   EuiSpacer,
   EuiText,
-  EuiHorizontalRule,
-  EuiPopoverTitle,
-  EuiLink,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiButtonIcon,
+  useEuiTheme,
 } from '@elastic/eui';
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { AlertsProgressBarData, GroupBySelection } from './types';
@@ -24,10 +25,10 @@ import type { AddFilterProps } from '../common/types';
 import { getAggregateData } from './helpers';
 import * as i18n from './translations';
 import {
-  SecurityCellActionType,
   CellActionsMode,
-  SecurityCellActionsTrigger,
   SecurityCellActions,
+  SecurityCellActionsTrigger,
+  SecurityCellActionType,
 } from '../../../../common/components/cell_actions';
 import { getSourcererScopeId } from '../../../../helpers';
 
@@ -60,6 +61,15 @@ const EmptyAction = styled.div`
  * Individual progress bar per row
  */
 const ProgressBarRow: React.FC<{ item: AlertsProgressBarData }> = ({ item }) => {
+  const { euiTheme } = useEuiTheme();
+  const color = useMemo(
+    () =>
+      euiTheme.themeName === 'EUI_THEME_BOREALIS'
+        ? euiTheme.colors.vis.euiColorVis6
+        : euiTheme.colors.vis.euiColorVis9,
+    [euiTheme]
+  );
+
   return (
     <EuiProgress
       valueText={
@@ -68,7 +78,7 @@ const ProgressBarRow: React.FC<{ item: AlertsProgressBarData }> = ({ item }) => 
         </EuiText>
       }
       max={1}
-      color={'vis9'}
+      color={color}
       size="s"
       value={item.percentage}
       label={
