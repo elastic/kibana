@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Action, createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { createAction, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
+import { map } from 'rxjs';
 import type { DiscoverAppLocator } from './open_in_discover_helpers';
 import { LensApi } from '../react_embeddable/types';
-import { map } from 'rxjs';
 
 const ACTION_OPEN_IN_DISCOVER = 'ACTION_OPEN_IN_DISCOVER';
 
@@ -54,11 +54,8 @@ export const createOpenInDiscoverAction = (
         throw new IncompatibleActionError();
       return hasDiscoverAccess && Boolean((embeddable as LensApi).canViewUnderlyingData$);
     },
-    getCompatibilityChangesSubject: (
-      { embeddable }: EmbeddableApiContext
-    ) => {
-      if (!typeof (embeddable as LensApi).canViewUnderlyingData$)
-        return;
+    getCompatibilityChangesSubject: ({ embeddable }: EmbeddableApiContext) => {
+      if (!typeof (embeddable as LensApi).canViewUnderlyingData$) return;
       return (embeddable as LensApi).canViewUnderlyingData$.pipe(map(() => undefined));
     },
     execute: async (context: EmbeddableApiContext) => {

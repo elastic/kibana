@@ -100,9 +100,7 @@ export interface Action<Context extends object = object>
   /**
    * @returns an Observable that emits when this action's compatibility changes.
    */
-  getCompatibilityChangesSubject?: (
-    context: Context,
-  ) => Observable<undefined> | undefined;
+  getCompatibilityChangesSubject?: (context: Context) => Observable<undefined> | undefined;
 
   /**
    * Determines if action could become compatible given the context. If present,
@@ -179,9 +177,7 @@ export interface ActionDefinition<Context extends object = object>
   /**
    * @returns an Observable that emits when this action's compatibility changes.
    */
-  getCompatibilityChangesSubject?: (
-    context: Context,
-  ) => Observable<undefined> | undefined;
+  getCompatibilityChangesSubject?: (context: Context) => Observable<undefined> | undefined;
 
   /**
    * Determines if action could become compatible given the context. If present,

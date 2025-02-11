@@ -52,11 +52,12 @@ export class ExpandPanelAction implements Action<EmbeddableApiContext> {
     return apiHasParentApi(embeddable) && apiCanExpandPanels(embeddable.parentApi);
   }
 
-  public getCompatibilityChangesSubject(
-    { embeddable }: EmbeddableApiContext,
-  ) {
+  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
     return isApiCompatible(embeddable)
-      ? embeddable.parentApi.expandedPanelId$.pipe(skip(1), map(() => undefined))
+      ? embeddable.parentApi.expandedPanelId$.pipe(
+          skip(1),
+          map(() => undefined)
+        )
       : undefined;
   }
 
