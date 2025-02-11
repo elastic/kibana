@@ -121,7 +121,12 @@ export class HealthComputingTask {
     const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
 
     try {
-      const computeHealth = new ComputeSLOHealth(esClient, soClient, this.logger);
+      const computeHealth = new ComputeSLOHealth(
+        esClient,
+        soClient,
+        this.logger,
+        this.abortController
+      );
       await computeHealth.execute();
     } catch (err) {
       if (err instanceof errors.RequestAbortedError) {

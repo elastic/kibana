@@ -46,11 +46,12 @@ export class ComputeSLOHealth {
   constructor(
     private readonly esClient: ElasticsearchClient,
     private readonly soClient: SavedObjectsClientContract,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly abortController: AbortController = new AbortController()
   ) {}
 
   public async execute(spaceId?: string): Promise<void> {
-    this.logger.info(`Computing SLOs health for spaceId [${spaceId ?? '*'}]...`);
+    this.logger.info(`Computing SLOs health for spaceId [${spaceId ?? '*'}]`);
 
     const finder = await this.soClient.createPointInTimeFinder<StoredSLODefinition>({
       type: SO_SLO_TYPE,
@@ -155,28 +156,32 @@ export class ComputeSLOHealth {
       });
 
       this.logger.debug(`Indexing ${health.length} health documents`);
-      await this.esClient.bulk({
-        index: HEALTH_INDEX_NAME,
-        operations: health.flatMap((doc) => [{ index: { _id: doc.id } }, doc]),
-      });
+      await this.esClient.bulk(
+        {
+          index: HEALTH_INDEX_NAME,
+          operations: health.flatMap((doc) => [{ index: { _id: doc.id } }, doc]),
+        },
+        { signal: this.abortController.signal }
+      );
     }
-
     await finder.close();
 
-    // remove old health documents (e.g. from SLO Definitions that were deleted)
-    await this.esClient.deleteByQuery({
-      index: HEALTH_INDEX_NAME,
-      wait_for_completion: false,
-      body: {
-        query: {
-          range: {
-            createdAt: {
-              lte: 'now-1d/d',
+    await this.esClient.deleteByQuery(
+      {
+        index: HEALTH_INDEX_NAME,
+        wait_for_completion: false,
+        body: {
+          query: {
+            range: {
+              createdAt: {
+                lte: 'now-1d/d',
+              },
             },
           },
         },
       },
-    });
+      { signal: this.abortController.signal }
+    );
 
     function generateDocId(
       sloDefinitionToSpaceMap: Record<string, string>,
@@ -289,53 +294,59 @@ export class ComputeSLOHealth {
     ]);
 
     const [transformStats, summaryResults] = await Promise.all([
-      this.esClient.transform.getTransformStats({
-        transform_id: transformIds,
-        allow_no_match: true,
-        size: transformIds.length,
-      }),
-      this.esClient.search<unknown, SummaryAggResults>({
-        index: SUMMARY_DESTINATION_INDEX_PATTERN,
-        size: 0,
-        query: {
-          bool: {
-            should: sloDefinitions.map((sloDefinition) => ({
-              bool: {
-                must: [
-                  { term: { 'slo.id': sloDefinition.id } },
-                  { term: { 'slo.revision': sloDefinition.revision } },
-                  { term: { spaceId: sloDefinitionToSpaceMap[sloDefinition.id] } },
+      this.esClient.transform.getTransformStats(
+        {
+          transform_id: transformIds,
+          allow_no_match: true,
+          size: transformIds.length,
+        },
+        { signal: this.abortController.signal }
+      ),
+      this.esClient.search<unknown, SummaryAggResults>(
+        {
+          index: SUMMARY_DESTINATION_INDEX_PATTERN,
+          size: 0,
+          query: {
+            bool: {
+              should: sloDefinitions.map((sloDefinition) => ({
+                bool: {
+                  must: [
+                    { term: { 'slo.id': sloDefinition.id } },
+                    { term: { 'slo.revision': sloDefinition.revision } },
+                    { term: { spaceId: sloDefinitionToSpaceMap[sloDefinition.id] } },
+                  ],
+                },
+              })),
+              minimum_should_match: 1,
+            },
+          },
+          aggs: {
+            bySlo: {
+              composite: {
+                size: BATCH_SIZE,
+                sources: [
+                  { sloId: { terms: { field: 'slo.id' } } },
+                  { sloRevision: { terms: { field: 'slo.revision' } } },
+                  { spaceId: { terms: { field: 'spaceId' } } },
                 ],
               },
-            })),
-            minimum_should_match: 1,
-          },
-        },
-        aggs: {
-          bySlo: {
-            composite: {
-              size: BATCH_SIZE,
-              sources: [
-                { sloId: { terms: { field: 'slo.id' } } },
-                { sloRevision: { terms: { field: 'slo.revision' } } },
-                { spaceId: { terms: { field: 'spaceId' } } },
-              ],
-            },
-            aggregations: {
-              summaryUpdatedAt: {
-                max: {
-                  field: 'summaryUpdatedAt',
+              aggregations: {
+                summaryUpdatedAt: {
+                  max: {
+                    field: 'summaryUpdatedAt',
+                  },
                 },
-              },
-              lastRollupIngestedAt: {
-                max: {
-                  field: 'latestSliTimestamp',
+                lastRollupIngestedAt: {
+                  max: {
+                    field: 'latestSliTimestamp',
+                  },
                 },
               },
             },
           },
         },
-      }),
+        { signal: this.abortController.signal }
+      ),
     ]);
 
     this.logger.debug(

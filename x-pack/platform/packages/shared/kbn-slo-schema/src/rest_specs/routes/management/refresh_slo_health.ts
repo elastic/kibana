@@ -8,9 +8,7 @@
 import * as t from 'io-ts';
 
 const refreshSLOHealthParamsSchema = t.partial({
-  query: t.partial({
-    spaceId: t.string,
-  }),
+  query: t.type({}),
 });
 
 export type RefreshSLOHealthParams = t.TypeOf<typeof refreshSLOHealthParamsSchema.props.query>;

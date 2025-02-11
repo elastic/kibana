@@ -5,13 +5,40 @@
  * 2.0.
  */
 
-import { RefreshSLOHealthParams } from '@kbn/slo-schema';
+import { ElasticsearchClient } from '@kbn/core/server';
+import moment from 'moment';
+import { HEALTH_INDEX_PATTERN } from '../../../common/constants';
+import { SLOHealth } from '../../domain/models';
 import { ComputeSLOHealth } from './compute_slo_health';
 
-export class RefreshSLOHealth {
-  constructor(private computeHealth: ComputeSLOHealth) {}
+const MIN_REFRESH_INTERVAL = 60;
 
-  public async execute(params: RefreshSLOHealthParams): Promise<void> {
-    await this.computeHealth.execute(params.spaceId);
+export class RefreshSLOHealth {
+  constructor(
+    private computeSLOHealth: ComputeSLOHealth,
+    private esClient: ElasticsearchClient,
+    private spaceId: string
+  ) {}
+
+  public async execute(): Promise<void> {
+    const lastRefreshedAt = await this.getLastRefreshedDate();
+
+    if (moment().diff(lastRefreshedAt, 's') >= MIN_REFRESH_INTERVAL) {
+      await this.computeSLOHealth.execute(this.spaceId);
+    }
+  }
+
+  private async getLastRefreshedDate(): Promise<Date> {
+    const results = await this.esClient.search<Pick<SLOHealth, 'createdAt'>>({
+      index: HEALTH_INDEX_PATTERN,
+      size: 1,
+      _source: ['createdAt'],
+      sort: [{ createdAt: { order: 'desc' } }],
+      query: { bool: { filter: [{ term: { spaceId: this.spaceId } }] } },
+    });
+
+    return results.hits.hits.length > 0 && !!results.hits.hits[0]._source?.createdAt
+      ? new Date(results.hits.hits[0]._source.createdAt)
+      : new Date();
   }
 }
