@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { toBooleanRt } from '@kbn/io-ts-utils';
 import {
   CheckAndLoadIntegrationResponse,
   DataStreamDetails,
@@ -45,7 +46,7 @@ const statsRoute = createDatasetQualityServerRoute({
   params: t.type({
     query: t.intersection([
       t.union([t.type({ types: typesRt }), t.type({ datasetQuery: t.string })]),
-      t.partial({ includeCreationDate: t.boolean }),
+      t.partial({ includeCreationDate: toBooleanRt }),
     ]),
   }),
   options: {
