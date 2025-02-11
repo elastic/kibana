@@ -274,7 +274,6 @@ describe('Observability AI Assistant client', () => {
       stream = observableIntoStream(
         client.complete({
           connectorId: 'foo',
-          systemMessage: 'This is a system message',
           messages: [user('How many alerts do I have?')],
           functionClient: functionClientMock,
           signal: new AbortController().signal,
@@ -487,7 +486,6 @@ describe('Observability AI Assistant client', () => {
               user: {
                 name: 'johndoe',
               },
-              systemMessage: 'This is a system message',
               messages: [
                 {
                   '@timestamp': expect.any(String),
@@ -551,7 +549,6 @@ describe('Observability AI Assistant client', () => {
                   labels: {},
                   numeric_labels: {},
                   public: false,
-                  systemMessage: 'This is a system message',
                   messages: [user('How many alerts do I have?')],
                 },
               },
@@ -567,7 +564,6 @@ describe('Observability AI Assistant client', () => {
       stream = observableIntoStream(
         await client.complete({
           connectorId: 'foo',
-          systemMessage: 'This is a system message',
           messages: [user('How many alerts do I have?')],
           functionClient: functionClientMock,
           signal: new AbortController().signal,
@@ -628,7 +624,6 @@ describe('Observability AI Assistant client', () => {
           user: {
             name: 'johndoe',
           },
-          systemMessage: 'This is a system message',
           messages: [
             {
               '@timestamp': expect.any(String),
@@ -671,7 +666,6 @@ describe('Observability AI Assistant client', () => {
       stream = observableIntoStream(
         await client.complete({
           connectorId: 'foo',
-          systemMessage: 'This is a system message',
           messages: [user('How many alerts do I have?')],
           functionClient: functionClientMock,
           signal: new AbortController().signal,
@@ -762,7 +756,6 @@ describe('Observability AI Assistant client', () => {
       stream = observableIntoStream(
         await client.complete({
           connectorId: 'foo',
-          systemMessage: 'This is a system message',
           messages: [user('How many alerts do I have?')],
           functionClient: functionClientMock,
           signal: new AbortController().signal,
@@ -1188,7 +1181,6 @@ describe('Observability AI Assistant client', () => {
       stream = observableIntoStream(
         await client.complete({
           connectorId: 'foo',
-          systemMessage: 'This is a system message',
           messages: [user('How many alerts do I have?')],
           functionClient: functionClientMock,
           signal: new AbortController().signal,
@@ -1314,7 +1306,6 @@ describe('Observability AI Assistant client', () => {
       stream = observableIntoStream(
         await client.complete({
           connectorId: 'foo',
-          systemMessage: 'This is a system message',
           messages: [user('How many alerts do I have?')],
           functionClient: functionClientMock,
           signal: new AbortController().signal,
@@ -1393,7 +1384,6 @@ describe('Observability AI Assistant client', () => {
       const stream = observableIntoStream(
         await client.complete({
           connectorId: 'foo',
-          systemMessage: 'This is a system message',
           messages: [user('How many alerts do I have?')],
           functionClient: functionClientMock,
           signal: new AbortController().signal,
@@ -1482,7 +1472,6 @@ describe('Observability AI Assistant client', () => {
       stream = observableIntoStream(
         await client.complete({
           connectorId: 'foo',
-          systemMessage: 'This is a system message',
           messages: [user('How many alerts do I have?')],
           functionClient: functionClientMock,
           signal: new AbortController().signal,
@@ -1548,7 +1537,6 @@ describe('Observability AI Assistant client', () => {
     client
       .complete({
         connectorId: 'foo',
-        systemMessage: 'This is a system message',
         messages: [user('A user message to cause completion')],
         functionClient: functionClientMock,
         signal: new AbortController().signal,
@@ -1558,7 +1546,7 @@ describe('Observability AI Assistant client', () => {
       .subscribe(() => {}); // To trigger call to chat
     await nextTick();
 
-    expect(chatSpy.mock.calls[0][1].system).toEqual(EXPECTED_STORED_SYSTEM_MESSAGE);
+    expect(chatSpy.mock.calls[0][1].systemMessage).toEqual(EXPECTED_STORED_SYSTEM_MESSAGE);
   });
 
   describe('when executing an action', () => {
@@ -1575,7 +1563,6 @@ describe('Observability AI Assistant client', () => {
 
       const complete$ = await client.complete({
         connectorId: 'foo',
-        systemMessage: 'This is a system message',
         messages: [user('Can you call the my_action function?')],
         functionClient: new ChatFunctionClient([
           {

@@ -165,7 +165,6 @@ export class ObservabilityAIAssistantClient {
     connectorId,
     simulateFunctionCalling = false,
     instructions: adHocInstructions = [],
-    systemMessage,
     messages: initialMessages,
     signal,
     persist,
@@ -175,7 +174,6 @@ export class ObservabilityAIAssistantClient {
     conversationId: predefinedConversationId,
     disableFunctions = false,
   }: {
-    systemMessage?: string;
     messages: Message[];
     connectorId: string;
     signal: AbortSignal;
@@ -209,6 +207,8 @@ export class ObservabilityAIAssistantClient {
           });
         }
 
+        const userInstructions$ = from(this.getKnowledgeBaseUserInstructions()).pipe(shareReplay());
+
         const registeredAdhocInstructions = functionClient.getAdhocInstructions();
         const allAdHocInstructions = adHocInstructions.concat(registeredAdhocInstructions);
 
@@ -235,21 +235,26 @@ export class ObservabilityAIAssistantClient {
                 tracer: completeTracer,
               }).pipe(shareReplay());
 
-        // we continue the conversation here, after resolving both the materialized
-        // messages and the knowledge base instructions
-        const nextEvents$ = from(this.getKnowledgeBaseUserInstructions()).pipe(
-          switchMap((userInstructions) => {
-            // if needed, inject a context function request here
-            const contextRequest = functionClient.hasFunction(CONTEXT_FUNCTION_NAME)
-              ? getContextFunctionRequestIfNeeded(initialMessages)
-              : undefined;
-
-            const systemMessageFromInstructions = getSystemMessageFromInstructions({
+        const systemMessage$ = userInstructions$.pipe(
+          map((userInstructions) => {
+            return getSystemMessageFromInstructions({
               applicationInstructions: functionClient.getInstructions(),
               userInstructions,
               adHocInstructions: allAdHocInstructions,
               availableFunctionNames: functionClient.getFunctions().map((fn) => fn.definition.name),
             });
+          }),
+          shareReplay()
+        );
+
+        // we continue the conversation here, after resolving both the materialized
+        // messages and the knowledge base instructions
+        const nextEvents$ = forkJoin([systemMessage$, userInstructions$]).pipe(
+          switchMap(([systemMessage, userInstructions]) => {
+            // if needed, inject a context function request here
+            const contextRequest = functionClient.hasFunction(CONTEXT_FUNCTION_NAME)
+              ? getContextFunctionRequestIfNeeded(initialMessages)
+              : undefined;
 
             return mergeOperator(
               // if we have added a context function request, also emit
@@ -262,7 +267,7 @@ export class ObservabilityAIAssistantClient {
                   // inject a chat function with predefined parameters
                   return this.chat(name, {
                     ...chatParams,
-                    system: systemMessageFromInstructions, // TODO: use the systemMessage from the arguments
+                    systemMessage,
                     signal,
                     simulateFunctionCalling,
                     connectorId,
@@ -300,8 +305,9 @@ export class ObservabilityAIAssistantClient {
             ).pipe(extractTokenCount()),
             // get just the title, and drop the token count events
             title$.pipe(filter((value): value is string => typeof value === 'string')),
+            systemMessage$,
           ]).pipe(
-            switchMap(([addedMessages, tokenCountResult, title]) => {
+            switchMap(([addedMessages, tokenCountResult, title, systemMessage]) => {
               const initialMessagesWithAddedMessages = initialMessages.concat(addedMessages);
 
               const lastMessage = last(initialMessagesWithAddedMessages);
@@ -435,7 +441,7 @@ export class ObservabilityAIAssistantClient {
   chat<TStream extends boolean>(
     name: string,
     {
-      system,
+      systemMessage,
       messages,
       connectorId,
       functions,
@@ -445,7 +451,7 @@ export class ObservabilityAIAssistantClient {
       tracer,
       stream,
     }: {
-      system?: string;
+      systemMessage?: string;
       messages: Message[];
       connectorId: string;
       functions?: Array<{ name: string; description: string; parameters?: CompatibleJSONSchema }>;
@@ -479,7 +485,7 @@ export class ObservabilityAIAssistantClient {
 
     const options = {
       connectorId,
-      system,
+      system: systemMessage,
       messages: convertMessagesForInference(messages),
       toolChoice,
       tools,
