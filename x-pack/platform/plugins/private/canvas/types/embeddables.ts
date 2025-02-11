@@ -12,6 +12,7 @@ import type {
   HasAppContext,
   HasDisableTriggers,
   HasType,
+  PublishesReload,
   PublishesViewMode,
   PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
@@ -28,4 +29,9 @@ export type CanvasContainerApi = PublishesViewMode &
   HasDisableTriggers &
   HasType &
   HasSerializedChildState &
-  Partial<HasAppContext & PublishesUnifiedSearch>;
+  HasAppContext &
+  PublishesReload &
+  Partial<PublishesUnifiedSearch> &
+  Partial<HasAppContext & PublishesUnifiedSearch> & {
+    reload: () => void;
+  };
