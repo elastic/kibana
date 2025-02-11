@@ -62,10 +62,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'visualization:useLegacyTimeAxis': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'visualization:regionmap:showWarnings': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
