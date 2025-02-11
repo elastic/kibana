@@ -29,12 +29,16 @@ export default function deleteMaintenanceWindowTests({ getService }: FtrProvider
       describe(scenario.id, () => {
         it('should handle delete maintenance window request appropriately', async () => {
           const { body: maintenanceWindowBody } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/maintenance_window`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/maintenance_window`)
             .set('kbn-xsrf', 'foo')
             .send(createParams);
 
           const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix(space.id)}/api/maintenance_window/${maintenanceWindowBody.id}`)
+            .delete(
+              `${getUrlPrefix(space.id)}/api/alerting/maintenance_window/${
+                maintenanceWindowBody.id
+              }`
+            )
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password);
 
@@ -47,17 +51,26 @@ export default function deleteMaintenanceWindowTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: `API [DELETE /api/maintenance_window/${maintenanceWindowBody.id}] is unauthorized for user, this action is granted by the Kibana privileges [write-maintenance-window]`,
+                message: `API [DELETE /api/alerting/maintenance_window/${maintenanceWindowBody.id}] is unauthorized for user, this action is granted by the Kibana privileges [write-maintenance-window]`,
                 statusCode: 403,
               });
-              objectRemover.add(space.id, maintenanceWindowBody.id, 'maintenance_window');
+              objectRemover.add(
+                space.id,
+                maintenanceWindowBody.id,
+                'maintenance_window',
+                'alerting'
+              );
               break;
             case 'superuser at space1':
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(204);
 
               const getResponse = await supertest
-                .get(`${getUrlPrefix(space.id)}/api/maintenance_window/${maintenanceWindowBody.id}`)
+                .get(
+                  `${getUrlPrefix(space.id)}/api/alerting/maintenance_window/${
+                    maintenanceWindowBody.id
+                  }`
+                )
                 .set('kbn-xsrf', 'foo');
 
               expect(getResponse.body.statusCode).to.eql(404);

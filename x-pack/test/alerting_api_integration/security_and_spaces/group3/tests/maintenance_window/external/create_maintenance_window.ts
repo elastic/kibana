@@ -40,13 +40,13 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
       describe(scenario.id, () => {
         it('should handle create maintenance window request appropriately', async () => {
           const response = await supertestWithoutAuth
-            .post(`${getUrlPrefix(space.id)}/api/maintenance_window`)
+            .post(`${getUrlPrefix(space.id)}/api/alerting/maintenance_window`)
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send(createParams);
 
           if (response.body.id) {
-            objectRemover.add(space.id, response.body.id, 'maintenance_window');
+            objectRemover.add(space.id, response.body.id, 'maintenance_window', 'alerting');
           }
 
           switch (scenario.id) {
@@ -59,7 +59,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
               expect(response.body).to.eql({
                 error: 'Forbidden',
                 message:
-                  'API [POST /api/maintenance_window] is unauthorized for user, this action is granted by the Kibana privileges [write-maintenance-window]',
+                  'API [POST /api/alerting/maintenance_window] is unauthorized for user, this action is granted by the Kibana privileges [write-maintenance-window]',
                 statusCode: 403,
               });
               break;
@@ -95,7 +95,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
 
     it('should throw if creating maintenance window with invalid scoped query', async () => {
       await supertest
-        .post(`${getUrlPrefix('space1')}/api/maintenance_window`)
+        .post(`${getUrlPrefix('space1')}/api/alerting/maintenance_window`)
         .set('kbn-xsrf', 'foo')
         .send({
           ...createParams,
