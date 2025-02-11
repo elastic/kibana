@@ -39,6 +39,9 @@ import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { css } from '@emotion/react';
 
+import type { EntityEcs } from '@kbn/securitysolution-ecs/src/entity';
+import { EmptyComponent } from '../../common/lib/cell_actions/helpers';
+import { useDynamicEntityFlyout } from '../hooks/use_dynamic_entity_flyout';
 import { type CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -135,13 +138,20 @@ export interface AllAssetsProps {
    * This function will be used in the control column to create a rule for a specific finding.
    */
   createFn?: (rowIndex: number) => ((http: HttpSetup) => Promise<unknown>) | undefined;
-  /**
-   * This is the component that will be rendered in the flyout when a row is expanded.
-   * This component will receive the row data and a function to close the flyout.
-   */
-  flyoutComponent: (hit: DataTableRecord, onCloseFlyout: () => void) => JSX.Element;
   'data-test-subj'?: string;
 }
+
+// TODO: Asset Inventory - adjust and remove type casting once we have real universal entity data
+const getEntity = (row: DataTableRecord): EntityEcs => {
+  return {
+    id: (row.flattened['asset.name'] as string) || '',
+    name: (row.flattened['asset.name'] as string) || '',
+    timestamp: row.flattened['@timestamp'] as Date,
+    type: 'universal',
+  };
+};
+
+const ASSET_INVENTORY_TABLE_ID = 'asset-inventory-table';
 
 const AllAssets = ({
   rows,
@@ -151,7 +161,6 @@ const AllAssets = ({
   height,
   hasDistributionBar = true,
   createFn,
-  flyoutComponent,
   ...rest
 }: AllAssetsProps) => {
   const { euiTheme } = useEuiTheme();
@@ -161,6 +170,31 @@ const AllAssets = ({
     defaultQuery: getDefaultQuery,
     nonPersistedFilters,
   });
+
+  // Table Flyout Controls -------------------------------------------------------------------
+
+  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
+
+  const { openDynamicFlyout, closeDynamicFlyout } = useDynamicEntityFlyout({
+    onFlyoutClose: () => setExpandedDoc(undefined),
+  });
+
+  const onExpandDocClick = (doc?: DataTableRecord | undefined) => {
+    if (doc) {
+      const entity = getEntity(doc);
+      setExpandedDoc(doc); // Table is expecting the same doc ref to highlight the selected row
+      openDynamicFlyout({
+        entity,
+        scopeId: ASSET_INVENTORY_TABLE_ID,
+        contextId: ASSET_INVENTORY_TABLE_ID,
+      });
+    } else {
+      closeDynamicFlyout();
+      setExpandedDoc(undefined);
+    }
+  };
+
+  // -----------------------------------------------------------------------------------------
 
   const {
     // columnsLocalStorageKey,
@@ -205,11 +239,6 @@ const AllAssets = ({
   }, [persistedSettings]);
 
   const { dataView, dataViewIsLoading, dataViewIsRefetching } = useDataViewContext();
-
-  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
-
-  const renderDocumentView = (hit: DataTableRecord) =>
-    flyoutComponent(hit, () => setExpandedDoc(undefined));
 
   const {
     uiActions,
@@ -413,7 +442,6 @@ const AllAssets = ({
                 className={styles.gridStyle}
                 ariaLabelledBy={title}
                 columns={currentColumns}
-                expandedDoc={expandedDoc}
                 dataView={dataView}
                 loadingState={loadingState}
                 onFilter={onAddFilter as DocViewFilterFn}
@@ -422,8 +450,9 @@ const AllAssets = ({
                 onSort={onSort}
                 rows={rows}
                 sampleSizeState={MAX_ASSETS_TO_LOAD}
-                setExpandedDoc={setExpandedDoc}
-                renderDocumentView={renderDocumentView}
+                expandedDoc={expandedDoc}
+                setExpandedDoc={onExpandDocClick}
+                renderDocumentView={EmptyComponent}
                 sort={sort}
                 rowsPerPageState={pageSize}
                 totalHits={rows.length}

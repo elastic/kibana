@@ -8,7 +8,13 @@
  */
 
 import { mergeTests } from 'playwright/test';
-import { coreWorkerFixtures, esArchiverFixture, uiSettingsFixture } from './worker';
+import {
+  ApiFixtures,
+  apiFixtures,
+  coreWorkerFixtures,
+  esArchiverFixture,
+  uiSettingsFixture,
+} from './worker';
 import type {
   EsArchiverFixture,
   EsClient,
@@ -34,6 +40,8 @@ export const scoutFixtures = mergeTests(
   coreWorkerFixtures,
   esArchiverFixture,
   uiSettingsFixture,
+  // api fixtures
+  apiFixtures,
   // test scope fixtures
   browserAuthFixture,
   scoutPageFixture,
@@ -47,7 +55,7 @@ export interface ScoutTestFixtures {
   pageObjects: PageObjects;
 }
 
-export interface ScoutWorkerFixtures {
+export interface ScoutWorkerFixtures extends ApiFixtures {
   log: ScoutLogger;
   config: ScoutTestConfig;
   kbnUrl: KibanaUrl;
