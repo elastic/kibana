@@ -39,6 +39,6 @@ export function registerServerRoutes({
     dependencies,
     core,
     logger,
-    validateSchemas: isDev,
+    runDevModeChecks: isDev,
   });
 }

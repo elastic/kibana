@@ -26,6 +26,6 @@ export function registerServerRoutes({
     logger,
     repository: getGlobalInventoryServerRouteRepository(),
     dependencies,
-    validateSchemas: isDev,
+    runDevModeChecks: isDev,
   });
 }

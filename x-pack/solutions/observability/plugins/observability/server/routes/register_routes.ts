@@ -40,6 +40,6 @@ export function registerRoutes({ repository, core, logger, dependencies, isDev }
     dependencies: { dependencies },
     logger,
     repository,
-    validateSchemas: isDev,
+    runDevModeChecks: isDev,
   });
 }

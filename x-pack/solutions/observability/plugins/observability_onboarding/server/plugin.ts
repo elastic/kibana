@@ -95,7 +95,7 @@ export class ObservabilityOnboardingPlugin
       logger: this.logger,
       repository: getObservabilityOnboardingServerRouteRepository(),
       dependencies,
-      validateSchemas: this.isDev,
+      runDevModeChecks: this.isDev,
     });
 
     plugins.customIntegrations.registerCustomIntegration({

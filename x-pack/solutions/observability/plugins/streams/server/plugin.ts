@@ -98,7 +98,7 @@ export class StreamsPlugin
       },
       core,
       logger: this.logger,
-      validateSchemas: this.isDev,
+      runDevModeChecks: this.isDev,
     });
 
     return {};

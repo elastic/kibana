@@ -29,6 +29,6 @@ export function registerServerRoutes({
     logger,
     repository: getGlobalInvestigateAppServerRouteRepository(),
     dependencies,
-    validateSchemas: isDev,
+    runDevModeChecks: isDev,
   });
 }

@@ -30,6 +30,6 @@ export function registerServerRoutes({
     logger,
     repository: getGlobalObservabilityAIAssistantServerRouteRepository(),
     dependencies,
-    validateSchemas: isDev,
+    runDevModeChecks: isDev,
   });
 }
