@@ -42,8 +42,7 @@ export const fieldTypes = [
   'counter_double',
   'unsupported',
   'date_nanos',
-  // This type is inconsistent in comparison to the others. This is how it comes from ES though.
-  'function named parameters',
+  'function_named_parameters',
 ] as const;
 
 export type FieldType = (typeof fieldTypes)[number];
@@ -171,7 +170,7 @@ export interface Signature {
 }
 
 export interface FunctionDefinition {
-  type: 'builtin' | 'agg' | 'eval' | 'operator';
+  type: 'builtin' | 'agg' | 'scalar' | 'operator';
   preview?: boolean;
   ignoreAsSuggestion?: boolean;
   name: string;
@@ -195,6 +194,10 @@ export interface CommandBaseDefinition<CommandName extends string> {
 
   alias?: string;
   description: string;
+  /**
+   * Displays a Technical preview label in the autocomplete
+   */
+  preview?: boolean;
   /**
    * Whether to show or hide in autocomplete suggestion list
    */

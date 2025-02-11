@@ -18,6 +18,7 @@ import {
   enableDefaultAlertingEffect,
   enableDefaultAlertingSilentlyEffect,
   getDefaultAlertingEffect,
+  inspectStatusRuleEffect,
   updateDefaultAlertingEffect,
 } from './alert_rules/effects';
 import { executeEsQueryEffect } from './elasticsearch';
@@ -80,6 +81,7 @@ export const rootEffect = function* root(): Generator {
     fork(quietFetchMonitorStatusHeatmap),
     fork(fetchOverviewTrendStats),
     fork(refreshOverviewTrendStats),
+    fork(inspectStatusRuleEffect),
     ...privateLocationsEffects.map((effect) => fork(effect)),
   ]);
 };

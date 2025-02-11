@@ -9,12 +9,12 @@ import { END, START, StateGraph } from '@langchain/langgraph';
 import { isEmpty } from 'lodash/fp';
 import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import { getEcsMappingNode } from './nodes/ecs_mapping';
-import { translationResultNode } from './nodes/translation_result';
 import { getFixQueryErrorsNode } from './nodes/fix_query_errors';
+import { getInlineQueryNode } from './nodes/inline_query';
 import { getRetrieveIntegrationsNode } from './nodes/retrieve_integrations';
 import { getTranslateRuleNode } from './nodes/translate_rule';
+import { getTranslationResultNode } from './nodes/translation_result';
 import { getValidationNode } from './nodes/validation';
-import { getInlineQueryNode } from './nodes/inline_query';
 import { translateRuleState } from './state';
 import type { TranslateRuleGraphParams, TranslateRuleState } from './types';
 
@@ -27,16 +27,22 @@ export function getTranslateRuleGraph({
   connectorId,
   ruleMigrationsRetriever,
   logger,
+  telemetryClient,
 }: TranslateRuleGraphParams) {
   const translateRuleNode = getTranslateRuleNode({
     inferenceClient,
     connectorId,
     logger,
   });
+  const translationResultNode = getTranslationResultNode();
   const inlineQueryNode = getInlineQueryNode({ model, ruleMigrationsRetriever });
   const validationNode = getValidationNode({ logger });
   const fixQueryErrorsNode = getFixQueryErrorsNode({ inferenceClient, connectorId, logger });
-  const retrieveIntegrationsNode = getRetrieveIntegrationsNode({ model, ruleMigrationsRetriever });
+  const retrieveIntegrationsNode = getRetrieveIntegrationsNode({
+    model,
+    ruleMigrationsRetriever,
+    telemetryClient,
+  });
   const ecsMappingNode = getEcsMappingNode({ inferenceClient, connectorId, logger });
 
   const translateRuleGraph = new StateGraph(translateRuleState)

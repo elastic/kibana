@@ -141,6 +141,7 @@ export function useCustomCards(
       version: '',
       integration: '',
       isQuickstart: true,
+      release: isServerless ? 'preview' : undefined,
     },
     {
       id: 'kubernetes-quick-start',
@@ -208,6 +209,7 @@ export function useCustomCards(
       version: '',
       integration: '',
       isQuickstart: true,
+      release: isServerless ? 'preview' : undefined,
     },
     {
       id: 'apm-virtual',

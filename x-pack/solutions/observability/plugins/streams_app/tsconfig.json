@@ -31,7 +31,6 @@
     "@kbn/observability-utils-server",
     "@kbn/ui-theme",
     "@kbn/calculate-auto",
-    "@kbn/core-notifications-browser",
     "@kbn/kibana-react-plugin",
     "@kbn/es-query",
     "@kbn/server-route-repository-client",
@@ -45,7 +44,6 @@
     "@kbn/code-editor",
     "@kbn/ui-theme",
     "@kbn/navigation-plugin",
-    "@kbn/core-notifications-browser",
     "@kbn/index-lifecycle-management-common-shared",
     "@kbn/streams-schema",
     "@kbn/react-hooks",
@@ -57,7 +55,6 @@
     "@kbn/deeplinks-analytics",
     "@kbn/dashboard-plugin",
     "@kbn/react-kibana-mount",
-    "@kbn/fields-metadata-plugin",
-    "@kbn/zod"
+    "@kbn/fields-metadata-plugin"
   ]
 }
