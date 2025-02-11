@@ -16,7 +16,6 @@ import {
   RecursiveRecord,
   getProcessorType,
   namedFieldDefinitionConfigSchema,
-  processorDefinitionSchema,
   processorWithIdDefinitionSchema,
   recursiveRecord,
 } from '@kbn/streams-schema';
@@ -78,7 +77,7 @@ export const simulateProcessorRoute = createServerRoute({
       pipelineSimulationBody
     );
 
-    const { normalizedDocs, processorsMetrics } = normalizePipelineSimulationResult(
+    const { normalizedDocs, processorsMetrics } = parsePipelineSimulationResult(
       pipelineSimulationResult,
       simulationData.docs,
       params.body.processing
@@ -279,7 +278,7 @@ const getDocumentStatus = (doc: IngestSimulateSimulateDocumentResult): DocSimula
   return 'failed';
 };
 
-const normalizePipelineSimulationResult = (
+const parsePipelineSimulationResult = (
   simulationResult: IngestSimulateResponse,
   sampleDocs: Array<{ _source: RecursiveRecord }>,
   processing: ProcessorDefinitionWithId[]
@@ -338,8 +337,8 @@ const computeSimulationDocDiff = (
   const successfulProcessors = docResult.processor_results!.filter(isSuccessfulProcessor);
 
   const comparisonDocs = [
-    { processor_id: 'base', value: sample },
-    ...successfulProcessors?.map((proc) => ({
+    { processor_id: 'sample', value: sample },
+    ...successfulProcessors.map((proc) => ({
       processor_id: proc.tag,
       value: omit(proc.doc._source, ['_errors', 'ingest']),
     })),
@@ -415,29 +414,6 @@ const prepareSimulationResponse = (
   };
 };
 
-// const prepareSimulationDiffs = (
-//   normalizedDocs: NormalizedSimulationDoc[],
-//   sampleDocs: Array<{ _source: RecursiveRecord }>
-// ) => {
-//   // Since we filter out failed documents, we need to map the simulation docs to the sample docs for later retrieval
-//   const samplesToSimulationMap = new Map(
-//     normalizedDocs.map((doc, id) => [doc.value, sampleDocs[id]])
-//   );
-
-//   const diffs = normalizedDocs
-//     .filter((doc) => doc.status !== 'failed') // Exclude completely failed documents, keep parsed and partially parsed
-//     .map((doc) => {
-//       const sample = samplesToSimulationMap.get(doc.value);
-//       if (sample) {
-//         return calculateObjectDiff(sample._source, doc.value);
-//       }
-
-//       return calculateObjectDiff({});
-//     });
-
-//   return diffs;
-// };
-
 const computeDetectedFields = (
   processorMetrics: Record<string, ProcessorMetrics>
 ): Array<{
@@ -450,16 +426,6 @@ const computeDetectedFields = (
 
   return uniqueFields.map((name) => ({ name, type: 'unmapped' }));
 };
-
-// const computeUpdatedFields = (simulationDiff: ReturnType<typeof prepareSimulationDiffs>) => {
-//   const diffs = simulationDiff
-//     .map((simulatedDoc) => flattenObject(simulatedDoc.updated))
-//     .flatMap(Object.keys);
-
-//   const uniqueFields = [...new Set(diffs)];
-
-//   return uniqueFields;
-// };
 
 const computeSuccessRate = (docs: NormalizedSimulationDoc[]) => {
   const successfulCount = docs.reduce((rate, doc) => (rate += doc.status === 'parsed' ? 1 : 0), 0);
