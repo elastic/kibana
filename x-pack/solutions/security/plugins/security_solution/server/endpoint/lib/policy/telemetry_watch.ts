@@ -81,6 +81,8 @@ export class TelemetryConfigWatcher {
       perPage: number;
     };
 
+    this.logger.debug('dummy - just to restart the instance');
+
     this.logger.debug(
       `Checking Endpoint policies to update due to changed global telemetry config setting. (New value: ${isTelemetryEnabled})`
     );
