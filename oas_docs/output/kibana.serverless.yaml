@@ -13384,6 +13384,11 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  additional_datastreams_permissions:
+                                    description: Additionnal datstream permissions, that will be added to the agent policy.
+                                    items:
+                                      type: string
+                                    type: array
                                   agents:
                                     type: number
                                   created_at:
@@ -14258,6 +14263,11 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                additional_datastreams_permissions:
+                                  description: Additionnal datstream permissions, that will be added to the agent policy.
+                                  items:
+                                    type: string
+                                  type: array
                                 agents:
                                   type: number
                                 created_at:
@@ -14940,6 +14950,11 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  additional_datastreams_permissions:
+                                    description: Additionnal datstream permissions, that will be added to the agent policy.
+                                    items:
+                                      type: string
+                                    type: array
                                   agents:
                                     type: number
                                   created_at:
@@ -15601,6 +15616,11 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                additional_datastreams_permissions:
+                                  description: Additionnal datstream permissions, that will be added to the agent policy.
+                                  items:
+                                    type: string
+                                  type: array
                                 agents:
                                   type: number
                                 created_at:
@@ -16473,6 +16493,11 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                additional_datastreams_permissions:
+                                  description: Additionnal datstream permissions, that will be added to the agent policy.
+                                  items:
+                                    type: string
+                                  type: array
                                 agents:
                                   type: number
                                 created_at:
@@ -17154,6 +17179,11 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                additional_datastreams_permissions:
+                                  description: Additionnal datstream permissions, that will be added to the agent policy.
+                                  items:
+                                    type: string
+                                  type: array
                                 agents:
                                   type: number
                                 created_at:
@@ -29397,6 +29427,11 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        additional_datastreams_permissions:
+                          description: Additionnal datstream permissions, that will be added to the agent policy.
+                          items:
+                            type: string
+                          type: array
                         agents:
                           type: number
                         created_at:
@@ -29826,6 +29861,11 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties:
+                    additional_datastreams_permissions:
+                      description: Additionnal datstream permissions, that will be added to the agent policy.
+                      items:
+                        type: string
+                      type: array
                     description:
                       description: Package policy description
                       type: string
@@ -30057,6 +30097,11 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties:
+                    additional_datastreams_permissions:
+                      description: Additionnal datstream permissions, that will be added to the agent policy.
+                      items:
+                        type: string
+                      type: array
                     description:
                       type: string
                     force:
@@ -30233,6 +30278,11 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      additional_datastreams_permissions:
+                        description: Additionnal datstream permissions, that will be added to the agent policy.
+                        items:
+                          type: string
+                        type: array
                       agents:
                         type: number
                       created_at:
@@ -30690,6 +30740,11 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        additional_datastreams_permissions:
+                          description: Additionnal datstream permissions, that will be added to the agent policy.
+                          items:
+                            type: string
+                          type: array
                         agents:
                           type: number
                         created_at:
@@ -31178,6 +31233,11 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      additional_datastreams_permissions:
+                        description: Additionnal datstream permissions, that will be added to the agent policy.
+                        items:
+                          type: string
+                        type: array
                       agents:
                         type: number
                       created_at:
@@ -31614,6 +31674,11 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties:
+                    additional_datastreams_permissions:
+                      description: Additionnal datstream permissions, that will be added to the agent policy.
+                      items:
+                        type: string
+                      type: array
                     description:
                       description: Package policy description
                       type: string
@@ -31839,6 +31904,11 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties:
+                    additional_datastreams_permissions:
+                      description: Additionnal datstream permissions, that will be added to the agent policy.
+                      items:
+                        type: string
+                      type: array
                     description:
                       type: string
                     force:
@@ -32014,6 +32084,11 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      additional_datastreams_permissions:
+                        description: Additionnal datstream permissions, that will be added to the agent policy.
+                        items:
+                          type: string
+                        type: array
                       agents:
                         type: number
                       created_at:
@@ -32774,6 +32849,11 @@ paths:
                           - additionalProperties: false
                             type: object
                             properties:
+                              additional_datastreams_permissions:
+                                description: Additionnal datstream permissions, that will be added to the agent policy.
+                                items:
+                                  type: string
+                                type: array
                               agents:
                                 type: number
                               created_at:
@@ -33147,6 +33227,11 @@ paths:
                           - additionalProperties: false
                             type: object
                             properties:
+                              additional_datastreams_permissions:
+                                description: Additionnal datstream permissions, that will be added to the agent policy.
+                                items:
+                                  type: string
+                                type: array
                               description:
                                 description: Package policy description
                                 type: string
