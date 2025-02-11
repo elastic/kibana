@@ -14,6 +14,6 @@ import * as i18n from '../translations';
 
 export const OptionalFieldLabel = (
   <EuiText color="subdued" size="xs" data-test-subj="form-optional-field-label">
-    {i18n.ADD_ACTION_OPTIONAL_TEXT}
+    {i18n.OPTIONAL_LABEL}
   </EuiText>
 );
