@@ -20,7 +20,8 @@ import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-describe(
+// TODO failing test https://github.com/elastic/kibana/issues/210364
+describe.skip(
   'Response console',
   {
     env: {
@@ -91,8 +92,7 @@ describe(
         ['file', filePath],
         ['folder', homeFilePath],
       ].forEach(([type, path]) => {
-        // TODO failing test https://github.com/elastic/kibana/issues/210364
-        it.skip(`"scan --path" - should scan a ${type}`, () => {
+        it(`"scan --path" - should scan a ${type}`, () => {
           waitForEndpointListPageToBeLoaded(createdHost.hostname);
           cy.task('createFileOnEndpoint', {
             hostname: createdHost.hostname,
