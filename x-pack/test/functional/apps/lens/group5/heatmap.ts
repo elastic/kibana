@@ -175,9 +175,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
     });
 
-    it('should change x-axis label rotation', async () => {
+    it('should change x axis label rotation', async () => {
       await lens.switchToVisualization('heatmap', 'heat');
-      await testSubjects.click('lnsHeatmapHorizontalAxisButton');
+
+      await lens.toggleToolbarPopover('lnsHeatmapHorizontalAxisButton');
       await testSubjects.click('axis_orientation_vertical');
 
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
