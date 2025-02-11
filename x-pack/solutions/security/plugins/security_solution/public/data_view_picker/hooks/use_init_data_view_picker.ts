@@ -12,6 +12,7 @@ import { addListener, removeListener } from '@reduxjs/toolkit';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import { shared, scopes, type RootState, selectDataViewAsync } from '../redux';
 import { useKibana } from '../../common/lib/kibana';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewPickerScopeName } from '../constants';
 
 const createDataViewsLoadingListener = (dependencies: { dataViews: DataViewsServicePublic }) => {
   return {
@@ -65,6 +66,9 @@ const createDataViewSelectedListener = (dependencies: { dataViews: DataViewsServ
   } as any;
 };
 
+/**
+ * Should only be used once in the application, on the top level of the rendering tree
+ */
 export const useInitDataViewPicker = () => {
   const dispatch = useDispatch();
   const services = useKibana().services;
@@ -82,6 +86,14 @@ export const useInitDataViewPicker = () => {
     dispatch(addListener(dataViewSelectedListener));
 
     dispatch(shared.actions.init());
+
+    // Preload the default view
+    dispatch(
+      selectDataViewAsync({
+        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+        scope: DataViewPickerScopeName.default,
+      })
+    );
 
     return () => {
       dispatch(removeListener(dataViewsLoadingListener));

@@ -8,6 +8,8 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
+import { DataViewPickerScopeName } from '../../../data_view_picker/constants';
+import { useSelectDataView } from '../../../data_view_picker/hooks/use_select_data_view';
 import type { Note } from '../../../../common/api/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { createNote } from '../notes/helpers';
@@ -36,6 +38,7 @@ import type { UpdateTimeline } from './types';
 
 export const useUpdateTimeline = () => {
   const dispatch = useDispatch();
+  const selectDataView = useSelectDataView();
 
   return useCallback(
     ({
@@ -65,6 +68,12 @@ export const useUpdateTimeline = () => {
             selectedPatterns: _timeline.indexNames,
           })
         );
+
+        selectDataView({
+          id: _timeline.dataViewId ?? undefined,
+          patterns: _timeline.indexNames,
+          scope: DataViewPickerScopeName.timeline,
+        });
       }
       if (
         _timeline.status === TimelineStatusEnum.immutable &&

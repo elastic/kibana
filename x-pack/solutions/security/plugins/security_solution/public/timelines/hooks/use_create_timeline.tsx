@@ -21,6 +21,8 @@ import type { TimeRange } from '../../common/store/inputs/model';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { defaultUdtHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { timelineDefaults } from '../store/defaults';
+import { useSelectDataView } from '../../data_view_picker/hooks/use_select_data_view';
+import { DataViewPickerScopeName } from '../../data_view_picker/constants';
 
 export interface UseCreateTimelineParams {
   /**
@@ -57,6 +59,8 @@ export const useCreateTimeline = ({
 
   const { resetDiscoverAppState } = useDiscoverInTimelineContext();
 
+  const setSelectedDataView = useSelectDataView();
+
   const createTimeline = useCallback(
     ({
       id,
@@ -79,6 +83,12 @@ export const useCreateTimeline = ({
           selectedPatterns,
         })
       );
+
+      setSelectedDataView({
+        id: dataViewId,
+        patterns: selectedPatterns,
+        scope: DataViewPickerScopeName.timeline,
+      });
 
       dispatch(
         timelineActions.createTimeline({
@@ -120,13 +130,14 @@ export const useCreateTimeline = ({
       }
     },
     [
-      dispatch,
       globalTimeRange,
+      timelineFullScreen,
+      dispatch,
       dataViewId,
       selectedPatterns,
-      setTimelineFullScreen,
-      timelineFullScreen,
+      setSelectedDataView,
       timelineType,
+      setTimelineFullScreen,
     ]
   );
 

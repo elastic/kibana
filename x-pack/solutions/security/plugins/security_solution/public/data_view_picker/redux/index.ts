@@ -121,12 +121,12 @@ export interface RootState {
 }
 
 export const sourcererAdapterSelector = (scope: DataViewPickerScopeName) =>
-  createSelector(
-    [(state: RootState) => state.dataViewPicker],
-    (dataViewPicker): ScopedDataViewSelectionState => {
-      return dataViewPicker[scope];
-    }
-  );
+  createSelector([(state: RootState) => state.dataViewPicker], (dataViewPicker) => {
+    return {
+      ...dataViewPicker[scope],
+      indicesExist: !!dataViewPicker[scope]?.dataView?.title?.split(',')?.length,
+    };
+  });
 
 // export const sharedStateSelector = createSelector(
 //  [(state: RootState) => state.dataViewPicker],

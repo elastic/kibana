@@ -7,12 +7,13 @@
 
 import { DataViewPicker as USDataViewPicker } from '@kbn/unified-search-plugin/public';
 import React, { useCallback, useRef, useMemo, memo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import type { DataViewPickerScopeName } from '../../constants';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
-import { selectDataViewAsync, sourcererAdapterSelector } from '../../redux';
+import { selectDataViewAsync } from '../../redux';
+import { useDataView } from '../../hooks/use_data_view';
 
 export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) => {
   const dispatch = useDispatch();
@@ -29,7 +30,7 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
   // Boolean(dataViewEditor?.userPermissions.editDataView()) || !dataView.isPersisted();
   const canEditDataView = true;
 
-  const { dataView } = useSelector(sourcererAdapterSelector(props.scope));
+  const { dataView } = useDataView(props.scope);
 
   const dataViewId = dataView?.id;
 
