@@ -24,23 +24,23 @@ export function flattenObject<TObj extends Record<PropertyKey, any>>(
   parentKey: string = ''
 ) {
   const result: Record<PropertyKey, GetValuesTypes<TObj>> = {};
-  const tmpNested: Record<PropertyKey, GetValuesTypes<TObj>> = {};
+  const nestedValues: Record<PropertyKey, GetValuesTypes<TObj>> = {};
 
   for (const key in obj) {
     if (Object.hasOwn(obj, key)) {
       const value = obj[key];
       const newKey = parentKey ? `${parentKey}.${key}` : key;
       if (isPlainObject(value)) {
-        Object.assign(tmpNested, { [newKey]: value });
+        Object.assign(nestedValues, { [newKey]: value });
       } else {
         result[newKey] = value;
       }
     }
   }
 
-  for (const key in tmpNested) {
-    if (Object.hasOwn(tmpNested, key)) {
-      const value = tmpNested[key];
+  for (const key in nestedValues) {
+    if (Object.hasOwn(nestedValues, key)) {
+      const value = nestedValues[key];
       Object.assign(result, flattenObject(value, key));
     }
   }

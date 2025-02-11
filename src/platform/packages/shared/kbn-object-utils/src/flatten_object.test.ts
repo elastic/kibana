@@ -30,7 +30,7 @@ describe('flattenObject', () => {
     });
   });
 
-  it('should flat more nested properties as last ones (more nested ovverride already flattened)', () => {
+  it('should flat nested object properties as last ones (more nested ovverride already flattened)', () => {
     const flattened = flattenObject({
       alpha: {
         gamma: {
