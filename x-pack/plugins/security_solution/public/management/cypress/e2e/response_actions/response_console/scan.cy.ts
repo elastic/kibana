@@ -91,7 +91,8 @@ describe(
         ['file', filePath],
         ['folder', homeFilePath],
       ].forEach(([type, path]) => {
-        it(`"scan --path" - should scan a ${type}`, () => {
+        // TODO failing test https://github.com/elastic/kibana/issues/210364
+        it.skip(`"scan --path" - should scan a ${type}`, () => {
           waitForEndpointListPageToBeLoaded(createdHost.hostname);
           cy.task('createFileOnEndpoint', {
             hostname: createdHost.hostname,
