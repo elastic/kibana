@@ -17,7 +17,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiText,
   EuiIconTip,
 } from '@elastic/eui';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
@@ -31,6 +30,7 @@ import { JiraActionParams } from './types';
 import { useGetIssueTypes } from './use_get_issue_types';
 import { useGetFieldsByIssueType } from './use_get_fields_by_issue_type';
 import { SearchIssues } from './search_issues';
+import { OptionalFieldLabel } from '../../common/optional_field_label';
 
 const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionParams>> = ({
   actionConnector,
@@ -205,6 +205,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
         label={i18n.translate('xpack.stackConnectors.components.jira.urgencySelectFieldLabel', {
           defaultMessage: 'Issue type',
         })}
+        labelAppend={OptionalFieldLabel}
       >
         <EuiSelect
           fullWidth
@@ -288,13 +289,6 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
           label={i18n.translate('xpack.stackConnectors.components.jira.summaryFieldLabel', {
             defaultMessage: 'Summary',
           })}
-          labelAppend={
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.stackConnectors.components.jira.summaryFieldRequiredLabel', {
-                defaultMessage: 'Required',
-              })}
-            </EuiText>
-          }
         >
           <TextFieldWithMessageVariables
             index={index}
@@ -373,15 +367,16 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
         <TextAreaWithMessageVariables
           index={index}
           editAction={editComment}
-          messageVariables={messageVariables}
-          paramsProperty={'comments'}
-          inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
           label={i18n.translate(
             'xpack.stackConnectors.components.jira.commentsTextAreaFieldLabel',
             {
               defaultMessage: 'Additional comments',
             }
           )}
+          messageVariables={messageVariables}
+          paramsProperty={'comments'}
+          inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
+          isOptionalField
         />
         <EuiFormRow
           fullWidth
@@ -426,6 +421,7 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             onDocumentsChange={(json: string) => {
               editSubActionProperty('otherFields', json === '' ? null : json);
             }}
+            isOptionalField
           />
         </EuiFormRow>
       </>
