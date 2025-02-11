@@ -90,7 +90,13 @@
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/presentation-containers",
     "@kbn/field-utils",
+<<<<<<< HEAD
     "@kbn/react-hooks"
+=======
+    "@kbn/react-hooks",
+    "@kbn/scout",
+    "@kbn/react-kibana-mount",
+>>>>>>> 8a30b862cc1 ([maps] lazy load map actions (#210252))
   ],
   "exclude": [
     "target/**/*",
