@@ -43,7 +43,7 @@ export function IngestionRate({
       start: { data },
     },
   } = useKibana();
-  const [timeRange, setTimeRange] = useState({ start: 'now-60d', end: 'now' });
+  const [timeRange, setTimeRange] = useState({ start: 'now-2w', end: 'now' });
 
   const { loading: isLoadingIngestionRate, value: ingestionRate } = useStreamsAppFetch(
     async ({ signal }) => {
