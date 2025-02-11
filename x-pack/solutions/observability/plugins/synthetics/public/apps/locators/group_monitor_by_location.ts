@@ -7,29 +7,15 @@
 
 import { syntheticsMonitorLocationQueryLocatorID } from '@kbn/observability-plugin/common';
 
-async function navigate({
-  monitorId,
-  locationId,
-  spaceId,
-}: {
-  monitorId: string;
-  locationId?: string;
-  spaceId?: string;
-}) {
-  let queryParam = locationId ? `?locationId=${locationId}` : '';
-
-  if (spaceId) {
-    queryParam += queryParam ? `&spaceId=${spaceId}` : `?spaceId=${spaceId}`;
-  }
-
+async function navigate({ locationId }: { locationId: string }) {
   return {
     app: 'synthetics',
-    path: `/monitor/${queryParam}`,
+    path: `?locations=${[locationId]}`,
     state: {},
   };
 }
 
-export const monitorDetailNavigatorParams = {
+export const monitorLocationNavigatorParams = {
   id: syntheticsMonitorLocationQueryLocatorID,
   getLocation: navigate,
 };
