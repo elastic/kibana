@@ -202,6 +202,9 @@ export default async function ({ readConfigFile }) {
       elasticsearchIndices: {
         pathname: '/app/elasticsearch/indices',
       },
+      searchPlayground: {
+        pathname: '/app/search_playground',
+      },
     },
 
     suiteTags: {
