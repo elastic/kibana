@@ -22,7 +22,7 @@ export function generateLayer(
 ): ClusterPutComponentTemplateRequest {
   const properties: Record<string, MappingProperty> = {};
   Object.entries(definition.ingest.wired.fields).forEach(([field, props]) => {
-    const property: MappingProperty = {
+    let property: MappingProperty = {
       type: props.type,
     };
     if (field === '@timestamp') {
@@ -31,6 +31,13 @@ export function generateLayer(
     }
     if (props.type === 'date' && props.format) {
       (property as MappingDateProperty).format = props.format;
+    }
+
+    if (props.additionalProperties) {
+      property = {
+        ...property,
+        ...props.additionalProperties,
+      } as MappingProperty;
     }
     properties[field] = property;
   });

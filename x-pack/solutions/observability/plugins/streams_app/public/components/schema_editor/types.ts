@@ -22,7 +22,7 @@ export interface MappedSchemaField extends BaseSchemaField {
 
 export interface UnmappedSchemaField extends BaseSchemaField {
   status: 'unmapped';
-  type?: SchemaFieldType | undefined;
+  type?: SchemaFieldType;
 }
 
 export type SchemaField = MappedSchemaField | UnmappedSchemaField;

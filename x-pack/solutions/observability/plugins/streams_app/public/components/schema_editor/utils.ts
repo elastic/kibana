@@ -13,4 +13,5 @@ export const convertToFieldDefinitionConfig = (
 ): FieldDefinitionConfig => ({
   type: field.type,
   ...(field.format && field.type === 'date' ? { format: field.format } : {}),
+  ...(field.additionalProperties ? { additionalProperties: field.additionalProperties } : {}),
 });

@@ -59,6 +59,7 @@ export const useSchemaFields = ({
         name,
         type: field.type,
         format: field.format,
+        additionalProperties: field.additionalProperties,
         parent: field.from,
         status: 'inherited',
       })
@@ -69,6 +70,7 @@ export const useSchemaFields = ({
         name,
         type: field.type,
         format: field.format,
+        additionalProperties: field.additionalProperties,
         parent: definition.stream.name,
         status: 'mapped',
       })
