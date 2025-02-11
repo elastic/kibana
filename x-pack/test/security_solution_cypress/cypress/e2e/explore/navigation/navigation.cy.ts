@@ -21,7 +21,6 @@ import {
   DETECTION_RESPONSE,
   DASHBOARDS,
   CSP_DASHBOARD,
-  KUBERNETES,
   INDICATORS,
   BLOCKLIST,
   CSP_BENCHMARKS,
@@ -54,7 +53,6 @@ import {
   EXPLORE_URL,
   MANAGE_URL,
   CSP_DASHBOARD_URL,
-  KUBERNETES_URL,
   BLOCKLIST_URL,
   CSP_BENCHMARKS_URL,
   CSP_FINDINGS_URL,
@@ -112,11 +110,6 @@ describe('top-level navigation common to all pages in the Security app', { tags:
   it('navigates to the Entity Analytics page', () => {
     navigateFromHeaderTo(ENTITY_ANALYTICS);
     cy.url().should('include', ENTITY_ANALYTICS_URL);
-  });
-
-  it('navigates to the Kubernetes page', () => {
-    navigateFromHeaderTo(KUBERNETES);
-    cy.url().should('include', KUBERNETES_URL);
   });
 
   it('navigates to the CSP dashboard page', () => {
@@ -287,11 +280,6 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
   it('navigates to the Entity Analytics page', () => {
     navigateFromHeaderTo(ServerlessHeaders.ENTITY_ANALYTICS, true);
     cy.url().should('include', ENTITY_ANALYTICS_URL);
-  });
-
-  it('navigates to the Kubernetes page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.KUBERNETES, true);
-    cy.url().should('include', KUBERNETES_URL);
   });
 
   it('navigates to the CSP dashboard page', () => {

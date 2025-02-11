@@ -38,7 +38,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     esTestCluster: {
       ...xPackFunctionalTestsConfig.get('esTestCluster'),
-      // this archive can not be loaded into 8.0+
+      // FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/209048
       // dataArchive: path.resolve(__dirname, './fixtures/data_archives/upgrade_assistant.zip'),
     },
   };

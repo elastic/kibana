@@ -59,8 +59,7 @@ export const FeatureFlagsExampleApp = ({ featureFlags }: FeatureFlagsExampleAppD
             <h3>Rendered together</h3>
             <p>
               `useObservable` causes a full re-render of the component, updating the{' '}
-              <i>statically</i>
-              evaluated flags as well.
+              <i>statically</i> evaluated flags as well.
             </p>
             <FeatureFlagsFullList featureFlags={featureFlags} />
           </EuiText>

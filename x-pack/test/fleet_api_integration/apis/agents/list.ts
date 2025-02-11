@@ -209,9 +209,11 @@ export default function ({ getService }: FtrProviderContext) {
         inactive: 0,
         offline: 4,
         online: 0,
+        orphaned: 0,
         unenrolled: 0,
         unenrolling: 0,
         updating: 0,
+        uninstalled: 0,
       });
     });
 
@@ -257,9 +259,11 @@ export default function ({ getService }: FtrProviderContext) {
         inactive: 0,
         offline: 0,
         online: 2,
+        orphaned: 0,
         unenrolled: 0,
         unenrolling: 0,
         updating: 0,
+        uninstalled: 0,
       });
     });
   });

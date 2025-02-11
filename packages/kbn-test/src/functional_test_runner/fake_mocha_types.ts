@@ -25,6 +25,7 @@ export interface Suite extends Runnable {
   suites: Suite[];
   tests: Test[];
   title: string;
+  fullTitle(): string;
   file: string;
   parent?: Suite;
   eachTest: (cb: (test: Test) => void) => void;
@@ -39,6 +40,7 @@ export interface Test extends Runnable {
   parent?: Suite;
   isPassed: () => boolean;
   pending?: boolean;
+  err?: Error;
 }
 
 export interface Runnable {
@@ -51,10 +53,22 @@ export interface Runnable {
   parent?: Suite;
 }
 
+interface Stats {
+  suites: number;
+  tests: number;
+  passes: number;
+  pending: number;
+  failures: number;
+  start?: Date;
+  end?: Date;
+  duration?: number;
+}
+
 export interface Runner extends EventEmitter {
   abort(): void;
   failures: any[];
   uncaught: (error: Error) => void;
+  stats?: Stats;
 }
 
 export interface Mocha {

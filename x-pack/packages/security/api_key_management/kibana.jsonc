@@ -1,5 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/security-api-key-management",
-  "owner": "@elastic/kibana-security"
-}

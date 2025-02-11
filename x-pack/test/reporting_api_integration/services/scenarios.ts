@@ -25,9 +25,9 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   const security = getService('security');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
-  const supertest = getService('supertest');
   const esSupertest = getService('esSupertest');
   const kibanaServer = getService('kibanaServer');
+  const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
 
@@ -172,10 +172,15 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
       .send({ jobParams });
   };
 
-  const postJob = async (apiPath: string): Promise<string> => {
+  const postJob = async (
+    apiPath: string,
+    username = 'elastic',
+    password = process.env.TEST_KIBANA_PASS || 'changeme'
+  ): Promise<string> => {
     log.debug(`ReportingAPI.postJob(${apiPath})`);
-    const { body } = await supertest
+    const { body } = await supertestWithoutAuth
       .post(removeWhitespace(apiPath))
+      .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .expect(200);
     return body.path;

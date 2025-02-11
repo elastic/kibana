@@ -5,23 +5,7 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "searchInferenceEndpoints",
-        "id": "def-public.INFERENCE_ENDPOINTS_UI_FLAG",
-        "type": "string",
-        "tags": [],
-        "label": "INFERENCE_ENDPOINTS_UI_FLAG",
-        "description": [],
-        "signature": [
-          "\"inferenceEndpointsUi:enabled\""
-        ],
-        "path": "x-pack/plugins/search_inference_endpoints/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": [],
     "setup": {
       "parentPluginId": "searchInferenceEndpoints",
@@ -30,7 +14,7 @@
       "tags": [],
       "label": "SearchInferenceEndpointsPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/search_inference_endpoints/public/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_inference_endpoints/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -44,103 +28,10 @@
       "tags": [],
       "label": "SearchInferenceEndpointsPluginStart",
       "description": [],
-      "path": "x-pack/plugins/search_inference_endpoints/public/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_inference_endpoints/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [
-        {
-          "parentPluginId": "searchInferenceEndpoints",
-          "id": "def-public.SearchInferenceEndpointsPluginStart.InferenceEdnpointsProvider",
-          "type": "Function",
-          "tags": [],
-          "label": "InferenceEdnpointsProvider",
-          "description": [],
-          "signature": [
-            "React.FunctionComponent<",
-            "InferenceEndpointsProviderProps",
-            " & { children?: React.ReactNode; }>"
-          ],
-          "path": "x-pack/plugins/search_inference_endpoints/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "searchInferenceEndpoints",
-              "id": "def-public.SearchInferenceEndpointsPluginStart.InferenceEdnpointsProvider.$1",
-              "type": "Uncategorized",
-              "tags": [],
-              "label": "props",
-              "description": [],
-              "signature": [
-                "P"
-              ],
-              "path": "node_modules/@types/react/ts5.0/index.d.ts",
-              "deprecated": false,
-              "trackAdoption": false
-            },
-            {
-              "parentPluginId": "searchInferenceEndpoints",
-              "id": "def-public.SearchInferenceEndpointsPluginStart.InferenceEdnpointsProvider.$2",
-              "type": "Any",
-              "tags": [],
-              "label": "context",
-              "description": [],
-              "signature": [
-                "any"
-              ],
-              "path": "node_modules/@types/react/ts5.0/index.d.ts",
-              "deprecated": false,
-              "trackAdoption": false
-            }
-          ]
-        },
-        {
-          "parentPluginId": "searchInferenceEndpoints",
-          "id": "def-public.SearchInferenceEndpointsPluginStart.InferenceEndpoints",
-          "type": "Function",
-          "tags": [],
-          "label": "InferenceEndpoints",
-          "description": [],
-          "signature": [
-            "React.FunctionComponent<{}>"
-          ],
-          "path": "x-pack/plugins/search_inference_endpoints/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false,
-          "returnComment": [],
-          "children": [
-            {
-              "parentPluginId": "searchInferenceEndpoints",
-              "id": "def-public.SearchInferenceEndpointsPluginStart.InferenceEndpoints.$1",
-              "type": "Uncategorized",
-              "tags": [],
-              "label": "props",
-              "description": [],
-              "signature": [
-                "P"
-              ],
-              "path": "node_modules/@types/react/ts5.0/index.d.ts",
-              "deprecated": false,
-              "trackAdoption": false
-            },
-            {
-              "parentPluginId": "searchInferenceEndpoints",
-              "id": "def-public.SearchInferenceEndpointsPluginStart.InferenceEndpoints.$2",
-              "type": "Any",
-              "tags": [],
-              "label": "context",
-              "description": [],
-              "signature": [
-                "any"
-              ],
-              "path": "node_modules/@types/react/ts5.0/index.d.ts",
-              "deprecated": false,
-              "trackAdoption": false
-            }
-          ]
-        }
-      ],
+      "children": [],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -159,7 +50,7 @@
       "tags": [],
       "label": "SearchInferenceEndpointsPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/search_inference_endpoints/server/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_inference_endpoints/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -173,7 +64,7 @@
       "tags": [],
       "label": "SearchInferenceEndpointsPluginStart",
       "description": [],
-      "path": "x-pack/plugins/search_inference_endpoints/server/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_inference_endpoints/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],

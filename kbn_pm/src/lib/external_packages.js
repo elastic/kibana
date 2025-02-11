@@ -12,7 +12,7 @@ module.exports = {
   ['@kbn/repo-packages']() {
     // we need to load this package before we install node modules so we can't use @kbn/* imports here
     // eslint-disable-next-line import/no-dynamic-require
-    return require('../../../' + 'packages/kbn-repo-packages');
+    return require('../../../' + 'src/platform/packages/private/kbn-repo-packages');
   },
 
   ['@kbn/ci-stats-reporter']() {

@@ -8,12 +8,7 @@
 import expect from '@kbn/expect';
 import { chunk, omit } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  ES_QUERY_ID,
-  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-} from '@kbn/rule-data-utils';
-import { SuperuserAtSpace1, UserAtSpaceScenarios, StackAlertsOnly } from '../../../scenarios';
+import { SuperuserAtSpace1, UserAtSpaceScenarios } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -613,121 +608,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
           ,
         ]);
       });
-    });
-
-    describe('stack alerts', () => {
-      const ruleTypes = [
-        [
-          ES_QUERY_ID,
-          {
-            searchType: 'esQuery',
-            timeWindowSize: 5,
-            timeWindowUnit: 'm',
-            threshold: [1000],
-            thresholdComparator: '>',
-            size: 100,
-            esQuery: '{\n    "query":{\n      "match_all" : {}\n    }\n  }',
-            aggType: 'count',
-            groupBy: 'all',
-            termSize: 5,
-            excludeHitsFromPreviousRun: false,
-            sourceFields: [],
-            index: ['.kibana'],
-            timeField: 'created_at',
-          },
-        ],
-        [
-          OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-          {
-            criteria: [
-              {
-                comparator: '>',
-                metrics: [
-                  {
-                    name: 'A',
-                    aggType: 'count',
-                  },
-                ],
-                threshold: [100],
-                timeSize: 1,
-                timeUnit: 'm',
-              },
-            ],
-            alertOnNoData: false,
-            alertOnGroupDisappear: false,
-            searchConfiguration: {
-              query: {
-                query: '',
-                language: 'kuery',
-              },
-              index: 'kibana-event-log-data-view',
-            },
-          },
-        ],
-        [
-          ML_ANOMALY_DETECTION_RULE_TYPE_ID,
-          {
-            severity: 75,
-            resultType: 'bucket',
-            includeInterim: false,
-            jobSelection: {
-              jobIds: ['low_request_rate'],
-            },
-          },
-        ],
-      ];
-
-      const createRule = async (rule = {}) => {
-        const { body: createdAlert } = await supertest
-          .post(`${getUrlPrefix('space1')}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(getTestRuleData({ ...rule }))
-          .expect(200);
-
-        objectRemover.add('space1', createdAlert.id, 'rule', 'alerting');
-      };
-
-      for (const [ruleTypeId, params] of ruleTypes) {
-        it(`should get rules of ${ruleTypeId} rule type ID and stackAlerts consumer`, async () => {
-          /**
-           * We create two rules. The first one is a test.noop
-           * rule with stackAlerts as consumer. The second rule
-           * is has different rule type ID but with the same consumer as the first rule (stackAlerts).
-           * This way we can verify that the find API call returns only the rules the user is authorized to.
-           * Specifically only the second rule because the StackAlertsOnly user does not have
-           * access to the test.noop rule type.
-           */
-          await createRule({ consumer: 'stackAlerts' });
-          await createRule({ rule_type_id: ruleTypeId, params, consumer: 'stackAlerts' });
-
-          const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix('space1')}/api/alerting/rules/_find`)
-            .auth(StackAlertsOnly.username, StackAlertsOnly.password);
-
-          expect(response.statusCode).to.eql(200);
-          expect(response.body.total).to.equal(1);
-          expect(response.body.data[0].rule_type_id).to.equal(ruleTypeId);
-          expect(response.body.data[0].consumer).to.equal('stackAlerts');
-        });
-      }
-
-      for (const [ruleTypeId, params] of ruleTypes) {
-        it(`should NOT get rules of ${ruleTypeId} rule type ID and NOT stackAlerts consumer`, async () => {
-          /**
-           * We create two rules with logs as consumer. The user is authorized to
-           * access rules only with the stackAlerts consumers.
-           */
-          await createRule({ consumer: 'logs' });
-          await createRule({ rule_type_id: ruleTypeId, params, consumer: 'logs' });
-
-          const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix('space1')}/api/alerting/rules/_find`)
-            .auth(StackAlertsOnly.username, StackAlertsOnly.password);
-
-          expect(response.statusCode).to.eql(200);
-          expect(response.body.total).to.equal(0);
-        });
-      }
     });
   });
 }

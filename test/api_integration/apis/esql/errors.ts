@@ -19,10 +19,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 function getConfigPath() {
   return Path.resolve(
     REPO_ROOT,
-    'packages',
-    'kbn-esql-validation-autocomplete',
-    'src',
-    'validation'
+    'src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation'
   );
 }
 

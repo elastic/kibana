@@ -118,7 +118,7 @@ export default function annotationApiTests({ getService }: DeploymentAgnosticFtr
         });
 
         response = (
-          await apmApiClient.readUser({
+          await apmApiClient.publicApi({
             endpoint: 'GET /api/apm/services/{serviceName}/annotation/search 2023-10-31',
             params: {
               path: {

@@ -62,15 +62,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           expect(isOpen).to.be(false);
         }
 
-        // open Infrastructure panel using the icon button and navigate to some link inside the panel
-        await solutionNavigation.sidenav.openPanel('metrics', { button: 'icon' });
+        // open Infrastructure panel and navigate to some link inside the panel
+        await solutionNavigation.sidenav.openPanel('metrics', { button: 'link' });
         {
           const isOpen = await solutionNavigation.sidenav.isPanelOpen('metrics');
           expect(isOpen).to.be(true);
         }
         await solutionNavigation.sidenav.clickPanelLink('metrics:inventory');
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Infrastructure inventory',
+          text: 'Infrastructure Inventory',
         });
 
         {

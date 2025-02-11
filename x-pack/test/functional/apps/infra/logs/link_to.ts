@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 import { URL } from 'url';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -47,13 +47,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const currentUrl = await browser.getCurrentUrl();
           const parsedUrl = new URL(currentUrl);
 
-          expect(parsedUrl.pathname).to.be('/app/observability-logs-explorer/');
-          expect(parsedUrl.searchParams.get('pageState')).to.contain(
-            `query:(language:kuery,query:\'trace.id:${traceId}')`
-          );
-          expect(parsedUrl.searchParams.get('pageState')).to.contain(
-            `time:(from:'${startDate}',to:'${endDate}')`
-          );
+          expect(parsedUrl.pathname).toEqual('/app/discover');
+          expect(parsedUrl.hash).toMatch(`query:(language:kuery,query:%27trace.id:${traceId}%27))`);
+          expect(parsedUrl.hash).toMatch(`time:(from:%27${startDate}%27,to:%27${endDate}%27)`);
         });
       });
     });
@@ -79,13 +75,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const currentUrl = await browser.getCurrentUrl();
           const parsedUrl = new URL(currentUrl);
 
-          expect(parsedUrl.pathname).to.be('/app/observability-logs-explorer/');
-          expect(parsedUrl.searchParams.get('pageState')).to.contain(
-            `query:(language:kuery,query:\'(kubernetes.pod.uid: 1234) and (trace.id:${traceId})\')`
+          expect(parsedUrl.pathname).toEqual('/app/discover');
+          expect(parsedUrl.hash).toMatch(
+            `query:(language:kuery,query:%27(kubernetes.pod.uid:%20${nodeId})%20and%20(trace.id:${traceId})%27))`
           );
-          expect(parsedUrl.searchParams.get('pageState')).to.contain(
-            `time:(from:'${startDate}',to:'${endDate}')`
-          );
+          expect(parsedUrl.hash).toMatch(`time:(from:%27${startDate}%27,to:%27${endDate}%27)`);
         });
       });
     });

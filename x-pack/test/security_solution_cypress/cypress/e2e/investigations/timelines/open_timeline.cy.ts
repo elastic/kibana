@@ -35,7 +35,7 @@ describe('Open timeline modal', { tags: ['@serverless', '@ess'] }, () => {
     login();
     visit(TIMELINES_URL);
     createTimeline()
-      .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
+      .then((response) => response.body.savedObjectId)
       .then((timelineId: string) => {
         refreshTimelinesUntilTimeLinePresent(timelineId)
           // This cy.wait is here because we cannot do a pipe on a timeline as that will introduce multiple URL

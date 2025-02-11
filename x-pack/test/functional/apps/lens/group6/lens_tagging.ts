@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('retains its saved object tags after save and return', async () => {
-      await dashboardPanelActions.clickEdit();
+      await dashboardPanelActions.navigateToEditorFromFlyout();
       await lens.saveAndReturn();
       await header.waitUntilLoadingHasFinished();
 

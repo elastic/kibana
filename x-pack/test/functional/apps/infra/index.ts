@@ -26,10 +26,7 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     describe('Logs UI', function () {
       loadTestFile(require.resolve('./logs/log_entry_categories_tab'));
       loadTestFile(require.resolve('./logs/log_entry_rate_tab'));
-      loadTestFile(require.resolve('./logs/logs_source_configuration'));
-      loadTestFile(require.resolve('./logs/log_stream_date_nano'));
       loadTestFile(require.resolve('./logs/link_to'));
-      loadTestFile(require.resolve('./logs/log_stream'));
       loadTestFile(require.resolve('./logs/ml_job_id_formats/tests'));
     });
   });

@@ -8,7 +8,7 @@ import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-p
 import expect from '@kbn/expect';
 import * as http from 'http';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { setupMockServer } from '../agentless_api/mock_agentless_api';
+import { setupMockServer } from './mock_agentless_api';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const mockAgentlessApiService = setupMockServer();
   const pageObjects = getPageObjects([

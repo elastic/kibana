@@ -115,6 +115,75 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
             },
           ],
         },
+        {
+          name: 'Add comments',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Add comments to cases',
+                  id: 'create_comment',
+                  includeIn: 'all',
+                  cases: {
+                    createComment: ['securitySolutionFixture'],
+                  },
+                  savedObject: {
+                    all: [...filesSavedObjectTypes],
+                    read: [...filesSavedObjectTypes],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'Re-open closed cases',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Re-open closed cases',
+                  id: 'case_reopen',
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  cases: {
+                    reopenCase: ['securitySolutionFixture'],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'Assign users',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  id: 'cases_assign',
+                  name: 'Assign users to cases',
+                  includeIn: 'all',
+                  savedObject: {
+                    all: [],
+                    read: [],
+                  },
+                  cases: {
+                    assign: ['securitySolutionFixture'],
+                  },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
       ],
     });
 

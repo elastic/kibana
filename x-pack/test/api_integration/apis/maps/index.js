@@ -38,7 +38,7 @@ export default function ({ loadTestFile, getService }) {
       loadTestFile(require.resolve('./migrations'));
       loadTestFile(require.resolve('./get_tile'));
       loadTestFile(require.resolve('./get_grid_tile'));
-      loadTestFile(require.resolve('./bsearch'));
+      loadTestFile(require.resolve('./search'));
     });
   });
 }

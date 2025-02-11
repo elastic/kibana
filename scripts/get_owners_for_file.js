@@ -8,4 +8,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/code-owners').runGetOwnersForFileCli();
+void require('@kbn/code-owners').cli.findCodeOwnersForPath();

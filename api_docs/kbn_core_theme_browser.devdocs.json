@@ -13,7 +13,7 @@
         "description": [
           "\nContains all the required information to apply Kibana's theme at the various levels it can be used.\n"
         ],
-        "path": "packages/core/theme/core-theme-browser/src/types.ts",
+        "path": "src/core/packages/theme/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -26,7 +26,20 @@
             "description": [
               "is dark mode enabled or not"
             ],
-            "path": "packages/core/theme/core-theme-browser/src/types.ts",
+            "path": "src/core/packages/theme/browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-theme-browser",
+            "id": "def-public.CoreTheme.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nName of the active theme"
+            ],
+            "path": "src/core/packages/theme/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -40,7 +53,7 @@
         "tags": [],
         "label": "ThemeServiceSetup",
         "description": [],
-        "path": "packages/core/theme/core-theme-browser/src/types.ts",
+        "path": "src/core/packages/theme/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -56,16 +69,10 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               ">"
             ],
-            "path": "packages/core/theme/core-theme-browser/src/types.ts",
+            "path": "src/core/packages/theme/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -80,15 +87,9 @@
             ],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              }
+              "CoreTheme"
             ],
-            "path": "packages/core/theme/core-theme-browser/src/types.ts",
+            "path": "src/core/packages/theme/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -108,15 +109,9 @@
         "label": "ThemeServiceStart",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-theme-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-public.ThemeServiceSetup",
-            "text": "ThemeServiceSetup"
-          }
+          "ThemeServiceSetup"
         ],
-        "path": "packages/core/theme/core-theme-browser/src/types.ts",
+        "path": "src/core/packages/theme/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

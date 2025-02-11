@@ -1,0 +1,261 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ElasticAgentCard props button 1`] = `
+<RedirectAppLinks
+  coreStart={
+    Object {
+      "application": Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      },
+    }
+  }
+>
+  <EuiCard
+    description="Use Elastic Agent for a simple, unified way to collect data from your machines."
+    footer={
+      <EuiButton
+        fill={true}
+      >
+        Button
+      </EuiButton>
+    }
+    href="/app/integrations/browse"
+    image={
+      <EuiImage
+        alt=""
+        css={
+          Object {
+            "background": "aliceblue",
+            "height": 240,
+            "objectFit": "cover",
+            "width": "max(100%, 360px)",
+          }
+        }
+        size="fullWidth"
+        url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+      />
+    }
+    paddingSize="l"
+    title={
+      <EuiScreenReaderOnly>
+        <span>
+          Add Elastic Agent
+        </span>
+      </EuiScreenReaderOnly>
+    }
+  />
+</RedirectAppLinks>
+`;
+
+exports[`ElasticAgentCard props category 1`] = `
+<RedirectAppLinks
+  coreStart={
+    Object {
+      "application": Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      },
+    }
+  }
+>
+  <EuiCard
+    description="Use Elastic Agent for a simple, unified way to collect data from your machines."
+    footer={
+      <EuiButton
+        fill={true}
+      >
+        Add Elastic Agent
+      </EuiButton>
+    }
+    href="/app/integrations/browse/custom"
+    image={
+      <EuiImage
+        alt=""
+        css={
+          Object {
+            "background": "aliceblue",
+            "height": 240,
+            "objectFit": "cover",
+            "width": "max(100%, 360px)",
+          }
+        }
+        size="fullWidth"
+        url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+      />
+    }
+    paddingSize="l"
+    title={
+      <EuiScreenReaderOnly>
+        <span>
+          Add Elastic Agent
+        </span>
+      </EuiScreenReaderOnly>
+    }
+  />
+</RedirectAppLinks>
+`;
+
+exports[`ElasticAgentCard props href 1`] = `
+<RedirectAppLinks
+  coreStart={
+    Object {
+      "application": Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      },
+    }
+  }
+>
+  <EuiCard
+    description="Use Elastic Agent for a simple, unified way to collect data from your machines."
+    footer={
+      <EuiButton
+        fill={true}
+      >
+        Button
+      </EuiButton>
+    }
+    href="#"
+    image={
+      <EuiImage
+        alt=""
+        css={
+          Object {
+            "background": "aliceblue",
+            "height": 240,
+            "objectFit": "cover",
+            "width": "max(100%, 360px)",
+          }
+        }
+        size="fullWidth"
+        url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+      />
+    }
+    paddingSize="l"
+    title={
+      <EuiScreenReaderOnly>
+        <span>
+          Add Elastic Agent
+        </span>
+      </EuiScreenReaderOnly>
+    }
+  />
+</RedirectAppLinks>
+`;
+
+exports[`ElasticAgentCard props recommended 1`] = `
+<RedirectAppLinks
+  coreStart={
+    Object {
+      "application": Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      },
+    }
+  }
+>
+  <EuiCard
+    betaBadgeProps={
+      Object {
+        "label": "Recommended",
+      }
+    }
+    description="Use Elastic Agent for a simple, unified way to collect data from your machines."
+    footer={
+      <EuiButton
+        fill={true}
+      >
+        Add Elastic Agent
+      </EuiButton>
+    }
+    href="/app/integrations/browse"
+    image={
+      <EuiImage
+        alt=""
+        css={
+          Object {
+            "background": "aliceblue",
+            "height": 240,
+            "objectFit": "cover",
+            "width": "max(100%, 360px)",
+          }
+        }
+        size="fullWidth"
+        url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+      />
+    }
+    paddingSize="l"
+    title={
+      <EuiScreenReaderOnly>
+        <span>
+          Add Elastic Agent
+        </span>
+      </EuiScreenReaderOnly>
+    }
+  />
+</RedirectAppLinks>
+`;
+
+exports[`ElasticAgentCard renders 1`] = `
+<RedirectAppLinks
+  coreStart={
+    Object {
+      "application": Object {
+        "capabilities": Object {
+          "navLinks": Object {
+            "integrations": true,
+          },
+        },
+      },
+    }
+  }
+>
+  <EuiCard
+    description="Use Elastic Agent for a simple, unified way to collect data from your machines."
+    footer={
+      <EuiButton
+        fill={true}
+      >
+        Add Elastic Agent
+      </EuiButton>
+    }
+    href="/app/integrations/browse"
+    image={
+      <EuiImage
+        alt=""
+        css={
+          Object {
+            "background": "aliceblue",
+            "height": 240,
+            "objectFit": "cover",
+            "width": "max(100%, 360px)",
+          }
+        }
+        size="fullWidth"
+        url="/plugins/kibanaReact/assets/elastic_agent_card.svg"
+      />
+    }
+    paddingSize="l"
+    title={
+      <EuiScreenReaderOnly>
+        <span>
+          Add Elastic Agent
+        </span>
+      </EuiScreenReaderOnly>
+    }
+  />
+</RedirectAppLinks>
+`;

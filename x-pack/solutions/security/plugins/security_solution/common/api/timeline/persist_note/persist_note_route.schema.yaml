@@ -1,0 +1,61 @@
+openapi: 3.0.0
+info:
+  title: Elastic Security - Timeline - Notes API
+  version: '2023-10-31'
+externalDocs:
+  url: https://www.elastic.co/guide/en/security/current/timeline-api-update.html
+  description: Documentation
+paths:
+  /api/note:
+    patch:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: PersistNoteRoute
+      summary: Add or update a note
+      description: Add a note to a Timeline or update an existing note.
+      tags:
+        - access:securitySolution
+      requestBody:
+        description: The note to add or update, along with additional metadata.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [note]
+              properties:
+                note:
+                  $ref: '../model/components.schema.yaml#/components/schemas/BareNote'
+                overrideOwner:
+                  type: boolean
+                  nullable: true
+                noteId:
+                  type: string
+                  nullable: true
+                version:
+                  type: string
+                  nullable: true
+                eventIngested:
+                  type: string
+                  nullable: true
+                eventTimestamp:
+                  type: string
+                  nullable: true
+                eventDataView:
+                  type: string
+                  nullable: true
+      responses:
+        '200':
+          description: Indicates the note was successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseNote'
+components:
+  schemas:
+    ResponseNote:
+      type: object
+      required: [note]
+      properties:
+        note:
+          $ref: '../model/components.schema.yaml#/components/schemas/Note'

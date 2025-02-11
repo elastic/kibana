@@ -53,8 +53,7 @@ const INITIAL_END_DATE = 'Jan 19, 2024 @ 20:33:29.186';
 const TIMELINE_REQ_WITH_SAVED_SEARCH = 'TIMELINE_REQ_WITH_SAVED_SEARCH';
 const TIMELINE_PATCH_REQ = 'TIMELINE_PATCH_REQ';
 
-const TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH =
-  'response.body.data.persistTimeline.timeline.savedObjectId';
+const TIMELINE_RESPONSE_SAVED_OBJECT_ID_PATH = 'response.body.savedObjectId';
 const esqlQuery = 'from auditbeat-* | where ecs.version == "8.0.0"';
 
 const handleIntercepts = () => {

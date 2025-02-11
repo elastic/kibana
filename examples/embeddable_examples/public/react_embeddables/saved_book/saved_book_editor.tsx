@@ -26,27 +26,29 @@ import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { i18n } from '@kbn/i18n';
 import { tracksOverlays } from '@kbn/presentation-containers';
-import {
-  apiHasParentApi,
-  apiHasUniqueId,
-  useBatchedOptionalPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import { apiHasUniqueId, useBatchedOptionalPublishingSubjects } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import React from 'react';
+import React, { useState } from 'react';
 import { serializeBookAttributes } from './book_state';
-import { BookAttributesManager } from './types';
+import { BookApi, BookAttributesManager } from './types';
+import { saveBookAttributes } from './saved_book_library';
 
-export const openSavedBookEditor = (
-  attributesManager: BookAttributesManager,
-  isCreate: boolean,
-  core: CoreStart,
-  api: unknown
-): Promise<{ addToLibrary: boolean }> => {
+export const openSavedBookEditor = ({
+  attributesManager,
+  isCreate,
+  core,
+  parent,
+  api,
+}: {
+  attributesManager: BookAttributesManager;
+  isCreate: boolean;
+  core: CoreStart;
+  parent?: unknown;
+  api?: BookApi;
+}): Promise<{ savedBookId?: string }> => {
   return new Promise((resolve) => {
     const closeOverlay = (overlayRef: OverlayRef) => {
-      if (apiHasParentApi(api) && tracksOverlays(api.parentApi)) {
-        api.parentApi.clearOverlays();
-      }
+      if (tracksOverlays(parent)) parent.clearOverlays();
       overlayRef.close();
     };
 
@@ -54,8 +56,9 @@ export const openSavedBookEditor = (
     const overlay = core.overlays.openFlyout(
       toMountPoint(
         <SavedBookEditor
-          attributesManager={attributesManager}
+          api={api}
           isCreate={isCreate}
+          attributesManager={attributesManager}
           onCancel={() => {
             // set the state back to the initial state and reject
             attributesManager.authorName.next(initialState.authorName);
@@ -64,19 +67,23 @@ export const openSavedBookEditor = (
             attributesManager.numberOfPages.next(initialState.numberOfPages);
             closeOverlay(overlay);
           }}
-          onSubmit={(addToLibrary: boolean) => {
+          onSubmit={async (addToLibrary: boolean) => {
+            const savedBookId = addToLibrary
+              ? await saveBookAttributes(
+                  api?.getSavedBookId(),
+                  serializeBookAttributes(attributesManager)
+                )
+              : undefined;
+
             closeOverlay(overlay);
-            resolve({ addToLibrary });
+            resolve({ savedBookId });
           }}
         />,
-        {
-          theme: core.theme,
-          i18n: core.i18n,
-        }
+        core
       ),
       {
         type: isCreate ? 'overlay' : 'push',
-        size: isCreate ? 'm' : 's',
+        size: 'm',
         onClose: () => closeOverlay(overlay),
       }
     );
@@ -86,9 +93,7 @@ export const openSavedBookEditor = (
      * if our parent needs to know about the overlay, notify it. This allows the parent to close the overlay
      * when navigating away, or change certain behaviors based on the overlay being open.
      */
-    if (apiHasParentApi(api) && tracksOverlays(api.parentApi)) {
-      api.parentApi.openOverlay(overlay, overlayOptions);
-    }
+    if (tracksOverlays(parent)) parent.openOverlay(overlay, overlayOptions);
   });
 };
 
@@ -97,19 +102,22 @@ export const SavedBookEditor = ({
   isCreate,
   onSubmit,
   onCancel,
+  api,
 }: {
   attributesManager: BookAttributesManager;
   isCreate: boolean;
-  onSubmit: (addToLibrary: boolean) => void;
+  onSubmit: (addToLibrary: boolean) => Promise<void>;
   onCancel: () => void;
+  api?: BookApi;
 }) => {
-  const [addToLibrary, setAddToLibrary] = React.useState(false);
   const [authorName, synopsis, bookTitle, numberOfPages] = useBatchedOptionalPublishingSubjects(
     attributesManager.authorName,
     attributesManager.bookSynopsis,
     attributesManager.bookTitle,
     attributesManager.numberOfPages
   );
+  const [addToLibrary, setAddToLibrary] = useState(Boolean(api?.getSavedBookId()));
+  const [saving, setSaving] = useState(false);
 
   return (
     <>
@@ -133,6 +141,7 @@ export const SavedBookEditor = ({
           })}
         >
           <EuiFieldText
+            disabled={saving}
             value={authorName ?? ''}
             onChange={(e) => attributesManager.authorName.next(e.target.value)}
           />
@@ -143,6 +152,7 @@ export const SavedBookEditor = ({
           })}
         >
           <EuiFieldText
+            disabled={saving}
             value={bookTitle ?? ''}
             onChange={(e) => attributesManager.bookTitle.next(e.target.value)}
           />
@@ -153,6 +163,7 @@ export const SavedBookEditor = ({
           })}
         >
           <EuiFieldNumber
+            disabled={saving}
             value={numberOfPages ?? ''}
             onChange={(e) => attributesManager.numberOfPages.next(+e.target.value)}
           />
@@ -163,6 +174,7 @@ export const SavedBookEditor = ({
           })}
         >
           <EuiTextArea
+            disabled={saving}
             value={synopsis ?? ''}
             onChange={(e) => attributesManager.bookSynopsis.next(e.target.value)}
           />
@@ -171,7 +183,7 @@ export const SavedBookEditor = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onCancel} flush="left">
+            <EuiButtonEmpty disabled={saving} iconType="cross" onClick={onCancel} flush="left">
               {i18n.translate('embeddableExamples.savedBook.editor.cancel', {
                 defaultMessage: 'Discard changes',
               })}
@@ -179,19 +191,25 @@ export const SavedBookEditor = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-              {isCreate && (
-                <EuiFlexItem grow={false}>
-                  <EuiSwitch
-                    label={i18n.translate('embeddableExamples.savedBook.editor.addToLibrary', {
-                      defaultMessage: 'Save to library',
-                    })}
-                    checked={addToLibrary}
-                    onChange={() => setAddToLibrary(!addToLibrary)}
-                  />
-                </EuiFlexItem>
-              )}
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={() => onSubmit(addToLibrary)} fill>
+                <EuiSwitch
+                  label={i18n.translate('embeddableExamples.savedBook.editor.addToLibrary', {
+                    defaultMessage: 'Save to library',
+                  })}
+                  checked={addToLibrary}
+                  disabled={saving}
+                  onChange={() => setAddToLibrary(!addToLibrary)}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  isLoading={saving}
+                  onClick={() => {
+                    setSaving(true);
+                    onSubmit(addToLibrary);
+                  }}
+                  fill
+                >
                   {isCreate
                     ? i18n.translate('embeddableExamples.savedBook.editor.create', {
                         defaultMessage: 'Create book',

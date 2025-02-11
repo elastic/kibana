@@ -28,7 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ecommerceSOPath = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    'doc_table:legacy': false,
   };
 
   const from = 'Apr 27, 2019 @ 23:56:51.374';
@@ -47,7 +46,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.importExport.unload(ecommerceSOPath);
-      await kibanaServer.uiSettings.unset('doc_table:legacy');
       await common.unsetTime();
     });
 

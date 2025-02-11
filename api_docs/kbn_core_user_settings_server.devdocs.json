@@ -19,7 +19,7 @@
         "tags": [],
         "label": "UserSettingsServiceSetup",
         "description": [],
-        "path": "packages/core/user-settings/core-user-settings-server/types.ts",
+        "path": "src/core/packages/user-settings/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],

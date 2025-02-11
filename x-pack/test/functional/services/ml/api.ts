@@ -85,7 +85,6 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const esSupertest = getService('esSupertest');
   const kbnSupertest = getService('supertest');
-  const esDeleteAllIndices = getService('esDeleteAllIndices');
 
   return {
     assertResponseStatusCode(expectedStatus: number, actualStatus: number, responseBody: object) {
@@ -310,8 +309,37 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug('> Indices deleted.');
     },
 
+    async deleteExpiredAnomalyDetectionData() {
+      log.debug('Deleting expired data ...');
+      const { body, status } = await esSupertest.delete('/_ml/_delete_expired_data');
+      this.assertResponseStatusCode(200, status, body);
+      log.debug('> Expired data deleted.');
+    },
+
+    async cleanAnomalyDetection() {
+      await this.deleteAllAnomalyDetectionJobs();
+      await this.deleteAllCalendars();
+      await this.deleteAllFilters();
+      await this.deleteAllAnnotations();
+      await this.deleteExpiredAnomalyDetectionData();
+      await this.syncSavedObjects();
+    },
+
+    async cleanDataFrameAnalytics() {
+      await this.deleteAllDataFrameAnalyticsJobs();
+      await this.syncSavedObjects();
+    },
+
+    async cleanTrainedModels() {
+      await this.deleteAllTrainedModelsIngestPipelines();
+      await this.deleteAllTrainedModelsES();
+      await this.syncSavedObjects();
+    },
+
     async cleanMlIndices() {
-      await esDeleteAllIndices('.ml-*');
+      await this.cleanAnomalyDetection();
+      await this.cleanDataFrameAnalytics();
+      await this.cleanTrainedModels();
     },
 
     async getJobState(jobId: string): Promise<JOB_STATE> {
@@ -537,6 +565,12 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return response;
     },
 
+    async getAllCalendars(expectedCode = 200) {
+      const response = await esSupertest.get('/_ml/calendars/_all');
+      this.assertResponseStatusCode(expectedCode, response.status, response.body);
+      return response;
+    },
+
     async createCalendar(
       calendarId: string,
       requestBody: Partial<Calendar> = { description: '', job_ids: [] }
@@ -557,6 +591,14 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
       await this.waitForCalendarNotToExist(calendarId);
       log.debug('> Calendar deleted.');
+    },
+
+    async deleteAllCalendars() {
+      log.debug('Deleting all calendars');
+      const getAllCalendarsRsp = await this.getAllCalendars();
+      for (const calendar of getAllCalendarsRsp.body.calendars) {
+        await this.deleteCalendar(calendar.calendar_id);
+      }
     },
 
     async waitForCalendarToExist(calendarId: string, errorMsg?: string) {
@@ -656,6 +698,12 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async getAnomalyDetectionJob(jobId: string) {
       const response = await esSupertest.get(`/_ml/anomaly_detectors/${jobId}`);
+      this.assertResponseStatusCode(200, response.status, response.body);
+      return response;
+    },
+
+    async getAllAnomalyDetectionJobs() {
+      const response = await esSupertest.get('/_ml/anomaly_detectors/_all');
       this.assertResponseStatusCode(200, response.status, response.body);
       return response;
     },
@@ -829,6 +877,14 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
       await this.waitForAnomalyDetectionJobNotToExist(jobId);
       log.debug('> AD job deleted.');
+    },
+
+    async deleteAllAnomalyDetectionJobs() {
+      log.debug('Deleting all anomaly detection jobs');
+      const getAllAdJobsResp = await this.getAllAnomalyDetectionJobs();
+      for (const job of getAllAdJobsResp.body.jobs) {
+        await this.deleteAnomalyDetectionJobES(job.job_id);
+      }
     },
 
     async getDatafeed(datafeedId: string) {
@@ -1034,6 +1090,12 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug('> DFA job created.');
     },
 
+    async getAllDataFrameAnalyticsJobs(expectedCode = 200) {
+      const response = await esSupertest.get('/_ml/data_frame/analytics/_all');
+      this.assertResponseStatusCode(expectedCode, response.status, response.body);
+      return response;
+    },
+
     async createDataFrameAnalyticsJobES(jobConfig: DataFrameAnalyticsConfig) {
       const { id: analyticsId, ...analyticsConfig } = jobConfig;
       log.debug(`Creating data frame analytic job with id '${analyticsId}' via ES API...`);
@@ -1062,6 +1124,14 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
       await this.waitForDataFrameAnalyticsJobNotToExist(analyticsId);
       log.debug('> DFA job deleted.');
+    },
+
+    async deleteAllDataFrameAnalyticsJobs() {
+      log.debug('Deleting all data frame analytics jobs');
+      const getAllDfaJobsResp = await this.getAllDataFrameAnalyticsJobs();
+      for (const job of getAllDfaJobsResp.body.data_frame_analytics) {
+        await this.deleteDataFrameAnalyticsJobES(job.id);
+      }
     },
 
     async getADJobRecordCount(jobId: string): Promise<number> {
@@ -1114,8 +1184,20 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       );
     },
 
+    async filterExists(filterId: string): Promise<boolean> {
+      const { status } = await esSupertest.get(`/_ml/filters/${filterId}`);
+      if (status !== 200) return false;
+      return true;
+    },
+
     async getFilter(filterId: string, expectedCode = 200) {
       const response = await esSupertest.get(`/_ml/filters/${filterId}`);
+      this.assertResponseStatusCode(expectedCode, response.status, response.body);
+      return response;
+    },
+
+    async getAllFilters(expectedCode = 200) {
+      const response = await esSupertest.get(`/_ml/filters`);
       this.assertResponseStatusCode(expectedCode, response.status, response.body);
       return response;
     },
@@ -1131,10 +1213,25 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async deleteFilter(filterId: string) {
       log.debug(`Deleting filter with id '${filterId}'...`);
-      await esSupertest.delete(`/_ml/filters/${filterId}`);
+
+      if ((await this.filterExists(filterId)) === false) {
+        log.debug('> Filter does not exist, nothing to delete');
+        return;
+      }
+
+      const { body, status } = await esSupertest.delete(`/_ml/filters/${filterId}`);
+      this.assertResponseStatusCode(200, status, body);
 
       await this.waitForFilterToNotExist(filterId, `expected filter '${filterId}' to be deleted`);
       log.debug('> Filter deleted.');
+    },
+
+    async deleteAllFilters() {
+      log.debug('Deleting all filters');
+      const getAllFiltersRsp = await this.getAllFilters();
+      for (const filter of getAllFiltersRsp.body.filters) {
+        await this.deleteFilter(filter.filter_id);
+      }
     },
 
     async assertModelMemoryLimitForJob(jobId: string, expectedMml: string) {
@@ -1195,6 +1292,25 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       expect(body).to.not.be(undefined);
       expect(body).to.have.property('hits');
       log.debug('> Annotations fetched.');
+      return body.hits.hits;
+    },
+
+    async getAllAnnotations() {
+      log.debug('Fetching all annotations ...');
+
+      if (
+        (await es.indices.exists({
+          index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
+          allow_no_indices: false,
+        })) === false
+      ) {
+        return [];
+      }
+
+      const body = await es.search<Annotation>({ index: ML_ANNOTATIONS_INDEX_ALIAS_READ });
+      expect(body).to.not.be(undefined);
+      expect(body).to.have.property('hits');
+      log.debug('> All annotations fetched.');
       return body.hits.hits;
     },
 
@@ -1262,6 +1378,24 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         expectedCount,
         `expected annotation count of ${expectedCount}, got ${annotations.length}`
       );
+    },
+
+    async deleteAnnotation(annotationId: string) {
+      log.debug(`Deleting annotation with id "${annotationId}"`);
+      const { body, status } = await kbnSupertest
+        .delete(`/internal/ml/annotations/delete/${annotationId}`)
+        .set(getCommonRequestHeader('1'));
+      this.assertResponseStatusCode(200, status, body);
+
+      log.debug('> Annotation deleted');
+    },
+
+    async deleteAllAnnotations() {
+      log.debug('Deleting all annotations.');
+      const allAnnotations = await this.getAllAnnotations();
+      for (const annotation of allAnnotations) {
+        await this.deleteAnnotation(annotation._id!);
+      }
     },
 
     async runDFAJob(dfaId: string) {
@@ -1645,6 +1779,18 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       this.assertResponseStatusCode(200, status, body);
 
       log.debug('> Ingest pipeline deleted');
+    },
+
+    async deleteAllTrainedModelsIngestPipelines() {
+      log.debug(`Deleting all trained models ingest pipelines`);
+      const getModelsRsp = await this.getTrainedModelsES();
+      for (const model of getModelsRsp.trained_model_configs) {
+        if (this.isInternalModelId(model.model_id)) {
+          log.debug(`> Skipping internal ${model.model_id}`);
+          continue;
+        }
+        await this.deleteIngestPipeline(model.model_id);
+      }
     },
 
     async assureMlStatsIndexExists(timeout: number = 60 * 1000) {

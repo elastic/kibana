@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/sse-utils",
+  "owner": [
+    "@elastic/obs-knowledge-team"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

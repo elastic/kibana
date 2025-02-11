@@ -119,7 +119,8 @@ export default function ({ getService }: FtrProviderContext) {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
                 expectedEntries: [
-                  'STOPPED',
+                  'Status',
+                  'stopped',
                   'Create time',
                   'Model memory limit',
                   '16mb',

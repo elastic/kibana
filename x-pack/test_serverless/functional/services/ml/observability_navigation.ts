@@ -15,7 +15,7 @@ export function MachineLearningNavigationProviderObservability({
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
 
   async function navigateToArea(id: string) {
-    await svlCommonNavigation.sidenav.openPanel('machine_learning-landing');
+    await svlCommonNavigation.sidenav.openPanel('machine_learning-landing', { button: 'link' });
     await testSubjects.existOrFail(`~panelNavItem-id-ml:${id}`, {
       timeout: 60 * 1000,
     });
@@ -25,6 +25,12 @@ export function MachineLearningNavigationProviderObservability({
   return {
     async navigateToAnomalyDetection() {
       await navigateToArea('anomalyDetection');
+    },
+    async navigateToMemoryUsage() {
+      await navigateToArea('memoryUsage');
+    },
+    async navigateToNotifications() {
+      await navigateToArea('notifications');
     },
   };
 }

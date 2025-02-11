@@ -50,14 +50,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // check the Content > Indices section
         await solutionNavigation.sidenav.clickLink({
-          deepLinkId: 'enterpriseSearchContent:searchIndices',
+          deepLinkId: 'management:index_management',
         });
         await solutionNavigation.sidenav.expectLinkActive({
-          deepLinkId: 'enterpriseSearchContent:searchIndices',
+          deepLinkId: 'management:index_management',
         });
-        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Indices' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Deployment' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Stack Management' });
+        await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          deepLinkId: 'enterpriseSearchContent:searchIndices',
+          text: 'Indices',
         });
 
         // navigate to a different section

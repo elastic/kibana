@@ -30,7 +30,7 @@
         "tags": [],
         "label": "hapiMocks",
         "description": [],
-        "path": "packages/kbn-hapi-mocks/index.ts",
+        "path": "src/platform/packages/private/kbn-hapi-mocks/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -60,7 +60,7 @@
               "ReqRefDefaults",
               ">"
             ],
-            "path": "packages/kbn-hapi-mocks/index.ts",
+            "path": "src/platform/packages/private/kbn-hapi-mocks/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -519,7 +519,7 @@
                   },
                   "<(name: string) => boolean> | undefined; }"
                 ],
-                "path": "packages/kbn-hapi-mocks/src/request.ts",
+                "path": "src/platform/packages/private/kbn-hapi-mocks/src/request.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

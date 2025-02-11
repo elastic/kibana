@@ -21,9 +21,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
-  describe('Diagnostics: Indices', () => {
-    describe.skip('When there is no data', () => {
-      it('returns empty response`', async () => {
+  // Failing tests were skipped because the current solution for verifying ingest pipelines needs improvement
+  describe.skip('Diagnostics: Indices', () => {
+    describe('When there is no data', () => {
+      it('returns empty response', async () => {
         const { status, body } = await apmApiClient.adminUser({
           endpoint: 'GET /internal/apm/diagnostics',
         });
@@ -34,7 +35,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe.skip('When data is ingested', () => {
+    describe('When data is ingested', () => {
       before(async () => {
         const instance = apm
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
@@ -68,7 +69,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe.skip('When data is ingested without the necessary index templates', () => {
+    describe('When data is ingested without the necessary index templates', () => {
       before(async () => {
         await es.indices.deleteDataStream({ name: 'traces-apm-*' });
         await es.indices.deleteIndexTemplate({ name: ['traces-apm'] });
@@ -114,7 +115,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
     });
 
-    describe.skip('ingest pipelines', () => {
+    describe('ingest pipelines', () => {
       before(async () => {
         const instance = apm
           .service({ name: 'synth-go', environment: 'production', agentName: 'go' })
@@ -138,7 +139,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         await apmSynthtraceEsClient.clean();
       });
 
-      describe.skip('an ingest pipeline is removed', () => {
+      describe('an ingest pipeline is removed', () => {
         before(async () => {
           const datastreamToUpdate = await es.indices.getDataStream({
             name: 'metrics-apm.internal-default',
@@ -168,7 +169,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
 
-      describe.skip('an ingest pipeline is changed', () => {
+      describe('an ingest pipeline is changed', () => {
         before(async () => {
           const datastreamToUpdate = await es.indices.getDataStream({
             name: 'metrics-apm.internal-default',

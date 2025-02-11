@@ -40,7 +40,7 @@
             "text": "Env"
           }
         ],
-        "path": "packages/kbn-config-mocks/src/env.mock.ts",
+        "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -51,7 +51,7 @@
             "tags": [],
             "label": "{\n  repoRoot = REPO_ROOT,\n  envOptions = getEnvOptions(),\n  packageInfo = createTestPackageInfo(),\n}",
             "description": [],
-            "path": "packages/kbn-config-mocks/src/env.mock.ts",
+            "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -65,7 +65,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/kbn-config-mocks/src/env.mock.ts",
+                "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -80,7 +80,7 @@
                   "EnvOptions",
                   " | undefined"
                 ],
-                "path": "packages/kbn-config-mocks/src/env.mock.ts",
+                "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -95,7 +95,7 @@
                   "RawPackageInfo",
                   " | undefined"
                 ],
-                "path": "packages/kbn-config-mocks/src/env.mock.ts",
+                "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -116,7 +116,7 @@
           "({ dist }?: { dist?: boolean | undefined; }) => ",
           "RawPackageInfo"
         ],
-        "path": "packages/kbn-config-mocks/src/env.mock.ts",
+        "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -127,7 +127,7 @@
             "tags": [],
             "label": "{ dist = true }",
             "description": [],
-            "path": "packages/kbn-config-mocks/src/env.mock.ts",
+            "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -141,7 +141,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/kbn-config-mocks/src/env.mock.ts",
+                "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -164,7 +164,7 @@
           ">) => ",
           "EnvOptions"
         ],
-        "path": "packages/kbn-config-mocks/src/env.mock.ts",
+        "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -180,7 +180,7 @@
               "EnvOptions",
               ">"
             ],
-            "path": "packages/kbn-config-mocks/src/env.mock.ts",
+            "path": "src/platform/packages/private/kbn-config-mocks/src/env.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -209,7 +209,7 @@
             "text": "ConfigDeprecationContext"
           }
         ],
-        "path": "packages/kbn-config-mocks/src/deprecations.mock.ts",
+        "path": "src/platform/packages/private/kbn-config-mocks/src/deprecations.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -249,7 +249,7 @@
           ", value: any], unknown>; getFlattenedPaths: jest.MockInstance<string[], [], unknown>; toRaw: jest.MockInstance<Record<string, any>, [], unknown>; } & ",
           "Config"
         ],
-        "path": "packages/kbn-config-mocks/src/config.mock.ts",
+        "path": "src/platform/packages/private/kbn-config-mocks/src/config.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -355,7 +355,7 @@
           ", dynamicConfigPaths: string[]], unknown>; setDynamicConfigOverrides: jest.MockInstance<Record<string, unknown>, [newOverrides: Record<string, unknown>], unknown>; } & ",
           "IConfigService"
         ],
-        "path": "packages/kbn-config-mocks/src/config_service.mock.ts",
+        "path": "src/platform/packages/private/kbn-config-mocks/src/config_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -382,7 +382,7 @@
           "RawConfigService",
           ">"
         ],
-        "path": "packages/kbn-config-mocks/src/raw_config_service.mock.ts",
+        "path": "src/platform/packages/private/kbn-config-mocks/src/raw_config_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -396,7 +396,7 @@
         "tags": [],
         "label": "configDeprecationsMock",
         "description": [],
-        "path": "packages/kbn-config-mocks/src/deprecations.mock.ts",
+        "path": "src/platform/packages/private/kbn-config-mocks/src/deprecations.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -417,7 +417,7 @@
                 "text": "ConfigDeprecationContext"
               }
             ],
-            "path": "packages/kbn-config-mocks/src/deprecations.mock.ts",
+            "path": "src/platform/packages/private/kbn-config-mocks/src/deprecations.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -433,7 +433,7 @@
         "tags": [],
         "label": "configMock",
         "description": [],
-        "path": "packages/kbn-config-mocks/src/config.mock.ts",
+        "path": "src/platform/packages/private/kbn-config-mocks/src/config.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -454,7 +454,7 @@
                 "text": "ConfigMock"
               }
             ],
-            "path": "packages/kbn-config-mocks/src/config.mock.ts",
+            "path": "src/platform/packages/private/kbn-config-mocks/src/config.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -470,7 +470,7 @@
         "tags": [],
         "label": "configServiceMock",
         "description": [],
-        "path": "packages/kbn-config-mocks/src/config_service.mock.ts",
+        "path": "src/platform/packages/private/kbn-config-mocks/src/config_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -491,7 +491,7 @@
                 "text": "IConfigServiceMock"
               }
             ],
-            "path": "packages/kbn-config-mocks/src/config_service.mock.ts",
+            "path": "src/platform/packages/private/kbn-config-mocks/src/config_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -506,7 +506,7 @@
                 "signature": [
                   "{ atPath?: Record<string, any> | undefined; getConfig$?: Record<string, any> | undefined; }"
                 ],
-                "path": "packages/kbn-config-mocks/src/config_service.mock.ts",
+                "path": "src/platform/packages/private/kbn-config-mocks/src/config_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -522,7 +522,7 @@
         "tags": [],
         "label": "rawConfigServiceMock",
         "description": [],
-        "path": "packages/kbn-config-mocks/src/raw_config_service.mock.ts",
+        "path": "src/platform/packages/private/kbn-config-mocks/src/raw_config_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -545,7 +545,7 @@
                 "text": "RawConfigServiceMock"
               }
             ],
-            "path": "packages/kbn-config-mocks/src/raw_config_service.mock.ts",
+            "path": "src/platform/packages/private/kbn-config-mocks/src/raw_config_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -562,7 +562,7 @@
                   "Observable",
                   "<Record<string, any>> | undefined; }"
                 ],
-                "path": "packages/kbn-config-mocks/src/raw_config_service.mock.ts",
+                "path": "src/platform/packages/private/kbn-config-mocks/src/raw_config_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
