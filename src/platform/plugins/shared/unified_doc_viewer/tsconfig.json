@@ -39,7 +39,11 @@
     "@kbn/management-settings-ids",
     "@kbn/apm-types",
     "@kbn/event-stacktrace",
+<<<<<<< 208693-discoverapm-custom-overview-tab-in-the-detail-flyout-of-traces_data_source_profile
     "@kbn/elastic-agent-utils"
+=======
+    "@kbn/data-view-utils"
+>>>>>>> main
 
   ],
   "exclude": [
