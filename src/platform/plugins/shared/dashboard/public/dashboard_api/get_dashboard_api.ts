@@ -279,5 +279,6 @@ export function getDashboardApi({
       unifiedSearchManager.cleanup();
       unsavedChangesManager.cleanup();
     },
+    controlGroupApi$,
   };
 }

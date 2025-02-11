@@ -258,8 +258,11 @@ export class DashboardPlugin
       mount: async (params: AppMountParameters) => {
         this.currentHistory = params.history;
         params.element.classList.add(APP_WRAPPER_CLASS);
+        const dashboardAppInitializeStartTime = performance.now();
+
         await untilPluginStartServicesReady();
         const { mountApp } = await import('./dashboard_app/dashboard_router');
+
         appMounted();
 
         const [coreStart] = await core.getStartServices();
@@ -271,6 +274,11 @@ export class DashboardPlugin
           setHeaderActionMenu: params.setHeaderActionMenu,
         };
 
+        const dashboardAppInitializeEndTime = performance.now();
+        console.log(
+          'Dashboard app initialized in',
+          dashboardAppInitializeEndTime - dashboardAppInitializeStartTime
+        );
         return mountApp({
           coreStart,
           appUnMounted,
