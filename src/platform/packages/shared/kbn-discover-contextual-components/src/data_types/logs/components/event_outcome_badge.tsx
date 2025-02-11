@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
+import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from './cell_actions_popover';
 import {
   eventOutcomeFailureLabel,
@@ -21,6 +22,25 @@ const FIELD_VALUE_TRANSLATIONS: Record<string, string> = {
   unknown: eventOutcomeUnknownLabel,
 };
 
-export const EventOutcomeBadgeWithActions = ({ value, ...props }: FieldBadgeWithActionsProps) => (
-  <FieldBadgeWithActions value={FIELD_VALUE_TRANSLATIONS[value]} {...props} />
-);
+export const EventOutcomeBadgeWithActions = ({
+  onFilter,
+  value,
+  ...props
+}: FieldBadgeWithActionsProps) => {
+  const onFilterCallback = useCallback<DocViewFilterFn>(
+    (mapping, _, mode) => {
+      if (onFilter) {
+        onFilter(mapping, value, mode);
+      }
+    },
+    [onFilter, value]
+  );
+
+  return (
+    <FieldBadgeWithActions
+      {...props}
+      value={FIELD_VALUE_TRANSLATIONS[value]}
+      onFilter={onFilterCallback}
+    />
+  );
+};
