@@ -44,13 +44,12 @@ export const getEcsMappingNode = ({
     const updatedQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1] ?? '';
     const ecsSummary = response.match(/## Field Mapping Summary[\s\S]*$/)?.[0] ?? '';
 
-    const translationResult = getTranslationResult(updatedQuery);
-
+    // We set includes_ecs_mapping to true to indicate that the ecs mapping has been applied.
+    // This is to ensure that the node only runs once
     return {
       response,
       comments: [generateAssistantComment(cleanMarkdown(ecsSummary))],
-      translation_finalized: true,
-      translation_result: translationResult,
+      includes_ecs_mapping: true,
       elastic_rule: {
         ...state.elastic_rule,
         query: updatedQuery,
