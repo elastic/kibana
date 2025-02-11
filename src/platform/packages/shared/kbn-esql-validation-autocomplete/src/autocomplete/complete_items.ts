@@ -39,7 +39,6 @@ export const getCommandAutocompleteDefinitions = (
     }
 
     const commandDefinition = getCommandDefinition(command.name);
-    const commandSignature = getCommandSignature(commandDefinition);
     const label = commandDefinition.name.toUpperCase();
     const text = commandDefinition.signature.params.length
       ? `${commandDefinition.name.toUpperCase()} $0`
@@ -56,6 +55,7 @@ export const getCommandAutocompleteDefinitions = (
       if (commandDefinition.preview) {
         detail = `[${techPreviewLabel}] ${detail}`;
       }
+      const commandSignature = getCommandSignature(commandDefinition, type.name);
       const suggestion: SuggestionRawDefinition = {
         label: type.name ? `${type.name.toLocaleUpperCase()} ${label}` : label,
         text: type.name ? `${type.name.toLocaleUpperCase()} ${text}` : text,

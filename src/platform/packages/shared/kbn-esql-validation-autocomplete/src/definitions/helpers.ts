@@ -57,12 +57,14 @@ function handleAdditionalArgs(
 
 export function getCommandSignature(
   { name, signature, options, examples }: CommandDefinition<string>,
+  typeName?: string,
   { withTypes }: { withTypes: boolean } = { withTypes: true }
 ) {
   return {
-    declaration: `${name.toUpperCase()} ${printCommandArguments(signature, withTypes)} ${(
-      options || []
-    ).map(
+    declaration: `${typeName?.toUpperCase()} ${name.toUpperCase()} ${printCommandArguments(
+      signature,
+      withTypes
+    )} ${(options || []).map(
       (option) =>
         `${
           option.wrapped ? option.wrapped[0] : ''
