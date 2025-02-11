@@ -22,7 +22,7 @@ export const StatsContainer = memo(({ children }: { children: React.ReactNode })
       css={css`
         font-size: ${euiTheme.font.scale.xs};
         font-weight: ${euiTheme.font.weight.semiBold};
-        padding-right: 16px;
+        padding-right: ${euiTheme.size.base};
 
         .smallDot {
           width: 3px !important;
