@@ -42,7 +42,10 @@ const createDataViewSelectedListener = (dependencies: { dataViews: DataViewsServ
     ) => {
       console.log('selectDataViewAsync', action);
 
-      let dataViewSpec: DataViewSpec;
+      let dataViewSpec: DataViewSpec | null = null;
+
+      let searchError: unknown;
+      let adhocError: unknown;
 
       try {
         if (action.payload.id) {
@@ -50,7 +53,7 @@ const createDataViewSelectedListener = (dependencies: { dataViews: DataViewsServ
           dataViewSpec = dataViewById.toSpec();
         }
       } catch (error: unknown) {
-        console.error(error);
+        searchError = error;
       }
 
       try {
@@ -62,10 +65,16 @@ const createDataViewSelectedListener = (dependencies: { dataViews: DataViewsServ
           dataViewSpec = adhocDataView.toSpec();
         }
       } catch (error: unknown) {
-        console.error(error);
+        adhocError = error;
       }
 
-      listenerApi.dispatch(scopes[action.payload.scope].actions.setSelectedDataView(dataViewSpec));
+      if (dataViewSpec) {
+        listenerApi.dispatch(
+          scopes[action.payload.scope].actions.setSelectedDataView(dataViewSpec)
+        );
+      } else {
+        console.error('data view picker error', searchError ?? adhocError);
+      }
     },
   } as any;
 };
