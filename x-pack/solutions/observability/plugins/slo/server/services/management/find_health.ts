@@ -58,7 +58,7 @@ export class FindSLOHealth {
   }
 }
 
-export function parseFilters(filters?: string) {
+function parseFilters(filters?: string) {
   if (!filters) {
     return {};
   }

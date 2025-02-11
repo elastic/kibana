@@ -6,7 +6,6 @@
  */
 
 import { findSLOHealthParamsSchema } from '@kbn/slo-schema';
-import { executeWithErrorHandler } from '../../errors';
 import { FindSLOHealth } from '../../services/management/find_health';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from '../slo/utils/assert_platinum_license';
@@ -21,13 +20,13 @@ export const findSLOHealthRoute = createSloServerRoute({
     },
   },
   params: findSLOHealthParamsSchema,
-  handler: async ({ context, request, params, logger, plugins }) => {
+  handler: async ({ context, request, params, plugins }) => {
     await assertPlatinumLicense(plugins);
     const [spaceId, coreContext] = await Promise.all([getSpaceId(plugins, request), context.core]);
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
     const findSLOHealth = new FindSLOHealth(esClient, spaceId);
 
-    return await executeWithErrorHandler(() => findSLOHealth.execute(params?.query ?? {}));
+    return await findSLOHealth.execute(params?.query ?? {});
   },
 });
