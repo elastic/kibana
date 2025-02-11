@@ -133,6 +133,22 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeBreadcrumbsAppendExtension.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [
+              "The order in which the extension should be appended to the breadcrumbs. Default is 50"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1908,19 +1924,19 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.ChromeStart.getBreadcrumbsAppendExtension$",
+            "id": "def-public.ChromeStart.getBreadcrumbsAppendExtensions$",
             "type": "Function",
             "tags": [],
-            "label": "getBreadcrumbsAppendExtension$",
+            "label": "getBreadcrumbsAppendExtensions$",
             "description": [
-              "\nGet an observable of the current extension appended to breadcrumbs"
+              "\nGet an observable of the current extensions appended to breadcrumbs"
             ],
             "signature": [
               "() => ",
               "Observable",
               "<",
               "ChromeBreadcrumbsAppendExtension",
-              " | undefined>"
+              "[]>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
@@ -1938,9 +1954,9 @@
               "\nMount an element next to the last breadcrumb"
             ],
             "signature": [
-              "(breadcrumbsAppendExtension?: ",
+              "(breadcrumbsAppendExtension: ",
               "ChromeBreadcrumbsAppendExtension",
-              " | undefined) => void"
+              ") => () => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
@@ -1954,13 +1970,12 @@
                 "label": "breadcrumbsAppendExtension",
                 "description": [],
                 "signature": [
-                  "ChromeBreadcrumbsAppendExtension",
-                  " | undefined"
+                  "ChromeBreadcrumbsAppendExtension"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "isRequired": true
               }
             ],
             "returnComment": []

@@ -9,6 +9,7 @@ import type { Observable } from 'rxjs';
 import type { ToolCallsOf, ToolOptions } from './tools';
 import type { Message } from './messages';
 import type { ChatCompletionEvent, ChatCompletionTokenCount } from './events';
+import type { ChatCompleteMetadata } from './metadata';
 
 /**
  * Request a completion from the LLM based on a prompt or conversation.
@@ -109,6 +110,10 @@ export type ChatCompleteOptions<
    * Optional signal that can be used to forcefully abort the request.
    */
   abortSignal?: AbortSignal;
+  /**
+   * Optional metadata related to call execution.
+   */
+  metadata?: ChatCompleteMetadata;
 } & TToolOptions;
 
 /**

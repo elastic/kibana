@@ -33,6 +33,9 @@ jest.mock('../../lib/rule_api/get_query_delay_settings', () => ({
 jest.mock('../../lib/rule_api/update_query_delay_settings', () => ({
   updateQueryDelaySettings: jest.fn(),
 }));
+jest.mock('../../../common/get_experimental_features', () => ({
+  getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+}));
 
 const queryClient = new QueryClient({
   defaultOptions: {

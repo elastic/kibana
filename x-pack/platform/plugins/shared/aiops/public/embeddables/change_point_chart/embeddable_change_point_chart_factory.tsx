@@ -21,6 +21,7 @@ import {
   initializeTimeRange,
   initializeTitleManager,
   useBatchedPublishingSubjects,
+  apiPublishesFilters,
 } from '@kbn/presentation-publishing';
 
 import fastIsEqual from 'fast-deep-equal';
@@ -78,6 +79,8 @@ export const getChangePointChartEmbeddableFactory = (
       const dataViews$ = new BehaviorSubject<DataView[] | undefined>([
         await pluginStart.data.dataViews.get(state.dataViewId),
       ]);
+
+      const filtersApi = apiPublishesFilters(parentApi) ? parentApi : undefined;
 
       const api = buildApi(
         {
@@ -194,6 +197,7 @@ export const getChangePointChartEmbeddableFactory = (
 
           return (
             <ChangePointDetectionComponent
+              filtersApi={filtersApi}
               viewType={viewType}
               timeRange={timeRange}
               fn={fn}
