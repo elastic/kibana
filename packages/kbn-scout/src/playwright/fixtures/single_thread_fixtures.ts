@@ -26,6 +26,7 @@ import {
   synthtraceFixture,
 } from './test';
 import type { BrowserAuthFixture, ScoutPage, PageObjects, SynthtraceFixture } from './test';
+export type { ScoutPage, PageObjects } from './test';
 
 export const scoutFixtures = mergeTests(
   // worker scope fixtures
