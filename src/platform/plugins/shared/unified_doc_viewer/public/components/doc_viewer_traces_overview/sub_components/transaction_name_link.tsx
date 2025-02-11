@@ -37,10 +37,6 @@ export function TransactionNameLink({ transactionName, serviceName }: Transactio
     rangeTo: string;
   }>(TRANSACTION_DETAILS_BY_NAME_LOCATOR);
 
-  if (!transactionName) {
-    return null; // TODO add query to name by transaction id
-  }
-
   const href = apmLinkToTransactionByNameLocator?.getRedirectUrl({
     serviceName,
     transactionName,
