@@ -102,7 +102,7 @@ export async function reIndexKnowledgeBase({
           {
             add: {
               index: originalIndex,
-              alias: '.kibana-observability-ai-assistant-kb',
+              alias: resourceNames.aliases.kb,
               is_write_index: true,
             },
           },
