@@ -28,6 +28,7 @@ import {
   type Action,
 } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer, apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { map } from 'rxjs';
 import { CONTROL_GROUP_TYPE } from '../../common';
 import { CanClearSelections, isClearableControl } from '../types';
 
@@ -89,15 +90,10 @@ export class ClearControlAction
     return isClearableControl(embeddable);
   }
 
-  public subscribeToCompatibilityChanges(
-    { embeddable }: EmbeddableApiContext,
-    onChange: (isCompatible: boolean, action: ClearControlAction) => void
-  ) {
-    if (!isClearableControl(embeddable)) return;
+  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
+    if (!isClearableControl(embeddable)) throw new IncompatibleActionError();
 
-    return embeddable.hasSelections$.subscribe((selection) => {
-      onChange(Boolean(selection), this);
-    });
+    return embeddable.hasSelections$.pipe(map(() => undefined));
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {

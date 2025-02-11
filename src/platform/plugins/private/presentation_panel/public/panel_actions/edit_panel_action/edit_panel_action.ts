@@ -24,6 +24,7 @@ import {
   IncompatibleActionError,
 } from '@kbn/ui-actions-plugin/public';
 import { ACTION_EDIT_PANEL } from './constants';
+import { map } from 'rxjs';
 
 export type EditPanelActionApi = CanAccessViewMode & HasEditCapabilities;
 
@@ -50,18 +51,12 @@ export class EditPanelAction
     });
   }
 
-  public subscribeToCompatibilityChanges(
+  public getCompatibilityChangesSubject(
     { embeddable }: EmbeddableApiContext,
-    onChange: (isCompatible: boolean, action: Action<EmbeddableApiContext>) => void
   ) {
-    if (!isApiCompatible(embeddable)) return;
-    return getViewModeSubject(embeddable)?.subscribe((viewMode) => {
-      if (viewMode === 'edit' && isApiCompatible(embeddable) && embeddable.isEditingEnabled()) {
-        onChange(true, this);
-        return;
-      }
-      onChange(false, this);
-    });
+    return isApiCompatible(embeddable)
+      ? getViewModeSubject(embeddable)?.pipe(map(() => undefined))
+      : undefined;
   }
 
   public couldBecomeCompatible({ embeddable }: EmbeddableApiContext) {

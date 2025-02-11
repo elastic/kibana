@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { merge } from 'rxjs';
+import { map, merge } from 'rxjs';
 
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
@@ -87,14 +87,11 @@ export class FiltersNotificationAction implements Action<EmbeddableApiContext> {
     return apiPublishesPartialUnifiedSearch(embeddable);
   }
 
-  public subscribeToCompatibilityChanges(
-    { embeddable }: EmbeddableApiContext,
-    onChange: (isCompatible: boolean, action: FiltersNotificationAction) => void
-  ) {
+  public getCompatibilityChangesSubject({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) return;
     return merge(
       ...[embeddable.query$, embeddable.filters$].filter((value) => Boolean(value))
-    ).subscribe(() => onChange(compatibilityCheck(embeddable), this));
+    ).pipe(map(() => undefined));
   }
 
   public execute = async () => {};
