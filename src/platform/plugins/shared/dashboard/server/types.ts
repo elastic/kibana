@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DashboardPluginSetup {}
-export interface DashboardPluginStart {
-  contentClient?: ReturnType<ContentManagementServerSetup['register']>['contentClient'];
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DashboardPluginStart {}

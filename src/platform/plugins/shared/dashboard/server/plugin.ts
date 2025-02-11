@@ -47,7 +47,6 @@ interface StartDeps {
 export class DashboardPlugin
   implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps>
 {
-  private contentClient?: ReturnType<ContentManagementServerSetup['register']>['contentClient'];
   private readonly logger: Logger;
 
   constructor(private initializerContext: PluginInitializerContext) {
@@ -65,7 +64,7 @@ export class DashboardPlugin
       })
     );
 
-    const { contentClient } = plugins.contentManagement.register({
+    plugins.contentManagement.register({
       id: CONTENT_ID,
       storage: new DashboardStorage({
         throwOnResultValidationError: this.initializerContext.env.mode.dev,
@@ -75,7 +74,6 @@ export class DashboardPlugin
         latest: LATEST_VERSION,
       },
     });
-    this.contentClient = contentClient;
 
     plugins.contentManagement.favorites.registerFavoriteType('dashboard');
 
@@ -138,9 +136,7 @@ export class DashboardPlugin
         });
     }
 
-    return {
-      contentClient: this.contentClient,
-    };
+    return {};
   }
 
   public stop() {}
