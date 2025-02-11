@@ -22,6 +22,7 @@ import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
 // Failing: See https://github.com/elastic/kibana/issues/183638
+// FLAKY: https://github.com/elastic/kibana/issues/183638
 describe.skip(
   'Uninstall agent from host when agent tamper protection is disabled',
   { tags: ['@ess'] },
