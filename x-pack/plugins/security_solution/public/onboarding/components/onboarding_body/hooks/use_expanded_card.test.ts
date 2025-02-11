@@ -79,7 +79,8 @@ describe('useExpandedCard Hook', () => {
       expect(mockSetStorageExpandedCardId).toHaveBeenCalledWith(mockCardId);
     });
 
-    it('should scroll to the expanded card id from the hash', async () => {
+    // flaky test https://github.com/elastic/kibana/issues/202147
+    it.skip('should scroll to the expanded card id from the hash', async () => {
       // Ensure that scroll and focus were triggered
       await waitFor(
         () => {
