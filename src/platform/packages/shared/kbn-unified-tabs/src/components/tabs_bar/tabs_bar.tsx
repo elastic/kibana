@@ -9,9 +9,18 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, UseEuiTheme } from '@elastic/eui';
 import { Tab } from '../tab';
 import type { TabItem } from '../../types';
+
+const barCss = ({ euiTheme }: UseEuiTheme) => css`
+  background-color: ${euiTheme.colors.lightestShade};
+`;
+
+const newTabCss = ({ euiTheme }: UseEuiTheme) => css`
+  margin-left: ${euiTheme.size.s};
+`;
 
 export interface TabsBarProps {
   items: TabItem[];
@@ -36,6 +45,8 @@ export const TabsBar: React.FC<TabsBarProps> = ({
       data-test-subj="unifiedTabs_tabsBar"
       responsive={false}
       alignItems="center"
+      gutterSize="none"
+      css={barCss}
     >
       {items.map((item) => (
         <EuiFlexItem key={item.id} grow={false}>
@@ -53,6 +64,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
           data-test-subj="unifiedTabs_tabsBar_newTabBtn"
           iconType="plus"
           color="text"
+          css={newTabCss}
           title={i18n.translate('unifiedTabs.createTabButton', {
             defaultMessage: 'New',
           })}

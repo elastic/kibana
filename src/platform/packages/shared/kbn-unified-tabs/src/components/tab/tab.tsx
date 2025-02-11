@@ -9,9 +9,29 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  UseEuiTheme,
+  useEuiTheme,
+} from '@elastic/eui';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import type { TabItem } from '../../types';
+
+const tabButtonCss = ({ euiTheme }: UseEuiTheme) => css`
+  width: 100%;
+  min-width: 0;
+  flex-grow: 1;
+  padding-right: ${euiTheme.size.xs};
+  text-align: left;
+  color: inherit;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+`;
 
 export interface TabProps {
   item: TabItem;
@@ -22,40 +42,81 @@ export interface TabProps {
 }
 
 export const Tab: React.FC<TabProps> = ({ item, isSelected, tabContentId, onSelect, onClose }) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiFlexGroup
+      alignItems="center"
+      // TODO: remove the usage of deprecated colors
+      css={css`
+        display: inline-flex;
+        border-right: ${euiTheme.border.thin};
+        height: ${euiTheme.size.xl};
+        padding-left: ${euiTheme.size.m};
+        padding-right: ${euiTheme.size.xs};
+        min-width: 96px;
+        max-width: 280px;
+
+        background-color: ${isSelected
+          ? euiTheme.colors.emptyShade
+          : euiTheme.colors.lightestShade};
+        color: ${isSelected ? euiTheme.colors.text : euiTheme.colors.subduedText};
+        transition: background-color ${euiTheme.animation.normal};
+
+        .unifiedTabs__closeTabBtn {
+          opacity: ${isSelected ? 1 : 0};
+          transition: opacity ${euiTheme.animation.normal};
+        }
+
+        ${isSelected
+          ? `
+          .unifiedTabs__tabBtn {
+            cursor: default;
+          }`
+          : `
+          cursor: pointer;
+
+          &:hover {
+            background-color: ${euiTheme.colors.mediumShade};
+            color: ${euiTheme.colors.text};
+
+            .unifiedTabs__closeTabBtn {
+              opacity: 1;
+            }
+        }`}
+      `}
       data-test-subj={`unifiedTabs_tab_${item.id}`}
       responsive={false}
-      alignItems="center"
+      gutterSize="none"
     >
-      <EuiFlexItem grow={false}>
-        <button
-          {...getTabAttributes(item, tabContentId)}
-          data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
-          role="tab"
-          type="button"
-          aria-selected={isSelected}
-          tabIndex={isSelected ? 0 : -1}
-          onClick={isSelected ? undefined : () => onSelect(item)}
-        >
-          <EuiText color={isSelected ? 'default' : 'subdued'}>{item.label}</EuiText>
-        </button>
+      <button
+        {...getTabAttributes(item, tabContentId)}
+        aria-selected={isSelected}
+        css={tabButtonCss}
+        className="unifiedTabs__tabBtn"
+        data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
+        role="tab"
+        type="button"
+        tabIndex={isSelected ? 0 : -1}
+        onClick={isSelected ? undefined : () => onSelect(item)}
+      >
+        <EuiText color="inherit" size="s" className="eui-textTruncate">
+          {item.label}
+        </EuiText>
+      </button>
+      <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
+        <EuiButtonIcon
+          color="text"
+          data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
+          iconType="cross"
+          title={i18n.translate('unifiedTabs.closeTabButton', {
+            defaultMessage: 'Close',
+          })}
+          onClick={() => {
+            onClose(item);
+          }}
+        />
       </EuiFlexItem>
-      {isSelected && (
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
-            iconType="cross"
-            color="text"
-            title={i18n.translate('unifiedTabs.closeTabButton', {
-              defaultMessage: 'Close',
-            })}
-            onClick={() => {
-              onClose(item);
-            }}
-          />
-        </EuiFlexItem>
-      )}
     </EuiFlexGroup>
   );
 };

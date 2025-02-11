@@ -17,6 +17,12 @@ let TMP_COUNTER = 0;
 
 export default {
   title: `${STORYBOOK_TITLE}/Tabs`,
+  parameters: {
+    backgrounds: {
+      default: 'white',
+      values: [{ name: 'white', value: '#fff' }],
+    },
+  },
 };
 
 const TabbedContentTemplate: ComponentStory<React.FC<TabbedContentProps>> = (args) => (
@@ -30,7 +36,9 @@ const TabbedContentTemplate: ComponentStory<React.FC<TabbedContentProps>> = (arg
       };
     }}
     onChanged={action('onClosed')}
-    renderContent={(item) => <div>Content for tab: {item.label}</div>}
+    renderContent={(item) => (
+      <div style={{ paddingTop: '16px' }}>Content for tab: {item.label}</div>
+    )}
   />
 );
 

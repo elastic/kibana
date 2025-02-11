@@ -15,6 +15,12 @@ import { STORYBOOK_TITLE } from '../../storybook_constants';
 
 export default {
   title: `${STORYBOOK_TITLE}/Tab`,
+  parameters: {
+    backgrounds: {
+      default: 'white',
+      values: [{ name: 'white', value: '#fff' }],
+    },
+  },
 };
 
 const TabTemplate: ComponentStory<React.FC<TabProps>> = (args) => (
