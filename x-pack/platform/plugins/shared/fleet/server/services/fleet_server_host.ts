@@ -66,7 +66,12 @@ export async function createFleetServerHost(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   fleetServerHost: NewFleetServerHost,
-  options?: { id?: string; overwrite?: boolean; fromPreconfiguration?: boolean }
+  options?: {
+    id?: string;
+    overwrite?: boolean;
+    fromPreconfiguration?: boolean;
+    secretHashes?: Record<string, any>;
+  }
 ): Promise<FleetServerHost> {
   const logger = appContextService.getLogger();
   const data: FleetServerHostSOAttributes = { ...omit(fleetServerHost, ['ssl', 'secrets']) };
@@ -103,6 +108,7 @@ export async function createFleetServerHost(
       await extractAndWriteFleetServerHostsSecrets({
         fleetServerHost,
         esClient,
+        secretHashes: fleetServerHost.is_preconfigured ? options?.secretHashes : undefined,
       });
     if (fleetServerHostWithSecrets.secrets)
       data.secrets = fleetServerHostWithSecrets.secrets as FleetServerHostSOAttributes['secrets'];
@@ -211,7 +217,7 @@ export async function updateFleetServerHost(
   esClient: ElasticsearchClient,
   id: string,
   data: Partial<FleetServerHost>,
-  options?: { fromPreconfiguration?: boolean }
+  options?: { fromPreconfiguration?: boolean; secretHashes?: Record<string, any> }
 ) {
   let secretsToDelete: PolicySecretReference[] = [];
 
@@ -261,6 +267,7 @@ export async function updateFleetServerHost(
       oldFleetServerHost: originalItem,
       fleetServerHostUpdate: data,
       esClient,
+      secretHashes: data.is_preconfigured ? options?.secretHashes : undefined,
     });
 
     updateData.secrets = secretsRes.fleetServerHostUpdate

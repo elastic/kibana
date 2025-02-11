@@ -1107,6 +1107,7 @@ export const getSavedObjectTypes = (
         importableAndExportable: false,
       },
       mappings: {
+        dynamic: false,
         properties: {
           name: { type: 'keyword' },
           is_default: { type: 'boolean' },
@@ -1154,31 +1155,7 @@ export const getSavedObjectTypes = (
           changes: [
             {
               type: 'mappings_addition',
-              addedMappings: {
-                ssl: { type: 'binary' },
-                secrets: {
-                  dynamic: false,
-                  properties: {
-                    ssl: {
-                      dynamic: false,
-                      properties: {
-                        key: {
-                          dynamic: false,
-                          properties: {
-                            id: { type: 'keyword' },
-                          },
-                        },
-                        es_key: {
-                          dynamic: false,
-                          properties: {
-                            id: { type: 'keyword' },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
+              addedMappings: {},
             },
           ],
         },

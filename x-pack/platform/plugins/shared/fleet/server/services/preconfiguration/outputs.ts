@@ -269,7 +269,7 @@ const hasHash = (secret?: SOSecret): secret is { id: string; hash: string } => {
   return !!secret && typeof secret !== 'string' && !!secret.hash;
 };
 
-async function isSecretDifferent(
+export async function isSecretDifferent(
   preconfiguredValue: SOSecret | undefined,
   existingSecret: SOSecret | undefined
 ): Promise<boolean> {

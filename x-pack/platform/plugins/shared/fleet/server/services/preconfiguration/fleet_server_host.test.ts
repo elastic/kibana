@@ -23,6 +23,7 @@ import {
   getPreconfiguredFleetServerHostFromConfig,
   createOrUpdatePreconfiguredFleetServerHosts,
 } from './fleet_server_host';
+import { hashSecret } from './outputs';
 
 jest.mock('../fleet_server_host');
 jest.mock('../app_context');
@@ -317,7 +318,9 @@ describe('createCloudFleetServerHostIfNeeded', () => {
 });
 
 describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
-  beforeEach(() => {
+  let secretHash: string;
+  beforeEach(async () => {
+    secretHash = await hashSecret('secretKey');
     mockedBulkGetFleetServerHosts.mockResolvedValue([
       {
         id: 'fleet-123',
@@ -331,11 +334,88 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
         is_default: false,
         is_internal: false,
         host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+      },
+      {
+        id: 'fleet-with-secrets',
+        name: 'TEST_SECRETS',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+        secrets: {
+          ssl: {
+            key: { id: 'test123', hash: secretHash },
+          },
+        },
       },
     ] as FleetServerHost[]);
   });
   afterEach(() => {
     mockedBulkGetFleetServerHosts.mockReset();
+    jest.resetAllMocks();
+  });
+
+  it('should create a preconfigured fleet server host that does not exist', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: 'new-fleet-server-host',
+        name: 'TEST_1',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+      },
+    ]);
+    expect(mockedCreateFleetServerHost).toBeCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({
+        name: 'TEST_1',
+      }),
+      expect.anything()
+    );
+    expect(mockedUpdateFleetServerHost).not.toBeCalled();
+  });
+
+  it('should create a preconfigured fleet server host with secrets that does not exist', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: 'new-fleet-server-host',
+        name: 'TEST_1',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+        secrets: {
+          ssl: {
+            key: 'unsecureKey1',
+            es_key: 'unsecureKey2',
+          },
+        },
+      },
+    ]);
+    expect(mockedCreateFleetServerHost).toBeCalledWith(
+      expect.anything(),
+      expect.anything(),
+      expect.objectContaining({
+        name: 'TEST_1',
+        secrets: {
+          ssl: {
+            key: 'unsecureKey1',
+            es_key: 'unsecureKey2',
+          },
+        },
+      }),
+      expect.anything()
+    );
+    expect(mockedUpdateFleetServerHost).not.toBeCalled();
   });
 
   it('should update preconfigured fleet server hosts if is_internal flag changes', async () => {
@@ -349,11 +429,224 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
         is_default: false,
         is_internal: true,
         host_urls: ['http://test-internal.fr'],
-        is_preconfigured: false,
+        is_preconfigured: true,
       },
     ]);
 
     expect(mockedCreateFleetServerHost).not.toBeCalled();
-    expect(mockedUpdateFleetServerHost).toBeCalled();
+    expect(mockedUpdateFleetServerHost).toBeCalledWith(
+      expect.anything(),
+      expect.anything(),
+      'fleet-internal',
+      expect.objectContaining({
+        is_internal: true,
+      }),
+      { fromPreconfiguration: true }
+    );
+  });
+
+  it('should update preconfigured fleet server hosts if host_urls change', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: 'fleet-internal',
+        name: 'TEST_INTERNAL',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr', 'http://test.fr'],
+        is_preconfigured: true,
+      },
+    ]);
+
+    expect(mockedCreateFleetServerHost).not.toBeCalled();
+    expect(mockedUpdateFleetServerHost).toBeCalledWith(
+      expect.anything(),
+      expect.anything(),
+      'fleet-internal',
+      expect.objectContaining({
+        host_urls: ['http://test-internal.fr', 'http://test.fr'],
+      }),
+      { fromPreconfiguration: true }
+    );
+  });
+
+  it('should update preconfigured fleet server hosts if proxy_id change', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: 'fleet-internal',
+        name: 'TEST_INTERNAL',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+        proxy_id: 'proxy-test',
+      },
+    ]);
+
+    expect(mockedCreateFleetServerHost).not.toBeCalled();
+    expect(mockedUpdateFleetServerHost).toBeCalledWith(
+      expect.anything(),
+      expect.anything(),
+      'fleet-internal',
+      expect.objectContaining({
+        proxy_id: 'proxy-test',
+      }),
+      { fromPreconfiguration: true }
+    );
+  });
+
+  it('should update preconfigured fleet server hosts if preconfigured host exists and changed to have ssl', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: 'fleet-internal',
+        name: 'TEST_INTERNAL',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+        ssl: {
+          key: 'unsecureKey1',
+          es_key: 'unsecureKey2',
+        },
+      },
+    ]);
+
+    expect(mockedCreateFleetServerHost).not.toBeCalled();
+    expect(mockedUpdateFleetServerHost).toBeCalledWith(
+      expect.anything(),
+      expect.anything(),
+      'fleet-internal',
+      expect.objectContaining({
+        ssl: {
+          key: 'unsecureKey1',
+          es_key: 'unsecureKey2',
+        },
+      }),
+      expect.anything()
+    );
+  });
+
+  it('should update preconfigured fleet server hosts if preconfigured host exists and changed to have secrets', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: 'fleet-internal',
+        name: 'TEST_INTERNAL',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+        secrets: {
+          ssl: {
+            key: 'unsecureKey1',
+            es_key: 'unsecureKey2',
+          },
+        },
+      },
+    ]);
+
+    expect(mockedCreateFleetServerHost).not.toBeCalled();
+    expect(mockedUpdateFleetServerHost).toBeCalledWith(
+      expect.anything(),
+      expect.anything(),
+      'fleet-internal',
+      expect.objectContaining({
+        secrets: {
+          ssl: {
+            key: 'unsecureKey1',
+            es_key: 'unsecureKey2',
+          },
+        },
+      }),
+      expect.anything()
+    );
+  });
+  it('should update preconfigured fleet server hosts if preconfigured host with secrets exists and changes', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: 'fleet-with-secrets',
+        name: 'TEST_SECRETS',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+        secrets: {
+          ssl: {
+            key: 'secretKey',
+            es_key: 'secretKey2',
+          },
+        },
+      },
+    ]);
+
+    expect(mockedCreateFleetServerHost).not.toBeCalled();
+    expect(mockedUpdateFleetServerHost).toBeCalledWith(
+      expect.anything(),
+      expect.anything(),
+      'fleet-with-secrets',
+      expect.objectContaining({
+        secrets: {
+          ssl: {
+            key: 'secretKey',
+            es_key: 'secretKey2',
+          },
+        },
+      }),
+      expect.anything()
+    );
+  });
+
+  it('should not update preconfigured fleet server hosts if no fields changed', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: 'fleet-internal',
+        name: 'TEST_INTERNAL',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+      },
+    ]);
+    expect(mockedCreateFleetServerHost).not.toBeCalled();
+    expect(mockedUpdateFleetServerHost).not.toBeCalled();
+  });
+
+  it('should not update preconfigured fleet server hosts with secrets if no fields changed', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+    await createOrUpdatePreconfiguredFleetServerHosts(soClient, esClient, [
+      {
+        id: 'fleet-with-secrets',
+        name: 'TEST_SECRETS',
+        is_default: false,
+        is_internal: false,
+        host_urls: ['http://test-internal.fr'],
+        is_preconfigured: true,
+        secrets: {
+          ssl: {
+            key: 'secretKey',
+          },
+        },
+      },
+    ]);
+    expect(mockedCreateFleetServerHost).not.toBeCalled();
+    expect(mockedUpdateFleetServerHost).not.toBeCalled();
   });
 });
