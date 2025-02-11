@@ -26,7 +26,6 @@ export interface ColumnRenderer {
     field,
     globalFilters,
     isDetails,
-    isDraggable,
     linkValues,
     rowRenderers,
     scopeId,
@@ -43,7 +42,6 @@ export interface ColumnRenderer {
     field: ColumnHeaderOptions;
     globalFilters?: Filter[];
     isDetails?: boolean;
-    isDraggable?: boolean;
     linkValues?: string[] | null | undefined;
     rowRenderers?: RowRenderer[];
     scopeId: string;

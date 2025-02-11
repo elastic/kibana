@@ -48,8 +48,8 @@ function asTrees(streams: StreamDefinition[]) {
     let currentTree = trees;
     let existingNode: StreamTree | undefined;
     const segments = getSegments(stream.name);
-    // traverse the tree following the prefix of the current id.
-    // once we reach the leaf, the current id is added as child - this works because the ids are sorted by depth
+    // traverse the tree following the prefix of the current name.
+    // once we reach the leaf, the current name is added as child - this works because the ids are sorted by depth
     while ((existingNode = currentTree.find((node) => isDescendantOf(node.name, stream.name)))) {
       currentTree = existingNode.children;
     }

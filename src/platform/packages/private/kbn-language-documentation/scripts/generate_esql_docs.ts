@@ -68,7 +68,7 @@ function loadFunctionDocs(pathToElasticsearch: string) {
       const functionName = path.basename(file, '.md');
 
       // Add the function name and content to the map
-      if (functionDefinition.type === 'eval') {
+      if (functionDefinition.type === 'scalar') {
         scalarFunctions.set(functionName, {
           description: content,
           preview: functionDefinition.preview,
