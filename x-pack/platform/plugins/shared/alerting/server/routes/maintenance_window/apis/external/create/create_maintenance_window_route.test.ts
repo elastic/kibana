@@ -15,7 +15,6 @@ import { getMockMaintenanceWindow } from '../../../../../data/maintenance_window
 import { MaintenanceWindowStatus } from '../../../../../../common';
 import { MaintenanceWindow } from '../../../../../application/maintenance_window/types';
 import { CreateMaintenanceWindowRequestBody } from '../../../../../../common/routes/maintenance_window/external/apis/create';
-import { transformCreateBody } from './transform_create_body';
 import { transformMaintenanceWindowToResponseV1 } from '../common/transforms';
 
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
