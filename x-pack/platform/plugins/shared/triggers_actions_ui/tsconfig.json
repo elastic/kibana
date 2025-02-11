@@ -69,7 +69,7 @@
     "@kbn/alerting-types",
     "@kbn/visualization-utils",
     "@kbn/core-ui-settings-browser",
-    "@kbn/observability-alerting-rule-utils",
+    "@kbn/alerting-rule-utils",
     "@kbn/core-application-browser",
     "@kbn/cloud-plugin",
     "@kbn/response-ops-rule-form",
