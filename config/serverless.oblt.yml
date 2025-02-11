@@ -6,7 +6,7 @@ xpack.cloudSecurityPosture.enabled: false
 xpack.infra.enabled: true
 xpack.uptime.enabled: true
 xpack.securitySolution.enabled: false
-xpack.search.notebooks.enabled: false
+xpack.searchNotebooks.enabled: false
 xpack.searchPlayground.enabled: false
 xpack.searchInferenceEndpoints.enabled: false
 xpack.searchIndices.enabled: false

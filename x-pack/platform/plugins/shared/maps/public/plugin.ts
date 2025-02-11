@@ -23,7 +23,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
-import { VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER, VISUALIZE_GEO_FIELD_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
@@ -73,7 +73,7 @@ import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent/
 import { synchronizeMovementAction } from './trigger_actions/synchronize_movement/action';
 import { visualizeGeoFieldAction } from './trigger_actions/visualize_geo_field_action';
 import { APP_NAME, APP_ICON_SOLUTION, APP_ID } from '../common/constants';
-import { getMapsVisTypeAlias } from './maps_vis_type_alias';
+import { mapsVisTypeAlias } from './maps_vis_type_alias';
 import { featureCatalogueEntry } from './feature_catalogue_entry';
 import {
   setIsCloudEnabled,
@@ -192,7 +192,7 @@ export class MapsPlugin
     if (plugins.home) {
       plugins.home.featureCatalogue.register(featureCatalogueEntry);
     }
-    plugins.visualizations.registerAlias(getMapsVisTypeAlias());
+    plugins.visualizations.registerAlias(mapsVisTypeAlias);
 
     core.application.register({
       id: APP_ID,
@@ -256,6 +256,17 @@ export class MapsPlugin
     }
     plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, filterByMapExtentAction);
     plugins.uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, synchronizeMovementAction);
+
+    plugins.uiActions.registerActionAsync('addMapPanelAction', async () => {
+      const { getAddMapPanelAction } = await import('./trigger_actions/add_map_panel_action');
+      return getAddMapPanelAction(plugins);
+    });
+    plugins.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addMapPanelAction');
+    if (plugins.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
+      // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
+      // the create action if the Canvas-specific trigger does indeed exist.
+      plugins.uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', 'addMapPanelAction');
+    }
 
     if (!core.application.capabilities.maps_v2.save) {
       plugins.visualizations.unRegisterAlias(APP_ID);
