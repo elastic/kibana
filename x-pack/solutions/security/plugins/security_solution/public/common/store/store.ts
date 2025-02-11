@@ -56,6 +56,8 @@ import { createMiddlewares } from './middlewares';
 import { addNewTimeline } from '../../timelines/store/helpers';
 import { initialNotesState } from '../../notes/store/notes.slice';
 import { hasAccessToSecuritySolution } from '../../helpers_access';
+import { dataViewPickerReducer } from '../../data_view_picker/redux';
+import { listenerMiddleware } from '../../data_view_picker/redux/effects/middleware';
 
 let store: Store<State, Action> | null = null;
 
@@ -178,6 +180,7 @@ export const createStoreFactory = async (
     ...subPlugins.explore.store.reducer,
     timeline: timelineReducer,
     ...subPlugins.management.store.reducer,
+    dataViewPicker: dataViewPickerReducer,
   };
 
   return createStore(initialState, rootReducer, coreStart, storage, [
@@ -288,7 +291,8 @@ export const createStore = (
     ...createMiddlewares(kibana, storage),
     telemetryMiddleware,
     ...(additionalMiddleware ?? []),
-    thunk
+    thunk,
+    listenerMiddleware.middleware
   );
 
   store = createReduxStore(

@@ -27,6 +27,7 @@ import { useSetupDetectionEngineHealthApi } from '../../detection_engine/rule_mo
 import { TopValuesPopover } from '../components/top_values_popover/top_values_popover';
 import { AssistantOverlay } from '../../assistant/overlay';
 import { useInitSourcerer } from '../../sourcerer/containers/use_init_sourcerer';
+import { useInitDataViewPicker } from '../../data_view_picker/hooks/use_init_data_view_picker';
 
 interface HomePageProps {
   children: React.ReactNode;
@@ -38,6 +39,7 @@ const HomePageComponent: React.FC<HomePageProps> = ({ children }) => {
   useUrlState();
   useUpdateBrowserTitle();
   useUpdateExecutionContext();
+  useInitDataViewPicker();
 
   const { browserFields } = useSourcererDataView(getScopeFromPath(pathname));
 
