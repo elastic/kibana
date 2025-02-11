@@ -43,13 +43,13 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
   repository,
   logger,
   dependencies,
-  validateSchemas,
+  runDevModeChecks,
 }: {
   core: CoreSetup;
   repository: Record<string, ServerRoute<string, RouteParamsRT | undefined, any, any, any>>;
   logger: Logger;
   dependencies: TDependencies;
-  validateSchemas: boolean;
+  runDevModeChecks: boolean;
 }) {
   const routes = Object.values(repository);
 
@@ -64,7 +64,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
 
     const { method, pathname, version } = parseEndpoint(endpoint);
 
-    if (validateSchemas && isZod(params)) {
+    if (runDevModeChecks && isZod(params)) {
       const dangerousSchemas = assertAllParsableSchemas(params);
       if (dangerousSchemas.size > 0) {
         for (const { key, schema } of dangerousSchemas) {
