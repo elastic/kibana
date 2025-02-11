@@ -16,7 +16,6 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiLoadingSpinner,
   EuiPopover,
   EuiText,
   useGeneratedHtmlId,
@@ -38,11 +37,13 @@ const RefreshButton = ({
   connectors,
   selectConnector,
   currentConnector,
+  isLoading,
 }: {
   generatePatterns: () => void;
   selectConnector?: UseGenAIConnectorsResult['selectConnector'];
   connectors?: FindActionResult[];
   currentConnector?: string;
+  isLoading: boolean;
 }) => {
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
   const splitButtonPopoverId = useGeneratedHtmlId({
@@ -61,6 +62,7 @@ const RefreshButton = ({
           iconType="sparkles"
           data-test-subj="streamsAppGrokAiSuggestionsRefreshSuggestionsButton"
           onClick={generatePatterns}
+          isLoading={isLoading}
           disabled={currentConnector === undefined}
         >
           {i18n.translate(
@@ -191,10 +193,6 @@ function InnerGrokAiSuggestions({
 
   let content: React.ReactNode = null;
 
-  if (isLoadingSuggestions) {
-    content = <EuiLoadingSpinner />;
-  }
-
   if (suggestionsError) {
     content = <EuiCallOut color="danger">{suggestionsError.message}</EuiCallOut>;
   }
@@ -303,17 +301,24 @@ function InnerGrokAiSuggestions({
     );
   }
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      {content}
-      <EuiFlexGroup direction="row" gutterSize="m" justifyContent="flexStart" alignItems="center">
-        <RefreshButton
-          generatePatterns={refreshSuggestions}
-          connectors={genAiConnectors?.connectors}
-          selectConnector={genAiConnectors?.selectConnector}
-          currentConnector={currentConnector}
-        />
-      </EuiFlexGroup>
-    </EuiFlexGroup>
+    <>
+      {content != null && (
+        <EuiFlexGroup direction="column" gutterSize="m">
+          {content}
+        </EuiFlexGroup>
+      )}
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="row" gutterSize="m" justifyContent="flexStart" alignItems="center">
+          <RefreshButton
+            isLoading={isLoadingSuggestions}
+            generatePatterns={refreshSuggestions}
+            connectors={genAiConnectors?.connectors}
+            selectConnector={genAiConnectors?.selectConnector}
+            currentConnector={currentConnector}
+          />
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </>
   );
 }
 

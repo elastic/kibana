@@ -20,6 +20,7 @@ import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { i18n } from '@kbn/i18n';
+import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
@@ -146,6 +147,14 @@ export const useProcessingSimulator = ({
     [liveDraftProcessors]
   );
 
+  const [memoizedSamplingCondition, setMemoizedSamplingCondition] = useState(samplingCondition);
+
+  useDeepCompareEffect(() => {
+    if (samplingCondition !== memoizedSamplingCondition) {
+      setMemoizedSamplingCondition(samplingCondition);
+    }
+  }, [samplingCondition]);
+
   const {
     loading: isLoadingSamples,
     value: samples,
@@ -156,12 +165,13 @@ export const useProcessingSimulator = ({
         return { documents: [] };
       }
 
+      console.log('Reloading samples', start, end);
       return streamsRepositoryClient.fetch('POST /api/streams/{name}/_sample', {
         signal,
         params: {
           path: { name: definition.stream.name },
           body: {
-            if: samplingCondition,
+            if: memoizedSamplingCondition,
             start: start?.valueOf(),
             end: end?.valueOf(),
             size: 100,
@@ -169,7 +179,7 @@ export const useProcessingSimulator = ({
         },
       });
     },
-    [definition, streamsRepositoryClient, start, end, samplingCondition],
+    [definition, streamsRepositoryClient, start, end, memoizedSamplingCondition],
     { disableToastOnError: true }
   );
 

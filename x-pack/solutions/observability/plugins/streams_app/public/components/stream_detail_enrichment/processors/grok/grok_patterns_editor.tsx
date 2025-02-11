@@ -22,7 +22,6 @@ import {
   EuiIcon,
   EuiFieldText,
   EuiButtonIcon,
-  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -87,10 +86,8 @@ export const GrokPatternsEditor = () => {
           </SortableList>
         </EuiPanel>
       </EuiFormRow>
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <GrokAiSuggestions />
-        </EuiFlexItem>
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" wrap>
+        <GrokAiSuggestions />
         <EuiButtonEmpty
           data-test-subj="streamsAppGrokPatternsEditorAddPatternButton"
           onClick={handleAddPattern}
