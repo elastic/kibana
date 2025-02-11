@@ -21,30 +21,31 @@ import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 import { SLOConfig } from '../../types';
 import { ComputeHealth } from '../management/compute_health';
 
-export const TYPE = 'slo:health-task';
+export const TYPE = 'slo:compute-health-task';
 export const VERSION = '1.0.0';
 
-interface HealthTaskSetupContract {
+interface TaskSetupContract {
   taskManager: TaskManagerSetupContract;
   core: CoreSetup;
   logFactory: LoggerFactory;
   config: SLOConfig;
 }
 
-export class HealthTask {
+export class HealthComputingTask {
   private abortController = new AbortController();
   private logger: Logger;
-  private config: SLOConfig; // replace with Settings SO when ready for production
+  private config: SLOConfig;
   private wasStarted: boolean = false;
 
-  constructor(setupContract: HealthTaskSetupContract) {
+  constructor(setupContract: TaskSetupContract) {
     const { core, config, taskManager, logFactory } = setupContract;
     this.logger = logFactory.get(this.taskId);
     this.config = config;
 
+    this.logger.info('Registering task');
     taskManager.registerTaskDefinitions({
       [TYPE]: {
-        title: 'SLOs Health Task',
+        title: 'SLOs compute health task',
         timeout: '5m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
@@ -54,7 +55,7 @@ export class HealthTask {
             },
 
             cancel: async () => {
-              this.abortController.abort('[HealthTask] Timed out');
+              this.abortController.abort('Timed out');
             },
           };
         },
@@ -64,7 +65,7 @@ export class HealthTask {
 
   public async start({ taskManager }: { taskManager: TaskManagerStartContract }) {
     if (!taskManager) {
-      this.logger.error('[HealthTask] Missing required service during start');
+      this.logger.error('Missing required service during start');
       return;
     }
 
@@ -72,7 +73,7 @@ export class HealthTask {
       return await taskManager.removeIfExists(this.taskId);
     }
 
-    this.logger.info(`[HealthTask] Started with 20m interval`);
+    this.logger.info('Scheduling with [20m] interval');
     this.wasStarted = true;
 
     try {
@@ -87,7 +88,7 @@ export class HealthTask {
         params: { version: VERSION },
       });
     } catch (e) {
-      this.logger.error(`Error scheduling HealthTask, error: ${e}`);
+      this.logger.error(`Error while scheduling task, error: ${e}`);
     }
   }
 
@@ -97,23 +98,23 @@ export class HealthTask {
 
   public async runTask(taskInstance: ConcreteTaskInstance, core: CoreSetup) {
     if (!this.wasStarted) {
-      this.logger.info('[HealthTask] runTask Aborted. Task not started yet');
+      this.logger.debug('runTask Aborted. Task not started yet');
       return;
     }
 
     if (taskInstance.id !== this.taskId) {
-      this.logger.info(
-        `[HealthTask] Outdated task version: Got [${taskInstance.id}], current version is [${this.taskId}]`
+      this.logger.debug(
+        `Outdated task version: Got [${taskInstance.id}], current version is [${this.taskId}]`
       );
       return getDeleteTaskRunResult();
     }
 
     if (!this.config.healthTaskEnabled) {
-      this.logger.debug('[HealthTask] Task is disabled');
+      this.logger.info('Task is disabled');
       return;
     }
 
-    this.logger.debug(`[HealthTask] runTask() started`);
+    this.logger.debug(`runTask() started`);
 
     const [coreStart] = await core.getStartServices();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
@@ -124,11 +125,11 @@ export class HealthTask {
       await computeHealth.execute();
     } catch (err) {
       if (err instanceof errors.RequestAbortedError) {
-        this.logger.warn(`[HealthTask] request aborted due to timeout: ${err}`);
+        this.logger.warn(`request aborted due to timeout: ${err}`);
 
         return;
       }
-      this.logger.error(`[HealthTask] error: ${err}`);
+      this.logger.error(`error: ${err}`);
     }
   }
 }

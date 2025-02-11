@@ -49,7 +49,7 @@ export class ComputeHealth {
   ) {}
 
   public async execute(): Promise<void> {
-    this.logger.info('[HealthTask] Computing SLOs health...');
+    this.logger.info('Computing SLOs health...');
 
     const finder = await this.soClient.createPointInTimeFinder<StoredSLODefinition>({
       type: SO_SLO_TYPE,
@@ -70,7 +70,7 @@ export class ComputeHealth {
         .filter(Boolean) as SLODefinition[];
 
       this.logger.debug(
-        `[HealthTask] Processing ${sloDefinitions.length} SLO Definitions from ${response.saved_objects.length} Saved Objects`
+        `Processing ${sloDefinitions.length} SLO Definitions from ${response.saved_objects.length} Saved Objects`
       );
 
       if (sloDefinitions.length === 0) {
@@ -141,7 +141,7 @@ export class ComputeHealth {
         };
       });
 
-      this.logger.info(`[HealthTask] Indexing ${health.length} health documents`);
+      this.logger.debug(`Indexing ${health.length} health documents`);
       await this.esClient.bulk({
         index: HEALTH_INDEX_NAME,
         operations: health.flatMap((doc) => [{ index: { _id: doc.id } }, doc]),
@@ -314,10 +314,10 @@ export class ComputeHealth {
     ]);
 
     this.logger.debug(
-      `[HealthTask] Found ${transformStats.transforms.length} transform stats for ${sloDefinitions.length} SLO Definitions`
+      `Found ${transformStats.transforms.length} transform stats for ${sloDefinitions.length} SLO Definitions`
     );
     this.logger.debug(
-      `[HealthTask] Found ${summaryResults.aggregations?.bySlo.buckets.length} summary buckets for ${sloDefinitions.length} SLO Definitions`
+      `Found ${summaryResults.aggregations?.bySlo.buckets.length} summary buckets for ${sloDefinitions.length} SLO Definitions`
     );
     return { transformStats, summaryResults };
   }

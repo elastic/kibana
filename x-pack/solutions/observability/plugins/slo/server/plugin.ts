@@ -38,7 +38,7 @@ import type {
   SLOServerStart,
 } from './types';
 import { getSloClientWithRequest } from './client';
-import { HealthTask } from './services/tasks/health_task';
+import { HealthComputingTask } from './services/tasks/health_computing_task';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
@@ -50,7 +50,7 @@ export class SLOPlugin
   private readonly config: SLOConfig;
   private readonly isServerless: boolean;
   private sloOrphanCleanupTask?: SloOrphanSummaryCleanupTask;
-  private healthTask?: HealthTask;
+  private healthTask?: HealthComputingTask;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.logger = this.initContext.logger.get();
@@ -175,7 +175,7 @@ export class SLOPlugin
       this.config
     );
 
-    this.healthTask = new HealthTask({
+    this.healthTask = new HealthComputingTask({
       core,
       taskManager: plugins.taskManager,
       logFactory: this.initContext.logger,
