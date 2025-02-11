@@ -30,6 +30,7 @@ import {
   apiCanAccessViewMode,
   apiHasType,
   apiIsOfType,
+  apiPublishesTitle,
   CanAccessViewMode,
   EmbeddableApiContext,
   getInheritedViewMode,
@@ -95,7 +96,7 @@ const compatibilityCheck = (api: EmbeddableApiContext['embeddable']): api is Get
     apiPublishesSavedSearch(api) &&
     apiCanAccessViewMode(api) &&
     Boolean((api as unknown as HasTimeRange).hasTimeRange) &&
-    Boolean((api as unknown as PublishesTitle).title$)
+    apiPublishesTitle(api)
   );
 };
 
