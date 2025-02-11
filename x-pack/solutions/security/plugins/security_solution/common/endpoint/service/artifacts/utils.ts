@@ -137,6 +137,10 @@ export const getArtifactOwnerSpaceIds = (
 
 /** Returns an Artifact `tag` value for a given space id */
 export const buildSpaceOwnerIdTag = (spaceId: string): string => {
+  if (spaceId.trim() === '') {
+    throw new Error('spaceId must be a string with a length greater than zero.');
+  }
+
   return `${OWNER_SPACE_ID_TAG_PREFIX}${spaceId}`;
 };
 
