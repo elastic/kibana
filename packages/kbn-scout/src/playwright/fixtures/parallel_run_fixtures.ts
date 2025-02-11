@@ -51,6 +51,7 @@ export interface ScoutParallelWorkerFixtures {
   kbnClient: KbnClient;
   esClient: EsClient;
   scoutSpace: ScoutSpaceParallelFixture;
-  synthtraceEsClient: SynthtraceFixture['synthtraceEsClient'];
-  synthtraceOtelEsClient: SynthtraceFixture['synthtraceOtelEsClient'];
+  apmSynthtraceEsClient: SynthtraceFixture['apmSynthtraceEsClient'];
+  infraSynthtraceEsClient: SynthtraceFixture['infraSynthtraceEsClient'];
+  otelSynthtraceEsClient: SynthtraceFixture['otelSynthtraceEsClient'];
 }

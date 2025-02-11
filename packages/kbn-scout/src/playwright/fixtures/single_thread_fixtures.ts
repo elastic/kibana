@@ -55,6 +55,7 @@ export interface ScoutWorkerFixtures {
   esClient: EsClient;
   esArchiver: EsArchiverFixture;
   uiSettings: UiSettingsFixture;
-  synthtraceEsClient: SynthtraceFixture['synthtraceEsClient'];
-  synthtraceOtelEsClient: SynthtraceFixture['synthtraceOtelEsClient'];
+  apmSynthtraceEsClient: SynthtraceFixture['apmSynthtraceEsClient'];
+  infraSynthtraceEsClient: SynthtraceFixture['infraSynthtraceEsClient'];
+  otelSynthtraceEsClient: SynthtraceFixture['otelSynthtraceEsClient'];
 }
