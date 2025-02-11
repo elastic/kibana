@@ -24,7 +24,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
 import { processorConverter } from '../utils';
 
-type Simulation = APIReturnType<'POST /api/streams/{id}/processing/_simulate'>;
+type Simulation = APIReturnType<'POST /api/streams/{name}/processing/_simulate'>;
 
 export interface TableColumn {
   name: string;
@@ -125,10 +125,10 @@ export const useProcessingSimulator = ({
         return { documents: [] };
       }
 
-      return streamsRepositoryClient.fetch('POST /api/streams/{id}/_sample', {
+      return streamsRepositoryClient.fetch('POST /api/streams/{name}/_sample', {
         signal,
         params: {
-          path: { id: definition.stream.name },
+          path: { name: definition.stream.name },
           body: {
             if: samplingCondition,
             start: start?.valueOf(),
@@ -165,10 +165,10 @@ export const useProcessingSimulator = ({
         return Promise.resolve(null);
       }
 
-      return streamsRepositoryClient.fetch('POST /api/streams/{id}/processing/_simulate', {
+      return streamsRepositoryClient.fetch('POST /api/streams/{name}/processing/_simulate', {
         signal,
         params: {
-          path: { id: definition.stream.name },
+          path: { name: definition.stream.name },
           body: {
             documents: sampleDocs,
             processing: liveDraftProcessors.map(processorConverter.toAPIDefinition),

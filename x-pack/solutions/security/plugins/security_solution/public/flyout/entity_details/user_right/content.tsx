@@ -34,7 +34,6 @@ interface UserPanelContentProps {
   recalculatingScore: boolean;
   contextID: string;
   scopeId: string;
-  isDraggable: boolean;
   onAssetCriticalityChange: () => void;
   openDetailsPanel: (path: EntityDetailsPath) => void;
   isPreviewMode?: boolean;
@@ -49,7 +48,6 @@ export const UserPanelContent = ({
   recalculatingScore,
   contextID,
   scopeId,
-  isDraggable,
   openDetailsPanel,
   onAssetCriticalityChange,
   isPreviewMode,
@@ -89,7 +87,6 @@ export const UserPanelContent = ({
         observedData={observedUser}
         contextID={contextID}
         scopeId={scopeId}
-        isDraggable={isDraggable}
         observedFields={observedFields}
         queryId={OBSERVED_USER_QUERY_ID}
       />
@@ -98,7 +95,6 @@ export const UserPanelContent = ({
         <ManagedUser
           managedUser={managedUser}
           contextID={contextID}
-          isDraggable={isDraggable}
           openDetailsPanel={openDetailsPanel}
           isPreviewMode={isPreviewMode}
           isLinkEnabled={isLinkEnabled}
