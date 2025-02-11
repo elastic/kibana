@@ -55,6 +55,8 @@ const createDataViewSelectionSlice = <T extends string>(scopeName: T) =>
     initialState: initialScopeState,
     reducers: {
       setSelectedDataView: (state, action: PayloadAction<DataViewSpec>) => {
+        console.log('setSelectedDataView', action.payload);
+
         state.dataView = action.payload;
         state.status = 'ready';
       },
