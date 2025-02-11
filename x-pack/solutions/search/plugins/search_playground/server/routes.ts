@@ -18,6 +18,7 @@ import { errorHandler } from './utils/error_handler';
 import { handleStreamResponse } from './utils/handle_stream_response';
 import {
   APIRoutes,
+  ElasticsearchRetrieverContentField,
   SearchPlaygroundPluginStart,
   SearchPlaygroundPluginStartDependencies,
 } from './types';
@@ -26,6 +27,7 @@ import { fetchIndices } from './lib/fetch_indices';
 import { isNotNullish } from '../common/is_not_nullish';
 import { MODELS } from '../common/models';
 import { ContextLimitError } from './lib/errors';
+import { parseSourceFields } from './utils/parse_source_fields';
 
 export function createRetriever(esQuery: string) {
   return (question: string) => {
@@ -125,15 +127,10 @@ export function defineRoutes({
         { actions, logger, request }
       );
 
-      let sourceFields = {};
+      let sourceFields: ElasticsearchRetrieverContentField;
 
       try {
-        sourceFields = JSON.parse(data.source_fields);
-        sourceFields = Object.keys(sourceFields).reduce((acc, key) => {
-          // @ts-ignore
-          acc[key] = sourceFields[key][0];
-          return acc;
-        }, {});
+        sourceFields = parseSourceFields(data.source_fields);
       } catch (e) {
         logger.error('Failed to parse the source fields', e);
         throw Error(e);

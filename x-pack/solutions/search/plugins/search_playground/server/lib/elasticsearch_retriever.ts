@@ -13,7 +13,8 @@ import {
   SearchHit,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { getValueForSelectedField } from '../utils/get_value_for_selected_field';
+import { contextDocumentHitMapper } from '../utils/context_document_mapper';
+import { ElasticsearchRetrieverContentField } from '../types';
 
 export interface ElasticsearchRetrieverInput extends BaseRetrieverInput {
   /**
@@ -23,7 +24,7 @@ export interface ElasticsearchRetrieverInput extends BaseRetrieverInput {
   /**
    * The name of the field the content resides in
    */
-  content_field: string | Record<string, string>;
+  content_field: ElasticsearchRetrieverContentField;
 
   index: string;
 
@@ -47,7 +48,7 @@ export class ElasticsearchRetriever extends BaseRetriever {
 
   index: string;
 
-  content_field: Record<string, string> | string;
+  content_field: ElasticsearchRetrieverContentField;
 
   hit_doc_mapper?: HitDocMapper;
 
@@ -82,24 +83,7 @@ export class ElasticsearchRetriever extends BaseRetriever {
       const hits = results.hits.hits;
 
       // default elasticsearch doc to LangChain doc
-      let mapper: HitDocMapper = (hit: SearchHit<any>) => {
-        const pageContentFieldKey =
-          typeof this.content_field === 'string'
-            ? this.content_field
-            : this.content_field[hit._index as string];
-
-        // we need to iterate over the _source object to get the value of complex key definition such as metadata.source
-        const valueForSelectedField = getValueForSelectedField(hit, pageContentFieldKey);
-
-        return new Document({
-          pageContent: valueForSelectedField,
-          metadata: {
-            _score: hit._score,
-            _id: hit._id,
-            _index: hit._index,
-          },
-        });
-      };
+      let mapper: HitDocMapper = contextDocumentHitMapper(this.content_field);
 
       if (this.hit_doc_mapper) {
         mapper = this.hit_doc_mapper;
