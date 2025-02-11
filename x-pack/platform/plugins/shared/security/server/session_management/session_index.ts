@@ -629,23 +629,10 @@ export class SessionIndex {
     // Prior to https://github.com/elastic/kibana/pull/134900, sessions would be written directly against the session index.
     // Now, we write sessions against a new session index alias. This call ensures that the alias exists, and is attached to the index.
     // This operation is safe to repeat, even if the alias already exists. This seems safer than retrieving the index details, and inspecting
-    // it to see if the alias already exists. If the index has been upgraded using the UA, then the index name has changed and `.kibana_security_session_1`
-    // is now an alias to the upgraded index. We must attach the alias to the index by using the current index name.
+    // it to see if the alias already exists.
     try {
-      const aliasResponse = await this.options.elasticsearchClient.indices.getAlias({
-        name: this.aliasName,
-      });
-      const indexNames = Object.keys(aliasResponse);
-      const indexName = indexNames.length > 0 ? indexNames[0] : this.indexName;
-
-      if (!indexName) {
-        throw new Error(
-          `No valid index found for alias '${this.aliasName}' and no fallback index provided.`
-        );
-      }
-
       await this.options.elasticsearchClient.indices.putAlias({
-        index: indexName,
+        index: this.indexName,
         name: this.aliasName,
       });
     } catch (err) {
@@ -694,16 +681,24 @@ export class SessionIndex {
         }
       }
 
-      await this.attachAliasToIndex();
-
       return;
     }
 
-    this.options.logger.debug(
-      'Session index already exists. Attaching alias to the index and ensuring up-to-date mappings...'
-    );
+    const isIndexNameAlias = await this.options.elasticsearchClient.indices.existsAlias({
+      name: this.aliasName,
+    });
 
-    await this.attachAliasToIndex();
+    if (!isIndexNameAlias) {
+      this.options.logger.debug(
+        'Session index already exists with no alias. Attaching alias to the index.'
+      );
+
+      await this.attachAliasToIndex();
+    }
+
+    this.options.logger.debug(
+      'Session index already exists. Ensuring up-to-date index mappings...'
+    );
 
     let indexMappingsVersion: string | undefined;
     try {
