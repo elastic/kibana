@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import type { Filter, Query } from '@kbn/es-query';
-import { EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
+import { EuiFlexItem, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
 import { useAlertsLocalStorage } from './alerts_local_storage';
 import type { AlertsSettings } from './alerts_local_storage/types';
 import { ChartContextMenu } from './chart_context_menu';
@@ -33,14 +33,6 @@ const CHART_PANEL_HEIGHT = 375; // px
 
 const DETECTIONS_ALERTS_CHARTS_PANEL_ID = 'detection-alerts-charts-panel';
 
-const FullHeightFlexItem = styled(EuiFlexItem)`
-  height: 100%;
-`;
-
-const ChartSelectContainer = styled.div`
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
-`;
-
 export interface Props {
   addFilter: ({ field, value, negate }: AddFilterProps) => void;
   alertsDefaultFilters: Filter[];
@@ -60,6 +52,8 @@ const ChartPanelsComponent: React.FC<Props> = ({
   signalIndexName,
   updateDateRangeCallback,
 }: Props) => {
+  const { euiTheme } = useEuiTheme();
+
   const { toggleStatus: isExpanded, setToggleStatus: setIsExpanded } = useQueryToggle(
     DETECTIONS_ALERTS_CHARTS_PANEL_ID
   );
@@ -145,12 +139,16 @@ const ChartPanelsComponent: React.FC<Props> = ({
 
   const title = useMemo(() => {
     return isExpanded ? (
-      <ChartSelectContainer>
+      <div
+        css={css`
+          margin-left: ${euiTheme.size.s};
+        `}
+      >
         <ChartSelect
           alertViewSelection={alertViewSelection}
           setAlertViewSelection={setAlertViewSelection}
         />
-      </ChartSelectContainer>
+      </div>
     ) : (
       <ChartCollapse
         groupBySelection={groupBySelection}
@@ -161,9 +159,10 @@ const ChartPanelsComponent: React.FC<Props> = ({
       />
     );
   }, [
+    isExpanded,
+    euiTheme.size.s,
     alertViewSelection,
     setAlertViewSelection,
-    isExpanded,
     groupBySelection,
     alertsDefaultFilters,
     query,
@@ -174,7 +173,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
   return (
     <div data-test-subj="chartPanels">
       {alertViewSelection === 'trend' && (
-        <FullHeightFlexItem grow={2}>
+        <EuiFlexItem grow={2}>
           {isLoadingIndexPattern ? (
             <EuiSkeletonText lines={10} data-test-subj="trendLoadingSpinner" />
           ) : (
@@ -189,31 +188,26 @@ const ChartPanelsComponent: React.FC<Props> = ({
               onFieldSelected={updateCommonStackBy0}
               panelHeight={CHART_PANEL_HEIGHT}
               setComboboxInputRef={setStackByField0ComboboxInputRef}
-              showGroupByPlaceholder={false}
-              showTotalAlertsCount={false}
               signalIndexName={signalIndexName}
               stackByLabel={GROUP_BY_LABEL}
               title={title}
-              titleSize={'s'}
               updateDateRange={updateDateRangeCallback}
               isExpanded={isExpanded}
               setIsExpanded={setIsExpanded}
             />
           )}
-        </FullHeightFlexItem>
+        </EuiFlexItem>
       )}
 
       {alertViewSelection === 'table' && (
-        <FullHeightFlexItem grow={1}>
+        <EuiFlexItem grow={1}>
           {isLoadingIndexPattern ? (
             <EuiSkeletonText lines={10} data-test-subj="tableLoadingSpinner" />
           ) : (
             <AlertsCountPanel
-              alignHeader="flexStart"
               chartOptionsContextMenu={chartOptionsContextMenu}
               extraActions={resetGroupByFieldAction}
               filters={alertsDefaultFilters}
-              inspectTitle={i18n.COUNTS}
               panelHeight={CHART_PANEL_HEIGHT}
               setStackByField0={updateCommonStackBy0}
               setStackByField0ComboboxInputRef={setStackByField0ComboboxInputRef}
@@ -228,20 +222,18 @@ const ChartPanelsComponent: React.FC<Props> = ({
               setIsExpanded={setIsExpanded}
             />
           )}
-        </FullHeightFlexItem>
+        </EuiFlexItem>
       )}
 
       {alertViewSelection === 'treemap' && (
-        <FullHeightFlexItem grow={1}>
+        <EuiFlexItem grow={1}>
           {isLoadingIndexPattern ? (
             <EuiSkeletonText lines={10} data-test-subj="treemapLoadingSpinner" />
           ) : (
             <AlertsTreemapPanel
               addFilter={addFilter}
-              alignHeader="flexStart"
               chartOptionsContextMenu={chartOptionsContextMenu}
               height={CHART_PANEL_HEIGHT}
-              inspectTitle={i18n.TREEMAP}
               isPanelExpanded={isExpanded}
               filters={alertsDefaultFilters}
               query={query}
@@ -259,16 +251,15 @@ const ChartPanelsComponent: React.FC<Props> = ({
               title={title}
             />
           )}
-        </FullHeightFlexItem>
+        </EuiFlexItem>
       )}
 
       {alertViewSelection === 'charts' && (
-        <FullHeightFlexItem grow={1}>
+        <EuiFlexItem grow={1}>
           {isLoadingIndexPattern ? (
             <EuiSkeletonText lines={10} data-test-subj="chartsLoadingSpinner" />
           ) : (
             <AlertsSummaryChartsPanel
-              alignHeader="flexStart"
               addFilter={addFilter}
               filters={alertsDefaultFilters}
               query={query}
@@ -282,7 +273,7 @@ const ChartPanelsComponent: React.FC<Props> = ({
               setGroupBySelection={setGroupBySelection}
             />
           )}
-        </FullHeightFlexItem>
+        </EuiFlexItem>
       )}
     </div>
   );

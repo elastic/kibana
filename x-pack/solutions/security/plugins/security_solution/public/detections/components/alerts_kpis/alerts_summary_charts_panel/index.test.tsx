@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { act, render, fireEvent, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { AlertsSummaryChartsPanel } from '.';
@@ -21,7 +21,12 @@ jest.mock('react-router-dom', () => {
 describe('AlertsSummaryChartsPanel', () => {
   const mockSetIsExpanded = jest.fn();
   const defaultProps = {
+    addFilter: jest.fn(),
+    filters: [],
+    panelHeight: 100,
+    query: { query: '', language: '' },
     signalIndexName: 'signalIndexName',
+    title: <div>{'test'}</div>,
     isExpanded: true,
     setIsExpanded: mockSetIsExpanded,
     groupBySelection: 'host.name' as GroupBySelection,
@@ -36,19 +41,6 @@ describe('AlertsSummaryChartsPanel', () => {
         </TestProviders>
       );
       expect(container.querySelector('[data-test-subj="alerts-charts-panel"]')).toBeInTheDocument();
-    });
-  });
-
-  test('it renders the header with the specified `alignHeader` alignment', async () => {
-    await act(async () => {
-      const { container } = render(
-        <TestProviders>
-          <AlertsSummaryChartsPanel {...defaultProps} alignHeader="flexEnd" />
-        </TestProviders>
-      );
-      expect(
-        container.querySelector('[data-test-subj="headerSectionInnerFlexGroup"]')?.classList[1]
-      ).toContain('flexEnd');
     });
   });
 

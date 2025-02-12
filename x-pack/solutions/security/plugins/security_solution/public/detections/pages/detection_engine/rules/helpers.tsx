@@ -7,8 +7,7 @@
 
 import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
-
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { EuiFlexItem } from '@elastic/eui';
 import type {
   Severity,
@@ -22,9 +21,9 @@ import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { requiredOptional } from '@kbn/zod-helpers';
 import { toSimpleRuleSchedule } from '../../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import {
-  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
-  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_FIELD_NAME,
+  ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
+  ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
   ALERT_SUPPRESSION_MISSING_FIELDS_FIELD_NAME,
 } from '../../../../detection_engine/rule_creation/components/alert_suppression_edit';
 import { THRESHOLD_ALERT_SUPPRESSION_ENABLED } from '../../../../detection_engine/rule_creation/components/threshold_alert_suppression_edit';
@@ -38,11 +37,11 @@ import {
 import type {
   AboutStepRule,
   AboutStepRuleDetails,
+  ActionsStepRule,
   DefineStepRule,
   ScheduleStepRule,
-  ActionsStepRule,
 } from './types';
-import { DataSourceType, AlertSuppressionDurationType } from './types';
+import { AlertSuppressionDurationType, DataSourceType } from './types';
 import { SeverityLevel } from '../../../../detection_engine/rule_creation_ui/components/step_about_rule/data';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import type { RuleAction, RuleResponse } from '../../../../../common/api/detection_engine';

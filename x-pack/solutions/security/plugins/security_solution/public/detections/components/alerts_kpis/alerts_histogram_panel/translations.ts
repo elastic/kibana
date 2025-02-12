@@ -13,20 +13,6 @@ export const TOP = (fieldName: string) =>
     defaultMessage: `Top {fieldName}`,
   });
 
-export const HISTOGRAM_HEADER = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.histogram.headerTitle',
-  {
-    defaultMessage: 'Trend',
-  }
-);
-
-export const NOT_AVAILABLE_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.histogram.notAvailableTooltip',
-  {
-    defaultMessage: 'Not available for trend view',
-  }
-);
-
 export const VIEW_ALERTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.histogram.viewAlertsButtonLabel',
   {

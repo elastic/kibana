@@ -747,6 +747,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                         filters={alertMergedFilters}
                         signalIndexName={signalIndexName}
                         defaultStackByOption={defaultRuleStackByOption}
+                        title={i18n.HISTOGRAM_HEADER}
                         updateDateRange={updateDateRangeCallback}
                       />
                       <EuiSpacer />

@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const COUNT_TABLE_COLUMN_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.alerts.count.countTableColumnTitle',
+export const COUNTS = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.count.tableOptionTitle',
   {
-    defaultMessage: 'Count of records',
+    defaultMessage: 'Counts',
   }
 );
 
@@ -20,11 +20,5 @@ export const COUNT_TABLE_TITLE = i18n.translate(
     defaultMessage: 'Count',
   }
 );
-
-export const COLUMN_LABEL = ({ fieldName, topN }: { fieldName: string; topN: number }) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.alerts.count.columnLabel', {
-    values: { fieldName, topN },
-    defaultMessage: 'Top {topN} values of {fieldName}',
-  });
 
 export * from '../common/translations';

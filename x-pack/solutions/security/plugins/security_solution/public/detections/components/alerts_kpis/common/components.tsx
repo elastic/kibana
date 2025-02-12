@@ -5,51 +5,75 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
-import { EuiPanel, EuiComboBox } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiComboBox, EuiPanel, useEuiTheme } from '@elastic/eui';
 import type { LegacyRef } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { PANEL_HEIGHT, MOBILE_PANEL_HEIGHT } from './config';
 import { useStackByFields } from './hooks';
 import * as i18n from './translations';
 
 const DEFAULT_WIDTH = 400;
+const DEFAULT_EXPANDED_PANEL_HEIGHT = 300;
+const DEFAULT_MOBILE_EXPANDED_PANEL_HEIGHT = 300;
+const DEFAULT_COLLAPSED_PANEL_HEIGHT = 64; // px
 
-export const KpiPanel = styled(EuiPanel)<{
-  height?: number;
-  $overflowY?:
-    | 'auto'
-    | 'clip'
-    | 'hidden'
-    | 'hidden visible'
-    | 'inherit'
-    | 'initial'
-    | 'revert'
-    | 'revert-layer'
-    | 'scroll'
-    | 'unset'
-    | 'visible';
-  $toggleStatus: boolean;
-}>`
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  overflow-x: hidden;
-  overflow-y: ${({ $overflowY }) => $overflowY ?? 'hidden'};
-  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
-    ${({ height, $toggleStatus }) =>
-      $toggleStatus &&
-      `
-      height: ${height != null ? height : PANEL_HEIGHT}px;
-  `}
-  }
-  ${({ $toggleStatus }) =>
-    $toggleStatus &&
-    `
-    height: ${MOBILE_PANEL_HEIGHT}px;
-  `}
-`;
+export interface KpiPanelProps {
+  /**
+   * Height to use when the panel is expanded
+   */
+  height?: number | undefined;
+  /**
+   * True if the panel is expanded
+   */
+  toggleStatus: boolean;
+  /**
+   * Data test subject string for testing
+   */
+  ['data-test-subj']: string;
+  /**
+   * Children component
+   */
+  children: React.ReactNode;
+}
+
+export const KpiPanel = ({
+  height,
+  toggleStatus,
+  'data-test-subj': dataTestSubj,
+  children,
+}: KpiPanelProps) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <EuiPanel
+      hasBorder
+      paddingSize="m"
+      data-test-subj={dataTestSubj}
+      css={css`
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+        @media only screen and (min-width: ${euiTheme.breakpoint.m}px) {
+          height: ${toggleStatus
+            ? height
+              ? height
+              : DEFAULT_EXPANDED_PANEL_HEIGHT
+            : DEFAULT_COLLAPSED_PANEL_HEIGHT}px;
+        }
+        height: ${toggleStatus
+          ? height
+            ? height
+            : DEFAULT_MOBILE_EXPANDED_PANEL_HEIGHT
+          : DEFAULT_COLLAPSED_PANEL_HEIGHT}px;
+      `}
+    >
+      {children}
+    </EuiPanel>
+  );
+};
+
 interface StackedBySelectProps {
   'aria-label'?: string;
   'data-test-subj'?: string;
@@ -62,11 +86,6 @@ interface StackedBySelectProps {
   useLensCompatibleFields?: boolean;
   width?: number;
 }
-
-export const StackByComboBoxWrapper = styled.div<{ width: number }>`
-  max-width: 400px;
-  width: ${({ width }) => width}px;
-`;
 
 export const StackByComboBox = React.forwardRef(
   (
@@ -109,7 +128,12 @@ export const StackByComboBox = React.forwardRef(
       return { asPlainText: true };
     }, []);
     return (
-      <StackByComboBoxWrapper width={width}>
+      <div
+        css={css`
+          max-width: 400px;
+          width: ${width}px;
+        `}
+      >
         <EuiComboBox
           data-test-subj={dataTestSubj}
           aria-label={ariaLabel}
@@ -126,7 +150,7 @@ export const StackByComboBox = React.forwardRef(
           compressed
           onChange={onChange}
         />
-      </StackByComboBoxWrapper>
+      </div>
     );
   }
 );

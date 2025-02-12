@@ -14,7 +14,6 @@ import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/confi
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { ChartContextMenu } from '../chart_panels/chart_context_menu';
 import { ChartSelect } from '../chart_panels/chart_select';
-import { TREEMAP } from '../chart_panels/chart_select/translations';
 import { TestProviders } from '../../../../common/mock/test_providers';
 import type { Props } from '.';
 import { AlertsTreemapPanel } from '.';
@@ -51,7 +50,6 @@ jest.mock('../../../containers/detection_engine/alerts/use_query', () => ({
 
 const defaultProps: Props = {
   addFilter: jest.fn(),
-  alignHeader: 'flexStart',
   chartOptionsContextMenu: (queryId: string) => (
     <ChartContextMenu
       defaultStackByField={DEFAULT_STACK_BY_FIELD}
@@ -61,7 +59,6 @@ const defaultProps: Props = {
       setStackByField1={jest.fn()}
     />
   ),
-  inspectTitle: TREEMAP,
   isPanelExpanded: true,
   filters: [
     {
@@ -97,19 +94,12 @@ const defaultProps: Props = {
       },
     },
   ],
+  height: 100,
   query: {
     query: '',
     language: 'kuery',
   },
   riskSubAggregationField: 'signal.rule.risk_score',
-  runtimeMappings: {
-    test_via_alerts_table: {
-      type: 'keyword',
-      script: {
-        source: 'emit("Hello World!");',
-      },
-    },
-  },
   setIsPanelExpanded: jest.fn(),
   setStackByField0: jest.fn(),
   setStackByField1: jest.fn(),
@@ -145,52 +135,6 @@ describe('AlertsTreemapPanel', () => {
     );
 
     await waitFor(() => expect(screen.getByTestId('treemapPanel')).toBeInTheDocument());
-  });
-
-  it('renders the panel with a hidden overflow-x', async () => {
-    render(
-      <TestProviders>
-        <AlertsTreemapPanel {...defaultProps} />
-      </TestProviders>
-    );
-
-    await waitFor(() =>
-      expect(screen.getByTestId('treemapPanel')).toHaveStyleRule('overflow-x', 'hidden')
-    );
-  });
-
-  it('renders the panel with the expected class to style the overflow-y scroll bar', async () => {
-    render(
-      <TestProviders>
-        <AlertsTreemapPanel {...defaultProps} />
-      </TestProviders>
-    );
-
-    await waitFor(() => expect(screen.getByTestId('treemapPanel')).toHaveClass('eui-yScroll'));
-  });
-
-  it('renders the panel with an auto overflow-y to allow vertical scrolling when necessary when the panel is expanded', async () => {
-    render(
-      <TestProviders>
-        <AlertsTreemapPanel {...defaultProps} />
-      </TestProviders>
-    );
-
-    await waitFor(() =>
-      expect(screen.getByTestId('treemapPanel')).toHaveStyleRule('overflow-y', 'auto')
-    );
-  });
-
-  it('renders the panel with a hidden overflow-y when the panel is NOT expanded', async () => {
-    render(
-      <TestProviders>
-        <AlertsTreemapPanel {...defaultProps} isPanelExpanded={false} />
-      </TestProviders>
-    );
-
-    await waitFor(() =>
-      expect(screen.getByTestId('treemapPanel')).toHaveStyleRule('overflow-y', 'hidden')
-    );
   });
 
   it('renders the chart selector as a custom header title', async () => {

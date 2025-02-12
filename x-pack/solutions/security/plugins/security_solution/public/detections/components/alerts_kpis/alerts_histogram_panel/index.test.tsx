@@ -111,14 +111,13 @@ jest.mock('../../../../common/components/visualization_actions/use_visualization
 
 const mockSetIsExpanded = jest.fn();
 const defaultProps = {
-  setQuery: jest.fn(),
-  showBuildingBlockAlerts: false,
-  showOnlyThreatIndicatorAlerts: false,
-  showTotalAlertsCount: true,
+  filters: [],
   signalIndexName: 'signalIndexName',
+  title: <div>{'test'}</div>,
   updateDateRange: jest.fn(),
   isExpanded: true,
   setIsExpanded: mockSetIsExpanded,
+  showTotalAlertsCount: true,
 };
 const mockSetToggle = jest.fn();
 const mockUseQueryToggle = useQueryToggle as jest.Mock;
@@ -231,42 +230,6 @@ describe('AlertsHistogramPanel', () => {
     });
   });
 
-  describe('stackByWidth', () => {
-    test('it renders the first StackByComboBox with the specified `stackByWidth`', () => {
-      const stackByWidth = 1234;
-
-      const wrapper = mount(
-        <TestProviders>
-          <AlertsHistogramPanel {...defaultProps} stackByWidth={stackByWidth} />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="stackByComboBox"]').first()).toHaveStyleRule(
-        'width',
-        `${stackByWidth}px`
-      );
-    });
-
-    test('it renders the placeholder StackByComboBox with the specified `stackByWidth`', () => {
-      const stackByWidth = 1234;
-
-      const wrapper = mount(
-        <TestProviders>
-          <AlertsHistogramPanel
-            {...defaultProps}
-            showGroupByPlaceholder={true}
-            stackByWidth={stackByWidth}
-          />
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="stackByPlaceholder"]').first()).toHaveStyleRule(
-        'width',
-        `${stackByWidth}px`
-      );
-    });
-  });
-
   describe('placeholder spacer', () => {
     test('it does NOT render the group by placeholder spacer by default', () => {
       const wrapper = mount(
@@ -275,15 +238,6 @@ describe('AlertsHistogramPanel', () => {
         </TestProviders>
       );
       expect(wrapper.find('[data-test-subj="placeholderSpacer"]').exists()).toBe(false);
-    });
-
-    test('it renders the placeholder spacer when `showGroupByPlaceholder` is true', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <AlertsHistogramPanel {...defaultProps} showGroupByPlaceholder={true} />
-        </TestProviders>
-      );
-      expect(wrapper.find('[data-test-subj="placeholderSpacer"]').exists()).toBe(true);
     });
   });
 
@@ -296,15 +250,6 @@ describe('AlertsHistogramPanel', () => {
       );
       expect(wrapper.find('[data-test-subj="placeholderTooltip"]').exists()).toBe(false);
     });
-
-    test('it renders the placeholder tooltip when `showGroupByPlaceholder` is true', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <AlertsHistogramPanel {...defaultProps} showGroupByPlaceholder={true} />
-        </TestProviders>
-      );
-      expect(wrapper.find('[data-test-subj="placeholderTooltip"]').exists()).toBe(true);
-    });
   });
 
   describe('placeholder', () => {
@@ -315,15 +260,6 @@ describe('AlertsHistogramPanel', () => {
         </TestProviders>
       );
       expect(wrapper.find('[data-test-subj="stackByPlaceholder"]').exists()).toBe(false);
-    });
-
-    test('it renders the placeholder when `showGroupByPlaceholder` is true', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <AlertsHistogramPanel {...defaultProps} showGroupByPlaceholder={true} />
-        </TestProviders>
-      );
-      expect(wrapper.find('[data-test-subj="stackByPlaceholder"]').exists()).toBe(true);
     });
   });
 

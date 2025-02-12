@@ -76,3 +76,10 @@ export const DELETE_CONFIRMATION_BODY = i18n.translate(
     defaultMessage: 'This action will delete the rule. Click "Delete" to continue.',
   }
 );
+
+export const HISTOGRAM_HEADER = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.histogram.headerTitle',
+  {
+    defaultMessage: 'Trend',
+  }
+);

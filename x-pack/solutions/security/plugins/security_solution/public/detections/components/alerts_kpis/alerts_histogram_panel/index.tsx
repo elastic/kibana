@@ -6,17 +6,15 @@
  */
 
 import type { Action } from '@kbn/ui-actions-plugin/public';
+import { css } from '@emotion/react';
 import type { EuiComboBox, EuiTitleSize } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { SyntheticEvent } from 'react';
-import React, { memo, useCallback, useMemo, useState, useEffect } from 'react';
-import styled from 'styled-components';
-import { isEmpty, noop } from 'lodash/fp';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { isEmpty } from 'lodash/fp';
 import { v4 as uuidv4 } from 'uuid';
 import { sumBy } from 'lodash';
-
 import type { Filter } from '@kbn/es-query';
-
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { APP_UI_ID } from '../../../../../common/constants';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
@@ -24,19 +22,17 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
-  showInitialLoadingSpinner,
-  createGenericSubtitle,
   createEmbeddedDataSubtitle,
+  createGenericSubtitle,
+  showInitialLoadingSpinner,
 } from './helpers';
 import * as i18n from './translations';
 import { LinkButton } from '../../../../common/components/links';
 import { SecurityPageName } from '../../../../app/types';
-import { DEFAULT_STACK_BY_FIELD, PANEL_HEIGHT } from '../common/config';
+import { DEFAULT_STACK_BY_FIELD } from '../common/config';
 import type { AlertsStackByField } from '../common/types';
 import { KpiPanel, StackByComboBox } from '../common/components';
-
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
-import { GROUP_BY_TOP_LABEL } from '../common/translations';
 import { getAlertsHistogramLensAttributes as getLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/alerts/alerts_histogram';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
@@ -44,11 +40,6 @@ import { useAlertHistogramCount } from '../../../hooks/alerts_visualization/use_
 import { useVisualizationResponse } from '../../../../common/components/visualization_actions/use_visualization_response';
 
 export const DETECTIONS_HISTOGRAM_ID = 'detections-histogram';
-
-const ViewAlertsFlexItem = styled(EuiFlexItem)`
-  margin-left: ${({ theme }) => theme.eui.euiSizeL};
-`;
-
 const CHART_HEIGHT = 155; // px
 
 interface AlertsHistogramPanelProps {
@@ -57,24 +48,20 @@ interface AlertsHistogramPanelProps {
   comboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   defaultStackByOption?: string;
   extraActions?: Action[];
-  filters?: Filter[];
+  filters: Filter[];
   headerChildren?: React.ReactNode;
   inspectTitle?: React.ReactNode;
   onFieldSelected?: (field: string) => void;
   /** Override all defaults, and only display this field */
   onlyField?: AlertsStackByField;
-  paddingSize?: 's' | 'm' | 'l' | 'none';
   panelHeight?: number;
   setComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
-  showGroupByPlaceholder?: boolean;
   showLinkToAlerts?: boolean;
   showStackBy?: boolean;
   showTotalAlertsCount?: boolean;
   signalIndexName: string | null;
   stackByLabel?: string;
-  stackByWidth?: number;
-  timelineId?: string;
-  title?: React.ReactNode;
+  title: React.ReactNode;
   titleSize?: EuiTitleSize;
   updateDateRange: UpdateDateRange;
   hideQueryToggle?: boolean;
@@ -94,21 +81,19 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     inspectTitle,
     onFieldSelected,
     onlyField,
-    paddingSize = 'm',
-    panelHeight = PANEL_HEIGHT,
+    panelHeight,
     setComboboxInputRef,
-    showGroupByPlaceholder = false,
     showLinkToAlerts = false,
     showStackBy = true,
     showTotalAlertsCount = false,
     stackByLabel,
-    stackByWidth,
-    title = i18n.HISTOGRAM_HEADER,
-    titleSize = 'm',
+    title,
+    titleSize = 's',
     hideQueryToggle = false,
     isExpanded,
     setIsExpanded,
   }) => {
+    const { euiTheme } = useEuiTheme();
     const { to, from } = useGlobalTime();
 
     // create a unique, but stable (across re-renders) query id
@@ -185,7 +170,12 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     const linkButton = useMemo(() => {
       if (showLinkToAlerts) {
         return (
-          <ViewAlertsFlexItem grow={false}>
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              margin-left: ${euiTheme.size.l};
+            `}
+          >
             <LinkButton
               data-test-subj="alerts-histogram-panel-go-to-alerts-page"
               onClick={goToDetectionEngine}
@@ -193,10 +183,10 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             >
               {i18n.VIEW_ALERTS}
             </LinkButton>
-          </ViewAlertsFlexItem>
+          </EuiFlexItem>
         );
       }
-    }, [showLinkToAlerts, goToDetectionEngine, formatUrl]);
+    }, [showLinkToAlerts, euiTheme.size.l, goToDetectionEngine, formatUrl]);
 
     const titleText = useMemo(
       () => (onlyField == null ? title : i18n.TOP(onlyField)),
@@ -226,10 +216,8 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
     return (
       <KpiPanel
         height={panelHeight}
-        hasBorder
-        paddingSize={paddingSize}
+        toggleStatus={showHistogram}
         data-test-subj="alerts-histogram-panel"
-        $toggleStatus={showHistogram}
       >
         <HeaderSection
           alignHeader={alignHeader}
@@ -247,37 +235,15 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
           <EuiFlexGroup alignItems="flexStart" data-test-subj="panelFlexGroup" gutterSize="none">
             <EuiFlexItem grow={false}>
               {showStackBy && (
-                <>
-                  <StackByComboBox
-                    data-test-subj="stackByComboBox"
-                    inputRef={setComboboxInputRef}
-                    onSelect={onSelect}
-                    prepend={stackByLabel}
-                    ref={comboboxRef}
-                    selected={selectedStackByOption}
-                    useLensCompatibleFields={true}
-                    width={stackByWidth}
-                  />
-                  {showGroupByPlaceholder && (
-                    <>
-                      <EuiSpacer data-test-subj="placeholderSpacer" size="s" />
-                      <EuiToolTip
-                        data-test-subj="placeholderTooltip"
-                        content={i18n.NOT_AVAILABLE_TOOLTIP}
-                      >
-                        <StackByComboBox
-                          data-test-subj="stackByPlaceholder"
-                          isDisabled={true}
-                          onSelect={noop}
-                          prepend={GROUP_BY_TOP_LABEL}
-                          selected=""
-                          useLensCompatibleFields={true}
-                          width={stackByWidth}
-                        />
-                      </EuiToolTip>
-                    </>
-                  )}
-                </>
+                <StackByComboBox
+                  data-test-subj="stackByComboBox"
+                  inputRef={setComboboxInputRef}
+                  onSelect={onSelect}
+                  prepend={stackByLabel}
+                  ref={comboboxRef}
+                  selected={selectedStackByOption}
+                  useLensCompatibleFields={true}
+                />
               )}
               {headerChildren != null && headerChildren}
             </EuiFlexItem>
@@ -292,7 +258,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               filters,
             }}
             getLensAttributes={getLensAttributes}
-            height={chartHeight ?? CHART_HEIGHT}
+            height={chartHeight}
             id={visualizationId}
             inspectTitle={inspectTitle ?? title}
             scopeId={SourcererScopeName.detections}

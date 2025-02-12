@@ -10,8 +10,7 @@ import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
-
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useThemes } from '../../../../../common/components/charts/common';
 import { DraggableLegend } from '../../../../../common/components/charts/draggable_legend';
@@ -39,24 +38,14 @@ export interface Props {
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
   data: AlertSearchResponse<unknown, AlertsTreeMapAggregation>;
   maxBuckets: number;
-  minChartHeight?: number;
   stackByField0: string;
   stackByField1: string | undefined;
 }
-
-const LegendContainer = styled.div`
-  margin-left: ${({ theme }) => theme.eui.euiSizeS};
-`;
-
-const ChartFlexItem = styled(EuiFlexItem)<{ $minChartHeight: number }>`
-  min-height: ${({ $minChartHeight }) => `${$minChartHeight}px`};
-`;
 
 const AlertsTreemapComponent: React.FC<Props> = ({
   addFilter,
   data,
   maxBuckets,
-  minChartHeight = DEFAULT_MIN_CHART_HEIGHT,
   stackByField0,
   stackByField1,
 }: Props) => {
@@ -170,7 +159,12 @@ const AlertsTreemapComponent: React.FC<Props> = ({
   return (
     <div data-test-subj="alerts-treemap">
       <EuiFlexGroup gutterSize="none">
-        <ChartFlexItem grow={true} $minChartHeight={minChartHeight}>
+        <EuiFlexItem
+          grow={true}
+          css={css`
+            min-height: ${DEFAULT_MIN_CHART_HEIGHT};
+          `}
+        >
           {stackByField1 != null && !isEmpty(stackByField1) && normalizedData.length === 0 ? (
             <NoData reason={NO_DATA_REASON_LABEL(stackByField1)} />
           ) : (
@@ -191,21 +185,25 @@ const AlertsTreemapComponent: React.FC<Props> = ({
               />
             </Chart>
           )}
-        </ChartFlexItem>
+        </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <LegendContainer>
-            {legendItems.length > 0 && (
+        {legendItems.length > 0 && (
+          <EuiFlexItem grow={false}>
+            <div
+              css={css`
+                margin-left: ${euiTheme.size.s};
+              `}
+            >
               <DraggableLegend
                 className="eui-yScroll"
-                height={minChartHeight}
+                height={DEFAULT_MIN_CHART_HEIGHT}
                 legendItems={legendItems}
                 minWidth={DEFAULT_LEGEND_WIDTH}
                 isInlineActions
               />
-            )}
-          </LegendContainer>
-        </EuiFlexItem>
+            </div>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </div>
   );

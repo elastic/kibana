@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
-import styled from 'styled-components';
-import * as i18n from './translations';
 import { KpiPanel } from '../common/components';
 import { HeaderSection } from '../../../../common/components/header_section';
 import { SeverityLevelPanel } from '../severity_level_panel';
@@ -18,23 +19,17 @@ import { AlertsProgressBarPanel } from '../alerts_progress_bar_panel';
 import type { GroupBySelection } from '../alerts_progress_bar_panel/types';
 import type { AddFilterProps } from '../common/types';
 
-const StyledFlexGroup = styled(EuiFlexGroup)`
-  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.l}) {
-  }
-`;
-
 const StyledFlexItem = styled(EuiFlexItem)`
   min-width: 355px;
 `;
 
 interface Props {
-  alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
-  filters?: Filter[];
-  addFilter?: ({ field, value, negate }: AddFilterProps) => void;
-  panelHeight?: number;
-  query?: Query;
+  addFilter: ({ field, value, negate }: AddFilterProps) => void;
+  filters: Filter[];
+  panelHeight: number;
+  query: Query;
   signalIndexName: string | null;
-  title?: React.ReactNode;
+  title: React.ReactNode;
   runtimeMappings?: MappingRuntimeFields;
   isExpanded: boolean;
   setIsExpanded: (status: boolean) => void;
@@ -43,19 +38,20 @@ interface Props {
 }
 
 export const AlertsSummaryChartsPanel: React.FC<Props> = ({
-  alignHeader,
-  filters,
   addFilter,
+  filters,
   panelHeight,
   query,
   runtimeMappings,
   signalIndexName,
-  title = i18n.CHARTS_TITLE,
+  title,
   isExpanded,
   setIsExpanded,
   groupBySelection,
   setGroupBySelection,
 }: Props) => {
+  const { euiTheme } = useEuiTheme();
+
   const toggleQuery = useCallback(
     (status: boolean) => {
       setIsExpanded(status);
@@ -64,14 +60,9 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
   );
 
   return (
-    <KpiPanel
-      $toggleStatus={isExpanded}
-      data-test-subj="alerts-charts-panel"
-      hasBorder
-      height={panelHeight}
-    >
+    <KpiPanel height={panelHeight} toggleStatus={isExpanded} data-test-subj="alerts-charts-panel">
       <HeaderSection
-        alignHeader={alignHeader}
+        alignHeader="flexStart"
         outerDirection="row"
         title={title}
         titleSize="s"
@@ -81,11 +72,15 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
         toggleQuery={toggleQuery}
       />
       {isExpanded && (
-        <StyledFlexGroup
+        <EuiFlexGroup
           data-test-subj="alerts-charts-container"
           className="eui-yScroll"
           wrap
           gutterSize="m"
+          css={css`
+            @media only screen and (min-width: ${euiTheme.breakpoint.l}) {
+            }
+          `}
         >
           <StyledFlexItem>
             <SeverityLevelPanel
@@ -118,7 +113,7 @@ export const AlertsSummaryChartsPanel: React.FC<Props> = ({
               addFilter={addFilter}
             />
           </StyledFlexItem>
-        </StyledFlexGroup>
+        </EuiFlexGroup>
       )}
     </KpiPanel>
   );
