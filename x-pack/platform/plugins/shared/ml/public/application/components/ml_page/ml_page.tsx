@@ -85,7 +85,9 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
               oldPath as keyof typeof DEPRECATED_ML_ROUTE_TO_NEW_ROUTE
             ];
           if (oldPath && newPath) {
-            decodedSearch = searchString.replace(`=(${oldPath}:`, `=('':`);
+            if (oldPath !== newPath) {
+              decodedSearch = searchString.replace(`=(${oldPath}:`, `=('':`);
+            }
             mlManagementLocator.navigate({
               sectionId: 'ml',
               appId: `${newPath}${decodedSearch}`,
