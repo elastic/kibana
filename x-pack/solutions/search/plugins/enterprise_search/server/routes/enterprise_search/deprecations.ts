@@ -9,10 +9,10 @@ import { schema } from '@kbn/config-schema';
 
 import { deleteConnectorById, putUpdateNative } from '@kbn/search-connectors';
 
+import { setPreEightEnterpriseSearchIndicesReadOnly } from '../../deprecations/pre_eight_index_deprecator';
 import { RouteDependencies } from '../../plugin';
 
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
-import { setPreEightEnterpriseSearchIndicesReadOnly } from '../../deprecations/pre_eight_index_deprecator';
 
 export function registerDeprecationRoutes({ router, log }: RouteDependencies) {
   router.post(

@@ -15,6 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { Connector, fetchConnectors } from '@kbn/search-connectors';
 
 import { ConfigType } from '..';
+
 import { getPreEightEnterpriseSearchIndices } from './pre_eight_index_deprecator';
 
 const NATIVE_SERVICE_TYPES = [
@@ -60,12 +61,18 @@ export const getRegisteredDeprecations = (
         true // only counts if the Fleet Server is active
       );
       const entSearchDetails = getEnterpriseSearchNodeDeprecation(config, cloud, docsUrl);
-      const [crawlerDetails, nativeConnectorsDetails, entSearchIndexIncompatibility] = await Promise.all([
-        await getCrawlerDeprecations(ctx, docsUrl),
-        await getNativeConnectorDeprecations(ctx, hasAgentless, hasFleetServer, cloud, docsUrl),
-        await getEnterpriseSearchPre7IndexDeprecations(ctx, config, cloud, docsUrl),
-      ]);
-      return [...entSearchDetails, ...crawlerDetails, ...nativeConnectorsDetails, ...entSearchIndexIncompatibility];
+      const [crawlerDetails, nativeConnectorsDetails, entSearchIndexIncompatibility] =
+        await Promise.all([
+          await getCrawlerDeprecations(ctx, docsUrl),
+          await getNativeConnectorDeprecations(ctx, hasAgentless, hasFleetServer, cloud, docsUrl),
+          await getEnterpriseSearchPre7IndexDeprecations(ctx, config, cloud, docsUrl),
+        ]);
+      return [
+        ...entSearchDetails,
+        ...crawlerDetails,
+        ...nativeConnectorsDetails,
+        ...entSearchIndexIncompatibility,
+      ];
     },
   };
 };
@@ -441,7 +448,7 @@ export async function getEnterpriseSearchPre7IndexDeprecations(
     return deprecations;
   }
 
-  let deprecatedIndicesCount = entSearchIndices.length;
+  const deprecatedIndicesCount = entSearchIndices.length;
   let indicesList = '';
   let datastreamsList = '';
   for (const index of entSearchIndices) {
@@ -455,23 +462,26 @@ export async function getEnterpriseSearchPre7IndexDeprecations(
   let message = `There are ${deprecatedIndicesCount} incompatible Enterprise Search indices.\n\n`;
 
   if (indicesList.length > 0) {
-    message += 'The following indices are found to be incompatible for upgrade:\n\n' +
-            '```\n' +
-            `${indicesList}` +
-            '\n```\n\n' +
-            'These indices must be either set to read-only or deleted before upgrading. ';
+    message +=
+      'The following indices are found to be incompatible for upgrade:\n\n' +
+      '```\n' +
+      `${indicesList}` +
+      '\n```\n\n' +
+      'These indices must be either set to read-only or deleted before upgrading. ';
   }
 
   if (datastreamsList.length > 0) {
-    message += '\n\The following data streams are found to be incompatible for upgrade:\n\n' +
-            '```\n' +
-            `${datastreamsList}` +
-            '\n```\n\n' +
-            'Using the "quick resolve" button below will roll over any datastreams and set all incompatible indices to read-only.\n\n' +
-            'Alternatively, manually deleting these indices and data streams will also unblock your upgrade.';
-  } else {          
-    message += 'Setting these indices to read-only can be attempted with the "quick resolve" button below.\n\n' +
-            'Alternatively, manually deleting these indices will also unblock your upgrade.';
+    message +=
+      '\nThe following data streams are found to be incompatible for upgrade:\n\n' +
+      '```\n' +
+      `${datastreamsList}` +
+      '\n```\n\n' +
+      'Using the "quick resolve" button below will roll over any datastreams and set all incompatible indices to read-only.\n\n' +
+      'Alternatively, manually deleting these indices and data streams will also unblock your upgrade.';
+  } else {
+    message +=
+      'Setting these indices to read-only can be attempted with the "quick resolve" button below.\n\n' +
+      'Alternatively, manually deleting these indices will also unblock your upgrade.';
   }
 
   deprecations.push({
@@ -513,9 +523,9 @@ export async function getEnterpriseSearchPre7IndexDeprecations(
         path: '/internal/enterprise_search/deprecations/set_enterprise_search_indices_read_only',
         body: {
           deprecationDetails: { domainId: 'enterpriseSearch' },
-        }
+        },
       },
-    },    
+    },
   });
 
   return deprecations;
