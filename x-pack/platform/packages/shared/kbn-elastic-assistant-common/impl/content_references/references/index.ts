@@ -71,11 +71,11 @@ export const knowledgeBaseReference = (
  * @returns KnowledgeBaseReference
  */
 export const esqlQueryReference = (
-  params: Omit<EsqlContentReference, "type">
+  params: Omit<EsqlContentReference, 'type'>
 ): EsqlContentReference => {
   return {
     type: 'EsqlQuery',
-    ...params
+    ...params,
   };
 };
 
