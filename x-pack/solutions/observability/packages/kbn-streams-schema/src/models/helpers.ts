@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { createIsNarrowSchema } from '../helpers';
+import { z } from '@kbn/zod';
+import { createAsSchemaOrThrow, createIsNarrowSchema } from '../helpers';
 import { streamDefinitionSchema } from './core';
+import { groupStreamDefinitionBaseSchema, groupStreamDefinitionSchema } from './group';
 import {
   ingestStreamDefinitionSchema,
   unwiredStreamDefinitionSchema,
@@ -23,9 +24,29 @@ export const isWiredStreamDefinition = createIsNarrowSchema(
   wiredStreamDefinitionSchema
 );
 
+export const asIngestStreamDefinition = createAsSchemaOrThrow(
+  streamDefinitionSchema,
+  ingestStreamDefinitionSchema
+);
+
+export const asWiredStreamDefinition = createAsSchemaOrThrow(
+  streamDefinitionSchema,
+  wiredStreamDefinitionSchema
+);
+
 export const isUnwiredStreamDefinition = createIsNarrowSchema(
   streamDefinitionSchema,
   unwiredStreamDefinitionSchema
+);
+
+export const isGroupStreamDefinition = createIsNarrowSchema(
+  streamDefinitionSchema,
+  groupStreamDefinitionSchema
+);
+
+export const isGroupStreamDefinitionBase = createIsNarrowSchema(
+  z.unknown(),
+  groupStreamDefinitionBaseSchema
 );
 
 export const isRootStreamDefinition = createIsNarrowSchema(

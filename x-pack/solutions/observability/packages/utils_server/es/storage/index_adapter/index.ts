@@ -27,13 +27,14 @@ import {
   StorageClientIndex,
   StorageClientIndexResponse,
   StorageClientSearch,
-  IStorageClient,
   StorageClientGet,
   StorageClientExistsIndex,
   StorageDocumentOf,
   StorageClientSearchResponse,
   StorageClientClean,
   StorageClientCleanResponse,
+  ApplicationDocument,
+  InternalIStorageClient,
 } from '..';
 import { getSchemaVersion } from '../get_schema_version';
 import { StorageMappingProperty } from '../types';
@@ -94,7 +95,7 @@ function wrapEsCall<T>(p: Promise<T>): Promise<T> {
  * - Index Lifecycle Management
  * - Schema upgrades w/ fallbacks
  */
-export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> {
+export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings, TApplicationType> {
   private readonly logger: Logger;
   constructor(
     private readonly esClient: ElasticsearchClient,
@@ -316,7 +317,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
     return [];
   }
 
-  private search: StorageClientSearch<TStorageSettings> = async (request) => {
+  private search: StorageClientSearch<ApplicationDocument<TApplicationType>> = async (request) => {
     return (await wrapEsCall(
       this.esClient
         .search({
@@ -345,10 +346,10 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
           }
           throw error;
         })
-    )) as unknown as ReturnType<StorageClientSearch<TStorageSettings>>;
+    )) as unknown as ReturnType<StorageClientSearch<ApplicationDocument<TApplicationType>>>;
   };
 
-  private index: StorageClientIndex<TStorageSettings> = async ({
+  private index: StorageClientIndex<ApplicationDocument<TApplicationType>> = async ({
     id,
     refresh = 'wait_for',
     ...request
@@ -387,7 +388,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
     });
   };
 
-  private bulk: StorageClientBulk<TStorageSettings> = ({
+  private bulk: StorageClientBulk<ApplicationDocument<TApplicationType>> = ({
     operations,
     refresh = 'wait_for',
     ...request
@@ -402,7 +403,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
               _id: operation.index._id,
             },
           },
-          operation.index.document,
+          operation.index.document as {},
         ];
       }
 
@@ -518,7 +519,10 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
     return { acknowledged: true, result: 'not_found' };
   };
 
-  private get: StorageClientGet = async ({ id, ...request }) => {
+  private get: StorageClientGet<ApplicationDocument<TApplicationType>> = async ({
+    id,
+    ...request
+  }) => {
     const response = await this.search({
       track_total_hits: false,
       size: 1,
@@ -550,6 +554,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
           request: {} as unknown as DiagnosticResult['meta']['request'],
         },
         warnings: [],
+        body: 'resource_not_found_exception',
         statusCode: 404,
       });
     }
@@ -558,7 +563,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
       _id: hit._id!,
       _index: hit._index,
       found: true,
-      _source: hit._source as StorageDocumentOf<TStorageSettings>,
+      _source: hit._source as ApplicationDocument<TApplicationType>,
       _ignored: hit._ignored,
       _primary_term: hit._primary_term,
       _routing: hit._routing,
@@ -574,7 +579,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
     });
   };
 
-  getClient(): IStorageClient<TStorageSettings> {
+  getClient(): InternalIStorageClient<ApplicationDocument<TApplicationType>> {
     return {
       bulk: this.bulk,
       delete: this.delete,
@@ -586,3 +591,6 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
     };
   }
 }
+
+export type SimpleStorageIndexAdapter<TStorageSettings extends IndexStorageSettings> =
+  StorageIndexAdapter<TStorageSettings, Omit<StorageDocumentOf<TStorageSettings>, '_id'>>;

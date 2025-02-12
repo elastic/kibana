@@ -243,6 +243,21 @@ describe('Legacy Alerts Client', () => {
     expect(mockCreateAlertFactory.hasReachedAlertLimit).toHaveBeenCalled();
   });
 
+  test('getMaxAlertLimit() should return the maxAlertLimit', async () => {
+    const alertsClient = new LegacyAlertsClient({
+      alertingEventLogger,
+      logger,
+      request: fakeRequest,
+      spaceId: 'space1',
+      ruleType,
+      maintenanceWindowsService,
+    });
+
+    await alertsClient.initializeExecution(defaultExecutionOpts);
+
+    expect(alertsClient.getMaxAlertLimit()).toBe(1000);
+  });
+
   test('processAlerts() should call processAlerts, trimRecoveredAlerts and getAlertsForNotifications', async () => {
     maintenanceWindowsService.getMaintenanceWindows.mockReturnValue({
       maintenanceWindows: [

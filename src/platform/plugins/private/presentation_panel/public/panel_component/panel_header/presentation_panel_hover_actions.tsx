@@ -33,25 +33,25 @@ import {
 } from '@elastic/eui';
 import { ActionExecutionContext, buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
+import { css } from '@emotion/react';
 import {
   apiCanLockHoverActions,
   EmbeddableApiContext,
-  getViewModeSubject,
   useBatchedOptionalPublishingSubjects,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import { Subscription } from 'rxjs';
-import { css } from '@emotion/react';
 import { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
+import { Subscription } from 'rxjs';
 import { uiActions } from '../../kibana_services';
 import {
-  contextMenuTrigger,
   CONTEXT_MENU_TRIGGER,
-  panelNotificationTrigger,
+  contextMenuTrigger,
   PANEL_NOTIFICATION_TRIGGER,
+  panelNotificationTrigger,
 } from '../../panel_actions';
-import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { AnyApiAction } from '../../panel_actions/types';
+import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
+import { useHoverActionStyles } from './use_hover_actions_styles';
 
 const getContextMenuAriaLabel = (title?: string, index?: number) => {
   if (title) {
@@ -130,106 +130,26 @@ export const PresentationPanelHoverActions = ({
   const [showNotification, setShowNotification] = useState<boolean>(false);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState<boolean>(false);
   const [notifications, setNotifications] = useState<AnyApiAction[]>([]);
-  const hoverActionsRef = useRef<HTMLDivElement | null>(null);
   const dragHandleRef = useRef<HTMLButtonElement | null>(null);
-  const anchorRef = useRef<HTMLDivElement | null>(null);
-  const rightHoverActionsRef = useRef<HTMLDivElement | null>(null);
-
-  const [combineHoverActions, setCombineHoverActions] = useState<boolean>(false);
 
   const { euiTheme } = useEuiTheme();
 
-  const EDIT_MODE_OUTLINE = `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseFormsControl}`;
-  const VIEW_MODE_OUTLINE = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`;
-
-  const ALL_ROUNDED_CORNERS = `
-  border-radius: ${euiTheme.border.radius.medium};
-`;
-  const TOP_ROUNDED_CORNERS = `
-  border-top-left-radius: ${euiTheme.border.radius.medium};
-  border-top-right-radius: ${euiTheme.border.radius.medium};
-  border-bottom: 0px;
-`;
-
-  const [borderStyles, setBorderStyles] = useState<string>(TOP_ROUNDED_CORNERS);
-
-  const updateCombineHoverActions = () => {
-    if (!hoverActionsRef.current || !anchorRef.current) return;
-    const anchorBox = anchorRef.current.getBoundingClientRect();
-    const anchorLeft = anchorBox.left;
-    const anchorTop = anchorBox.top;
-    const anchorWidth = anchorRef.current.offsetWidth;
-    const hoverActionsWidth =
-      (rightHoverActionsRef.current?.offsetWidth ?? 0) +
-      (dragHandleRef.current?.offsetWidth ?? 0) +
-      parseInt(euiTheme.size.base, 10) * 2;
-    const hoverActionsHeight = rightHoverActionsRef.current?.offsetHeight ?? 0;
-
-    // Left align hover actions when they would get cut off by the right edge of the window
-    if (anchorLeft - (hoverActionsWidth - anchorWidth) <= parseInt(euiTheme.size.base, 10)) {
-      dragHandleRef.current?.style.removeProperty('right');
-      dragHandleRef.current?.style.setProperty('left', '0');
-    } else {
-      hoverActionsRef.current.style.removeProperty('left');
-      hoverActionsRef.current.style.setProperty('right', '0');
-    }
-
-    if (anchorRef.current && rightHoverActionsRef.current) {
-      const shouldCombine = anchorWidth < hoverActionsWidth;
-      const willGetCutOff = anchorTop < hoverActionsHeight;
-
-      if (shouldCombine !== combineHoverActions) {
-        setCombineHoverActions(shouldCombine);
-      }
-
-      if (willGetCutOff) {
-        hoverActionsRef.current.style.setProperty('position', 'absolute');
-        hoverActionsRef.current.style.setProperty('top', `-${euiTheme.size.s}`);
-      } else if (shouldCombine) {
-        hoverActionsRef.current.style.setProperty('top', `-${euiTheme.size.l}`);
-      } else {
-        hoverActionsRef.current.style.removeProperty('position');
-        hoverActionsRef.current.style.removeProperty('top');
-      }
-
-      if (shouldCombine || willGetCutOff) {
-        setBorderStyles(ALL_ROUNDED_CORNERS);
-      } else {
-        setBorderStyles(TOP_ROUNDED_CORNERS);
-      }
-    }
-  };
-
-  const [
-    defaultTitle,
-    title,
-    description,
-    hidePanelTitle,
-    hasLockedHoverActions,
-    parentHideTitle,
-    parentViewMode,
-  ] = useBatchedOptionalPublishingSubjects(
-    api?.defaultTitle$,
-    api?.title$,
-    api?.description$,
-    api?.hideTitle$,
-    api?.hasLockedHoverActions$,
-    api?.parentApi?.hideTitle$,
-    /**
-     * View mode changes often have the biggest influence over which actions will be compatible,
-     * so we build and update all actions when the view mode changes. This is temporary, as these
-     * actions should eventually all be Frequent Compatibility Change Actions which can track their
-     * own dependencies.
-     */
-    getViewModeSubject(api ?? undefined)
-  );
+  const [defaultTitle, title, description, hidePanelTitle, hasLockedHoverActions, parentHideTitle] =
+    useBatchedOptionalPublishingSubjects(
+      api?.defaultTitle$,
+      api?.title$,
+      api?.description$,
+      api?.hideTitle$,
+      api?.hasLockedHoverActions$,
+      api?.parentApi?.hideTitle$
+    );
 
   const hideTitle = hidePanelTitle || parentHideTitle;
   const showDescription = description && (!title || hideTitle);
 
   const quickActionIds = useMemo(
-    () => QUICK_ACTION_IDS[parentViewMode === 'edit' ? 'edit' : 'view'],
-    [parentViewMode]
+    () => QUICK_ACTION_IDS[viewMode === 'edit' ? 'edit' : 'view'],
+    [viewMode]
   );
 
   const onClose = useCallback(() => {
@@ -369,15 +289,7 @@ export const PresentationPanelHoverActions = ({
     return () => {
       canceled = true;
     };
-  }, [
-    actionPredicate,
-    api,
-    getActions,
-    isContextMenuOpen,
-    onClose,
-    parentViewMode,
-    quickActionIds,
-  ]);
+  }, [actionPredicate, api, getActions, isContextMenuOpen, onClose, viewMode, quickActionIds]);
 
   const quickActionElements = useMemo(() => {
     if (!api || quickActions.length < 1) return [];
@@ -472,6 +384,17 @@ export const PresentationPanelHoverActions = ({
     // memoize the drag handle to avoid calling `setDragHandle` unnecessarily
     () => (
       <button
+        className={`embPanel--dragHandle`}
+        css={css`
+          cursor: move;
+          visibility: hidden; // default for every mode **except** edit mode
+          width: 0px;
+
+          .embPanel__hoverActionsAnchor--editMode & {
+            width: auto;
+            visibility: visible; // overwrite visibility in edit mode
+          }
+        `}
         ref={(ref) => {
           dragHandleRef.current = ref;
           setDragHandle('hoverActions', ref);
@@ -480,14 +403,13 @@ export const PresentationPanelHoverActions = ({
         <EuiIcon
           type="move"
           color="text"
-          className={`embPanel--dragHandle`}
-          aria-label={i18n.translate('presentationPanel.dragHandle', {
-            defaultMessage: 'Move panel',
-          })}
-          data-test-subj="embeddablePanelDragHandle"
           css={css`
             margin: ${euiTheme.size.xs};
           `}
+          data-test-subj="embeddablePanelDragHandle"
+          aria-label={i18n.translate('presentationPanel.dragHandle', {
+            defaultMessage: 'Move panel',
+          })}
         />
       </button>
     ),
@@ -495,170 +417,90 @@ export const PresentationPanelHoverActions = ({
   );
 
   const hasHoverActions = quickActionElements.length || contextMenuPanels.lastIndexOf.length;
+  const { containerStyles, hoverActionStyles } = useHoverActionStyles(
+    viewMode === 'edit',
+    showBorder
+  );
 
   return (
     <div
-      onMouseOver={updateCombineHoverActions}
-      onFocus={updateCombineHoverActions}
-      ref={anchorRef}
       className={classNames('embPanel__hoverActionsAnchor', {
         'embPanel__hoverActionsAnchor--lockHoverActions': hasLockedHoverActions,
+        'embPanel__hoverActionsAnchor--editMode': viewMode === 'edit',
       })}
       data-test-embeddable-id={api?.uuid}
       data-test-subj={`embeddablePanelHoverActions-${(title || defaultTitle || '').replace(
         /\s/g,
         ''
       )}`}
-      css={css`
-        border-radius: ${euiTheme.border.radius.medium};
-        position: relative;
-        height: 100%;
-
-        .embPanel {
-          ${showBorder
-            ? `
-              outline: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
-            `
-            : ''}
-        }
-
-        .embPanel__hoverActions {
-          opacity: 0;
-          padding: calc(${euiTheme.size.xs} - 1px);
-          display: flex;
-          flex-wrap: nowrap;
-
-          background-color: ${euiTheme.colors.backgroundBasePlain};
-          height: ${euiTheme.size.xl};
-
-          pointer-events: all; // Re-enable pointer-events for hover actions
-        }
-
-        &:hover,
-        &:focus-within,
-        &.embPanel__hoverActionsAnchor--lockHoverActions {
-          .embPanel {
-            outline: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
-            z-index: ${euiTheme.levels.menu};
-          }
-          .embPanel__hoverActionsWrapper {
-            z-index: ${euiTheme.levels.toast};
-            top: -${euiTheme.size.xl};
-
-            .embPanel__hoverActions {
-              opacity: 1;
-            }
-          }
-        }
-      `}
+      css={containerStyles}
     >
       {children}
-      {api ? (
-        <div
-          ref={hoverActionsRef}
-          className="embPanel__hoverActionsWrapper"
-          css={css`
-            height: ${euiTheme.size.xl};
-            position: absolute;
-            top: 0;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 ${euiTheme.size.base};
-            flex-wrap: nowrap;
-            min-width: 100%;
-            z-index: -1;
-            pointer-events: none; // Prevent hover actions wrapper from blocking interactions with other panels
-          `}
-        >
-          {viewMode === 'edit' && !combineHoverActions ? (
-            <div
-              data-test-subj="embPanel__hoverActions__left"
-              className={classNames(
-                'embPanel__hoverActions',
-                'embPanel__hoverActionsLeft',
-                className
-              )}
-              css={css`
-                border: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
-                ${borderStyles}
-              `}
-            >
-              {dragHandle}
-            </div>
-          ) : (
-            <div /> // necessary for the right hover actions to align correctly when left hover actions are not present
-          )}
-          {hasHoverActions ? (
-            <div
-              ref={rightHoverActionsRef}
-              data-test-subj="embPanel__hoverActions__right"
-              className={classNames(
-                'embPanel__hoverActions',
-                'embPanel__hoverActionsRight',
-                className
-              )}
-              css={css`
-                border: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
-                ${borderStyles}
-              `}
-            >
-              {viewMode === 'edit' && combineHoverActions && dragHandle}
-              {showNotifications && notificationElements}
-              {showDescription && (
-                <EuiIconTip
-                  title={!hideTitle ? title || undefined : undefined}
-                  content={description}
-                  delay="regular"
-                  position="top"
-                  anchorClassName="embPanel__descriptionTooltipAnchor"
-                  data-test-subj="embeddablePanelDescriptionTooltip"
-                  type="iInCircle"
-                />
-              )}
-              {quickActionElements.map(
-                ({ iconType, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
-                  <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
-                    <EuiButtonIcon
-                      iconType={iconType}
-                      color="text"
-                      onClick={onClick as MouseEventHandler}
-                      data-test-subj={dataTestSubj}
-                      aria-label={name as string}
-                    />
-                  </EuiToolTip>
-                )
-              )}
-              {contextMenuPanels.length ? (
-                <EuiPopover
-                  repositionOnScroll
-                  panelPaddingSize="none"
-                  anchorPosition="downRight"
-                  button={ContextMenuButton}
-                  isOpen={isContextMenuOpen}
-                  className={contextMenuClasses}
-                  closePopover={onClose}
-                  data-test-subj={
-                    isContextMenuOpen
-                      ? 'embeddablePanelContextMenuOpen'
-                      : 'embeddablePanelContextMenuClosed'
-                  }
-                  focusTrapProps={{
-                    closeOnMouseup: true,
-                    clickOutsideDisables: false,
-                    onClickOutside: onClose,
-                  }}
-                >
-                  <EuiContextMenu
-                    data-test-subj="presentationPanelContextMenuItems"
-                    initialPanelId={'mainMenu'}
-                    panels={contextMenuPanels}
+      {api && hasHoverActions && (
+        <div className={classNames('embPanel__hoverActions', className)} css={hoverActionStyles}>
+          {dragHandle}
+          {/* Wrapping all "right actions" in a span so that flex space-between works as expected */}
+          <span>
+            {showNotifications && notificationElements}
+            {showDescription && (
+              <EuiIconTip
+                size="m"
+                title={!hideTitle ? title || undefined : undefined}
+                content={description}
+                delay="regular"
+                position="top"
+                data-test-subj="embeddablePanelDescriptionTooltip"
+                type="iInCircle"
+                iconProps={{
+                  css: css`
+                    margin: ${euiTheme.size.xs};
+                  `,
+                }}
+              />
+            )}
+            {quickActionElements.map(
+              ({ iconType, 'data-test-subj': dataTestSubj, onClick, name }, i) => (
+                <EuiToolTip key={`main_action_${dataTestSubj}_${api?.uuid}`} content={name}>
+                  <EuiButtonIcon
+                    iconType={iconType}
+                    color="text"
+                    onClick={onClick as MouseEventHandler}
+                    data-test-subj={dataTestSubj}
+                    aria-label={name as string}
                   />
-                </EuiPopover>
-              ) : null}
-            </div>
-          ) : null}
+                </EuiToolTip>
+              )
+            )}
+            {contextMenuPanels.length ? (
+              <EuiPopover
+                repositionOnScroll
+                panelPaddingSize="none"
+                anchorPosition="downRight"
+                button={ContextMenuButton}
+                isOpen={isContextMenuOpen}
+                className={contextMenuClasses}
+                closePopover={onClose}
+                data-test-subj={
+                  isContextMenuOpen
+                    ? 'embeddablePanelContextMenuOpen'
+                    : 'embeddablePanelContextMenuClosed'
+                }
+                focusTrapProps={{
+                  closeOnMouseup: true,
+                  clickOutsideDisables: false,
+                  onClickOutside: onClose,
+                }}
+              >
+                <EuiContextMenu
+                  data-test-subj="presentationPanelContextMenuItems"
+                  initialPanelId={'mainMenu'}
+                  panels={contextMenuPanels}
+                />
+              </EuiPopover>
+            ) : null}
+          </span>
         </div>
-      ) : null}
+      )}
     </div>
   );
 };
