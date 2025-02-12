@@ -6,6 +6,7 @@
  */
 
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { SplunkSeverity } from './types';
 
 export const SIEM_MIGRATIONS_ASSISTANT_USER = 'assistant';
 
@@ -68,4 +69,12 @@ export const DEFAULT_TRANSLATION_FIELDS = {
   from: 'now-360s',
   to: 'now',
   interval: '5m',
+} as const;
+
+export const SPLUNK_ELASTIC_ALERT_SEVERITY_MAP: Record<keyof SplunkSeverity, Severity> = {
+  '1': 'low',
+  '2': 'low',
+  '3': 'medium',
+  '4': 'high',
+  '5': 'critical',
 } as const;

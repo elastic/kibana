@@ -7,9 +7,9 @@
 
 import {
   DEFAULT_TRANSLATION_RISK_SCORE,
-  DEFAULT_TRANSLATION_SEVERITY,
   RuleTranslationResult,
 } from '../../../../../../../../../../common/siem_migrations/constants';
+import { getElasticSeverityFromOriginalRule } from '../../../../../util/map_splunk_severity_elastic';
 import type { GraphNode } from '../../types';
 
 export const getTranslationResultNode = (): GraphNode => {
@@ -18,8 +18,8 @@ export const getTranslationResultNode = (): GraphNode => {
     const elasticRule = {
       title: state.original_rule.title,
       description: state.original_rule.description || state.original_rule.title,
-      severity: DEFAULT_TRANSLATION_SEVERITY,
       risk_score: DEFAULT_TRANSLATION_RISK_SCORE,
+      severity: getElasticSeverityFromOriginalRule(state.original_rule),
       ...state.elastic_rule,
     };
 

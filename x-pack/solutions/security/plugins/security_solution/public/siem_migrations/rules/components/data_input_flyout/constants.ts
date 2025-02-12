@@ -5,6 +5,17 @@
  * 2.0.
  */
 
+/**
+ * Splunk Alert severity levels mapped to Elastic
+ *
+ * 1 -  info - low
+ * 2 -  low - low
+ * 3 -  medium - medium
+ * 4 -  high - high
+ * 5 -  critical - Critical
+ *
+ * */
+
 export const SPLUNK_RULES_COLUMNS = [
   'id',
   'title',
@@ -12,6 +23,7 @@ export const SPLUNK_RULES_COLUMNS = [
   'description',
   'action.escu.eli5',
   'action.correlationsearch.annotations',
+  'alert.severity',
 ] as const;
 
 export const RULES_SPLUNK_QUERY = `| rest /servicesNS/-/-/saved/searches
