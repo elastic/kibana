@@ -96,7 +96,7 @@ export const getFieldConfiguration = (
       ),
       value: attributes[SPAN_DESTINATION_SERVICE_RESOURCE_FIELD],
       fieldMetadata: {
-        flat_name: 'span.destination.service.resource ',
+        flat_name: 'span.destination.service.resource',
       },
     },
     [TIMESTAMP_FIELD]: {
