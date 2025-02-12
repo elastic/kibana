@@ -82,7 +82,7 @@ const dashboardWithExtractedByValuePanel: ParsedDashboardAttributesWithType = {
       explicitInput: {
         id: 'panel_1',
         extracted_reference: 'ref',
-      } as { id: string; extracted_reference: string },
+      },
     },
   },
 };
@@ -103,7 +103,7 @@ const unextractedDashboardByValueState: ParsedDashboardAttributesWithType = {
       explicitInput: {
         id: 'panel_1',
         value: 'id',
-      } as { id: string; value: string },
+      },
     },
   },
 };
