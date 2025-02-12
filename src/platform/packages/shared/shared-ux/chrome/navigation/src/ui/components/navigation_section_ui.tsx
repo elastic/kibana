@@ -378,7 +378,9 @@ function nodeToEuiCollapsibleNavProps(
     };
   }
 
-  if (renderAs === 'panelOpener') {
+  const hasVisibleSubItems = subItems && subItems.length > 0;
+
+  if (renderAs === 'panelOpener' && hasVisibleSubItems) {
     // Render as a panel opener (button to open a panel as a second navigation)
     return {
       items: [...renderPanelOpener(navNode, deps)],
@@ -386,7 +388,7 @@ function nodeToEuiCollapsibleNavProps(
     };
   }
 
-  if (renderAs === 'block' && deps.treeDepth > 0 && subItems) {
+  if (renderAs === 'block' && deps.treeDepth > 0 && hasVisibleSubItems) {
     // Render as a group block (bold title + list of links underneath)
     return {
       items: [...renderGroup(navNode, subItems)],
@@ -406,10 +408,10 @@ function nodeToEuiCollapsibleNavProps(
       ['data-test-subj']: dataTestSubj,
       iconProps: { size: deps.treeDepth === 0 ? 'm' : 's' },
 
-      // Render as an accordion or a link (handled by EUI) depending if
-      // "items" is undefined or not. If it is undefined --> a link, otherwise an
-      // accordion is rendered.
-      ...(subItems ? { items: subItems, isCollapsible } : { href, linkProps }),
+      // If navNode has subItems, render as an accordion.
+      // Otherwise render as a link.
+      // NavItemProp declarations are handled by us, rendering is handled by EUI.
+      ...(hasVisibleSubItems ? { items: subItems, isCollapsible } : { href, linkProps }),
     },
   ];
 
