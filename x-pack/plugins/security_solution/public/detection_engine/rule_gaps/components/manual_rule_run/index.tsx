@@ -5,6 +5,7 @@
  * 2.0.
  */
 import {
+  EuiBetaBadge,
   EuiConfirmModal,
   EuiDatePicker,
   EuiDatePickerRange,
@@ -19,6 +20,7 @@ import {
 import moment from 'moment';
 import React, { useCallback, useMemo, useState } from 'react';
 import { MAX_MANUAL_RULE_RUN_LOOKBACK_WINDOW_DAYS } from '../../../../../common/constants';
+import { BETA, BETA_TOOLTIP } from '../../../../common/translations';
 
 import * as i18n from './translations';
 
@@ -70,6 +72,9 @@ const ManualRuleRunModalComponent = ({ onCancel, onConfirm }: ManualRuleRunModal
       title={
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem>{i18n.MANUAL_RULE_RUN_MODAL_TITLE}</EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiBetaBadge label={BETA} tooltipContent={BETA_TOOLTIP} />
+          </EuiFlexItem>
         </EuiFlexGroup>
       }
       titleProps={{ id: modalTitleId, style: { width: '100%' } }}
