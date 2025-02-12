@@ -17,11 +17,10 @@ import { i18n } from '@kbn/i18n';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Query, BoolQuery } from '@kbn/es-query';
+import { ObservabilityAlertsTable } from '../../../components/alerts_table/alerts_table';
 import { observabilityAlertFeatureIds } from '../../../../common';
 import { useKibana } from '../../../utils/kibana_react';
-import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/alert_search_bar/alert_search_bar_with_url_sync';
-import { RULE_DETAILS_ALERTS_TABLE_CONFIG_ID } from '../../../constants';
 import {
   RULE_DETAILS_ALERTS_TAB,
   RULE_DETAILS_EXECUTION_TAB,
@@ -30,6 +29,7 @@ import {
   RULE_DETAILS_SEARCH_BAR_URL_STORAGE_KEY,
 } from '../constants';
 import type { TabId } from '../rule_details';
+import { getColumns } from '../../../components/alerts_table/common/get_columns';
 
 interface Props {
   activeTabId: TabId;
@@ -46,6 +46,8 @@ interface Props {
   onSetTabId: (tabId: TabId) => void;
 }
 
+const tableColumns = getColumns();
+
 export function RuleDetailsTabs({
   activeTabId,
   esQuery,
@@ -57,13 +59,8 @@ export function RuleDetailsTabs({
   onEsQueryChange,
 }: Props) {
   const {
-    triggersActionsUi: {
-      alertsTableConfigurationRegistry,
-      getAlertsStateTable: AlertsStateTable,
-      getRuleEventLogList: RuleEventLogList,
-    },
+    triggersActionsUi: { getRuleEventLogList: RuleEventLogList },
   } = useKibana().services;
-  const { observabilityRuleTypeRegistry } = usePluginContext();
 
   const ruleQuery = useRef<Query[]>([
     { query: `kibana.alert.rule.uuid: ${ruleId}`, language: 'kuery' },
@@ -91,15 +88,12 @@ export function RuleDetailsTabs({
           <EuiFlexGroup style={{ minHeight: 450 }} direction={'column'}>
             <EuiFlexItem>
               {esQuery && ruleTypeIds && (
-                <AlertsStateTable
-                  alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-                  configurationId={RULE_DETAILS_ALERTS_TABLE_CONFIG_ID}
+                <ObservabilityAlertsTable
                   id={RULE_DETAILS_PAGE_ID}
                   ruleTypeIds={ruleTypeIds}
                   consumers={observabilityAlertFeatureIds}
                   query={esQuery}
-                  showAlertStatusWithFlapping
-                  cellContext={{ observabilityRuleTypeRegistry }}
+                  columns={tableColumns}
                 />
               )}
             </EuiFlexItem>
