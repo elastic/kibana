@@ -7,12 +7,30 @@
 
 import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
-import { addListener, removeListener } from '@reduxjs/toolkit';
+import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
+import {
+  addListener as originalAddListener,
+  removeListener as originalRemoveListener,
+} from '@reduxjs/toolkit';
+import type { RootState } from '../redux/reducer';
 import { shared, selectDataViewAsync } from '../redux/reducer';
 import { useKibana } from '../../common/lib/kibana';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewPickerScopeName } from '../constants';
 import { createDataViewSelectedListener } from '../redux/listeners/data_view_selected';
 import { createInitListener } from '../redux/listeners/init_listener';
+
+type OriginalListener = Parameters<typeof originalAddListener>[0];
+
+interface Listener<Action extends AnyAction = AnyAction> {
+  actionCreator?: unknown;
+  effect: (action: Action, listenerApi: ListenerEffectAPI<RootState, Dispatch>) => void;
+}
+
+const addListener = <T extends AnyAction>(listener: Listener<T>) =>
+  originalAddListener(listener as unknown as OriginalListener);
+
+const removeListener = <T extends AnyAction>(listener: Listener<T>) =>
+  originalRemoveListener(listener as unknown as OriginalListener);
 
 /**
  * Should only be used once in the application, on the top level of the rendering tree
