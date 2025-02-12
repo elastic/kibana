@@ -8,8 +8,6 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
-
-import { DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY } from '../drag_and_drop/translations';
 import { TestProviders } from '../../mock';
 import { getEmptyString } from '../empty_value';
 import { useMountAppended } from '../../utils/use_mount_appended';
@@ -112,9 +110,7 @@ describe('draggables', () => {
           <DefaultDraggable id="draggable-id" field={field} value={value} />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
-        `${field}${value}${DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY}`
-      );
+      expect(wrapper.text()).toEqual(value);
     });
 
     test('it returns null if value is undefined', () => {
@@ -206,9 +202,7 @@ describe('draggables', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
-        `some-fieldsome value${DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY}`
-      );
+      expect(wrapper.text()).toEqual('some value');
     });
 
     test('it returns null if value is undefined', () => {
@@ -249,9 +243,7 @@ describe('draggables', () => {
           />
         </TestProviders>
       );
-      expect(wrapper.text()).toEqual(
-        `some-field${getEmptyString()}${DRAGGABLE_KEYBOARD_INSTRUCTIONS_NOT_DRAGGING_SCREEN_READER_ONLY}`
-      );
+      expect(wrapper.text()).toEqual(getEmptyString());
     });
 
     test('it renders a tooltip with the field name if a tooltip is not explicitly provided', () => {
