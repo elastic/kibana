@@ -7,7 +7,8 @@
 
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { TaskTypes } from '../../types';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 export const INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES = [25, 50, 100];
 
 export enum SortFieldInferenceEndpoint {
@@ -30,7 +31,7 @@ export interface QueryParams extends SortingParams {
 
 export interface FilterOptions {
   provider: ServiceProviderKeys[];
-  type: TaskTypes[];
+  type: InferenceTaskType[];
 }
 
 export interface AllInferenceEndpointsTableState {
