@@ -111,7 +111,7 @@ export const getCorrectiveAction = (
     const transformIds = (metadata as IndexActionMetadata)?.transform_ids;
     return {
       type: 'reindex',
-      ...(transformIds?.length ? { transformIds } : {})
+      ...(transformIds?.length ? { transformIds } : {}),
     };
   }
 
