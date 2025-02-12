@@ -76,7 +76,7 @@ export class FileManager {
     indexCreated: STATUS.NOT_STARTED,
     pipelineCreated: STATUS.NOT_STARTED,
     modelDeployed: STATUS.NA,
-    dataViewCreated: STATUS.NA,
+    dataViewCreated: STATUS.NOT_STARTED,
     pipelinesDeleted: STATUS.NOT_STARTED,
     fileImport: STATUS.NOT_STARTED,
     filesStatus: [],
@@ -91,6 +91,7 @@ export class FileManager {
     private http: HttpSetup,
     private dataViewsContract: DataViewsServicePublic,
     private autoAddInferenceEndpointName: string | null = null,
+    private autoCreateDataView: boolean = true,
     private removePipelinesAfterImport: boolean = true,
     indexSettingsOverride: IndicesIndexSettings | undefined = undefined
   ) {
@@ -225,10 +226,7 @@ export class FileManager {
     return files.map((file) => file.getPipeline());
   }
 
-  public async import(
-    indexName: string,
-    createDataView: boolean = true
-  ): Promise<FileUploadResults | null> {
+  public async import(indexName: string): Promise<FileUploadResults | null> {
     if (this.mappings === null || this.pipelines === null || this.commonFileFormat === null) {
       this.setStatus({
         overallImportStatus: STATUS.FAILED,
@@ -239,6 +237,7 @@ export class FileManager {
 
     this.setStatus({
       overallImportStatus: STATUS.STARTED,
+      dataViewCreated: this.autoCreateDataView ? STATUS.NOT_STARTED : STATUS.NA,
     });
 
     this.importer = await this.fileUpload.importerFactory(this.commonFileFormat, {});
@@ -372,7 +371,7 @@ export class FileManager {
 
     const dataView = '';
     let dataViewResp;
-    if (createDataView) {
+    if (this.autoCreateDataView) {
       this.setStatus({
         dataViewCreated: STATUS.STARTED,
       });

@@ -69,6 +69,12 @@ export interface AdaptiveAllocationsParams {
   };
 }
 
+export interface StartAllocationParams {
+  modelId: string;
+  deploymentParams: CommonDeploymentParams;
+  adaptiveAllocationsParams?: AdaptiveAllocationsParams;
+}
+
 export interface UpdateAllocationParams extends AdaptiveAllocationsParams {
   number_of_allocations?: number;
 }
@@ -227,16 +233,16 @@ export function trainedModelsApiProvider(httpService: HttpService) {
       });
     },
 
-    startModelAllocation(
-      modelId: string,
-      queryParams?: CommonDeploymentParams,
-      bodyParams?: AdaptiveAllocationsParams
-    ) {
-      return httpService.http<{ acknowledge: boolean }>({
+    startModelAllocation({
+      modelId,
+      deploymentParams,
+      adaptiveAllocationsParams,
+    }: StartAllocationParams) {
+      return httpService.http$<{ acknowledge: boolean }>({
         path: `${ML_INTERNAL_BASE_PATH}/trained_models/${modelId}/deployment/_start`,
         method: 'POST',
-        query: queryParams,
-        ...(bodyParams ? { body: JSON.stringify(bodyParams) } : {}),
+        query: deploymentParams,
+        ...(adaptiveAllocationsParams ? { body: JSON.stringify(adaptiveAllocationsParams) } : {}),
         version: '1',
       });
     },

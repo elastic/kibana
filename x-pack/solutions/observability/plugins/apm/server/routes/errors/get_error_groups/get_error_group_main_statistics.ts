@@ -17,7 +17,6 @@ import {
   ERROR_EXC_TYPE,
   ERROR_GROUP_ID,
   ERROR_GROUP_NAME,
-  ERROR_ID,
   ERROR_LOG_MESSAGE,
   SERVICE_NAME,
   TRACE_ID,
@@ -97,7 +96,7 @@ export async function getErrorGroupMainStatistics({
       ]
     : [];
 
-  const requiredFields = asMutableArray([AT_TIMESTAMP, ERROR_GROUP_ID, ERROR_ID] as const);
+  const requiredFields = asMutableArray([AT_TIMESTAMP, ERROR_GROUP_ID] as const);
 
   const optionalFields = asMutableArray([
     TRACE_ID,
