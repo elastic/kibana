@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFormRow, EuiHorizontalRule, EuiRange, EuiRangeProps } from '@elastic/eui';
+import { EuiFormRow, EuiHorizontalRule, EuiRange, EuiRangeProps, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { RowHeightSettings, RowHeightSettingsProps } from './row_height_settings';
@@ -56,6 +56,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     Math.min(RANGE_MIN_SAMPLE_SIZE, sampleSize),
     MIN_ALLOWED_SAMPLE_SIZE
   ); // flexible: allows to go lower than RANGE_MIN_SAMPLE_SIZE but greater than MIN_ALLOWED_SAMPLE_SIZE
+  const { euiTheme } = useEuiTheme();
 
   const debouncedOnChangeSampleSize = useMemo(
     () =>
@@ -123,7 +124,6 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
             showRange
           />
         </EuiFormRow>
-        <EuiHorizontalRule margin="xs" />
       </>
     );
   }
@@ -159,6 +159,22 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
         onChangeLineCountInput={onChangeRowHeightLines}
         data-test-subj="unifiedDataTableRowHeightSettings"
         lineCountInput={lineCountInput}
+      />
+    );
+  }
+
+  // We want horizontal line after "Sample size" only if there are more controls below
+  if (settings.length > 1 && onChangeSampleSize) {
+    settings.splice(
+      1,
+      0,
+      <EuiHorizontalRule
+        margin="xs"
+        css={{
+          marginInlineStart: `-${euiTheme.size.s}`,
+          marginInlineEnd: `-${euiTheme.size.s}`,
+          inlineSize: 'unset',
+        }}
       />
     );
   }
