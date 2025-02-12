@@ -15,6 +15,7 @@ import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 const persistableStateService = createEmbeddablePersistableStateServiceMock();
 
 const dashboardWithExtractedPanel: ParsedDashboardAttributesWithType = {
+  id: 'id',
   type: 'dashboard',
   panels: {
     panel_1: {
@@ -35,6 +36,7 @@ const extractedSavedObjectPanelRef = {
 };
 
 const unextractedDashboardState: ParsedDashboardAttributesWithType = {
+  id: 'id',
   type: 'dashboard',
   panels: {
     panel_1: {
@@ -72,6 +74,7 @@ describe('inject/extract by reference panel', () => {
 });
 
 const dashboardWithExtractedByValuePanel: ParsedDashboardAttributesWithType = {
+  id: 'id',
   type: 'dashboard',
   panels: {
     panel_1: {
@@ -92,6 +95,7 @@ const extractedByValueRef = {
 };
 
 const unextractedDashboardByValueState: ParsedDashboardAttributesWithType = {
+  id: 'id',
   type: 'dashboard',
   panels: {
     panel_1: {
