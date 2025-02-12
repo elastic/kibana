@@ -86,7 +86,7 @@ export async function reIndexKnowledgeBase({
       'Re-indexing knowledge base completed successfully. Semantic text field is now supported.'
     );
   } catch (error) {
-    throw new Error(`Failed to reindex knowledge base: ${error.message}`);
+    throw new Error(`Failed to re-index knowledge base: ${error.message}`);
   }
 }
 
