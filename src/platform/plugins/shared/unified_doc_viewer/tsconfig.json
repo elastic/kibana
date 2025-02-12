@@ -4,11 +4,12 @@
     "outDir": "target/types"
   },
   "include": [
-    "../../../../../typings/**/*",
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "utils/**/*"
+    "utils/**/*",
+    "utils/**/*",
+    "typings/**/*",
   ],
   "kbn_references": [
     "@kbn/kibana-react-plugin",
