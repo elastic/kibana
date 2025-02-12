@@ -8,11 +8,11 @@
 import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
 
 async function navigate({
-  monitorId,
+  configId,
   locationId,
   spaceId,
 }: {
-  monitorId: string;
+  configId: string;
   locationId?: string;
   spaceId?: string;
 }) {
@@ -24,7 +24,7 @@ async function navigate({
 
   return {
     app: 'synthetics',
-    path: `/monitor/${monitorId}${queryParam}`,
+    path: `/monitor/${configId}${queryParam}`,
     state: {},
   };
 }

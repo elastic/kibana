@@ -39,7 +39,7 @@ export function SyntheticsIndicatorOverview({ slo }: Props) {
     return null;
   }
 
-  const onMonitorClick = () => monitorLocator?.navigate({ monitorId, locationId });
+  const onMonitorClick = () => monitorLocator?.navigate({ configId: monitorId, locationId });
   const onLocationClick = () => regionLocator?.navigate({ locationId: location });
   const showOverviewItem = name || location;
 
