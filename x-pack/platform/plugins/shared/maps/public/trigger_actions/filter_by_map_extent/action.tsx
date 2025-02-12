@@ -8,23 +8,23 @@
 import { i18n } from '@kbn/i18n';
 import {
   type EmbeddableApiContext,
-  apiHasType,
   apiIsOfType,
   areTriggersDisabled,
+  HasParentApi,
+  HasType,
 } from '@kbn/presentation-publishing';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { apiHasVisualizeConfig } from '@kbn/visualizations-plugin/public';
-import { type FilterByMapExtentActionApi } from './types';
+import React, { Suspense, lazy } from 'react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { EuiModalBody, EuiSkeletonText } from '@elastic/eui';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { isLegacyMapApi } from '../../legacy_visualizations/is_legacy_map';
+import { getCore } from '../../kibana_services';
+import { FILTER_BY_MAP_EXTENT } from './constants';
 
-export const FILTER_BY_MAP_EXTENT = 'FILTER_BY_MAP_EXTENT';
-
-export const isApiCompatible = (api: unknown | null): api is FilterByMapExtentActionApi =>
-  Boolean(apiHasType(api));
-
-function getContainerLabel(api: FilterByMapExtentActionApi | unknown) {
-  return isApiCompatible(api) && api.parentApi?.type === 'dashboard'
+function getContainerLabel(api: unknown) {
+  return (api as Partial<HasParentApi<Partial<HasType>>>)?.parentApi?.type === 'dashboard'
     ? i18n.translate('xpack.maps.filterByMapExtentMenuItem.dashboardLabel', {
         defaultMessage: 'dashboard',
       })
@@ -33,7 +33,7 @@ function getContainerLabel(api: FilterByMapExtentActionApi | unknown) {
       });
 }
 
-function getDisplayName(api: FilterByMapExtentActionApi | unknown) {
+function getDisplayName(api: unknown) {
   return i18n.translate('xpack.maps.filterByMapExtentMenuItem.displayName', {
     defaultMessage: 'Filter {containerLabel} by map bounds',
     values: { containerLabel: getContainerLabel(api) },
@@ -44,28 +44,42 @@ export const filterByMapExtentAction = createAction<EmbeddableApiContext>({
   id: FILTER_BY_MAP_EXTENT,
   type: FILTER_BY_MAP_EXTENT,
   order: 20,
-  getDisplayName: ({ embeddable }: EmbeddableApiContext) => {
-    return getDisplayName(embeddable);
-  },
-  getDisplayNameTooltip: ({ embeddable }: EmbeddableApiContext) => {
-    return i18n.translate('xpack.maps.filterByMapExtentMenuItem.displayNameTooltip', {
+  getDisplayName: ({ embeddable }: EmbeddableApiContext) => getDisplayName(embeddable),
+  getDisplayNameTooltip: ({ embeddable }: EmbeddableApiContext) =>
+    i18n.translate('xpack.maps.filterByMapExtentMenuItem.displayNameTooltip', {
       defaultMessage:
         'As you zoom and pan the map, the {containerLabel} updates to display only the data visible in the map bounds.',
       values: { containerLabel: getContainerLabel(embeddable) },
-    });
-  },
-  getIconType: () => {
-    return 'filter';
-  },
+    }),
+  getIconType: () => 'filter',
   isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
-    if (!isApiCompatible(embeddable) || areTriggersDisabled(embeddable)) return false;
     return (
-      apiIsOfType(embeddable, MAP_SAVED_OBJECT_TYPE) ||
-      (apiHasVisualizeConfig(embeddable) && isLegacyMapApi(embeddable))
+      !areTriggersDisabled(embeddable) &&
+      (apiIsOfType(embeddable, MAP_SAVED_OBJECT_TYPE) ||
+        (apiHasVisualizeConfig(embeddable) && isLegacyMapApi(embeddable)))
     );
   },
   execute: async ({ embeddable }: EmbeddableApiContext) => {
-    const { openModal } = await import('./modal');
-    openModal(getDisplayName(embeddable));
+    const core = getCore();
+    const LazyModal = lazy(async () => {
+      const { FilterByMapExtentModal } = await import('./modal');
+      return {
+        default: FilterByMapExtentModal,
+      };
+    });
+    const overlayRef = core.overlays.openModal(
+      toMountPoint(
+        <Suspense
+          fallback={
+            <EuiModalBody>
+              <EuiSkeletonText />
+            </EuiModalBody>
+          }
+        >
+          <LazyModal onClose={() => overlayRef.close()} title={getDisplayName(embeddable)} />
+        </Suspense>,
+        core
+      )
+    );
   },
 });
