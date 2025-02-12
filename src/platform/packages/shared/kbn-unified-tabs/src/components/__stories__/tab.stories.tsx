@@ -11,7 +11,7 @@ import React from 'react';
 import type { ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { Tab, type TabProps } from '../tab';
-import { STORYBOOK_TITLE } from '../../storybook_constants';
+import { STORYBOOK_TITLE } from './storybook_constants';
 
 export default {
   title: `${STORYBOOK_TITLE}/Tab`,

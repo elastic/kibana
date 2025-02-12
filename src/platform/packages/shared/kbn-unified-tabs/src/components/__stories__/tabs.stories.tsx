@@ -11,7 +11,7 @@ import React from 'react';
 import type { ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { TabbedContent, type TabbedContentProps } from '../tabbed_content';
-import { STORYBOOK_TITLE } from '../../storybook_constants';
+import { STORYBOOK_TITLE } from './storybook_constants';
 
 let TMP_COUNTER = 0;
 

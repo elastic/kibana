@@ -10,28 +10,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  UseEuiTheme,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import type { TabItem } from '../../types';
-
-const tabButtonCss = ({ euiTheme }: UseEuiTheme) => css`
-  width: 100%;
-  min-width: 0;
-  flex-grow: 1;
-  padding-right: ${euiTheme.size.xs};
-  text-align: left;
-  color: inherit;
-  border: none;
-  border-radius: 0;
-  background: transparent;
-`;
 
 export interface TabProps {
   item: TabItem;
@@ -43,6 +24,10 @@ export interface TabProps {
 
 export const Tab: React.FC<TabProps> = ({ item, isSelected, tabContentId, onSelect, onClose }) => {
   const { euiTheme } = useEuiTheme();
+
+  const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
+    defaultMessage: 'Close',
+  });
 
   return (
     <EuiFlexGroup
@@ -92,7 +77,17 @@ export const Tab: React.FC<TabProps> = ({ item, isSelected, tabContentId, onSele
       <button
         {...getTabAttributes(item, tabContentId)}
         aria-selected={isSelected}
-        css={tabButtonCss}
+        css={css`
+          width: 100%;
+          min-width: 0;
+          flex-grow: 1;
+          padding-right: ${euiTheme.size.xs};
+          text-align: left;
+          color: inherit;
+          border: none;
+          border-radius: 0;
+          background: transparent;
+        `}
         className="unifiedTabs__tabBtn"
         data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
         role="tab"
@@ -106,12 +101,11 @@ export const Tab: React.FC<TabProps> = ({ item, isSelected, tabContentId, onSele
       </button>
       <EuiFlexItem grow={false} className="unifiedTabs__closeTabBtn">
         <EuiButtonIcon
+          aria-label={closeButtonLabel}
+          title={closeButtonLabel}
           color="text"
           data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
           iconType="cross"
-          title={i18n.translate('unifiedTabs.closeTabButton', {
-            defaultMessage: 'Close',
-          })}
           onClick={() => {
             onClose(item);
           }}

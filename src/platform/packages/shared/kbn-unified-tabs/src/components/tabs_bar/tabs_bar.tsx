@@ -10,17 +10,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, UseEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { Tab } from '../tab';
 import type { TabItem } from '../../types';
-
-const barCss = ({ euiTheme }: UseEuiTheme) => css`
-  background-color: ${euiTheme.colors.lightestShade};
-`;
-
-const newTabCss = ({ euiTheme }: UseEuiTheme) => css`
-  margin-left: ${euiTheme.size.s};
-`;
 
 export interface TabsBarProps {
   items: TabItem[];
@@ -39,6 +31,12 @@ export const TabsBar: React.FC<TabsBarProps> = ({
   onSelect,
   onClose,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
+  const addButtonLabel = i18n.translate('unifiedTabs.createTabButton', {
+    defaultMessage: 'New',
+  });
+
   return (
     <EuiFlexGroup
       role="tablist"
@@ -46,7 +44,9 @@ export const TabsBar: React.FC<TabsBarProps> = ({
       responsive={false}
       alignItems="center"
       gutterSize="none"
-      css={barCss}
+      css={css`
+        background-color: ${euiTheme.colors.lightestShade};
+      `}
     >
       {items.map((item) => (
         <EuiFlexItem key={item.id} grow={false}>
@@ -64,10 +64,11 @@ export const TabsBar: React.FC<TabsBarProps> = ({
           data-test-subj="unifiedTabs_tabsBar_newTabBtn"
           iconType="plus"
           color="text"
-          css={newTabCss}
-          title={i18n.translate('unifiedTabs.createTabButton', {
-            defaultMessage: 'New',
-          })}
+          css={css`
+            margin-left: ${euiTheme.size.s};
+          `}
+          aria-label={addButtonLabel}
+          title={addButtonLabel}
           onClick={onAdd}
         />
       </EuiFlexItem>
