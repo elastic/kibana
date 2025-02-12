@@ -93,6 +93,7 @@ export const GridRowHeader = React.memo(
           className="kbnGridRowHeader"
           id={`kbnGridRowHeader--${rowIndex}`}
           aria-controls={`kbnGridRow--${rowIndex}`}
+          data-test-subj={`kbnGridRowHeader--${rowIndex}`}
         >
           <EuiFlexItem grow={false}>
             <EuiButtonIcon
