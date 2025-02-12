@@ -57,13 +57,17 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
 
   const onClose = useCallback(
     (item: TabItem) => {
-      setState((prevState) => ({
-        items: prevState.items.filter((prevItem) => prevItem.id !== item.id),
-        selectedItem:
-          prevState.selectedItem?.id !== item.id
-            ? prevState.selectedItem
-            : prevState.items[prevState.items.length - 2] || null,
-      }));
+      setState((prevState) => {
+        const nextItems = prevState.items.filter((prevItem) => prevItem.id !== item.id);
+        // TODO: better selection logic
+        const nextSelectedItem = nextItems.length ? nextItems[nextItems.length - 1] : null;
+
+        return {
+          items: nextItems,
+          selectedItem:
+            prevState.selectedItem?.id !== item.id ? prevState.selectedItem : nextSelectedItem,
+        };
+      });
     },
     [setState]
   );

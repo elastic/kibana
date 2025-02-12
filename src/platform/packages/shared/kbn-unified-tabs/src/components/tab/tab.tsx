@@ -7,10 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { MouseEvent, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiThemeComputed,
+  useEuiTheme,
+} from '@elastic/eui';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import type { TabItem } from '../../types';
 
@@ -25,75 +32,58 @@ export interface TabProps {
 export const Tab: React.FC<TabProps> = ({ item, isSelected, tabContentId, onSelect, onClose }) => {
   const { euiTheme } = useEuiTheme();
 
+  const tabContainerDataTestSubj = `unifiedTabs_tab_${item.id}`;
   const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
     defaultMessage: 'Close',
   });
 
+  const onSelectEvent = useCallback(
+    (event: MouseEvent<HTMLElement>) => {
+      event.stopPropagation();
+
+      if (!isSelected) {
+        onSelect(item);
+      }
+    },
+    [onSelect, item, isSelected]
+  );
+
+  const onCloseEvent = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation();
+      onClose(item);
+    },
+    [onClose, item]
+  );
+
+  const onClickEvent = useCallback(
+    (event: MouseEvent<HTMLDivElement>) => {
+      if (event.currentTarget.getAttribute('data-test-subj') === tabContainerDataTestSubj) {
+        // if user presses on the space around the buttons, we should still trigger the onSelectEvent
+        onSelectEvent(event);
+      }
+    },
+    [onSelectEvent, tabContainerDataTestSubj]
+  );
+
   return (
     <EuiFlexGroup
       alignItems="center"
-      // TODO: remove the usage of deprecated colors
-      css={css`
-        display: inline-flex;
-        border-right: ${euiTheme.border.thin};
-        height: ${euiTheme.size.xl};
-        padding-left: ${euiTheme.size.m};
-        padding-right: ${euiTheme.size.xs};
-        min-width: 96px;
-        max-width: 280px;
-
-        background-color: ${isSelected
-          ? euiTheme.colors.emptyShade
-          : euiTheme.colors.lightestShade};
-        color: ${isSelected ? euiTheme.colors.text : euiTheme.colors.subduedText};
-        transition: background-color ${euiTheme.animation.normal};
-
-        .unifiedTabs__closeTabBtn {
-          opacity: ${isSelected ? 1 : 0};
-          transition: opacity ${euiTheme.animation.normal};
-        }
-
-        ${isSelected
-          ? `
-          .unifiedTabs__tabBtn {
-            cursor: default;
-          }`
-          : `
-          cursor: pointer;
-
-          &:hover {
-            background-color: ${euiTheme.colors.mediumShade};
-            color: ${euiTheme.colors.text};
-
-            .unifiedTabs__closeTabBtn {
-              opacity: 1;
-            }
-        }`}
-      `}
-      data-test-subj={`unifiedTabs_tab_${item.id}`}
+      css={getTabContainerCss(euiTheme, isSelected)}
+      data-test-subj={tabContainerDataTestSubj}
       responsive={false}
       gutterSize="none"
+      onClick={onClickEvent}
     >
       <button
         {...getTabAttributes(item, tabContentId)}
         aria-selected={isSelected}
-        css={css`
-          width: 100%;
-          min-width: 0;
-          flex-grow: 1;
-          padding-right: ${euiTheme.size.xs};
-          text-align: left;
-          color: inherit;
-          border: none;
-          border-radius: 0;
-          background: transparent;
-        `}
+        css={getTabButtonCss(euiTheme)}
         className="unifiedTabs__tabBtn"
         data-test-subj={`unifiedTabs_selectTabBtn_${item.id}`}
         role="tab"
         type="button"
-        tabIndex={isSelected ? 0 : -1}
-        onClick={isSelected ? undefined : () => onSelect(item)}
+        onClick={onSelectEvent}
       >
         <EuiText color="inherit" size="s" className="eui-textTruncate">
           {item.label}
@@ -106,11 +96,63 @@ export const Tab: React.FC<TabProps> = ({ item, isSelected, tabContentId, onSele
           color="text"
           data-test-subj={`unifiedTabs_closeTabBtn_${item.id}`}
           iconType="cross"
-          onClick={() => {
-            onClose(item);
-          }}
+          onClick={onCloseEvent}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
+
+function getTabContainerCss(euiTheme: EuiThemeComputed, isSelected: boolean) {
+  // TODO: remove the usage of deprecated colors
+
+  return css`
+    display: inline-flex;
+    border-right: ${euiTheme.border.thin};
+    height: ${euiTheme.size.xl};
+    padding-left: ${euiTheme.size.m};
+    padding-right: ${euiTheme.size.xs};
+    min-width: 96px;
+    max-width: 280px;
+
+    background-color: ${isSelected ? euiTheme.colors.emptyShade : euiTheme.colors.lightestShade};
+    color: ${isSelected ? euiTheme.colors.text : euiTheme.colors.subduedText};
+    transition: background-color ${euiTheme.animation.normal};
+
+    .unifiedTabs__closeTabBtn {
+      opacity: ${isSelected ? 1 : 0};
+      transition: opacity ${euiTheme.animation.normal};
+    }
+
+    ${isSelected
+      ? `
+          .unifiedTabs__tabBtn {
+            cursor: default;
+          }`
+      : `
+          cursor: pointer;
+
+          &:hover {
+            background-color: ${euiTheme.colors.mediumShade};
+            color: ${euiTheme.colors.text};
+
+            .unifiedTabs__closeTabBtn {
+              opacity: 1;
+            }
+        }`}
+  `;
+}
+
+function getTabButtonCss(euiTheme: EuiThemeComputed) {
+  return css`
+    width: 100%;
+    min-width: 0;
+    flex-grow: 1;
+    padding-right: ${euiTheme.size.xs};
+    text-align: left;
+    color: inherit;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+  `;
+}

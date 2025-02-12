@@ -67,7 +67,7 @@ export const TabsBar: React.FC<TabsBarProps> = ({
           iconType="plus"
           color="text"
           css={css`
-            margin-left: ${euiTheme.size.s};
+            margin-inline: ${euiTheme.size.s};
           `}
           aria-label={addButtonLabel}
           title={addButtonLabel}
