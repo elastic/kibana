@@ -91,6 +91,7 @@ interface HostIdRendererTypes {
   host: HostEcs;
   ipFilter?: string;
   noLink?: boolean;
+  scopeId: string | undefined;
 }
 
 export const hostIdRenderer = ({
@@ -98,6 +99,7 @@ export const hostIdRenderer = ({
   host,
   ipFilter,
   noLink,
+  scopeId,
 }: HostIdRendererTypes): React.ReactElement =>
   host.id && host.ip && (ipFilter == null || host.ip.includes(ipFilter)) ? (
     <>
@@ -110,6 +112,7 @@ export const hostIdRenderer = ({
           value={host.id[0]}
           isAggregatable={true}
           fieldType={'keyword'}
+          scopeId={scopeId}
         >
           {noLink ? (
             <>{host.id}</>
