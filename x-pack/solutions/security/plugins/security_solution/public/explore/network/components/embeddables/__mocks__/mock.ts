@@ -283,7 +283,7 @@ export const mockLineLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#6092C0' },
+        options: { color: '#A6EDEA' },
       },
       lineColor: {
         type: 'STATIC',
@@ -348,7 +348,7 @@ export const mockClientServerLineLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#6092C0' },
+        options: { color: '#A6EDEA' },
       },
       lineColor: {
         type: 'STATIC',
