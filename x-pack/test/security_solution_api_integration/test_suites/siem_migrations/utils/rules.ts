@@ -10,32 +10,51 @@ import type { Client } from '@elastic/elasticsearch';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 
-import { RuleMigration } from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
+import {
+  ElasticRule,
+  OriginalRule,
+  RuleMigration,
+} from '@kbn/security-solution-plugin/common/siem_migrations/model/rule_migration.gen';
 import { INDEX_PATTERN as SIEM_MIGRATIONS_INDEX_PATTERN } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/data/rule_migrations_data_service';
 import { SIEM_RULE_MIGRATION_PATH } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import { GetRuleMigrationResponse } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { generateAssistantComment } from '@kbn/security-solution-plugin/server/lib/siem_migrations/rules/task/util/comments';
+import { RuleMigrationFilters } from '@kbn/security-solution-plugin/common/siem_migrations/types';
 
 const SIEM_MIGRATIONS_RULES_INDEX_PATTERN = `${SIEM_MIGRATIONS_INDEX_PATTERN}-rules-default`;
 
 export type RuleMigrationDocument = Omit<RuleMigration, 'id'>;
 
-const migrationRuleDocument: RuleMigrationDocument = {
+export const defaultOriginalRule: OriginalRule = {
+  id: 'https://127.0.0.1:8089/servicesNS/nobody/SA-AccessProtection/saved/searches/Access%20-%20Default%20Account%20Usage%20-%20Rule',
+  vendor: 'splunk',
+  title: 'Access - Default Account Usage - Rule',
+  description:
+    'Discovers use of default accounts (such as admin, administrator, etc.). Default accounts have default passwords and are therefore commonly targeted by attackers using brute force attack tools.',
+  query:
+    '| from datamodel:"Authentication"."Successful_Default_Authentication" | stats max("_time") as "lastTime",values("tag") as "tag",count by "dest","user","app"',
+  query_language: 'spl',
+  annotations: {
+    mitre_attack: ['T1078'],
+  },
+};
+
+export const defaultElasticRule: ElasticRule = {
+  severity: 'low',
+  risk_score: 21,
+  integration_ids: [''],
+  query:
+    'FROM [indexPattern]\n| STATS lastTime = max(_time), tag = values(tag), count BY dest, user, app',
+  description:
+    'Discovers use of default accounts (such as admin, administrator, etc.). Default accounts have default passwords and are therefore commonly targeted by attackers using brute force attack tools.',
+  query_language: 'esql',
+  title: 'Access - Default Account Usage - Rule',
+};
+
+const defaultMigrationRuleDocument: RuleMigrationDocument = {
   '@timestamp': '2025-01-13T15:17:43.571Z',
   migration_id: '25a24356-3aab-401b-a73c-905cb8bf7a6d',
-  original_rule: {
-    id: 'https://127.0.0.1:8089/servicesNS/nobody/SA-AccessProtection/saved/searches/Access%20-%20Default%20Account%20Usage%20-%20Rule',
-    vendor: 'splunk',
-    title: 'Access - Default Account Usage - Rule',
-    description:
-      'Discovers use of default accounts (such as admin, administrator, etc.). Default accounts have default passwords and are therefore commonly targeted by attackers using brute force attack tools.',
-    query:
-      '| from datamodel:"Authentication"."Successful_Default_Authentication" | stats max("_time") as "lastTime",values("tag") as "tag",count by "dest","user","app"',
-    query_language: 'spl',
-    annotations: {
-      mitre_attack: ['T1078'],
-    },
-  },
+  original_rule: defaultOriginalRule,
   status: 'completed',
   created_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
   updated_by: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
@@ -50,32 +69,34 @@ const migrationRuleDocument: RuleMigrationDocument = {
     ),
   ],
   translation_result: 'partial',
-  elastic_rule: {
-    severity: 'low',
-    risk_score: 21,
-    integration_ids: [''],
-    query:
-      'FROM [indexPattern]\n| STATS lastTime = max(_time), tag = values(tag), count BY dest, user, app',
-    description:
-      'Discovers use of default accounts (such as admin, administrator, etc.). Default accounts have default passwords and are therefore commonly targeted by attackers using brute force attack tools.',
-    query_language: 'esql',
-    title: 'Access - Default Account Usage - Rule',
-  },
+  elastic_rule: defaultElasticRule,
 };
 
 export const getMigrationRuleDocument = (
   overrideParams: Partial<RuleMigrationDocument>
 ): RuleMigrationDocument => ({
-  ...migrationRuleDocument,
+  ...defaultMigrationRuleDocument,
   ...overrideParams,
 });
+
+export const getMigrationRuleDocuments = (
+  count: number,
+  overrideCallback: (index: number) => Partial<RuleMigrationDocument>
+): RuleMigrationDocument[] => {
+  const docs: RuleMigrationDocument[] = [];
+  for (let i = 0; i < count; i++) {
+    const overrideParams = overrideCallback(i);
+    docs.push(getMigrationRuleDocument(overrideParams));
+  }
+  return docs;
+};
 
 export const createMigrationRules = async (
   es: Client,
   rules: RuleMigrationDocument[]
-): Promise<void> => {
+): Promise<string[]> => {
   const createdAt = new Date().toISOString();
-  await es.bulk({
+  const res = await es.bulk({
     refresh: 'wait_for',
     operations: rules.flatMap((ruleMigration) => [
       { create: { _index: SIEM_MIGRATIONS_RULES_INDEX_PATTERN } },
@@ -86,6 +107,13 @@ export const createMigrationRules = async (
       },
     ]),
   });
+  const ids = res.items.reduce((acc, item) => {
+    if (item.create?._id) {
+      acc.push(item.create._id);
+    }
+    return acc;
+  }, [] as string[]);
+  return ids;
 };
 
 export const deleteAllMigrationRules = async (es: Client): Promise<void> => {
@@ -109,14 +137,50 @@ const assertStatusCode = (statusCode: number, response: SuperTest.Response) => {
   }
 };
 
+export interface GetRuleMigrationParams {
+  /** `id` of the migration to get rules documents for */
+  migrationId: string;
+  /** Optional page number to retrieve */
+  page?: number;
+  /** Optional number of documents per page to retrieve */
+  perPage?: number;
+  /** Optional field of the rule migration object to sort results by */
+  sortField?: string;
+  /** Optional direction to sort results by */
+  sortDirection?: 'asc' | 'desc';
+  /** Optional parameter to filter documents */
+  filters?: RuleMigrationFilters;
+  /** Optional expected status code parameter */
+  expectStatusCode?: number;
+}
+
 export const migrationRulesRouteHelpersFactory = (supertest: SuperTest.Agent) => {
   return {
-    get: async (
-      migrationId: string,
-      expectStatusCode: number = 200
-    ): Promise<{ body: GetRuleMigrationResponse }> => {
+    get: async ({
+      migrationId,
+      page,
+      perPage,
+      sortField,
+      sortDirection,
+      filters,
+      expectStatusCode = 200,
+    }: GetRuleMigrationParams): Promise<{ body: GetRuleMigrationResponse }> => {
       const response = await supertest
         .get(replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }))
+        .query({
+          page,
+          per_page: perPage,
+          sort_field: sortField,
+          sort_direction: sortDirection,
+          search_term: filters?.searchTerm,
+          ids: filters?.ids,
+          is_prebuilt: filters?.prebuilt,
+          is_installed: filters?.installed,
+          is_fully_translated: filters?.fullyTranslated,
+          is_partially_translated: filters?.partiallyTranslated,
+          is_untranslatable: filters?.untranslatable,
+          is_failed: filters?.failed,
+        })
         .set('kbn-xsrf', 'true')
         .set('elastic-api-version', '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
