@@ -31,7 +31,11 @@ import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
 import { initLangtrace } from './service/client/instrumentation/init_langtrace';
 import { aiAssistantCapabilities } from '../common/capabilities';
-import { registerMigrateKnowledgeBaseEntriesTask } from './service/task_manager_definitions/register_migrate_knowledge_base_entries_task';
+import {
+  registerKbSemanticTextMigrationTask,
+  scheduleKbSemanticTextMigrationTask,
+} from './service/task_manager_definitions/register_kb_semantic_text_migration_task';
+import { updateExistingIndexAssets } from './service/create_or_update_index_assets';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -126,14 +130,33 @@ export class ObservabilityAIAssistantPlugin
       config: this.config,
     }));
 
-    registerMigrateKnowledgeBaseEntriesTask({
+    // Update existing index assets (mappings, templates, etc). This will not create assets if they do not exist.
+    updateExistingIndexAssets({ logger: this.logger, core }).catch((e) =>
+      this.logger.error(`Index assets could not be updated: ${e.message}`)
+    );
+
+    // register task to migrate knowledge base entries to include semantic_text field
+    registerKbSemanticTextMigrationTask({
       core,
       taskManager: plugins.taskManager,
-      logger: this.logger,
+      logger: this.logger.get('kb_semantic_text_migration_task'),
       config: this.config,
-    }).catch((e) => {
-      this.logger.error(`Knowledge base migration was not successfully: ${e.message}`);
     });
+
+    // schedule task to run on startup
+    core
+      .getStartServices()
+      .then(([_, pluginsStart]) =>
+        scheduleKbSemanticTextMigrationTask({
+          taskManager: pluginsStart.taskManager,
+          logger: this.logger,
+        })
+      )
+      .catch((e) => {
+        this.logger.error(
+          `Knowledge base semantic_text migration task could not be scheduled to run: ${e.message}`
+        );
+      });
 
     service.register(registerFunctions);
 

@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import path from 'path';
+import { REPO_ROOT as KIBANA_ROOT } from '@kbn/repo-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { services } from './services';
+
+export const AI_ASSISTANT_SNAPSHOT_REPO_PATH = path.resolve(
+  KIBANA_ROOT,
+  'x-pack/test/api_integration/deployment_agnostic/apis/observability/ai_assistant/knowledge_base/snapshot_kb_8.10'
+);
 
 export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProviderContext) {
   const xPackFunctionalTestsConfig = await readConfigFile(
@@ -38,7 +45,7 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
       serverArgs: [
         ...xPackFunctionalTestsConfig.get('esTestCluster.serverArgs'),
         'node.attr.name=apiIntegrationTestNode',
-        'path.repo=/tmp/repo,/tmp/repo_1,/tmp/repo_2,/tmp/cloud-snapshots/',
+        `path.repo=/tmp/repo,/tmp/repo_1,/tmp/repo_2,/tmp/cloud-snapshots/,${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`,
       ],
     },
   };

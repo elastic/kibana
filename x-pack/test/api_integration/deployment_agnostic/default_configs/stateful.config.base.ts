@@ -152,6 +152,13 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
           '--xpack.uptime.service.devUrl=mockDevUrl',
           '--xpack.uptime.service.manifestUrl=mockDevUrl',
+          `--logging.loggers=${JSON.stringify([
+            {
+              name: 'plugins.observabilityAIAssistant',
+              level: 'all',
+              appenders: ['default'],
+            },
+          ])}`,
         ],
       },
     };
