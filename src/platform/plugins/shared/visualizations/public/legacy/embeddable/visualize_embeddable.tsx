@@ -23,7 +23,6 @@ import { Warnings } from '@kbn/charts-plugin/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
-import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 import {
   ExpressionAstExpression,
   ExpressionLoader,
@@ -95,7 +94,7 @@ export type VisualizeSavedObjectAttributes = SavedObjectAttributes & {
   savedVis?: VisSavedObject;
 };
 export type VisualizeByValueInput = { attributes: VisualizeSavedObjectAttributes } & VisualizeInput;
-export type VisualizeByReferenceInput = SavedObjectEmbeddableInput & VisualizeInput;
+export type VisualizeByReferenceInput = { savedObjectId: string } & VisualizeInput;
 
 /** @deprecated
  * VisualizeEmbeddable is no longer registered with the legacy embeddable system and is only

@@ -18,8 +18,6 @@ import {
 } from '@kbn/saved-objects-plugin/public';
 import {
   EmbeddableInput,
-  SavedObjectEmbeddableInput,
-  isSavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/common';
 import { getNotifications } from '../../services';
 
@@ -60,7 +58,7 @@ export class AttributeService<
   ValType extends EmbeddableInput & {
     [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes;
   } = EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: SavedObjectAttributes },
-  RefType extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
+  RefType extends { savedObjectId: string } = { savedObjectId: string },
   MetaInfo extends unknown = unknown
 > {
   constructor(
@@ -93,7 +91,7 @@ export class AttributeService<
     const originalInput = input ? input : {};
     const savedObjectId =
       input && this.inputIsRefType(input)
-        ? (input as SavedObjectEmbeddableInput).savedObjectId
+        ? input.savedObjectId
         : undefined;
     if (!useRefType) {
       return { [ATTRIBUTE_SERVICE_KEY]: newAttributes } as ValType;
@@ -119,7 +117,7 @@ export class AttributeService<
   }
 
   inputIsRefType = (input: ValType | RefType): input is RefType => {
-    return isSavedObjectEmbeddableInput(input);
+    return Boolean((input as RefType).savedObjectId);
   };
 
   getInputAsValueType = async (input: ValType | RefType): Promise<ValType> => {

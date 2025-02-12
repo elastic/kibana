@@ -75,7 +75,7 @@ export type EmbeddableInput = {
 };
 
 export interface PanelState<
-  E extends EmbeddableInput & { id: string } = { id: string; version?: string }
+  PanelStateType = object
 > {
   // The type of embeddable in this panel. Will be used to find the factory in which to
   // load the embeddable.
@@ -83,7 +83,7 @@ export interface PanelState<
 
   // Stores input for this embeddable that is specific to this embeddable. Other parts of embeddable input
   // will be derived from the container's input. **State in here will override state derived from the container.**
-  explicitInput: Partial<E> & { id: string };
+  explicitInput: Partial<PanelStateType> & { id: string; savedObjectId?: string; title?: string };
 }
 
 export type EmbeddableStateWithType = EmbeddableInput & { type: string };
