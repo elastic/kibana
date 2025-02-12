@@ -10,10 +10,13 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { UnifiedDocViewerTracesOverview } from '@kbn/unified-doc-viewer-plugin/public';
+import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
+import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { DocViewerExtensionParams, DocViewerExtension } from '../../../../types';
 
 export const getDocViewer =
-  (prev, { context }) =>
-  (params) => {
+  (prev: (params: DocViewerExtensionParams) => DocViewerExtension) =>
+  (params: DocViewerExtensionParams) => {
     const recordId = params.record.id;
     const prevValue = prev(params);
     const dataStreamTypes = params.record.flattened['data_stream.type'];
@@ -23,7 +26,7 @@ export const getDocViewer =
     if (!isTrace) {
       return {
         title: `Record #${recordId}`,
-        docViewsRegistry: (registry) => registry,
+        docViewsRegistry: (registry: DocViewsRegistry) => registry,
       };
     }
     const parentId = params.record.flattened['parent.id'];
@@ -31,14 +34,16 @@ export const getDocViewer =
 
     return {
       title: `Record #${recordId}`,
-      docViewsRegistry: (registry) => {
+      docViewsRegistry: (registry: DocViewsRegistry) => {
         registry.add({
           id: 'doc_view_overview',
           title: `${documentName} ${i18n.translate('discover.docViews.tracesOverview.title', {
             defaultMessage: 'Overview',
           })}`,
           order: 0,
-          component: (props) => {
+          component: (
+            props: React.JSX.IntrinsicAttributes & DocViewRenderProps & React.RefAttributes<{}>
+          ) => {
             return <UnifiedDocViewerTracesOverview {...props} />;
           },
         });
