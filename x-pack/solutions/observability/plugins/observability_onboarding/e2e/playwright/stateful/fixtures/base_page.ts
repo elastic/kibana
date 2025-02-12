@@ -14,6 +14,8 @@ import { AutoDetectFlowPage } from '../pom/pages/auto_detect_flow.page';
 import { KubernetesEAFlowPage } from '../pom/pages/kubernetes_ea_flow.page';
 import { OtelKubernetesFlowPage } from '../pom/pages/otel_kubernetes_flow.page';
 import { OtelKubernetesOverviewDashboardPage } from '../pom/pages/otel_kubernetes_overview_dashboard.page';
+import { OtelHostFlowPage } from '../pom/pages/otel_host_flow.page';
+import { HostsOverviewPage } from '../pom/pages/hosts_overview.page';
 
 export const test = base.extend<{
   headerBar: HeaderBar;
@@ -24,6 +26,8 @@ export const test = base.extend<{
   otelKubernetesFlowPage: OtelKubernetesFlowPage;
   kubernetesOverviewDashboardPage: KubernetesOverviewDashboardPage;
   otelKubernetesOverviewDashboardPage: OtelKubernetesOverviewDashboardPage;
+  otelHostFlowPage: OtelHostFlowPage;
+  hostsOverviewPage: HostsOverviewPage;
 }>({
   headerBar: async ({ page }, use) => {
     await use(new HeaderBar(page));
@@ -55,5 +59,13 @@ export const test = base.extend<{
 
   otelKubernetesOverviewDashboardPage: async ({ page }, use) => {
     await use(new OtelKubernetesOverviewDashboardPage(page));
+  },
+
+  otelHostFlowPage: async ({ page }, use) => {
+    await use(new OtelHostFlowPage(page));
+  },
+
+  hostsOverviewPage: async ({ page }, use) => {
+    await use(new HostsOverviewPage(page));
   },
 });
