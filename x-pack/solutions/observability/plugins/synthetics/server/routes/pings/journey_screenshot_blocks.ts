@@ -33,7 +33,7 @@ export const createJourneyScreenshotBlocksRoute: SyntheticsRestApiRouteFactory =
       });
     }
     const resultSet = new Set(result.map((block) => block.id));
-    if (blockIds.filter((id: string) => !resultSet.has(id)).length) {
+    if (blockIds.some((id: string) => !resultSet.has(id))) {
       return response.multiStatus({
         body: blockIds.map((id) =>
           resultSet.has(id)
