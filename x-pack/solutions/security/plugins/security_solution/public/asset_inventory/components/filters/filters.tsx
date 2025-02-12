@@ -17,13 +17,9 @@ import { useDataViewContext } from '../../hooks/data_view_context';
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
+import { ASSET_INVENTORY_INDEX_PATTERN } from '../../constants';
 import { FilterGroupLoading } from './filters_loading';
 import { ASSET_INVENTORY_RULE_TYPE_IDS } from './rule_type_ids';
-
-const SECURITY_ASSET_INVENTORY_DATA_VIEW = {
-  id: 'asset-inventory-logs-default',
-  name: 'asset-inventory-logs',
-};
 
 const DEFAULT_ASSET_INVENTORY_FILTERS: FilterControlConfig[] = [
   {
@@ -87,8 +83,8 @@ export const Filters = ({ onFiltersChange }: FiltersProps) => {
     () =>
       indexPattern
         ? {
-            id: SECURITY_ASSET_INVENTORY_DATA_VIEW.id,
-            name: SECURITY_ASSET_INVENTORY_DATA_VIEW.name,
+            id: ASSET_INVENTORY_INDEX_PATTERN,
+            name: ASSET_INVENTORY_INDEX_PATTERN,
             allowNoIndex: true,
             title: indexPattern.title,
             timeFieldName: '@timestamp',
