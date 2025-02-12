@@ -17,7 +17,7 @@ import {
   InfraSynthtraceKibanaClient,
 } from '@kbn/apm-synthtrace';
 import { Readable } from 'stream';
-import {
+import type {
   ApmFields,
   Fields,
   InfraDocument,
@@ -120,7 +120,7 @@ export const synthtraceFixture = coreWorkerFixtures.extend<SynthtraceFixture>({
     await use({ index, clean });
 
     // cleanup function after all tests have ran
-    await clean();
+    await synthtraceEsClient.clean();
   },
   otelSynthtraceEsClient: async ({ esClient }, use) => {
     const logger = createLogger(LogLevel.info);
@@ -145,6 +145,6 @@ export const synthtraceFixture = coreWorkerFixtures.extend<SynthtraceFixture>({
     await use({ index, clean });
 
     // cleanup function after all tests have ran
-    await clean();
+    await synthtraceEsClient.clean();
   },
 });
