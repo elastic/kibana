@@ -56,8 +56,8 @@ import { createMiddlewares } from './middlewares';
 import { addNewTimeline } from '../../timelines/store/helpers';
 import { initialNotesState } from '../../notes/store/notes.slice';
 import { hasAccessToSecuritySolution } from '../../helpers_access';
-import { dataViewPickerReducer } from '../../data_view_picker/redux';
-import { listenerMiddleware } from '../../data_view_picker/redux/effects/middleware';
+import { dataViewPickerReducer } from '../../data_view_picker/redux/reducer';
+import { listenerMiddleware } from '../../data_view_picker/redux/middleware';
 
 let store: Store<State, Action> | null = null;
 

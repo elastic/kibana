@@ -7,78 +7,12 @@
 
 import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
-import type { AnyAction, Dispatch, ListenerEffectAPI } from '@reduxjs/toolkit';
 import { addListener, removeListener } from '@reduxjs/toolkit';
-import type { DataViewSpec, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import { shared, scopes, type RootState, selectDataViewAsync } from '../redux';
+import { shared, selectDataViewAsync } from '../redux/reducer';
 import { useKibana } from '../../common/lib/kibana';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewPickerScopeName } from '../constants';
-
-const createDataViewsLoadingListener = (dependencies: { dataViews: DataViewsServicePublic }) => {
-  return {
-    actionCreator: shared.actions.init,
-    effect: async (
-      _action: AnyAction,
-      listenerApi: ListenerEffectAPI<RootState, Dispatch<AnyAction>>
-    ) => {
-      try {
-        const dataViews = await dependencies.dataViews.getAllDataViewLazy();
-        const dataViewSpecs = await Promise.all(dataViews.map((dataView) => dataView.toSpec()));
-
-        listenerApi.dispatch(shared.actions.setDataViews(dataViewSpecs));
-      } catch (error: unknown) {
-        listenerApi.dispatch(shared.actions.error());
-      }
-    },
-  } as any;
-};
-
-const createDataViewSelectedListener = (dependencies: { dataViews: DataViewsServicePublic }) => {
-  return {
-    actionCreator: selectDataViewAsync,
-    effect: async (
-      action: ReturnType<typeof selectDataViewAsync>,
-      listenerApi: ListenerEffectAPI<RootState, Dispatch<AnyAction>>
-    ) => {
-      console.log('selectDataViewAsync', action);
-
-      let dataViewSpec: DataViewSpec | null = null;
-
-      let searchError: unknown;
-      let adhocError: unknown;
-
-      try {
-        if (action.payload.id) {
-          const dataViewById = await dependencies.dataViews.get(action.payload.id);
-          dataViewSpec = dataViewById.toSpec();
-        }
-      } catch (error: unknown) {
-        searchError = error;
-      }
-
-      try {
-        if (!dataViewSpec) {
-          const adhocDataView = await dependencies.dataViews.create({
-            id: 'adhoc' + action.payload.patterns?.join(','),
-            title: action.payload.patterns?.join(','),
-          });
-          dataViewSpec = adhocDataView.toSpec();
-          listenerApi.dispatch(shared.actions.addAdhocDataView(dataViewSpec));
-        }
-      } catch (error: unknown) {
-        adhocError = error;
-      }
-
-      if (dataViewSpec) {
-        listenerApi.dispatch(
-          scopes[action.payload.scope].actions.setSelectedDataView(dataViewSpec)
-        );
-      } else {
-        console.error('data view picker error', searchError ?? adhocError);
-      }
-    },
-  } as any;
-};
+import { createDataViewSelectedListener } from '../redux/listeners/data_view_selected';
+import { createInitListener } from '../redux/listeners/init_listener';
 
 /**
  * Should only be used once in the application, on the top level of the rendering tree
@@ -88,7 +22,7 @@ export const useInitDataViewPicker = () => {
   const services = useKibana().services;
 
   useEffect(() => {
-    const dataViewsLoadingListener = createDataViewsLoadingListener({
+    const dataViewsLoadingListener = createInitListener({
       dataViews: services.dataViews,
     });
 

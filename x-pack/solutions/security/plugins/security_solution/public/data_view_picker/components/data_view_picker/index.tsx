@@ -13,8 +13,9 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerScopeName } from '../../constants';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
-import { selectDataViewAsync, sharedStateSelector } from '../../redux';
+import { selectDataViewAsync } from '../../redux/reducer';
 import { useDataView } from '../../hooks/use_data_view';
+import { sharedStateSelector } from '../../redux/selectors';
 
 export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) => {
   const dispatch = useDispatch();

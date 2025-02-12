@@ -15,8 +15,6 @@ import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/tim
 import { createNote } from '../notes/helpers';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
-import { sourcererActions } from '../../../sourcerer/store';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import {
   addNotes as dispatchAddNotes,
   updateNote as dispatchUpdateNote,
@@ -61,16 +59,8 @@ export const useUpdateTimeline = () => {
         _timeline = { ...timeline, updated: undefined, changed: true, version: null };
       }
       if (!isEmpty(_timeline.indexNames)) {
-        dispatch(
-          sourcererActions.setSelectedDataView({
-            id: SourcererScopeName.timeline,
-            selectedDataViewId: _timeline.dataViewId,
-            selectedPatterns: _timeline.indexNames,
-          })
-        );
-
         selectDataView({
-          id: _timeline.dataViewId ?? undefined,
+          id: _timeline.dataViewId,
           patterns: _timeline.indexNames,
           scope: DataViewPickerScopeName.timeline,
         });
@@ -147,6 +137,6 @@ export const useUpdateTimeline = () => {
         );
       }
     },
-    [dispatch]
+    [dispatch, selectDataView]
   );
 };

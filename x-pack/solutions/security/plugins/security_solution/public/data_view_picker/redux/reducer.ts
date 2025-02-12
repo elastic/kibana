@@ -6,33 +6,12 @@
  */
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
-import {
-  combineReducers,
-  createSlice,
-  createSelector,
-  createAction,
-  type PayloadAction,
-} from '@reduxjs/toolkit';
+import type { AnyAction } from '@reduxjs/toolkit';
+import { combineReducers, createAction, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { DataViewPickerScopeName, SLICE_PREFIX } from '../constants';
-
-export interface ScopedDataViewSelectionState {
-  dataView: DataViewSpec | null;
-  /**
-   * There are several states the picker can be in internally:
-   * - pristine - not initialized yet
-   * - loading
-   * - error - some kind of a problem during data init
-   * - ready - ready to provide index information to the client
-   */
-  status: 'pristine' | 'loading' | 'error' | 'ready';
-}
-
-export interface SharedDataViewSelectionState {
-  dataViews: DataViewSpec[];
-  adhocDataViews: DataViewSpec[];
-  status: 'pristine' | 'loading' | 'error' | 'ready';
-}
+import type { SharedDataViewSelectionState } from './types';
+import { type ScopedDataViewSelectionState } from './types';
 
 export const initialScopeState: ScopedDataViewSelectionState = {
   dataView: null,
@@ -46,7 +25,7 @@ export const initialSharedState: SharedDataViewSelectionState = {
 };
 
 export const selectDataViewAsync = createAction<{
-  id?: string;
+  id?: string | null;
   patterns?: string[];
   scope: DataViewPickerScopeName;
 }>(`${SLICE_PREFIX}/selectDataView`);
@@ -57,10 +36,11 @@ const createDataViewSelectionSlice = <T extends string>(scopeName: T) =>
     initialState: initialScopeState,
     reducers: {
       setSelectedDataView: (state, action: PayloadAction<DataViewSpec>) => {
-        console.log('setSelectedDataView', action.payload);
-
         state.dataView = action.payload;
         state.status = 'ready';
+      },
+      dataViewSelectionError: (state, action: AnyAction) => {
+        state.status = 'error';
       },
     },
     extraReducers(builder) {
@@ -123,19 +103,3 @@ export type DataviewPickerState = ReturnType<typeof dataViewPickerReducer>;
 export interface RootState {
   dataViewPicker: DataviewPickerState;
 }
-
-export const sourcererAdapterSelector = (scope: DataViewPickerScopeName) =>
-  createSelector([(state: RootState) => state.dataViewPicker], (dataViewPicker) => {
-    const scopedState = dataViewPicker[scope];
-
-    return {
-      ...scopedState,
-      dataView: scopedState.dataView ? scopedState.dataView : { title: '', id: '' },
-      indicesExist: !!dataViewPicker[scope]?.dataView?.title?.split(',')?.length,
-    };
-  });
-
-export const sharedStateSelector = createSelector(
-  [(state: RootState) => state.dataViewPicker],
-  (dataViewPicker) => dataViewPicker.shared
-);

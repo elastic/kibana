@@ -7,7 +7,7 @@
 
 import { useSelector } from 'react-redux';
 import type { DataViewPickerScopeName } from '../constants';
-import { sourcererAdapterSelector } from '../redux';
+import { sourcererAdapterSelector } from '../redux/selectors';
 
 /**
  * Returns data view selection for given scopeName
