@@ -8655,6 +8655,20 @@
             "path": "x-pack/platform/plugins/shared/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.OperationMetadata.hasArraySupport",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasArraySupport",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -14497,10 +14511,10 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.AxesSettingsConfig",
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.AxesSettingsConfig",
                 "text": "AxesSettingsConfig"
               },
               " | undefined"
@@ -14518,10 +14532,10 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.AxesSettingsConfig",
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.AxesSettingsConfig",
                 "text": "AxesSettingsConfig"
               },
               " | undefined"
@@ -14539,10 +14553,10 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.AxesSettingsConfig",
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.AxesSettingsConfig",
                 "text": "AxesSettingsConfig"
               },
               " | undefined"

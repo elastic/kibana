@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IS_SERVERLESS, CLOUD_SERVERLESS } from '../env_var_names_constants';
+import { CLOUD_SERVERLESS, IS_SERVERLESS } from '../env_var_names_constants';
 import { getDataTestSubjectSelector } from '../helpers/common';
 
 export const ADD_EXCEPTION_BTN = '[data-test-subj="add-exception-menu-item"]';
@@ -27,14 +27,11 @@ export const ALERT_GRID_CELL = '[data-test-subj="dataGridRowCell"]';
 
 export const ALERT_RULE_NAME = '[data-test-subj="formatted-field-kibana.alert.rule.name"]';
 
-export const ALERT_RISK_SCORE = '[data-test-subj="formatted-field-kibana.alert.risk_score"]';
+export const ALERT_RISK_SCORE = '[data-test-subj="render-content-kibana.alert.risk_score"]';
 
-export const ALERT_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.severity"]';
+export const ALERT_SEVERITY = '[data-test-subj="render-content-kibana.alert.severity"]';
 
 export const ALERT_DATA_GRID = '[data-test-subj="euiDataGridBody"]';
-
-export const ALERT_TABLE_ROW = (rowIndex: number) =>
-  `[data-grid-row-index="${rowIndex}"] [data-test-subj="dataGridRowCell"]`;
 
 export const ALERT_DATA_GRID_ROW = `${ALERT_DATA_GRID} .euiDataGridRow`;
 
@@ -46,7 +43,7 @@ export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="closed-alert-status"]
 
 export const CLOSED_ALERTS_FILTER_BTN = '[data-test-subj="closedAlerts"]';
 
-export const EMPTY_ALERT_TABLE = '[data-test-subj="alertsStateTableEmptyState"]';
+export const EMPTY_ALERT_TABLE = '[data-test-subj="alertsTableEmptyState"]';
 
 export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';
 
@@ -115,12 +112,16 @@ export const FILTER_BADGE_DELETE = '[data-test-subj="deleteFilter"]';
 
 export const CELL_FILTER_IN_BUTTON =
   '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-filterIn"]';
+
 export const CELL_FILTER_OUT_BUTTON =
   '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-filterOut"]';
+
 export const CELL_ADD_TO_TIMELINE_BUTTON =
   '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-addToTimeline"]';
+
 export const CELL_SHOW_TOP_FIELD_BUTTON =
   '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-showTopN"]';
+
 export const CELL_COPY_BUTTON =
   '[data-test-subj="dataGridColumnCellAction-security-default-cellActions-copyToClipboard"]';
 
@@ -203,17 +204,13 @@ export const EVENT_SUMMARY_ALERT_RENDERER_CONTENT = '[data-test-subj="alertRende
 
 export const ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION = '[data-test-subj="eventRenderedView"]';
 
-export const ALERT_TABLE_SUMMARY_VIEW_SELECTOR = '[data-test-subj="summary-view-selector"]';
-
 export const ALERT_RENDERER_HOST_NAME =
   '[data-test-subj="alertFieldBadge"] [data-test-subj="render-content-host.name"]';
 
 export const HOVER_ACTIONS_CONTAINER = getDataTestSubjectSelector('hoverActionsPopover');
 
-export const SECURITY_SOLUTION_USERS_AVATAR = (user: string) =>
-  `[data-test-subj="securitySolutionUsersAvatar-${user}"]`;
-
 export const ALERT_USERS_PROFILES_SELECTABLE_MENU_ITEM = '.euiSelectableListItem';
+
 export const ALERT_USERS_PROFILES_CLEAR_SEARCH_BUTTON = '[data-test-subj="clearSearchButton"]';
 
 export const ALERT_ASSIGN_CONTEXT_MENU_ITEM =
@@ -240,6 +237,7 @@ export const ALERT_USER_AVATAR = (assignee: string) => {
 
   return `[data-test-subj^="securitySolutionUsersAvatar-"][title='${expectedAssignee}']`;
 };
+
 export const ALERT_AVATARS_PANEL = '[data-test-subj="securitySolutionUsersAvatarsPanel"]';
 
 export const ALERT_ASIGNEES_COLUMN =
@@ -257,6 +255,7 @@ export const ALERT_DETAILS_TAKE_ACTION_BUTTON =
   '[data-test-subj="securitySolutionFlyoutFooterDropdownButton"]';
 
 export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';
+
 export const TOOLTIP = '[data-test-subj="message-tool-tip"]';
 
 export const HOVER_ACTIONS = {
