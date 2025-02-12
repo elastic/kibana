@@ -36,7 +36,6 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { SimpleSavedObject } from '@kbn/core/public';
 import { useKibana } from '../../utils/kibana_react';
 import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
@@ -79,7 +78,6 @@ export default function Expressions(props: Props) {
     unifiedSearch: {
       ui: { SearchBar },
     },
-    savedObjects,
   } = useKibana().services;
 
   const hasGroupBy = useMemo<boolean>(
