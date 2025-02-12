@@ -201,6 +201,9 @@ const expandedPanelStyles = css`
     // targets the grid row container that contains the expanded panel
     .kbnGridRowHeader {
       height: 0px; // used instead of 'display: none' due to a11y concerns
+      padding: 0px;
+      display: block;
+      overflow: hidden;
     }
     .kbnGridRow {
       display: block !important; // overwrite grid display

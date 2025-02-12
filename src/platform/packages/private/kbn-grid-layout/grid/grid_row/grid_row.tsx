@@ -35,7 +35,6 @@ export const GridRow = ({
   gridLayoutStateManager,
 }: GridRowProps) => {
   const currentRow = gridLayoutStateManager.gridLayout$.value[rowIndex];
-
   const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
   const [panelIds, setPanelIds] = useState<string[]>(Object.keys(currentRow.panels));
   const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
@@ -127,8 +126,8 @@ export const GridRow = ({
 
       return () => {
         interactionStyleSubscription.unsubscribe();
-        gridLayoutSubscription.unsubscribe();
         rowStateSubscription.unsubscribe();
+        gridLayoutSubscription.unsubscribe();
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

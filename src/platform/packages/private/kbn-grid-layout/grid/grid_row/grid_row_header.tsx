@@ -50,8 +50,7 @@ export const GridRowHeader = React.memo(
         });
 
       /**
-       * This subscription is responsible for updating the panel count as the grid layout
-       * gets updated so that the (X panels) label updates as expected
+       * This subscription is responsible for keeping the panel count in sync
        */
       const panelCountSubscription = gridLayoutStateManager.gridLayout$
         .pipe(
@@ -70,7 +69,7 @@ export const GridRowHeader = React.memo(
 
     const confirmDeleteRow = useCallback(() => {
       /**
-       * memoization of this callback does not need to be dependant on the React panel count
+       * Memoization of this callback does not need to be dependant on the React panel count
        * state, so just grab the panel count via gridLayoutStateManager instead
        */
       const count = Object.keys(

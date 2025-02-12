@@ -83,7 +83,7 @@ export const GridRowTitle = React.memo(
         ) : (
           <>
             <EuiFlexItem grow={false}>
-              <EuiLink onClick={toggleIsCollapsed}>
+              <EuiLink onClick={toggleIsCollapsed} color="text">
                 <EuiTitle size="xs" data-test-subj="kbnGridRowTitle">
                   <h2>{rowTitle}</h2>
                 </EuiTitle>
