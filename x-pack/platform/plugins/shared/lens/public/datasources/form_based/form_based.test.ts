@@ -2168,6 +2168,7 @@ describe('IndexPattern Data Source', () => {
           scale: undefined,
           sortingHint: undefined,
           interval: undefined,
+          hasArraySupport: false,
         } as OperationDescriptor);
       });
 
