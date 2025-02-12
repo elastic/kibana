@@ -10,7 +10,14 @@ import type { KibanaUrl, ScoutPage } from '@kbn/scout';
 export class ServiceMapPage {
   constructor(private readonly page: ScoutPage, private readonly kbnUrl: KibanaUrl) {}
 
-  async goto() {
-    this.page.goto(`${this.kbnUrl.app('apm')}/service-map`);
+  async gotoWithDateSelected(start: string, end: string) {
+    this.page.goto(`${this.kbnUrl.app('apm')}/service-map?&rangeFrom=${start}&rangeTo=${end}`);
+  }
+  async getSearchBar() {
+    await this.page.testSubj.waitForSelector('apmUnifiedSearchBar');
+  }
+  async typeInTheSearchBar() {
+    await this.getSearchBar();
+    await this.page.testSubj.typeWithDelay('apmUnifiedSearchBar', `_id : foo{enter}`);
   }
 }
