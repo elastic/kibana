@@ -258,6 +258,11 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should not allow multiple limited packages on the same agent policy', async function () {
+      await apiClient.installPackage({
+        pkgName: 'endpoint',
+        pkgVersion: '8.5.0',
+        force: true,
+      });
       await supertest
         .post(`/api/fleet/package_policies`)
         .set('kbn-xsrf', 'xxxx')
@@ -271,7 +276,7 @@ export default function (providerContext: FtrProviderContext) {
           package: {
             name: 'endpoint',
             title: 'Endpoint',
-            version: '8.4.0',
+            version: '8.5.0',
           },
           force: true,
         })
