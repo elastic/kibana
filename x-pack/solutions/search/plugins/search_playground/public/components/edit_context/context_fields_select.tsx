@@ -28,13 +28,23 @@ export const ContextFieldsSelect = ({
   const { options: selectOptions, selectedOptions } = useMemo(() => {
     if (!indexFields.source_fields?.length) return { options: [], selectedOptions: [] };
 
-    const options = indexFields.source_fields.map((field) => ({
-      label: field,
-      'data-test-subj': `contextField-${field}`,
-    }));
+    const options: Array<EuiComboBoxOptionOption<unknown>> = indexFields.source_fields.map(
+      (field) => ({
+        label: field,
+        'data-test-subj': `contextField-${field}`,
+      })
+    );
+    const selected: Array<EuiComboBoxOptionOption<unknown>> =
+      selectedContextFields
+        ?.map((field) => options.find((opt) => opt.label === field))
+        ?.filter(
+          (
+            val: EuiComboBoxOptionOption<unknown> | undefined
+          ): val is EuiComboBoxOptionOption<unknown> => val !== undefined
+        ) ?? [];
     return {
       options,
-      selectedOptions: options.filter((opt) => selectedContextFields?.includes(opt.label)),
+      selectedOptions: selected,
     };
   }, [indexFields.source_fields, selectedContextFields]);
   const onSelectFields = useCallback(
