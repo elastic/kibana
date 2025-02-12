@@ -11344,10 +11344,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/chroma-js@^2.1.0":
-  version "2.1.3"
-  resolved "https://registry.yarnpkg.com/@types/chroma-js/-/chroma-js-2.1.3.tgz#0b03d737ff28fad10eb884e0c6cedd5ffdc4ba0a"
-  integrity sha512-1xGPhoSGY1CPmXLCBcjVZSQinFjL26vlR8ZqprsBWiFyED4JacJJ9zHhh5aaUXqbY9B37mKQ73nlydVAXmr1+g==
+"@types/chroma-js@^3.1.1":
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/@types/chroma-js/-/chroma-js-3.1.1.tgz#92cac57fb32d642ce156dbc4c052b5e3a3a25db1"
+  integrity sha512-SFCr4edNkZ1bGaLzGz7rgR1bRzVX4MmMxwsIa3/Bh6ose8v+hRpneoizHv0KChdjxaXyjRtaMq7sCuZSzPomQA==
 
 "@types/chromedriver@^81.0.5":
   version "81.0.5"
@@ -11385,10 +11385,10 @@
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"
   integrity sha512-rr+OQyAjxze7GgWrSaJwydHStIhHq2lvY3BOC2Mj7KnzI7XK0Uw1TOOdI9lDoajEbSWLiYgoo4f1R51erQfhPQ==
 
-"@types/color@^3.0.3":
-  version "3.0.3"
-  resolved "https://registry.yarnpkg.com/@types/color/-/color-3.0.3.tgz#e6d8d72b7aaef4bb9fe80847c26c7c786191016d"
-  integrity sha512-X//qzJ3d3Zj82J9sC/C18ZY5f43utPbAJ6PhYt/M7uG6etcF6MRpKdN880KBy43B0BMzSfeT96MzrsNjFI3GbA==
+"@types/color@^4.2.0":
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/@types/color/-/color-4.2.0.tgz#06b259b912a15080d6cd3be35fc265f16c802eae"
+  integrity sha512-6+xrIRImMtGAL2X3qYkd02Mgs+gFGs+WsK0b7VVMaO4mYRISwyTjcqNrO0mNSmYEoq++rSLDB2F5HDNmqfOe+A==
   dependencies:
     "@types/color-convert" "*"
 
@@ -12545,10 +12545,10 @@
   dependencies:
     "@types/node" "*"
 
-"@types/tinycolor2@^1.4.0", "@types/tinycolor2@^1.4.1":
-  version "1.4.2"
-  resolved "https://registry.yarnpkg.com/@types/tinycolor2/-/tinycolor2-1.4.2.tgz#721ca5c5d1a2988b4a886e35c2ffc5735b6afbdf"
-  integrity sha512-PeHg/AtdW6aaIO2a+98Xj7rWY4KC1E6yOy7AFknJQ7VXUGNrMlyxDFxJo7HqLtjQms/ZhhQX52mLVW/EX3JGOw==
+"@types/tinycolor2@^1.4.6":
+  version "1.4.6"
+  resolved "https://registry.yarnpkg.com/@types/tinycolor2/-/tinycolor2-1.4.6.tgz#670cbc0caf4e58dd61d1e3a6f26386e473087f06"
+  integrity sha512-iEN8J0BoMnsWBqjVbWH/c0G0Hh7O21lpR2/+PrvAVgWdzL7eexIFm4JN/Wn10PTcmNdtS6U67r499mlWMXOxNw==
 
 "@types/topojson-client@3.1.5":
   version "3.1.5"
@@ -15266,10 +15266,15 @@ chownr@^3.0.0:
   resolved "https://registry.yarnpkg.com/chownr/-/chownr-3.0.0.tgz#9855e64ecd240a9cc4267ce8a4aa5d24a1da15e4"
   integrity sha512-+IxzY9BZOQd/XuYPRmrvEVjF/nqj5kgT4kEq7VofrDoM1MxoRjEWkrCC3EtLi59TVawxTAn+orJwFQcrqEN1+g==
 
-chroma-js@2.4.2, chroma-js@^2.1.0, chroma-js@^2.4.2:
+chroma-js@2.4.2, chroma-js@^2.4.2:
   version "2.4.2"
   resolved "https://registry.yarnpkg.com/chroma-js/-/chroma-js-2.4.2.tgz#dffc214ed0c11fa8eefca2c36651d8e57cbfb2b0"
   integrity sha512-U9eDw6+wt7V8z5NncY2jJfZa+hUH8XEj8FQHgFJTrUFnJfXYf4Ml4adI2vXZOjqRDpFWtYVWypDfZwnJ+HIR4A==
+
+chroma-js@^3.1.2:
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/chroma-js/-/chroma-js-3.1.2.tgz#cfb807045182228574eae5380587cdb830e985d6"
+  integrity sha512-IJnETTalXbsLx1eKEgx19d5L6SRM7cH4vINw/99p/M11HCuXGRWL+6YmCm7FWFGIo6dtWuQoQi1dc5yQ7ESIHg==
 
 chrome-trace-event@^1.0.2:
   version "1.0.2"
@@ -31271,18 +31276,17 @@ tiny-warning@^1.0.0, tiny-warning@^1.0.2:
   resolved "https://registry.yarnpkg.com/tiny-warning/-/tiny-warning-1.0.3.tgz#94a30db453df4c643d0fd566060d60a875d84754"
   integrity sha512-lBN9zLN/oAf68o3zNXYrdCt1kP8WsiGW8Oo2ka41b2IM5JL/S1CTyX1rW0mb/zSuJun0ZUrDxx4sqvYS2FWzPA==
 
-tinycolor2@1.4.1, tinycolor2@^1.0.0:
-  version "1.4.1"
-  resolved "https://registry.yarnpkg.com/tinycolor2/-/tinycolor2-1.4.1.tgz#f4fad333447bc0b07d4dc8e9209d8f39a8ac77e8"
-  integrity sha1-9PrTM0R7wLB9TcjpIJ2POaisd+g=
+tinycolor2@1.6.0, tinycolor2@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/tinycolor2/-/tinycolor2-1.6.0.tgz#f98007460169b0263b97072c5ae92484ce02d09e"
+  integrity sha512-XPaBkWQJdsf3pLKJV9p4qN/S+fm2Oj8AIPo1BTUhg5oxkvm9+SVEGFdhyOz7tTdUTfvxMiAs4sp6/eZO2Ew+pw==
 
-tinygradient@0.4.3:
-  version "0.4.3"
-  resolved "https://registry.yarnpkg.com/tinygradient/-/tinygradient-0.4.3.tgz#0a8dfde56f8865deec4c435a51bd5b0c0dec59fa"
-  integrity sha512-tBPYQSs6eWukzzAITBSmqcOwZCKACvRa/XjPPh1mj4mnx4G3Drm51HxyCTU/TKnY8kG4hmTe5QlOh9O82aNtJQ==
+tinygradient@2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/tinygradient/-/tinygradient-2.0.0.tgz#fda9241735d64ac40573cb3ec90e414101c67b37"
+  integrity sha512-5bNlsvdjaDvgK8cvjXaAAPNqWZEIod+nL2+WVUMTuOHZapZqeO2QPGKTODSCU1lc9MbvwQO86HcoQRk7vUCddA==
   dependencies:
-    "@types/tinycolor2" "^1.4.0"
-    tinycolor2 "^1.0.0"
+    tinycolor2 "^1.6.0"
 
 tinyqueue@^2.0.3:
   version "2.0.3"
