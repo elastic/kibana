@@ -12,12 +12,13 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { sortBy, uniqBy } from 'lodash';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ErrorResponseBase } from '@elastic/elasticsearch/lib/api/types';
+import pMap from 'p-map';
 
+import { MAX_CONCURRENT_TRANSFORMS_OPERATIONS } from '../../../../constants';
 import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 import type { Installation } from '../../../../../common';
 import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
-
 import { retryTransientEsErrors } from '../retry';
 
 interface FleetTransformMetadata {
@@ -180,20 +181,21 @@ export async function handleTransformReauthorizeAndStart({
     }
   } else {
     // Else, create & start all the transforms at once for speed
-    const transformsPromises = transformsMetadata.map(
-      async ({ transformId, unattended, ...meta }) => {
-        return await reauthorizeAndStartTransform({
+    authorizedTransforms = await pMap(
+      transformsMetadata,
+      async ({ transformId, unattended, ...meta }) =>
+        reauthorizeAndStartTransform({
           esClient,
           logger,
           transformId,
           secondaryAuth,
           meta: { ...meta, last_authorized_by: username },
           shouldStopBeforeStart: unattended,
-        });
+        }),
+      {
+        concurrency: MAX_CONCURRENT_TRANSFORMS_OPERATIONS,
       }
-    );
-
-    authorizedTransforms = await Promise.all(transformsPromises).then((results) => results.flat());
+    ).then((results) => results.flat());
   }
 
   const so = await savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
