@@ -49,8 +49,8 @@ const cardIcons: CardIcons = {
 };
 
 const CardIcon = ({ cardId }: { cardId: OnboardingCardId }) => {
-  const isDark = useDarkMode();
-  const icon = cardIcons[cardId]?.[isDark ? 'dark' : 'light'] || '';
+  const isDarkMode = useDarkMode();
+  const icon = cardIcons[cardId]?.[isDarkMode ? 'dark' : 'light'] || '';
 
   if (!icon) return null;
 
