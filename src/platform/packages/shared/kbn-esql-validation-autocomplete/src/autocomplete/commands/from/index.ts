@@ -37,11 +37,10 @@ export async function suggest({
   getRecommendedQueriesSuggestions,
   getSourcesFromQuery,
 }: CommandSuggestParams<'from'>): Promise<SuggestionRawDefinition[]> {
-  // // TODO - this is a workaround because it was too difficult to handle this case in a generic way :(
-  // if (node && isSourceItem(node) && /\s/.test(node.name)) {
-  //   // FROM " <suggest>"
-  //   return [];
-  // }
+  if (/\".*$/.test(innerText)) {
+    // FROM "<suggest>"
+    return [];
+  }
 
   const suggestions: SuggestionRawDefinition[] = [];
 
@@ -58,6 +57,7 @@ export async function suggest({
     | ESQLCommandOption
     | undefined;
 
+  // FROM index METADATA ... /
   if (metadataNode) {
     return suggestForMetadata(metadataNode, innerText);
   }

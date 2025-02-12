@@ -368,11 +368,10 @@ describe('autocomplete', () => {
 
   // @TODO: get updated eval block from main
   describe('values suggestions', () => {
-    testSuggestions('FROM "i/"', ['index'], undefined, [, [{ name: 'index', hidden: false }]]);
-    testSuggestions('FROM "index/"', ['index'], undefined, [, [{ name: 'index', hidden: false }]]);
-    // TODO — re-enable these tests when we can support this case
-    testSuggestions.skip('FROM "  a/"', []);
-    testSuggestions.skip('FROM "foo b/"', []);
+    testSuggestions('FROM "i/"', []);
+    testSuggestions('FROM "index/"', []);
+    testSuggestions('FROM "  a/"', []);
+    testSuggestions('FROM "foo b/"', []);
     testSuggestions('FROM a | WHERE tags == " /"', [], ' ');
     testSuggestions('FROM a | WHERE tags == """ /"""', [], ' ');
     testSuggestions('FROM a | WHERE tags == "a/"', []);

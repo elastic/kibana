@@ -40,6 +40,12 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from /index', visibleIndices);
       });
 
+      test("doesn't create suggestions after an open quote", async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('FROM " /"', []);
+      });
+
       test('can suggest integration data sources', async () => {
         const dataSources = indexes.concat(integrations);
         const visibleDataSources = dataSources
@@ -80,7 +86,7 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from a, b /', expected);
       });
 
-      test('on SPACE plus prefix', async () => {
+      test('partially-typed METADATA keyword', async () => {
         const { assertSuggestions } = await setup();
 
         assertSuggestions('FROM index1 MET/', ['METADATA $0']);
