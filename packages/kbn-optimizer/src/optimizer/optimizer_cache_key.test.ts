@@ -91,6 +91,8 @@ describe('getOptimizerCacheKey()', () => {
           "reactVersion": "17",
           "repoRoot": <absolute path>,
           "themeTags": Array [
+            "v8light",
+            "v8dark",
             "borealislight",
             "borealisdark",
           ],
