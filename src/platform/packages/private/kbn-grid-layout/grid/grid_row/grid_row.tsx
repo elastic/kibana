@@ -9,7 +9,7 @@
 
 import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useState } from 'react';
-import { combineLatest, distinctUntilChanged, map, pairwise, skip } from 'rxjs';
+import { combineLatest, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
 
@@ -110,22 +110,10 @@ export const GridRow = React.memo(
           }
         );
 
-        const columnCountSubscription = gridLayoutStateManager.runtimeSettings$
-          .pipe(
-            map(({ columnCount }) => columnCount),
-            distinctUntilChanged()
-          )
-          .subscribe((columnCount) => {
-            const rowRef = gridLayoutStateManager.rowRefs.current[rowIndex];
-            if (!rowRef) return;
-            rowRef.style.setProperty('--kbnGridRowColumnCount', `${columnCount}`);
-          });
-
         return () => {
           interactionStyleSubscription.unsubscribe();
           gridLayoutSubscription.unsubscribe();
           rowStateSubscription.unsubscribe();
-          columnCountSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -190,10 +178,10 @@ const styles = {
     gap: 'calc(var(--kbnGridGutterSize) * 1px)',
     gridAutoRows: 'calc(var(--kbnGridRowHeight) * 1px)',
     gridTemplateColumns: `repeat(
-          var(--kbnGridRowColumnCount),
+          var(--kbnGridColumnCount),
           calc(
-            (100% - (var(--kbnGridGutterSize) * (var(--kbnGridRowColumnCount) - 1) * 1px)) /
-              var(--kbnGridRowColumnCount)
+            (100% - (var(--kbnGridGutterSize) * (var(--kbnGridColumnCount) - 1) * 1px)) /
+              var(--kbnGridColumnCount)
           )
         )`,
   }),

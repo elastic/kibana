@@ -146,11 +146,12 @@ export const useGridLayoutState = ({
      */
     const cssVariableSubscription = gridLayoutStateManager.runtimeSettings$
       .pipe(distinctUntilChanged(deepEqual))
-      .subscribe(({ gutterSize, columnPixelWidth, rowHeight }) => {
+      .subscribe(({ gutterSize, columnPixelWidth, rowHeight, columnCount }) => {
         if (!layoutRef.current) return;
         layoutRef.current.style.setProperty('--kbnGridGutterSize', `${gutterSize}`);
         layoutRef.current.style.setProperty('--kbnGridRowHeight', `${rowHeight}`);
         layoutRef.current.style.setProperty('--kbnGridColumnWidth', `${columnPixelWidth}`);
+        layoutRef.current.style.setProperty('--kbnGridColumnCount', `${columnCount}`);
       });
 
     return () => {
