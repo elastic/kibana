@@ -63,4 +63,18 @@ export const logsDefaultPipelineProcessors = [
       `,
     },
   },
+  {
+    dot_expander: {
+      field: 'resource.attributes.*',
+      path: 'resource.attributes',
+      ignore_failure: true,
+    },
+  },
+  {
+    dot_expander: {
+      field: 'attributes.*',
+      path: 'attributes',
+      ignore_failure: true,
+    },
+  },
 ];
