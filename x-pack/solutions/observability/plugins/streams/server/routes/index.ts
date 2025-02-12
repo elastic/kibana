@@ -13,6 +13,7 @@ import { managementRoutes } from './streams/management/route';
 import { schemaRoutes } from './streams/schema/route';
 import { processingRoutes } from './streams/processing/route';
 import { ingestRoutes } from './streams/ingest/route';
+import { lifecycleRoutes } from './streams/lifecycle/route';
 
 export const streamsRouteRepository = {
   ...esqlRoutes,
@@ -23,6 +24,7 @@ export const streamsRouteRepository = {
   ...schemaRoutes,
   ...processingRoutes,
   ...ingestRoutes,
+  ...lifecycleRoutes,
 };
 
 export type StreamsRouteRepository = typeof streamsRouteRepository;
