@@ -1,0 +1,36 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/core-logging-server-mocks'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-core'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/core-logging-server-mocks'
+  description: Moon project for @kbn/core-logging-server-mocks
+  channel: ''
+  owner: '@elastic/kibana-core'
+  metadata:
+    sourceRoot: packages/core/logging/core-logging-server-mocks
+tags:
+  - platform
+  - shared-server
+  - dev
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

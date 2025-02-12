@@ -1,0 +1,37 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/inference-endpoint-ui-common'
+type: unknown
+owners:
+  defaultOwner: '@elastic/response-ops'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/inference-endpoint-ui-common'
+  description: Moon project for @kbn/inference-endpoint-ui-common
+  channel: ''
+  owner: '@elastic/response-ops'
+  metadata:
+    sourceRoot: x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common
+tags:
+  - platform
+  - shared-browser
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

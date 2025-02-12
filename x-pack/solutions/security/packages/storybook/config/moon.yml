@@ -1,0 +1,28 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/security-solution-storybook-config'
+type: unknown
+owners:
+  defaultOwner: '@elastic/security-threat-hunting-explore'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/security-solution-storybook-config'
+  description: Moon project for @kbn/security-solution-storybook-config
+  channel: ''
+  owner: '@elastic/security-threat-hunting-explore'
+  metadata:
+    sourceRoot: x-pack/solutions/security/packages/storybook/config
+tags:
+  - security
+  - shared-common
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

@@ -1,0 +1,28 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/serverless-security-settings'
+type: unknown
+owners:
+  defaultOwner: '@elastic/security-solution'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/serverless-security-settings'
+  description: Moon project for @kbn/serverless-security-settings
+  channel: ''
+  owner: '@elastic/security-solution'
+  metadata:
+    sourceRoot: src/platform/packages/shared/serverless/settings/security_project
+tags:
+  - platform
+  - shared-common
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

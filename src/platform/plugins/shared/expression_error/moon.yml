@@ -1,0 +1,30 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/expression-error-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-presentation'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/expression-error-plugin'
+  description: Moon project for @kbn/expression-error-plugin
+  channel: ''
+  owner: '@elastic/kibana-presentation'
+  metadata:
+    sourceRoot: src/platform/plugins/shared/expression_error
+tags:
+  - platform
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - common/**/*
+    - public/**/*
+    - server/**/*
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

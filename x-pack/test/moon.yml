@@ -1,0 +1,36 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/test-suites-xpack'
+type: unknown
+owners: {}
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/test-suites-xpack'
+  description: Moon project for @kbn/test-suites-xpack
+  channel: ''
+  metadata:
+    sourceRoot: x-pack/test
+tags:
+  - platform
+  - test-helper
+  - dev
+fileGroups:
+  src:
+    - '**/*'
+    - ./api_integration/apis/logstash/pipeline/fixtures/*.json
+    - ./api_integration/apis/logstash/pipelines/fixtures/*.json
+    - ./api_integration/apis/telemetry/fixtures/*.json
+    - ./monitoring_api_integration/fixtures/**/*.json
+    - '!security_solution_cypress/cypress/**/*'
+    - '!target/**/*'
+    - '!*/plugins/**/*'
+    - '!*/packages/**/*'
+    - '!*/*/packages/**/*'
+    - '!security_solution_api_integration/**/*'
+    - '!security_solution_endpoint/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

@@ -1,0 +1,29 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/core-feature-flags-browser'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-core'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/core-feature-flags-browser'
+  description: Moon project for @kbn/core-feature-flags-browser
+  channel: ''
+  owner: '@elastic/kibana-core'
+  metadata:
+    sourceRoot: src/core/packages/feature-flags/browser
+tags:
+  - platform
+  - shared-browser
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

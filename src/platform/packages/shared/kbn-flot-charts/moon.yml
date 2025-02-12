@@ -1,0 +1,28 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/flot-charts'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-presentation'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/flot-charts'
+  description: Moon project for @kbn/flot-charts
+  channel: ''
+  owner: '@elastic/kibana-presentation'
+  metadata:
+    sourceRoot: src/platform/packages/shared/kbn-flot-charts
+tags:
+  - platform
+  - shared-common
+  - prod
+fileGroups:
+  src:
+    - '**/*.js'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

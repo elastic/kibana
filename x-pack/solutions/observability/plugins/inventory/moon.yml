@@ -1,0 +1,41 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/inventory-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/obs-ux-infra_services-team'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/inventory-plugin'
+  description: Moon project for @kbn/inventory-plugin
+  channel: ''
+  owner: '@elastic/obs-ux-infra_services-team'
+  metadata:
+    sourceRoot: x-pack/solutions/observability/plugins/inventory
+tags:
+  - observability
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - common/**/*
+    - public/**/*
+    - public/**/*.json
+    - server/**/*
+    - .storybook/**/*
+    - '!target/**/*'
+    - '!.storybook/**/*.js'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

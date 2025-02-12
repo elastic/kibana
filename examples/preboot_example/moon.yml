@@ -1,0 +1,29 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/preboot-example-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-security'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/preboot-example-plugin'
+  description: Moon project for @kbn/preboot-example-plugin
+  channel: ''
+  owner: '@elastic/kibana-security'
+  metadata:
+    sourceRoot: examples/preboot_example
+tags:
+  - common
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - public/**/*
+    - server/**/*
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

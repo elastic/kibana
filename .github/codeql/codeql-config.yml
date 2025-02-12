@@ -35,7 +35,6 @@ paths-ignore:
   - packages/kbn-apm-synthtrace
   - packages/kbn-axe-config
   - packages/kbn-babel-*
-  - packages/kbn-bazel-*
   - packages/kbn-ci-*
   - packages/kbn-cli-dev-mode
   - packages/kbn-cypress-*

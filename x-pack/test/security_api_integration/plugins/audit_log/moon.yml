@@ -1,0 +1,29 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/audit-log-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-security'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/audit-log-plugin'
+  description: Moon project for @kbn/audit-log-plugin
+  channel: ''
+  owner: '@elastic/kibana-security'
+  metadata:
+    sourceRoot: x-pack/test/security_api_integration/plugins/audit_log
+tags:
+  - common
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

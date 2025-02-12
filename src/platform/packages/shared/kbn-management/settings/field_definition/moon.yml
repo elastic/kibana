@@ -1,0 +1,28 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/management-settings-field-definition'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-management'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/management-settings-field-definition'
+  description: Moon project for @kbn/management-settings-field-definition
+  channel: ''
+  owner: '@elastic/kibana-management'
+  metadata:
+    sourceRoot: src/platform/packages/shared/kbn-management/settings/field_definition
+tags:
+  - platform
+  - shared-browser
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

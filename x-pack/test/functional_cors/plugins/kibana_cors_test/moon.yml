@@ -1,0 +1,29 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/kibana-cors-test-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-security'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/kibana-cors-test-plugin'
+  description: Moon project for @kbn/kibana-cors-test-plugin
+  channel: ''
+  owner: '@elastic/kibana-security'
+  metadata:
+    sourceRoot: x-pack/test/functional_cors/plugins/kibana_cors_test
+tags:
+  - common
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

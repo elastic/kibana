@@ -1,0 +1,29 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/management-settings-section-registry'
+type: unknown
+owners:
+  defaultOwner: '@elastic/appex-sharedux'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/management-settings-section-registry'
+  description: Moon project for @kbn/management-settings-section-registry
+  channel: ''
+  owner: '@elastic/appex-sharedux'
+  metadata:
+    sourceRoot: src/platform/packages/shared/kbn-management/settings/section_registry
+tags:
+  - platform
+  - shared-browser
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '**/*.tsx'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

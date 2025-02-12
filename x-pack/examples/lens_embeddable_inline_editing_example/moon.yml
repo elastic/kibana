@@ -1,0 +1,32 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/lens-inline-editing-example-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-visualizations'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/lens-inline-editing-example-plugin'
+  description: Moon project for @kbn/lens-inline-editing-example-plugin
+  channel: ''
+  owner: '@elastic/kibana-visualizations'
+  metadata:
+    sourceRoot: x-pack/examples/lens_embeddable_inline_editing_example
+tags:
+  - common
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - index.ts
+    - public/**/*.ts
+    - public/**/*.tsx
+    - server/**/*.ts
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'
+  lint: {}

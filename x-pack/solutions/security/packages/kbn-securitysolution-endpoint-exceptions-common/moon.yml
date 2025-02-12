@@ -1,0 +1,29 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/securitysolution-endpoint-exceptions-common'
+type: unknown
+owners:
+  defaultOwner: '@elastic/security-detection-engine'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/securitysolution-endpoint-exceptions-common'
+  description: Moon project for @kbn/securitysolution-endpoint-exceptions-common
+  channel: ''
+  owner: '@elastic/security-detection-engine'
+  metadata:
+    sourceRoot: >-
+      x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common
+tags:
+  - security
+  - shared-common
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

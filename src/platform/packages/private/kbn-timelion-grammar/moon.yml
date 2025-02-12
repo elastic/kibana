@@ -1,0 +1,28 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/timelion-grammar'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-visualizations'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/timelion-grammar'
+  description: Moon project for @kbn/timelion-grammar
+  channel: ''
+  owner: '@elastic/kibana-visualizations'
+  metadata:
+    sourceRoot: src/platform/packages/private/kbn-timelion-grammar
+tags:
+  - platform
+  - shared-common
+  - prod
+fileGroups:
+  src:
+    - '*.js'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

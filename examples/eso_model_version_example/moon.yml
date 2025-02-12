@@ -1,0 +1,32 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/eso-model-version-example'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-security'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/eso-model-version-example'
+  description: Moon project for @kbn/eso-model-version-example
+  channel: ''
+  owner: '@elastic/kibana-security'
+  metadata:
+    sourceRoot: examples/eso_model_version_example
+tags:
+  - common
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - index.ts
+    - common/**/*.ts
+    - public/**/*.ts
+    - public/**/*.tsx
+    - server/**/*.ts
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

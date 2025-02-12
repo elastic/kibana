@@ -1,0 +1,41 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/presentation-util-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-presentation'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/presentation-util-plugin'
+  description: Moon project for @kbn/presentation-util-plugin
+  channel: ''
+  owner: '@elastic/kibana-presentation'
+  metadata:
+    sourceRoot: src/platform/plugins/shared/presentation_util
+tags:
+  - platform
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - common/**/*
+    - public/**/*
+    - public/**/*.json
+    - server/**/*
+    - test_helpers/**/*
+    - storybook/**/*
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

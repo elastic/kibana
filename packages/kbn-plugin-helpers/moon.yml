@@ -1,0 +1,28 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/plugin-helpers'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-operations'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/plugin-helpers'
+  description: Moon project for @kbn/plugin-helpers
+  channel: ''
+  owner: '@elastic/kibana-operations'
+  metadata:
+    sourceRoot: packages/kbn-plugin-helpers
+tags:
+  - common
+  - shared-server
+  - dev
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

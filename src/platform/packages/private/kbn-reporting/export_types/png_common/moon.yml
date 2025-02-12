@@ -1,0 +1,28 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/reporting-export-types-png-common'
+type: unknown
+owners:
+  defaultOwner: '@elastic/appex-sharedux'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/reporting-export-types-png-common'
+  description: Moon project for @kbn/reporting-export-types-png-common
+  channel: ''
+  owner: '@elastic/appex-sharedux'
+  metadata:
+    sourceRoot: src/platform/packages/private/kbn-reporting/export_types/png_common
+tags:
+  - platform
+  - shared-common
+  - prod
+fileGroups:
+  src:
+    - '**/*.ts'
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "A safer version of the lodash set and setWith functions",
   "scripts": {
-    "lint": "../../../../../node_modules/.bin/dependency-check --missing ../../../../../package.json ./src/platform/packages/shared/kbn-safer-lodash-set/set.js ./src/platform/packages/shared/kbn-safer-lodash-set/setWith.js ./src/platform/packages/shared/kbn-safer-lodash-set/fp/*.js",
-    "test": "npm run lint && ../../../../../node_modules/.bin/tape test/*.js && npm run test:types",
+    "dep-check": "../../../../../node_modules/.bin/dependency-check --missing ../../../../../package.json ./src/platform/packages/shared/kbn-safer-lodash-set/set.js ./src/platform/packages/shared/kbn-safer-lodash-set/setWith.js ./src/platform/packages/shared/kbn-safer-lodash-set/fp/*.js",
+    "test": "npm run dep-check && ../../../../../node_modules/.bin/tape test/*.js && npm run test:types",
     "test:types": "../../../../../node_modules/.bin/tsc --noEmit",
     "update": "./scripts/update.sh",
     "save_state": "./scripts/save_state.sh"

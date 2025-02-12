@@ -1,0 +1,32 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/serverless-observability'
+type: unknown
+owners:
+  defaultOwner: '@elastic/obs-ux-management-team'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/serverless-observability'
+  description: Moon project for @kbn/serverless-observability
+  channel: ''
+  owner: '@elastic/obs-ux-management-team'
+  metadata:
+    sourceRoot: x-pack/solutions/observability/plugins/serverless_observability
+tags:
+  - observability
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - index.ts
+    - common/**/*.ts
+    - public/**/*.ts
+    - public/**/*.tsx
+    - server/**/*.ts
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

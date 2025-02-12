@@ -1,0 +1,38 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/vis-type-metric-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-visualizations'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/vis-type-metric-plugin'
+  description: Moon project for @kbn/vis-type-metric-plugin
+  channel: ''
+  owner: '@elastic/kibana-visualizations'
+  metadata:
+    sourceRoot: src/platform/plugins/private/vis_types/metric
+tags:
+  - platform
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - public/**/*
+    - server/**/*
+    - '*.ts'
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'

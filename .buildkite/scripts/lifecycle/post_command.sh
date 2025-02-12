@@ -56,6 +56,10 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
 
 fi
 
+if [[ -f 'moon.log' ]]; then
+  buildkite-agent artifact upload 'moon.log'
+fi
+
 if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
   # If the slack team environment variable is set, ping the team in slack
   if [ -n "${PING_SLACK_TEAM:-}" ]; then

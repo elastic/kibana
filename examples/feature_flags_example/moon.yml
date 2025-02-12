@@ -1,0 +1,32 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/feature-flags-example-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/kibana-core'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/feature-flags-example-plugin'
+  description: Moon project for @kbn/feature-flags-example-plugin
+  channel: ''
+  owner: '@elastic/kibana-core'
+  metadata:
+    sourceRoot: examples/feature_flags_example
+tags:
+  - common
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - index.ts
+    - common/**/*.ts
+    - public/**/*.ts
+    - public/**/*.tsx
+    - server/**/*.ts
+    - '!target/**/*'
+tasks:
+  jest:
+    script: echo 'stubbed:noop'
+  jestCI:
+    script: echo 'stubbed:noop'

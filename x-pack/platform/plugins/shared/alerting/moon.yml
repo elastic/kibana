@@ -1,0 +1,39 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/alerting-plugin'
+type: unknown
+owners:
+  defaultOwner: '@elastic/response-ops'
+toolchain:
+  default: node
+language: typescript
+project:
+  name: '@kbn/alerting-plugin'
+  description: Moon project for @kbn/alerting-plugin
+  channel: ''
+  owner: '@elastic/response-ops'
+  metadata:
+    sourceRoot: x-pack/platform/plugins/shared/alerting
+tags:
+  - platform
+  - plugin
+  - prod
+fileGroups:
+  src:
+    - server/**/*
+    - server/**/*.json
+    - public/**/*
+    - common/**/*
+    - '!target/**/*'
+tasks:
+  jest:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
+  jestCI:
+    args:
+      - '--config'
+      - $projectRoot/jest.config.js
+    inputs:
+      - '@group(src)'
