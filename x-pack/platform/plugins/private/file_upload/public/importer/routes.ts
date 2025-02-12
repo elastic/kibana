@@ -61,7 +61,7 @@ export function callImportRoute({ index, data, ingestPipelineId }: CallImportRou
   return getHttp().fetch<ImportResponse>({
     path: `/internal/file_upload/import`,
     method: 'POST',
-    version: '1',
+    version: '2',
     body,
   });
 }
