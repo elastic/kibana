@@ -326,6 +326,22 @@ export function LensEditConfigurationFlyout({
 
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
+      const dsStates = Object.fromEntries(
+        Object.entries(datasourceStates).map(([id, ds]) => {
+          const dsState = ds.state;
+          return [id, dsState];
+        })
+      );
+      const currentAttributes: TypedLensSerializedState['attributes'] = {
+        ...attributes,
+        state: {
+          ...attributes.state,
+          visualization: visualization.state,
+          datasourceStates: dsStates,
+        },
+        visualizationType: visualization.activeId ?? attributes.visualizationType,
+      };
+
       const attrs = await getSuggestions(
         q,
         startDependencies,
@@ -337,7 +353,7 @@ export function LensEditConfigurationFlyout({
         setDataGridAttrs,
         esqlVariables,
         shouldUpdateAttrs,
-        previousAttributes.current
+        currentAttributes
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -348,13 +364,17 @@ export function LensEditConfigurationFlyout({
       setIsVisualizationLoading(false);
     },
     [
+      datasourceStates,
+      attributes,
+      visualization.state,
+      visualization.activeId,
       startDependencies,
       datasourceMap,
       visualizationMap,
       adHocDataViews,
+      esqlVariables,
       setCurrentAttributes,
       updateSuggestion,
-      esqlVariables,
     ]
   );
 
