@@ -33,6 +33,7 @@ import {
   IngestSimulateResponse,
   IngestSimulateSimulateDocumentResult,
 } from '@elastic/elasticsearch/lib/api/types';
+import { errors } from '@elastic/elasticsearch';
 import { StreamsClient } from '../../../lib/streams/client';
 import { formatToIngestProcessors } from '../../../lib/streams/helpers/processing';
 import { checkAccess } from '../../../lib/streams/stream_crud';
@@ -87,20 +88,22 @@ export const simulateProcessorRoute = createServerRoute({
       conditionallyExecuteIngestSimulation(scopedClusterClient, simulationData, params),
     ]);
 
+    if (pipelineSimulationResult.status === 'failure') {
+      return prepareFailureResponse(pipelineSimulationResult.error);
+    }
+
     const { normalizedDocs, processorsMetrics } = parsePipelineSimulationResult(
-      pipelineSimulationResult,
+      pipelineSimulationResult.simulation,
       simulationData.docs,
       params.body.processing
     );
 
-    const res = await prepareSimulationResponse(
+    return prepareSimulationResponse(
       normalizedDocs,
       processorsMetrics,
       streamsClient,
       params.path.name
     );
-
-    return res;
   },
 });
 
@@ -227,32 +230,60 @@ const getStreamFields = async (streamsClient: StreamsClient, streamName: string)
   return {};
 };
 
+type PipelineSimulationResult =
+  | {
+      status: 'success';
+      simulation: IngestSimulateResponse;
+    }
+  | {
+      status: 'failure';
+      error: SimulatedDocError;
+    };
+
 const executePipelineSimulation = async (
   scopedClusterClient: IScopedClusterClient,
   simulationBody: IngestSimulateRequest
-) => {
+): Promise<PipelineSimulationResult> => {
   try {
-    return await scopedClusterClient.asCurrentUser.ingest.simulate(simulationBody);
+    const simulation = await scopedClusterClient.asCurrentUser.ingest.simulate(simulationBody);
+
+    return {
+      status: 'success',
+      simulation,
+    };
   } catch (error) {
+    if (error instanceof errors.ResponseError) {
+      const { processor_tag, reason } = error.body?.error;
+
+      return {
+        status: 'failure',
+        error: {
+          processor_id: processor_tag,
+          message: reason,
+        },
+      };
+    }
     // This catch high level errors that might occur during the simulation, such invalid grok syntax
     // I'm rethrowing the error to normalize the ES error as it has a different structure than the other errors.
     throw new SimulationFailedError(error);
   }
 };
 
+interface IngestSimulationResult {
+  docs: Array<{ doc: IngestSimulateDocument & { error?: ErrorCauseKeys } }>;
+}
+
 // TODO: update type once Kibana updates to elasticsearch-js 8.17
 const conditionallyExecuteIngestSimulation = async (
   scopedClusterClient: IScopedClusterClient,
   simulationData: ReturnType<typeof prepareSimulationData>,
   params: ProcessingSimulateParams
-): Promise<any> => {
+): Promise<IngestSimulationResult | null> => {
   if (!params.body.detected_fields) return null;
 
   const simulationBody = prepareIngestSimulationBody(simulationData, params);
 
-  let simulationResult: {
-    docs: Array<{ doc: IngestSimulateDocument & { error?: ErrorCauseKeys } }>;
-  };
+  let simulationResult: IngestSimulationResult;
 
   try {
     // TODO: We should be using scopedClusterClient.asCurrentUser.simulate.ingest() once Kibana updates to elasticsearch-js 8.17
@@ -454,6 +485,23 @@ const prepareSimulationResponse = async (
     processor_metrics: processorMetrics,
     failure_rate: parseFloat(failureRate.toFixed(2)),
     success_rate: parseFloat(successRate.toFixed(2)),
+  };
+};
+
+const prepareFailureResponse = (error: SimulatedDocError) => {
+  return {
+    detected_fields: [],
+    documents: [],
+    processor_metrics: {
+      [error.processor_id]: {
+        detected_fields: [],
+        errors: [error.message],
+        failure_rate: 1,
+        success_rate: 0,
+      },
+    },
+    failure_rate: 1,
+    success_rate: 0,
   };
 };
 
