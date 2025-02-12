@@ -184,7 +184,7 @@ export class FileWrapper {
     return this.analyzedFile$.getValue().data;
   }
 
-  public async import(id: string, index: string, mappings: MappingTypeMapping, pipelineId: string) {
+  public async import(index: string, mappings: MappingTypeMapping, pipelineId: string) {
     this.setStatus({ importStatus: STATUS.STARTED });
     const format = this.analyzedFile$.getValue().results!.format;
     const importer = await this.fileUpload.importerFactory(format, {
@@ -192,7 +192,7 @@ export class FileWrapper {
       multilineStartPattern: this.analyzedFile$.getValue().results!.multiline_start_pattern,
     });
 
-    importer.initializeWithoutCreate(index, mappings, this.getPipeline());
+    importer.initializeWithoutCreate(index, mappings, [this.getPipeline()]);
     const data = this.getData();
     if (data === null) {
       this.setStatus({ importStatus: STATUS.FAILED });
@@ -200,7 +200,7 @@ export class FileWrapper {
     }
     importer.read(data);
     try {
-      const resp = await importer.import(id, index, pipelineId, (p) => {
+      const resp = await importer.import(index, pipelineId, (p) => {
         this.setStatus({ importProgress: p });
       });
       this.setStatus({ docCount: resp.docCount, importStatus: STATUS.COMPLETED });

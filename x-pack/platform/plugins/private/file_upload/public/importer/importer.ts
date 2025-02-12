@@ -24,6 +24,7 @@ import type {
   IngestPipelineWrapper,
 } from '../../common/types';
 import { CreateDocsResponse, IImporter, ImportResults } from './types';
+import { callImportRoute, callInitializeImportRoute } from './routes';
 
 const CHUNK_SIZE = 5000;
 const REDUCED_CHUNK_SIZE = 100;
@@ -36,7 +37,7 @@ export abstract class Importer implements IImporter {
   protected _docArray: ImportDoc[] = [];
   protected _chunkSize = CHUNK_SIZE;
   private _index: string | undefined;
-  private _pipeline: IngestPipeline | undefined;
+  private _pipelines: IngestPipelineWrapper[] = [];
   private _timeFieldName: string | undefined;
   private _initialized = false;
 
@@ -82,42 +83,27 @@ export abstract class Importer implements IImporter {
 
   protected abstract _createDocs(t: string, isLastPart: boolean): CreateDocsResponse<ImportDoc>;
 
-  public async initializeImport(
-    index: string,
-    settings: IndicesIndexSettings,
-    mappings: MappingTypeMapping,
-    pipeline: IngestPipeline | undefined,
-    createPipelines?: IngestPipeline[]
-  ) {
-    let ingestPipelineWrapper: IngestPipelineWrapper | undefined;
-    if (pipeline !== undefined) {
-      updatePipelineTimezone(pipeline);
+  private _initialize(index: string, mappings: MappingTypeMapping, pipelines: IngestPipeline[]) {
+    if (pipelines !== undefined) {
+      for (let i = 0; i < pipelines.length; i++) {
+        const pipeline = pipelines[i];
+        updatePipelineTimezone(pipeline);
 
-      if (pipelineContainsSpecialProcessors(pipeline)) {
-        // pipeline contains processors which we know are slow
-        // so reduce the chunk size significantly to avoid timeouts
-        this._chunkSize = REDUCED_CHUNK_SIZE;
-      }
-      // if no pipeline has been supplied,
-      // send an empty object
-      ingestPipelineWrapper = {
-        id: `${index}-pipeline`,
-        pipeline,
-      };
-    }
-
-    let createPipelinesWrappers: IngestPipelineWrapper[] | undefined;
-    if (createPipelines) {
-      createPipelinesWrappers = createPipelines.map((p, i) => {
-        return {
+        if (pipelineContainsSpecialProcessors(pipeline)) {
+          // pipeline contains processors which we know are slow
+          // so reduce the chunk size significantly to avoid timeouts
+          this._chunkSize = REDUCED_CHUNK_SIZE;
+        }
+        // if no pipeline has been supplied,
+        // send an empty object
+        this._pipelines.push({
           id: `${index}-${i}-pipeline`,
-          pipeline: p,
-        };
-      });
+          pipeline,
+        });
+      }
     }
 
     this._index = index;
-    this._pipeline = pipeline;
 
     // if an @timestamp field has been added to the
     // mappings, use this field as the time field.
@@ -128,67 +114,47 @@ export abstract class Importer implements IImporter {
       : undefined;
 
     this._initialized = true;
+  }
 
-    return await callImportRoute({
-      id: undefined,
+  public async initializeImport(
+    index: string,
+    settings: IndicesIndexSettings,
+    mappings: MappingTypeMapping,
+    pipelines: IngestPipeline[]
+  ) {
+    this._initialize(index, mappings, pipelines);
+
+    return await callInitializeImportRoute({
       index,
-      data: [],
       settings,
       mappings,
-      ingestPipeline: ingestPipelineWrapper,
-      createPipelines: createPipelinesWrappers,
+      ingestPipelines: this._pipelines,
     });
   }
 
   public async initializeWithoutCreate(
     index: string,
     mappings: MappingTypeMapping,
-    pipeline: IngestPipeline | undefined
+    pipelines: IngestPipeline[]
   ) {
-    if (pipeline !== undefined) {
-      if (pipelineContainsSpecialProcessors(pipeline)) {
-        // pipeline contains processors which we know are slow
-        // so reduce the chunk size significantly to avoid timeouts
-        this._chunkSize = REDUCED_CHUNK_SIZE;
-      }
-    }
-
-    this._index = index;
-    this._pipeline = pipeline;
-
-    // if an @timestamp field has been added to the
-    // mappings, use this field as the time field.
-    // This relies on the field being populated by
-    // the ingest pipeline on ingest
-    this._timeFieldName = isPopulatedObject(mappings.properties, [DEFAULT_TIME_FIELD])
-      ? DEFAULT_TIME_FIELD
-      : undefined;
-
-    this._initialized = true;
+    this._initialize(index, mappings, pipelines);
   }
 
   public async import(
-    id: string,
     index: string,
-    pipelineId: string | undefined,
+    ingestPipelineId: string,
     setImportProgress: (progress: number) => void
   ): Promise<ImportResults> {
-    if (!id || !index) {
+    if (!index) {
       return {
         success: false,
         error: i18n.translate('xpack.fileUpload.import.noIdOrIndexSuppliedErrorMessage', {
-          defaultMessage: 'no ID or index supplied',
+          defaultMessage: 'No index supplied',
         }),
       };
     }
 
     const chunks = createDocumentChunks(this._docArray, this._chunkSize);
-
-    const ingestPipeline: IngestPipelineWrapper | undefined = pipelineId
-      ? {
-          id: pipelineId,
-        }
-      : undefined;
 
     let success = true;
     const failures: ImportFailure[] = [];
@@ -200,7 +166,6 @@ export abstract class Importer implements IImporter {
         success: false,
         failures: [],
         docCount: 0,
-        id: '',
         index: '',
         pipelineId: '',
       };
@@ -208,12 +173,9 @@ export abstract class Importer implements IImporter {
       while (resp.success === false && retries > 0) {
         try {
           resp = await callImportRoute({
-            id,
             index,
+            ingestPipelineId,
             data: chunks[i],
-            settings: {},
-            mappings: {},
-            ingestPipeline,
           });
 
           if (retries < IMPORT_RETRIES) {
@@ -269,7 +231,8 @@ export abstract class Importer implements IImporter {
   }
 
   public async previewIndexTimeRange() {
-    if (this._initialized === false || this._pipeline === undefined) {
+    const ingestPipeline = this._pipelines[0];
+    if (this._initialized === false || ingestPipeline?.pipeline === undefined) {
       throw new Error('Import has not been initialized');
     }
 
@@ -280,7 +243,7 @@ export abstract class Importer implements IImporter {
 
     const body = JSON.stringify({
       docs: firstDocs.concat(lastDocs),
-      pipeline: this._pipeline,
+      pipeline: ingestPipeline.pipeline,
       timeField: this._timeFieldName,
     });
     return await getHttp().fetch<{ start: number | null; end: number | null }>({
@@ -291,14 +254,9 @@ export abstract class Importer implements IImporter {
     });
   }
 
-  public async deletePipelines(pipelineIds: string[]) {
-    // remove_pipelines
-    // const body = JSON.stringify({
-    //   pipelineIds,
-    // });
-
+  public async deletePipelines() {
     return await getHttp().fetch<IngestDeletePipelineResponse[]>({
-      path: `/internal/file_upload/remove_pipelines/${pipelineIds.join(',')}`,
+      path: `/internal/file_upload/remove_pipelines/${this._pipelines.map((p) => p.id).join(',')}`,
       method: 'DELETE',
       version: '1',
     });
@@ -390,40 +348,4 @@ function pipelineContainsSpecialProcessors(pipeline: IngestPipeline) {
 
   const specialProcessors = ['inference', 'enrich'];
   return intersection(specialProcessors, keys).length !== 0;
-}
-
-export function callImportRoute({
-  id,
-  index,
-  data,
-  settings,
-  mappings,
-  ingestPipeline,
-  createPipelines,
-}: {
-  id: string | undefined;
-  index: string;
-  data: ImportDoc[];
-  settings: IndicesIndexSettings;
-  mappings: MappingTypeMapping;
-  ingestPipeline: IngestPipelineWrapper | undefined;
-  createPipelines?: IngestPipelineWrapper[];
-}) {
-  const query = id !== undefined ? { id } : {};
-  const body = JSON.stringify({
-    index,
-    data,
-    settings,
-    mappings,
-    ingestPipeline,
-    createPipelines,
-  });
-
-  return getHttp().fetch<ImportResponse>({
-    path: `/internal/file_upload/import`,
-    method: 'POST',
-    version: '1',
-    query,
-    body,
-  });
 }

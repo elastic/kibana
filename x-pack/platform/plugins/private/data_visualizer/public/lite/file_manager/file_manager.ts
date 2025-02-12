@@ -13,7 +13,10 @@ import { switchMap, combineLatest, BehaviorSubject, of } from 'rxjs';
 import type { HttpSetup } from '@kbn/core/public';
 import type { IImporter } from '@kbn/file-upload-plugin/public/importer/types';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
-import type { ImportResponse, IngestPipeline } from '@kbn/file-upload-plugin/common/types';
+import type {
+  IngestPipeline,
+  InitializeImportResponse,
+} from '@kbn/file-upload-plugin/common/types';
 import type {
   IndicesIndexSettings,
   MappingTypeMapping,
@@ -262,23 +265,22 @@ export class FileManager {
     });
 
     let indexCreated = false;
-    let pipelineCreated = false;
-    let initializeImportResp: ImportResponse | undefined;
+    let pipelinesCreated = false;
+    let initializeImportResp: InitializeImportResponse | undefined;
 
     try {
       initializeImportResp = await this.importer.initializeImport(
         indexName,
         this.settings,
         this.mappings,
-        this.pipelines[0],
         this.pipelines
       );
       this.timeFieldName = this.importer.getTimeField();
       indexCreated = initializeImportResp.index !== undefined;
-      pipelineCreated = initializeImportResp.pipelineId !== undefined;
+      pipelinesCreated = !!initializeImportResp.pipelineIds?.length;
       this.setStatus({
         indexCreated: indexCreated ? STATUS.COMPLETED : STATUS.FAILED,
-        pipelineCreated: pipelineCreated ? STATUS.COMPLETED : STATUS.FAILED,
+        pipelineCreated: pipelinesCreated ? STATUS.COMPLETED : STATUS.FAILED,
       });
 
       if (initializeImportResp.error) {
@@ -299,7 +301,7 @@ export class FileManager {
       return null;
     }
 
-    if (!indexCreated || !pipelineCreated || !initializeImportResp) {
+    if (!indexCreated || !pipelinesCreated || !initializeImportResp) {
       return null;
     }
 
@@ -313,12 +315,7 @@ export class FileManager {
     try {
       await Promise.all(
         files.map(async (file, i) => {
-          await file.import(
-            initializeImportResp!.id,
-            indexName,
-            this.mappings!,
-            `${indexName}-${i}-pipeline`
-          );
+          await file.import(indexName, this.mappings!, `${indexName}-${i}-pipeline`);
         })
       );
     } catch (error) {
