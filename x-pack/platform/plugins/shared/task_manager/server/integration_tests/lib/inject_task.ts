@@ -33,3 +33,27 @@ export async function injectTask(
     },
   });
 }
+
+export async function injectTaskBulk(esClient: ElasticsearchClient, tasks: ConcreteTaskInstance[]) {
+  const bulkRequest = [];
+  for (const task of tasks) {
+    bulkRequest.push({ create: { _id: `task:${task.id}` } });
+    bulkRequest.push({
+      references: [],
+      type: 'task',
+      updated_at: new Date().toISOString(),
+      task: {
+        ...task,
+        state: JSON.stringify(task.state),
+        params: JSON.stringify(task.params),
+        runAt: task.runAt.toISOString(),
+        scheduledAt: task.scheduledAt.toISOString(),
+        partition: murmurhash.v3(task.id) % MAX_PARTITIONS,
+      },
+    });
+  }
+  await esClient.bulk({
+    index: '.kibana_task_manager',
+    body: bulkRequest,
+  });
+}

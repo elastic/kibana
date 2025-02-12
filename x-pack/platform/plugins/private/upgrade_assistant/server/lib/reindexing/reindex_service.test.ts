@@ -799,11 +799,34 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
         expect(clusterClient.asCurrentUser.indices.updateAliases).toHaveBeenCalledWith({
           actions: [
-            { add: { index: 'myIndex-reindex-0', alias: 'myIndex' } },
+            { add: { index: 'myIndex-reindex-0', alias: 'myIndex', is_hidden: false } },
             { remove_index: { index: 'myIndex' } },
           ],
         });
       });
+
+      it.each([true, 'true'])(
+        'switches aliases, passing on hidden status of index to alias if defined (hidden value: %p)',
+        async (hidden) => {
+          clusterClient.asCurrentUser.indices.getAlias.mockResponseOnce({
+            myIndex: { aliases: {} },
+          });
+          clusterClient.asCurrentUser.indices.getSettings.mockResponseOnce({
+            myIndex: { settings: { index: { hidden } } },
+          });
+          clusterClient.asCurrentUser.indices.updateAliases.mockResponseOnce({
+            acknowledged: true,
+          });
+          const updatedOp = await service.processNextStep(reindexOp);
+          expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
+          expect(clusterClient.asCurrentUser.indices.updateAliases).toHaveBeenCalledWith({
+            actions: [
+              { add: { index: 'myIndex-reindex-0', alias: 'myIndex', is_hidden: true } },
+              { remove_index: { index: 'myIndex' } },
+            ],
+          });
+        }
+      );
 
       it('moves existing aliases over to new index', async () => {
         clusterClient.asCurrentUser.indices.getAlias.mockResponseOnce({
@@ -811,6 +834,7 @@ describe('reindexService', () => {
             aliases: {
               myAlias: {},
               myFilteredAlias: { filter: { term: { https: true } } },
+              myHiddenAlias: { is_hidden: true },
             },
           },
         });
@@ -821,7 +845,7 @@ describe('reindexService', () => {
         expect(updatedOp.attributes.lastCompletedStep).toEqual(ReindexStep.aliasCreated);
         expect(clusterClient.asCurrentUser.indices.updateAliases).toHaveBeenCalledWith({
           actions: [
-            { add: { index: 'myIndex-reindex-0', alias: 'myIndex' } },
+            { add: { index: 'myIndex-reindex-0', alias: 'myIndex', is_hidden: false } },
             { remove_index: { index: 'myIndex' } },
             { add: { index: 'myIndex-reindex-0', alias: 'myAlias' } },
             {
@@ -829,6 +853,13 @@ describe('reindexService', () => {
                 index: 'myIndex-reindex-0',
                 alias: 'myFilteredAlias',
                 filter: { term: { https: true } },
+              },
+            },
+            {
+              add: {
+                index: 'myIndex-reindex-0',
+                alias: 'myHiddenAlias',
+                is_hidden: true,
               },
             },
           ],
