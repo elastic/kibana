@@ -462,16 +462,15 @@ export async function getEnterpriseSearchPre7IndexDeprecations(
         'xpack.enterpriseSearch.deprecations.incompatibleEnterpriseSearchIndexes.message',
         {
           defaultMessage:
-          'There are {deprecatedIndicesCount} incompatible Enterprise Search indices.\n\n' +
-          'The following indices are found to be incompatible for upgrade:\n' +
-          '<details>\n' +
-          '<summary>Click to view incompatible indices</summary>\n' +
-          '{indicesList}\n' +
-          '</details>\n' +
-          'These indices must be either set to read-only or deleted before upgrading. ' +
-          'Setting these indices to a lossless operation, and can be attempted with the "quick resolve" button below.\n\n' +
-          'Alternatively, manually deleting these indices will also unblock your upgrade.',
-}
+            `There are ${deprecatedIndicesCount} incompatible Enterprise Search indices.\n\n` +
+            'The following indices are found to be incompatible for upgrade:\n\n' +
+            '```\n' +
+            `${indicesList}` +
+            '```\n\n' +
+            'These indices must be either set to read-only or deleted before upgrading. ' +
+            'Setting these indices to read-only is a lossless operation, and can be attempted with the "quick resolve" button below.\n\n' +
+            'Alternatively, manually deleting these indices will also unblock your upgrade.',
+        }
       ),
     },
     documentationUrl: docsUrl,

@@ -18,7 +18,6 @@ export async function getPreEightEnterpriseSearchIndices(esClient: Elasticsearch
 
   const entSearchIndices = await esClient.indices.get({
     index: `${ENT_SEARCH_INDEX_PREFIX}*`,
-    features: ['aliases', 'settings'],
     ignore_unavailable: true,
     expand_wildcards: ['all'],
   });
@@ -42,17 +41,8 @@ export async function setPreEightEnterpriseSearchIndicesReadOnly(esClient: Elast
   // get the indices again to ensure nothing's changed since the last check
   const indices = await getPreEightEnterpriseSearchIndices(esClient);
 
-  const body = {
-    settings: {
-      'index.blocks.read_only': true
-    }
-  };
-
   for (const index of indices) {
-    let indexResponse = await esClient.indices.putSettings({
-      index,
-      body,
-    });
+    let indexResponse = await esClient.indices.addBlock({ index, block: 'write' });
 
     if (!indexResponse || indexResponse.acknowledged !== true) {
       return false;
