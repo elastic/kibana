@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { htmlIdGenerator } from '@elastic/eui';
+import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TabsBar } from '../tabs_bar';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
 import { TabItem } from '../../types';
@@ -83,25 +83,32 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   }, [state, onChanged]);
 
   return (
-    <>
-      <TabsBar
-        items={items}
-        selectedItem={selectedItem}
-        tabContentId={tabContentId}
-        onAdd={onAdd}
-        onSelect={onSelect}
-        onClose={onClose}
-      />
+    <EuiFlexGroup
+      responsive={false}
+      direction="column"
+      gutterSize="none"
+      className="eui-fullHeight"
+    >
+      <EuiFlexItem grow={false}>
+        <TabsBar
+          items={items}
+          selectedItem={selectedItem}
+          tabContentId={tabContentId}
+          onAdd={onAdd}
+          onSelect={onSelect}
+          onClose={onClose}
+        />
+      </EuiFlexItem>
       {selectedItem ? (
-        <div
+        <EuiFlexItem
           data-test-subj="unifiedTabs_selectedTabContent"
           role="tabpanel"
           id={tabContentId}
           aria-labelledby={getTabAttributes(selectedItem, tabContentId).id}
         >
           {renderContent(selectedItem)}
-        </div>
+        </EuiFlexItem>
       ) : null}
-    </>
+    </EuiFlexGroup>
   );
 };

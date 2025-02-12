@@ -7,8 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { TabItem } from './src/types';
-export {
-  TabbedContent as UnifiedTabs,
-  type TabbedContentProps as UnifiedTabsProps,
-} from './src/components/tabbed_content';
+export const PLUGIN_ID = 'unifiedTabsExamples';
+export const PLUGIN_NAME = 'Unified Tabs Examples';

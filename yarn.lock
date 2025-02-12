@@ -7861,6 +7861,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/unified-tabs-examples-plugin@link:examples/unified_tabs_examples":
+  version "0.0.0"
+  uid ""
+
 "@kbn/unified-field-list@link:src/platform/packages/shared/kbn-unified-field-list":
   version "0.0.0"
   uid ""

@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { TabItem } from './src/types';
-export {
-  TabbedContent as UnifiedTabs,
-  type TabbedContentProps as UnifiedTabsProps,
-} from './src/components/tabbed_content';
+import { UnifiedTabsExamplesPlugin } from './plugin';
+
+// This exports static code and TypeScript types,
+// as well as, Kibana Platform `plugin()` initializer.
+export function plugin() {
+  return new UnifiedTabsExamplesPlugin();
+}
+export type { UnifiedTabsExamplesPluginSetup, UnifiedTabsExamplesPluginStart } from './types';
