@@ -189,7 +189,7 @@ export class SLOPlugin
       ?.start(plugins.taskManager, internalSoClient, internalEsClient)
       .catch(() => {});
 
-    this.tempSummaryCleanupTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
+    this.tempSummaryCleanupTask?.start(plugins).catch(() => {});
 
     return {
       getSloClientWithRequest: (request: KibanaRequest) => {

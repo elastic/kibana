@@ -7,13 +7,9 @@
 
 import { errors } from '@elastic/elasticsearch';
 import { type CoreSetup, type Logger, type LoggerFactory } from '@kbn/core/server';
-import {
-  ConcreteTaskInstance,
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import { SLOConfig } from '../../types';
+import { SLOConfig, SLOPluginStartDependencies } from '../../types';
 import { CleanUpTempSummary } from '../management/clean_up_temp_summary';
 
 export const TYPE = 'slo:temp-summary-cleanup-task';
@@ -59,22 +55,28 @@ export class TempSummaryCleanupTask {
     });
   }
 
-  public async start({ taskManager }: { taskManager: TaskManagerStartContract }) {
-    if (!taskManager) {
+  public async start(plugins: SLOPluginStartDependencies) {
+    const hasCorrectLicense = (await plugins.licensing.getLicense()).hasAtLeast('platinum');
+    if (!hasCorrectLicense) {
+      this.logger.debug('Platinum license is required');
+      return;
+    }
+
+    if (!plugins.taskManager) {
       this.logger.error('Missing required service during start');
       return;
     }
 
     if (!this.config.tempSummaryCleanupTaskEnabled) {
       this.logger.info('Unscheduling task');
-      return await taskManager.removeIfExists(this.taskId);
+      return await plugins.taskManager.removeIfExists(this.taskId);
     }
 
     this.logger.info('Scheduling task with [1h] interval');
     this.wasStarted = true;
 
     try {
-      await taskManager.ensureScheduled({
+      await plugins.taskManager.ensureScheduled({
         id: this.taskId,
         taskType: TYPE,
         scope: ['observability', 'slo'],
