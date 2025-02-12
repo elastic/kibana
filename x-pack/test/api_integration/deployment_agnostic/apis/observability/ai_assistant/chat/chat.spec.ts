@@ -92,7 +92,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               .on('error', reject)
               .send({
                 name: 'my_api_call',
-                system: 'You are a helpful assistant',
+                systemMessage: 'You are a helpful assistant',
                 messages,
                 connectorId,
                 functions: [],

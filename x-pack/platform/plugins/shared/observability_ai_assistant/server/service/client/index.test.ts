@@ -486,6 +486,7 @@ describe('Observability AI Assistant client', () => {
               user: {
                 name: 'johndoe',
               },
+              systemMessage: 'system',
               messages: [
                 {
                   '@timestamp': expect.any(String),
@@ -624,6 +625,7 @@ describe('Observability AI Assistant client', () => {
           user: {
             name: 'johndoe',
           },
+          systemMessage: 'system',
           messages: [
             {
               '@timestamp': expect.any(String),
