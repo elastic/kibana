@@ -59,8 +59,7 @@ describe(
             policy = indexedPolicy.integrationPolicies[0];
 
             return enableAllPolicyProtections(policy.id).then(() => {
-              // At this point 8.14.2 is GA and this functionality is not available until 8.15.0
-              return createEndpointHost(policy.policy_ids[0], '8.15.0').then((host) => {
+              return createEndpointHost(policy.policy_ids[0]).then((host) => {
                 createdHost = host as CreateAndEnrollEndpointHostResponse;
               });
             });
