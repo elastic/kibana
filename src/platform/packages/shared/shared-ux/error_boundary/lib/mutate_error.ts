@@ -10,12 +10,13 @@
 import { REACT_FATAL_ERROR_EVENT_TYPE } from './telemetry_events';
 
 /**
- * Adds a `react_error_type` property to an Error object.
- * The Error is mutated rather than copied, to keep the original prototype so that it can be captured in APM
- * without side effects.
+ * Adds ability to use APM to filter for errors caught by this error boundary.
+ * The Error is mutated rather than copied, to keep the original prototype so that it can be captured in APM without side effects.
  */
 export function mutateError(error: Error) {
-  const customError: Error & { react_error_type?: string } = error;
+  const customError: Error & { react_error_type?: string; original_name?: string } = error;
   customError.react_error_type = REACT_FATAL_ERROR_EVENT_TYPE;
+  customError.original_name = error.name;
+  customError.name = 'FatalReactError';
   return customError;
 }
