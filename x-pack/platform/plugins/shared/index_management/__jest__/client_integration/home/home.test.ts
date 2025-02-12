@@ -10,6 +10,8 @@ import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../helpers';
 import { HomeTestBed, setup } from './home.helpers';
 
+jest.mock('react-use/lib/useObservable', () => () => jest.fn());
+
 describe('<IndexManagementHome />', () => {
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
   let testBed: HomeTestBed;

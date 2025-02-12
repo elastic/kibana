@@ -60,6 +60,10 @@ export interface WithDegradedDocs {
   degradedDocStats: DataStreamDocsStat[];
 }
 
+export interface WithFailedDocs {
+  failedDocStats: DataStreamDocsStat[];
+}
+
 export interface WithNonAggregatableDatasets {
   nonAggregatableDatasets: string[];
 }
@@ -76,6 +80,7 @@ export type DefaultDatasetQualityControllerState = WithTableOptions &
   WithDataStreamStats &
   WithTotalDocs &
   WithDegradedDocs &
+  WithFailedDocs &
   WithDatasets &
   WithFilters &
   WithNonAggregatableDatasets &
@@ -93,7 +98,15 @@ export type DatasetQualityControllerTypeState =
       context: DefaultDatasetQualityStateContext;
     }
   | {
+      value: 'stats.docsStats.fetching';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
       value: 'stats.degradedDocs.fetching';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'stats.failedDocs.fetching';
       context: DefaultDatasetQualityStateContext;
     }
   | {

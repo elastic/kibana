@@ -183,7 +183,10 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     [rawFilteredQuery]
   );
 
-  const entity = useMemo(() => ({ type: 'host' as const, name: detailName }), [detailName]);
+  const entity = useMemo(
+    () => ({ type: EntityType.host as const, name: detailName }),
+    [detailName]
+  );
   const privileges = useAssetCriticalityPrivileges(entity.name);
 
   const refetchRiskScore = useRefetchOverviewPageRiskScore(HOST_OVERVIEW_RISK_SCORE_QUERY_ID);

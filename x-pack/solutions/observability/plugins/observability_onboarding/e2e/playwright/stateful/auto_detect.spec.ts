@@ -36,6 +36,19 @@ test('Auto-detect logs and metrics', async ({ page, onboardingHomePage, autoDete
   fs.writeFileSync(outputPath, clipboardData);
 
   await autoDetectFlowPage.assertReceivedDataIndicator();
+
+  /**
+   * Host Details page sometime shows "No Data"
+   * even when we've detected data during
+   * the onboarding flow. This is most prominent
+   * in a test script which click on the "Explore Data"
+   * CTA immediately. Having a timeout before going
+   * to the Host Details page "solves" the issue.
+   * 2 minutes is generous and should be more then enough
+   * for the data to propagate everywhere.
+   */
+  await page.waitForTimeout(2 * 60000);
+
   await autoDetectFlowPage.clickAutoDetectSystemIntegrationCTA();
 
   /**
@@ -44,22 +57,5 @@ test('Auto-detect logs and metrics', async ({ page, onboardingHomePage, autoDete
    */
   const hostDetailsPage = new HostDetailsPage(await page.waitForEvent('popup'));
 
-  /**
-   * There is a glitch on the Hosts page where it can show "No data"
-   * screen even though data is available and it can show it with a delay
-   * after the Hosts page layout was loaded. This workaround waits for
-   * the No Data screen to be visible, and if so - reloads the page.
-   * If the No Data screen does not appear, the test can proceed normally.
-   * Seems like some caching issue with the Hosts page.
-   */
-  try {
-    await hostDetailsPage.noData().waitFor({ state: 'visible', timeout: 10000 });
-    await hostDetailsPage.page.waitForTimeout(2000);
-    await hostDetailsPage.page.reload();
-  } catch {
-    /* Ignore if "No Data" screen never showed up */
-  }
-
-  await hostDetailsPage.clickHostDetailsLogsTab();
-  await hostDetailsPage.assertHostDetailsLogsStream();
+  await hostDetailsPage.assertCpuPercentageNotEmpty();
 });

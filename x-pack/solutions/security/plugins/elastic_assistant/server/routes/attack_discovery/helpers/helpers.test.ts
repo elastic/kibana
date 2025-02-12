@@ -6,11 +6,15 @@
  */
 
 import { AuthenticatedUser } from '@kbn/core-security-common';
-
-import { getAttackDiscoveryStats } from './helpers';
+import moment from 'moment/moment';
+import { getAttackDiscoveryStats, updateAttackDiscoveries } from './helpers';
 import { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
 import { transformESSearchToAttackDiscovery } from '../../../lib/attack_discovery/persistence/transforms/transforms';
 import { getAttackDiscoverySearchEsMock } from '../../../__mocks__/attack_discovery_schema.mock';
+import { mockAnonymizedAlerts } from '../../../lib/attack_discovery/evaluation/__mocks__/mock_anonymized_alerts';
+import { mockAttackDiscoveries } from '../../../lib/attack_discovery/evaluation/__mocks__/mock_attack_discoveries';
+import { coreMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
 jest.mock('lodash/fp', () => ({
   uniq: jest.fn((arr) => Array.from(new Set(arr))),
@@ -268,6 +272,171 @@ describe('helpers', () => {
           connectorId: 'my-gen-a2i',
         },
       ]);
+    });
+  });
+
+  describe('updateAttackDiscoveries', () => {
+    const mockTelemetry = coreMock.createSetup().analytics;
+    const mockLogger = loggerMock.create();
+    const mockStartTime = moment('2024-03-28T22:27:28.000Z');
+    const mockApiConfig = {
+      actionTypeId: '.gen-ai',
+      connectorId: 'my-gen-ai',
+      model: 'gpt-4',
+    };
+    const mockReplacements = {};
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should update attack discovery successfully', async () => {
+      getAttackDiscovery.mockResolvedValue(mockCurrentAd);
+      updateAttackDiscovery.mockResolvedValue({});
+
+      await updateAttackDiscoveries({
+        anonymizedAlerts: mockAnonymizedAlerts,
+        apiConfig: mockApiConfig,
+        attackDiscoveries: mockAttackDiscoveries,
+        attackDiscoveryId: 'attack-discovery-id',
+        authenticatedUser: mockAuthenticatedUser,
+        dataClient: mockDataClient,
+        hasFilter: false,
+        end: 'now',
+        latestReplacements: mockReplacements,
+        logger: mockLogger,
+        size: 10,
+        start: 'now-24h',
+        startTime: mockStartTime,
+        telemetry: mockTelemetry,
+      });
+
+      expect(updateAttackDiscovery).toHaveBeenCalledWith({
+        attackDiscoveryUpdateProps: expect.objectContaining({
+          status: 'succeeded',
+        }),
+        authenticatedUser: mockAuthenticatedUser,
+      });
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
+        actionTypeId: '.gen-ai',
+        alertsContextCount: 2,
+        alertsCount: 8,
+        configuredAlertsCount: 10,
+        dateRangeDuration: 24,
+        discoveriesGenerated: 1,
+        durationMs: 0,
+        hasFilter: false,
+        isDefaultDateRange: true,
+        model: 'gpt-4',
+      });
+    });
+    it('should detect non-default time range', async () => {
+      getAttackDiscovery.mockResolvedValue(mockCurrentAd);
+      updateAttackDiscovery.mockResolvedValue({});
+
+      await updateAttackDiscoveries({
+        anonymizedAlerts: mockAnonymizedAlerts,
+        apiConfig: mockApiConfig,
+        attackDiscoveries: mockAttackDiscoveries,
+        attackDiscoveryId: 'attack-discovery-id',
+        authenticatedUser: mockAuthenticatedUser,
+        dataClient: mockDataClient,
+        hasFilter: false,
+        end: 'now',
+        latestReplacements: mockReplacements,
+        logger: mockLogger,
+        size: 10,
+        start: 'now-1w',
+        startTime: mockStartTime,
+        telemetry: mockTelemetry,
+      });
+
+      expect(updateAttackDiscovery).toHaveBeenCalledWith({
+        attackDiscoveryUpdateProps: expect.objectContaining({
+          status: 'succeeded',
+        }),
+        authenticatedUser: mockAuthenticatedUser,
+      });
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
+        actionTypeId: '.gen-ai',
+        alertsContextCount: 2,
+        alertsCount: 8,
+        configuredAlertsCount: 10,
+        dateRangeDuration: 168,
+        discoveriesGenerated: 1,
+        durationMs: 0,
+        hasFilter: false,
+        isDefaultDateRange: false,
+        model: 'gpt-4',
+      });
+    });
+    it('hasFilter should be true when filter exists', async () => {
+      getAttackDiscovery.mockResolvedValue(mockCurrentAd);
+      updateAttackDiscovery.mockResolvedValue({});
+
+      await updateAttackDiscoveries({
+        anonymizedAlerts: mockAnonymizedAlerts,
+        apiConfig: mockApiConfig,
+        attackDiscoveries: mockAttackDiscoveries,
+        attackDiscoveryId: 'attack-discovery-id',
+        authenticatedUser: mockAuthenticatedUser,
+        dataClient: mockDataClient,
+        hasFilter: true,
+        end: 'now',
+        latestReplacements: mockReplacements,
+        logger: mockLogger,
+        size: 10,
+        start: 'now-24h',
+        startTime: mockStartTime,
+        telemetry: mockTelemetry,
+      });
+
+      expect(updateAttackDiscovery).toHaveBeenCalledWith({
+        attackDiscoveryUpdateProps: expect.objectContaining({
+          status: 'succeeded',
+        }),
+        authenticatedUser: mockAuthenticatedUser,
+      });
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith('attack_discovery_success', {
+        actionTypeId: '.gen-ai',
+        alertsContextCount: 2,
+        alertsCount: 8,
+        configuredAlertsCount: 10,
+        dateRangeDuration: 24,
+        discoveriesGenerated: 1,
+        durationMs: 0,
+        hasFilter: true,
+        isDefaultDateRange: true,
+        model: 'gpt-4',
+      });
+    });
+
+    it('should handle error during update', async () => {
+      const mockError = new Error('Update failed');
+      getAttackDiscovery.mockRejectedValue(mockError);
+
+      await updateAttackDiscoveries({
+        anonymizedAlerts: mockAnonymizedAlerts,
+        apiConfig: mockApiConfig,
+        attackDiscoveries: mockAttackDiscoveries,
+        attackDiscoveryId: 'attack-discovery-id',
+        authenticatedUser: mockAuthenticatedUser,
+        dataClient: mockDataClient,
+        hasFilter: false,
+        end: 'now',
+        latestReplacements: mockReplacements,
+        logger: mockLogger,
+        size: 10,
+        start: 'now-24h',
+        startTime: mockStartTime,
+        telemetry: mockTelemetry,
+      });
+
+      expect(mockLogger.error).toHaveBeenCalledWith(mockError);
+      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
+        'attack_discovery_error',
+        expect.any(Object)
+      );
     });
   });
 });

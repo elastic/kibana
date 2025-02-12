@@ -98,7 +98,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   hits?: UnifiedHistogramHitsContext;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
-  dataLoading$?: LensEmbeddableOutput['dataLoading'];
+  dataLoading$?: LensEmbeddableOutput['dataLoading$'];
   /**
    * Context object for the chart -- leave undefined to hide the chart
    */
@@ -119,10 +119,6 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * This element would replace the default chart toggle buttons
    */
   renderCustomChartToggleActions?: () => ReactElement | undefined;
-  /**
-   * Disable automatic refetching based on props changes, and instead wait for a `refetch` message
-   */
-  disableAutoFetching?: boolean;
   /**
    * Disable triggers for the Lens embeddable
    */
@@ -219,7 +215,6 @@ export const UnifiedHistogramLayout = ({
   container,
   topPanelHeight,
   renderCustomChartToggleActions,
-  disableAutoFetching,
   disableTriggers,
   disabledActions,
   lensSuggestionsApi,
@@ -359,7 +354,6 @@ export const UnifiedHistogramLayout = ({
           breakdown={breakdown}
           renderCustomChartToggleActions={renderCustomChartToggleActions}
           appendHistogram={chartSpacer}
-          disableAutoFetching={disableAutoFetching}
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}
           input$={input$}

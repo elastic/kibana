@@ -15,7 +15,6 @@ import { i18n } from '@kbn/i18n';
 
 import { ANALYTICS_PLUGIN, APPLICATIONS_PLUGIN } from '../../../../common/constants';
 import { SEARCH_APPLICATIONS_PATH, SearchApplicationViewTabs } from '../../applications/routes';
-import { useIndicesNav } from '../../enterprise_search_content/components/search_index/indices/indices_nav';
 
 import { KibanaLogic } from '../kibana';
 
@@ -32,8 +31,6 @@ import { generateNavLink } from './nav_link_helpers';
 export const useEnterpriseSearchNav = (alwaysReturn = false) => {
   const { isSidebarEnabled, getNavLinks } = useValues(KibanaLogic);
 
-  const indicesNavItems = useIndicesNav();
-
   const navItems: Array<EuiSideNavItemTypeEnhanced<unknown>> = useMemo(() => {
     const baseNavItems = buildBaseClassicNavItems();
     const deepLinks = getNavLinks().reduce((links, link) => {
@@ -41,8 +38,8 @@ export const useEnterpriseSearchNav = (alwaysReturn = false) => {
       return links;
     }, {} as Record<string, ChromeNavLink | undefined>);
 
-    return generateSideNavItems(baseNavItems, deepLinks, { search_indices: indicesNavItems });
-  }, [indicesNavItems]);
+    return generateSideNavItems(baseNavItems, deepLinks);
+  }, []);
 
   if (!isSidebarEnabled && !alwaysReturn) return undefined;
 

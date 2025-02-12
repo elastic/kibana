@@ -1,0 +1,26 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react",
+      "@testing-library/jest-dom"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    "src/**/*.json",
+    "../../../../../typings/emotion.d.ts"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/apm-types",
+    "@kbn/key-value-metadata-table"
+  ]
+}

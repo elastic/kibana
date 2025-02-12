@@ -111,7 +111,7 @@ Array [
                 "type": "return",
                 "value": Object {
                   "darkMode": false,
-                  "name": "amsterdam",
+                  "name": "borealis",
                 },
               },
             ],
@@ -134,10 +134,16 @@ Array [
       }
     >
       <EuiConfirmModal
+        aria-labelledby="generated-id"
         cancelButtonText="Cancel"
         confirmButtonText="Confirm"
         onCancel={[Function]}
         onConfirm={[Function]}
+        titleProps={
+          Object {
+            "id": "generated-id",
+          }
+        }
       >
         <MountWrapper
           className="kbnOverlayMountWrapper"
@@ -155,6 +161,7 @@ exports[`ModalService openConfirm() renders a mountpoint confirm message 2`] = `
   data-eui="EuiFocusTrap"
 >
   <div
+    aria-labelledby="generated-id"
     aria-modal="true"
     class="euiModal euiModal--confirmation emotion-euiModal-defaultMaxWidth-confirmation"
     role="alertdialog"
@@ -304,10 +311,16 @@ Array [
                   >
                     <KibanaErrorBoundary>
                       <EuiConfirmModal
+                        aria-labelledby="generated-id"
                         cancelButtonText="Cancel"
                         confirmButtonText="Confirm"
                         onCancel={[Function]}
                         onConfirm={[Function]}
+                        titleProps={
+                          Object {
+                            "id": "generated-id",
+                          }
+                        }
                       >
                         <MountWrapper
                           className="kbnOverlayMountWrapper"
@@ -374,10 +387,16 @@ Array [
                   >
                     <KibanaErrorBoundary>
                       <EuiConfirmModal
+                        aria-labelledby="generated-id"
                         cancelButtonText="Cancel"
                         confirmButtonText="Confirm"
                         onCancel={[Function]}
                         onConfirm={[Function]}
+                        titleProps={
+                          Object {
+                            "id": "generated-id",
+                          }
+                        }
                       >
                         <MountWrapper
                           className="kbnOverlayMountWrapper"
@@ -404,14 +423,14 @@ Array [
                 "type": "return",
                 "value": Object {
                   "darkMode": false,
-                  "name": "amsterdam",
+                  "name": "borealis",
                 },
               },
               Object {
                 "type": "return",
                 "value": Object {
                   "darkMode": false,
-                  "name": "amsterdam",
+                  "name": "borealis",
                 },
               },
             ],
@@ -434,10 +453,16 @@ Array [
       }
     >
       <EuiConfirmModal
+        aria-labelledby="generated-id"
         cancelButtonText="Cancel"
         confirmButtonText="Confirm"
         onCancel={[Function]}
         onConfirm={[Function]}
+        titleProps={
+          Object {
+            "id": "generated-id",
+          }
+        }
       >
         Some message
       </EuiConfirmModal>
@@ -452,6 +477,7 @@ exports[`ModalService openConfirm() renders a string confirm message 2`] = `
   data-eui="EuiFocusTrap"
 >
   <div
+    aria-labelledby="generated-id"
     aria-modal="true"
     class="euiModal euiModal--confirmation emotion-euiModal-defaultMaxWidth-confirmation"
     role="alertdialog"
@@ -597,10 +623,16 @@ Array [
                   >
                     <KibanaErrorBoundary>
                       <EuiConfirmModal
+                        aria-labelledby="generated-id"
                         cancelButtonText="Cancel"
                         confirmButtonText="Confirm"
                         onCancel={[Function]}
                         onConfirm={[Function]}
+                        titleProps={
+                          Object {
+                            "id": "generated-id",
+                          }
+                        }
                       >
                         <MountWrapper
                           className="kbnOverlayMountWrapper"
@@ -632,10 +664,16 @@ Array [
                   >
                     <KibanaErrorBoundary>
                       <EuiConfirmModal
+                        aria-labelledby="generated-id"
                         cancelButtonText="Cancel"
                         confirmButtonText="Confirm"
                         onCancel={[Function]}
                         onConfirm={[Function]}
+                        titleProps={
+                          Object {
+                            "id": "generated-id",
+                          }
+                        }
                       >
                         Some message
                       </EuiConfirmModal>
@@ -699,10 +737,16 @@ Array [
                   >
                     <KibanaErrorBoundary>
                       <EuiConfirmModal
+                        aria-labelledby="generated-id"
                         cancelButtonText="Cancel"
                         confirmButtonText="Confirm"
                         onCancel={[Function]}
                         onConfirm={[Function]}
+                        titleProps={
+                          Object {
+                            "id": "generated-id",
+                          }
+                        }
                       >
                         <MountWrapper
                           className="kbnOverlayMountWrapper"
@@ -734,10 +778,16 @@ Array [
                   >
                     <KibanaErrorBoundary>
                       <EuiConfirmModal
+                        aria-labelledby="generated-id"
                         cancelButtonText="Cancel"
                         confirmButtonText="Confirm"
                         onCancel={[Function]}
                         onConfirm={[Function]}
+                        titleProps={
+                          Object {
+                            "id": "generated-id",
+                          }
+                        }
                       >
                         Some message
                       </EuiConfirmModal>
@@ -762,21 +812,21 @@ Array [
                 "type": "return",
                 "value": Object {
                   "darkMode": false,
-                  "name": "amsterdam",
+                  "name": "borealis",
                 },
               },
               Object {
                 "type": "return",
                 "value": Object {
                   "darkMode": false,
-                  "name": "amsterdam",
+                  "name": "borealis",
                 },
               },
               Object {
                 "type": "return",
                 "value": Object {
                   "darkMode": false,
-                  "name": "amsterdam",
+                  "name": "borealis",
                 },
               },
             ],
@@ -799,10 +849,16 @@ Array [
       }
     >
       <EuiConfirmModal
+        aria-labelledby="generated-id"
         cancelButtonText="Cancel"
         confirmButtonText="Confirm"
         onCancel={[Function]}
         onConfirm={[Function]}
+        titleProps={
+          Object {
+            "id": "generated-id",
+          }
+        }
       >
         confirm 1
       </EuiConfirmModal>
@@ -881,10 +937,16 @@ Array [
                   >
                     <KibanaErrorBoundary>
                       <EuiConfirmModal
+                        aria-labelledby="generated-id"
                         cancelButtonText="Cancel"
                         confirmButtonText="Confirm"
                         onCancel={[Function]}
                         onConfirm={[Function]}
+                        titleProps={
+                          Object {
+                            "id": "generated-id",
+                          }
+                        }
                       >
                         <MountWrapper
                           className="kbnOverlayMountWrapper"
@@ -916,10 +978,16 @@ Array [
                   >
                     <KibanaErrorBoundary>
                       <EuiConfirmModal
+                        aria-labelledby="generated-id"
                         cancelButtonText="Cancel"
                         confirmButtonText="Confirm"
                         onCancel={[Function]}
                         onConfirm={[Function]}
+                        titleProps={
+                          Object {
+                            "id": "generated-id",
+                          }
+                        }
                       >
                         Some message
                       </EuiConfirmModal>
@@ -983,10 +1051,16 @@ Array [
                   >
                     <KibanaErrorBoundary>
                       <EuiConfirmModal
+                        aria-labelledby="generated-id"
                         cancelButtonText="Cancel"
                         confirmButtonText="Confirm"
                         onCancel={[Function]}
                         onConfirm={[Function]}
+                        titleProps={
+                          Object {
+                            "id": "generated-id",
+                          }
+                        }
                       >
                         <MountWrapper
                           className="kbnOverlayMountWrapper"
@@ -1018,10 +1092,16 @@ Array [
                   >
                     <KibanaErrorBoundary>
                       <EuiConfirmModal
+                        aria-labelledby="generated-id"
                         cancelButtonText="Cancel"
                         confirmButtonText="Confirm"
                         onCancel={[Function]}
                         onConfirm={[Function]}
+                        titleProps={
+                          Object {
+                            "id": "generated-id",
+                          }
+                        }
                       >
                         Some message
                       </EuiConfirmModal>
@@ -1046,21 +1126,21 @@ Array [
                 "type": "return",
                 "value": Object {
                   "darkMode": false,
-                  "name": "amsterdam",
+                  "name": "borealis",
                 },
               },
               Object {
                 "type": "return",
                 "value": Object {
                   "darkMode": false,
-                  "name": "amsterdam",
+                  "name": "borealis",
                 },
               },
               Object {
                 "type": "return",
                 "value": Object {
                   "darkMode": false,
-                  "name": "amsterdam",
+                  "name": "borealis",
                 },
               },
             ],
@@ -1083,10 +1163,16 @@ Array [
       }
     >
       <EuiConfirmModal
+        aria-labelledby="generated-id"
         cancelButtonText="Cancel"
         confirmButtonText="Confirm"
         onCancel={[Function]}
         onConfirm={[Function]}
+        titleProps={
+          Object {
+            "id": "generated-id",
+          }
+        }
       >
         some confirm
       </EuiConfirmModal>
@@ -1170,10 +1256,16 @@ Array [
                   >
                     <KibanaErrorBoundary>
                       <EuiConfirmModal
+                        aria-labelledby="generated-id"
                         cancelButtonText="Cancel"
                         confirmButtonText="Confirm"
                         onCancel={[Function]}
                         onConfirm={[Function]}
+                        titleProps={
+                          Object {
+                            "id": "generated-id",
+                          }
+                        }
                       >
                         <MountWrapper
                           className="kbnOverlayMountWrapper"
@@ -1205,10 +1297,16 @@ Array [
                   >
                     <KibanaErrorBoundary>
                       <EuiConfirmModal
+                        aria-labelledby="generated-id"
                         cancelButtonText="Cancel"
                         confirmButtonText="Confirm"
                         onCancel={[Function]}
                         onConfirm={[Function]}
+                        titleProps={
+                          Object {
+                            "id": "generated-id",
+                          }
+                        }
                       >
                         Some message
                       </EuiConfirmModal>
@@ -1272,10 +1370,16 @@ Array [
                   >
                     <KibanaErrorBoundary>
                       <EuiConfirmModal
+                        aria-labelledby="generated-id"
                         cancelButtonText="Cancel"
                         confirmButtonText="Confirm"
                         onCancel={[Function]}
                         onConfirm={[Function]}
+                        titleProps={
+                          Object {
+                            "id": "generated-id",
+                          }
+                        }
                       >
                         <MountWrapper
                           className="kbnOverlayMountWrapper"
@@ -1307,10 +1411,16 @@ Array [
                   >
                     <KibanaErrorBoundary>
                       <EuiConfirmModal
+                        aria-labelledby="generated-id"
                         cancelButtonText="Cancel"
                         confirmButtonText="Confirm"
                         onCancel={[Function]}
                         onConfirm={[Function]}
+                        titleProps={
+                          Object {
+                            "id": "generated-id",
+                          }
+                        }
                       >
                         Some message
                       </EuiConfirmModal>
@@ -1335,21 +1445,21 @@ Array [
                 "type": "return",
                 "value": Object {
                   "darkMode": false,
-                  "name": "amsterdam",
+                  "name": "borealis",
                 },
               },
               Object {
                 "type": "return",
                 "value": Object {
                   "darkMode": false,
-                  "name": "amsterdam",
+                  "name": "borealis",
                 },
               },
               Object {
                 "type": "return",
                 "value": Object {
                   "darkMode": false,
-                  "name": "amsterdam",
+                  "name": "borealis",
                 },
               },
             ],
@@ -1454,10 +1564,16 @@ Array [
                   >
                     <KibanaErrorBoundary>
                       <EuiConfirmModal
+                        aria-labelledby="generated-id"
                         cancelButtonText="Cancel"
                         confirmButtonText="Confirm"
                         onCancel={[Function]}
                         onConfirm={[Function]}
+                        titleProps={
+                          Object {
+                            "id": "generated-id",
+                          }
+                        }
                       >
                         <MountWrapper
                           className="kbnOverlayMountWrapper"
@@ -1489,10 +1605,16 @@ Array [
                   >
                     <KibanaErrorBoundary>
                       <EuiConfirmModal
+                        aria-labelledby="generated-id"
                         cancelButtonText="Cancel"
                         confirmButtonText="Confirm"
                         onCancel={[Function]}
                         onConfirm={[Function]}
+                        titleProps={
+                          Object {
+                            "id": "generated-id",
+                          }
+                        }
                       >
                         Some message
                       </EuiConfirmModal>
@@ -1556,10 +1678,16 @@ Array [
                   >
                     <KibanaErrorBoundary>
                       <EuiConfirmModal
+                        aria-labelledby="generated-id"
                         cancelButtonText="Cancel"
                         confirmButtonText="Confirm"
                         onCancel={[Function]}
                         onConfirm={[Function]}
+                        titleProps={
+                          Object {
+                            "id": "generated-id",
+                          }
+                        }
                       >
                         <MountWrapper
                           className="kbnOverlayMountWrapper"
@@ -1591,10 +1719,16 @@ Array [
                   >
                     <KibanaErrorBoundary>
                       <EuiConfirmModal
+                        aria-labelledby="generated-id"
                         cancelButtonText="Cancel"
                         confirmButtonText="Confirm"
                         onCancel={[Function]}
                         onConfirm={[Function]}
+                        titleProps={
+                          Object {
+                            "id": "generated-id",
+                          }
+                        }
                       >
                         Some message
                       </EuiConfirmModal>
@@ -1619,21 +1753,21 @@ Array [
                 "type": "return",
                 "value": Object {
                   "darkMode": false,
-                  "name": "amsterdam",
+                  "name": "borealis",
                 },
               },
               Object {
                 "type": "return",
                 "value": Object {
                   "darkMode": false,
-                  "name": "amsterdam",
+                  "name": "borealis",
                 },
               },
               Object {
                 "type": "return",
                 "value": Object {
                   "darkMode": false,
-                  "name": "amsterdam",
+                  "name": "borealis",
                 },
               },
             ],
@@ -1656,10 +1790,16 @@ Array [
       }
     >
       <EuiConfirmModal
+        aria-labelledby="generated-id"
         cancelButtonText="Cancel"
         confirmButtonText="Confirm"
         onCancel={[Function]}
         onConfirm={[Function]}
+        titleProps={
+          Object {
+            "id": "generated-id",
+          }
+        }
       >
         some confirm
       </EuiConfirmModal>
@@ -1862,7 +2002,7 @@ Array [
                 "type": "return",
                 "value": Object {
                   "darkMode": false,
-                  "name": "amsterdam",
+                  "name": "borealis",
                 },
               },
             ],
@@ -1885,10 +2025,16 @@ Array [
       }
     >
       <EuiConfirmModal
+        aria-labelledby="generated-id"
         cancelButtonText="Cancel"
         confirmButtonText="Confirm"
         onCancel={[Function]}
         onConfirm={[Function]}
+        titleProps={
+          Object {
+            "id": "generated-id",
+          }
+        }
       >
         confirm 1
       </EuiConfirmModal>
@@ -1996,7 +2142,7 @@ Array [
                 "type": "return",
                 "value": Object {
                   "darkMode": false,
-                  "name": "amsterdam",
+                  "name": "borealis",
                 },
               },
             ],
@@ -2019,10 +2165,16 @@ Array [
       }
     >
       <EuiConfirmModal
+        aria-labelledby="generated-id"
         cancelButtonText="Cancel"
         confirmButtonText="Confirm"
         onCancel={[Function]}
         onConfirm={[Function]}
+        titleProps={
+          Object {
+            "id": "generated-id",
+          }
+        }
       >
         some confirm
       </EuiConfirmModal>
@@ -2135,7 +2287,7 @@ Array [
                 "type": "return",
                 "value": Object {
                   "darkMode": false,
-                  "name": "amsterdam",
+                  "name": "borealis",
                 },
               },
             ],
@@ -2269,7 +2421,7 @@ Array [
                 "type": "return",
                 "value": Object {
                   "darkMode": false,
-                  "name": "amsterdam",
+                  "name": "borealis",
                 },
               },
             ],

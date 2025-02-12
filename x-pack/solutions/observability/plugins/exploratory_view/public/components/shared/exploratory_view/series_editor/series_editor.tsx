@@ -9,7 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { rgba } from 'polished';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { AppDataType, ReportViewType, BuilderItem } from '../types';
 import { SeriesContextValue, useSeriesStorage } from '../hooks/use_series_storage';
 import { DataViewState, useAppDataViewContext } from '../hooks/use_app_data_view';
@@ -160,15 +160,15 @@ export const SeriesEditor = React.memo(function () {
   );
 });
 
-const Wrapper = euiStyled.div`
+const Wrapper = styled.div`
   &::-webkit-scrollbar {
-    height: ${({ theme }) => theme.eui.euiScrollBar};
-    width: ${({ theme }) => theme.eui.euiScrollBar};
+    height: ${({ theme }) => theme.euiTheme.size.base};
+    width: ${({ theme }) => theme.euiTheme.size.base};
   }
   &::-webkit-scrollbar-thumb {
     background-clip: content-box;
-    background-color: ${({ theme }) => rgba(theme.eui.euiColorDarkShade, 0.5)};
-    border: ${({ theme }) => theme.eui.euiScrollBarCorner} solid transparent;
+    background-color: ${({ theme }) => rgba(theme.euiTheme.colors.darkShade, 0.5)};
+    border: ${({ theme }) => theme.euiTheme.border.radius.small} solid transparent;
   }
   &::-webkit-scrollbar-corner,
   &::-webkit-scrollbar-track {
@@ -178,7 +178,7 @@ const Wrapper = euiStyled.div`
   &&& {
     .euiTableRow-isExpandedRow .euiTableRowCell {
       border-top: none;
-      background-color: #FFFFFF;
+      background-color: #ffffff;
       border-bottom: 2px solid #d3dae6;
       border-right: 2px solid rgb(211, 218, 230);
       border-left: 2px solid rgb(211, 218, 230);
@@ -197,26 +197,26 @@ const Wrapper = euiStyled.div`
   }
 `;
 
-const SectionHeaderBackground = euiStyled.div`
+const SectionHeaderBackground = styled.div`
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 56px;
-  background-color: ${({ theme }) => theme.eui.euiPageBackgroundColor};
-  border-bottom: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
+  background-color: ${({ theme }) => theme.euiTheme.colors.body};
+  border-bottom: 1px solid ${({ theme }) => theme.euiTheme.colors.lightShade};
   z-index: 90;
 `;
 
-const StickyFlexGroup = euiStyled(EuiFlexGroup)`
+const StickyFlexGroup = styled(EuiFlexGroup)`
   position: sticky;
   top: 0;
   z-index: 100;
   padding: 0;
 `;
 
-const EditorRowsWrapper = euiStyled.div`
-  margin: ${({ theme }) => theme.eui.euiSizeM} 0;
+const EditorRowsWrapper = styled.div`
+  margin: ${({ theme }) => theme.euiTheme.size.m} 0;
 `;
 
 export const LOADING_VIEW = i18n.translate(

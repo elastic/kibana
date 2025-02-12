@@ -24,7 +24,7 @@ export const deleteNoteRoute = (router: SecuritySolutionPluginRouter) => {
       path: NOTE_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: ['notes_write'],
         },
       },
       access: 'public',

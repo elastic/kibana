@@ -49,8 +49,7 @@ export const buildBaseClassicNavItems = (): ClassicNavItem[] => {
       {
         'data-test-subj': 'searchSideNav-Indices',
         deepLink: {
-          link: 'enterpriseSearchContent:searchIndices',
-          shouldShowActiveForSubroutes: true,
+          link: 'management:index_management',
         },
         id: 'search_indices',
       },

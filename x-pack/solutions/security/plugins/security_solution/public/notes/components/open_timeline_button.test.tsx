@@ -11,9 +11,11 @@ import { OpenTimelineButtonIcon } from './open_timeline_button';
 import type { Note } from '../../../common/api/timeline';
 import { OPEN_TIMELINE_BUTTON_TEST_ID } from './test_ids';
 import { useQueryTimelineById } from '../../timelines/components/open_timeline/helpers';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 
 jest.mock('../../common/hooks/use_experimental_features');
 jest.mock('../../timelines/components/open_timeline/helpers');
+jest.mock('../../common/components/user_privileges');
 
 const note: Note = {
   eventId: '1',
@@ -29,10 +31,23 @@ const note: Note = {
 const index = 0;
 
 describe('OpenTimelineButtonIcon', () => {
+  beforeEach(() => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: true } });
+  });
+
   it('should render the timeline icon', () => {
     const { getByTestId } = render(<OpenTimelineButtonIcon note={note} index={index} />);
 
     expect(getByTestId(`${OPEN_TIMELINE_BUTTON_TEST_ID}-${index}`)).toBeInTheDocument();
+  });
+
+  it('should disable the button if the user does not have the correct privileges', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: false } });
+    (useQueryTimelineById as jest.Mock).mockReturnValue(jest.fn());
+
+    const { getByTestId } = render(<OpenTimelineButtonIcon note={note} index={index} />);
+
+    expect(getByTestId(`${OPEN_TIMELINE_BUTTON_TEST_ID}-${index}`)).toHaveAttribute('disabled');
   });
 
   it('should call openTimeline with the correct values', () => {

@@ -68,7 +68,7 @@ export function MochaReporterProvider({ getService }) {
       }
 
       if (config.get('scoutReporter.enabled')) {
-        new ScoutFTRReporter(runner);
+        new ScoutFTRReporter(runner, config);
       }
     }
 

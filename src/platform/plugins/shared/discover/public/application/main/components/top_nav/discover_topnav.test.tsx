@@ -55,7 +55,7 @@ jest.mock('../../../../customizations', () => ({
 }));
 
 const mockDefaultCapabilities = {
-  discover: { save: true },
+  discover_v2: { save: true },
 } as unknown as typeof mockDiscoverService.capabilities;
 
 function getProps(
@@ -107,7 +107,7 @@ describe('Discover topnav component', () => {
   });
 
   test('generated config of TopNavMenu config is correct when discover save permissions are assigned', () => {
-    const props = getProps({ capabilities: { discover: { save: true } } });
+    const props = getProps({ capabilities: { discover_v2: { save: true } } });
     const component = mountWithIntl(
       <DiscoverMainProvider value={props.stateContainer}>
         <DiscoverTopNav {...props} />
@@ -119,7 +119,7 @@ describe('Discover topnav component', () => {
   });
 
   test('generated config of TopNavMenu config is correct when no discover save permissions are assigned', () => {
-    const props = getProps({ capabilities: { discover: { save: false } } });
+    const props = getProps({ capabilities: { discover_v2: { save: false } } });
     const component = mountWithIntl(
       <DiscoverMainProvider value={props.stateContainer}>
         <DiscoverTopNav {...props} />
@@ -128,32 +128,6 @@ describe('Discover topnav component', () => {
     const topNavMenu = component.find(TopNavMenu).props();
     const topMenuConfig = topNavMenu.config?.map((obj: TopNavMenuData) => obj.id);
     expect(topMenuConfig).toEqual(['inspect', 'new', 'open', 'share']);
-  });
-
-  test('top nav is correct when discover saveQuery permission is granted', () => {
-    const props = getProps({ capabilities: { discover: { saveQuery: true } } });
-    const component = mountWithIntl(
-      <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNav {...props} />
-      </DiscoverMainProvider>
-    );
-    const statefulSearchBar = component.find(
-      mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu
-    );
-    expect(statefulSearchBar.props().saveQueryMenuVisibility).toBe('allowed_by_app_privilege');
-  });
-
-  test('top nav is correct when discover saveQuery permission is not granted', () => {
-    const props = getProps({ capabilities: { discover: { saveQuery: false } } });
-    const component = mountWithIntl(
-      <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNav {...props} />
-      </DiscoverMainProvider>
-    );
-    const statefulSearchBar = component.find(
-      mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu
-    );
-    expect(statefulSearchBar.props().saveQueryMenuVisibility).toBe('globally_managed');
   });
 
   describe('top nav customization', () => {
@@ -229,35 +203,6 @@ describe('Discover topnav component', () => {
 
       const topNav = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
       expect(topNav.prop('dataViewPickerComponentProps')).toBeUndefined();
-    });
-  });
-
-  describe('inline top nav', () => {
-    it('should render top nav when inline top nav is not enabled', () => {
-      const props = getProps();
-      const component = mountWithIntl(
-        <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNav {...props} />
-        </DiscoverMainProvider>
-      );
-      const searchBar = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
-      expect(searchBar.prop('badges')).toBeDefined();
-      expect(searchBar.prop('config')).toBeDefined();
-      expect(searchBar.prop('setMenuMountPoint')).toBeDefined();
-    });
-
-    it('should not render top nav when inline top nav is enabled', () => {
-      const props = getProps();
-      props.stateContainer.customizationContext.inlineTopNav.enabled = true;
-      const component = mountWithIntl(
-        <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNav {...props} />
-        </DiscoverMainProvider>
-      );
-      const searchBar = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
-      expect(searchBar.prop('badges')).toBeUndefined();
-      expect(searchBar.prop('config')).toBeUndefined();
-      expect(searchBar.prop('setMenuMountPoint')).toBeUndefined();
     });
   });
 });

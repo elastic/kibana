@@ -6,7 +6,9 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { initializeTitles } from '@kbn/presentation-publishing';
+import { initializeTitleManager } from '@kbn/presentation-publishing';
+import { apiPublishesESQLVariables } from '@kbn/esql-variables-types';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildObservableVariable, createEmptyLensState } from '../helper';
 import type {
@@ -19,13 +21,14 @@ import type {
 } from '../types';
 import { apiHasAbortController, apiHasLensComponentProps } from '../type_guards';
 import type { UserMessage } from '../../types';
+import { getEmbeddableVariables } from './utils';
 
 export function initializeInternalApi(
   initialState: LensRuntimeState,
   parentApi: unknown,
+  titleManager: ReturnType<typeof initializeTitleManager>,
   { visualizationMap }: LensEmbeddableStartServices
 ): LensInternalApi {
-  const { titlesApi } = initializeTitles(initialState);
   const [hasRenderCompleted$] = buildObservableVariable<boolean>(false);
   const [expressionParams$] = buildObservableVariable<ExpressionWrapperProps | null>(null);
   const expressionAbortController$ = new BehaviorSubject<AbortController | undefined>(undefined);
@@ -66,19 +69,32 @@ export function initializeInternalApi(
     activeData: undefined,
   });
 
+  const [esqlVariables$] = buildObservableVariable(
+    apiPublishesESQLVariables(parentApi) ? parentApi.esqlVariables$ : []
+  );
+
+  const query = initialState.attributes.state.query;
+
+  const panelEsqlVariables$ = new BehaviorSubject<ESQLControlVariable[]>([]);
+  esqlVariables$.subscribe((newVariables) => {
+    const esqlVariables = getEmbeddableVariables(query, newVariables) ?? [];
+    panelEsqlVariables$.next(esqlVariables);
+  });
+
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
   return {
     attributes$,
     overrides$,
     disableTriggers$,
+    esqlVariables$: panelEsqlVariables$,
     dataLoading$,
     hasRenderCompleted$,
     expressionParams$,
     expressionAbortController$,
     renderCount$,
     isNewlyCreated$,
-    dataViews: dataViews$,
+    dataViews$,
     blockingError$,
     messages$,
     validationMessages$,
@@ -123,7 +139,7 @@ export function initializeInternalApi(
         };
       }
 
-      if (displayOptions.noPanelTitle == null && titlesApi.hidePanelTitle?.getValue()) {
+      if (displayOptions.noPanelTitle == null && titleManager.api.hideTitle$?.getValue()) {
         displayOptions = {
           ...displayOptions,
           noPanelTitle: true,

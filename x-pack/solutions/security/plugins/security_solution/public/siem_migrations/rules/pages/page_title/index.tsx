@@ -30,7 +30,7 @@ export const PageTitle: React.FC = React.memo(() => {
 
       <EuiFlexItem
         css={css`
-          margin: ${euiTheme.size.m} 0 0 ${euiTheme.size.m};
+          margin: ${euiTheme.size.s} 0 0 ${euiTheme.size.m};
         `}
         grow={false}
       >

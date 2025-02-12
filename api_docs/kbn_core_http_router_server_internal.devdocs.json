@@ -65,7 +65,7 @@
             "label": "from",
             "description": [],
             "signature": [
-              "({ router, defaultHandlerResolutionStrategy, isDev, useVersionResolutionStrategyForInternalPaths, }: ",
+              "({ router, log, defaultHandlerResolutionStrategy, env, useVersionResolutionStrategyForInternalPaths, }: ",
               "VersionedRouterArgs",
               ") => ",
               "CoreVersionedRouter"
@@ -79,7 +79,7 @@
                 "id": "def-server.CoreVersionedRouter.from.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    router,\n    defaultHandlerResolutionStrategy,\n    isDev,\n    useVersionResolutionStrategyForInternalPaths,\n  }",
+                "label": "{\n    router,\n    log,\n    defaultHandlerResolutionStrategy,\n    env,\n    useVersionResolutionStrategyForInternalPaths,\n  }",
                 "description": [],
                 "signature": [
                   "VersionedRouterArgs"
@@ -561,6 +561,56 @@
               "string[]"
             ],
             "path": "src/core/packages/http/router-server-internal/src/headers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-router-server-internal",
+        "id": "def-server.getWarningHeaderMessageFromRouteDeprecation",
+        "type": "Function",
+        "tags": [],
+        "label": "getWarningHeaderMessageFromRouteDeprecation",
+        "description": [],
+        "signature": [
+          "(deprecationObject: ",
+          "RouteDeprecationInfo",
+          ", kibanaVersion: string) => string"
+        ],
+        "path": "src/core/packages/http/router-server-internal/src/get_warning_header_message.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-server.getWarningHeaderMessageFromRouteDeprecation.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "deprecationObject",
+            "description": [],
+            "signature": [
+              "RouteDeprecationInfo"
+            ],
+            "path": "src/core/packages/http/router-server-internal/src/get_warning_header_message.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-server.getWarningHeaderMessageFromRouteDeprecation.$2",
+            "type": "string",
+            "tags": [],
+            "label": "kibanaVersion",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/core/packages/http/router-server-internal/src/get_warning_header_message.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

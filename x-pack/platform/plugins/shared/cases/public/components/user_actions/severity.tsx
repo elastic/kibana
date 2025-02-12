@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import type { SnakeToCamelCase } from '../../../common/types';
 import type { SeverityUserAction } from '../../../common/types/domain';
 import { SET_SEVERITY_TO } from '../create/translations';
 import { createCommonUpdateUserActionBuilder } from './common';
 import type { UserActionBuilder } from './types';
-import { severities } from '../severity/config';
+import { severities, SeverityHealth } from '../severity/config';
 
 const getLabelTitle = (userAction: SnakeToCamelCase<SeverityUserAction>) => {
   const severity = userAction.payload.severity;
+
   const severityData = severities[severity];
   if (severityData === undefined) {
     return null;
@@ -29,7 +30,7 @@ const getLabelTitle = (userAction: SnakeToCamelCase<SeverityUserAction>) => {
     >
       <EuiFlexItem grow={false}>{SET_SEVERITY_TO}</EuiFlexItem>
       <EuiFlexItem data-test-subj={`${userAction.id}-user-action-severity-title-${severity}`}>
-        <EuiHealth color={severityData.color}>{severityData.label}</EuiHealth>
+        <SeverityHealth severity={severity} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -7,17 +7,9 @@
 
 import React, { useCallback } from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
-import type {
-  AuthorFilter,
-  StatusFilter,
-} from '../../../../../../common/siem_migrations/constants';
+import type { AuthorFilter, FilterOptions, StatusFilter } from '../../../types';
 import { StatusFilterButton } from './status';
 import { AuthorFilterButton } from './author';
-
-export interface FilterOptions {
-  status?: StatusFilter;
-  author?: AuthorFilter;
-}
 
 export interface MigrationRulesFilterProps {
   filterOptions?: FilterOptions;

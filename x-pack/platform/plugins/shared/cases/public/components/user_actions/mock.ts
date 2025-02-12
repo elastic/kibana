@@ -65,7 +65,7 @@ export const getMockBuilderArgs = (): UserActionBuilderArgs => {
     persistableStateAttachmentTypeRegistry,
     caseData: basicCase,
     casesConfiguration: casesConfigurationsMock,
-    comments: basicCase.comments,
+    attachments: basicCase.comments,
     index: 0,
     alertData,
     commentRefs,

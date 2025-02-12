@@ -130,13 +130,18 @@ Note: if you need to do simultaneous Kibana and Fleet Server development, refer 
 Kibana primarily uses Jest for unit testing. Each plugin or package defines a `jest.config.js` that extends a preset provided by the `@kbn/test` package. Unless you intend to run all unit tests within the project, you should provide the Jest configuration for Fleet. The following command runs all Fleet unit tests:
 
 ```sh
-yarn jest --config x-pack/platform/plugins/shared/fleet/jest.config.js
+yarn jest --config x-pack/platform/plugins/shared/fleet/jest.config.dev.js
 ```
 
 You can also run a specific test by passing the filepath as an argument, e.g.:
 
 ```sh
-yarn jest --config x-pack/platform/plugins/shared/fleet/jest.config.js x-pack/platform/plugins/shared/fleet/common/services/validate_package_policy.test.ts
+yarn jest --config x-pack/platform/plugins/shared/fleet/jest.config.dev.js x-pack/platform/plugins/shared/fleet/common/services/validate_package_policy.test.ts
+```
+
+Or alternatively:
+```sh
+yarn test:jest x-pack/platform/plugins/shared/fleet/common/services/validate_package_policy.test.ts
 ```
 
 #### API integration tests (stateful)
@@ -250,7 +255,7 @@ The projects below are dependent on Fleet, most using Fleet API as well. In case
 
 Fleet supports shipping integrations as `.zip` archives with Kibana's source code through a concept referred to as _bundled packages_. This allows integrations like APM, which is enabled by default in Cloud, to reliably provide upgrade paths without internet access, and generally improves stability around Fleet's installation/setup processes for several common integrations.
 
-The set of bundled packages included with Kibana is dictated by a top-level `fleet_packages.json` file in the Kibana repo. This file includes a list of packages with a pinned version that Kibana will consider bundled. When the Kibana distributable is built, a [build task](https://github.com/elastic/kibana/blob/main/src/dev/build/tasks/bundle_fleet_packages.ts) will resolve these packages from the Elastic Package Registry, download the appropriate version as a `.zip` archive, and place it in a directory configurable by a `xpack.fleet.bundledPackageLocation` value in `kibana.yml`. By default, these archives are stored in `x-pack/platform/plugins/shared/fleet/.target/bundled_packages/`. In CI/CD, we [override](https://github.com/elastic/kibana/blob/main/x-pack/test/fleet_api_integration/config.ts#L20) this default with `/tmp/fleet_bundled_packages`.
+The set of bundled packages included with Kibana is dictated by a top-level `fleet_packages.json` file in the Kibana repo. This file includes a list of packages with a pinned version that Kibana will consider bundled. When the Kibana distributable is built, a [build task](https://github.com/elastic/kibana/blob/main/src/dev/build/tasks/bundle_fleet_packages.ts) will resolve these packages from the Elastic Package Registry, download the appropriate version as a `.zip` archive, and place it in a directory configurable by a `xpack.fleet.bundledPackageLocation` value in `kibana.yml`. By default, these archives are stored in `x-pack/platform/plugins/shared/fleet/.target/bundled_packages/`. In CI/CD, we [override](https://github.com/elastic/kibana/blob/main/x-pack/test/fleet_api_integration/config.base.ts#L19) this default with `/tmp/fleet_bundled_packages`.
 
 Until further automation is added, this `fleet_packages.json` file should be updated as part of the release process to ensure the latest compatible version of each bundled package is included with that Kibana version. **This must be done before the final BC for a release is built.**
 Tracking issues should be opened and tracked by the Fleet UI team. See https://github.com/elastic/kibana/issues/129309 as an example.

@@ -42,6 +42,9 @@ export const UpdateExceptionListRequestBody = z.object({
   tags: ExceptionListTags.optional(),
   meta: ExceptionListMeta.optional(),
   version: ExceptionListVersion.optional(),
+  /**
+   * The version id, normally returned by the API when the item was retrieved. Use it ensure updates are done against the latest version.
+   */
   _version: z.string().optional(),
 });
 export type UpdateExceptionListRequestBodyInput = z.input<typeof UpdateExceptionListRequestBody>;

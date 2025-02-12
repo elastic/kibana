@@ -127,17 +127,19 @@ export const runActionTestSuite = ({
         properties: {},
       },
     })();
-    const docs100k = new Array(100000).fill({
+    const docs10k = new Array(10000).fill({
       _source: { title: new Array(1000).fill('a').join(), type: 'large' },
-    }) as unknown as SavedObjectsRawDoc[]; // 100k "large" saved objects
+    }) as unknown as SavedObjectsRawDoc[]; // 10k "large" saved objects
+    const operations = docs10k.map((doc) => createBulkIndexOperationTuple(doc));
 
-    await bulkOverwriteTransformedDocuments({
-      client,
-      index: 'existing_index_with_100k_docs',
-      operations: docs100k.map((doc) => createBulkIndexOperationTuple(doc)),
-      refresh: 'wait_for',
-    })();
-
+    for (let i = 0; i < 10; i++) {
+      await bulkOverwriteTransformedDocuments({
+        client,
+        index: 'existing_index_with_100k_docs',
+        operations,
+        refresh: 'wait_for',
+      })();
+    }
     await createIndex({
       client,
       indexName: 'existing_index_2',

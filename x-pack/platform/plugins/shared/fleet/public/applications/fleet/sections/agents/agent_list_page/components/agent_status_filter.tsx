@@ -40,6 +40,12 @@ const statusFilters = [
     }),
   },
   {
+    status: 'orphaned',
+    label: i18n.translate('xpack.fleet.agentList.statusOrphanedFilterText', {
+      defaultMessage: 'Orphaned',
+    }),
+  },
+  {
     status: 'updating',
     label: i18n.translate('xpack.fleet.agentList.statusUpdatingFilterText', {
       defaultMessage: 'Updating',
@@ -61,6 +67,12 @@ const statusFilters = [
     status: 'unenrolled',
     label: i18n.translate('xpack.fleet.agentList.statusUnenrolledFilterText', {
       defaultMessage: 'Unenrolled',
+    }),
+  },
+  {
+    status: 'uninstalled',
+    label: i18n.translate('xpack.fleet.agentList.statusUninstalledFilterText', {
+      defaultMessage: 'Uninstalled',
     }),
   },
 ];

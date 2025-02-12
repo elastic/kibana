@@ -1,0 +1,98 @@
+- input: azure-blob-storage
+  template_path: azure-blob-storage.yml.hbs
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
+  vars:
+    - name: account_name
+      type: text
+      title: Account Name
+      description: |
+        This attribute is required for various internal operations with respect to authentication, creating service clients and blob clients which are used internally for various processing purposes.
+      required: true
+      show_user: true
+    - name: service_account_key
+      type: password
+      title: Service Account Key
+      description: |
+        This attribute contains the access key, found under the Access keys section on Azure Cloud, under the respective storage account. A single storage account can contain multiple containers, and they will all use this common access key.
+      required: false
+      show_user: true
+      secret: true
+    - name: service_account_uri
+      type: text
+      title: Service Account URI
+      description: |
+        This attribute contains the connection string, found under the Access keys section on Azure Cloud, under the respective storage account. A single storage account can contain multiple containers, and they will all use this common connection string.
+      required: false
+      show_user: false
+    - name: storage_url
+      type: text
+      title: Storage URL
+      description: >-
+        Use this attribute to specify a custom storage URL if required. By default it points to azure cloud storage. Only use this if there is a specific need to connect to a different environment where blob storage is available.
+        URL format : {{protocol}}://{{account_name}}.{{storage_uri}}.
+      required: false
+      show_user: false
+    - name: number_of_workers
+      type: integer
+      title: Maximum number of workers
+      multi: false
+      required: false
+      show_user: true
+      default: 3
+      description: Determines how many workers are spawned per container.
+    - name: poll
+      type: bool
+      title: Polling
+      multi: false
+      required: false
+      show_user: true
+      default: true
+      description: Determines if the container will be continuously polled for new documents.
+    - name: poll_interval
+      type: text
+      title: Polling interval
+      multi: false
+      required: false
+      show_user: true
+      default: 15s
+      description: Determines the time interval between polling operations.
+    - name: containers
+      type: yaml
+      title: Containers
+      description: "This attribute contains the details about a specific container like, name, number_of_workers, poll, poll_interval etc. \nThe attribute 'name' is specific to a container as it describes the container name, while the fields number_of_workers, poll, poll_interval can exist both at the container level and at the global level. \nIf you have already defined the attributes globally, then you can only specify the container name in this yaml config. \nIf you want to override any specific attribute for a container, then, you can define it here. \nAny attribute defined in the yaml will override the global definitions. Please see the relevant [documentation](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-azure-blob-storage.html#attrib-containers) for further information.\n"
+      required: true
+      show_user: true
+      default: |
+        - name: azure-container1
+          max_workers: 3
+          poll: true
+          poll_interval: 15s
+        #- name: azure-container2
+        #  max_workers: 3
+        #  poll: true
+        #  poll_interval: 10s
+    - name: file_selectors
+      type: yaml
+      title: File Selectors
+      multi: false
+      required: false
+      show_user: false
+      default: |
+        # - regex: "event/"
+      description: "If the container will have events that correspond to files that this integration shouldn’t process, file_selectors can be used to limit the files that are downloaded. This is a list of selectors which is made up of regex patters. \nThe regex should match the container filepath. Regexes use [RE2 syntax](https://pkg.go.dev/regexp/syntax). Files that don’t match one of the regexes will not be processed.\n"
+    - name: timestamp_epoch
+      type: integer
+      title: Timestamp Epoch
+      multi: false
+      required: false
+      show_user: false
+    - name: expand_event_list_from_field
+      type: text
+      title: Expand Event List From Field
+      multi: false
+      required: false
+      show_user: false
+      description: "If the file-set using this input expects to receive multiple messages bundled under a specific field or an array of objects then the config option for 'expand_event_list_from_field' can be specified. \nThis setting will be able to split the messages under the group value into separate events. This can be specified at the global level or at the container level.\nFor more info please refer to the [documentation](https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-input-azure-blob-storage.html#attrib-expand_event_list_from_field).\n"

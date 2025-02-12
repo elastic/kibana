@@ -120,7 +120,7 @@
               "Allowed values to show on the Control Slider"
             ],
             "signature": [
-              "number[]"
+              "{ label: string; value: number; accessibleLabel?: string | undefined; }[]"
             ],
             "path": "x-pack/platform/packages/private/kbn-random-sampling/src/ui/slider_control/index.tsx",
             "deprecated": false,

@@ -17,9 +17,10 @@ import { VISUALIZATIONS_TEST_ID } from './test_ids';
 import { GraphPreviewContainer } from './graph_preview_container';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
-import { GRAPH_VISUALIZATION_IN_FLYOUT_ENABLED_EXPERIMENTAL_FEATURE } from '../../shared/constants/experimental_features';
+import {
+  ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING,
+  ENABLE_GRAPH_VISUALIZATION_SETTING,
+} from '../../../../../common/constants';
 
 const KEY = 'visualizations';
 
@@ -35,9 +36,7 @@ export const VisualizationsSection = memo(() => {
     ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
   );
 
-  const isGraphFeatureEnabled = useIsExperimentalFeatureEnabled(
-    GRAPH_VISUALIZATION_IN_FLYOUT_ENABLED_EXPERIMENTAL_FEATURE
-  );
+  const [graphVisualizationEnabled] = useUiSetting$<boolean>(ENABLE_GRAPH_VISUALIZATION_SETTING);
 
   // Decide whether to show the graph preview or not
   const { hasGraphRepresentation } = useGraphPreview({
@@ -47,7 +46,7 @@ export const VisualizationsSection = memo(() => {
   });
 
   const shouldShowGraphPreview =
-    visualizationInFlyoutEnabled && isGraphFeatureEnabled && hasGraphRepresentation;
+    visualizationInFlyoutEnabled && graphVisualizationEnabled && hasGraphRepresentation;
 
   return (
     <ExpandableSection

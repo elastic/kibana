@@ -1073,6 +1073,160 @@
       },
       {
         "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.useConfirmModal",
+        "type": "Function",
+        "tags": [],
+        "label": "useConfirmModal",
+        "description": [],
+        "signature": [
+          "({\n  title,\n  children,\n  confirmButtonText,\n}: { title: React.ReactNode; children: React.ReactNode; confirmButtonText: React.ReactNode; }) => { element: React.ReactNode; confirm: () => Promise<boolean>; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.useConfirmModal.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  title,\n  children,\n  confirmButtonText,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.useConfirmModal.$1.title",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "title",
+                "description": [],
+                "signature": [
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.useConfirmModal.$1.children",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "children",
+                "description": [],
+                "signature": [
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-assistant",
+                "id": "def-public.useConfirmModal.$1.confirmButtonText",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "confirmButtonText",
+                "description": [],
+                "signature": [
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_confirm_modal.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.useConversationsByDate",
+        "type": "Function",
+        "tags": [],
+        "label": "useConversationsByDate",
+        "description": [],
+        "signature": [
+          "(conversations: ",
+          {
+            "pluginId": "observabilityAIAssistant",
+            "scope": "common",
+            "docId": "kibObservabilityAIAssistantPluginApi",
+            "section": "def-common.Conversation",
+            "text": "Conversation"
+          },
+          "[], getConversationHref: ((id: string) => string) | undefined) => Record<string, { id: string; label: string; lastUpdated: string; href?: string | undefined; }[]>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversations_by_date.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.useConversationsByDate.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "conversations",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "common",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-common.Conversation",
+                "text": "Conversation"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversations_by_date.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ai-assistant",
+            "id": "def-public.useConversationsByDate.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "getConversationHref",
+            "description": [],
+            "signature": [
+              "((id: string) => string) | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_conversations_by_date.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.useGenAIConnectors",
+        "type": "Function",
+        "tags": [],
+        "label": "useGenAIConnectors",
+        "description": [],
+        "signature": [
+          "() => ",
+          "UseGenAIConnectorsResult"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_genai_connectors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
         "id": "def-public.useKnowledgeBase",
         "type": "Function",
         "tags": [],
@@ -1143,11 +1297,11 @@
             "signature": [
               "State<{ errorMessage?: string | undefined; ready: boolean; enabled: boolean; endpoint?: Partial<",
               "InferenceInferenceEndpointInfo",
-              "> | undefined; model_stats?: { deployment_state: ",
+              "> | undefined; model_stats?: { deployment_state?: ",
               "MlDeploymentAssignmentState",
-              " | undefined; allocation_state: ",
+              " | undefined; allocation_state?: ",
               "MlDeploymentAllocationState",
-              " | undefined; } | undefined; }> & { refresh: () => void; }"
+              " | undefined; allocation_count?: number | undefined; } | undefined; }> & { refresh: () => void; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_knowledge_base.tsx",
             "deprecated": false,
@@ -1230,6 +1384,18 @@
           }
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/service/create_app_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-assistant",
+        "id": "def-public.UseGenAIConnectorsResult",
+        "type": "Type",
+        "tags": [],
+        "label": "UseGenAIConnectorsResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-ai-assistant/src/hooks/use_genai_connectors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

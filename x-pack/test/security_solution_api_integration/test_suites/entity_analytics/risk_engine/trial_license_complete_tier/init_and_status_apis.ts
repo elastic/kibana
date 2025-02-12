@@ -71,6 +71,8 @@ export default ({ getService }: FtrProviderContext) => {
         const dataStreamName = 'risk-score.risk-score-default';
         const latestIndexName = 'risk-score.risk-score-latest-default';
         const transformId = 'risk_score_latest_transform_default';
+        const defaultPipeline =
+          'entity_analytics_create_eventIngest_from_timestamp-pipeline-default';
 
         await riskEngineRoutes.init();
 
@@ -88,6 +90,13 @@ export default ({ getService }: FtrProviderContext) => {
             '@timestamp': {
               ignore_malformed: false,
               type: 'date',
+            },
+            event: {
+              properties: {
+                ingested: {
+                  type: 'date',
+                },
+              },
             },
             host: {
               properties: {
@@ -288,6 +297,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(indexTemplate.index_template.template!.settings).to.eql({
           index: {
+            default_pipeline: defaultPipeline,
             mapping: {
               total_fields: {
                 limit: '1000',
@@ -341,6 +351,7 @@ export default ({ getService }: FtrProviderContext) => {
         const dataStreamName = `risk-score.risk-score-${customSpaceName}`;
         const latestIndexName = `risk-score.risk-score-latest-${customSpaceName}`;
         const transformId = `risk_score_latest_transform_${customSpaceName}`;
+        const defaultPipeline = `entity_analytics_create_eventIngest_from_timestamp-pipeline-${customSpaceName}`;
 
         await riskEngineRoutesWithNamespace.init();
 
@@ -358,6 +369,13 @@ export default ({ getService }: FtrProviderContext) => {
             '@timestamp': {
               ignore_malformed: false,
               type: 'date',
+            },
+            event: {
+              properties: {
+                ingested: {
+                  type: 'date',
+                },
+              },
             },
             host: {
               properties: {
@@ -562,6 +580,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(indexTemplate.index_template.template!.settings).to.eql({
           index: {
+            default_pipeline: defaultPipeline,
             mapping: {
               total_fields: {
                 limit: '1000',
@@ -626,7 +645,7 @@ export default ({ getService }: FtrProviderContext) => {
             start: 'now-30d',
           },
           _meta: {
-            mappingsVersion: 2,
+            mappingsVersion: 3,
           },
         });
       });

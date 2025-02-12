@@ -60,7 +60,7 @@ export const ControlsContent: React.FC<Props> = ({
         Object.keys(children).map((childId) => {
           const child = children[childId] as DataControlApi;
           child.CustomPrependComponent = () => (
-            <ControlTitle title={child.panelTitle.getValue()} embeddableId={childId} />
+            <ControlTitle title={child.title$.getValue()} embeddableId={childId} />
           );
         });
       });

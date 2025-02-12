@@ -12,7 +12,6 @@ import {
   EuiSkeletonText,
   EuiText,
   EuiTitle,
-  euiPaletteColorBlindBehindText,
   useEuiTheme,
 } from '@elastic/eui';
 import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
@@ -148,7 +147,7 @@ export const MonitorAlerts = ({
                   ...(locationFilter ?? []),
                 ],
                 color: isAmsterdam
-                  ? euiPaletteColorBlindBehindText()[7]
+                  ? euiTheme.colors.vis.euiColorVisBehindText7
                   : euiTheme.colors.vis.euiColorVis7,
               },
             ]}
@@ -203,7 +202,7 @@ export const MonitorAlerts = ({
                   ...(locationFilter ?? []),
                 ],
                 color: isAmsterdam
-                  ? euiPaletteColorBlindBehindText()[0]
+                  ? euiTheme.colors.vis.euiColorVisBehindText0
                   : euiTheme.colors.vis.euiColorVis0,
               },
             ]}

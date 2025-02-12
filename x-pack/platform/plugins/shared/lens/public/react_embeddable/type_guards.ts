@@ -7,7 +7,7 @@
 
 import {
   apiIsOfType,
-  apiPublishesPanelTitle,
+  apiPublishesTitle,
   apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { isObject } from 'lodash';
@@ -34,7 +34,7 @@ export const isLensApi = (api: unknown): api is LensApi => {
       apiIsOfType(api, 'lens') &&
       'canViewUnderlyingData$' in api &&
       apiHasLensCallbacks(api) &&
-      apiPublishesPanelTitle(api) &&
+      apiPublishesTitle(api) &&
       apiPublishesUnifiedSearch(api)
   );
 };

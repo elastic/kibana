@@ -34,9 +34,7 @@ import { ObservabilityOnboardingContextValue } from '../../../plugin';
 import { useKubernetesFlow } from '../kubernetes/use_kubernetes_flow';
 
 const OTEL_HELM_CHARTS_REPO = 'https://open-telemetry.github.io/opentelemetry-helm-charts';
-const OTEL_KUBE_STACK_VERSION = '0.3.3';
-const OTEL_KUBE_STACK_VALUES_FILE_URL =
-  'https://raw.githubusercontent.com/elastic/opentelemetry/refs/heads/8.16/resources/kubernetes/operator/helm/values.yaml';
+const OTEL_KUBE_STACK_VERSION = '0.3.9';
 const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes_otel-cluster-overview';
 
 export const OtelKubernetesPanel: React.FC = () => {
@@ -55,6 +53,9 @@ export const OtelKubernetesPanel: React.FC = () => {
     );
   }
 
+  const otelKubeStackValuesFileUrl = data
+    ? `https://raw.githubusercontent.com/elastic/elastic-agent/refs/tags/v${data.elasticAgentVersionInfo.agentBaseVersion}/deploy/helm/edot-collector/kube-stack/values.yaml`
+    : '';
   const namespace = 'opentelemetry-operator-system';
   const addRepoCommand = `helm repo add open-telemetry '${OTEL_HELM_CHARTS_REPO}' --force-update`;
   const installStackCommand = data
@@ -65,7 +66,7 @@ kubectl create secret generic elastic-secret-otel \\
   --from-literal=elastic_api_key='${data.apiKeyEncoded}'
 helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
   --namespace ${namespace} \\
-  --values '${OTEL_KUBE_STACK_VALUES_FILE_URL}' \\
+  --values '${otelKubeStackValuesFileUrl}' \\
   --version '${OTEL_KUBE_STACK_VERSION}'`
     : undefined;
 
@@ -160,7 +161,7 @@ helm install opentelemetry-kube-stack open-telemetry/opentelemetry-kube-stack \\
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
                       iconType="download"
-                      href={OTEL_KUBE_STACK_VALUES_FILE_URL}
+                      href={otelKubeStackValuesFileUrl}
                       flush="left"
                       target="_blank" // The `download` attribute does not work cross-origin so it's better to open the file in a new tab
                       data-test-subj="observabilityOnboardingOtelKubernetesPanelDownloadValuesFileButton"

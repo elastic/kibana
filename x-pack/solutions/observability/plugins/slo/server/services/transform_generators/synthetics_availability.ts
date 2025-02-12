@@ -18,7 +18,7 @@ import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
   getSLOPipelineId,
   getSLOTransformId,
-  SLO_DESTINATION_INDEX_NAME,
+  SLI_DESTINATION_INDEX_NAME,
   SYNTHETICS_DEFAULT_GROUPINGS,
   SYNTHETICS_INDEX_PATTERN,
 } from '../../../common/constants';
@@ -111,7 +111,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     const queryFilter: estypes.QueryDslQueryContainer[] = [
       { term: { 'summary.final_attempt': true } },
       { term: { 'meta.space_id': this.spaceId } },
-      getFilterRange(slo, '@timestamp'),
+      getFilterRange(slo, '@timestamp', this.isServerless),
     ];
     const { monitorIds, tags, projects } = buildParamValues({
       monitorIds: indicator.params.monitorIds || [],
@@ -163,7 +163,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
   private buildDestination(slo: SLODefinition) {
     return {
       pipeline: getSLOPipelineId(slo.id, slo.revision),
-      index: SLO_DESTINATION_INDEX_NAME,
+      index: SLI_DESTINATION_INDEX_NAME,
     };
   }
 

@@ -230,7 +230,6 @@ export const ContextApp = ({ dataView, anchorId, referrer }: ContextAppProps) =>
       showSearchBar: true,
       showQueryInput: false,
       showFilterBar: true,
-      saveQueryMenuVisibility: 'hidden' as const,
       showDatePicker: false,
       indexPatterns: [dataView],
       useDefaultBehaviors: true,

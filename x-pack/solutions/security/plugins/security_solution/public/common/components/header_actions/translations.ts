@@ -14,14 +14,6 @@ export const OPEN_SESSION_VIEW = i18n.translate(
   }
 );
 
-export const SORT_FIELDS = i18n.translate('xpack.securitySolution.timeline.sortFieldsButton', {
-  defaultMessage: 'Sort fields',
-});
-
-export const FULL_SCREEN = i18n.translate('xpack.securitySolution.timeline.fullScreenButton', {
-  defaultMessage: 'Full screen',
-});
-
 export const VIEW_DETAILS = i18n.translate(
   'xpack.securitySolution.hoverActions.viewDetailsAriaLabel',
   {

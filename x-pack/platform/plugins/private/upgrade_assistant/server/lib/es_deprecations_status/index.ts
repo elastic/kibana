@@ -56,14 +56,22 @@ export async function getESUpgradeStatus(
       return status !== 'green';
     }) as EnrichedDeprecationInfo[];
 
-    return [...enrichedHealthIndicators, ...toggledMigrationsDeprecations];
+    return {
+      enrichedHealthIndicators,
+      migrationsDeprecations: toggledMigrationsDeprecations,
+    };
   };
+  const { enrichedHealthIndicators, migrationsDeprecations } = await getCombinedDeprecations();
 
-  const combinedDeprecations = await getCombinedDeprecations();
-  const criticalWarnings = combinedDeprecations.filter(({ isCritical }) => isCritical === true);
-
-  return {
-    totalCriticalDeprecations: criticalWarnings.length,
-    deprecations: combinedDeprecations,
+  const result = {
+    totalCriticalDeprecations: migrationsDeprecations.filter(
+      ({ isCritical }) => isCritical === true
+    ).length,
+    migrationsDeprecations,
+    totalCriticalHealthIssues: enrichedHealthIndicators.filter(
+      ({ isCritical }) => isCritical === true
+    ).length,
+    enrichedHealthIndicators,
   };
+  return result;
 }

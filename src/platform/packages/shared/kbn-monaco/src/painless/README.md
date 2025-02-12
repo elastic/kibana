@@ -45,7 +45,7 @@ This directory contains the Painless lexer and grammar rules, as well as the gen
 
 ```
 import { PainlessLang, PainlessContext } from '@kbn/monaco';
-import { CodeEditor } from '../src/platform/plugins/shared/kibana_react/public';
+import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
 // Fields are optional and only applicable in certain contexts
 const fields = [

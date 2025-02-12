@@ -49,6 +49,7 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
 
   const { showNodeInfo } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.anomalyDetection;
+
   return (
     <>
       <MlPageHeader>

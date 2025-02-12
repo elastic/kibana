@@ -28,6 +28,7 @@ import {
   getLanguageDisplayName,
 } from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
@@ -47,11 +48,13 @@ import {
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
-import { getSuggestions, getGridAttrs, type ESQLDataGridAttrs } from './helpers';
+import { getSuggestions, type ESQLDataGridAttrs } from './helpers';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { ESQLDataGridAccordion } from './esql_data_grid_accordion';
+import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
+import { useESQLVariables } from './use_esql_variables';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -77,12 +80,15 @@ export function LensEditConfigurationFlyout({
   onApply: onApplyCallback,
   onCancel: onCancelCallback,
   hideTimeFilterInfo,
+  parentApi,
+  panelId,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
   const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
   const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
+
   const [errors, setErrors] = useState<Error[] | undefined>();
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
@@ -93,6 +99,17 @@ export function LensEditConfigurationFlyout({
   const [dataGridAttrs, setDataGridAttrs] = useState<ESQLDataGridAttrs | undefined>(undefined);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeDatasource = datasourceMap[datasourceId];
+
+  const esqlVariables = useStateFromPublishingSubject(
+    isApiESQLVariablesCompatible(parentApi) ? parentApi?.esqlVariables$ : undefined
+  );
+
+  const { onSaveControl, onCancelControl } = useESQLVariables({
+    parentApi,
+    panelId,
+    attributes,
+    closeFlyout,
+  });
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
@@ -138,27 +155,6 @@ export function LensEditConfigurationFlyout({
     });
     return () => s?.unsubscribe();
   }, [dispatch, dataLoading$, layers]);
-
-  useEffect(() => {
-    const abortController = new AbortController();
-    const getESQLGridAttrs = async () => {
-      if (!dataGridAttrs && isOfAggregateQueryType(query)) {
-        const { dataView, columns, rows } = await getGridAttrs(
-          query,
-          adHocDataViews,
-          startDependencies,
-          abortController
-        );
-
-        setDataGridAttrs({
-          rows,
-          dataView,
-          columns,
-        });
-      }
-    };
-    getESQLGridAttrs();
-  }, [adHocDataViews, dataGridAttrs, query, startDependencies]);
 
   const attributesChanged: boolean = useMemo(() => {
     const previousAttrs = previousAttributes.current;
@@ -323,7 +319,7 @@ export function LensEditConfigurationFlyout({
   });
 
   const runQuery = useCallback(
-    async (q: AggregateQuery, abortController?: AbortController) => {
+    async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
       const attrs = await getSuggestions(
         q,
         startDependencies,
@@ -332,7 +328,9 @@ export function LensEditConfigurationFlyout({
         adHocDataViews,
         setErrors,
         abortController,
-        setDataGridAttrs
+        setDataGridAttrs,
+        esqlVariables,
+        shouldUpdateAttrs
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -349,8 +347,32 @@ export function LensEditConfigurationFlyout({
       adHocDataViews,
       setCurrentAttributes,
       updateSuggestion,
+      esqlVariables,
     ]
   );
+
+  useEffect(() => {
+    const abortController = new AbortController();
+    const initializeChart = async () => {
+      if (isOfAggregateQueryType(query) && !dataGridAttrs) {
+        try {
+          await runQuery(query, abortController, Boolean(attributes.state.needsRefresh));
+        } catch (e) {
+          setErrors([e]);
+          prevQuery.current = query;
+        }
+      }
+    };
+    initializeChart();
+  }, [
+    adHocDataViews,
+    runQuery,
+    esqlVariables,
+    query,
+    startDependencies,
+    dataGridAttrs,
+    attributes.state.needsRefresh,
+  ]);
 
   const isSaveable = useMemo(() => {
     if (!attributesChanged) {
@@ -508,6 +530,7 @@ export function LensEditConfigurationFlyout({
                     : undefined
                 }
                 editorIsInline
+                supportsControls
                 hideRunQueryText
                 onTextLangQuerySubmit={async (q, a) => {
                   // do not run the suggestions if the query is the same as the previous one
@@ -519,6 +542,9 @@ export function LensEditConfigurationFlyout({
                 isDisabled={false}
                 allowQueryCancellation
                 isLoading={isVisualizationLoading}
+                onSaveControl={onSaveControl}
+                onCancelControl={onCancelControl}
+                esqlVariables={esqlVariables}
               />
             </EuiFlexItem>
           )}
@@ -554,9 +580,8 @@ export function LensEditConfigurationFlyout({
                 <EuiTitle
                   size="xxs"
                   css={css`
-                padding: 2px;
-              }
-            `}
+                    padding: 2px;
+                  `}
                 >
                   <h5>
                     {i18n.translate('xpack.lens.config.visualizationConfigurationLabel', {
@@ -601,13 +626,12 @@ export function LensEditConfigurationFlyout({
             grow={isSuggestionsAccordionOpen ? 1 : false}
             data-test-subj="InlineEditingSuggestions"
             css={css`
-                border-top: ${euiThemeVars.euiBorderThin};
-                border-bottom: ${euiThemeVars.euiBorderThin};
-                padding-left: ${euiThemeVars.euiSize};
-                padding-right: ${euiThemeVars.euiSize};
-                .euiAccordion__childWrapper {
-                  flex: ${isSuggestionsAccordionOpen ? 1 : 'none'}
-                }
+              border-top: ${euiThemeVars.euiBorderThin};
+              border-bottom: ${euiThemeVars.euiBorderThin};
+              padding-left: ${euiThemeVars.euiSize};
+              padding-right: ${euiThemeVars.euiSize};
+              .euiAccordion__childWrapper {
+                flex: ${isSuggestionsAccordionOpen ? 1 : 'none'};
               }
             `}
           >

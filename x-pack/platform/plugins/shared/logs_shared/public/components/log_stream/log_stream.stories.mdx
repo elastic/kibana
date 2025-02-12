@@ -18,9 +18,9 @@ import { LogStream } from '../../../../../../../logs_shared/public';
 To use the component your plugin needs to follow certain criteria:
 
 - Ensure `"logsShared"` and `"data"` are specified as a `requiredPlugins` in your plugin's `kibana.json`.
-- Ensure the `<LogStream />` component is mounted inside the hierachy of a [`kibana-react` provider](https://github.com/elastic/kibana/blob/b2d0aa7b7fae1c89c8f9e8854ae73e71be64e765/src/plugins/kibana_react/README.md#L45). At a minimum, the kibana-react provider must pass `http` (from core start services) and `data` (from core plugin start dependencies).
-- Ensure the `<LogStream />` component is mounted inside the hierachy of a [`KibanaThemeProvider`](https://github.com/elastic/kibana/blob/31d2db035c905fb5819fa6dc2354f3be795a34cf/src/plugins/kibana_react/public/theme/kibana_theme_provider.tsx#L27).
-- Ensure the `<LogStream />` component is mounted inside the hierachy of a [`EuiThemeProvider`](https://github.com/elastic/kibana/blob/main/src/plugins/kibana_react/common/eui_styled_components.tsx). This is not the same as the provider exported by EUI. It bridges the gap between EUI and styled components and predates the css-in-js support in EUI.
+- Ensure the `<LogStream />` component is mounted inside the hierachy of a [`kibana-react` provider](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_react/README.md). At a minimum, the kibana-react provider must pass `http` (from core start services) and `data` (from core plugin start dependencies).
+- Ensure the `<LogStream />` component is mounted inside the hierachy of a [`KibanaThemeProvider`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_utils/public/theme/kibana_theme_provider.tsx#L26).
+- Ensure the `<LogStream />` component is mounted inside the hierachy of a [`EuiThemeProvider`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/kibana_react/common/eui_styled_components.tsx). This is not the same as the provider exported by EUI. It bridges the gap between EUI and styled components and predates the css-in-js support in EUI.
 
 ## Usage
 
@@ -80,7 +80,7 @@ The component also has a `filters` prop that accepts valid es-query `filters`. T
 
 ## Center the view on a specific entry
 
-By default the component will load at the bottom of the list, showing the newest entries. You can change the rendering point with the `center` prop. The prop takes a [`LogEntriesCursor`](https://github.com/elastic/kibana/blob/0a6c748cc837c016901f69ff05d81395aa2d41c8/x-pack/plugins/observability_solution/logs_shared/common/http_api/log_entries/common.ts#L9-L13).
+By default the component will load at the bottom of the list, showing the newest entries. You can change the rendering point with the `center` prop. The prop takes a [`LogEntriesCursor`](https://github.com/elastic/kibana/blob/main/x-pack/platform/plugins/shared/logs_shared/public/components/log_stream/log_stream.tsx).
 
 ```tsx
 <LogStream

@@ -9,7 +9,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { COMMON_VISUALIZATION_GROUPING } from '@kbn/visualizations-plugin/public';
+import { ADD_PANEL_VISUALIZATION_GROUP } from '@kbn/embeddable-plugin/public';
 import type { LensPluginStartDependencies } from '../../plugin';
 import type { EditorFrameService } from '../../editor_frame_service';
 
@@ -22,7 +22,7 @@ export class CreateESQLPanelAction implements Action<EmbeddableApiContext> {
   public id = ACTION_CREATE_ESQL_CHART;
   public order = 50;
 
-  public grouping = COMMON_VISUALIZATION_GROUPING;
+  public grouping = [ADD_PANEL_VISUALIZATION_GROUP];
 
   constructor(
     protected readonly startDependencies: LensPluginStartDependencies,

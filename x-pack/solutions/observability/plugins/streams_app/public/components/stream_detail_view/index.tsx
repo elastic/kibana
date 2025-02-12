@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EntityDetailViewWithoutParams, EntityViewTab } from '../entity_detail_view';
-import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
-import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
+import { isUnwiredStreamGetResponse, isWiredStreamGetResponse } from '@kbn/streams-schema';
+import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
-import { StreamDetailOverview } from '../stream_detail_overview';
+import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
+import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
+import { EntityDetailViewWithoutParams, EntityViewTab } from '../entity_detail_view';
 import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailManagement } from '../stream_detail_management';
+import { StreamDetailOverview } from '../stream_detail_overview';
 
 export function StreamDetailView() {
   const params1 = useStreamsAppParams('/{key}/{tab}', true);
@@ -35,15 +36,45 @@ export function StreamDetailView() {
     refresh,
     loading,
   } = useStreamsAppFetch(
-    ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /api/streams/{id}', {
-        signal,
-        params: {
-          path: {
-            id: key,
+    async ({ signal }) => {
+      return streamsRepositoryClient
+        .fetch('GET /api/streams/{name}', {
+          signal,
+          params: {
+            path: {
+              name: key,
+            },
           },
-        },
-      });
+        })
+        .then((response) => {
+          if (isWiredStreamGetResponse(response)) {
+            return {
+              dashboards: response.dashboards,
+              inherited_fields: response.inherited_fields,
+              elasticsearch_assets: [],
+              effective_lifecycle: response.effective_lifecycle,
+              name: key,
+              stream: {
+                ...response.stream,
+              },
+            };
+          }
+
+          if (isUnwiredStreamGetResponse(response)) {
+            return {
+              dashboards: response.dashboards,
+              elasticsearch_assets: response.elasticsearch_assets,
+              inherited_fields: {},
+              effective_lifecycle: response.effective_lifecycle,
+              name: key,
+              data_stream_exists: response.data_stream_exists,
+              stream: {
+                ...response.stream,
+              },
+            };
+          }
+          throw new Error('Stream detail only supports IngestStreams.');
+        });
     },
     [streamsRepositoryClient, key]
   );

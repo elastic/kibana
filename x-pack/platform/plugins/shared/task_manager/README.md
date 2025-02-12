@@ -61,7 +61,7 @@ The task_manager can be configured via `taskManager` config options (e.g. `taskM
 
 Plugins define tasks by calling the `registerTaskDefinitions` method on the `server.plugins.task_manager` object.
 
-A sample task can be found in the [x-pack/test/plugin_api_integration/platform/plugins/shared/task_manager](../../../../test/plugin_api_integration/platform/plugins/shared/task_manager/index.js) folder.
+A sample task can be found in the [x-pack/test/plugin_api_integration/plugins/sample_task_plugin/](../../../../../x-pack/test/plugin_api_integration/plugins/sample_task_plugin/server/plugin.ts) folder.
 
 ```js
 export class Plugin {
@@ -88,7 +88,7 @@ export class Plugin {
         maxAttempts: 5,
 
         // The maximum number tasks of this type that can be run concurrently per Kibana instance.
-        // Setting this value will force Task Manager to poll for this task type seperatly from other task types which 
+        // Setting this value will force Task Manager to poll for this task type seperatly from other task types which
         // can add significant load to the ES cluster, so please use this configuration only when absolutly necesery.
         maxConcurrency: 1,
 

@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { sloAppId } from '../../../../../common';
-import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../../common/constants';
+import { SUMMARY_DESTINATION_INDEX_NAME } from '../../../../../common/constants';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { useFetchSloGroups } from '../../../../hooks/use_fetch_slo_groups';
 import { SLI_OPTIONS } from '../../../../pages/slo_edit/constants';
@@ -86,7 +86,7 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
       : []),
   ];
   const { dataView } = useCreateDataView({
-    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
+    indexPatternString: SUMMARY_DESTINATION_INDEX_NAME,
   });
   const [selectedGroupBy, setSelectedGroupBy] =
     useState<GroupBy>(selectedFilters.groupBy) ?? 'status';
@@ -254,7 +254,7 @@ export function SloGroupFilters({ selectedFilters, onSelected }: Props) {
           query={{ query: String(kqlQuery), language: 'kuery' }}
           showDatePicker={false}
           disableQueryLanguageSwitcher={true}
-          saveQueryMenuVisibility="globally_managed"
+          allowSavingQueries
           onClearSavedQuery={() => {}}
           showQueryInput={true}
           onSavedQueryUpdated={(savedQuery) => {

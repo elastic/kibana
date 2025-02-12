@@ -22,7 +22,6 @@ const SystemEndgameProcessExampleComponent: React.FC = () => {
     <>
       {systemEndgameProcessRowRenderer.renderRow({
         data: demoEndgameCreationEvent,
-        isDraggable: false,
         scopeId: ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID,
       })}
     </>

@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
+import type { DocLinksServiceSetup, IKibanaResponse, Logger } from '@kbn/core/server';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { DETECTION_ENGINE_RULES_BULK_CREATE } from '../../../../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_BULK_CREATE,
+  DETECTION_ENGINE_RULES_IMPORT_URL,
+} from '../../../../../../../common/constants';
 import {
   BulkCreateRulesRequestBody,
   validateCreateRuleProps,
@@ -34,7 +37,11 @@ import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from '../.
  *
  * TODO: https://github.com/elastic/kibana/issues/193184 Delete this route and clean up the code
  */
-export const bulkCreateRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const bulkCreateRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger,
+  docLinks: DocLinksServiceSetup
+) => {
   router.versioned
     .post({
       access: 'public',
@@ -56,6 +63,17 @@ export const bulkCreateRulesRoute = (router: SecuritySolutionPluginRouter, logge
         validate: {
           request: {
             body: buildRouteValidationWithZod(BulkCreateRulesRequestBody),
+          },
+        },
+        options: {
+          deprecated: {
+            documentationUrl: docLinks.links.securitySolution.legacyBulkApiDeprecations,
+            severity: 'critical',
+            reason: {
+              type: 'migrate',
+              newApiMethod: 'POST',
+              newApiPath: DETECTION_ENGINE_RULES_IMPORT_URL,
+            },
           },
         },
       },

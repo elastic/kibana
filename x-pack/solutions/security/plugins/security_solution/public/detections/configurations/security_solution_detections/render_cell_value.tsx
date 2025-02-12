@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { EuiDataGridCellProps } from '@elastic/eui';
-import React, { useMemo, memo } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
+import React, { memo, useMemo } from 'react';
 import { find, getOr } from 'lodash/fp';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
-import { tableDefaults, dataTableSelectors } from '@kbn/securitysolution-data-table';
 import type { TableId } from '@kbn/securitysolution-data-table';
+import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
@@ -51,7 +51,6 @@ export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellCon
       rowRenderers,
       isDetails,
       isExpandable,
-      isDraggable = false,
       isExpanded,
       colIndex,
       eventId,
@@ -135,7 +134,6 @@ export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellCon
             eventId={eventId}
             header={myHeader}
             isDetails={isDetails}
-            isDraggable={isDraggable}
             isExpandable={isExpandable}
             isExpanded={isExpanded}
             linkValues={linkValues ?? localLinkValues}
@@ -161,7 +159,6 @@ export const RenderCellValue: React.FC<NonNullable<EuiDataGridCellProps['cellCon
       finalData,
       eventId,
       isDetails,
-      isDraggable,
       isExpandable,
       isExpanded,
       linkValues,

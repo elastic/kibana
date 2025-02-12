@@ -30,7 +30,6 @@
     "@kbn/charts-plugin",
     "@kbn/discover-plugin",
     "@kbn/i18n",
-    "@kbn/ui-theme",
     "@kbn/i18n-react",
     "@kbn/es-query",
     "@kbn/data-views-plugin",
@@ -66,6 +65,7 @@
     "@kbn/cloud-security-posture-common",
     "@kbn/cloud-security-posture",
     "@kbn/analytics",
+    "@kbn/management-settings-ids",
   ],
   "exclude": ["target/**/*"]
 }

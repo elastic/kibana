@@ -11,6 +11,8 @@ import { RouterDeprecatedApiDetails } from '@kbn/core-http-server';
 import { CoreDeprecatedApiUsageStats } from '@kbn/core-usage-data-server';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import type { DeprecationDetailsMessage } from '@kbn/core-deprecations-common';
 
 export const getApiDeprecationTitle = (
   details: Pick<RouterDeprecatedApiDetails, 'routePath' | 'routeMethod'>
@@ -31,8 +33,9 @@ export const getApiDeprecationMessage = (
     RouterDeprecatedApiDetails,
     'routePath' | 'routeMethod' | 'routeDeprecationOptions'
   >,
-  apiUsageStats: CoreDeprecatedApiUsageStats
-): string[] => {
+  apiUsageStats: CoreDeprecatedApiUsageStats,
+  docLinks: DocLinksServiceSetup
+): Array<string | DeprecationDetailsMessage> => {
   const { routePath, routeMethod, routeDeprecationOptions } = details;
   const { apiLastCalledAt, apiTotalCalls, markedAsResolvedLastCalledAt, totalMarkedAsResolved } =
     apiUsageStats;
@@ -41,7 +44,7 @@ export const getApiDeprecationMessage = (
   const wasResolvedBefore = totalMarkedAsResolved > 0;
   const routeWithMethod = `${routeMethod.toUpperCase()} ${routePath}`;
 
-  const messages = [
+  const messages: Array<string | DeprecationDetailsMessage> = [
     i18n.translate('core.deprecations.apiAccessDeprecation.apiCallsDetailsMessage', {
       defaultMessage:
         'The API "{routeWithMethod}" has been called {apiTotalCalls} times. The last call was on {apiLastCalledAt}.',
@@ -72,6 +75,16 @@ export const getApiDeprecationMessage = (
         'Internal APIs are meant to be used by Elastic services only. You should not use them. External access to these APIs will be restricted.',
     })
   );
+  messages.push({
+    type: 'markdown',
+    content: i18n.translate('core.deprecations.apiAccessDeprecation.enableDebugLogsMessage', {
+      defaultMessage:
+        'To include information in debug logs about calls to APIs that are internal to Elastic, edit your Kibana configuration as detailed in [the documentation]({enableDeprecationHttpDebugLogsLink}).',
+      values: {
+        enableDeprecationHttpDebugLogsLink: docLinks.links.logging.enableDeprecationHttpDebugLogs,
+      },
+    }),
+  });
 
   if (routeDeprecationOptions?.message) {
     // Surfaces additional deprecation messages passed into the route in UA

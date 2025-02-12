@@ -33,28 +33,4 @@ export const registerSyntheticsEmbeddables = (
       return getMonitorsEmbeddableFactory(core.getStartServices);
     }
   );
-
-  core.getStartServices().then(([_, pluginsStart]) => {
-    pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
-      SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
-      () => {
-        return { width: 10, height: 8 };
-      }
-    );
-    pluginsStart.dashboard.registerDashboardPanelPlacementSetting(
-      SYNTHETICS_MONITORS_EMBEDDABLE,
-      () => {
-        return { width: 30, height: 12 };
-      }
-    );
-  });
-
-  const registerAsyncUiActions = async () => {
-    if (pluginsSetup.uiActions) {
-      const { registerSyntheticsUiActions } = await import('./ui_actions/register_ui_actions');
-      registerSyntheticsUiActions(core, pluginsSetup);
-    }
-  };
-  // can be done async
-  registerAsyncUiActions();
 };

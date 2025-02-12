@@ -268,6 +268,7 @@ describe('validateAgentPolicyOutputForIntegration', () => {
           data_output_id: 'test1',
           monitoring_output_id: 'test1',
         } as any,
+        {} as any,
         'fleet_server'
       )
     ).rejects.toThrow(
@@ -281,6 +282,7 @@ describe('validateAgentPolicyOutputForIntegration', () => {
           data_output_id: 'test1',
           monitoring_output_id: 'test1',
         } as any,
+        {} as any,
         'fleet_server',
         false
       )
@@ -302,6 +304,7 @@ describe('validateAgentPolicyOutputForIntegration', () => {
           data_output_id: 'test1',
           monitoring_output_id: 'test1',
         } as any,
+        {} as any,
         'apm'
       )
     ).rejects.toThrow(
@@ -315,6 +318,7 @@ describe('validateAgentPolicyOutputForIntegration', () => {
           data_output_id: 'test1',
           monitoring_output_id: 'test1',
         } as any,
+        {} as any,
         'apm',
         false
       )
@@ -335,6 +339,7 @@ describe('validateAgentPolicyOutputForIntegration', () => {
         {
           name: 'Agent policy',
         } as any,
+        {} as any,
         'synthetics'
       )
     ).rejects.toThrow(
@@ -353,6 +358,7 @@ describe('validateAgentPolicyOutputForIntegration', () => {
       {
         name: 'Agent policy',
       } as any,
+      {} as any,
       'nginx'
     );
   });
@@ -368,7 +374,30 @@ describe('validateAgentPolicyOutputForIntegration', () => {
       {
         name: 'Agent policy',
       } as any,
+      {} as any,
       'fleet_server'
+    );
+  });
+
+  it('should not allow non-local ES output to be added or edited to an agentless policy', async () => {
+    mockHasLicence(true);
+    mockedOutputService.get.mockResolvedValue({
+      type: 'logstash',
+    } as any);
+    mockedOutputService.getDefaultDataOutputId.mockResolvedValue('default');
+    await expect(
+      validateAgentPolicyOutputForIntegration(
+        savedObjectsClientMock.create(),
+        {
+          name: 'Agent policy',
+        } as any,
+        {
+          supports_agentless: true,
+        } as any,
+        'some_package'
+      )
+    ).rejects.toThrow(
+      'Integration "some_package" cannot be added to agent policy "Agent policy" because it uses output type "logstash".'
     );
   });
 });

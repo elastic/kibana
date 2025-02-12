@@ -9,21 +9,12 @@ import moment from 'moment';
 import { apiService } from '../../../../utils/api_service';
 import {
   EncryptedSyntheticsMonitorCodec,
+  Ping,
   PingsResponse,
   PingsResponseType,
   SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
 import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common/constants';
-
-export const fetchMonitorLastRun = async ({
-  monitorId,
-  locationId,
-}: {
-  monitorId: string;
-  locationId: string;
-}): Promise<PingsResponse> => {
-  return fetchMonitorRecentPings({ monitorId, locationId, size: 1 });
-};
 
 export interface MostRecentPingsRequest {
   monitorId: string;
@@ -61,6 +52,20 @@ export const fetchMonitorRecentPings = async ({
     },
     PingsResponseType
   );
+};
+
+export const fetchLatestTestRun = async ({
+  monitorId,
+  locationLabel,
+}: {
+  monitorId: string;
+  locationLabel?: string;
+}): Promise<{ ping?: Ping }> => {
+  return apiService.get<{ ping?: Ping }>(SYNTHETICS_API_URLS.LATEST_TEST_RUN, {
+    monitorId,
+    locationLabel,
+    version: INITIAL_REST_VERSION,
+  });
 };
 
 export const fetchSyntheticsMonitor = async ({

@@ -10,15 +10,17 @@
 import { PublishingSubject } from '../publishing_subject';
 
 export interface PublishesBlockingError {
-  blockingError: PublishingSubject<Error | undefined>;
+  blockingError$: PublishingSubject<Error | undefined>;
 }
 
 export const apiPublishesBlockingError = (
   unknownApi: null | unknown
 ): unknownApi is PublishesBlockingError => {
-  return Boolean(unknownApi && (unknownApi as PublishesBlockingError)?.blockingError !== undefined);
+  return Boolean(
+    unknownApi && (unknownApi as PublishesBlockingError)?.blockingError$ !== undefined
+  );
 };
 
 export function hasBlockingError(api: unknown) {
-  return apiPublishesBlockingError(api) && api.blockingError?.value !== undefined;
+  return apiPublishesBlockingError(api) && api.blockingError$?.value !== undefined;
 }

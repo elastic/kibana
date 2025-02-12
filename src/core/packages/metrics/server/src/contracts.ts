@@ -8,7 +8,8 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { OpsMetrics } from './metrics';
+import type { EluMetrics, OpsMetrics } from './metrics';
+
 /**
  * APIs to retrieves metrics gathered and exposed by the core platform.
  *
@@ -17,6 +18,11 @@ import type { OpsMetrics } from './metrics';
 export interface MetricsServiceSetup {
   /** Interval metrics are collected in milliseconds */
   readonly collectionInterval: number;
+
+  /**
+   * Retrieve an observable emitting {@link EluMetrics}.
+   */
+  getEluMetrics$(): Observable<EluMetrics>;
 
   /**
    * Retrieve an observable emitting the {@link OpsMetrics} gathered.

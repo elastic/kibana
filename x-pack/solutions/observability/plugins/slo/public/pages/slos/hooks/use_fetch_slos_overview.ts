@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { GetOverviewResponse } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
+import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../common/constants';
 import { sloKeys } from '../../../hooks/query_key_factory';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
@@ -45,7 +45,7 @@ export function useFetchSLOsOverview({
   } = useKibana().services;
 
   const { dataView } = useCreateDataView({
-    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+    indexPatternString: SUMMARY_DESTINATION_INDEX_PATTERN,
   });
 
   const filters = useMemo(() => {
