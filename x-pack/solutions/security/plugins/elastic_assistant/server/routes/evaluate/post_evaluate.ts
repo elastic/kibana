@@ -240,6 +240,8 @@ export const postEvaluateRoute = (
             connectorId: string;
           }> = await Promise.all(
             connectors.map(async (connector) => {
+
+              // TODO: adapt there too
               const llmType = getLlmType(connector.actionTypeId);
               const isOssModel = isOpenSourceModel(connector);
               const isOpenAI = llmType === 'openai' && !isOssModel;
