@@ -47,13 +47,13 @@ export interface ProcessingSimulationParams {
   };
 }
 
-interface SimulateProcessingDeps {
+export interface SimulateProcessingDeps {
   params: ProcessingSimulationParams;
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
 }
 
-interface SimulationError {
+export interface SimulationError {
   message: string;
   processor_id: string;
   type:
@@ -62,16 +62,16 @@ interface SimulationError {
     | 'non_additive_processor_failure';
 }
 
-type DocSimulationStatus = 'parsed' | 'partially_parsed' | 'failed';
+export type DocSimulationStatus = 'parsed' | 'partially_parsed' | 'failed';
 
-interface SimulationDocReport {
+export interface SimulationDocReport {
   detected_fields: Array<{ processor_id: string; field: string }>;
   errors: SimulationError[];
   status: DocSimulationStatus;
   value: FlattenRecord;
 }
 
-interface ProcessorMetrics {
+export interface ProcessorMetrics {
   detected_fields: string[];
   errors: SimulationError[];
   failure_rate: number;
@@ -79,16 +79,16 @@ interface ProcessorMetrics {
 }
 
 // Narrow down the type to only successful processor results
-type SuccessfulIngestSimulateDocumentResult = WithRequired<
+export type SuccessfulIngestSimulateDocumentResult = WithRequired<
   IngestSimulateSimulateDocumentResult,
   'processor_results'
 >;
 
-interface SuccessfulIngestSimulateResponse {
+export interface SuccessfulIngestSimulateResponse {
   docs: SuccessfulIngestSimulateDocumentResult[];
 }
 
-type PipelineSimulationResult =
+export type PipelineSimulationResult =
   | {
       status: 'success';
       simulation: SuccessfulIngestSimulateResponse;
@@ -98,10 +98,12 @@ type PipelineSimulationResult =
       error: SimulationError;
     };
 
-type DetectedField = WithName | WithName<FieldDefinitionConfig | InheritedFieldDefinitionConfig>;
+export type DetectedField =
+  | WithName
+  | WithName<FieldDefinitionConfig | InheritedFieldDefinitionConfig>;
 
-type WithName<TObj = {}> = TObj & { name: string };
-type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKey]-?: TObj[TProp] };
+export type WithName<TObj = {}> = TObj & { name: string };
+export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKey]-?: TObj[TProp] };
 
 export const simulateProcessing = async ({
   params,

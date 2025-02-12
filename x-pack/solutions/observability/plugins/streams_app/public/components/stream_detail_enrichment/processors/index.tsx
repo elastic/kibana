@@ -7,7 +7,6 @@
 
 import {
   EuiButton,
-  EuiCallOut,
   EuiForm,
   EuiSpacer,
   EuiButtonEmpty,
