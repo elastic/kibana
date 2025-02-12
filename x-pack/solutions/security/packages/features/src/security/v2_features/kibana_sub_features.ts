@@ -725,8 +725,9 @@ const globalArtifactManagementSubFeature = (): SubFeatureConfig => ({
     'securitySolutionPackages.features.featureRegistry.subFeatures.globalArtifactManagement.description',
     {
       defaultMessage:
-        'Manage (create, update, delete) global Elastic Defend artifacts (ex. Trusted Applications, Event Filters, etc.). ' +
-        'NOTE: A user still requires "ALL" access to a given artifact type to manage global artifacts.',
+        'Manage global assignment of endpoint artifacts (e.g., Trusted Applications, Event Filters) ' +
+        'across all policies. This privilege controls global assignment rights only; privileges for each ' +
+        'artifact type are required for full artifact management.',
     }
   ),
   privilegeGroups: [
@@ -780,6 +781,16 @@ export const getSecurityV2SubFeaturesMap = ({
       SecuritySubFeatureId.endpointExceptions,
       enableSpaceAwarenessIfNeeded(endpointExceptionsSubFeature()),
     ],
+
+    ...((experimentalFeatures.endpointManagementSpaceAwarenessEnabled
+      ? [
+          [
+            SecuritySubFeatureId.globalArtifactManagement,
+            enableSpaceAwarenessIfNeeded(globalArtifactManagementSubFeature()),
+          ],
+        ]
+      : []) as Array<[SecuritySubFeatureId, SubFeatureConfig]>),
+
     [
       SecuritySubFeatureId.trustedApplications,
       enableSpaceAwarenessIfNeeded(trustedApplicationsSubFeature()),
@@ -790,15 +801,6 @@ export const getSecurityV2SubFeaturesMap = ({
     ],
     [SecuritySubFeatureId.blocklist, enableSpaceAwarenessIfNeeded(blocklistSubFeature())],
     [SecuritySubFeatureId.eventFilters, enableSpaceAwarenessIfNeeded(eventFiltersSubFeature())],
-
-    ...((experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-      ? [
-          [
-            SecuritySubFeatureId.globalArtifactManagement,
-            enableSpaceAwarenessIfNeeded(globalArtifactManagementSubFeature()),
-          ],
-        ]
-      : []) as Array<[SecuritySubFeatureId, SubFeatureConfig]>),
 
     [
       SecuritySubFeatureId.policyManagement,
