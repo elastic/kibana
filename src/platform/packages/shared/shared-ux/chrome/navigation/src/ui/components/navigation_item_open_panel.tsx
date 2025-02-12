@@ -9,31 +9,11 @@
 
 import React, { useCallback, type FC } from 'react';
 import classNames from 'classnames';
-import { css } from '@emotion/css';
-import { type EuiThemeComputed, useEuiTheme, transparentize, EuiButton } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { transparentize, EuiButton } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import type { NavigateToUrlFn } from '../../types';
 import { usePanel } from './panel';
-
-const getButtonStyles = (euiTheme: EuiThemeComputed<{}>, isActive: boolean) => css`
-  background-color: ${isActive
-    ? transparentize(euiTheme.colors.backgroundBasePlain, 0.5)
-    : 'transparent'};
-  transform: none !important; /* don't translateY 1px */
-  color: inherit;
-  font-weight: inherit;
-  padding-inline: ${euiTheme.size.s};
-  & > span {
-    justify-content: flex-start;
-    position: relative;
-  }
-  & .euiIcon {
-    position: absolute;
-    right: 0;
-    top: 0;
-    transform: translateY(50%);
-  }
-`;
 
 interface Props {
   item: ChromeProjectNavigationNode;
@@ -42,14 +22,11 @@ interface Props {
 }
 
 export const NavigationItemOpenPanel: FC<Props> = ({ item }: Props) => {
-  const { euiTheme } = useEuiTheme();
   const { open: openPanel, close: closePanel, selectedNode } = usePanel();
   const { title, deepLink } = item;
   const { id, path } = item;
   const isExpanded = selectedNode?.path === path;
   const isActive = isExpanded;
-
-  const buttonClassNames = classNames('sideNavItem', getButtonStyles(euiTheme, isActive));
 
   const dataTestSubj = classNames(`nav-item`, `nav-item-${path}`, {
     [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
@@ -80,7 +57,26 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item }: Props) => {
       iconType="arrowRight"
       size="s"
       fullWidth
-      className={buttonClassNames}
+      className="sideNavItem"
+      css={({ euiTheme }) => css`
+        background-color: ${isActive
+          ? transparentize(euiTheme.colors.backgroundBasePlain, 0.5)
+          : 'transparent'};
+        transform: none !important; /* don't translateY 1px */
+        color: inherit;
+        font-weight: inherit;
+        padding-inline: ${euiTheme.size.s};
+        & > span {
+          justify-content: flex-start;
+          position: relative;
+        }
+        & .euiIcon {
+          position: absolute;
+          right: 0;
+          top: 0;
+          transform: translateY(50%);
+        }
+      `}
       data-test-subj={dataTestSubj}
     >
       {title}
