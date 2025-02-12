@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlyout, EuiLoadingElastic } from '@elastic/eui';
+import { EuiFlyoutResizable, EuiLoadingElastic } from '@elastic/eui';
 import React, { Suspense, lazy, useCallback } from 'react';
 import type { RuleFormProps } from '../src/rule_form';
 import type { RuleTypeMetaData } from '../src/types';
@@ -33,11 +33,12 @@ const RuleFormFlyoutWithContext = <MetaData extends RuleTypeMetaData>(
     }
   }, [onClickClose, props]);
   return (
-    <EuiFlyout
+    <EuiFlyoutResizable
       ownFocus
       onClose={onClose}
       aria-labelledby="flyoutTitle"
       size={620}
+      minWidth={500}
       className="ruleFormFlyout__container"
       hideCloseButton={hideCloseButton}
     >
@@ -50,7 +51,7 @@ const RuleFormFlyoutWithContext = <MetaData extends RuleTypeMetaData>(
       >
         <RuleForm {...props} isFlyout />
       </Suspense>
-    </EuiFlyout>
+    </EuiFlyoutResizable>
   );
 };
 
