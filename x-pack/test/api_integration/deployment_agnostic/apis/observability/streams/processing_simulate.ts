@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import expect from '@kbn/expect';
 import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import { errors } from '@elastic/elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import { disableStreams, enableStreams, forkStream, indexDocument } from './helpers/requests';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
@@ -54,6 +56,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     const basicGrokProcessor = {
+      id: 'draft',
       grok: {
         field: 'message',
         patterns: [
@@ -104,8 +107,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(response.body.success_rate).to.be(1);
           expect(response.body.failure_rate).to.be(0);
 
-          const { isMatch, value } = response.body.documents[0];
-          expect(isMatch).to.be(true);
+          const { detected_fields, errors, status, value } = response.body.documents[0];
+          expect(status).to.be('parsed');
+          expect(errors).to.eql([]);
+          expect(detected_fields).to.eql([
+            { name: 'parsed_timestamp' },
+            { name: 'parsed_level' },
+            { name: 'parsed_message' },
+          ]);
           expect(value).to.have.property('parsed_timestamp', TEST_TIMESTAMP);
           expect(value).to.have.property('parsed_level', 'error');
           expect(value).to.have.property('parsed_message', 'test');
@@ -144,9 +153,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           expect(response.body.success_rate).to.be(0.67);
           expect(response.body.failure_rate).to.be(0.33);
           expect(response.body.documents).to.have.length(3);
-          expect(response.body.documents[0].isMatch).to.be(true);
-          expect(response.body.documents[1].isMatch).to.be(false);
-          expect(response.body.documents[2].isMatch).to.be(true);
+          expect(response.body.documents[0].status).to.be('parsed');
+          expect(response.body.documents[1].status).to.be('failed');
+          expect(response.body.documents[2].status).to.be('parsed');
         });
       });
     });
@@ -159,6 +168,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             processing: [
               {
+                id: 'draft-processor',
                 grok: {
                   field: 'message',
                   patterns: ['%{INVALID_PATTERN:field}'],
@@ -180,6 +190,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             processing: [
               {
+                id: 'draft-processor',
                 grok: {
                   field: 'message',
                   patterns: ['%{TIMESTAMP_ISO8601:parsed_timestamp} %{GREEDYDATA:message}'], // Overwrites existing message field
@@ -192,7 +203,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           400
         );
 
-        expect((response.body as errors.ResponseError['body']).message).to.contain(
+        expect((response.body as esErrors.ResponseError['body']).message).to.contain(
           'The processor is not additive to the documents. It might update fields [message]'
         );
       });
@@ -211,7 +222,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           400
         );
 
-        expect((response.body as errors.ResponseError['body']).message).to.contain(
+        expect((response.body as esErrors.ResponseError['body']).message).to.contain(
           'The detected field types might not be compatible with these documents.'
         );
       });
@@ -229,8 +240,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         expect(response.body.success_rate).to.be(0.5);
         expect(response.body.failure_rate).to.be(0.5);
-        expect(response.body.documents[0].isMatch).to.be(true);
-        expect(response.body.documents[1].isMatch).to.be(false);
+        expect(response.body.documents[0].status).to.be('parsed');
+        expect(response.body.documents[1].status).to.be('failed');
       });
     });
   });
