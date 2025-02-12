@@ -19,6 +19,12 @@ export const getNewSearchAppMenuItem = ({
 
   document.addEventListener('keydown', (event: KeyboardEvent) => {
     isModifierKeyPressed = event.metaKey || event.ctrlKey;
+    console.log(isModifierKeyPressed);
+  });
+
+  document.addEventListener('keyup', (event: KeyboardEvent) => {
+    isModifierKeyPressed = false;
+    console.log(isModifierKeyPressed);
   });
 
   return {
