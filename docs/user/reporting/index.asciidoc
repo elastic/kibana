@@ -10,6 +10,12 @@
 {kib} provides you with several options to share *Discover* sessions, dashboards, *Visualize Library* visualizations, and *Canvas* workpads. These sharing options are available from the *Share* menu in the toolbar.
 
 [float]
+== Permissions
+
+To be able to share objects or generate reports, you must have a role that allows these actions on the specific Elasticsearch indices and Kibana applications containing the data that you want to share. Check <<secure-reporting,Configuring reporting>> for more information.
+
+
+[float]
 [[share-a-direct-link]]
 == Share with a direct link
 
