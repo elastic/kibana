@@ -37,6 +37,11 @@ import { listEnrollmentApiKeys } from '../api_keys';
 import { listFleetServerHosts } from '../fleet_server_host';
 import type { AgentlessConfig } from '../utils/agentless';
 import { prependAgentlessApiBasePathToEndpoint, isAgentlessEnabled } from '../utils/agentless';
+import {
+  MAXIMUM_RETRIES,
+  RETRYABLE_HTTP_STATUSES,
+  RETRYABLE_SERVER_CODES,
+} from '../../../common/constants/agentless';
 
 interface AgentlessAgentErrorHandlingMessages {
   [key: string]: {
@@ -213,7 +218,7 @@ class AgentlessAgentService {
     const urlEndpoint = prependAgentlessApiBasePathToEndpoint(
       agentlessConfig,
       `/deployments/${policyId}`
-    );
+    ).split('/api')[1];
     logger.info(
       `[Agentless API] Call Agentless API endpoint ${urlEndpoint} to upgrade agentless deployment`
     );
@@ -254,13 +259,14 @@ class AgentlessAgentService {
       `[Agentless API] Upgrade agentless deployment with request config ${requestConfigDebugStatus}`
     );
 
-    const response = await axios(requestConfig).catch((error: AxiosError) => {
-      this.catchAgentlessApiError(
-        'upgrade',
+    const response = await axios(requestConfig).catch(async (error: AxiosError) => {
+      await this.handleErrorsWithRetries(
         error,
-        logger,
-        policyId,
         requestConfig,
+        'upgrade',
+        logger,
+        MAXIMUM_RETRIES,
+        policyId,
         requestConfigDebugStatus,
         errorMetadata,
         traceId
@@ -640,6 +646,91 @@ class AgentlessAgentService {
       },
     };
   }
+
+  private handleErrorsWithRetries = async (
+    error: AxiosError,
+    requestConfig: AxiosRequestConfig,
+    action: 'create' | 'delete' | 'upgrade',
+    logger: Logger,
+    retries: number,
+    id: string,
+    requestConfigDebugStatus: string,
+    errorMetadata: any,
+    traceId?: string
+  ) => {
+    const hasRetryableStatusError = this.hasRetryableStatusError(error, RETRYABLE_HTTP_STATUSES);
+    const hasRetryableCodeError = this.hasRetryableCodeError(error, RETRYABLE_SERVER_CODES);
+
+    if (hasRetryableStatusError || hasRetryableCodeError) {
+      await this.retry(
+        async () => await axios(requestConfig),
+        action,
+        requestConfigDebugStatus,
+        logger,
+        retries,
+        () =>
+          this.catchAgentlessApiError(
+            action,
+            error,
+            logger,
+            id,
+            requestConfig,
+            requestConfigDebugStatus,
+            errorMetadata,
+            traceId
+          )
+      );
+    } else {
+      this.catchAgentlessApiError(
+        action,
+        error,
+        logger,
+        id,
+        requestConfig,
+        requestConfigDebugStatus,
+        errorMetadata,
+        traceId
+      );
+    }
+  };
+
+  private retry = async <T>(
+    fn: () => Promise<unknown>,
+    action: 'create' | 'delete' | 'upgrade',
+    requestConfigDebugStatus: string,
+    logger: Logger,
+    retries = MAXIMUM_RETRIES,
+    throwAgentlessError: () => void
+  ) => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        await fn();
+      } catch (e) {
+        logger.info(
+          `[Agentless API] Attempt ${i + 1} failed to ${action} agentless deployment, retrying...`
+        );
+        if (i === retries - 1) {
+          logger.error(
+            `[Agentless API] Reached maximum ${retries} attempts. Failed to ${action} agentless deployment with [REQUEST]: ${requestConfigDebugStatus}`
+          );
+          throwAgentlessError();
+        }
+      }
+    }
+  };
+
+  private hasRetryableStatusError = (
+    error: AxiosError,
+    retryableStatusErrors: number[]
+  ): boolean => {
+    const status = error?.response?.status;
+    return !!status && retryableStatusErrors.some((errorStatus) => errorStatus === status);
+  };
+
+  private hasRetryableCodeError = (error: AxiosError, retryableCodeErrors: string[]): boolean => {
+    const code = error?.code;
+    return !!code && retryableCodeErrors.includes(code);
+  };
 }
 
 export const agentlessAgentService = new AgentlessAgentService();
