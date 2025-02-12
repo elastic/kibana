@@ -18,9 +18,9 @@ export interface EndpointInfoProps {
 }
 
 export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, provider }) => (
-  <EuiFlexGroup justifyContent="spaceBetween">
+  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
     <EuiFlexItem grow={false}>
-      <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexGroup gutterSize="s" alignItems="center" wrap>
         <EuiFlexItem grow={false}>
           <span>
             <strong>{inferenceId}</strong>
@@ -40,12 +40,17 @@ export const EndpointInfo: React.FC<EndpointInfoProps> = ({ inferenceId, provide
         ) : null}
       </EuiFlexGroup>
     </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <span>
-        {isEndpointPreconfigured(inferenceId) ? (
-          <EuiBetaBadge label={i18n.PRECONFIGURED_LABEL} size="s" color="hollow" />
-        ) : null}
-      </span>
-    </EuiFlexItem>
+    {isEndpointPreconfigured(inferenceId) ? (
+      <EuiFlexItem grow={false}>
+        <span>
+          <EuiBetaBadge
+            label={i18n.PRECONFIGURED_LABEL}
+            size="s"
+            color="hollow"
+            alignment="middle"
+          />
+        </span>
+      </EuiFlexItem>
+    ) : null}
   </EuiFlexGroup>
 );
