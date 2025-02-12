@@ -23,7 +23,6 @@ import { ML_PAGES } from '../../locator';
  */
 export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
   const { pathname } = useLocation();
-
   const {
     services: { executionContext, overlays, ...startServices },
   } = useMlKibana();

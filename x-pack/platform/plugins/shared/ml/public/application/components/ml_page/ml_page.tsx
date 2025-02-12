@@ -38,9 +38,14 @@ import { MlPageHeaderRenderer } from '../page_header/page_header';
 import { useSideNavItems } from './side_nav';
 import { useEnabledFeatures } from '../../contexts/ml';
 import { MANAGEMENT_SECTION_IDS } from '../../management';
-interface RouteModules {
+import type { NavigateToApp } from '../../routing/breadcrumbs';
+interface RouteToPath {
   [key: string]: (navigateToPath: NavigateToPath, basePath: string) => MlRoute;
 }
+interface RouteToApp {
+  [key: string]: (navigateToApp: NavigateToApp, basePath: string) => MlRoute;
+}
+type RouteModules = RouteToPath | RouteToApp;
 
 const ML_APP_SELECTOR = '[data-test-subj="mlApp"]';
 
@@ -126,26 +131,26 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
 
     const routeList = useMemo(
       () => {
-        let currentRoutes: RouteModules = routes;
+        let currentRoutes: RouteModules = routes as RouteToPath;
 
         switch (entryPoint) {
           case MANAGEMENT_SECTION_IDS.OVERVIEW:
-            currentRoutes = overviewRoutes;
+            currentRoutes = overviewRoutes as RouteToApp;
             break;
           case MANAGEMENT_SECTION_IDS.ANOMALY_DETECTION:
-            currentRoutes = anomalyDetectionRoutes;
+            currentRoutes = anomalyDetectionRoutes as RouteToApp;
             break;
           case MANAGEMENT_SECTION_IDS.ANALYTICS:
-            currentRoutes = dfaRoutes;
+            currentRoutes = dfaRoutes as RouteToApp;
             break;
           case MANAGEMENT_SECTION_IDS.TRAINED_MODELS:
-            currentRoutes = trainedModelsRoutes;
+            currentRoutes = trainedModelsRoutes as RouteToApp;
             break;
           case MANAGEMENT_SECTION_IDS.SUPPLIED_CONFIGURATIONS:
-            currentRoutes = suppliedConfigsRoutes;
+            currentRoutes = suppliedConfigsRoutes as RouteToApp;
             break;
           case MANAGEMENT_SECTION_IDS.AD_SETTINGS:
-            currentRoutes = settingsRoutes;
+            currentRoutes = settingsRoutes as RouteToApp;
             break;
           default:
             break;
@@ -286,7 +291,7 @@ const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(({ pageDeps, ro
               />
             );
           })}
-          <Redirect to="/" />
+          <Redirect to="/overview" />
         </Routes>
       </EuiPageSection>
     </RedirectAppLinks>
