@@ -28,7 +28,7 @@ export async function createMaintenanceWindow(
 ): Promise<MaintenanceWindow> {
   const { data } = params;
   const { savedObjectsClient, getModificationMetadata, logger, uiSettings } = context;
-  const { title, duration, rRule, categoryIds, scopedQuery } = data;
+  const { title, duration, rRule, categoryIds, scopedQuery, enabled = true } = data;
   const esQueryConfig = await getEsQueryConfig(uiSettings);
 
   try {
@@ -63,14 +63,6 @@ export async function createMaintenanceWindow(
     );
   }
 
-  if (scopedQueryWithGeneratedValue) {
-    if (data.categoryIds?.length !== 1) {
-      throw Boom.badRequest(
-        `Error validating create maintenance window data - scoped query must be accompanied by 1 category ID`
-      );
-    }
-  }
-
   const id = SavedObjectsUtils.generateId();
   const expirationDate = moment().utc().add(1, 'year').toISOString();
   const modificationMetadata = await getModificationMetadata();
@@ -78,7 +70,7 @@ export async function createMaintenanceWindow(
   const events = generateMaintenanceWindowEvents({ rRule, expirationDate, duration });
   const maintenanceWindowAttributes = transformMaintenanceWindowToMaintenanceWindowAttributes({
     title,
-    enabled: true,
+    enabled,
     expirationDate,
     categoryIds,
     scopedQuery: scopedQueryWithGeneratedValue,
