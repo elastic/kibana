@@ -42,7 +42,7 @@ import { DashboardEmbedSettings } from '../dashboard_app/types';
 import { LEGACY_DASHBOARD_APP_ID } from '../plugin_constants';
 import { openSettingsFlyout } from '../dashboard_container/embeddable/api';
 import { DashboardRedirect } from '../dashboard_container/types';
-import { SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
+import { SaveDashboardReturn } from '../dashboard_content_management/types';
 import { getDashboardRecentlyAccessedService } from '../services/dashboard_recently_accessed_service';
 import {
   coreServices,

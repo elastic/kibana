@@ -15,7 +15,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import { convertPanelMapToPanelsArray, extractReferences, generateNewPanelIds } from '../../common';
 import type { DashboardAttributes } from '../../server';
 
-import { convertDashboardVersionToNumber } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
+import { convertDashboardVersionToNumber } from '../dashboard_content_management/dashboard_versioning';
 import {
   dataService,
   embeddableService,
@@ -23,7 +23,7 @@ import {
 } from '../services/kibana_services';
 import { DashboardState } from './types';
 import { LATEST_VERSION } from '../../common/content_management';
-import { convertNumberToDashboardVersion } from '../services/dashboard_content_management_service/lib/dashboard_versioning';
+import { convertNumberToDashboardVersion } from '../dashboard_content_management/dashboard_versioning';
 
 const LATEST_DASHBOARD_CONTAINER_VERSION = convertNumberToDashboardVersion(LATEST_VERSION);
 

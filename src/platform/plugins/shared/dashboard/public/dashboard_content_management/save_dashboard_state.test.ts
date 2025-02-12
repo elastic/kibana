@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardContainerInput } from '../../../../common';
-import { getSampleDashboardState } from '../../../mocks';
+import { DashboardContainerInput } from '../../common';
+import { getSampleDashboardState } from '../mocks';
 import {
   contentManagementService,
   coreServices,
   dataService,
   embeddableService,
-} from '../../kibana_services';
+} from '../services/kibana_services';
 import { saveDashboardState } from './save_dashboard_state';
 
 contentManagementService.client.create = jest.fn().mockImplementation(({ options }) => {

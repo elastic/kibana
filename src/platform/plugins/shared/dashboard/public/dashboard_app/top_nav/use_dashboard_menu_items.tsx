@@ -18,7 +18,7 @@ import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { openSettingsFlyout } from '../../dashboard_container/embeddable/api';
 import { confirmDiscardUnsavedChanges } from '../../dashboard_listing/confirm_overlays';
 import { getDashboardBackupService } from '../../services/dashboard_backup_service';
-import { SaveDashboardReturn } from '../../services/dashboard_content_management_service/types';
+import { SaveDashboardReturn } from '../../dashboard_content_management/types';
 import { coreServices, shareService } from '../../services/kibana_services';
 import { getDashboardCapabilities } from '../../utils/get_dashboard_capabilities';
 import { topNavStrings } from '../_dashboard_app_strings';

@@ -10,7 +10,7 @@
 import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { StateComparators, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
+import { LoadDashboardReturn } from '../dashboard_content_management/types';
 import { getDashboardBackupService } from '../services/dashboard_backup_service';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { DashboardState } from './types';

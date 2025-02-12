@@ -12,16 +12,16 @@ import type { Query, SerializedSearchSourceFields } from '@kbn/data-plugin/commo
 import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
-import { DashboardContainerInput } from '../../../common';
-import type { DashboardAttributes, DashboardGetOut } from '../../../server/content_management';
-import { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
+import { DashboardContainerInput } from '../../common';
+import type { DashboardAttributes, DashboardGetOut } from '../../server/content_management';
+import { DashboardDuplicateTitleCheckProps } from './check_for_duplicate_dashboard_title';
 import {
   FindDashboardsByIdResponse,
   SearchDashboardsArgs,
   SearchDashboardsResponse,
-} from './lib/find_dashboards';
-import { DashboardState } from '../../dashboard_api/types';
-import { UpdateDashboardMetaProps } from './lib/update_dashboard_meta';
+} from './find_dashboards';
+import { DashboardState } from '../dashboard_api/types';
+import { UpdateDashboardMetaProps } from './update_dashboard_meta';
 
 export interface DashboardContentManagementService {
   findDashboards: FindDashboardsService;

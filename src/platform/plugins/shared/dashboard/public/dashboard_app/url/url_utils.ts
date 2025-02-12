@@ -25,7 +25,7 @@ import type { DashboardPanel } from '../../../server/content_management';
 import type { SavedDashboardPanel } from '../../../server/dashboard_saved_object';
 import { DashboardApi } from '../../dashboard_api/types';
 import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
-import { migrateLegacyQuery } from '../../services/dashboard_content_management_service/lib/load_dashboard_state';
+import { migrateLegacyQuery } from '../../dashboard_content_management/load_dashboard_state';
 import { coreServices } from '../../services/kibana_services';
 import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
 

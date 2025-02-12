@@ -13,14 +13,15 @@ import type { Reference } from '@kbn/content-management-utils';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
+import { SaveDashboardReturn } from '../dashboard_content_management/types';
 import { DashboardSaveOptions } from '../dashboard_container/types';
 import { coreServices, dataService, savedObjectsTaggingService } from '../services/kibana_services';
-import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
 import { DashboardState } from './types';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../utils/telemetry_constants';
 import { extractTitleAndCount } from '../dashboard_container/embeddable/api/lib/extract_title_and_count';
 import { DashboardSaveModal } from '../dashboard_container/embeddable/api/overlays/save_modal';
+import { checkForDuplicateDashboardTitle } from '../dashboard_content_management/check_for_duplicate_dashboard_title';
+import { saveDashboardState } from '../dashboard_content_management/save_dashboard_state';
 
 /**
  * @description exclusively for user directed dashboard save actions, also
@@ -46,7 +47,6 @@ export async function openSaveModal({
   if (viewMode === 'edit' && isManaged) {
     return undefined;
   }
-  const dashboardContentManagementService = getDashboardContentManagementService();
   const saveAsTitle = lastSavedId
     ? await getSaveAsTitle(dashboardState.title)
     : dashboardState.title;
@@ -70,7 +70,7 @@ export async function openSaveModal({
 
         try {
           if (
-            !(await dashboardContentManagementService.checkForDuplicateDashboardTitle({
+            !(await checkForDuplicateDashboardTitle({
               title: newTitle,
               onTitleDuplicate,
               lastSavedTitle: dashboardState.title,
@@ -100,7 +100,7 @@ export async function openSaveModal({
 
           const beforeAddTime = window.performance.now();
 
-          const saveResult = await dashboardContentManagementService.saveDashboardState({
+          const saveResult = await saveDashboardState({
             controlGroupReferences,
             panelReferences,
             searchSourceReferences,
@@ -160,7 +160,7 @@ function getCustomModalTitle(viewMode: ViewMode) {
 async function getSaveAsTitle(title: string) {
   const [baseTitle, baseCount] = extractTitleAndCount(title);
   let saveAsTitle = `${baseTitle} (${baseCount + 1})`;
-  await getDashboardContentManagementService().checkForDuplicateDashboardTitle({
+  await checkForDuplicateDashboardTitle({
     title: saveAsTitle,
     lastSavedTitle: title,
     copyOnSave: true,
