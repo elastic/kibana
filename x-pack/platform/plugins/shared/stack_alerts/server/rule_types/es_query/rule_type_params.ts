@@ -21,7 +21,6 @@ export type EsQueryRuleParamsExtractedParams = Omit<EsQueryRuleParams, 'searchCo
   };
 };
 
-// should this be also moved to package?
 export function validateServerless(params: EsQueryRuleParams) {
   const { size } = params;
   if (size > ES_QUERY_MAX_HITS_PER_EXECUTION_SERVERLESS) {
