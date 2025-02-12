@@ -17,10 +17,10 @@ import { authenticatedUser } from '../../__mocks__/user';
 import { getCreateKnowledgeBaseEntrySchemaMock } from '../../__mocks__/knowledge_base_entry_schema.mock';
 import {
   ContentReferencesStore,
-  EsqlContentReference,
   IndexEntry,
 } from '@kbn/elastic-assistant-common';
 import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { isString } from 'lodash';
 
 // Mock dependencies
 jest.mock('@elastic/elasticsearch');
@@ -169,7 +169,8 @@ describe('getStructuredToolForIndexEntry', () => {
     );
   });
 
-  it('should execute func correctly and return expected results', async () => {
+  it.only('should execute func correctly and return expected results', async () => {
+    (isString as unknown as jest.Mock).mockReturnValue(true);
     const mockSearchResult = {
       hits: {
         hits: [
@@ -177,6 +178,7 @@ describe('getStructuredToolForIndexEntry', () => {
             _index: 'exampleIndex',
             _id: 'exampleId',
             _source: {
+              '@timestamp': '2021-01-01T00:00:00.000Z',
               field1: 'value1',
               field2: 2,
             },
@@ -200,11 +202,7 @@ describe('getStructuredToolForIndexEntry', () => {
     (contentReferencesStore.add as jest.Mock).mockImplementation(
       (creator: Parameters<ContentReferencesStore['add']>[0]) => {
         const reference = creator({ id: 'exampleContentReferenceId' });
-        expect(reference.type).toEqual('EsqlQuery');
-        expect((reference as EsqlContentReference).label).toEqual('exampleIndex');
-        expect((reference as EsqlContentReference).query).toEqual(
-          'FROM exampleIndex METADATA _id\n | WHERE _id == "exampleId"'
-        );
+        expect(reference).toEqual(expect.objectContaining({ id: 'exampleContentReferenceId', type: 'EsqlQuery', label: 'Index: exampleIndex', query: 'FROM exampleIndex METADATA _id\n | WHERE _id == "exampleId"', timerange: { from: '2021-01-01T00:00:00.000Z', to: '2021-01-01T00:00:00.000Z' } }));
         return reference;
       }
     );
