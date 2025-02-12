@@ -6,6 +6,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { SiemMigrationTelemetryClient } from './rule_migrations_telemetry_client';
 import type { RuleMigrationIntegration, RuleMigrationPrebuiltRule } from '../types';
 import type { MigrateRuleState } from './agent/types';
@@ -68,8 +69,10 @@ const preFilterIntegrationMocks: RuleMigrationIntegration[] = [
 ];
 
 const mockTelemetry = coreMock.createSetup().analytics;
+const mockLogger = loggerMock.create();
 const siemTelemetryClient = new SiemMigrationTelemetryClient(
   mockTelemetry,
+  mockLogger,
   'testmigration',
   'testModel'
 );
@@ -199,7 +202,7 @@ describe('siemMigrationTelemetry', () => {
       migrationId: 'testmigration',
       model: 'testModel',
       postFilterRuleCount: 1,
-      postFilterRuleNames: 'rule1id',
+      postFilterRuleName: 'rule1id',
       preFilterRuleCount: 2,
       preFilterRuleNames: ['rule1id', 'rule2id'],
     });
@@ -212,7 +215,7 @@ describe('siemMigrationTelemetry', () => {
       migrationId: 'testmigration',
       model: 'testModel',
       postFilterRuleCount: 0,
-      postFilterRuleNames: '',
+      postFilterRuleName: '',
       preFilterRuleCount: 2,
       preFilterRuleNames: ['rule1id', 'rule2id'],
     });
