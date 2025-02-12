@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { EuiBasicTable, EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { TaskTypes } from '../../../common/types';
+import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as i18n from '../../../common/translations';
 
 import { useTableData } from '../../hooks/use_table_data';
@@ -124,7 +124,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
         field: 'type',
         name: i18n.TASK_TYPE,
         'data-test-subj': 'typeCell',
-        render: (type: TaskTypes) => {
+        render: (type: InferenceTaskType) => {
           if (type) {
             return <TaskType type={type} />;
           }

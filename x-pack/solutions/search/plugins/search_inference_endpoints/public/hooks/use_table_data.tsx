@@ -10,7 +10,6 @@ import { Pagination } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import { useMemo } from 'react';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
-import { TaskTypes } from '../../common/types';
 import { DEFAULT_TABLE_LIMIT } from '../components/all_inference_endpoints/constants';
 import {
   FilterOptions,
@@ -45,7 +44,7 @@ export const useTableData = (
 
     if (filterOptions.type.length > 0) {
       filteredEndpoints = filteredEndpoints.filter((endpoint) =>
-        filterOptions.type.includes(TaskTypes[endpoint.task_type])
+        filterOptions.type.includes(endpoint.task_type)
       );
     }
 
