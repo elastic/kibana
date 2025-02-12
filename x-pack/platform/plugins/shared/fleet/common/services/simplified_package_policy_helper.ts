@@ -174,8 +174,11 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     ),
     supports_agentless: supportsAgentless,
     output_id: outputId,
-    additional_datastreams_permissions: additionalDatastreamsPermissions,
   };
+
+  if (additionalDatastreamsPermissions) {
+    packagePolicy.additional_datastreams_permissions = additionalDatastreamsPermissions;
+  }
 
   if (packagePolicy.package && options?.experimental_data_stream_features) {
     packagePolicy.package.experimental_data_stream_features =
