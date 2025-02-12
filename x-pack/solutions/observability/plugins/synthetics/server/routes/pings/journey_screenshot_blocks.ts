@@ -19,16 +19,31 @@ export const createJourneyScreenshotBlocksRoute: SyntheticsRestApiRouteFactory =
     }),
   },
   writeAccess: false,
-  handler: async ({ request, syntheticsEsClient }) => {
-    const { hashes: blockIds } = request.body;
+  handler: async ({ request, response, syntheticsEsClient }) => {
+    const { hashes: blockIds } = request.body as { hashes: string[] };
 
     const result = await getJourneyScreenshotBlocks({
       blockIds,
       syntheticsEsClient,
     });
 
-    return {
-      result,
-    };
+    if (result.length === 0) {
+      return response.noContent({
+        body: result,
+      });
+    }
+    const resultSet = new Set(result.map((block) => block.id));
+    if (blockIds.filter((id: string) => !resultSet.has(id)).length) {
+      return response.multiStatus({
+        body: blockIds.map((id) =>
+          resultSet.has(id)
+            ? { ...result.find((block) => block.id === id), status: 200 }
+            : { id, status: 404 }
+        ),
+      });
+    }
+    return response.ok({
+      body: result,
+    });
   },
 });

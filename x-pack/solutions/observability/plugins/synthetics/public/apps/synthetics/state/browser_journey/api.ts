@@ -24,13 +24,13 @@ export interface FetchJourneyStepsParams {
 }
 
 export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlockDoc[]> {
-  const response = await apiService.post<{ result: ScreenshotBlockDoc[] }>(
+  const response = await apiService.post<ScreenshotBlockDoc[] | ''>(
     SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT_BLOCKS,
     {
       hashes: params,
     }
   );
-  return response.result;
+  return typeof response === 'string' ? [] : response;
 }
 
 export async function fetchBrowserJourney(
