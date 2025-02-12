@@ -10,7 +10,6 @@
 import { uniq, uniqBy } from 'lodash';
 import {
   type AstProviderFn,
-  type ESQLAst,
   type ESQLAstItem,
   type ESQLCommand,
   type ESQLCommandOption,
