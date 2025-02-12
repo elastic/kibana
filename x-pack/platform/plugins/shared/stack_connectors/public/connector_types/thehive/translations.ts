@@ -60,6 +60,13 @@ export const TLP_LABEL = i18n.translate(
   }
 );
 
+export const IS_RULE_SEVERITY_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.thehive.isRuleSeverityToggleLabel',
+  {
+    defaultMessage: 'Keep severity from rule',
+  }
+);
+
 export const SEVERITY_LABEL = i18n.translate(
   'xpack.stackConnectors.components.thehive.severitySelectFieldLabel',
   {
@@ -123,18 +130,10 @@ export const BODY_DESCRIPTION = i18n.translate(
   }
 );
 
-export const BODY_HELP_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.thehive.bodyFieldHelpLabel',
+export const SELECT_BODY_TEMPLATE_POPOVER_BUTTON = i18n.translate(
+  'xpack.stackConnectors.components.thehive.selectBodyTemplatePopoverButton',
   {
-    defaultMessage: 'Body Help',
-  }
-);
-
-export const BODY_HELP_TEXT = i18n.translate(
-  'xpack.stackConnectors.components.thehive.bodyFieldHelpText',
-  {
-    defaultMessage:
-      'Additional body parameters such as observables, procedures (TTPs), and custom fields to include in the API request.',
+    defaultMessage: 'Select body template',
   }
 );
 

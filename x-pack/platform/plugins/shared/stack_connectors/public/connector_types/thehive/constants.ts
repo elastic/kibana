@@ -118,47 +118,8 @@ export const tlpOptions = [
   },
 ];
 
-export const templateOptions = [
-  {
-    value: TheHiveTemplate.BUILD_YOUR_OWN,
-    text: i18n.translate(
-      'xpack.stackConnectors.components.thehive.eventSelectTemplate1OptionLabel',
-      {
-        defaultMessage: 'Build Your Own',
-      }
-    ),
-  },
-  {
-    value: TheHiveTemplate.COMPROMISED_USER_ACCOUNT_INVESTIGATION,
-    text: i18n.translate(
-      'xpack.stackConnectors.components.thehive.eventSelectTemplate2OptionLabel',
-      {
-        defaultMessage: 'Compromised User Account Investigation',
-      }
-    ),
-  },
-  {
-    value: TheHiveTemplate.MALICIOUS_FILE_ANALYSIS,
-    text: i18n.translate(
-      'xpack.stackConnectors.components.thehive.eventSelectTemplate3OptionLabel',
-      {
-        defaultMessage: 'Malicious File Analysis',
-      }
-    ),
-  },
-  {
-    value: TheHiveTemplate.SUSPICIOUS_NETWORK_ACTIVITY,
-    text: i18n.translate(
-      'xpack.stackConnectors.components.thehive.eventSelectTemplate4OptionLabel',
-      {
-        defaultMessage: 'Suspicious Network Activity',
-      }
-    ),
-  },
-];
-
-export const bodyOption: { [key: string]: string } = {
-  [TheHiveTemplate.BUILD_YOUR_OWN]: '{}',
+export const bodyOption: { [key: string]: string | null } = {
+  [TheHiveTemplate.CUSTOM_TEMPLATE]: null,
   [TheHiveTemplate.COMPROMISED_USER_ACCOUNT_INVESTIGATION]:
     '{\r\n  "observables": [\r\n    {\r\n      "dataType": "mail",\r\n      "data": "{{#context.alerts}}{{user.email}}{{/context.alerts}}",\r\n      "tags": [\r\n        "phishing",\r\n        "targeted-user"\r\n      ]\r\n    },\r\n    {\r\n      "dataType": "other",\r\n      "data": "{{#context.alerts}}{{user.name}}{{/context.alerts}}",\r\n      "tags": [\r\n        "username",\r\n        "compromised-account",\r\n        "unauthorized-access"\r\n      ]\r\n    }\r\n  ],\r\n  "procedures": [\r\n    {\r\n      "patternId": "{{#context.alerts}}{{threat.technique.id}}{{/context.alerts}}",\r\n      "occurDate": {{#context.alerts}}{{#signal.original_time}}{{#FormatDate}} {{{signal.original_time}}} ; ; x {{/FormatDate}}{{/signal.original_time}}{{^signal.original_time}}1640000000000{{/signal.original_time}}{{/context.alerts}}\r\n    }\r\n  ]\r\n}',
   [TheHiveTemplate.MALICIOUS_FILE_ANALYSIS]:
@@ -167,8 +128,8 @@ export const bodyOption: { [key: string]: string } = {
     '{\r\n  "observables":\r\n    [\r\n      {\r\n        "dataType": "ip",\r\n        "data": "{{#context.alerts}}{{threat.indicator.ip}}{{/context.alerts}}",\r\n        "tags": ["source", "malicious-activity"]\r\n      }\r\n    ],\r\n  "procedures":\r\n    [\r\n      {\r\n        "patternId": "{{#context.alerts}}{{threat.technique.id}}{{/context.alerts}}",\r\n        "occurDate": {{#context.alerts}}{{#signal.original_time}}{{#FormatDate}} {{{signal.original_time}}} ; ; x {{/FormatDate}}{{/signal.original_time}}{{^signal.original_time}}1640000000000{{/signal.original_time}}{{/context.alerts}}\r\n      }\r\n    ]\r\n}\r\n',
 };
 
-export const testBodyOption: { [key: string]: string } = {
-  [TheHiveTemplate.BUILD_YOUR_OWN]: '{}',
+export const testBodyOption: { [key: string]: string | null } = {
+  [TheHiveTemplate.CUSTOM_TEMPLATE]: null,
   [TheHiveTemplate.COMPROMISED_USER_ACCOUNT_INVESTIGATION]: JSON.stringify(
     {
       observables: [
@@ -234,3 +195,43 @@ export const testBodyOption: { [key: string]: string } = {
     2
   ),
 };
+
+export const testCustomTemplatePlaceHolder = JSON.stringify(
+  {
+    observables: [
+      {
+        dataType: 'url',
+        data: 'http://example.org',
+      },
+    ],
+    procedures: [
+      {
+        patternId: 'TA0001',
+        occurDate: 1640000000000,
+        tactic: 'tactic-name',
+      },
+    ],
+  },
+  null,
+  2
+).replace(/ /g, '\u00A0');
+
+export const ruleCustomTemplatePlaceHolder = JSON.stringify(
+  {
+    observables: [
+      {
+        dataType: 'url',
+        data: '{{#context.alerts}}{{url.original}}{{/context.alerts}}',
+      },
+    ],
+    procedures: [
+      {
+        patternId: '{{#context.alerts}}{{threat.technique.id}}{{/context.alerts}}',
+        occurDate: 1640000000000,
+        tactic: '{{#context.alerts}}{{threat.tactic.name}}{{/context.alerts}}',
+      },
+    ],
+  },
+  null,
+  2
+).replace(/ /g, '\u00A0');

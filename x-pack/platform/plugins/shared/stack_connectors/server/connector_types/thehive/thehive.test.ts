@@ -415,7 +415,6 @@ describe('TheHiveConnector', () => {
       severity: 1,
       tlp: 2,
       tags: ['tag1', 'tag2'],
-      template: 0,
       body: JSON.stringify(
         {
           observables: [
@@ -438,7 +437,7 @@ describe('TheHiveConnector', () => {
       ),
     };
 
-    const { body, template, ...restOfAlert } = alert;
+    const { body, ...restOfAlert } = alert;
     const expectedAlertBody = { ...restOfAlert, ...JSON.parse(body ?? '{}') };
 
     it('TheHive API call is successful with correct parameters', async () => {
