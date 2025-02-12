@@ -31,7 +31,7 @@ export interface GridRowProps {
 
 export const GridRow = React.memo(
   ({ rowIndex, renderPanelContents, gridLayoutStateManager }: GridRowProps) => {
-    const headerRef = useRef<HTMLDivElement | null>(null);
+    const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
     const currentRow = gridLayoutStateManager.gridLayout$.value[rowIndex];
 
     const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
@@ -131,8 +131,8 @@ export const GridRow = React.memo(
       /**
        * Set `aria-expanded` without passing as prop to `gridRowHeader` to prevent re-render
        */
-      if (!headerRef.current) return;
-      headerRef.current.ariaExpanded = `${!isCollapsed}`;
+      if (!collapseButtonRef.current) return;
+      collapseButtonRef.current.ariaExpanded = `${!isCollapsed}`;
     }, [isCollapsed]);
 
     return (
@@ -147,7 +147,7 @@ export const GridRow = React.memo(
             rowIndex={rowIndex}
             gridLayoutStateManager={gridLayoutStateManager}
             toggleIsCollapsed={toggleIsCollapsed}
-            headerRef={headerRef}
+            collapseButtonRef={collapseButtonRef}
           />
         )}
         {!isCollapsed && (

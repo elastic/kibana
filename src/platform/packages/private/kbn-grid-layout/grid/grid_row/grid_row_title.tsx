@@ -10,9 +10,17 @@ import { cloneDeep } from 'lodash';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { distinctUntilChanged, map } from 'rxjs';
 
-import { EuiButtonIcon, EuiFlexItem, EuiInlineEditTitle, EuiLink, EuiTitle } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexItem,
+  EuiInlineEditTitle,
+  EuiTitle,
+  UseEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { css } from '@emotion/react';
 import { GridLayoutStateManager } from '../types';
 
 export const GridRowTitle = React.memo(
@@ -23,6 +31,7 @@ export const GridRowTitle = React.memo(
     setEditTitleOpen,
     toggleIsCollapsed,
     gridLayoutStateManager,
+    collapseButtonRef,
   }: {
     readOnly: boolean;
     rowIndex: number;
@@ -30,6 +39,7 @@ export const GridRowTitle = React.memo(
     setEditTitleOpen: (value: boolean) => void;
     toggleIsCollapsed: () => void;
     gridLayoutStateManager: GridLayoutStateManager;
+    collapseButtonRef: React.MutableRefObject<HTMLButtonElement | null>;
   }) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const currentRow = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
@@ -74,6 +84,29 @@ export const GridRowTitle = React.memo(
 
     return (
       <>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            buttonRef={collapseButtonRef}
+            color="text"
+            aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
+              defaultMessage: 'Toggle collapse',
+            })}
+            iconType={'arrowDown'}
+            onClick={toggleIsCollapsed}
+            css={rotateAccordianArrowStyles}
+            size="m"
+            id={`kbnGridRowHeader--${rowIndex}`}
+            aria-controls={`kbnGridRow--${rowIndex}`}
+            data-test-subj={`kbnGridRowHeader--${rowIndex}`}
+            textProps={false}
+          >
+            {editTitleOpen ? null : (
+              <EuiTitle size="xs">
+                <h2>{rowTitle}</h2>
+              </EuiTitle>
+            )}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
         {!readOnly && editTitleOpen ? (
           <EuiFlexItem grow={true}>
             {/* @ts-ignore - EUI typing issue that will be resolved with https://github.com/elastic/eui/pull/8307 */}
@@ -91,17 +124,11 @@ export const GridRowTitle = React.memo(
                 defaultMessage: 'Edit section title',
               })}
               data-test-subj="kbnGridRowTitle--editor"
+              css={nudgeInputStyles}
             />
           </EuiFlexItem>
         ) : (
           <>
-            <EuiFlexItem grow={false}>
-              <EuiLink onClick={toggleIsCollapsed} color="text">
-                <EuiTitle size="xs" data-test-subj="kbnGridRowTitle">
-                  <h2>{rowTitle}</h2>
-                </EuiTitle>
-              </EuiLink>
-            </EuiFlexItem>
             {!readOnly && (
               <EuiFlexItem grow={false}>
                 <EuiButtonIcon
@@ -121,5 +148,21 @@ export const GridRowTitle = React.memo(
     );
   }
 );
+
+const rotateAccordianArrowStyles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    svg: {
+      transition: `transform ${euiTheme.animation.fast} ease`,
+      transform: 'rotate(0deg)',
+      '.kbnGridRowContainer--collapsed &': {
+        transform: 'rotate(-90deg) !important',
+      },
+    },
+  });
+
+const nudgeInputStyles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    marginLeft: `calc(${euiTheme.size.xxs} * -3)`, // 6px
+  });
 
 GridRowTitle.displayName = 'GridRowTitle';

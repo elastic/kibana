@@ -23,11 +23,16 @@ export interface GridRowHeaderProps {
   rowIndex: number;
   gridLayoutStateManager: GridLayoutStateManager;
   toggleIsCollapsed: () => void;
-  headerRef: React.MutableRefObject<HTMLDivElement | null>;
+  collapseButtonRef: React.MutableRefObject<HTMLButtonElement | null>;
 }
 
 export const GridRowHeader = React.memo(
-  ({ rowIndex, gridLayoutStateManager, toggleIsCollapsed, headerRef }: GridRowHeaderProps) => {
+  ({
+    rowIndex,
+    gridLayoutStateManager,
+    toggleIsCollapsed,
+    collapseButtonRef,
+  }: GridRowHeaderProps) => {
     const headerStyles = useGridRowHeaderStyles();
     const [editTitleOpen, setEditTitleOpen] = useState<boolean>(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
@@ -86,26 +91,11 @@ export const GridRowHeader = React.memo(
     return (
       <>
         <EuiFlexGroup
-          ref={headerRef}
           gutterSize="xs"
           alignItems="center"
           css={headerStyles}
           className="kbnGridRowHeader"
-          id={`kbnGridRowHeader--${rowIndex}`}
-          aria-controls={`kbnGridRow--${rowIndex}`}
-          data-test-subj={`kbnGridRowHeader--${rowIndex}`}
         >
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              color="text"
-              aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
-                defaultMessage: 'Toggle collapse',
-              })}
-              iconType={'arrowDown'}
-              onClick={toggleIsCollapsed}
-              css={styles.accordianArrow}
-            />
-          </EuiFlexItem>
           <GridRowTitle
             rowIndex={rowIndex}
             readOnly={readOnly}
@@ -113,6 +103,7 @@ export const GridRowHeader = React.memo(
             editTitleOpen={editTitleOpen}
             setEditTitleOpen={setEditTitleOpen}
             gridLayoutStateManager={gridLayoutStateManager}
+            collapseButtonRef={collapseButtonRef}
           />
           {
             /**
@@ -180,12 +171,6 @@ export const GridRowHeader = React.memo(
 );
 
 const styles = {
-  accordianArrow: css({
-    transform: 'rotate(0deg)',
-    '.kbnGridRowContainer--collapsed &': {
-      transform: 'rotate(-90deg) !important',
-    },
-  }),
   hiddenOnCollapsed: css({
     display: 'none',
     '.kbnGridRowContainer--collapsed &': {
