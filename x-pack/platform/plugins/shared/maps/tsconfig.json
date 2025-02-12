@@ -90,7 +90,8 @@
     "@kbn/embeddable-enhanced-plugin",
     "@kbn/presentation-containers",
     "@kbn/field-utils",
-    "@kbn/react-hooks"
+    "@kbn/react-hooks",
+    "@kbn/react-kibana-mount",
   ],
   "exclude": [
     "target/**/*",

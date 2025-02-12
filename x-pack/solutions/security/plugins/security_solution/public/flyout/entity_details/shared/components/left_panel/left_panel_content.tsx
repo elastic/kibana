@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEuiBackgroundColor } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import type { VFC } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
@@ -22,6 +22,7 @@ export interface PanelContentProps {
  * Appears after the user clicks on the expand details button in the right section.
  */
 export const LeftPanelContent: VFC<PanelContentProps> = ({ selectedTabId, tabs }) => {
+  const { euiTheme } = useEuiTheme();
   const selectedTabContent = useMemo(() => {
     return tabs.find((tab) => tab.id === selectedTabId)?.content;
   }, [selectedTabId, tabs]);
@@ -29,7 +30,7 @@ export const LeftPanelContent: VFC<PanelContentProps> = ({ selectedTabId, tabs }
   return (
     <FlyoutBody
       css={css`
-        background-color: ${useEuiBackgroundColor('subdued')};
+        background-color: ${euiTheme.colors.backgroundBaseSubdued};
       `}
     >
       {selectedTabContent}

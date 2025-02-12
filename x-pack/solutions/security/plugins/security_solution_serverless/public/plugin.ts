@@ -23,6 +23,7 @@ import {
   type ExperimentalFeatures,
 } from '../common/experimental_features';
 import { setOnboardingSettings } from './onboarding';
+import { getEnablementModalCallout } from './components/enablement_modal_callout';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -69,6 +70,7 @@ export class SecuritySolutionServerlessPlugin
 
     securitySolution.setComponents({
       DashboardsLandingCallout: getDashboardsLandingCallout(services),
+      EnablementModalCallout: getEnablementModalCallout(services),
     });
 
     setOnboardingSettings(services);
