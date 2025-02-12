@@ -19,9 +19,11 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
-import { APP_FIXED_VIEWPORT_ID } from '@kbn/core-rendering-browser';
-import { GlobalAppStyle } from '@kbn/core-application-common';
-import { AppWrapper } from './app_containers';
+
+import { KibanaWorkspace } from '@kbn/core-workspace-components';
+import { InternalHttpStart } from '@kbn/core-http-browser-internal';
+import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import { WorkspaceService } from '@kbn/core-workspace-browser-internal';
 
 interface StartServices {
   analytics: AnalyticsServiceStart;
@@ -35,6 +37,9 @@ export interface StartDeps extends StartServices {
   chrome: InternalChromeStart;
   overlays: OverlayStart;
   targetDomElement: HTMLDivElement;
+  http: InternalHttpStart;
+  customBranding: CustomBrandingStart;
+  workspace: WorkspaceService;
 }
 
 /**
@@ -46,10 +51,16 @@ export interface StartDeps extends StartServices {
  * @internal
  */
 export class RenderingService {
-  start({ application, chrome, overlays, targetDomElement, ...startServices }: StartDeps) {
-    const chromeHeader = chrome.getHeaderComponent();
-    const appComponent = application.getComponent();
-    const bannerComponent = overlays.banners.getComponent();
+  start({
+    application,
+    chrome,
+    overlays,
+    targetDomElement,
+    http,
+    customBranding,
+    ...startServices
+  }: StartDeps) {
+    // const bannerComponent = overlays.banners.getComponent();
 
     const body = document.querySelector('body')!;
     chrome
@@ -60,27 +71,25 @@ export class RenderingService {
         body.classList.add(...newClasses);
       });
 
+    const component = application.getComponent() || <></>;
+    const { workspace } = chrome;
+    const { getActiveNodes$, getProjectSideNavComponent$ } = chrome.projectNavigation;
+    const { currentActionMenu$ } = application;
+
+    // TODO: unpack observables here, props changes will handle the rest.
+
     ReactDOM.render(
       <KibanaRootContextProvider {...startServices} globalStyles={true}>
-        <>
-          {/* Global Styles that apply across the entire app */}
-          <GlobalAppStyle />
-
-          {/* Fixed headers */}
-          {chromeHeader}
-
-          {/* banners$.subscribe() for things like the No data banner */}
-          <div id="globalBannerList">{bannerComponent}</div>
-
-          {/* The App Wrapper outside of the fixed headers that accepts custom class names from apps */}
-          <AppWrapper chromeVisible$={chrome.getIsVisible$()}>
-            {/* Affixes a div to restrict the position of charts tooltip to the visible viewport minus the header */}
-            <div id={APP_FIXED_VIEWPORT_ID} />
-
-            {/* The actual plugin/app */}
-            {appComponent}
-          </AppWrapper>
-        </>
+        <KibanaWorkspace
+          {...{
+            workspace,
+            getActiveNodes$,
+            currentActionMenu$,
+            getProjectSideNavComponent$,
+          }}
+        >
+          {component}
+        </KibanaWorkspace>
       </KibanaRootContextProvider>,
       targetDomElement
     );

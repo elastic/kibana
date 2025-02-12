@@ -14,6 +14,7 @@ import { BehaviorSubject, map, ReplaySubject, takeUntil } from 'rxjs';
 
 import type { BuildFlavor } from '@kbn/config/src/types';
 import type { CoreStart } from '@kbn/core/public';
+import { WORKSPACE_TOOL_PROFILE } from '@kbn/core-workspace-browser';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type {
@@ -24,6 +25,8 @@ import type {
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { SecurityNavControl } from './nav_control_component';
+import { ToolboxButton } from './toolbox_button';
+import { ToolboxContent } from './toolbox_content';
 import type { SecurityLicense } from '../../common';
 import type { SecurityApiClients } from '../components';
 import { AuthenticationProvider, SecurityApiClientsProvider } from '../components';
@@ -110,6 +113,33 @@ export class SecurityNavControlService {
   }
 
   private registerSecurityNavControl(core: CoreStart, authc: AuthenticationServiceSetup) {
+    if (core.chrome.workspace.isEnabled()) {
+      const recentlyAccessed$ = core.chrome.recentlyAccessed.get$();
+
+      core.chrome.workspace.toolbox.registerTool({
+        button: {
+          iconType: () => (
+            <AuthenticationProvider authc={authc}>
+              <SecurityApiClientsProvider {...this.securityApiClients}>
+                <ToolboxButton />
+              </SecurityApiClientsProvider>
+            </AuthenticationProvider>
+          ),
+        },
+        toolId: WORKSPACE_TOOL_PROFILE,
+        tool: {
+          title: 'Profile',
+          children: (
+            <AuthenticationProvider authc={authc}>
+              <SecurityApiClientsProvider {...this.securityApiClients}>
+                <ToolboxContent {...{ recentlyAccessed$ }} />
+              </SecurityApiClientsProvider>
+            </AuthenticationProvider>
+          ),
+        },
+      });
+      return;
+    }
     core.chrome.navControls.registerRight({
       order: 4000,
       mount: (element: HTMLElement) => {

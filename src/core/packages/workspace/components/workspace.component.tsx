@@ -8,56 +8,41 @@
  */
 
 import React from 'react';
-import { Global } from '@emotion/react';
 
-import { WorkspaceHeaderComponent as Header } from './workspace_header.component';
-import { WorkspaceBannerComponent as Banner } from './workspace_banner.component';
-import { WorkspaceNavigationComponent as Navigation } from './workspace_navigation.component';
-import { WorkspaceApplicationComponent as Application } from './workspace_application.component';
-import { WorkspaceToolboxComponent as Toolbox } from './workspace_toolbox.component';
-import { WorkspaceTool as Tool } from './workspace_tool';
-import { WorkspaceFooterComponent as Footer } from './workspace_footer.component';
+import { WorkspaceHeader as Header, WorkspaceBanner as Banner } from './header';
+import { WorkspaceNavigation as Navigation } from './navigation';
+import { WorkspaceApplication as Application } from './application';
+import { WorkspaceToolbox as Toolbox, WorkspaceTool as Tool } from './toolbox';
+import { WorkspaceFooter as Footer } from './footer';
 
 import { useWorkspaceStyles } from './workspace.styles';
 
 export interface WorkspaceComponentProps {
-  isNavigationOpen: boolean;
-  isToolboxOpen: boolean;
-  toolboxWidth?: 'regular' | 'wide' | 'fullWidth';
   children: {
-    banner?: () => JSX.Element;
-    header: () => JSX.Element;
-    navigation: () => JSX.Element;
-    application: () => JSX.Element;
-    toolbox: () => JSX.Element;
-    tool: () => JSX.Element;
-    footer?: () => JSX.Element;
+    application: ReturnType<typeof Application>;
+    banner?: ReturnType<typeof Banner>;
+    navigation: ReturnType<typeof Navigation>;
+    footer?: ReturnType<typeof Footer>;
+    header: ReturnType<typeof Header>;
+    tool: ReturnType<typeof Tool>;
+    toolbox: ReturnType<typeof Toolbox>;
   };
 }
 
 const Workspace = ({
-  children: { banner: bannerFn, header, navigation, application, toolbox, tool, footer: footerFn },
-  ...props
+  children: { application, banner, footer, navigation, header, tool, toolbox },
 }: WorkspaceComponentProps) => {
   const styles = useWorkspaceStyles();
 
-  const banner = bannerFn ? (
-    <WorkspaceComponent.Banner>{bannerFn()}</WorkspaceComponent.Banner>
-  ) : null;
-  const footer = footerFn ? (
-    <WorkspaceComponent.Footer>{footerFn()}</WorkspaceComponent.Footer>
-  ) : null;
-
   return (
     <>
-      <Global styles={styles.global({ ...props, hasBanner: !!banner, hasFooter: !!footer })} />
       <div css={styles.workspace}>
         {banner}
-        <WorkspaceComponent.Header>{header()}</WorkspaceComponent.Header>
-        <WorkspaceComponent.Application>{application()}</WorkspaceComponent.Application>
-        <WorkspaceComponent.Navigation>{navigation()}</WorkspaceComponent.Navigation>
-        <WorkspaceComponent.Toolbox>{toolbox()}</WorkspaceComponent.Toolbox>
-        <WorkspaceComponent.Tool>{tool()}</WorkspaceComponent.Tool>
+        {header}
+        {navigation}
+        {application}
+        {toolbox}
+        {tool}
         {footer}
       </div>
     </>
@@ -67,8 +52,8 @@ const Workspace = ({
 export const WorkspaceComponent = Object.assign(Workspace, {
   Banner,
   Header,
-  Navigation,
   Application,
+  Navigation,
   Toolbox,
   Tool,
   Footer,

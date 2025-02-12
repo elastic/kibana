@@ -7,4 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { WorkspaceComponent, type WorkspaceComponentProps } from './workspace.component';
+export { Workspace, type WorkspaceProps } from './workspace';
+export { KibanaWorkspace, type KibanaWorkspaceProps } from './kibana';
+export type { WorkspaceToolProps, WorkspaceToolboxButtonProps } from './toolbox';

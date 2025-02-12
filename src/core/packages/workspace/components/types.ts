@@ -11,3 +11,4 @@ import { EuiThemeComputed } from '@elastic/eui';
 import { SerializedStyles } from '@emotion/serialize';
 
 export type EmotionFn = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => SerializedStyles;
+export type ToolboxSize = 'regular' | 'wide' | 'fullWidth';

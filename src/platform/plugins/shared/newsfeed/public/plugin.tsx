@@ -14,9 +14,12 @@ import React from 'react';
 import moment from 'moment';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { WORKSPACE_TOOL_NEWSFEED } from '@kbn/core-workspace-browser';
 import { NewsfeedPluginBrowserConfig, NewsfeedPluginStartDependencies } from './types';
 import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
 import { getApi, NewsfeedApi, NewsfeedApiEndpoint } from './lib/api';
+import { NewsfeedContainer } from './components/newsfeed_container';
+import { NewsfeedContent } from './components/newsfeed_content';
 
 export type NewsfeedPublicPluginSetup = ReturnType<NewsfeedPublicPlugin['setup']>;
 export type NewsfeedPublicPluginStart = ReturnType<NewsfeedPublicPlugin['start']>;
@@ -49,10 +52,32 @@ export class NewsfeedPublicPlugin
     const isScreenshotMode = screenshotMode.isScreenshotMode();
 
     const api = this.createNewsfeedApi(this.config, NewsfeedApiEndpoint.KIBANA, isScreenshotMode);
-    core.chrome.navControls.registerRight({
-      order: 1000,
-      mount: (target) => this.mount(api, target, core),
-    });
+
+    if (core.chrome.workspace.isEnabled()) {
+      core.chrome.workspace.toolbox.registerTool({
+        toolId: WORKSPACE_TOOL_NEWSFEED,
+        button: {
+          iconType: 'cheer',
+        },
+        tool: {
+          title: 'Newsfeed',
+          children: (
+            <NewsfeedContainer
+              {...{
+                newsfeedApi: api,
+              }}
+            >
+              <NewsfeedContent showPlainSpinner={false} />
+            </NewsfeedContainer>
+          ),
+        },
+      });
+    } else {
+      core.chrome.navControls.registerRight({
+        order: 1000,
+        mount: (target) => this.mount(api, target, core),
+      });
+    }
 
     return {
       createNewsFeed$: (endpoint: NewsfeedApiEndpoint) => {

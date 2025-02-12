@@ -8,16 +8,33 @@
  */
 
 import React from 'react';
+import { useIsNavigationCollapsed, useIsToolboxOpen } from '@kbn/core-workspace-state';
+
 import { WorkspaceComponent, WorkspaceComponentProps } from './workspace.component';
-import { useIsNavigationOpen, useIsToolboxOpen } from './state';
+import { WorkspaceGlobalCSS } from './workspace_global_css';
 
 export type WorkspaceProps = Pick<WorkspaceComponentProps, 'children'>;
 
-export const Workspace = ({ children }: WorkspaceProps) => {
-  const isNavigationOpen = useIsNavigationOpen();
+const WorkspaceLayout = ({ children }: WorkspaceProps) => {
+  const isNavigationCollapsed = useIsNavigationCollapsed();
   const isToolboxOpen = useIsToolboxOpen();
 
   return (
-    <WorkspaceComponent {...{ isNavigationOpen, isToolboxOpen }}>{children}</WorkspaceComponent>
+    <>
+      <WorkspaceGlobalCSS />
+      <WorkspaceComponent {...{ isNavigationCollapsed, isToolboxOpen }}>
+        {children}
+      </WorkspaceComponent>
+    </>
   );
 };
+
+export const Workspace = Object.assign(WorkspaceLayout, {
+  Banner: WorkspaceComponent.Banner,
+  Header: WorkspaceComponent.Header,
+  Application: WorkspaceComponent.Application,
+  Navigation: WorkspaceComponent.Navigation,
+  Toolbox: WorkspaceComponent.Toolbox,
+  Tool: WorkspaceComponent.Tool,
+  Footer: WorkspaceComponent.Footer,
+});
