@@ -8,7 +8,7 @@
  */
 
 import React, { type FC, useMemo, useEffect, useState, useCallback } from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import {
   EuiTitle,
   EuiCollapsibleNavItem,
@@ -153,7 +153,7 @@ const renderBlockTitle: (
       size="xxxs"
       className="eui-textTruncate"
       data-test-subj={dataTestSubj}
-      css={({ euiTheme }: any) => {
+      css={({ euiTheme }) => {
         return {
           marginTop: spaceBefore ? euiTheme.size[spaceBefore] : undefined,
           paddingBlock: euiTheme.size.xs,
@@ -427,12 +427,6 @@ function nodeToEuiCollapsibleNavProps(
   return { items, isVisible };
 }
 
-const className = css`
-  .euiAccordion__childWrapper {
-    transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
-  }
-`;
-
 interface Props {
   navNode: ChromeProjectNavigationNode;
 }
@@ -541,8 +535,14 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
     return null;
   }
 
+  const navItemStyles = css`
+    .euiAccordion__childWrapper {
+      transition: none; // Remove the transition as it does not play well with dynamic links added to the accordion
+    }
+  `;
+
   if (!items) {
-    return <EuiCollapsibleNavItem {...props} className={className} />;
+    return <EuiCollapsibleNavItem {...props} css={navItemStyles} />;
   }
 
   // Item type ExclusiveUnion - accordions should not contain links
@@ -551,7 +551,7 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
   return (
     <EuiCollapsibleNavItem
       {...rest}
-      className={className}
+      css={navItemStyles}
       items={items}
       accordionProps={getAccordionProps(navNode.path)}
     />
