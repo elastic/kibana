@@ -186,5 +186,15 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.data[dataSpaceB.hosts[0].agent.id].found).to.eql(false);
       });
     });
+
+    describe(`Artifact management (via Lists plugin)`, () => {
+      it('should add owner space id when item is created', () => {
+        // TODO: implement
+      });
+
+      it('should not add owner space id during artifact update if one is not present');
+
+      it('should add owner space id when item is updated, if one is not present');
+    });
   });
 }
