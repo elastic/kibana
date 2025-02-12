@@ -23,6 +23,9 @@ export async function getDataStreamsCreationDate({
         return { name, creationDate: undefined };
       }
 
+      // While _cat api is not recommended for application use this is the only way
+      // to retrieve the creation date in serverless for now. We should change this
+      // once a proper approach exists (see elastic/elasticsearch-serverless#3010)
       const response = await esClient.cat.indices({
         index: oldestIndex.index_name,
         h: ['creation.date'],
