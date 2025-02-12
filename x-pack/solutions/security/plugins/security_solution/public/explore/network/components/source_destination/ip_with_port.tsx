@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { Ip } from '../ip';
 import { Port } from '../port';
