@@ -15,7 +15,7 @@ import {
   AGENT_NAMES,
   OPEN_TELEMETRY_AGENT_NAMES,
   OPEN_TELEMETRY_BASE_AGENT_NAMES,
-  RUM_AGENT_NAMES
+  RUM_AGENT_NAMES,
 } from '@kbn/elastic-agent-utils/src/agent_names';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import {
