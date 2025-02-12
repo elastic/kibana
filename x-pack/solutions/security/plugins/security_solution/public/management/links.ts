@@ -183,7 +183,7 @@ export const links: LinkItem = {
       id: SecurityPageName.entityAnalyticsManagement,
       title: ENTITY_ANALYTICS_RISK_SCORE,
       description: i18n.translate('xpack.securitySolution.appLinks.entityRiskScoringDescription', {
-        defaultMessage: 'Monitor user and host risk scores, and track anomalies.',
+        defaultMessage: "Monitor entities' risk scores, and track anomalies.",
       }),
       landingIcon: IconEntityAnalytics,
       path: ENTITY_ANALYTICS_MANAGEMENT_PATH,
