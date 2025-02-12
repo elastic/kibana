@@ -9,11 +9,11 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiConfirmModal,
-  EuiInMemoryTable,
+  EuiBasicTable,
   EuiTitle,
   EuiText,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { Conversation } from '../../../assistant_context/types';
 import { ConversationTableItem, useConversationsTable } from './use_conversations_table';
@@ -59,7 +59,14 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   } = useAssistantContext();
 
   const { data: allPrompts, isFetched: promptsLoaded, refetch: refetchPrompts } = useFetchPrompts();
-
+  const [totalItemCount, setTotalItemCount] = useState(10);
+  const { onTableChange, pagination, sorting } = useSessionPagination<false>({
+    nameSpace,
+    storageKey: CONVERSATION_TABLE_SESSION_STORAGE_KEY,
+    defaultTableOptions: DEFAULT_TABLE_OPTIONS,
+    inMemory: false,
+    totalItemCount,
+  });
   const {
     data: conversations,
     isFetched: conversationsLoaded,
@@ -67,6 +74,10 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   } = useFetchCurrentUserConversations({
     http,
     isAssistantEnabled,
+    // pagination index starts at 0, page starts as one
+    page: pagination.pageIndex + 1,
+    perPage: pagination.pageSize,
+    setTotalItemCount,
   });
 
   const refetchAll = useCallback(() => {
@@ -74,10 +85,11 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     refetchConversations();
   }, [refetchPrompts, refetchConversations]);
 
+  const conversationSettings = conversations;
+
   const {
     systemPromptSettings: allSystemPrompts,
     assistantStreamingEnabled,
-    conversationSettings,
     conversationsSettingsBulkActions,
     resetSettings,
     saveSettings,
@@ -130,18 +142,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const onSelectedConversationChange = useCallback((conversation?: Conversation) => {
     setSelectedConversation(conversation);
   }, []);
-
-  useEffect(() => {
-    if (selectedConversation != null) {
-      const newConversation =
-        conversationSettings[selectedConversation.id] ||
-        conversationSettings[selectedConversation.title];
-      setSelectedConversation(
-        // conversationSettings has title as key, sometime has id as key
-        newConversation
-      );
-    }
-  }, [conversationSettings, selectedConversation]);
 
   const {
     isFlyoutOpen: editFlyoutVisible,
@@ -215,12 +215,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
 
   const { getConversationsList, getColumns } = useConversationsTable();
 
-  const { onTableChange, pagination, sorting } = useSessionPagination({
-    nameSpace,
-    storageKey: CONVERSATION_TABLE_SESSION_STORAGE_KEY,
-    defaultTableOptions: DEFAULT_TABLE_OPTIONS,
-  });
-
   const conversationOptions = getConversationsList({
     allSystemPrompts,
     actionTypeRegistry,
@@ -281,12 +275,12 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         <EuiSpacer size="xs" />
         <EuiText size="m">{i18n.CONVERSATIONS_LIST_DESCRIPTION}</EuiText>
         <EuiSpacer size="s" />
-        <EuiInMemoryTable
+        <EuiBasicTable
           items={conversationOptions}
           columns={columns}
           pagination={pagination}
           sorting={sorting}
-          onTableChange={onTableChange}
+          onChange={onTableChange}
         />
       </EuiPanel>
       {editFlyoutVisible && (

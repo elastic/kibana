@@ -29,11 +29,13 @@ export interface FetchConversationsResponse {
 
 export interface UseFetchCurrentUserConversationsParams {
   http: HttpSetup;
+  fields?: string[];
   page?: number;
   perPage?: number;
   signal?: AbortSignal | undefined;
   refetchOnWindowFocus?: boolean;
   isAssistantEnabled: boolean;
+  setTotalItemCount?: (total: number) => void;
 }
 
 export interface FetchCurrentUserConversations {
@@ -72,18 +74,20 @@ const formatFetchedData = (data: InfiniteData<FetchConversationsResponse> | unde
  */
 export const useFetchCurrentUserConversations = ({
   http,
+  fields = query.fields,
   page = query.page,
   perPage = query.perPage,
   signal,
   refetchOnWindowFocus = true,
   isAssistantEnabled,
+  setTotalItemCount,
 }: UseFetchCurrentUserConversationsParams): FetchCurrentUserConversations => {
   const queryFn = async ({ pageParam }: { pageParam?: UseFetchCurrentUserConversationsParams }) => {
     return http.fetch<FetchConversationsResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, {
       method: 'GET',
       version: API_VERSIONS.public.v1,
       query: {
-        ...query,
+        fields,
         page: pageParam?.page ?? page,
         per_page: pageParam?.perPage ?? perPage,
       },
@@ -102,16 +106,30 @@ export const useFetchCurrentUserConversations = ({
     };
   };
 
-  const { refetch, data, fetchNextPage, isLoading, isFetching, isFetched, hasNextPage } =
-    useInfiniteQuery(
-      [ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, page, perPage, API_VERSIONS.public.v1],
-      queryFn,
-      {
-        enabled: isAssistantEnabled,
-        getNextPageParam,
-        refetchOnWindowFocus,
-      }
-    );
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    hasPreviousPage,
+    isFetched,
+    isFetching,
+    isLoading,
+    refetch,
+  } = useInfiniteQuery(
+    [ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, page, perPage, API_VERSIONS.public.v1],
+    queryFn,
+    {
+      enabled: isAssistantEnabled,
+      getNextPageParam,
+      refetchOnWindowFocus,
+    }
+  );
+  useEffect(() => {
+    if (setTotalItemCount && data?.pages?.length) {
+      setTotalItemCount(data?.pages[0].total ?? 0);
+    }
+  }, [data?.pages, setTotalItemCount]);
+
   const formatted = formatFetchedData(data);
 
   const observerRef = useRef<IntersectionObserver>();

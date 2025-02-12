@@ -16,28 +16,67 @@ export const DEFAULT_TABLE_OPTIONS = {
   sort: { field: '', direction: 'asc' as const },
 };
 
-export const useSessionPagination = ({
+interface InMemoryPagination {
+  initialPageSize: number;
+  pageSizeOptions: number[];
+  pageIndex: number;
+}
+
+interface ServerSidePagination {
+  totalItemCount: number;
+  pageSize: number;
+  pageSizeOptions: number[];
+  pageIndex: number;
+}
+
+interface UseSessionPaginationReturn<T extends boolean> {
+  onTableChange: ({
+    page,
+    sort,
+  }: {
+    page: { size: number; index: number };
+    sort: { field: string; direction: Direction };
+  }) => void;
+  pagination: T extends true ? InMemoryPagination : ServerSidePagination;
+  sorting: {
+    sort: { field: string; direction: Direction };
+  };
+}
+
+export const useSessionPagination = <T extends boolean>({
   defaultTableOptions,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
+  inMemory = true as T,
   storageKey,
+  totalItemCount = 0,
 }: {
   defaultTableOptions: {
     page: { size: number; index: number };
     sort: { field: string; direction: Direction };
   };
+  inMemory?: boolean;
   nameSpace?: string;
   storageKey: string;
-}) => {
+  totalItemCount?: number;
+}): UseSessionPaginationReturn<T> => {
   const [sessionStorageTableOptions = defaultTableOptions, setSessionStorageTableOptions] =
     useSessionStorage(`${nameSpace}.${storageKey}`, defaultTableOptions);
 
   const pagination = useMemo(
-    () => ({
-      initialPageSize: sessionStorageTableOptions.page.size,
-      pageSizeOptions: [5, 10, DEFAULT_PAGE_SIZE, 50],
-      pageIndex: sessionStorageTableOptions.page.index,
-    }),
-    [sessionStorageTableOptions]
+    () =>
+      inMemory
+        ? ({
+            initialPageSize: sessionStorageTableOptions.page.size,
+            pageSizeOptions: [5, 10, DEFAULT_PAGE_SIZE, 50],
+            pageIndex: sessionStorageTableOptions.page.index,
+          } as InMemoryPagination)
+        : ({
+            totalItemCount,
+            pageSize: sessionStorageTableOptions.page.size ?? DEFAULT_PAGE_SIZE,
+            pageSizeOptions: [5, 10, DEFAULT_PAGE_SIZE, 50],
+            pageIndex: sessionStorageTableOptions.page.index,
+          } as ServerSidePagination),
+    [inMemory, sessionStorageTableOptions, totalItemCount]
   );
 
   const sorting = useMemo(
@@ -48,11 +87,12 @@ export const useSessionPagination = ({
   );
 
   const onTableChange = useCallback(
-    ({
-      page,
-      sort,
-    }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    any) => {
+    (
+      args: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      any
+    ) => {
+      const { page, sort } = args;
+      console.log('onTableChange', args);
       setSessionStorageTableOptions({
         page,
         sort,

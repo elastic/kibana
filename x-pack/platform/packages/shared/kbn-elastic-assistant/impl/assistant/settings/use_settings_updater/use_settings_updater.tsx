@@ -234,10 +234,10 @@ export const useSettingsUpdater = (
 
   useEffect(() => {
     // Update conversation settings when conversations are loaded
-    if (conversationsLoaded) {
+    if (conversationsLoaded && Object.keys(conversationSettings).length === 0) {
       setConversationSettings(conversations);
     }
-  }, [conversations, conversationsLoaded]);
+  }, [conversationSettings, conversations, conversationsLoaded]);
 
   useEffect(() => {
     // Update quick prompts settings when prompts are loaded

@@ -19,7 +19,6 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 jest.mock('@kbn/elastic-assistant', () => ({
   useAssistantContext: jest.fn(),
   useFetchCurrentUserConversations: jest.fn(),
-  formatPersistedConversations: jest.fn(),
   Welcome: 'Welcome Conversation',
 }));
 jest.mock('@kbn/elastic-assistant/impl/assistant/settings/assistant_settings_management', () => ({
