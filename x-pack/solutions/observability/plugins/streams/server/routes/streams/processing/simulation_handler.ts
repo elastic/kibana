@@ -64,7 +64,7 @@ interface SimulationError {
 
 type DocSimulationStatus = 'parsed' | 'partially_parsed' | 'failed';
 
-interface NormalizedSimulationDoc {
+interface SimulationDocReport {
   detected_fields: Array<{ processor_id: string; field: string }>;
   errors: SimulationError[];
   status: DocSimulationStatus;
@@ -78,6 +78,7 @@ interface ProcessorMetrics {
   success_rate: number;
 }
 
+// Narrow down the type to only successful processor results
 type SuccessfulIngestSimulateDocumentResult = WithRequired<
   IngestSimulateSimulateDocumentResult,
   'processor_results'
@@ -107,14 +108,13 @@ export const simulateProcessing = async ({
   scopedClusterClient,
   streamsClient,
 }: SimulateProcessingDeps) => {
-  // Prepare data for either simulation types (ingest, pipeline), used to compose both simulation bodies
+  /* 1. Prepare data for either simulation types (ingest, pipeline), prepare simulation body for the mandatory pipeline simulation */
   const simulationData = prepareSimulationData(params);
-
   const pipelineSimulationBody = preparePipelineSimulationBody(simulationData);
 
   /**
-   * Run both pipeline and ingest simulations in parallel.
-   * - The pipeline simulation is used to extract the normalized documents and the processor metrics. This always runs.
+   * 2. Run both pipeline and ingest simulations in parallel.
+   * - The pipeline simulation is used to extract the documents reports and the processor metrics. This always runs.
    * - The ingest simulation is used to fail fast on mapping failures. This runs only if `detected_fields` is provided.
    */
   const [pipelineSimulationResult] = await Promise.all([
@@ -122,23 +122,27 @@ export const simulateProcessing = async ({
     conditionallyExecuteIngestSimulation(scopedClusterClient, simulationData, params),
   ]);
 
+  /* 3. Fail fast on pipeline simulation errors and return the generic error response gracefully */
   if (pipelineSimulationResult.status === 'failure') {
     return prepareSimulationFailureResponse(pipelineSimulationResult.error);
   }
 
-  const { normalizedDocs, processorsMetrics } = parsePipelineSimulationResult(
+  /* 4. Extract all the documents reports and processor metrics from the pipeline simulation */
+  const { docReports, processorsMetrics } = computePipelineSimulationResult(
     pipelineSimulationResult.simulation,
     simulationData.docs,
     params.body.processing
   );
 
+  /* 5. Extract valid detected fields asserting existing mapped fields from stream and ancestors */
   const detectedFields = await computeDetectedFields(
     processorsMetrics,
     streamsClient,
     params.path.name
   );
 
-  return prepareSimulationResponse(normalizedDocs, processorsMetrics, detectedFields);
+  /* 6. Derive general insights and process final response body */
+  return prepareSimulationResponse(docReports, processorsMetrics, detectedFields);
 };
 
 const prepareSimulationDocs = (
@@ -250,6 +254,11 @@ const prepareIngestSimulationBody = (
   return simulationBody;
 };
 
+/**
+ * When running a pipeline simulation, we want to fail fast on syntax failures, such as grok patterns.
+ * If the simulation fails, we won't be able to extract the documents reports and the processor metrics.
+ * In case any other error occurs, we delegate the error handling to currently in draft processor.
+ */
 const executePipelineSimulation = async (
   scopedClusterClient: IScopedClusterClient,
   simulationBody: IngestSimulateRequest
@@ -319,6 +328,55 @@ const conditionallyExecuteIngestSimulation = async (
   return simulationResult;
 };
 
+/**
+ * Computing simulation insights for each document and processor takes a few steps:
+ * 1. Extract the last document source and the status of the simulation.
+ * 2. Compute the diff between the sample document and the simulation document to detect added fields and non-additive changes.
+ * 3. Track the detected fields and errors for each processor.
+ *
+ * To keep this process the at O(n) complexity, we iterate over the documents and processors only once.
+ * This requires a closure on the processor metrics map to keep track of the processor state while iterating over the documents.
+ */
+const computePipelineSimulationResult = (
+  simulationResult: SuccessfulIngestSimulateResponse,
+  sampleDocs: Array<{ _source: FlattenRecord }>,
+  processing: ProcessorDefinitionWithId[]
+): {
+  docReports: SimulationDocReport[];
+  processorsMetrics: Record<string, ProcessorMetrics>;
+} => {
+  const processorsMap = initProcessorMetricsMap(processing);
+
+  const docReports = simulationResult.docs.map((docResult, id) => {
+    const { errors, status, value } = getLastDoc(docResult);
+
+    const diff = computeSimulationDocDiff(docResult, sampleDocs[id]._source);
+
+    diff.detected_fields.forEach(({ processor_id, field }) => {
+      processorsMap[processor_id].detected_fields.push(field);
+    });
+
+    errors.push(...diff.errors);
+    errors.forEach((error) => {
+      const procId = error.processor_id;
+
+      processorsMap[procId].errors.push(error);
+      processorsMap[procId].failure_rate++;
+    });
+
+    return {
+      detected_fields: diff.detected_fields,
+      errors,
+      status,
+      value,
+    };
+  });
+
+  const processorsMetrics = extractProcessorMetrics(processorsMap);
+
+  return { docReports, processorsMetrics };
+};
+
 const initProcessorMetricsMap = (
   processing: ProcessorDefinitionWithId[]
 ): Record<string, ProcessorMetrics> => {
@@ -371,46 +429,6 @@ const getLastDoc = (docResult: SuccessfulIngestSimulateDocumentResult) => {
   }
 };
 
-const parsePipelineSimulationResult = (
-  simulationResult: SuccessfulIngestSimulateResponse,
-  sampleDocs: Array<{ _source: FlattenRecord }>,
-  processing: ProcessorDefinitionWithId[]
-): {
-  normalizedDocs: NormalizedSimulationDoc[];
-  processorsMetrics: Record<string, ProcessorMetrics>;
-} => {
-  const processorsMap = initProcessorMetricsMap(processing);
-
-  const normalizedDocs = simulationResult.docs.map((docResult, id) => {
-    const { errors, status, value } = getLastDoc(docResult);
-
-    const diff = computeSimulationDocDiff(docResult, sampleDocs[id]._source);
-
-    diff.detected_fields.forEach(({ processor_id, field }) => {
-      processorsMap[processor_id].detected_fields.push(field);
-    });
-
-    errors.push(...diff.errors);
-    errors.forEach((error) => {
-      const procId = error.processor_id;
-
-      processorsMap[procId].errors.push(error);
-      processorsMap[procId].failure_rate++;
-    });
-
-    return {
-      detected_fields: diff.detected_fields,
-      errors,
-      status,
-      value,
-    };
-  });
-
-  const processorsMetrics = extractProcessorMetrics(processorsMap);
-
-  return { normalizedDocs, processorsMetrics };
-};
-
 /**
  * Computing how a simulation document differs from the sample document is not enough
  * to determine if the processor fails on additive changes.
@@ -432,7 +450,7 @@ const computeSimulationDocDiff = (
     })),
   ];
 
-  const diffResult: Pick<NormalizedSimulationDoc, 'detected_fields' | 'errors'> = {
+  const diffResult: Pick<SimulationDocReport, 'detected_fields' | 'errors'> = {
     detected_fields: [],
     errors: [],
   };
@@ -474,11 +492,11 @@ const computeSimulationDocDiff = (
 };
 
 const prepareSimulationResponse = async (
-  normalizedDocs: NormalizedSimulationDoc[],
+  docReports: SimulationDocReport[],
   processorsMetrics: Record<string, ProcessorMetrics>,
   detectedFields: DetectedField[]
 ) => {
-  const successRate = computeSuccessRate(normalizedDocs);
+  const successRate = computeSuccessRate(docReports);
   const failureRate = 1 - successRate;
   const isNotAdditiveSimulation = some(processorsMetrics, (metrics) =>
     metrics.errors.some(isNonAdditiveSimulationError)
@@ -486,7 +504,7 @@ const prepareSimulationResponse = async (
 
   return {
     detected_fields: detectedFields,
-    documents: normalizedDocs,
+    documents: docReports,
     processors_metrics: processorsMetrics,
     failure_rate: parseFloat(failureRate.toFixed(2)),
     success_rate: parseFloat(successRate.toFixed(2)),
@@ -525,6 +543,9 @@ const getStreamFields = async (streamsClient: StreamsClient, streamName: string)
   return {};
 };
 
+/**
+ * In case new fields have been detected, we want to tell the user which ones are inherited and already mapped.
+ */
 const computeDetectedFields = async (
   processorsMetrics: Record<string, ProcessorMetrics>,
   streamsClient: StreamsClient,
@@ -534,7 +555,7 @@ const computeDetectedFields = async (
 
   const uniqueFields = uniq(fields);
 
-  // Short-circuit to avoid fetching streams field if none is detected
+  // Short-circuit to avoid fetching streams fields if none is detected
   if (isEmpty(uniqueFields)) {
     return [];
   }
@@ -551,7 +572,7 @@ const computeDetectedFields = async (
   });
 };
 
-const computeSuccessRate = (docs: NormalizedSimulationDoc[]) => {
+const computeSuccessRate = (docs: SimulationDocReport[]) => {
   const successfulCount = docs.reduce((rate, doc) => (rate += doc.status === 'parsed' ? 1 : 0), 0);
 
   return successfulCount / docs.length;
@@ -564,7 +585,6 @@ const computeMappingProperties = (detectedFields: NamedFieldDefinitionConfig[]) 
 /**
  * Guard helpers
  */
-
 const isSuccessfulProcessor = (
   processor: IngestSimulatePipelineSimulation
 ): processor is WithRequired<IngestSimulatePipelineSimulation, 'doc' | 'tag'> =>
