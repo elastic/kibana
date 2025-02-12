@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
+  const browser = getService('browser');
   const dataViews = getService('dataViews');
   const { common, discover, header } = getPageObjects(['common', 'discover', 'header']);
 
@@ -28,6 +29,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('load kibana with no data');
       await kibanaServer.importExport.unload(kbnDirectory);
       await common.navigateToApp('discover');
+    });
+
+    beforeEach(async () => {
+      await browser.clearLocalStorage();
     });
 
     after(async () => {

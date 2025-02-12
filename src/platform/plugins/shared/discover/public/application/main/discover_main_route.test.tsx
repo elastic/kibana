@@ -177,6 +177,7 @@ function getServicesMock(
   hasUserDataView = true,
   locationState?: MainHistoryLocationState
 ) {
+  discoverServiceMock.storage.clear();
   const dataViewsMock = discoverServiceMock.data.dataViews;
   dataViewsMock.hasData = {
     hasESData: jest.fn(() => Promise.resolve(hasESData)),

@@ -351,14 +351,26 @@ export function getDiscoverStateContainer({
     const cacheKey = `discover:cache:${currentUser.profile_uid}:${currentSpace?.id}`;
     const [hasUserDataViewValue, hasESDataValue, defaultDataViewExists, dataViewList] =
       await Promise.all([
-        getSWRBoolean(useCache ? `${cacheKey}:hasUserDataView` : '', () =>
-          dataViews.hasData.hasUserDataView()
+        getSWRBoolean(
+          useCache ? `${cacheKey}:hasUserDataView` : '',
+          () => dataViews.hasData.hasUserDataView(),
+          services.storage
         ),
-        getSWRBoolean(useCache ? `${cacheKey}:hasData` : '', () => dataViews.hasData.hasESData()),
-        getSWRBoolean(useCache ? `${cacheKey}:defaultDataView` : '', () =>
-          dataViews.defaultDataViewExists()
+        getSWRBoolean(
+          useCache ? `${cacheKey}:hasData` : '',
+          () => dataViews.hasData.hasESData(),
+          services.storage
         ),
-        getSWRDataViewList(useCache ? `${cacheKey}:dataViewList` : '', () => loadDataViewList()),
+        getSWRBoolean(
+          useCache ? `${cacheKey}:defaultDataView` : '',
+          () => dataViews.defaultDataViewExists(),
+          services.storage
+        ),
+        getSWRDataViewList(
+          useCache ? `${cacheKey}:dataViewList` : '',
+          () => loadDataViewList(),
+          services.sessionStorage
+        ),
       ]);
 
     return {

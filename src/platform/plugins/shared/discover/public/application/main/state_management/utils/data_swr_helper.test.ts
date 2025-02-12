@@ -8,37 +8,35 @@
  */
 
 import { getSWRDataViewList, getSWRBoolean } from './data_swr_helper';
+import { discoverServiceMock } from '../../../../__mocks__/services';
 
 describe('getSWRDataViewList', () => {
   const cacheKey = 'testKey';
   const valueFn = jest.fn().mockResolvedValue([{ id: '1', title: 'Test DataView' }]);
+  const storage = discoverServiceMock.sessionStorage;
 
   beforeEach(() => {
-    sessionStorage.clear();
+    storage.clear();
   });
 
   it('should return cached value if available and call the value function in the background', async () => {
-    sessionStorage.setItem(cacheKey, JSON.stringify([{ id: '1', title: 'Cached DataView' }]));
-    const result = await getSWRDataViewList(cacheKey, valueFn);
+    storage.set(cacheKey, [{ id: '1', title: 'Cached DataView' }]);
+    const result = await getSWRDataViewList(cacheKey, valueFn, storage);
     expect(result).toEqual([{ id: '1', title: 'Cached DataView' }]);
     expect(valueFn).toHaveBeenCalled();
-    expect(sessionStorage.getItem(cacheKey)).toEqual(
-      JSON.stringify([{ id: '1', title: 'Test DataView' }])
-    );
+    expect(storage.get(cacheKey)).toEqual([{ id: '1', title: 'Test DataView' }]);
   });
 
   it('should call valueFn and return its result if no cached value', async () => {
-    const result = await getSWRDataViewList(cacheKey, valueFn);
+    const result = await getSWRDataViewList(cacheKey, valueFn, storage);
     expect(result).toEqual([{ id: '1', title: 'Test DataView' }]);
     expect(valueFn).toHaveBeenCalled();
-    expect(sessionStorage.getItem(cacheKey)).toEqual(
-      JSON.stringify([{ id: '1', title: 'Test DataView' }])
-    );
+    expect(storage.get(cacheKey)).toEqual([{ id: '1', title: 'Test DataView' }]);
   });
 
   it('should return an empty array if an error occurs', async () => {
-    sessionStorage.setItem(cacheKey, 'invalid JSON');
-    const result = await getSWRDataViewList(cacheKey, valueFn);
+    storage.set(cacheKey, 'invalid JSON');
+    const result = await getSWRDataViewList(cacheKey, valueFn, storage);
     expect(result).toEqual([{ id: '1', title: 'Test DataView' }]);
   });
 });
@@ -46,44 +44,45 @@ describe('getSWRDataViewList', () => {
 describe('getSWRBoolean', () => {
   const cacheKey = 'testBooleanKey';
   const valueFn = jest.fn().mockResolvedValue(true);
+  const storage = discoverServiceMock.storage;
 
   beforeEach(() => {
-    localStorage.clear();
+    storage.clear();
   });
 
   it('should return true if cached value is available', async () => {
-    localStorage.setItem(cacheKey, '1');
-    const result = await getSWRBoolean(cacheKey, valueFn);
+    storage.set(cacheKey, '1');
+    const result = await getSWRBoolean(cacheKey, valueFn, storage);
     expect(result).toBe(true);
     expect(valueFn).toHaveBeenCalled();
   });
 
   it('should set localstorage key to 1, if the valueFn returns true ', async () => {
-    const result = await getSWRBoolean(cacheKey, valueFn);
+    const result = await getSWRBoolean(cacheKey, valueFn, storage);
     expect(result).toBe(true);
-    expect(localStorage.getItem(cacheKey)).toBe('1');
+    expect(storage.get(cacheKey)).toBe('1');
   });
 
   it('should call valueFn and return its result if no cached value', async () => {
-    const result = await getSWRBoolean(cacheKey, valueFn);
+    const result = await getSWRBoolean(cacheKey, valueFn, storage);
     expect(result).toBe(true);
     expect(valueFn).toHaveBeenCalled();
   });
 
   it('should return false if an error occurs', async () => {
-    localStorage.setItem(cacheKey, 'invalid');
-    const result = await getSWRBoolean(cacheKey, valueFn);
+    storage.set(cacheKey, 'invalid');
+    const result = await getSWRBoolean(cacheKey, valueFn, storage);
     expect(result).toBe(true);
   });
 
   it('should return true of cache and if valueFn returned false, the cache value should be removed', async () => {
-    localStorage.setItem(cacheKey, '1');
+    storage.set(cacheKey, '1');
     const valueFnFalse = jest.fn().mockResolvedValue(false);
-    const resultTrue = await getSWRBoolean(cacheKey, valueFnFalse);
+    const resultTrue = await getSWRBoolean(cacheKey, valueFnFalse, storage);
     expect(resultTrue).toBe(true);
-    const resultFalse = await getSWRBoolean(cacheKey, valueFnFalse);
+    const resultFalse = await getSWRBoolean(cacheKey, valueFnFalse, storage);
     expect(resultFalse).toBe(false);
-    const cachedValue = localStorage.getItem(cacheKey);
+    const cachedValue = storage.get(cacheKey);
     expect(cachedValue).toBe(null);
   });
 });

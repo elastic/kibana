@@ -13,6 +13,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   analyticsServiceMock,
   chromeServiceMock,
@@ -39,7 +40,6 @@ import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-import { LocalStorageMock } from './local_storage_mock';
 import { createDiscoverDataViewsMock } from './data_views';
 import { SearchSourceDependencies } from '@kbn/data-plugin/common';
 import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
@@ -213,7 +213,8 @@ export function createDiscoverServicesMock(): DiscoverServices {
       branch: 'test',
     },
     theme,
-    storage: new LocalStorageMock({}) as unknown as Storage,
+    sessionStorage: new Storage(sessionStorage),
+    storage: new Storage(localStorage),
     addBasePath: jest.fn(),
     toastNotifications: {
       addInfo: jest.fn(),

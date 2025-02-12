@@ -8,6 +8,7 @@
  */
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 /**
  * Get a boolean value from the cache in localStorage or fetch it from the server
@@ -15,18 +16,18 @@ import type { DataViewListItem } from '@kbn/data-views-plugin/common';
  */
 export const getSWRBoolean = async (
   cacheKey: string,
-  valueFn: () => Promise<boolean>
+  valueFn: () => Promise<boolean>,
+  storage: Storage
 ): Promise<boolean> => {
-  const storage = localStorage;
   try {
-    const cachedValue = cacheKey ? storage.getItem(cacheKey) : null;
+    const cachedValue = cacheKey ? storage.get(cacheKey) : null;
 
     const result = valueFn()
       .then((value) => {
         if (value) {
-          storage.setItem(cacheKey, '1');
+          storage.set(cacheKey, '1');
         } else {
-          storage.removeItem(cacheKey);
+          storage.remove(cacheKey);
         }
         return value;
       })
@@ -46,22 +47,17 @@ export const getSWRBoolean = async (
  */
 export const getSWRDataViewList = async (
   cacheKey: string,
-  valueFn: () => Promise<DataViewListItem[]>
+  valueFn: () => Promise<DataViewListItem[]>,
+  storage: Storage
 ): Promise<DataViewListItem[]> => {
-  const storage = sessionStorage;
   try {
-    const cachedValue = cacheKey ? storage.getItem(cacheKey) : null;
+    const cachedValue = cacheKey ? storage.get(cacheKey) : null;
     const result = valueFn().then((value) => {
-      storage.setItem(cacheKey, JSON.stringify(value));
+      storage.set(cacheKey, value);
       return value;
     });
-    if (cachedValue) {
-      try {
-        // catch an invalid JSON
-        return JSON.parse(cachedValue);
-      } catch (e) {
-        // empty
-      }
+    if (cachedValue && Array.isArray(cachedValue)) {
+      return cachedValue;
     }
     return result;
   } catch {
