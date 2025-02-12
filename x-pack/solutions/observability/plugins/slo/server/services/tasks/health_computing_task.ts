@@ -12,13 +12,9 @@ import {
   type Logger,
   type LoggerFactory,
 } from '@kbn/core/server';
-import {
-  ConcreteTaskInstance,
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
-import { SLOConfig } from '../../types';
+import { SLOConfig, SLOPluginStartDependencies } from '../../types';
 import { ComputeSLOHealth } from '../management/compute_slo_health';
 
 export const TYPE = 'slo:compute-health-task';
@@ -63,21 +59,27 @@ export class HealthComputingTask {
     });
   }
 
-  public async start({ taskManager }: { taskManager: TaskManagerStartContract }) {
-    if (!taskManager) {
+  public async start(plugins: SLOPluginStartDependencies) {
+    const hasCorrectLicense = (await plugins.licensing.getLicense()).hasAtLeast('platinum');
+    if (!hasCorrectLicense) {
+      this.logger.debug('Platinum license is required');
+      return;
+    }
+
+    if (!plugins.taskManager) {
       this.logger.error('Missing required service during start');
       return;
     }
 
     if (!this.config.healthTaskEnabled) {
-      return await taskManager.removeIfExists(this.taskId);
+      return await plugins.taskManager.removeIfExists(this.taskId);
     }
 
     this.logger.info('Scheduling with [20m] interval');
     this.wasStarted = true;
 
     try {
-      await taskManager.ensureScheduled({
+      await plugins.taskManager.ensureScheduled({
         id: this.taskId,
         taskType: TYPE,
         scope: ['observability', 'slo'],
@@ -107,11 +109,6 @@ export class HealthComputingTask {
         `Outdated task version: Got [${taskInstance.id}], current version is [${this.taskId}]`
       );
       return getDeleteTaskRunResult();
-    }
-
-    if (!this.config.healthTaskEnabled) {
-      this.logger.info('Task is disabled');
-      return;
     }
 
     this.logger.debug(`runTask() started`);
