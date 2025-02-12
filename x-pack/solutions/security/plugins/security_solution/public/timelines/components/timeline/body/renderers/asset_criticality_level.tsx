@@ -14,7 +14,7 @@ import { DefaultDraggable } from '../../../../../common/components/draggables';
 
 interface Props {
   contextId: string;
-  eventId: string;
+  eventId?: string;
   fieldName: string;
   fieldType: string;
   isAggregatable: boolean;

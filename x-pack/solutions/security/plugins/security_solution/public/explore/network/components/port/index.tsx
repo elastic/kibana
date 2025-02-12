@@ -15,7 +15,7 @@ import { PortOrServiceNameLink } from '../../../../common/components/links';
 export const Port = React.memo<{
   contextId: string;
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  eventId: string;
+  eventId?: string;
   fieldName: string;
   fieldType?: string;
   isAggregatable?: boolean;

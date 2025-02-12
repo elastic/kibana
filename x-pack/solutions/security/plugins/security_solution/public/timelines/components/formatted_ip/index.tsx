@@ -34,7 +34,7 @@ const getUniqueId = ({
   address,
 }: {
   contextId: string;
-  eventId: string;
+  eventId?: string;
   fieldName: string;
   address: string | object | null | undefined;
 }) => `formatted-ip-data-provider-${contextId}-${fieldName}-${address}-${eventId}`;
@@ -54,7 +54,7 @@ const getDataProvider = ({
   address,
 }: {
   contextId: string;
-  eventId: string;
+  eventId?: string;
   fieldName: string;
   address: string | object | null | undefined;
 }): DataProvider => ({
@@ -73,7 +73,7 @@ const getDataProvider = ({
 
 const NonDecoratedIpComponent: React.FC<{
   contextId: string;
-  eventId: string;
+  eventId?: string;
   fieldName: string;
   fieldType: string;
   isAggregatable: boolean;
@@ -264,7 +264,7 @@ interface AddressLinksProps {
   addresses: string[];
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   contextId: string;
-  eventId: string;
+  eventId?: string;
   fieldName: string;
   fieldType: string;
   isAggregatable: boolean;
@@ -345,7 +345,7 @@ const AddressLinks = React.memo(
 const FormattedIpComponent: React.FC<{
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   contextId: string;
-  eventId: string;
+  eventId?: string;
   fieldName: string;
   fieldType: string;
   isAggregatable: boolean;

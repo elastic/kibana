@@ -18,7 +18,7 @@ export const BYTES_FORMAT = 'bytes';
  */
 export const Bytes = React.memo<{
   contextId: string;
-  eventId: string;
+  eventId?: string;
   fieldName: string;
   fieldType: string;
   isAggregatable: boolean;

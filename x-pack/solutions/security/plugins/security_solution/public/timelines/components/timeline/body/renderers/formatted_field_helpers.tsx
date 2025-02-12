@@ -36,7 +36,7 @@ interface RenderRuleNameProps {
   children?: React.ReactNode;
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   contextId: string;
-  eventId: string;
+  eventId?: string;
   fieldName: string;
   fieldType: string;
   isAggregatable: boolean;
@@ -233,7 +233,7 @@ export const renderEventModule = ({
   value,
 }: {
   contextId: string;
-  eventId: string;
+  eventId?: string;
   fieldName: string;
   fieldType: string;
   isAggregatable: boolean;
@@ -339,7 +339,7 @@ export const renderUrl = ({
   contextId: string;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  eventId: string;
+  eventId?: string;
   fieldName: string;
   fieldType: string;
   isAggregatable: boolean;

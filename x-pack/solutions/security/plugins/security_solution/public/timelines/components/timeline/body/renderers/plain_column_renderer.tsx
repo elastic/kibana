@@ -34,7 +34,7 @@ export const plainColumnRenderer: ColumnRenderer = {
   }: {
     asPlainText?: boolean;
     columnName: string;
-    eventId: string;
+    eventId?: string;
     field: ColumnHeaderOptions;
     globalFilters?: Filter[];
     isDraggable?: boolean;

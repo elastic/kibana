@@ -34,7 +34,7 @@ export const emptyColumnRenderer: ColumnRenderer = {
     truncate,
   }: {
     columnName: string;
-    eventId: string;
+    eventId?: string;
     field: ColumnHeaderOptions;
     isDraggable?: boolean;
     scopeId: string;

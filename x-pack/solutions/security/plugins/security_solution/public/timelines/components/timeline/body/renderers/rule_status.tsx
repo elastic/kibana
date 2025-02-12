@@ -25,7 +25,7 @@ const StyledEuiBadge = styled(EuiBadge)`
 
 interface BaseProps {
   contextId: string;
-  eventId: string;
+  eventId?: string;
   fieldName: string;
   fieldType: string;
   isAggregatable: boolean;
