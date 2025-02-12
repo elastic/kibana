@@ -195,7 +195,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                   <EuiFieldText
                     name="name"
                     data-test-subj="nameInput"
-                    value={name}
+                    value={isValidName(name) ? name : ''}
                     onChange={onChange.name}
                     isInvalid={invalidFields.name}
                     isLoading={isLoadingPackageNames}
