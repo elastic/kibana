@@ -60,25 +60,6 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.contentReferencesStoreFactory",
-        "type": "Function",
-        "tags": [],
-        "label": "contentReferencesStoreFactory",
-        "description": [
-          "\nCreates a new ContentReferencesStore used for storing references (also known as citations)"
-        ],
-        "signature": [
-          "() => { add: <T extends { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; } | { id: string; type: \"SecurityAlert\"; alertId: string; } | { id: string; type: \"SecurityAlertsPage\"; } | { id: string; type: \"ProductDocumentation\"; title: string; url: string; } | { id: string; type: \"EsqlQuery\"; label: string; query: string; }>(generator: (params: { id: string; }) => T) => T; getStore: () => Zod.objectOutputType<{}, Zod.ZodUnion<[Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"KnowledgeBaseEntry\">; knowledgeBaseEntryId: Zod.ZodString; knowledgeBaseEntryName: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; }, { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"SecurityAlert\">; alertId: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"SecurityAlert\"; alertId: string; }, { id: string; type: \"SecurityAlert\"; alertId: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"SecurityAlertsPage\">; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"SecurityAlertsPage\"; }, { id: string; type: \"SecurityAlertsPage\"; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"ProductDocumentation\">; title: Zod.ZodString; url: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"ProductDocumentation\"; title: string; url: string; }, { id: string; type: \"ProductDocumentation\"; title: string; url: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"EsqlQuery\">; query: Zod.ZodString; label: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"EsqlQuery\"; label: string; query: string; }, { id: string; type: \"EsqlQuery\"; label: string; query: string; }>]>, \"strip\">; }"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/content_references/content_references_store/content_references_store_factory.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.contentReferenceString",
         "type": "Function",
         "tags": [],
@@ -801,6 +782,25 @@
         "returnComment": [
           "KnowledgeBaseReference"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.newContentReferencesStore",
+        "type": "Function",
+        "tags": [],
+        "label": "newContentReferencesStore",
+        "description": [
+          "\nCreates a new ContentReferencesStore used for storing references (also known as citations)"
+        ],
+        "signature": [
+          "() => { add: <T extends { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; } | { id: string; type: \"SecurityAlert\"; alertId: string; } | { id: string; type: \"SecurityAlertsPage\"; } | { id: string; type: \"ProductDocumentation\"; title: string; url: string; } | { id: string; type: \"EsqlQuery\"; label: string; query: string; }>(generator: (params: { id: string; }) => T) => T; getStore: () => Zod.objectOutputType<{}, Zod.ZodUnion<[Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"KnowledgeBaseEntry\">; knowledgeBaseEntryId: Zod.ZodString; knowledgeBaseEntryName: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; }, { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"SecurityAlert\">; alertId: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"SecurityAlert\"; alertId: string; }, { id: string; type: \"SecurityAlert\"; alertId: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"SecurityAlertsPage\">; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"SecurityAlertsPage\"; }, { id: string; type: \"SecurityAlertsPage\"; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"ProductDocumentation\">; title: Zod.ZodString; url: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"ProductDocumentation\"; title: string; url: string; }, { id: string; type: \"ProductDocumentation\"; title: string; url: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"EsqlQuery\">; query: Zod.ZodString; label: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"EsqlQuery\"; label: string; query: string; }, { id: string; type: \"EsqlQuery\"; label: string; query: string; }>]>, \"strip\">; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/content_references/content_references_store/content_references_store.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {

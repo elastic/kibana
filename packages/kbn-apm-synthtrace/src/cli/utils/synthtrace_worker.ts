@@ -84,7 +84,7 @@ async function start() {
 
   logger.info(`Running scenario from ${bucketFrom.toISOString()} to ${bucketTo.toISOString()}`);
 
-  const { generate, bootstrap } = await scenario({ ...runOptions, logger });
+  const { generate, bootstrap, teardown } = await scenario({ ...runOptions, logger });
 
   if (bootstrap) {
     await bootstrap({
@@ -142,6 +142,18 @@ async function start() {
 
     await Promise.all(promises);
   });
+
+  if (teardown) {
+    await teardown({
+      apmEsClient,
+      logsEsClient,
+      infraEsClient,
+      syntheticsEsClient,
+      otelEsClient,
+      entitiesEsClient,
+      entitiesKibanaClient,
+    });
+  }
 }
 
 parentPort!.on('message', (message) => {
