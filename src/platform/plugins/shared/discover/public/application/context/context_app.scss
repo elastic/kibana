@@ -13,8 +13,4 @@
 .dscDocsGrid {
   flex: 1 1 100%;
   overflow: auto;
-
-  .unifiedDataTable__cell--highlight {
-    background-color: tintOrShade($euiColorPrimary, 90%, 70%);
-  }
 }

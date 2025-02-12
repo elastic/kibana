@@ -252,6 +252,10 @@ export const checkNonAggregatableFieldExistsRequest = (
 
 const DEFAULT_DOCS_SAMPLE_OF_TEXT_FIELDS_SIZE = 1000;
 
+export const isUnsupportedVectorField = (fieldName: string) => {
+  return fieldName.endsWith('.chunks.embeddings') || fieldName.endsWith('.chunks.offset');
+};
+
 export const getSampleOfDocumentsForNonAggregatableFields = (
   nonAggregatableFields: string[],
   dataViewTitle: string,
@@ -305,6 +309,19 @@ export const processNonAggregatableFieldsExistResponse = (
       });
       return;
     }
+    if (isUnsupportedVectorField(fieldName)) {
+      stats.nonAggregatableExistsFields.push({
+        fieldName,
+        existsInDocs: true,
+        stats: {
+          count: undefined,
+          cardinality: undefined,
+          sampleCount: undefined,
+        },
+      });
+      return;
+    }
+
     const foundField = results.find((r) => r.rawResponse.fieldName === fieldName);
     const existsInDocs = foundField !== undefined && foundField.rawResponse.hits.total > 0;
 
