@@ -730,6 +730,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     securityWorkflowInsightsService
       .start({
         esClient: core.elasticsearch.client.asInternalUser,
+        registerDefendInsightsCallback: plugins.elasticAssistant.registerCallback,
       })
       .catch(() => {});
 

@@ -9,15 +9,13 @@
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { DefendInsightsPostRequestBody } from '@kbn/elastic-assistant-common';
-
-import { getPrompt } from '@kbn/security-ai-prompts';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { DefendInsightStatus, DefendInsightType } from '@kbn/elastic-assistant-common';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 import type { DefendInsightsDataClient } from '../../ai_assistant_data_clients/defend_insights';
-
 import { serverMock } from '../../__mocks__/server';
 import {
   ElasticAssistantRequestHandlerContextMock,
@@ -26,14 +24,12 @@ import {
 import { transformESSearchToDefendInsights } from '../../ai_assistant_data_clients/defend_insights/helpers';
 import { getDefendInsightsSearchEsMock } from '../../__mocks__/defend_insights_schema.mock';
 import { postDefendInsightsRequest } from '../../__mocks__/request';
-import { getAssistantTool, createDefendInsight, isDefendInsightsEnabled } from './helpers';
+import { createDefendInsight, isDefendInsightsEnabled, invokeDefendInsightsGraph } from './helpers';
 import { postDefendInsightsRoute } from './post_defend_insights';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 
 jest.mock('@kbn/security-ai-prompts');
 jest.mock('./helpers');
 
-const getPromptMock = getPrompt as jest.Mock;
 describe('postDefendInsightsRoute', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: ElasticAssistantRequestHandlerContextMock;
@@ -83,7 +79,6 @@ describe('postDefendInsightsRoute', () => {
       langSmithApiKey: 'langSmithApiKey',
     };
   }
-  const getTool = jest.fn();
 
   beforeEach(() => {
     const tools = requestContextMock.createTools();
@@ -98,13 +93,15 @@ describe('postDefendInsightsRoute', () => {
     mockDataClient = getDefaultDataClient();
     mockApiConfig = getDefaultApiConfig();
     mockRequestBody = getDefaultRequestBody();
-    getPromptMock.mockResolvedValue('prompt');
-    (getAssistantTool as jest.Mock).mockReturnValue({ getTool, name: 'test-tool' });
     (createDefendInsight as jest.Mock).mockResolvedValue({
       currentInsight: mockCurrentInsight,
       defendInsightId: mockCurrentInsight.id,
     });
     (isDefendInsightsEnabled as jest.Mock).mockResolvedValue(true);
+    (invokeDefendInsightsGraph as jest.Mock).mockResolvedValue({
+      anonymizedEvents: [],
+      insights: [mockCurrentInsight],
+    });
 
     context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     context.elasticAssistant.getDefendInsightsDataClient.mockResolvedValue(mockDataClient);
@@ -168,15 +165,6 @@ describe('postDefendInsightsRoute', () => {
     });
   });
 
-  it('should handle assistantTool null response', async () => {
-    (getAssistantTool as jest.Mock).mockReturnValueOnce(null);
-    const response = await server.inject(
-      postDefendInsightsRequest(mockRequestBody),
-      requestContextMock.convertContext(context)
-    );
-    expect(response.status).toEqual(404);
-  });
-
   it('should 404 if feature flag disabled', async () => {
     (isDefendInsightsEnabled as jest.Mock).mockReturnValueOnce(false);
     const response = await server.inject(
@@ -200,24 +188,5 @@ describe('postDefendInsightsRoute', () => {
       },
       status_code: 500,
     });
-  });
-
-  it('should call getPrompt for tool description', async () => {
-    await server.inject(
-      postDefendInsightsRequest(mockRequestBody),
-      requestContextMock.convertContext(context)
-    );
-    expect(getPromptMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        connectorId: 'connector-id',
-        promptId: 'test-tool',
-        promptGroupId: 'security-tools',
-      })
-    );
-    expect(getTool).toHaveBeenCalledWith(
-      expect.objectContaining({
-        description: 'prompt',
-      })
-    );
   });
 });
