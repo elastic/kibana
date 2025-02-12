@@ -45,12 +45,10 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'date',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'date_period',
-          optional: false,
           constantOnly: true,
         },
       ],
@@ -61,24 +59,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'date',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'date',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'date',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -89,23 +83,11 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'date',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'time_literal',
-          optional: false,
           constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'date',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'keyword',
-          optional: true,
         },
       ],
       returnType: 'date',
@@ -115,23 +97,11 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'double',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'double',
-          optional: false,
           constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'date',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'text',
-          optional: true,
         },
       ],
       returnType: 'double',
@@ -141,24 +111,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'double',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'double',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'double',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -169,24 +135,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'double',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'double',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'integer',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -197,24 +159,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'double',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'double',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'long',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -225,24 +183,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'double',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'integer',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'double',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -253,24 +207,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'double',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'integer',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'integer',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -281,24 +231,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'double',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'integer',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'long',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -309,12 +255,10 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'double',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
@@ -335,12 +279,10 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'double',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
@@ -361,24 +303,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'double',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'long',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'long',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -389,23 +327,11 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'integer',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'double',
-          optional: false,
           constantOnly: true,
-        },
-        {
-          name: 'from',
-          type: 'date',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'keyword',
-          optional: true,
         },
       ],
       returnType: 'double',
@@ -415,24 +341,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'integer',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'double',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'double',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -443,24 +365,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'integer',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'double',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'integer',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -471,24 +389,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'integer',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'double',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'long',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -499,24 +413,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'integer',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'integer',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'double',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -527,24 +437,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'integer',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'integer',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'integer',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -555,24 +461,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'integer',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'integer',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'long',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -583,24 +485,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'integer',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'long',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'double',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -611,12 +509,10 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'integer',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
@@ -637,12 +533,10 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'integer',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
@@ -663,12 +557,10 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'long',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'double',
-          optional: false,
           constantOnly: true,
         },
       ],
@@ -679,24 +571,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'long',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'double',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'double',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -707,24 +595,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'long',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'double',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'integer',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -735,24 +619,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'long',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'double',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'long',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -763,24 +643,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'long',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'integer',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'double',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -791,24 +667,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'long',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'integer',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'integer',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -819,24 +691,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'long',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'integer',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'long',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -847,24 +715,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'long',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'long',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'double',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -875,24 +739,20 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'long',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'long',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'integer',
-          optional: true,
           constantOnly: true,
         },
       ],
@@ -903,580 +763,21 @@ const bucketDefinition: FunctionDefinition = {
         {
           name: 'field',
           type: 'long',
-          optional: false,
         },
         {
           name: 'buckets',
           type: 'integer',
-          optional: false,
           constantOnly: true,
         },
         {
           name: 'startDate',
           type: 'long',
-          optional: true,
           constantOnly: true,
         },
         {
           name: 'endDate',
           type: 'long',
-          optional: true,
           constantOnly: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'double',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'double',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'from',
-          type: 'double',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'double',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'from',
-          type: 'double',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'integer',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'from',
-          type: 'double',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'long',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'from',
-          type: 'integer',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'double',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'from',
-          type: 'integer',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'integer',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'from',
-          type: 'integer',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'long',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'from',
-          type: 'long',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'double',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'from',
-          type: 'long',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'integer',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'from',
-          type: 'long',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'long',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'long',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'double',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'from',
-          type: 'double',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'double',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'from',
-          type: 'double',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'integer',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'from',
-          type: 'double',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'long',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'from',
-          type: 'integer',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'double',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'from',
-          type: 'integer',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'integer',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'from',
-          type: 'integer',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'long',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'from',
-          type: 'long',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'double',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'from',
-          type: 'long',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'integer',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'integer',
-          optional: false,
-        },
-        {
-          name: 'from',
-          type: 'long',
-          optional: true,
-        },
-        {
-          name: 'to',
-          type: 'long',
-          optional: true,
-        },
-      ],
-      returnType: 'double',
-    },
-    {
-      params: [
-        {
-          name: 'field',
-          type: 'long',
-          optional: false,
-        },
-        {
-          name: 'buckets',
-          type: 'long',
-          optional: false,
         },
       ],
       returnType: 'double',

@@ -286,22 +286,6 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
   count: {
     signatures: [{ params: [{ supportsWildcard: true }] }],
   },
-  bucket: {
-    signatures: [
-      ...bucketParameterTypes.map((signature) => {
-        const [fieldType, bucketType, fromType, toType, resultType] = signature;
-        return {
-          params: [
-            { name: 'field', type: fieldType },
-            { name: 'buckets', type: bucketType, constantOnly: true },
-            ...(fromType ? [{ name: 'startDate', type: fromType, constantOnly: true }] : []),
-            ...(toType ? [{ name: 'endDate', type: toType, constantOnly: true }] : []),
-          ],
-          returnType: resultType,
-        };
-      }),
-    ],
-  },
 };
 
 const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
@@ -679,10 +663,33 @@ const replaceParamName = (str: string) => {
 const enrichGrouping = (
   groupingFunctionDefinitions: FunctionDefinition[]
 ): FunctionDefinition[] => {
-  return groupingFunctionDefinitions.map((op) => ({
-    ...op,
-    supportedOptions: ['by'],
-  }));
+  return groupingFunctionDefinitions.map((op) => {
+    if (op.name === 'bucket') {
+      const signatures = [
+        ...bucketParameterTypes.map((signature) => {
+          const [fieldType, bucketType, fromType, toType, resultType] = signature;
+          return {
+            params: [
+              { name: 'field', type: fieldType },
+              { name: 'buckets', type: bucketType, constantOnly: true },
+              ...(fromType ? [{ name: 'startDate', type: fromType, constantOnly: true }] : []),
+              ...(toType ? [{ name: 'endDate', type: toType, constantOnly: true }] : []),
+            ],
+            returnType: resultType,
+          };
+        }),
+      ];
+      return {
+        ...op,
+        signatures,
+        supportedOptions: ['by'],
+      };
+    }
+    return {
+      ...op,
+      supportedOptions: ['by'],
+    };
+  });
 };
 
 const enrichOperators = (
