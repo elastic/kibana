@@ -1151,6 +1151,8 @@ async function getFunctionArgsSuggestions(
     } else {
       fnToIgnore.push(
         ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
+        // ignore grouping functions, they are only used for grouping
+        ...getAllFunctions({ type: 'grouping' }).map(({ name }) => name),
         ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
           ? getAllFunctions({ type: 'agg' }).map(({ name }) => name)
           : [])
