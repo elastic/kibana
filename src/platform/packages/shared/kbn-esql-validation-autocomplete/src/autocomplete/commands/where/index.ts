@@ -41,7 +41,7 @@ export async function suggest(
   _getSuggestedVariableName: () => string,
   getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
   _getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
-  previousCommands?: ESQLCommand[],
+  previousCommands?: ESQLCommand[]
 ): Promise<SuggestionRawDefinition[]> {
   const suggestions: SuggestionRawDefinition[] = [];
 
@@ -162,8 +162,7 @@ export async function suggest(
 
     case 'empty_expression':
       // Don't suggest MATCH or QSTR after unsupported commands
-      const priorCommands =
-        previousCommands?.map((a) => a.name) ?? [];
+      const priorCommands = previousCommands?.map((a) => a.name) ?? [];
       const ignored = [];
       if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_MATCH.has(c))) {
         ignored.push('match');
