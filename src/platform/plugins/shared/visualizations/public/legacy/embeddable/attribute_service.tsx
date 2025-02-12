@@ -17,7 +17,11 @@ import {
   showSaveModal,
 } from '@kbn/saved-objects-plugin/public';
 import { getNotifications } from '../../services';
-import { VisualizeByReferenceInput, VisualizeByValueInput, VisualizeSavedObjectAttributes } from './visualize_embeddable';
+import {
+  VisualizeByReferenceInput,
+  VisualizeByValueInput,
+  VisualizeSavedObjectAttributes,
+} from './visualize_embeddable';
 
 /**
  * The attribute service is a shared, generic service that embeddables can use to provide the functionality
@@ -40,21 +44,18 @@ export interface AttributeServiceOptions {
     savedObjectId?: string
   ) => Promise<{ id?: string } | { error: Error }>;
   checkForDuplicateTitle: (props: OnSaveProps) => Promise<boolean>;
-  unwrapMethod?: (
-    savedObjectId: string
-  ) => Promise<AttributeServiceUnwrapResult>;
+  unwrapMethod?: (savedObjectId: string) => Promise<AttributeServiceUnwrapResult>;
 }
 
 export class AttributeService {
-  constructor(
-    private type: string,
-    private options: AttributeServiceOptions
-  ) {}
+  constructor(private type: string, private options: AttributeServiceOptions) {}
 
   private async defaultUnwrapMethod(
     input: VisualizeByReferenceInput
   ): Promise<AttributeServiceUnwrapResult> {
-    return Promise.resolve({ attributes: { ...(input as unknown as VisualizeSavedObjectAttributes) } });
+    return Promise.resolve({
+      attributes: { ...(input as unknown as VisualizeSavedObjectAttributes) },
+    });
   }
 
   public async unwrapAttributes(
@@ -74,10 +75,7 @@ export class AttributeService {
     input?: VisualizeByValueInput | VisualizeByReferenceInput
   ): Promise<Omit<VisualizeByValueInput | VisualizeByReferenceInput, 'id'>> {
     const originalInput = input ? input : {};
-    const savedObjectId =
-      input && this.inputIsRefType(input)
-        ? input.savedObjectId
-        : undefined;
+    const savedObjectId = input && this.inputIsRefType(input) ? input.savedObjectId : undefined;
     if (!useRefType) {
       return { [ATTRIBUTE_SERVICE_KEY]: newAttributes } as VisualizeByValueInput;
     }
@@ -101,11 +99,15 @@ export class AttributeService {
     }
   }
 
-  inputIsRefType = (input: VisualizeByValueInput | VisualizeByReferenceInput): input is VisualizeByReferenceInput => {
+  inputIsRefType = (
+    input: VisualizeByValueInput | VisualizeByReferenceInput
+  ): input is VisualizeByReferenceInput => {
     return Boolean((input as VisualizeByReferenceInput).savedObjectId);
   };
 
-  getInputAsValueType = async (input: VisualizeByValueInput | VisualizeByReferenceInput): Promise<VisualizeByValueInput> => {
+  getInputAsValueType = async (
+    input: VisualizeByValueInput | VisualizeByReferenceInput
+  ): Promise<VisualizeByValueInput> => {
     if (!this.inputIsRefType(input)) {
       return input as VisualizeByValueInput;
     }

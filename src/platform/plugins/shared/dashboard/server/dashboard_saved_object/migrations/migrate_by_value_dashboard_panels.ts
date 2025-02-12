@@ -22,13 +22,13 @@ import {
 } from './utils';
 import type { SavedDashboardPanel } from '..';
 
-type ValueOrReferenceInput = {
+interface ValueOrReferenceInput {
   id: string;
   attributes?: Serializable;
   savedVis?: Serializable;
   savedObjectId?: string;
   title?: string;
-};
+}
 
 // Runs the embeddable migrations on each panel
 export const migrateByValueDashboardPanels =

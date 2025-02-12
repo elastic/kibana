@@ -74,9 +74,7 @@ export type EmbeddableInput = {
   executionContext?: KibanaExecutionContext;
 };
 
-export interface PanelState<
-  PanelStateType = object
-> {
+export interface PanelState<PanelStateType = object> {
   // The type of embeddable in this panel. Will be used to find the factory in which to
   // load the embeddable.
   type: string;
