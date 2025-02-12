@@ -39,7 +39,7 @@ export class SavedObjectsClientFactory {
     private readonly httpServiceSetup: HttpServiceSetup
   ) {}
 
-  protected createFakeHttpRequest(spaceId: string = DEFAULT_SPACE_ID): KibanaRequest {
+  public createFakeHttpRequest(spaceId: string = DEFAULT_SPACE_ID): KibanaRequest {
     const fakeRequest = kibanaRequestFactory({
       headers: {},
       path: '/',

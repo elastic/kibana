@@ -6,7 +6,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { elasticsearchServiceMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
@@ -32,7 +32,6 @@ const MockPackagePolicyWithEndpointPolicy = (
 };
 
 describe('Telemetry config watcher', () => {
-  const soStartMock = savedObjectsServiceMock.createStartContract();
   const esStartMock = elasticsearchServiceMock.createStart();
   let packagePolicySvcMock: jest.Mocked<PackagePolicyClient>;
   let telemetryWatcher: TelemetryConfigWatcher;
@@ -60,7 +59,6 @@ describe('Telemetry config watcher', () => {
 
     telemetryWatcher = new TelemetryConfigWatcher(
       packagePolicySvcMock,
-      soStartMock,
       esStartMock,
       createMockEndpointAppContextService()
     );

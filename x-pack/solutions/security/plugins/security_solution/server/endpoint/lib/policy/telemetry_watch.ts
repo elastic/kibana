@@ -10,15 +10,12 @@ import type { Subscription } from 'rxjs';
 import type {
   ElasticsearchClient,
   ElasticsearchServiceStart,
-  KibanaRequest,
   Logger,
   SavedObjectsClientContract,
-  SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import type { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
@@ -29,18 +26,17 @@ export class TelemetryConfigWatcher {
   private logger: Logger;
   private esClient: ElasticsearchClient;
   private policyService: PackagePolicyClient;
+  private endpointAppContextService: EndpointAppContextService;
   private subscription: Subscription | undefined;
-  private soStart: SavedObjectsServiceStart;
   constructor(
     policyService: PackagePolicyClient,
-    soStart: SavedObjectsServiceStart,
     esStart: ElasticsearchServiceStart,
     endpointAppContextService: EndpointAppContextService
   ) {
     this.policyService = policyService;
     this.esClient = esStart.client.asInternalUser;
+    this.endpointAppContextService = endpointAppContextService;
     this.logger = endpointAppContextService.createLogger(this.constructor.name);
-    this.soStart = soStart;
   }
 
   /**
@@ -50,16 +46,10 @@ export class TelemetryConfigWatcher {
    * intentionally using the system user here. Be very aware of what you are using this
    * client to do
    */
-  private makeInternalSOClient(soStart: SavedObjectsServiceStart): SavedObjectsClientContract {
-    const fakeRequest = {
-      headers: {},
-      getBasePath: () => '',
-      path: '/',
-      route: { settings: {} },
-      url: { href: {} },
-      raw: { req: { url: '/' } },
-    } as unknown as KibanaRequest;
-    return soStart.getScopedClient(fakeRequest, { excludedExtensions: [SECURITY_EXTENSION_ID] });
+  private makeInternalSOClient(isScoped: boolean): SavedObjectsClientContract {
+    return isScoped
+      ? this.endpointAppContextService.savedObjects.createInternalScopedSoClient()
+      : this.endpointAppContextService.savedObjects.createInternalUnscopedSoClient();
   }
 
   public start(telemetryConfigProvider: TelemetryConfigProvider) {
@@ -81,94 +71,102 @@ export class TelemetryConfigWatcher {
       perPage: number;
     };
 
-    this.logger.debug('dummy - just to restart the instance');
-
     this.logger.debug(
       `Checking Endpoint policies to update due to changed global telemetry config setting. (New value: ${isTelemetryEnabled})`
     );
+    this.logger.debug(
+      `This is how a fake request looks like: ${stringify(
+        this.endpointAppContextService.savedObjects.createFakeHttpRequest()
+      )}`
+    );
 
-    do {
-      try {
-        response = await this.policyService.list(this.makeInternalSOClient(this.soStart), {
-          page: page++,
-          perPage: 100,
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
-        });
-      } catch (e) {
-        this.logger.warn(
-          `Unable to verify endpoint policies in line with telemetry change: failed to fetch package policies: ${stringify(
-            e
-          )}`
-        );
-        return;
-      }
-
-      const updates: UpdatePackagePolicy[] = [];
-      for (const policy of response.items as PolicyData[]) {
-        const updatePolicy = getPolicyDataForUpdate(policy);
-        const policyConfig = updatePolicy.inputs[0].config.policy.value;
-
-        if (isTelemetryEnabled !== policyConfig.global_telemetry_enabled) {
-          policyConfig.global_telemetry_enabled = isTelemetryEnabled;
-
-          updates.push({ ...updatePolicy, id: policy.id });
-        }
-      }
-
-      if (updates.length) {
+    for (const isScoped of [false, true]) {
+      this.logger.debug(`trying with isScoped: ${isScoped}`);
+      do {
         try {
-          this.logger.debug(`Updating ${page}. page, ${updates.length} policies on current page.`);
-          const bulkUpdateResponse = await this.policyService.bulkUpdate(
-            this.makeInternalSOClient(this.soStart),
-            this.esClient,
-            updates
-          );
-
-          if (bulkUpdateResponse.failedPolicies.length > 0) {
-            this.logger.debug(
-              `Failed to update ${bulkUpdateResponse.failedPolicies.length} of ${page} policies, trying again once more...`
-            );
-            throw new Error(
-              `Failed to update ${bulkUpdateResponse.failedPolicies.length} policies.`
-            );
-          }
-
-          this.logger.debug(`Successfully updated ${updates.length} policies on page ${page}.`);
+          response = await this.policyService.list(this.makeInternalSOClient(isScoped), {
+            page: page++,
+            perPage: 100,
+            kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`,
+          });
         } catch (e) {
-          // try again for transient issues
+          this.logger.warn(
+            `Unable to verify endpoint policies in line with telemetry change: failed to fetch package policies: ${stringify(
+              e
+            )}`
+          );
+          return;
+        }
+
+        const updates: UpdatePackagePolicy[] = [];
+        for (const policy of response.items as PolicyData[]) {
+          const updatePolicy = getPolicyDataForUpdate(policy);
+          const policyConfig = updatePolicy.inputs[0].config.policy.value;
+
+          if (isTelemetryEnabled !== policyConfig.global_telemetry_enabled) {
+            policyConfig.global_telemetry_enabled = isTelemetryEnabled;
+
+            updates.push({ ...updatePolicy, id: policy.id });
+          }
+        }
+
+        if (updates.length) {
           try {
+            this.logger.debug(
+              `Updating ${page}. page, ${updates.length} policies on current page.`
+            );
             const bulkUpdateResponse = await this.policyService.bulkUpdate(
-              this.makeInternalSOClient(this.soStart),
+              this.makeInternalSOClient(isScoped),
               this.esClient,
               updates
             );
+
             if (bulkUpdateResponse.failedPolicies.length > 0) {
-              this.logger.warn(
-                `Failed to update ${
-                  bulkUpdateResponse.failedPolicies.length
-                } of ${page} policies.\n${JSON.stringify(
-                  bulkUpdateResponse.failedPolicies,
-                  null,
-                  2
-                )}`
+              this.logger.debug(
+                `Failed to update ${bulkUpdateResponse.failedPolicies.length} of ${page} policies, trying again once more...`
               );
               throw new Error(
                 `Failed to update ${bulkUpdateResponse.failedPolicies.length} policies.`
               );
             }
-            this.logger.debug(
-              `Successfully updated ${updates.length} policies on page ${page} on second try.`
-            );
-          } catch (ee) {
-            this.logger.warn(
-              `Unable to update telemetry config state to ${isTelemetryEnabled} in policies: ${updates.map(
-                (update) => update.id
-              )}`
-            );
-            this.logger.warn(stringify(ee));
+
+            this.logger.debug(`Successfully updated ${updates.length} policies on page ${page}.`);
+          } catch (e) {
+            // try again for transient issues
+            try {
+              const bulkUpdateResponse = await this.policyService.bulkUpdate(
+                this.makeInternalSOClient(isScoped),
+                this.esClient,
+                updates
+              );
+              if (bulkUpdateResponse.failedPolicies.length > 0) {
+                this.logger.warn(
+                  `Failed to update ${
+                    bulkUpdateResponse.failedPolicies.length
+                  } of ${page} policies.\n${JSON.stringify(
+                    bulkUpdateResponse.failedPolicies,
+                    null,
+                    2
+                  )}`
+                );
+                throw new Error(
+                  `Failed to update ${bulkUpdateResponse.failedPolicies.length} policies.`
+                );
+              }
+              this.logger.debug(
+                `Successfully updated ${updates.length} policies on page ${page} on second try.`
+              );
+            } catch (ee) {
+              this.logger.warn(
+                `Unable to update telemetry config state to ${isTelemetryEnabled} in policies: ${updates.map(
+                  (update) => update.id
+                )}`
+              );
+              this.logger.warn(stringify(ee));
+            }
           }
         }
-      }
-    } while (response.page * response.perPage < response.total);
+      } while (response.page * response.perPage < response.total);
+    }
   }
 }
