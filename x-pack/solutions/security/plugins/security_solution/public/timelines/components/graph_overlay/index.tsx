@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useEffect, useRef, useLayoutEffect } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,7 +13,6 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
 } from '@elastic/eui';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { useDispatch } from 'react-redux';
 import styled, { css } from 'styled-components';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
@@ -50,13 +49,13 @@ const OverlayContainer = styled.div`
 `;
 
 const FullScreenOverlayStyles = css`
-  background-color:  ${({ theme }) => `${theme.eui.euiColorEmptyShade};`}
+  background-color: ${({ theme }) => `${theme.eui.euiColorEmptyShade};`}
   position: fixed;
   top: 0;
   bottom: 2em;
   left: 0;
   right: 0;
-  z-index: ${euiThemeVars.euiZLevel3};
+  z-index: 3000;
 `;
 
 const FullScreenOverlayContainer = styled.div`
@@ -71,6 +70,7 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
   ${({ theme }) => `background-color: ${theme.eui.euiColorEmptyShade};`}
   overflow: hidden;
   width: 100%;
+
   &.${SESSION_VIEW_FULL_SCREEN} {
     ${({ theme }) => `padding: 0 ${theme.eui.euiSizeM}`}
   }
