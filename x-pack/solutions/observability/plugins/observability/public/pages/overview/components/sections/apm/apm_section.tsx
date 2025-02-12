@@ -92,7 +92,7 @@ export function APMSection({ bucketSize }: Props) {
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
-  const transactionsColor = theme.eui.euiColorVis1;
+  const transactionsColor = theme.eui.euiColorVis0;
 
   return (
     <SectionContainer
