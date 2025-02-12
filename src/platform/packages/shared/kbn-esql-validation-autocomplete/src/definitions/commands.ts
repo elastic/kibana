@@ -44,6 +44,7 @@ import { suggest as suggestForStats } from '../autocomplete/commands/stats';
 import { suggest as suggestForWhere } from '../autocomplete/commands/where';
 import { suggest as suggestForJoin } from '../autocomplete/commands/join';
 import { suggest as suggestForFrom } from '../autocomplete/commands/from';
+import { suggest as suggestForRow } from '../autocomplete/commands/row';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -197,6 +198,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       // syntax check already validates part of this
       params: [{ name: 'assignment', type: 'any' }],
     },
+    suggest: suggestForRow,
     options: [],
     modes: [],
   },
