@@ -19,34 +19,55 @@ export const createDataViewSelectedListener = (dependencies: {
       action: ReturnType<typeof selectDataViewAsync>,
       listenerApi: ListenerEffectAPI<RootState, Dispatch<AnyAction>>
     ) => {
+      const state = listenerApi.getState();
+
       const currentScopeActions = scopes[action.payload.scope].actions;
 
-      let dataViewSpec: DataViewSpec | null = null;
+      const findCachedDataView = (id: string | null | undefined) => {
+        const savedDataView = state.dataViewPicker.shared.dataViews.find((dv) => dv.id === id);
+
+        if (savedDataView) {
+          return savedDataView;
+        }
+
+        return state.dataViewPicker.shared.adhocDataViews.find((dv) => dv.id === id) ?? null;
+      };
 
       let dataViewByIdError: unknown;
       let adhocDataViewCreationError: unknown;
 
-      try {
-        if (action.payload.id) {
-          const dataViewById = await dependencies.dataViews.get(action.payload.id);
-          dataViewSpec = dataViewById.toSpec();
+      /**
+       * Try to locate the data view in cached entries first
+       */
+      let dataViewSpec: DataViewSpec | null = findCachedDataView(action.payload.id);
+
+      if (!dataViewSpec) {
+        try {
+          if (action.payload.id) {
+            const dataViewById = await dependencies.dataViews.get(action.payload.id);
+            dataViewSpec = dataViewById.toSpec();
+          }
+        } catch (error: unknown) {
+          dataViewByIdError = error;
         }
-      } catch (error: unknown) {
-        dataViewByIdError = error;
       }
 
-      try {
-        if (!dataViewSpec) {
+      if (!dataViewSpec) {
+        try {
           const title = action.payload.patterns?.join(',') ?? '';
+          if (!title.length) {
+            throw new Error('empty adhoc title field');
+          }
+
           const adhocDataView = await dependencies.dataViews.create({
             id: `adhoc_${title}`,
             title,
           });
+          listenerApi.dispatch(shared.actions.addDataView(adhocDataView));
           dataViewSpec = adhocDataView.toSpec();
-          listenerApi.dispatch(shared.actions.addAdhocDataView(dataViewSpec));
+        } catch (error: unknown) {
+          adhocDataViewCreationError = error;
         }
-      } catch (error: unknown) {
-        adhocDataViewCreationError = error;
       }
 
       if (dataViewSpec) {

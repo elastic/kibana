@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
 import type { AnyAction } from '@reduxjs/toolkit';
 import { combineReducers, createAction, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
@@ -61,12 +61,22 @@ export const shared = createSlice({
     setDataViews: (state, action: PayloadAction<DataViewSpec[]>) => {
       state.dataViews = action.payload;
     },
-    addAdhocDataView: (state, action: PayloadAction<DataViewSpec>) => {
-      if (state.adhocDataViews.find((dv) => dv.title === action.payload.title)) {
-        return;
-      }
+    addDataView: (state, action: PayloadAction<DataView>) => {
+      const dataViewSpec = action.payload.toSpec();
 
-      state.adhocDataViews.push(action.payload);
+      if (action.payload.isPersisted()) {
+        if (state.dataViews.find((dv) => dv.id === dataViewSpec.id)) {
+          return;
+        }
+
+        state.dataViews.push(dataViewSpec);
+      } else {
+        if (state.adhocDataViews.find((dv) => dv.title === dataViewSpec.title)) {
+          return;
+        }
+
+        state.adhocDataViews.push(dataViewSpec);
+      }
     },
     init: (state) => {
       state.status = 'loading';

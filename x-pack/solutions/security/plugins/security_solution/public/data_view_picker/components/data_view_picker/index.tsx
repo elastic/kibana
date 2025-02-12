@@ -9,11 +9,11 @@ import { DataViewPicker as USDataViewPicker } from '@kbn/unified-search-plugin/p
 import React, { useCallback, useRef, useMemo, memo, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerScopeName } from '../../constants';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
-import { selectDataViewAsync } from '../../redux/reducer';
+import { selectDataViewAsync, shared } from '../../redux/reducer';
 import { useDataView } from '../../hooks/use_data_view';
 import { sharedStateSelector } from '../../redux/selectors';
 
@@ -36,13 +36,16 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
 
   const dataViewId = dataView?.id;
 
-  const createNewDataView = useCallback(async () => {
-    closeDataViewEditor.current = await dataViewEditor.openEditor({
-      // eslint-disable-next-line no-console
-      onSave: () => console.log('new data view saved'),
+  const createNewDataView = useCallback(() => {
+    closeDataViewEditor.current = dataViewEditor.openEditor({
+      onSave: async (newDataView) => {
+        dispatch(shared.actions.addDataView(newDataView));
+        dispatch(selectDataViewAsync({ id: newDataView.id, scope: props.scope }));
+        // TODO: reload data views
+      },
       allowAdHocDataView: true,
     });
-  }, [dataViewEditor]);
+  }, [dataViewEditor, dispatch, props.scope]);
 
   const onFieldEdited = useCallback(() => {}, []);
 
@@ -88,18 +91,26 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
     };
   }, [dataView]);
 
-  const { adhocDataViews: adhocDataViewSpecs } = useSelector(sharedStateSelector);
+  const { adhocDataViews: adhocDataViewSpecs, dataViews } = useSelector(sharedStateSelector);
 
   const [adhocDataViews, setAdhocDataViews] = useState<DataView[]>([]);
+  const [managedDataViews, setManagedDataViews] = useState<DataViewListItem[]>([]);
 
   useEffect(() => {
     (async () => {
-      const dataViews = await Promise.all(
+      const adhoc = await Promise.all(
         adhocDataViewSpecs.map((dvSpec) => data.dataViews.create(dvSpec))
       );
-      setAdhocDataViews(dataViews);
+      setAdhocDataViews(adhoc);
+
+      const managed: DataViewListItem[] = dataViews.map((spec) => ({
+        id: spec.id ?? '',
+        title: spec.title ?? '',
+        name: spec.name,
+      }));
+      setManagedDataViews(managed);
     })();
-  }, [data.dataViews, adhocDataViewSpecs]);
+  }, [data.dataViews, adhocDataViewSpecs, dataViews]);
 
   return (
     <USDataViewPicker
@@ -110,6 +121,7 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
       onAddField={addField}
       onDataViewCreated={createNewDataView}
       adHocDataViews={adhocDataViews}
+      savedDataViews={managedDataViews}
     />
   );
 });
