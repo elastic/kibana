@@ -11,9 +11,9 @@ import { omit } from 'lodash';
 import type { SavedDashboardPanel } from '../schema';
 import type { DashboardPanelState } from '../../../common';
 
-export function convertSavedDashboardPanelToPanelState<
-  PanelState = object
->(savedDashboardPanel: SavedDashboardPanel): DashboardPanelState<PanelState> {
+export function convertSavedDashboardPanelToPanelState<PanelState = object>(
+  savedDashboardPanel: SavedDashboardPanel
+): DashboardPanelState<PanelState> {
   return {
     type: savedDashboardPanel.type,
     gridData: savedDashboardPanel.gridData,
