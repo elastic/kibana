@@ -117,6 +117,7 @@ export const SearchPanelContent = ({
       showFilterBar={true}
       showDatePicker={false}
       showQueryInput={true}
+      showSavedQueryControls={false}
       query={searchInput}
       onQuerySubmit={(params: { dateRange: TimeRange; query?: Query | undefined }) =>
         searchHandler({ query: params.query })
