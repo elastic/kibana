@@ -14,7 +14,7 @@ import {
 import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { ESQLRow } from '@kbn/es-types';
-import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
+import { getLensAttributesFromSuggestion, mapVisToChartType } from '@kbn/visualization-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -93,7 +93,8 @@ export const getSuggestions = async (
   abortController?: AbortController,
   setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void,
   esqlVariables: ESQLControlVariable[] = [],
-  shouldUpdateAttrs = true
+  shouldUpdateAttrs = true,
+  preferredVisAttributes?: TypedLensSerializedState['attributes']
 ) => {
   try {
     const { dataView, columns, rows } = await getGridAttrs(
@@ -117,6 +118,10 @@ export const getSuggestions = async (
       return;
     }
 
+    const preferredChartType = preferredVisAttributes
+      ? mapVisToChartType(preferredVisAttributes.visualizationType)
+      : undefined;
+
     const context = {
       dataViewSpec: dataView?.toSpec(false),
       fieldName: '',
@@ -125,7 +130,14 @@ export const getSuggestions = async (
     };
 
     const allSuggestions =
-      suggestionsApi({ context, dataView, datasourceMap, visualizationMap }) ?? [];
+      suggestionsApi({
+        context,
+        dataView,
+        datasourceMap,
+        visualizationMap,
+        preferredChartType,
+        preferredVisAttributes,
+      }) ?? [];
 
     // Lens might not return suggestions for some cases, i.e. in case of errors
     if (!allSuggestions.length) return undefined;

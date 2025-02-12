@@ -336,7 +336,8 @@ export function LensEditConfigurationFlyout({
         abortController,
         setDataGridAttrs,
         esqlVariables,
-        shouldUpdateAttrs
+        shouldUpdateAttrs,
+        previousAttributes.current
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
