@@ -49,8 +49,10 @@ export class ObservabilityAIAssistantPlugin
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
   service: ObservabilityAIAssistantService | undefined;
+  private isDev: boolean;
 
   constructor(context: PluginInitializerContext<ObservabilityAIAssistantConfig>) {
+    this.isDev = context.env.mode.dev;
     this.logger = context.logger.get();
     this.config = context.config.get<ObservabilityAIAssistantConfig>();
     initLangtrace();
@@ -171,6 +173,7 @@ export class ObservabilityAIAssistantPlugin
         plugins: withCore,
         service: this.service,
       },
+      isDev: this.isDev,
     });
 
     core.analytics.registerEventType(recallRankingEvent);

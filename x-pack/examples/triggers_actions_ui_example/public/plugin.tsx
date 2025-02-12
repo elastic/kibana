@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import { Plugin, CoreSetup, AppMountParameters, CoreStart } from '@kbn/core/public';
 import { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -14,19 +13,12 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { get } from 'lodash';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { AlertTableConfigRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/alert_table_config_registry';
-import {
-  AlertsTableConfigurationRegistry,
-  AlertsTableFlyoutBaseProps,
-  AlertTableFlyoutComponent,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
-import { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
-import { EuiDataGridColumn } from '@elastic/eui';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { getConnectorType as getSystemLogExampleConnectorType } from './connector_types/system_log_example/system_log_example';
 
 export interface TriggersActionsUiExamplePublicSetupDeps {
@@ -43,6 +35,8 @@ export interface TriggersActionsUiExamplePublicStartDeps {
   dataViews: DataViewsPublicPluginStart;
   dataViewsEditor: DataViewEditorStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  fieldFormats: FieldFormatsStart;
+  licensing: LicensingPluginStart;
 }
 
 export class TriggersActionsUiExamplePlugin
@@ -78,86 +72,7 @@ export class TriggersActionsUiExamplePlugin
     });
   }
 
-  public start(
-    coreStart: CoreStart,
-    { triggersActionsUi }: TriggersActionsUiExamplePublicStartDeps
-  ) {
-    const {
-      alertsTableConfigurationRegistry,
-    }: { alertsTableConfigurationRegistry: AlertTableConfigRegistry } = triggersActionsUi;
-
-    const columns: EuiDataGridColumn[] = [
-      {
-        id: 'event.action',
-        displayAsText: 'Alert status',
-        initialWidth: 150,
-      },
-      {
-        id: '@timestamp',
-        displayAsText: 'Last updated',
-        initialWidth: 250,
-      },
-      {
-        id: 'kibana.alert.duration.us',
-        displayAsText: 'Duration',
-        initialWidth: 150,
-      },
-      {
-        id: 'kibana.alert.reason',
-        displayAsText: 'Reason',
-      },
-    ];
-
-    const FlyoutBody: AlertTableFlyoutComponent = ({ alert }: AlertsTableFlyoutBaseProps) => (
-      <ul>
-        {columns.map((column) => (
-          <li data-test-subj={`alertsFlyout${column.displayAsText}`} key={column.id}>
-            {get(alert as any, column.id, [])[0]}
-          </li>
-        ))}
-      </ul>
-    );
-
-    const FlyoutHeader: AlertTableFlyoutComponent = ({ alert }: AlertsTableFlyoutBaseProps) => {
-      const { 'kibana.alert.rule.name': name } = alert;
-      return <div data-test-subj="alertsFlyoutName">{name}</div>;
-    };
-
-    const useInternalFlyout = () => ({
-      body: FlyoutBody,
-      header: FlyoutHeader,
-      footer: null,
-    });
-
-    const sort: SortCombinations[] = [
-      {
-        'event.action': {
-          order: 'asc',
-        },
-      },
-    ];
-
-    const config: AlertsTableConfigurationRegistry = {
-      id: 'observabilityCases',
-      columns,
-      useInternalFlyout,
-      getRenderCellValue: (props: {
-        data?: Array<{ field: string; value: string }>;
-        columnId?: string;
-      }) => {
-        const value = props.data?.find((d) => d.field === props.columnId)?.value ?? [];
-
-        if (Array.isArray(value)) {
-          return <>{value.length ? value.join() : '--'}</>;
-        }
-
-        return <>{value}</>;
-      },
-      sort,
-    };
-
-    alertsTableConfigurationRegistry.register(config);
-
+  public start(_: CoreStart, { triggersActionsUi }: TriggersActionsUiExamplePublicStartDeps) {
     triggersActionsUi.actionTypeRegistry.register(getSystemLogExampleConnectorType());
   }
 

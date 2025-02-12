@@ -56,6 +56,11 @@ jobs:
       env:
         NODE_OPTIONS: "--max-old-space-size=8192"
         CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES: ${{ env.CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES }}
+        # CodeQL divides the memory between ts and jvm, though most of the memory is used by the ts.
+        # We double the memory, so ts can use it in full capacity.
+        # Refer to https://github.com/github/codeql/blob/59a77a873c894bca7274a7ed7c7c6d937547e9b3/javascript/resources/tools/autobuild.sh#L7-L13
+        # 2 * 14576, considering our runner is 4 CPU/16GB.
+        CODEQL_RAM: 29152
       with:
         category: "/language:${{matrix.language}}"
         ref: ${{ env.CHECKOUT_REF }}
