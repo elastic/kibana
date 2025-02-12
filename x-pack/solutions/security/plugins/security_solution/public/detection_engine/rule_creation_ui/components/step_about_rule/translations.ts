@@ -92,7 +92,7 @@ export const ADD_RULE_NOTE_HELP_TEXT = i18n.translate(
 );
 
 export const ADD_RULE_SETUP_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.setupHelpText',
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.addRuleSetupHelpText',
   {
     defaultMessage: 'Add rule setup guide...',
   }
