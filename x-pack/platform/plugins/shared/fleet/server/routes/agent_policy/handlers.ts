@@ -39,6 +39,7 @@ import type {
   FleetRequestHandlerContext,
   GetAgentPolicyOutputsRequestSchema,
   GetListAgentPolicyOutputsRequestSchema,
+  GetAutoUpgradeAgentsStatusRequestSchema,
 } from '../../types';
 
 import type {
@@ -55,6 +56,8 @@ import type {
   BulkGetAgentPoliciesResponse,
   GetAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsResponse,
+  GetAutoUpgradeAgentsStatusResponse,
+  CurrentVersionCount,
 } from '../../../common/types';
 import { AgentPolicyNotFoundError, FleetUnauthorizedError, FleetError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
@@ -275,6 +278,86 @@ export const getOneAgentPolicyHandler: FleetRequestHandler<
       body: { message: 'Agent policy not found' },
     });
   }
+};
+
+export const getAutoUpgradeAgentsStatusHandler: FleetRequestHandler<
+  TypeOf<typeof GetAutoUpgradeAgentsStatusRequestSchema.params>,
+  undefined
+> = async (context, request, response) => {
+  const [_, fleetContext] = await Promise.all([context.core, context.fleet]);
+
+  const agentClient = fleetContext.agentClient.asCurrentUser;
+
+  const currentVersionsMap: {
+    [version: string]: CurrentVersionCount;
+  } = {};
+  let total = 0;
+
+  await agentClient
+    .listAgents({
+      showInactive: false,
+      perPage: 0,
+      kuery: `${AGENTS_PREFIX}.policy_id:"${request.params.agentPolicyId}"`,
+      aggregations: {
+        versions: {
+          terms: {
+            field: 'local_metadata.elastic.agent.version.keyword',
+            size: 1000,
+          },
+        },
+      },
+    })
+    .then((result) => {
+      (result.aggregations?.versions as any)?.buckets.forEach(
+        (bucket: { key: string; doc_count: number }) =>
+          (currentVersionsMap[bucket.key] = {
+            version: bucket.key,
+            agents: bucket.doc_count,
+            failedAgents: 0,
+          })
+      );
+      total = result.total;
+    });
+
+  await agentClient
+    .listAgents({
+      showInactive: false,
+      perPage: 0,
+      kuery: `${AGENTS_PREFIX}.policy_id:"${request.params.agentPolicyId}" AND ${AGENTS_PREFIX}.upgrade_details.state:"UPG_FAILED"`, // UPG_FAILED
+      aggregations: {
+        versions: {
+          terms: {
+            field: 'upgrade_details.target_version.keyword',
+            size: 1000,
+          },
+        },
+      },
+    })
+    .then((result) => {
+      (result.aggregations?.versions as any)?.buckets.forEach(
+        (bucket: { key: string; doc_count: number }) =>
+          (currentVersionsMap[bucket.key] = {
+            version: bucket.key,
+            agents: currentVersionsMap[bucket.key]?.agents ?? 0,
+            failedAgents: bucket.doc_count,
+          })
+      );
+    });
+
+  // TODO remove
+  currentVersionsMap['8.16.3'] = {
+    version: '8.16.3',
+    agents: 0,
+    failedAgents: 1,
+  };
+
+  const body: GetAutoUpgradeAgentsStatusResponse = {
+    currentVersions: Object.values(currentVersionsMap),
+    totalAgents: total,
+  };
+  return response.ok({
+    body,
+  });
 };
 
 export const createAgentPolicyHandler: FleetRequestHandler<

@@ -37,6 +37,17 @@ export interface GetOneAgentPolicyResponse {
   item: AgentPolicy;
 }
 
+export interface CurrentVersionCount {
+  version: string;
+  agents: number;
+  failedAgents: number;
+}
+
+export interface GetAutoUpgradeAgentsStatusResponse {
+  currentVersions: CurrentVersionCount[];
+  totalAgents: number;
+}
+
 export interface CreateAgentPolicyRequest {
   body: NewAgentPolicy;
 }

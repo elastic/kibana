@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,16 +19,23 @@ import {
   EuiIconTip,
   EuiSpacer,
   EuiSuperSelect,
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { AgentTargetVersion } from '../../../../../../../common/types';
+import type {
+  AgentTargetVersion,
+  GetAutoUpgradeAgentsStatusResponse,
+} from '../../../../../../../common/types';
 
 import type { AgentPolicy } from '../../../../../../../common';
 import { useGetAgentsAvailableVersionsQuery, useStartServices } from '../../../../../../hooks';
 import { checkTargetVersionsValidity } from '../../../../../../../common/services';
-import { sendUpdateAgentPolicyForRq } from '../../../../../../hooks/use_request/agent_policy';
+import {
+  sendUpdateAgentPolicyForRq,
+  useGetAutoUpgradeAgentsStatusQuery,
+} from '../../../../../../hooks/use_request/agent_policy';
 
 export interface ManageAutoUpgradeAgentsModalProps {
   onClose: (refreshPolicy: boolean) => void;
@@ -47,6 +54,7 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
   });
   const latestVersion = agentsAvailableVersions?.items[0];
   const [errors, setErrors] = useState<string[]>([]);
+  const { data: autoUpgradeAgentStatus } = useGetAutoUpgradeAgentsStatusQuery(agentPolicy.id);
 
   const submitUpdateAgentPolicy = async () => {
     setIsLoading(true);
@@ -152,6 +160,7 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
                       )
                     );
                   }}
+                  currentVersionCounts={autoUpgradeAgentStatus}
                 />
                 <EuiSpacer size="s" />
               </>
@@ -189,7 +198,8 @@ const TargetVersionsRow: React.FunctionComponent<{
   requiredVersion: AgentTargetVersion;
   onRemove: () => void;
   onUpdate: (version: string, percentage: number) => void;
-}> = ({ agentsAvailableVersions, requiredVersion, onRemove, onUpdate }) => {
+  currentVersionCounts?: GetAutoUpgradeAgentsStatusResponse;
+}> = ({ agentsAvailableVersions, requiredVersion, onRemove, onUpdate, currentVersionCounts }) => {
   const options = agentsAvailableVersions.map((version) => ({
     value: version,
     inputDisplay: version,
@@ -206,6 +216,68 @@ const TargetVersionsRow: React.FunctionComponent<{
   const onPercentageChange = (value: number) => {
     setPercentage(value);
   };
+
+  const calcPercentage = useCallback(
+    (agents: number): number =>
+      currentVersionCounts ? Math.round((agents / currentVersionCounts.totalAgents) * 100) : 0,
+    [currentVersionCounts]
+  );
+
+  const currentPercentage = useMemo(() => {
+    let result = 0;
+    if (currentVersionCounts) {
+      const currentVersion = currentVersionCounts.currentVersions.find(
+        (value) => value.version === version
+      );
+      if (currentVersion) {
+        result = calcPercentage(currentVersion.agents);
+      }
+    }
+    return `${result}%`;
+  }, [currentVersionCounts, version, calcPercentage]);
+
+  const currentStatus = useMemo(() => {
+    const inProgressStatus = (
+      <EuiButtonEmpty size="s" iconType="clock">
+        <FormattedMessage
+          id="xpack.fleet.manageAutoUpgradeAgents.inProgressText"
+          defaultMessage="In progress"
+        />
+      </EuiButtonEmpty>
+    );
+    const failedStatus = (
+      <EuiButtonEmpty size="s" iconType="errorFilled" color="danger" href="#">
+        <FormattedMessage
+          id="xpack.fleet.manageAutoUpgradeAgents.failedText"
+          defaultMessage="Upgrade failed"
+        />
+      </EuiButtonEmpty>
+    );
+    const completedStatus = (
+      <EuiButtonEmpty size="s" iconType="checkInCircleFilled" color="success">
+        <FormattedMessage
+          id="xpack.fleet.manageAutoUpgradeAgents.completedText"
+          defaultMessage="Completed"
+        />
+      </EuiButtonEmpty>
+    );
+    if (!currentVersionCounts) return inProgressStatus;
+    const currentVersion = currentVersionCounts.currentVersions.find(
+      (value) => value.version === version
+    );
+    if (currentVersion) {
+      if (currentVersion.failedAgents > 0) {
+        return failedStatus;
+      }
+      const currPercentage = calcPercentage(currentVersion.agents);
+      if (currPercentage >= percentage) {
+        return completedStatus;
+      } else {
+        return inProgressStatus;
+      }
+    }
+    return inProgressStatus;
+  }, [currentVersionCounts, version, percentage, calcPercentage]);
 
   return (
     <EuiFlexGroup direction="row" alignItems="flexEnd">
@@ -273,6 +345,23 @@ const TargetVersionsRow: React.FunctionComponent<{
             max={100}
             required
           />
+        </EuiFormRow>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFormRow
+          label={
+            <FormattedMessage
+              id="xpack.fleet.manageAutoUpgradeAgents.statusTitle"
+              defaultMessage="Status"
+            />
+          }
+        >
+          <EuiFlexGroup direction="row" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">{currentPercentage}</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem component="span">{currentStatus}</EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem>
