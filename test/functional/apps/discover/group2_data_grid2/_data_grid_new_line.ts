@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(rows.length).to.be.above(0);
 
       const cell = await dataGrid.getCellElementExcludingControlColumns(0, 0);
-      const content = await cell.findByCssSelector('.unifiedDataTable__descriptionListDescription');
+      const content = await cell.findByCssSelector('dd');
       expect(await content.getVisibleText()).to.be(VALUE_WITHOUT_NEW_LINES);
       expect(await content.getComputedStyle('white-space')).to.be('normal');
     });
