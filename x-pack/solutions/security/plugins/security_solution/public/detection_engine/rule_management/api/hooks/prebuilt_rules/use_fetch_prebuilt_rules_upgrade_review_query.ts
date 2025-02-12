@@ -11,6 +11,8 @@ import { reviewRuleUpgrade } from '../../api';
 import { REVIEW_RULE_UPGRADE_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules/urls';
 import type { ReviewRuleUpgradeResponseBody } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { DEFAULT_QUERY_OPTIONS } from '../constants';
+import { retryOnRateLimitedError } from './retry_on_rate_limited_error';
+import { cappedExponentialBackoff } from './capped_exponential_backoff';
 
 export const REVIEW_RULE_UPGRADE_QUERY_KEY = ['POST', REVIEW_RULE_UPGRADE_URL];
 
@@ -26,6 +28,8 @@ export const useFetchPrebuiltRulesUpgradeReviewQuery = (
     {
       ...DEFAULT_QUERY_OPTIONS,
       ...options,
+      retry: retryOnRateLimitedError,
+      retryDelay: cappedExponentialBackoff,
     }
   );
 };

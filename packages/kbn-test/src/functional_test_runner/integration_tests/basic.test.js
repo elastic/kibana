@@ -17,7 +17,10 @@ const BASIC_CONFIG = require.resolve('./__fixtures__/simple_project/config.js');
 
 describe('basic config file with a single app and test', function () {
   it('runs and prints expected output', () => {
-    const proc = spawnSync(process.execPath, [SCRIPT, '--config', BASIC_CONFIG]);
+    const proc = spawnSync(process.execPath, [SCRIPT, '--config', BASIC_CONFIG], {
+      // this FTR run should not produce a scout report
+      env: { ...process.env, SCOUT_REPORTER_ENABLED: '0' },
+    });
     const stdout = proc.stdout.toString('utf8');
     expect(stdout).toContain('$BEFORE$');
     expect(stdout).toContain('$TESTNAME$');

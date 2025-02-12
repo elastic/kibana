@@ -180,7 +180,7 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   ];
   const agentPoliciesFromPackagePolicies = await agentPolicyService.getByIds(
     internalSoClientWithoutSpaceExtension,
-    agentPolicyIdsFromPackagePolicies
+    agentPolicyIdsFromPackagePolicies.map((id) => ({ id, spaceId: '*' }))
   );
 
   const agentPoliciesIndexedById = indexBy(
@@ -249,7 +249,7 @@ async function findPoliciesWithFleetServerOrSynthetics(outputId?: string, isDefa
     if (agentPolicyIds.length) {
       agentPolicies = await agentPolicyService.getByIds(
         internalSoClientWithoutSpaceExtension,
-        agentPolicyIds
+        agentPolicyIds.map((id) => ({ id, spaceId: '*' }))
       );
       for (const packagePolicy of packagePolicies) {
         for (const policyId of packagePolicy.policy_ids) {

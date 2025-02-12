@@ -14,13 +14,13 @@ import {
   EuiLoadingSpinner,
   useEuiTheme,
 } from '@elastic/eui';
+import { TOTAL_COUNT_OF_ALERTS } from '../../alerts_table/translations';
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
 import { ChartLabel } from '../../../../overview/components/detection_response/alerts_by_status/chart_label';
 import { useGetSeverityTableColumns } from './columns';
 import { getSeverityColor } from './helpers';
-import { TOTAL_COUNT_OF_ALERTS } from '../../alerts_table/translations';
 
 const DONUT_HEIGHT = 150;
 

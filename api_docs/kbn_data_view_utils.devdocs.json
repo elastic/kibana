@@ -125,6 +125,113 @@
       },
       {
         "parentPluginId": "@kbn/data-view-utils",
+        "id": "def-common.getDataViewFieldOrCreateFromColumnMeta",
+        "type": "Function",
+        "tags": [],
+        "label": "getDataViewFieldOrCreateFromColumnMeta",
+        "description": [],
+        "signature": [
+          "({ dataView, fieldName, columnMeta, }: { dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          "; fieldName: string; columnMeta?: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumnMeta",
+            "text": "DatatableColumnMeta"
+          },
+          " | undefined; }) => ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewField",
+            "text": "DataViewField"
+          },
+          " | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/get_data_view_field_or_create.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/data-view-utils",
+            "id": "def-common.getDataViewFieldOrCreateFromColumnMeta.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  dataView,\n  fieldName,\n  columnMeta,\n}",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/get_data_view_field_or_create.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/data-view-utils",
+                "id": "def-common.getDataViewFieldOrCreateFromColumnMeta.$1.dataView",
+                "type": "Object",
+                "tags": [],
+                "label": "dataView",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.DataView",
+                    "text": "DataView"
+                  }
+                ],
+                "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/get_data_view_field_or_create.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/data-view-utils",
+                "id": "def-common.getDataViewFieldOrCreateFromColumnMeta.$1.fieldName",
+                "type": "string",
+                "tags": [],
+                "label": "fieldName",
+                "description": [],
+                "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/get_data_view_field_or_create.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/data-view-utils",
+                "id": "def-common.getDataViewFieldOrCreateFromColumnMeta.$1.columnMeta",
+                "type": "Object",
+                "tags": [],
+                "label": "columnMeta",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "expressions",
+                    "scope": "common",
+                    "docId": "kibExpressionsPluginApi",
+                    "section": "def-common.DatatableColumnMeta",
+                    "text": "DatatableColumnMeta"
+                  },
+                  " | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-data-view-utils/src/utils/get_data_view_field_or_create.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/data-view-utils",
         "id": "def-common.testPatternAgainstAllowedList",
         "type": "Function",
         "tags": [],

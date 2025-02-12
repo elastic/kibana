@@ -28,7 +28,6 @@ import {
   EuiDataGridCustomBodyProps,
   EuiDataGridStyle,
   EuiDataGridProps,
-  EuiHorizontalRule,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -1061,11 +1060,10 @@ export const UnifiedDataTable = ({
 
     return {
       allowDensity: Boolean(onUpdateDataGridDensity),
-      allowRowHeight: false,
+      allowRowHeight: Boolean(onChangeRowHeight) || Boolean(onChangeHeaderRowHeight),
       allowResetButton: false,
-      additionalDisplaySettings: (
+      customRender: ({ densityControl }) => (
         <>
-          {onUpdateDataGridDensity ? <EuiHorizontalRule margin="s" /> : null}
           <UnifiedDataTableAdditionalDisplaySettings
             rowHeight={rowHeight}
             onChangeRowHeight={onChangeRowHeight}
@@ -1078,6 +1076,7 @@ export const UnifiedDataTable = ({
             onChangeSampleSize={onUpdateSampleSize}
             lineCountInput={lineCountInput}
             headerLineCountInput={headerLineCountInput}
+            densityControl={densityControl}
           />
         </>
       ),

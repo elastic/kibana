@@ -38,7 +38,7 @@ const leftPanel1: FlyoutPanelProps = {
 };
 const previewPanel1: FlyoutPanelProps = {
   id: 'preview1',
-  state: { id: 'state' },
+  params: { id: 'id' },
 };
 
 const rightPanel2: FlyoutPanelProps = {
@@ -51,7 +51,7 @@ const leftPanel2: FlyoutPanelProps = {
 };
 const previewPanel2: FlyoutPanelProps = {
   id: 'preview2',
-  state: { id: 'state' },
+  params: { id: 'id' },
 };
 
 describe('panelsReducer', () => {

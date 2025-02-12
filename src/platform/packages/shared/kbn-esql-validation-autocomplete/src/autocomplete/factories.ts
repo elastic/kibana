@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
 import { SuggestionRawDefinition } from './types';
-import { groupingFunctionDefinitions } from '../definitions/grouping';
+import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { getFunctionSignatures } from '../definitions/helpers';

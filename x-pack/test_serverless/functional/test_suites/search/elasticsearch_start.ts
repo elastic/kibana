@@ -135,6 +135,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
       });
 
+      it('should create a new api key when the existing one is invalidated', async () => {
+        await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
+        await pageObjects.svlApiKeys.expectAPIKeyAvailable();
+        // Get initial API key
+        const initialApiKey = await pageObjects.svlApiKeys.getAPIKeyFromSessionStorage();
+        expect(initialApiKey.id).to.not.be(null);
+
+        // Navigate away to keep key in current session, invalidate key and return back
+        await svlSearchNavigation.navigateToInferenceManagementPage();
+        await pageObjects.svlApiKeys.invalidateAPIKey(initialApiKey.id);
+        await svlSearchNavigation.navigateToElasticsearchStartPage();
+        await pageObjects.svlSearchElasticsearchStartPage.clickCodeViewButton();
+
+        // Check that new key was generated
+        await pageObjects.svlApiKeys.expectAPIKeyAvailable();
+        const newApiKey = await pageObjects.svlApiKeys.getAPIKeyFromSessionStorage();
+        expect(newApiKey).to.not.be(null);
+        expect(newApiKey.id).to.not.eql(initialApiKey.id);
+      });
+
       it('should explicitly ask to create api key when project already has an apikey', async () => {
         await pageObjects.svlApiKeys.clearAPIKeySessionStorage();
         await pageObjects.svlApiKeys.createAPIKey();
@@ -153,7 +174,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchElasticsearchStartPage.clickCreateIndexButton();
         await pageObjects.svlSearchElasticsearchStartPage.expectToBeOnIndexDetailsPage();
 
-        await pageObjects.svlApiKeys.expectAPIKeyAvailable();
+        await pageObjects.svlApiKeys.expectShownAPIKeyAvailable();
         const indexDetailsApiKey = await pageObjects.svlApiKeys.getAPIKeyFromUI();
 
         expect(apiKeyUI).to.eql(indexDetailsApiKey);

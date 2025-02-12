@@ -74,10 +74,6 @@ export interface FlyoutPanelProps {
    * Tracks the path for what to show in a panel, such as activated tab and subtab
    */
   path?: PanelPath;
-  /**
-   * Tracks visual state such as whether the panel is collapsed
-   */
-  state?: Record<string, unknown>;
 }
 
 export interface Panel {

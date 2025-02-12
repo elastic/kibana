@@ -27,10 +27,11 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         ${isEditMode ? editModeOutline : viewModeOutline}
       );
 
+      display: inline-block;
       container: hoverActionsAnchor / inline-size;
       border-radius: ${euiTheme.border.radius.medium};
       position: relative;
-      display: inline-block;
+      vertical-align: top;
       width: 100%;
       height: 100%;
 
@@ -41,9 +42,19 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
             }
           `
         : css`
+            .embPanel {
+              outline: 1px solid transparent; // necessary for outline-color transition
+              z-index: ${euiTheme.levels.content}; // necessary for z-index transition
+              // delay hiding border on hover out to match delay on hover actions
+              transition: outline-color ${euiTheme.animation.extraFast},
+                z-index ${euiTheme.animation.extraFast};
+              transition-delay: ${euiTheme.animation.fast};
+            }
+
             &:hover .embPanel {
               outline: var(--internalBorderStyle);
               z-index: ${euiTheme.levels.menu};
+              transition: none; // apply transition on hover out only
             }
           `}
 
@@ -55,9 +66,9 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         visibility: hidden;
 
         // delay hiding hover actions to make grabbing the drag handle easier
-        transition: ${euiTheme.animation.extraFast} opacity ease-in,
-          ${euiTheme.animation.extraFast} z-index linear,
-          ${euiTheme.animation.extraFast} visibility linear;
+        transition: opacity ${euiTheme.animation.extraFast} ease-in,
+          z-index ${euiTheme.animation.extraFast} linear,
+          visibility ${euiTheme.animation.extraFast} linear;
         transition-delay: ${euiTheme.animation.fast};
       }
 

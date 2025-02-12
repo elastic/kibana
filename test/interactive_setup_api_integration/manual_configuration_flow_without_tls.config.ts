@@ -10,6 +10,7 @@
 import fs from 'fs/promises';
 import { join, resolve } from 'path';
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { FtrConfigProviderContext } from '@kbn/test';
 import { getDataPath } from '@kbn/utils';
 
@@ -24,6 +25,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   await fs.writeFile(tempKibanaYamlFile, '');
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [require.resolve('./tests/manual_configuration_flow_without_tls')],
     servers: xPackAPITestsConfig.get('servers'),
     services,
