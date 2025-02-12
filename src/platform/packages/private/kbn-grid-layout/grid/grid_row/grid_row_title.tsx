@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { cloneDeep } from 'lodash';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { distinctUntilChanged, map } from 'rxjs';
 
 import { EuiButtonIcon, EuiFlexItem, EuiInlineEditTitle, EuiLink, EuiTitle } from '@elastic/eui';
@@ -31,6 +31,7 @@ export const GridRowTitle = React.memo(
     toggleIsCollapsed: () => void;
     gridLayoutStateManager: GridLayoutStateManager;
   }) => {
+    const inputRef = useRef<HTMLInputElement | null>(null);
     const currentRow = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
     const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
 
@@ -51,6 +52,15 @@ export const GridRowTitle = React.memo(
         titleSubscription.unsubscribe();
       };
     }, [rowIndex, gridLayoutStateManager]);
+
+    useEffect(() => {
+      /**
+       * Set focus on title input when edit mode is open
+       */
+      if (editTitleOpen && inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, [editTitleOpen]);
 
     const updateTitle = useCallback(
       (title: string) => {
@@ -74,6 +84,9 @@ export const GridRowTitle = React.memo(
               onSave={updateTitle}
               onCancel={() => setEditTitleOpen(false)}
               startWithEditOpen
+              editModeProps={{
+                inputProps: { inputRef },
+              }}
               inputAriaLabel={i18n.translate('kbnGridLayout.row.editTitleAriaLabel', {
                 defaultMessage: 'Edit section title',
               })}

@@ -23,12 +23,12 @@ export interface GridRowHeaderProps {
   rowIndex: number;
   gridLayoutStateManager: GridLayoutStateManager;
   toggleIsCollapsed: () => void;
+  headerRef: React.MutableRefObject<HTMLDivElement | null>;
 }
 
 export const GridRowHeader = React.memo(
-  ({ rowIndex, gridLayoutStateManager, toggleIsCollapsed }: GridRowHeaderProps) => {
+  ({ rowIndex, gridLayoutStateManager, toggleIsCollapsed, headerRef }: GridRowHeaderProps) => {
     const headerStyles = useGridRowHeaderStyles();
-
     const [editTitleOpen, setEditTitleOpen] = useState<boolean>(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
     const [readOnly, setReadOnly] = useState<boolean>(
@@ -86,10 +86,13 @@ export const GridRowHeader = React.memo(
     return (
       <>
         <EuiFlexGroup
+          ref={headerRef}
           gutterSize="xs"
           alignItems="center"
           css={headerStyles}
           className="kbnGridRowHeader"
+          id={`kbnGridRowHeader--${rowIndex}`}
+          aria-controls={`kbnGridRow--${rowIndex}`}
         >
           <EuiFlexItem grow={false}>
             <EuiButtonIcon

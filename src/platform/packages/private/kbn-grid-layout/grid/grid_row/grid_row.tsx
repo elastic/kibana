@@ -8,7 +8,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { combineLatest, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
@@ -31,6 +31,7 @@ export interface GridRowProps {
 
 export const GridRow = React.memo(
   ({ rowIndex, renderPanelContents, gridLayoutStateManager }: GridRowProps) => {
+    const headerRef = useRef<HTMLDivElement | null>(null);
     const currentRow = gridLayoutStateManager.gridLayout$.value[rowIndex];
 
     const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
@@ -126,6 +127,14 @@ export const GridRow = React.memo(
       gridLayoutStateManager.gridLayout$.next(newLayout);
     }, [rowIndex, gridLayoutStateManager.gridLayout$]);
 
+    useEffect(() => {
+      /**
+       * Set `aria-expanded` without passing as prop to `gridRowHeader` to prevent re-render
+       */
+      if (!headerRef.current) return;
+      headerRef.current.ariaExpanded = `${!isCollapsed}`;
+    }, [isCollapsed]);
+
     return (
       <div
         css={styles.fullHeight}
@@ -138,15 +147,19 @@ export const GridRow = React.memo(
             rowIndex={rowIndex}
             gridLayoutStateManager={gridLayoutStateManager}
             toggleIsCollapsed={toggleIsCollapsed}
+            headerRef={headerRef}
           />
         )}
         {!isCollapsed && (
           <div
+            id={`kbnGridRow--${rowIndex}`}
             className={'kbnGridRow'}
             ref={(element: HTMLDivElement | null) =>
               (gridLayoutStateManager.rowRefs.current[rowIndex] = element)
             }
             css={[styles.fullHeight, styles.grid]}
+            role="region"
+            aria-labelledby={`kbnGridRowHeader--${rowIndex}`}
           >
             {/* render the panels **in order** for accessibility, using the memoized panel components */}
             {panelIdsInOrder.map((panelId) => (
