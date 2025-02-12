@@ -19,12 +19,12 @@ import { getProcessingPipelineName } from './name';
 import { formatToIngestProcessors } from '../helpers/processing';
 
 export function generateIngestPipeline(
-  id: string,
+  name: string,
   definition: StreamDefinition
 ): IngestPutPipelineRequest {
   const isWiredStream = isWiredStreamDefinition(definition);
   return {
-    id: getProcessingPipelineName(id),
+    id: getProcessingPipelineName(name),
     processors: [
       ...(isRoot(definition.name) ? logsDefaultPipelineProcessors : []),
       ...(!isRoot(definition.name) && isWiredStream
@@ -53,13 +53,13 @@ export function generateIngestPipeline(
       ...((isWiredStream && formatToIngestProcessors(definition.ingest.processing)) || []),
       {
         pipeline: {
-          name: `${id}@stream.reroutes`,
+          name: `${name}@stream.reroutes`,
           ignore_missing_pipeline: true,
         },
       },
     ],
     _meta: {
-      description: `Default pipeline for the ${id} stream`,
+      description: `Default pipeline for the ${name} stream`,
       managed: true,
     },
     version: ASSET_VERSION,
