@@ -44,8 +44,10 @@ export const TabsBar: React.FC<TabsBarProps> = ({
       responsive={false}
       alignItems="center"
       gutterSize="none"
+      className="eui-scrollBar"
       css={css`
         background-color: ${euiTheme.colors.lightestShade};
+        overflow-x: auto;
       `}
     >
       {items.map((item) => (
