@@ -10,7 +10,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../../common/types';
+import {
+  EnrichedDeprecationInfo,
+  ReindexAction,
+  ReindexStatus,
+} from '../../../../../../../common/types';
 
 import type { IndexStateContext } from '../context';
 import { DeprecationBadge } from '../../../../shared';
@@ -154,6 +158,7 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
             startReadonly={() => {
               setFlyoutStep('confirmReadonly');
             }}
+            correctiveAction={correctiveAction as ReindexAction}
             updateIndexState={updateIndexState}
             reindexState={reindexState}
           />
@@ -213,7 +218,7 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
     }
   }, [
     flyoutStep,
-    correctiveAction?.type,
+    correctiveAction,
     closeFlyout,
     updateIndexState,
     reindexState,

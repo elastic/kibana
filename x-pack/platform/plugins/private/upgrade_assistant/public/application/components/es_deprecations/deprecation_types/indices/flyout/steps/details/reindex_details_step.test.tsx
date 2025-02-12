@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { findTestSubject } from '@elastic/eui/lib/test';
 import { shallow } from 'enzyme';
 import React from 'react';
 import { ReindexDetailsFlyoutStep } from './reindex_details_step';
@@ -12,6 +13,7 @@ import type { ReindexState } from '../../../use_reindex';
 import type { UpdateIndexState } from '../../../use_update_index';
 import { LoadingState } from '../../../../../../types';
 import { cloneDeep } from 'lodash';
+import { ESTransformsTargetGuidance } from './es_transform_target_guidance';
 
 jest.mock('../../../../../../../app_context', () => {
   const { docLinksServiceMock } = jest.requireActual('@kbn/core-doc-links-browser-mocks');
@@ -181,6 +183,88 @@ describe('ReindexDetailsFlyoutStep', () => {
                     />
                   </EuiButton>
                 </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <EuiButton
+                    color="primary"
+                    data-test-subj="startReindexingButton"
+                    disabled={false}
+                    fill={true}
+                    isLoading={false}
+                    onClick={[MockFunction]}
+                  >
+                    <MemoizedFormattedMessage
+                      defaultMessage="Start reindexing"
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexButton.runReindexLabel"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </Fragment>
+    `);
+  });
+
+  it('renders correct guidance for indices with transforms', () => {
+    const wrapper = shallow(
+      <ReindexDetailsFlyoutStep
+        closeFlyout={jest.fn()}
+        startReindex={jest.fn()}
+        startReadonly={jest.fn()}
+        reindexState={defaultReindexState}
+        updateIndexState={defaultUpdateIndexState}
+        correctiveAction={{ type: 'reindex', transformIds: ['abc', 'def'] }}
+      />
+    );
+    expect(wrapper).toMatchInlineSnapshot(`
+      <Fragment>
+        <EuiFlyoutBody>
+          <EuiText>
+            <p>
+              <MemoizedFormattedMessage
+                defaultMessage="This index was created in ES 7.x and it is not compatible with the next major version. Choose one of the following options:"
+                id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.notCompatibleIndexText"
+              />
+            </p>
+            <ESTransformsTargetGuidance
+              index="some_index"
+              transformIds={
+                Array [
+                  "abc",
+                  "def",
+                ]
+              }
+            />
+          </EuiText>
+          <EuiSpacer />
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiButtonEmpty
+                flush="left"
+                iconType="cross"
+                onClick={[MockFunction]}
+              >
+                <MemoizedFormattedMessage
+                  defaultMessage="Close"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.closeButtonLabel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiFlexGroup
+                gutterSize="s"
+              >
                 <EuiFlexItem
                   grow={false}
                 >
