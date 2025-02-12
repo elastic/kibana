@@ -367,7 +367,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const conversation = await getConversationForUser('admin');
 
         expect(conversation.systemMessage).to.not.contain(userInstructionText);
-        expect(conversation.messages.length).to.be(5);
+        expect(conversation.messages.length).to.be(4);
       });
     });
 
