@@ -29,7 +29,7 @@ describe('ML locator', () => {
 
         expect(location).toMatchObject({
           app: 'ml',
-          path: '/jobs',
+          path: '',
           state: {},
         });
       });
@@ -44,7 +44,7 @@ describe('ML locator', () => {
 
         expect(location).toMatchObject({
           app: 'ml',
-          path: "/jobs?_a=(jobs:(queryText:'id:fq_single_1'))",
+          path: "?_a=('':(queryText:'id:fq_single_1'))",
           state: {},
         });
       });
@@ -59,7 +59,7 @@ describe('ML locator', () => {
 
         expect(location).toMatchObject({
           app: 'ml',
-          path: "/jobs?_a=(jobs:(queryText:'groups:(farequote%20or%20categorization)'))",
+          path: "?_a=('':(queryText:'groups:(farequote%20or%20categorization)'))",
           state: {},
         });
       });
@@ -210,7 +210,7 @@ describe('ML locator', () => {
 
           expect(location).toMatchObject({
             app: 'ml',
-            path: '/data_frame_analytics',
+            path: '',
             state: {},
           });
         });
@@ -225,7 +225,7 @@ describe('ML locator', () => {
 
           expect(location).toMatchObject({
             app: 'ml',
-            path: "/data_frame_analytics?_a=(data_frame_analytics:(queryText:'id:grid_regression_1'))",
+            path: "?_a=('':(queryText:'id:grid_regression_1'))",
             state: {},
           });
         });
@@ -240,7 +240,7 @@ describe('ML locator', () => {
 
           expect(location).toMatchObject({
             app: 'ml',
-            path: "/data_frame_analytics?_a=(data_frame_analytics:(queryText:'groups:(group_1%20or%20group_2)'))",
+            path: "?_a=('':(queryText:'groups:(group_1%20or%20group_2)'))",
             state: {},
           });
         });

@@ -7,6 +7,12 @@
 
 export const ML_APP_LOCATOR = 'ML_APP_LOCATOR';
 
+export const DEPRECATED_ML_ROUTE_TO_NEW_ROUTE = {
+  jobs: 'anomaly_detection',
+  data_frame_analytics: 'analytics',
+  trained_models: 'trained_models',
+};
+
 export const ML_PAGES = {
   ANOMALY_DETECTION_JOBS_MANAGE: '',
   ANOMALY_EXPLORER: 'explorer',

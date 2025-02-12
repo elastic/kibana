@@ -14,6 +14,10 @@ import { ML_PAGES } from '../../../common/constants/locator';
 
 export type NavigateToApp = CoreStart['application']['navigateToApp'];
 
+type ManagementBreadcrumbType = ChromeBreadcrumb & {
+  appId?: string;
+  path?: string;
+};
 const stackManagementBreadcrumbText = i18n.translate(
   'xpack.ml.settings.breadcrumbs.stackManagementLabel',
   {
@@ -21,7 +25,7 @@ const stackManagementBreadcrumbText = i18n.translate(
   }
 );
 
-export const ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB = {
+export const ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
   text: i18n.translate('xpack.ml.anomalyDetectionManagementBreadcrumbLabel', {
     defaultMessage: 'Anomaly Detection Jobs',
   }),
@@ -30,7 +34,7 @@ export const ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB = {
   deepLinkId: 'ml:anomalyDetection',
 };
 
-export const CREATE_JOB_MANAGEMENT_BREADCRUMB = {
+export const CREATE_JOB_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
   text: i18n.translate('xpack.ml.createJobManagementBreadcrumbLabel', {
     defaultMessage: 'Create job',
   }),
@@ -38,7 +42,7 @@ export const CREATE_JOB_MANAGEMENT_BREADCRUMB = {
   appId: `anomaly_detection`,
 };
 
-export const DATA_FRAME_ANALYTICS_MANAGEMENT_BREADCRUMB = {
+export const DATA_FRAME_ANALYTICS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
   text: i18n.translate('xpack.ml.dataFrameAnalyticsManagementLabel', {
     defaultMessage: 'Data Frame Analytics Jobs',
   }),
@@ -47,7 +51,7 @@ export const DATA_FRAME_ANALYTICS_MANAGEMENT_BREADCRUMB = {
   deepLinkId: 'ml:dataFrameAnalytics',
 };
 
-export const TRAINED_MODELS_MANAGEMENT_BREADCRUMB = {
+export const TRAINED_MODELS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
   text: i18n.translate('xpack.ml.trainedModelManagementLabel', {
     defaultMessage: 'Machine Learning Trained Models',
   }),
@@ -56,7 +60,7 @@ export const TRAINED_MODELS_MANAGEMENT_BREADCRUMB = {
   deepLinkId: 'ml:modelManagement',
 };
 
-export const SUPPLIED_CONFIGURATIONS_MANAGEMENT_BREADCRUMB = {
+export const SUPPLIED_CONFIGURATIONS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
   text: i18n.translate('xpack.ml.suppliedConfigurationsManagementLabel', {
     defaultMessage: 'Supplied configurations',
   }),
@@ -65,7 +69,7 @@ export const SUPPLIED_CONFIGURATIONS_MANAGEMENT_BREADCRUMB = {
   deepLinkId: 'ml:suppliedConfigurations',
 };
 
-export const SETTINGS_MANAGEMENT_BREADCRUMB = {
+export const SETTINGS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
   text: i18n.translate('xpack.ml.settingsBreadcrumbLabel', {
     defaultMessage: 'Machine Learning Settings',
   }),
@@ -74,7 +78,7 @@ export const SETTINGS_MANAGEMENT_BREADCRUMB = {
   deepLinkId: 'ml:settings',
 };
 
-export const FILTER_LISTS_MANAGEMENT_BREADCRUMB = {
+export const FILTER_LISTS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
   text: i18n.translate('xpack.ml.settings.breadcrumbs.filterListsManagementLabel', {
     defaultMessage: 'Filter lists',
   }),
@@ -83,7 +87,7 @@ export const FILTER_LISTS_MANAGEMENT_BREADCRUMB = {
   deepLinkId: 'ml:filterListsSettings',
 };
 
-export const CALENDAR_LISTS_MANAGEMENT_BREADCRUMB = {
+export const CALENDAR_LISTS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
   text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarListManagementLabel', {
     defaultMessage: 'Calendar management',
   }),
@@ -92,7 +96,7 @@ export const CALENDAR_LISTS_MANAGEMENT_BREADCRUMB = {
   deepLinkId: 'ml:calendarSettings',
 };
 
-export const CALENDAR_DST_LISTS_MANAGEMENT_BREADCRUMB = {
+export const CALENDAR_DST_LISTS_MANAGEMENT_BREADCRUMB: ManagementBreadcrumbType = {
   text: i18n.translate('xpack.ml.settings.breadcrumbs.calendarListManagementLabel', {
     defaultMessage: 'Calendar DST management',
   }),

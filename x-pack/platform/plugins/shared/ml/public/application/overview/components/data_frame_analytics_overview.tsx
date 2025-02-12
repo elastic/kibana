@@ -7,22 +7,19 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '../../../locator';
 import dfaImage from '../../data_frame_analytics/pages/analytics_management/components/empty_prompt/data_frame_analytics_kibana.png';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
-import { useMlApi, useMlLocator, useMlManagementLocator, useMlKibana } from '../../contexts/kibana';
+import { useMlApi, useMlLocator, useMlManagementLocator } from '../../contexts/kibana';
 import { mlNodesAvailable } from '../../ml_nodes_check';
 import { MLEmptyPromptCard } from '../../components/overview/ml_empty_prompt_card';
 import { AnalyticsEmptyPrompt } from '../../data_frame_analytics/pages/analytics_management/components/empty_prompt/empty_prompt';
 export const DataFrameAnalyticsOverviewCard: FC = () => {
   const mlLocator = useMlLocator();
   const mlManagementLocator = useMlManagementLocator();
-  const {
-    services: { docLinks },
-  } = useMlKibana();
 
   const [hasDFAs, setHasDFAs] = useState(false);
   const [canCreateDataFrameAnalytics, canStartStopDataFrameAnalytics] = usePermissionCheck([
@@ -98,7 +95,6 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
     fetchAnalytics();
   }, [mlApi]);
 
-  const { euiTheme } = useEuiTheme();
   return !hasDFAs ? (
     <AnalyticsEmptyPrompt />
   ) : (
