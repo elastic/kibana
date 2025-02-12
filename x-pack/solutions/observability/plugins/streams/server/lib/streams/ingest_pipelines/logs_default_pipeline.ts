@@ -27,27 +27,40 @@ export const logsDefaultPipelineProcessors = [
     },
   },
   {
-    dot_expander: {
-      field: 'attributes',
-      ignore_failure: true,
-    },
-  },
-  {
-    dot_expander: {
-      field: 'body.structured',
-      ignore_failure: true,
-    },
-  },
-  {
-    dot_expander: {
-      field: 'resource.attributes',
-      ignore_failure: true,
-    },
-  },
-  {
-    dot_expander: {
-      field: 'scope.attributes',
-      ignore_failure: true,
+    script: {
+      lang: 'painless',
+      source: `
+        if (ctx.resource?.attributes != null) return;
+        ctx.resource = [:];
+        ctx.resource.attributes = [:];
+        if (ctx.host?.name != null) {
+          ctx.resource.attributes['host.name'] = ctx.host.name;
+          ctx.host.remove('name');
+        }
+        if (ctx['host.name'] != null) {
+          ctx.resource.attributes['host.name'] = ctx['host.name'];
+          ctx.remove('host.name');
+        }
+        if (ctx.message != null) {
+          ctx['body'] = ctx.message;
+          ctx.remove('message');
+        }
+        if (ctx.log?.level != null) {
+          ctx.severity_text = ctx.log.level;
+          ctx.log.remove('level');
+        }
+        ctx.attributes = [:];
+        def keysToRemove = [];
+        for (entry in ctx.entrySet()) {
+          if (entry.getKey() != '@timestamp' && entry.getKey() != 'resource' && !entry.getKey().startsWith('_') && entry.getKey() != 'severity_text' && entry.getKey() != 'attributes' && entry.getKey() != 'resource' && entry.getKey() != 'body') {
+            ctx.attributes[entry.getKey()] = entry.getValue();
+            keysToRemove.add(entry.getKey());
+          }
+        }
+        for (key in keysToRemove) {
+          ctx.remove(key);
+        }
+      `,
     },
   },
 ];
