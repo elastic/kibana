@@ -587,7 +587,11 @@ describe('autocomplete', () => {
     // STATS argument
     testSuggestions('FROM index1 | STATS f/', [
       'var0 = ',
-      ...getFunctionSignaturesByReturnType('stats', 'any', { scalar: true, agg: true }),
+      ...getFunctionSignaturesByReturnType('stats', 'any', {
+        scalar: true,
+        agg: true,
+        grouping: true,
+      }),
     ]);
 
     // STATS argument BY
@@ -942,9 +946,11 @@ describe('autocomplete', () => {
       'FROM a | STATS /',
       [
         'var0 = ',
-        ...getFunctionSignaturesByReturnType('stats', 'any', { scalar: true, agg: true }).map(
-          attachAsSnippet
-        ),
+        ...getFunctionSignaturesByReturnType('stats', 'any', {
+          scalar: true,
+          agg: true,
+          grouping: true,
+        }).map(attachAsSnippet),
       ].map(attachTriggerCommand)
     );
 

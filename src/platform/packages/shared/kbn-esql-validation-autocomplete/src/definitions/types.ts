@@ -8,7 +8,6 @@
  */
 
 import type {
-  ESQLAst,
   ESQLAstItem,
   ESQLCommand,
   ESQLCommandOption,
@@ -171,7 +170,7 @@ export interface Signature {
 }
 
 export interface FunctionDefinition {
-  type: 'builtin' | 'agg' | 'scalar' | 'operator';
+  type: 'builtin' | 'agg' | 'scalar' | 'operator' | 'grouping';
   preview?: boolean;
   ignoreAsSuggestion?: boolean;
   name: string;
@@ -241,7 +240,10 @@ export interface CommandSuggestParams<CommandName extends string> {
    * @returns
    */
   getRecommendedQueriesSuggestions: (prefix?: string) => Promise<SuggestionRawDefinition[]>;
-  fullTextAst?: ESQLAst;
+  /**
+   * The AST for the query behind the cursor.
+   */
+  previousCommands?: ESQLCommand[];
   callbacks?: ESQLCallbacks;
 }
 
@@ -259,6 +261,10 @@ export interface CommandBaseDefinition<CommandName extends string> {
 
   alias?: string;
   description: string;
+  /**
+   * Displays a Technical preview label in the autocomplete
+   */
+  preview?: boolean;
   /**
    * Whether to show or hide in autocomplete suggestion list
    */

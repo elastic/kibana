@@ -159,10 +159,6 @@ export async function suggest(
   const { ast } = await astProvider(correctedQuery);
   const astContext = getAstContext(innerText, ast, offset);
 
-  // But we also need the full ast for the full query
-  const correctedFullQuery = correctQuerySyntax(fullText, context);
-  const { ast: fullAst } = await astProvider(correctedFullQuery);
-
   if (astContext.type === 'comment') {
     return [];
   }
@@ -227,7 +223,6 @@ export async function suggest(
       getPolicies,
       getPolicyMetadata,
       resourceRetriever?.getPreferences,
-      fullAst,
       resourceRetriever
     );
   }
@@ -403,7 +398,6 @@ async function getSuggestionsWithinCommandExpression(
   getPolicies: GetPoliciesFn,
   getPolicyMetadata: GetPolicyMetadataFn,
   getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
-  fullAst?: ESQLAst,
   callbacks?: ESQLCallbacks
 ) {
   const commandDef = getCommandDefinition(command.name);
@@ -424,13 +418,13 @@ async function getSuggestionsWithinCommandExpression(
       getExpressionType: (expression: ESQLAstItem | undefined) =>
         getExpressionType(expression, references.fields, references.variables),
       getPreferences,
-      fullTextAst: fullAst,
       definition: commandDef,
-      callbacks,
       getSources,
       getRecommendedQueriesSuggestions: (prefix) =>
         getRecommendedQueriesSuggestions(getColumnsByType, prefix),
       getSourcesFromQuery: (type) => getSourcesFromCommands(commands, type),
+      previousCommands: commands,
+      callbacks,
     });
   } else {
     // The deprecated path.
@@ -1053,6 +1047,8 @@ async function getFunctionArgsSuggestions(
     } else {
       fnToIgnore.push(
         ...getFunctionsToIgnoreForStats(command, finalCommandArgIndex),
+        // ignore grouping functions, they are only used for grouping
+        ...getAllFunctions({ type: 'grouping' }).map(({ name }) => name),
         ...(isAggFunctionUsedAlready(command, finalCommandArgIndex)
           ? getAllFunctions({ type: 'agg' }).map(({ name }) => name)
           : [])
