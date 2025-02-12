@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EntityStoreEnablementModal } from './enablement_modal';
 import { TestProviders } from '../../../../common/mock';
@@ -82,8 +83,10 @@ const missingRiskEnginePrivileges: RiskEngineMissingPrivilegesResponse = {
   },
 };
 
-const renderComponent = (props = defaultProps) => {
-  return render(<EntityStoreEnablementModal {...props} />, { wrapper: TestProviders });
+const renderComponent = async (props = defaultProps) => {
+  await act(async () => {
+    return render(<EntityStoreEnablementModal {...props} />, { wrapper: TestProviders });
+  });
 };
 
 describe('EntityStoreEnablementModal', () => {
