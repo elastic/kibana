@@ -30,7 +30,9 @@ export const getServiceNameCell =
   (serviceNameField: string, { actions }: CellRenderersExtensionParams) =>
   (props: DataGridCellValueElementProps) => {
     const { core, share } = useDiscoverServices();
-    const serviceNameValue = getFieldValue(props.row, serviceNameField) as string;
+    const serviceNameValue = getFieldValue(props.row, serviceNameField);
+    const field = props.dataView.getFieldByName(serviceNameField);
+    const formatter = field && props.dataView.getFormatterForField(field);
     const agentName = getFieldValue(props.row, AGENT_NAME_FIELD) as AgentName;
 
     if (!serviceNameValue) {
@@ -47,7 +49,8 @@ export const getServiceNameCell =
       <ServiceNameBadgeWithActions
         onFilter={actions.addFilter}
         icon={getIcon}
-        value={serviceNameValue}
+        rawValue={serviceNameValue}
+        value={formatter?.convert(serviceNameValue, 'html', { field }) ?? `${serviceNameValue}`}
         property={serviceNameField}
         core={core}
         share={share}
