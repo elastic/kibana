@@ -539,6 +539,8 @@ export class TaskRunner<
 
       // Set rule monitoring data
       this.ruleMonitoring.setMonitoring(runRuleParams.rule.monitoring);
+
+      // Clear gap range that was persisted in the rule SO
       if (this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range) {
         this.ruleMonitoring.getLastRunMetricsSetters().setLastRunMetricsGapRange(null);
       }
@@ -629,6 +631,7 @@ export class TaskRunner<
               )} - ${JSON.stringify(lastRun)}`
             );
           }
+
           await this.updateRuleSavedObjectPostRun(ruleId, {
             executionStatus: ruleExecutionStatusToRaw(executionStatus),
             nextRun,

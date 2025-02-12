@@ -177,6 +177,9 @@ export function columnToOperation(
     interval: isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)
       ? column.params.interval
       : undefined,
+    hasArraySupport:
+      isColumnOfType<LastValueIndexPatternColumn>('last_value', column) &&
+      column.params.showArrayValues,
   };
 }
 
@@ -211,7 +214,7 @@ export function getFormBasedDatasource({
   dataViewFieldEditor: IndexPatternFieldEditorStart;
   uiActions: UiActionsStart;
 }) {
-  const { uiSettings } = core;
+  const { uiSettings, featureFlags } = core;
 
   const DATASOURCE_ID = 'formBased';
   const ALIAS_IDS = ['indexpattern'];
@@ -464,6 +467,7 @@ export function getFormBasedDatasource({
         layerId,
         indexPatterns,
         uiSettings,
+        featureFlags,
         dateRange,
         nowInstant,
         searchSessionId,

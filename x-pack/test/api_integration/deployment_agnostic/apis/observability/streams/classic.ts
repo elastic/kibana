@@ -53,6 +53,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(classicStream).to.eql({
         name: TEST_STREAM_NAME,
         ingest: {
+          lifecycle: { inherit: {} },
           processing: [],
           routing: [],
           unwired: {},
@@ -61,15 +62,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Allows setting processing on classic streams', async () => {
-      const putResponse = await apiClient.fetch('PUT /api/streams/{id}', {
+      const putResponse = await apiClient.fetch('PUT /api/streams/{name}', {
         params: {
           path: {
-            id: TEST_STREAM_NAME,
+            name: TEST_STREAM_NAME,
           },
           body: {
             dashboards: [],
             stream: {
               ingest: {
+                lifecycle: { inherit: {} },
                 routing: [],
                 processing: [
                   {
@@ -93,8 +95,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(putResponse.body).to.have.property('acknowledged', true);
 
-      const getResponse = await apiClient.fetch('GET /api/streams/{id}', {
-        params: { path: { id: TEST_STREAM_NAME } },
+      const getResponse = await apiClient.fetch('GET /api/streams/{name}', {
+        params: { path: { name: TEST_STREAM_NAME } },
       });
 
       expect(getResponse.status).to.eql(200);
@@ -111,7 +113,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(dashboards).to.eql([]);
 
       expect(stream).to.eql({
+        name: TEST_STREAM_NAME,
         ingest: {
+          lifecycle: { inherit: {} },
           processing: [
             {
               grok: {
@@ -180,13 +184,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Allows removing processing on classic streams', async () => {
-      const response = await apiClient.fetch('PUT /api/streams/{id}', {
+      const response = await apiClient.fetch('PUT /api/streams/{name}', {
         params: {
-          path: { id: TEST_STREAM_NAME },
+          path: { name: TEST_STREAM_NAME },
           body: {
             dashboards: [],
             stream: {
               ingest: {
+                lifecycle: { inherit: {} },
                 processing: [],
                 routing: [],
                 unwired: {},
@@ -218,10 +223,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Allows deleting classic streams', async () => {
-      const deleteStreamResponse = await apiClient.fetch('DELETE /api/streams/{id}', {
+      const deleteStreamResponse = await apiClient.fetch('DELETE /api/streams/{name}', {
         params: {
           path: {
-            id: TEST_STREAM_NAME,
+            name: TEST_STREAM_NAME,
           },
         },
       });

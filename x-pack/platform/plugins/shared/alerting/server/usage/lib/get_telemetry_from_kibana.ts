@@ -25,6 +25,7 @@ import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 import { groupRulesBySearchType } from './group_rules_by_search_type';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../common';
 import { MaintenanceWindowAttributes } from '../../data/maintenance_window/types';
+import { parseAndLogError } from './parse_and_log_error';
 
 interface Opts {
   esClient: ElasticsearchClient;
@@ -376,15 +377,8 @@ export async function getTotalCountAggregations({
       },
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
+    const errorMessage = parseAndLogError(err, `getTotalCountAggregations`, logger);
 
-    logger.warn(
-      `Error executing alerting telemetry task: getTotalCountAggregations - ${JSON.stringify(err)}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
-      }
-    );
     return {
       hasErrors: true,
       errorMessage,
@@ -491,14 +485,8 @@ export async function getTotalCountInUse({
       countNamespaces: aggregations.namespaces_count.value ?? 0,
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
-    logger.warn(
-      `Error executing alerting telemetry task: getTotalCountInUse - ${JSON.stringify(err)}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
-      }
-    );
+    const errorMessage = parseAndLogError(err, `getTotalCountInUse`, logger);
+
     return {
       hasErrors: true,
       errorMessage,
@@ -548,14 +536,8 @@ export async function getMWTelemetry({
       count_mw_with_filter_alert_toggle_on: countMWWithFilterAlertToggleON,
     };
   } catch (err) {
-    const errorMessage = err?.message ? err.message : err.toString();
-    logger.warn(
-      `Error executing alerting telemetry task: getTotalMWCount - ${JSON.stringify(err)}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err?.stack },
-      }
-    );
+    const errorMessage = parseAndLogError(err, `getTotalMWCount`, logger);
+
     return {
       hasErrors: true,
       errorMessage,

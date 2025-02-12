@@ -1056,6 +1056,19 @@ components:
       required:
         - connectorId
         - actionTypeId
+    BaseContentReference:
+      description: The basis of a content reference
+      type: object
+      properties:
+        id:
+          description: Id of the content reference
+          type: string
+        type:
+          description: Type of the content reference
+          type: string
+      required:
+        - id
+        - type
     BulkCrudActionSummary:
       type: object
       properties:
@@ -1127,6 +1140,17 @@ components:
         - user
         - assistant
       type: string
+    ContentReferences:
+      additionalProperties:
+        oneOf:
+          - $ref: '#/components/schemas/KnowledgeBaseEntryContentReference'
+          - $ref: '#/components/schemas/SecurityAlertContentReference'
+          - $ref: '#/components/schemas/SecurityAlertsPageContentReference'
+          - $ref: '#/components/schemas/ProductDocumentationContentReference'
+          - $ref: '#/components/schemas/EsqlContentReference'
+            additionalProperties: false
+      description: A union of all content reference types
+      type: object
     ConversationCategory:
       description: The conversation category.
       enum:
@@ -1375,6 +1399,26 @@ components:
           required:
             - id
         - $ref: '#/components/schemas/DocumentEntryCreateFields'
+    EsqlContentReference:
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          properties:
+            label:
+              description: Label of the query
+              type: string
+            query:
+              description: An ESQL query
+              type: string
+            type:
+              enum:
+                - EsqlQuery
+              type: string
+          required:
+            - type
+            - query
+            - label
+      description: References an ESQL query
     FindAnonymizationFieldsSortField:
       enum:
         - created_at
@@ -1620,6 +1664,26 @@ components:
         - skipped
         - succeeded
         - total
+    KnowledgeBaseEntryContentReference:
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          properties:
+            knowledgeBaseEntryId:
+              description: Id of the Knowledge Base Entry
+              type: string
+            knowledgeBaseEntryName:
+              description: Name of the knowledge base entry
+              type: string
+            type:
+              enum:
+                - KnowledgeBaseEntry
+              type: string
+          required:
+            - type
+            - knowledgeBaseEntryId
+            - knowledgeBaseEntryName
+      description: References a knowledge base entry
     KnowledgeBaseEntryCreateProps:
       anyOf:
         - $ref: '#/components/schemas/DocumentEntryCreateFields'
@@ -1678,6 +1742,9 @@ components:
         isError:
           description: Is error message.
           type: boolean
+        metadata:
+          $ref: '#/components/schemas/MessageMetadata'
+          description: metadata
         reader:
           $ref: '#/components/schemas/Reader'
           description: Message content.
@@ -1697,6 +1764,13 @@ components:
     MessageData:
       additionalProperties: true
       type: object
+    MessageMetadata:
+      description: Message metadata
+      type: object
+      properties:
+        contentReferences:
+          $ref: '#/components/schemas/ContentReferences'
+          description: Data refered to by the message content.
     MessageRole:
       description: Message role.
       enum:
@@ -1760,6 +1834,26 @@ components:
         - message
         - status_code
         - prompts
+    ProductDocumentationContentReference:
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          properties:
+            title:
+              description: Title of the documentation
+              type: string
+            type:
+              enum:
+                - ProductDocumentation
+              type: string
+            url:
+              description: URL to the documentation
+              type: string
+          required:
+            - type
+            - title
+            - url
+      description: References the product documentation
     PromptCreateProps:
       type: object
       properties:
@@ -1971,6 +2065,34 @@ components:
         - createdBy
         - updatedAt
         - updatedBy
+    SecurityAlertContentReference:
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          properties:
+            alertId:
+              description: ID of the Alert
+              type: string
+            type:
+              enum:
+                - SecurityAlert
+              type: string
+          required:
+            - type
+            - alertId
+      description: References a security alert
+    SecurityAlertsPageContentReference:
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          properties:
+            type:
+              enum:
+                - SecurityAlertsPage
+              type: string
+          required:
+            - type
+      description: References the security alerts page
     SortOrder:
       enum:
         - asc

@@ -277,7 +277,7 @@ export function getUiSettings(
       value: false,
       deprecation: {
         message: i18n.translate('data.advancedSettings.search.includeFrozenTextDeprecation', {
-          defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.0.',
+          defaultMessage: 'This setting is deprecated and will be removed in Kibana 9.1.',
         }),
         docLinksKey: 'kibanaSearchSettings',
       },

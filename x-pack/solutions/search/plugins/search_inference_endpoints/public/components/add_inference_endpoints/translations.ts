@@ -14,13 +14,6 @@ export const SAVE = i18n.translate(
   }
 );
 
-export const SAVE_TEST = i18n.translate(
-  'xpack.searchInferenceEndpoints.addInferenceEndpoint.saveAndTestBtnLabel',
-  {
-    defaultMessage: 'Save and test',
-  }
-);
-
 export const CANCEL = i18n.translate(
   'xpack.searchInferenceEndpoints.addInferenceEndpoint.cancelBtnLabel',
   {

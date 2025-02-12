@@ -59,7 +59,7 @@ import type { ArchiveIterator } from '../../../../common/types';
 
 import { airGappedUtils } from '../airgapped';
 
-import { fetchUrl, getResponse, getResponseStream } from './requests';
+import { fetchUrl, getResponse, getResponseStreamWithSize } from './requests';
 import { getRegistryUrl } from './registry_url';
 
 export const splitPkgKey = split;
@@ -495,7 +495,9 @@ export async function fetchArchiveBuffer({
   const registryUrl = getRegistryUrl();
   const archiveUrl = `${registryUrl}${archivePath}`;
   try {
-    const archiveBuffer = await getResponseStream(archiveUrl).then(streamToBuffer);
+    const archiveBuffer = await getResponseStreamWithSize(archiveUrl).then(({ stream, size }) =>
+      streamToBuffer(stream, size)
+    );
     if (!archiveBuffer) {
       logger.warn(`Archive Buffer not found`);
       throw new ArchiveNotFoundError('Archive Buffer not found');

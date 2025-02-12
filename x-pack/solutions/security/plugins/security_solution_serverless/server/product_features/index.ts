@@ -9,12 +9,13 @@ import type { Logger } from '@kbn/logging';
 
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
-import { getAttackDiscoveryProductFeaturesConfigurator } from './attack_discovery_product_features_config';
 import { getCasesProductFeaturesConfigurator } from './cases_product_features_config';
 import { getSecurityProductFeaturesConfigurator } from './security_product_features_config';
 import { getSecurityAssistantProductFeaturesConfigurator } from './assistant_product_features_config';
+import { getAttackDiscoveryProductFeaturesConfigurator } from './attack_discovery_product_features_config';
 import { getTimelineProductFeaturesConfigurator } from './timeline_product_features_config';
 import { getNotesProductFeaturesConfigurator } from './notes_product_features_config';
+import { getSiemMigrationsProductFeaturesConfigurator } from './siem_migrations_product_features_config';
 import { enableRuleActions } from '../rules/enable_rule_actions';
 import type { ServerlessSecurityConfig } from '../config';
 import type { Tier, SecuritySolutionServerlessPluginSetupDeps } from '../types';
@@ -35,15 +36,16 @@ export const registerProductFeatures = (
 
   // register product features for the main security solution product features service
   pluginsSetup.securitySolution.setProductFeaturesConfigurator({
-    attackDiscovery: getAttackDiscoveryProductFeaturesConfigurator(enabledProductFeatureKeys),
     security: getSecurityProductFeaturesConfigurator(
       enabledProductFeatureKeys,
       config.experimentalFeatures
     ),
     cases: getCasesProductFeaturesConfigurator(enabledProductFeatureKeys),
     securityAssistant: getSecurityAssistantProductFeaturesConfigurator(enabledProductFeatureKeys),
+    attackDiscovery: getAttackDiscoveryProductFeaturesConfigurator(enabledProductFeatureKeys),
     timeline: getTimelineProductFeaturesConfigurator(enabledProductFeatureKeys),
     notes: getNotesProductFeaturesConfigurator(enabledProductFeatureKeys),
+    siemMigrations: getSiemMigrationsProductFeaturesConfigurator(enabledProductFeatureKeys),
   });
 
   // enable rule actions based on the enabled product features
@@ -52,9 +54,9 @@ export const registerProductFeatures = (
     productFeatureKeys: enabledProductFeatureKeys,
   });
 
-  // set availability for the integration assistant plugin based on the product features
-  pluginsSetup.integrationAssistant?.setIsAvailable(
-    enabledProductFeatureKeys.includes(ProductFeatureKey.integrationAssistant)
+  // set availability for the automatic import plugin based on the product features
+  pluginsSetup.automaticImport?.setIsAvailable(
+    enabledProductFeatureKeys.includes(ProductFeatureKey.automaticImport)
   );
 };
 

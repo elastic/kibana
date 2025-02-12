@@ -15,7 +15,7 @@ const inferenceEndpoints = [
   {
     inference_id: 'my-elser-model-05',
     task_type: 'sparse_embedding',
-    service: 'elser',
+    service: 'elasticsearch',
     service_settings: {
       num_allocations: 1,
       num_threads: 1,
@@ -127,13 +127,21 @@ describe('When the tabular page is loaded', () => {
   it('should only disable delete action for preconfigured endpoints', () => {
     render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
 
-    const deleteActions = screen.getAllByTestId(/inferenceUIDeleteAction/);
+    screen.getAllByTestId('euiCollapsedItemActionsButton')[0].click();
 
-    expect(deleteActions[0]).toBeDisabled();
-    expect(deleteActions[1]).toBeDisabled();
-    expect(deleteActions[2]).toBeEnabled();
-    expect(deleteActions[3]).toBeEnabled();
-    expect(deleteActions[4]).toBeEnabled();
+    const deleteAction = screen.getByTestId(/inferenceUIDeleteAction/);
+
+    expect(deleteAction).toBeDisabled();
+  });
+
+  it('should not disable delete action for other endpoints', () => {
+    render(<TabularPage inferenceEndpoints={inferenceEndpoints} />);
+
+    screen.getAllByTestId('euiCollapsedItemActionsButton')[4].click();
+
+    const deleteAction = screen.getByTestId(/inferenceUIDeleteAction/);
+
+    expect(deleteAction).toBeEnabled();
   });
 
   it('should show preconfigured badge only for preconfigured endpoints', () => {

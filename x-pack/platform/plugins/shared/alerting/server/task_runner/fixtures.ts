@@ -100,6 +100,8 @@ export const generateRuleUpdateParams = ({
               metrics: {
                 duration: 0,
                 gap_duration_s: null,
+                // TODO: uncomment after intermidiate release
+                // gap_range: null,
                 total_alerts_created: null,
                 total_alerts_detected: null,
                 total_indexing_duration_ms: null,
@@ -379,6 +381,8 @@ export const generateRunnerResult = ({
           metrics: {
             duration: 0,
             gap_duration_s: null,
+            // TODO: uncomment after intermidiate release
+            // gap_range: null,
             total_alerts_created: null,
             total_alerts_detected: null,
             total_indexing_duration_ms: null,

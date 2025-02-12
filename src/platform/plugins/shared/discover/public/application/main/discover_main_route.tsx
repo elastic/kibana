@@ -40,7 +40,7 @@ import {
 } from '../../customizations';
 import { DiscoverStateContainer, LoadParams } from './state_management/discover_state';
 import { DataSourceType, isDataSourceType } from '../../../common/data_sources';
-import { useRootProfile } from '../../context_awareness';
+import { useDefaultAdHocDataViews, useRootProfile } from '../../context_awareness';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -133,21 +133,30 @@ export function DiscoverMainRoute({
           stateContainer.actions.loadDataViewList(),
         ]);
 
-        if (!hasUserDataViewValue || !defaultDataViewExists) {
-          setNoDataState({
-            showNoDataPage: true,
-            hasESData: hasESDataValue,
-            hasUserDataView: hasUserDataViewValue,
-          });
-          return false;
+        const persistedDataViewsExist = hasUserDataViewValue && defaultDataViewExists;
+        const adHocDataViewsExist =
+          stateContainer.internalState.getState().adHocDataViews.length > 0;
+        const locationStateHasDataViewSpec = Boolean(historyLocationState?.dataViewSpec);
+        const canAccessWithAdHocDataViews =
+          hasESDataValue && (adHocDataViewsExist || locationStateHasDataViewSpec);
+
+        if (persistedDataViewsExist || canAccessWithAdHocDataViews) {
+          return true;
         }
-        return true;
+
+        setNoDataState({
+          showNoDataPage: true,
+          hasESData: hasESDataValue,
+          hasUserDataView: hasUserDataViewValue,
+        });
+
+        return false;
       } catch (e) {
         setError(e);
         return false;
       }
     },
-    [data.dataViews, savedSearchId, stateContainer]
+    [data.dataViews, historyLocationState?.dataViewSpec, savedSearchId, stateContainer]
   );
 
   const loadSavedSearch = useCallback(
@@ -227,22 +236,45 @@ export function DiscoverMainRoute({
     ]
   );
 
+  const rootProfileState = useRootProfile();
+  const { initializeProfileDataViews } = useDefaultAdHocDataViews({
+    stateContainer,
+    rootProfileState,
+  });
+
   useEffect(() => {
-    if (!isCustomizationServiceInitialized) return;
-    setLoading(true);
-    setNoDataState({
-      hasESData: false,
-      hasUserDataView: false,
-      showNoDataPage: false,
-    });
-    setError(undefined);
-    if (savedSearchId) {
-      loadSavedSearch();
-    } else {
-      // restore the previously selected data view for a new state (when a saved search was open)
-      loadSavedSearch(getLoadParamsForNewSearch(stateContainer));
+    if (!isCustomizationServiceInitialized || rootProfileState.rootProfileLoading) {
+      return;
     }
-  }, [isCustomizationServiceInitialized, loadSavedSearch, savedSearchId, stateContainer]);
+
+    const load = async () => {
+      setLoading(true);
+      setNoDataState({
+        hasESData: false,
+        hasUserDataView: false,
+        showNoDataPage: false,
+      });
+      setError(undefined);
+
+      await initializeProfileDataViews();
+
+      if (savedSearchId) {
+        await loadSavedSearch();
+      } else {
+        // restore the previously selected data view for a new state (when a saved search was open)
+        await loadSavedSearch(getLoadParamsForNewSearch(stateContainer));
+      }
+    };
+
+    load();
+  }, [
+    initializeProfileDataViews,
+    isCustomizationServiceInitialized,
+    loadSavedSearch,
+    rootProfileState.rootProfileLoading,
+    savedSearchId,
+    stateContainer,
+  ]);
 
   // secondary fetch: in case URL is set to `/`, used to reset to 'new' state, keeping the current data view
   useUrl({
@@ -338,8 +370,6 @@ export function DiscoverMainRoute({
     noDataState.showNoDataPage,
     stateContainer,
   ]);
-
-  const rootProfileState = useRootProfile();
 
   if (error) {
     return <DiscoverError error={error} />;

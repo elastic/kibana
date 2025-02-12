@@ -99,7 +99,8 @@ export const AssistantBody: FunctionComponent<Props> = ({
     (
       commentsContainerRef.current?.childNodes[0].childNodes[0] as HTMLElement
     ).lastElementChild?.scrollIntoView();
-  });
+    // currentConversation is required in the dependency array to keep the scroll at the bottom.
+  }, [currentConversation]);
   //  End Scrolling
 
   if (!isAssistantEnabled) {

@@ -123,6 +123,7 @@ const previouslyRegisteredTypes = [
   'search',
   'search-session',
   'search-telemetry',
+  'security-ai-prompt',
   'security-rule',
   'security-solution-signals-migration',
   'risk-engine-configuration',

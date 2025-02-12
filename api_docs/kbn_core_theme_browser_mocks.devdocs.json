@@ -14,7 +14,7 @@
         "tags": [],
         "label": "themeServiceMock",
         "description": [],
-        "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+        "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,7 +28,7 @@
             "signature": [
               "() => jest.Mocked<ThemeServiceContract>"
             ],
-            "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+            "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -48,7 +48,7 @@
               "ThemeServiceSetup",
               ">"
             ],
-            "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+            "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -63,7 +63,7 @@
                 "signature": [
                   "CoreTheme"
                 ],
-                "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+                "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -83,7 +83,7 @@
               "ThemeServiceSetup",
               ">"
             ],
-            "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+            "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -98,7 +98,7 @@
                 "signature": [
                   "CoreTheme"
                 ],
-                "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+                "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -115,7 +115,7 @@
               "() => ",
               "CoreTheme"
             ],
-            "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+            "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -137,7 +137,7 @@
               "CoreTheme",
               ">"
             ],
-            "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+            "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -152,7 +152,7 @@
                 "signature": [
                   "CoreTheme"
                 ],
-                "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+                "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

@@ -10,6 +10,7 @@ import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import {
   UPGRADE_INVESTIGATION_GUIDE,
   UPGRADE_INVESTIGATION_GUIDE_INTERACTIONS,
+  UPGRADE_PREBUILT_RULE_CUSTOMIZATION,
 } from '@kbn/security-solution-upselling/messages';
 import type {
   UpsellingMessageId,
@@ -34,7 +35,7 @@ import {
   ThreatIntelligencePaywallLazy,
 } from './lazy_upselling';
 import * as i18n from './translations';
-import { IntegrationsAssistantLazy } from './sections/integration_assistant';
+import { AutomaticImportLazy } from './sections/automatic_import';
 
 interface UpsellingsConfig {
   pli: ProductFeatureKeyType;
@@ -140,11 +141,9 @@ export const upsellingSections: UpsellingSections = [
     ),
   },
   {
-    id: 'integration_assistant',
-    pli: ProductFeatureKey.integrationAssistant,
-    component: () => (
-      <IntegrationsAssistantLazy requiredPLI={ProductFeatureKey.integrationAssistant} />
-    ),
+    id: 'automatic_import',
+    pli: ProductFeatureKey.automaticImport,
+    component: () => <AutomaticImportLazy requiredPLI={ProductFeatureKey.automaticImport} />,
   },
 ];
 
@@ -162,6 +161,13 @@ export const upsellingMessages: UpsellingMessages = [
     pli: ProductFeatureKey.investigationGuideInteractions,
     message: UPGRADE_INVESTIGATION_GUIDE_INTERACTIONS(
       getProductTypeByPLI(ProductFeatureKey.investigationGuideInteractions) ?? ''
+    ),
+  },
+  {
+    id: 'prebuilt_rule_customization',
+    pli: ProductFeatureKey.prebuiltRuleCustomization,
+    message: UPGRADE_PREBUILT_RULE_CUSTOMIZATION(
+      getProductTypeByPLI(ProductFeatureKey.prebuiltRuleCustomization) ?? ''
     ),
   },
 ];

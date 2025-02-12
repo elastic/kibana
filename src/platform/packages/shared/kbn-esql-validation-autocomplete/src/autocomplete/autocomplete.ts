@@ -81,7 +81,7 @@ import {
   getOperatorSuggestions,
   getSuggestionsAfterNot,
 } from './factories';
-import { EDITOR_MARKER, METADATA_FIELDS } from '../shared/constants';
+import { EDITOR_MARKER, FULL_TEXT_SEARCH_FUNCTIONS, METADATA_FIELDS } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
 import {
   buildQueryUntilPreviousCommand,
@@ -1229,10 +1229,12 @@ async function getFunctionArgsSuggestions(
         }))
       );
     }
+
     // could also be in stats (bucket) but our autocomplete is not great yet
     if (
       (getTypesFromParamDefs(typesToSuggestNext).includes('date') &&
-        ['where', 'eval'].includes(command.name)) ||
+        ['where', 'eval'].includes(command.name) &&
+        !FULL_TEXT_SEARCH_FUNCTIONS.includes(fnDefinition.name)) ||
       (command.name === 'stats' &&
         typesToSuggestNext.some((t) => t && t.type === 'date' && t.constantOnly === true))
     )

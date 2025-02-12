@@ -33185,16 +33185,16 @@
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.CidrMaskIpRangeAggKey",
-            "text": "CidrMaskIpRangeAggKey"
+            "section": "def-common.RangeIpRangeAggKey",
+            "text": "RangeIpRangeAggKey"
           },
           " | ",
           {
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.RangeIpRangeAggKey",
-            "text": "RangeIpRangeAggKey"
+            "section": "def-common.CidrMaskIpRangeAggKey",
+            "text": "CidrMaskIpRangeAggKey"
           }
         ],
         "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/lib/ip_range.ts",

@@ -31,13 +31,13 @@ import type {
   BulkManualRuleRun,
   CoverageOverviewResponse,
   GetRuleManagementFiltersResponse,
+  BulkActionsDryRunErrCode,
 } from '../../../../common/api/detection_engine/rule_management';
 import {
   RULE_MANAGEMENT_FILTERS_URL,
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
   BulkActionTypeEnum,
 } from '../../../../common/api/detection_engine/rule_management';
-import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_IMPORT_URL,
@@ -187,6 +187,7 @@ export const fetchRules = async ({
     page: 1,
     perPage: 20,
   },
+  gapsRange,
   signal,
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
   const kql = convertRulesFilterToKQL(filterOptions);
@@ -196,6 +197,7 @@ export const fetchRules = async ({
     per_page: pagination.perPage,
     sort_field: sortingOptions.field,
     sort_order: sortingOptions.order,
+    ...(gapsRange ? { gaps_range_start: gapsRange.start, gaps_range_end: gapsRange.end } : {}),
     ...(kql !== '' ? { filter: kql } : {}),
   };
 

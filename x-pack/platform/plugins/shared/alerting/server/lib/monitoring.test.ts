@@ -107,6 +107,8 @@ describe('resetMonitoringLastRun', () => {
       total_alerts_detected: null,
       total_alerts_created: null,
       gap_duration_s: null,
+      // TODO: uncomment after intermidiate release
+      // gap_range: null,
     });
   });
 

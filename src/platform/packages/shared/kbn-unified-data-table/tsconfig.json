@@ -42,6 +42,8 @@
     "@kbn/unified-field-list",
     "@kbn/core-notifications-browser",
     "@kbn/core-capabilities-browser-mocks",
-    "@kbn/sort-predicates"
+    "@kbn/sort-predicates",
+    "@kbn/data-grid-in-table-search",
+    "@kbn/data-view-utils",
   ]
 }

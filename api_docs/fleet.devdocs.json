@@ -794,18 +794,18 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-public.FleetStartServices.integrationAssistant",
+            "id": "def-public.FleetStartServices.automaticImport",
             "type": "Object",
             "tags": [],
-            "label": "integrationAssistant",
+            "label": "automaticImport",
             "description": [],
             "signature": [
               {
-                "pluginId": "integrationAssistant",
+                "pluginId": "automaticImport",
                 "scope": "public",
-                "docId": "kibIntegrationAssistantPluginApi",
-                "section": "def-public.IntegrationAssistantPluginStart",
-                "text": "IntegrationAssistantPluginStart"
+                "docId": "kibAutomaticImportPluginApi",
+                "section": "def-public.AutomaticImportPluginStart",
+                "text": "AutomaticImportPluginStart"
               },
               " | undefined"
             ],
@@ -21591,6 +21591,20 @@
         },
         {
           "parentPluginId": "fleet",
+          "id": "def-server.FleetStartContract.agentless",
+          "type": "Object",
+          "tags": [],
+          "label": "agentless",
+          "description": [],
+          "signature": [
+            "{ enabled: boolean; }"
+          ],
+          "path": "x-pack/platform/plugins/shared/fleet/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "fleet",
           "id": "def-server.FleetStartContract.authz",
           "type": "Object",
           "tags": [],
@@ -28426,6 +28440,21 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.RegistryInput.RegistryInputKeys.required_vars",
+            "type": "Object",
+            "tags": [],
+            "label": "[RegistryInputKeys.required_vars]",
+            "description": [],
+            "signature": [
+              "RegistryRequiredVars",
+              " | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.RegistryInput.RegistryInputKeys.vars",
             "type": "Array",
             "tags": [],
@@ -28504,6 +28533,21 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryStream.RegistryStreamKeys.required_vars",
+            "type": "Object",
+            "tags": [],
+            "label": "[RegistryStreamKeys.required_vars]",
+            "description": [],
+            "signature": [
+              "RegistryRequiredVars",
+              " | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -29387,7 +29431,7 @@
         "label": "DisplayedAssetTypes",
         "description": [],
         "signature": [
-          "(\"search\" | \"map\" | \"index\" | \"transform\" | \"tag\" | \"dashboard\" | \"index-pattern\" | \"ingest_pipeline\" | \"lens\" | \"visualization\" | \"ml-module\" | \"security-rule\" | \"csp-rule-template\" | \"osquery-pack-asset\" | \"osquery-saved-query\" | \"index_template\" | \"component_template\" | \"ilm_policy\" | \"data_stream_ilm_policy\" | \"ml_model\")[]"
+          "(\"search\" | \"map\" | \"index\" | \"transform\" | \"tag\" | \"dashboard\" | \"index-pattern\" | \"ingest_pipeline\" | \"lens\" | \"visualization\" | \"ml-module\" | \"security-ai-prompt\" | \"security-rule\" | \"csp-rule-template\" | \"osquery-pack-asset\" | \"osquery-saved-query\" | \"index_template\" | \"component_template\" | \"ilm_policy\" | \"data_stream_ilm_policy\" | \"ml_model\")[]"
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
         "deprecated": false,
@@ -30131,6 +30175,14 @@
             "text": "KibanaAssetParts"
           },
           "[]; ml_module: ",
+          {
+            "pluginId": "fleet",
+            "scope": "common",
+            "docId": "kibFleetPluginApi",
+            "section": "def-common.KibanaAssetParts",
+            "text": "KibanaAssetParts"
+          },
+          "[]; security_ai_prompt: ",
           {
             "pluginId": "fleet",
             "scope": "common",

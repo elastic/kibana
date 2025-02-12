@@ -224,7 +224,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             <AddConnectorModal
               actionTypeRegistry={actionTypeRegistry}
               actionTypes={actionTypes}
-              onClose={() => setIsConnectorModalVisible(false)}
+              onClose={cleanupAndCloseModal}
               onSaveConnector={onSaveConnector}
               onSelectActionType={(actionType: ActionType) => setSelectedActionType(actionType)}
               selectedActionType={selectedActionType}

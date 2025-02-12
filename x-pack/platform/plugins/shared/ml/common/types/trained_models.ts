@@ -324,6 +324,10 @@ interface BaseModelItem {
    * Indices with associated pipelines that have inference processors utilizing the model deployments.
    */
   indices?: string[];
+  /**
+   * Spaces associated with the model
+   */
+  spaces?: string[];
 }
 
 /** Common properties for existing NLP models and NLP model download configs */

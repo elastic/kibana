@@ -10,3 +10,4 @@
 export { useProfileAccessor } from './use_profile_accessor';
 export { useRootProfile, BaseAppWrapper } from './use_root_profile';
 export { useAdditionalCellActions } from './use_additional_cell_actions';
+export { useDefaultAdHocDataViews } from './use_default_ad_hoc_data_views';

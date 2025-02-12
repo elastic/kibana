@@ -4283,7 +4283,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       },
       secret_value: {
         default_value: null,
-        depends_on: [],
+        depends_on: [{ field: 'auth_method', value: 'secret' }],
         display: TEXTBOX,
         label: translate(
           'searchConnectors.nativeConnectors.sharepoint_online.configuration.secretValueLabel',

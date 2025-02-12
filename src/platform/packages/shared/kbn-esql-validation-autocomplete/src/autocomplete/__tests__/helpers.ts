@@ -48,13 +48,21 @@ export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
 
 export const triggerCharacters = [',', '(', '=', ' '];
 
-export const fields: Array<ESQLRealField & { suggestedAs?: string }> = [
+export type TestField = ESQLRealField & { suggestedAs?: string };
+
+export const fields: TestField[] = [
   ...fieldTypes.map((type) => ({
     name: `${camelCase(type)}Field`,
     type,
   })),
   { name: 'any#Char$Field', type: 'double', suggestedAs: '`any#Char$Field`' },
   { name: 'kubernetes.something.something', type: 'double' },
+];
+
+export const lookupIndexFields: TestField[] = [
+  { name: 'booleanField', type: 'boolean' },
+  { name: 'dateField', type: 'date' },
+  { name: 'joinIndexOnlyField', type: 'text' },
 ];
 
 export const indexes = (
@@ -279,7 +287,13 @@ export function createCustomCallbackMocks(
   const finalSources = customSources || indexes;
   const finalPolicies = customPolicies || policies;
   return {
-    getColumnsFor: jest.fn(async () => finalColumnsSinceLastCommand),
+    getColumnsFor: jest.fn(async ({ query }) => {
+      if (query === 'FROM join_index') {
+        return lookupIndexFields;
+      }
+
+      return finalColumnsSinceLastCommand;
+    }),
     getSources: jest.fn(async () => finalSources),
     getPolicies: jest.fn(async () => finalPolicies),
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),

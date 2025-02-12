@@ -8,12 +8,12 @@
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { PrebuiltRulesCustomizationDisabledReason } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type {
   RuleFieldsToUpgrade,
   RuleUpgradeSpecifier,
 } from '../../../../../../common/api/detection_engine';
-import { useIsPrebuiltRulesCustomizationEnabled } from '../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled';
-import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { RuleUpgradeTab } from '../../../../rule_management/components/rule_details/three_way_diff';
 import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
@@ -38,6 +38,7 @@ import { RuleTypeChangeCallout } from './rule_type_change_callout';
 import { UpgradeFlyoutSubHeader } from './upgrade_flyout_subheader';
 import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations';
 import * as i18n from './translations';
+import { CustomizationDisabledCallout } from './customization_disabled_callout';
 
 const REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL = 5 * 60 * 1000;
 
@@ -83,10 +84,6 @@ export interface UpgradePrebuiltRulesTableState {
    * The timestamp for when the rules were successfully fetched
    */
   lastUpdated: number;
-  /**
-   * Feature Flag to enable prebuilt rules customization
-   */
-  isPrebuiltRulesCustomizationEnabled: boolean;
 }
 
 export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
@@ -122,15 +119,14 @@ interface UpgradePrebuiltRulesTableContextProviderProps {
 export const UpgradePrebuiltRulesTableContextProvider = ({
   children,
 }: UpgradePrebuiltRulesTableContextProviderProps) => {
-  const isPrebuiltRulesCustomizationEnabled = useIsPrebuiltRulesCustomizationEnabled();
+  const { isRulesCustomizationEnabled, customizationDisabledReason } =
+    usePrebuiltRulesCustomizationStatus();
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const [filterOptions, setFilterOptions] = useState<UpgradePrebuiltRulesTableFilterOptions>({
     filter: '',
     tags: [],
     ruleSource: [],
   });
-  const { addError } = useAppToasts();
-
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
   const {
@@ -197,21 +193,15 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
           pickVersion: 'MERGED',
           rules: ruleUpgradeSpecifiers,
         });
-      } catch (err) {
-        addError(err, { title: i18n.UPDATE_ERROR });
+      } catch {
+        // Error is handled by the mutation's onError callback, so no need to do anything here
       } finally {
         const upgradedRuleIdsSet = new Set(upgradingRuleIds);
 
         setLoadingRules((prev) => prev.filter((id) => !upgradedRuleIdsSet.has(id)));
       }
     },
-    [
-      confirmLegacyMLJobs,
-      confirmConflictsUpgrade,
-      rulesUpgradeState,
-      upgradeSpecificRulesRequest,
-      addError,
-    ]
+    [confirmLegacyMLJobs, confirmConflictsUpgrade, rulesUpgradeState, upgradeSpecificRulesRequest]
   );
 
   const upgradeRulesToTarget = useCallback(
@@ -234,26 +224,26 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
           pickVersion: 'TARGET',
           rules: ruleUpgradeSpecifiers,
         });
-      } catch (err) {
-        addError(err, { title: i18n.UPDATE_ERROR });
+      } catch {
+        // Error is handled by the mutation's onError callback, so no need to do anything here
       } finally {
         const upgradedRuleIdsSet = new Set(ruleIds);
 
         setLoadingRules((prev) => prev.filter((id) => !upgradedRuleIdsSet.has(id)));
       }
     },
-    [confirmLegacyMLJobs, rulesUpgradeState, upgradeSpecificRulesRequest, addError]
+    [confirmLegacyMLJobs, rulesUpgradeState, upgradeSpecificRulesRequest]
   );
 
   const upgradeRules = useCallback(
     async (ruleIds: RuleSignatureId[]) => {
-      if (isPrebuiltRulesCustomizationEnabled) {
+      if (isRulesCustomizationEnabled) {
         await upgradeRulesToResolved(ruleIds);
       } else {
         await upgradeRulesToTarget(ruleIds);
       }
     },
-    [isPrebuiltRulesCustomizationEnabled, upgradeRulesToResolved, upgradeRulesToTarget]
+    [isRulesCustomizationEnabled, upgradeRulesToResolved, upgradeRulesToTarget]
   );
 
   const upgradeAllRules = useCallback(
@@ -270,7 +260,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     [rulesUpgradeState]
   );
   const ruleActionsFactory = useCallback(
-    (rule: RuleResponse, closeRulePreview: () => void) => {
+    (rule: RuleResponse, closeRulePreview: () => void, isEditingRule: boolean) => {
       const ruleUpgradeState = rulesUpgradeState[rule.rule_id];
       if (!ruleUpgradeState) {
         return null;
@@ -283,10 +273,11 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
             loadingRules.includes(rule.rule_id) ||
             isRefetching ||
             isUpgradingSecurityPackages ||
-            (ruleUpgradeState.hasUnresolvedConflicts && !hasRuleTypeChange)
+            (ruleUpgradeState.hasUnresolvedConflicts && !hasRuleTypeChange) ||
+            isEditingRule
           }
           onClick={() => {
-            if (hasRuleTypeChange) {
+            if (hasRuleTypeChange || isRulesCustomizationEnabled === false) {
               // If there is a rule type change, we can't resolve conflicts, only accept the target rule
               upgradeRulesToTarget([rule.rule_id]);
             } else {
@@ -306,6 +297,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       loadingRules,
       isRefetching,
       isUpgradingSecurityPackages,
+      isRulesCustomizationEnabled,
       upgradeRulesToTarget,
       upgradeRulesToResolved,
     ]
@@ -322,24 +314,25 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       const hasCustomizations =
         ruleUpgradeState.current_rule.rule_source.type === 'external' &&
         ruleUpgradeState.current_rule.rule_source.is_customized;
-      const shouldShowRuleTypeChangeCallout =
-        hasRuleTypeChange && isPrebuiltRulesCustomizationEnabled;
+
+      let headerCallout = null;
+      if (
+        hasCustomizations &&
+        customizationDisabledReason === PrebuiltRulesCustomizationDisabledReason.License
+      ) {
+        headerCallout = <CustomizationDisabledCallout />;
+      } else if (hasRuleTypeChange && isRulesCustomizationEnabled) {
+        headerCallout = <RuleTypeChangeCallout hasCustomizations={hasCustomizations} />;
+      }
 
       let updateTabContent = (
-        <PerFieldRuleDiffTab
-          header={
-            shouldShowRuleTypeChangeCallout && (
-              <RuleTypeChangeCallout hasCustomizations={hasCustomizations} />
-            )
-          }
-          ruleDiff={ruleUpgradeState.diff}
-        />
+        <PerFieldRuleDiffTab header={headerCallout} ruleDiff={ruleUpgradeState.diff} />
       );
 
       // Show the resolver tab only if rule customization is enabled and there
       // is no rule type change. In case of rule type change users can't resolve
       // conflicts, only accept the target rule.
-      if (isPrebuiltRulesCustomizationEnabled && !hasRuleTypeChange) {
+      if (isRulesCustomizationEnabled && !hasRuleTypeChange) {
         updateTabContent = (
           <RuleUpgradeTab
             ruleUpgradeState={ruleUpgradeState}
@@ -377,7 +370,12 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
 
       return [updatesTab, jsonViewTab];
     },
-    [rulesUpgradeState, setRuleFieldResolvedValue, isPrebuiltRulesCustomizationEnabled]
+    [
+      rulesUpgradeState,
+      customizationDisabledReason,
+      isRulesCustomizationEnabled,
+      setRuleFieldResolvedValue,
+    ]
   );
   const filteredRules = useMemo(
     () => filteredRuleUpgradeStates.map(({ target_rule: targetRule }) => targetRule),
@@ -418,7 +416,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         isUpgradingSecurityPackages,
         loadingRules,
         lastUpdated: dataUpdatedAt,
-        isPrebuiltRulesCustomizationEnabled,
       },
       actions,
     }),
@@ -435,7 +432,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       loadingRules,
       dataUpdatedAt,
       actions,
-      isPrebuiltRulesCustomizationEnabled,
     ]
   );
 

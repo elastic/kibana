@@ -22,7 +22,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { SloSelector } from '../alerts/slo_selector';
 import type { EmbeddableProps } from './types';
@@ -76,7 +75,7 @@ export function Configuration({ onCreate, onCancel }: Props) {
               onSelected={(slo) => {
                 setHasError(slo === undefined);
                 if (slo && 'id' in slo) {
-                  setSelectedSlo({ sloId: slo.id, sloInstanceId: slo.instanceId ?? ALL_VALUE });
+                  setSelectedSlo({ sloId: slo.id, sloInstanceId: slo.instanceId });
                 }
               }}
             />

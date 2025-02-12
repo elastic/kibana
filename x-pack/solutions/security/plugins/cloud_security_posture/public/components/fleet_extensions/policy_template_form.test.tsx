@@ -41,7 +41,6 @@ import { useParams } from 'react-router-dom';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import {
   AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
   AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
@@ -51,7 +50,6 @@ import {
   CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS,
   CIS_GCP_OPTION_TEST_SUBJ,
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
-  SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ,
   SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
   SUBSCRIPTION_NOT_ALLOWED_TEST_SUBJECT,
 } from '../test_subjects';
@@ -1171,7 +1169,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         credentials_type: { value: 'credentials-file' },
-        setup_access: { value: 'manual' },
       });
 
       const { getByText } = render(
@@ -1193,7 +1190,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         credentials_type: { value: 'credentials-file' },
-        setup_access: { value: 'manual' },
       });
 
       const { getByText } = render(
@@ -1210,7 +1206,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-        setup_access: { value: 'google_cloud_shell' },
       });
 
       const { getByTestId } = render(
@@ -1230,7 +1225,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.credentials.type': { value: 'credentials-file' },
-        setup_access: { value: 'manual' },
       });
 
       const { getByLabelText, getByRole } = render(
@@ -1249,7 +1243,6 @@ describe('<CspPolicyTemplateForm />', () => {
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.project_id': { value: 'a' },
         'gcp.credentials.type': { value: 'credentials-file' },
-        setup_access: { value: 'manual' },
       });
 
       const { getByTestId } = render(
@@ -1291,7 +1284,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-        setup_access: { value: 'google_cloud_shell' },
       });
 
       const { getByLabelText, getByTestId } = render(
@@ -1307,7 +1299,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-        setup_access: { value: 'manual' },
       });
 
       const { getByLabelText, getByTestId } = render(
@@ -1323,7 +1314,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_SINGLE_ACCOUNT },
-        setup_access: { value: 'google_cloud_shell' },
       });
 
       const { queryByLabelText, queryByTestId } = render(
@@ -1339,7 +1329,6 @@ describe('<CspPolicyTemplateForm />', () => {
       let policy = getMockPolicyGCP();
       policy = getPosturePolicy(policy, CLOUDBEAT_GCP, {
         'gcp.account_type': { value: GCP_ORGANIZATION_ACCOUNT },
-        setup_access: { value: 'manual' },
       });
 
       const { getByTestId } = render(
@@ -1505,17 +1494,12 @@ describe('<CspPolicyTemplateForm />', () => {
     it('should render setup technology selector for AWS and allow to select agentless', async () => {
       const newPackagePolicy = getMockPolicyAWS();
 
-      const { getByTestId, getByRole } = render(
+      const { getByTestId, getByLabelText } = render(
         <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={true} />
-      );
-
-      const setupTechnologySelectorAccordion = getByTestId(
-        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
       );
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
 
       // default state
-      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
 
@@ -1526,8 +1510,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       // select agent-based and check for cloudformation option
       await userEvent.click(setupTechnologySelector);
-      const agentlessOption = getByRole('option', { name: /agentless/i });
-      await waitForEuiPopoverOpen();
+      const agentlessOption = getByLabelText(/agentless/i);
       await userEvent.click(agentlessOption);
 
       const awsCredentialsTypeSelector = getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
@@ -1547,7 +1530,7 @@ describe('<CspPolicyTemplateForm />', () => {
     it.skip('should render setup technology selector for GCP for organisation account type', async () => {
       const newPackagePolicy = getMockPolicyGCP();
 
-      const { getByTestId, queryByTestId, getByRole } = render(
+      const { getByTestId, queryByTestId, getByLabelText } = render(
         <WrappedComponent
           newPolicy={newPackagePolicy}
           isAgentlessEnabled={true}
@@ -1559,9 +1542,6 @@ describe('<CspPolicyTemplateForm />', () => {
       const gcpSelectorButton = getByTestId(CIS_GCP_OPTION_TEST_SUBJ);
       await userEvent.click(gcpSelectorButton);
 
-      const setupTechnologySelectorAccordion = queryByTestId(
-        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
-      );
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
       const orgIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID);
       const projectIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
@@ -1576,7 +1556,6 @@ describe('<CspPolicyTemplateForm />', () => {
       );
 
       // default state for GCP with the Org selected
-      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
       expect(orgIdField).toBeInTheDocument();
@@ -1587,8 +1566,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       // select agent-based and check for Cloud Shell option
       await userEvent.click(setupTechnologySelector);
-      const agentBasedOption = getByRole('option', { name: /agent-based/i });
-      await waitForEuiPopoverOpen();
+      const agentBasedOption = getByLabelText(/agent-based/i);
       await userEvent.click(agentBasedOption);
       await waitFor(() => {
         expect(getByTestId(GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ.CLOUD_SHELL)).toBeInTheDocument();
@@ -1613,9 +1591,6 @@ describe('<CspPolicyTemplateForm />', () => {
       const gcpSelectorButton = getByTestId(CIS_GCP_OPTION_TEST_SUBJ);
       await userEvent.click(gcpSelectorButton);
 
-      const setupTechnologySelectorAccordion = queryByTestId(
-        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
-      );
       const setupTechnologySelector = queryByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
       const orgIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID);
       const projectIdField = queryByTestId(CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID);
@@ -1630,7 +1605,6 @@ describe('<CspPolicyTemplateForm />', () => {
       );
 
       // default state for GCP with the Org selected
-      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
       expect(orgIdField).not.toBeInTheDocument();
@@ -1643,7 +1617,7 @@ describe('<CspPolicyTemplateForm />', () => {
     it('should render setup technology selector for Azure for Organisation type', async () => {
       const newPackagePolicy = getMockPolicyAzure();
 
-      const { getByTestId, queryByTestId, getByRole } = render(
+      const { getByTestId, queryByTestId, getByLabelText } = render(
         <WrappedComponent
           newPolicy={newPackagePolicy}
           isAgentlessEnabled={true}
@@ -1655,13 +1629,9 @@ describe('<CspPolicyTemplateForm />', () => {
       const azureSelectorButton = getByTestId(CIS_AZURE_OPTION_TEST_SUBJ);
       await userEvent.click(azureSelectorButton);
 
-      const setupTechnologySelectorAccordion = queryByTestId(
-        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
-      );
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
 
       // default state for Azure with the Org selected
-      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agent-based/i);
       await waitFor(() => {
@@ -1671,8 +1641,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       // select agent-based and check for ARM template option
       await userEvent.click(setupTechnologySelector);
-      const agentlessOption = getByRole('option', { name: /agentless/i });
-      await waitForEuiPopoverOpen();
+      const agentlessOption = getByLabelText(/agentless/i);
       await userEvent.click(agentlessOption);
 
       const tenantIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
@@ -1681,7 +1650,6 @@ describe('<CspPolicyTemplateForm />', () => {
       const armTemplateSelector = queryByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
       const manualSelector = queryByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
 
-      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
       expect(tenantIdField).toBeInTheDocument();
@@ -1696,7 +1664,7 @@ describe('<CspPolicyTemplateForm />', () => {
         'azure.account_type': { value: 'single-account', type: 'text' },
       });
 
-      const { getByTestId, queryByTestId, getByRole } = render(
+      const { getByTestId, queryByTestId, getByLabelText } = render(
         <WrappedComponent
           newPolicy={newPackagePolicy}
           isAgentlessEnabled={true}
@@ -1708,15 +1676,11 @@ describe('<CspPolicyTemplateForm />', () => {
       const azureSelectorButton = getByTestId(CIS_AZURE_OPTION_TEST_SUBJ);
       await userEvent.click(azureSelectorButton);
 
-      const setupTechnologySelectorAccordion = queryByTestId(
-        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
-      );
       const setupTechnologySelector = getByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
 
       // select agentless and check for ARM template option
       await userEvent.click(setupTechnologySelector);
-      const agentlessOption = getByRole('option', { name: /agentless/i });
-      await waitForEuiPopoverOpen();
+      const agentlessOption = getByLabelText(/agentless/i);
       await userEvent.click(agentlessOption);
 
       const tenantIdField = queryByTestId(CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID);
@@ -1726,7 +1690,6 @@ describe('<CspPolicyTemplateForm />', () => {
       const manualSelector = queryByTestId(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
 
       // default state for Azure with the Org selected
-      expect(setupTechnologySelectorAccordion).toBeInTheDocument();
       expect(setupTechnologySelector).toBeInTheDocument();
       expect(setupTechnologySelector).toHaveTextContent(/agentless/i);
       expect(tenantIdField).toBeInTheDocument();
@@ -1743,11 +1706,9 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={true} />
       );
 
-      const setupTechnologySelectorAccordion = queryByTestId(
-        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
-      );
+      const setupTechnologySelector = queryByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
 
-      expect(setupTechnologySelectorAccordion).not.toBeInTheDocument();
+      expect(setupTechnologySelector).not.toBeInTheDocument();
     });
 
     it('should not render setup technology selector for CNVM', () => {
@@ -1757,11 +1718,9 @@ describe('<CspPolicyTemplateForm />', () => {
         <WrappedComponent newPolicy={newPackagePolicy} isAgentlessEnabled={true} />
       );
 
-      const setupTechnologySelectorAccordion = queryByTestId(
-        SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ
-      );
+      const setupTechnologySelector = queryByTestId(SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ);
 
-      expect(setupTechnologySelectorAccordion).not.toBeInTheDocument();
+      expect(setupTechnologySelector).not.toBeInTheDocument();
     });
   });
 

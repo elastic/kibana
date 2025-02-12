@@ -91,16 +91,16 @@ export interface ChromeStart {
   setBreadcrumbs(newBreadcrumbs: ChromeBreadcrumb[], params?: ChromeSetBreadcrumbsParams): void;
 
   /**
-   * Get an observable of the current extension appended to breadcrumbs
+   * Get an observable of the current extensions appended to breadcrumbs
    */
-  getBreadcrumbsAppendExtension$(): Observable<ChromeBreadcrumbsAppendExtension | undefined>;
+  getBreadcrumbsAppendExtensions$(): Observable<ChromeBreadcrumbsAppendExtension[]>;
 
   /**
    * Mount an element next to the last breadcrumb
    */
   setBreadcrumbsAppendExtension(
-    breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension
-  ): void;
+    breadcrumbsAppendExtension: ChromeBreadcrumbsAppendExtension
+  ): () => void;
 
   /**
    * Get an observable of the current custom nav link

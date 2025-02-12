@@ -25,8 +25,8 @@ import { GetHistogramIndicatorAggregation } from '../aggregations';
 import { getFilterRange, getTimesliceTargetComparator } from './common';
 
 export class HistogramTransformGenerator extends TransformGenerator {
-  constructor(spaceId: string, dataViewService: DataViewsService) {
-    super(spaceId, dataViewService);
+  constructor(spaceId: string, dataViewService: DataViewsService, isServerless: boolean) {
+    super(spaceId, dataViewService, isServerless);
   }
 
   public async getTransformParams(slo: SLODefinition): Promise<TransformPutTransformRequest> {
@@ -59,7 +59,7 @@ export class HistogramTransformGenerator extends TransformGenerator {
       query: {
         bool: {
           filter: [
-            getFilterRange(slo, indicator.params.timestampField),
+            getFilterRange(slo, indicator.params.timestampField, this.isServerless),
             getElasticsearchQueryOrThrow(indicator.params.filter, dataView),
           ],
         },

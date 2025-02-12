@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IValidatedEvent } from '@kbn/event-log-plugin/server';
+import { IValidatedEventInternalDocInfo } from '@kbn/event-log-plugin/server';
 import { getUrlPrefix } from '.';
 import { FtrProviderContext } from '../ftr_provider_context';
 
@@ -34,7 +34,9 @@ interface GetEventLogParams {
 
 // Return event log entries given the specified parameters; for the `actions`
 // parameter, at least one event of each action must be in the returned entries.
-export async function getEventLog(params: GetEventLogParams): Promise<IValidatedEvent[]> {
+export async function getEventLog(
+  params: GetEventLogParams
+): Promise<IValidatedEventInternalDocInfo[]> {
   const { getService, spaceId, type, id, provider, actions } = params;
   const supertest = getService('supertest');
 
@@ -49,7 +51,7 @@ export async function getEventLog(params: GetEventLogParams): Promise<IValidated
   }
 
   // filter events to matching provider and requested actions
-  const events: IValidatedEvent[] = (result.data as IValidatedEvent[])
+  const events: IValidatedEventInternalDocInfo[] = (result.data as IValidatedEventInternalDocInfo[])
     .filter((event) => event?.event?.provider === provider)
     .filter((event) => event?.event?.action)
     .filter((event) => actions.has(event?.event?.action!));

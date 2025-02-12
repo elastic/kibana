@@ -14,16 +14,26 @@ import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { Profile } from '../types';
 
 /**
+ * The root profile state
+ */
+export type RootProfileState =
+  | { rootProfileLoading: true }
+  | {
+      rootProfileLoading: false;
+      AppWrapper: Profile['getRenderAppWrapper'];
+      getDefaultAdHocDataViews: Profile['getDefaultAdHocDataViews'];
+    };
+
+/**
  * Hook to trigger and wait for root profile resolution
  * @param options Options object
- * @returns If the root profile is loading
+ * @returns The root profile state
  */
 export const useRootProfile = () => {
   const { profilesManager, core } = useDiscoverServices();
-  const [rootProfileState, setRootProfileState] = useState<
-    | { rootProfileLoading: true }
-    | { rootProfileLoading: false; AppWrapper: Profile['getRenderAppWrapper'] }
-  >({ rootProfileLoading: true });
+  const [rootProfileState, setRootProfileState] = useState<RootProfileState>({
+    rootProfileLoading: true,
+  });
 
   useEffect(() => {
     const subscription = core.chrome
@@ -32,11 +42,14 @@ export const useRootProfile = () => {
         distinctUntilChanged(),
         filter((id) => id !== undefined),
         tap(() => setRootProfileState({ rootProfileLoading: true })),
-        switchMap((id) => profilesManager.resolveRootProfile({ solutionNavId: id })),
-        tap(({ getRenderAppWrapper }) =>
+        switchMap((solutionNavId) => profilesManager.resolveRootProfile({ solutionNavId })),
+        tap(({ getRenderAppWrapper, getDefaultAdHocDataViews }) =>
           setRootProfileState({
             rootProfileLoading: false,
             AppWrapper: getRenderAppWrapper?.(BaseAppWrapper) ?? BaseAppWrapper,
+            getDefaultAdHocDataViews:
+              getDefaultAdHocDataViews?.(baseGetDefaultAdHocDataViews) ??
+              baseGetDefaultAdHocDataViews,
           })
         )
       )
@@ -51,3 +64,5 @@ export const useRootProfile = () => {
 };
 
 export const BaseAppWrapper: Profile['getRenderAppWrapper'] = ({ children }) => <>{children}</>;
+
+const baseGetDefaultAdHocDataViews: Profile['getDefaultAdHocDataViews'] = () => [];

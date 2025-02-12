@@ -53,10 +53,10 @@ processingCommand
     | grokCommand
     | enrichCommand
     | mvExpandCommand
+    | joinCommand
     // in development
     | {this.isDevVersion()}? inlinestatsCommand
     | {this.isDevVersion()}? lookupCommand
-    | {this.isDevVersion()}? joinCommand
     ;
 
 whereCommand
@@ -112,7 +112,7 @@ functionName
     ;
 
 mapExpression
-    : {this.isDevVersion()}? LEFT_BRACES entryExpression (COMMA entryExpression)* RIGHT_BRACES
+    : LEFT_BRACES entryExpression (COMMA entryExpression)* RIGHT_BRACES
     ;
 
 entryExpression
@@ -145,6 +145,7 @@ indexPattern
 
 clusterString
     : UNQUOTED_SOURCE
+    | QUOTED_STRING
     ;
 
 indexString
@@ -195,7 +196,7 @@ identifier
 
 identifierPattern
     : ID_PATTERN
-    | {this.isDevVersion()}? parameter
+    | parameter
     ;
 
 constant
@@ -218,7 +219,7 @@ parameter
 
 identifierOrParameter
     : identifier
-    | {this.isDevVersion()}? parameter
+    | parameter
     ;
 
 limitCommand
@@ -326,11 +327,11 @@ inlinestatsCommand
     ;
 
 joinCommand
-    : type=(DEV_JOIN_LOOKUP | DEV_JOIN_LEFT | DEV_JOIN_RIGHT)? DEV_JOIN joinTarget joinCondition
+    : type=(JOIN_LOOKUP | DEV_JOIN_LEFT | DEV_JOIN_RIGHT) JOIN joinTarget joinCondition
     ;
 
 joinTarget
-    : index=identifier (AS alias=identifier)?
+    : index=indexPattern
     ;
 
 joinCondition
