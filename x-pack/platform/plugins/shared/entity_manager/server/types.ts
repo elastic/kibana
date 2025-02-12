@@ -21,7 +21,6 @@ export interface EntityManagerServerSetup {
   logger: Logger;
   security: SecurityPluginStart;
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
-  isServerless: boolean;
 }
 
 export interface ElasticsearchAccessorOptions {

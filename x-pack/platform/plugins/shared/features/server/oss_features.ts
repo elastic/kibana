@@ -21,291 +21,58 @@ export const buildOSSFeatures = ({
 }: BuildOSSFeaturesParams): KibanaFeatureConfig[] => {
   return [
     {
+      deprecated: {
+        notice: i18n.translate('xpack.features.discoverFeatureDeprecationNotice', {
+          defaultMessage:
+            'The Discover V1 privilege has been deprecated and replaced with a Discover V2 privilege in order to improve saved query management. See {link} for more details.',
+          values: { link: 'https://github.com/elastic/kibana/pull/202863' },
+        }),
+        replacedBy: ['discover_v2'],
+      },
       id: 'discover',
-      name: i18n.translate('xpack.features.discoverFeatureName', {
-        defaultMessage: 'Discover',
-      }),
-      management: {
-        kibana: ['search_sessions'],
-        ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
-      },
       order: 100,
-      category: DEFAULT_APP_CATEGORIES.kibana,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-      app: ['discover', 'kibana'],
-      catalogue: ['discover'],
-      privileges: {
-        all: {
-          app: ['discover', 'kibana'],
-          api: ['fileUpload:analyzeFile', 'savedQuery:manage', 'savedQuery:read'],
-          catalogue: ['discover'],
-          savedObject: {
-            all: ['search', 'query'],
-            read: ['index-pattern'],
-          },
-          ui: ['show', 'save', 'saveQuery'],
-        },
-        read: {
-          app: ['discover', 'kibana'],
-          catalogue: ['discover'],
-          savedObject: {
-            all: [],
-            read: ['index-pattern', 'search', 'query'],
-          },
-          ui: ['show'],
-          api: ['savedQuery:read'],
-        },
-      },
-      subFeatures: [
-        {
-          name: i18n.translate('xpack.features.ossFeatures.discoverShortUrlSubFeatureName', {
-            defaultMessage: 'Short URLs',
-          }),
-          privilegeGroups: [
-            {
-              groupType: 'independent',
-              privileges: [
-                {
-                  id: 'url_create',
-                  name: i18n.translate(
-                    'xpack.features.ossFeatures.discoverCreateShortUrlPrivilegeName',
-                    {
-                      defaultMessage: 'Create Short URLs',
-                    }
-                  ),
-                  includeIn: 'all',
-                  savedObject: {
-                    all: ['url'],
-                    read: [],
-                  },
-                  ui: ['createShortUrl'],
-                },
-              ],
-            },
-          ],
-        },
-        {
-          name: i18n.translate('xpack.features.ossFeatures.discoverSearchSessionsFeatureName', {
-            defaultMessage: 'Store Search Sessions',
-          }),
-          privilegeGroups: [
-            {
-              groupType: 'independent',
-              privileges: [
-                {
-                  id: 'store_search_session',
-                  name: i18n.translate(
-                    'xpack.features.ossFeatures.discoverStoreSearchSessionsPrivilegeName',
-                    {
-                      defaultMessage: 'Store Search Sessions',
-                    }
-                  ),
-                  includeIn: 'all',
-                  savedObject: {
-                    all: ['search-session'],
-                    read: [],
-                  },
-                  ui: ['storeSearchSession'],
-                  management: {
-                    kibana: ['search_sessions'],
-                  },
-                  api: ['store_search_session'],
-                },
-              ],
-            },
-          ],
-        },
-        ...(includeReporting ? [reportingFeatures.discoverReporting] : []),
-      ],
+      ...getBaseDiscoverFeature({ includeReporting, version: 'v1' }),
     },
     {
+      id: 'discover_v2',
+      order: 101,
+      ...getBaseDiscoverFeature({ includeReporting, version: 'v2' }),
+    },
+    {
+      deprecated: {
+        notice: i18n.translate('xpack.features.visualizeFeatureDeprecationNotice', {
+          defaultMessage:
+            'The Visualize Library V1 privilege has been deprecated and replaced with a Visualize Library V2 privilege in order to improve saved query management. See {link} for more details.',
+          values: { link: 'https://github.com/elastic/kibana/pull/202863' },
+        }),
+        replacedBy: ['visualize_v2'],
+      },
       id: 'visualize',
-      name: i18n.translate('xpack.features.visualizeFeatureName', {
-        defaultMessage: 'Visualize Library',
-      }),
-      management: {
-        ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
-      },
       order: 700,
-      category: DEFAULT_APP_CATEGORIES.kibana,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-      app: ['visualize', 'lens', 'kibana'],
-      catalogue: ['visualize'],
-      privileges: {
-        all: {
-          app: ['visualize', 'lens', 'kibana'],
-          catalogue: ['visualize'],
-          savedObject: {
-            all: ['visualization', 'query', 'lens'],
-            read: ['index-pattern', 'search', 'tag'],
-          },
-          ui: ['show', 'delete', 'save', 'saveQuery'],
-          api: ['savedQuery:manage', 'savedQuery:read'],
-        },
-        read: {
-          app: ['visualize', 'lens', 'kibana'],
-          catalogue: ['visualize'],
-          savedObject: {
-            all: [],
-            read: ['index-pattern', 'search', 'visualization', 'query', 'lens', 'tag'],
-          },
-          ui: ['show'],
-          api: ['savedQuery:read'],
-        },
-      },
-      subFeatures: [
-        {
-          name: i18n.translate('xpack.features.ossFeatures.visualizeShortUrlSubFeatureName', {
-            defaultMessage: 'Short URLs',
-          }),
-          privilegeGroups: [
-            {
-              groupType: 'independent',
-              privileges: [
-                {
-                  id: 'url_create',
-                  name: i18n.translate(
-                    'xpack.features.ossFeatures.visualizeCreateShortUrlPrivilegeName',
-                    {
-                      defaultMessage: 'Create Short URLs',
-                    }
-                  ),
-                  includeIn: 'all',
-                  savedObject: {
-                    all: ['url'],
-                    read: [],
-                  },
-                  ui: ['createShortUrl'],
-                },
-              ],
-            },
-          ],
-        },
-        ...(includeReporting ? [reportingFeatures.visualizeReporting] : []),
-      ],
+      ...getBaseVisualizeFeature({ includeReporting, version: 'v1' }),
     },
     {
+      id: 'visualize_v2',
+      order: 701,
+      ...getBaseVisualizeFeature({ includeReporting, version: 'v2' }),
+    },
+    {
+      deprecated: {
+        notice: i18n.translate('xpack.features.dashboardFeatureDeprecationNotice', {
+          defaultMessage:
+            'The Dashboard V1 privilege has been deprecated and replaced with a Dashboard V2 privilege in order to improve saved query management. See {link} for more details.',
+          values: { link: 'https://github.com/elastic/kibana/pull/202863' },
+        }),
+        replacedBy: ['dashboard_v2'],
+      },
       id: 'dashboard',
-      name: i18n.translate('xpack.features.dashboardFeatureName', {
-        defaultMessage: 'Dashboard',
-      }),
-      management: {
-        kibana: ['search_sessions'],
-        ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
-      },
       order: 200,
-      category: DEFAULT_APP_CATEGORIES.kibana,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
-      app: ['dashboards', 'kibana'],
-      catalogue: ['dashboard'],
-      privileges: {
-        all: {
-          app: ['dashboards', 'kibana'],
-          catalogue: ['dashboard'],
-          savedObject: {
-            all: ['dashboard', 'query'],
-            read: [
-              'index-pattern',
-              'search',
-              'visualization',
-              'canvas-workpad',
-              'lens',
-              'links',
-              'map',
-              'tag',
-            ],
-          },
-          ui: ['createNew', 'show', 'showWriteControls', 'saveQuery'],
-          api: [
-            'bulkGetUserProfiles',
-            'dashboardUsageStats',
-            'savedQuery:manage',
-            'savedQuery:read',
-          ],
-        },
-        read: {
-          app: ['dashboards', 'kibana'],
-          catalogue: ['dashboard'],
-          savedObject: {
-            all: [],
-            read: [
-              'index-pattern',
-              'search',
-              'visualization',
-              'canvas-workpad',
-              'lens',
-              'links',
-              'map',
-              'dashboard',
-              'query',
-              'tag',
-            ],
-          },
-          ui: ['show'],
-          api: ['bulkGetUserProfiles', 'dashboardUsageStats', 'savedQuery:read'],
-        },
-      },
-      subFeatures: [
-        {
-          name: i18n.translate('xpack.features.ossFeatures.dashboardShortUrlSubFeatureName', {
-            defaultMessage: 'Short URLs',
-          }),
-          privilegeGroups: [
-            {
-              groupType: 'independent',
-              privileges: [
-                {
-                  id: 'url_create',
-                  name: i18n.translate(
-                    'xpack.features.ossFeatures.dashboardCreateShortUrlPrivilegeName',
-                    {
-                      defaultMessage: 'Create Short URLs',
-                    }
-                  ),
-                  includeIn: 'all',
-                  savedObject: {
-                    all: ['url'],
-                    read: [],
-                  },
-                  ui: ['createShortUrl'],
-                },
-              ],
-            },
-          ],
-        },
-        {
-          name: i18n.translate('xpack.features.ossFeatures.dashboardSearchSessionsFeatureName', {
-            defaultMessage: 'Store Search Sessions',
-          }),
-          privilegeGroups: [
-            {
-              groupType: 'independent',
-              privileges: [
-                {
-                  id: 'store_search_session',
-                  name: i18n.translate(
-                    'xpack.features.ossFeatures.dashboardStoreSearchSessionsPrivilegeName',
-                    {
-                      defaultMessage: 'Store Search Sessions',
-                    }
-                  ),
-                  includeIn: 'all',
-                  savedObject: {
-                    all: ['search-session'],
-                    read: [],
-                  },
-                  ui: ['storeSearchSession'],
-                  management: {
-                    kibana: ['search_sessions'],
-                  },
-                  api: ['store_search_session'],
-                },
-              ],
-            },
-          ],
-        },
-        ...(includeReporting ? [reportingFeatures.dashboardReporting] : []),
-      ],
+      ...getBaseDashboardFeature({ includeReporting, version: 'v1' }),
+    },
+    {
+      id: 'dashboard_v2',
+      order: 201,
+      ...getBaseDashboardFeature({ includeReporting, version: 'v2' }),
     },
     {
       id: 'dev_tools',
@@ -552,8 +319,7 @@ export const buildOSSFeatures = ({
       app: ['kibana'],
       catalogue: [],
       privilegesTooltip: i18n.translate('xpack.features.savedQueryManagementTooltip', {
-        defaultMessage:
-          'If set to "All", saved queries can be managed across Kibana in all applications that support them. Otherwise, saved query privileges will be determined independently by each application.',
+        defaultMessage: 'Controls access to saved queries across Kibana',
       }),
       privileges: {
         all: {
@@ -563,7 +329,7 @@ export const buildOSSFeatures = ({
             all: ['query'],
             read: [],
           },
-          ui: ['saveQuery'],
+          ui: ['showQueries', 'saveQuery'],
           api: ['savedQuery:manage', 'savedQuery:read'],
         },
         read: {
@@ -571,12 +337,443 @@ export const buildOSSFeatures = ({
             all: [],
             read: ['query'],
           },
-          ui: [],
+          ui: ['showQueries'],
           api: ['savedQuery:read'],
         },
       },
     },
   ];
+};
+
+const getBaseDiscoverFeature = ({
+  includeReporting,
+  version,
+}: {
+  includeReporting: boolean;
+  version: 'v1' | 'v2';
+}): Omit<KibanaFeatureConfig, 'id' | 'order'> => {
+  const apiAllPrivileges = ['fileUpload:analyzeFile'];
+  const savedObjectAllPrivileges = ['search'];
+  const uiAllPrivileges = ['show', 'save'];
+  const apiReadPrivileges = [];
+  const savedObjectReadPrivileges = ['index-pattern', 'search'];
+
+  if (version === 'v1') {
+    apiAllPrivileges.push('savedQuery:manage', 'savedQuery:read');
+    savedObjectAllPrivileges.push('query');
+    uiAllPrivileges.push('saveQuery');
+    apiReadPrivileges.push('savedQuery:read');
+    savedObjectReadPrivileges.push('query');
+  }
+
+  return {
+    name: i18n.translate('xpack.features.discoverFeatureName', {
+      defaultMessage: 'Discover',
+    }),
+    management: {
+      kibana: ['search_sessions'],
+      ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
+    },
+    category: DEFAULT_APP_CATEGORIES.kibana,
+    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+    app: ['discover', 'kibana'],
+    catalogue: ['discover'],
+    privileges: {
+      all: {
+        app: ['discover', 'kibana'],
+        api: apiAllPrivileges,
+        catalogue: ['discover'],
+        savedObject: {
+          all: savedObjectAllPrivileges,
+          read: ['index-pattern'],
+        },
+        ui: uiAllPrivileges,
+        ...(version === 'v1' && {
+          replacedBy: {
+            default: [
+              { feature: 'discover_v2', privileges: ['all'] },
+              { feature: 'savedQueryManagement', privileges: ['all'] },
+            ],
+            minimal: [
+              { feature: 'discover_v2', privileges: ['minimal_all'] },
+              { feature: 'savedQueryManagement', privileges: ['minimal_all'] },
+            ],
+          },
+        }),
+      },
+      read: {
+        app: ['discover', 'kibana'],
+        api: apiReadPrivileges,
+        catalogue: ['discover'],
+        savedObject: {
+          all: [],
+          read: savedObjectReadPrivileges,
+        },
+        ui: ['show'],
+        ...(version === 'v1' && {
+          replacedBy: {
+            default: [
+              { feature: 'discover_v2', privileges: ['read'] },
+              { feature: 'savedQueryManagement', privileges: ['read'] },
+            ],
+            minimal: [
+              { feature: 'discover_v2', privileges: ['minimal_read'] },
+              { feature: 'savedQueryManagement', privileges: ['minimal_read'] },
+            ],
+          },
+        }),
+      },
+    },
+    subFeatures: [
+      {
+        name: i18n.translate('xpack.features.ossFeatures.discoverShortUrlSubFeatureName', {
+          defaultMessage: 'Short URLs',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: 'url_create',
+                name: i18n.translate(
+                  'xpack.features.ossFeatures.discoverCreateShortUrlPrivilegeName',
+                  {
+                    defaultMessage: 'Create Short URLs',
+                  }
+                ),
+                includeIn: 'all',
+                savedObject: {
+                  all: ['url'],
+                  read: [],
+                },
+                ui: ['createShortUrl'],
+                ...(version === 'v1' && {
+                  replacedBy: [{ feature: 'discover_v2', privileges: ['url_create'] }],
+                }),
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.features.ossFeatures.discoverSearchSessionsFeatureName', {
+          defaultMessage: 'Store Search Sessions',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: 'store_search_session',
+                name: i18n.translate(
+                  'xpack.features.ossFeatures.discoverStoreSearchSessionsPrivilegeName',
+                  {
+                    defaultMessage: 'Store Search Sessions',
+                  }
+                ),
+                includeIn: 'all',
+                savedObject: {
+                  all: ['search-session'],
+                  read: [],
+                },
+                ui: ['storeSearchSession'],
+                management: {
+                  kibana: ['search_sessions'],
+                },
+                api: ['store_search_session'],
+                ...(version === 'v1' && {
+                  replacedBy: [{ feature: 'discover_v2', privileges: ['store_search_session'] }],
+                }),
+              },
+            ],
+          },
+        ],
+      },
+      ...(includeReporting ? [reportingFeatures.getDiscoverReporting(version)] : []),
+    ],
+  };
+};
+
+const getBaseVisualizeFeature = ({
+  includeReporting,
+  version,
+}: {
+  includeReporting: boolean;
+  version: 'v1' | 'v2';
+}): Omit<KibanaFeatureConfig, 'id' | 'order'> => {
+  const apiAllPrivileges = [];
+  const savedObjectAllPrivileges = ['visualization', 'lens'];
+  const uiAllPrivileges = ['show', 'delete', 'save'];
+  const apiReadPrivileges = [];
+  const savedObjectReadPrivileges = ['index-pattern', 'search', 'visualization', 'lens', 'tag'];
+
+  if (version === 'v1') {
+    apiAllPrivileges.push('savedQuery:manage', 'savedQuery:read');
+    savedObjectAllPrivileges.push('query');
+    uiAllPrivileges.push('saveQuery');
+    apiReadPrivileges.push('savedQuery:read');
+    savedObjectReadPrivileges.push('query');
+  }
+
+  return {
+    name: i18n.translate('xpack.features.visualizeFeatureName', {
+      defaultMessage: 'Visualize Library',
+    }),
+    management: {
+      ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
+    },
+    category: DEFAULT_APP_CATEGORIES.kibana,
+    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+    app: ['visualize', 'lens', 'kibana'],
+    catalogue: ['visualize'],
+    privileges: {
+      all: {
+        app: ['visualize', 'lens', 'kibana'],
+        api: apiAllPrivileges,
+        catalogue: ['visualize'],
+        savedObject: {
+          all: savedObjectAllPrivileges,
+          read: ['index-pattern', 'search', 'tag'],
+        },
+        ui: uiAllPrivileges,
+        ...(version === 'v1' && {
+          replacedBy: {
+            default: [
+              { feature: 'visualize_v2', privileges: ['all'] },
+              { feature: 'savedQueryManagement', privileges: ['all'] },
+            ],
+            minimal: [
+              { feature: 'visualize_v2', privileges: ['minimal_all'] },
+              { feature: 'savedQueryManagement', privileges: ['minimal_all'] },
+            ],
+          },
+        }),
+      },
+      read: {
+        app: ['visualize', 'lens', 'kibana'],
+        api: apiReadPrivileges,
+        catalogue: ['visualize'],
+        savedObject: {
+          all: [],
+          read: savedObjectReadPrivileges,
+        },
+        ui: ['show'],
+        ...(version === 'v1' && {
+          replacedBy: {
+            default: [
+              { feature: 'visualize_v2', privileges: ['read'] },
+              { feature: 'savedQueryManagement', privileges: ['read'] },
+            ],
+            minimal: [
+              { feature: 'visualize_v2', privileges: ['minimal_read'] },
+              { feature: 'savedQueryManagement', privileges: ['minimal_read'] },
+            ],
+          },
+        }),
+      },
+    },
+    subFeatures: [
+      {
+        name: i18n.translate('xpack.features.ossFeatures.visualizeShortUrlSubFeatureName', {
+          defaultMessage: 'Short URLs',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: 'url_create',
+                name: i18n.translate(
+                  'xpack.features.ossFeatures.visualizeCreateShortUrlPrivilegeName',
+                  {
+                    defaultMessage: 'Create Short URLs',
+                  }
+                ),
+                includeIn: 'all',
+                savedObject: {
+                  all: ['url'],
+                  read: [],
+                },
+                ui: ['createShortUrl'],
+                ...(version === 'v1' && {
+                  replacedBy: [{ feature: 'visualize_v2', privileges: ['url_create'] }],
+                }),
+              },
+            ],
+          },
+        ],
+      },
+      ...(includeReporting ? [reportingFeatures.getVisualizeReporting(version)] : []),
+    ],
+  };
+};
+
+const getBaseDashboardFeature = ({
+  includeReporting,
+  version,
+}: {
+  includeReporting: boolean;
+  version: 'v1' | 'v2';
+}): Omit<KibanaFeatureConfig, 'id' | 'order'> => {
+  const apiAllPrivileges = ['bulkGetUserProfiles', 'dashboardUsageStats'];
+  const savedObjectAllPrivileges = ['dashboard'];
+  const uiAllPrivileges = ['createNew', 'show', 'showWriteControls'];
+  const apiReadPrivileges = ['bulkGetUserProfiles', 'dashboardUsageStats'];
+  const savedObjectReadPrivileges = [
+    'index-pattern',
+    'search',
+    'visualization',
+    'canvas-workpad',
+    'lens',
+    'links',
+    'map',
+    'dashboard',
+    'tag',
+  ];
+
+  if (version === 'v1') {
+    apiAllPrivileges.push('savedQuery:manage', 'savedQuery:read');
+    savedObjectAllPrivileges.push('query');
+    uiAllPrivileges.push('saveQuery');
+    apiReadPrivileges.push('savedQuery:read');
+    savedObjectReadPrivileges.push('query');
+  }
+
+  return {
+    name: i18n.translate('xpack.features.dashboardFeatureName', {
+      defaultMessage: 'Dashboard',
+    }),
+    management: {
+      kibana: ['search_sessions'],
+      ...(includeReporting ? { insightsAndAlerting: ['reporting'] } : {}),
+    },
+    category: DEFAULT_APP_CATEGORIES.kibana,
+    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+    app: ['dashboards', 'kibana'],
+    catalogue: ['dashboard'],
+    privileges: {
+      all: {
+        app: ['dashboards', 'kibana'],
+        catalogue: ['dashboard'],
+        savedObject: {
+          all: savedObjectAllPrivileges,
+          read: [
+            'index-pattern',
+            'search',
+            'visualization',
+            'canvas-workpad',
+            'lens',
+            'links',
+            'map',
+            'tag',
+          ],
+        },
+        ui: uiAllPrivileges,
+        api: apiAllPrivileges,
+        ...(version === 'v1' && {
+          replacedBy: {
+            default: [
+              { feature: 'dashboard_v2', privileges: ['all'] },
+              { feature: 'savedQueryManagement', privileges: ['all'] },
+            ],
+            minimal: [
+              { feature: 'dashboard_v2', privileges: ['minimal_all'] },
+              { feature: 'savedQueryManagement', privileges: ['minimal_all'] },
+            ],
+          },
+        }),
+      },
+      read: {
+        app: ['dashboards', 'kibana'],
+        catalogue: ['dashboard'],
+        savedObject: {
+          all: [],
+          read: savedObjectReadPrivileges,
+        },
+        ui: ['show'],
+        api: apiReadPrivileges,
+        ...(version === 'v1' && {
+          replacedBy: {
+            default: [
+              { feature: 'dashboard_v2', privileges: ['read'] },
+              { feature: 'savedQueryManagement', privileges: ['read'] },
+            ],
+            minimal: [
+              { feature: 'dashboard_v2', privileges: ['minimal_read'] },
+              { feature: 'savedQueryManagement', privileges: ['minimal_read'] },
+            ],
+          },
+        }),
+      },
+    },
+    subFeatures: [
+      {
+        name: i18n.translate('xpack.features.ossFeatures.dashboardShortUrlSubFeatureName', {
+          defaultMessage: 'Short URLs',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: 'url_create',
+                name: i18n.translate(
+                  'xpack.features.ossFeatures.dashboardCreateShortUrlPrivilegeName',
+                  {
+                    defaultMessage: 'Create Short URLs',
+                  }
+                ),
+                includeIn: 'all',
+                savedObject: {
+                  all: ['url'],
+                  read: [],
+                },
+                ui: ['createShortUrl'],
+                ...(version === 'v1' && {
+                  replacedBy: [{ feature: 'dashboard_v2', privileges: ['url_create'] }],
+                }),
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.features.ossFeatures.dashboardSearchSessionsFeatureName', {
+          defaultMessage: 'Store Search Sessions',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'independent',
+            privileges: [
+              {
+                id: 'store_search_session',
+                name: i18n.translate(
+                  'xpack.features.ossFeatures.dashboardStoreSearchSessionsPrivilegeName',
+                  {
+                    defaultMessage: 'Store Search Sessions',
+                  }
+                ),
+                includeIn: 'all',
+                savedObject: {
+                  all: ['search-session'],
+                  read: [],
+                },
+                ui: ['storeSearchSession'],
+                management: {
+                  kibana: ['search_sessions'],
+                },
+                api: ['store_search_session'],
+                ...(version === 'v1' && {
+                  replacedBy: [{ feature: 'dashboard_v2', privileges: ['store_search_session'] }],
+                }),
+              },
+            ],
+          },
+        ],
+      },
+      ...(includeReporting ? [reportingFeatures.getDashboardReporting(version)] : []),
+    ],
+  };
 };
 
 const reportingPrivilegeGroupName = i18n.translate(
@@ -587,11 +784,11 @@ const reportingPrivilegeGroupName = i18n.translate(
 );
 
 const reportingFeatures: {
-  discoverReporting: SubFeatureConfig;
-  dashboardReporting: SubFeatureConfig;
-  visualizeReporting: SubFeatureConfig;
+  getDiscoverReporting: (version: 'v1' | 'v2') => SubFeatureConfig;
+  getDashboardReporting: (version: 'v1' | 'v2') => SubFeatureConfig;
+  getVisualizeReporting: (version: 'v1' | 'v2') => SubFeatureConfig;
 } = {
-  discoverReporting: {
+  getDiscoverReporting: (version) => ({
     name: reportingPrivilegeGroupName,
     privilegeGroups: [
       {
@@ -607,12 +804,15 @@ const reportingFeatures: {
             management: { insightsAndAlerting: ['reporting'] },
             api: ['generateReport'],
             ui: ['generateCsv'],
+            ...(version === 'v1' && {
+              replacedBy: [{ feature: 'discover_v2', privileges: ['generate_report'] }],
+            }),
           },
         ],
       },
     ],
-  },
-  dashboardReporting: {
+  }),
+  getDashboardReporting: (version) => ({
     name: reportingPrivilegeGroupName,
     privilegeGroups: [
       {
@@ -632,6 +832,9 @@ const reportingFeatures: {
             management: { insightsAndAlerting: ['reporting'] },
             api: ['generateReport'],
             ui: ['generateScreenshot'],
+            ...(version === 'v1' && {
+              replacedBy: [{ feature: 'dashboard_v2', privileges: ['generate_report'] }],
+            }),
           },
           {
             id: 'download_csv_report',
@@ -643,12 +846,15 @@ const reportingFeatures: {
             management: { insightsAndAlerting: ['reporting'] },
             api: ['downloadCsv'],
             ui: ['downloadCsv'],
+            ...(version === 'v1' && {
+              replacedBy: [{ feature: 'dashboard_v2', privileges: ['download_csv_report'] }],
+            }),
           },
         ],
       },
     ],
-  },
-  visualizeReporting: {
+  }),
+  getVisualizeReporting: (version) => ({
     name: reportingPrivilegeGroupName,
     privilegeGroups: [
       {
@@ -668,9 +874,12 @@ const reportingFeatures: {
             management: { insightsAndAlerting: ['reporting'] },
             api: ['generateReport'],
             ui: ['generateScreenshot'],
+            ...(version === 'v1' && {
+              replacedBy: [{ feature: 'visualize_v2', privileges: ['generate_report'] }],
+            }),
           },
         ],
       },
     ],
-  },
+  }),
 };

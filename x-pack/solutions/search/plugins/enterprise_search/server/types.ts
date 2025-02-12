@@ -27,7 +27,6 @@ import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import type { IEnterpriseSearchRequestHandler } from './lib/enterprise_search_request_handler';
 import type { GlobalConfigService } from './services/global_config_service';
 
 import type { ConfigType } from '.';
@@ -55,7 +54,6 @@ export interface PluginsStart {
 
 export interface RouteDependencies {
   config: ConfigType;
-  enterpriseSearchRequestHandler: IEnterpriseSearchRequestHandler;
   getSavedObjectsService?(): SavedObjectsServiceStart;
   getStartServices: StartServicesAccessor<PluginsStart, unknown>;
   globalConfigService: GlobalConfigService;

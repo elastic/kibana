@@ -50,12 +50,26 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
         'QuickStatsDocumentCount'
       );
       expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Document count\n0');
-      expect(await quickStatsDocumentElem.getVisibleText()).not.to.contain('Index Size\n0b');
+      expect(await quickStatsDocumentElem.getVisibleText()).not.to.contain('Total\n0');
       await quickStatsDocumentElem.click();
-      expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Index Size\n227b');
+      expect(await quickStatsDocumentElem.getVisibleText()).to.contain('Total\n0\nDeleted\n0');
+    },
+
+    async expectQuickStatsToHaveIndexStatus() {
+      await testSubjects.existOrFail('QuickStatsIndexStatus');
+    },
+
+    async expectQuickStatsToHaveIndexStorage(size?: string) {
+      await testSubjects.existOrFail('QuickStatsStorage');
+      if (!size) return;
+
+      const quickStatsElem = await testSubjects.find('quickStats');
+      const quickStatsStorageElem = await quickStatsElem.findByTestSubject('QuickStatsStorage');
+      expect(await quickStatsStorageElem.getVisibleText()).to.contain(`Storage\n${size}`);
     },
 
     async expectQuickStatsToHaveDocumentCount(count: number) {
+      await testSubjects.existOrFail('QuickStatsDocumentCount');
       const quickStatsElem = await testSubjects.find('quickStats');
       const quickStatsDocumentElem = await quickStatsElem.findByTestSubject(
         'QuickStatsDocumentCount'
@@ -65,6 +79,7 @@ export function SearchIndexDetailPageProvider({ getService }: FtrProviderContext
 
     async expectQuickStatsAIMappings() {
       await testSubjects.existOrFail('quickStats', { timeout: 2000 });
+      await testSubjects.existOrFail('QuickStatsAIMappings');
       const quickStatsElem = await testSubjects.find('quickStats');
       const quickStatsAIMappingsElem = await quickStatsElem.findByTestSubject(
         'QuickStatsAIMappings'

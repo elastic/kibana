@@ -22,14 +22,14 @@ const pageConfigurations = {
     dismissalStorageKey: 'log_stream_deprecation_callout_dismissed',
     message: i18n.translate('xpack.infra.logsDeprecationCallout.stream.exploreWithDiscover', {
       defaultMessage:
-        'Logs Stream and Logs Explorer are set to be deprecated. Switch to Discover which now includes their functionality plus more features, better performance, and more intuitive navigation. ',
+        'Logs Stream and Logs Explorer are set to be deprecated. Switch to Discover and enable the new Observability solution for an improved logs experience.',
     }),
   },
   settings: {
     dismissalStorageKey: 'log_settings_deprecation_callout_dismissed',
     message: i18n.translate('xpack.infra.logsDeprecationCallout.settings.exploreWithDiscover', {
       defaultMessage:
-        'These settings only apply to the legacy Logs Stream app. Switch to Discover for the same functionality plus more features, better performance, and more intuitive navigation.',
+        'These settings only apply to the legacy Logs Stream app. Switch to Discover and enable the new Observability solution for an improved logs experience.',
     }),
   },
 };
@@ -44,7 +44,7 @@ export const LogsDeprecationCallout = ({ page }: LogsDeprecationCalloutProps) =>
     services: {
       share,
       application: {
-        capabilities: { discover, fleet },
+        capabilities: { discover_v2: discover, fleet },
       },
     },
   } = useKibanaContextForPlugin();

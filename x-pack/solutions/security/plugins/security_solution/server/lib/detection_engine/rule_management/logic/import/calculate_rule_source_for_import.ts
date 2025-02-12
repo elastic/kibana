@@ -9,6 +9,7 @@ import type {
   RuleSource,
   ValidatedRuleToImport,
 } from '../../../../../../common/api/detection_engine';
+import type { PrebuiltRulesCustomizationStatus } from '../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type { PrebuiltRuleAsset } from '../../../prebuilt_rules';
 import { calculateRuleSourceFromAsset } from './calculate_rule_source_from_asset';
 import { convertRuleToImportToRuleResponse } from './converters/convert_rule_to_import_to_rule_response';
@@ -28,12 +29,12 @@ export const calculateRuleSourceForImport = ({
   rule,
   prebuiltRuleAssetsByRuleId,
   isKnownPrebuiltRule,
-  isRuleCustomizationEnabled,
+  ruleCustomizationStatus,
 }: {
   rule: ValidatedRuleToImport;
   prebuiltRuleAssetsByRuleId: Record<string, PrebuiltRuleAsset>;
   isKnownPrebuiltRule: boolean;
-  isRuleCustomizationEnabled: boolean;
+  ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
 }): { ruleSource: RuleSource; immutable: boolean } => {
   const assetWithMatchingVersion = prebuiltRuleAssetsByRuleId[rule.rule_id];
   // We convert here so that RuleSource calculation can
@@ -45,7 +46,7 @@ export const calculateRuleSourceForImport = ({
     rule: ruleResponseForImport,
     assetWithMatchingVersion,
     isKnownPrebuiltRule,
-    isRuleCustomizationEnabled,
+    ruleCustomizationStatus,
   });
 
   return {

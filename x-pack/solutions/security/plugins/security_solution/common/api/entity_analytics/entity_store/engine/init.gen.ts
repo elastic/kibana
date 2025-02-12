@@ -36,6 +36,46 @@ export const InitEntityEngineRequestBody = z.object({
   indexPattern: IndexPattern.optional(),
   filter: z.string().optional(),
   enrichPolicyExecutionInterval: Interval.optional(),
+  /**
+   * The field to use as the timestamp for the entity type.
+   */
+  timestampField: z.string().optional().default('@timestamp'),
+  /**
+   * The amount of time the transform looks back to calculate the aggregations.
+   */
+  lookbackPeriod: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('24h'),
+  /**
+   * The timeout for initializing the aggregating transform.
+   */
+  timeout: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('180s'),
+  /**
+   * The frequency at which the transform will run.
+   */
+  frequency: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('1m'),
+  /**
+   * The delay before the transform will run.
+   */
+  delay: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('1m'),
+  /**
+   * The number of documents per second to process.
+   */
+  docsPerSecond: z.number().int().optional(),
 });
 export type InitEntityEngineRequestBodyInput = z.input<typeof InitEntityEngineRequestBody>;
 

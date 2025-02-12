@@ -49,8 +49,8 @@ export default function ({ getService }: FtrProviderContext) {
               },
               {
                 feature: {
-                  dashboard: ['read'],
-                  discover: ['all'],
+                  dashboard_v2: ['read'],
+                  discover_v2: ['all'],
                   ml: ['all'],
                 },
                 spaces: ['marketing', 'sales'],
@@ -78,7 +78,11 @@ export default function ({ getService }: FtrProviderContext) {
               },
               {
                 application: 'kibana-.kibana',
-                privileges: ['feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
+                privileges: [
+                  'feature_dashboard_v2.read',
+                  'feature_discover_v2.all',
+                  'feature_ml.all',
+                ],
                 resources: ['space:marketing', 'space:sales'],
               },
             ],
@@ -206,7 +210,7 @@ export default function ({ getService }: FtrProviderContext) {
             kibana: [
               {
                 feature: {
-                  dashboard: ['read'],
+                  dashboard_v2: ['read'],
                   dev_tools: ['all'],
                 },
                 spaces: ['*'],
@@ -233,7 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['feature_dashboard.read', 'feature_dev_tools.all'],
+                privileges: ['feature_dashboard_v2.read', 'feature_dev_tools.all'],
                 resources: ['*'],
               },
               {
@@ -332,7 +336,11 @@ export default function ({ getService }: FtrProviderContext) {
               },
               {
                 application: 'kibana-.kibana',
-                privileges: ['feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
+                privileges: [
+                  'feature_dashboard_v2.read',
+                  'feature_discover_v2.all',
+                  'feature_ml.all',
+                ],
                 resources: ['space:marketing', 'space:sales'],
               },
               {
@@ -380,8 +388,8 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 base: [],
                 feature: {
-                  dashboard: ['read'],
-                  discover: ['all'],
+                  dashboard_v2: ['read'],
+                  discover_v2: ['all'],
                   ml: ['all'],
                 },
                 spaces: ['marketing', 'sales'],
@@ -408,7 +416,11 @@ export default function ({ getService }: FtrProviderContext) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
+                privileges: [
+                  'feature_dashboard_v2.read',
+                  'feature_discover_v2.all',
+                  'feature_ml.all',
+                ],
                 resources: ['space:marketing', 'space:sales'],
               },
             ],
@@ -436,7 +448,11 @@ export default function ({ getService }: FtrProviderContext) {
             applications: [
               {
                 application: 'kibana-.kibana',
-                privileges: ['feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
+                privileges: [
+                  'feature_dashboard_v2.read',
+                  'feature_discover_v2.all',
+                  'feature_ml.all',
+                ],
                 resources: ['space:engineering', 'space:sales'],
               },
             ],

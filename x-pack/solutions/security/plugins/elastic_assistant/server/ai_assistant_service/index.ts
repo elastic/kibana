@@ -13,6 +13,11 @@ import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { Subject } from 'rxjs';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
+import {
+  IndicesGetFieldMappingResponse,
+  IndicesIndexSettings,
+} from '@elastic/elasticsearch/lib/api/types';
+import { omit } from 'lodash';
 import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/field_maps_configuration/field_maps_configuration';
 import { defendInsightsFieldMap } from '../ai_assistant_data_clients/defend_insights/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
@@ -35,19 +40,18 @@ import {
 import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/field_maps_configuration';
 import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
-import { knowledgeBaseFieldMap } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
+import {
+  ASSISTANT_ELSER_INFERENCE_ID,
+  ELASTICSEARCH_ELSER_INFERENCE_ID,
+  knowledgeBaseFieldMap,
+} from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
 import {
   AIAssistantKnowledgeBaseDataClient,
   GetAIAssistantKnowledgeBaseDataClientParams,
 } from '../ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { DefendInsightsDataClient } from '../ai_assistant_data_clients/defend_insights';
-import {
-  createGetElserId,
-  createPipeline,
-  ensureProductDocumentationInstalled,
-  pipelineExists,
-} from './helpers';
+import { createGetElserId, ensureProductDocumentationInstalled } from './helpers';
 import { hasAIAssistantLicense } from '../routes/helpers';
 
 const TOTAL_FIELDS_LIMIT = 2500;
@@ -84,6 +88,8 @@ export type CreateDataStream = (params: {
   fieldMap: FieldMap;
   kibanaVersion: string;
   spaceId?: string;
+  settings?: IndicesIndexSettings;
+  writeIndexOnly?: boolean;
 }) => DataStreamSpacesAdapter;
 
 export class AIAssistantService {
@@ -104,6 +110,8 @@ export class AIAssistantService {
   // Temporary 'feature flag' to determine if we should initialize the new message metadata mappings, toggled when citations should be enabled.
   private contentReferencesEnabled: boolean = false;
   private hasInitializedContentReferences: boolean = false;
+  // Temporary 'feature flag' to determine if we should initialize the new knowledge base mappings
+  private assistantDefaultInferenceEndpoint: boolean = false;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
@@ -167,15 +175,23 @@ export class AIAssistantService {
     this.isKBSetupInProgress = isInProgress;
   }
 
-  private createDataStream: CreateDataStream = ({ resource, kibanaVersion, fieldMap }) => {
+  private createDataStream: CreateDataStream = ({
+    resource,
+    kibanaVersion,
+    fieldMap,
+    settings,
+    writeIndexOnly,
+  }) => {
     const newDataStream = new DataStreamSpacesAdapter(this.resourceNames.aliases[resource], {
       kibanaVersion,
       totalFieldsLimit: TOTAL_FIELDS_LIMIT,
+      writeIndexOnly,
     });
 
     newDataStream.setComponentTemplate({
       name: this.resourceNames.componentTemplate[resource],
       fieldMap,
+      settings,
     });
 
     newDataStream.setIndexTemplate({
@@ -229,29 +245,124 @@ export class AIAssistantService {
         pluginStop$: this.options.pluginStop$,
       });
 
-      await this.knowledgeBaseDataStream.install({
-        esClient,
-        logger: this.options.logger,
-        pluginStop$: this.options.pluginStop$,
-      });
+      if (this.assistantDefaultInferenceEndpoint) {
+        const knowledgeBaseDataStreamExists = (
+          await esClient.indices.getDataStream({
+            name: this.knowledgeBaseDataStream.name,
+          })
+        )?.data_streams?.length;
 
-      // Note: Pipeline creation can be removed in favor of semantic_text
-      const pipelineCreated = await pipelineExists({
-        esClient,
-        id: this.resourceNames.pipelines.knowledgeBase,
-      });
-      // ensure pipeline is re-created for those upgrading
-      // pipeline is noop now, so if one does not exist we do not need one
-      if (pipelineCreated) {
-        this.options.logger.debug(
-          `Installing ingest pipeline - ${this.resourceNames.pipelines.knowledgeBase}`
-        );
-        const response = await createPipeline({
+        // update component template for semantic_text field
+        // rollover
+        let mappings: IndicesGetFieldMappingResponse = {};
+        try {
+          mappings = await esClient.indices.getFieldMapping({
+            index: '.kibana-elastic-ai-assistant-knowledge-base-default',
+            fields: ['semantic_text'],
+          });
+        } catch (error) {
+          /* empty */
+        }
+
+        const isUsingDedicatedInferenceEndpoint =
+          (
+            Object.values(mappings)[0]?.mappings?.semantic_text?.mapping?.semantic_text as {
+              inference_id: string;
+            }
+          )?.inference_id === ASSISTANT_ELSER_INFERENCE_ID;
+
+        if (knowledgeBaseDataStreamExists && isUsingDedicatedInferenceEndpoint) {
+          const currentDataStream = this.createDataStream({
+            resource: 'knowledgeBase',
+            kibanaVersion: this.options.kibanaVersion,
+            fieldMap: {
+              ...omit(knowledgeBaseFieldMap, 'semantic_text'),
+              semantic_text: {
+                type: 'semantic_text',
+                array: false,
+                required: false,
+                inference_id: ASSISTANT_ELSER_INFERENCE_ID,
+                search_inference_id: ELASTICSEARCH_ELSER_INFERENCE_ID,
+              },
+            },
+          });
+
+          // Add `search_inference_id` to the existing mappings
+          await currentDataStream.install({
+            esClient,
+            logger: this.options.logger,
+            pluginStop$: this.options.pluginStop$,
+          });
+
+          // Migrate data stream mapping to the default inference_id
+          const newDS = this.createDataStream({
+            resource: 'knowledgeBase',
+            kibanaVersion: this.options.kibanaVersion,
+            fieldMap: {
+              ...omit(knowledgeBaseFieldMap, 'semantic_text'),
+              semantic_text: {
+                type: 'semantic_text',
+                array: false,
+                required: false,
+              },
+            },
+            settings: {
+              // force new semantic_text field behavior
+              'index.mapping.semantic_text.use_legacy_format': false,
+            },
+            writeIndexOnly: true,
+          });
+
+          // We need to first install the templates and then rollover the indices
+          await newDS.installTemplates({
+            esClient,
+            logger: this.options.logger,
+            pluginStop$: this.options.pluginStop$,
+          });
+
+          const indexNames = (
+            await esClient.indices.getDataStream({ name: newDS.name })
+          ).data_streams.map((ds) => ds.name);
+
+          try {
+            await Promise.all(
+              indexNames.map((indexName) => esClient.indices.rollover({ alias: indexName }))
+            );
+          } catch (e) {
+            /* empty */
+          }
+        } else {
+          // We need to make sure that the data stream is created with the correct mappings
+          this.knowledgeBaseDataStream = this.createDataStream({
+            resource: 'knowledgeBase',
+            kibanaVersion: this.options.kibanaVersion,
+            fieldMap: {
+              ...omit(knowledgeBaseFieldMap, 'semantic_text'),
+              semantic_text: {
+                type: 'semantic_text',
+                array: false,
+                required: false,
+              },
+            },
+            settings: {
+              // force new semantic_text field behavior
+              'index.mapping.semantic_text.use_legacy_format': false,
+            },
+            writeIndexOnly: true,
+          });
+          await this.knowledgeBaseDataStream.install({
+            esClient,
+            logger: this.options.logger,
+            pluginStop$: this.options.pluginStop$,
+          });
+        }
+      } else {
+        // Legacy path
+        await this.knowledgeBaseDataStream.install({
           esClient,
-          id: this.resourceNames.pipelines.knowledgeBase,
+          logger: this.options.logger,
+          pluginStop$: this.options.pluginStop$,
         });
-
-        this.options.logger.debug(`Installed ingest pipeline: ${response}`);
       }
 
       await this.promptsDataStream.install({
@@ -443,6 +554,7 @@ export class AIAssistantService {
       setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
       spaceId: opts.spaceId,
       manageGlobalKnowledgeBaseAIAssistant: opts.manageGlobalKnowledgeBaseAIAssistant ?? false,
+      assistantDefaultInferenceEndpoint: this.assistantDefaultInferenceEndpoint,
     });
   }
 

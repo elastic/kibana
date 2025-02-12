@@ -607,6 +607,22 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.IEventLogClient.refreshIndex",
+            "type": "Function",
+            "tags": [],
+            "label": "refreshIndex",
+            "description": [],
+            "signature": [
+              "() => Promise<void>"
+            ],
+            "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

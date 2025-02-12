@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import { useActions, useValues } from 'kea';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { Status } from '../../../../../../common/types/api';
+import { errorToText } from '../../../../../../common/utils/error_to_text';
 import { docLinks } from '../../../../shared/doc_links';
 import { KibanaLogic } from '../../../../shared/kibana';
 import { LicensingLogic } from '../../../../shared/licensing';
@@ -20,10 +21,6 @@ import {
   LICENSING_FEATURE,
 } from '../../../../shared/licensing_callout/licensing_callout';
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
-
-import { FetchCloudHealthApiLogic } from '../../../api/stats/fetch_cloud_health_api_logic';
-
-import { errorToText } from '../utils/error_to_text';
 
 import { AddConnectorLogic } from './add_connector_logic';
 import { NewConnectorTemplate } from './new_connector_template';
@@ -60,14 +57,6 @@ export const MethodConnector: React.FC<MethodConnectorProps> = ({
   const isNative = isNativeAvailable && isNativeProp;
 
   const isGated = isNative && !isCloud && !hasPlatinumLicense;
-
-  const { makeRequest: fetchCloudHealth } = useActions(FetchCloudHealthApiLogic);
-
-  useEffect(() => {
-    if (isCloud) {
-      fetchCloudHealth({});
-    }
-  }, [isCloud]);
 
   return (
     <EuiFlexGroup direction="column">

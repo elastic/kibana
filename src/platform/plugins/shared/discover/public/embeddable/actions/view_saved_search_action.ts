@@ -50,7 +50,7 @@ export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
   async isCompatible({ embeddable }: EmbeddableApiContext) {
     const { capabilities } = this.application;
     const hasDiscoverPermissions =
-      (capabilities.discover.show as boolean) || (capabilities.discover.save as boolean);
+      (capabilities.discover_v2.show as boolean) || (capabilities.discover_v2.save as boolean);
 
     if (!hasDiscoverPermissions) return false; // early return to delay async import until absolutely necessary
     const { compatibilityCheck } = await import('./view_saved_search_compatibility_check');

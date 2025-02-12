@@ -271,6 +271,23 @@ Use Kibana feature privileges to control access to reporting features. For more 
 - The `xpack.reporting.roles.allow` setting is no longer supported. If you have a `xpack.reporting.roles.allow` value in your `kibana.yml`, you should remove this setting and assign privileges to reporting features using Kibana feature privileges.
 ====
 
+[discrete]
+[[breaking-202863]]
+.Saved query privileges have been reworked (9.0.0)
+[%collapsible]
+====
+*Details* +
+Saved query privileges have been reworked to rely solely on a single global `savedQueryManagement` privilege, and eliminate app-specific overrides (e.g. implicit access with `all` privilege for Discover, Dashboard, Maps, and Visualize apps). This change simplifies the security model and ensures consistency in the saved query management UI across Kibana, but results in different handling of saved query privileges for new user roles, and minor breaking changes to the existing management UX.
+For more information, refer to {kibana-pull}202863[#202863].
+*Impact* +
+The `savedQueryManagement` feature privilege now globally controls access to saved query management for all new user roles. Regardless of privileges for Discover, Dashboard, Maps, or Visualize, new user roles follow this behaviour:
+. If `savedQueryManagement` is `none`, the user cannot see or access the saved query management UI or APIs.
+. If `savedQueryManagement` is `read`, the user can load queries from the UI and access read APIs, but cannot save queries from the UI or make changes to queries through APIs.
+. If `savedQueryManagement` is `all`, the user can both load and save queries from the UI and through APIs.
+*Action* +
+Existing user roles that were previously implicitly granted access to saved queries through the dashboard, discover, visualize, or maps feature privileges will retain that access to prevent breaking changes. While no action is required for existing roles, it’s still advisable to audit relevant roles and re-save them to migrate to the latest privileges model. For new roles, ensure that the savedQueryManagement privilege is set as needed.
+====
+
 [float]
 === Deprecation notices
 

@@ -6,10 +6,25 @@
  */
 
 import { resolve } from 'path';
-import type { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext, GenericFtrProviderContext } from '@kbn/test';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
+import {
+  KibanaEBTServerProvider,
+  KibanaEBTUIProvider,
+} from '@kbn/test-suites-src/analytics/services/kibana_ebt';
 import { pageObjects } from './page_objects';
 import { services } from './services';
+import type { services as inheritedServices } from '../functional/services';
+
+type SecurityTelemetryServices = typeof inheritedServices &
+  typeof services & {
+    kibana_ebt_ui: typeof KibanaEBTUIProvider;
+  };
+
+export type SecurityTelemetryFtrProviderContext = GenericFtrProviderContext<
+  SecurityTelemetryServices,
+  typeof pageObjects
+>;
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xpackFunctionalConfig = await readConfigFile(
@@ -21,6 +36,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     services: {
       ...xpackFunctionalConfig.get('services'),
       ...services,
+      kibana_ebt_server: KibanaEBTServerProvider,
+      kibana_ebt_ui: KibanaEBTUIProvider,
     },
     pageObjects,
     testFiles: [resolve(__dirname, './pages')],
@@ -50,6 +67,12 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // `--xpack.fleet.registryUrl=https://localhost:8080`,
         `--xpack.fleet.agents.fleet_server.hosts=["https://ftr.kibana:8220"]`,
         `--xpack.fleet.internal.fleetServerStandalone=true`,
+        `--xpack.fleet.internal.registry.kibanaVersionCheckEnabled=false`,
+        // Required for telemetry e2e tests
+        `--plugin-path=${resolve(
+          __dirname,
+          '../../../test/analytics/plugins/analytics_ftr_helpers'
+        )}`,
       ],
     },
   };
