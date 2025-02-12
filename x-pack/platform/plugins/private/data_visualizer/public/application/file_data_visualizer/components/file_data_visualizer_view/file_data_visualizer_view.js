@@ -366,6 +366,7 @@ export class FileDataVisualizerView extends Component {
               mode={mode}
               onChangeMode={this.changeMode}
               onCancel={this.onCancel}
+              setUploadResults={this.props.setUploadResults}
             />
           </>
         )}

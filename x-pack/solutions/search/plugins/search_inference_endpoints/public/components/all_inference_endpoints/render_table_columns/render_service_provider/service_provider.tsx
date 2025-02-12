@@ -11,83 +11,12 @@ import {
   ELASTIC_MODEL_DEFINITIONS,
   InferenceAPIConfigResponse,
 } from '@kbn/ml-trained-models-utils';
-import elasticIcon from '../../../../assets/images/providers/elastic.svg';
-import huggingFaceIcon from '../../../../assets/images/providers/hugging_face.svg';
-import cohereIcon from '../../../../assets/images/providers/cohere.svg';
-import openAIIcon from '../../../../assets/images/providers/open_ai.svg';
-import azureAIStudioIcon from '../../../../assets/images/providers/azure_ai_studio.svg';
-import azureOpenAIIcon from '../../../../assets/images/providers/azure_open_ai.svg';
-import googleAIStudioIcon from '../../../../assets/images/providers/google_ai_studio.svg';
-import mistralIcon from '../../../../assets/images/providers/mistral.svg';
-import amazonBedrockIcon from '../../../../assets/images/providers/amazon_bedrock.svg';
-import alibabaCloudAISearchIcon from '../../../../assets/images/providers/alibaba_cloud_ai_search.svg';
-import watsonxAIIcon from '../../../../assets/images/providers/watsonx_ai.svg';
-import { ServiceProviderKeys } from '../../types';
+import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import * as i18n from './translations';
 
 interface ServiceProviderProps {
   providerEndpoint: InferenceAPIConfigResponse;
 }
-
-interface ServiceProviderRecord {
-  icon: string;
-  name: string;
-}
-
-export const SERVICE_PROVIDERS: Record<ServiceProviderKeys, ServiceProviderRecord> = {
-  [ServiceProviderKeys['alibabacloud-ai-search']]: {
-    icon: alibabaCloudAISearchIcon,
-    name: 'AlibabaCloud AI Search',
-  },
-  [ServiceProviderKeys.amazonbedrock]: {
-    icon: amazonBedrockIcon,
-    name: 'Amazon Bedrock',
-  },
-  [ServiceProviderKeys.azureaistudio]: {
-    icon: azureAIStudioIcon,
-    name: 'Azure AI Studio',
-  },
-  [ServiceProviderKeys.azureopenai]: {
-    icon: azureOpenAIIcon,
-    name: 'Azure OpenAI',
-  },
-  [ServiceProviderKeys.cohere]: {
-    icon: cohereIcon,
-    name: 'Cohere',
-  },
-  [ServiceProviderKeys.elasticsearch]: {
-    icon: elasticIcon,
-    name: 'Elasticsearch',
-  },
-  [ServiceProviderKeys.elastic]: {
-    icon: elasticIcon,
-    name: 'Elastic',
-  },
-  [ServiceProviderKeys.elser]: {
-    icon: elasticIcon,
-    name: 'Elasticsearch',
-  },
-  [ServiceProviderKeys.googleaistudio]: {
-    icon: googleAIStudioIcon,
-    name: 'Google AI Studio',
-  },
-  [ServiceProviderKeys.hugging_face]: {
-    icon: huggingFaceIcon,
-    name: 'Hugging Face',
-  },
-  [ServiceProviderKeys.mistral]: {
-    icon: mistralIcon,
-    name: 'Mistral',
-  },
-  [ServiceProviderKeys.openai]: {
-    icon: openAIIcon,
-    name: 'OpenAI',
-  },
-  [ServiceProviderKeys.watsonxai]: {
-    icon: watsonxAIIcon,
-    name: 'WatsonxAI',
-  },
-};
 
 export const ServiceProvider: React.FC<ServiceProviderProps> = ({ providerEndpoint }) => {
   const { service } = providerEndpoint;

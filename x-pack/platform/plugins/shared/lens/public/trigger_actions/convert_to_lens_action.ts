@@ -17,7 +17,7 @@ export const convertToLensActionFactory =
       type: ACTION_CONVERT_TO_LENS,
       id,
       getDisplayName: () => displayName,
-      isCompatible: async () => !!application.capabilities.visualize.show,
+      isCompatible: async () => !!application.capabilities.visualize_v2.show,
       execute: async (context: { [key: string]: VisualizeEditorContext }) => {
         const table = Object.values(context.layers);
         const payload = {

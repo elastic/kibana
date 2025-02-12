@@ -8,7 +8,6 @@
  */
 
 import type {
-  ESQLAst,
   ESQLAstItem,
   ESQLCommand,
   ESQLCommandOption,
@@ -42,6 +41,7 @@ export const fieldTypes = [
   'counter_double',
   'unsupported',
   'date_nanos',
+  'function_named_parameters',
 ] as const;
 
 export type FieldType = (typeof fieldTypes)[number];
@@ -162,13 +162,14 @@ export interface Signature {
      * values that we don't want to show as suggestions.
      */
     literalSuggestions?: string[];
+    mapParams?: string;
   }>;
   minParams?: number;
   returnType: FunctionReturnType;
 }
 
 export interface FunctionDefinition {
-  type: 'builtin' | 'agg' | 'eval' | 'operator';
+  type: 'builtin' | 'agg' | 'scalar' | 'operator' | 'grouping';
   preview?: boolean;
   ignoreAsSuggestion?: boolean;
   name: string;
@@ -193,6 +194,10 @@ export interface CommandBaseDefinition<CommandName extends string> {
   alias?: string;
   description: string;
   /**
+   * Displays a Technical preview label in the autocomplete
+   */
+  preview?: boolean;
+  /**
    * Whether to show or hide in autocomplete suggestion list
    */
   hidden?: boolean;
@@ -204,7 +209,7 @@ export interface CommandBaseDefinition<CommandName extends string> {
     getSuggestedVariableName: () => string,
     getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
     getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
-    fullTextAst?: ESQLAst,
+    previousCommands?: ESQLCommand[],
     definition?: CommandDefinition<CommandName>,
     callbacks?: ESQLCallbacks
   ) => Promise<SuggestionRawDefinition[]>;

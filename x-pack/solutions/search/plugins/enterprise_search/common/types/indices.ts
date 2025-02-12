@@ -5,19 +5,11 @@
  * 2.0.
  */
 
-import { Connector, ConnectorIndex, ElasticsearchIndex } from '@kbn/search-connectors';
-
-import { Crawler } from './crawler';
+import type { ConnectorIndex, ElasticsearchIndex } from '@kbn/search-connectors';
 
 export interface AlwaysShowPattern {
   alias_pattern: string;
   index_pattern: string;
-}
-
-// TODO: Remove this type
-export interface CrawlerIndex extends ElasticsearchIndex {
-  connector: Connector;
-  crawler: Crawler;
 }
 
 export interface ElasticsearchIndexWithPrivileges extends ElasticsearchIndex {
@@ -28,4 +20,4 @@ export interface ElasticsearchIndexWithPrivileges extends ElasticsearchIndex {
   };
 }
 
-export type ElasticsearchIndexWithIngestion = ElasticsearchIndex | ConnectorIndex | CrawlerIndex;
+export type ElasticsearchIndexWithIngestion = ElasticsearchIndex | ConnectorIndex;

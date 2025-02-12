@@ -282,7 +282,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
               "icon": "search",
               "inAppUrl": Object {
                 "path": "/discover/2",
-                "uiCapabilitiesPath": "discover.show",
+                "uiCapabilitiesPath": "discover_v2.show",
               },
               "title": "MySearch",
             },
@@ -294,7 +294,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
               "icon": "dashboardApp",
               "inAppUrl": Object {
                 "path": "/dashboard/3",
-                "uiCapabilitiesPath": "dashboard.show",
+                "uiCapabilitiesPath": "dashboard_v2.show",
               },
               "title": "MyDashboard",
             },
@@ -306,7 +306,7 @@ exports[`SavedObjectsTable should render normally 1`] = `
               "icon": "visualizeApp",
               "inAppUrl": Object {
                 "path": "/edit/4",
-                "uiCapabilitiesPath": "visualize.show",
+                "uiCapabilitiesPath": "visualize_v2.show",
               },
               "title": "MyViz",
             },

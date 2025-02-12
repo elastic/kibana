@@ -8,7 +8,13 @@
 import React from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiBetaBadge, EuiFormRow, EuiSpacer, EuiSuperSelect, EuiText } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiText,
+  EuiRadioGroup,
+  EuiDescribedFormGroup,
+  EuiSpacer,
+} from '@elastic/eui';
 
 import { SetupTechnology } from '../../../../../types';
 
@@ -16,113 +22,96 @@ export const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';
 
 export const SetupTechnologySelector = ({
   disabled,
+  allowedSetupTechnologies,
   setupTechnology,
   onSetupTechnologyChange,
 }: {
   disabled: boolean;
+  allowedSetupTechnologies: SetupTechnology[];
   setupTechnology: SetupTechnology;
   onSetupTechnologyChange: (value: SetupTechnology) => void;
 }) => {
-  const options = [
-    {
-      value: SetupTechnology.AGENTLESS,
-      inputDisplay: (
-        <>
-          <FormattedMessage
-            id="xpack.fleet.setupTechnology.agentlessInputDisplay"
-            defaultMessage="Agentless"
-          />
-          &nbsp;
-          <EuiBetaBadge
-            label="Beta"
-            size="s"
-            tooltipContent="This module is not yet GA. Please help us by reporting any bugs."
-          />
-        </>
-      ),
-      dropdownDisplay: (
-        <>
-          <strong>
-            <FormattedMessage
-              id="xpack.fleet.setupTechnology.agentlessDrowpownDisplay"
-              defaultMessage="Agentless"
-            />
-          </strong>
-          &nbsp;
-          <EuiBetaBadge
-            label="Beta"
-            size="s"
-            tooltipContent="This module is not GA. Please help us by reporting any bugs."
-          />
-          <EuiText size="s" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.fleet.setupTechnology.agentlessDrowpownDescription"
-                defaultMessage="Set up the integration without an agent"
-              />
-            </p>
-          </EuiText>
-        </>
-      ),
-    },
-    {
-      value: SetupTechnology.AGENT_BASED,
-      inputDisplay: (
-        <FormattedMessage
-          id="xpack.fleet.setupTechnology.agentbasedInputDisplay"
-          defaultMessage="Agent-based"
-        />
-      ),
-      dropdownDisplay: (
-        <>
-          <strong>
-            <FormattedMessage
-              id="xpack.fleet.setupTechnology.agentbasedDrowpownDisplay"
-              defaultMessage="Agent-based"
-            />
-          </strong>
-          <EuiText size="s" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.fleet.setupTechnology.agentbasedDrowpownDescription"
-                defaultMessage="Set up the integration with an agent"
-              />
-            </p>
-          </EuiText>
-        </>
-      ),
-    },
-  ];
-
   return (
-    <>
-      <EuiSpacer size="l" />
-      <EuiFormRow
-        fullWidth
-        label={
+    <EuiDescribedFormGroup
+      title={
+        <h3>
           <FormattedMessage
             id="xpack.fleet.setupTechnology.setupTechnologyLabel"
-            defaultMessage="Setup technology"
+            defaultMessage="Deployment options"
           />
-        }
-      >
-        <EuiSuperSelect
-          disabled={disabled}
-          options={options}
-          valueOfSelected={setupTechnology}
-          placeholder={
-            <FormattedMessage
-              id="xpack.fleet.setupTechnology.setupTechnologyPlaceholder"
-              defaultMessage="Select the setup technology"
-            />
-          }
-          onChange={onSetupTechnologyChange}
-          itemLayoutAlign="top"
-          hasDividers
-          fullWidth
-          data-test-subj={SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ}
+        </h3>
+      }
+      description={
+        <FormattedMessage
+          id="xpack.fleet.setupTechnology.setupTechnologyDescription"
+          defaultMessage="Select a deployment mode for this integration."
         />
-      </EuiFormRow>
-    </>
+      }
+    >
+      <EuiRadioGroup
+        disabled={disabled}
+        name="SetupTechnologySelector"
+        data-test-subj={SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ}
+        options={[
+          {
+            id: `SetupTechnologySelector_${SetupTechnology.AGENTLESS}`,
+            value: SetupTechnology.AGENTLESS,
+            disabled: !allowedSetupTechnologies.includes(SetupTechnology.AGENTLESS),
+            label: (
+              <>
+                <strong>
+                  <FormattedMessage
+                    id="xpack.fleet.setupTechnology.agentlessInputDisplay"
+                    defaultMessage="Agentless"
+                  />{' '}
+                  <EuiBetaBadge
+                    label="Beta"
+                    size="s"
+                    tooltipContent="This module is not yet GA. Please help us by reporting any bugs."
+                    alignment="middle"
+                  />
+                </strong>
+                <EuiText size="s">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.fleet.setupTechnology.agentlessInputDescription"
+                      defaultMessage="Set up the integration without an agent"
+                    />
+                  </p>
+                </EuiText>
+                <EuiSpacer size="xs" />
+              </>
+            ),
+          },
+          {
+            id: `SetupTechnologySelector_${SetupTechnology.AGENT_BASED}`,
+            value: SetupTechnology.AGENT_BASED,
+            disabled: !allowedSetupTechnologies.includes(SetupTechnology.AGENT_BASED),
+            label: (
+              <>
+                <strong>
+                  <FormattedMessage
+                    id="xpack.fleet.setupTechnology.agentbasedInputDisplay"
+                    defaultMessage="Agent-based"
+                  />
+                </strong>
+                <EuiText size="s">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.fleet.setupTechnology.agentbasedInputDescription"
+                      defaultMessage="Deploy an Elastic Agent into your cloud environment"
+                    />
+                  </p>
+                </EuiText>
+              </>
+            ),
+          },
+        ]}
+        idSelected={`SetupTechnologySelector_${setupTechnology}`}
+        onChange={(id, value) => {
+          onSetupTechnologyChange(value as SetupTechnology);
+        }}
+      />
+    </EuiDescribedFormGroup>
   );
 };

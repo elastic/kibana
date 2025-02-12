@@ -1,0 +1,14 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "include": ["*.ts", "src/**/*", "__mocks__/**/*.ts"],
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/visualization-utils",
+  ]
+}

@@ -22,6 +22,7 @@ import {
 } from '../alerting_usage_collector';
 import { replaceDotSymbols } from './replace_dots_with_underscores';
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
+import { parseAndLogError } from './parse_and_log_error';
 
 const Millis2Nanos = 1000 * 1000;
 const percentileFieldNameMapping: Record<string, string> = {
@@ -189,14 +190,8 @@ export async function getExecutionsPerDayCount({
       ),
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
-    logger.warn(
-      `Error executing alerting telemetry task: getExecutionsPerDayCount - ${JSON.stringify(err)}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
-      }
-    );
+    const errorMessage = parseAndLogError(err, `getExecutionsPerDayCount`, logger);
+
     return {
       hasErrors: true,
       errorMessage,
@@ -262,17 +257,8 @@ export async function getExecutionTimeoutsPerDayCount({
       countExecutionTimeoutsByType: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
+    const errorMessage = parseAndLogError(err, `getExecutionsTimeoutsPerDayCount`, logger);
 
-    logger.warn(
-      `Error executing alerting telemetry task: getExecutionsTimeoutsPerDayCount - ${JSON.stringify(
-        err
-      )}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
-      }
-    );
     return {
       hasErrors: true,
       errorMessage,

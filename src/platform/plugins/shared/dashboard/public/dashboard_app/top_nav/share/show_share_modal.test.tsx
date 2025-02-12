@@ -8,15 +8,16 @@
  */
 
 import { Capabilities } from '@kbn/core/public';
-import { convertPanelMapToPanelsArray, DashboardContainerInput } from '../../../../common';
+import { convertPanelMapToPanelsArray } from '../../../../common';
 import { DashboardLocatorParams } from '../../../dashboard_container/types';
 
 import { shareService } from '../../../services/kibana_services';
 import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';
 import { getDashboardBackupService } from '../../../services/dashboard_backup_service';
+import { DashboardState } from '../../../dashboard_api/types';
 
 describe('showPublicUrlSwitch', () => {
-  test('returns false if "dashboard" app is not available', () => {
+  test('returns false if "dashboard_v2" app is not available', () => {
     const anonymousUserCapabilities: Capabilities = {
       catalogue: {},
       management: {},
@@ -27,12 +28,12 @@ describe('showPublicUrlSwitch', () => {
     expect(result).toBe(false);
   });
 
-  test('returns false if "dashboard" app is not accessible', () => {
+  test('returns false if "dashboard_v2" app is not accessible', () => {
     const anonymousUserCapabilities: Capabilities = {
       catalogue: {},
       management: {},
       navLinks: {},
-      dashboard: {
+      dashboard_v2: {
         show: false,
       },
     };
@@ -41,12 +42,12 @@ describe('showPublicUrlSwitch', () => {
     expect(result).toBe(false);
   });
 
-  test('returns true if "dashboard" app is not available an accessible', () => {
+  test('returns true if "dashboard_v2" app is not available an accessible', () => {
     const anonymousUserCapabilities: Capabilities = {
       catalogue: {},
       management: {},
       navLinks: {},
-      dashboard: {
+      dashboard_v2: {
         show: true,
       },
     };
@@ -67,9 +68,7 @@ describe('ShowShareModal', () => {
     jest.clearAllMocks();
   });
 
-  const getPropsAndShare = (
-    unsavedState?: Partial<DashboardContainerInput>
-  ): ShowShareModalProps => {
+  const getPropsAndShare = (unsavedState?: Partial<DashboardState>): ShowShareModalProps => {
     dashboardBackupService.getState = jest.fn().mockReturnValue({ dashboardState: unsavedState });
     return {
       isDirty: true,
@@ -93,7 +92,7 @@ describe('ShowShareModal', () => {
   });
 
   it('locatorParams unsaved state is properly propagated to locator', () => {
-    const unsavedDashboardState: DashboardContainerInput = {
+    const unsavedDashboardState = {
       panels: {
         panel_1: {
           type: 'panel_type',
@@ -120,7 +119,7 @@ describe('ShowShareModal', () => {
         },
       ],
       query: { query: 'bye', language: 'kuery' },
-    } as unknown as DashboardContainerInput;
+    };
     const showModalProps = getPropsAndShare(unsavedDashboardState);
     showModalProps.getPanelsState = () => {
       return {

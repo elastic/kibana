@@ -6,6 +6,7 @@
  */
 
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 import path from 'node:path';
 
@@ -19,6 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [require.resolve('./upgrade_assistant')],
     servers: xPackFunctionalTestsConfig.get('servers'),
     services: {
@@ -38,7 +40,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     esTestCluster: {
       ...xPackFunctionalTestsConfig.get('esTestCluster'),
-      dataArchive: path.resolve(__dirname, './fixtures/data_archives/upgrade_assistant.zip'),
+      // FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/209048
+      // dataArchive: path.resolve(__dirname, './fixtures/data_archives/upgrade_assistant.zip'),
     },
   };
 }

@@ -76,5 +76,7 @@
     "@kbn/default-nav-devtools",
     "@kbn/core-saved-objects-import-export-server-internal",
     "@kbn/core-deprecations-common",
+    "@kbn/data-grid-in-table-search",
+    "@kbn/scout-info",
   ]
 }
