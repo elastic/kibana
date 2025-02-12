@@ -58,7 +58,7 @@ export const otelFields: FieldDefinition = {
   severity_text: {
     type: 'keyword',
   },
-  body: {
+  'body.text': {
     type: 'match_only_text',
   },
   'severity.number': {
@@ -91,7 +91,7 @@ export const otelMappings: Record<string, MappingProperty> = {
     type: 'alias',
   },
   message: {
-    path: 'body',
+    path: 'body.text',
     type: 'alias',
   },
   'trace.id': {

@@ -42,7 +42,8 @@ export const logsDefaultPipelineProcessors = [
           ctx.remove('host.name');
         }
         if (ctx.message != null) {
-          ctx['body'] = ctx.message;
+          ctx.body = [:];
+          ctx.body.text = ctx.message;
           ctx.remove('message');
         }
         if (ctx.log?.level != null) {
@@ -65,15 +66,15 @@ export const logsDefaultPipelineProcessors = [
   },
   {
     dot_expander: {
-      field: 'resource.attributes.*',
       path: 'resource.attributes',
+      field: '*',
       ignore_failure: true,
     },
   },
   {
     dot_expander: {
-      field: 'attributes.*',
       path: 'attributes',
+      field: '*',
       ignore_failure: true,
     },
   },

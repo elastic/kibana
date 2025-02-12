@@ -52,7 +52,7 @@ export function generateLayer(
         dynamic: false,
         properties: {
           ...properties,
-          ...otelMappings,
+          ...(isRoot(name) ? otelMappings : {}),
         },
       },
     },
