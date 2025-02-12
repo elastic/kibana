@@ -195,6 +195,7 @@ export const chatCompleteRoute = (
             traceData: Message['traceData'] = {},
             isError = false
           ): Promise<void> => {
+            console.log('*** onLlmResponse', content);
             if (newConversation?.id && conversationsDataClient) {
               const contentReferences =
                 contentReferencesStore && pruneContentReferences(content, contentReferencesStore);
@@ -211,6 +212,7 @@ export const chatCompleteRoute = (
             }
           };
 
+          // execution:
           return await langChainExecute({
             abortSignal,
             isStream: request.body.isStream ?? false,

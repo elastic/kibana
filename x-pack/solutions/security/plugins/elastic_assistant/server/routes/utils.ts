@@ -182,6 +182,7 @@ export const getLlmType = (actionTypeId: string): string | undefined => {
   return llmTypeDictionary[actionTypeId];
 };
 
+// TODO: find remaining usages
 export const getLlmClass = (llmType?: string) => {
   switch (llmType) {
     case 'bedrock':
