@@ -20,6 +20,7 @@ import type { NewRemoteElasticsearchOutput } from '../../common/types';
 
 import { appContextService, outputService } from '../services';
 import { getInstalledPackageSavedObjects } from '../services/epm/packages/get';
+import { FLEET_SYNCED_INTEGRATIONS_INDEX_NAME } from '../services/setup/fleet_synced_integrations';
 
 export const TYPE = 'fleet:sync-integrations-task';
 export const VERSION = '1.0.0';
@@ -27,7 +28,6 @@ const TITLE = 'Fleet Sync Integrations Task';
 const SCOPE = ['fleet'];
 const INTERVAL = '5m';
 const TIMEOUT = '1m';
-export const FLEET_SYNCED_INTEGRATIONS_INDEX_NAME = 'fleet-synced-integrations';
 
 interface SyncIntegrationsTaskSetupContract {
   core: CoreSetup;
@@ -208,7 +208,7 @@ export class SyncIntegrationsTask {
 
     await esClient.update(
       {
-        id: 'fleet-synced-integrations',
+        id: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
         index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
         body: {
           doc: newDoc,
