@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataViewPicker as USDataViewPicker } from '@kbn/unified-search-plugin/public';
+import { DataViewPicker as UnifiedDataViewPicker } from '@kbn/unified-search-plugin/public';
 import React, { useCallback, useRef, useMemo, memo, useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -113,7 +113,7 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
   }, [data.dataViews, adhocDataViewSpecs, dataViews]);
 
   return (
-    <USDataViewPicker
+    <UnifiedDataViewPicker
       currentDataViewId={dataViewId || DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID}
       trigger={triggerConfig}
       onChangeDataView={handleChangeDataView}
