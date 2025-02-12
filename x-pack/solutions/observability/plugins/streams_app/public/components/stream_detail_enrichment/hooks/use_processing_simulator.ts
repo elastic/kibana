@@ -28,7 +28,7 @@ import { processorConverter } from '../utils';
 
 export type Simulation = APIReturnType<'POST /api/streams/{name}/processing/_simulate'>;
 export type ProcessorMetrics =
-  Simulation['processor_metrics'][keyof Simulation['processor_metrics']];
+  Simulation['processors_metrics'][keyof Simulation['processors_metrics']];
 
 export interface TableColumn {
   name: string;

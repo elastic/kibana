@@ -85,7 +85,7 @@ export const ProcessorErrors = ({ errors }: { errors: ProcessorMetrics['errors']
     >
       {visibleErrors.map((error, id) => (
         <EuiCallOut key={id} color="danger" iconType="warning" size="s" title={errorTitle}>
-          {error}
+          {error.message}
         </EuiCallOut>
       ))}
       {shouldDisplayErrorToggle && !isErrorListExpanded && (

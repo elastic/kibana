@@ -28,7 +28,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useForm, SubmitHandler, FormProvider, useWatch } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
-import useToggle from 'react-use/lib/useToggle';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
 import { ProcessorTypeSelector } from './processor_type_selector';

@@ -231,7 +231,7 @@ const ProcessorsEditor = React.memo(
                   onDeleteProcessor={onDeleteProcessor}
                   onUpdateProcessor={onUpdateProcessor}
                   onWatchProcessor={onWatchProcessor}
-                  processorMetrics={simulation?.processor_metrics[processor.id]}
+                  processorMetrics={simulation?.processors_metrics[processor.id]}
                 />
               ))}
             </SortableList>
@@ -241,7 +241,7 @@ const ProcessorsEditor = React.memo(
             definition={definition}
             onAddProcessor={onAddProcessor}
             onWatchProcessor={onWatchProcessor}
-            processorMetrics={simulation?.processor_metrics.draft}
+            processorMetrics={simulation?.processors_metrics.draft}
           />
         </EuiPanel>
       </>
