@@ -10,32 +10,36 @@ import React from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const GridRowHeader = ({
-  isCollapsed,
-  toggleIsCollapsed,
-  rowTitle,
-}: {
-  isCollapsed: boolean;
-  toggleIsCollapsed: () => void;
-  rowTitle?: string;
-}) => {
-  return (
-    <div className="kbnGridRowHeader">
-      <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s">
-        <EuiButtonIcon
-          color="text"
-          aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
-            defaultMessage: 'Toggle collapse',
-          })}
-          iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
-          onClick={toggleIsCollapsed}
-        />
-        <EuiTitle size="xs">
-          <h2>{rowTitle}</h2>
-        </EuiTitle>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-    </div>
-  );
-};
+export const GridRowHeader = React.memo(
+  ({
+    isCollapsed,
+    toggleIsCollapsed,
+    rowTitle,
+  }: {
+    isCollapsed: boolean;
+    toggleIsCollapsed: () => void;
+    rowTitle?: string;
+  }) => {
+    return (
+      <div className="kbnGridRowHeader">
+        <EuiSpacer size="s" />
+        <EuiFlexGroup gutterSize="s">
+          <EuiButtonIcon
+            color="text"
+            aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
+              defaultMessage: 'Toggle collapse',
+            })}
+            iconType={isCollapsed ? 'arrowRight' : 'arrowDown'}
+            onClick={toggleIsCollapsed}
+          />
+          <EuiTitle size="xs">
+            <h2>{rowTitle}</h2>
+          </EuiTitle>
+        </EuiFlexGroup>
+        <EuiSpacer size="s" />
+      </div>
+    );
+  }
+);
+
+GridRowHeader.displayName = 'KbnGridLayoutRowHeader';
