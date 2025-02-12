@@ -177,6 +177,7 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
             onChange={onChangeApiDefinition}
             display="large"
             aria-label="Upload API definition file"
+            data-loading={isParsing || isGenerating}
             isLoading={isParsing || isGenerating}
             isInvalid={apiFileError != null || (showValidation && uploadedFile === undefined)}
             data-test-subj="apiDefinitionFilePicker"

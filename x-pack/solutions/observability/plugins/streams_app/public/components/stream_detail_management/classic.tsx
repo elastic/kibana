@@ -6,25 +6,26 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { UnwiredReadStreamDefinition } from '@kbn/streams-schema';
+import { UnwiredStreamGetResponse } from '@kbn/streams-schema';
 import { EuiCallOut, EuiFlexGroup, EuiListGroup, EuiText } from '@elastic/eui';
 import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 import { RedirectTo } from '../redirect_to';
 import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { useKibana } from '../../hooks/use_kibana';
 import { ManagementTabs, Wrapper } from './wrapper';
+import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 
-type ManagementSubTabs = 'enrich' | 'overview';
+type ManagementSubTabs = 'enrich' | 'overview' | 'lifecycle';
 
 function isValidManagementSubTab(value: string): value is ManagementSubTabs {
-  return ['enrich', 'overview'].includes(value);
+  return ['enrich', 'overview', 'lifecycle'].includes(value);
 }
 
 export function ClassicStreamDetailManagement({
   definition,
   refreshDefinition,
 }: {
-  definition: UnwiredReadStreamDefinition;
+  definition: UnwiredStreamGetResponse;
   refreshDefinition: () => void;
 }) {
   const {
@@ -49,6 +50,15 @@ export function ClassicStreamDetailManagement({
         defaultMessage: 'Extract field',
       }),
     };
+
+    tabs.lifecycle = {
+      content: (
+        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+        defaultMessage: 'Data retention',
+      }),
+    };
   }
 
   if (!isValidManagementSubTab(subtab)) {
@@ -63,7 +73,7 @@ export function ClassicStreamDetailManagement({
   return <Wrapper tabs={tabs} streamId={key} subtab={subtab} />;
 }
 
-function UnmanagedStreamOverview({ definition }: { definition: UnwiredReadStreamDefinition }) {
+function UnmanagedStreamOverview({ definition }: { definition: UnwiredStreamGetResponse }) {
   const {
     core: {
       http: { basePath },
