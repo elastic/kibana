@@ -39,7 +39,7 @@ elasticsearch.ignoreVersionMismatch: true
 - Run this command to start evaluating: `node x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/index.js --kibana http://<username>:<password>@localhost:5601`
 
 By default the script will use the Elasticsearch credentials specified in `kibana.dev.yml`, if you want to override it use the `--es` flag when running the evaluation script:
-E.g.: `node x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/index.js --kibana http://<username>:<password>@localhost:5601 --es https://<username>:<password>@<hosted-url>:<port>`
+E.g.: `node x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/index.js --kibana http://<username>:<password>@localhost:5601 --es http://<username>:<password>@<hosted-url>:<port>`
 
 The `--kibana` and `--es` flags override the default credentials. Only basic auth is supported.
 
