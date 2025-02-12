@@ -26,7 +26,7 @@ export const VERSION_UPDATE_INFO = (
 ) => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.versionUpdateInfo"
-    defaultMessage="{numOfFieldsWithUpdatesValue} {numOfFieldsWithUpdates, plural, one {field} other {fields}} changed in Elastic update from version {currentVersionNumber} to {targetVersionNumber}"
+    defaultMessage="{numOfFieldsWithUpdatesValue} {numOfFieldsWithUpdates, plural, one {field} other {fields}} being changed in this Elastic update from version {currentVersionNumber} to {targetVersionNumber}"
     values={{
       numOfFieldsWithUpdatesValue: <strong>{numOfFieldsWithUpdates}</strong>,
       numOfFieldsWithUpdates,
