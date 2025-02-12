@@ -8,46 +8,17 @@
  */
 
 import React, { useCallback, type FC } from 'react';
-import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { css } from '@emotion/css';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiListGroup,
-  EuiListGroupItem,
-  type EuiThemeComputed,
-  useEuiTheme,
-  transparentize,
-  useIsWithinMinBreakpoint,
-  EuiButton,
-} from '@elastic/eui';
+import { type EuiThemeComputed, useEuiTheme, transparentize, EuiButton } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import { useNavigation as useServices } from '../../services';
-import { isActiveFromUrl } from '../../utils';
 import type { NavigateToUrlFn } from '../../types';
 import { usePanel } from './panel';
 
-const getStyles = (euiTheme: EuiThemeComputed<{}>) => css`
-  * {
-    // EuiListGroupItem changes the links font-weight, we need to override it
-    font-weight: ${euiTheme.font.weight.regular};
-  }
-  &.sideNavItem:hover {
-    background-color: transparent;
-  }
-  &.sideNavItem--isActive:hover,
-  &.sideNavItem--isActive {
-    background-color: ${transparentize(euiTheme.colors.lightShade, 0.5)};
-    & * {
-      font-weight: ${euiTheme.font.weight.medium};
-    }
-  }
-`;
-
 const getButtonStyles = (euiTheme: EuiThemeComputed<{}>, isActive: boolean) => css`
-  background-color: ${isActive ? transparentize(euiTheme.colors.lightShade, 0.5) : 'transparent'};
+  background-color: ${isActive
+    ? transparentize(euiTheme.colors.backgroundBasePlain, 0.5)
+    : 'transparent'};
   transform: none !important; /* don't translateY 1px */
   color: inherit;
   font-weight: inherit;
@@ -70,24 +41,13 @@ interface Props {
   activeNodes: ChromeProjectNavigationNode[][];
 }
 
-export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, activeNodes }: Props) => {
+export const NavigationItemOpenPanel: FC<Props> = ({ item }: Props) => {
   const { euiTheme } = useEuiTheme();
   const { open: openPanel, close: closePanel, selectedNode } = usePanel();
-  const { isSideNavCollapsed } = useServices();
-  const { title, deepLink, children } = item;
+  const { title, deepLink } = item;
   const { id, path } = item;
-  const href = deepLink?.url ?? item.href;
-  const isNotMobile = useIsWithinMinBreakpoint('s');
-  const isIconVisible = isNotMobile && !isSideNavCollapsed && !!children && children.length > 0;
-  const hasLandingPage = Boolean(href);
   const isExpanded = selectedNode?.path === path;
-  const isActive = hasLandingPage ? isActiveFromUrl(item.path, activeNodes) : isExpanded;
-
-  const itemClassNames = classNames(
-    'sideNavItem',
-    { 'sideNavItem--isActive': isActive },
-    getStyles(euiTheme)
-  );
+  const isActive = isExpanded;
 
   const buttonClassNames = classNames('sideNavItem', getButtonStyles(euiTheme, isActive));
 
@@ -95,11 +55,6 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
     [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
     [`nav-item-id-${id}`]: id,
     [`nav-item-isActive`]: isActive,
-  });
-
-  const buttonDataTestSubj = classNames(`panelOpener`, `panelOpener-${path}`, {
-    [`panelOpener-id-${id}`]: id,
-    [`panelOpener-deepLinkId-${deepLink?.id}`]: !!deepLink,
   });
 
   const togglePanel = useCallback(() => {
@@ -111,72 +66,24 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, active
   }, [selectedNode?.id, item, closePanel, openPanel]);
 
   const onLinkClick = useCallback(
-    (e: React.MouseEvent) => {
-      if (!href) {
-        togglePanel();
-        return;
-      }
-      e.preventDefault();
-      navigateToUrl(href);
-      closePanel();
+    (_e: React.MouseEvent) => {
+      togglePanel();
+      return;
     },
-    [closePanel, href, navigateToUrl, togglePanel]
+    [togglePanel]
   );
 
-  const onIconClick = useCallback(() => {
-    togglePanel();
-  }, [togglePanel]);
-
-  if (!hasLandingPage) {
-    return (
-      <EuiButton
-        onClick={onLinkClick}
-        iconSide="right"
-        iconType="arrowRight"
-        size="s"
-        fullWidth
-        className={buttonClassNames}
-        data-test-subj={dataTestSubj}
-      >
-        {title}
-      </EuiButton>
-    );
-  }
-
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="xs">
-      <EuiFlexItem style={{ flexBasis: isIconVisible ? '80%' : '100%' }}>
-        <EuiListGroup gutterSize="none">
-          <EuiListGroupItem
-            label={title}
-            href={href}
-            wrapText
-            onClick={onLinkClick}
-            className={itemClassNames}
-            color="text"
-            size="s"
-            data-test-subj={dataTestSubj}
-          />
-        </EuiListGroup>
-      </EuiFlexItem>
-      {isIconVisible && (
-        <EuiFlexItem grow={0} style={{ flexBasis: '15%' }}>
-          <EuiButtonIcon
-            display={isExpanded ? 'base' : 'empty'}
-            size="s"
-            color="text"
-            onClick={onIconClick}
-            iconType="spaces"
-            iconSize="m"
-            aria-label={i18n.translate('sharedUXPackages.chrome.sideNavigation.togglePanel', {
-              defaultMessage: 'Toggle "{title}" panel navigation',
-              values: { title },
-            })}
-            aria-expanded={isExpanded}
-            data-test-subj={buttonDataTestSubj}
-          />
-        </EuiFlexItem>
-      )}
-    </EuiFlexGroup>
+    <EuiButton
+      onClick={onLinkClick}
+      iconSide="right"
+      iconType="arrowRight"
+      size="s"
+      fullWidth
+      className={buttonClassNames}
+      data-test-subj={dataTestSubj}
+    >
+      {title}
+    </EuiButton>
   );
 };
