@@ -43,7 +43,7 @@ const readGroupRoute = createServerRoute({
       return { group: definition.group };
     }
 
-    throw badRequest(`Stream is not an ingest stream`);
+    throw badRequest(`Stream is not a group stream`);
   },
 });
 
