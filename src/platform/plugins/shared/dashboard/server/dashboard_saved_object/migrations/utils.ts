@@ -41,7 +41,10 @@ export function convertPanelStateToSavedDashboardPanel(
       i: panelId,
     },
     panelIndex: panelId,
-    embeddableConfig: omit(panelState.explicitInput as { id: string, savedObjectId?: string, title?: string }, ['id', 'savedObjectId', 'title']),
+    embeddableConfig: omit(
+      panelState.explicitInput as { id: string; savedObjectId?: string; title?: string },
+      ['id', 'savedObjectId', 'title']
+    ),
     ...(title !== undefined && { title }),
     ...(savedObjectId !== undefined && { id: savedObjectId }),
     ...(panelState.panelRefName !== undefined && { panelRefName: panelState.panelRefName }),

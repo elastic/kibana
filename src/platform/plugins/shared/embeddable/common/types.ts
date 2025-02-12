@@ -75,8 +75,8 @@ export type EmbeddableInput = {
 };
 
 export type EmbeddableStateWithType = {
-  enhancements?: SerializableRecord,
-  type: string
+  enhancements?: SerializableRecord;
+  type: string;
 };
 
 export interface EmbeddableRegistryDefinition<

@@ -21,11 +21,11 @@ export interface DashboardCapabilities {
 /**
  * A partially parsed version of the Dashboard Attributes used for inject and extract logic for both the Dashboard Container and the Dashboard Saved Object.
  */
-export type ParsedDashboardAttributesWithType = {
+export interface ParsedDashboardAttributesWithType {
   id: string;
   panels: DashboardPanelMap;
   type: 'dashboard';
-};
+}
 
 export interface DashboardAttributesAndReferences {
   attributes: DashboardAttributes;
