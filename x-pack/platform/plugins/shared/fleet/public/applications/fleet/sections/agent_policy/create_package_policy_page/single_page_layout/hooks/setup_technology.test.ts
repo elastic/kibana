@@ -290,6 +290,10 @@ describe('useSetupTechnology', () => {
         })
       );
 
+      expect(result.current.allowedSetupTechnologies).toStrictEqual([
+        SetupTechnology.AGENTLESS,
+        SetupTechnology.AGENT_BASED,
+      ]);
       expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
     });
 
@@ -419,6 +423,7 @@ describe('useSetupTechnology', () => {
         })
       );
 
+      expect(result.current.allowedSetupTechnologies).toStrictEqual([SetupTechnology.AGENTLESS]);
       expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENTLESS);
     });
 

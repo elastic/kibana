@@ -178,6 +178,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     hasAgentPolicyError,
     isInitialized,
     handleSetupTechnologyChange,
+    allowedSetupTechnologies,
     selectedSetupTechnology,
     defaultSetupTechnology,
     isAgentlessSelected,
@@ -404,6 +405,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           {!extensionView && isAgentlessIntegration(packageInfo) && (
             <SetupTechnologySelector
               disabled={false}
+              allowedSetupTechnologies={allowedSetupTechnologies}
               setupTechnology={selectedSetupTechnology}
               onSetupTechnologyChange={(value) => {
                 handleSetupTechnologyChange(value);
@@ -456,6 +458,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       isAgentlessSelected,
       handleExtensionViewOnChange,
       handleSetupTechnologyChange,
+      allowedSetupTechnologies,
     ]
   );
 

@@ -50,6 +50,7 @@ import { ConnectorMissingCallout } from '../connectorland/connector_missing_call
 import { ConversationSidePanel } from './conversations/conversation_sidepanel';
 import { SelectedPromptContexts } from './prompt_editor/selected_prompt_contexts';
 import { AssistantHeader } from './assistant_header';
+import { AnonymizedValuesAndCitationsTour } from '../tour/anonymized_values_and_citations_tour';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
 
@@ -448,196 +449,201 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   return (
-    <EuiFlexGroup direction={'row'} wrap={false} gutterSize="none">
-      {chatHistoryVisible && (
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            inline-size: ${CONVERSATION_SIDE_PANEL_WIDTH}px;
-            border-right: ${euiTheme.border.thin};
-          `}
-        >
-          <ConversationSidePanel
-            currentConversation={currentConversation}
-            onConversationSelected={handleOnConversationSelected}
-            conversations={conversations}
-            onConversationDeleted={handleOnConversationDeleted}
-            onConversationCreate={handleCreateConversation}
-            refetchCurrentUserConversations={refetchCurrentUserConversations}
-          />
-        </EuiFlexItem>
+    <>
+      {contentReferencesEnabled && (
+        <AnonymizedValuesAndCitationsTour conversation={currentConversation} />
       )}
-      <EuiFlexItem
-        css={css`
-          overflow: hidden;
-        `}
-      >
-        <CommentContainer data-test-subj="assistantChat">
-          <EuiFlexGroup
+      <EuiFlexGroup direction={'row'} wrap={false} gutterSize="none">
+        {chatHistoryVisible && (
+          <EuiFlexItem
+            grow={false}
             css={css`
-              overflow: hidden;
+              inline-size: ${CONVERSATION_SIDE_PANEL_WIDTH}px;
+              border-right: ${euiTheme.border.thin};
             `}
           >
-            <EuiFlexItem
+            <ConversationSidePanel
+              currentConversation={currentConversation}
+              onConversationSelected={handleOnConversationSelected}
+              conversations={conversations}
+              onConversationDeleted={handleOnConversationDeleted}
+              onConversationCreate={handleCreateConversation}
+              refetchCurrentUserConversations={refetchCurrentUserConversations}
+            />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem
+          css={css`
+            overflow: hidden;
+          `}
+        >
+          <CommentContainer data-test-subj="assistantChat">
+            <EuiFlexGroup
               css={css`
-                max-width: 100%;
+                overflow: hidden;
               `}
             >
-              <EuiFlyoutHeader hasBorder>
-                <AssistantHeader
-                  isLoading={isInitialLoad}
-                  selectedConversation={currentConversation}
-                  defaultConnector={defaultConnector}
-                  isDisabled={isDisabled || isLoadingChatSend}
-                  isSettingsModalVisible={isSettingsModalVisible}
-                  setIsSettingsModalVisible={setIsSettingsModalVisible}
-                  onCloseFlyout={onCloseFlyout}
-                  onChatCleared={handleOnChatCleared}
-                  chatHistoryVisible={chatHistoryVisible}
-                  setChatHistoryVisible={setChatHistoryVisible}
-                  onConversationSelected={handleOnConversationSelected}
-                  conversations={conversations}
-                  conversationsLoaded={isFetchedCurrentUserConversations}
-                  refetchCurrentUserConversations={refetchCurrentUserConversations}
-                  onConversationCreate={handleCreateConversation}
-                  isAssistantEnabled={isAssistantEnabled}
-                  refetchPrompts={refetchPrompts}
-                />
-
-                {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
-                {createCodeBlockPortals()}
-              </EuiFlyoutHeader>
-              <EuiFlyoutBody
+              <EuiFlexItem
                 css={css`
-                  min-height: 100px;
-                  flex: 1;
+                  max-width: 100%;
+                `}
+              >
+                <EuiFlyoutHeader hasBorder>
+                  <AssistantHeader
+                    isLoading={isInitialLoad}
+                    selectedConversation={currentConversation}
+                    defaultConnector={defaultConnector}
+                    isDisabled={isDisabled || isLoadingChatSend}
+                    isSettingsModalVisible={isSettingsModalVisible}
+                    setIsSettingsModalVisible={setIsSettingsModalVisible}
+                    onCloseFlyout={onCloseFlyout}
+                    onChatCleared={handleOnChatCleared}
+                    chatHistoryVisible={chatHistoryVisible}
+                    setChatHistoryVisible={setChatHistoryVisible}
+                    onConversationSelected={handleOnConversationSelected}
+                    conversations={conversations}
+                    conversationsLoaded={isFetchedCurrentUserConversations}
+                    refetchCurrentUserConversations={refetchCurrentUserConversations}
+                    onConversationCreate={handleCreateConversation}
+                    isAssistantEnabled={isAssistantEnabled}
+                    refetchPrompts={refetchPrompts}
+                  />
 
-                  > div {
+                  {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
+                  {createCodeBlockPortals()}
+                </EuiFlyoutHeader>
+                <EuiFlyoutBody
+                  css={css`
+                    min-height: 100px;
+                    flex: 1;
+
+                    > div {
+                      display: flex;
+                      flex-direction: column;
+                      align-items: stretch;
+
+                      > .euiFlyoutBody__banner {
+                        overflow-x: unset;
+                      }
+
+                      > .euiFlyoutBody__overflowContent {
+                        display: flex;
+                        flex: 1;
+                        overflow: auto;
+                      }
+                    }
+                  `}
+                  banner={
+                    !isDisabled &&
+                    showMissingConnectorCallout &&
+                    isFetchedConnectors && (
+                      <ConnectorMissingCallout
+                        isConnectorConfigured={(connectors?.length ?? 0) > 0}
+                        isSettingsModalVisible={isSettingsModalVisible}
+                        setIsSettingsModalVisible={setIsSettingsModalVisible}
+                      />
+                    )
+                  }
+                >
+                  <AssistantBody
+                    allSystemPrompts={allSystemPrompts}
+                    comments={comments}
+                    currentConversation={currentConversation}
+                    currentSystemPromptId={currentSystemPrompt?.id}
+                    handleOnConversationSelected={handleOnConversationSelected}
+                    http={http}
+                    isAssistantEnabled={isAssistantEnabled}
+                    isLoading={isInitialLoad}
+                    isSettingsModalVisible={isSettingsModalVisible}
+                    isWelcomeSetup={isWelcomeSetup}
+                    setCurrentSystemPromptId={setCurrentSystemPromptId}
+                    setIsSettingsModalVisible={setIsSettingsModalVisible}
+                  />
+                </EuiFlyoutBody>
+                <EuiFlyoutFooter
+                  css={css`
+                    background: none;
+                    border-top: ${euiTheme.border.thin};
+                    overflow: hidden;
+                    max-height: 60%;
                     display: flex;
                     flex-direction: column;
-                    align-items: stretch;
-
-                    > .euiFlyoutBody__banner {
-                      overflow-x: unset;
-                    }
-
-                    > .euiFlyoutBody__overflowContent {
-                      display: flex;
-                      flex: 1;
-                      overflow: auto;
-                    }
-                  }
-                `}
-                banner={
-                  !isDisabled &&
-                  showMissingConnectorCallout &&
-                  isFetchedConnectors && (
-                    <ConnectorMissingCallout
-                      isConnectorConfigured={(connectors?.length ?? 0) > 0}
-                      isSettingsModalVisible={isSettingsModalVisible}
-                      setIsSettingsModalVisible={setIsSettingsModalVisible}
-                    />
-                  )
-                }
-              >
-                <AssistantBody
-                  allSystemPrompts={allSystemPrompts}
-                  comments={comments}
-                  currentConversation={currentConversation}
-                  currentSystemPromptId={currentSystemPrompt?.id}
-                  handleOnConversationSelected={handleOnConversationSelected}
-                  http={http}
-                  isAssistantEnabled={isAssistantEnabled}
-                  isLoading={isInitialLoad}
-                  isSettingsModalVisible={isSettingsModalVisible}
-                  isWelcomeSetup={isWelcomeSetup}
-                  setCurrentSystemPromptId={setCurrentSystemPromptId}
-                  setIsSettingsModalVisible={setIsSettingsModalVisible}
-                />
-              </EuiFlyoutBody>
-              <EuiFlyoutFooter
-                css={css`
-                  background: none;
-                  border-top: ${euiTheme.border.thin};
-                  overflow: hidden;
-                  max-height: 60%;
-                  display: flex;
-                  flex-direction: column;
-                `}
-              >
-                <EuiPanel
-                  paddingSize="m"
-                  hasShadow={false}
-                  css={css`
-                    overflow: auto;
                   `}
                 >
-                  {!isDisabled &&
-                    Object.keys(promptContexts).length !== selectedPromptContextsCount && (
-                      <EuiFlexGroup>
-                        <EuiFlexItem>
-                          <>
-                            <ContextPills
-                              anonymizationFields={anonymizationFields}
-                              promptContexts={promptContexts}
-                              selectedPromptContexts={selectedPromptContexts}
-                              setSelectedPromptContexts={setSelectedPromptContexts}
-                            />
-                            {Object.keys(promptContexts).length > 0 && <EuiSpacer size={'s'} />}
-                          </>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    )}
+                  <EuiPanel
+                    paddingSize="m"
+                    hasShadow={false}
+                    css={css`
+                      overflow: auto;
+                    `}
+                  >
+                    {!isDisabled &&
+                      Object.keys(promptContexts).length !== selectedPromptContextsCount && (
+                        <EuiFlexGroup>
+                          <EuiFlexItem>
+                            <>
+                              <ContextPills
+                                anonymizationFields={anonymizationFields}
+                                promptContexts={promptContexts}
+                                selectedPromptContexts={selectedPromptContexts}
+                                setSelectedPromptContexts={setSelectedPromptContexts}
+                              />
+                              {Object.keys(promptContexts).length > 0 && <EuiSpacer size={'s'} />}
+                            </>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      )}
 
-                  <EuiFlexGroup direction="column" gutterSize="s">
-                    {Object.keys(selectedPromptContexts).length ? (
+                    <EuiFlexGroup direction="column" gutterSize="s">
+                      {Object.keys(selectedPromptContexts).length ? (
+                        <EuiFlexItem grow={false}>
+                          <SelectedPromptContexts
+                            promptContexts={promptContexts}
+                            selectedPromptContexts={selectedPromptContexts}
+                            setSelectedPromptContexts={setSelectedPromptContexts}
+                            currentReplacements={currentConversation?.replacements}
+                          />
+                        </EuiFlexItem>
+                      ) : null}
+
                       <EuiFlexItem grow={false}>
-                        <SelectedPromptContexts
-                          promptContexts={promptContexts}
-                          selectedPromptContexts={selectedPromptContexts}
-                          setSelectedPromptContexts={setSelectedPromptContexts}
-                          currentReplacements={currentConversation?.replacements}
+                        <ChatSend
+                          handleChatSend={handleChatSend}
+                          setUserPrompt={setUserPrompt}
+                          handleRegenerateResponse={handleRegenerateResponse}
+                          isDisabled={isSendingDisabled}
+                          isLoading={isLoadingChatSend}
+                          shouldRefocusPrompt={shouldRefocusPrompt}
+                          userPrompt={userPrompt}
                         />
                       </EuiFlexItem>
-                    ) : null}
-
-                    <EuiFlexItem grow={false}>
-                      <ChatSend
-                        handleChatSend={handleChatSend}
-                        setUserPrompt={setUserPrompt}
-                        handleRegenerateResponse={handleRegenerateResponse}
-                        isDisabled={isSendingDisabled}
-                        isLoading={isLoadingChatSend}
-                        shouldRefocusPrompt={shouldRefocusPrompt}
-                        userPrompt={userPrompt}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
-
-                {!isDisabled && (
-                  <EuiPanel
-                    css={css`
-                      background: ${euiTheme.colors.backgroundBaseSubdued};
-                    `}
-                    hasShadow={false}
-                    paddingSize="m"
-                    borderRadius="none"
-                  >
-                    <QuickPrompts
-                      setInput={setUserPrompt}
-                      setIsSettingsModalVisible={setIsSettingsModalVisible}
-                      trackPrompt={trackPrompt}
-                      allPrompts={allPrompts}
-                    />
+                    </EuiFlexGroup>
                   </EuiPanel>
-                )}
-              </EuiFlyoutFooter>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </CommentContainer>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+
+                  {!isDisabled && (
+                    <EuiPanel
+                      css={css`
+                        background: ${euiTheme.colors.backgroundBaseSubdued};
+                      `}
+                      hasShadow={false}
+                      paddingSize="m"
+                      borderRadius="none"
+                    >
+                      <QuickPrompts
+                        setInput={setUserPrompt}
+                        setIsSettingsModalVisible={setIsSettingsModalVisible}
+                        trackPrompt={trackPrompt}
+                        allPrompts={allPrompts}
+                      />
+                    </EuiPanel>
+                  )}
+                </EuiFlyoutFooter>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </CommentContainer>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
   );
 };
 

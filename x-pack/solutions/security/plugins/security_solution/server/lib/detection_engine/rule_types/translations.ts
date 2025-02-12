@@ -28,6 +28,27 @@ export const EQL_SEARCH_REQUEST_DESCRIPTION = i18n.translate(
   }
 );
 
+export const EQL_SHARD_FAILURE_MESSAGE = (
+  isEqlSequenceQuery: boolean,
+  shardFailuresMessage: string
+) =>
+  isEqlSequenceQuery
+    ? i18n.translate(
+        'xpack.securitySolution.detectionEngine.eqlSequenceRuleType.eqlShardFailures',
+        {
+          defaultMessage: `The EQL query failed to run successfully due to unavailable shards: {shardFailures}`,
+          values: {
+            shardFailures: shardFailuresMessage,
+          },
+        }
+      )
+    : i18n.translate('xpack.securitySolution.detectionEngine.eqlEventRuleType.eqlShardFailures', {
+        defaultMessage: `The EQL event query was only executed on the available shards. The query failed to run successfully on the following shards: {shardFailures}`,
+        values: {
+          shardFailures: shardFailuresMessage,
+        },
+      });
+
 export const FIND_THRESHOLD_BUCKETS_DESCRIPTION = (afterBucket?: string) =>
   afterBucket
     ? i18n.translate(
