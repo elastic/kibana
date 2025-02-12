@@ -24,7 +24,8 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('CNVM AWS', () => {
-      it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {
+      // fixed by https://github.com/elastic/kibana/pull/208345 in v9.0
+      it.skip('Hyperlink on PostInstallation Modal should have the correct URL', async () => {
         await cisIntegration.navigateToAddIntegrationCnvmPage();
         await cisIntegration.inputUniqueIntegrationName();
         await pageObjects.header.waitUntilLoadingHasFinished();
