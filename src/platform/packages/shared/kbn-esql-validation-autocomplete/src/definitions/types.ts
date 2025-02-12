@@ -42,6 +42,7 @@ export const fieldTypes = [
   'counter_double',
   'unsupported',
   'date_nanos',
+  'function_named_parameters',
 ] as const;
 
 export type FieldType = (typeof fieldTypes)[number];
@@ -162,6 +163,7 @@ export interface Signature {
      * values that we don't want to show as suggestions.
      */
     literalSuggestions?: string[];
+    mapParams?: string;
   }>;
   minParams?: number;
   returnType: FunctionReturnType;
@@ -192,6 +194,10 @@ export interface CommandBaseDefinition<CommandName extends string> {
 
   alias?: string;
   description: string;
+  /**
+   * Displays a Technical preview label in the autocomplete
+   */
+  preview?: boolean;
   /**
    * Whether to show or hide in autocomplete suggestion list
    */

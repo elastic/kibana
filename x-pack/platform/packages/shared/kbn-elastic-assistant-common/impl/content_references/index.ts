@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { contentReferencesStoreFactory } from './content_references_store/content_references_store_factory';
+export { newContentReferencesStore } from './content_references_store/content_references_store';
 export { pruneContentReferences } from './content_references_store/prune_content_references';
 export {
   securityAlertReference,

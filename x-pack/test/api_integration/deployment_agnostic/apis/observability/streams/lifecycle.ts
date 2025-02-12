@@ -12,6 +12,7 @@ import {
   IngestStreamUpsertRequest,
   WiredReadStreamDefinition,
   WiredStreamGetResponse,
+  asIngestStreamGetResponse,
   isDslLifecycle,
   isIlmLifecycle,
 } from '@kbn/streams-schema';
@@ -35,7 +36,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   ) {
     const definitions = await Promise.all(streams.map((stream) => getStream(apiClient, stream)));
     for (const definition of definitions) {
-      expect(definition.effective_lifecycle).to.eql(expectedLifecycle);
+      expect(asIngestStreamGetResponse(definition).effective_lifecycle).to.eql(expectedLifecycle);
     }
 
     const dataStreams = await esClient.indices.getDataStream({ name: streams });
@@ -108,7 +109,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             dsl: { data_retention: '999d' },
           }
         );
-        expect(updatedRootDefinition.effective_lifecycle).to.eql({
+        expect((updatedRootDefinition as WiredReadStreamDefinition).effective_lifecycle).to.eql({
           dsl: { data_retention: '999d' },
           from: 'logs',
         });

@@ -6,6 +6,7 @@
  */
 
 import {
+  IngestStreamDefinition,
   StreamDefinition,
   getParentId,
   isRoot,
@@ -49,7 +50,7 @@ export function generateIngestPipeline(
           value: definition.name,
         },
       },
-      ...formatToIngestProcessors(definition.ingest.processing),
+      ...((isWiredStream && formatToIngestProcessors(definition.ingest.processing)) || []),
       {
         pipeline: {
           name: `${id}@stream.reroutes`,
@@ -65,7 +66,7 @@ export function generateIngestPipeline(
   };
 }
 
-export function generateClassicIngestPipelineBody(definition: StreamDefinition) {
+export function generateClassicIngestPipelineBody(definition: IngestStreamDefinition) {
   return {
     processors: formatToIngestProcessors(definition.ingest.processing),
     _meta: {

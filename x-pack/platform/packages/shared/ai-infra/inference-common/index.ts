@@ -56,6 +56,8 @@ export {
   isToolValidationError,
   isTokenLimitReachedError,
   isToolNotFoundError,
+  type ChatCompleteMetadata,
+  type ConnectorTelemetryMetadata,
 } from './src/chat_complete';
 export {
   OutputEventType,
