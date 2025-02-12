@@ -281,10 +281,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       it('Allows adding processing to classic streams without pipeline', async () => {
-        const putResponse = await apiClient.fetch('PUT /api/streams/{id}', {
+        const putResponse = await apiClient.fetch('PUT /api/streams/{name}', {
           params: {
             path: {
-              id: DATA_STREAM_NAME,
+              name: DATA_STREAM_NAME,
             },
             body: {
               dashboards: [],
