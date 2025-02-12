@@ -169,7 +169,7 @@ describe('getStructuredToolForIndexEntry', () => {
     );
   });
 
-  it.only('should execute func correctly and return expected results', async () => {
+  it('should execute func correctly and return expected results', async () => {
     (isString as unknown as jest.Mock).mockReturnValue(true);
     const mockSearchResult = {
       hits: {
