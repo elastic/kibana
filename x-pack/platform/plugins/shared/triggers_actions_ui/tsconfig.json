@@ -46,9 +46,7 @@
     "@kbn/shared-ux-router",
     "@kbn/alerts-ui-shared",
     "@kbn/safer-lodash-set",
-    "@kbn/cases-components",
     "@kbn/field-types",
-    "@kbn/alerts-as-data-utils",
     "@kbn/core-ui-settings-common",
     "@kbn/dashboard-plugin",
     "@kbn/licensing-plugin",
@@ -69,13 +67,15 @@
     "@kbn/alerting-types",
     "@kbn/visualization-utils",
     "@kbn/core-ui-settings-browser",
-    "@kbn/observability-alerting-rule-utils",
+    "@kbn/alerting-rule-utils",
     "@kbn/core-application-browser",
     "@kbn/cloud-plugin",
+    "@kbn/response-ops-alerts-apis",
+    "@kbn/response-ops-alerts-table",
     "@kbn/response-ops-rule-form",
-    "@kbn/core-user-profile-browser-mocks",
     "@kbn/charts-theme",
-    "@kbn/rrule"
+    "@kbn/rrule",
+    "@kbn/core-notifications-browser-mocks"
   ],
   "exclude": ["target/**/*"]
 }

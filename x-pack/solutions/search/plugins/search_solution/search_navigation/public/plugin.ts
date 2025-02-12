@@ -20,10 +20,10 @@ import type {
   SearchNavigationPluginSetup,
   SearchNavigationPluginStart,
   ClassicNavItem,
-  ClassicNavigationFactoryFn,
   SearchNavigationSetBreadcrumbsOptions,
   AppPluginStartDependencies,
 } from './types';
+import { classicNavigationFactory } from './classic_navigation';
 
 export class SearchNavigationPlugin
   implements Plugin<SearchNavigationPluginSetup, SearchNavigationPluginStart>
@@ -33,7 +33,6 @@ export class SearchNavigationPlugin
   private baseClassicNavItemsFn: (() => ClassicNavItem[]) | undefined = undefined;
   private coreStart: CoreStart | undefined = undefined;
   private pluginsStart: AppPluginStartDependencies | undefined = undefined;
-  private classicNavFactory: ClassicNavigationFactoryFn | undefined = undefined;
   private onAppMountHandlers: Array<() => Promise<void>> = [];
   private chromeSub: Subscription | undefined;
 
@@ -50,10 +49,6 @@ export class SearchNavigationPlugin
     this.pluginsStart = plugins;
     this.chromeSub = core.chrome.getChromeStyle$().subscribe((value) => {
       this.currentChromeStyle = value;
-    });
-
-    import('./classic_navigation').then(({ classicNavigationFactory }) => {
-      this.classicNavFactory = classicNavigationFactory;
     });
 
     return {
@@ -97,13 +92,12 @@ export class SearchNavigationPlugin
   private useClassicNavigation(history: ScopedHistory<unknown>) {
     if (
       this.baseClassicNavItemsFn === undefined ||
-      this.classicNavFactory === undefined ||
       this.coreStart === undefined ||
       this.currentChromeStyle !== 'classic'
     )
       return undefined;
 
-    return this.classicNavFactory(this.baseClassicNavItemsFn(), this.coreStart, history);
+    return classicNavigationFactory(this.baseClassicNavItemsFn(), this.coreStart, history);
   }
 
   private setBreadcrumbs(

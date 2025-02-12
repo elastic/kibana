@@ -29,6 +29,7 @@ export const SortableList = ({ onDragItem, children }: SortableListProps) => {
         droppableId="droppable-area"
         css={css`
           background-color: ${euiTheme.colors.backgroundTransparent};
+          margin-bottom: ${euiTheme.size.s};
         `}
       >
         {children}

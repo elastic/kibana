@@ -593,7 +593,11 @@ describe('autocomplete', () => {
     // STATS argument
     testSuggestions('FROM index1 | STATS f/', [
       'var0 = ',
-      ...getFunctionSignaturesByReturnType('stats', 'any', { scalar: true, agg: true }),
+      ...getFunctionSignaturesByReturnType('stats', 'any', {
+        scalar: true,
+        agg: true,
+        grouping: true,
+      }),
     ]);
 
     // STATS argument BY
@@ -953,9 +957,11 @@ describe('autocomplete', () => {
       'FROM a | STATS /',
       [
         'var0 = ',
-        ...getFunctionSignaturesByReturnType('stats', 'any', { scalar: true, agg: true }).map(
-          attachAsSnippet
-        ),
+        ...getFunctionSignaturesByReturnType('stats', 'any', {
+          scalar: true,
+          agg: true,
+          grouping: true,
+        }).map(attachAsSnippet),
       ].map(attachTriggerCommand)
     );
 
@@ -1185,7 +1191,7 @@ describe('autocomplete', () => {
   describe('Replacement ranges are attached when needed', () => {
     testSuggestions('FROM a | WHERE doubleField IS NOT N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 36 } },
-      { text: 'IS NULL', rangeToReplace: { start: 37, end: 37 } },
+      { text: 'IS NULL', rangeToReplace: { start: 35, end: 35 } },
       '!= $0',
       '== $0',
       'IN $0',
@@ -1200,7 +1206,7 @@ describe('autocomplete', () => {
     testSuggestions('FROM a | WHERE doubleField IS N/', [
       { text: 'IS NOT NULL', rangeToReplace: { start: 28, end: 32 } },
       { text: 'IS NULL', rangeToReplace: { start: 28, end: 32 } },
-      { text: '!= $0', rangeToReplace: { start: 33, end: 33 } },
+      { text: '!= $0', rangeToReplace: { start: 31, end: 31 } },
       '== $0',
       'IN $0',
       'AND $0',

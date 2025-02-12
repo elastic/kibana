@@ -198,12 +198,21 @@ async function hashSecrets(output: PreconfiguredOutput) {
   }
   if (output.type === 'remote_elasticsearch') {
     const remoteESOutput = output as NewRemoteElasticsearchOutput;
+    let secrets;
     if (typeof remoteESOutput.secrets?.service_token === 'string') {
       const serviceToken = await hashSecret(remoteESOutput.secrets?.service_token);
-      return {
+      secrets = {
         service_token: serviceToken,
       };
     }
+    if (typeof remoteESOutput.secrets?.kibana_api_key === 'string') {
+      const kibanaAPIKey = await hashSecret(remoteESOutput.secrets?.kibana_api_key);
+      secrets = {
+        ...(secrets ? secrets : {}),
+        kibana_api_key: kibanaAPIKey,
+      };
+    }
+    return secrets;
   }
 
   return undefined;
@@ -350,10 +359,17 @@ async function isPreconfiguredOutputDifferentFromCurrent(
     ) {
       return false;
     }
-    const serviceTokenIsDifferent = await isSecretDifferent(
-      preconfiguredOutput.secrets?.service_token,
-      existingOutput.secrets?.service_token
-    );
+    const serviceTokenIsDifferent =
+      (await isSecretDifferent(
+        preconfiguredOutput.secrets?.service_token,
+        existingOutput.secrets?.service_token
+      )) ||
+      (await isSecretDifferent(
+        preconfiguredOutput.secrets?.kibana_api_key,
+        existingOutput.secrets?.kibana_api_key
+      )) ||
+      isDifferent(existingOutput.kibana_url, preconfiguredOutput.kibana_url) ||
+      isDifferent(existingOutput.sync_integrations, preconfiguredOutput.sync_integrations);
 
     return serviceTokenIsDifferent;
   };
