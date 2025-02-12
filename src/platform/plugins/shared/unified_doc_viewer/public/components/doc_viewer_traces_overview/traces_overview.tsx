@@ -53,10 +53,6 @@ export function TracesOverview({
           {(isTransaction ? transactionFieldIds : spanFieldIds).map((fieldId) => {
             const fieldConfiguration = getFieldConfiguration(parsedDoc)[fieldId];
 
-            if (!fieldConfiguration.content) {
-              return null;
-            }
-
             return (
               <TraceSummary
                 key={fieldId}
