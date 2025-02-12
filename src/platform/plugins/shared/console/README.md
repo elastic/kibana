@@ -312,7 +312,7 @@ One of the main changes in architecture is refactoring the retrieval of autocomp
 
 To address these issues, we created a specific [route](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/routes/api/console/autocomplete_entities/index.ts) in the Kibana server to retrieve all autocomplete entities in one request and send it to the client. The response for mappings capped to 10MB to avoid sending a huge payload. The client-side code was refactored to use the new response format. For more details, see [#130633](https://github.com/elastic/kibana/pull/130633).
 
-Another change is replacing jQuery with the core http client to communicate with the Kibana server. Console used a custom jQuery ajax [function](https://github.com/elastic/kibana/blob/8.0/src/platform/plugins/shared/console/public/lib/es/es.ts) to send requests to the Kibana server to have lower-level control over the requests, specifically controls like `crossDomain: true`. This is no longer needed since we are using the core http client. For more details, see [#127867](https://github.com/elastic/kibana/pull/127867).
+Another change is replacing jQuery with the core http client to communicate with the Kibana server. Console used a custom jQuery ajax [function](https://github.com/elastic/kibana/blob/8.0/src/plugins/console/public/lib/es/es.ts) to send requests to the Kibana server to have lower-level control over the requests, specifically controls like `crossDomain: true`. This is no longer needed since we are using the core http client. For more details, see [#127867](https://github.com/elastic/kibana/pull/127867).
 
 ### Outstanding issues
 #### Autocomplete suggestions for Kibana API endpoints

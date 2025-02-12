@@ -6,9 +6,10 @@
  */
 
 import * as Gemini from '@google/generative-ai';
-import { from, map, switchMap } from 'rxjs';
-import { Readable } from 'stream';
+import { from, map, switchMap, throwError } from 'rxjs';
+import { isReadable, Readable } from 'stream';
 import {
+  createInferenceInternalError,
   Message,
   MessageRole,
   ToolChoiceType,
@@ -17,6 +18,7 @@ import {
   ToolSchemaType,
 } from '@kbn/inference-common';
 import type { InferenceConnectorAdapter } from '../../types';
+import { convertUpstreamError } from '../../utils';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import { processVertexStream } from './process_vertex_stream';
 import type { GenerateContentResponseChunk, GeminiMessage, GeminiToolConfig } from './types';
@@ -31,6 +33,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     temperature = 0,
     modelName,
     abortSignal,
+    metadata,
   }) => {
     return from(
       executor.invoke({
@@ -44,12 +47,26 @@ export const geminiAdapter: InferenceConnectorAdapter = {
           model: modelName,
           signal: abortSignal,
           stopSequences: ['\n\nHuman:'],
+          ...(metadata?.connectorTelemetry
+            ? { telemetryMetadata: metadata.connectorTelemetry }
+            : {}),
         },
       })
     ).pipe(
       switchMap((response) => {
-        const readable = response.data as Readable;
-        return eventSourceStreamIntoObservable(readable);
+        if (response.status === 'error') {
+          return throwError(() =>
+            convertUpstreamError(response.serviceMessage!, {
+              messagePrefix: 'Error calling connector:',
+            })
+          );
+        }
+        if (isReadable(response.data as any)) {
+          return eventSourceStreamIntoObservable(response.data as Readable);
+        }
+        return throwError(() =>
+          createInferenceInternalError('Unexpected error', response.data as Record<string, any>)
+        );
       }),
       map((line) => {
         return JSON.parse(line) as GenerateContentResponseChunk;

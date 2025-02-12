@@ -13,3 +13,21 @@ export interface RuleMigrationStats extends RuleMigrationTaskStats {
   /** The sequential number of the migration */
   number: number;
 }
+
+export enum AuthorFilter {
+  ELASTIC = 'elastic',
+  CUSTOM = 'custom',
+}
+
+export enum StatusFilter {
+  INSTALLED = 'installed',
+  TRANSLATED = 'translated',
+  PARTIALLY_TRANSLATED = 'partially_translated',
+  UNTRANSLATABLE = 'untranslatable',
+  FAILED = 'failed',
+}
+
+export interface FilterOptions {
+  status?: StatusFilter;
+  author?: AuthorFilter;
+}

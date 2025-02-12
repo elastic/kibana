@@ -68,7 +68,7 @@ function DimensionButtonImpl({
         gap: ${euiTheme.size.s};
         min-height: ${euiTheme.size.xl};
         padding: ${euiTheme.size.xs} ${euiTheme.size.s};
-        background-color: ${euiTheme.colors.backgroundBaseSubdued};
+        background-color: ${euiTheme.colors.backgroundBaseHighlighted};
       `}
     >
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="none" responsive={false}>

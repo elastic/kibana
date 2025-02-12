@@ -85,6 +85,18 @@ export const sendBulkGetAgentPolicies = (
   });
 };
 
+export const sendBulkGetAgentPoliciesForRq = (
+  ids: string[],
+  options?: { full?: boolean; ignoreMissing?: boolean }
+) => {
+  return sendRequestForRq<BulkGetAgentPoliciesResponse>({
+    path: agentPolicyRouteService.getBulkGetPath(),
+    method: 'post',
+    body: JSON.stringify({ ids, full: options?.full, ignoreMissing: options?.ignoreMissing }),
+    version: API_VERSIONS.public.v1,
+  });
+};
+
 export const sendGetAgentPolicies = (query?: GetAgentPoliciesRequest['query']) => {
   return sendRequest<GetAgentPoliciesResponse>({
     path: agentPolicyRouteService.getListPath(),
@@ -149,6 +161,18 @@ export const sendUpdateAgentPolicy = (
   body: UpdateAgentPolicyRequest['body']
 ) => {
   return sendRequest<UpdateAgentPolicyResponse>({
+    path: agentPolicyRouteService.getUpdatePath(agentPolicyId),
+    method: 'put',
+    body: JSON.stringify(body),
+    version: API_VERSIONS.public.v1,
+  });
+};
+
+export const sendUpdateAgentPolicyForRq = (
+  agentPolicyId: string,
+  body: UpdateAgentPolicyRequest['body']
+) => {
+  return sendRequestForRq<UpdateAgentPolicyResponse>({
     path: agentPolicyRouteService.getUpdatePath(agentPolicyId),
     method: 'put',
     body: JSON.stringify(body),

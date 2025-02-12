@@ -12,7 +12,13 @@ import path from 'node:path';
 import readline from 'node:readline';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Client as ESClient } from '@elastic/elasticsearch';
-import { SCOUT_TEST_EVENTS_DATA_STREAM_NAME } from '@kbn/scout-info';
+import {
+  SCOUT_REPORTER_ES_API_KEY,
+  SCOUT_REPORTER_ES_URL,
+  SCOUT_REPORTER_ES_VERIFY_CERTS,
+  SCOUT_TEST_EVENTS_DATA_STREAM_NAME,
+} from '@kbn/scout-info';
+import { getValidatedESClient } from '../../../../helpers/elasticsearch';
 import { ScoutReportEvent } from '../event';
 import * as componentTemplates from './component_templates';
 import * as indexTemplates from './index_templates';
@@ -140,4 +146,42 @@ export class ScoutReportDataStream {
       this.log.warning(`Failed to upload ${stats.failed} events`);
     }
   }
+}
+
+/**
+ * Upload events logged by a Scout reporter to the configured Scout Reporter ES instance
+ *
+ * @param eventLogPath Path to event log file
+ * @param log Logger instance
+ */
+export async function uploadScoutReportEvents(eventLogPath: string, log?: ToolingLog) {
+  const logger = log || new ToolingLog();
+
+  const warnSettingWasNotConfigured = (settingName: string) =>
+    logger.warning(`Won't upload Scout reporter events: ${settingName} was not configured`);
+
+  if (SCOUT_REPORTER_ES_URL === undefined) {
+    warnSettingWasNotConfigured('SCOUT_REPORTER_ES_URL');
+    return;
+  }
+
+  if (SCOUT_REPORTER_ES_API_KEY === undefined) {
+    warnSettingWasNotConfigured('SCOUT_REPORTER_ES_API_KEY');
+    return;
+  }
+
+  log?.info(`Connecting to Scout reporter ES URL ${SCOUT_REPORTER_ES_URL}`);
+  const es = await getValidatedESClient(
+    {
+      node: SCOUT_REPORTER_ES_URL,
+      auth: { apiKey: SCOUT_REPORTER_ES_API_KEY },
+      tls: {
+        rejectUnauthorized: SCOUT_REPORTER_ES_VERIFY_CERTS,
+      },
+    },
+    { log }
+  );
+
+  const reportDataStream = new ScoutReportDataStream(es, logger);
+  await reportDataStream.addEventsFromFile(eventLogPath);
 }

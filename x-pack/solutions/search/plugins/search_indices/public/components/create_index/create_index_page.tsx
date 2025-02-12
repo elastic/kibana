@@ -46,7 +46,7 @@ export const CreateIndexPage = () => {
       grow={false}
       solutionNav={searchNavigation?.useClassicNavigation(history)}
     >
-      <KibanaPageTemplate.Section alignment="center" restrictWidth={false} grow>
+      <KibanaPageTemplate.Section alignment="top" restrictWidth={false}>
         {isInitialLoading && <EuiLoadingLogo />}
         {hasIndicesStatusFetchError && <LoadIndicesStatusError error={indicesFetchError} />}
         {!isInitialLoading && !hasIndicesStatusFetchError && (

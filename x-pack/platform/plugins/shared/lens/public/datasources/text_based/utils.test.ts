@@ -144,6 +144,76 @@ describe('Text based languages utils', () => {
         },
       ]);
     });
+
+    it('should maintain the variable info if it exists', async () => {
+      const existingOnLayer = [
+        {
+          fieldName: 'time',
+          columnId: 'time',
+          meta: {
+            type: 'date',
+          },
+        },
+        {
+          fieldName: 'bytes',
+          columnId: 'bytes',
+          meta: {
+            type: 'number',
+          },
+        },
+      ] as TextBasedLayerColumn[];
+      const columnsFromQuery = [
+        {
+          name: 'timestamp',
+          id: 'timestamp',
+          meta: {
+            type: 'date',
+          },
+        },
+        {
+          name: 'bytes',
+          id: 'bytes',
+          meta: {
+            type: 'number',
+          },
+        },
+        {
+          name: 'memory',
+          id: 'memory',
+          meta: {
+            type: 'number',
+          },
+          variable: 'field1',
+        },
+      ] as DatatableColumn[];
+      const allColumns = getAllColumns(existingOnLayer, columnsFromQuery);
+      expect(allColumns).toStrictEqual([
+        {
+          fieldName: 'bytes',
+          columnId: 'bytes',
+          meta: {
+            type: 'number',
+          },
+        },
+        {
+          fieldName: 'timestamp',
+          columnId: 'timestamp',
+          label: 'timestamp',
+          meta: {
+            type: 'date',
+          },
+        },
+        {
+          fieldName: 'memory',
+          columnId: 'memory',
+          label: 'memory',
+          meta: {
+            type: 'number',
+          },
+          variable: 'field1',
+        },
+      ]);
+    });
   });
 
   describe('getStateFromAggregateQuery', () => {

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import '../index.scss';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { HttpSetup, NotificationsSetup, DocLinksStart } from '@kbn/core/public';

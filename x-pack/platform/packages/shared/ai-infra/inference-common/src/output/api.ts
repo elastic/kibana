@@ -6,7 +6,13 @@
  */
 
 import type { Observable } from 'rxjs';
-import { Message, FunctionCallingMode, FromToolSchema, ToolSchema } from '../chat_complete';
+import {
+  Message,
+  FunctionCallingMode,
+  FromToolSchema,
+  ToolSchema,
+  ChatCompleteMetadata,
+} from '../chat_complete';
 import { Output, OutputEvent } from './events';
 
 /**
@@ -93,7 +99,7 @@ export interface OutputOptions<
    */
   modelName?: string;
   /**
-   * Function calling mode, defaults to "native".
+   * Function calling mode, defaults to "auto".
    */
   functionCalling?: FunctionCallingMode;
   /**
@@ -117,6 +123,10 @@ export interface OutputOptions<
      */
     onValidationError?: boolean | number;
   };
+  /**
+   * Optional metadata related to call execution.
+   */
+  metadata?: ChatCompleteMetadata;
 }
 
 /**

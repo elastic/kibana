@@ -17,10 +17,19 @@ import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import { ScoutPlaywrightOptions, ScoutTestOptions, VALID_CONFIG_MARKER } from '../types';
 
 export function createPlaywrightConfig(options: ScoutPlaywrightOptions): PlaywrightTestConfig {
-  const runId = generateTestRunId();
+  /**
+   * Playwright loads the config file multiple times, so we need to generate a unique run id
+   * and store it in the environment to be used across all config function calls.
+   */
+  let runId = process.env.TEST_RUN_ID;
+  if (!runId) {
+    runId = generateTestRunId();
+    process.env.TEST_RUN_ID = runId;
+  }
 
   return defineConfig<ScoutTestOptions>({
     testDir: options.testDir,
+    globalSetup: options.globalSetup,
     /* Run tests in files in parallel */
     fullyParallel: false,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -38,6 +47,7 @@ export function createPlaywrightConfig(options: ScoutPlaywrightOptions): Playwri
     ],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
+      testIdAttribute: 'data-test-subj',
       serversConfigDir: SCOUT_SERVERS_ROOT,
       [VALID_CONFIG_MARKER]: true,
       /* Base URL to use in actions like `await page.goto('/')`. */

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 
-import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle } from '@elastic/eui';
+import { EuiSkeletonLoading, EuiSkeletonText, EuiSkeletonTitle, EuiSpacer } from '@elastic/eui';
 import type { RouteComponentProps } from 'react-router-dom';
 import type { RelatedIntegration } from '../../../../common/api/detection_engine';
 import { SiemMigrationTaskStatus } from '../../../../common/siem_migrations/constants';
@@ -18,7 +18,7 @@ import { SecurityPageName } from '../../../app/types';
 
 import { MigrationRulesTable } from '../components/rules_table';
 import { NeedAdminForUpdateRulesCallOut } from '../../../detections/components/callouts/need_admin_for_update_callout';
-import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
+import { MissingPrivilegesCallOut } from './missing_privileges_callout';
 import { HeaderButtons } from '../components/header_buttons';
 import { UnknownMigration } from '../components/unknown_migration';
 import { useLatestStats } from '../service/hooks/use_latest_stats';
@@ -29,6 +29,7 @@ import { useInvalidateGetMigrationRules } from '../logic/use_get_migration_rules
 import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migration_translation_stats';
 import { useGetIntegrations } from '../service/hooks/use_get_integrations';
 import { PageTitle } from './page_title';
+import { RuleMigrationsUploadMissingPanel } from '../components/migration_status_panels/upload_missing_panel';
 
 type MigrationRulesPageProps = RouteComponentProps<{ migrationId?: string }>;
 
@@ -99,19 +100,24 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
       if (!migrationId || !migrationStats) {
         return <UnknownMigration />;
       }
-      if (migrationStats.status === SiemMigrationTaskStatus.FINISHED) {
-        return (
-          <MigrationRulesTable
-            migrationId={migrationId}
-            refetchData={refetchData}
-            integrations={integrations}
-            isIntegrationsLoading={isIntegrationsLoading}
-          />
-        );
-      }
       return (
         <RuleMigrationDataInputWrapper onFlyoutClosed={refetchData}>
           <>
+            {migrationStats.status === SiemMigrationTaskStatus.FINISHED && (
+              <>
+                <RuleMigrationsUploadMissingPanel
+                  migrationStats={migrationStats}
+                  topSpacerSize="s"
+                />
+                <EuiSpacer size="m" />
+                <MigrationRulesTable
+                  migrationId={migrationId}
+                  refetchData={refetchData}
+                  integrations={integrations}
+                  isIntegrationsLoading={isIntegrationsLoading}
+                />
+              </>
+            )}
             {migrationStats.status === SiemMigrationTaskStatus.READY && (
               <MigrationReadyPanel migrationStats={migrationStats} />
             )}
@@ -124,30 +130,27 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
     }, [migrationId, refetchData, ruleMigrationsStats, integrations, isIntegrationsLoading]);
 
     return (
-      <>
+      <SecuritySolutionPageWrapper>
+        <HeaderPage title={pageTitle} border>
+          <HeaderButtons
+            ruleMigrationsStats={ruleMigrationsStats}
+            selectedMigrationId={migrationId}
+            onMigrationIdChange={onMigrationIdChange}
+          />
+        </HeaderPage>
         <NeedAdminForUpdateRulesCallOut />
         <MissingPrivilegesCallOut />
-
-        <SecuritySolutionPageWrapper>
-          <HeaderPage title={pageTitle}>
-            <HeaderButtons
-              ruleMigrationsStats={ruleMigrationsStats}
-              selectedMigrationId={migrationId}
-              onMigrationIdChange={onMigrationIdChange}
-            />
-          </HeaderPage>
-          <EuiSkeletonLoading
-            isLoading={isLoading}
-            loadingContent={
-              <>
-                <EuiSkeletonTitle />
-                <EuiSkeletonText />
-              </>
-            }
-            loadedContent={content}
-          />
-        </SecuritySolutionPageWrapper>
-      </>
+        <EuiSkeletonLoading
+          isLoading={isLoading}
+          loadingContent={
+            <>
+              <EuiSkeletonTitle />
+              <EuiSkeletonText />
+            </>
+          }
+          loadedContent={content}
+        />
+      </SecuritySolutionPageWrapper>
     );
   }
 );

@@ -49,6 +49,7 @@ import { TimelineEventDetailRow } from './timeline_event_detail_row';
 import { CustomTimelineDataGridBody } from './custom_timeline_data_grid_body';
 import { TIMELINE_EVENT_DETAIL_ROW_ID } from '../../body/constants';
 import { DocumentEventTypes } from '../../../../../common/lib/telemetry/types';
+import { getTimelineRowTypeIndicator } from './get_row_indicator';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -423,6 +424,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
             trailingControlColumns={finalTrailControlColumns}
             externalControlColumns={leadingControlColumns}
             onUpdatePageIndex={onUpdatePageIndex}
+            getRowIndicator={getTimelineRowTypeIndicator}
           />
         </StyledTimelineUnifiedDataTable>
       </StatefulEventContext.Provider>

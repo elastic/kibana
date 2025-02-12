@@ -20,10 +20,14 @@ import {
   updateESQLQueryTrigger,
   UpdateESQLQueryAction,
   UPDATE_ESQL_QUERY_TRIGGER,
+  esqlControlTrigger,
+  CreateESQLControlAction,
+  ESQL_CONTROL_TRIGGER,
 } from './triggers';
 import { setKibanaServices } from './kibana_services';
 import { JoinIndicesAutocompleteResult } from '../common';
 import { cacheNonParametrizedAsyncFunction } from './util/cache';
+import { EsqlVariablesService } from './variables_service';
 
 interface EsqlPluginSetupDependencies {
   indexManagement: IndexManagementPluginSetup;
@@ -41,6 +45,7 @@ interface EsqlPluginStartDependencies {
 
 export interface EsqlPluginStart {
   getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
+  variablesService: EsqlVariablesService;
 }
 
 export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
@@ -50,6 +55,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
     this.indexManagement = indexManagement;
 
     uiActions.registerTrigger(updateESQLQueryTrigger);
+    uiActions.registerTrigger(esqlControlTrigger);
 
     return {};
   }
@@ -66,9 +72,15 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
     }: EsqlPluginStartDependencies
   ): EsqlPluginStart {
     const storage = new Storage(localStorage);
+
+    // Register triggers
     const appendESQLAction = new UpdateESQLQueryAction(data);
 
     uiActions.addTriggerAction(UPDATE_ESQL_QUERY_TRIGGER, appendESQLAction);
+    const createESQLControlAction = new CreateESQLControlAction(core, data.search.search);
+    uiActions.addTriggerAction(ESQL_CONTROL_TRIGGER, createESQLControlAction);
+
+    const variablesService = new EsqlVariablesService();
 
     const getJoinIndicesAutocomplete = cacheNonParametrizedAsyncFunction(
       async () => {
@@ -84,14 +96,17 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
 
     const start = {
       getJoinIndicesAutocomplete,
+      variablesService,
     };
 
     setKibanaServices(
       start,
       core,
       dataViews,
+      data,
       expressions,
       storage,
+      uiActions,
       this.indexManagement,
       fieldsMetadata,
       usageCollection

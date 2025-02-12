@@ -19,12 +19,14 @@ export function DataViewApiProvider({ getService }: DeploymentAgnosticFtrProvide
       name,
       title,
       spaceId,
+      data,
     }: {
       roleAuthc: RoleCredentials;
       id: string;
       name: string;
       title: string;
       spaceId?: string;
+      data?: Record<string, string>;
     }) {
       const { body } = await supertestWithoutAuth
         .post(`${spaceId ? '/s/' + spaceId : ''}/api/content_management/rpc/create`)
@@ -43,6 +45,7 @@ export function DataViewApiProvider({ getService }: DeploymentAgnosticFtrProvide
             typeMeta: '{}',
             runtimeFieldMap: '{}',
             name,
+            ...(data ? data : {}),
           },
           options: { id },
           version: 1,

@@ -902,12 +902,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "@kbn/reporting-public",
-                "path": "src/platform/packages/private/kbn-reporting/public/share/share_context_menu/register_pdf_png_modal_reporting.tsx"
-              },
-              {
                 "plugin": "discover",
                 "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/app_menu_actions/get_share.tsx"
+              },
+              {
+                "plugin": "@kbn/reporting-public",
+                "path": "src/platform/packages/private/kbn-reporting/public/share/share_context_menu/register_pdf_png_modal_reporting.tsx"
               }
             ]
           },
@@ -998,7 +998,9 @@
             "parentPluginId": "share",
             "id": "def-public.ShareContext.showPublicUrlSwitch",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "showPublicUrlSwitch",
             "description": [],
             "signature": [
@@ -1007,13 +1009,23 @@
               ") => boolean) | undefined"
             ],
             "path": "src/platform/plugins/shared/share/public/types.ts",
-            "deprecated": false,
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/lens_top_nav.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/app_menu_actions/get_share.tsx"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "share",
                 "id": "def-public.ShareContext.showPublicUrlSwitch.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "anonymousUserCapabilities",
                 "description": [],

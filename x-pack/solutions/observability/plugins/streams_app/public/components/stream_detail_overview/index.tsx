@@ -19,7 +19,12 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
-import { ReadStreamDefinition, isWiredReadStream, isWiredStream } from '@kbn/streams-schema';
+import {
+  IngestStreamGetResponse,
+  isDescendantOf,
+  isUnwiredStreamGetResponse,
+  isWiredStreamDefinition,
+} from '@kbn/streams-schema';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import { useKibana } from '../../hooks/use_kibana';
@@ -32,6 +37,7 @@ import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 import { DashboardsTable } from '../stream_detail_dashboards_view/dashboard_table';
 import { AssetImage } from '../asset_image';
+import { useWiredStreams } from '../../hooks/use_wired_streams';
 
 const formatNumber = (val: number) => {
   return Number(val).toLocaleString('en', {
@@ -39,7 +45,7 @@ const formatNumber = (val: number) => {
   });
 };
 
-export function StreamDetailOverview({ definition }: { definition?: ReadStreamDefinition }) {
+export function StreamDetailOverview({ definition }: { definition?: IngestStreamGetResponse }) {
   const {
     dependencies: {
       start: {
@@ -58,7 +64,7 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
   } = useDateRange({ data });
 
   const indexPatterns = useMemo(() => {
-    return getIndexPatterns(definition);
+    return getIndexPatterns(definition?.stream);
   }, [definition]);
 
   const discoverLocator = useMemo(
@@ -126,14 +132,17 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
 
   const docCountFetch = useStreamsAppFetch(
     async ({ signal }) => {
-      if (!definition) {
+      if (
+        !definition ||
+        (isUnwiredStreamGetResponse(definition) && !definition.data_stream_exists)
+      ) {
         return undefined;
       }
-      return streamsRepositoryClient.fetch('GET /api/streams/{id}/_details', {
+      return streamsRepositoryClient.fetch('GET /api/streams/{name}/_details', {
         signal,
         params: {
           path: {
-            id: definition.name as string,
+            name: definition.stream.name,
           },
           query: {
             start: String(start),
@@ -142,20 +151,21 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
         },
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [definition, dataViews, streamsRepositoryClient, start, end]
   );
 
   const [selectedTab, setSelectedTab] = React.useState<string | undefined>(undefined);
 
   const tabs = [
-    ...(definition && isWiredReadStream(definition)
+    ...(definition && isWiredStreamDefinition(definition.stream)
       ? [
           {
             id: 'streams',
             name: i18n.translate('xpack.streams.entityDetailOverview.tabs.streams', {
               defaultMessage: 'Streams',
             }),
-            content: <ChildStreamList stream={definition} />,
+            content: <ChildStreamList definition={definition} />,
           },
         ]
       : []),
@@ -164,7 +174,7 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
       name: i18n.translate('xpack.streams.entityDetailOverview.tabs.quicklinks', {
         defaultMessage: 'Quick Links',
       }),
-      content: <QuickLinks stream={definition} />,
+      content: <QuickLinks definition={definition} />,
     },
   ];
 
@@ -268,8 +278,8 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
 
 const EMPTY_DASHBOARD_LIST: SanitizedDashboardAsset[] = [];
 
-function QuickLinks({ stream }: { stream?: ReadStreamDefinition }) {
-  const dashboardsFetch = useDashboardsFetch(stream?.name);
+function QuickLinks({ definition }: { definition?: IngestStreamGetResponse }) {
+  const dashboardsFetch = useDashboardsFetch(definition?.stream.name);
 
   return (
     <DashboardsTable
@@ -279,35 +289,19 @@ function QuickLinks({ stream }: { stream?: ReadStreamDefinition }) {
   );
 }
 
-function ChildStreamList({ stream }: { stream?: ReadStreamDefinition }) {
-  const {
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-  } = useKibana();
+function ChildStreamList({ definition }: { definition?: IngestStreamGetResponse }) {
   const router = useStreamsAppRouter();
 
-  const streamsListFetch = useStreamsAppFetch(
-    ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /api/streams', {
-        signal,
-      });
-    },
-    [streamsRepositoryClient]
-  );
+  const { wiredStreams } = useWiredStreams();
 
-  const childDefinitions = useMemo(() => {
-    if (!stream) {
+  const childrenStreams = useMemo(() => {
+    if (!definition) {
       return [];
     }
-    return streamsListFetch.value?.streams.filter(
-      (d) => isWiredStream(d) && d.name.startsWith(stream.name as string)
-    );
-  }, [stream, streamsListFetch.value?.streams]);
+    return wiredStreams?.filter((d) => isDescendantOf(definition.stream.name, d.name));
+  }, [definition, wiredStreams]);
 
-  if (stream && childDefinitions?.length === 1) {
+  if (definition && childrenStreams?.length === 0) {
     return (
       <EuiFlexItem grow>
         <EuiFlexGroup alignItems="center" justifyContent="center">
@@ -332,10 +326,11 @@ function ChildStreamList({ stream }: { stream?: ReadStreamDefinition }) {
               </EuiText>
               <EuiFlexGroup justifyContent="center">
                 <EuiButton
+                  data-test-subj="streamsAppChildStreamListCreateChildStreamButton"
                   iconType="plusInCircle"
                   href={router.link('/{key}/management/{subtab}', {
                     path: {
-                      key: stream?.name as string,
+                      key: definition?.stream.name,
                       subtab: 'route',
                     },
                   })}
@@ -352,5 +347,5 @@ function ChildStreamList({ stream }: { stream?: ReadStreamDefinition }) {
     );
   }
 
-  return <StreamsList definitions={childDefinitions} showControls={false} />;
+  return <StreamsList streams={childrenStreams} showControls={false} />;
 }

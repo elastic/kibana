@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { i18n } from '@kbn/i18n';
@@ -34,6 +35,8 @@ import {
   isStatusTransitionException,
 } from '@kbn/search-connectors/utils/identify_exceptions';
 
+import { AgentlessConnectorsInfraService } from '@kbn/search-connectors-plugin/server/services';
+
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
 import { generateConfig } from '../../lib/connectors/generate_config';
@@ -48,7 +51,7 @@ import { getDefaultPipeline } from '../../lib/pipelines/get_default_pipeline';
 import { updateDefaultPipeline } from '../../lib/pipelines/update_default_pipeline';
 import { updateConnectorPipeline } from '../../lib/pipelines/update_pipeline';
 
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../types';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import {
@@ -57,7 +60,7 @@ import {
   isIndexNotFoundException,
 } from '../../utils/identify_exceptions';
 
-export function registerConnectorRoutes({ router, log }: RouteDependencies) {
+export function registerConnectorRoutes({ router, log, getStartServices }: RouteDependencies) {
   router.post(
     {
       path: '/internal/enterprise_search/connectors',
@@ -210,9 +213,6 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     {
       path: '/internal/enterprise_search/connectors/{connectorId}/start_sync',
       validate: {
-        body: schema.object({
-          nextSyncConfig: schema.maybe(schema.string()),
-        }),
         params: schema.object({
           connectorId: schema.string(),
         }),
@@ -220,12 +220,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await startSync(
-        client,
-        request.params.connectorId,
-        SyncJobType.FULL,
-        request.body.nextSyncConfig
-      );
+      await startSync(client, request.params.connectorId, SyncJobType.FULL);
       return response.ok();
     })
   );
@@ -876,6 +871,109 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
         } else {
           throw error;
         }
+      }
+    })
+  );
+
+  router.get(
+    {
+      path: '/internal/enterprise_search/{connectorId}/agentless_policy',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { connectorId } = request.params;
+      const { client } = (await context.core).elasticsearch;
+
+      try {
+        const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
+
+        if (!connector) {
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.resource_not_found_error',
+              {
+                defaultMessage: 'Connector with id {connectorId} is not found.',
+                values: { connectorId },
+              }
+            ),
+            response,
+            statusCode: 404,
+          });
+        }
+
+        if (!connector?.is_native) {
+          return createError({
+            errorCode: ErrorCode.CONNECTOR_UNSUPPORTED_OPERATION,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.generateConfiguration.indexAlreadyExistsError',
+              {
+                defaultMessage:
+                  'Failed to fetch agentless deployment details: This action is only supported for Elastic-managed connectors.',
+              }
+            ),
+            response,
+            statusCode: 400,
+          });
+        }
+
+        const [_core, start] = await getStartServices();
+
+        const savedObjects = _core.savedObjects;
+
+        const agentPolicyService = start.fleet!.agentPolicyService;
+        const packagePolicyService = start.fleet!.packagePolicyService;
+        const agentService = start.fleet!.agentService;
+
+        const soClient = new SavedObjectsClient(savedObjects.createInternalRepository());
+
+        const service = new AgentlessConnectorsInfraService(
+          soClient,
+          client.asCurrentUser,
+          packagePolicyService,
+          agentPolicyService,
+          agentService,
+          log
+        );
+
+        const policy = await service.getAgentPolicyForConnectorId({ connectorId });
+
+        if (!policy) {
+          return response.ok({
+            body: {
+              policy: null,
+              agent: null,
+            },
+            headers: { 'content-type': 'application/json' },
+          });
+        }
+
+        return response.ok({
+          body: {
+            policy: {
+              id: policy.agent_policy_ids[0],
+              name: policy.package_policy_name,
+            },
+            agent: policy.agent_metadata,
+          },
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        return createError({
+          errorCode: ErrorCode.CONNECTOR_UNSUPPORTED_OPERATION,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.connectors.agentlessPolicyError',
+            {
+              defaultMessage: 'Failed to fetch agentless deployment details',
+            }
+          ),
+          response,
+          statusCode: 500,
+        });
       }
     })
   );

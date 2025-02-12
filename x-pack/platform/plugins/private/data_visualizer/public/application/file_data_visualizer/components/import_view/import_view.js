@@ -79,6 +79,7 @@ const DEFAULT_STATE = {
   createPipeline: true,
   initializeDeployment: false,
   initializeDeploymentStatus: IMPORT_STATUS.INCOMPLETE,
+  inferenceId: null,
 };
 
 export class ImportView extends Component {

@@ -20,6 +20,7 @@ import type {
   IKibanaResponse,
   RouteAccess,
   RouteConfigOptions,
+  PostValidationMetadata,
 } from '@kbn/core-http-server';
 import { isConfigSchema } from '@kbn/config-schema';
 import { isZod } from '@kbn/zod';
@@ -205,10 +206,13 @@ function routeSchemasFromRouteConfig<P, Q, B>(
   }
 }
 
-function getPostValidateEventMetadata(request: AnyKibanaRequest, routeInfo: RouteInfo) {
+function getPostValidateEventMetadata(
+  request: AnyKibanaRequest,
+  routeInfo: RouteInfo
+): PostValidationMetadata {
   return {
     deprecated: routeInfo.deprecated,
     isInternalApiRequest: request.isInternalApiRequest,
-    isPublicAccess: isPublicAccessApiRoute(routeInfo),
+    isPublicAccess: routeInfo.access === 'public',
   };
 }

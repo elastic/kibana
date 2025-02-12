@@ -8,8 +8,23 @@
 import { transformDiffableFieldValues } from './diffable_rule_fields_mappings';
 
 describe('transformDiffableFieldValues', () => {
-  it('transforms rule_schedule into "from" value', () => {
-    const result = transformDiffableFieldValues('from', { interval: '5m', lookback: '4m' });
-    expect(result).toEqual({ type: 'TRANSFORMED_FIELD', value: 'now-540s' });
+  it('does NOT transform "from" in rule_schedule', () => {
+    const result = transformDiffableFieldValues('from', {
+      interval: '5m',
+      from: 'now-10m',
+      to: 'now',
+    });
+
+    expect(result).toEqual({ type: 'NON_TRANSFORMED_FIELD' });
+  });
+
+  it('does NOT transform "to" in rule_schedule', () => {
+    const result = transformDiffableFieldValues('to', {
+      interval: '5m',
+      from: 'now-10m',
+      to: 'now',
+    });
+
+    expect(result).toEqual({ type: 'NON_TRANSFORMED_FIELD' });
   });
 });

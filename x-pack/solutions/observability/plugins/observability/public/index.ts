@@ -58,7 +58,36 @@ export { DatePicker } from './pages/overview/components/date_picker';
 
 export const LazyAlertsFlyout = lazy(() => import('./components/alerts_flyout/alerts_flyout'));
 
-export * from './typings';
+export type {
+  Stat,
+  Coordinates,
+  Series,
+  FetchDataParams,
+  HasDataParams,
+  HasDataResponse,
+  UXHasDataResponse,
+  SyntheticsHasDataResponse,
+  APMHasDataResponse,
+  InfraMetricsHasDataResponse,
+  InfraLogsHasDataResponse,
+  FetchData,
+  HasData,
+  ObservabilityFetchDataPlugins,
+  DataHandler,
+  FetchDataResponse,
+  LogsFetchDataResponse,
+  StringOrNull,
+  NumberOrNull,
+  MetricsFetchDataSeries,
+  MetricsFetchDataResponse,
+  UptimeFetchDataResponse,
+  ApmFetchDataResponse,
+  UxFetchDataResponse,
+  UniversalProfilingDataResponse,
+  ObservabilityFetchDataResponse,
+  ObservabilityHasDataResponse,
+  Subset,
+} from './typings';
 import { TopAlert } from './typings/alerts';
 export type { TopAlert };
 import type { AlertDetailsAppSectionProps } from './pages/alert_details/types';

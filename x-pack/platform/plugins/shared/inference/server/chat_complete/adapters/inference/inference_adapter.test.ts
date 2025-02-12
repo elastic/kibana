@@ -5,13 +5,20 @@
  * 2.0.
  */
 
+import { isNativeFunctionCallingSupportedMock } from './inference_adapter.test.mocks';
 import OpenAI from 'openai';
 import { v4 } from 'uuid';
 import { PassThrough } from 'stream';
-import { lastValueFrom, Subject, toArray } from 'rxjs';
-import type { Logger } from '@kbn/logging';
+import { lastValueFrom, Subject, toArray, filter } from 'rxjs';
 import { loggerMock } from '@kbn/logging-mocks';
-import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
+import {
+  ToolChoiceType,
+  ChatCompletionEventType,
+  MessageRole,
+  isChatCompletionChunkEvent,
+  isChatCompletionTokenCountEvent,
+  InferenceConnectorType,
+} from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import { InferenceExecutor } from '../../utils/inference_executor';
 import { inferenceAdapter } from './inference_adapter';
@@ -43,21 +50,31 @@ function createOpenAIChunk({
 
 describe('inferenceAdapter', () => {
   const executorMock = {
+    getConnector: jest.fn(),
     invoke: jest.fn(),
-  } as InferenceExecutor & { invoke: jest.MockedFn<InferenceExecutor['invoke']> };
+  } as InferenceExecutor & {
+    invoke: jest.MockedFn<InferenceExecutor['invoke']>;
+    getConnector: jest.MockedFn<InferenceExecutor['getConnector']>;
+  };
 
-  const logger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-  } as unknown as Logger;
+  const logger = loggerMock.create();
 
   beforeEach(() => {
     executorMock.invoke.mockReset();
+    isNativeFunctionCallingSupportedMock.mockReset().mockReturnValue(true);
+    executorMock.getConnector.mockReset().mockImplementation(() => {
+      return {
+        type: InferenceConnectorType.Inference,
+        name: 'inference connector',
+        connectorId: '.id',
+        config: {},
+      };
+    });
   });
 
   const defaultArgs = {
     executor: executorMock,
-    logger: loggerMock.create(),
+    logger,
   };
 
   describe('when creating the request', () => {
@@ -110,7 +127,9 @@ describe('inferenceAdapter', () => {
 
       source$.complete();
 
-      const allChunks = await lastValueFrom(response$.pipe(toArray()));
+      const allChunks = await lastValueFrom(
+        response$.pipe(filter(isChatCompletionChunkEvent), toArray())
+      );
 
       expect(allChunks).toEqual([
         {
@@ -124,6 +143,124 @@ describe('inferenceAdapter', () => {
           type: ChatCompletionEventType.ChatCompletionChunk,
         },
       ]);
+    });
+
+    it('emits token count event when provided by the response', async () => {
+      const source$ = new Subject<Record<string, any>>();
+
+      executorMock.invoke.mockImplementation(async () => {
+        return {
+          actionId: '',
+          status: 'ok',
+          data: observableIntoEventSourceStream(source$, logger),
+        };
+      });
+
+      const response$ = inferenceAdapter.chatComplete({
+        ...defaultArgs,
+        messages: [
+          {
+            role: MessageRole.User,
+            content: 'Hello',
+          },
+        ],
+      });
+
+      source$.next(
+        createOpenAIChunk({
+          delta: {
+            content: 'First',
+          },
+          usage: {
+            completion_tokens: 5,
+            prompt_tokens: 10,
+            total_tokens: 15,
+          },
+        })
+      );
+
+      source$.complete();
+
+      const tokenChunks = await lastValueFrom(
+        response$.pipe(filter(isChatCompletionTokenCountEvent), toArray())
+      );
+
+      expect(tokenChunks).toEqual([
+        {
+          type: ChatCompletionEventType.ChatCompletionTokenCount,
+          tokens: {
+            completion: 5,
+            prompt: 10,
+            total: 15,
+          },
+        },
+      ]);
+    });
+
+    it('emits token count event when not provided by the response', async () => {
+      const source$ = new Subject<Record<string, any>>();
+
+      executorMock.invoke.mockImplementation(async () => {
+        return {
+          actionId: '',
+          status: 'ok',
+          data: observableIntoEventSourceStream(source$, logger),
+        };
+      });
+
+      const response$ = inferenceAdapter.chatComplete({
+        ...defaultArgs,
+        messages: [
+          {
+            role: MessageRole.User,
+            content: 'Hello',
+          },
+        ],
+      });
+
+      source$.next(
+        createOpenAIChunk({
+          delta: {
+            content: 'First',
+          },
+        })
+      );
+
+      source$.complete();
+
+      const tokenChunks = await lastValueFrom(
+        response$.pipe(filter(isChatCompletionTokenCountEvent), toArray())
+      );
+
+      expect(tokenChunks).toEqual([
+        {
+          type: ChatCompletionEventType.ChatCompletionTokenCount,
+          tokens: {
+            completion: expect.any(Number),
+            prompt: expect.any(Number),
+            total: expect.any(Number),
+          },
+        },
+      ]);
+    });
+
+    it('propagates the temperature parameter', () => {
+      inferenceAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        temperature: 0.4,
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'unified_completion_stream',
+        subActionParams: expect.objectContaining({
+          body: expect.objectContaining({
+            temperature: 0.4,
+          }),
+        }),
+      });
     });
 
     it('propagates the abort signal when provided', () => {
@@ -145,20 +282,26 @@ describe('inferenceAdapter', () => {
       });
     });
 
-    it('propagates the temperature parameter', () => {
+    it('uses the right value for functionCalling=auto', () => {
+      isNativeFunctionCallingSupportedMock.mockReturnValue(false);
+
       inferenceAdapter.chatComplete({
         logger,
         executor: executorMock,
         messages: [{ role: MessageRole.User, content: 'question' }],
-        temperature: 0.4,
+        tools: {
+          foo: { description: 'my tool' },
+        },
+        toolChoice: ToolChoiceType.auto,
+        functionCalling: 'auto',
       });
 
       expect(executorMock.invoke).toHaveBeenCalledTimes(1);
       expect(executorMock.invoke).toHaveBeenCalledWith({
         subAction: 'unified_completion_stream',
         subActionParams: expect.objectContaining({
-          body: expect.objectContaining({
-            temperature: 0.4,
+          body: expect.not.objectContaining({
+            tools: expect.any(Array),
           }),
         }),
       });
@@ -181,6 +324,30 @@ describe('inferenceAdapter', () => {
           }),
         }),
       });
+    });
+
+    it('throws an error if the connector response is in error', async () => {
+      executorMock.invoke.mockImplementation(async () => {
+        return {
+          actionId: 'actionId',
+          status: 'error',
+          serviceMessage: 'something went wrong',
+          data: undefined,
+        };
+      });
+
+      await expect(
+        lastValueFrom(
+          inferenceAdapter
+            .chatComplete({
+              ...defaultArgs,
+              messages: [{ role: MessageRole.User, content: 'Hello' }],
+            })
+            .pipe(toArray())
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Error calling connector: something went wrong"`
+      );
     });
   });
 });

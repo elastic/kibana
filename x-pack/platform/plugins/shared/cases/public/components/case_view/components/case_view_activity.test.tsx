@@ -147,6 +147,8 @@ const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
 const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
 const useReplaceCustomFieldMock = useReplaceCustomField as jest.Mock;
 
+const localStorageKey = `${basicCase.owner}.cases.userActivity.sortOrder`;
+
 describe('Case View Page activity tab', () => {
   let appMockRender: AppMockRenderer;
   const caseConnectors = getCaseConnectorsMockResponse();
@@ -216,6 +218,8 @@ describe('Case View Page activity tab', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     appMockRender = createAppMockRenderer();
+
+    localStorage.clear();
 
     useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: caseUsers });
     useCasesFeaturesMock.mockReturnValue(useGetCasesFeaturesRes);
@@ -389,6 +393,29 @@ describe('Case View Page activity tab', () => {
     });
 
     expect(await screen.findByTestId('case-view-edit-connector')).toBeInTheDocument();
+  });
+
+  it('should save sortOrder in localstorage', async () => {
+    (useGetCaseConfiguration as jest.Mock).mockReturnValue({
+      data: {
+        customFields: [customFieldsConfigurationMock[1]],
+        observableTypes: [],
+      },
+    });
+
+    appMockRender.render(
+      <CaseViewActivity
+        {...caseProps}
+        caseData={{
+          ...caseProps.caseData,
+          customFields: [customFieldsMock[1]],
+        }}
+      />
+    );
+
+    await userEvent.selectOptions(await screen.findByTestId('user-actions-sort-select'), 'desc');
+
+    expect(localStorage.getItem(localStorageKey)).toBe('"desc"');
   });
 
   describe('filter activity', () => {

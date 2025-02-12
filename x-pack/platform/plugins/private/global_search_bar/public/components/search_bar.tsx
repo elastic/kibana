@@ -395,6 +395,7 @@ export const SearchBar: FC<SearchBarProps> = (opts) => {
       emptyMessage={<EmptyMessage />}
       noMatchesMessage={<PopoverPlaceholder basePath={props.basePathUrl} />}
       popoverProps={{
+        zIndex: Number(euiTheme.levels.navigation),
         'data-test-subj': 'nav-search-popover',
         panelClassName: 'navSearch__panel',
         repositionOnScroll: true,

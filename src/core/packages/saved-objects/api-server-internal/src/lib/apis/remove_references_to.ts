@@ -8,11 +8,12 @@
  */
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsRemoveReferencesToOptions,
   SavedObjectsRemoveReferencesToResponse,
 } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { getSearchDsl } from '../search';
 import type { ApiExecutionContext } from './types';
 
@@ -24,7 +25,7 @@ export interface PerformRemoveReferencesToParams {
 
 export const performRemoveReferencesTo = async <T>(
   { type, id, options }: PerformRemoveReferencesToParams,
-  { registry, helpers, client, mappings, extensions = {} }: ApiExecutionContext
+  { registry, helpers, client, mappings, serializer, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObjectsRemoveReferencesToResponse> => {
   const { common: commonHelper } = helpers;
   const { securityExtension } = extensions;
@@ -32,7 +33,28 @@ export const performRemoveReferencesTo = async <T>(
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
   const { refresh = true } = options;
 
-  await securityExtension?.authorizeRemoveReferences({ namespace, object: { type, id } });
+  if (securityExtension) {
+    let name;
+
+    if (securityExtension.includeSavedObjectNames()) {
+      const nameAttribute = registry.getNameAttribute(type);
+
+      const savedObjectResponse = await client.get<SavedObjectsRawDocSource>(
+        {
+          index: commonHelper.getIndexForType(type),
+          id: serializer.generateRawId(namespace, type, id),
+          _source_includes: SavedObjectsUtils.getIncludedNameFields(type, nameAttribute),
+        },
+        { ignore: [404], meta: true }
+      );
+
+      const saveObject = { attributes: savedObjectResponse.body._source?.[type] };
+
+      name = SavedObjectsUtils.getName(nameAttribute, saveObject);
+    }
+
+    await securityExtension.authorizeRemoveReferences({ namespace, object: { type, id, name } });
+  }
 
   const allTypes = registry.getAllTypes().map((t) => t.name);
 

@@ -13,6 +13,7 @@ import type {
   FunctionCallingMode,
   Message,
   ToolOptions,
+  ChatCompleteMetadata,
 } from '@kbn/inference-common';
 import type { InferenceExecutor } from './utils';
 
@@ -24,18 +25,26 @@ import type { InferenceExecutor } from './utils';
  */
 export interface InferenceConnectorAdapter {
   chatComplete: (
-    options: {
-      executor: InferenceExecutor;
-      messages: Message[];
-      system?: string;
-      functionCalling?: FunctionCallingMode;
-      temperature?: number;
-      modelName?: string;
-      abortSignal?: AbortSignal;
-      logger: Logger;
-    } & ToolOptions
+    options: InferenceAdapterChatCompleteOptions
   ) => Observable<InferenceConnectorAdapterChatCompleteEvent>;
 }
+
+/**
+ * Options for {@link InferenceConnectorAdapter.chatComplete}
+ *
+ * @internal
+ */
+export type InferenceAdapterChatCompleteOptions = {
+  executor: InferenceExecutor;
+  messages: Message[];
+  logger: Logger;
+  system?: string;
+  functionCalling?: FunctionCallingMode;
+  temperature?: number;
+  modelName?: string;
+  abortSignal?: AbortSignal;
+  metadata?: ChatCompleteMetadata;
+} & ToolOptions;
 
 /**
  * Events that can be emitted by the observable returned from {@link InferenceConnectorAdapter.chatComplete}

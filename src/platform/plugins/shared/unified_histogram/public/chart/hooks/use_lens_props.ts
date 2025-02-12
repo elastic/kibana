@@ -10,7 +10,7 @@
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { EmbeddableComponentProps, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
 import type {
@@ -20,21 +20,38 @@ import type {
 } from '../../types';
 import { useStableCallback } from '../../hooks/use_stable_callback';
 
+export type LensProps = Pick<
+  EmbeddableComponentProps,
+  | 'id'
+  | 'viewMode'
+  | 'timeRange'
+  | 'attributes'
+  | 'noPadding'
+  | 'searchSessionId'
+  | 'executionContext'
+  | 'onLoad'
+>;
+
 export const useLensProps = ({
   request,
   getTimeRange,
-  refetch$,
+  fetch$,
   visContext,
   onLoad,
 }: {
   request?: UnifiedHistogramRequestContext;
   getTimeRange: () => TimeRange;
-  refetch$: Observable<UnifiedHistogramInputMessage>;
-  visContext: UnifiedHistogramVisContext;
+  fetch$: Observable<UnifiedHistogramInputMessage>;
+  visContext?: UnifiedHistogramVisContext;
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
 }) => {
   const buildLensProps = useCallback(() => {
+    if (!visContext) {
+      return;
+    }
+
     const { attributes, requestData } = visContext;
+
     return {
       requestData: JSON.stringify(requestData),
       lensProps: getLensProps({
@@ -46,13 +63,14 @@ export const useLensProps = ({
     };
   }, [visContext, getTimeRange, onLoad, request?.searchSessionId]);
 
-  const [lensPropsContext, setLensPropsContext] = useState(buildLensProps());
+  // Initialize with undefined to avoid rendering Lens until a fetch has been triggered
+  const [lensPropsContext, setLensPropsContext] = useState<ReturnType<typeof buildLensProps>>();
   const updateLensPropsContext = useStableCallback(() => setLensPropsContext(buildLensProps()));
 
   useEffect(() => {
-    const subscription = refetch$.subscribe(updateLensPropsContext);
+    const subscription = fetch$.subscribe(updateLensPropsContext);
     return () => subscription.unsubscribe();
-  }, [refetch$, updateLensPropsContext]);
+  }, [fetch$, updateLensPropsContext]);
 
   return lensPropsContext;
 };
@@ -67,7 +85,7 @@ export const getLensProps = ({
   getTimeRange: () => TimeRange;
   attributes: TypedLensByValueInput['attributes'];
   onLoad: (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => void;
-}) => ({
+}): LensProps => ({
   id: 'unifiedHistogramLensComponent',
   viewMode: ViewMode.VIEW,
   timeRange: getTimeRange(),

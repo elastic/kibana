@@ -12,10 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import {
-  StepsProgress,
-  useFlowProgressTelemetry,
-} from '../../../hooks/use_flow_progress_telemetry';
+import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { ProgressIndicator } from '../shared/progress_indicator';
 import { GetStartedPanel } from '../shared/get_started_panel';
@@ -30,10 +27,10 @@ const SHOW_TROUBLESHOOTING_DELAY = 120000; // 2 minutes
 const CLUSTER_OVERVIEW_DASHBOARD_ID = 'kubernetes-f4dc26db-1b53-4ea2-a78b-1bfab8ea267c';
 
 export function DataIngestStatus({ onboardingId }: Props) {
-  const [progress, setProgress] = useState<StepsProgress | undefined>(undefined);
   const [checkDataStartTime] = useState(Date.now());
+  const [dataReceivedTelemetrySent, setDataReceivedTelemetrySent] = useState(false);
   const {
-    services: { share },
+    services: { share, analytics },
   } = useKibana<ObservabilityOnboardingContextValue>();
   const dashboardLocator = share.url.locators.get(DASHBOARD_APP_LOCATOR);
 
@@ -61,12 +58,16 @@ export function DataIngestStatus({ onboardingId }: Props) {
   }, [data?.hasData, refetch, status]);
 
   useEffect(() => {
-    if (data?.hasData === true) {
-      setProgress({ 'logs-ingest': { status: 'complete' } });
+    if (data?.hasData === true && !dataReceivedTelemetrySent) {
+      setDataReceivedTelemetrySent(true);
+      analytics.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
+        flow_type: 'kubernetes',
+        flow_id: onboardingId,
+        step: 'logs-ingest',
+        step_status: 'complete',
+      });
     }
-  }, [data?.hasData]);
-
-  useFlowProgressTelemetry(progress, onboardingId);
+  }, [analytics, data?.hasData, dataReceivedTelemetrySent, onboardingId]);
 
   const isTroubleshootingVisible =
     data?.hasData === false && Date.now() - checkDataStartTime > SHOW_TROUBLESHOOTING_DELAY;

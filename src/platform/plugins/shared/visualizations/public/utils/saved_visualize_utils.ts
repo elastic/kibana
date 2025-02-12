@@ -36,6 +36,7 @@ import { injectReferences, extractReferences } from './saved_visualization_refer
 import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from './saved_objects_utils/constants';
 import { visualizationsClient } from '../content_management';
 import { VisualizationSavedObjectAttributes } from '../../common';
+import { urlFor } from './url_utils';
 
 export const SAVED_VIS_TYPE = 'visualization';
 
@@ -47,14 +48,6 @@ const getDefaults = (opts: GetVisOptions) => ({
   savedSearchId: opts.savedSearchId,
   version: 1,
 });
-
-export function getFullPath(id: string) {
-  return `/app/visualize#/edit/${id}`;
-}
-
-export function urlFor(id: string) {
-  return `#/edit/${encodeURIComponent(id)}`;
-}
 
 export function mapHitSource(
   visTypes: Pick<TypesStart, 'get'>,

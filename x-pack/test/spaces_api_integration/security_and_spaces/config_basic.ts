@@ -8,4 +8,7 @@
 import { createTestConfig } from '../common/config';
 
 // eslint-disable-next-line import/no-default-export
-export default createTestConfig('security_and_spaces', { license: 'basic' });
+export default createTestConfig('security_and_spaces', {
+  license: 'basic',
+  testFiles: [require.resolve('./apis'), require.resolve('./apis/get_all')],
+});

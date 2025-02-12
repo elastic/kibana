@@ -58,10 +58,10 @@ export interface ActivePanel {
 
 export interface GridLayoutStateManager {
   gridLayout$: BehaviorSubject<GridLayoutData>;
+  proposedGridLayout$: BehaviorSubject<GridLayoutData | undefined>; // temporary state for layout during drag and drop operations
   expandedPanelId$: BehaviorSubject<string | undefined>;
   isMobileView$: BehaviorSubject<boolean>;
   accessMode$: BehaviorSubject<GridAccessMode>;
-
   gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
   activePanel$: BehaviorSubject<ActivePanel | undefined>;
@@ -122,9 +122,3 @@ export interface PanelPlacementSettings {
 }
 
 export type GridAccessMode = 'VIEW' | 'EDIT';
-
-export type UserMouseEvent = MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>;
-
-export type UserTouchEvent = TouchEvent | React.TouchEvent<HTMLButtonElement>;
-
-export type UserInteractionEvent = React.UIEvent<HTMLElement> | Event;

@@ -10,62 +10,55 @@
 import React, { useEffect, useRef } from 'react';
 import { combineLatest, skip } from 'rxjs';
 
-import { transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { GridLayoutStateManager } from './types';
 
-export const DragPreview = ({
-  rowIndex,
-  gridLayoutStateManager,
-}: {
-  rowIndex: number;
-  gridLayoutStateManager: GridLayoutStateManager;
-}) => {
-  const dragPreviewRef = useRef<HTMLDivElement | null>(null);
-  const { euiTheme } = useEuiTheme();
+export const DragPreview = React.memo(
+  ({
+    rowIndex,
+    gridLayoutStateManager,
+  }: {
+    rowIndex: number;
+    gridLayoutStateManager: GridLayoutStateManager;
+  }) => {
+    const dragPreviewRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(
-    () => {
-      /** Update the styles of the drag preview via a subscription to prevent re-renders */
-      const styleSubscription = combineLatest([
-        gridLayoutStateManager.activePanel$,
-        gridLayoutStateManager.gridLayout$,
-      ])
-        .pipe(skip(1)) // skip the first emit because the drag preview is only rendered after a user action
-        .subscribe(([activePanel, gridLayout]) => {
-          if (!dragPreviewRef.current) return;
+    useEffect(
+      () => {
+        /** Update the styles of the drag preview via a subscription to prevent re-renders */
+        const styleSubscription = combineLatest([
+          gridLayoutStateManager.activePanel$,
+          gridLayoutStateManager.proposedGridLayout$,
+        ])
+          .pipe(skip(1)) // skip the first emit because the drag preview is only rendered after a user action
+          .subscribe(([activePanel, proposedGridLayout]) => {
+            if (!dragPreviewRef.current) return;
 
-          if (!activePanel || !gridLayout[rowIndex].panels[activePanel.id]) {
-            dragPreviewRef.current.style.display = 'none';
-          } else {
-            const panel = gridLayout[rowIndex].panels[activePanel.id];
-            dragPreviewRef.current.style.display = 'block';
-            dragPreviewRef.current.style.gridColumnStart = `${panel.column + 1}`;
-            dragPreviewRef.current.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
-            dragPreviewRef.current.style.gridRowStart = `${panel.row + 1}`;
-            dragPreviewRef.current.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
-          }
-        });
+            if (!activePanel || !proposedGridLayout?.[rowIndex].panels[activePanel.id]) {
+              dragPreviewRef.current.style.display = 'none';
+            } else {
+              const panel = proposedGridLayout[rowIndex].panels[activePanel.id];
+              dragPreviewRef.current.style.display = 'block';
+              dragPreviewRef.current.style.gridColumnStart = `${panel.column + 1}`;
+              dragPreviewRef.current.style.gridColumnEnd = `${panel.column + 1 + panel.width}`;
+              dragPreviewRef.current.style.gridRowStart = `${panel.row + 1}`;
+              dragPreviewRef.current.style.gridRowEnd = `${panel.row + 1 + panel.height}`;
+            }
+          });
 
-      return () => {
-        styleSubscription.unsubscribe();
-      };
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
+        return () => {
+          styleSubscription.unsubscribe();
+        };
+      },
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      []
+    );
 
-  return (
-    <div
-      ref={dragPreviewRef}
-      css={css`
-        display: none;
-        pointer-events: none;
-        border-radius: ${euiTheme.border.radius};
-        background-color: ${transparentize(euiTheme.colors.accentSecondary, 0.2)};
-        transition: opacity 100ms linear;
-      `}
-    />
-  );
-};
+    return <div ref={dragPreviewRef} className={'kbnGridPanel--dragPreview'} css={styles} />;
+  }
+);
+
+const styles = css({ display: 'none', pointerEvents: 'none' });
+
+DragPreview.displayName = 'KbnGridLayoutDragPreview';

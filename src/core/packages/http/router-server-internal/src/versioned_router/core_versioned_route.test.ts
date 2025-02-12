@@ -21,6 +21,12 @@ import { createRequest } from './core_versioned_route.test.util';
 import { isConfigSchema } from '@kbn/config-schema';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { getEnvOptions, createTestEnv } from '@kbn/config-mocks';
+
+const notDevOptions = getEnvOptions();
+notDevOptions.cliArgs.dev = false;
+const notDevEnv = createTestEnv({ envOptions: notDevOptions });
+const devEnv = createTestEnv();
 
 describe('Versioned route', () => {
   let router: Router;
@@ -33,6 +39,7 @@ describe('Versioned route', () => {
     versionedRouter = CoreVersionedRouter.from({
       router,
       log: loggingSystemMock.createLogger(),
+      env: notDevEnv,
     });
   });
 
@@ -198,7 +205,7 @@ describe('Versioned route', () => {
 
   it('allows public versions other than "2023-10-31"', () => {
     expect(() =>
-      CoreVersionedRouter.from({ router, log: loggingSystemMock.createLogger(), isDev: false })
+      CoreVersionedRouter.from({ router, log: loggingSystemMock.createLogger(), env: notDevEnv })
         .get({ access: 'public', path: '/foo' })
         .addVersion({ version: '2023-01-31', validate: false }, (ctx, req, res) => res.ok())
     ).not.toThrow();
@@ -297,7 +304,7 @@ describe('Versioned route', () => {
     beforeEach(() => {
       versionedRouter = CoreVersionedRouter.from({
         router,
-        isDev: true,
+        env: devEnv,
         log: loggingSystemMock.createLogger(),
       });
     });
@@ -346,7 +353,7 @@ describe('Versioned route', () => {
       (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
       versionedRouter = CoreVersionedRouter.from({
         router,
-        isDev: true,
+        env: devEnv,
         log: loggingSystemMock.createLogger(),
       });
       versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
@@ -379,7 +386,7 @@ describe('Versioned route', () => {
       (router.registerRoute as jest.Mock).mockImplementation((opts) => (handler = opts.handler));
       versionedRouter = CoreVersionedRouter.from({
         router,
-        isDev: true,
+        env: devEnv,
         log: loggingSystemMock.createLogger(),
       });
       versionedRouter.post({ path: '/test/{id}', access: 'internal' }).addVersion(
@@ -411,7 +418,7 @@ describe('Versioned route', () => {
   it('allows using default resolution for specific internal routes', async () => {
     versionedRouter = CoreVersionedRouter.from({
       router,
-      isDev: true,
+      env: devEnv,
       log: loggingSystemMock.createLogger(),
       useVersionResolutionStrategyForInternalPaths: ['/bypass_me/{id?}'],
     });

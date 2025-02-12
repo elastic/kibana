@@ -6,26 +6,31 @@
  */
 
 import React from 'react';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, EuiSpacer, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { DeleteManagedAssetsCallout } from '@kbn/delete-managed-asset-callout';
+import { Pipeline } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 
 export const PipelineDeleteModal = ({
   pipelinesToDelete,
   callback,
 }: {
-  pipelinesToDelete: string[];
+  pipelinesToDelete: Pipeline[];
   callback: (data?: { hasDeletedPipelines: boolean }) => void;
 }) => {
   const { services } = useKibana();
 
   const numPipelinesToDelete = pipelinesToDelete.length;
+  const managedPipelinesToDelete = pipelinesToDelete.filter(({ isManaged }) => isManaged).length;
 
   const handleDeletePipelines = () => {
+    const pipelineNames = pipelinesToDelete.map(({ name }) => name);
+
     services.api
-      .deletePipelines(pipelinesToDelete)
+      .deletePipelines(pipelineNames)
       .then(({ data: { itemsDeleted, errors }, error }) => {
         const hasDeletedPipelines = itemsDeleted && itemsDeleted.length;
 
@@ -36,7 +41,7 @@ export const PipelineDeleteModal = ({
                   'xpack.ingestPipelines.deleteModal.successDeleteSingleNotificationMessageText',
                   {
                     defaultMessage: "Deleted pipeline ''{pipelineName}''",
-                    values: { pipelineName: pipelinesToDelete[0] },
+                    values: { pipelineName: pipelineNames[0] },
                   }
                 )
               : i18n.translate(
@@ -66,7 +71,7 @@ export const PipelineDeleteModal = ({
               )
             : i18n.translate('xpack.ingestPipelines.deleteModal.errorNotificationMessageText', {
                 defaultMessage: "Error deleting pipeline ''{name}''",
-                values: { name: (errors && errors[0].name) || pipelinesToDelete[0] },
+                values: { name: (errors && errors[0].name) || pipelineNames[0] },
               });
           services.notifications.toasts.addDanger(errorMessage);
         }
@@ -105,6 +110,18 @@ export const PipelineDeleteModal = ({
       }
     >
       <>
+        {managedPipelinesToDelete > 0 && (
+          <>
+            <DeleteManagedAssetsCallout
+              assetName={i18n.translate('xpack.ingestPipelines.deleteModal.assetName', {
+                defaultMessage: 'ingest pipelines',
+              })}
+            />
+
+            <EuiSpacer size="m" />
+          </>
+        )}
+
         <p>
           <FormattedMessage
             id="xpack.ingestPipelines.deleteModal.deleteDescription"
@@ -114,8 +131,17 @@ export const PipelineDeleteModal = ({
         </p>
 
         <ul>
-          {pipelinesToDelete.map((name) => (
-            <li key={name}>{name}</li>
+          {pipelinesToDelete.map(({ name, isManaged }) => (
+            <li key={name}>
+              {name}{' '}
+              {isManaged && (
+                <EuiBadge color="hollow">
+                  {i18n.translate('xpack.ingestPipelines.deleteModal.managedPipelineLabel', {
+                    defaultMessage: 'Managed',
+                  })}
+                </EuiBadge>
+              )}
+            </li>
           ))}
         </ul>
       </>

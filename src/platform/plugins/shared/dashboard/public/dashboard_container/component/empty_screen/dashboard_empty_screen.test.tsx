@@ -23,7 +23,7 @@ visualizationsService.getAliases = jest.fn().mockReturnValue([{ name: 'lens' }])
 describe('DashboardEmptyScreen', () => {
   function mountComponent(viewMode: ViewMode) {
     const mockDashboardApi = {
-      viewMode: new BehaviorSubject<ViewMode>(viewMode),
+      viewMode$: new BehaviorSubject<ViewMode>(viewMode),
     } as unknown as DashboardApi;
     return mountWithIntl(
       <DashboardContext.Provider value={mockDashboardApi}>
@@ -57,7 +57,7 @@ describe('DashboardEmptyScreen', () => {
   });
 
   test('renders correctly with readonly mode', () => {
-    (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
+    (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
 
     const component = mountComponent('view');
     expect(component.render()).toMatchSnapshot();
@@ -72,7 +72,7 @@ describe('DashboardEmptyScreen', () => {
 
   // even when in edit mode, readonly users should not have access to the editing buttons in the empty prompt.
   test('renders correctly with readonly and edit mode', () => {
-    (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
+    (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
 
     const component = mountComponent('edit');
     expect(component.render()).toMatchSnapshot();

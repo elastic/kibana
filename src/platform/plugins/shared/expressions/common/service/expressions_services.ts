@@ -400,7 +400,6 @@ export class ExpressionsService
 
   public readonly run: ExpressionsServiceStart['run'] = (ast, input, params) => {
     this.assertStart();
-
     return this.executor.run(ast, input, params);
   };
 

@@ -28,9 +28,7 @@ import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
 import { ClientConfigType, InitialAppData } from '../../common/types';
 import { PluginsStart, ClientData, ESConfig, UpdateSideNavDefinitionFn } from '../plugin';
 
-import { externalUrl } from './shared/enterprise_search_url';
 import { mountFlashMessagesLogic } from './shared/flash_messages';
-import { getCloudEnterpriseSearchHost } from './shared/get_cloud_enterprise_search_host/get_cloud_enterprise_search_host';
 import { mountHttpLogic } from './shared/http';
 import { mountKibanaLogic } from './shared/kibana';
 import { mountLicensingLogic } from './shared/licensing';
@@ -58,18 +56,7 @@ export const renderApp = (
   },
   { config, data, esConfig }: { config: ClientConfigType; data: ClientData; esConfig: ESConfig }
 ) => {
-  const {
-    appSearch,
-    configuredLimits,
-    enterpriseSearchVersion,
-    errorConnectingMessage,
-    features,
-    kibanaVersion,
-    publicUrl,
-    readOnlyMode,
-    searchOAuth,
-    workplaceSearch,
-  } = data;
+  const { errorConnectingMessage, features, kibanaVersion } = data;
   const { history } = params;
   const { application, chrome, http, notifications, uiSettings } = core;
   const { capabilities, navigateToUrl } = application;
@@ -83,10 +70,8 @@ export const renderApp = (
     share,
     ml,
     fleet,
+    uiActions,
   } = plugins;
-
-  const entCloudHost = getCloudEnterpriseSearchHost(plugins.cloud);
-  externalUrl.enterpriseSearchUrl = publicUrl || entCloudHost || config.host || '';
 
   const productFeatures = features ?? { ...DEFAULT_PRODUCT_FEATURES };
 
@@ -131,6 +116,7 @@ export const renderApp = (
     setChromeIsVisible: chrome.setIsVisible,
     setDocTitle: chrome.docTitle.change,
     share,
+    uiActions,
     uiSettings,
     updateSideNavDefinition,
   });
@@ -141,7 +127,6 @@ export const renderApp = (
   const unmountHttpLogic = mountHttpLogic({
     errorConnectingMessage,
     http,
-    readOnlyMode,
   });
 
   const unmountFlashMessagesLogic = mountFlashMessagesLogic({ notifications });
@@ -161,16 +146,7 @@ export const renderApp = (
               <CloudContext>
                 <Provider store={store}>
                   <Router history={params.history}>
-                    <App
-                      appSearch={appSearch}
-                      configuredLimits={configuredLimits}
-                      enterpriseSearchVersion={enterpriseSearchVersion}
-                      features={features}
-                      kibanaVersion={kibanaVersion}
-                      readOnlyMode={readOnlyMode}
-                      searchOAuth={searchOAuth}
-                      workplaceSearch={workplaceSearch}
-                    />
+                    <App features={features} kibanaVersion={kibanaVersion} />
                   </Router>
                 </Provider>
               </CloudContext>
@@ -195,7 +171,7 @@ export const renderApp = (
  * Render function for Kibana's header action menu chrome -
  * reusable by any Enterprise Search plugin simply by passing in
  * a custom HeaderActions component (e.g., WorkplaceSearchHeaderActions)
- * @see https://github.com/elastic/kibana/blob/main/docs/development/core/public/kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md
+ * @see https://github.com/elastic/kibana/blob/8.0/docs/development/core/public/kibana-plugin-core-public.appmountparameters.setheaderactionmenu.md
  */
 
 export const renderHeaderActions = (

@@ -17,6 +17,12 @@
     "initialize-server:ea:basic_essentials": "node ./scripts/index.js server entity_analytics basic_license_essentials_tier",
     "run-tests:ea:basic_essentials": "node ./scripts/index.js runner entity_analytics basic_license_essentials_tier",
 
+    "initialize-server:asset_inventory:trial_complete": "node ./scripts/index.js server asset_inventory trial_license_complete_tier",
+    "run-tests:asset_inventory:trial_complete": "node ./scripts/index.js runner asset_inventory trial_license_complete_tier",
+
+    "asset_inventory:entity_store:server:ess": "npm run initialize-server:asset_inventory:trial_complete entity_store ess",
+    "asset_inventory:entity_store:runner:ess": "npm run run-tests:asset_inventory:trial_complete entity_store ess essEnv --",
+
     "initialize-server:dr": "node ./scripts/index.js server detections_response trial_license_complete_tier",
     "run-tests:dr": "node ./scripts/index.js runner detections_response trial_license_complete_tier",
 

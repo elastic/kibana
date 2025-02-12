@@ -30,10 +30,7 @@ import { topPanelHeightSelector } from './utils/state_selectors';
 import { exportVisContext } from '../utils/external_vis_context';
 import { getBreakdownField } from './utils/local_storage_utils';
 
-type LayoutProps = Pick<
-  UnifiedHistogramLayoutProps,
-  'disableAutoFetching' | 'disableTriggers' | 'disabledActions'
->;
+type LayoutProps = Pick<UnifiedHistogramLayoutProps, 'disableTriggers' | 'disabledActions'>;
 
 /**
  * The options used to initialize the container
@@ -84,9 +81,9 @@ export type UnifiedHistogramContainerProps = {
  */
 export type UnifiedHistogramApi = {
   /**
-   * Manually trigger a refetch of the data
+   * Trigger a fetch of the data
    */
-  refetch: () => void;
+  fetch: () => void;
 } & Pick<
   UnifiedHistogramStateService,
   'state$' | 'setChartHidden' | 'setTopPanelHeight' | 'setTimeInterval' | 'setTotalHits'
@@ -112,7 +109,7 @@ export const UnifiedHistogramContainer = forwardRef<
     const options = await getCreationOptions?.();
     const apiHelper = await services.lens.stateHelperApi();
 
-    setLayoutProps(pick(options, 'disableAutoFetching', 'disableTriggers', 'disabledActions'));
+    setLayoutProps(pick(options, 'disableTriggers', 'disabledActions'));
     setLocalStorageKeyPrefix(options?.localStorageKeyPrefix);
     setStateService(createStateService({ services, ...options }));
     setLensSuggestionsApi(() => apiHelper.suggestions);
@@ -125,8 +122,8 @@ export const UnifiedHistogramContainer = forwardRef<
     }
 
     setApi({
-      refetch: () => {
-        input$.next({ type: 'refetch' });
+      fetch: () => {
+        input$.next({ type: 'fetch' });
       },
       ...pick(
         stateService,

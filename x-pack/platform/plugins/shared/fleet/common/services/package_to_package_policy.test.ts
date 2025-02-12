@@ -33,6 +33,7 @@ describe('Fleet - packageToPackagePolicy', () => {
         map: [],
         lens: [],
         ml_module: [],
+        security_ai_prompt: [],
         security_rule: [],
         tag: [],
         osquery_pack_asset: [],

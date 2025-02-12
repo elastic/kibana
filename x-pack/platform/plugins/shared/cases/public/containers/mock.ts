@@ -1324,3 +1324,16 @@ export const mockObservables: ObservableUI[] = [
     updatedAt: '2024-12-11',
   },
 ];
+
+export const mockSimilarObservables = [
+  {
+    value: '127.0.0.1',
+    typeKey: OBSERVABLE_TYPE_IPV4.key,
+    typeLabel: OBSERVABLE_TYPE_IPV4.label,
+  },
+  {
+    value: '10.0.0.1',
+    typeKey: OBSERVABLE_TYPE_IPV4.key,
+    typeLabel: OBSERVABLE_TYPE_IPV4.label,
+  },
+];

@@ -19,10 +19,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { isEqual } from 'lodash';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
@@ -30,7 +31,11 @@ import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
-import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
+import {
+  type ESQLRealField,
+  ESQLVariableType,
+  type ESQLControlVariable,
+} from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
@@ -42,6 +47,7 @@ import {
   useDebounceWithOptions,
   onKeyDownResizeHandler,
   onMouseDownResizeHandler,
+  getEditorOverwrites,
   type MonacoMessage,
 } from './helpers';
 import { addQueriesToCache } from './history_local_storage';
@@ -54,10 +60,27 @@ import {
 } from './esql_editor.styles';
 import type { ESQLEditorProps, ESQLEditorDeps } from './types';
 
-import './overwrite.scss';
-
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
+
+const triggerControl = async (
+  queryString: string,
+  variableType: ESQLVariableType,
+  position: monaco.Position | null | undefined,
+  uiActions: ESQLEditorDeps['uiActions'],
+  esqlVariables?: ESQLControlVariable[],
+  onSaveControl?: ESQLEditorProps['onSaveControl'],
+  onCancelControl?: ESQLEditorProps['onCancelControl']
+) => {
+  await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
+    queryString,
+    variableType,
+    cursorPosition: position,
+    esqlVariables,
+    onSaveControl,
+    onCancelControl,
+  });
+};
 
 export const ESQLEditor = memo(function ESQLEditor({
   query,
@@ -69,6 +92,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   isLoading,
   isDisabled,
   hideRunQueryText,
+  hideRunQueryButton,
   editorIsInline,
   disableSubmitAction,
   dataTestSubj,
@@ -78,10 +102,14 @@ export const ESQLEditor = memo(function ESQLEditor({
   hasOutline,
   displayDocumentationAsFlyout,
   disableAutoFocus,
+  onSaveControl,
+  onCancelControl,
+  supportsControls,
+  esqlVariables,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
-  const { euiTheme } = useEuiTheme();
+  const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
   const {
     dataViews,
@@ -91,8 +119,11 @@ export const ESQLEditor = memo(function ESQLEditor({
     core,
     fieldsMetadata,
     uiSettings,
+    uiActions,
+    data,
   } = kibana.services;
 
+  const variablesService = kibana.services?.esql?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(query.esql ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
@@ -187,6 +218,23 @@ export const ESQLEditor = memo(function ESQLEditor({
     }
   }, [code, query.esql]);
 
+  // Enable the variables service if the feature is supported in the consumer app
+  useEffect(() => {
+    if (supportsControls) {
+      variablesService?.enableSuggestions();
+
+      const variables = variablesService?.esqlVariables;
+      if (!isEqual(variables, esqlVariables)) {
+        variablesService?.clearVariables();
+        esqlVariables?.forEach((variable) => {
+          variablesService?.addVariable(variable);
+        });
+      }
+    } else {
+      variablesService?.disableSuggestions();
+    }
+  }, [variablesService, supportsControls, esqlVariables]);
+
   const toggleHistory = useCallback((status: boolean) => {
     setIsHistoryOpen(status);
   }, []);
@@ -230,8 +278,47 @@ export const ESQLEditor = memo(function ESQLEditor({
     openTimePickerPopover();
   });
 
+  monaco.editor.registerCommand('esql.control.time_literal.create', async (...args) => {
+    const position = editor1.current?.getPosition();
+    await triggerControl(
+      query.esql,
+      ESQLVariableType.TIME_LITERAL,
+      position,
+      uiActions,
+      esqlVariables,
+      onSaveControl,
+      onCancelControl
+    );
+  });
+
+  monaco.editor.registerCommand('esql.control.fields.create', async (...args) => {
+    const position = editor1.current?.getPosition();
+    await triggerControl(
+      query.esql,
+      ESQLVariableType.FIELDS,
+      position,
+      uiActions,
+      esqlVariables,
+      onSaveControl,
+      onCancelControl
+    );
+  });
+
+  monaco.editor.registerCommand('esql.control.values.create', async (...args) => {
+    const position = editor1.current?.getPosition();
+    await triggerControl(
+      query.esql,
+      ESQLVariableType.VALUES,
+      position,
+      uiActions,
+      esqlVariables,
+      onSaveControl,
+      onCancelControl
+    );
+  });
+
   const styles = esqlEditorStyles(
-    euiTheme,
+    theme.euiTheme,
     editorHeight,
     Boolean(editorMessages.errors.length),
     Boolean(editorMessages.warnings.length),
@@ -302,7 +389,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
     const fn = memoize(
-      (...args: [{ esql: string }, ExpressionsStart, undefined, AbortController?]) => ({
+      (...args: [{ esql: string }, ExpressionsStart, TimeRange, AbortController?]) => ({
         timestamp: Date.now(),
         result: fetchFieldsFromESQL(...args),
       }),
@@ -336,11 +423,12 @@ export const ESQLEditor = memo(function ESQLEditor({
           };
           // Check if there's a stale entry and clear it
           clearCacheWhenOld(esqlFieldsCache, esqlQuery.esql);
+          const timeRange = data.query.timefilter.timefilter.getTime();
           try {
             const table = await memoizedFieldsFromESQL(
               esqlQuery,
               expressions,
-              undefined,
+              timeRange,
               abortController
             ).result;
             const columns: ESQLRealField[] =
@@ -373,23 +461,32 @@ export const ESQLEditor = memo(function ESQLEditor({
       },
       // @ts-expect-error To prevent circular type import, type defined here is partial of full client
       getFieldsMetadata: fieldsMetadata?.getClient(),
+      getVariablesByType: (type: ESQLVariableType) => {
+        return variablesService?.esqlVariables.filter((variable) => variable.type === type);
+      },
+      canSuggestVariables: () => {
+        return variablesService?.areSuggestionsEnabled ?? false;
+      },
       getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
     };
     return callbacks;
   }, [
+    fieldsMetadata,
+    kibana.services?.esql?.getJoinIndicesAutocomplete,
+    dataSourcesCache,
     query.esql,
     memoizedSources,
-    dataSourcesCache,
     dataViews,
     core,
     esqlFieldsCache,
+    data.query.timefilter.timefilter,
     memoizedFieldsFromESQL,
     expressions,
     abortController,
     indexManagementApiService,
     histogramBarTarget,
-    fieldsMetadata,
-    kibana.services?.esql?.getJoinIndicesAutocomplete,
+    variablesService?.esqlVariables,
+    variablesService?.areSuggestionsEnabled,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -590,13 +687,13 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   const editorPanel = (
     <>
-      {Boolean(editorIsInline) && (
+      {Boolean(editorIsInline) && !hideRunQueryButton && (
         <EuiFlexGroup
           gutterSize="none"
           responsive={false}
           justifyContent="flexEnd"
           css={css`
-            padding: ${euiTheme.size.s};
+            padding: ${theme.euiTheme.size.s};
           `}
         >
           <EuiFlexItem grow={false}>
@@ -640,6 +737,7 @@ export const ESQLEditor = memo(function ESQLEditor({
               <div css={styles.editorContainer}>
                 <CodeEditor
                   languageId={ESQL_LANG_ID}
+                  classNameCss={getEditorOverwrites(theme)}
                   value={code}
                   options={codeEditorOptions}
                   width="100%"
@@ -769,8 +867,8 @@ export const ESQLEditor = memo(function ESQLEditor({
             tabIndex={0}
             style={{
               ...popoverPosition,
-              backgroundColor: euiTheme.colors.emptyShade,
-              borderRadius: euiTheme.border.radius.small,
+              backgroundColor: theme.euiTheme.colors.emptyShade,
+              borderRadius: theme.euiTheme.border.radius.small,
               position: 'absolute',
               overflow: 'auto',
             }}

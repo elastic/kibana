@@ -1760,10 +1760,10 @@
             "signature": [
               "{ (operation: ",
               {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.ApiOperation",
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.ApiOperation",
                 "text": "ApiOperation"
               },
               ", subject: string): string; (subject: string): string; }"
@@ -1781,10 +1781,10 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/security-plugin-types-server",
-                    "scope": "server",
-                    "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                    "section": "def-server.ApiOperation",
+                    "pluginId": "@kbn/security-plugin-types-common",
+                    "scope": "common",
+                    "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                    "section": "def-common.ApiOperation",
                     "text": "ApiOperation"
                   }
                 ],
@@ -1823,10 +1823,10 @@
             "signature": [
               "{ (operation: ",
               {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.ApiOperation",
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.ApiOperation",
                 "text": "ApiOperation"
               },
               ", subject: string): string; (subject: string): string; }"
@@ -3134,6 +3134,19 @@
             "label": "enabled",
             "description": [
               "\nIndicates whether audit logging is enabled or not.\n\nUseful for skipping resource-intense operations that don't need to be performed when audit\nlogging is disabled."
+            ],
+            "path": "src/core/packages/security/server/src/audit_logging/audit_logger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "security",
+            "id": "def-server.AuditLogger.includeSavedObjectNames",
+            "type": "boolean",
+            "tags": [],
+            "label": "includeSavedObjectNames",
+            "description": [
+              "\nIndicates whether to include saved objects names in audit log"
             ],
             "path": "src/core/packages/security/server/src/audit_logging/audit_logger.ts",
             "deprecated": false,
@@ -5096,9 +5109,7 @@
             "label": "get",
             "description": [],
             "signature": [
-              "(featureId: keyof ",
-              "Capabilities",
-              ", ...uiCapabilityParts: string[]) => string"
+              "(featureId: string | number, ...uiCapabilityParts: string[]) => string"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/ui.ts",
             "deprecated": false,
@@ -5112,8 +5123,7 @@
                 "label": "featureId",
                 "description": [],
                 "signature": [
-                  "keyof ",
-                  "Capabilities"
+                  "string | number"
                 ],
                 "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/ui.ts",
                 "deprecated": false,
@@ -5433,7 +5443,7 @@
         "label": "CasesSupportedOperations",
         "description": [],
         "signature": [
-          "\"getTags\" | \"createComment\" | \"reopenCase\" | \"pushCase\" | \"createCase\" | \"getCase\" | \"getComment\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"deleteCase\" | \"deleteComment\" | \"createConfiguration\" | \"updateConfiguration\""
+          "\"getTags\" | \"createComment\" | \"reopenCase\" | \"pushCase\" | \"createCase\" | \"getCase\" | \"getComment\" | \"getReporters\" | \"getUserActions\" | \"findConfigurations\" | \"updateCase\" | \"updateComment\" | \"deleteCase\" | \"deleteComment\" | \"createConfiguration\" | \"updateConfiguration\" | \"assignCase\""
         ],
         "path": "x-pack/platform/packages/private/security/authorization_core/src/privileges/feature_privilege_builder/cases.ts",
         "deprecated": false,
@@ -5976,7 +5986,7 @@
             },
             {
               "plugin": "observabilityAIAssistant",
-              "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/server/service/index.ts"
+              "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/index.ts"
             },
             {
               "plugin": "transform",
@@ -7515,12 +7525,12 @@
           {
             "parentPluginId": "security",
             "id": "def-common.RoleRemoteClusterPrivilege.clusters",
-            "type": "Array",
+            "type": "CompoundType",
             "tags": [],
             "label": "clusters",
             "description": [],
             "signature": [
-              "string[]"
+              "string | string[]"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
@@ -7534,7 +7544,14 @@
             "label": "privileges",
             "description": [],
             "signature": [
-              "string[]"
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RemoteClusterPrivilege",
+                "text": "RemoteClusterPrivilege"
+              },
+              "[]"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,

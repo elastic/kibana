@@ -49,6 +49,7 @@ const ServerResponse = 'A unique response returned by the server!';
 describe('axios connections', () => {
   let testServer: http.Server | https.Server | null;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let savedAxiosDefaultsAdapter: any;
 
   beforeEach(() => {

@@ -322,6 +322,7 @@ export class WrappingPrettyPrinter {
       lines = 1;
       txt = ctx instanceof CommandVisitorContext ? '' : '\n';
       const args = [...ctx.arguments()].filter((arg) => {
+        if (!arg) return false;
         if (arg.type === 'option') return arg.name === 'as';
         return true;
       });
@@ -397,6 +398,7 @@ export class WrappingPrettyPrinter {
             indented = true;
           }
           txt = indent + LeafPrinter.comment(decoration) + '\n' + txt;
+          indented = true;
         }
       }
     }
@@ -476,17 +478,23 @@ export class WrappingPrettyPrinter {
         !(value.type === 'function' && value.subtype === 'variadic-call');
       const castType = ctx.node.castType;
 
-      let valueFormatted = ctx.visitValue({
+      const valueResult = ctx.visitValue({
         indent: inp.indent,
         remaining: inp.remaining - castType.length - 2,
-      }).txt;
+      });
+      let { txt: valueFormatted } = valueResult;
 
       if (wrapInBrackets) {
         valueFormatted = `(${valueFormatted})`;
       }
 
       const formatted = `${valueFormatted}::${ctx.node.castType}${inp.suffix ?? ''}`;
-      const { txt, indented } = this.decorateWithComments(inp.indent, ctx.node, formatted);
+      const { txt, indented } = this.decorateWithComments(
+        inp.indent,
+        ctx.node,
+        formatted,
+        valueResult.indented
+      );
 
       return { txt, indented };
     })

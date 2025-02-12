@@ -10,10 +10,10 @@ import useObservable from 'react-use/lib/useObservable';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { TagListComponentProps } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { Tag, TagWithOptionalId } from '../../../common/types';
-import { getObjectTags } from '../../utils';
 import { TagList } from '../base';
 import type { ITagsCache } from '../../services';
 import { byNameTagSorter } from '../../utils';
+import { getObjectTags } from '../../../common';
 
 interface SavedObjectTagListProps {
   object: { references: SavedObjectReference[] };

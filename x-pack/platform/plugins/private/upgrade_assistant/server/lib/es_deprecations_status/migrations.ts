@@ -16,14 +16,15 @@ import {
   convertFeaturesToIndicesArray,
   getESSystemIndicesMigrationStatus,
 } from '../es_system_indices_migration';
-import { getCorrectiveAction } from './get_corrective_actions';
+import { type EsMetadata, getCorrectiveAction } from './get_corrective_actions';
 import { esIndicesStateCheck } from '../es_indices_state_check';
 
 /**
- * Remove once the data_streams type is added to the `MigrationDeprecationsResponse` type
+ * Remove once the these keys are added to the `MigrationDeprecationsResponse` type
  */
 interface EsDeprecations extends MigrationDeprecationsResponse {
-  data_streams: Record<string, MigrationDeprecationsDeprecation[]>;
+  templates: Record<string, MigrationDeprecationsDeprecation[]>;
+  ilm_policies: Record<string, MigrationDeprecationsDeprecation[]>;
 }
 
 const createBaseMigrationDeprecation = (
@@ -35,9 +36,7 @@ const createBaseMigrationDeprecation = (
     message,
     url,
     level,
-    // @ts-expect-error @elastic/elasticsearch _meta not available yet in MigrationDeprecationInfoResponse
     _meta: metadata,
-    // @ts-expect-error @elastic/elasticsearch resolve_during_rolling_upgrade not available yet in MigrationDeprecationInfoResponse
     resolve_during_rolling_upgrade: resolveDuringUpgrade,
   } = migrationDeprecation;
 
@@ -76,6 +75,28 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
     }
   );
 
+  const ilmPoliciesMigrations = Object.entries(migrationsResponse.ilm_policies).flatMap(
+    ([indexName, ilmPolicyDeprecations]) => {
+      return ilmPolicyDeprecations.flatMap((ilmPolicyData) =>
+        createBaseMigrationDeprecation(ilmPolicyData, {
+          indexName,
+          deprecationType: 'ilm_policies',
+        })
+      );
+    }
+  );
+
+  const templatesMigrations = Object.entries(migrationsResponse.templates).flatMap(
+    ([indexName, templatesDeprecations]) => {
+      return templatesDeprecations.flatMap((templatesDataa) =>
+        createBaseMigrationDeprecation(templatesDataa, {
+          indexName,
+          deprecationType: 'templates',
+        })
+      );
+    }
+  );
+
   const mlSettingsMigrations = migrationsResponse.ml_settings.map((depractionData) =>
     createBaseMigrationDeprecation(depractionData, { deprecationType: 'ml_settings' })
   );
@@ -93,6 +114,8 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
     ...nodeSettingsMigrations,
     ...indexSettingsMigrations,
     ...dataStreamsMigrations,
+    ...ilmPoliciesMigrations,
+    ...templatesMigrations,
   ].flat();
 };
 
@@ -122,6 +145,8 @@ export const getEnrichedDeprecations = async (
           return !systemIndicesList.includes(deprecation.index);
         }
         case 'cluster_settings':
+        case 'templates':
+        case 'ilm_policies':
         case 'ml_settings':
         case 'node_settings':
         case 'data_streams': {
@@ -136,9 +161,10 @@ export const getEnrichedDeprecations = async (
     })
     .map((deprecation) => {
       const correctiveAction = getCorrectiveAction(
+        deprecation.type,
         deprecation.message,
-        deprecation.metadata,
-        deprecation.index!
+        deprecation.metadata as EsMetadata,
+        deprecation.index
       );
 
       // If we have found deprecation information for index/indices

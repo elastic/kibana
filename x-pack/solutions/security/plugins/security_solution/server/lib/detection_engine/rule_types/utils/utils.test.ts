@@ -49,6 +49,7 @@ import {
   getUnprocessedExceptionsWarnings,
   getDisabledActionsWarningText,
   calculateFromValue,
+  stringifyAfterKey,
 } from './utils';
 import type { BulkResponseErrorAggregation, SearchAfterAndBulkCreateReturnType } from '../types';
 import {
@@ -491,9 +492,11 @@ describe('utils', () => {
     });
 
     test('should return two tuples if gap and previouslyStartedAt', async () => {
-      const { tuples, remainingGap, warningStatusMessage } = await getRuleRangeTuples({
-        previousStartedAt: moment().subtract(65, 's').toDate(),
-        startedAt: moment().toDate(),
+      const previouslyStartedAt = moment().subtract(65, 's').toDate();
+      const startedAt = moment().toDate();
+      const { tuples, remainingGap, warningStatusMessage, gap } = await getRuleRangeTuples({
+        previousStartedAt: previouslyStartedAt,
+        startedAt,
         interval: '50s',
         from: 'now-55s',
         to: 'now',
@@ -505,12 +508,15 @@ describe('utils', () => {
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(55);
       expect(remainingGap.asMilliseconds()).toEqual(0);
       expect(warningStatusMessage).toEqual(undefined);
+      expect(gap).toEqual(undefined);
     });
 
     test('should return five tuples when give long gap', async () => {
-      const { tuples, remainingGap, warningStatusMessage } = await getRuleRangeTuples({
-        previousStartedAt: moment().subtract(65, 's').toDate(), // 64 is 5 times the interval + lookback, which will trigger max lookback
-        startedAt: moment().toDate(),
+      const previousStartedAt = moment().subtract(65, 's').toDate(); // 64 is 5 times the interval + lookback, which will trigger max lookback
+      const startedAt = moment().toDate();
+      const { tuples, remainingGap, warningStatusMessage, gap } = await getRuleRangeTuples({
+        previousStartedAt,
+        startedAt,
         interval: '10s',
         from: 'now-13s',
         to: 'now',
@@ -529,6 +535,8 @@ describe('utils', () => {
       });
       expect(remainingGap.asMilliseconds()).toEqual(12000);
       expect(warningStatusMessage).toEqual(undefined);
+      expect(gap?.gte).toEqual(previousStartedAt.toISOString());
+      expect(gap?.lte).toEqual(moment(previousStartedAt).add(remainingGap, 'ms').toISOString());
     });
 
     test('should return a single tuple when give a negative gap (rule ran sooner than expected)', async () => {
@@ -1754,6 +1762,20 @@ describe('utils', () => {
           getExceptionListItemSchemaMock().name
         }`
       );
+    });
+  });
+
+  describe('stringifyAfterKey', () => {
+    it('should stringify after_key object with single key value', () => {
+      expect(stringifyAfterKey({ 'agent.name': 'test' })).toBe('agent.name: test');
+    });
+    it('should stringify after_key object with multiple key values', () => {
+      expect(stringifyAfterKey({ 'agent.name': 'test', 'destination.ip': '127.0.0.1' })).toBe(
+        'agent.name: test, destination.ip: 127.0.0.1'
+      );
+    });
+    it('should return undefined if after_key is undefined', () => {
+      expect(stringifyAfterKey(undefined)).toBeUndefined();
     });
   });
 

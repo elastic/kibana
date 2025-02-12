@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import semverValid from 'semver/functions/valid';
-
 import type { AgentTargetVersion } from '../../../common/types';
 
 import { AgentPolicyInvalidError } from '../../errors';
 import { appContextService } from '..';
+import { checkTargetVersionsValidity } from '../../../common/services/agent_utils';
 
 export function validateRequiredVersions(
   name: string,
@@ -24,24 +23,10 @@ export function validateRequiredVersions(
       `Policy "${name}" failed validation: required_versions are not allowed when automatic upgrades feature is disabled`
     );
   }
-  const versions = requiredVersions.map((v) => v.version);
-  const uniqueVersions = new Set(versions);
-  if (versions.length !== uniqueVersions.size) {
+  const error = checkTargetVersionsValidity(requiredVersions);
+  if (error) {
     throw new AgentPolicyInvalidError(
-      `Policy "${name}" failed validation: duplicate versions not allowed in required_versions`
-    );
-  }
-  versions.forEach((version) => {
-    if (!semverValid(version)) {
-      throw new AgentPolicyInvalidError(
-        `Policy "${name}" failed validation: invalid semver version ${version} in required_versions`
-      );
-    }
-  });
-  const sumOfPercentages = requiredVersions.reduce((acc, v) => acc + v.percentage, 0);
-  if (sumOfPercentages > 100) {
-    throw new AgentPolicyInvalidError(
-      `Policy "${name}" failed validation: sum of required_versions percentages cannot exceed 100`
+      `Policy "${name}" failed required_versions validation: ${error}`
     );
   }
 }

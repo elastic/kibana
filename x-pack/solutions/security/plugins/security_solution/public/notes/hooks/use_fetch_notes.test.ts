@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { fetchNotesByDocumentIds } from '../store/notes.slice';
 import { useFetchNotes } from './use_fetch_notes';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 
 jest.mock('react-redux', () => ({
   useDispatch: jest.fn(),
@@ -23,6 +24,8 @@ jest.mock('../store/notes.slice', () => ({
   fetchNotesByDocumentIds: jest.fn(),
 }));
 
+jest.mock('../../common/components/user_privileges');
+
 const mockedUseDispatch = useDispatch as jest.MockedFunction<typeof useDispatch>;
 const mockedUseIsExperimentalFeatureEnabled =
   useIsExperimentalFeatureEnabled as jest.MockedFunction<typeof useIsExperimentalFeatureEnabled>;
@@ -33,6 +36,9 @@ describe('useFetchNotes', () => {
   beforeEach(() => {
     mockDispatch = jest.fn();
     mockedUseDispatch.mockReturnValue(mockDispatch);
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      notesPrivileges: { read: true },
+    });
   });
 
   afterEach(() => {
@@ -58,6 +64,19 @@ describe('useFetchNotes', () => {
     const { result } = renderHook(() => useFetchNotes());
 
     result.current.onLoad([]);
+    expect(mockDispatch).not.toHaveBeenCalled();
+  });
+
+  it('should not dispatch action when user has insufficient privileges', () => {
+    mockedUseIsExperimentalFeatureEnabled.mockReturnValue(false);
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      notesPrivileges: { read: false },
+    });
+    const { result } = renderHook(() => useFetchNotes());
+
+    const events = [{ _id: '1' }, { _id: '2' }, { _id: '3' }];
+    result.current.onLoad(events);
+
     expect(mockDispatch).not.toHaveBeenCalled();
   });
 

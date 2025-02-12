@@ -21,7 +21,7 @@ describe('Remove panel action', () => {
     context = {
       embeddable: {
         uuid: 'superId',
-        viewMode: new BehaviorSubject<ViewMode>('edit'),
+        viewMode$: new BehaviorSubject<ViewMode>('edit'),
         parentApi: getMockPresentationContainer(),
       },
     };
@@ -39,7 +39,7 @@ describe('Remove panel action', () => {
   });
 
   it('is incompatible when view mode is view', async () => {
-    context.embeddable.viewMode = new BehaviorSubject<ViewMode>('view');
+    context.embeddable.viewMode$ = new BehaviorSubject<ViewMode>('view');
     expect(await action.isCompatible(context)).toBe(false);
   });
 

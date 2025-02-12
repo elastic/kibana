@@ -9,6 +9,7 @@ import type { ActionsClientLlm } from '@kbn/langchain/server';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { Runnable } from '@langchain/core/runnables';
 
+import { GenerationPrompts } from '../prompts';
 import { getOutputParser } from '../get_output_parser';
 
 interface GetChainWithFormatInstructions {
@@ -17,10 +18,14 @@ interface GetChainWithFormatInstructions {
   llmType: string;
 }
 
-export const getChainWithFormatInstructions = (
-  llm: ActionsClientLlm
-): GetChainWithFormatInstructions => {
-  const outputParser = getOutputParser();
+export const getChainWithFormatInstructions = ({
+  llm,
+  prompts,
+}: {
+  llm: ActionsClientLlm;
+  prompts: GenerationPrompts;
+}): GetChainWithFormatInstructions => {
+  const outputParser = getOutputParser(prompts);
   const formatInstructions = outputParser.getFormatInstructions();
 
   const prompt = ChatPromptTemplate.fromTemplate(

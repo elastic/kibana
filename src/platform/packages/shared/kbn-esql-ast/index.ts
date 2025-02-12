@@ -12,6 +12,7 @@ export type {
   ESQLAstItem,
   ESQLAstCommand,
   ESQLAstMetricsCommand,
+  ESQLAstJoinCommand,
   ESQLCommand,
   ESQLCommandOption,
   ESQLCommandMode,
@@ -31,10 +32,13 @@ export type {
 } from './src/types';
 
 export {
-  isBinaryExpression,
   isColumn,
   isDoubleLiteral,
   isFunctionExpression,
+  isBinaryExpression,
+  isWhereExpression,
+  isFieldExpression,
+  isSource,
   isIdentifier,
   isIntegerLiteral,
   isLiteral,

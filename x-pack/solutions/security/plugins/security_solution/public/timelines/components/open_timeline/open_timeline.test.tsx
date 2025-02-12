@@ -106,7 +106,7 @@ describe('OpenTimeline', () => {
 
   test('it shows the delete action columns when onDeleteSelected and deleteTimelines are specified', () => {
     useUserPrivilegesMock.mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+      timelinePrivileges: { crud: true, read: true },
     });
     const defaultProps = getDefaultTestProps(mockResults);
     const wrapper = mountWithIntl(
@@ -190,7 +190,7 @@ describe('OpenTimeline', () => {
       deleteTimelines: undefined,
     };
     useUserPrivilegesMock.mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: false, read: true },
+      timelinePrivileges: { crud: false, read: true },
     });
     const wrapper = mountWithIntl(
       <ThemeProvider theme={mockTheme}>
@@ -354,7 +354,7 @@ describe('OpenTimeline', () => {
 
   test('it should disable delete timeline if no timeline is selected', async () => {
     useUserPrivilegesMock.mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+      timelinePrivileges: { crud: true, read: true },
     });
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
@@ -405,7 +405,7 @@ describe('OpenTimeline', () => {
 
   test('it should enable delete timeline if a timeline is selected', async () => {
     useUserPrivilegesMock.mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+      timelinePrivileges: { crud: true, read: true },
     });
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
@@ -432,7 +432,7 @@ describe('OpenTimeline', () => {
 
   test("it should render a selectable timeline table if timelineStatus is active (selecting custom templates' tab)", () => {
     useUserPrivilegesMock.mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+      timelinePrivileges: { crud: true, read: true },
     });
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
@@ -451,7 +451,7 @@ describe('OpenTimeline', () => {
 
   test('it should include createRule in timeline actions if onCreateRule is passed', () => {
     useUserPrivilegesMock.mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+      timelinePrivileges: { crud: true, read: true },
     });
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
@@ -474,7 +474,7 @@ describe('OpenTimeline', () => {
       timelineStatus: TimelineStatusEnum.active,
     };
     useUserPrivilegesMock.mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: false, read: true },
+      timelinePrivileges: { crud: false, read: true },
     });
     const wrapper = mountWithIntl(
       <ThemeProvider theme={mockTheme}>
@@ -517,7 +517,7 @@ describe('OpenTimeline', () => {
 
   test("it should not render a selectable timeline table if timelineStatus is immutable (selecting Elastic templates' tab)", () => {
     useUserPrivilegesMock.mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+      timelinePrivileges: { crud: true, read: true },
     });
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
@@ -564,7 +564,7 @@ describe('OpenTimeline', () => {
 
   test("it should render a selectable timeline table if timelineStatus is null (no template timelines' tab selected)", () => {
     useUserPrivilegesMock.mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+      timelinePrivileges: { crud: true, read: true },
     });
     const defaultProps = {
       ...getDefaultTestProps(mockResults),
@@ -587,7 +587,7 @@ describe('OpenTimeline', () => {
       timelineStatus: null,
     };
     useUserPrivilegesMock.mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: false, read: true },
+      timelinePrivileges: { crud: false, read: true },
     });
     const wrapper = mountWithIntl(
       <ThemeProvider theme={mockTheme}>

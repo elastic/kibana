@@ -129,6 +129,7 @@ export function getEntityCountQuery({
     idEvalCommand({ sources }),
     whereCommand({ sources }),
     statsCommand({ sources }),
+    `LIMIT 1000`,
   ]);
 
   const filter = dslFilter({ sources, filters, start, end });

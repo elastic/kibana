@@ -15,7 +15,7 @@ import {
   ImportRulesRequestQuery,
   ImportRulesResponse,
 } from '../../../../../../../common/api/detection_engine/rule_management';
-import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constants';
+import { DETECTION_ENGINE_RULES_IMPORT_URL } from '../../../../../../../common/constants';
 import type { ConfigType } from '../../../../../../config';
 import type { HapiReadableStream, SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { ImportRuleResponse } from '../../../../routes/utils';
@@ -46,7 +46,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
   router.versioned
     .post({
       access: 'public',
-      path: `${DETECTION_ENGINE_RULES_URL}/_import`,
+      path: DETECTION_ENGINE_RULES_IMPORT_URL,
       security: {
         authz: {
           requiredPrivileges: ['securitySolution'],
@@ -85,8 +85,8 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             'licensing',
           ]);
 
-          const { prebuiltRulesCustomizationEnabled } = config.experimentalFeatures;
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
+          const { isRulesCustomizationEnabled } = detectionRulesClient.getRuleCustomizationStatus();
           const actionsClient = ctx.actions.getActionsClient();
           const actionSOClient = ctx.core.savedObjects.getClient({
             includedHiddenTypes: ['action'],
@@ -158,6 +158,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             config,
             context: ctx.securitySolution,
             prebuiltRuleAssetsClient: createPrebuiltRuleAssetsClient(savedObjectsClient),
+            ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
           });
 
           const [parsedRules, parsedRuleErrors] = partition(isRuleToImport, parsedRuleStream);
@@ -165,7 +166,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
 
           let importRuleResponse: ImportRuleResponse[] = [];
 
-          if (prebuiltRulesCustomizationEnabled) {
+          if (isRulesCustomizationEnabled) {
             importRuleResponse = await importRules({
               ruleChunks,
               overwriteRules: request.query.overwrite,

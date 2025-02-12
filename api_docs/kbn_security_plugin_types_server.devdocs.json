@@ -530,10 +530,10 @@
             "signature": [
               "{ (operation: ",
               {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.ApiOperation",
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.ApiOperation",
                 "text": "ApiOperation"
               },
               ", subject: string): string; (subject: string): string; }"
@@ -551,10 +551,10 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "@kbn/security-plugin-types-server",
-                    "scope": "server",
-                    "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                    "section": "def-server.ApiOperation",
+                    "pluginId": "@kbn/security-plugin-types-common",
+                    "scope": "common",
+                    "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                    "section": "def-common.ApiOperation",
                     "text": "ApiOperation"
                   }
                 ],
@@ -593,10 +593,10 @@
             "signature": [
               "{ (operation: ",
               {
-                "pluginId": "@kbn/security-plugin-types-server",
-                "scope": "server",
-                "docId": "kibKbnSecurityPluginTypesServerPluginApi",
-                "section": "def-server.ApiOperation",
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.ApiOperation",
                 "text": "ApiOperation"
               },
               ", subject: string): string; (subject: string): string; }"
@@ -2294,6 +2294,19 @@
             "label": "enabled",
             "description": [
               "\nIndicates whether audit logging is enabled or not.\n\nUseful for skipping resource-intense operations that don't need to be performed when audit\nlogging is disabled."
+            ],
+            "path": "src/core/packages/security/server/src/audit_logging/audit_logger.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/security-plugin-types-server",
+            "id": "def-server.AuditLogger.includeSavedObjectNames",
+            "type": "boolean",
+            "tags": [],
+            "label": "includeSavedObjectNames",
+            "description": [
+              "\nIndicates whether to include saved objects names in audit log"
             ],
             "path": "src/core/packages/security/server/src/audit_logging/audit_logger.ts",
             "deprecated": false,
@@ -4296,6 +4309,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/plugin.ts"
               }
             ]
           },
@@ -4383,7 +4400,7 @@
               },
               {
                 "plugin": "observabilityAIAssistant",
-                "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/server/service/index.ts"
+                "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/index.ts"
               },
               {
                 "plugin": "transform",
@@ -4612,9 +4629,7 @@
             "label": "get",
             "description": [],
             "signature": [
-              "(featureId: keyof ",
-              "Capabilities",
-              ", ...uiCapabilityParts: string[]) => string"
+              "(featureId: string | number, ...uiCapabilityParts: string[]) => string"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/ui.ts",
             "deprecated": false,
@@ -4628,8 +4643,7 @@
                 "label": "featureId",
                 "description": [],
                 "signature": [
-                  "keyof ",
-                  "Capabilities"
+                  "string | number"
                 ],
                 "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/ui.ts",
                 "deprecated": false,
@@ -5186,20 +5200,7 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [
-      {
-        "parentPluginId": "@kbn/security-plugin-types-server",
-        "id": "def-server.ApiOperation",
-        "type": "Enum",
-        "tags": [],
-        "label": "ApiOperation",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/security/plugin_types_server/src/authorization/actions/api.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/security-plugin-types-server",

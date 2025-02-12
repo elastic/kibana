@@ -17,7 +17,7 @@ import { getLensProps, useLensProps } from './use_lens_props';
 describe('useLensProps', () => {
   it('should return lens props', async () => {
     const getTimeRange = jest.fn();
-    const refetch$ = new Subject<UnifiedHistogramInputMessage>();
+    const fetch$ = new Subject<UnifiedHistogramInputMessage>();
     const onLoad = jest.fn();
     const query = {
       language: 'kuery',
@@ -41,12 +41,15 @@ describe('useLensProps', () => {
           adapter: undefined,
         },
         getTimeRange,
-        refetch$,
+        fetch$,
         visContext: attributesContext!,
         onLoad,
       });
     });
-    expect(lensProps.result.current.lensProps).toEqual(
+    act(() => {
+      fetch$.next({ type: 'fetch' });
+    });
+    expect(lensProps.result.current?.lensProps).toEqual(
       getLensProps({
         searchSessionId: 'id',
         getTimeRange,
@@ -58,7 +61,7 @@ describe('useLensProps', () => {
 
   it('should return lens props for text based languages', async () => {
     const getTimeRange = jest.fn();
-    const refetch$ = new Subject<UnifiedHistogramInputMessage>();
+    const fetch$ = new Subject<UnifiedHistogramInputMessage>();
     const onLoad = jest.fn();
     const query = {
       language: 'kuery',
@@ -82,12 +85,15 @@ describe('useLensProps', () => {
           adapter: undefined,
         },
         getTimeRange,
-        refetch$,
+        fetch$,
         visContext: attributesContext!,
         onLoad,
       });
     });
-    expect(lensProps.result.current.lensProps).toEqual(
+    act(() => {
+      fetch$.next({ type: 'fetch' });
+    });
+    expect(lensProps.result.current?.lensProps).toEqual(
       getLensProps({
         searchSessionId: 'id',
         getTimeRange,
@@ -97,9 +103,9 @@ describe('useLensProps', () => {
     );
   });
 
-  it('should only update lens props when refetch$ is triggered', async () => {
+  it('should only return lens props after fetch$ is triggered', async () => {
     const getTimeRange = jest.fn();
-    const refetch$ = new Subject<UnifiedHistogramInputMessage>();
+    const fetch$ = new Subject<UnifiedHistogramInputMessage>();
     const onLoad = jest.fn();
     const query = {
       language: 'kuery',
@@ -122,7 +128,7 @@ describe('useLensProps', () => {
         adapter: undefined,
       },
       getTimeRange,
-      refetch$,
+      fetch$,
       visContext: attributesContext!,
       onLoad,
     };
@@ -132,12 +138,12 @@ describe('useLensProps', () => {
       },
       { initialProps: lensProps }
     );
-    const originalProps = hook.result.current;
+    expect(hook.result.current).toEqual(undefined);
     hook.rerender({ ...lensProps, request: { searchSessionId: '456', adapter: undefined } });
-    expect(hook.result.current).toEqual(originalProps);
+    expect(hook.result.current).toEqual(undefined);
     act(() => {
-      refetch$.next({ type: 'refetch' });
+      fetch$.next({ type: 'fetch' });
     });
-    expect(hook.result.current).not.toEqual(originalProps);
+    expect(hook.result.current).not.toEqual(undefined);
   });
 });

@@ -7,7 +7,7 @@
 
 import type { Datum, ElementClickListener, PartialTheme } from '@elastic/charts';
 import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
@@ -60,6 +60,7 @@ const AlertsTreemapComponent: React.FC<Props> = ({
   stackByField0,
   stackByField1,
 }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const { theme, baseTheme } = useThemes();
   const fillColor = useMemo(
     () => theme?.background?.color ?? baseTheme.background.color,
@@ -101,7 +102,7 @@ const AlertsTreemapComponent: React.FC<Props> = ({
     [buckets, maxRiskSubAggregations, stackByField0]
   );
 
-  const colorPalette = useMemo(() => getRiskScorePalette(RISK_SCORE_STEPS), []);
+  const colorPalette = useMemo(() => getRiskScorePalette(RISK_SCORE_STEPS, euiTheme), [euiTheme]);
 
   const legendItems: LegendItem[] = useMemo(
     () =>
@@ -200,6 +201,7 @@ const AlertsTreemapComponent: React.FC<Props> = ({
                 height={minChartHeight}
                 legendItems={legendItems}
                 minWidth={DEFAULT_LEGEND_WIDTH}
+                isInlineActions
               />
             )}
           </LegendContainer>

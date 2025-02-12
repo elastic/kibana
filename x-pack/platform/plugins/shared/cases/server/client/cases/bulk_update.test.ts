@@ -20,7 +20,7 @@ import {
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { Operations } from '../../authorization';
-import { bulkUpdate } from './bulk_update';
+import { bulkUpdate, getOperationsToAuthorize } from './bulk_update';
 
 describe('update', () => {
   const cases = {
@@ -313,6 +313,113 @@ describe('update', () => {
         )
       ).rejects.toThrow(
         'Failed to update case, ids: [{"id":"mock-id-1","version":"WzAsMV0="}]: Error: The length of the field assignees is too long. Array must be of length <= 10.'
+      );
+    });
+
+    it('returns only updateCase operation when no reopened cases or changed assignees', () => {
+      const operations = getOperationsToAuthorize({
+        reopenedCases: [],
+        changedAssignees: [],
+        allCases: cases.cases,
+      });
+      expect(operations).toEqual([Operations.updateCase]);
+    });
+
+    it('returns only assignCase operation when all cases are assignee changes', () => {
+      const operations = getOperationsToAuthorize({
+        reopenedCases: [],
+        changedAssignees: cases.cases,
+        allCases: cases.cases,
+      });
+      expect(operations).toEqual([Operations.assignCase]);
+    });
+
+    it('returns only reopenCase operation when all cases are being reopened', () => {
+      const operations = getOperationsToAuthorize({
+        reopenedCases: cases.cases,
+        changedAssignees: [],
+        allCases: cases.cases,
+      });
+      expect(operations).toEqual([Operations.reopenCase]);
+    });
+
+    it('returns assignCase and updateCase when some cases have non-assignee changes', () => {
+      const case2 = { id: 'case-2', version: '1' };
+      const operations = getOperationsToAuthorize({
+        reopenedCases: [],
+        changedAssignees: cases.cases,
+        allCases: [...cases.cases, case2],
+      });
+      expect(operations).toEqual([Operations.assignCase, Operations.updateCase]);
+    });
+
+    it('returns reopenCase and updateCase when some cases have non-reopen changes', () => {
+      const case2 = { id: 'case-2', version: '1' };
+      const operations = getOperationsToAuthorize({
+        reopenedCases: cases.cases,
+        changedAssignees: [],
+        allCases: [...cases.cases, case2],
+      });
+      expect(operations).toEqual([Operations.reopenCase, Operations.updateCase]);
+    });
+
+    it('returns all operations when cases have mixed changes', () => {
+      const case2 = { id: 'case-2', version: '1' };
+      const case3 = { id: 'case-3', version: '1' };
+      const operations = getOperationsToAuthorize({
+        reopenedCases: cases.cases,
+        changedAssignees: [case2],
+        allCases: [...cases.cases, case2, case3],
+      });
+      expect(operations).toEqual([
+        Operations.reopenCase,
+        Operations.assignCase,
+        Operations.updateCase,
+      ]);
+    });
+
+    it('handles empty casesToAuthorize array', () => {
+      const operations = getOperationsToAuthorize({
+        reopenedCases: [],
+        changedAssignees: [],
+        allCases: [],
+      });
+      expect(operations).toEqual([]);
+    });
+
+    it('returns only combined operations when all cases have both reopen and assignee changes', () => {
+      const operations = getOperationsToAuthorize({
+        reopenedCases: cases.cases,
+        changedAssignees: cases.cases,
+        allCases: cases.cases,
+      });
+      expect(operations).toEqual([
+        Operations.reopenCase,
+        Operations.assignCase,
+        Operations.updateCase,
+      ]);
+    });
+
+    it('should filter out empty user profiles', async () => {
+      const casesWithEmptyAssignee = {
+        cases: [
+          {
+            ...cases.cases[0],
+            assignees: [{ uid: '' }, { uid: '2' }],
+          },
+        ],
+      };
+      await bulkUpdate(casesWithEmptyAssignee, clientArgs, casesClientMock);
+      expect(clientArgs.services.caseService.patchCases).toHaveBeenCalledWith(
+        expect.objectContaining({
+          cases: expect.arrayContaining([
+            expect.objectContaining({
+              updatedAttributes: expect.objectContaining({
+                assignees: [{ uid: '2' }],
+              }),
+            }),
+          ]),
+        })
       );
     });
   });
@@ -1727,7 +1834,7 @@ describe('update', () => {
         });
       });
 
-      it('checks authorization for both reopenCase and updateCase operations when reopening a case', async () => {
+      it('checks authorization for only reopenCase', async () => {
         // Mock a closed case
         const closedCase = {
           ...mockCases[0],
@@ -1759,7 +1866,7 @@ describe('update', () => {
 
         expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith({
           entities: [{ id: closedCase.id, owner: closedCase.attributes.owner }],
-          operation: [Operations.reopenCase, Operations.updateCase],
+          operation: [Operations.reopenCase],
         });
       });
 

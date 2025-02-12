@@ -16,7 +16,8 @@
       "actions",
       "management",
       "observabilityAIAssistant",
-      "observabilityShared"
+      "observabilityShared",
+      "ml",
     ],
     "optionalPlugins": [
       "home",

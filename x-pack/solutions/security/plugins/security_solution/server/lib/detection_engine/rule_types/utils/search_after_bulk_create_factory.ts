@@ -23,11 +23,33 @@ import type {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
   SignalSourceHit,
+  LoggedRequestsConfig,
 } from '../types';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { GenericBulkCreateResponse } from '../factories';
+import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import * as i18n from '../translations';
+
+const createLoggedRequestsConfig = (
+  isLoggedRequestsEnabled: boolean | undefined,
+  sortIds: estypes.SortResults | undefined,
+  page: number
+): LoggedRequestsConfig | undefined => {
+  if (!isLoggedRequestsEnabled) {
+    return undefined;
+  }
+  const description = sortIds
+    ? i18n.FIND_EVENTS_AFTER_CURSOR_DESCRIPTION(JSON.stringify(sortIds))
+    : i18n.FIND_EVENTS_DESCRIPTION;
+
+  return {
+    type: 'findDocuments',
+    description,
+    skipRequestQuery: page > 2, // skipping query logging for performance reasons, so we won't overwhelm Kibana with large response size
+  };
+};
 
 export interface SearchAfterAndBulkCreateFactoryParams extends SearchAfterAndBulkCreateParams {
   bulkCreateExecutor: (params: {
@@ -56,10 +78,13 @@ export const searchAfterAndBulkCreateFactory = async ({
   additionalFilters,
   bulkCreateExecutor,
   getWarningMessage,
+  isLoggedRequestsEnabled,
 }: SearchAfterAndBulkCreateFactoryParams): Promise<SearchAfterAndBulkCreateReturnType> => {
+  // eslint-disable-next-line complexity
   return withSecuritySpan('searchAfterAndBulkCreate', async () => {
     let toReturn = createSearchAfterReturnType();
     let searchingIteration = 0;
+    const loggedRequests: RulePreviewLoggedRequest[] = [];
 
     // sortId tells us where to start our next consecutive search_after query
     let sortIds: estypes.SortResults | undefined;
@@ -88,7 +113,12 @@ export const searchAfterAndBulkCreateFactory = async ({
         );
 
         if (hasSortId) {
-          const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
+          const {
+            searchResult,
+            searchDuration,
+            searchErrors,
+            loggedRequests: singleSearchLoggedRequests = [],
+          } = await singleSearchAfter({
             searchAfterSortIds: sortIds,
             index: inputIndexPattern,
             runtimeMappings,
@@ -103,6 +133,11 @@ export const searchAfterAndBulkCreateFactory = async ({
             trackTotalHits,
             sortOrder,
             additionalFilters,
+            loggedRequestsConfig: createLoggedRequestsConfig(
+              isLoggedRequestsEnabled,
+              sortIds,
+              searchingIteration
+            ),
           });
           mergedSearchResults = mergeSearchResults([mergedSearchResults, searchResult]);
           toReturn = mergeReturns([
@@ -116,7 +151,7 @@ export const searchAfterAndBulkCreateFactory = async ({
               errors: searchErrors,
             }),
           ]);
-
+          loggedRequests.push(...singleSearchLoggedRequests);
           // determine if there are any candidate signals to be processed
           const totalHits = getTotalHitsValue(mergedSearchResults.hits.total);
           const lastSortIds = getSafeSortIds(
@@ -211,6 +246,11 @@ export const searchAfterAndBulkCreateFactory = async ({
       }
     }
     ruleExecutionLogger.debug(`Completed bulk indexing of ${toReturn.createdSignalsCount} alert`);
+
+    if (isLoggedRequestsEnabled) {
+      toReturn.loggedRequests = loggedRequests;
+    }
+
     return toReturn;
   });
 };

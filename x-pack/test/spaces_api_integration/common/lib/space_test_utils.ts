@@ -42,6 +42,7 @@ export function getTestScenariosForSpace(spaceId: string) {
 export function getAggregatedSpaceData(es: Client, objectTypes: string[]) {
   return es.search({
     index: ALL_SAVED_OBJECT_INDICES,
+    request_cache: false,
     body: {
       size: 0,
       runtime_mappings: {

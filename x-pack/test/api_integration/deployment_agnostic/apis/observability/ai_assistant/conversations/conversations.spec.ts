@@ -45,9 +45,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   });
 
   describe('Conversations', function () {
-    // Fails on MKI: https://github.com/elastic/kibana/issues/206549
-    this.tags(['failsOnMKI']);
-
     describe('without conversations', () => {
       it('returns no conversations when listing', async () => {
         const { status, body } = await observabilityAIAssistantAPIClient.editor({
@@ -127,7 +124,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('returns the conversation', () => {
         // delete user from response to avoid comparing it as it will be different in MKI
-        // delete createResponse.body.user;
+        delete createResponse.body.user;
+
         expect(createResponse.body).to.eql({
           '@timestamp': createResponse.body['@timestamp'],
           conversation: {
@@ -140,10 +138,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           messages: conversationCreate.messages,
           namespace: 'default',
           public: conversationCreate.public,
-          user: {
-            id: 'u_gf3TRV5WWjD0PQCcTzkUyRE8By8uUt90gK-rT9ZPhA4_0',
-            name: 'elastic_editor',
-          },
         });
       });
 
@@ -186,6 +180,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(response.status).to.be(200);
 
+        // delete user from response to avoid comparing it as it will be different in MKI
+        delete response.body.user;
         expect(response.body).to.eql(createResponse.body);
       });
 
@@ -196,8 +192,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(response.status).to.be(200);
 
+        // delete user from response to avoid comparing it as it will be different in MKI
+        delete response.body.conversations[0].user;
         expect(response.body.conversations[0]).to.eql(createResponse.body);
       });
+
       // TODO
       it.skip('returns a 404 when reading it with another user', () => {});
 
@@ -247,6 +246,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         });
       });
     });
+
     describe('security roles and access privileges', () => {
       describe('should deny access for users without the ai_assistant privilege', () => {
         let createResponse: Awaited<

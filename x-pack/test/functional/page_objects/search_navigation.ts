@@ -17,9 +17,18 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
   const testSubjects = getService('testSubjects');
 
   return {
-    async navigateToElasticsearchStartPage(expectRedirect: boolean = false) {
+    async navigateToElasticsearchOverviewPage(basePath?: string) {
+      await retry.tryForTime(60 * 1000, async () => {
+        await common.navigateToApp('enterpriseSearch', {
+          shouldLoginIfPrompted: false,
+          basePath,
+        });
+      });
+    },
+    async navigateToElasticsearchStartPage(expectRedirect: boolean = false, basePath?: string) {
       await retry.tryForTime(60 * 1000, async () => {
         await common.navigateToApp('elasticsearchStart', {
+          basePath,
           shouldLoginIfPrompted: false,
         });
         if (!expectRedirect) {

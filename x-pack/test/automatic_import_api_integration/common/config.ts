@@ -81,7 +81,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
                 `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
               ]
             : []),
-          '--xpack.integration_assistant.enabled=true',
+          '--xpack.automatic_import.enabled=true',
         ],
       },
     };

@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { load } from 'js-yaml';
 
 import { isEqual } from 'lodash';
 
 import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_settings_context';
-import type {
-  AgentPolicy,
-  NewPackagePolicy,
-  NewAgentPolicy,
-  CreatePackagePolicyRequest,
-  PackagePolicy,
-  PackageInfo,
+import {
+  type AgentPolicy,
+  type NewPackagePolicy,
+  type NewAgentPolicy,
+  type CreatePackagePolicyRequest,
+  type PackagePolicy,
+  type PackageInfo,
+  SetupTechnology,
 } from '../../../../../types';
 import {
   useStartServices,
@@ -49,7 +50,9 @@ import {
   getCloudShellUrlFromPackagePolicy,
 } from '../../../../../../../components/cloud_security_posture/services';
 
-import { useAgentless } from './setup_technology';
+import { AGENTLESS_DISABLED_INPUTS } from '../../../../../../../../common/constants';
+
+import { useAgentless, useSetupTechnology } from './setup_technology';
 
 export async function createAgentPolicy({
   packagePolicy,
@@ -142,6 +145,8 @@ export function useOnSubmit({
   packageInfo,
   integrationToEnable,
   hasFleetAddAgentsPrivileges,
+  setNewAgentPolicy,
+  setSelectedPolicyTab,
 }: {
   packageInfo?: PackageInfo;
   newAgentPolicy: NewAgentPolicy;
@@ -151,6 +156,8 @@ export function useOnSubmit({
   queryParamsPolicyId: string | undefined;
   integrationToEnable?: string;
   hasFleetAddAgentsPrivileges: boolean;
+  setNewAgentPolicy: (policy: NewAgentPolicy) => void;
+  setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
 }) {
   const { notifications } = useStartServices();
   const confirmForceInstall = useConfirmForceInstall();
@@ -176,9 +183,10 @@ export function useOnSubmit({
   // Validation state
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
-  const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   const { isAgentlessIntegration, isAgentlessAgentPolicy } = useAgentless();
+
+  const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   // Update agent policy method
   const updateAgentPolicies = useCallback(
@@ -255,16 +263,15 @@ export function useOnSubmit({
       const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
 
       isInitializedRef.current = true;
-      updatePackagePolicy(
-        packageToPackagePolicy(
-          packageInfo,
-          agentPolicies.map((policy) => policy.id),
-          '',
-          DEFAULT_PACKAGE_POLICY.name || incrementedName,
-          DEFAULT_PACKAGE_POLICY.description,
-          integrationToEnable
-        )
+      const basePackagePolicy = packageToPackagePolicy(
+        packageInfo,
+        agentPolicies.map((policy) => policy.id),
+        '',
+        DEFAULT_PACKAGE_POLICY.name || incrementedName,
+        DEFAULT_PACKAGE_POLICY.description,
+        integrationToEnable
       );
+      updatePackagePolicy(basePackagePolicy);
       setIsInitialized(true);
     }
     init();
@@ -284,8 +291,47 @@ export function useOnSubmit({
     }
   }, [packagePolicy, agentPolicies, updatePackagePolicy, canUseMultipleAgentPolicies]);
 
-  const onSaveNavigate = useOnSaveNavigate({
+  const {
+    handleSetupTechnologyChange,
+    allowedSetupTechnologies,
+    selectedSetupTechnology,
+    defaultSetupTechnology,
+  } = useSetupTechnology({
+    newAgentPolicy,
+    setNewAgentPolicy,
+    updatePackagePolicy,
+    setSelectedPolicyTab,
+    packageInfo,
     packagePolicy,
+    integrationToEnable,
+  });
+  const setupTechnologyRef = useRef<SetupTechnology | undefined>(selectedSetupTechnology);
+  // sync the inputs with the agentless selector change
+  useEffect(() => {
+    setupTechnologyRef.current = selectedSetupTechnology;
+  });
+  const prevSetupTechnology = setupTechnologyRef.current;
+  const isAgentlessSelected =
+    isAgentlessIntegration(packageInfo) && selectedSetupTechnology === SetupTechnology.AGENTLESS;
+
+  const newInputs = useMemo(() => {
+    return packagePolicy.inputs.map((input, i) => {
+      if (isAgentlessSelected && AGENTLESS_DISABLED_INPUTS.includes(input.type)) {
+        return { ...input, enabled: false };
+      }
+      return packagePolicy.inputs[i];
+    });
+  }, [packagePolicy.inputs, isAgentlessSelected]);
+
+  useEffect(() => {
+    if (prevSetupTechnology !== selectedSetupTechnology) {
+      updatePackagePolicy({
+        inputs: newInputs,
+      });
+    }
+  }, [newInputs, prevSetupTechnology, selectedSetupTechnology, updatePackagePolicy, packagePolicy]);
+
+  const onSaveNavigate = useOnSaveNavigate({
     queryParamsPolicyId,
   });
 
@@ -495,5 +541,10 @@ export function useOnSubmit({
     // TODO check
     navigateAddAgent,
     navigateAddAgentHelp,
+    handleSetupTechnologyChange,
+    allowedSetupTechnologies,
+    selectedSetupTechnology,
+    defaultSetupTechnology,
+    isAgentlessSelected,
   };
 }

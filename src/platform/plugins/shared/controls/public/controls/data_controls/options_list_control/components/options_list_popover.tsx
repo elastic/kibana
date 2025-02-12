@@ -23,7 +23,7 @@ export const OptionsListPopover = () => {
     api.field$,
     api.availableOptions$,
     api.invalidSelections$,
-    api.dataLoading
+    api.dataLoading$
   );
   const [showOnlySelected, setShowOnlySelected] = useState(false);
 

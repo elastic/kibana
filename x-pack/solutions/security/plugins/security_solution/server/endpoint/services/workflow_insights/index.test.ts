@@ -32,7 +32,12 @@ import {
   ActionType,
 } from '../../../../common/endpoint/types/workflow_insights';
 import { createMockEndpointAppContext } from '../../mocks';
-import { createDatastream, createPipeline, generateInsightId } from './helpers';
+import {
+  checkIfRemediationExists,
+  createDatastream,
+  createPipeline,
+  generateInsightId,
+} from './helpers';
 import { securityWorkflowInsightsService } from '.';
 import { DATA_STREAM_NAME } from './constants';
 import { buildWorkflowInsights } from './builders';
@@ -43,6 +48,7 @@ jest.mock('./helpers', () => {
     ...original,
     createDatastream: jest.fn(),
     createPipeline: jest.fn(),
+    checkIfRemediationExists: jest.fn(),
   };
 });
 
@@ -291,6 +297,22 @@ describe('SecurityWorkflowInsightsService', () => {
         refresh: 'wait_for',
         op_type: 'create',
       });
+    });
+
+    it('should not index the doc if remediation exists', async () => {
+      await securityWorkflowInsightsService.start({ esClient });
+      const insight = getDefaultInsight();
+
+      const remediationExistsMock = checkIfRemediationExists as jest.Mock;
+      remediationExistsMock.mockResolvedValueOnce(true);
+
+      await securityWorkflowInsightsService.create(insight);
+
+      expect(remediationExistsMock).toHaveBeenCalledTimes(1);
+
+      // two since it calls fetch as well
+      expect(isInitializedSpy).toHaveBeenCalledTimes(1);
+      expect(esClient.index).toHaveBeenCalledTimes(0);
     });
 
     it('should call update instead if insight already exists', async () => {

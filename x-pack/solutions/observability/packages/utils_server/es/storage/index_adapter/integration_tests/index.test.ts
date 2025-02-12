@@ -11,7 +11,7 @@ import {
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import {
-  IStorageClient,
+  SimpleIStorageClient,
   StorageClientBulkResponse,
   StorageClientIndexResponse,
   StorageIndexAdapter,
@@ -22,6 +22,7 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import * as getSchemaVersionModule from '../../get_schema_version';
 import { isResponseError } from '@kbn/es-errors';
 import { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
+import { SimpleStorageIndexAdapter } from '..';
 
 const TEST_INDEX_NAME = 'test_index';
 
@@ -56,8 +57,8 @@ describe('StorageIndexAdapter', () => {
     },
   } satisfies StorageSettings;
 
-  let adapter: StorageIndexAdapter<typeof storageSettings>;
-  let client: IStorageClient<typeof storageSettings>;
+  let adapter: SimpleStorageIndexAdapter<typeof storageSettings>;
+  let client: SimpleIStorageClient<typeof storageSettings>;
 
   describe('with a clean Elasticsearch instance', () => {
     beforeAll(async () => {
@@ -178,10 +179,13 @@ describe('StorageIndexAdapter', () => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/206482
-    // FLAKY: https://github.com/elastic/kibana/issues/206483
-    describe.skip('after rolling over the index manually and indexing the same document', () => {
+    it('deletes the document', async () => {
+      await verifyClean();
+    });
+
+    describe('after rolling over the index manually and indexing the same document', () => {
       beforeAll(async () => {
+        await verifyClean();
         await client.index({ id: 'doc1', document: { foo: 'bar' } });
         await rolloverIndex();
         await client.index({ id: 'doc1', document: { foo: 'bar' } });
@@ -316,6 +320,10 @@ describe('StorageIndexAdapter', () => {
       it('deletes the document from the rolled over index', async () => {
         await verifyDocumentDeletedInRolledOverIndex();
       });
+
+      it('deletes the documents', async () => {
+        await verifyClean();
+      });
     });
   });
 
@@ -348,6 +356,10 @@ describe('StorageIndexAdapter', () => {
       expect(indices).toEqual([writeIndexName]);
 
       expect(getIndicesResponse[writeIndexName].mappings?._meta?.version).toEqual('next_version');
+    });
+
+    it('deletes the documents', async () => {
+      await verifyClean();
     });
   });
 
@@ -387,11 +399,15 @@ describe('StorageIndexAdapter', () => {
         		illegal_argument_exception: mapper [foo] cannot be changed from type [keyword] to [text]"
       `);
     });
+
+    it('deletes the documents', async () => {
+      await verifyClean();
+    });
   });
 
   function createStorageIndexAdapter<TStorageSettings extends StorageSettings>(
     settings: TStorageSettings
-  ): StorageIndexAdapter<TStorageSettings> {
+  ): SimpleStorageIndexAdapter<TStorageSettings> {
     return new StorageIndexAdapter(esClient, loggerMock, settings);
   }
 
@@ -566,5 +582,29 @@ describe('StorageIndexAdapter', () => {
         },
       },
     });
+  }
+
+  async function verifyClean() {
+    await client.clean();
+
+    // verify that the index template is removed
+    const templates = await esClient.indices
+      .getIndexTemplate({
+        name: TEST_INDEX_NAME,
+      })
+      .catch((error) => {
+        if (isResponseError(error) && error.statusCode === 404) {
+          return { index_templates: [] };
+        }
+        throw error;
+      });
+
+    expect(templates.index_templates).toEqual([]);
+
+    // verify that the backing indices are removed
+    const indices = await esClient.indices.get({
+      index: `${TEST_INDEX_NAME}*`,
+    });
+    expect(Object.keys(indices)).toEqual([]);
   }
 });

@@ -25,12 +25,13 @@ import { useSessionViewPanelContext } from '../context';
 export const AlertsTab = memo(() => {
   const { eventId, indexName, investigatedAlertId, sessionEntityId, sessionStartTime, scopeId } =
     useSessionViewPanelContext();
+
   const {
     data: alertsData,
     fetchNextPage: fetchNextPageAlerts,
     isFetching: isFetchingAlerts,
     hasNextPage: hasNextPageAlerts,
-  } = useFetchSessionViewAlerts(sessionEntityId, sessionStartTime, undefined);
+  } = useFetchSessionViewAlerts(sessionEntityId, sessionStartTime, investigatedAlertId);
 
   // this code mimics what is being done in the x-pack/plugins/session_view/public/components/session_view/index.tsx file
   const alerts = useMemo(() => {
