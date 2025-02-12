@@ -20,7 +20,6 @@ export function convertSavedDashboardPanelToPanelState<
     gridData: savedDashboardPanel.gridData,
     panelRefName: savedDashboardPanel.panelRefName,
     explicitInput: {
-      id: savedDashboardPanel.panelIndex,
       ...(savedDashboardPanel.id !== undefined && { savedObjectId: savedDashboardPanel.id }),
       ...(savedDashboardPanel.title !== undefined && { title: savedDashboardPanel.title }),
       ...savedDashboardPanel.embeddableConfig,
@@ -30,19 +29,20 @@ export function convertSavedDashboardPanelToPanelState<
 }
 
 export function convertPanelStateToSavedDashboardPanel(
+  panelId: string,
   panelState: DashboardPanelState
 ): SavedDashboardPanel {
   const savedObjectId = (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId;
-  const panelIndex = panelState.explicitInput.id;
+  const title = (panelState.explicitInput as { title?: string }).title;
   return {
     type: panelState.type,
     gridData: {
       ...panelState.gridData,
-      i: panelIndex,
+      i: panelId,
     },
-    panelIndex,
-    embeddableConfig: omit(panelState.explicitInput, ['id', 'savedObjectId', 'title']),
-    ...(panelState.explicitInput.title !== undefined && { title: panelState.explicitInput.title }),
+    panelIndex: panelId,
+    embeddableConfig: omit(panelState.explicitInput as { id: string, savedObjectId?: string, title?: string }, ['id', 'savedObjectId', 'title']),
+    ...(title !== undefined && { title }),
     ...(savedObjectId !== undefined && { id: savedObjectId }),
     ...(panelState.panelRefName !== undefined && { panelRefName: panelState.panelRefName }),
     ...(panelState.version !== undefined && { version: panelState.version }),

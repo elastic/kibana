@@ -91,7 +91,7 @@ test('convertPanelStateToSavedDashboardPanel', () => {
     type: 'search',
   };
 
-  expect(convertPanelStateToSavedDashboardPanel(dashboardPanel)).toEqual({
+  expect(convertPanelStateToSavedDashboardPanel('123', dashboardPanel)).toEqual({
     type: 'search',
     embeddableConfig: {
       something: 'hi!',
@@ -124,7 +124,7 @@ test('convertPanelStateToSavedDashboardPanel will not add an undefined id when n
     type: 'search',
   };
 
-  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel);
+  const converted = convertPanelStateToSavedDashboardPanel('123', dashboardPanel);
   expect(Object.hasOwn(converted, 'id')).toBe(false);
 });
 
@@ -144,7 +144,7 @@ test('convertPanelStateToSavedDashboardPanel will not leave title as part of emb
     type: 'search',
   };
 
-  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel);
+  const converted = convertPanelStateToSavedDashboardPanel('123', dashboardPanel);
   expect(Object.hasOwn(converted.embeddableConfig, 'title')).toBe(false);
   expect(converted.title).toBe('title');
 });
@@ -166,6 +166,6 @@ test('convertPanelStateToSavedDashboardPanel retains legacy version info', () =>
     version: '8.10.0',
   };
 
-  const converted = convertPanelStateToSavedDashboardPanel(dashboardPanel);
+  const converted = convertPanelStateToSavedDashboardPanel('123', dashboardPanel);
   expect(converted.version).toBe('8.10.0');
 });

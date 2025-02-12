@@ -8,8 +8,6 @@
  */
 
 import {
-  PanelState,
-  EmbeddableInput,
   SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
@@ -21,8 +19,10 @@ export interface DashboardPanelMap {
 }
 
 export interface DashboardPanelState<
-  TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
-> extends PanelState<TEmbeddableInput> {
+  PanelState = object
+> {
+  type: string;
+  explicitInput: PanelState;
   readonly gridData: GridData;
   panelRefName?: string;
 

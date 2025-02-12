@@ -44,9 +44,9 @@ export const convertPanelMapToPanelsArray = (
   panels: DashboardPanelMap,
   removeLegacyVersion?: boolean
 ) => {
-  return Object.values(panels).map((panelState) => {
+  return Object.entries(panels).map(([panelId, panelState]) => {
     const savedObjectId = (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId;
-    const panelIndex = panelState.explicitInput.id;
+    const title = (panelState.explicitInput as { title?: string }).title;
     return {
       /**
        * Version information used to be stored in the panel until 8.11 when it was moved to live inside the
@@ -57,11 +57,9 @@ export const convertPanelMapToPanelsArray = (
 
       type: panelState.type,
       gridData: panelState.gridData,
-      panelIndex,
+      panelIndex: panelId,
       panelConfig: omit(panelState.explicitInput, ['id', 'savedObjectId', 'title']),
-      ...(panelState.explicitInput.title !== undefined && {
-        title: panelState.explicitInput.title,
-      }),
+      ...(title !== undefined && { title }),
       ...(savedObjectId !== undefined && { id: savedObjectId }),
       ...(panelState.panelRefName !== undefined && { panelRefName: panelState.panelRefName }),
     };
