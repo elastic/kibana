@@ -148,6 +148,7 @@ import { registerDeployAgentPoliciesTask } from './services/agent_policies/deplo
 import { DeleteUnenrolledAgentsTask } from './tasks/delete_unenrolled_agents_task';
 import { registerBumpAgentPoliciesTask } from './services/agent_policies/bump_agent_policies_task';
 import { UpgradeAgentlessDeploymentsTask } from './tasks/upgrade_agentless_deployment';
+import { SyncIntegrationsTask } from './tasks/sync_integrations_task';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -202,6 +203,7 @@ export interface FleetAppContext {
   updateAgentlessDeploymentsTask: UpgradeAgentlessDeploymentsTask;
   taskManagerStart?: TaskManagerStartContract;
   fetchUsage?: (abortController: AbortController) => Promise<FleetUsage | undefined>;
+  syncIntegrationsTask: SyncIntegrationsTask;
 }
 
 export type FleetSetupContract = void;
@@ -304,6 +306,7 @@ export class FleetPlugin
   private unenrollInactiveAgentsTask?: UnenrollInactiveAgentsTask;
   private deleteUnenrolledAgentsTask?: DeleteUnenrolledAgentsTask;
   private updateAgentlessDeploymentsTask?: UpgradeAgentlessDeploymentsTask;
+  private syncIntegrationsTask?: SyncIntegrationsTask;
 
   private agentService?: AgentService;
   private packageService?: PackageService;
@@ -655,6 +658,11 @@ export class FleetPlugin
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
     });
+    this.syncIntegrationsTask = new SyncIntegrationsTask({
+      core,
+      taskManager: deps.taskManager,
+      logFactory: this.initializerContext.logger,
+    });
 
     // Register fields metadata extractors
     registerFieldsMetadataExtractors({ core, fieldsMetadata: deps.fieldsMetadata });
@@ -705,6 +713,7 @@ export class FleetPlugin
       updateAgentlessDeploymentsTask: this.updateAgentlessDeploymentsTask!,
       taskManagerStart: plugins.taskManager,
       fetchUsage: this.fetchUsage,
+      syncIntegrationsTask: this.syncIntegrationsTask!,
     });
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
@@ -720,6 +729,7 @@ export class FleetPlugin
     this.fleetMetricsTask
       ?.start(plugins.taskManager, core.elasticsearch.client.asInternalUser)
       .catch(() => {});
+    this.syncIntegrationsTask?.start({ taskManager: plugins.taskManager }).catch(() => {});
 
     const logger = appContextService.getLogger();
 
