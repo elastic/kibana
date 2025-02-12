@@ -9,7 +9,7 @@
 
 import { ObjectType } from '@kbn/config-schema';
 import type { Writable } from '@kbn/utility-types';
-import { CoreQueryParams } from '@kbn/response-ops-rule-params/index_threshold';
+import type { CoreQueryParams } from '@kbn/response-ops-rule-params/index_threshold';
 import { MAX_GROUPS } from '@kbn/response-ops-rule-params/common';
 
 const DefaultParams: Writable<Partial<CoreQueryParams>> = {

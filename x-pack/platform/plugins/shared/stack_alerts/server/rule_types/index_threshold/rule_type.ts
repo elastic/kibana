@@ -18,7 +18,7 @@ import {
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
-import { Params, ParamsSchema } from '@kbn/response-ops-rule-params/index_threshold';
+import { type Params, ParamsSchema } from '@kbn/response-ops-rule-params/index_threshold';
 import { ComparatorFns } from '@kbn/response-ops-rule-params/common';
 import { ALERT_EVALUATION_CONDITIONS, ALERT_TITLE, STACK_ALERTS_AAD_CONFIG } from '..';
 import { getComparatorScript, getHumanReadableComparator } from '../../../common';

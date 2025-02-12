@@ -7,8 +7,8 @@
 
 import {
   ParamsSchema,
-  Params,
-  CoreQueryParams,
+  type Params,
+  type CoreQueryParams,
 } from '@kbn/response-ops-rule-params/index_threshold';
 import { MAX_GROUPS } from '@kbn/response-ops-rule-params/common';
 import { ObjectType, TypeOf } from '@kbn/config-schema';

@@ -126,7 +126,7 @@ function validateParams(anyParams: unknown): string | undefined {
   } = anyParams as EsQueryRuleParams;
 
   if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
-    return i18n.translate('xpack.stackAlerts.esQuery.invalidThreshold2ErrorMessage', {
+    return i18n.translate('responseOps.ruleParams.esQuery.invalidThreshold2ErrorMessage', {
       defaultMessage:
         '[threshold]: must have two elements for the "{thresholdComparator}" comparator',
       values: {
@@ -136,7 +136,7 @@ function validateParams(anyParams: unknown): string | undefined {
   }
 
   if (aggType !== 'count' && !aggField) {
-    return i18n.translate('xpack.stackAlerts.esQuery.aggTypeRequiredErrorMessage', {
+    return i18n.translate('responseOps.ruleParams.esQuery.aggTypeRequiredErrorMessage', {
       defaultMessage: '[aggField]: must have a value when [aggType] is "{aggType}"',
       values: {
         aggType,
@@ -147,22 +147,25 @@ function validateParams(anyParams: unknown): string | undefined {
   // check grouping
   if (groupBy === 'top') {
     if (termField == null) {
-      return i18n.translate('xpack.stackAlerts.esQuery.termFieldRequiredErrorMessage', {
+      return i18n.translate('xpack.responseOps.ruleParams.esQuery.termFieldRequiredErrorMessage', {
         defaultMessage: '[termField]: termField required when [groupBy] is top',
       });
     }
     if (termSize == null) {
-      return i18n.translate('xpack.stackAlerts.esQuery.termSizeRequiredErrorMessage', {
+      return i18n.translate('xpack.responseOps.ruleParams.esQuery.termSizeRequiredErrorMessage', {
         defaultMessage: '[termSize]: termSize required when [groupBy] is top',
       });
     }
     if (termSize > MAX_GROUPS) {
-      return i18n.translate('xpack.stackAlerts.esQuery.invalidTermSizeMaximumErrorMessage', {
-        defaultMessage: '[termSize]: must be less than or equal to {maxGroups}',
-        values: {
-          maxGroups: MAX_GROUPS,
-        },
-      });
+      return i18n.translate(
+        'xpack.responseOps.ruleParams.esQuery.invalidTermSizeMaximumErrorMessage',
+        {
+          defaultMessage: '[termSize]: must be less than or equal to {maxGroups}',
+          values: {
+            maxGroups: MAX_GROUPS,
+          },
+        }
+      );
     }
   }
 
@@ -174,17 +177,20 @@ function validateParams(anyParams: unknown): string | undefined {
     const { timeField } = anyParams as EsQueryRuleParams;
 
     if (!timeField) {
-      return i18n.translate('xpack.stackAlerts.esQuery.esqlTimeFieldErrorMessage', {
+      return i18n.translate('xpack.responseOps.ruleParams.esQuery.esqlTimeFieldErrorMessage', {
         defaultMessage: '[timeField]: is required',
       });
     }
     if (thresholdComparator !== Comparator.GT) {
-      return i18n.translate('xpack.stackAlerts.esQuery.esqlThresholdComparatorErrorMessage', {
-        defaultMessage: '[thresholdComparator]: is required to be greater than',
-      });
+      return i18n.translate(
+        'xpack.responseOps.ruleParams.esQuery.esqlThresholdComparatorErrorMessage',
+        {
+          defaultMessage: '[thresholdComparator]: is required to be greater than',
+        }
+      );
     }
     if (threshold && threshold[0] !== 0) {
-      return i18n.translate('xpack.stackAlerts.esQuery.esqlThresholdErrorMessage', {
+      return i18n.translate('xpack.responseOps.ruleParams.esQuery.esqlThresholdErrorMessage', {
         defaultMessage: '[threshold]: is required to be 0',
       });
     }
@@ -195,12 +201,12 @@ function validateParams(anyParams: unknown): string | undefined {
     const parsedQuery = JSON.parse(esQuery);
 
     if (parsedQuery && !parsedQuery.query) {
-      return i18n.translate('xpack.stackAlerts.esQuery.missingEsQueryErrorMessage', {
+      return i18n.translate('xpack.responseOps.ruleParams.esQuery.missingEsQueryErrorMessage', {
         defaultMessage: '[esQuery]: must contain "query"',
       });
     }
   } catch (err) {
-    return i18n.translate('xpack.stackAlerts.esQuery.invalidEsQueryErrorMessage', {
+    return i18n.translate('xpack.responseOps.ruleParams.esQuery.invalidEsQueryErrorMessage', {
       defaultMessage: '[esQuery]: must be valid JSON',
     });
   }
