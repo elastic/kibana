@@ -62,6 +62,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#efb785' },
         { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#e7664c' },
       ]);
+
+      // assert x-axis label rotation
+      expect(debugState?.axes!.x[0].rotation).to.eql(0);
     });
 
     it('should reflect stop colors change on the chart', async () => {
@@ -171,6 +174,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         { key: '14,142.11 - 16,948.555', name: '14,142.11 - 16,948.555', color: '#e7664c' },
         { key: '≥ 16,948.555', name: '≥ 16,948.555', color: '#cc5642' },
       ]);
+    });
+
+    it('should change x axis label rotation', async () => {
+      // close flyouts
+      await lens.closePalettePanel();
+      await lens.closeDimensionEditor();
+
+      await lens.toggleToolbarPopover('lnsHeatmapHorizontalAxisButton');
+      await testSubjects.click('axis_orientation_vertical');
+
+      const debugState = await lens.getCurrentChartDebugState('heatmapChart');
+
+      expect(debugState?.axes!.x[0].rotation).to.eql(90);
     });
 
     // Skip for now as EC is not reporting title
