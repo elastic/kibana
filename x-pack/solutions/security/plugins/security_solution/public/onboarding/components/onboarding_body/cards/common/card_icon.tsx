@@ -15,6 +15,8 @@ import dashboardsIcon from '../dashboards/images/dashboards_icon.png';
 import dashboardsDarkIcon from '../dashboards/images/dashboards_icon_dark.png';
 import alertsIcon from '../alerts/images/alerts_icon.png';
 import alertsDarkIcon from '../alerts/images/alerts_icon_dark.png';
+import startMigrationIcon from '../siem_migrations/start_migration/images/start_migration_icon.png';
+import startMigrationDarkIcon from '../siem_migrations/start_migration/images/start_migration_icon_dark.png';
 
 interface CardIcons {
   [key: string]: {
@@ -39,6 +41,10 @@ const cardIcons: CardIcons = {
   [OnboardingCardId.alerts]: {
     light: alertsIcon,
     dark: alertsDarkIcon,
+  },
+  [OnboardingCardId.siemMigrationsStart]: {
+    light: startMigrationIcon,
+    dark: startMigrationDarkIcon,
   },
 };
 
