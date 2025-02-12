@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { ArrowBody, ArrowHead } from '../arrows';
 import {
