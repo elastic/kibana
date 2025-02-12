@@ -39,14 +39,15 @@ import {
 
 interface CellActionsPopoverProps {
   onFilter?: DocViewFilterFn;
-  /* ECS mapping for the key */
+  /** ECS mapping for the key */
   property: string;
-  /* Value for the mapping, which will be displayed */
+  /** Formatted value from the mapping, which will be displayed */
   value: string;
+  /** The raw value from the mapping, can be an object */
   rawValue: unknown;
-  /* Optional callback to render the value */
-  renderValue?: (value: unknown) => React.ReactNode;
-  /* Props to forward to the trigger Badge */
+  /** Optional callback to render the formatted value */
+  renderValue?: (value: string) => React.ReactNode;
+  /** Props to forward to the trigger Badge */
   renderPopoverTrigger: (props: {
     popoverTriggerProps: {
       onClick: () => void;
@@ -101,7 +102,7 @@ export function CellActionsPopover({
           >
             <strong>{property}</strong>{' '}
             {typeof renderValue === 'function'
-              ? renderValue(rawValue)
+              ? renderValue(value)
               : rawValue != null && typeof rawValue !== 'object'
               ? (rawValue as React.ReactNode)
               : value}
