@@ -442,10 +442,7 @@ export async function getEnterpriseSearchPre7IndexDeprecations(
   }
 
   let deprecatedIndicesCount = entSearchIndices.length;
-  let indicesList = '';
-  for (const index of entSearchIndices) {
-    indicesList += `- ${index}\n`;
-  }
+  let indicesList = entSearchIndices.join('\n');
 
   deprecations.push({
     level: 'critical',
@@ -466,7 +463,7 @@ export async function getEnterpriseSearchPre7IndexDeprecations(
             'The following indices are found to be incompatible for upgrade:\n\n' +
             '```\n' +
             `${indicesList}` +
-            '```\n\n' +
+            '\n```\n\n' +
             'These indices must be either set to read-only or deleted before upgrading. ' +
             'Setting these indices to read-only is a lossless operation, and can be attempted with the "quick resolve" button below.\n\n' +
             'Alternatively, manually deleting these indices will also unblock your upgrade.',
@@ -479,7 +476,13 @@ export async function getEnterpriseSearchPre7IndexDeprecations(
         i18n.translate(
           'xpack.enterpriseSearch.deprecations.incompatibleEnterpriseSearchIndexes.deleteIndices',
           {
-            defaultMessage: 'Delete all incompatible indices shows in the list above',
+            defaultMessage: 'Set all incompatible indices to read only, or',
+          }
+        ),
+        i18n.translate(
+          'xpack.enterpriseSearch.deprecations.incompatibleEnterpriseSearchIndexes.deleteIndices',
+          {
+            defaultMessage: 'Delete all incompatible indices',
           }
         ),
       ],
