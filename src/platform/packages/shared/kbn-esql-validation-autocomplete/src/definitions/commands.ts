@@ -45,6 +45,7 @@ import { suggest as suggestForWhere } from '../autocomplete/commands/where';
 import { suggest as suggestForJoin } from '../autocomplete/commands/join';
 import { suggest as suggestForFrom } from '../autocomplete/commands/from';
 import { suggest as suggestForRow } from '../autocomplete/commands/row';
+import { suggest as suggestForShow } from '../autocomplete/commands/show';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -222,13 +223,14 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.showDoc', {
       defaultMessage: 'Returns information about the deployment and its capabilities',
     }),
-    examples: ['show info'],
+    examples: ['SHOW INFO'],
     options: [],
     modes: [],
     signature: {
       multipleParams: false,
       params: [{ name: 'functions', type: 'function' }],
     },
+    suggest: suggestForShow,
   },
   {
     name: 'metrics',
