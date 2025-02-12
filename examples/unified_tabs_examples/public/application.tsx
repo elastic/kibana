@@ -18,7 +18,7 @@ import { UnifiedTabsExampleApp } from './example_app';
 export const renderApp = (
   core: CoreStart,
   deps: AppPluginStartDependencies,
-  { element }: AppMountParameters
+  { element, setHeaderActionMenu }: AppMountParameters
 ) => {
   ReactDOM.render(
     <I18nProvider>
@@ -28,6 +28,7 @@ export const renderApp = (
             core,
             ...deps,
           }}
+          setHeaderActionMenu={setHeaderActionMenu}
         />
       </KibanaThemeProvider>
     </I18nProvider>,

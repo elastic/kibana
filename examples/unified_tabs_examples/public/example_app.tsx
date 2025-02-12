@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import type { AppMountParameters } from '@kbn/core-application-browser';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
@@ -31,9 +32,13 @@ let TMP_COUNTER = 0;
 
 interface UnifiedTabsExampleAppProps {
   services: FieldListSidebarProps['services'];
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
 }
 
-export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({ services }) => {
+export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({
+  services,
+  setHeaderActionMenu,
+}) => {
   const { euiTheme } = useEuiTheme();
   const { navigation, data, unifiedSearch } = services;
   const { IndexPatternSelect } = unifiedSearch.ui;
@@ -128,6 +133,39 @@ export const UnifiedTabsExampleApp: React.FC<UnifiedTabsExampleAppProps> = ({ se
                         }
                         useDefaultBehaviors
                         displayStyle="detached"
+                        config={[
+                          {
+                            id: 'inspect',
+                            label: 'Inspect',
+                            run: () => {},
+                          },
+                          {
+                            id: 'alerts',
+                            label: 'Alerts',
+                            run: () => {},
+                          },
+                          {
+                            id: 'open',
+                            label: 'Open',
+                            iconType: 'folderOpen',
+                            iconOnly: true,
+                            run: () => {},
+                          },
+                          {
+                            id: 'share',
+                            label: 'Share',
+                            iconType: 'share',
+                            iconOnly: true,
+                            run: () => {},
+                          },
+                          {
+                            id: 'save',
+                            label: 'Save',
+                            emphasize: true,
+                            run: () => {},
+                          },
+                        ]}
+                        setMenuMountPoint={setHeaderActionMenu}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={true}>
