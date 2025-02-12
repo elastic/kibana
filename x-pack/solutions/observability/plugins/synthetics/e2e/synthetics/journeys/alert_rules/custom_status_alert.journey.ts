@@ -50,14 +50,13 @@ journey(`CustomStatusAlert`, async ({ page, params }) => {
     await page.getByTestId('manageStatusRuleName').click();
     await page.getByTestId('createNewStatusRule').click();
 
-    await page.getByTestId('ruleFormStep-details').click();
-    await page.getByTestId('ruleDetailsNameInput').fill('Synthetics status rule');
     let requestMade = false;
     page.on('request', (request) => {
       if (request.url().includes('api/alerting/rule') && request.method() === 'POST') {
         requestMade = true;
       }
     });
+    await page.waitForSelector('[data-test-subj="ruleFlyoutFooterSaveButton"]');
     await page.getByTestId('ruleFlyoutFooterSaveButton').click();
     await page.getByTestId('confirmModalConfirmButton').click();
     expect(requestMade).toBe(true);
@@ -65,6 +64,6 @@ journey(`CustomStatusAlert`, async ({ page, params }) => {
 
   step('verify rule creation', async () => {
     await syntheticsApp.goToRulesPage();
-    await page.waitForSelector(`text='Synthetics status rule'`);
+    await page.waitForSelector(`text='Synthetics monitor status rule'`);
   });
 });
