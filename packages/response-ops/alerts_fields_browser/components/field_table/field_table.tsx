@@ -16,6 +16,7 @@ import {
   CriteriaWithPagination,
 } from '@elastic/eui';
 import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { FindFieldsMetadataResponsePayload } from '@kbn/fields-metadata-plugin/common/fields_metadata/v1';
 import { getFieldColumns, getFieldItemsData } from '../field_items';
 import { CATEGORY_TABLE_CLASS_NAME, TABLE_HEIGHT } from '../../helpers';
 import type { BrowserFieldItem, FieldBrowserProps, GetFieldTableColumns } from '../../types';
@@ -52,6 +53,8 @@ export interface FieldTableProps extends Pick<FieldBrowserProps, 'columnIds' | '
    * Hides the field browser when invoked
    */
   onHide: () => void;
+
+  fieldsMetadata?: FindFieldsMetadataResponsePayload['fields'];
 }
 
 const FieldTableComponent: React.FC<FieldTableProps> = ({
@@ -64,6 +67,7 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
   onToggleColumn,
   searchInput,
   selectedCategoryIds,
+  fieldsMetadata,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [pageIndex, setPageIndex] = useState(0);
@@ -78,8 +82,9 @@ const FieldTableComponent: React.FC<FieldTableProps> = ({
         browserFields: filteredBrowserFields,
         selectedCategoryIds,
         columnIds,
+        fieldsMetadata,
       }),
-    [columnIds, filteredBrowserFields, selectedCategoryIds]
+    [columnIds, fieldsMetadata, filteredBrowserFields, selectedCategoryIds]
   );
 
   /**

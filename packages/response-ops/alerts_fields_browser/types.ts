@@ -9,6 +9,7 @@
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 /**
  * An item rendered in the table
@@ -57,4 +58,10 @@ export interface FieldBrowserProps {
   options?: FieldBrowserOptions;
   /** The width of the field browser */
   width?: number;
+  /**
+   * Services
+   */
+  services: {
+    fieldsMetadata: FieldsMetadataPublicStart;
+  };
 }

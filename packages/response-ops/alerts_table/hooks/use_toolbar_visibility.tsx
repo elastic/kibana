@@ -15,6 +15,7 @@ import React, { lazy, memo, ReactNode, Suspense, useMemo } from 'react';
 import { Alert, BrowserFields, EsQuerySnapshot } from '@kbn/alerting-types';
 import { FieldBrowser, FieldBrowserOptions } from '@kbn/response-ops-alerts-fields-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { AlertsCount } from '../components/alerts_count';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 import type { BulkActionsPanelConfig, RowSelection } from '../types';
@@ -61,6 +62,7 @@ const LeftAppendControl = memo(
     onResetColumns,
     onToggleColumn,
     fieldsBrowserOptions,
+    fieldsMetadata,
   }: {
     alertsCount: number;
     columnIds: string[];
@@ -70,6 +72,7 @@ const LeftAppendControl = memo(
     fieldsBrowserOptions?: FieldBrowserOptions;
     hasBrowserFields: boolean;
     browserFields: BrowserFields;
+    fieldsMetadata: FieldsMetadataPublicStart;
   }) => {
     return (
       <>
@@ -81,6 +84,7 @@ const LeftAppendControl = memo(
             onResetColumns={onResetColumns}
             onToggleColumn={onToggleColumn}
             options={fieldsBrowserOptions}
+            services={{ fieldsMetadata }}
           />
         )}
       </>
@@ -99,6 +103,7 @@ const useGetDefaultVisibility = ({
   alertsQuerySnapshot,
   showInspectButton,
   toolbarVisibilityProp,
+  fieldsMetadata,
 }: {
   alertsCount: number;
   columnIds: string[];
@@ -110,6 +115,7 @@ const useGetDefaultVisibility = ({
   alertsQuerySnapshot?: EsQuerySnapshot;
   showInspectButton: boolean;
   toolbarVisibilityProp?: EuiDataGridToolBarVisibilityOptions;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }): EuiDataGridToolBarVisibilityOptions => {
   return useMemo(() => {
     const hasBrowserFields = Object.keys(browserFields).length > 0;
@@ -132,6 +138,7 @@ const useGetDefaultVisibility = ({
               onResetColumns={onResetColumns}
               onToggleColumn={onToggleColumn}
               fieldsBrowserOptions={fieldsBrowserOptions}
+              fieldsMetadata={fieldsMetadata}
             />
           ),
         },
@@ -142,15 +149,16 @@ const useGetDefaultVisibility = ({
       showSortSelector: true,
     };
   }, [
-    alertsCount,
     browserFields,
-    columnIds,
-    fieldsBrowserOptions,
+    additionalToolbarControls,
     alertsQuerySnapshot,
+    showInspectButton,
+    alertsCount,
+    columnIds,
     onResetColumns,
     onToggleColumn,
-    showInspectButton,
-    additionalToolbarControls,
+    fieldsBrowserOptions,
+    fieldsMetadata,
   ]);
 };
 
@@ -173,6 +181,7 @@ export const useGetToolbarVisibility = ({
   showInspectButton,
   toolbarVisibilityProp,
   settings,
+  fieldsMetadata,
 }: {
   bulkActions: BulkActionsPanelConfig[];
   alertsCount: number;
@@ -192,6 +201,7 @@ export const useGetToolbarVisibility = ({
   showInspectButton: boolean;
   toolbarVisibilityProp?: EuiDataGridToolBarVisibilityOptions;
   settings: SettingsStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
   const defaultVisibilityProps = useMemo(() => {
@@ -205,6 +215,7 @@ export const useGetToolbarVisibility = ({
       fieldsBrowserOptions,
       alertsQuerySnapshot,
       showInspectButton,
+      fieldsMetadata,
     };
   }, [
     alertsCount,
@@ -216,6 +227,7 @@ export const useGetToolbarVisibility = ({
     fieldsBrowserOptions,
     alertsQuerySnapshot,
     showInspectButton,
+    fieldsMetadata,
   ]);
   const defaultVisibility = useGetDefaultVisibility(defaultVisibilityProps);
   const options = useMemo(() => {

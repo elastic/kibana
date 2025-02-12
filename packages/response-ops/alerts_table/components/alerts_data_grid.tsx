@@ -98,7 +98,7 @@ export const AlertsDataGrid = typedMemo(
       refresh: refreshQueries,
       columns,
       dataGridRef,
-      services: { http, notifications, application, cases: casesService, settings },
+      services: { http, notifications, application, cases: casesService, settings, fieldsMetadata },
     } = renderContext;
 
     const { colorMode } = useEuiTheme();
@@ -149,6 +149,7 @@ export const AlertsDataGrid = typedMemo(
       showInspectButton,
       toolbarVisibilityProp,
       settings,
+      fieldsMetadata,
     });
 
     const leadingControlColumns: EuiDataGridControlColumn[] | undefined = useMemo(() => {
