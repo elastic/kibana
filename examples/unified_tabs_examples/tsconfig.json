@@ -30,5 +30,6 @@
     "@kbn/unified-field-list",
     "@kbn/ui-actions-plugin",
     "@kbn/react-kibana-context-theme",
+    "@kbn/unified-tabs",
   ]
 }
