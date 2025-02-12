@@ -8,18 +8,13 @@
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
-
 import { AlertsHistogramPanel } from '../../../detections/components/alerts_kpis/alerts_histogram_panel';
 import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-
 import { InputsModelId } from '../../../common/store/inputs/constants';
 import type { UpdateDateRange } from '../../../common/components/charts/common';
-
 import type { AlertsStackByField } from '../../../detections/components/alerts_kpis/common/types';
-
 import * as i18n from '../../pages/translations';
-
 import { useFiltersForSignalsByCategory } from './use_filters_for_signals_by_category';
 
 interface Props {
@@ -27,7 +22,6 @@ interface Props {
   headerChildren?: React.ReactNode;
   /** Override all defaults, and only display this field */
   onlyField?: AlertsStackByField;
-  paddingSize?: 's' | 'm' | 'l' | 'none';
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   hideQueryToggle?: boolean;
 }
@@ -36,7 +30,6 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
   filters,
   headerChildren,
   onlyField,
-  paddingSize,
   setAbsoluteRangeDatePickerTarget = InputsModelId.global,
   hideQueryToggle = false,
 }) => {
@@ -66,7 +59,6 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
       filters={filtersForSignalsByCategory}
       headerChildren={headerChildren}
       onlyField={onlyField}
-      paddingSize={paddingSize}
       showLinkToAlerts={onlyField == null ? true : false}
       showStackBy={onlyField == null}
       showTotalAlertsCount={true}
