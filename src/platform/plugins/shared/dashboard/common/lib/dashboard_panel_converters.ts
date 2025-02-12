@@ -10,7 +10,6 @@
 import { v4 } from 'uuid';
 import { omit } from 'lodash';
 
-import type { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardPanelMap } from '..';
 import type { DashboardPanel } from '../../server/content_management';
@@ -45,7 +44,7 @@ export const convertPanelMapToPanelsArray = (
   removeLegacyVersion?: boolean
 ) => {
   return Object.entries(panels).map(([panelId, panelState]) => {
-    const savedObjectId = (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId;
+    const savedObjectId = (panelState.explicitInput as { savedObjectId?: string }).savedObjectId;
     const title = (panelState.explicitInput as { title?: string }).title;
     return {
       /**

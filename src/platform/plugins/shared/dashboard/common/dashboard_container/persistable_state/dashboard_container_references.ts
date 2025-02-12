@@ -9,7 +9,6 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import {
-  EmbeddableInput,
   EmbeddablePersistableStateService,
   EmbeddableStateWithType,
 } from '@kbn/embeddable-plugin/common';
@@ -89,7 +88,7 @@ export const createInject = (
           panelReferences
         );
 
-        workingState.panels[key].explicitInput = injectedState as EmbeddableInput;
+        workingState.panels[key].explicitInput = injectedState;
       }
     }
 
@@ -139,7 +138,7 @@ export const createExtract = (
         references.push(...prefixReferencesFromPanel(id, panelReferences));
 
         const { type, ...restOfState } = panelState;
-        workingState.panels[id].explicitInput = restOfState as EmbeddableInput;
+        workingState.panels[id].explicitInput = restOfState;
       }
     }
 

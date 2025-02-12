@@ -8,13 +8,12 @@
  */
 
 import { omit } from 'lodash';
-import type { EmbeddableInput, SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 import type { SavedDashboardPanel } from '../schema';
 import type { DashboardPanelState } from '../../../common';
 
 export function convertSavedDashboardPanelToPanelState<
-  TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
->(savedDashboardPanel: SavedDashboardPanel): DashboardPanelState<TEmbeddableInput> {
+  PanelState = object
+>(savedDashboardPanel: SavedDashboardPanel): DashboardPanelState<PanelState> {
   return {
     type: savedDashboardPanel.type,
     gridData: savedDashboardPanel.gridData,
@@ -23,7 +22,7 @@ export function convertSavedDashboardPanelToPanelState<
       ...(savedDashboardPanel.id !== undefined && { savedObjectId: savedDashboardPanel.id }),
       ...(savedDashboardPanel.title !== undefined && { title: savedDashboardPanel.title }),
       ...savedDashboardPanel.embeddableConfig,
-    } as TEmbeddableInput,
+    } as PanelState,
     version: savedDashboardPanel.version,
   };
 }
@@ -32,7 +31,7 @@ export function convertPanelStateToSavedDashboardPanel(
   panelId: string,
   panelState: DashboardPanelState
 ): SavedDashboardPanel {
-  const savedObjectId = (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId;
+  const savedObjectId = (panelState.explicitInput as { savedObjectId?: string }).savedObjectId;
   const title = (panelState.explicitInput as { title?: string }).title;
   return {
     type: panelState.type,
