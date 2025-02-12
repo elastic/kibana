@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import {
@@ -19,57 +19,28 @@ import {
   EuiPageTemplate,
   EuiText,
 } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
+import useMountedState from 'react-use/lib/useMountedState';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import { DASHBOARD_UI_METRIC_ID } from '../../../utils/telemetry_constants';
-import {
-  coreServices,
-  dataService,
-  embeddableService,
-  usageCollectionService,
-  visualizationsService,
-} from '../../../services/kibana_services';
+import { coreServices } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
 import { addFromLibrary } from '../../embeddable/api';
+import { executeAddLensPanelAction } from '../../../dashboard_actions/execute_add_lens_panel_action';
 
 export function DashboardEmptyScreen() {
-  const lensAlias = useMemo(
-    () => visualizationsService.getAliases().find(({ name }) => name === 'lens'),
-    []
-  );
   const { showWriteControls } = useMemo(() => {
     return getDashboardCapabilities();
   }, []);
 
+  const isMounted = useMountedState();
   const dashboardApi = useDashboardApi();
+  const [isLoading, setIsLoading] = useState(false);
   const isDarkTheme = useObservable(coreServices.theme.theme$)?.darkMode;
   const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
   const isEditMode = useMemo(() => {
     return viewMode === 'edit';
   }, [viewMode]);
-
-  const goToLens = useCallback(() => {
-    if (!lensAlias || !lensAlias.alias) return;
-    const trackUiMetric = usageCollectionService?.reportUiCounter.bind(
-      usageCollectionService,
-      DASHBOARD_UI_METRIC_ID
-    );
-
-    if (trackUiMetric) {
-      trackUiMetric(METRIC_TYPE.CLICK, `${lensAlias.name}:create`);
-    }
-    const appContext = dashboardApi.getAppContext();
-    embeddableService.getStateTransfer().navigateToEditor(lensAlias.alias.app, {
-      path: lensAlias.alias.path,
-      state: {
-        originatingApp: appContext?.currentAppId,
-        originatingPath: appContext?.getCurrentPath?.() ?? '',
-        searchSessionId: dataService.search.session.getSessionId(),
-      },
-    });
-  }, [lensAlias, dashboardApi]);
 
   // TODO replace these SVGs with versions from EuiIllustration as soon as it becomes available.
   const imageUrl = coreServices.http.basePath.prepend(
@@ -123,7 +94,17 @@ export function DashboardEmptyScreen() {
       return (
         <EuiFlexGroup justifyContent="center" gutterSize="l" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="lensApp" onClick={() => goToLens()}>
+            <EuiButton
+              isLoading={isLoading}
+              iconType="lensApp"
+              onClick={async () => {
+                setIsLoading(true);
+                await executeAddLensPanelAction(dashboardApi);
+                if (isMounted()) {
+                  setIsLoading(false);
+                }
+              }}
+            >
               {i18n.translate('dashboard.emptyScreen.createVisualization', {
                 defaultMessage: 'Create visualization',
               })}
