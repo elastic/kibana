@@ -64,9 +64,9 @@ export const RulesWithGapsOverviewPanel = () => {
     </EuiButton>
   );
 
-  const handleShowRulesWithGapsFilterButtonClick = (value: boolean) => {
+  const handleShowRulesWithGapsFilterButtonClick = () => {
     setFilterOptions({
-      showRulesWithGaps: value,
+      showRulesWithGaps: !showRulesWithGaps,
     });
   };
 
@@ -120,15 +120,9 @@ export const RulesWithGapsOverviewPanel = () => {
         <EuiFlexItem grow={false}>
           <EuiFilterGroup>
             <EuiFilterButton
-              withNext
-              hasActiveFilters={!showRulesWithGaps}
-              onClick={() => handleShowRulesWithGapsFilterButtonClick(false)}
-            >
-              {i18n.RULE_GAPS_OVERVIEW_PANEL_SHOW_ALL_RULES_LABEL}
-            </EuiFilterButton>
-            <EuiFilterButton
               hasActiveFilters={showRulesWithGaps}
-              onClick={() => handleShowRulesWithGapsFilterButtonClick(true)}
+              onClick={handleShowRulesWithGapsFilterButtonClick}
+              iconType={showRulesWithGaps ? `checkInCircleFilled` : undefined}
             >
               {i18n.RULE_GAPS_OVERVIEW_PANEL_SHOW_RULES_WITH_GAPS_LABEL}
             </EuiFilterButton>
