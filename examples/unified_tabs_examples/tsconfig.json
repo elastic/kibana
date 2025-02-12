@@ -30,5 +30,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/react-kibana-context-theme",
     "@kbn/unified-tabs",
+    "@kbn/core-application-browser",
   ]
 }
