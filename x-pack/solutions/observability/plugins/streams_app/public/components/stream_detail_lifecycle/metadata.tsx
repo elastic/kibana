@@ -229,5 +229,5 @@ function MetadataRow({
 const formatIngestionRate = (bytesPerDay: number) => {
   const perDay = formatBytes(bytesPerDay);
   const perMonth = formatBytes(bytesPerDay * 30);
-  return `${perDay.value} ${perDay.unit} / Day - ${perMonth.value} ${perMonth.unit} / Month`;
+  return `${perDay} / Day - ${perMonth} / Month`;
 };

@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { lastValueFrom } from 'rxjs';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { i18n } from '@kbn/i18n';
@@ -21,11 +21,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { AreaSeries, Axis, Chart, Settings } from '@elastic/charts';
-import { formatBytes } from './helpers/format_bytes';
 import { useKibana } from '../../hooks/use_kibana';
 import { DataStreamStats } from './hooks/use_data_stream_stats';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { ingestionRateQuery } from './helpers/ingestion_rate_query';
+import { formatBytes } from './helpers/format_bytes';
 
 export function IngestionRate({
   definition,
@@ -70,11 +70,6 @@ export function IngestionRate({
     },
     [data.search, definition, stats, isLoadingStats, timeRange]
   );
-
-  const sizeUnit = useMemo(() => {
-    if (!ingestionRate) return;
-    return formatBytes(Math.max(...ingestionRate.map(({ value }) => value))).unit;
-  }, [ingestionRate]);
 
   return (
     <>
@@ -138,7 +133,7 @@ export function IngestionRate({
           <Axis
             id="left-axis"
             position="left"
-            tickFormat={(value) => `${formatBytes(value, sizeUnit).value} ${sizeUnit}`}
+            tickFormat={(value) => formatBytes(value)}
             gridLine={{ visible: true }}
           />
         </Chart>

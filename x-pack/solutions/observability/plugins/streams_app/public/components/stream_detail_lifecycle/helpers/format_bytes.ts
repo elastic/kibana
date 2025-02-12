@@ -5,17 +5,6 @@
  * 2.0.
  */
 
-const units = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'] as const;
-type SizeUnitTuple = typeof units;
-export type SizeUnit = SizeUnitTuple[number];
+import { formatNumber } from '@elastic/eui';
 
-export const formatBytes = (bytes: number, unit?: SizeUnit) => {
-  if (bytes === 0) {
-    return { value: 0, unit: unit || 'Bytes' };
-  }
-
-  const k = 1024;
-  const i = unit ? units.findIndex((u) => u === unit) : Math.floor(Math.log(bytes) / Math.log(k));
-
-  return { value: parseFloat((bytes / Math.pow(k, i)).toFixed(0)), unit: units[i] };
-};
+export const formatBytes = (value: number) => formatNumber(value, '0.0 b');
