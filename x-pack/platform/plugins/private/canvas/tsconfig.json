@@ -47,7 +47,6 @@
     "@kbn/presentation-util-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/usage-collection-plugin",
-    "@kbn/visualizations-plugin",
     "@kbn/features-plugin",
     "@kbn/lens-plugin",
     "@kbn/maps-plugin",
@@ -89,7 +88,8 @@
     "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
     "@kbn/react-kibana-context-render",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/visualizations-plugin"
   ],
   "exclude": ["target/**/*"]
 }
