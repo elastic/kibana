@@ -88,8 +88,8 @@ export class AbstractGeoFileImporter extends Importer implements GeoFileImporter
     if (!index) {
       return {
         success: false,
-        error: i18n.translate('xpack.fileUpload.import.noIdOrIndexSuppliedErrorMessage', {
-          defaultMessage: 'no ID or index supplied',
+        error: i18n.translate('xpack.fileUpload.import.noIndexSuppliedErrorMessage', {
+          defaultMessage: 'No index supplied',
         }),
       };
     }

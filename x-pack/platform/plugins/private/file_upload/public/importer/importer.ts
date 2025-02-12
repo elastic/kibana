@@ -146,7 +146,7 @@ export abstract class Importer implements IImporter {
     if (!index) {
       return {
         success: false,
-        error: i18n.translate('xpack.fileUpload.import.noIdOrIndexSuppliedErrorMessage', {
+        error: i18n.translate('xpack.fileUpload.import.noIndexSuppliedErrorMessage', {
           defaultMessage: 'No index supplied',
         }),
       };
