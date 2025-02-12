@@ -442,7 +442,37 @@ export async function getEnterpriseSearchPre7IndexDeprecations(
   }
 
   let deprecatedIndicesCount = entSearchIndices.length;
-  let indicesList = entSearchIndices.join('\n');
+  let indicesList = '';
+  let datastreamsList = '';
+  for (const index of entSearchIndices) {
+    if (index.isDatastream) {
+      datastreamsList += `${index.name}\n`;
+    } else {
+      indicesList += `${index.name}\n`;
+    }
+  }
+
+  let message = `There are ${deprecatedIndicesCount} incompatible Enterprise Search indices.\n\n`;
+
+  if (indicesList.length > 0) {
+    message += 'The following indices are found to be incompatible for upgrade:\n\n' +
+            '```\n' +
+            `${indicesList}` +
+            '\n```\n\n' +
+            'These indices must be either set to read-only or deleted before upgrading. ';
+  }
+
+  if (datastreamsList.length > 0) {
+    message += '\n\The following data streams are found to be incompatible for upgrade:\n\n' +
+            '```\n' +
+            `${datastreamsList}` +
+            '\n```\n\n' +
+            'Using the "quick resolve" button below will roll over any datastreams and set all incompatible indices to read-only.\n\n' +
+            'Alternatively, manually deleting these indices and data streams will also unblock your upgrade.';
+  } else {          
+    message += 'Setting these indices to read-only can be attempted with the "quick resolve" button below.\n\n' +
+            'Alternatively, manually deleting these indices will also unblock your upgrade.';
+  }
 
   deprecations.push({
     level: 'critical',
@@ -458,15 +488,7 @@ export async function getEnterpriseSearchPre7IndexDeprecations(
       content: i18n.translate(
         'xpack.enterpriseSearch.deprecations.incompatibleEnterpriseSearchIndexes.message',
         {
-          defaultMessage:
-            `There are ${deprecatedIndicesCount} incompatible Enterprise Search indices.\n\n` +
-            'The following indices are found to be incompatible for upgrade:\n\n' +
-            '```\n' +
-            `${indicesList}` +
-            '\n```\n\n' +
-            'These indices must be either set to read-only or deleted before upgrading. ' +
-            'Setting these indices to read-only is a lossless operation, and can be attempted with the "quick resolve" button below.\n\n' +
-            'Alternatively, manually deleting these indices will also unblock your upgrade.',
+          defaultMessage: message,
         }
       ),
     },

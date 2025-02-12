@@ -6,15 +6,17 @@
  */
 
 import { ElasticsearchClient } from "@kbn/core/server";
+import { EnterpriseSearchPlugin } from "../plugin";
 
 const ENT_SEARCH_INDEX_PREFIX = '.ent-search-';
 
-/**
- * This function will return all Enterprise Search indices that were created with Elasticsearch 7.x. 
- * @param esClient an ElasticsearchClient instance
- * @returns a list of Enterprise Search index names that were created with Elasticsearch 7.x.
- */
-export async function getPreEightEnterpriseSearchIndices(esClient: ElasticsearchClient): Promise<string[]> {
+export interface EnterpriseSearchIndexMapping {
+    name: string;
+    isDatastream: boolean;
+    datastreamName: string;
+}
+
+export async function getPreEightEnterpriseSearchIndices(esClient: ElasticsearchClient): Promise<EnterpriseSearchIndexMapping[]> {
 
   const entSearchIndices = await esClient.indices.get({
     index: `${ENT_SEARCH_INDEX_PREFIX}*`,
@@ -26,29 +28,55 @@ export async function getPreEightEnterpriseSearchIndices(esClient: Elasticsearch
     return [];
   }
 
-  let returnIndices: string[] = [];
+  let returnIndices: EnterpriseSearchIndexMapping[] = [];
   for (const [index, indexData] of Object.entries(entSearchIndices)) {
     if (indexData.settings?.index?.version?.created?.startsWith('7') && indexData.settings?.index?.blocks?.write !== 'true') {
-      returnIndices.push(index);
+      let dataStreamName = indexData.data_stream;
+      returnIndices.push({
+        name: index,
+        isDatastream: dataStreamName ? true : false,
+        datastreamName: dataStreamName ?? '',
+      });
     }
   }
 
   return returnIndices;
 }
-    
 
-export async function setPreEightEnterpriseSearchIndicesReadOnly(esClient: ElasticsearchClient): Promise<boolean> {
+export async function setPreEightEnterpriseSearchIndicesReadOnly(esClient: ElasticsearchClient): Promise<string> {
   // get the indices again to ensure nothing's changed since the last check
-  const indices = await getPreEightEnterpriseSearchIndices(esClient);
+  let indices = await getPreEightEnterpriseSearchIndices(esClient);
+
+  
+  // rollover any datastreams first
+  let hasOneDatastream = false;
+  for (const index of indices) {
+    if (index.isDatastream) {
+        // let indexResponse = esClient.indices.delete({ index: index.name });
+        let indexResponse = await esClient.indices.rollover({ alias: index.datastreamName });
+
+        if (!indexResponse) {
+            return `Could not delete datastream: ${index.name}`;
+        }
+        hasOneDatastream = true;
+    }
+  }
+
+  if (hasOneDatastream) {
+    // we rolled over at least one datastream,
+    // get the indices again
+    indices = await getPreEightEnterpriseSearchIndices(esClient);
+  }
 
   for (const index of indices) {
-    let indexResponse = await esClient.indices.addBlock({ index, block: 'write' });
+    let indexName = index.name;
+    let indexResponse = await esClient.indices.addBlock({ index: indexName, block: 'write' });
 
     if (!indexResponse || indexResponse.acknowledged !== true) {
-      return false;
+      return `Could not set index read-only: ${indexName}`;
     }
   }  
 
-  return true;
+  return '';
 }
 

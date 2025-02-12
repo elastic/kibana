@@ -74,7 +74,13 @@ export function registerDeprecationRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      await setPreEightEnterpriseSearchIndicesReadOnly(client.asCurrentUser);
+      const setResponse = await setPreEightEnterpriseSearchIndicesReadOnly(client.asCurrentUser);
+      if (setResponse.length > 0) {
+        return response.badRequest({
+          body: { message: setResponse },
+          headers: { 'content-type': 'application/json' },
+        });
+      }
       return response.ok({
         body: { acknowedged: true },
         headers: { 'content-type': 'application/json' },
