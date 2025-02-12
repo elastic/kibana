@@ -313,7 +313,7 @@ describe('Observability AI Assistant client', () => {
           expect.objectContaining({
             connectorId: 'foo',
             stream: false,
-            functionCalling: 'native',
+            functionCalling: 'auto',
             toolChoice: expect.objectContaining({
               function: 'title_conversation',
             }),
@@ -349,7 +349,7 @@ describe('Observability AI Assistant client', () => {
             messages: expect.arrayContaining([
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
-            functionCalling: 'native',
+            functionCalling: 'auto',
             toolChoice: undefined,
             tools: undefined,
           },
@@ -872,7 +872,7 @@ describe('Observability AI Assistant client', () => {
               },
             },
           ],
-          useSimulatedFunctionCalling: false,
+          simulateFunctionCalling: false,
         });
       });
 
@@ -919,7 +919,7 @@ describe('Observability AI Assistant client', () => {
             messages: expect.arrayContaining([
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
-            functionCalling: 'native',
+            functionCalling: 'auto',
             toolChoice: 'auto',
             tools: expect.any(Object),
           },
@@ -1080,7 +1080,7 @@ describe('Observability AI Assistant client', () => {
             messages: expect.arrayContaining([
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
-            functionCalling: 'native',
+            functionCalling: 'auto',
             toolChoice: 'auto',
             tools: expect.any(Object),
           },

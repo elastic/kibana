@@ -20,6 +20,7 @@ import {
   FtrConfigProviderContext,
   defineDockerServersConfig,
 } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
@@ -85,6 +86,7 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
 
     return {
       servers,
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       dockerServers: defineDockerServersConfig({
         registry: {
           enabled: !!dockerRegistryPort,
