@@ -8655,6 +8655,20 @@
             "path": "x-pack/platform/plugins/shared/lens/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.OperationMetadata.hasArraySupport",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hasArraySupport",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/lens/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
