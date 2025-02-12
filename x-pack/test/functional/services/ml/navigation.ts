@@ -18,6 +18,7 @@ export function MachineLearningNavigationProvider({
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'header', 'discover']);
+  const managementMenu = getService('managementMenu');
 
   return {
     async navigateToMl() {
@@ -42,6 +43,28 @@ export function MachineLearningNavigationProvider({
         } else {
           await testSubjects.missingOrFail('jobsListLink', { timeout: 2000 });
         }
+      });
+    },
+
+    async navigateToStackManagementMlSection(sectionId: string, pageSubject: string) {
+      await PageObjects.common.navigateToApp('home');
+      await PageObjects.common.navigateToApp('management');
+      const sections = await managementMenu.getSections();
+      expect(sections).to.have.length(3);
+      expect(sections[1]).to.eql({
+        sectionId: 'ml',
+        sectionLinks: [
+          'overview',
+          'anomaly_detection',
+          'analytics',
+          'trained_models',
+          'supplied_configurations',
+          'ad_settings',
+        ],
+      });
+      testSubjects.click(sectionId);
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail(pageSubject);
       });
     },
 

@@ -62,7 +62,7 @@ export const App: FC<AppProps> = ({
   mlFeatures,
   experimentalFeatures,
   nlpSettings,
-  entryPoint, // TODO: might need to update this naming
+  entryPoint,
 }) => {
   const pageDeps: PageDependencies = {
     history: appMountParams.history,
