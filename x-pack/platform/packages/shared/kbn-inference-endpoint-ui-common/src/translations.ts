@@ -120,6 +120,13 @@ export const OPTIONALTEXT = i18n.translate(
   }
 );
 
+export const ES_MODELS_LINK_TEXT = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.esModelsLinkText',
+  {
+    defaultMessage: 'Looking for Elasticsearch model Ids',
+  }
+);
+
 export const RE_ENTER_SECRETS = (label: string) => {
   return i18n.translate('xpack.inferenceEndpointUICommon.components.requiredGenericTextField', {
     defaultMessage:
