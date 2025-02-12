@@ -11,7 +11,7 @@ interface ObjectToRemove {
   spaceId: string;
   id: string;
   type: string;
-  plugin: string;
+  plugin?: string;
   isInternal?: boolean;
 }
 
