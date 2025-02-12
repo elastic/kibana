@@ -38,7 +38,11 @@ export const DeleteGridRowModal = ({
       }}
     >
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Delete section</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          {i18n.translate('kbnGridLayout.deleteGridRowModal.title', {
+            defaultMessage: 'Delete section',
+          })}
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         {i18n.translate('kbnGridLayout.deleteGridRowModal.body', {

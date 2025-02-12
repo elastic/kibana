@@ -128,7 +128,6 @@ export const GridRow = React.memo(
 
     return (
       <div
-        id={`kbnGridLayoutRow--${rowIndex}`}
         css={styles.fullHeight}
         className={classNames('kbnGridRowContainer', {
           'kbnGridRowContainer--collapsed': isCollapsed,
