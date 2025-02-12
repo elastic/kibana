@@ -31,6 +31,8 @@ export type { VisualizationsSetup, VisualizationsStart };
 export { VisGroups } from './vis_types/vis_groups_enum';
 export type {
   BaseVisType,
+  CustomEditorConfig,
+  DefaultEditorConfig,
   VisTypeAlias,
   VisTypeDefinition,
   Schema,

@@ -55,7 +55,7 @@ type DefaultEditorOptionsComponent<TVisParams> = React.ComponentType<
   VisEditorOptionsProps<TVisParams>
 >;
 
-interface DefaultEditorConfig<TVisParams> {
+export interface DefaultEditorConfig<TVisParams> {
   // collections should moved directly into default editor in https://github.com/elastic/kibana/issues/84879
   collections?: {
     [key: string]: Array<{ text: string; value: string }> | Array<{ id: string; label: string }>;
@@ -72,7 +72,7 @@ interface DefaultEditorConfig<TVisParams> {
   schemas?: Array<Partial<Schema>>;
 }
 
-interface CustomEditorConfig {
+export interface CustomEditorConfig {
   editor: string;
 }
 
