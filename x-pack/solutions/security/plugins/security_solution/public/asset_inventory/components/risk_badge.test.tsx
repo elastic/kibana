@@ -17,6 +17,17 @@ describe('AssetInventory', () => {
       cleanup();
     });
 
+    it('renders unknown risk with undefined risk score', async () => {
+      render(<RiskBadge data-test-subj="badge" />);
+      const badge = screen.getByTestId('badge');
+      expect(badge).toHaveTextContent('');
+
+      fireEvent.mouseOver(badge.parentElement as Node);
+      await waitForEuiToolTipVisible();
+
+      const tooltip = screen.getByRole('tooltip');
+      expect(tooltip).toHaveTextContent(RiskSeverity.Unknown);
+    });
     it('renders unknown risk with 0 risk score', async () => {
       render(<RiskBadge risk={0} data-test-subj="badge" />);
       const badge = screen.getByTestId('badge');
