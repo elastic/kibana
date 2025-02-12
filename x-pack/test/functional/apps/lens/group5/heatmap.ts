@@ -176,7 +176,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should change x axis label rotation', async () => {
-      await lens.switchToVisualization('heatmap', 'heat');
+      // close flyouts
+      await lens.closePalettePanel();
+      await lens.closeDimensionEditor();
 
       await lens.toggleToolbarPopover('lnsHeatmapHorizontalAxisButton');
       await testSubjects.click('axis_orientation_vertical');
