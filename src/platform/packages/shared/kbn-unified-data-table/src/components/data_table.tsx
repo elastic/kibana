@@ -605,10 +605,11 @@ export const UnifiedDataTable = ({
         dataView,
         columnId,
         fieldFormats,
+        columnsMeta,
         options,
       });
     },
-    [displayedRows, dataView, fieldFormats]
+    [displayedRows, dataView, fieldFormats, columnsMeta]
   );
 
   /**
@@ -731,6 +732,7 @@ export const UnifiedDataTable = ({
         externalCustomRenderers,
         isPlainRecord,
         isCompressed: dataGridDensity === DataGridDensity.COMPACT,
+        columnsMeta,
       }),
     [
       dataView,
@@ -741,6 +743,7 @@ export const UnifiedDataTable = ({
       externalCustomRenderers,
       isPlainRecord,
       dataGridDensity,
+      columnsMeta,
     ]
   );
 
