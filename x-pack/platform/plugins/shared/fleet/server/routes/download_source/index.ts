@@ -21,7 +21,7 @@ import {
 } from '../../types';
 
 import { genericErrorResponse } from '../schema/errors';
-
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { ListResponseSchema } from '../schema/utils';
 
 import {
@@ -36,8 +36,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: DOWNLOAD_SOURCE_API_ROUTES.LIST_PATTERN,
-      fleetAuthz: (authz) => {
-        return authz.fleet.readSettings || authz.fleet.readAgentPolicies;
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.SETTINGS.READ,
+              ],
+            },
+          ],
+        },
       },
       summary: `Get agent binary download sources`,
       options: {
@@ -65,8 +74,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: DOWNLOAD_SOURCE_API_ROUTES.INFO_PATTERN,
-      fleetAuthz: (authz) => {
-        return authz.fleet.readSettings || authz.fleet.readAgentPolicies;
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: [
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.SETTINGS.READ,
+              ],
+            },
+          ],
+        },
       },
       summary: `Get an agent binary download source`,
       description: `Get an agent binary download source by ID.`,
@@ -95,8 +113,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .put({
       path: DOWNLOAD_SOURCE_API_ROUTES.UPDATE_PATTERN,
-      fleetAuthz: {
-        fleet: { allSettings: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.ALL],
+        },
       },
       summary: `Update an agent binary download source`,
       description: `Update an agent binary download source by ID.`,
@@ -125,8 +145,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: DOWNLOAD_SOURCE_API_ROUTES.CREATE_PATTERN,
-      fleetAuthz: {
-        fleet: { allSettings: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.ALL],
+        },
       },
       summary: `Create an agent binary download source`,
       options: {
@@ -154,8 +176,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .delete({
       path: DOWNLOAD_SOURCE_API_ROUTES.DELETE_PATTERN,
-      fleetAuthz: {
-        fleet: { allSettings: true },
+      security: {
+        authz: {
+          requiredPrivileges: [FLEET_API_PRIVILEGES.SETTINGS.ALL],
+        },
       },
       summary: `Delete an agent binary download source`,
       description: `Delete an agent binary download source by ID.`,

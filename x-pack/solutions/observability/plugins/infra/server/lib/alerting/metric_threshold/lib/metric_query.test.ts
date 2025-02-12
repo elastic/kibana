@@ -7,7 +7,8 @@
 
 import moment from 'moment';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import type { MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import { Aggregators } from '../../../../../common/alerting/metrics';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {

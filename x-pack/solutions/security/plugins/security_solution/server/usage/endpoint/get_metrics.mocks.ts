@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchResponse, AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 
 export const getUniqueEndpointCountMock = (): SearchResponse<
   unknown,

@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { Ip } from '../ip';
 import { Port } from '../port';
@@ -23,26 +23,15 @@ IpPortSeparator.displayName = 'IpPortSeparator';
  * a port is specified
  */
 const PortWithSeparator = React.memo<{
-  contextId: string;
-  eventId: string;
-  isDraggable?: boolean;
   port?: string | null;
-  portFieldName: string;
-}>(({ contextId, eventId, isDraggable, port, portFieldName }) => {
+}>(({ port }) => {
   return port != null ? (
     <EuiFlexGroup gutterSize="none">
       <EuiFlexItem grow={false}>
         <IpPortSeparator data-test-subj="ip-port-separator">{':'}</IpPortSeparator>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <Port
-          contextId={contextId}
-          data-test-subj="port"
-          eventId={eventId}
-          fieldName={portFieldName}
-          isDraggable={isDraggable}
-          value={port}
-        />
+        <Port data-test-subj="port" value={port} />
       </EuiFlexItem>
     </EuiFlexGroup>
   ) : null;
@@ -59,10 +48,8 @@ export const IpWithPort = React.memo<{
   eventId: string;
   ip?: string | null;
   ipFieldName: string;
-  isDraggable?: boolean;
   port?: string | null;
-  portFieldName: string;
-}>(({ contextId, eventId, ip, ipFieldName, isDraggable, port, portFieldName }) => (
+}>(({ contextId, eventId, ip, ipFieldName, port }) => (
   <EuiFlexGroup gutterSize="none">
     <EuiFlexItem grow={false}>
       <Ip
@@ -70,18 +57,11 @@ export const IpWithPort = React.memo<{
         data-test-subj="ip"
         eventId={eventId}
         fieldName={ipFieldName}
-        isDraggable={isDraggable}
         value={ip}
       />
     </EuiFlexItem>
     <EuiFlexItem>
-      <PortWithSeparator
-        contextId={contextId}
-        eventId={eventId}
-        isDraggable={isDraggable}
-        port={port}
-        portFieldName={portFieldName}
-      />
+      <PortWithSeparator port={port} />
     </EuiFlexItem>
   </EuiFlexGroup>
 ));

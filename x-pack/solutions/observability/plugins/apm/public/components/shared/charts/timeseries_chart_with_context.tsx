@@ -5,23 +5,18 @@
  * 2.0.
  */
 
-import {
-  AnnotationDomainType,
-  LegendItemListener,
-  LineAnnotation,
-  Position,
-  YDomainRange,
-} from '@elastic/charts';
+import type { LegendItemListener, YDomainRange } from '@elastic/charts';
+import { AnnotationDomainType, LineAnnotation, Position } from '@elastic/charts';
 import React from 'react';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
 import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
-import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
+import type { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
+import type { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { unit } from '../../../utils/style';
 import { getTimeZone } from './helper/timezone';
 import { TimeseriesChart } from './timeseries_chart';

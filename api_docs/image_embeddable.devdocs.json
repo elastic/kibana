@@ -16,7 +16,7 @@
         "signature": [
           "\"IMAGE_CLICK_TRIGGER\""
         ],
-        "path": "src/plugins/image_embeddable/public/actions/image_click_trigger.ts",
+        "path": "src/platform/plugins/private/image_embeddable/public/actions/image_click_trigger.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

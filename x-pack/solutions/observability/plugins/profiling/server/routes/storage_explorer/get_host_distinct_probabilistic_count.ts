@@ -10,7 +10,7 @@ import {
   IndexLifecyclePhaseSelectOption,
   indexLifeCyclePhaseToDataTier,
 } from '../../../common/storage_explorer';
-import { ProfilingESClient } from '../../utils/create_profiling_es_client';
+import type { ProfilingESClient } from '../../utils/create_profiling_es_client';
 
 export async function getHostAndDistinctProbabilisticCount({
   client,

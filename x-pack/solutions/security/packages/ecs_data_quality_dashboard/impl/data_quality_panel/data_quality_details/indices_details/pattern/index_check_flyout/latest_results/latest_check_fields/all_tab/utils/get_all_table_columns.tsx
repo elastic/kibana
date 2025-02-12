@@ -24,7 +24,7 @@ import {
 } from '../../../../../../../../translations';
 import { EcsAllowedValues } from '../../../../ecs_allowed_values';
 import { IndexInvalidValues } from '../../../../index_invalid_values';
-import { CodeDanger, CodeSuccess } from '../../../../../../../../styles';
+import { codeDangerCss, codeSuccessCss } from '../../../../../../../../styles';
 import type {
   AllowedValue,
   EnrichedFieldMetadata,
@@ -45,9 +45,9 @@ export const getAllTableColumns = (): Array<EuiTableFieldDataColumnType<Enriched
     field: 'type',
     name: ECS_MAPPING_TYPE_EXPECTED,
     render: (type: string | undefined) => (
-      <CodeSuccess data-test-subj="codeSuccess">
+      <EuiCode css={codeSuccessCss} data-test-subj="codeSuccess">
         {type != null ? type : EMPTY_PLACEHOLDER}
-      </CodeSuccess>
+      </EuiCode>
     ),
     sortable: true,
     truncateText: false,
@@ -59,21 +59,31 @@ export const getAllTableColumns = (): Array<EuiTableFieldDataColumnType<Enriched
     render: (_, x) => {
       // if custom field or ecs based field with mapping match
       if (isCustomFieldMetadata(x) || isEcsCompliantFieldMetadata(x)) {
-        return <CodeSuccess data-test-subj="codeSuccess">{x.indexFieldType}</CodeSuccess>;
+        return (
+          <EuiCode css={codeSuccessCss} data-test-subj="codeSuccess">
+            {x.indexFieldType}
+          </EuiCode>
+        );
       }
 
       // mapping mismatch due to same family
       if (isSameFamilyFieldMetadata(x)) {
         return (
           <div>
-            <CodeSuccess data-test-subj="codeSuccess">{x.indexFieldType}</CodeSuccess>
+            <EuiCode css={codeSuccessCss} data-test-subj="codeSuccess">
+              {x.indexFieldType}
+            </EuiCode>
             <SameFamily />
           </div>
         );
       }
 
       // mapping mismatch
-      return <CodeDanger data-test-subj="codeDanger">{x.indexFieldType}</CodeDanger>;
+      return (
+        <EuiCode css={codeDangerCss} data-test-subj="codeDanger">
+          {x.indexFieldType}
+        </EuiCode>
+      );
     },
     sortable: true,
     truncateText: false,

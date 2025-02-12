@@ -5,19 +5,15 @@
  * 2.0.
  */
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FramesSummary } from '../../../components/frames_summary';
-import {
-  DifferentialTopNFunctionsGrid,
-  OnChangeSortParams,
-} from '../../../components/differential_topn_functions_grid';
-import {
-  NormalizationMenu,
-  NormalizationMode,
-  NormalizationOptions,
-} from '../../../components/normalization_menu';
+import type { OnChangeSortParams } from '../../../components/differential_topn_functions_grid';
+import { DifferentialTopNFunctionsGrid } from '../../../components/differential_topn_functions_grid';
+import type { NormalizationOptions } from '../../../components/normalization_menu';
+import { NormalizationMenu, NormalizationMode } from '../../../components/normalization_menu';
 import { PrimaryAndComparisonSearchBar } from '../../../components/primary_and_comparison_search_bar';
 import { AsyncStatus } from '../../../hooks/use_async';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
@@ -27,6 +23,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 
 export function DifferentialTopNFunctionsView() {
+  const { onPageReady } = usePerformanceContext();
   const { query } = useProfilingParams('/functions/differential');
   const {
     rangeFrom,
@@ -151,6 +148,28 @@ export function DifferentialTopNFunctionsView() {
       query: { ...query, ...sorting },
     });
   }
+
+  useEffect(() => {
+    if (state.status === AsyncStatus.Settled || comparisonState.status === AsyncStatus.Settled) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+        customMetrics: {
+          key1: 'totalCount',
+          value1: state.data?.TotalCount ?? 0,
+        },
+      });
+    }
+  }, [
+    state.status,
+    state.data?.TotalCount,
+    comparisonState.status,
+    onPageReady,
+    rangeTo,
+    rangeFrom,
+  ]);
 
   return (
     <>

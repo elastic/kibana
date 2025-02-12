@@ -70,6 +70,9 @@ export default ({ getService }: FtrProviderContext) => {
         expect(
           assetCriticalityIndexResult['.asset-criticality.asset-criticality-default']?.mappings
         ).to.eql({
+          _meta: {
+            version: 3,
+          },
           dynamic: 'strict',
           properties: {
             '@timestamp': {
@@ -78,11 +81,32 @@ export default ({ getService }: FtrProviderContext) => {
             criticality_level: {
               type: 'keyword',
             },
+            event: {
+              properties: {
+                ingested: {
+                  type: 'date',
+                },
+              },
+            },
             id_field: {
               type: 'keyword',
             },
             id_value: {
               type: 'keyword',
+            },
+            service: {
+              properties: {
+                asset: {
+                  properties: {
+                    criticality: {
+                      type: 'keyword',
+                    },
+                  },
+                },
+                name: {
+                  type: 'keyword',
+                },
+              },
             },
             updated_at: {
               type: 'date',
@@ -143,8 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(result['@timestamp']).to.be.a('string');
 
         const doc = await getAssetCriticalityDoc({ idField: 'host.name', idValue: 'host-01', es });
-
-        expect(doc).to.eql(result);
+        expect(_.omit(doc, 'event')).to.eql(result);
       });
 
       it('should return 400 if criticality is invalid', async () => {
@@ -355,7 +378,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const doc = await getAssetCriticalityDoc({ idField: 'host.name', idValue: 'host-01', es });
 
-        expect(doc).to.eql(updatedDoc);
+        expect(_.omit(doc, 'event')).to.eql(_.omit(updatedDoc, 'event'));
       });
     });
 
@@ -370,7 +393,7 @@ export default ({ getService }: FtrProviderContext) => {
           idValue: expectedDoc.id_value,
         });
 
-        expect(omit(esDoc, '@timestamp')).to.eql(expectedDoc);
+        expect(omit(esDoc, ['@timestamp', 'event'])).to.eql(expectedDoc);
       };
 
       it('should return 400 if the records array is empty', async () => {
@@ -461,9 +484,8 @@ export default ({ getService }: FtrProviderContext) => {
         await assetCriticalityRoutes.upsert(assetCriticality);
 
         const res = await assetCriticalityRoutes.delete('host.name', 'delete-me');
-
         expect(res.body.deleted).to.eql(true);
-        expect(_.omit(res.body.record, '@timestamp')).to.eql(
+        expect(_.omit(res.body.record, ['@timestamp', 'event'])).to.eql(
           assetCreateTypeToAssetRecord(assetCriticality)
         );
 
@@ -477,7 +499,9 @@ export default ({ getService }: FtrProviderContext) => {
           ...assetCriticality,
           criticality_level: CRITICALITY_VALUES.DELETED,
         };
-        expect(_.omit(doc, '@timestamp')).to.eql(assetCreateTypeToAssetRecord(deletedDoc));
+        expect(_.omit(doc, ['@timestamp', 'event'])).to.eql(
+          assetCreateTypeToAssetRecord(deletedDoc)
+        );
       });
 
       it('should not return 404 if the asset criticality does not exist', async () => {

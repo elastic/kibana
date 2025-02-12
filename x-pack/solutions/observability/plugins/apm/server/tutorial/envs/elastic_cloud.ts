@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { INSTRUCTION_VARIANT, TutorialSchema, InstructionSetSchema } from '@kbn/home-plugin/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { TutorialSchema, InstructionSetSchema } from '@kbn/home-plugin/server';
+import { INSTRUCTION_VARIANT } from '@kbn/home-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import {
   createNodeAgentInstructions,

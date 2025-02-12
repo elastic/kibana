@@ -16,8 +16,10 @@ import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import { render, screen, waitFor } from '@testing-library/react';
 import { useLicense } from '../../../../common/hooks/use_license';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 jest.mock('../../../../common/hooks/use_license');
+jest.mock('../../../../common/components/user_privileges');
 
 const mockUseUiSetting = jest.fn().mockReturnValue([false]);
 jest.mock('@kbn/kibana-react-plugin/public', () => {
@@ -39,7 +41,6 @@ jest.mock('react-router-dom', () => {
 jest.mock('../../../../common/hooks/esql/use_esql_availability', () => ({
   useEsqlAvailability: jest.fn().mockReturnValue({
     isEsqlAdvancedSettingEnabled: true,
-    isTimelineEsqlEnabledByFeatureFlag: true,
   }),
 }));
 
@@ -73,22 +74,6 @@ describe('Timeline', () => {
       it('should not show the esql tab when the advanced setting is disabled', async () => {
         useEsqlAvailabilityMock.mockReturnValue({
           isEsqlAdvancedSettingEnabled: false,
-          isTimelineEsqlEnabledByFeatureFlag: true,
-        });
-        render(
-          <TestProviders>
-            <TabsContent {...defaultProps} />
-          </TestProviders>
-        );
-
-        await waitFor(() => {
-          expect(screen.queryByTestId(esqlTabSubj)).toBeNull();
-        });
-      });
-      it('should not show the esql tab when the esql is disabled by feature flag', async () => {
-        useEsqlAvailabilityMock.mockReturnValue({
-          isEsqlAdvancedSettingEnabled: false,
-          isTimelineEsqlEnabledByFeatureFlag: false,
         });
         render(
           <TestProviders>
@@ -113,7 +98,6 @@ describe('Timeline', () => {
       it('should show the esql tab when the advanced setting is disabled', async () => {
         useEsqlAvailabilityMock.mockReturnValue({
           isESQLTabInTimelineEnabled: false,
-          isTimelineEsqlEnabledByFeatureFlag: true,
         });
 
         render(
@@ -124,23 +108,6 @@ describe('Timeline', () => {
 
         await waitFor(() => {
           expect(screen.queryByTestId(esqlTabSubj)).toBeVisible();
-        });
-      });
-
-      it('should not show the esql tab when the esql is disabled by the feature flag', async () => {
-        useEsqlAvailabilityMock.mockReturnValue({
-          isESQLTabInTimelineEnabled: true,
-          isTimelineEsqlEnabledByFeatureFlag: false,
-        });
-
-        render(
-          <TestProviders store={mockStore}>
-            <TabsContent {...defaultProps} />
-          </TestProviders>
-        );
-
-        await waitFor(() => {
-          expect(screen.queryByTestId(esqlTabSubj)).toBeNull();
         });
       });
     });
@@ -170,6 +137,38 @@ describe('Timeline', () => {
       );
       expect(screen.queryByTestId(analyzerTabSubj)).not.toBeInTheDocument();
       expect(screen.queryByTestId(sessionViewTabSubj)).not.toBeInTheDocument();
+    });
+  });
+
+  describe('privileges', () => {
+    it('should show notes and pinned tabs for users with the required privileges', () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        timelinePrivileges: { read: true },
+        notesPrivileges: { read: true },
+      });
+
+      render(
+        <TestProviders>
+          <TabsContent {...defaultProps} />
+        </TestProviders>
+      );
+      expect(screen.getByTestId('timelineTabs-notes')).not.toBeDisabled();
+      expect(screen.getByTestId('timelineTabs-pinned')).not.toBeDisabled();
+    });
+
+    it('should not show notes and pinned tabs for users with the insufficient privileges', () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        timelinePrivileges: { read: false },
+        notesPrivileges: { read: false },
+      });
+
+      render(
+        <TestProviders>
+          <TabsContent {...defaultProps} />
+        </TestProviders>
+      );
+      expect(screen.getByTestId('timelineTabs-notes')).toBeDisabled();
+      expect(screen.getByTestId('timelineTabs-pinned')).toBeDisabled();
     });
   });
 });

@@ -9,12 +9,12 @@ import { EuiTitle, EuiText, EuiFormRow, EuiFlexGroup, EuiFlexItem, EuiLink } fro
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
-import { ApplicationStart } from '@kbn/core-application-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { DatasetFilter, QualityWarning } from '../../../../../common/log_analysis';
+import type { DatasetFilter, QualityWarning } from '../../../../../common/log_analysis';
 import { LoadingOverlayWrapper } from '../../../loading_overlay_wrapper';
 import { IndexSetupRow } from './index_setup_row';
-import { AvailableIndex, ValidationIndicesError } from './validation';
+import type { AvailableIndex, ValidationIndicesError } from './validation';
 
 function getKibanaAdvancedSettingsHref(application: ApplicationStart) {
   return application.getUrlForApp('management', {

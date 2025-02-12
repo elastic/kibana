@@ -7,7 +7,7 @@
 
 import datemath from '@kbn/datemath';
 import { pickBy } from 'lodash';
-import { UrlParams } from './types';
+import type { UrlParams } from './types';
 
 function getParsedDate(rawDate?: string, options = {}) {
   if (rawDate) {

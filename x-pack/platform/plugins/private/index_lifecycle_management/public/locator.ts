@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import { ManagementAppLocator } from '@kbn/management-plugin/common';
 import { LocatorDefinition } from '@kbn/share-plugin/public';
-import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
+import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import {
   getPoliciesListPath,
   getPolicyCreatePath,
@@ -17,11 +16,6 @@ import {
 import { PLUGIN } from '../common/constants';
 
 export { ILM_LOCATOR_ID };
-
-export interface IlmLocatorParams extends SerializableRecord {
-  page: 'policies_list' | 'policy_edit' | 'policy_create';
-  policyName?: string;
-}
 
 export interface IlmLocatorDefinitionDependencies {
   managementAppLocator: ManagementAppLocator;

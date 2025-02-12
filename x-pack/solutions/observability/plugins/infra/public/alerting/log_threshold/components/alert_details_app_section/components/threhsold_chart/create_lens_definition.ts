@@ -6,8 +6,9 @@
  */
 
 import moment from 'moment';
-import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { EuiThemeComputed, transparentize } from '@elastic/eui';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { transparentize } from '@elastic/eui';
 
 export interface IndexPattern {
   pattern: string;

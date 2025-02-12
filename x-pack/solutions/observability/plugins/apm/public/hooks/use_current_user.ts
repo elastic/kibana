@@ -7,8 +7,8 @@
 
 import { useState, useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AuthenticatedUser } from '@kbn/security-plugin/common';
-import { ApmServices } from '../plugin';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
+import type { ApmServices } from '../plugin';
 
 export function useCurrentUser() {
   const {

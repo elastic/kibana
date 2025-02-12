@@ -10,6 +10,7 @@ import {
   STANDARD_INDEX_MODE,
   LOGSDB_INDEX_MODE,
   TIME_SERIES_MODE,
+  LOOKUP_INDEX_MODE,
 } from '../../../common/constants';
 
 export const indexModeLabels = {
@@ -22,6 +23,9 @@ export const indexModeLabels = {
   [TIME_SERIES_MODE]: i18n.translate('xpack.idxMgmt.indexModeLabels.timeSeriesIndexModeLabel', {
     defaultMessage: 'Time series',
   }),
+  [LOOKUP_INDEX_MODE]: i18n.translate('xpack.idxMgmt.indexModeLabels.lookupIndexModeLabel', {
+    defaultMessage: 'Lookup',
+  }),
 };
 
 export const indexModeDescriptions = {
@@ -29,20 +33,26 @@ export const indexModeDescriptions = {
     'xpack.idxMgmt.indexModeDescriptions.standardIndexModeDescription',
     {
       defaultMessage:
-        'Standard indexing with default settings, for data other than logs or metrics',
+        'Standard indexing with default settings, for data other than logs or metrics.',
     }
   ),
   [LOGSDB_INDEX_MODE]: i18n.translate(
     'xpack.idxMgmt.indexModeDescriptions.logsdbIndexModeDescription',
     {
       defaultMessage:
-        'Optimized for storing logs data, with reduced storage and default settings that help reduce the chance of logs being rejected by Elasticsearch',
+        'Optimized for storing logs data, with reduced storage and default settings that help reduce the chance of logs being rejected by Elasticsearch.',
     }
   ),
   [TIME_SERIES_MODE]: i18n.translate(
     'xpack.idxMgmt.indexModeDescriptions.timeSeriesIndexModeDescription',
     {
-      defaultMessage: 'Optimized for metrics data with reduced storage',
+      defaultMessage: 'Optimized for metrics data with reduced storage.',
+    }
+  ),
+  [LOOKUP_INDEX_MODE]: i18n.translate(
+    'xpack.idxMgmt.indexModeDescriptions.lookupIndexModeDescription',
+    {
+      defaultMessage: 'Optimized for ES|QL join operations.',
     }
   ),
 };

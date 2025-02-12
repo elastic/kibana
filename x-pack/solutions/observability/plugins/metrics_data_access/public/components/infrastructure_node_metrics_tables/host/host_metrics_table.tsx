@@ -13,14 +13,13 @@ import type {
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo } from 'react';
-import type { SortState } from '../shared';
+import type { SortState, NodeMetricsTableData } from '../shared';
 import {
   MetricsNodeDetailsLink,
   MetricsTableEmptyIndicesContent,
   MetricsTableErrorContent,
   MetricsTableLoadingContent,
   MetricsTableNoIndicesContent,
-  NodeMetricsTableData,
   NumberCell,
   StepwisePagination,
 } from '../shared';

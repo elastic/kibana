@@ -63,6 +63,7 @@ export const Pin = React.memo<Props>(
         onClick={onClick}
         isDisabled={isDisabled || isTemplate || !allowUnpinning}
         size="s"
+        color="text"
       />
     );
   }

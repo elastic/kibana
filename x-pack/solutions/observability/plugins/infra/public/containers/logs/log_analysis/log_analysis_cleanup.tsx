@@ -6,7 +6,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
-import { IdFormat, JobType } from '../../../../common/http_api/latest';
+import type { IdFormat, JobType } from '../../../../common/http_api/latest';
 import { getJobId } from '../../../../common/log_analysis';
 import { callDeleteJobs, callGetJobDeletionTasks, callStopDatafeeds } from './api/ml_cleanup';
 

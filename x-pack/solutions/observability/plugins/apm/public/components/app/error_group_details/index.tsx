@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { isOpenTelemetryAgentName, isRumAgentName } from '../../../../common/agent_name';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -25,7 +26,7 @@ import { ErrorDistribution } from './distribution';
 import { TopErroneousTransactions } from './top_erroneous_transactions';
 import { maybe } from '../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 type ErrorSamplesAPIResponse =
@@ -82,7 +83,7 @@ export function ErrorGroupDetails() {
 
   const apmRouter = useApmRouter();
   const history = useHistory();
-
+  const { onPageReady } = usePerformanceContext();
   const { observabilityAIAssistant } = useApmPluginContext();
 
   const {
@@ -169,6 +170,20 @@ export function ErrorGroupDetails() {
       });
     }
   }, [history, errorId, errorSamplesData, errorSamplesFetchStatus]);
+
+  useEffect(() => {
+    if (
+      errorSamplesFetchStatus === FETCH_STATUS.SUCCESS &&
+      errorDistributionStatus === FETCH_STATUS.SUCCESS
+    ) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+      });
+    }
+  }, [onPageReady, errorSamplesFetchStatus, errorDistributionStatus, rangeFrom, rangeTo]);
 
   const { agentName } = useApmServiceContext();
   const isOpenTelemetryAgent = isOpenTelemetryAgentName(agentName as AgentName);

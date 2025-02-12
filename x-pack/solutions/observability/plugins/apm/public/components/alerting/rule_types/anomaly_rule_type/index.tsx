@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { defaults, omit } from 'lodash';
 import React, { useEffect } from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
@@ -17,7 +17,7 @@ import { EuiText } from '@elastic/eui';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 import { EnvironmentField, ServiceField, TransactionTypeField } from '../../utils/fields';
-import { AlertMetadata } from '../../utils/helper';
+import type { AlertMetadata } from '../../utils/helper';
 import { ApmRuleParamsContainer } from '../../ui_components/apm_rule_params_container';
 import { PopoverExpression } from '../../ui_components/popover_expression';
 import { AnomalySeverity, SelectAnomalySeverity } from './select_anomaly_severity';
@@ -26,7 +26,7 @@ import {
   ANOMALY_DETECTOR_SELECTOR_OPTIONS,
   getApmMlDetectorLabel,
 } from '../../../../../common/rules/apm_rule_types';
-import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
+import type { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 
 export interface AlertParams {
   anomalySeverityType?:

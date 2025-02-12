@@ -191,7 +191,7 @@ export const ConfigurationForm = React.memo(({ value, esNodesPlugins }: Props) =
   return (
     <Form
       form={form}
-      isInvalid={form.isSubmitted && !form.isValid}
+      isInvalid={form.isSubmitted && !form.isValid && !form.isSubmitting}
       error={form.getErrors()}
       data-test-subj="advancedConfiguration"
     >

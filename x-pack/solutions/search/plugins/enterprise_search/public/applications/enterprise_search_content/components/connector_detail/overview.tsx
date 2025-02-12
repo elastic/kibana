@@ -9,7 +9,17 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiCallOut, EuiCode, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiCode,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLink,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -38,7 +48,9 @@ import { ConnectorViewLogic } from './connector_view_logic';
 
 export const ConnectorDetailOverview: React.FC = () => {
   const { indexData } = useValues(IndexViewLogic);
-  const { connector, error } = useValues(ConnectorViewLogic);
+  const { connector, error, isWaitingOnAgentlessDeployment, connectorAgentlessPolicy } =
+    useValues(ConnectorViewLogic);
+
   const { isCloud } = useValues(KibanaLogic);
   const { showModal } = useActions(ConvertConnectorLogic);
   const { isModalVisible } = useValues(ConvertConnectorLogic);
@@ -73,6 +85,39 @@ export const ConnectorDetailOverview: React.FC = () => {
             </>
           )
       }
+      {isWaitingOnAgentlessDeployment && (
+        <>
+          <EuiCallOut
+            color="warning"
+            title={
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiLoadingSpinner />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.content.connectors.overview.agentlessDeploymentNotReadyCallOut.title',
+                    {
+                      defaultMessage: 'Provisioning infrastructure',
+                    }
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            }
+          >
+            <EuiSpacer size="s" />
+            <EuiText size="s">
+              {i18n.translate(
+                'xpack.enterpriseSearch.content.connectors.overview.agentlessDeploymentNotReadyCallOut.description',
+                {
+                  defaultMessage: 'Setting up the agentless infrastructure to run the connector.',
+                }
+              )}
+            </EuiText>
+          </EuiCallOut>
+          <EuiSpacer />
+        </>
+      )}
       {error && (
         <>
           <EuiCallOut
@@ -213,7 +258,11 @@ export const ConnectorDetailOverview: React.FC = () => {
         </>
       )}
       {connector && connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE && (
-        <ConnectorStats connector={connector} indexData={indexData || undefined} />
+        <ConnectorStats
+          connector={connector}
+          indexData={indexData || undefined}
+          agentlessOverview={connectorAgentlessPolicy}
+        />
       )}
       {connector && connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE && (
         <>

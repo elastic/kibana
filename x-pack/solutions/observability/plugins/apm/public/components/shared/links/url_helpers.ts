@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { History } from 'history';
+import type { History } from 'history';
 import { parse, stringify } from 'query-string';
 import { url } from '@kbn/kibana-utils-plugin/public';
 

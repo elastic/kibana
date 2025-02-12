@@ -13,7 +13,7 @@ import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
 import { AnalyzeDataButton } from './analyze_data_button';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
+import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 
 interface Args {
   agentName: string;
@@ -42,7 +42,7 @@ export default {
               {
                 core: {
                   application: {
-                    capabilities: { dashboard: { show: canShowDashboard } },
+                    capabilities: { dashboard_v2: { show: canShowDashboard } },
                   },
                   http: { basePath: { get: () => '' } },
                 },

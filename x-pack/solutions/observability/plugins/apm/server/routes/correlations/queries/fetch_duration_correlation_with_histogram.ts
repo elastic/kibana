@@ -18,11 +18,11 @@ import {
   KS_TEST_THRESHOLD,
 } from '../../../../common/correlations/constants';
 
-import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
+import type { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { fetchDurationCorrelation } from './fetch_duration_correlation';
 import { fetchDurationRanges } from './fetch_duration_ranges';
 import { getEventType } from '../utils';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function fetchDurationCorrelationWithHistogram({
   apmEventClient,

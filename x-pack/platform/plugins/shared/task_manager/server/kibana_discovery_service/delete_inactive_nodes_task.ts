@@ -12,6 +12,7 @@ import { TaskTypeDictionary } from '../task_type_dictionary';
 import { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
 import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
 import { TaskManagerStartContract } from '..';
+import { TaskManagerPluginsStart } from '../plugin';
 
 export const TASK_ID = 'delete_inactive_background_task_nodes';
 const TASK_TYPE = `task_manager:${TASK_ID}`;
@@ -40,7 +41,7 @@ export async function scheduleDeleteInactiveNodesTaskDefinition(
 
 export function registerDeleteInactiveNodesTaskDefinition(
   logger: Logger,
-  coreStartServices: () => Promise<[CoreStart, TaskManagerStartContract, unknown]>,
+  coreStartServices: () => Promise<[CoreStart, TaskManagerPluginsStart, TaskManagerStartContract]>,
   taskTypeDictionary: TaskTypeDictionary
 ) {
   taskTypeDictionary.registerTaskDefinitions({
@@ -53,7 +54,7 @@ export function registerDeleteInactiveNodesTaskDefinition(
 
 export function taskRunner(
   logger: Logger,
-  coreStartServices: () => Promise<[CoreStart, TaskManagerStartContract, unknown]>
+  coreStartServices: () => Promise<[CoreStart, TaskManagerPluginsStart, TaskManagerStartContract]>
 ) {
   return () => {
     return {

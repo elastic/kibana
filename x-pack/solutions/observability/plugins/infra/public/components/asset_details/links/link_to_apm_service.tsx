@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiBadge, EuiText } from '@elastic/eui';
 import { AgentIcon } from '@kbn/custom-icons';
-import { AgentName } from '@kbn/elastic-agent-utils';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import { i18n } from '@kbn/i18n';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 

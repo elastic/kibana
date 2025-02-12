@@ -39,6 +39,9 @@ jest.mock('../../services/setup', () => {
 });
 
 jest.mock('../../services/fleet_server');
+jest.mock('../../services/secrets', () => ({
+  isSecretStorageEnabled: jest.fn().mockResolvedValue(true),
+}));
 
 const mockSetupFleet = setupFleet as jest.MockedFunction<typeof setupFleet>;
 
@@ -199,7 +202,7 @@ describe('FleetStatusHandler', () => {
 
     const expectedBody = {
       isReady: true,
-      is_secrets_storage_enabled: false,
+      is_secrets_storage_enabled: true,
       is_space_awareness_enabled: false,
       missing_optional_features: [],
       missing_requirements: [],
@@ -221,7 +224,7 @@ describe('FleetStatusHandler', () => {
 
     const expectedBody = {
       isReady: false,
-      is_secrets_storage_enabled: false,
+      is_secrets_storage_enabled: true,
       is_space_awareness_enabled: false,
       missing_optional_features: [],
       missing_requirements: ['api_keys', 'fleet_server'],
@@ -252,7 +255,7 @@ describe('FleetStatusHandler', () => {
 
     const expectedBody = {
       isReady: true,
-      is_secrets_storage_enabled: false,
+      is_secrets_storage_enabled: true,
       is_space_awareness_enabled: false,
       missing_optional_features: [],
       missing_requirements: [],

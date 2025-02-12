@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { createContext, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { createContext } from 'react';
 import { useHistory } from 'react-router-dom';
-import { History } from 'history';
+import type { History } from 'history';
 import { ApmDocumentType } from '../../../common/document_type';
 import { getDefaultTransactionType } from '../../../common/transaction_types';
 import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
@@ -17,7 +18,7 @@ import { useTimeRange } from '../../hooks/use_time_range';
 import { useFallbackToTransactionsFetcher } from '../../hooks/use_fallback_to_transactions_fetcher';
 import { replace } from '../../components/shared/links/url_helpers';
 import { FETCH_STATUS } from '../../hooks/use_fetcher';
-import { ServerlessType } from '../../../common/serverless';
+import type { ServerlessType } from '../../../common/serverless';
 import { usePreferredDataSourceAndBucketSize } from '../../hooks/use_preferred_data_source_and_bucket_size';
 import {
   type ServiceEntitySummary,

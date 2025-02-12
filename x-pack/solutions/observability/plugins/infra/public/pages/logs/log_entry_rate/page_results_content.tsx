@@ -15,13 +15,13 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useLogViewContext, LogEntryFlyout } from '@kbn/logs-shared-plugin/public';
-import { IdFormatByJobType } from '../../../../common/http_api/latest';
+import type { IdFormatByJobType } from '../../../../common/http_api/latest';
 import {
   isJobStatusWithResults,
   logEntryCategoriesJobType,
   logEntryRateJobType,
 } from '../../../../common/log_analysis';
-import { TimeKey } from '../../../../common/time';
+import type { TimeKey } from '../../../../common/time';
 import {
   CategoryJobNoticesSection,
   LogAnalysisJobProblemIndicator,

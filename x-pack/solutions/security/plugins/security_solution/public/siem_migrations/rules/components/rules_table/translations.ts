@@ -49,6 +49,13 @@ export const INSTALL_SELECTED_RULES = (numberOfSelectedRules: number) => {
   });
 };
 
+export const REPROCESS_FAILED_RULES = (numberOfFailedRules: number) => {
+  return i18n.translate('xpack.securitySolution.siemMigrations.rules.table.reprocessFailedRules', {
+    defaultMessage: 'Reprocess rules ({numberOfFailedRules})',
+    values: { numberOfFailedRules },
+  });
+};
+
 export const INSTALL_TRANSLATED_RULES_EMPTY_STATE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.table.installTranslatedRulesEmptyState',
   {
@@ -78,6 +85,13 @@ export const INSTALL_TRANSLATED_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.table.installTranslatedButtonAriaLabel',
   {
     defaultMessage: 'Install all translated rules',
+  }
+);
+
+export const REPROCESS_FAILED_ARIA_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.table.reprocessFailedRulesButtonAriaLabel',
+  {
+    defaultMessage: 'Reprocess failed rules',
   }
 );
 

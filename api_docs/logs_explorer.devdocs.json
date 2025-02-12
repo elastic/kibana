@@ -989,22 +989,7 @@
       "path": "x-pack/solutions/observability/plugins/logs_explorer/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [
-        {
-          "parentPluginId": "logsExplorer",
-          "id": "def-public.LogsExplorerPluginSetup.locators",
-          "type": "Object",
-          "tags": [],
-          "label": "locators",
-          "description": [],
-          "signature": [
-            "LogsExplorerLocators"
-          ],
-          "path": "x-pack/solutions/observability/plugins/logs_explorer/public/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        }
-      ],
+      "children": [],
       "lifecycle": "setup",
       "initialIsOpen": true
     },

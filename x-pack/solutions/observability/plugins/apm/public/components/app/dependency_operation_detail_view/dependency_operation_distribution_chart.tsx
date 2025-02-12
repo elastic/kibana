@@ -13,7 +13,7 @@ import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useSampleChartSelection } from '../../../hooks/use_sample_chart_selection';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { DurationDistributionChartData } from '../../shared/charts/duration_distribution_chart';
+import type { DurationDistributionChartData } from '../../shared/charts/duration_distribution_chart';
 import { DurationDistributionChartWithScrubber } from '../../shared/charts/duration_distribution_chart_with_scrubber';
 
 export function DependencyOperationDistributionChart() {

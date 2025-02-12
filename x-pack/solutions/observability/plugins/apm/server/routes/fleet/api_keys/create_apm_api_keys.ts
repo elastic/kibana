@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart, Logger } from '@kbn/core/server';
+import type { CoreStart, Logger } from '@kbn/core/server';
 import {
   APM_AGENT_CONFIGURATION_INDEX,
   APM_SOURCE_MAP_INDEX,

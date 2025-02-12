@@ -42,7 +42,6 @@
       "visualizations",
       "dashboard",
       "expressions",
-      "logsExplorer",
       "logsShared",
       "licensing",
       "navigation"
@@ -61,6 +60,7 @@
     ],
     "requiredBundles": [
       "data",
+      "discover",
       "kibanaReact",
       "kibanaUtils",
       "unifiedSearch",

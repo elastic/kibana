@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AssistantAvatar } from '@kbn/elastic-assistant';
 import { ConnectorSetup } from '@kbn/elastic-assistant/impl/connectorland/connector_setup';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import * as i18n from './translations';
 
 const WelcomeComponent: React.FC = () => {
@@ -22,7 +22,7 @@ const WelcomeComponent: React.FC = () => {
         gutterSize="none"
       >
         <EuiFlexItem data-test-subj="emptyPromptAvatar" grow={false}>
-          <AssistantAvatar size="m" />
+          <AssistantIcon size="xl" />
           <EuiSpacer size="m" />
         </EuiFlexItem>
 

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState, useCallback, useMemo } from 'react';
+import React, { FunctionComponent, useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
-import { EuiCode, EuiLink, EuiText } from '@elastic/eui';
+import { isEmpty, isUndefined } from 'lodash';
+import { EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -18,24 +18,14 @@ import {
   ToggleField,
   UseField,
   Field,
-  FieldHook,
-  FieldConfig,
   useFormContext,
 } from '../../../../../../shared_imports';
 import { hasTemplateSnippet } from '../../../utils';
 
-import { FieldsConfig, to, from } from './shared';
+import { FieldsConfig, to, from, isXJsonField, isXJsonValue } from './shared';
 
 import { FieldNameField } from './common_fields/field_name_field';
-
-interface ValueToggleTypes {
-  value: string;
-  copy_from: string;
-}
-
-type ValueToggleFields = {
-  [K in keyof ValueToggleTypes]: FieldHook<ValueToggleTypes[K]>;
-};
+import { XJsonToggle } from '../field_components';
 
 // Optional fields config
 const fieldsConfig: FieldsConfig = {
@@ -94,134 +84,131 @@ const fieldsConfig: FieldsConfig = {
       />
     ),
   },
-};
-
-// Required fields config
-const getValueConfig: (toggleCustom: () => void) => Record<
-  keyof ValueToggleFields,
-  {
-    path: string;
-    config?: FieldConfig<any>;
-    euiFieldProps?: Record<string, any>;
-    labelAppend: JSX.Element;
-  }
-> = (toggleCustom: () => void) => ({
   value: {
-    path: 'fields.value',
-    euiFieldProps: {
-      'data-test-subj': 'valueFieldInput',
+    type: FIELD_TYPES.TEXT,
+    defaultValue: (value: string) => {
+      return isXJsonValue(value) ? '{}' : '';
     },
-    config: {
-      type: FIELD_TYPES.TEXT,
-      serializer: from.emptyStringToUndefined,
-      label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.valueFieldLabel', {
-        defaultMessage: 'Value',
-      }),
-      helpText: (
-        <FormattedMessage
-          id="xpack.ingestPipelines.pipelineEditor.setForm.valueFieldHelpText"
-          defaultMessage="Value for the field."
-        />
-      ),
-      fieldsToValidateOnChange: ['fields.value', 'fields.copy_from'],
-      validations: [
-        {
-          validator: ({ value, path, formData }) => {
-            if (isEmpty(value) && isEmpty(formData['fields.copy_from'])) {
-              return {
-                path,
-                message: i18n.translate('xpack.ingestPipelines.pipelineEditor.requiredValue', {
-                  defaultMessage: 'A value is required.',
-                }),
-              };
-            }
-          },
-        },
-      ],
+    deserializer: (value: string | object) => {
+      return isXJsonValue(value) ? to.xJsonString(value) : value;
     },
-    labelAppend: (
-      <EuiText size="xs">
-        <EuiLink onClick={toggleCustom} data-test-subj="toggleCustomField">
-          <FormattedMessage
-            id="xpack.ingestPipelines.pipelineEditor.useCopyFromLabel"
-            defaultMessage="Use copy from field"
-          />
-        </EuiLink>
-      </EuiText>
+    serializer: (value: string) => {
+      return isXJsonValue(value) ? value : from.emptyStringToUndefined(value);
+    },
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.valueFieldLabel', {
+      defaultMessage: 'Value',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.setForm.valueFieldHelpText"
+        defaultMessage="Value for the field."
+      />
     ),
-    key: 'value',
+    validations: [
+      {
+        validator: ({ value, path, formData }) => {
+          if (isEmpty(value) && isUndefined(formData['fields.copy_from'])) {
+            return {
+              path,
+              message: i18n.translate('xpack.ingestPipelines.pipelineEditor.requiredValue', {
+                defaultMessage: 'A value is required.',
+              }),
+            };
+          }
+        },
+      },
+      {
+        validator: (args) => {
+          const {
+            customData: { value: isJson },
+          } = args;
+          if (isJson) {
+            return isXJsonField(
+              i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.valueInvalidJsonError', {
+                defaultMessage: 'Invalid JSON',
+              }),
+              {
+                allowEmptyString: true,
+              }
+            )({ ...args });
+          }
+        },
+      },
+    ],
   },
   copy_from: {
-    path: 'fields.copy_from',
-    euiFieldProps: {
-      'data-test-subj': 'copyFromInput',
-    },
-    config: {
-      type: FIELD_TYPES.TEXT,
-      serializer: from.emptyStringToUndefined,
-      fieldsToValidateOnChange: ['fields.value', 'fields.copy_from'],
-      validations: [
-        {
-          validator: ({ value, path, formData }) => {
-            if (isEmpty(value) && isEmpty(formData['fields.value'])) {
-              return {
-                path,
-                message: i18n.translate('xpack.ingestPipelines.pipelineEditor.requiredCopyFrom', {
-                  defaultMessage: 'A copy from value is required.',
-                }),
-              };
-            }
-          },
+    type: FIELD_TYPES.TEXT,
+    serializer: from.emptyStringToUndefined,
+    fieldsToValidateOnChange: ['fields.value', 'fields.copy_from'],
+    validations: [
+      {
+        validator: ({ value, path }) => {
+          if (isEmpty(value)) {
+            return {
+              path,
+              message: i18n.translate('xpack.ingestPipelines.pipelineEditor.requiredCopyFrom', {
+                defaultMessage: 'A copy from value is required.',
+              }),
+            };
+          }
         },
-      ],
-      label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.copyFromFieldLabel', {
-        defaultMessage: 'Copy from',
-      }),
-      helpText: (
-        <FormattedMessage
-          id="xpack.ingestPipelines.pipelineEditor.setForm.copyFromFieldHelpText"
-          defaultMessage="Field to copy into {field}."
-          values={{
-            field: <EuiCode>{'Field'}</EuiCode>,
-          }}
-        />
-      ),
-    },
-    labelAppend: (
-      <EuiText size="xs">
-        <EuiLink onClick={toggleCustom} data-test-subj="toggleCustomField">
-          <FormattedMessage
-            id="xpack.ingestPipelines.pipelineEditor.useValueLabel"
-            defaultMessage="Use value field"
-          />
-        </EuiLink>
-      </EuiText>
+      },
+    ],
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.copyFromFieldLabel', {
+      defaultMessage: 'Copy from',
+    }),
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.setForm.copyFromFieldHelpText"
+        defaultMessage="Field to copy into {field}."
+        values={{
+          field: <EuiCode>{'Field'}</EuiCode>,
+        }}
+      />
     ),
-    key: 'copy_from',
   },
-});
+  toggle_custom_field: {
+    type: FIELD_TYPES.TOGGLE,
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.setForm.enablingCopyFieldLabel', {
+      defaultMessage: 'Use Copy instead of Value',
+    }),
+    fieldsToValidateOnChange: ['fields.value', 'fields.copy_from'],
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.setForm.enablingCopydHelpText"
+        defaultMessage="Specify fields to copy into {field} instead of setting a {value}."
+        values={{
+          field: <EuiCode>{'Field'}</EuiCode>,
+          value: <EuiCode>{'Value'}</EuiCode>,
+        }}
+      />
+    ),
+  },
+};
 
 /**
  * Disambiguate name from the Set data structure
  */
 export const SetProcessor: FunctionComponent = () => {
-  const { getFieldDefaultValue } = useFormContext();
-  const [{ fields }] = useFormData({ watch: ['fields.value', 'fields.copy_from'] });
+  const { getFieldDefaultValue, setFieldValue } = useFormContext();
+  const [{ fields }] = useFormData({
+    watch: ['fields.value', 'fields.copy_from'],
+  });
 
   const isCopyFromDefined = getFieldDefaultValue('fields.copy_from') !== undefined;
   const [isCopyFromEnabled, setIsCopyFrom] = useState<boolean>(isCopyFromDefined);
+  const [isDefineAsJson, setIsDefineAsJson] = useState<boolean | undefined>(undefined);
+
+  const getIsJsonValue = (isJson: boolean) => {
+    setIsDefineAsJson(isJson);
+  };
 
   const toggleCustom = useCallback(() => {
+    const newIsCopyFrom = !isCopyFromEnabled;
     setIsCopyFrom((prev) => !prev);
-  }, []);
-
-  const valueFieldProps = useMemo(
-    () =>
-      isCopyFromEnabled
-        ? getValueConfig(toggleCustom).copy_from
-        : getValueConfig(toggleCustom).value,
-    [isCopyFromEnabled, toggleCustom]
-  );
+    setFieldValue('fields.value', !newIsCopyFrom && isDefineAsJson ? '{}' : '');
+    setFieldValue('fields.copy_from', '');
+  }, [isCopyFromEnabled, isDefineAsJson, setFieldValue]);
 
   return (
     <>
@@ -231,7 +218,17 @@ export const SetProcessor: FunctionComponent = () => {
         })}
       />
 
-      <UseField {...valueFieldProps} component={Field} />
+      <UseField
+        config={fieldsConfig.value}
+        component={XJsonToggle}
+        path="fields.value"
+        componentProps={{
+          disabled: isCopyFromEnabled,
+          handleIsJson: getIsJsonValue,
+          fieldType: 'text',
+        }}
+        validationData={isDefineAsJson}
+      />
 
       {hasTemplateSnippet(fields?.value) && (
         <UseField
@@ -257,6 +254,24 @@ export const SetProcessor: FunctionComponent = () => {
           config={fieldsConfig.mediaType}
           component={SelectField}
           path="fields.media_type"
+        />
+      )}
+
+      <UseField
+        config={fieldsConfig.toggle_custom_field}
+        component={ToggleField}
+        data-test-subj="toggleCustomField"
+        onChange={toggleCustom}
+        defaultValue={isCopyFromEnabled}
+        path=""
+      />
+
+      {isCopyFromEnabled && (
+        <UseField
+          data-test-subj="copyFromInput"
+          config={fieldsConfig.copy_from}
+          component={Field}
+          path="fields.copy_from"
         />
       )}
 

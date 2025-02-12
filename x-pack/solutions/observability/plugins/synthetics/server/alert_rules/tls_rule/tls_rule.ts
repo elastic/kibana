@@ -15,8 +15,11 @@ import {
 } from '@kbn/alerting-plugin/server';
 import { asyncForEach } from '@kbn/std';
 import { SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
+import {
+  tlsRuleParamsSchema,
+  type TLSRuleParams,
+} from '@kbn/response-ops-rule-params/synthetics_tls';
 import { getAlertDetailsUrl, observabilityPaths } from '@kbn/observability-plugin/common';
-import { schema } from '@kbn/config-schema';
 import { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
 import { syntheticsRuleFieldMap } from '../../../common/rules/synthetics_rule_field_map';
 import { SyntheticsPluginsSetupDependencies, SyntheticsServerSetup } from '../../types';
@@ -27,9 +30,7 @@ import { TLS_CERTIFICATE } from '../../../common/constants/synthetics_alerts';
 import { SyntheticsRuleTypeAlertDefinition, updateState } from '../common';
 import { ALERT_DETAILS_URL, getActionVariables } from '../action_variables';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { TLSParams } from '../../../common/runtime_types/alerts/tls';
 
-type TLSRuleTypeParams = TLSParams;
 type TLSActionGroups = ActionGroupIdsOf<typeof TLS_CERTIFICATE>;
 type TLSRuleTypeState = SyntheticsCommonState;
 type TLSAlertState = ReturnType<typeof getCertSummary>;
@@ -53,11 +54,7 @@ export const registerSyntheticsTLSCheckRule = (
     producer: 'uptime',
     name: TLS_CERTIFICATE.name,
     validate: {
-      params: schema.object({
-        search: schema.maybe(schema.string()),
-        certExpirationThreshold: schema.maybe(schema.number()),
-        certAgeThreshold: schema.maybe(schema.number()),
-      }),
+      params: tlsRuleParamsSchema,
     },
     defaultActionGroupId: TLS_CERTIFICATE.id,
     actionGroups: [TLS_CERTIFICATE],
@@ -67,7 +64,7 @@ export const registerSyntheticsTLSCheckRule = (
     doesSetRecoveryContext: true,
     executor: async (
       options: RuleExecutorOptions<
-        TLSRuleTypeParams,
+        TLSRuleParams,
         TLSRuleTypeState,
         TLSAlertState,
         TLSAlertContext,

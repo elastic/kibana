@@ -29,7 +29,7 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 
 import { asTransactionRate } from '../../../../common/utils/formatters';
 import { getIndexManagementHref } from './get_storage_explorer_links';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
 interface Props {
   data?: APIReturnType<'GET /internal/apm/storage_explorer_summary_stats'>;

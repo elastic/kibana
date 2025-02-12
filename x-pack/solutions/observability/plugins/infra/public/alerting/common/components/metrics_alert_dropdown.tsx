@@ -18,7 +18,7 @@ import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { PrefilledInventoryAlertFlyout } from '../../inventory/components/alert_flyout';
 import { PrefilledMetricThresholdAlertFlyout } from '../../metric_threshold/components/alert_flyout';
 import { AlertFlyout as CustomThresholdAlertFlyout } from '../../custom_threshold';
-import { InfraClientStartDeps } from '../../../types';
+import type { InfraClientStartDeps } from '../../../types';
 
 type VisibleFlyoutType = 'inventory' | 'metricThreshold' | 'customThreshold';
 

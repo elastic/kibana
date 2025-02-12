@@ -6,6 +6,7 @@
  */
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import { USER } from '../../../services/ml/security_common';
 
 export default function ({ getService }: FtrProviderContext) {
   const browser = getService('browser');
@@ -115,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testResources.createDataViewIfNeeded('ft_ihp_outlier', '@timestamp');
 
       await ml.testResources.setKibanaTimeZoneToUTC();
-      await ml.securityUI.loginAsMlPowerUser();
+      await ml.securityUI.loginAs(USER.ML_POWERUSER_ALL_SPACES);
 
       for (const spaceId of Object.values(spaceIds)) {
         if (spaceId !== 'default') {

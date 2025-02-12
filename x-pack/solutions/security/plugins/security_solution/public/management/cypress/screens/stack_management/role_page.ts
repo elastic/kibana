@@ -65,11 +65,13 @@ export const getSecuritySolutionCategoryKibanaPrivileges = (): Cypress.Chainable
  * kibana feature privileges grouping. This is the area where Endpoint related RBAC is managed
  */
 export const expandEndpointSecurityFeaturePrivileges = (): Cypress.Chainable => {
-  return cy.getByTestSubj('featurePrivilegeControls_securitySolution_siem_accordionToggle').click();
+  return cy
+    .getByTestSubj('featurePrivilegeControls_securitySolution_siemV2_accordionToggle')
+    .click();
 };
 
 export const getEndpointSecurityFeaturePrivileges = () => {
-  return cy.getByTestSubj('featureCategory_securitySolution_siem');
+  return cy.getByTestSubj('featureCategory_securitySolution_siemV2');
 };
 
 /**
@@ -101,7 +103,9 @@ export const setKibanaPrivilegeSpace = (spaceId: string) => {
 export const setSecuritySolutionEndpointGroupPrivilege = (
   privilege: 'all' | 'read' | 'none'
 ): Cypress.Chainable<JQuery<HTMLElement>> => {
-  return getSecuritySolutionCategoryKibanaPrivileges().findByTestSubj(`siem_${privilege}`).click();
+  return getSecuritySolutionCategoryKibanaPrivileges()
+    .findByTestSubj(`siemV2_${privilege}`)
+    .click();
 };
 
 /**
@@ -144,7 +148,7 @@ export const setEndpointSubFeaturePrivilege = (
   privilege: 'all' | 'read' | 'none'
 ): Cypress.Chainable<JQuery<HTMLElement>> => {
   return getEndpointSecurityFeaturePrivileges()
-    .findByTestSubj(`securitySolution_siem_${feature}_privilegeGroup`)
+    .findByTestSubj(`securitySolution_siemV2_${feature}_privilegeGroup`)
     .find(`button[title="${privilegeMapToTitle[privilege]}"]`)
     .click();
 };

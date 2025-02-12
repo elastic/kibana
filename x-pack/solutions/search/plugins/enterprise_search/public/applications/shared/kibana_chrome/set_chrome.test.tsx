@@ -16,28 +16,17 @@ import { shallow } from 'enzyme';
 jest.mock('./generate_breadcrumbs', () => ({
   useGenerateBreadcrumbs: jest.requireActual('./generate_breadcrumbs').useGenerateBreadcrumbs,
   useSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
-  useAppSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
-  useWorkplaceSearchBreadcrumbs: jest.fn(() => (crumbs: any) => crumbs),
 }));
-import {
-  useSearchBreadcrumbs,
-  useAppSearchBreadcrumbs,
-  useWorkplaceSearchBreadcrumbs,
-} from './generate_breadcrumbs';
+import { useSearchBreadcrumbs } from './generate_breadcrumbs';
 
 jest.mock('./generate_title', () => ({
   searchTitle: jest.fn((title: any) => title),
-  appSearchTitle: jest.fn((title: any) => title),
-  workplaceSearchTitle: jest.fn((title: any) => title),
 }));
-import { searchTitle, appSearchTitle, workplaceSearchTitle } from './generate_title';
+import { searchTitle } from './generate_title';
 
-import { SetSearchChrome, SetAppSearchChrome, SetWorkplaceSearchChrome } from '.';
+import { SetSearchChrome } from '.';
 
 describe('Set Kibana Chrome helpers', () => {
-  const mockCurrentPath = (pathname: string) =>
-    setMockValues({ history: { location: { pathname } } });
-
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues({ history: mockHistory });
@@ -66,54 +55,6 @@ describe('Set Kibana Chrome helpers', () => {
 
       expect(searchTitle).toHaveBeenCalledWith([]);
       expect(useSearchBreadcrumbs).toHaveBeenCalledWith([]);
-    });
-  });
-
-  describe('SetAppSearchChrome', () => {
-    it('sets breadcrumbs and document title', () => {
-      mockCurrentPath('/engines/{name}/curations');
-      shallow(<SetAppSearchChrome trail={['Engines', 'Some Engine', 'Curations']} />);
-
-      expect(appSearchTitle).toHaveBeenCalledWith(['Curations', 'Some Engine', 'Engines']);
-      expect(useAppSearchBreadcrumbs).toHaveBeenCalledWith([
-        { text: 'Engines', path: '/engines' },
-        { text: 'Some Engine', path: '/engines/{name}' },
-        { text: 'Curations', path: '/engines/{name}/curations' },
-      ]);
-    });
-
-    it('handles empty trails as a root-level page', () => {
-      shallow(<SetAppSearchChrome />);
-
-      expect(appSearchTitle).toHaveBeenCalledWith([]);
-      expect(useAppSearchBreadcrumbs).toHaveBeenCalledWith([]);
-    });
-  });
-
-  describe('SetWorkplaceSearchChrome', () => {
-    it('sets breadcrumbs and document title', () => {
-      mockCurrentPath('/groups/{id}/source_prioritization');
-      shallow(
-        <SetWorkplaceSearchChrome trail={['Groups', 'Some Group', 'Source Prioritization']} />
-      );
-
-      expect(workplaceSearchTitle).toHaveBeenCalledWith([
-        'Source Prioritization',
-        'Some Group',
-        'Groups',
-      ]);
-      expect(useWorkplaceSearchBreadcrumbs).toHaveBeenCalledWith([
-        { text: 'Groups', path: '/groups' },
-        { text: 'Some Group', path: '/groups/{id}' },
-        { text: 'Source Prioritization', path: '/groups/{id}/source_prioritization' },
-      ]);
-    });
-
-    it('handles empty trails as a root-level page', () => {
-      shallow(<SetWorkplaceSearchChrome />);
-
-      expect(workplaceSearchTitle).toHaveBeenCalledWith([]);
-      expect(useWorkplaceSearchBreadcrumbs).toHaveBeenCalledWith([]);
     });
   });
 });

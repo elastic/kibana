@@ -5,17 +5,18 @@
  * 2.0.
  */
 
+import type { WithEuiThemeProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiDatePicker,
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
-  WithEuiThemeProps,
   withEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 import React, { useCallback } from 'react';
 import { convertIntervalToString } from '../../../../../utils/convert_interval_to_string';
 import { useWaffleTimeContext } from '../../hooks/use_waffle_time';

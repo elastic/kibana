@@ -150,6 +150,14 @@ components:
         - updatedAt
         - updatedBy
 
+    DeleteResponseFields:
+      type: object
+      properties:
+        id:
+          $ref: "../../common_attributes.schema.yaml#/components/schemas/NonEmptyString"
+      required:
+        - id
+
     SharedResponseProps:
       x-inline: true
       allOf:
@@ -306,3 +314,7 @@ components:
       anyOf:
         - $ref: "#/components/schemas/DocumentEntry"
         - $ref: "#/components/schemas/IndexEntry"
+
+    KnowledgeBaseEntryDeleteResponse:
+      allOf:
+        - $ref: "#/components/schemas/DeleteResponseFields"

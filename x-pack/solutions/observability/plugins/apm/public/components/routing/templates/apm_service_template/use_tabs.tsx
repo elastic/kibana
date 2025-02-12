@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiPageHeaderProps, EuiToolTip } from '@elastic/eui';
+import type { EuiPageHeaderProps } from '@elastic/eui';
+import { EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import { keyBy, omit } from 'lodash';
@@ -18,7 +19,7 @@ import {
   isServerlessAgentName,
 } from '../../../../../common/agent_name';
 import { ApmFeatureFlagName } from '../../../../../common/apm_feature_flags';
-import { ServerlessType } from '../../../../../common/serverless';
+import type { ServerlessType } from '../../../../../common/serverless';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';

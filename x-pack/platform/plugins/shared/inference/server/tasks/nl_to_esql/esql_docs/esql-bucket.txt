@@ -30,8 +30,7 @@ BUCKET can operate in two modes:
 - one where the bucket size is computed based on a bucket count recommendation and a range,
 - and another where the bucket size is provided directly.
 
-When the bucket size is provided directly for time interval,
-it is expressed as a *timespan literal*, e.g.
+When the bucket size is provided directly for time interval, it is expressed as a **timespan literal**, e.g.
 - GOOD: `BUCKET(@timestamp, 1 month)`
 - BAD: `BUCKET(@timestamp, "month")`
 
@@ -74,19 +73,29 @@ FROM employees
 
 More examples:
 
+*Regrouping employees in buckets based on salary and counting them*
 ```esql
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
-| STATS c = COUNT(1) BY b = BUCKET(salary, 5000.)
+| STATS c = COUNT(*) BY b = BUCKET(salary, 5000.)
 | SORT b
 ```
 
+*Group data emitted over the last 24h into 25 buckets*
 ```esql
 FROM sample_data
 | WHERE @timestamp >= NOW() - 1 day and @timestamp < NOW()
 | STATS COUNT(*) BY bucket = BUCKET(@timestamp, 25, NOW() - 1 day, NOW())
 ```
 
+*Similar to previous example but with fixed 1 hour bucket size*
+```esql
+FROM sample_data
+| WHERE @timestamp >= NOW() - 1 day and @timestamp < NOW()
+| STATS COUNT(*) BY bucket = BUCKET(@timestamp, 1 hour)
+```
+
+*Group employees in 20 buckets based on their hire_date and then calculate the average salary for each bucket*
 ```esql
 FROM employees
 | WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
@@ -94,9 +103,10 @@ FROM employees
 | SORT bucket
 ```
 
+*Similar to previous example but using fixed 1 month buckets size*
 ```esql
 FROM employees
-| STATS s1 = BUCKET(salary / 1000 + 999, 50.) + 2 BY b1 = BUCKET(salary / 100 + 99, 50.), b2 = BUCKET(salary / 1000 + 999, 50.)
-| SORT b1, b2
-| KEEP b1, s1, b2
+| WHERE hire_date >= "1985-01-01T00:00:00Z" AND hire_date < "1986-01-01T00:00:00Z"
+| STATS AVG(salary) BY bucket = BUCKET(hire_date, 1 month)
+| SORT bucket
 ```

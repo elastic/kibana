@@ -6,7 +6,7 @@
  */
 
 import { createMetricsHostsAnomaliesQuery } from './metrics_hosts_anomalies';
-import { Sort, Pagination } from '../../../../common/http_api/infra_ml';
+import type { Sort, Pagination } from '../../../../common/http_api/infra_ml';
 
 describe('createMetricsHostAnomaliesQuery', () => {
   const jobIds = ['kibana-metrics-ui-default-default-hosts_memory_usage'];

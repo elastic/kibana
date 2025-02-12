@@ -49,7 +49,7 @@ export const FieldDescription = <T extends SettingType>({
   const { description, name } = field;
 
   // TODO - this does *not* match the `UiSetting` type.
-  // @see packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts
+  // @see src/core/packages/ui-settings/common/src/ui_settings.ts
   let content: ReactElement | string | undefined = description;
 
   if (!React.isValidElement(content)) {

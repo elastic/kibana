@@ -11,12 +11,13 @@ import { pick } from 'lodash';
 import { ReactFlow, Controls, Background } from '@xyflow/react';
 import { Story } from '@storybook/react';
 import { NodeViewModel } from '../types';
+import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { HexagonNode, PentagonNode, EllipseNode, RectangleNode, DiamondNode, LabelNode } from '.';
 
 import '@xyflow/react/dist/style.css';
 
 export default {
-  title: 'Components/Graph Components/Labels',
+  title: 'Components/Graph Components/Additional Components/Labels',
   description: 'CDR - Graph visualization',
   argTypes: {
     color: {
@@ -29,6 +30,7 @@ export default {
     },
     expandButtonClick: { action: 'expandButtonClick' },
   },
+  decorators: [GlobalStylesStorybookDecorator],
 };
 
 const nodeTypes = {

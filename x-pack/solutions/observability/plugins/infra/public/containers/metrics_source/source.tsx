@@ -8,7 +8,7 @@
 import createContainer from 'constate';
 import React, { useEffect, useState } from 'react';
 
-import { IHttpFetchError } from '@kbn/core-http-browser';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import type {
   MetricsSourceConfigurationResponse,

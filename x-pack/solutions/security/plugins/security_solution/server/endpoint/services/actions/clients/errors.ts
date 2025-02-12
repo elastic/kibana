@@ -7,6 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
+import type { ResponseActionsClient } from '../..';
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
 import { stringify } from '../../../utils/stringify';
 import { CustomHttpRequestError } from '../../../../utils/custom_http_request_error';
@@ -31,7 +32,7 @@ export class ResponseActionsClientError extends CustomHttpRequestError {
 
 export class ResponseActionsNotSupportedError extends ResponseActionsClientError {
   constructor(
-    responseAction?: ResponseActionsApiCommandNames,
+    responseAction?: ResponseActionsApiCommandNames | keyof ResponseActionsClient,
     statusCode: number = 405,
     meta?: unknown
   ) {

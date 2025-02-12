@@ -18,6 +18,9 @@ import { createDetectionRulesClient } from './detection_rules_client';
 import type { IDetectionRulesClient } from './detection_rules_client_interface';
 import { getRuleByRuleId } from './methods/get_rule_by_rule_id';
 import { getValidatedRuleToImportMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+import type { ExperimentalFeatures } from '../../../../../../common';
+import { createProductFeaturesServiceMock } from '../../../../product_features_service/mocks';
 
 jest.mock('../../../../machine_learning/authz');
 jest.mock('../../../../machine_learning/validation');
@@ -51,7 +54,9 @@ describe('DetectionRulesClient.importRule', () => {
       rulesClient,
       mlAuthz,
       savedObjectsClient,
-      isRuleCustomizationEnabled: true,
+      license: licenseMock.createLicenseMock(),
+      experimentalFeatures: { prebuiltRulesCustomizationEnabled: true } as ExperimentalFeatures,
+      productFeaturesService: createProductFeaturesServiceMock(),
     });
   });
 

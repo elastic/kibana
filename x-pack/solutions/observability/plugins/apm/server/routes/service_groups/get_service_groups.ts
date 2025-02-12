@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ServiceGroup, SavedServiceGroup } from '../../../common/service_groups';
 import {
-  ServiceGroup,
-  SavedServiceGroup,
   APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
   MAX_NUMBER_OF_SERVICE_GROUPS,
 } from '../../../common/service_groups';

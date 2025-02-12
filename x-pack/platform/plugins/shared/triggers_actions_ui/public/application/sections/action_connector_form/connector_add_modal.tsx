@@ -21,6 +21,7 @@ import {
   EuiBetaBadge,
   EuiButtonGroup,
   EuiSpacer,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import './connector_add_modal.scss';
@@ -214,12 +215,15 @@ const ConnectorAddModal = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiModal
       className="actConnectorModal"
       data-test-subj="connectorAddModal"
       onClose={closeModal}
       style={{ width: actionTypeRegistry.get(actionType.id).modalWidth }}
+      aria-labelledby={modalTitleId}
     >
       <EuiModalHeader>
         <EuiFlexGroup gutterSize="m" alignItems="center">
@@ -231,7 +235,7 @@ const ConnectorAddModal = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" justifyContent="center" alignItems="center">
               <EuiFlexItem>
-                <EuiModalHeaderTitle size="s" component="h3" id="flyoutTitle">
+                <EuiModalHeaderTitle id={modalTitleId} size="s" component="h3">
                   <FormattedMessage
                     defaultMessage="{actionTypeName} connector"
                     id="xpack.triggersActionsUI.sections.addModalConnectorForm.flyoutTitle"
@@ -302,7 +306,7 @@ const ConnectorAddModal = ({
         {canSave ? (
           <EuiButton
             fill
-            color="success"
+            color="primary"
             data-test-subj="saveActionButtonModal"
             type="submit"
             iconType="check"

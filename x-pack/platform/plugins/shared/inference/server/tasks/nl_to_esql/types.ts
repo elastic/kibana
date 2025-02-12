@@ -13,6 +13,7 @@ import type {
   Message,
   ToolOptions,
   OutputCompleteEvent,
+  ChatCompleteMetadata,
 } from '@kbn/inference-common';
 import type { InferenceClient } from '../../inference_client';
 
@@ -30,5 +31,6 @@ export type NlToEsqlTaskParams<TToolOptions extends ToolOptions> = {
   logger: Pick<Logger, 'debug'>;
   functionCalling?: FunctionCallingMode;
   system?: string;
+  metadata?: ChatCompleteMetadata;
 } & TToolOptions &
   ({ input: string } | { messages: Message[] });

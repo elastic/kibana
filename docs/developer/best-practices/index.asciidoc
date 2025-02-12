@@ -38,7 +38,7 @@ ensure your public facing strings will be translated to ensure all
 {kib} apps are localized.
 
 * Read and adhere to our
-{kib-repo}blob/{branch}/packages/kbn-i18n/GUIDELINE.md[i18n
+{kib-repo}blob/{branch}/src/platform/packages/shared/kbn-i18n/GUIDELINE.md[i18n
 guidelines]
 
 [discrete]
@@ -71,9 +71,9 @@ They take care of the nitty gritty so you can focus on creative
 solutions to your particular problem sphere. Some examples of common
 services you should consider:
 
-* {kib-repo}tree/{branch}/src/plugins/data/README.mdx[Data
+* {kib-repo}tree/{branch}/src/platform/plugins/shared/data/README.mdx[Data
 services]
-** {kib-repo}tree/{branch}/src/plugins/data/README.mdx#search[Search
+** {kib-repo}tree/{branch}/src/platform/plugins/shared/data/README.mdx#search[Search
 strategies]
 *** Use the `esSearchStrategy` to make raw queries to ES that will
 support async searching and partial results, as well as injecting the
@@ -82,17 +82,17 @@ right advanced settings like whether to include frozen indices or not.
 ** Rendering maps, visualizations, dashboards in your application
 ** Register new widgets that will can be added to a dashboard or Canvas
 workpad, or rendered in another plugin.
-* {kib-repo}tree/{branch}/src/plugins/ui_actions/README.asciidoc[UiActions]
+* {kib-repo}tree/{branch}/src/platform/plugins/shared/ui_actions/README.asciidoc[UiActions]
 ** Let other plugins inject functionality into your application
 ** Inject custom functionality into other plugins
 * Stateless helper utilities
-* {kib-repo}tree/{branch}/src/plugins/kibana_utils/docs/state_sync/README.md[state
+* {kib-repo}tree/{branch}/src/platform/plugins/shared/kibana_utils/docs/state_sync/README.md[state
 syncing] and
-* {kib-repo}tree/{branch}/src/plugins/kibana_utils/docs/state_containers/README.md[state
+* {kib-repo}tree/{branch}/src/platform/plugins/shared/kibana_utils/docs/state_containers/README.md[state
 container] utilities provided by
-* {kib-repo}tree/{branch}/src/plugins/kibana_utils/README.md[kibana_utils]
+* {kib-repo}tree/{branch}/src/platform/plugins/shared/kibana_utils/README.md[kibana_utils]
 if you want to sync your application state to the URL?
-** {kib-repo}tree/{branch}/src/plugins/kibana_react/README.md[kibana_react]
+** {kib-repo}tree/{branch}/src/platform/plugins/shared/kibana_react/README.md[kibana_react]
 for react specific helpers
 
 Re-using these services will help create a consistent experience across

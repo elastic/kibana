@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ExperimentalFeatures } from '../../../../common';
 import type {
   RiskScoresCalculationResponse,
   RiskScoresPreviewResponse,
@@ -48,6 +49,7 @@ export interface RiskScoreServiceFactoryParams {
   riskScoreDataClient: RiskScoreDataClient;
   spaceId: string;
   refresh?: 'wait_for';
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 export const riskScoreServiceFactory = ({
@@ -57,9 +59,16 @@ export const riskScoreServiceFactory = ({
   riskEngineDataClient,
   riskScoreDataClient,
   spaceId,
+  experimentalFeatures,
 }: RiskScoreServiceFactoryParams): RiskScoreService => ({
   calculateScores: (params) =>
-    calculateRiskScores({ ...params, assetCriticalityService, esClient, logger }),
+    calculateRiskScores({
+      ...params,
+      assetCriticalityService,
+      esClient,
+      logger,
+      experimentalFeatures,
+    }),
   calculateAndPersistScores: (params) =>
     calculateAndPersistRiskScores({
       ...params,
@@ -68,6 +77,7 @@ export const riskScoreServiceFactory = ({
       logger,
       riskScoreDataClient,
       spaceId,
+      experimentalFeatures,
     }),
   getConfigurationWithDefaults: async (entityAnalyticsConfig: EntityAnalyticsConfig) => {
     const savedObjectConfig = await riskEngineDataClient.getConfiguration();

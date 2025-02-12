@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { match as RouteMatch, Redirect } from 'react-router-dom';
+import type { match as RouteMatch } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { inventoryModels } from '@kbn/metrics-data-access-plugin/common';

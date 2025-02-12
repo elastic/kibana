@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
-import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
-import { COMPARATORS } from '@kbn/alerting-comparators';
-import { LEGACY_COMPARATORS } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
+import type { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type { COMPARATORS } from '@kbn/alerting-comparators';
+import type { LEGACY_COMPARATORS } from '@kbn/observability-plugin/common/utils/convert_legacy_outside_comparator';
 export { INFRA_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
-import { SnapshotCustomMetricInput } from '../../http_api';
+import type { SnapshotCustomMetricInput } from '../../http_api';
 
 export const METRIC_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.threshold';
 export const METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID = 'metrics.alert.inventory.threshold';

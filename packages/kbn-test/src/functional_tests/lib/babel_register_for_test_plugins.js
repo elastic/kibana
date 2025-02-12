@@ -19,7 +19,7 @@ require('@kbn/babel-register').install({
     'x-pack/examples',
     // TODO: should should probably remove this link back to the source
     'x-pack/platform/plugins/shared/task_manager/server/config.ts',
-    'src/plugins/field_formats/common',
+    'src/platform/plugins/shared/field_formats/common',
     'packages',
     'x-pack/packages',
   ].map((path) => Path.resolve(REPO_ROOT, path)),

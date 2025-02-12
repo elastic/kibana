@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
-import { GetHostParameters } from '../types';
+import type { GetHostParameters } from '../types';
 
 export const getApmHostNames = async ({
   apmDataAccessServices,

@@ -110,9 +110,13 @@ export function syntheticsAppPageProvider({
     },
 
     async navigateToAddMonitor() {
-      await page.goto(addMonitor, {
-        waitUntil: 'networkidle',
-      });
+      if (await page.isVisible('[data-test-subj="syntheticsAddMonitorBtn"]')) {
+        await page.click('[data-test-subj="syntheticsAddMonitorBtn"]');
+      } else {
+        await page.goto(addMonitor, {
+          waitUntil: 'networkidle',
+        });
+      }
     },
 
     async ensureIsOnMonitorConfigPage() {

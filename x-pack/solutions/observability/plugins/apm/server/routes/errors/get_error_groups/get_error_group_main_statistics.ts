@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery, rangeQuery, termQuery, wildcardQuery } from '@kbn/observability-plugin/server';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
@@ -17,7 +17,6 @@ import {
   ERROR_EXC_TYPE,
   ERROR_GROUP_ID,
   ERROR_GROUP_NAME,
-  ERROR_ID,
   ERROR_LOG_MESSAGE,
   SERVICE_NAME,
   TRACE_ID,
@@ -26,7 +25,7 @@ import {
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { getErrorName } from '../../../lib/helpers/get_error_name';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 
@@ -97,7 +96,7 @@ export async function getErrorGroupMainStatistics({
       ]
     : [];
 
-  const requiredFields = asMutableArray([AT_TIMESTAMP, ERROR_GROUP_ID, ERROR_ID] as const);
+  const requiredFields = asMutableArray([AT_TIMESTAMP, ERROR_GROUP_ID] as const);
 
   const optionalFields = asMutableArray([
     TRACE_ID,
@@ -176,7 +175,7 @@ export async function getErrorGroupMainStatistics({
         error: {
           ...(event.error ?? {}),
           exception:
-            (errorSource?.error.exception?.length ?? 0) > 1
+            (errorSource?.error.exception?.length ?? 0) > 0
               ? errorSource?.error.exception
               : event?.error.exception && [event.error.exception],
         },

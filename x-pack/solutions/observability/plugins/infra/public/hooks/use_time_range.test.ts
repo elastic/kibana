@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react';
 import { useTimeRange } from './use_time_range';
 import * as datemath from '../utils/datemath';
 

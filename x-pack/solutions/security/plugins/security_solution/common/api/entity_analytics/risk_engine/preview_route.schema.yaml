@@ -101,3 +101,13 @@ components:
               items:
                 $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
               description: A list of user risk scores
+            service:
+              type: array
+              items:
+                $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
+              description: A list of service risk scores
+            universal:
+              type: array
+              items:
+                $ref: '../common/common.schema.yaml#/components/schemas/EntityRiskScoreRecord'
+              description: A list of universal risk scores

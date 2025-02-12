@@ -7,7 +7,7 @@
 
 import { EuiInMemoryTable } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import {
   ERRORS_CONTAINER_MAX_WIDTH,
@@ -16,10 +16,12 @@ import {
 } from './helpers';
 import type { ErrorSummary } from '../../../../../types';
 
-const ErrorsViewerContainer = styled.div`
-  max-width: ${ERRORS_CONTAINER_MAX_WIDTH}px;
-  min-width: ${ERRORS_CONTAINER_MIN_WIDTH}px;
-`;
+const styles = {
+  errorsViewerContainer: css({
+    maxWidth: ERRORS_CONTAINER_MAX_WIDTH,
+    minWidth: ERRORS_CONTAINER_MIN_WIDTH,
+  }),
+};
 
 interface Props {
   errorSummary: ErrorSummary[];
@@ -29,7 +31,7 @@ const ErrorsViewerComponent: React.FC<Props> = ({ errorSummary }) => {
   const columns = useMemo(() => getErrorsViewerTableColumns(), []);
 
   return (
-    <ErrorsViewerContainer data-test-subj="errorsViewer">
+    <div css={styles.errorsViewerContainer} data-test-subj="errorsViewer">
       <EuiInMemoryTable
         columns={columns}
         compressed={true}
@@ -37,7 +39,7 @@ const ErrorsViewerComponent: React.FC<Props> = ({ errorSummary }) => {
         sorting={false}
         pagination={true}
       />
-    </ErrorsViewerContainer>
+    </div>
   );
 };
 

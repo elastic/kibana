@@ -33,7 +33,13 @@ const createKubernetesOnboardingFlowRoute = createObservabilityOnboardingServerR
   params: t.type({
     body: t.type({ pkgName: t.union([t.literal('kubernetes'), t.literal('kubernetes_otel')]) }),
   }),
-  options: { tags: [] },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'Authorization is checked by custom logic using Elasticsearch client and by the Package Service client',
+    },
+  },
   async handler({
     context,
     request,
@@ -90,7 +96,12 @@ const hasKubernetesDataRoute = createObservabilityOnboardingServerRoute({
       onboardingId: t.string,
     }),
   }),
-  options: { tags: [] },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'Authorization is checked by Elasticsearch',
+    },
+  },
   async handler(resources): Promise<HasKubernetesDataRouteResponse> {
     const { onboardingId } = resources.params.path;
     const { elasticsearch } = await resources.context.core;

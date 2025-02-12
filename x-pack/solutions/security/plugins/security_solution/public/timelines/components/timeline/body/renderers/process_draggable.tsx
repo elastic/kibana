@@ -21,7 +21,6 @@ interface Props {
   processExecutable: string | undefined | null;
   processPid: number | undefined | null;
   processName: string | undefined | null;
-  isDraggable?: boolean;
 }
 
 export const ProcessDraggable = React.memo<Props>(
@@ -33,7 +32,6 @@ export const ProcessDraggable = React.memo<Props>(
     processExecutable,
     processName,
     processPid,
-    isDraggable,
   }) => {
     if (
       isNillEmptyOrNotFinite(processName) &&
@@ -55,7 +53,6 @@ export const ProcessDraggable = React.memo<Props>(
               field="process.name"
               value={processName}
               iconType="console"
-              isDraggable={isDraggable}
               fieldType="keyword"
               isAggregatable={true}
             />
@@ -68,7 +65,6 @@ export const ProcessDraggable = React.memo<Props>(
               field="process.executable"
               value={processExecutable}
               iconType="console"
-              isDraggable={isDraggable}
               fieldType="keyword"
               isAggregatable={true}
             />
@@ -81,7 +77,6 @@ export const ProcessDraggable = React.memo<Props>(
               field="endgame.process_name"
               value={endgameProcessName}
               iconType="console"
-              isDraggable={isDraggable}
               fieldType="keyword"
               isAggregatable={true}
             />
@@ -96,7 +91,6 @@ export const ProcessDraggable = React.memo<Props>(
               field="process.pid"
               queryValue={String(processPid)}
               value={`(${String(processPid)})`}
-              isDraggable={isDraggable}
               fieldType="keyword"
               isAggregatable={true}
             />
@@ -109,7 +103,6 @@ export const ProcessDraggable = React.memo<Props>(
               field="endgame.pid"
               queryValue={String(endgamePid)}
               value={`(${String(endgamePid)})`}
-              isDraggable={isDraggable}
               fieldType="keyword"
               isAggregatable={true}
             />
@@ -131,7 +124,6 @@ export const ProcessDraggableWithNonExistentProcess = React.memo<Props>(
     processExecutable,
     processName,
     processPid,
-    isDraggable,
   }) => {
     if (
       endgamePid == null &&
@@ -151,7 +143,6 @@ export const ProcessDraggableWithNonExistentProcess = React.memo<Props>(
           processExecutable={processExecutable}
           processName={processName}
           processPid={processPid}
-          isDraggable={isDraggable}
         />
       );
     }

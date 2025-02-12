@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ColumnarViewModel } from '@elastic/charts';
+import type { ColumnarViewModel } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import d3 from 'd3';
 import { compact, range, sum, uniqueId } from 'lodash';
-import { describeFrameType, FrameType } from '@kbn/profiling-utils';
-import type { ElasticFlameGraph } from '@kbn/profiling-utils';
+import { describeFrameType } from '@kbn/profiling-utils';
+import type { ElasticFlameGraph, FrameType } from '@kbn/profiling-utils';
 import { createColumnarViewModel } from '../../../common/columnar_view_model';
 import { FRAME_TYPE_COLOR_MAP, rgbToRGBA } from '../../../common/frame_type_colors';
 import { ComparisonMode } from '../../components/normalization_menu';

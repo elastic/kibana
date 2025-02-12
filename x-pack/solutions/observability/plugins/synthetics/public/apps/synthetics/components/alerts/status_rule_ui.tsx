@@ -9,10 +9,11 @@ import React, { useCallback } from 'react';
 import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { Filter } from '@kbn/es-query';
 import { EuiSpacer } from '@elastic/eui';
+import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import { StatusRuleViz } from './status_rule_viz';
 import { FieldFilters } from './common/field_filters';
 import { AlertSearchBar } from './query_bar';
 import { StatusRuleExpression } from './status_rule_expression';
-import { StatusRuleParams } from '../../../../../common/rules/status_rule';
 
 export type StatusRuleParamsProps = RuleTypeParamsExpressionProps<StatusRuleParams>;
 
@@ -32,8 +33,9 @@ export const StatusRuleComponent: React.FC<{
       <AlertSearchBar kqlQuery={ruleParams.kqlQuery ?? ''} onChange={onFiltersChange} />
       <EuiSpacer size="m" />
       <FieldFilters ruleParams={ruleParams} setRuleParams={setRuleParams} />
-      <StatusRuleExpression ruleParams={ruleParams} setRuleParams={setRuleParams} />
+      <StatusRuleViz ruleParams={ruleParams} />
       <EuiSpacer size="m" />
+      <StatusRuleExpression ruleParams={ruleParams} setRuleParams={setRuleParams} />
     </>
   );
 };

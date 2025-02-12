@@ -12,16 +12,10 @@
         "description": [],
         "signature": [
           "(error: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.IHttpFetchError",
-            "text": "IHttpFetchError"
-          },
+          "IHttpFetchError",
           "<unknown> | T) => boolean"
         ],
-        "path": "packages/core/http/core-http-browser/src/utils.ts",
+        "path": "src/core/packages/http/browser/src/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -33,16 +27,10 @@
             "label": "error",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.IHttpFetchError",
-                "text": "IHttpFetchError"
-              },
+              "IHttpFetchError",
               "<unknown> | T"
             ],
-            "path": "packages/core/http/core-http-browser/src/utils.ts",
+            "path": "src/core/packages/http/browser/src/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -63,23 +51,11 @@
           "\nAll options that may be used with a {@link HttpHandler}."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpFetchOptions",
-            "text": "HttpFetchOptions"
-          },
+          "HttpFetchOptions",
           " extends ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpRequestInit",
-            "text": "HttpRequestInit"
-          }
+          "HttpRequestInit"
         ],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -93,16 +69,10 @@
               "\nThe query string for an HTTP request. See {@link HttpFetchQuery}."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpFetchQuery",
-                "text": "HttpFetchQuery"
-              },
+              "HttpFetchQuery",
               " | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -118,7 +88,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -132,16 +102,10 @@
               "\nHeaders to send with the request. See {@link HttpHeadersInit}."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpHeadersInit",
-                "text": "HttpHeadersInit"
-              },
+              "HttpHeadersInit",
               " | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -157,7 +121,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -173,7 +137,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -189,7 +153,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -201,16 +165,10 @@
             "label": "context",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
+              "KibanaExecutionContext",
               " | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -226,7 +184,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -243,23 +201,11 @@
           "\nSimilar to {@link HttpFetchOptions} but with the URL path included."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpFetchOptionsWithPath",
-            "text": "HttpFetchOptionsWithPath"
-          },
+          "HttpFetchOptionsWithPath",
           " extends ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpFetchOptions",
-            "text": "HttpFetchOptions"
-          }
+          "HttpFetchOptions"
         ],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -270,7 +216,7 @@
             "tags": [],
             "label": "path",
             "description": [],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -284,7 +230,7 @@
         "tags": [],
         "label": "HttpFetchQuery",
         "description": [],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -300,7 +246,7 @@
             "signature": [
               "[key: string]:  string | number | boolean | string[] | boolean[] | number[] | null | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -316,7 +262,7 @@
         "description": [
           "\nA function for making an HTTP requests to Kibana's backend. See {@link HttpFetchOptions} for options and\n{@link HttpResponse} for the response.\n"
         ],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -330,7 +276,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -344,7 +290,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -358,7 +304,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -372,7 +318,7 @@
             "signature": [
               "any"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -388,7 +334,7 @@
         "description": [
           "\nHeaders to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause\n{@link HttpHandler} to throw an error.\nIncludes the required Header that validates internal requests to internal APIs"
         ],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -402,7 +348,7 @@
             "signature": [
               "[name: string]:  any"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -418,7 +364,7 @@
         "description": [
           "\nAn object that may define global interceptor functions for different parts of the request and response lifecycle.\nSee {@link IHttpInterceptController}.\n"
         ],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -433,21 +379,9 @@
             ],
             "signature": [
               "((fetchOptions: Readonly<",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpFetchOptionsWithPath",
-                "text": "HttpFetchOptionsWithPath"
-              },
+              "HttpFetchOptionsWithPath",
               ">, controller: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.IHttpInterceptController",
-                "text": "IHttpInterceptController"
-              },
+              "IHttpInterceptController",
               ") => void | ",
               {
                 "pluginId": "@kbn/utility-types",
@@ -457,16 +391,10 @@
                 "text": "MaybePromise"
               },
               "<Partial<",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpFetchOptionsWithPath",
-                "text": "HttpFetchOptionsWithPath"
-              },
+              "HttpFetchOptionsWithPath",
               ">>) | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -479,16 +407,10 @@
                 "description": [],
                 "signature": [
                   "Readonly<",
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpFetchOptionsWithPath",
-                    "text": "HttpFetchOptionsWithPath"
-                  },
+                  "HttpFetchOptionsWithPath",
                   ">"
                 ],
-                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "path": "src/core/packages/http/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -503,15 +425,9 @@
                   "{@link IHttpInterceptController }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.IHttpInterceptController",
-                    "text": "IHttpInterceptController"
-                  }
+                  "IHttpInterceptController"
                 ],
-                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "path": "src/core/packages/http/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -530,21 +446,9 @@
             ],
             "signature": [
               "((httpErrorRequest: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpInterceptorRequestError",
-                "text": "HttpInterceptorRequestError"
-              },
+              "HttpInterceptorRequestError",
               ", controller: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.IHttpInterceptController",
-                "text": "IHttpInterceptController"
-              },
+              "IHttpInterceptController",
               ") => void | ",
               {
                 "pluginId": "@kbn/utility-types",
@@ -554,16 +458,10 @@
                 "text": "MaybePromise"
               },
               "<Partial<",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpFetchOptionsWithPath",
-                "text": "HttpFetchOptionsWithPath"
-              },
+              "HttpFetchOptionsWithPath",
               ">>) | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -577,15 +475,9 @@
                   "{@link HttpInterceptorRequestError }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpInterceptorRequestError",
-                    "text": "HttpInterceptorRequestError"
-                  }
+                  "HttpInterceptorRequestError"
                 ],
-                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "path": "src/core/packages/http/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -600,15 +492,9 @@
                   "{@link IHttpInterceptController }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.IHttpInterceptController",
-                    "text": "IHttpInterceptController"
-                  }
+                  "IHttpInterceptController"
                 ],
-                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "path": "src/core/packages/http/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -627,21 +513,9 @@
             ],
             "signature": [
               "((httpResponse: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpResponse",
-                "text": "HttpResponse"
-              },
+              "HttpResponse",
               "<unknown>, controller: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.IHttpInterceptController",
-                "text": "IHttpInterceptController"
-              },
+              "IHttpInterceptController",
               ") => void | ",
               {
                 "pluginId": "@kbn/utility-types",
@@ -651,16 +525,10 @@
                 "text": "MaybePromise"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.IHttpResponseInterceptorOverrides",
-                "text": "IHttpResponseInterceptorOverrides"
-              },
+              "IHttpResponseInterceptorOverrides",
               "<unknown>>) | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -674,16 +542,10 @@
                   "{@link HttpResponse }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpResponse",
-                    "text": "HttpResponse"
-                  },
+                  "HttpResponse",
                   "<unknown>"
                 ],
-                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "path": "src/core/packages/http/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -698,15 +560,9 @@
                   "{@link IHttpInterceptController }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.IHttpInterceptController",
-                    "text": "IHttpInterceptController"
-                  }
+                  "IHttpInterceptController"
                 ],
-                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "path": "src/core/packages/http/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -725,21 +581,9 @@
             ],
             "signature": [
               "((httpErrorResponse: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpInterceptorResponseError",
-                "text": "HttpInterceptorResponseError"
-              },
+              "HttpInterceptorResponseError",
               ", controller: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.IHttpInterceptController",
-                "text": "IHttpInterceptController"
-              },
+              "IHttpInterceptController",
               ") => void | ",
               {
                 "pluginId": "@kbn/utility-types",
@@ -749,16 +593,10 @@
                 "text": "MaybePromise"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.IHttpResponseInterceptorOverrides",
-                "text": "IHttpResponseInterceptorOverrides"
-              },
+              "IHttpResponseInterceptorOverrides",
               "<unknown>>) | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -772,15 +610,9 @@
                   "{@link HttpInterceptorResponseError }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpInterceptorResponseError",
-                    "text": "HttpInterceptorResponseError"
-                  }
+                  "HttpInterceptorResponseError"
                 ],
-                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "path": "src/core/packages/http/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -795,15 +627,9 @@
                   "{@link IHttpInterceptController }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.IHttpInterceptController",
-                    "text": "IHttpInterceptController"
-                  }
+                  "IHttpInterceptController"
                 ],
-                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "path": "src/core/packages/http/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -821,7 +647,7 @@
         "tags": [],
         "label": "HttpInterceptorRequestError",
         "description": [],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -834,32 +660,14 @@
             "description": [],
             "signature": [
               "{ readonly path: string; readonly query?: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpFetchQuery",
-                "text": "HttpFetchQuery"
-              },
+              "HttpFetchQuery",
               " | undefined; readonly prependBasePath?: boolean | undefined; readonly headers?: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpHeadersInit",
-                "text": "HttpHeadersInit"
-              },
+              "HttpHeadersInit",
               " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly rawResponse?: boolean | undefined; readonly context?: ",
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
+              "KibanaExecutionContext",
               " | undefined; readonly version?: string | undefined; readonly body?: BodyInit | null | undefined; readonly cache?: RequestCache | undefined; readonly credentials?: RequestCredentials | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: RequestMode | undefined; readonly redirect?: RequestRedirect | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: ReferrerPolicy | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -873,7 +681,7 @@
             "signature": [
               "Error"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -888,24 +696,12 @@
         "label": "HttpInterceptorResponseError",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpInterceptorResponseError",
-            "text": "HttpInterceptorResponseError"
-          },
+          "HttpInterceptorResponseError",
           " extends ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpResponse",
-            "text": "HttpResponse"
-          },
+          "HttpResponse",
           "<unknown>"
         ],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -919,7 +715,7 @@
             "signature": [
               "{ readonly cache: RequestCache; readonly credentials: RequestCredentials; readonly destination: RequestDestination; readonly headers: Headers; readonly integrity: string; readonly keepalive: boolean; readonly method: string; readonly mode: RequestMode; readonly redirect: RequestRedirect; readonly referrer: string; readonly referrerPolicy: ReferrerPolicy; readonly signal: AbortSignal; readonly url: string; readonly clone: () => Request; readonly body: ReadableStream<Uint8Array> | null; readonly bodyUsed: boolean; readonly arrayBuffer: () => Promise<ArrayBuffer>; readonly blob: () => Promise<Blob>; readonly formData: () => Promise<FormData>; readonly json: () => Promise<any>; readonly text: () => Promise<string>; }"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -932,16 +728,10 @@
             "description": [],
             "signature": [
               "Error | ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.IHttpFetchError",
-                "text": "IHttpFetchError"
-              },
+              "IHttpFetchError",
               "<unknown>"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -957,7 +747,7 @@
         "description": [
           "\nFetch API options available to {@link HttpHandler}s.\n"
         ],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -973,7 +763,7 @@
             "signature": [
               "BodyInit | null | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -989,7 +779,7 @@
             "signature": [
               "RequestCache | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1005,7 +795,7 @@
             "signature": [
               "RequestCredentials | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1019,16 +809,10 @@
               "{@link HttpHeadersInit}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpHeadersInit",
-                "text": "HttpHeadersInit"
-              },
+              "HttpHeadersInit",
               " | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1044,7 +828,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1060,7 +844,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1076,7 +860,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1092,7 +876,7 @@
             "signature": [
               "RequestMode | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1108,7 +892,7 @@
             "signature": [
               "RequestRedirect | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1124,7 +908,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1140,7 +924,7 @@
             "signature": [
               "ReferrerPolicy | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1156,7 +940,7 @@
             "signature": [
               "AbortSignal | null | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1172,7 +956,7 @@
             "signature": [
               "null | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1187,16 +971,10 @@
         "label": "HttpResponse",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpResponse",
-            "text": "HttpResponse"
-          },
+          "HttpResponse",
           "<TResponseBody>"
         ],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1211,32 +989,14 @@
             ],
             "signature": [
               "{ readonly path: string; readonly query?: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpFetchQuery",
-                "text": "HttpFetchQuery"
-              },
+              "HttpFetchQuery",
               " | undefined; readonly prependBasePath?: boolean | undefined; readonly headers?: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpHeadersInit",
-                "text": "HttpHeadersInit"
-              },
+              "HttpHeadersInit",
               " | undefined; readonly asSystemRequest?: boolean | undefined; readonly asResponse?: boolean | undefined; readonly rawResponse?: boolean | undefined; readonly context?: ",
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
+              "KibanaExecutionContext",
               " | undefined; readonly version?: string | undefined; readonly body?: BodyInit | null | undefined; readonly cache?: RequestCache | undefined; readonly credentials?: RequestCredentials | undefined; readonly integrity?: string | undefined; readonly keepalive?: boolean | undefined; readonly method?: string | undefined; readonly mode?: RequestMode | undefined; readonly redirect?: RequestRedirect | undefined; readonly referrer?: string | undefined; readonly referrerPolicy?: ReferrerPolicy | undefined; readonly signal?: AbortSignal | null | undefined; readonly window?: null | undefined; }"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1252,7 +1012,7 @@
             "signature": [
               "{ readonly cache: RequestCache; readonly credentials: RequestCredentials; readonly destination: RequestDestination; readonly headers: Headers; readonly integrity: string; readonly keepalive: boolean; readonly method: string; readonly mode: RequestMode; readonly redirect: RequestRedirect; readonly referrer: string; readonly referrerPolicy: ReferrerPolicy; readonly signal: AbortSignal; readonly url: string; readonly clone: () => Request; readonly body: ReadableStream<Uint8Array> | null; readonly bodyUsed: boolean; readonly arrayBuffer: () => Promise<ArrayBuffer>; readonly blob: () => Promise<Blob>; readonly formData: () => Promise<FormData>; readonly json: () => Promise<any>; readonly text: () => Promise<string>; }"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1268,7 +1028,7 @@
             "signature": [
               "Readonly<Response> | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1284,7 +1044,7 @@
             "signature": [
               "TResponseBody | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1298,7 +1058,7 @@
         "tags": [],
         "label": "HttpSetup",
         "description": [],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1312,15 +1072,9 @@
               "\nAPIs for manipulating the basePath on URL segments.\nSee {@link IBasePath}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.IBasePath",
-                "text": "IBasePath"
-              }
+              "IBasePath"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1334,15 +1088,9 @@
               "\nAPIs for creating hrefs to static assets.\nSee {@link IStaticAssets}"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.IStaticAssets",
-                "text": "IStaticAssets"
-              }
+              "IStaticAssets"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1356,15 +1104,9 @@
               "\nAPIs for denoting certain paths for not requiring authentication"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.IAnonymousPaths",
-                "text": "IAnonymousPaths"
-              }
+              "IAnonymousPaths"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1376,15 +1118,9 @@
             "label": "externalUrl",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.IExternalUrl",
-                "text": "IExternalUrl"
-              }
+              "IExternalUrl"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1399,16 +1135,10 @@
             ],
             "signature": [
               "(interceptor: ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpInterceptor",
-                "text": "HttpInterceptor"
-              },
+              "HttpInterceptor",
               ") => () => void"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1422,15 +1152,9 @@
                   "a {@link HttpInterceptor }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpInterceptor",
-                    "text": "HttpInterceptor"
-                  }
+                  "HttpInterceptor"
                 ],
-                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "path": "src/core/packages/http/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1450,15 +1174,9 @@
               "Makes an HTTP request. Defaults to a GET request unless overridden. See {@link HttpHandler} for options."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpHandler",
-                "text": "HttpHandler"
-              }
+              "HttpHandler"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1472,15 +1190,9 @@
               "Makes an HTTP request with the DELETE method. See {@link HttpHandler} for options."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpHandler",
-                "text": "HttpHandler"
-              }
+              "HttpHandler"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1494,15 +1206,9 @@
               "Makes an HTTP request with the GET method. See {@link HttpHandler} for options."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpHandler",
-                "text": "HttpHandler"
-              }
+              "HttpHandler"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1516,15 +1222,9 @@
               "Makes an HTTP request with the HEAD method. See {@link HttpHandler} for options."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpHandler",
-                "text": "HttpHandler"
-              }
+              "HttpHandler"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1538,15 +1238,9 @@
               "Makes an HTTP request with the OPTIONS method. See {@link HttpHandler} for options."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpHandler",
-                "text": "HttpHandler"
-              }
+              "HttpHandler"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1560,15 +1254,9 @@
               "Makes an HTTP request with the PATCH method. See {@link HttpHandler} for options."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpHandler",
-                "text": "HttpHandler"
-              }
+              "HttpHandler"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1582,15 +1270,9 @@
               "Makes an HTTP request with the POST method. See {@link HttpHandler} for options."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpHandler",
-                "text": "HttpHandler"
-              }
+              "HttpHandler"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1604,15 +1286,9 @@
               "Makes an HTTP request with the PUT method. See {@link HttpHandler} for options."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpHandler",
-                "text": "HttpHandler"
-              }
+              "HttpHandler"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1630,7 +1306,7 @@
               "Observable",
               "<number>) => void"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1647,7 +1323,7 @@
                   "Observable",
                   "<number>"
                 ],
-                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "path": "src/core/packages/http/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1669,7 +1345,7 @@
               "Observable",
               "<number>"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1687,7 +1363,7 @@
         "description": [
           "\nAPIs for denoting paths as not requiring authentication"
         ],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1703,7 +1379,7 @@
             "signature": [
               "(path: string) => boolean"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1717,7 +1393,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "path": "src/core/packages/http/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1737,7 +1413,7 @@
             "signature": [
               "(path: string) => void"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1751,7 +1427,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "path": "src/core/packages/http/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1771,7 +1447,7 @@
         "description": [
           "\nAPIs for manipulating the basePath on URL segments."
         ],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1787,7 +1463,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1805,7 +1481,7 @@
             "signature": [
               "(url: string) => string"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1819,7 +1495,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "path": "src/core/packages/http/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1839,7 +1515,7 @@
             "signature": [
               "(url: string) => string"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1853,7 +1529,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "path": "src/core/packages/http/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1870,7 +1546,7 @@
             "description": [
               "\nReturns the server's root basePath as configured, without any namespace prefix.\n\nSee {@link BasePath.get} for getting the basePath value for a specific request"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1883,7 +1559,7 @@
             "description": [
               "\nHref (hypertext reference) intended to be used as the base for constructing\nother hrefs to static assets."
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1899,7 +1575,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1915,7 +1591,7 @@
         "description": [
           "\nAPIs for working with external URLs.\n"
         ],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1931,7 +1607,7 @@
             "signature": [
               "(relativeOrAbsoluteUrl: string) => boolean"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1945,7 +1621,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "path": "src/core/packages/http/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1965,7 +1641,7 @@
             "signature": [
               "(relativeOrAbsoluteUrl: string) => URL | null"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1979,7 +1655,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "path": "src/core/packages/http/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1998,16 +1674,10 @@
         "label": "IHttpFetchError",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.IHttpFetchError",
-            "text": "IHttpFetchError"
-          },
+          "IHttpFetchError",
           "<TResponseBody> extends Error"
         ],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2018,7 +1688,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2032,7 +1702,7 @@
             "signature": [
               "Request"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2046,7 +1716,7 @@
             "signature": [
               "Response | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2060,7 +1730,7 @@
             "signature": [
               "TResponseBody | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2076,7 +1746,7 @@
         "description": [
           "\nUsed to halt a request Promise chain in a {@link HttpInterceptor}."
         ],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2089,7 +1759,7 @@
             "description": [
               "Whether or not this chain has been halted."
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2105,7 +1775,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2124,16 +1794,10 @@
           "\nProperties that can be returned by HttpInterceptor.request to override the response."
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.IHttpResponseInterceptorOverrides",
-            "text": "IHttpResponseInterceptorOverrides"
-          },
+          "IHttpResponseInterceptorOverrides",
           "<TResponseBody>"
         ],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2149,7 +1813,7 @@
             "signature": [
               "Readonly<Response> | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2165,7 +1829,7 @@
             "signature": [
               "TResponseBody | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2181,7 +1845,7 @@
         "description": [
           "\nAPIs for creating hrefs to static assets.\n"
         ],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2197,7 +1861,7 @@
             "signature": [
               "(assetPath: string) => string"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2211,7 +1875,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/http/core-http-browser/src/types.ts",
+                "path": "src/core/packages/http/browser/src/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2229,7 +1893,7 @@
         "tags": [],
         "label": "ResponseErrorBody",
         "description": [],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2240,7 +1904,7 @@
             "tags": [],
             "label": "message",
             "description": [],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2251,7 +1915,7 @@
             "tags": [],
             "label": "statusCode",
             "description": [],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2265,7 +1929,7 @@
             "signature": [
               "Record<string, unknown> | undefined"
             ],
-            "path": "packages/core/http/core-http-browser/src/types.ts",
+            "path": "src/core/packages/http/browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2285,15 +1949,9 @@
           "\nSee {@link HttpSetup}"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          }
+          "HttpSetup"
         ],
-        "path": "packages/core/http/core-http-browser/src/types.ts",
+        "path": "src/core/packages/http/browser/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

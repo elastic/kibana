@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiTextColor, EuiPanel } from '@elastic/eui';
+import { EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   ProcessEventHost,
@@ -16,7 +16,6 @@ import type {
 import { DetailPanelAccordion } from '../detail_panel_accordion';
 import { DetailPanelCopy } from '../detail_panel_copy';
 import { DetailPanelListItem } from '../detail_panel_list_item';
-import { useStyles } from '../detail_panel_process_tab/styles';
 import { useStyles as useStylesChild } from './styles';
 import { getHostData, getContainerData, getOrchestratorData, getCloudData } from './helpers';
 
@@ -36,7 +35,6 @@ export const DetailPanelMetadataTab = ({
   processOrchestrator,
   processCloud,
 }: DetailPanelMetadataTabDeps) => {
-  const styles = useStyles();
   const stylesChild = useStylesChild();
   const hostData = useMemo(() => getHostData(processHost), [processHost]);
   const containerData = useMemo(() => getContainerData(processContainer), [processContainer]);
@@ -62,9 +60,7 @@ export const DetailPanelMetadataTab = ({
                 textToCopy={`host.id: "${hostData.id}"`}
                 tooltipContent={hostData.id}
               >
-                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {hostData.id}
-                </EuiTextColor>
+                {hostData.id}
               </DetailPanelCopy>
             ),
           },
@@ -75,9 +71,7 @@ export const DetailPanelMetadataTab = ({
                 textToCopy={`host.hostname: "${hostData.hostname}"`}
                 tooltipContent={hostData.hostname}
               >
-                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {hostData.hostname}
-                </EuiTextColor>
+                {hostData.hostname}
               </DetailPanelCopy>
             ),
           },
@@ -88,9 +82,7 @@ export const DetailPanelMetadataTab = ({
                 textToCopy={`host.ip: "${hostData.ip}"`}
                 tooltipContent={hostData.ip}
               >
-                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {hostData.ip}
-                </EuiTextColor>
+                {hostData.ip}
               </DetailPanelCopy>
             ),
           },
@@ -101,9 +93,7 @@ export const DetailPanelMetadataTab = ({
                 textToCopy={`host.mac: "${hostData.mac}"`}
                 tooltipContent={hostData.mac}
               >
-                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {hostData.mac}
-                </EuiTextColor>
+                {hostData.mac}
               </DetailPanelCopy>
             ),
           },
@@ -114,9 +104,7 @@ export const DetailPanelMetadataTab = ({
                 textToCopy={`host.name: "${hostData.name}"`}
                 tooltipContent={hostData.name}
               >
-                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {hostData.name}
-                </EuiTextColor>
+                {hostData.name}
               </DetailPanelCopy>
             ),
           },
@@ -143,9 +131,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`host.architecture: "${hostData.architecture}"`}
                     tooltipContent={hostData.architecture}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {hostData.architecture}
-                    </EuiTextColor>
+                    {hostData.architecture}
                   </DetailPanelCopy>
                 ),
               },
@@ -156,9 +142,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`host.os.family: "${hostData.os.family}"`}
                     tooltipContent={hostData.os.family}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {hostData.os.family}
-                    </EuiTextColor>
+                    {hostData.os.family}
                   </DetailPanelCopy>
                 ),
               },
@@ -169,9 +153,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`host.os.full: "${hostData.os.full}"`}
                     tooltipContent={hostData.os.full}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {hostData.os.full}
-                    </EuiTextColor>
+                    {hostData.os.full}
                   </DetailPanelCopy>
                 ),
               },
@@ -182,9 +164,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`host.os.kernel: "${hostData.os.kernel}"`}
                     tooltipContent={hostData.os.kernel}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {hostData.os.kernel}
-                    </EuiTextColor>
+                    {hostData.os.kernel}
                   </DetailPanelCopy>
                 ),
               },
@@ -195,9 +175,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`host.os.name: "${hostData.os.name}"`}
                     tooltipContent={hostData.os.name}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {hostData.os.name}
-                    </EuiTextColor>
+                    {hostData.os.name}
                   </DetailPanelCopy>
                 ),
               },
@@ -208,9 +186,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`host.os.platform: "${hostData.os.platform}"`}
                     tooltipContent={hostData.os.platform}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {hostData.os.platform}
-                    </EuiTextColor>
+                    {hostData.os.platform}
                   </DetailPanelCopy>
                 ),
               },
@@ -221,9 +197,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`host.os.version: "${hostData.os.version}"`}
                     tooltipContent={hostData.os.version}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {hostData.os.version}
-                    </EuiTextColor>
+                    {hostData.os.version}
                   </DetailPanelCopy>
                 ),
               },
@@ -247,9 +221,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`cloud.provider: "${cloudData.instance.name}"`}
                     tooltipContent={cloudData.instance.name}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {cloudData.instance.name}
-                    </EuiTextColor>
+                    {cloudData.instance.name}
                   </DetailPanelCopy>
                 ),
               },
@@ -260,9 +232,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`cloud.provider: "${cloudData.provider}"`}
                     tooltipContent={cloudData.provider}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {cloudData.provider}
-                    </EuiTextColor>
+                    {cloudData.provider}
                   </DetailPanelCopy>
                 ),
               },
@@ -273,9 +243,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`cloud.region: "${cloudData.region}"`}
                     tooltipContent={cloudData.region}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {cloudData.region}
-                    </EuiTextColor>
+                    {cloudData.region}
                   </DetailPanelCopy>
                 ),
               },
@@ -286,9 +254,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`cloud.account.id: "${cloudData.account.id}"`}
                     tooltipContent={cloudData.account.id}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {cloudData.account.id}
-                    </EuiTextColor>
+                    {cloudData.account.id}
                   </DetailPanelCopy>
                 ),
               },
@@ -299,9 +265,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`cloud.project.id: "${cloudData.project.id}"`}
                     tooltipContent={cloudData.project.id}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {cloudData.project.id}
-                    </EuiTextColor>
+                    {cloudData.project.id}
                   </DetailPanelCopy>
                 ),
               },
@@ -312,9 +276,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`cloud.project.name: "${cloudData.project.name}"`}
                     tooltipContent={cloudData.project.name}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {cloudData.project.name}
-                    </EuiTextColor>
+                    {cloudData.project.name}
                   </DetailPanelCopy>
                 ),
               },
@@ -337,9 +299,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`container.id: "${containerData.id}"`}
                     tooltipContent={containerData.id}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {containerData.id}
-                    </EuiTextColor>
+                    {containerData.id}
                   </DetailPanelCopy>
                 ),
               },
@@ -350,9 +310,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`container.name: "${containerData.name}"`}
                     tooltipContent={containerData.name}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {containerData.name}
-                    </EuiTextColor>
+                    {containerData.name}
                   </DetailPanelCopy>
                 ),
               },
@@ -363,9 +321,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`container.image.name: "${containerData.image.name}"`}
                     tooltipContent={containerData.image.name}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {containerData.image.name}
-                    </EuiTextColor>
+                    {containerData.image.name}
                   </DetailPanelCopy>
                 ),
               },
@@ -376,9 +332,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`container.image.tag: "${containerData.image.tag}"`}
                     tooltipContent={containerData.image.tag}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {containerData.image.tag}
-                    </EuiTextColor>
+                    {containerData.image.tag}
                   </DetailPanelCopy>
                 ),
               },
@@ -389,9 +343,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`container.image.hash.all: "${containerData.image.hash.all}"`}
                     tooltipContent={containerData.image.hash.all}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {containerData.image.hash.all}
-                    </EuiTextColor>
+                    {containerData.image.hash.all}
                   </DetailPanelCopy>
                 ),
               },
@@ -414,9 +366,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`orchestrator.resource.ip: "${orchestratorData.resource.ip}"`}
                     tooltipContent={orchestratorData.resource.ip}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {orchestratorData.resource.ip}
-                    </EuiTextColor>
+                    {orchestratorData.resource.ip}
                   </DetailPanelCopy>
                 ),
               },
@@ -427,9 +377,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`orchestrator.resource.name: "${orchestratorData.resource.name}"`}
                     tooltipContent={orchestratorData.resource.name}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {orchestratorData.resource.name}
-                    </EuiTextColor>
+                    {orchestratorData.resource.name}
                   </DetailPanelCopy>
                 ),
               },
@@ -440,9 +388,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`orchestrator.resource.type: "${orchestratorData.resource.type}"`}
                     tooltipContent={orchestratorData.resource.type}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {orchestratorData.resource.type}
-                    </EuiTextColor>
+                    {orchestratorData.resource.type}
                   </DetailPanelCopy>
                 ),
               },
@@ -453,9 +399,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`orchestrator.resource.parent.type: "${orchestratorData.resource.parent.type}"`}
                     tooltipContent={orchestratorData.resource.parent.type}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {orchestratorData.resource.parent.type}
-                    </EuiTextColor>
+                    {orchestratorData.resource.parent.type}
                   </DetailPanelCopy>
                 ),
               },
@@ -466,9 +410,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`orchestrator.namespace: "${orchestratorData.namespace}"`}
                     tooltipContent={orchestratorData.namespace}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {orchestratorData.namespace}
-                    </EuiTextColor>
+                    {orchestratorData.namespace}
                   </DetailPanelCopy>
                 ),
               },
@@ -479,9 +421,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`orchestrator.cluster.id: "${orchestratorData.cluster.id}"`}
                     tooltipContent={orchestratorData.cluster.id}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {orchestratorData.cluster.id}
-                    </EuiTextColor>
+                    {orchestratorData.cluster.id}
                   </DetailPanelCopy>
                 ),
               },
@@ -492,9 +432,7 @@ export const DetailPanelMetadataTab = ({
                     textToCopy={`orchestrator.cluster.name: "${orchestratorData.cluster.name}"`}
                     tooltipContent={orchestratorData.cluster.name}
                   >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {orchestratorData.cluster.name}
-                    </EuiTextColor>
+                    {orchestratorData.cluster.name}
                   </DetailPanelCopy>
                 ),
               },

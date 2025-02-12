@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { SubFeature } from '@kbn/actions-plugin/common';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
 import { EditConnectorTabs } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -29,9 +30,9 @@ import { hasExecuteActionsCapability } from '../../../lib/capabilities';
 
 const FlyoutHeaderComponent: React.FC<{
   isExperimental?: boolean;
+  subFeature?: SubFeature;
   isPreconfigured: boolean;
   connectorName: string;
-  connectorTypeId: string;
   connectorTypeDesc: string;
   selectedTab: EditConnectorTabs;
   setTab: (nextPage: EditConnectorTabs) => void;
@@ -39,9 +40,9 @@ const FlyoutHeaderComponent: React.FC<{
 }> = ({
   icon,
   isExperimental = false,
+  subFeature,
   isPreconfigured,
   connectorName,
-  connectorTypeId,
   connectorTypeDesc,
   selectedTab,
   setTab,
@@ -51,7 +52,7 @@ const FlyoutHeaderComponent: React.FC<{
   } = useKibana().services;
 
   const { euiTheme } = useEuiTheme();
-  const canExecute = hasExecuteActionsCapability(capabilities, connectorTypeId);
+  const canExecute = hasExecuteActionsCapability(capabilities, subFeature);
 
   const setConfigurationTab = useCallback(() => {
     setTab(EditConnectorTabs.Configuration);

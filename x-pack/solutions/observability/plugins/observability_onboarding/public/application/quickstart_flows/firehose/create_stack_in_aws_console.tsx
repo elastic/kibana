@@ -11,8 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import {
   FIREHOSE_CLOUDFORMATION_STACK_NAME,
-  FIREHOSE_LOGS_STREAM_NAME,
-  FIREHOSE_METRICS_STREAM_NAME,
+  FIREHOSE_STREAM_NAME,
 } from '../../../../common/aws_firehose';
 import { DownloadTemplateCallout } from './download_template_callout';
 import { buildCreateStackAWSConsoleURL } from './utils';
@@ -33,8 +32,7 @@ export function CreateStackInAWSConsole({
   const awsConsoleURL = buildCreateStackAWSConsoleURL({
     templateUrl,
     stackName: FIREHOSE_CLOUDFORMATION_STACK_NAME,
-    logsStreamName: FIREHOSE_LOGS_STREAM_NAME,
-    metricsStreamName: FIREHOSE_METRICS_STREAM_NAME,
+    streamName: FIREHOSE_STREAM_NAME,
     elasticsearchUrl,
     encodedApiKey,
   });

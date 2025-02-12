@@ -6,7 +6,7 @@
  */
 
 import type { InventoryItemType, InventoryMetric } from '@kbn/metrics-data-access-plugin/common';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { InfraMetadataRT } from '../../../../common/http_api/metadata_api';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/server';
-import { ApmPluginRequestHandlerContext } from '../typings';
+import type { CoreStart } from '@kbn/core/server';
+import type { ApmPluginRequestHandlerContext } from '../typings';
 
 export interface AgentKeysPrivilegesResponse {
   areApiKeysEnabled: boolean;

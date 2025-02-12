@@ -10,13 +10,14 @@
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import {
   QueryHistoryAction,
   getTableColumns,
   QueryColumn,
   HistoryAndStarredQueriesTabs,
 } from './history_starred_queries';
+import { of } from 'rxjs';
 
 jest.mock('../history_local_storage', () => {
   const module = jest.requireActual('../history_local_storage');
@@ -77,6 +78,7 @@ describe('Starred and History queries components', () => {
           field: 'queryString',
           name: 'Query',
           render: expect.anything(),
+          css: expect.anything(),
         },
         {
           'data-test-subj': 'timeRan',
@@ -119,6 +121,7 @@ describe('Starred and History queries components', () => {
           field: 'queryString',
           name: 'Query',
           render: expect.anything(),
+          css: expect.anything(),
         },
         {
           'data-test-subj': 'timeRan',
@@ -170,6 +173,7 @@ describe('Starred and History queries components', () => {
         field: 'queryString',
         name: 'Query',
         render: expect.anything(),
+        css: expect.anything(),
       },
       {
         actions: [],
@@ -218,6 +222,7 @@ describe('Starred and History queries components', () => {
     const services = {
       core: coreMock.createStart(),
     };
+
     it('should render two tabs', () => {
       render(
         <KibanaContextProvider services={services}>
@@ -270,6 +275,31 @@ describe('Starred and History queries components', () => {
       expect(screen.getByTestId('ESQLEditor-history-starred-queries-helpText')).toHaveTextContent(
         'Showing 0 queries (max 100)'
       );
+    });
+
+    it('should hide starred tab if starred service failed to initialize', async () => {
+      jest.spyOn(services.core.userProfile, 'getEnabled$').mockImplementation(() => of(false));
+
+      render(
+        <KibanaContextProvider services={services}>
+          <HistoryAndStarredQueriesTabs
+            containerCSS={{}}
+            containerWidth={1024}
+            onUpdateAndSubmit={jest.fn()}
+            height={200}
+          />
+        </KibanaContextProvider>
+      );
+
+      // initial render two tabs are shown
+      expect(screen.getByTestId('history-queries-tab')).toBeInTheDocument();
+      expect(screen.getByTestId('history-queries-tab')).toHaveTextContent('Recent');
+      expect(screen.getByTestId('starred-queries-tab')).toBeInTheDocument();
+      expect(screen.getByTestId('starred-queries-tab')).toHaveTextContent('Starred');
+
+      await waitFor(() => {
+        expect(screen.queryByText('starred-queries-tab')).not.toBeInTheDocument();
+      });
     });
   });
 });

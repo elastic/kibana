@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderProps, EuiTitle } from '@elastic/eui';
+import type { EuiPageHeaderProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
@@ -30,6 +31,7 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'dependencies'
     | 'errors-and-crashes'
     | 'service-map'
+    | 'logs'
     | 'alerts'
     | 'dashboards';
   hidden?: boolean;
@@ -199,6 +201,17 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
       label: i18n.translate('xpack.apm.mobileServiceDetails.serviceMapTabLabel', {
         defaultMessage: 'Service Map',
       }),
+    },
+    {
+      key: 'logs',
+      href: router.link('/mobile-services/{serviceName}/logs', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.home.serviceLogsTabLabel', {
+        defaultMessage: 'Logs',
+      }),
+      append: <TechnicalPreviewBadge icon="beaker" />,
     },
     {
       key: 'alerts',

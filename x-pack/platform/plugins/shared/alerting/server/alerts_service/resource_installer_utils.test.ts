@@ -36,14 +36,17 @@ describe('getIndexTemplateAndPattern', () => {
     expect(getIndexTemplateAndPattern({ context: 'test' })).toEqual({
       template: '.alerts-test.alerts-default-index-template',
       pattern: '.internal.alerts-test.alerts-default-*',
+      reindexedPattern: '.reindexed-v8-internal.alerts-test.alerts-default-*',
       basePattern: '.alerts-test.alerts-*',
       alias: '.alerts-test.alerts-default',
       validPrefixes: [
         '.ds-.alerts-',
-        '.internal.alerts-',
         '.alerts-',
-        '.internal.preview.alerts-',
+        '.internal.alerts-',
+        '.reindexed-v8-internal.alerts-',
         '.preview.alerts-',
+        '.internal.preview.alerts-',
+        '.reindexed-v8-internal.preview.alerts-',
       ],
       name: '.internal.alerts-test.alerts-default-000001',
     });
@@ -53,14 +56,17 @@ describe('getIndexTemplateAndPattern', () => {
     expect(getIndexTemplateAndPattern({ context: 'test', namespace: 'special' })).toEqual({
       template: '.alerts-test.alerts-special-index-template',
       pattern: '.internal.alerts-test.alerts-special-*',
+      reindexedPattern: '.reindexed-v8-internal.alerts-test.alerts-special-*',
       basePattern: '.alerts-test.alerts-*',
       alias: '.alerts-test.alerts-special',
       validPrefixes: [
         '.ds-.alerts-',
-        '.internal.alerts-',
         '.alerts-',
-        '.internal.preview.alerts-',
+        '.internal.alerts-',
+        '.reindexed-v8-internal.alerts-',
         '.preview.alerts-',
+        '.internal.preview.alerts-',
+        '.reindexed-v8-internal.preview.alerts-',
       ],
       name: '.internal.alerts-test.alerts-special-000001',
     });
@@ -76,15 +82,18 @@ describe('getIndexTemplateAndPattern', () => {
     ).toEqual({
       template: '.alerts-test.alerts-special-index-template',
       pattern: '.internal.alerts-test.alerts-special-*',
+      reindexedPattern: '.reindexed-v8-internal.alerts-test.alerts-special-*',
       basePattern: '.alerts-test.alerts-*',
       alias: '.alerts-test.alerts-special',
       name: '.internal.alerts-test.alerts-special-000001',
       validPrefixes: [
         '.ds-.alerts-',
-        '.internal.alerts-',
         '.alerts-',
-        '.internal.preview.alerts-',
+        '.internal.alerts-',
+        '.reindexed-v8-internal.alerts-',
         '.preview.alerts-',
+        '.internal.preview.alerts-',
+        '.reindexed-v8-internal.preview.alerts-',
       ],
       secondaryAlias: `siem.signals-special`,
     });

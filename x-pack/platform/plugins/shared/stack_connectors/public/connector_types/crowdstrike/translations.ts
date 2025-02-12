@@ -43,3 +43,24 @@ export const INVALID_ACTION = i18n.translate(
     defaultMessage: 'Invalid action name.',
   }
 );
+
+export const ACTION_TYPE_LABEL = i18n.translate(
+  'xpack.stackConnectors.security.crowdstrike.params.actionTypeFieldLabel',
+  {
+    defaultMessage: 'Action type',
+  }
+);
+
+export const GET_AGENT_DETAILS_ACTION_LABEL = i18n.translate(
+  'xpack.stackConnectors.security.crowdstrike.params.getAgentDetailsActionLabel',
+  {
+    defaultMessage: 'Get agent details',
+  }
+);
+
+export const AGENT_IDS_LABEL = i18n.translate(
+  'xpack.stackConnectors.security.crowdstrike.params.agentIdsLabel',
+  {
+    defaultMessage: 'Agent IDs',
+  }
+);

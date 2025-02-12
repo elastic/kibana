@@ -14,6 +14,7 @@ import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 import { TestProviders } from '../../common/mock';
 import { DataQuality } from './data_quality';
 import { useKibana } from '../../common/lib/kibana';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 const mockedUseKibana = mockUseKibana();
 
@@ -104,11 +105,13 @@ describe('DataQuality', () => {
   describe('when indices exist, and loading is complete', () => {
     beforeEach(async () => {
       render(
-        <TestProviders>
-          <MemoryRouter>
-            <DataQuality />
-          </MemoryRouter>
-        </TestProviders>
+        <KibanaRenderContextProvider {...mockedUseKibana.services}>
+          <TestProviders>
+            <MemoryRouter>
+              <DataQuality />
+            </MemoryRouter>
+          </TestProviders>
+        </KibanaRenderContextProvider>
       );
 
       await waitFor(() => {});
@@ -136,11 +139,13 @@ describe('DataQuality', () => {
       mockUseSourcererDataView.mockReturnValue({ ...defaultUseSourcererReturn, loading: true });
 
       render(
-        <TestProviders>
-          <MemoryRouter>
-            <DataQuality />
-          </MemoryRouter>
-        </TestProviders>
+        <KibanaRenderContextProvider {...mockedUseKibana.services}>
+          <TestProviders>
+            <MemoryRouter>
+              <DataQuality />
+            </MemoryRouter>
+          </TestProviders>
+        </KibanaRenderContextProvider>
       );
 
       await waitFor(() => {});
@@ -168,11 +173,13 @@ describe('DataQuality', () => {
       mockUseSignalIndex.mockReturnValue({ ...defaultUseSignalIndexReturn, loading: true });
 
       render(
-        <TestProviders>
-          <MemoryRouter>
-            <DataQuality />
-          </MemoryRouter>
-        </TestProviders>
+        <KibanaRenderContextProvider {...mockedUseKibana.services}>
+          <TestProviders>
+            <MemoryRouter>
+              <DataQuality />
+            </MemoryRouter>
+          </TestProviders>
+        </KibanaRenderContextProvider>
       );
 
       await waitFor(() => {});
@@ -205,11 +212,13 @@ describe('DataQuality', () => {
       mockUseSignalIndex.mockReturnValue({ ...defaultUseSignalIndexReturn, loading: false });
 
       render(
-        <TestProviders>
-          <MemoryRouter>
-            <DataQuality />
-          </MemoryRouter>
-        </TestProviders>
+        <KibanaRenderContextProvider {...mockedUseKibana.services}>
+          <TestProviders>
+            <MemoryRouter>
+              <DataQuality />
+            </MemoryRouter>
+          </TestProviders>
+        </KibanaRenderContextProvider>
       );
 
       await waitFor(() => {});
@@ -242,11 +251,13 @@ describe('DataQuality', () => {
       mockUseSignalIndex.mockReturnValue({ ...defaultUseSignalIndexReturn, loading: false });
 
       render(
-        <TestProviders>
-          <MemoryRouter>
-            <DataQuality />
-          </MemoryRouter>
-        </TestProviders>
+        <KibanaRenderContextProvider {...mockedUseKibana.services}>
+          <TestProviders>
+            <MemoryRouter>
+              <DataQuality />
+            </MemoryRouter>
+          </TestProviders>
+        </KibanaRenderContextProvider>
       );
 
       await waitFor(() => {});
@@ -279,11 +290,13 @@ describe('DataQuality', () => {
       mockUseSignalIndex.mockReturnValue({ ...defaultUseSignalIndexReturn, loading: true });
 
       render(
-        <TestProviders>
-          <MemoryRouter>
-            <DataQuality />
-          </MemoryRouter>
-        </TestProviders>
+        <KibanaRenderContextProvider {...mockedUseKibana.services}>
+          <TestProviders>
+            <MemoryRouter>
+              <DataQuality />
+            </MemoryRouter>
+          </TestProviders>
+        </KibanaRenderContextProvider>
       );
 
       await waitFor(() => {});
@@ -335,11 +348,13 @@ describe('DataQuality', () => {
       });
 
       render(
-        <TestProviders>
-          <MemoryRouter>
-            <DataQuality />
-          </MemoryRouter>
-        </TestProviders>
+        <KibanaRenderContextProvider {...mockedUseKibana.services}>
+          <TestProviders>
+            <MemoryRouter>
+              <DataQuality />
+            </MemoryRouter>
+          </TestProviders>
+        </KibanaRenderContextProvider>
       );
 
       await waitFor(() => {});

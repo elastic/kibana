@@ -147,25 +147,37 @@ describe('autocomplete.suggest', () => {
         '| ',
         ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
           'double',
+          'long',
         ]),
+        'IN $0',
+        'IS NOT NULL',
+        'IS NULL',
       ]);
       await assertSuggestions(
         'from a | eval a=round(doubleField, /',
         [
-          ...getFieldNamesByType('integer'),
-          ...getFunctionSignaturesByReturnType('eval', 'integer', { scalar: true }, undefined, [
-            'round',
-          ]),
+          ...getFieldNamesByType(['integer', 'long']),
+          ...getFunctionSignaturesByReturnType(
+            'eval',
+            ['integer', 'long'],
+            { scalar: true },
+            undefined,
+            ['round']
+          ),
         ],
         { triggerCharacter: '(' }
       );
       await assertSuggestions(
         'from a | eval round(doubleField, /',
         [
-          ...getFieldNamesByType('integer'),
-          ...getFunctionSignaturesByReturnType('eval', 'integer', { scalar: true }, undefined, [
-            'round',
-          ]),
+          ...getFieldNamesByType(['integer', 'long']),
+          ...getFunctionSignaturesByReturnType(
+            'eval',
+            ['integer', 'long'],
+            { scalar: true },
+            undefined,
+            ['round']
+          ),
         ],
         { triggerCharacter: '(' }
       );
@@ -372,9 +384,16 @@ describe('autocomplete.suggest', () => {
         // skip this fn for the moment as it's quite hard to test
         // Add match in the test when the autocomplete is ready https://github.com/elastic/kibana/issues/196995
         if (
-          !['bucket', 'date_extract', 'date_diff', 'case', 'match', 'qstr', 'date_trunc'].includes(
-            fn.name
-          )
+          ![
+            'bucket',
+            'date_extract',
+            'date_diff',
+            'case',
+            'match',
+            'qstr',
+            'kql',
+            'date_trunc',
+          ].includes(fn.name)
         ) {
           test(`${fn.name}`, async () => {
             const testedCases = new Set<string>();

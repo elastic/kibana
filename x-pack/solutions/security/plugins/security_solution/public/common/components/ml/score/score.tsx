@@ -13,7 +13,7 @@ import {
 } from '../../cell_actions';
 import type { Anomaly } from '../types';
 import { Spacer } from '../../page';
-import { getScoreString } from './score_health';
+import { getScoreString } from './get_score_string';
 
 export const ScoreComponent = ({
   index = 0,

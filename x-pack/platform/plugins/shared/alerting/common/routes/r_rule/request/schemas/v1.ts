@@ -6,15 +6,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { validateTimezone } from '../../../rule/validation/validate_timezone/v1';
 import {
   validateStartDateV1,
   validateEndDateV1,
-  createValidateRecurrenceByV1,
+  validateRecurrenceByWeekdayV1,
 } from '../../validation';
 
 export const rRuleRequestSchema = schema.object({
   dtstart: schema.string({ validate: validateStartDateV1 }),
-  tzid: schema.string(),
+  tzid: schema.string({ validate: validateTimezone }),
   freq: schema.maybe(
     schema.oneOf([schema.literal(0), schema.literal(1), schema.literal(2), schema.literal(3)])
   ),
@@ -41,17 +42,10 @@ export const rRuleRequestSchema = schema.object({
   ),
   byweekday: schema.maybe(
     schema.arrayOf(schema.string(), {
-      validate: createValidateRecurrenceByV1('byweekday'),
+      minSize: 1,
+      validate: validateRecurrenceByWeekdayV1,
     })
   ),
-  bymonthday: schema.maybe(
-    schema.arrayOf(schema.number(), {
-      validate: createValidateRecurrenceByV1('bymonthday'),
-    })
-  ),
-  bymonth: schema.maybe(
-    schema.arrayOf(schema.number(), {
-      validate: createValidateRecurrenceByV1('bymonth'),
-    })
-  ),
+  bymonthday: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 31 }), { minSize: 1 })),
+  bymonth: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 12 }), { minSize: 1 })),
 });

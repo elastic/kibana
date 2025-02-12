@@ -78,49 +78,30 @@ describe('getValueForSelectedField', () => {
     expect(getValueForSelectedField(hit, 'bla.sources')).toBe('');
   });
 
-  test('should return when its a chunked passage', () => {
+  test('should return when it has highlighted messages', () => {
     const hit = {
-      _index: 'sample-index',
+      _index: 'books',
       _id: '8jSNY48B6iHEi98DL1C-',
       _score: 0.7789394,
       _source: {
-        test: 'The Shawshank Redemption',
+        test: 'The Big Bang and Black Holes',
         metadata: {
           source:
-            'Over the course of several years, two convicts form a friendship, seeking consolation and, eventually, redemption through basic compassion',
+            'This book explores the origins of the universe, beginning with the Big Bang—an immense explosion that created space, time, and matter. It delves into how black holes, regions of space where gravity is so strong that not even light can escape, play a crucial role in the evolution of galaxies and the universe as a whole. Stephen Hawking’s groundbreaking discoveries about black hole radiation, often referred to as Hawking Radiation, are also discussed in detail.',
         },
       },
-      inner_hits: {
-        'sample-index.test': {
-          hits: {
-            hits: [
-              {
-                _source: {
-                  text: 'Over the course of several years',
-                },
-              },
-              {
-                _source: {
-                  text: 'two convicts form a friendship',
-                },
-              },
-              {
-                _source: {
-                  text: 'seeking consolation and, eventually, redemption through basic compassion',
-                },
-              },
-            ],
-          },
-        },
+      highlight: {
+        test: [
+          'This book explores the origins of the universe.',
+          'The beginning with the Big Bang—an immense explosion that created space, time, and matter. It delves into how black holes, regions of space where gravity is so strong that not even light can escape, play a crucial role in the evolution of galaxies and the universe as a whole. Stephen Hawking’s groundbreaking discoveries about black hole radiation, often referred to as Hawking Radiation, are also discussed in detail.',
+        ],
       },
     };
 
     expect(getValueForSelectedField(hit as any, 'test')).toMatchInlineSnapshot(`
-      "Over the course of several years
+      "This book explores the origins of the universe.
        --- 
-      two convicts form a friendship
-       --- 
-      seeking consolation and, eventually, redemption through basic compassion"
+      The beginning with the Big Bang—an immense explosion that created space, time, and matter. It delves into how black holes, regions of space where gravity is so strong that not even light can escape, play a crucial role in the evolution of galaxies and the universe as a whole. Stephen Hawking’s groundbreaking discoveries about black hole radiation, often referred to as Hawking Radiation, are also discussed in detail."
     `);
   });
 

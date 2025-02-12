@@ -65,6 +65,11 @@ const testProps = {
     },
   ],
   title: 'Group alerts by',
+  euiTheme: {
+    border: {
+      thin: '1px solid #E3E8F2',
+    },
+  },
 };
 describe('group selector', () => {
   beforeEach(() => {

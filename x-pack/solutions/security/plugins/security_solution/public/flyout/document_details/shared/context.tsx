@@ -67,6 +67,14 @@ export interface DocumentDetailsContext {
    * Boolean to indicate whether it is a preview panel
    */
   isPreviewMode: boolean;
+  /**
+   * To allow communication between the SessionView in the left panel and its preview panels
+   */
+  jumpToEntityId?: string;
+  /**
+   * To allow communication between the SessionView in the left panel and its preview panels
+   */
+  jumpToCursor?: string;
 }
 
 /**
@@ -82,7 +90,15 @@ export type DocumentDetailsProviderProps = {
 } & Partial<DocumentDetailsProps['params']>;
 
 export const DocumentDetailsProvider = memo(
-  ({ id, indexName, scopeId, isPreviewMode, children }: DocumentDetailsProviderProps) => {
+  ({
+    id,
+    indexName,
+    scopeId,
+    jumpToEntityId,
+    jumpToCursor,
+    isPreviewMode,
+    children,
+  }: DocumentDetailsProviderProps) => {
     const {
       browserFields,
       dataAsNestedObject,
@@ -117,20 +133,24 @@ export const DocumentDetailsProvider = memo(
               getFieldsData,
               isPreview: scopeId === TableId.rulePreview,
               isPreviewMode: Boolean(isPreviewMode),
+              jumpToEntityId,
+              jumpToCursor,
             }
           : undefined,
       [
         id,
-        maybeRule,
         indexName,
         scopeId,
-        browserFields,
         dataAsNestedObject,
         dataFormattedForFieldBrowser,
         searchHit,
+        browserFields,
+        maybeRule?.investigation_fields?.field_names,
         refetchFlyoutData,
         getFieldsData,
         isPreviewMode,
+        jumpToEntityId,
+        jumpToCursor,
       ]
     );
 

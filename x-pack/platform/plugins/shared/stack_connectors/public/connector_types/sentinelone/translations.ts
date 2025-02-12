@@ -73,6 +73,13 @@ export const RELEASE_AGENT_ACTION_LABEL = i18n.translate(
   }
 );
 
+export const GET_AGENT_ACTION_LABEL = i18n.translate(
+  'xpack.stackConnectors.security.sentinelone.params.getAgentActionLabel',
+  {
+    defaultMessage: 'Get agent details',
+  }
+);
+
 export const AGENTS_FIELD_LABEL = i18n.translate(
   'xpack.stackConnectors.security.sentinelone.params.agentsFieldLabel',
   {
@@ -90,7 +97,7 @@ export const AGENTS_FIELD_PLACEHOLDER = i18n.translate(
 export const ACTION_TYPE_LABEL = i18n.translate(
   'xpack.stackConnectors.security.sentinelone.params.actionTypeFieldLabel',
   {
-    defaultMessage: 'Action Type',
+    defaultMessage: 'Action type',
   }
 );
 

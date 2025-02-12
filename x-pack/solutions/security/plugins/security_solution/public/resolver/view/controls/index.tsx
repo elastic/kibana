@@ -22,7 +22,6 @@ import {
   userSetPositionOfCamera,
 } from '../../store/camera/action';
 import type { State } from '../../../common/store/types';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { SourcererButton } from './sourcerer_selection';
 import { DateSelectionButton } from './date_picker';
 import { StyledGraphControls, StyledGraphControlsColumn, StyledEuiRange } from './styles';
@@ -61,9 +60,6 @@ export const GraphControls = React.memo(
       selectors.scalingFactor(state.analyzer[id])
     );
     const { timestamp } = useContext(SideEffectContext);
-    const isDatePickerAndSourcererDisabled = useIsExperimentalFeatureEnabled(
-      'analyzerDatePickersAndSourcererDisabled'
-    );
     const [activePopover, setPopover] = useState<PopoverType>(null);
     const colorMap = useColors();
 
@@ -143,22 +139,18 @@ export const GraphControls = React.memo(
             isOpen={activePopover === 'nodeLegend'}
             setActivePopover={setActivePopover}
           />
-          {!isDatePickerAndSourcererDisabled ? (
-            <>
-              <SourcererButton
-                id={id}
-                closePopover={closePopover}
-                isOpen={activePopover === 'sourcererSelection'}
-                setActivePopover={setActivePopover}
-              />
-              <DateSelectionButton
-                id={id}
-                closePopover={closePopover}
-                isOpen={activePopover === 'datePicker'}
-                setActivePopover={setActivePopover}
-              />
-            </>
-          ) : null}
+          <SourcererButton
+            id={id}
+            closePopover={closePopover}
+            isOpen={activePopover === 'sourcererSelection'}
+            setActivePopover={setActivePopover}
+          />
+          <DateSelectionButton
+            id={id}
+            closePopover={closePopover}
+            isOpen={activePopover === 'datePicker'}
+            setActivePopover={setActivePopover}
+          />
           {isSplitPanel && showPanelOnClick && (
             <ShowPanelButton showPanelOnClick={showPanelOnClick} />
           )}

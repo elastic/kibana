@@ -9,14 +9,15 @@ import { EuiFlexGroup, EuiFlexItem, EuiIconTip, RIGHT_ALIGNMENT } from '@elastic
 import { i18n } from '@kbn/i18n';
 import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
 import { ListMetric } from '../list_metric';
-import { ITableColumn } from '../managed_table';
-import { FETCH_STATUS, isPending } from '../../../hooks/use_fetcher';
+import type { ITableColumn } from '../managed_table';
+import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { isPending } from '../../../hooks/use_fetcher';
 import {
   asMillisecondDuration,
   asPercent,
   asTransactionRate,
 } from '../../../../common/utils/formatters';
-import { Coordinate } from '../../../../typings/timeseries';
+import type { Coordinate } from '../../../../typings/timeseries';
 import { ImpactBar } from '../impact_bar';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
 

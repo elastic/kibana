@@ -18,13 +18,12 @@ import {
   timeFormatter,
   Tooltip,
 } from '@elastic/charts';
+import type { EuiAccordionProps, EuiFlexGroupProps } from '@elastic/eui';
 import {
   EuiAccordion,
-  EuiAccordionProps,
   EuiBadge,
   EuiButton,
   EuiFlexGroup,
-  EuiFlexGroupProps,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
@@ -39,7 +38,8 @@ import { i18n } from '@kbn/i18n';
 import type { StackFrameMetadata } from '@kbn/profiling-utils';
 import { groupBy } from 'lodash';
 import React, { Fragment, useMemo, useState } from 'react';
-import { CountPerTime, OTHER_BUCKET_LABEL, TopNSample } from '../../common/topn';
+import type { CountPerTime, TopNSample } from '../../common/topn';
+import { OTHER_BUCKET_LABEL } from '../../common/topn';
 import { useKibanaTimeZoneSetting } from '../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../hooks/use_profiling_charts_theme';
 import { asNumber } from '../utils/formatters/as_number';

@@ -5,11 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import { Chart, Datum, Partition, PartitionLayout } from '@elastic/charts';
+import type { Datum } from '@elastic/charts';
+import { Chart, Partition, PartitionLayout } from '@elastic/charts';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { percentValueGetter } from '@elastic/charts/dist/chart_types/partition_chart/layout/config';
 import { isEmpty } from 'lodash';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { ChartContainer } from '../chart_container';
 
 type DataType = Array<{

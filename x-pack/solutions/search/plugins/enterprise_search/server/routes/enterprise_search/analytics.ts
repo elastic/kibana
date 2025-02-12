@@ -19,7 +19,7 @@ import { analyticsEventsExist } from '../../lib/analytics/analytics_events_exist
 import { createApiKey } from '../../lib/analytics/create_api_key';
 import { deleteAnalyticsCollectionById } from '../../lib/analytics/delete_analytics_collection';
 import { fetchAnalyticsCollections } from '../../lib/analytics/fetch_analytics_collection';
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../types';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 

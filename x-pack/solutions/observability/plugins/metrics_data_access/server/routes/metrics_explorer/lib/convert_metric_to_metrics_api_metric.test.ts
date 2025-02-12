@@ -6,7 +6,7 @@
  */
 
 import { convertMetricToMetricsAPIMetric } from './convert_metric_to_metrics_api_metric';
-import {
+import type {
   MetricsExplorerMetric,
   MetricsAPIMetric,
   MetricsExplorerAggregation,

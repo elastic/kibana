@@ -16,7 +16,9 @@
       "dataViews",
       "unifiedSearch",
       "share",
-      "navigation"
+      "savedObjectsTagging",
+      "navigation",
+      "fieldsMetadata",
     ],
     "requiredBundles": [
       "kibanaReact"

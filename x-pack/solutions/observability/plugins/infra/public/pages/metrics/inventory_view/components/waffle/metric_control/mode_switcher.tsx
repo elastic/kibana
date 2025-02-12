@@ -17,8 +17,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SNAPSHOT_API_MAX_METRICS } from '../../../../../../../common/constants';
-import { CustomMetricMode } from './types';
-import { SnapshotCustomMetricInput } from '../../../../../../../common/http_api/snapshot_api';
+import type { CustomMetricMode } from './types';
+import type { SnapshotCustomMetricInput } from '../../../../../../../common/http_api/snapshot_api';
 
 interface Props {
   onEdit: () => void;

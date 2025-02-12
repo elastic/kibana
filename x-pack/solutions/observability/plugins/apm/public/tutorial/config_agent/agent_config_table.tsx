@@ -8,7 +8,8 @@
 import React from 'react';
 import type { ValuesType } from 'utility-types';
 import { get } from 'lodash';
-import { EuiBasicTable, EuiText, EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 export function AgentConfigurationTable({

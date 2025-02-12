@@ -9,11 +9,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiSuperDatePicker, EuiText } from '@elastic
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import {
+import type {
   MetricsExplorerMetric,
   MetricsExplorerAggregation,
 } from '../../../../../common/http_api/metrics_explorer';
-import {
+import type {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
   MetricsExplorerChartOptions,

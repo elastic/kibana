@@ -8,7 +8,8 @@
 import type { CoreStart } from '@kbn/core/public';
 import type { Meta, Story } from '@storybook/react';
 import { noop } from 'lodash';
-import React, { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
+import React from 'react';
 import type { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginStorybook } from '../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { mockApmApiCallResponse } from '../../../services/rest/call_apm_api_spy';

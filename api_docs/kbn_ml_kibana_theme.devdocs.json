@@ -32,13 +32,7 @@
         ],
         "signature": [
           "(theme: ",
-          {
-            "pluginId": "@kbn/core-theme-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-public.ThemeServiceSetup",
-            "text": "ThemeServiceSetup"
-          },
+          "ThemeServiceSetup",
           ") => boolean"
         ],
         "path": "x-pack/platform/packages/private/ml/kibana_theme/src/hooks.ts",
@@ -53,13 +47,7 @@
             "label": "theme",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              }
+              "ThemeServiceSetup"
             ],
             "path": "x-pack/platform/packages/private/ml/kibana_theme/src/hooks.ts",
             "deprecated": false,

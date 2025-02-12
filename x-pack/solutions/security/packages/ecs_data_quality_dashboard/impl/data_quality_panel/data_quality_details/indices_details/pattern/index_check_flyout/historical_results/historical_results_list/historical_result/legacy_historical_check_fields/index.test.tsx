@@ -113,7 +113,7 @@ describe('LegacyHistoricalCheckFields', () => {
             <TestExternalProviders>
               <EuiMarkdownFormat>{tablesMarkdown}</EuiMarkdownFormat>
             </TestExternalProviders>
-          ).container.innerHTML
+          ).container.children[0].innerHTML
         );
 
         expect(screen.getByTestId('incompatibleTablesMarkdown')).toBeInTheDocument();

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Meta, Story } from '@storybook/react';
+import type { Meta, Story } from '@storybook/react';
 import React, { useState } from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { RuntimeAttachment } from '.';
 import { JavaRuntimeAttachment } from './supported_agents/java_runtime_attachment';

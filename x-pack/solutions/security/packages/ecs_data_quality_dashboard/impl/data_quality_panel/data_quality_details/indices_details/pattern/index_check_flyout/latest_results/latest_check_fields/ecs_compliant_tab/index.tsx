@@ -9,7 +9,7 @@ import { EcsVersion } from '@elastic/ecs';
 
 import { EuiCallOut, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import { CompareFieldsTable } from '../../../compare_fields_table';
 import { EmptyPromptBody } from '../../../empty_prompt_body';
@@ -17,7 +17,7 @@ import { EmptyPromptTitle } from '../../../empty_prompt_title';
 import type { EcsCompliantFieldMetadata } from '../../../../../../../types';
 import { isTimestampFieldMissing } from '../utils/is_timestamp_field_missing';
 import { getEcsCompliantTableColumns } from './utils/get_ecs_compliant_table_columns';
-import { CalloutItem } from '../../../styles';
+import { calloutItemCss } from '../../../styles';
 import {
   CUSTOM_DETECTION_ENGINE_RULES_WORK,
   ECS_COMPLIANT_CALLOUT,
@@ -30,9 +30,11 @@ import {
   PRE_BUILT_DETECTION_ENGINE_RULES_WORK,
 } from '../../../translations';
 
-const EmptyPromptContainer = styled.div`
-  width: 100%;
-`;
+const styles = {
+  emptyPromptContainer: css({
+    width: '100%',
+  }),
+};
 
 interface Props {
   indexName: string;
@@ -54,11 +56,11 @@ const EcsCompliantTabComponent: React.FC<Props> = ({ indexName, ecsCompliantFiel
                 version: EcsVersion,
               })}
             </p>
-            <CalloutItem>{PRE_BUILT_DETECTION_ENGINE_RULES_WORK}</CalloutItem>
-            <CalloutItem>{CUSTOM_DETECTION_ENGINE_RULES_WORK}</CalloutItem>
-            <CalloutItem>{PAGES_DISPLAY_EVENTS}</CalloutItem>
-            <CalloutItem>{OTHER_APP_CAPABILITIES_WORK_PROPERLY}</CalloutItem>
-            <CalloutItem>{ECS_COMPLIANT_MAPPINGS_ARE_FULLY_SUPPORTED}</CalloutItem>
+            <div css={calloutItemCss}>{PRE_BUILT_DETECTION_ENGINE_RULES_WORK}</div>
+            <div css={calloutItemCss}>{CUSTOM_DETECTION_ENGINE_RULES_WORK}</div>
+            <div css={calloutItemCss}>{PAGES_DISPLAY_EVENTS}</div>
+            <div css={calloutItemCss}>{OTHER_APP_CAPABILITIES_WORK_PROPERLY}</div>
+            <div css={calloutItemCss}>{ECS_COMPLIANT_MAPPINGS_ARE_FULLY_SUPPORTED}</div>
           </EuiCallOut>
           <EuiSpacer />
           <CompareFieldsTable
@@ -68,7 +70,7 @@ const EcsCompliantTabComponent: React.FC<Props> = ({ indexName, ecsCompliantFiel
           />
         </>
       ) : (
-        <EmptyPromptContainer>
+        <div css={styles.emptyPromptContainer}>
           <EuiEmptyPrompt
             body={emptyPromptBody}
             iconType="cross"
@@ -76,7 +78,7 @@ const EcsCompliantTabComponent: React.FC<Props> = ({ indexName, ecsCompliantFiel
             title={title}
             titleSize="s"
           />
-        </EmptyPromptContainer>
+        </div>
       )}
     </div>
   );

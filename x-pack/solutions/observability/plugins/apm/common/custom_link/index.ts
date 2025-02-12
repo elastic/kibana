@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 import Mustache from 'mustache';
-import { Transaction } from '../../typings/es_schemas/ui/transaction';
+import type { Transaction } from '../../typings/es_schemas/ui/transaction';
 
 export const INVALID_LICENSE = i18n.translate('xpack.apm.settings.customLink.license.text', {
   defaultMessage:

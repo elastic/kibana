@@ -59,7 +59,7 @@ const EVENT_TYPES: Record<string, ArrayElement<EcsEvent['type']>> = {
 };
 
 /**
- * These values need to match the respective values in this file: x-pack/packages/security/authorization_core/src/privileges/feature_privilege_builder/cases.ts
+ * These values need to match the respective values in this file: x-pack/platform/packages/private/security/authorization_core/src/privileges/feature_privilege_builder/cases.ts
  * These are shared between find, get, get all, and delete/delete all
  * There currently isn't a use case for a user to delete one comment but not all or differentiating between get, get all,
  * and find operations from a privilege stand point.
@@ -186,6 +186,14 @@ const CaseOperations = {
     ecsType: EVENT_TYPES.change,
     name: WriteOperations.ReopenCase as const,
     action: 'case_reopen',
+    verbs: updateVerbs,
+    docType: 'case',
+    savedObjectType: CASE_SAVED_OBJECT,
+  },
+  [WriteOperations.AssignCase]: {
+    ecsType: EVENT_TYPES.change,
+    name: WriteOperations.AssignCase as const,
+    action: 'cases_assign',
     verbs: updateVerbs,
     docType: 'case',
     savedObjectType: CASE_SAVED_OBJECT,

@@ -8,13 +8,10 @@
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType, type TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ApmDataAccessServicesWrapper } from '../../../../lib/helpers/get_apm_data_access_client';
-import {
-  EVENT_MODULE,
-  METRICSET_MODULE,
-  SYSTEM_INTEGRATION,
-} from '../../../../../common/constants';
+import type { SYSTEM_INTEGRATION } from '../../../../../common/constants';
+import { EVENT_MODULE, METRICSET_MODULE } from '../../../../../common/constants';
 import type { InfraAssetMetricType } from '../../../../../common/http_api/infra';
 
 export const getFilterByIntegration = (integration: typeof SYSTEM_INTEGRATION) => {

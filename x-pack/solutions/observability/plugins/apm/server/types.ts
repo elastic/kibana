@@ -23,14 +23,14 @@ import type { ActionsPlugin } from '@kbn/actions-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
-import { HomeServerPluginSetup, HomeServerPluginStart } from '@kbn/home-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { HomeServerPluginSetup, HomeServerPluginStart } from '@kbn/home-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
-import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
-import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import {
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
+import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
   FleetSetupContract as FleetPluginSetup,
   FleetStartContract as FleetPluginStart,
 } from '@kbn/fleet-plugin/server';
@@ -60,7 +60,7 @@ import type {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
-import { APMConfig } from '.';
+import type { APMConfig } from '.';
 
 export interface APMPluginSetup {
   config$: Observable<APMConfig>;

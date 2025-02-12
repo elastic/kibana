@@ -7,27 +7,27 @@
 /* Error Rate */
 
 import React from 'react';
+import type { RecursivePartial } from '@elastic/eui';
 import {
   EuiFlexItem,
   EuiPanel,
   EuiFlexGroup,
   EuiTitle,
   EuiIconTip,
-  RecursivePartial,
   useEuiTheme,
   transparentize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { BoolQuery } from '@kbn/es-query';
+import type { BoolQuery } from '@kbn/es-query';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { Theme } from '@elastic/charts';
+import type { Theme } from '@elastic/charts';
 import { AlertActiveTimeRangeAnnotation, AlertAnnotation } from '@kbn/observability-alert-details';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CHART_SETTINGS, DEFAULT_DATE_FORMAT } from './constants';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { ChartType } from '../../../shared/charts/helper/get_timeseries_color';
 import * as get_timeseries_color from '../../../shared/charts/helper/get_timeseries_color';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import { yLabelFormat } from './helpers';

@@ -9,7 +9,7 @@ import { EuiToolTip, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import styled from '@emotion/styled';
 import { asDuration } from '../../../../../../common/utils/formatters';
-import { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
+import type { AgentMark } from '../../../../app/transaction_details/waterfall_with_summary/waterfall_container/marks/get_agent_marks';
 import { Legend } from '../legend';
 
 const NameContainer = styled.div`

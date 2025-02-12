@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
-import { APMRouteHandlerResources } from '../../../../routes/apm_routes/register_apm_server_routes';
+import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import type { APMRouteHandlerResources } from '../../../../routes/apm_routes/register_apm_server_routes';
 
 type InfraMetricsSearchParams = Omit<ESSearchRequest, 'index'> & {
   size: number;

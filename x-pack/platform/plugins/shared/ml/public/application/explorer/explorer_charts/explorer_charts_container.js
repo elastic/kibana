@@ -45,6 +45,7 @@ import { EmbeddedMapComponentWrapper } from './explorer_chart_embedded_map';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { BarSeries, Chart, Settings, LEGACY_LIGHT_THEME } from '@elastic/charts';
 import { escapeKueryForFieldValuePair } from '../../util/string_utils';
+import { useCssMlExplorerChartContainer } from './explorer_chart_styles';
 
 const textTooManyBuckets = i18n.translate('xpack.ml.explorer.charts.tooManyBucketsDescription', {
   defaultMessage:
@@ -239,7 +240,7 @@ function ExplorerChartContainer({
       <div style={{ width: 0, height: 0 }}>
         <Chart ref={chartRef}>
           <Settings
-            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+            // TODO connect to charts.theme service see src/platform/plugins/shared/charts/public/services/theme/README.md
             baseTheme={LEGACY_LIGHT_THEME}
             noResults={<div />}
             width={0}
@@ -398,6 +399,7 @@ export const ExplorerChartsContainerUI = ({
   chartsService,
   showFilterIcons = true,
 }) => {
+  const cssMlExplorerChartContainer = useCssMlExplorerChartContainer();
   const {
     services: { embeddable: embeddablePlugin, maps: mapsPlugin },
   } = kibana;
@@ -443,7 +445,8 @@ export const ExplorerChartsContainerUI = ({
             return (
               <EuiFlexItem
                 key={chartId}
-                className="ml-explorer-chart-container"
+                data-test-subj="mlExplorerChartContainerItem"
+                css={cssMlExplorerChartContainer}
                 style={{ minWidth: chartsWidth }}
               >
                 <ExplorerChartContainer

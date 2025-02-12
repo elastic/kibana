@@ -1,0 +1,6 @@
+{
+  "type": "test-helper",
+  "id": "@kbn/scout-oblt",
+  "owner": "@elastic/appex-qa",
+  "devOnly": true
+}

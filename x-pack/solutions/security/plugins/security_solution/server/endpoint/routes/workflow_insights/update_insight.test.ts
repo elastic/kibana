@@ -35,7 +35,7 @@ describe('Update Insights Route Handler', () => {
 
     registerUpdateInsightsRoute(router, mockEndpointContext);
 
-    callRoute = async (params, body, authz = { canReadSecuritySolution: true }) => {
+    callRoute = async (params, body, authz = { canWriteWorkflowInsights: true }) => {
       const mockContext = {
         core: {
           security: {
@@ -102,7 +102,7 @@ describe('Update Insights Route Handler', () => {
       await callRoute(
         { insightId: '1' },
         { name: 'Updated Insight' },
-        { canReadSecuritySolution: false }
+        { canWriteWorkflowInsights: false }
       );
 
       expect(mockResponse.forbidden).toHaveBeenCalled();

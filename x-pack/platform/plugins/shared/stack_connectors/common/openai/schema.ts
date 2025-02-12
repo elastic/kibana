@@ -8,6 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from './constants';
 
+export const TelemtryMetadataSchema = schema.object({
+  pluginId: schema.maybe(schema.string()),
+  aggregateBy: schema.maybe(schema.string()),
+});
+
 // Connector schema
 export const ConfigSchema = schema.oneOf([
   schema.object({
@@ -37,6 +42,7 @@ export const RunActionParamsSchema = schema.object({
   // abort signal from client
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
+  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
 });
 
 const AIMessage = schema.object({
@@ -68,6 +74,41 @@ const AIMessage = schema.object({
 export const InvokeAIActionParamsSchema = schema.object({
   messages: schema.arrayOf(AIMessage),
   model: schema.maybe(schema.string()),
+  tools: schema.maybe(
+    schema.arrayOf(
+      schema.object(
+        {
+          type: schema.literal('function'),
+          function: schema.object(
+            {
+              description: schema.maybe(schema.string()),
+              name: schema.string(),
+              parameters: schema.object({}, { unknowns: 'allow' }),
+              strict: schema.maybe(schema.boolean()),
+            },
+            { unknowns: 'allow' }
+          ),
+        },
+        // Not sure if this will include other properties, we should pass them if it does
+        { unknowns: 'allow' }
+      )
+    )
+  ),
+  tool_choice: schema.maybe(
+    schema.oneOf([
+      schema.literal('none'),
+      schema.literal('auto'),
+      schema.literal('required'),
+      schema.object(
+        {
+          type: schema.literal('function'),
+          function: schema.object({ name: schema.string() }, { unknowns: 'allow' }),
+        },
+        { unknowns: 'ignore' }
+      ),
+    ])
+  ),
+  // Deprecated in favor of tools
   functions: schema.maybe(
     schema.arrayOf(
       schema.object(
@@ -89,6 +130,7 @@ export const InvokeAIActionParamsSchema = schema.object({
       )
     )
   ),
+  // Deprecated in favor of tool_choice
   function_call: schema.maybe(
     schema.oneOf([
       schema.literal('none'),
@@ -109,6 +151,7 @@ export const InvokeAIActionParamsSchema = schema.object({
   // abort signal from client
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
+  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
 });
 
 export const InvokeAIActionResponseSchema = schema.object({

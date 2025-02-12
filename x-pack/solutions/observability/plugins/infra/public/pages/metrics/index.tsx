@@ -19,11 +19,9 @@ import {
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
-import {
-  ObservabilityOnboardingLocatorParams,
-  OBSERVABILITY_ONBOARDING_LOCATOR,
-} from '@kbn/deeplinks-observability';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
@@ -37,7 +35,7 @@ import { NotFoundPage } from '../404';
 import { ReactQueryProvider } from '../../containers/react_query_provider';
 import { usePluginConfig } from '../../containers/plugin_config_context';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
-import { SearchSessionProvider } from '../../hooks/use_search_session';
+import { ReloadRequestTimeProvider } from '../../hooks/use_reload_request_time';
 import { OnboardingFlow } from '../../components/shared/templates/no_data_config';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
@@ -77,7 +75,7 @@ export const InfrastructurePage = () => {
     <EuiErrorBoundary>
       <ReactQueryProvider>
         <AlertPrefillProvider>
-          <SearchSessionProvider>
+          <ReloadRequestTimeProvider>
             <InfraMLCapabilitiesProvider>
               <HelpCenterContent
                 feedbackLink="https://discuss.elastic.co/c/metrics"
@@ -120,7 +118,7 @@ export const InfrastructurePage = () => {
                 </HeaderMenuPortal>
               )}
 
-              <Routes>
+              <Routes enableExecutionContextTracking={true}>
                 <Route path="/inventory" component={SnapshotPage} />
                 {config.featureFlags.metricsExplorerEnabled && (
                   <Route path="/explorer" component={MetricsExplorerPage} />
@@ -144,7 +142,7 @@ export const InfrastructurePage = () => {
                 />
               </Routes>
             </InfraMLCapabilitiesProvider>
-          </SearchSessionProvider>
+          </ReloadRequestTimeProvider>
         </AlertPrefillProvider>
       </ReactQueryProvider>
     </EuiErrorBoundary>

@@ -22,6 +22,11 @@ import {
   GenerateConnectorApiKeyApiLogic,
 } from '../../api/connector/generate_connector_api_key_api_logic';
 import {
+  GetConnectorAgentlessPolicyApiLogic,
+  GetConnectorAgentlessPolicyApiLogicActions,
+  GetConnectorAgentlessPolicyApiResponse,
+} from '../../api/connector/get_connector_agentless_policy_api_logic';
+import {
   ConnectorConfigurationApiLogic,
   PostConnectorConfigurationActions,
 } from '../../api/connector/update_connector_configuration_api_logic';
@@ -53,6 +58,8 @@ export interface ConnectorViewActions {
   fetchIndexApiSuccess: FetchIndexActions['apiSuccess'];
   generateApiKeySuccess: GenerateConnectorApiKeyApiLogicActions['apiSuccess'];
   generateConfigurationSuccess: DeploymentLogicActions['generateConfigurationSuccess'];
+  getConnectorAgentlessPolicy: GetConnectorAgentlessPolicyApiLogicActions['makeRequest'];
+  getConnectorAgentlessPolicyApiSuccess: GetConnectorAgentlessPolicyApiLogicActions['apiSuccess'];
   nameAndDescriptionApiError: ConnectorNameAndDescriptionActions['apiError'];
   nameAndDescriptionApiSuccess: ConnectorNameAndDescriptionActions['apiSuccess'];
   startConnectorPoll: CachedFetchConnectorByIdApiLogicActions['startPolling'];
@@ -67,9 +74,11 @@ export interface ConnectorViewValues {
   connectorError: string | undefined;
   connectorId: string | null;
   connectorName: string | null;
+  connectorAgentlessPolicy: GetConnectorAgentlessPolicyApiResponse;
   error: string | undefined;
   fetchConnectorApiStatus: Status;
   fetchIndexApiStatus: Status;
+  getConnectorAgentlessPolicyStatus: Status;
   hasAdvancedFilteringFeature: boolean;
   hasBasicFilteringFeature: boolean;
   hasDocumentLevelSecurityFeature: boolean;
@@ -82,6 +91,7 @@ export interface ConnectorViewValues {
   isCanceling: boolean;
   isHiddenIndex: boolean;
   isLoading: boolean;
+  isWaitingOnAgentlessDeployment: boolean;
   lastUpdated: string | null;
   pipelineData: IngestPipelineParams | undefined;
   recheckIndexLoading: boolean;
@@ -120,6 +130,11 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       ['generateConfigurationSuccess'],
       GenerateConnectorApiKeyApiLogic,
       ['apiSuccess as generateApiKeySuccess'],
+      GetConnectorAgentlessPolicyApiLogic,
+      [
+        'makeRequest as getConnectorAgentlessPolicy',
+        'apiSuccess as getConnectorAgentlessPolicySuccess',
+      ],
     ],
     values: [
       CachedFetchConnectorByIdApiLogic,
@@ -128,6 +143,8 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       ['data as index', 'status as fetchIndexApiStatus'],
       ConnectorConfigurationApiLogic,
       ['status as updateConnectorConfigurationStatus'],
+      GetConnectorAgentlessPolicyApiLogic,
+      ['data as connectorAgentlessPolicy', 'status as getConnectorAgentlessPolicyStatus'],
     ],
   },
   events: ({ actions }) => ({
@@ -140,6 +157,9 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
     fetchConnectorApiSuccess: ({ connector }) => {
       if (!values.index && connector?.index_name) {
         actions.fetchIndex({ indexName: connector.index_name });
+      }
+      if (connector?.id && connector.is_native) {
+        actions.getConnectorAgentlessPolicy({ connectorId: connector.id });
       }
     },
     generateApiKeySuccess: () => {
@@ -206,6 +226,7 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       () => [selectors.hasAdvancedFilteringFeature, selectors.hasBasicFilteringFeature],
       (advancedFeature: boolean, basicFeature: boolean) => advancedFeature || basicFeature,
     ],
+
     hasIncrementalSyncFeature: [
       () => [selectors.connector],
       (connector?: Connector) => hasIncrementalSyncFeature(connector),
@@ -230,6 +251,16 @@ export const ConnectorViewLogic = kea<MakeLogicType<ConnectorViewValues, Connect
       ) =>
         [Status.IDLE && Status.LOADING].includes(fetchConnectorApiStatus) ||
         (index && [Status.IDLE && Status.LOADING].includes(fetchIndexApiStatus)),
+    ],
+    isWaitingOnAgentlessDeployment: [
+      () => [selectors.connector],
+      (connector: Connector) => {
+        if (!connector || !connector.is_native) return false;
+
+        const connectorNotCheckedInYet = connector.last_seen == null;
+
+        return connectorNotCheckedInYet;
+      },
     ],
     pipelineData: [
       () => [selectors.connector],

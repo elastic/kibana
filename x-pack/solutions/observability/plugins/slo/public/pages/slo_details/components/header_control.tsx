@@ -30,6 +30,10 @@ import { isApmIndicatorType } from '../../../utils/slo/indicator';
 import { EditBurnRateRuleFlyout } from '../../slos/components/common/edit_burn_rate_rule_flyout';
 import { useGetQueryParams } from '../hooks/use_get_query_params';
 import { useSloActions } from '../hooks/use_slo_actions';
+import { SloDisableConfirmationModal } from '../../../components/slo/disable_confirmation_modal/slo_disable_confirmation_modal';
+import { SloEnableConfirmationModal } from '../../../components/slo/enable_confirmation_modal/slo_enable_confirmation_modal';
+import { useDisableSlo } from '../../../hooks/use_disable_slo';
+import { useEnableSlo } from '../../../hooks/use_enable_slo';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -45,16 +49,28 @@ export function HeaderControl({ slo }: Props) {
   const hasApmReadCapabilities = capabilities.apm.show;
   const { data: permissions } = usePermissions();
 
-  const { isDeletingSlo, isResettingSlo, removeDeleteQueryParam, removeResetQueryParam } =
-    useGetQueryParams();
+  const {
+    isDeletingSlo,
+    isResettingSlo,
+    isEnablingSlo,
+    isDisablingSlo,
+    removeDeleteQueryParam,
+    removeResetQueryParam,
+    removeEnableQueryParam,
+    removeDisableQueryParam,
+  } = useGetQueryParams();
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRuleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [isEditRuleFlyoutOpen, setIsEditRuleFlyoutOpen] = useState(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
   const [isResetConfirmationModalOpen, setResetConfirmationModalOpen] = useState(false);
+  const [isEnableConfirmationModalOpen, setEnableConfirmationModalOpen] = useState(false);
+  const [isDisableConfirmationModalOpen, setDisableConfirmationModalOpen] = useState(false);
 
-  const { mutateAsync: resetSlo, isLoading: isResetLoading } = useResetSlo();
+  const { mutate: resetSlo, isLoading: isResetLoading } = useResetSlo();
+  const { mutate: enableSlo, isLoading: isEnableLoading } = useEnableSlo();
+  const { mutate: disableSlo, isLoading: isDisableLoading } = useDisableSlo();
 
   const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
     sloIds: [slo.id],
@@ -72,7 +88,13 @@ export function HeaderControl({ slo }: Props) {
     if (isResettingSlo) {
       setResetConfirmationModalOpen(true);
     }
-  }, [isDeletingSlo, isResettingSlo]);
+    if (isEnablingSlo) {
+      setEnableConfirmationModalOpen(true);
+    }
+    if (isDisablingSlo) {
+      setDisableConfirmationModalOpen(true);
+    }
+  }, [isDeletingSlo, isResettingSlo, isEnablingSlo, isDisablingSlo]);
 
   const onCloseRuleFlyout = () => {
     setRuleFlyoutVisibility(false);
@@ -83,7 +105,14 @@ export function HeaderControl({ slo }: Props) {
     setRuleFlyoutVisibility(true);
   };
 
-  const { handleNavigateToRules, sloEditUrl, remoteDeleteUrl, remoteResetUrl } = useSloActions({
+  const {
+    handleNavigateToRules,
+    sloEditUrl,
+    remoteDeleteUrl,
+    remoteResetUrl,
+    remoteEnableUrl,
+    remoteDisableUrl,
+  } = useSloActions({
     slo,
     rules,
     setIsEditRuleFlyoutOpen,
@@ -129,11 +158,12 @@ export function HeaderControl({ slo }: Props) {
       window.open(remoteResetUrl, '_blank');
     } else {
       setResetConfirmationModalOpen(true);
+      setIsPopoverOpen(false);
     }
   };
 
-  const handleResetConfirm = async () => {
-    await resetSlo({ id: slo.id, name: slo.name });
+  const handleResetConfirm = () => {
+    resetSlo({ id: slo.id, name: slo.name });
     removeResetQueryParam();
     setResetConfirmationModalOpen(false);
   };
@@ -141,6 +171,42 @@ export function HeaderControl({ slo }: Props) {
   const handleResetCancel = () => {
     removeResetQueryParam();
     setResetConfirmationModalOpen(false);
+  };
+
+  const handleEnable = () => {
+    if (!!remoteEnableUrl) {
+      window.open(remoteEnableUrl, '_blank');
+    } else {
+      setEnableConfirmationModalOpen(true);
+      setIsPopoverOpen(false);
+    }
+  };
+  const handleEnableCancel = () => {
+    removeEnableQueryParam();
+    setEnableConfirmationModalOpen(false);
+  };
+  const handleEnableConfirm = () => {
+    enableSlo({ id: slo.id, name: slo.name });
+    removeEnableQueryParam();
+    setEnableConfirmationModalOpen(false);
+  };
+
+  const handleDisable = () => {
+    if (!!remoteDisableUrl) {
+      window.open(remoteDisableUrl, '_blank');
+    } else {
+      setDisableConfirmationModalOpen(true);
+      setIsPopoverOpen(false);
+    }
+  };
+  const handleDisableCancel = () => {
+    removeDisableQueryParam();
+    setDisableConfirmationModalOpen(false);
+  };
+  const handleDisableConfirm = () => {
+    disableSlo({ id: slo.id, name: slo.name });
+    removeDisableQueryParam();
+    setDisableConfirmationModalOpen(false);
   };
 
   const navigate = useCallback(
@@ -249,6 +315,35 @@ export function HeaderControl({ slo }: Props) {
               )
             )
             .concat(
+              slo.enabled ? (
+                <EuiContextMenuItem
+                  key="disable"
+                  icon="stop"
+                  disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
+                  onClick={handleDisable}
+                  toolTipContent={
+                    hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+                  }
+                  data-test-subj="sloActionsDisable"
+                >
+                  {i18n.translate('xpack.slo.item.actions.disable', { defaultMessage: 'Disable' })}
+                  {showRemoteLinkIcon}
+                </EuiContextMenuItem>
+              ) : (
+                <EuiContextMenuItem
+                  key="enable"
+                  icon="play"
+                  disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
+                  onClick={handleEnable}
+                  toolTipContent={
+                    hasUndefinedRemoteKibanaUrl ? NOT_AVAILABLE_FOR_UNDEFINED_REMOTE_KIBANA_URL : ''
+                  }
+                  data-test-subj="sloActionsEnable"
+                >
+                  {i18n.translate('xpack.slo.item.actions.enable', { defaultMessage: 'Enable' })}
+                  {showRemoteLinkIcon}
+                </EuiContextMenuItem>
+              ),
               <EuiContextMenuItem
                 key="clone"
                 disabled={!permissions?.hasAllWriteRequested || hasUndefinedRemoteKibanaUrl}
@@ -325,6 +420,24 @@ export function HeaderControl({ slo }: Props) {
           onCancel={handleResetCancel}
           onConfirm={handleResetConfirm}
           isLoading={isResetLoading}
+        />
+      ) : null}
+
+      {isEnableConfirmationModalOpen ? (
+        <SloEnableConfirmationModal
+          slo={slo}
+          onCancel={handleEnableCancel}
+          onConfirm={handleEnableConfirm}
+          isLoading={isEnableLoading}
+        />
+      ) : null}
+
+      {isDisableConfirmationModalOpen ? (
+        <SloDisableConfirmationModal
+          slo={slo}
+          onCancel={handleDisableCancel}
+          onConfirm={handleDisableConfirm}
+          isLoading={isDisableLoading}
         />
       ) : null}
     </>

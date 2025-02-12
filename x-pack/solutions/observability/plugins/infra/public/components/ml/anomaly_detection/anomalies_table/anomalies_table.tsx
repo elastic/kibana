@@ -6,7 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type {
+  EuiTableFieldDataColumnType,
+  EuiTableActionsColumnType,
+  Criteria,
+} from '@elastic/eui';
 import {
   EuiSuperDatePicker,
   useEuiTheme,
@@ -14,9 +20,6 @@ import {
   EuiFieldSearch,
   EuiBasicTable,
   EuiFlexGroup,
-  EuiTableFieldDataColumnType,
-  EuiTableActionsColumnType,
-  Criteria,
   EuiContextMenuItem,
   EuiComboBox,
   EuiButtonIcon,
@@ -34,7 +37,7 @@ import { type HostsLocatorParams, HOSTS_LOCATOR_ID } from '@kbn/observability-sh
 import { HOST_NAME_FIELD } from '../../../../../common/constants';
 import { buildCombinedAssetFilter } from '../../../../utils/filters/build';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { FetcherOptions } from '../../../../hooks/use_fetcher';
+import type { FetcherOptions } from '../../../../hooks/use_fetcher';
 import { datemathToEpochMillis } from '../../../../utils/datemath';
 import { useSorting } from '../../../../hooks/use_sorting';
 import { useMetricsK8sAnomaliesResults } from '../../../../pages/metrics/inventory_view/hooks/use_metrics_k8s_anomalies';
@@ -49,10 +52,8 @@ import { AnomalySummary } from './annomaly_summary';
 import { AnomalySeverityIndicator } from '../../../logging/log_analysis_results/anomaly_severity_indicator';
 import { useMetricsDataViewContext, useSourceContext } from '../../../../containers/metrics_source';
 import { createResultsUrl } from '../flyout_home';
-import {
-  useWaffleViewState,
-  WaffleViewState,
-} from '../../../../pages/metrics/inventory_view/hooks/use_waffle_view_state';
+import type { WaffleViewState } from '../../../../pages/metrics/inventory_view/hooks/use_waffle_view_state';
+import { useWaffleViewState } from '../../../../pages/metrics/inventory_view/hooks/use_waffle_view_state';
 
 type JobType = 'k8s' | 'hosts';
 type SortField = 'anomalyScore' | 'startTime';

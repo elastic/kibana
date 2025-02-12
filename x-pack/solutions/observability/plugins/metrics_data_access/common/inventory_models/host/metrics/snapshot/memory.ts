@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import type { MetricsUIAggregation } from '../../../types';
 
 export const memory: MetricsUIAggregation = {
   memory: { avg: { field: 'system.memory.actual.used.pct' } },

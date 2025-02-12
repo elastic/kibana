@@ -25,8 +25,7 @@ import { PrivateLocationTestService } from '../../../services/synthetics_private
 import { getFixtureJson } from './helpers/get_fixture_json';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
-  // Failing: See https://github.com/elastic/kibana/issues/204158
-  describe.skip('getSyntheticsMonitors', function () {
+  describe('getSyntheticsMonitors', function () {
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const retry = getService('retry');
@@ -80,8 +79,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       monitors = _monitors;
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/204069
-    describe.skip('get many monitors', () => {
+    describe('get many monitors', () => {
       it('without params', async () => {
         const uuid = uuidv4();
         const [mon1, mon2] = await Promise.all(

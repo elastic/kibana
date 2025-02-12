@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common/inventory_models/types';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common/inventory_models/types';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { useLocation } from 'react-router-dom';
 import type { LinkProps } from '@kbn/observability-shared-plugin/public/hooks/use_link_props';

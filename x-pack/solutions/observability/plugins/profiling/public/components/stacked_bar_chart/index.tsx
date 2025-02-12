@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CustomTooltip, SeriesIdentifier, XYChartElementEvent } from '@elastic/charts';
 import {
   Axis,
   BrushAxis,
@@ -15,14 +16,14 @@ import {
   StackMode,
   timeFormatter,
   Tooltip,
-  XYChartElementEvent,
   TooltipContainer,
+  TooltipHeader,
 } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
 import { keyBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { TopNSample, TopNSubchart } from '../../../common/topn';
+import type { TopNSample, TopNSubchart } from '../../../common/topn';
 import { useKibanaTimeZoneSetting } from '../../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../../hooks/use_profiling_charts_theme';
 import { asPercentage } from '../../utils/formatters/as_percentage';
@@ -57,7 +58,7 @@ export function StackedBarChart({
 
   const { chartsBaseTheme, chartsTheme } = useProfilingChartsTheme();
 
-  function CustomTooltipWithSubChart() {
+  const CustomTooltipWithSubChart: CustomTooltip<{}, SeriesIdentifier> = ({ header }) => {
     if (!highlightedSample) {
       return null;
     }
@@ -69,6 +70,7 @@ export function StackedBarChart({
 
     return (
       <TooltipContainer>
+        <TooltipHeader header={header} />
         <EuiPanel>
           <SubChart
             index={highlightedSubchart.Index}
@@ -88,7 +90,7 @@ export function StackedBarChart({
         </EuiPanel>
       </TooltipContainer>
     );
-  }
+  };
 
   return (
     <Chart size={{ height }}>

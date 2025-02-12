@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import type { DescriptionList } from '../../../../../common/utility_types';
 import type { Anomaly, NarrowDateRange } from '../types';
-import { getScoreString } from './score_health';
+import { getScoreString } from './get_score_string';
 import { PreferenceFormattedDate } from '../../formatted_date';
 import { createInfluencers } from '../influencers/create_influencers';
 import * as i18n from './translations';

@@ -8,19 +8,19 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { SloListCardView } from './card_view/slos_card_view';
+import { SloListCardView } from './card_view/slo_list_card_view';
 import { SloListCompactView } from './compact_view/slo_list_compact_view';
 import { HealthCallout } from './health_callout/health_callout';
 import { SloListEmpty } from './slo_list_empty';
 import { SloListError } from './slo_list_error';
 import { SloListView } from './slo_list_view/slo_list_view';
-import { SLOView } from './toggle_slo_view';
+import type { ViewType } from '../types';
 
 export interface Props {
   sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
-  view: SLOView;
+  view: ViewType;
 }
 
 export function SlosView({ sloList, loading, error, view }: Props) {

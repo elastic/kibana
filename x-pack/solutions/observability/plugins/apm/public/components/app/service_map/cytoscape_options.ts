@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import cytoscape from 'cytoscape';
-import { CSSProperties } from 'react';
+import type cytoscape from 'cytoscape';
+import type { CSSProperties } from 'react';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
+import type { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
 import { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
 import {
   getServiceHealthStatusColor,
@@ -100,7 +100,7 @@ function isService(el: cytoscape.NodeSingular) {
 const getStyle = (
   euiTheme: EuiThemeComputed,
   isTraceExplorerEnabled: boolean
-): cytoscape.Stylesheet[] => {
+): cytoscape.StylesheetJson => {
   const lineColor = euiTheme.colors.mediumShade;
   return [
     {
@@ -178,15 +178,12 @@ const getStyle = (
         'source-arrow-shape': isIE11 ? 'none' : 'triangle',
         'source-arrow-color': lineColor,
         'target-arrow-shape': isIE11 ? 'none' : 'triangle',
-        // @ts-expect-error
         'source-distance-from-node': isIE11 ? undefined : parseInt(euiTheme.size.xs, 10),
         'target-distance-from-node': isIE11 ? undefined : parseInt(euiTheme.size.xs, 10),
       },
     },
     {
       selector: 'edge[isInverseEdge]',
-      // @ts-expect-error DefinitelyTyped says visibility is "none" but it's
-      // actually "hidden"
       style: { visibility: 'hidden' },
     },
     {

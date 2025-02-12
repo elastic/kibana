@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiDataGridCellValueElementProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TopNFunctionSortField } from '@kbn/profiling-utils';
 import React, { useEffect } from 'react';
@@ -21,7 +15,7 @@ import { asWeight } from '../../utils/formatters/as_weight';
 import { StackFrameSummary } from '../stack_frame_summary';
 import { CPUStat } from './cpu_stat';
 import { SampleStat } from './sample_stat';
-import { IFunctionRow } from './utils';
+import type { IFunctionRow } from './utils';
 
 interface Props {
   functionRow: IFunctionRow;

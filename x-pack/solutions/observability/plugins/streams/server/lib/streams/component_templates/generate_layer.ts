@@ -10,24 +10,19 @@ import {
   MappingDateProperty,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
-import { WiredStreamDefinition } from '@kbn/streams-schema';
+import { WiredStreamDefinition, isDslLifecycle, isIlmLifecycle, isRoot } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings } from './logs_layer';
-import { isRoot } from '../helpers/hierarchy';
 import { getComponentTemplateName } from './name';
-import { otelFields, otelMappings, otelPrefixes, otelSettings } from './otel_layer';
-import { getSortedFields } from '../helpers/field_sorting';
+import { otelMappings, otelPrefixes } from './otel_layer';
 
 export function generateLayer(
-  id: string,
-  definition: WiredStreamDefinition
+  name: string,
+  definition: WiredStreamDefinition,
+  isServerless: boolean
 ): ClusterPutComponentTemplateRequest {
   const properties: Record<string, MappingProperty> = {};
-  const fields = {
-    ...definition.stream.ingest.wired.fields,
-    ...(definition.stream.ingest.wired.otel_compat_mode ? otelFields : {}),
-  };
-  getSortedFields(fields).forEach(([field, props]) => {
+  Object.entries(definition.ingest.wired.fields).forEach(([field, props]) => {
     const property: MappingProperty = {
       type: props.type,
     };
@@ -39,37 +34,83 @@ export function generateLayer(
       (property as MappingDateProperty).format = props.format;
     }
     properties[field] = property;
-    if (
-      definition.stream.ingest.wired.otel_compat_mode &&
-      otelPrefixes.some((prefix) => field.startsWith(prefix))
-    ) {
+    if (otelPrefixes.some((prefix) => field.startsWith(prefix))) {
       properties[field.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '')] = {
         type: 'alias',
         path: field,
       };
     }
   });
+
   return {
-    name: getComponentTemplateName(id),
+    name: getComponentTemplateName(name),
     template: {
-      settings: isRoot(definition.name)
-        ? logsSettings
-        : definition.stream.ingest.wired.otel_compat_mode
-        ? otelSettings
-        : {},
+      lifecycle: getTemplateLifecycle(definition, isServerless),
+      settings: getTemplateSettings(definition, isServerless),
       mappings: {
         subobjects: false,
         dynamic: false,
         properties: {
           ...properties,
-          ...(definition.stream.ingest.wired.otel_compat_mode ? otelMappings : {}),
+          ...otelMappings,
         },
       },
     },
     version: ASSET_VERSION,
     _meta: {
       managed: true,
-      description: `Default settings for the ${id} stream`,
+      description: `Default settings for the ${name} stream`,
     },
   };
+}
+
+function getTemplateLifecycle(definition: WiredStreamDefinition, isServerless: boolean) {
+  const lifecycle = definition.ingest.lifecycle;
+  if (isServerless) {
+    // dlm cannot be disabled in serverless
+    return {
+      data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
+    };
+  }
+
+  if (isIlmLifecycle(lifecycle)) {
+    return { enabled: false };
+  }
+
+  if (isDslLifecycle(lifecycle)) {
+    return {
+      enabled: true,
+      data_retention: lifecycle.dsl.data_retention,
+    };
+  }
+
+  return undefined;
+}
+
+function getTemplateSettings(definition: WiredStreamDefinition, isServerless: boolean) {
+  const baseSettings = isRoot(definition.name) ? logsSettings : {};
+  const lifecycle = definition.ingest.lifecycle;
+
+  if (isServerless) {
+    return baseSettings;
+  }
+
+  if (isIlmLifecycle(lifecycle)) {
+    return {
+      ...baseSettings,
+      'index.lifecycle.prefer_ilm': true,
+      'index.lifecycle.name': lifecycle.ilm.policy,
+    };
+  }
+
+  if (isDslLifecycle(lifecycle)) {
+    return {
+      ...baseSettings,
+      'index.lifecycle.prefer_ilm': false,
+      'index.lifecycle.name': undefined,
+    };
+  }
+
+  // don't specify any lifecycle property when lifecyle is disabled or inherited
+  return baseSettings;
 }

@@ -11,12 +11,15 @@ import expect from '@kbn/expect';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { chatClient, esClient } from '../../services';
 
-describe('elasticsearch functions', () => {
+describe('Elasticsearch functions', () => {
   describe('health', () => {
     it('returns the cluster health state', async () => {
-      const conversation = await chatClient.complete(
-        'Can you tell me what the state of my Elasticsearch cluster is?'
-      );
+      const conversation = await chatClient.complete({
+        messages: 'Can you tell me what the state of my Elasticsearch cluster is?',
+        // using 'all' for elasticsearch scenarios enables the LLM correctly pick
+        // elasticsearch functions when querying for data
+        scope: 'all',
+      });
 
       const result = await chatClient.evaluate(conversation, [
         'Calls the Elasticsearch function with method: GET and path: _cluster/health',
@@ -45,6 +48,9 @@ describe('elasticsearch functions', () => {
               },
             },
           },
+          settings: {
+            'index.mapping.semantic_text.use_legacy_format': false,
+          },
         });
 
         await esClient.index({
@@ -58,7 +64,10 @@ describe('elasticsearch functions', () => {
       });
 
       it('returns the count of docs in the KB', async () => {
-        const conversation = await chatClient.complete('How many documents are in the index kb?');
+        const conversation = await chatClient.complete({
+          messages: 'How many documents are in the index kb?',
+          scope: 'all',
+        });
 
         const result = await chatClient.evaluate(conversation, [
           'Calls the `elasticsearch` function OR the `query` function',
@@ -69,15 +78,19 @@ describe('elasticsearch functions', () => {
       });
 
       it('returns store and refresh stats of an index', async () => {
-        let conversation = await chatClient.complete('What are the store stats of the index kb?');
+        let conversation = await chatClient.complete({
+          messages: 'What are the store stats of the index kb?',
+          scope: 'all',
+        });
 
-        conversation = await chatClient.complete(
-          conversation.conversationId!,
-          conversation.messages.concat({
+        conversation = await chatClient.complete({
+          conversationId: conversation.conversationId!,
+          messages: conversation.messages.concat({
             content: 'What are the the refresh stats of the index?',
             role: MessageRole.User,
-          })
-        );
+          }),
+          scope: 'all',
+        });
 
         const result = await chatClient.evaluate(conversation, [
           'Calls the Elasticsearch function with method: kb/_stats/store',
@@ -98,25 +111,29 @@ describe('elasticsearch functions', () => {
 
     describe('assistant created index', () => {
       it('creates index, adds documents and deletes index', async () => {
-        let conversation = await chatClient.complete(
-          'Create a new index called testing_ai_assistant what will have two documents, one for the test_suite alerts with message "This test is for alerts" and another one for the test_suite esql with the message "This test is for esql"'
-        );
+        let conversation = await chatClient.complete({
+          messages:
+            'Create a new index called testing_ai_assistant that will have two documents, one for the test_suite alerts with message "This test is for alerts" and another one for the test_suite esql with the message "This test is for esql"',
+          scope: 'all',
+        });
 
-        conversation = await chatClient.complete(
-          conversation.conversationId!,
-          conversation.messages.concat({
+        conversation = await chatClient.complete({
+          conversationId: conversation.conversationId!,
+          messages: conversation.messages.concat({
             content: 'What are the fields types for the index testing_ai_assistant?',
             role: MessageRole.User,
-          })
-        );
+          }),
+          scope: 'all',
+        });
 
-        conversation = await chatClient.complete(
-          conversation.conversationId!,
-          conversation.messages.concat({
+        conversation = await chatClient.complete({
+          conversationId: conversation.conversationId!,
+          messages: conversation.messages.concat({
             content: 'Delete the testing_ai_assistant index',
             role: MessageRole.User,
-          })
-        );
+          }),
+          scope: 'all',
+        });
 
         const result = await chatClient.evaluate(conversation, [
           'Calls the Elasticsearch function to create the index testing_ai_assistant and add the documents to it',
@@ -129,9 +146,13 @@ describe('elasticsearch functions', () => {
       });
     });
   });
+
   describe('other', () => {
     it('returns clusters license', async () => {
-      const conversation = await chatClient.complete('What is my clusters license?');
+      const conversation = await chatClient.complete({
+        messages: 'What is my clusters license?',
+        scope: 'all',
+      });
 
       const result = await chatClient.evaluate(conversation, [
         'Calls the Elasticsearch function',

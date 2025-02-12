@@ -11,11 +11,11 @@ import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { asTransactionRate } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
+import type { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { TimeseriesChartWithContext } from '../charts/timeseries_chart_with_context';
 import { ChartType, getTimeSeriesColor } from '../charts/helper/get_timeseries_color';
 import { getComparisonChartTheme } from '../time_comparison/get_comparison_chart_theme';
-import { DependencyMetricChartsRouteParams } from './dependency_metric_charts_route_params';
+import type { DependencyMetricChartsRouteParams } from './dependency_metric_charts_route_params';
 import { useSearchServiceDestinationMetrics } from '../../../context/time_range_metadata/use_search_service_destination_metrics';
 
 export function DependencyThroughputChart({

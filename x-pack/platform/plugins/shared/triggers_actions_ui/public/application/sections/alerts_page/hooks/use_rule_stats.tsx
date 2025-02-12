@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiStat } from '@elastic/eui';
 import styled from '@emotion/styled';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { loadRuleAggregations, useKibana } from '../../../..';
 
 const Stat = styled(EuiStat)`
@@ -19,7 +18,7 @@ const Stat = styled(EuiStat)`
 `;
 
 const Divider = styled.div`
-  border-right: 1px solid ${euiThemeVars.euiColorLightShade};
+  border-right: ${(props) => props.theme.euiTheme.border.thin};
   height: 100%;
 `;
 

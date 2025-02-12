@@ -8,11 +8,11 @@
 import { scaleLog } from 'd3-scale';
 
 import { isFiniteNumber } from '@kbn/observability-plugin/common/utils/is_finite_number';
-import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
-import { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
+import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
+import type { LatencyDistributionChartType } from '../../../../common/latency_distribution_chart_types';
 import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { getDurationField, getEventType } from '../utils';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBackwardCompatibleDocumentTypeFilter } from '../../../lib/helpers/transactions';
 
 const getHistogramRangeSteps = (min: number, max: number, steps: number) => {

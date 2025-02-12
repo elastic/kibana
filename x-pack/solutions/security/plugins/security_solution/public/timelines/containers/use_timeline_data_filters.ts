@@ -6,27 +6,19 @@
  */
 
 import { useMemo } from 'react';
-import { useSelector } from 'react-redux';
-import { useLocation } from 'react-router-dom';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import {
   isLoadingSelector,
   startSelector,
   endSelector,
 } from '../../common/components/super_date_picker/selectors';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { SourcererScopeName } from '../../sourcerer/store/model';
 import { useSourcererDataView } from '../../sourcerer/containers';
-import { getScopeFromPath } from '../../sourcerer/containers/sourcerer_paths';
-import { sourcererSelectors } from '../../common/store';
 
 export function useTimelineDataFilters(isActiveTimelines: boolean) {
   const getStartSelector = useMemo(() => startSelector(), []);
   const getEndSelector = useMemo(() => endSelector(), []);
   const getIsLoadingSelector = useMemo(() => isLoadingSelector(), []);
-  const isDatePickerAndSourcererDisabled = useIsExperimentalFeatureEnabled(
-    'analyzerDatePickersAndSourcererDisabled'
-  );
 
   const shouldUpdate = useDeepEqualSelector((state) => {
     if (isActiveTimelines) {
@@ -49,35 +41,15 @@ export function useTimelineDataFilters(isActiveTimelines: boolean) {
       return getEndSelector(state.inputs.global);
     }
   });
-  const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
-  const { pathname } = useLocation();
-  const { selectedPatterns: nonTimelinePatterns } = useSourcererDataView(
-    getScopeFromPath(pathname)
-  );
-
-  const { selectedPatterns: timelinePatterns } = useSourcererDataView(SourcererScopeName.timeline);
-
-  const selectedPatterns = useMemo(() => {
-    return isActiveTimelines
-      ? [...new Set([...timelinePatterns, ...defaultDataView.patternList])]
-      : [...new Set([...nonTimelinePatterns, ...defaultDataView.patternList])];
-  }, [isActiveTimelines, timelinePatterns, nonTimelinePatterns, defaultDataView.patternList]);
 
   const { selectedPatterns: analyzerPatterns } = useSourcererDataView(SourcererScopeName.analyzer);
 
   return useMemo(() => {
     return {
-      selectedPatterns: isDatePickerAndSourcererDisabled ? selectedPatterns : analyzerPatterns,
+      selectedPatterns: analyzerPatterns,
       from,
       to,
       shouldUpdate,
     };
-  }, [
-    selectedPatterns,
-    from,
-    to,
-    shouldUpdate,
-    isDatePickerAndSourcererDisabled,
-    analyzerPatterns,
-  ]);
+  }, [from, to, shouldUpdate, analyzerPatterns]);
 }

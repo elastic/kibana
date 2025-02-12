@@ -7,7 +7,8 @@
 
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { transparentize } from 'polished';
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import styled from '@emotion/styled';
 
 export const LoadingOverlayWrapper: React.FC<

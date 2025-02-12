@@ -6,13 +6,28 @@
  */
 
 import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { actionTaskParamsSchemaV1 } from '../schemas/action_task_params';
+import { actionTaskParamsSchemaV1, actionTaskParamsSchemaV2 } from '../schemas/action_task_params';
 
 export const actionTaskParamsModelVersions: SavedObjectsModelVersionMap = {
   '1': {
     changes: [],
     schemas: {
+      forwardCompatibility: actionTaskParamsSchemaV1.extends({}, { unknowns: 'ignore' }),
       create: actionTaskParamsSchemaV1,
+    },
+  },
+  '2': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          apiKeyId: { type: 'keyword' },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: actionTaskParamsSchemaV2.extends({}, { unknowns: 'ignore' }),
+      create: actionTaskParamsSchemaV2,
     },
   },
 };

@@ -8,7 +8,8 @@
 import { useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
-import { RouterLinkProps, getRouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
+import type { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
+import { getRouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import {
   type AssetDetailsLocatorParams,
   ASSET_DETAILS_LOCATOR_ID,

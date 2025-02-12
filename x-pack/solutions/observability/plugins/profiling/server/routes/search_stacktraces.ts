@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { decodeStackTraceResponse } from '@kbn/profiling-utils';
-import { ProfilingESClient } from '../utils/create_profiling_es_client';
-import { ProjectTimeQuery } from './query';
+import type { ProfilingESClient } from '../utils/create_profiling_es_client';
+import type { ProjectTimeQuery } from './query';
 
 export async function searchStackTraces({
   client,

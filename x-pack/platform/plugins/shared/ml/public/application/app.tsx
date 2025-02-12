@@ -100,6 +100,7 @@ const App: FC<AppProps> = ({
       unifiedSearch: deps.unifiedSearch,
       usageCollection: deps.usageCollection,
       mlServices: getMlGlobalServices(coreStart, deps.data.dataViews, deps.usageCollection),
+      spaces: deps.spaces,
     };
   }, [deps, coreStart]);
 
@@ -122,9 +123,17 @@ const App: FC<AppProps> = ({
 
   if (!licenseReady || !mlCapabilities) return null;
 
-  const startServices = pick(coreStart, 'analytics', 'i18n', 'theme');
+  const startServices = pick(coreStart, 'analytics', 'i18n', 'theme', 'userProfile');
   const datePickerDeps: DatePickerDependencies = {
-    ...pick(services, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
+    ...pick(services, [
+      'data',
+      'http',
+      'notifications',
+      'theme',
+      'uiSettings',
+      'userProfile',
+      'i18n',
+    ]),
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice: !isServerless,
   };

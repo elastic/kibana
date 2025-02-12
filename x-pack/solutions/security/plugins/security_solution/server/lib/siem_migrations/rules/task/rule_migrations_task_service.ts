@@ -21,12 +21,14 @@ export class RuleMigrationsTaskService {
   public createClient({
     currentUser,
     dataClient,
+    dependencies,
   }: RuleMigrationTaskCreateClientParams): RuleMigrationsTaskClient {
     return new RuleMigrationsTaskClient(
       this.migrationsRunning,
       this.logger,
       dataClient,
-      currentUser
+      currentUser,
+      dependencies
     );
   }
 

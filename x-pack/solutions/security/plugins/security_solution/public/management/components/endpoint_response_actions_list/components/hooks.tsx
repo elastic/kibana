@@ -177,6 +177,9 @@ const useTypesFilterInitialState = ({
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
     'responseActionsSentinelOneV1Enabled'
   );
+  const isMicrosoftDefenderEnabled = useIsExperimentalFeatureEnabled(
+    'responseActionsMSDefenderEndpointEnabled'
+  );
   const isCrowdstrikeEnabled = useIsExperimentalFeatureEnabled(
     'responseActionsCrowdstrikeManualHostIsolationEnabled'
   );
@@ -207,14 +210,21 @@ const useTypesFilterInitialState = ({
 
   // v8.13 onwards
   // for showing agent types and action types in the same filter
-  if (isSentinelOneV1Enabled || isCrowdstrikeEnabled) {
+  if (isSentinelOneV1Enabled || isCrowdstrikeEnabled || isMicrosoftDefenderEnabled) {
     if (!isFlyout) {
       return [
         {
           label: FILTER_NAMES.agentTypes,
           isGroupLabel: true,
         },
-        ...RESPONSE_ACTION_AGENT_TYPE.map((type) =>
+        ...RESPONSE_ACTION_AGENT_TYPE.filter((agentType) => {
+          switch (agentType) {
+            case 'microsoft_defender_endpoint':
+              return isMicrosoftDefenderEnabled;
+            default:
+              return true;
+          }
+        }).map((type) =>
           getFilterOptions({
             key: type,
             label: getAgentTypeName(type),

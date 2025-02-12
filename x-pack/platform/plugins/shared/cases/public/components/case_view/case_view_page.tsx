@@ -91,6 +91,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           data-test-subj="case-view-title"
           titleNode={
             <EditableTitle
+              key={caseData.id}
               isLoading={isLoading && loadingKey === 'title'}
               title={caseData.title}
               onSubmit={onSubmitTitle}

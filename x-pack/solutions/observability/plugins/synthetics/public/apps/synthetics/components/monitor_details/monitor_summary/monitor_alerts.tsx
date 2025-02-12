@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSkeletonText,
   EuiPanel,
+  EuiSkeletonText,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
-import { useTheme } from '@kbn/observability-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useSelectedLocation } from '../hooks/use_selected_location';
-import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
-import { AlertActions } from './alert_actions';
+import React from 'react';
 import { ClientPluginsStart } from '../../../../../plugin';
+import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
+import { useSelectedLocation } from '../hooks/use_selected_location';
+import { AlertActions } from './alert_actions';
 
 const MONITOR_STATUS_RULE = {
   'kibana.alert.rule.category': ['Synthetics monitor status'],
@@ -40,7 +40,8 @@ export const MonitorAlerts = ({
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
+  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
 
   const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
   const selectedLocation = useSelectedLocation();
@@ -145,7 +146,9 @@ export const MonitorAlerts = ({
                   { field: 'kibana.alert.status', values: ['active'] },
                   ...(locationFilter ?? []),
                 ],
-                color: theme.eui.euiColorVis7_behindText,
+                color: isAmsterdam
+                  ? euiTheme.colors.vis.euiColorVisBehindText7
+                  : euiTheme.colors.vis.euiColorVis7,
               },
             ]}
           />
@@ -198,7 +201,9 @@ export const MonitorAlerts = ({
                   { field: 'kibana.alert.status', values: ['recovered'] },
                   ...(locationFilter ?? []),
                 ],
-                color: theme.eui.euiColorVis0_behindText,
+                color: isAmsterdam
+                  ? euiTheme.colors.vis.euiColorVisBehindText0
+                  : euiTheme.colors.vis.euiColorVis0,
               },
             ]}
           />

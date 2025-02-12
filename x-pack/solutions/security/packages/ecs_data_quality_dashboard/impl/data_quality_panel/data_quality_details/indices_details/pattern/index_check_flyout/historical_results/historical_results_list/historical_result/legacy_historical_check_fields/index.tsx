@@ -6,7 +6,7 @@
  */
 
 import React, { FC, memo, useMemo } from 'react';
-import { EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
+import { EuiButtonGroup, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 
 import { INCOMPATIBLE_FIELDS, SAME_FAMILY } from '../../../../../../../../translations';
 import { Actions } from '../../../../../../../../actions';
@@ -16,7 +16,7 @@ import { CheckSuccessEmptyPrompt } from '../../../../check_success_empty_prompt'
 import { INCOMPATIBLE_TAB_ID, SAME_FAMILY_TAB_ID } from '../../../../constants';
 import { getIncompatibleStatBadgeColor } from '../../../../../../../../utils/get_incompatible_stat_badge_color';
 import { CheckFieldsTabs } from '../../../../check_fields_tabs';
-import { StyledHistoricalResultsCheckFieldsButtonGroup } from '../styles';
+import { historicalResultsCheckFieldsButtonGroupCss } from '../styles';
 import { NOT_INCLUDED_IN_HISTORICAL_RESULTS } from './translations';
 
 interface Props {
@@ -88,7 +88,9 @@ const LegacyHistoricalCheckFieldsComponent: FC<Props> = ({ indexName, historical
     <div data-test-subj="legacyHistoricalCheckFields">
       <CheckFieldsTabs
         tabs={tabs}
-        renderButtonGroup={(props) => <StyledHistoricalResultsCheckFieldsButtonGroup {...props} />}
+        renderButtonGroup={(props) => (
+          <EuiButtonGroup css={historicalResultsCheckFieldsButtonGroupCss} {...props} />
+        )}
       />
     </div>
   );

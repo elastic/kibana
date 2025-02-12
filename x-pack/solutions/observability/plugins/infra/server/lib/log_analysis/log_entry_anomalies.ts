@@ -6,29 +6,32 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { PersistedLogViewReference, ResolvedLogView } from '@kbn/logs-shared-plugin/common';
+import type { PersistedLogViewReference, ResolvedLogView } from '@kbn/logs-shared-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { IdFormat, IdFormatByJobType } from '../../../common/http_api/latest';
-import {
+import type { IdFormat, IdFormatByJobType } from '../../../common/http_api/latest';
+import type {
   AnomaliesSort,
+  LogEntryAnomalyDatasets,
+  Pagination,
+} from '../../../common/log_analysis';
+import {
   getJobId,
   isCategoryAnomaly,
   jobCustomSettingsRT,
-  LogEntryAnomalyDatasets,
   logEntryCategoriesJobType,
   logEntryCategoriesJobTypes,
   logEntryRateJobType,
   logEntryRateJobTypes,
-  Pagination,
 } from '../../../common/log_analysis';
-import { startTracingSpan, TracingSpan } from '../../../common/performance_tracing';
+import type { TracingSpan } from '../../../common/performance_tracing';
+import { startTracingSpan } from '../../../common/performance_tracing';
 import type {
   InfraPluginRequestHandlerContext,
   InfraRequestHandlerContext,
   MlAnomalyDetectors,
   MlSystem,
 } from '../../types';
-import { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
+import type { KibanaFramework } from '../adapters/framework/kibana_framework_adapter';
 import { fetchMlJob, getLogEntryDatasets } from './common';
 import {
   InsufficientAnomalyMlJobsConfigured,

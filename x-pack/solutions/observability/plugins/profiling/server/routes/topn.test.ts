@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { ProfilingESField } from '@kbn/profiling-utils';
-import { ProfilingESClient } from '../utils/create_profiling_es_client';
+import type { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { topNElasticSearchQuery } from './topn';
 
 const anyQuery = 'any::query';

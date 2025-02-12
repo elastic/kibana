@@ -64,11 +64,11 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const selectAndFillInEsQueryRule = async (ruleName: string) => {
     await testSubjects.click(`.es-query-SelectOption`);
     await retry.waitFor(
-      'Create Rule flyout is visible',
-      async () => await testSubjects.exists('addRuleFlyoutTitle')
+      'Create Rule form is visible',
+      async () => await testSubjects.exists('createRuleForm')
     );
 
-    await testSubjects.setValue('ruleNameInput', ruleName);
+    await testSubjects.setValue('ruleDetailsNameInput', ruleName);
     await testSubjects.click('queryFormType_esQuery');
     await testSubjects.click('selectIndexExpression');
     const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
@@ -90,7 +90,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     const observability = getService('observability');
 
-    const navigateAndOpenCreateRuleFlyout = async () => {
+    const navigateAndOpenRuleTypeModal = async () => {
       await observability.alerts.common.navigateToRulesPage();
       await retry.waitFor(
         'Create Rule button is visible',
@@ -128,11 +128,11 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     describe('Create rule button', () => {
       it('Show Rule Type Modal when Create Rule button is clicked', async () => {
-        await navigateAndOpenCreateRuleFlyout();
+        await navigateAndOpenRuleTypeModal();
       });
     });
 
-    describe('Create rules flyout', () => {
+    describe('Create rules form', () => {
       const ruleName = 'esQueryRule';
 
       afterEach(async () => {
@@ -151,12 +151,14 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
               infrastructure: ['all'],
             })
           );
-          await navigateAndOpenCreateRuleFlyout();
+          await navigateAndOpenRuleTypeModal();
           await selectAndFillInEsQueryRule(ruleName);
 
-          await testSubjects.click('saveRuleButton');
+          await testSubjects.click('rulePageFooterSaveButton');
 
           await PageObjects.header.waitUntilLoadingHasFinished();
+
+          await observability.alerts.common.navigateToRulesPage();
 
           const tableRows = await find.allByCssSelector('.euiTableRow');
           const rows = await getRulesList(tableRows);
@@ -174,13 +176,14 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
               logs: ['all'],
             })
           );
-          await navigateAndOpenCreateRuleFlyout();
+          await navigateAndOpenRuleTypeModal();
           await selectAndFillInEsQueryRule(ruleName);
 
-          await testSubjects.click('saveRuleButton');
+          await testSubjects.click('rulePageFooterSaveButton');
 
           await PageObjects.header.waitUntilLoadingHasFinished();
 
+          await observability.alerts.common.navigateToRulesPage();
           const tableRows = await find.allByCssSelector('.euiTableRow');
           const rows = await getRulesList(tableRows);
           expect(rows.length).to.be(1);
@@ -196,17 +199,17 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           })
         );
 
-        await navigateAndOpenCreateRuleFlyout();
+        await navigateAndOpenRuleTypeModal();
         await selectAndFillInEsQueryRule(ruleName);
 
         await retry.waitFor('consumer select modal is visible', async () => {
-          return await testSubjects.exists('ruleFormConsumerSelect');
+          return await testSubjects.exists('ruleConsumerSelection');
         });
 
-        const consumerSelect = await testSubjects.find('ruleFormConsumerSelect');
+        const consumerSelect = await testSubjects.find('ruleConsumerSelection');
         await consumerSelect.click();
         const consumerOptionsList = await testSubjects.find(
-          'comboBoxOptionsList ruleFormConsumerSelect-optionsList'
+          'comboBoxOptionsList ruleConsumerSelectionInput-optionsList'
         );
         const consumerOptions = await consumerOptionsList.findAllByClassName(
           'euiComboBoxOption__content'

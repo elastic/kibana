@@ -40,7 +40,7 @@ interface PluginsStart {
   data: DataPluginStart;
 }
 
-export class CanvasPlugin implements Plugin {
+export class CanvasPlugin implements Plugin<void, void, PluginsSetup, PluginsStart> {
   private readonly logger: Logger;
 
   constructor(public readonly initializerContext: PluginInitializerContext) {

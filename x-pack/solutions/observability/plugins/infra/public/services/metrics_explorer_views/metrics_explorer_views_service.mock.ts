@@ -6,7 +6,7 @@
  */
 
 import { createMetricsExplorerViewsClientMock } from './metrics_explorer_views_client.mock';
-import { MetricsExplorerViewsServiceStart } from './types';
+import type { MetricsExplorerViewsServiceStart } from './types';
 
 export const createMetricsExplorerViewsServiceStartMock = () => ({
   getClient: () => Promise.resolve(createMetricsExplorerViewsClientMock()),

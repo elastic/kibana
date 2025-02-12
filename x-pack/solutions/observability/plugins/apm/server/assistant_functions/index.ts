@@ -14,7 +14,7 @@ import type {
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { APMConfig } from '..';
 import type { ApmFeatureFlags } from '../../common/apm_feature_flags';
-import { APMEventClient } from '../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../lib/helpers/create_es_client/create_apm_event_client';
 import { getApmEventClient } from '../lib/helpers/get_apm_event_client';
 import { getRandomSampler } from '../lib/helpers/get_random_sampler';
 import type {

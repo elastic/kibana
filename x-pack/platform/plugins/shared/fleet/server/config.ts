@@ -131,6 +131,7 @@ export const config: PluginConfigDescriptor = {
     {
       isAirGapped: schema.maybe(schema.boolean({ defaultValue: false })),
       enableDeleteUnenrolledAgents: schema.maybe(schema.boolean({ defaultValue: false })),
+      enableManagedLogsAndMetricsDataviews: schema.boolean({ defaultValue: true }),
       registryUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       registryProxyUrl: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
       agents: schema.object({
@@ -223,10 +224,7 @@ export const config: PluginConfigDescriptor = {
         retrySetupOnBoot: schema.boolean({ defaultValue: false }),
         registry: schema.object(
           {
-            // Must be set back to `true`  before v9 release
-            // Requires all registry packages to add v9 as a compatible semver range
-            // https://github.com/elastic/kibana/issues/192624
-            kibanaVersionCheckEnabled: schema.boolean({ defaultValue: false }),
+            kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),
             excludePackages: schema.arrayOf(schema.string(), { defaultValue: [] }),
             spec: schema.object(
               {
@@ -254,10 +252,7 @@ export const config: PluginConfigDescriptor = {
           },
           {
             defaultValue: {
-              // Must be set back to `true`  before v9 release
-              // Requires all registry packages to add v9 as a compatible semver range
-              // https://github.com/elastic/kibana/issues/192624
-              kibanaVersionCheckEnabled: false,
+              kibanaVersionCheckEnabled: true,
               capabilities: [],
               excludePackages: [],
               spec: {

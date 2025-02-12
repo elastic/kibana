@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiPageHeaderProps } from '@elastic/eui';
+import type { EuiPageHeaderProps } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import type { ObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template';
 import React, { useContext } from 'react';
 import { useLocation } from 'react-router-dom';
@@ -20,7 +21,7 @@ import { KibanaEnvironmentContext } from '../../../../context/kibana_environment
 import { getPathForFeedback } from '../../../../utils/get_path_for_feedback';
 import { EnvironmentsContextProvider } from '../../../../context/environments_context/environments_context';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { ApmPluginStartDeps } from '../../../../plugin';
+import type { ApmPluginStartDeps } from '../../../../plugin';
 import { ServiceGroupSaveButton } from '../../../app/service_groups';
 import { ServiceGroupsButtonGroup } from '../../../app/service_groups/service_groups_button_group';
 import { ApmEnvironmentFilter } from '../../../shared/environment_filter';

@@ -16,6 +16,7 @@ import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.moc
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { Readable } from 'stream';
+import { createAxiosResponseMock } from '../lib/mocks';
 import { SENTINELONE_CONNECTOR_ID } from '../../../common/sentinelone/constants';
 import { SentinelOneConnector } from './sentinelone';
 import {
@@ -154,17 +155,6 @@ const createGetAgentsApiResponseMock = (): SentinelOneGetAgentsResponse => {
   };
 };
 
-const createAxiosResponseMock = <R>(data: R, status = 200, statusText = 'ok'): AxiosResponse<R> => {
-  return {
-    data,
-    status,
-    statusText,
-    headers: {},
-    // @ts-expect-error
-    config: {},
-  };
-};
-
 class SentinelOneConnectorTestClass extends SentinelOneConnector {
   // Defined details API responses for SentinelOne. These can be manipulated by the tests to mock specific results
   public mockResponses = {
@@ -180,6 +170,7 @@ class SentinelOneConnectorTestClass extends SentinelOneConnector {
     downloadRemoteScriptResults: Readable.from(['test']),
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public requestSpy = jest.fn(async ({ url }: SubActionRequestParams<any>) => {
     const response = createAxiosResponseMock({});
 

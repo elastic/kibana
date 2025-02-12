@@ -47,23 +47,12 @@ export const useStyles = () => {
       flex-grow: 0;
       text-align: left;
     }
-    & .euiDataGrid__controls {
-      gap: ${euiTheme.size.s};
-    }
-    & .euiDataGrid__leftControls {
-      display: flex;
-      align-items: center;
-      width: 100%;
-    }
     & .cspDataTableTotal {
       font-size: ${euiTheme.size.m};
       font-weight: ${euiTheme.font.weight.bold};
       border-right: ${euiTheme.border.thin};
       margin-inline: ${euiTheme.size.s};
       padding-right: ${euiTheme.size.m};
-    }
-    & .euiDataGrid__rightControls {
-      display: none;
     }
 
     & [data-test-subj='docTableExpandToggleColumn'] svg {

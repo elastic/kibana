@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ColumnarViewModel } from '@elastic/charts';
+import type { ColumnarViewModel } from '@elastic/charts';
 import type { ElasticFlameGraph } from '@kbn/profiling-utils';
 import { frameTypeToRGB, rgbToRGBA } from './frame_type_colors';
 

@@ -10,7 +10,7 @@ import React, { useMemo } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '../../hooks/use_kibana';
 
-interface Props {
+export interface StreamsAppSearchBarProps {
   query?: string;
   dateRangeFrom?: string;
   dateRangeTo?: string;
@@ -30,7 +30,7 @@ export function StreamsAppSearchBar({
   query,
   placeholder,
   dataViews,
-}: Props) {
+}: StreamsAppSearchBarProps) {
   const {
     dependencies: {
       start: { unifiedSearch },

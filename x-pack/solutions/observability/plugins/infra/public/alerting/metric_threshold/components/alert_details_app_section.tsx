@@ -19,9 +19,9 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import { RuleConditionChart, TopAlert } from '@kbn/observability-plugin/public';
+import { RuleConditionChart } from '@kbn/observability-plugin/public';
 import { ALERT_END, ALERT_START, ALERT_EVALUATION_VALUES, ALERT_GROUP } from '@kbn/rule-data-utils';
-import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
+import type { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import type {
   EventAnnotationConfig,
@@ -30,13 +30,13 @@ import type {
 } from '@kbn/event-annotation-common';
 
 import { getGroupFilters } from '@kbn/observability-plugin/public';
-import type { GenericAggType } from '@kbn/observability-plugin/public';
+import type { GenericAggType, TopAlert } from '@kbn/observability-plugin/public';
 import { metricValueFormatter } from '../../../../common/alerting/metrics/metric_value_formatter';
 import { Threshold } from '../../common/components/threshold';
 import { useMetricsDataViewContext, withSourceProvider } from '../../../containers/metrics_source';
 import { generateUniqueKey } from '../lib/generate_unique_key';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { AlertParams } from '../types';
+import type { AlertParams } from '../types';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 export type MetricThresholdRule = Rule<RuleTypeParams & AlertParams>;

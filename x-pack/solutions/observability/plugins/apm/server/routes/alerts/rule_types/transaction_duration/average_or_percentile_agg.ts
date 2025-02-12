@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { AggregationType } from '../../../../../common/rules/apm_rule_types';
-import { getDurationFieldForTransactions } from '../../../../lib/helpers/transactions';
+import type { getDurationFieldForTransactions } from '../../../../lib/helpers/transactions';
 
 type TransactionDurationField = ReturnType<typeof getDurationFieldForTransactions>;
 

@@ -7,7 +7,7 @@
 
 import type { OWNERS } from './owners';
 
-export enum HttpApiTagOperation {
+export enum HttpApiPrivilegeOperation {
   Read = 'Read',
   Create = 'Create',
   Delete = 'Delete',

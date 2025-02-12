@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -16,7 +16,8 @@ import {
 } from '@elastic/eui';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import type { SpacerSize } from '@elastic/eui/src/components/spacer/spacer';
-import type { RuleMigrationResourceData } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { PanelText } from '../../../../common/components/panel_text';
 import { useGetMissingResources } from '../../service/hooks/use_get_missing_resources';
 import * as i18n from './translations';
@@ -25,13 +26,14 @@ import type { RuleMigrationStats } from '../../types';
 
 interface RuleMigrationsUploadMissingPanelProps {
   migrationStats: RuleMigrationStats;
-  spacerSizeTop?: SpacerSize;
+  topSpacerSize?: SpacerSize;
 }
 export const RuleMigrationsUploadMissingPanel = React.memo<RuleMigrationsUploadMissingPanelProps>(
-  ({ migrationStats, spacerSizeTop }) => {
+  ({ migrationStats, topSpacerSize }) => {
     const { euiTheme } = useEuiTheme();
+    const { telemetry } = useKibana().services.siemMigrations.rules;
     const { openFlyout } = useRuleMigrationDataInputContext();
-    const [missingResources, setMissingResources] = React.useState<RuleMigrationResourceData[]>([]);
+    const [missingResources, setMissingResources] = useState<RuleMigrationResourceBase[]>([]);
     const { getMissingResources, isLoading } = useGetMissingResources(setMissingResources);
 
     useEffect(() => {
@@ -40,14 +42,18 @@ export const RuleMigrationsUploadMissingPanel = React.memo<RuleMigrationsUploadM
 
     const onOpenFlyout = useCallback(() => {
       openFlyout(migrationStats);
-    }, [migrationStats, openFlyout]);
+      telemetry.reportSetupMigrationOpenResources({
+        migrationId: migrationStats.id,
+        missingResourcesCount: missingResources.length,
+      });
+    }, [migrationStats, openFlyout, missingResources, telemetry]);
 
     if (isLoading || missingResources.length === 0) {
       return null;
     }
     return (
       <>
-        {spacerSizeTop && <EuiSpacer size={spacerSizeTop} />}
+        {topSpacerSize && <EuiSpacer size={topSpacerSize} />}
         <EuiPanel
           hasShadow={false}
           hasBorder

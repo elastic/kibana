@@ -6,21 +6,20 @@
  */
 
 import { EuiCallOut, EuiForm, EuiSpacer } from '@elastic/eui';
-import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { QualityWarning, SetupStatus } from '../../../../../common/log_analysis';
+import type { QualityWarning, SetupStatus } from '../../../../../common/log_analysis';
 import { AnalysisSetupIndicesForm } from './analysis_setup_indices_form';
 import { AnalysisSetupTimerangeForm } from './analysis_setup_timerange_form';
-import {
+import type {
   AvailableIndex,
   TimeRangeValidationError,
-  timeRangeValidationErrorRT,
   ValidationIndicesError,
-  validationIndicesErrorRT,
   ValidationUIError,
 } from './validation';
+import { timeRangeValidationErrorRT, validationIndicesErrorRT } from './validation';
 
 interface InitialConfigurationStepProps {
   setStartTime: (startTime: number | undefined) => void;

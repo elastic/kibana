@@ -28,7 +28,7 @@ export const createModuleTable = (
 ) => {
   const table = new Table({
     head,
-    colAligns: ['left', 'left'],
+    colAligns: head.map(() => 'left'),
     style: {
       compact: true,
       'padding-left': 2,

@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { EuiTableFieldDataColumnType } from '@elastic/eui';
+import { EuiCode, EuiTableFieldDataColumnType } from '@elastic/eui';
 
-import { CodeSuccess } from '../../../../../../../../styles';
+import { codeSuccessCss } from '../../../../../../../../styles';
 import { AllowedValue, EcsCompliantFieldMetadata } from '../../../../../../../../types';
 import { FIELD } from '../../../../../../../../translations';
 import { EcsAllowedValues } from '../../../../ecs_allowed_values';
@@ -28,7 +28,11 @@ export const getEcsCompliantTableColumns = (): Array<
   {
     field: 'type',
     name: ECS_MAPPING_TYPE,
-    render: (type: string) => <CodeSuccess data-test-subj="type">{type}</CodeSuccess>,
+    render: (type: string) => (
+      <EuiCode css={codeSuccessCss} data-test-subj="type">
+        {type}
+      </EuiCode>
+    ),
     sortable: true,
     truncateText: false,
     width: '25%',

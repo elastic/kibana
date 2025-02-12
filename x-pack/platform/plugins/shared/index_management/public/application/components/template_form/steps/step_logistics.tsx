@@ -40,6 +40,7 @@ import {
   STANDARD_INDEX_MODE,
   TIME_SERIES_MODE,
   LOGSDB_INDEX_MODE,
+  LOOKUP_INDEX_MODE,
 } from '../../../../../common/constants';
 import { indexModeLabels, indexModeDescriptions } from '../../../lib/index_mode_labels';
 
@@ -110,6 +111,7 @@ function getFieldsMeta(esDocsBase: string) {
         {
           value: STANDARD_INDEX_MODE,
           inputDisplay: indexModeLabels[STANDARD_INDEX_MODE],
+          'data-test-subj': 'index_mode_standard',
           dropdownDisplay: (
             <Fragment>
               <strong>{indexModeLabels[STANDARD_INDEX_MODE]}</strong>
@@ -122,6 +124,7 @@ function getFieldsMeta(esDocsBase: string) {
         {
           value: TIME_SERIES_MODE,
           inputDisplay: indexModeLabels[TIME_SERIES_MODE],
+          'data-test-subj': 'index_mode_time_series',
           dropdownDisplay: (
             <Fragment>
               <strong>{indexModeLabels[TIME_SERIES_MODE]}</strong>
@@ -134,11 +137,25 @@ function getFieldsMeta(esDocsBase: string) {
         {
           value: LOGSDB_INDEX_MODE,
           inputDisplay: indexModeLabels[LOGSDB_INDEX_MODE],
+          'data-test-subj': 'index_mode_logsdb',
           dropdownDisplay: (
             <Fragment>
               <strong>{indexModeLabels[LOGSDB_INDEX_MODE]}</strong>
               <EuiText size="s" color="subdued">
                 <p>{indexModeDescriptions[LOGSDB_INDEX_MODE]}</p>
+              </EuiText>
+            </Fragment>
+          ),
+        },
+        {
+          value: LOOKUP_INDEX_MODE,
+          inputDisplay: indexModeLabels[LOOKUP_INDEX_MODE],
+          'data-test-subj': 'index_mode_logsdb',
+          dropdownDisplay: (
+            <Fragment>
+              <strong>{indexModeLabels[LOOKUP_INDEX_MODE]}</strong>
+              <EuiText size="s" color="subdued">
+                <p>{indexModeDescriptions[LOOKUP_INDEX_MODE]}</p>
               </EuiText>
             </Fragment>
           ),
@@ -384,20 +401,18 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
             </FormRow>
           )}
 
-          {doCreateDataStream && (
-            <FormRow title={indexMode.title} description={indexMode.description}>
-              <UseField
-                path="indexMode"
-                componentProps={{
-                  euiFieldProps: {
-                    hasDividers: true,
-                    'data-test-subj': indexMode.testSubject,
-                    options: indexMode.options,
-                  },
-                }}
-              />
-            </FormRow>
-          )}
+          <FormRow title={indexMode.title} description={indexMode.description}>
+            <UseField
+              path="indexMode"
+              componentProps={{
+                euiFieldProps: {
+                  hasDividers: true,
+                  'data-test-subj': indexMode.testSubject,
+                  options: indexMode.options,
+                },
+              }}
+            />
+          </FormRow>
 
           {/*
             Since data stream and data retention are settings that are only allowed for non legacy,

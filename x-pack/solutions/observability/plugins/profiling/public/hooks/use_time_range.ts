@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { TimeRange } from '../../common/types';
+import type { TimeRange } from '../../common/types';
 import { getNextTimeRange } from '../utils/get_next_time_range';
 import { useTimeRangeContext } from './use_time_range_context';
 

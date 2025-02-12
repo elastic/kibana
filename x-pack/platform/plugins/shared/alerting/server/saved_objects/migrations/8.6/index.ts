@@ -60,6 +60,7 @@ const getMonitoring = (attributes: RawRule) => {
 
   const { lastExecutionDate, lastDuration } = executionStatus;
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const monitoringExecution = (monitoring as any).execution;
 
   return {

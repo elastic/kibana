@@ -44,7 +44,7 @@ interface ItemFilterPopoverProps {
 }
 
 // This component is mostly inspired by EUI's Data Grid Column Selector
-// https://github.com/elastic/eui/blob/main/src/components/datagrid/controls/column_selector.tsx
+// https://github.com/elastic/eui/blob/main/packages/eui/src/components/datagrid/controls/column_selector.tsx
 export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
   dataTestSubj,
   disabled,
@@ -59,7 +59,7 @@ export const ItemFilterPopover: FC<ItemFilterPopoverProps> = ({
   onChange,
 }) => {
   const euiThemeContext = useEuiTheme();
-  // Inspired by https://github.com/elastic/eui/blob/main/src/components/datagrid/controls/_data_grid_column_selector.scss
+  // Inspired by https://github.com/elastic/eui/blob/v94.0.0/src/components/datagrid/controls/_data_grid_column_selector.scss
   const itemSelectPopover = useMemo(
     () => css`
       ${euiYScrollWithShadows(euiThemeContext, {})}

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonProps } from '@elastic/eui';
+import type { EuiButtonProps } from '@elastic/eui';
+import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';

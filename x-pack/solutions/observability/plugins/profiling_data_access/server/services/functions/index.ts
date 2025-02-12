@@ -14,12 +14,12 @@ import {
   profilingAzureCostDiscountRate,
   profilingShowErrorFrames,
 } from '@kbn/observability-plugin/common';
-import { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
+import type { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
 import { createTopNFunctions } from '@kbn/profiling-utils';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { percentToFactor } from '../../utils/percent_to_factor';
 import { withProfilingSpan } from '../../utils/with_profiling_span';
-import { RegisterServicesParams } from '../register_services';
+import type { RegisterServicesParams } from '../register_services';
 import { searchStackTraces } from '../search_stack_traces';
 
 export interface FetchFunctionsParams {

@@ -1,8 +1,0 @@
-{
-  "type": "test-helper",
-  "id": "@kbn/observability-onboarding-e2e",
-  "owner": ["@elastic/obs-ux-logs-team"],
-  "group": "observability",
-  "visibility": "private",
-  "devOnly": true
-}

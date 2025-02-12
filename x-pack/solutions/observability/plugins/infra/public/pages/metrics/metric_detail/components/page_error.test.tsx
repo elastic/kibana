@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 
 import { PageError } from './page_error';
 import { errorTitle } from '../../../../translations';
-import { InfraHttpError } from '../../../../types';
+import type { InfraHttpError } from '../../../../types';
 import { useDocumentTitle } from '../../../../hooks/use_document_title';
 import { I18nProvider } from '@kbn/i18n-react';
 

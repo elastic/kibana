@@ -13,10 +13,10 @@ import { Subscription } from 'rxjs';
 
 import { uiActions } from '../../kibana_services';
 import {
-  panelBadgeTrigger,
-  panelNotificationTrigger,
   PANEL_BADGE_TRIGGER,
   PANEL_NOTIFICATION_TRIGGER,
+  panelBadgeTrigger,
+  panelNotificationTrigger,
 } from '../../panel_actions';
 import { AnyApiAction } from '../../panel_actions/types';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
@@ -50,7 +50,7 @@ export const usePresentationPanelHeaderActions = <
           embeddable: api,
         })) as AnyApiAction[]) ?? [];
 
-      const disabledActions = (api.disabledActionIds?.value ?? []).concat(disabledNotifications);
+      const disabledActions = (api.disabledActionIds$?.value ?? []).concat(disabledNotifications);
       nextActions = nextActions.filter((badge) => disabledActions.indexOf(badge.id) === -1);
       return nextActions;
     };
@@ -80,10 +80,11 @@ export const usePresentationPanelHeaderActions = <
       const apiContext = { embeddable: api };
 
       // subscribe to any frequently changing badge actions
-      const frequentlyChangingBadges = uiActions.getFrequentlyChangingActionsForTrigger(
+      const frequentlyChangingBadges = await uiActions.getFrequentlyChangingActionsForTrigger(
         PANEL_BADGE_TRIGGER,
         apiContext
       );
+      if (canceled) return;
       for (const badge of frequentlyChangingBadges) {
         subscriptions.add(
           badge.subscribeToCompatibilityChanges(apiContext, (isCompatible, action) =>
@@ -93,10 +94,12 @@ export const usePresentationPanelHeaderActions = <
       }
 
       // subscribe to any frequently changing notification actions
-      const frequentlyChangingNotifications = uiActions.getFrequentlyChangingActionsForTrigger(
-        PANEL_NOTIFICATION_TRIGGER,
-        apiContext
-      );
+      const frequentlyChangingNotifications =
+        await uiActions.getFrequentlyChangingActionsForTrigger(
+          PANEL_NOTIFICATION_TRIGGER,
+          apiContext
+        );
+      if (canceled) return;
       for (const notification of frequentlyChangingNotifications) {
         if (!disabledNotifications.includes(notification.id))
           subscriptions.add(
@@ -125,7 +128,6 @@ export const usePresentationPanelHeaderActions = <
       const badgeElement = (
         <EuiBadge
           key={badge.id}
-          className="embPanel__headerBadge"
           iconType={badge.getIconType({ embeddable: api, trigger: panelBadgeTrigger })}
           onClick={() => badge.execute({ embeddable: api, trigger: panelBadgeTrigger })}
           onClickAriaLabel={badge.getDisplayName({ embeddable: api, trigger: panelBadgeTrigger })}

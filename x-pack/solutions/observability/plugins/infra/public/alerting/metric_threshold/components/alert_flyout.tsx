@@ -8,8 +8,8 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 import { TriggerActionsContext } from '../../../containers/triggers_actions_context';
 import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../../common/alerting/metrics';
-import { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
-import { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import type { MetricsExplorerSeries } from '../../../../common/http_api/metrics_explorer';
+import type { MetricsExplorerOptions } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { useAlertPrefillContext } from '../../use_alert_prefill';
 
 interface Props {

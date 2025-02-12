@@ -20,13 +20,13 @@ import { spacesServiceMock } from '@kbn/spaces-plugin/server/spaces_service/spac
 import { ActionType as ConnectorType, ConnectorUsageCollector } from '../types';
 import { actionsAuthorizationMock, actionsMock } from '../mocks';
 import {
+  ActionExecutionSourceType,
   asBackgroundTaskExecutionSource,
   asHttpRequestExecutionSource,
   asSavedObjectExecutionSource,
 } from './action_execution_source';
 import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
-import { SecurityConnectorFeatureId } from '../../common';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { createTaskRunError, getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
@@ -42,6 +42,7 @@ const eventLogger = eventLoggerMock.create();
 const CONNECTOR_ID = '1';
 const ACTION_EXECUTION_ID = '2';
 const ACTION_PARAMS = { foo: true };
+const SOURCE = { type: ActionExecutionSourceType.HTTP_REQUEST, source: 'test' };
 
 const executeUnsecuredParams = {
   actionExecutionId: ACTION_EXECUTION_ID,
@@ -56,6 +57,7 @@ const executeParams = {
   params: ACTION_PARAMS,
   executionId: '123abc',
   request: {} as KibanaRequest,
+  source: SOURCE,
 };
 
 const spacesMock = spacesServiceMock.createStartContract();
@@ -132,6 +134,20 @@ const systemConnectorType: jest.Mocked<ConnectorType> = {
   executor: jest.fn(),
 };
 
+const subFeatureConnectorType: jest.Mocked<ConnectorType> = {
+  id: 'test.sub-feature-action',
+  name: 'Test',
+  minimumLicenseRequired: 'platinum',
+  supportedFeatureIds: ['siem'],
+  subFeature: 'endpointSecurity',
+  validate: {
+    config: { schema: schema.any() },
+    secrets: { schema: schema.any() },
+    params: { schema: schema.any() },
+  },
+  executor: jest.fn(),
+};
+
 const connectorSavedObject = {
   id: CONNECTOR_ID,
   type: 'action',
@@ -149,6 +165,16 @@ const connectorSavedObject = {
   references: [],
 };
 
+const subFeatureConnectorSavedObject = {
+  ...connectorSavedObject,
+  attributes: {
+    ...connectorSavedObject.attributes,
+    config: {},
+    secrets: {},
+    actionTypeId: 'test.sub-feature-action',
+  },
+};
+
 interface ActionUsage {
   request_body_bytes: number;
 }
@@ -162,6 +188,7 @@ const getBaseExecuteStartEventLogDoc = (unsecured: boolean) => {
     kibana: {
       action: {
         execution: {
+          ...(unsecured ? {} : { source: 'http_request' }),
           uuid: ACTION_EXECUTION_ID,
         },
         id: CONNECTOR_ID,
@@ -303,6 +330,7 @@ describe('Action Executor', () => {
         params: { foo: true },
         logger: loggerMock,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        ...(executeUnsecure ? {} : { source: SOURCE }),
       });
 
       expect(loggerMock.debug).toBeCalledWith('executing action test:1: 1');
@@ -458,6 +486,7 @@ describe('Action Executor', () => {
         params: { foo: true },
         logger: loggerMock,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        ...(executeUnsecure ? {} : { source: SOURCE }),
       });
 
       expect(loggerMock.debug).toBeCalledWith('executing action test:preconfigured: Preconfigured');
@@ -542,6 +571,7 @@ describe('Action Executor', () => {
           logger: loggerMock,
           request: {},
           connectorUsageCollector: expect.any(ConnectorUsageCollector),
+          ...(executeUnsecure ? {} : { source: SOURCE }),
         });
       }
 
@@ -619,6 +649,100 @@ describe('Action Executor', () => {
       });
     });
 
+    test(`${label} with sub-feature connector`, async () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        subFeatureConnectorSavedObject
+      );
+      connectorTypeRegistry.get.mockReturnValueOnce(subFeatureConnectorType);
+      connectorTypeRegistry.hasSubFeature.mockReturnValueOnce(true);
+
+      if (executeUnsecure) {
+        await actionExecutor.executeUnsecured(executeUnsecuredParams);
+      } else {
+        await actionExecutor.execute(executeParams);
+      }
+
+      if (executeUnsecure) {
+        expect(connectorTypeRegistry.hasSubFeature).not.toHaveBeenCalled();
+      } else {
+        expect(connectorTypeRegistry.hasSubFeature).toHaveBeenCalled();
+        expect(authorizationMock.ensureAuthorized).toBeCalled();
+      }
+
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+        'action',
+        CONNECTOR_ID,
+        { namespace: 'some-namespace' }
+      );
+
+      expect(connectorTypeRegistry.get).toHaveBeenCalledWith('test.sub-feature-action');
+      expect(connectorTypeRegistry.isActionExecutable).toHaveBeenCalledWith(
+        CONNECTOR_ID,
+        'test.sub-feature-action',
+        {
+          notifyUsage: true,
+        }
+      );
+
+      expect(subFeatureConnectorType.executor).toHaveBeenCalledWith({
+        actionId: CONNECTOR_ID,
+        services: expect.anything(),
+        config: {},
+        secrets: {},
+        params: { foo: true },
+        logger: loggerMock,
+        connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        ...(executeUnsecure ? {} : { source: SOURCE }),
+      });
+
+      expect(loggerMock.debug).toBeCalledWith('executing action test.sub-feature-action:1: 1');
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(2);
+
+      const execStartDoc = getBaseExecuteStartEventLogDoc(executeUnsecure);
+      const execDoc = getBaseExecuteEventLogDoc(executeUnsecure);
+
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+        ...execStartDoc,
+        kibana: {
+          ...execStartDoc.kibana,
+          action: {
+            ...execStartDoc.kibana.action,
+            type_id: 'test.sub-feature-action',
+          },
+          saved_objects: [
+            {
+              id: '1',
+              namespace: 'some-namespace',
+              rel: 'primary',
+              type: 'action',
+              type_id: 'test.sub-feature-action',
+            },
+          ],
+        },
+        message: 'action started: test.sub-feature-action:1: 1',
+      });
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
+        ...execDoc,
+        kibana: {
+          ...execDoc.kibana,
+          action: {
+            ...execDoc.kibana.action,
+            type_id: 'test.sub-feature-action',
+          },
+          saved_objects: [
+            {
+              id: '1',
+              namespace: 'some-namespace',
+              rel: 'primary',
+              type: 'action',
+              type_id: 'test.sub-feature-action',
+            },
+          ],
+        },
+        message: 'action executed: test.sub-feature-action:1: 1',
+      });
+    });
+
     test(`${label} should return error status with error message when executor returns an error`, async () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         connectorSavedObject
@@ -644,59 +768,6 @@ describe('Action Executor', () => {
         retry: true,
         status: 'error',
       });
-    });
-
-    test(`${label} should handle SentinelOne connector type`, async () => {
-      const sentinelOneConnectorType: jest.Mocked<ConnectorType> = {
-        id: '.sentinelone',
-        name: 'sentinelone',
-        minimumLicenseRequired: 'enterprise',
-        supportedFeatureIds: [SecurityConnectorFeatureId],
-        validate: {
-          config: { schema: schema.any() },
-          secrets: { schema: schema.any() },
-          params: { schema: schema.any() },
-        },
-        executor: jest.fn(),
-      };
-      const sentinelOneSavedObject = {
-        id: '1',
-        type: 'action',
-        attributes: {
-          name: '1',
-          actionTypeId: '.sentinelone',
-          config: {
-            bar: true,
-          },
-          secrets: {
-            baz: true,
-          },
-          isMissingSecrets: false,
-        },
-        references: [],
-      };
-
-      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
-        sentinelOneSavedObject
-      );
-      connectorTypeRegistry.get.mockReturnValueOnce(sentinelOneConnectorType);
-
-      if (executeUnsecure) {
-        await actionExecutor.executeUnsecured({
-          ...executeUnsecuredParams,
-          actionId: 'sentinel-one-connector-authz',
-        });
-        expect(authorizationMock.ensureAuthorized).not.toHaveBeenCalled();
-      } else {
-        await actionExecutor.execute({
-          ...executeParams,
-          actionId: 'sentinel-one-connector-authz',
-        });
-        expect(authorizationMock.ensureAuthorized).toHaveBeenCalledWith({
-          operation: 'execute',
-          actionTypeId: '.sentinelone',
-        });
-      }
     });
 
     test(`${label} with taskInfo`, async () => {
@@ -923,6 +994,7 @@ describe('Action Executor', () => {
         params: { foo: true },
         logger: loggerMock,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        ...(executeUnsecure ? {} : { source: SOURCE }),
       });
     });
 
@@ -955,6 +1027,7 @@ describe('Action Executor', () => {
         logger: loggerMock,
         request: {},
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        source: SOURCE,
       });
     });
 
@@ -1024,6 +1097,7 @@ describe('Action Executor', () => {
         params: { foo: true },
         logger: loggerMock,
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        ...(executeUnsecure ? {} : { source: SOURCE }),
       });
 
       expect(loggerMock.debug).toBeCalledWith('executing action test:preconfigured: Preconfigured');
@@ -1117,6 +1191,7 @@ describe('Action Executor', () => {
         logger: loggerMock,
         request: {},
         connectorUsageCollector: expect.any(ConnectorUsageCollector),
+        source: SOURCE,
       });
 
       expect(loggerMock.debug).toBeCalledWith(
@@ -1337,6 +1412,7 @@ describe('Action Executor', () => {
           params: { foo: true },
           logger: loggerMock,
           connectorUsageCollector: expect.any(ConnectorUsageCollector),
+          source: SOURCE,
         });
       }
     });
@@ -1371,7 +1447,7 @@ describe('System actions', () => {
       getKibanaPrivileges: () => ['test/create'],
     });
     connectorTypeRegistry.isSystemActionType.mockReturnValueOnce(true);
-    connectorTypeRegistry.getSystemActionKibanaPrivileges.mockReturnValueOnce(['test/create']);
+    connectorTypeRegistry.getActionKibanaPrivileges.mockReturnValueOnce(['test/create']);
 
     await actionExecutor.execute({ ...executeParams, actionId: 'system-connector-.cases' });
 
@@ -1382,13 +1458,13 @@ describe('System actions', () => {
     });
   });
 
-  test('pass the params to the connectorTypeRegistry when authorizing system actions', async () => {
+  test('pass the params and source to the connectorTypeRegistry when authorizing system actions', async () => {
     connectorTypeRegistry.get.mockReturnValueOnce({
       ...systemConnectorType,
       getKibanaPrivileges: () => ['test/create'],
     });
     connectorTypeRegistry.isSystemActionType.mockReturnValueOnce(true);
-    connectorTypeRegistry.getSystemActionKibanaPrivileges.mockReturnValueOnce(['test/create']);
+    connectorTypeRegistry.getActionKibanaPrivileges.mockReturnValueOnce(['test/create']);
 
     await actionExecutor.execute({
       ...executeParams,
@@ -1396,12 +1472,69 @@ describe('System actions', () => {
       actionId: 'system-connector-.cases',
     });
 
-    expect(connectorTypeRegistry.getSystemActionKibanaPrivileges).toHaveBeenCalledWith('.cases', {
-      foo: 'bar',
-    });
+    expect(connectorTypeRegistry.getActionKibanaPrivileges).toHaveBeenCalledWith(
+      '.cases',
+      {
+        foo: 'bar',
+      },
+      ActionExecutionSourceType.HTTP_REQUEST
+    );
 
     expect(authorizationMock.ensureAuthorized).toBeCalledWith({
       actionTypeId: '.cases',
+      operation: 'execute',
+      additionalPrivileges: ['test/create'],
+    });
+  });
+});
+
+describe('Sub-feature connectors', () => {
+  test('calls ensureAuthorized on sub-feature connectors if additional privileges are specified', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      subFeatureConnectorSavedObject
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce({
+      ...subFeatureConnectorType,
+      getKibanaPrivileges: () => ['test/create'],
+    });
+    connectorTypeRegistry.hasSubFeature.mockReturnValueOnce(true);
+    connectorTypeRegistry.getActionKibanaPrivileges.mockReturnValueOnce(['test/create']);
+
+    await actionExecutor.execute(executeParams);
+
+    expect(authorizationMock.ensureAuthorized).toBeCalledWith({
+      actionTypeId: 'test.sub-feature-action',
+      operation: 'execute',
+      additionalPrivileges: ['test/create'],
+    });
+  });
+
+  test('pass the params and source to the connectorTypeRegistry when authorizing sub-feature connectors', async () => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+      subFeatureConnectorSavedObject
+    );
+    connectorTypeRegistry.get.mockReturnValueOnce({
+      ...subFeatureConnectorType,
+      getKibanaPrivileges: () => ['test/create'],
+    });
+    connectorTypeRegistry.hasSubFeature.mockReturnValueOnce(true);
+    connectorTypeRegistry.getActionKibanaPrivileges.mockReturnValueOnce(['test/create']);
+
+    await actionExecutor.execute({
+      ...executeParams,
+      params: { foo: 'bar' },
+    });
+
+    expect(connectorTypeRegistry.getActionKibanaPrivileges).toHaveBeenCalledWith(
+      'test.sub-feature-action',
+      {
+        foo: 'bar',
+      },
+      ActionExecutionSourceType.HTTP_REQUEST
+    );
+
+    expect(authorizationMock.ensureAuthorized).toBeCalledWith({
+      actionTypeId: 'test.sub-feature-action',
       operation: 'execute',
       additionalPrivileges: ['test/create'],
     });
@@ -1474,6 +1607,7 @@ describe('Event log', () => {
       kibana: {
         action: {
           execution: {
+            source: 'http_request',
             uuid: '2',
           },
           name: 'action-1',
@@ -1528,6 +1662,7 @@ describe('Event log', () => {
       kibana: {
         action: {
           execution: {
+            source: 'http_request',
             uuid: '2',
           },
           name: 'action-1',
@@ -1591,6 +1726,7 @@ describe('Event log', () => {
       kibana: {
         action: {
           execution: {
+            source: 'http_request',
             usage: {
               request_body_bytes: 0,
             },
@@ -1675,6 +1811,7 @@ describe('Event log', () => {
             gen_ai: {
               usage: mockGenAi.usage,
             },
+            source: 'http_request',
             usage: {
               request_body_bytes: 0,
             },
@@ -1775,6 +1912,7 @@ describe('Event log', () => {
                 total_tokens: 35,
               },
             },
+            source: 'http_request',
             usage: {
               request_body_bytes: 0,
             },

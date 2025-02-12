@@ -31,7 +31,7 @@
         "signature": [
           "({ actions, title, body }: NotFoundProps) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/prompt/not_found/src/not_found_prompt.tsx",
+        "path": "src/platform/packages/shared/shared-ux/prompt/not_found/src/not_found_prompt.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +45,7 @@
             "signature": [
               "NotFoundProps"
             ],
-            "path": "packages/shared-ux/prompt/not_found/src/not_found_prompt.tsx",
+            "path": "src/platform/packages/shared/shared-ux/prompt/not_found/src/not_found_prompt.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

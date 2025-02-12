@@ -6,8 +6,9 @@
  */
 
 import { queryByLabelText } from '@testing-library/react';
-import { createMemoryHistory, MemoryHistory } from 'history';
-import { CoreStart } from '@kbn/core/public';
+import type { MemoryHistory } from 'history';
+import { createMemoryHistory } from 'history';
+import type { CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { MockApmPluginContextWrapper } from '../../../context/apm_plugin/mock_apm_plugin_context';
@@ -23,6 +24,13 @@ import { TransactionOverview } from '.';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { MockTimeRangeContextProvider } from '../../../context/time_range_metadata/mock_time_range_metadata_context_provider';
+
+// Mock the usePerformanceContext hook
+jest.mock('@kbn/ebt-tools', () => ({
+  usePerformanceContext: () => ({
+    onPageReady: jest.fn(),
+  }),
+}));
 
 const KibanaReactContext = createKibanaReactContext({
   uiSettings: { get: () => true },

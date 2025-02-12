@@ -31,13 +31,13 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 
+import { errorToText } from '../../../../../../common/utils/error_to_text';
 import { HttpLogic } from '../../../../shared/http';
 import { KibanaLogic } from '../../../../shared/kibana';
 
 import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 import { EnterpriseSearchContentPageTemplate } from '../../layout';
 import { NewConnectorLogic } from '../../new_index/method_connector/new_connector_logic';
-import { errorToText } from '../../new_index/utils/error_to_text';
 import { connectorsBreadcrumbs } from '../connectors';
 
 import { generateStepState } from '../utils/generate_step_state';
@@ -51,11 +51,12 @@ import { StartStep } from './start_step';
 
 export type ConnectorCreationSteps = 'start' | 'deployment' | 'configure' | 'finish';
 export type SelfManagePreference = 'native' | 'selfManaged';
+
 export const CreateConnector: React.FC = () => {
   const { overlays } = useKibana().services;
 
   const { http } = useValues(HttpLogic);
-  const { application, history } = useValues(KibanaLogic);
+  const { application, history, isAgentlessEnabled } = useValues(KibanaLogic);
 
   const { error } = useValues(AddConnectorApiLogic);
   const { euiTheme } = useEuiTheme();
@@ -65,13 +66,10 @@ export const CreateConnector: React.FC = () => {
   const { setCurrentStep } = useActions(NewConnectorLogic);
   const stepStates = generateStepState(currentStep);
 
-  const { config } = useValues(KibanaLogic);
-  const isRunningLocally = (config.host ?? '').includes('localhost');
-
   useEffect(() => {
     if (
       (selectedConnector && !selectedConnector.isNative && selfManagePreference === 'native') ||
-      isRunningLocally
+      !isAgentlessEnabled
     ) {
       setSelfManagePreference('selfManaged');
     }
@@ -146,7 +144,6 @@ export const CreateConnector: React.FC = () => {
           setSelfManagePreference(preference);
         }}
         error={errorToText(error)}
-        isRunningLocally={isRunningLocally}
       />
     ),
   };

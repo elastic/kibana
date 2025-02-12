@@ -5,11 +5,18 @@
  * 2.0.
  */
 
-import { EuiFieldSearch, EuiOutsideClickDetector, EuiPanel } from '@elastic/eui';
 import React from 'react';
+import { css } from '@emotion/react';
+import {
+  EuiFieldSearch,
+  EuiOutsideClickDetector,
+  EuiPanel,
+  logicalCSS,
+  UseEuiTheme,
+} from '@elastic/eui';
+
 import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { euiThemeVars } from '@kbn/ui-theme';
+
 import { composeStateUpdaters } from '../../lib/typed_react';
 import { SuggestionItem } from './suggestion_item';
 
@@ -59,7 +66,7 @@ export class AutocompleteField extends React.Component<
 
     return (
       <EuiOutsideClickDetector onOutsideClick={this.handleBlur}>
-        <AutocompleteContainer>
+        <div css={autocompleteContainerCss}>
           <EuiFieldSearch
             fullWidth
             disabled={disabled}
@@ -76,7 +83,7 @@ export class AutocompleteField extends React.Component<
             aria-label={ariaLabel}
           />
           {areSuggestionsVisible && !isLoadingSuggestions && suggestions.length > 0 ? (
-            <SuggestionsPanel>
+            <EuiPanel css={suggestionsPanelCss} paddingSize="none" hasShadow>
               {suggestions.map((suggestion, suggestionIndex) => (
                 <SuggestionItem
                   key={suggestion.text}
@@ -86,9 +93,9 @@ export class AutocompleteField extends React.Component<
                   onClick={this.applySuggestionAt(suggestionIndex)}
                 />
               ))}
-            </SuggestionsPanel>
+            </EuiPanel>
           ) : null}
-        </AutocompleteContainer>
+        </div>
       </EuiOutsideClickDetector>
     );
   }
@@ -299,19 +306,16 @@ const withUnfocused = (state: AutocompleteFieldState) => ({
   isFocused: false,
 });
 
-const AutocompleteContainer = euiStyled.div`
+const autocompleteContainerCss = css`
   position: relative;
 `;
 
-const SuggestionsPanel = euiStyled(EuiPanel).attrs(() => ({
-  paddingSize: 'none',
-  hasShadow: true,
-}))`
+const suggestionsPanelCss = ({ euiTheme }: UseEuiTheme) => css`
   position: absolute;
   width: 100%;
-  margin-top: 2px;
+  ${logicalCSS('margin-top', euiTheme.size.xxs)}
   overflow-x: hidden;
   overflow-y: scroll;
-  z-index: ${euiThemeVars.euiZLevel1};
+  z-index: ${euiTheme.levels.maskBelowHeader};
   max-height: 322px;
 `;

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Dispatch, useReducer } from 'react';
+import type { Dispatch } from 'react';
+import { useReducer } from 'react';
 import deepEqual from 'fast-deep-equal';
 import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';

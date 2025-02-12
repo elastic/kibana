@@ -98,13 +98,7 @@
           "<DecodedValue, EncodedValue, InputValue>(runtimeType: ",
           "Type",
           "<DecodedValue, EncodedValue, InputValue>) => ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouteValidationFunction",
-            "text": "RouteValidationFunction"
-          },
+          "RouteValidationFunction",
           "<DecodedValue>"
         ],
         "path": "src/platform/packages/shared/kbn-io-ts-utils/src/route_validation/index.ts",

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TopNodesResponse } from '../../../../common/http_api/overview_api';
-import { InfraDatabaseSearchResponse } from '../../../lib/adapters/framework';
+import type { TopNodesResponse } from '../../../../common/http_api/overview_api';
+import type { InfraDatabaseSearchResponse } from '../../../lib/adapters/framework';
 import { getMetadataFromNodeBucket } from './get_matadata_from_node_bucket';
-import { ESResponseForTopNodes } from './types';
+import type { ESResponseForTopNodes } from './types';
 
 export const convertESResponseToTopNodesResponse = (
   response: InfraDatabaseSearchResponse<{}, ESResponseForTopNodes>

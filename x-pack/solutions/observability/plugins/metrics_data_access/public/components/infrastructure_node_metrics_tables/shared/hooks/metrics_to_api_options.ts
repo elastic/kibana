@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ObjectValues } from '../../../../../common/utility_types';
+import type { ObjectValues } from '../../../../../common/utility_types';
 import type {
   MetricsExplorerOptions,
   MetricsExplorerOptionsMetric,

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
-import {
+import type { HttpStart } from '@kbn/core/public';
+import type {
   MetricsExplorerRequestBody,
   MetricsExplorerResponse,
 } from '../../common/http_api/metrics_explorer';

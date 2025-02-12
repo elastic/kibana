@@ -52,7 +52,7 @@ function withDefaultPublicAccess<Method extends RouteMethod>(
     return {
       ...options,
       access: PUBLIC_API_ACCESS,
-      security: DEFAULT_FLEET_ROUTE_SECURITY,
+      security: options.security ? options.security : DEFAULT_FLEET_ROUTE_SECURITY,
     };
   }
 }

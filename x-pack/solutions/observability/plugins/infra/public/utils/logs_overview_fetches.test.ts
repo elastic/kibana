@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createResolvedLogViewMock } from '@kbn/logs-shared-plugin/common/mocks';
 import { createLogsSharedPluginStartMock } from '@kbn/logs-shared-plugin/public/mocks';
 import { of } from 'rxjs';
 import { createInfraPluginStartMock } from '../mocks';
-import { InfraClientStartDeps, InfraClientStartExports } from '../types';
+import type { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { getLogsHasDataFetcher, getLogsOverviewDataFetcher } from './logs_overview_fetchers';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 

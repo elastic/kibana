@@ -9,7 +9,6 @@
 
 import React from 'react';
 
-// eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
 
 import {
@@ -118,7 +117,7 @@ export const ElasticsearchJavaClientReadme = () => {
                 <EuiCodeBlock language="java" isCopyable>
                   {`dependencies {
     implementation 'co.elastic.clients:elasticsearch-java:8.5.0'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.12.3'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.17.0'
 }`}
                 </EuiCodeBlock>
 

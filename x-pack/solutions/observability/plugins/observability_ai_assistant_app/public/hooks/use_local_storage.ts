@@ -5,44 +5,73 @@
  * 2.0.
  */
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
-export function useLocalStorage<T>(key: string, defaultValue: T) {
-  // This is necessary to fix a race condition issue.
-  // It guarantees that the latest value will be always returned after the value is updated
-  const [storageUpdate, setStorageUpdate] = useState(0);
+const LOCAL_STORAGE_UPDATE_EVENT_TYPE = 'customLocalStorage';
 
-  const item = useMemo(() => {
-    return getFromStorage(key, defaultValue);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, storageUpdate, defaultValue]);
-
-  const saveToStorage = useCallback(
-    (value: T) => {
-      if (value === undefined) {
-        window.localStorage.removeItem(key);
-      } else {
-        window.localStorage.setItem(key, JSON.stringify(value));
-        setStorageUpdate(storageUpdate + 1);
-      }
-    },
-    [key, storageUpdate]
+export function useLocalStorage<T extends AllowedValue>(
+  key: string,
+  defaultValue: T | (() => T)
+): [T, SetValue<T>] {
+  const defaultValueRef = useRef<T>(
+    typeof defaultValue === 'function' ? defaultValue() : defaultValue
   );
 
+  const [value, setValue] = useState(() => getFromStorage(key, defaultValueRef.current));
+
+  const valueRef = useRef(value);
+  valueRef.current = value;
+
+  const setter = useMemo(() => {
+    return (valueOrCallback: T | ((prev: T) => T)) => {
+      const nextValue =
+        typeof valueOrCallback === 'function' ? valueOrCallback(valueRef.current) : valueOrCallback;
+
+      window.localStorage.setItem(key, JSON.stringify(nextValue));
+
+      /*
+       * This is necessary to trigger the event listener in the same
+       * window context.
+       */
+      window.dispatchEvent(
+        new window.CustomEvent<{ key: string }>(LOCAL_STORAGE_UPDATE_EVENT_TYPE, {
+          detail: { key },
+        })
+      );
+    };
+  }, [key]);
+
   useEffect(() => {
-    function onUpdate(event: StorageEvent) {
+    function updateValueFromStorage() {
+      setValue(getFromStorage(key, defaultValueRef.current));
+    }
+
+    function onStorageEvent(event: StorageEvent) {
       if (event.key === key) {
-        setStorageUpdate(storageUpdate + 1);
+        updateValueFromStorage();
       }
     }
-    window.addEventListener('storage', onUpdate);
-    return () => {
-      window.removeEventListener('storage', onUpdate);
-    };
-  }, [key, setStorageUpdate, storageUpdate]);
 
-  return useMemo(() => [item, saveToStorage] as const, [item, saveToStorage]);
+    function onCustomLocalStorageEvent(event: Event) {
+      if (event instanceof window.CustomEvent && event.detail?.key === key) {
+        updateValueFromStorage();
+      }
+    }
+
+    window.addEventListener('storage', onStorageEvent);
+    window.addEventListener(LOCAL_STORAGE_UPDATE_EVENT_TYPE, onCustomLocalStorageEvent);
+
+    return () => {
+      window.removeEventListener('storage', onStorageEvent);
+      window.removeEventListener(LOCAL_STORAGE_UPDATE_EVENT_TYPE, onCustomLocalStorageEvent);
+    };
+  }, [key]);
+
+  return [value, setter];
 }
+
+type AllowedValue = string | number | boolean | Record<string, any> | any[];
+type SetValue<T extends AllowedValue> = (next: T | ((prev: T) => T)) => void;
 
 function getFromStorage<T>(keyName: string, defaultValue: T) {
   const storedItem = window.localStorage.getItem(keyName);

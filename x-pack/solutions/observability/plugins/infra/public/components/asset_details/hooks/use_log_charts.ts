@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMemo } from 'react';
-import { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { useChartSeriesColor } from './use_chart_series_color';
 
 const LOG_RATE = i18n.translate('xpack.infra.assetDetails.charts.logRate', {

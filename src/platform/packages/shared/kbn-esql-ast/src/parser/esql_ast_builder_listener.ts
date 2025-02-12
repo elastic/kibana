@@ -60,9 +60,12 @@ import type { ESQLAst, ESQLAstMetricsCommand } from '../types';
 import { createJoinCommand } from './factories/join';
 import { createDissectCommand } from './factories/dissect';
 import { createGrokCommand } from './factories/grok';
+import { createStatsCommand } from './factories/stats';
 
 export class ESQLAstBuilderListener implements ESQLParserListener {
   private ast: ESQLAst = [];
+
+  constructor(public src: string) {}
 
   public getAst() {
     return { ast: this.ast };
@@ -121,15 +124,13 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
     this.ast.push(commandAst);
     commandAst.args.push(...collectAllSourceIdentifiers(ctx));
     const metadataContext = ctx.metadata();
-    const metadataContent =
-      metadataContext?.deprecated_metadata()?.metadataOption() || metadataContext?.metadataOption();
-    if (metadataContent && metadataContent.METADATA()) {
+    if (metadataContext && metadataContext.METADATA()) {
       const option = createOption(
-        metadataContent.METADATA().getText().toLowerCase(),
-        metadataContent
+        metadataContext.METADATA().getText().toLowerCase(),
+        metadataContext
       );
       commandAst.args.push(option);
-      option.args.push(...collectAllColumnIdentifiers(metadataContent));
+      option.args.push(...collectAllColumnIdentifiers(metadataContext));
     }
   }
 
@@ -173,16 +174,9 @@ export class ESQLAstBuilderListener implements ESQLParserListener {
    * @param ctx the parse tree
    */
   exitStatsCommand(ctx: StatsCommandContext) {
-    const command = createCommand('stats', ctx);
-    this.ast.push(command);
+    const command = createStatsCommand(ctx, this.src);
 
-    // STATS expression is optional
-    if (ctx._stats) {
-      command.args.push(...collectAllAggFields(ctx.aggFields()));
-    }
-    if (ctx._grouping) {
-      command.args.push(...visitByOption(ctx, ctx.fields()));
-    }
+    this.ast.push(command);
   }
 
   /**

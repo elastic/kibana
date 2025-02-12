@@ -378,7 +378,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Search source Alert', function () {
     // Failing: https://github.com/elastic/kibana/issues/203045
-    this.tags(['skipSvlOblt']);
+    // Failing: https://github.com/elastic/kibana/issues/207865
+    this.tags(['skipSvlOblt', 'skipSvlSearch']);
 
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
@@ -553,9 +554,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // change title
       await testSubjects.click('editIndexPatternButton');
-      await testSubjects.setValue('createIndexPatternTitleInput', 'search-s', {
-        clearWithKeyboard: true,
-        typeCharByChar: true,
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await retry.try(async () => {
+        await PageObjects.settings.setIndexPatternField('search-s*');
       });
       await testSubjects.click('saveIndexPatternButton');
       await testSubjects.click('confirmModalConfirmButton');

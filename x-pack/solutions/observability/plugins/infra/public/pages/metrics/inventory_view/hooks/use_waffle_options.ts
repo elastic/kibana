@@ -12,7 +12,7 @@ import { constant, identity } from 'fp-ts/lib/function';
 import createContainer from 'constate';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
-import { InventoryViewOptions } from '../../../../../common/inventory_views/types';
+import type { InventoryViewOptions } from '../../../../../common/inventory_views/types';
 import {
   type InventoryLegendOptions,
   type InventoryOptionsState,

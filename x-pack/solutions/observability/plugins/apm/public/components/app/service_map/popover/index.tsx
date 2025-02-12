@@ -15,19 +15,12 @@ import {
   EuiIcon,
   useEuiTheme,
 } from '@elastic/eui';
-import cytoscape from 'cytoscape';
-import React, {
-  CSSProperties,
-  MouseEvent,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import type cytoscape from 'cytoscape';
+import type { CSSProperties, MouseEvent } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { SERVICE_NAME, SPAN_TYPE } from '../../../../../common/es_fields/apm';
-import { Environment } from '../../../../../common/environment_rt';
+import type { Environment } from '../../../../../common/environment_rt';
 import { useTraceExplorerEnabledSetting } from '../../../../hooks/use_trace_explorer_enabled_setting';
 import { CytoscapeContext } from '../cytoscape';
 import { getAnimationOptions, popoverWidth } from '../cytoscape_options';
@@ -143,7 +136,7 @@ export function Popover({ focusedServiceName, environment, kuery, start, end }: 
       if (cy) {
         cy.removeListener('select', 'node', selectHandler);
         cy.removeListener('unselect', 'node', deselect);
-        cy.removeListener('viewport', undefined, deselect);
+        cy.removeListener('viewport', deselect);
         cy.removeListener('drag', 'node', deselect);
         cy.removeListener('select', 'edge', selectHandler);
         cy.removeListener('unselect', 'edge', deselect);

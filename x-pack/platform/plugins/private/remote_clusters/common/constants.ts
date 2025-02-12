@@ -28,13 +28,13 @@ export const SNIFF_MODE = 'sniff';
 export const PROXY_MODE = 'proxy';
 
 export const getSecurityModel = (type: string) => {
-  if (type === 'certificate') {
+  if (type === SECURITY_MODEL.CERTIFICATE) {
     return i18n.translate('xpack.remoteClusters.securityModelCert', {
       defaultMessage: 'Certificate',
     });
   }
 
-  if (type === 'api_key') {
+  if (type === SECURITY_MODEL.API) {
     return i18n.translate('xpack.remoteClusters.securityModelApiKey', {
       defaultMessage: 'API key',
     });
@@ -45,3 +45,8 @@ export const getSecurityModel = (type: string) => {
 
 // Hardcoded limit of maximum node connections allowed
 export const MAX_NODE_CONNECTIONS = 2 ** 31 - 1; // 2147483647
+
+export enum SECURITY_MODEL {
+  API = 'api_key',
+  CERTIFICATE = 'certificate',
+}

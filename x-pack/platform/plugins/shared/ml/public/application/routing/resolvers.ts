@@ -22,3 +22,7 @@ export const basicResolvers = (): Resolvers => ({
   getMlNodeCount,
   loadMlServerInfo,
 });
+
+export const initSavedObjects = async (mlApi: MlApi) => {
+  return mlApi.savedObjects.initSavedObjects().catch(() => {});
+};

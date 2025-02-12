@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import type { SearchRequest as ESSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { rangeQuery, termQuery, typedSearch } from '@kbn/observability-plugin/server/utils/queries';
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import moment from 'moment';
-import { ESSearchRequest } from '@kbn/es-types';
-import { alertDetailsContextRt } from '@kbn/observability-plugin/server/services';
+import type { alertDetailsContextRt } from '@kbn/observability-plugin/server/services';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { SERVICE_NAME } from '@kbn/apm-types';
 import { maybe } from '../../../../common/utils/maybe';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { ApmDocumentType } from '../../../../common/document_type';
-import {
+import type {
   APMEventClient,
   APMEventESSearchRequest,
 } from '../../../lib/helpers/create_es_client/create_apm_event_client';

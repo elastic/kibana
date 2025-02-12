@@ -71,9 +71,10 @@ describe('Agent Status API route handler', () => {
   });
 
   it.each`
-    agentType         | featureFlag
-    ${'sentinel_one'} | ${'responseActionsSentinelOneV1Enabled'}
-    ${'crowdstrike'}  | ${'responseActionsCrowdstrikeManualHostIsolationEnabled'}
+    agentType                        | featureFlag
+    ${'sentinel_one'}                | ${'responseActionsSentinelOneV1Enabled'}
+    ${'crowdstrike'}                 | ${'responseActionsCrowdstrikeManualHostIsolationEnabled'}
+    ${'microsoft_defender_endpoint'} | ${'responseActionsMSDefenderEndpointEnabled'}
   `(
     'should error if the $agentType feature flag ($featureFlag) is turned off',
     async ({
@@ -102,6 +103,10 @@ describe('Agent Status API route handler', () => {
 
   it.each(RESPONSE_ACTION_AGENT_TYPE)('should accept agent type of %s', async (agentType) => {
     httpRequestMock.query.agentType = agentType;
+    apiTestSetup.endpointAppContextMock.experimentalFeatures = {
+      ...apiTestSetup.endpointAppContextMock.experimentalFeatures,
+      responseActionsMSDefenderEndpointEnabled: true,
+    };
     await apiTestSetup
       .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')
       .routeHandler(httpHandlerContextMock, httpRequestMock, httpResponseMock);

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSeriesStorage } from '../../hooks/use_series_storage';

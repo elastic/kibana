@@ -7,7 +7,7 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { InventoryMetaResponseRT } from '../../../../../../common/http_api/inventory_meta_api';
 import { useFetcher } from '../../../../../hooks/use_fetcher';
@@ -20,7 +20,7 @@ import { ContainerToolbarItems } from './container_toolbar_items';
 import { HostToolbarItems } from './host_toolbar_items';
 import { PodToolbarItems } from './pod_toolbar_items';
 import { ToolbarWrapper } from './toolbar_wrapper';
-import { ToolbarProps } from './types';
+import type { ToolbarProps } from './types';
 
 interface Props {
   nodeType: InventoryItemType;

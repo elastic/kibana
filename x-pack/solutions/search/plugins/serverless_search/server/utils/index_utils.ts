@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 
 export function isHidden(index: IndicesIndexState): boolean {
   return index.settings?.index?.hidden === true || index.settings?.index?.hidden === 'true';
