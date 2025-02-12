@@ -13,9 +13,8 @@ import { getTranslateRuleGraph } from './sub_graphs/translate_rule';
 import type { MigrateRuleGraphParams, MigrateRuleState } from './types';
 export function getRuleMigrationAgent({
   model,
-  inferenceClient,
+  esqlKnowledgeBase,
   ruleMigrationsRetriever,
-  connectorId,
   logger,
   telemetryClient,
 }: MigrateRuleGraphParams) {
@@ -27,9 +26,8 @@ export function getRuleMigrationAgent({
   });
   const translationSubGraph = getTranslateRuleGraph({
     model,
-    inferenceClient,
+    esqlKnowledgeBase,
     ruleMigrationsRetriever,
-    connectorId,
     telemetryClient,
     logger,
   });

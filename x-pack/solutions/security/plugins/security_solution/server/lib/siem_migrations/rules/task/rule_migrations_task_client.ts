@@ -8,6 +8,8 @@
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { AbortError, abortSignalToPromise } from '@kbn/kibana-utils-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
+import { TELEMETRY_SIEM_MIGRATION_ID } from './util/constants';
+import { EsqlKnowledgeBase } from './util/esql_knowledge_base';
 import {
   SiemMigrationStatus,
   SiemMigrationTaskStatus,
@@ -202,7 +204,12 @@ export class RuleMigrationsTaskClient {
     telemetryClient,
   }: RuleMigrationTaskCreateAgentParams): Promise<MigrationAgent> {
     const { inferenceClient, rulesClient, savedObjectsClient } = this.dependencies;
-
+    const esqlKnowledgeBase = new EsqlKnowledgeBase(
+      connectorId,
+      migrationId,
+      inferenceClient,
+      this.logger
+    );
     const ruleMigrationsRetriever = new RuleMigrationsRetriever(migrationId, {
       data: this.data,
       rules: rulesClient,
@@ -212,9 +219,8 @@ export class RuleMigrationsTaskClient {
     await ruleMigrationsRetriever.initialize();
 
     return getRuleMigrationAgent({
-      connectorId,
       model,
-      inferenceClient,
+      esqlKnowledgeBase,
       ruleMigrationsRetriever,
       telemetryClient,
       logger: this.logger,
@@ -296,7 +302,7 @@ export class RuleMigrationsTaskClient {
     const { actionsClient } = this.dependencies;
     const actionsClientChat = new ActionsClientChat(connectorId, actionsClient, this.logger);
     const model = await actionsClientChat.createModel({
-      telemetryMetadata: { pluginId: 'siem_migrations', aggregateBy: migrationId },
+      telemetryMetadata: { pluginId: TELEMETRY_SIEM_MIGRATION_ID, aggregateBy: migrationId },
       maxRetries: 10,
       signal: abortController.signal,
       temperature: 0.05,

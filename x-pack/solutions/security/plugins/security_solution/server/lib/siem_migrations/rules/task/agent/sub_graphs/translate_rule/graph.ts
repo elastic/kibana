@@ -22,27 +22,25 @@ const MAX_VALIDATION_ITERATIONS = 3;
 
 export function getTranslateRuleGraph({
   model,
-  inferenceClient,
-  connectorId,
+  esqlKnowledgeBase,
   ruleMigrationsRetriever,
   logger,
   telemetryClient,
 }: TranslateRuleGraphParams) {
   const translateRuleNode = getTranslateRuleNode({
-    inferenceClient,
-    connectorId,
+    esqlKnowledgeBase,
     logger,
   });
   const translationResultNode = getTranslationResultNode();
   const inlineQueryNode = getInlineQueryNode({ model, ruleMigrationsRetriever });
   const validationNode = getValidationNode({ logger });
-  const fixQueryErrorsNode = getFixQueryErrorsNode({ inferenceClient, connectorId, logger });
+  const fixQueryErrorsNode = getFixQueryErrorsNode({ esqlKnowledgeBase, logger });
   const retrieveIntegrationsNode = getRetrieveIntegrationsNode({
     model,
     ruleMigrationsRetriever,
     telemetryClient,
   });
-  const ecsMappingNode = getEcsMappingNode({ inferenceClient, connectorId, logger });
+  const ecsMappingNode = getEcsMappingNode({ esqlKnowledgeBase, logger });
 
   const translateRuleGraph = new StateGraph(translateRuleState)
     // Nodes

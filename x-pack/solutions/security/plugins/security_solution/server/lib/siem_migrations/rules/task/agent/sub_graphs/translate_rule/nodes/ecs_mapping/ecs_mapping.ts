@@ -6,25 +6,21 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { InferenceClient } from '@kbn/inference-plugin/server';
-import { getEsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base_caller';
+import type { EsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base';
 import type { GraphNode } from '../../types';
 import { SIEM_RULE_MIGRATION_CIM_ECS_MAP } from './cim_ecs_map';
 import { ESQL_TRANSLATE_ECS_MAPPING_PROMPT } from './prompts';
 import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
 
 interface GetEcsMappingNodeParams {
-  inferenceClient: InferenceClient;
-  connectorId: string;
+  esqlKnowledgeBase: EsqlKnowledgeBase;
   logger: Logger;
 }
 
 export const getEcsMappingNode = ({
-  inferenceClient,
-  connectorId,
+  esqlKnowledgeBase,
   logger,
 }: GetEcsMappingNodeParams): GraphNode => {
-  const esqlKnowledgeBaseCaller = getEsqlKnowledgeBase({ inferenceClient, connectorId, logger });
   return async (state) => {
     const elasticRule = {
       title: state.elastic_rule.title,
@@ -38,7 +34,7 @@ export const getEcsMappingNode = ({
       elastic_rule: JSON.stringify(elasticRule, null, 2),
     });
 
-    const response = await esqlKnowledgeBaseCaller(prompt);
+    const response = await esqlKnowledgeBase.translate(prompt);
 
     const updatedQuery = response.match(/```esql\n([\s\S]*?)\n```/)?.[1] ?? '';
     const ecsSummary = response.match(/## Field Mapping Summary[\s\S]*$/)?.[0] ?? '';
