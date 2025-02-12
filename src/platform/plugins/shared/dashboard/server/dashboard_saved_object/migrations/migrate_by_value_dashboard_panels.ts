@@ -78,7 +78,7 @@ export const migrateByValueDashboardPanels =
         newPanels.push({
           ...convertPanelStateToSavedDashboardPanel(panel.panelIndex, {
             ...originalPanelState,
-            explicitInput: { ...migratedInput, id: migratedInput.id as string },
+            explicitInput: { ...migratedInput },
           }),
           version,
         });
