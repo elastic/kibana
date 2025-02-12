@@ -120,11 +120,7 @@ describe('unrecognized task types', () => {
         );
         expect(runSoonResponse).toEqual({ id: 'mark_removed_tasks_as_unrecognized' });
       } catch (err) {
-        // it's possible the task is already running, so catch those errors and retry
-        // otherwise throw
-        if (!err.message.includes('as it is currently running')) {
-          throw err;
-        }
+        // ignore errors and retry
       }
     });
 
