@@ -24,14 +24,18 @@ export const useCardPanelStyles = () => {
     .onboardingCardIcon {
       padding: ${euiTheme.size.m};
       border-radius: 50%;
-      background-color: ${euiTheme.colors.backgroundBaseSubdued};
+      background-color: ${isDarkMode
+        ? euiTheme.colors.lightShade
+        : euiTheme.colors.backgroundBaseSubdued};
+      display: flex;
+      align-items: center;
     }
     .onboardingCardHeaderTitle {
       font-weight: ${euiTheme.font.weight.semiBold};
     }
     .onboardingCardHeaderCompleteBadge {
-      background-color: ${successBackgroundColor};
-      color: ${euiTheme.colors.textSuccess};
+      background-color: ${isDarkMode ? euiTheme.colors.success : successBackgroundColor};
+      color: ${isDarkMode ? euiTheme.colors.emptyShade : euiTheme.colors.textSuccess};
     }
     .onboardingCardContentWrapper {
       display: grid;
