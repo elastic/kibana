@@ -37,7 +37,7 @@ import type { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { UiCounterMetricType } from '@kbn/analytics';
-import { IStorage, Storage } from '@kbn/kibana-utils-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
@@ -62,7 +62,6 @@ import type { DataVisualizerPluginStart } from '@kbn/data-visualizer-plugin/publ
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
 import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
-import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { DiscoverStartPlugins } from './types';
 import type { DiscoverContextAppLocator } from './application/context/services/locator';
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
@@ -173,7 +172,7 @@ export const buildServices = memoize(
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }): DiscoverServices => {
     const { usageCollection } = plugins;
-    const storage = new Storage(createMockStore());
+    const storage = new Storage(localStorage);
 
     return {
       aiops: plugins.aiops,
@@ -210,7 +209,7 @@ export const buildServices = memoize(
       notifications: core.notifications,
       uiSettings: core.uiSettings,
       settings: core.settings,
-      sessionStorage: new Storage(createMockStore()),
+      sessionStorage: new Storage(sessionStorage),
       storage,
       trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
       dataViewFieldEditor: plugins.dataViewFieldEditor,
@@ -239,13 +238,3 @@ export const buildServices = memoize(
     };
   }
 );
-
-const createMockStore = (): MockedKeys<IStorage> => {
-  let store: Record<string, unknown> = {};
-  return {
-    getItem: jest.fn().mockImplementation((key) => store[key]),
-    setItem: jest.fn().mockImplementation((key, value) => (store[key] = value)),
-    removeItem: jest.fn().mockImplementation((key: string) => delete store[key]),
-    clear: jest.fn().mockImplementation(() => (store = {})),
-  };
-};
