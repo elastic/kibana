@@ -23,11 +23,10 @@ import {
   browserAuthFixture,
   pageObjectsFixture,
   validateTagsFixture,
-  BrowserAuthFixture,
-  ScoutPage,
-  PageObjects,
+  synthtraceFixture,
 } from './test';
 export type { PageObjects, ScoutPage } from './test';
+import type { BrowserAuthFixture, ScoutPage, PageObjects, SynthtraceFixture } from './test';
 
 export const scoutFixtures = mergeTests(
   // worker scope fixtures
@@ -38,7 +37,8 @@ export const scoutFixtures = mergeTests(
   browserAuthFixture,
   scoutPageFixture,
   pageObjectsFixture,
-  validateTagsFixture
+  validateTagsFixture,
+  synthtraceFixture
 );
 
 export interface ScoutTestFixtures {
@@ -55,4 +55,7 @@ export interface ScoutWorkerFixtures {
   esClient: EsClient;
   esArchiver: EsArchiverFixture;
   uiSettings: UiSettingsFixture;
+  apmSynthtraceEsClient: SynthtraceFixture['apmSynthtraceEsClient'];
+  infraSynthtraceEsClient: SynthtraceFixture['infraSynthtraceEsClient'];
+  otelSynthtraceEsClient: SynthtraceFixture['otelSynthtraceEsClient'];
 }
