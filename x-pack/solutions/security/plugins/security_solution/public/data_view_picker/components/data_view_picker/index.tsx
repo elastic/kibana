@@ -86,8 +86,14 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
   const handleEditDataView = useCallback(() => {}, []);
 
   const triggerConfig = useMemo(() => {
+    if (dataView?.id === DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID) {
+      return {
+        label: 'Default Security Data View',
+      };
+    }
+
     return {
-      label: dataView?.name ?? dataView?.id ?? 'Data view',
+      label: dataView?.name || dataView?.id || 'Data view',
     };
   }, [dataView]);
 
