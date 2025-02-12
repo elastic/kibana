@@ -83,7 +83,7 @@ export const Filters = ({ onFiltersChange }: FiltersProps) => {
     () =>
       indexPattern
         ? {
-            id: ASSET_INVENTORY_INDEX_PATTERN,
+            id: 'cloud_asset_inventory-2773feaf-50bb-43f8-9fa9-8f9a5f85e566', // ASSET_INVENTORY_INDEX_PATTERN,
             name: ASSET_INVENTORY_INDEX_PATTERN,
             allowNoIndex: true,
             title: indexPattern.title,
