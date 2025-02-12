@@ -203,7 +203,7 @@ export async function importData(props: Props, config: Config, setState: (state:
   });
 
   if (createPipeline) {
-    const pipelinesCreated = !!initializeImportResp.pipelineIds?.length;
+    const pipelinesCreated = initializeImportResp.pipelineIds.length > 0;
     if (indexCreated) {
       setState({
         ingestPipelineCreatedStatus: pipelinesCreated
