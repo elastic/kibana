@@ -57,7 +57,12 @@ describe('autocomplete.suggest', () => {
     describe('... <aggregates> ...', () => {
       test('lists possible aggregations on space after command', async () => {
         const { assertSuggestions } = await setup();
-        const expected = ['var0 = ', ...allAggFunctions, ...allEvaFunctions];
+        const expected = [
+          'var0 = ',
+          ...allAggFunctions,
+          ...allGroupingFunctions,
+          ...allEvaFunctions,
+        ];
 
         await assertSuggestions('from a | stats /', expected);
         await assertSuggestions('FROM a | STATS /', expected);
@@ -66,7 +71,11 @@ describe('autocomplete.suggest', () => {
       test('on assignment expression, shows all agg and eval functions', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | stats a=/', [...allAggFunctions, ...allEvaFunctions]);
+        await assertSuggestions('from a | stats a=/', [
+          ...allAggFunctions,
+          ...allGroupingFunctions,
+          ...allEvaFunctions,
+        ]);
       });
 
       test('on space after aggregate field', async () => {
@@ -81,6 +90,7 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from a | stats a=max(b), /', [
           'var0 = ',
           ...allAggFunctions,
+          ...allGroupingFunctions,
           ...allEvaFunctions,
         ]);
       });
@@ -99,7 +109,6 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from a | stats round(/', [
           ...getFunctionSignaturesByReturnType('stats', roundParameterTypes, {
             agg: true,
-            grouping: true,
           }),
           ...getFieldNamesByType(roundParameterTypes),
           ...getFunctionSignaturesByReturnType(
@@ -206,11 +215,13 @@ describe('autocomplete.suggest', () => {
           // TODO verify that this change is ok
           ...allAggFunctions,
           ...allEvaFunctions,
+          ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats var0=min(b),var1=c,/', [
           'var2 = ',
           ...allAggFunctions,
           ...allEvaFunctions,
+          ...allGroupingFunctions,
         ]);
       });
     });
@@ -252,6 +263,7 @@ describe('autocomplete.suggest', () => {
           'var0 = ',
           ...allAggFunctions,
           ...allEvaFunctions,
+          ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by c, /', [
           'var0 = ',
@@ -272,7 +284,8 @@ describe('autocomplete.suggest', () => {
           ...getFunctionSignaturesByReturnType('eval', ['integer', 'double', 'long'], {
             scalar: true,
           }),
-          ...allGroupingFunctions,
+          // categorize is not compatible here
+          ...allGroupingFunctions.filter((f) => !f.text.includes('CATEGORIZE')),
         ]);
         await assertSuggestions('from a | stats avg(b) by var0 = /', [
           getDateHistogramCompletionItem(),

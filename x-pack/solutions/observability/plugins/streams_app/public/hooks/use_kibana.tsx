@@ -18,19 +18,21 @@ export interface StreamsAppKibanaContext {
     start: StreamsAppStartDependencies;
   };
   services: StreamsAppServices;
+  isServerless: boolean;
 }
 
 const useTypedKibana = (): StreamsAppKibanaContext => {
   const context = useKibana<CoreStart & Omit<StreamsAppKibanaContext, 'core'>>();
 
   return useMemo(() => {
-    const { appParams, dependencies, services, ...core } = context.services;
+    const { appParams, dependencies, services, isServerless, ...core } = context.services;
 
     return {
       appParams,
       core,
       dependencies,
       services,
+      isServerless,
     };
   }, [context.services]);
 };

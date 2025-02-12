@@ -8,8 +8,8 @@
  */
 
 import { convertItemsMock } from './driver.test.mocks';
-// @ts-expect-error
-import fetchMock from 'fetch-mock/es5/client';
+
+import fetchMock from 'fetch-mock';
 import { take } from 'rxjs';
 import { NewsfeedApiDriver } from './driver';
 import { storageMock } from './storage.mock';
@@ -67,9 +67,12 @@ describe('NewsfeedApiDriver', () => {
         .toPromise();
 
       expect(fetchMock.lastUrl()).toEqual('http://newsfeed.com/8.0.0/news');
-      expect(fetchMock.lastOptions()).toEqual({
-        method: 'GET',
-      });
+      expect(fetchMock.lastOptions()).toMatchInlineSnapshot(`
+        Object {
+          "body": Promise {},
+          "method": "GET",
+        }
+      `);
     });
 
     it('calls `convertItems` with the correct parameters', async () => {

@@ -13,7 +13,9 @@ import { InTableSearchHighlightsWrapper } from './in_table_search_highlights_wra
 import type { RenderCellValuePropsWithInTableSearch, RenderCellValueWrapper } from './types';
 
 export const wrapRenderCellValueWithInTableSearchSupport = (
-  renderCellValue: EuiDataGridProps['renderCellValue']
+  renderCellValue: EuiDataGridProps['renderCellValue'],
+  highlightColor: string,
+  highlightBackgroundColor: string
 ): RenderCellValueWrapper => {
   const RenderCellValue = renderCellValue;
 
@@ -27,6 +29,8 @@ export const wrapRenderCellValueWithInTableSearchSupport = (
         // it's very important to have a unique key for each inTableSearchTerm change so it can add the highlights again
         key={`cell-${inTableSearchTerm || ''}`}
         inTableSearchTerm={inTableSearchTerm}
+        highlightColor={highlightColor}
+        highlightBackgroundColor={highlightBackgroundColor}
         onHighlightsCountFound={onHighlightsCountFound}
       >
         <RenderCellValue {...props} />

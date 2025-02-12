@@ -19,18 +19,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import * as i18n from './translations';
-import type { IntegrationSettings } from '../../../../types';
-
-const loadPaths = (integrationSettings: IntegrationSettings | undefined): string[] => {
-  const pathObjs = integrationSettings?.apiSpec?.getPaths();
-  if (!pathObjs) {
-    return [];
-  }
-  return Object.keys(pathObjs).filter((path) => pathObjs[path].get);
-};
 
 interface EndpointSelectionProps {
-  integrationSettings: IntegrationSettings | undefined;
+  allPaths: string[];
   pathSuggestions: string[];
   selectedPath: string | undefined;
   selectedOtherPath: string | undefined;
@@ -43,7 +34,7 @@ interface EndpointSelectionProps {
 
 export const EndpointSelection = React.memo<EndpointSelectionProps>(
   ({
-    integrationSettings,
+    allPaths,
     pathSuggestions,
     selectedPath,
     selectedOtherPath,
@@ -53,7 +44,6 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
     onChangeSuggestedPath,
     onChangeOtherPath,
   }) => {
-    const allPaths = loadPaths(integrationSettings);
     const otherPathOptions = allPaths.map<EuiComboBoxOptionOption>((p) => ({ label: p }));
 
     const hasSuggestedPaths = pathSuggestions.length > 0;
@@ -113,6 +103,7 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
                 fullWidth
                 options={otherPathOptions}
                 isDisabled={isGenerating}
+                aria-invalid={showValidation && useOtherEndpoint && selectedOtherPath === undefined}
                 isInvalid={showValidation && useOtherEndpoint && selectedOtherPath === undefined}
                 selectedOptions={
                   selectedOtherPath === undefined ? undefined : [{ label: selectedOtherPath }]

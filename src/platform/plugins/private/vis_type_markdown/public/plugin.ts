@@ -11,14 +11,22 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/cor
 import { Plugin as ExpressionsPublicPlugin } from '@kbn/expressions-plugin/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
+import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { createMarkdownVisFn } from './markdown_fn';
 import type { ConfigSchema } from '../server/config';
 import { getMarkdownVisRenderer } from './markdown_renderer';
 
-/** @internal */
-export interface MarkdownPluginSetupDependencies {
+interface MarkdownSetupDependencies {
   expressions: ReturnType<ExpressionsPublicPlugin['setup']>;
   visualizations: VisualizationsSetup;
+}
+
+export interface MarkdownStartDependencies {
+  data: DataPublicPluginStart;
+  embeddable: EmbeddableStart;
+  uiActions: UiActionsStart;
 }
 
 /** @internal */
@@ -29,16 +37,20 @@ export class MarkdownPlugin implements Plugin<void, void> {
     this.initializerContext = initializerContext;
   }
 
-  public setup(core: CoreSetup, { expressions, visualizations }: MarkdownPluginSetupDependencies) {
+  public setup(core: CoreSetup, { expressions, visualizations }: MarkdownSetupDependencies) {
     visualizations.createBaseVisualization('markdown', async () => {
-      const { markdownVisDefinition } = await import('./markdown_vis');
-      return markdownVisDefinition;
+      const { markdownVisType } = await import('./markdown_vis');
+      return markdownVisType;
     });
     expressions.registerRenderer(getMarkdownVisRenderer({ getStartDeps: core.getStartServices }));
     expressions.registerFunction(createMarkdownVisFn);
   }
 
-  public start(core: CoreStart) {
-    // nothing to do here yet
+  public start(core: CoreStart, deps: MarkdownStartDependencies) {
+    deps.uiActions.registerActionAsync('addMarkdownAction', async () => {
+      const { getAddMarkdownPanelAction } = await import('./add_markdown_panel_action');
+      return getAddMarkdownPanelAction(deps);
+    });
+    deps.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addMarkdownAction');
   }
 }
