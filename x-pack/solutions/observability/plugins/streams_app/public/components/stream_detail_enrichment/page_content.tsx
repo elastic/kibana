@@ -82,6 +82,24 @@ export function StreamDetailEnrichmentContent({
     return <RootStreamEmptyPrompt />;
   }
 
+  const isNonAdditiveSimulation = simulation && simulation.is_non_additive_simulation;
+  const isSubmitDisabled = Boolean(!hasChanges || isNonAdditiveSimulation);
+
+  const confirmTooltip = isNonAdditiveSimulation
+    ? {
+        title: i18n.translate('xpack.streams.streamDetailView.nonAdditiveProcessorsTooltip.title', {
+          defaultMessage: 'Non additive simulation detected',
+        }),
+        content: i18n.translate(
+          'xpack.streams.streamDetailView.nonAdditiveProcessorsTooltip.content',
+          {
+            defaultMessage:
+              'We currently prevent adding processors that change/remove existing data. Please update your processor configurations to continue.',
+          }
+        ),
+      }
+    : undefined;
+
   return (
     <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
       <EuiSplitPanel.Inner
@@ -112,9 +130,7 @@ export function StreamDetailEnrichmentContent({
                   simulation={simulation}
                 />
               </EuiResizablePanel>
-
               <EuiResizableButton indicator="border" accountForScrollbars="both" />
-
               <EuiResizablePanel
                 initialSize={70}
                 minSize="300px"
@@ -137,10 +153,11 @@ export function StreamDetailEnrichmentContent({
       </EuiSplitPanel.Inner>
       <EuiSplitPanel.Inner grow={false} color="subdued">
         <ManagementBottomBar
+          confirmTooltip={confirmTooltip}
           onCancel={resetChanges}
           onConfirm={saveChanges}
           isLoading={isSavingChanges}
-          disabled={!hasChanges}
+          disabled={isSubmitDisabled}
         />
       </EuiSplitPanel.Inner>
     </EuiSplitPanel.Outer>

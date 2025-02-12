@@ -75,19 +75,20 @@ export const ProcessorErrors = ({ errors }: { errors: ProcessorMetrics['errors']
   const shouldDisplayErrorToggle = remainingCount > 0;
 
   return (
-    <EuiFlexGroup
-      gutterSize="xs"
-      direction="column"
-      alignItems="flexStart"
-      css={css`
-        margin-top: ${euiTheme.size.m};
-      `}
-    >
-      {visibleErrors.map((error, id) => (
-        <EuiCallOut key={id} color="danger" iconType="warning" size="s" title={errorTitle}>
-          {error.message}
-        </EuiCallOut>
-      ))}
+    <>
+      <EuiFlexGroup
+        gutterSize="xs"
+        direction="column"
+        css={css`
+          margin-top: ${euiTheme.size.m};
+        `}
+      >
+        {visibleErrors.map((error, id) => (
+          <EuiCallOut key={id} color="danger" iconType="warning" size="s" title={errorTitle}>
+            {error.message}
+          </EuiCallOut>
+        ))}
+      </EuiFlexGroup>
       {shouldDisplayErrorToggle && !isErrorListExpanded && (
         <EuiButtonEmpty
           data-test-subj="streamsAppProcessorErrorsShowMoreButton"
@@ -115,6 +116,6 @@ export const ProcessorErrors = ({ errors }: { errors: ProcessorMetrics['errors']
           )}
         </EuiButtonEmpty>
       )}
-    </EuiFlexGroup>
+    </>
   );
 };
