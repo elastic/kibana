@@ -55,7 +55,7 @@ export async function fetchRelatedSavedObjects(
           .getLogger()
           ?.warn(`Unable to get fleet server hosts for policy ${agentPolicy?.id}: ${err.message}`);
 
-        return;
+        return undefined;
       }),
     ]);
 

@@ -1018,3 +1018,22 @@ export async function deleteFleetServerHostsSecrets(opts: {
 
   await deleteSOSecrets(esClient, secretPaths);
 }
+
+export function getFleetServerHostsSecretReferences(
+  fleetServerHost: FleetServerHost
+): PolicySecretReference[] {
+  const secretPaths: PolicySecretReference[] = [];
+
+  if (typeof fleetServerHost.secrets?.ssl?.key === 'object') {
+    secretPaths.push({
+      id: fleetServerHost.secrets.ssl.key.id,
+    });
+  }
+  if (typeof fleetServerHost.secrets?.ssl?.es_key === 'object') {
+    secretPaths.push({
+      id: fleetServerHost.secrets.ssl.es_key.id,
+    });
+  }
+
+  return secretPaths;
+}
