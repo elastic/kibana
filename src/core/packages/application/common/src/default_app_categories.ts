@@ -26,7 +26,7 @@ export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory> = Object.freeze
       defaultMessage: 'Elasticsearch',
     }),
     order: 2000,
-    euiIconType: 'logoEnterpriseSearch',
+    euiIconType: 'logoElasticsearch',
   },
   observability: {
     id: 'observability',
