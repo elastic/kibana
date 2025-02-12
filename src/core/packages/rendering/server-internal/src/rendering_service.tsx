@@ -63,7 +63,7 @@ const themeVersion: ThemeVersion = 'v8';
 
 // TODO: Remove the temporary feature flag and supporting code when Borealis is live in Serverless
 // https://github.com/elastic/eui-private/issues/192
-const DEFAULT_THEME_NAME_FEATURE_FLAG = 'coreRendering.defaultThemeName';
+export const DEFAULT_THEME_NAME_FEATURE_FLAG = 'coreRendering.defaultThemeName';
 
 /** @internal */
 export class RenderingService {
