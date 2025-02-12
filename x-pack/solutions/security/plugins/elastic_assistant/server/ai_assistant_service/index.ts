@@ -111,7 +111,7 @@ export class AIAssistantService {
   private contentReferencesEnabled: boolean = false;
   private hasInitializedContentReferences: boolean = false;
   // Temporary 'feature flag' to determine if we should initialize the new knowledge base mappings
-  private assistantDefaultInferenceEndpoint: boolean = false;
+  private assistantDefaultInferenceEndpoint: boolean = true;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
