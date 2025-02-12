@@ -71,24 +71,6 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
             <EuiSpacer />
 
             <EuiFlexGroup gutterSize="m">
-              {guidedOnboardingService?.isEnabled && (
-                <EuiFlexItem grow={false}>
-                  {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-                  <EuiButton
-                    data-test-subj="guidedOnboardingLink"
-                    fill
-                    href={addBasePath('#/getting_started')}
-                    onClick={(event: MouseEvent) => {
-                      trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding_link');
-                    }}
-                  >
-                    <FormattedMessage
-                      id="home.addData.guidedOnboardingLinkLabel"
-                      defaultMessage="Setup guides"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              )}
               <EuiFlexItem grow={false}>
                 <RedirectAppLinks
                   coreStart={{

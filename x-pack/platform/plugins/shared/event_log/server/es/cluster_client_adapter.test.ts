@@ -15,6 +15,7 @@ import {
   AggregateEventsOptionsBySavedObjectFilter,
   AggregateEventsWithAuthFilter,
   getQueryBodyWithAuthFilter,
+  Doc,
 } from './cluster_client_adapter';
 import { AggregateOptionsType, queryOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
@@ -627,6 +628,7 @@ describe('createDataStream', () => {
   test(`shouldn't throw when an error of type resource_already_exists_exception is thrown`, async () => {
     // ElasticsearchError can be a bit random in shape, we need an any here
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const err = new Error('Already exists') as any;
     err.body = {
       error: {
@@ -733,7 +735,15 @@ describe('queryEventsBySavedObject', () => {
   test('should call cluster with correct options', async () => {
     clusterClient.search.mockResponse({
       hits: {
-        hits: [{ _index: 'index-name-00001', _id: '1', _source: { foo: 'bar' } }],
+        hits: [
+          {
+            _index: 'index-name-00001',
+            _id: '1',
+            _source: { foo: 'bar' },
+            _seq_no: 1,
+            _primary_term: 1,
+          },
+        ],
         total: { relation: 'eq', value: 1 },
       },
       took: 0,
@@ -766,6 +776,7 @@ describe('queryEventsBySavedObject', () => {
     expect(query).toEqual({
       index: 'index-name',
       track_total_hits: true,
+      seq_no_primary_term: true,
       body: {
         size: 6,
         from: 12,
@@ -777,7 +788,7 @@ describe('queryEventsBySavedObject', () => {
       page: 3,
       per_page: 6,
       total: 1,
-      data: [{ foo: 'bar' }],
+      data: [{ foo: 'bar', _id: '1', _index: 'index-name-00001', _seq_no: 1, _primary_term: 1 }],
     });
   });
 });
@@ -2291,6 +2302,318 @@ describe('getQueryBodyWithAuthFilter', () => {
   });
 });
 
+describe('updateDocuments', () => {
+  test('should successfully update document with meta information', async () => {
+    const doc = {
+      body: { foo: 'updated' },
+      index: 'test-index',
+      internalFields: {
+        _id: 'test-id',
+        _index: 'test-index',
+        _seq_no: 1,
+        _primary_term: 1,
+      },
+    };
+
+    clusterClient.bulk.mockResponse({
+      took: 15,
+      items: [
+        {
+          update: {
+            _index: 'test-index',
+            _id: 'test-id',
+            _version: 2,
+            result: 'updated',
+            status: 200,
+            _shards: {
+              total: 2,
+              successful: 1,
+              failed: 0,
+            },
+            _seq_no: 2,
+            _primary_term: 1,
+          },
+        },
+      ],
+      errors: false,
+    });
+
+    await clusterClientAdapter.updateDocuments([doc as unknown as Required<Doc>]);
+
+    expect(clusterClient.bulk).toHaveBeenCalledWith({
+      body: [
+        {
+          update: {
+            _id: doc.internalFields._id,
+            _index: doc.internalFields._index,
+            if_primary_term: doc.internalFields._primary_term,
+            if_seq_no: doc.internalFields._seq_no,
+          },
+        },
+        { doc: doc.body },
+      ],
+    });
+  });
+
+  test('should throw error if internal fields information is missing', async () => {
+    const doc = {
+      body: { foo: 'updated' },
+      index: 'test-index',
+    };
+
+    await expect(
+      clusterClientAdapter.updateDocuments([doc as unknown as Required<Doc>])
+    ).rejects.toThrowErrorMatchingInlineSnapshot('"Internal fields are required"');
+
+    expect(logger.error).toHaveBeenCalledWith(
+      `error updating events in bulk: "Internal fields are required"; docs: ${JSON.stringify([
+        doc,
+      ])}`
+    );
+  });
+
+  test('should throw error when update fails', async () => {
+    const doc = {
+      body: { foo: 'updated' },
+      index: 'test-index',
+      internalFields: {
+        _id: 'test-id',
+        _index: 'test-index',
+        _seq_no: 1,
+        _primary_term: 1,
+      },
+    };
+
+    const error = new Error('Update failed');
+    clusterClient.bulk.mockRejectedValue(error);
+
+    await expect(
+      clusterClientAdapter.updateDocuments([doc as unknown as Required<Doc>])
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Update failed"`);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      `error updating events in bulk: "Update failed"; docs: ${JSON.stringify([doc])}`
+    );
+  });
+
+  test('should log error when bulk response contains errors', async () => {
+    const doc = {
+      body: { foo: 'updated' },
+      index: 'test-index',
+      internalFields: {
+        _id: 'test-id',
+        _index: 'test-index',
+        _seq_no: 1,
+        _primary_term: 1,
+      },
+    };
+
+    const errorItem = {
+      update: {
+        _index: 'test-index',
+        _id: 'test-id',
+        status: 400,
+        error: {
+          type: 'version_conflict_engine_exception',
+          reason: 'version conflict',
+        },
+      },
+    };
+
+    const bulkResponse = {
+      took: 15,
+      items: [errorItem],
+      errors: true,
+    };
+
+    clusterClient.bulk.mockResponse(bulkResponse);
+
+    const response = await clusterClientAdapter.updateDocuments([doc as unknown as Required<Doc>]);
+
+    expect(response).toEqual(bulkResponse);
+    expect(logger.error).toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'Error updating some bulk events',
+      })
+    );
+  });
+});
+
+describe('queryEventsByDocumentIds', () => {
+  test('should successfully retrieve documents by ids', async () => {
+    const docs = [
+      { _id: 'test-id-1', _index: 'test-index' },
+      { _id: 'test-id-2', _index: 'test-index' },
+    ];
+
+    clusterClient.mget.mockResponse({
+      docs: [
+        {
+          _index: 'test-index',
+          _id: 'test-id-1',
+          _seq_no: 1,
+          _primary_term: 1,
+          found: true,
+          _source: { message: 'test 1' },
+        },
+        {
+          _index: 'test-index',
+          _id: 'test-id-2',
+          _seq_no: 2,
+          _primary_term: 1,
+          found: true,
+          _source: { message: 'test 2' },
+        },
+      ],
+    });
+
+    const result = await clusterClientAdapter.queryEventsByDocumentIds(docs);
+
+    expect(clusterClient.mget).toHaveBeenCalledWith({
+      docs,
+    });
+
+    expect(result).toEqual({
+      data: [
+        {
+          message: 'test 1',
+          _id: 'test-id-1',
+          _index: 'test-index',
+          _seq_no: 1,
+          _primary_term: 1,
+        },
+        {
+          message: 'test 2',
+          _id: 'test-id-2',
+          _index: 'test-index',
+          _seq_no: 2,
+          _primary_term: 1,
+        },
+      ],
+    });
+  });
+
+  test('should handle not found documents', async () => {
+    const docs = [
+      { _id: 'test-id-1', _index: 'test-index' },
+      { _id: 'test-id-2', _index: 'test-index' },
+    ];
+
+    clusterClient.mget.mockResponse({
+      docs: [
+        {
+          _index: 'test-index',
+          _id: 'test-id-1',
+          found: false,
+        },
+        {
+          _index: 'test-index',
+          _id: 'test-id-2',
+          _seq_no: 2,
+          _primary_term: 1,
+          found: true,
+          _source: { message: 'test 2' },
+        },
+      ],
+    });
+
+    const result = await clusterClientAdapter.queryEventsByDocumentIds(docs);
+
+    expect(logger.error).toHaveBeenCalledWith('Event not found: test-id-1');
+    expect(result).toEqual({
+      data: [
+        {
+          message: 'test 2',
+          _id: 'test-id-2',
+          _index: 'test-index',
+          _seq_no: 2,
+          _primary_term: 1,
+        },
+      ],
+    });
+  });
+
+  test('should handle documents with errors', async () => {
+    const docs = [
+      { _id: 'test-id-1', _index: 'test-index' },
+      { _id: 'test-id-2', _index: 'test-index' },
+    ];
+
+    clusterClient.mget.mockResponse({
+      docs: [
+        {
+          _index: 'test-index',
+          _id: 'test-id-1',
+          error: {
+            type: 'document_missing_exception',
+            reason: 'Document missing',
+          },
+        },
+        {
+          _index: 'test-index',
+          _id: 'test-id-2',
+          _seq_no: 2,
+          _primary_term: 1,
+          found: true,
+          _source: { message: 'test 2' },
+        },
+      ],
+    });
+
+    const result = await clusterClientAdapter.queryEventsByDocumentIds(docs);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'Event not found: test-id-1, with error: Document missing'
+    );
+    expect(result).toEqual({
+      data: [
+        {
+          message: 'test 2',
+          _id: 'test-id-2',
+          _index: 'test-index',
+          _seq_no: 2,
+          _primary_term: 1,
+        },
+      ],
+    });
+  });
+
+  test('should throw error when mget fails', async () => {
+    const docs = [
+      { _id: 'test-id-1', _index: 'test-index' },
+      { _id: 'test-id-2', _index: 'test-index' },
+    ];
+
+    clusterClient.mget.mockRejectedValue(new Error('Failed to get documents'));
+
+    await expect(
+      clusterClientAdapter.queryEventsByDocumentIds(docs)
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error querying events by document ids: Failed to get documents"`
+    );
+  });
+});
+
+describe('refreshIndex', () => {
+  test('should successfully refresh index', async () => {
+    clusterClient.indices.refresh.mockResolvedValue({});
+
+    await clusterClientAdapter.refreshIndex();
+
+    expect(clusterClient.indices.refresh).toHaveBeenCalledWith({
+      index: 'kibana-event-log-ds',
+    });
+  });
+
+  test('should throw error when refresh fails', async () => {
+    clusterClient.indices.refresh.mockRejectedValue(new Error('Failed to refresh index'));
+
+    await expect(clusterClientAdapter.refreshIndex()).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to refresh index"`
+    );
+  });
+});
 type RetryableFunction = () => boolean;
 
 const RETRY_UNTIL_DEFAULT_COUNT = 20;

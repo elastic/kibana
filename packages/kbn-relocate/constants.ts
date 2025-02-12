@@ -24,7 +24,7 @@ export const EXTENSIONS = [
   'lock',
   'bazel',
   'md',
-  'mdz',
+  'mdx',
   'asciidoc',
   'sh',
   'snap',
@@ -42,6 +42,10 @@ export const EXCLUDED_FOLDERS = [
   './.es',
   './.git',
   // './.github',
+  './bazel-bin',
+  './bazel-kibana',
+  './bazel-out',
+  './bazel-testlogs',
   './.native_modules',
   './.node_binaries',
   './.vscode',
@@ -55,6 +59,8 @@ export const EXCLUDED_FOLDERS = [
   './test2.codeql',
   './trash',
 ];
+
+export const EXCLUDED_FOLDER_NAMES = ['target'];
 
 export const NO_GREP = EXCLUDED_FOLDERS.map((f) => `--exclude-dir "${f}"`).join(' ');
 

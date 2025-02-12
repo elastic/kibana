@@ -15,7 +15,7 @@ const capabilities = deepFreeze({
   catalogue: {},
   management: {},
   navLinks: {},
-  discover: {
+  discover_v2: {
     show: true,
     edit: false,
   },

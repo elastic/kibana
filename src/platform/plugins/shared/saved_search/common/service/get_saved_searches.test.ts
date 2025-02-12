@@ -42,7 +42,7 @@ describe('getSavedSearch', () => {
     }
 
     expect(errorMessage).toBe(
-      'Could not locate that search (id: ccf1af80-2297-11ec-86e0-1155ffb9c7a7)'
+      'Could not locate that Discover session (id: ccf1af80-2297-11ec-86e0-1155ffb9c7a7)'
     );
   });
 

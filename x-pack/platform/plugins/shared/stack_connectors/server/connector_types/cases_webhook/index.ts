@@ -10,7 +10,7 @@ import type {
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
-import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
+import { CasesConnectorFeatureId } from '@kbn/actions-plugin/common';
 import {
   CasesWebhookActionParamsType,
   CasesWebhookExecutorResultData,

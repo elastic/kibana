@@ -41,7 +41,7 @@ type BuilderArgs<C, R> = Pick<
   UserActionBuilderArgs,
   'userAction' | 'caseData' | 'handleDeleteComment' | 'userProfiles'
 > & {
-  comment: SnakeToCamelCase<C>;
+  attachment: SnakeToCamelCase<C>;
   registry: R;
   isLoading: boolean;
   getId: () => string;
@@ -82,7 +82,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
 >({
   userAction,
   userProfiles,
-  comment,
+  attachment,
   registry,
   caseData,
   isLoading,
@@ -98,7 +98,10 @@ export const createRegisteredAttachmentUserActionBuilder = <
       return [
         {
           username: (
-            <HoverableUserWithAvatarResolver user={comment.createdBy} userProfiles={userProfiles} />
+            <HoverableUserWithAvatarResolver
+              user={attachment.createdBy}
+              userProfiles={userProfiles}
+            />
           ),
           event: (
             <>
@@ -106,8 +109,8 @@ export const createRegisteredAttachmentUserActionBuilder = <
               <EuiCode>{attachmentTypeId}</EuiCode>
             </>
           ),
-          className: `comment-${comment.type}-not-found`,
-          'data-test-subj': `comment-${comment.type}-not-found`,
+          className: `comment-${attachment.type}-not-found`,
+          'data-test-subj': `comment-${attachment.type}-not-found`,
           timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
           children: (
             <EuiCallOut title={ATTACHMENT_NOT_REGISTERED_ERROR} color="danger" iconType="warning" />
@@ -120,7 +123,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
 
     const props = {
       ...getAttachmentViewProps(),
-      attachmentId: comment.id,
+      attachmentId: attachment.id,
       caseData: { id: caseData.id, title: caseData.title },
     };
 
@@ -135,30 +138,33 @@ export const createRegisteredAttachmentUserActionBuilder = <
     return [
       {
         username: (
-          <HoverableUserWithAvatarResolver user={comment.createdBy} userProfiles={userProfiles} />
+          <HoverableUserWithAvatarResolver
+            user={attachment.createdBy}
+            userProfiles={userProfiles}
+          />
         ),
-        className: `comment-${comment.type}-attachment-${attachmentTypeId}`,
+        className: `comment-${attachment.type}-attachment-${attachmentTypeId}`,
         event: attachmentViewObject.event,
-        'data-test-subj': `comment-${comment.type}-${attachmentTypeId}`,
+        'data-test-subj': `comment-${attachment.type}-${attachmentTypeId}`,
         timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
         timelineAvatar: attachmentViewObject.timelineAvatar,
         actions: (
-          <UserActionContentToolbar id={comment.id}>
+          <UserActionContentToolbar id={attachment.id}>
             {visiblePrimaryActions.map(
               (action) =>
                 (action.type === AttachmentActionType.BUTTON && (
                   <EuiFlexItem
                     grow={false}
-                    data-test-subj={`attachment-${attachmentTypeId}-${comment.id}`}
-                    key={`attachment-${attachmentTypeId}-${comment.id}`}
+                    data-test-subj={`attachment-${attachmentTypeId}-${attachment.id}`}
+                    key={`attachment-${attachmentTypeId}-${attachment.id}`}
                   >
                     <EuiButtonIcon
                       aria-label={action.label}
                       iconType={action.iconType}
                       color={action.color ?? 'text'}
                       onClick={action.onClick}
-                      data-test-subj={`attachment-${attachmentTypeId}-${comment.id}-${action.iconType}`}
-                      key={`attachment-${attachmentTypeId}-${comment.id}-${action.iconType}`}
+                      data-test-subj={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
+                      key={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
                     />
                   </EuiFlexItem>
                 )) ||
@@ -166,7 +172,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
             )}
             <RegisteredAttachmentsPropertyActions
               isLoading={isLoading}
-              onDelete={() => handleDeleteComment(comment.id, DELETE_REGISTERED_ATTACHMENT)}
+              onDelete={() => handleDeleteComment(attachment.id, DELETE_REGISTERED_ATTACHMENT)}
               registeredAttachmentActions={[...nonVisiblePrimaryActions, ...nonPrimaryActions]}
               hideDefaultActions={!!attachmentViewObject.hideDefaultActions}
             />

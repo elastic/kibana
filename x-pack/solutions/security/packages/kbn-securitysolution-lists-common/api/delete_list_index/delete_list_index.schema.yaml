@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Delete list DS API endpoint
+  title: Delete value list DS API endpoint
   version: '2023-10-31'
 paths:
   /api/lists/index:
@@ -8,7 +8,7 @@ paths:
       x-labels: [serverless, ess]
       operationId: DeleteListIndex
       x-codegen-enabled: true
-      summary: Delete list data streams
+      summary: Delete value list data streams
       description: Delete the `.lists` and `.items` data streams.
       responses:
         200:
@@ -35,6 +35,12 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
@@ -53,3 +59,8 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500

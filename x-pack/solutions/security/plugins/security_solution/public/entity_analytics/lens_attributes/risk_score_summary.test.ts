@@ -74,6 +74,7 @@ describe('getRiskScoreSummaryAttributes', () => {
             spaceId: 'default',
             riskEntity: EntityType.user,
           }),
+
           applyGlobalQueriesAndFilters: false,
         }),
       { wrapper }

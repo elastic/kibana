@@ -301,6 +301,14 @@ export class SpacesClient implements ISpacesClient {
         continue;
       }
 
+      // If the feature is deprecated and replacement features are explicitly defined, use them.
+      // Otherwise, use the replacement features defined in the feature privileges.
+      const featureReplacedBy = feature.deprecated?.replacedBy;
+      if (featureReplacedBy) {
+        deprecatedFeatureReferences.set(feature.id, new Set(featureReplacedBy));
+        continue;
+      }
+
       // Collect all feature privileges including the ones provided by sub-features, if any.
       const allPrivileges = Object.values(feature.privileges ?? {}).concat(
         feature.subFeatures?.flatMap((subFeature) =>

@@ -37,12 +37,12 @@ export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
         advancedSettings: ['all'],
         dev_tools: ['all'],
         fleet: ['all'],
-        generalCasesV2: ['all'],
+        generalCasesV3: ['all'],
         indexPatterns: ['all'],
         osquery: ['all'],
         savedObjectsManagement: ['all'],
         savedObjectsTagging: ['all'],
-        siem: [
+        siemV2: [
           'minimal_all',
           'endpoint_list_all',
           'endpoint_list_read',
@@ -57,6 +57,8 @@ export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
           'policy_management_all',
           'policy_management_read',
         ],
+        securitySolutionTimeline: ['all'],
+        securitySolutionNotes: ['all'],
         stackAlerts: ['all'],
       },
       spaces: ['*'],

@@ -18,7 +18,7 @@ export default function testGetGuideConfig({ getService }: FtrProviderContext) {
 
   describe(`GET ${getConfigsPath}`, () => {
     // check that production guides are present
-    ['siem', 'appSearch', 'websiteSearch', 'databaseSearch', 'kubernetes'].map((guideId) => {
+    ['siem', 'databaseSearch', 'kubernetes'].map((guideId) => {
       it(`returns config for ${guideId}`, async () => {
         const response = await supertest
           .get(`${getConfigsPath}/${guideId}`)
@@ -27,6 +27,17 @@ export default function testGetGuideConfig({ getService }: FtrProviderContext) {
         expect(response.body).not.to.be.empty();
         const { config } = response.body;
         expect(config).to.not.be.empty();
+      });
+    });
+
+    // expecting websiteSearch to be disabled for now, but adding this test to ensure
+    // it's added back to the above list when support for web crawlers is added back.
+    ['websiteSearch'].map((guideId) => {
+      it(`does not returns config for ${guideId}`, async () => {
+        await supertest
+          .get(`${getConfigsPath}/${guideId}`)
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .expect(404);
       });
     });
   });

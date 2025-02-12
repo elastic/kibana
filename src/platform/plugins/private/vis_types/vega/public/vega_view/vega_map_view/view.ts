@@ -99,10 +99,10 @@ export class VegaMapView extends VegaBaseView {
     const { mapStyle, emsTileServiceId } = this._parser.mapConfig;
     //
     if (mapStyle) {
-      const isDarkMode: boolean = getThemeService().getTheme().darkMode;
+      const { darkMode, name } = getThemeService().getTheme();
       return emsTileServiceId
         ? emsTileServiceId
-        : await this._serviceSettings.getDefaultTmsLayer(isDarkMode);
+        : await this._serviceSettings.getDefaultTmsLayer(darkMode, name);
     }
   }
 

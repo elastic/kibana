@@ -10,7 +10,7 @@ import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/
 import apm from 'elastic-apm-node';
 import pMap from 'p-map';
 
-import { partition } from 'lodash';
+import { partition, uniq } from 'lodash';
 
 import { appContextService } from '../app_context';
 import type {
@@ -446,7 +446,10 @@ export async function cancelAgentAction(
   } as AgentAction;
 }
 
-async function getAgentActionsByIds(esClient: ElasticsearchClient, actionIds: string[]) {
+async function getAgentActionsByIds(
+  esClient: ElasticsearchClient,
+  actionIds: string[]
+): Promise<string[]> {
   if (actionIds.length === 0) {
     return [];
   }
@@ -464,6 +467,7 @@ async function getAgentActionsByIds(esClient: ElasticsearchClient, actionIds: st
         ],
       },
     },
+    _source: ['agents', 'total'],
     size: SO_SEARCH_LIMIT,
   });
 
@@ -473,6 +477,7 @@ async function getAgentActionsByIds(esClient: ElasticsearchClient, actionIds: st
   }
 
   const result: FleetServerAgentAction[] = [];
+  let total = 0;
 
   for (const hit of res.hits.hits) {
     auditLoggingService.writeCustomAuditLog({
@@ -483,9 +488,53 @@ async function getAgentActionsByIds(esClient: ElasticsearchClient, actionIds: st
       ...hit._source,
       id: hit._id,
     });
+    total = hit._source?.total ?? 0;
   }
 
-  return result;
+  const agentIds: string[] = [];
+  if (result.length > 0) {
+    agentIds.push(...(result.flatMap((a) => a?.agents).filter((agent) => !!agent) as string[]));
+  }
+
+  if (agentIds.length < total) {
+    const agentIdsFromResults = await getAgentIdsFromResults(esClient, actionIds);
+    return uniq([...agentIds, ...agentIdsFromResults]);
+  }
+
+  return agentIds;
+}
+
+async function getAgentIdsFromResults(
+  esClient: ElasticsearchClient,
+  actionIds: string[]
+): Promise<string[]> {
+  try {
+    const results = await esClient.search({
+      index: AGENT_ACTIONS_RESULTS_INDEX,
+      ignore_unavailable: true,
+      query: {
+        bool: {
+          filter: [{ terms: { action_id: actionIds } }, { exists: { field: 'error' } }],
+        },
+      },
+      _source: ['agent_id'],
+      size: SO_SEARCH_LIMIT,
+    });
+
+    const resultAgentIds = new Set<string>();
+    for (const hit of results.hits.hits) {
+      resultAgentIds.add((hit._source as any)?.agent_id);
+    }
+    return Array.from(resultAgentIds);
+  } catch (err) {
+    if (err.statusCode === 404) {
+      // .fleet-actions-results does not yet exist
+      appContextService.getLogger().debug(err);
+    } else {
+      throw err;
+    }
+  }
+  return [];
 }
 
 export const getAgentsByActionsIds = async (
@@ -501,14 +550,7 @@ export const getAgentsByActionsIds = async (
     (actionsId) => actionsId.split(':').length > 1
   );
 
-  const agentIds: string[] = [];
-
-  const agentActions = await getAgentActionsByIds(esClient, agentActionIds);
-  if (agentActions.length > 0) {
-    agentIds.push(
-      ...(agentActions.flatMap((a) => a?.agents).filter((agent) => !!agent) as string[])
-    );
-  }
+  const agentIds: string[] = await getAgentActionsByIds(esClient, agentActionIds);
 
   const policyIds = agentPolicyActionIds.map((actionId) => actionId.split(':')[0]);
   const assignedAgentIds = await getAgentIdsForAgentPolicies(esClient, policyIds);

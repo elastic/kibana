@@ -6,7 +6,8 @@
       "jest",
       "node",
       "react",
-      "@emotion/react/types/css-prop"
+      "@emotion/react/types/css-prop",
+      "../../../../../typings/emotion.d.ts"
     ]
   },
   "include": [
@@ -17,7 +18,6 @@
   "kbn_references": [
     "@kbn/securitysolution-io-ts-list-types",
     "@kbn/securitysolution-autocomplete",
-    "@kbn/ui-theme",
     "@kbn/i18n",
     "@kbn/i18n-react",
   ],

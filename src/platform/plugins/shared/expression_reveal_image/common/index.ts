@@ -9,5 +9,5 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110893
 
-export * from './constants';
-export * from './expression_functions';
+export { PLUGIN_ID, PLUGIN_NAME, BASE64, URL } from './constants';
+export { functions, revealImageFunction } from './expression_functions';

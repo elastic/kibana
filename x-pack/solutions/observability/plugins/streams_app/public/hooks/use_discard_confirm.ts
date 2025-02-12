@@ -6,30 +6,35 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { OverlayModalConfirmOptions } from '@kbn/core/public';
 import { useKibana } from './use_kibana';
 
-export const useDiscardConfirm = (handler: () => void) => {
+const defaultMessage = i18n.translate('xpack.streams.cancelModal.message', {
+  defaultMessage: 'Are you sure you want to discard your changes?',
+});
+
+export const useDiscardConfirm = <THandler extends (..._args: any[]) => any>(
+  handler: THandler,
+  options: OverlayModalConfirmOptions & { message?: string } = {}
+) => {
   const { core } = useKibana();
+  const { message = defaultMessage, ...optionsOverride } = options;
 
-  return async () => {
-    const hasCancelled = await core.overlays.openConfirm(
-      i18n.translate('xpack.streams.cancelModal.message', {
-        defaultMessage: 'Are you sure you want to discard your changes?',
+  return async (...args: Parameters<THandler>) => {
+    const hasCancelled = await core.overlays.openConfirm(message, {
+      buttonColor: 'danger',
+      title: i18n.translate('xpack.streams.cancelModal.title', {
+        defaultMessage: 'Discard changes?',
       }),
-      {
-        buttonColor: 'danger',
-        title: i18n.translate('xpack.streams.cancelModal.title', {
-          defaultMessage: 'Discard changes?',
-        }),
-        confirmButtonText: i18n.translate('xpack.streams.cancelModal.confirm', {
-          defaultMessage: 'Discard',
-        }),
-        cancelButtonText: i18n.translate('xpack.streams.cancelModal.cancel', {
-          defaultMessage: 'Keep editing',
-        }),
-      }
-    );
+      confirmButtonText: i18n.translate('xpack.streams.cancelModal.confirm', {
+        defaultMessage: 'Discard',
+      }),
+      cancelButtonText: i18n.translate('xpack.streams.cancelModal.cancel', {
+        defaultMessage: 'Keep editing',
+      }),
+      ...optionsOverride,
+    });
 
-    if (hasCancelled) handler();
+    if (hasCancelled) handler(...args);
   };
 };

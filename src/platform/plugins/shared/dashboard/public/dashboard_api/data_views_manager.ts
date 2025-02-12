@@ -25,17 +25,17 @@ export function initializeDataViewsManager(
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
   children$: PublishingSubject<{ [key: string]: unknown }>
 ) {
-  const dataViews = new BehaviorSubject<DataView[] | undefined>([]);
+  const dataViews$ = new BehaviorSubject<DataView[] | undefined>([]);
 
   const controlGroupDataViewsPipe: Observable<DataView[] | undefined> = controlGroupApi$.pipe(
     switchMap((controlGroupApi) => {
-      return controlGroupApi ? controlGroupApi.dataViews : of([]);
+      return controlGroupApi ? controlGroupApi.dataViews$ : of([]);
     })
   );
 
   const childDataViewsPipe = combineCompatibleChildrenApis<PublishesDataViews, DataView[]>(
     { children$ },
-    'dataViews',
+    'dataViews$',
     apiPublishesDataViews,
     []
   );
@@ -57,13 +57,13 @@ export function initializeDataViewsManager(
         return uniqBy(allDataViews, 'id');
       })
     )
-    .subscribe((newDataViews) => {
-      dataViews.next(newDataViews);
+    .subscribe((nextDataViews) => {
+      dataViews$.next(nextDataViews);
     });
 
   return {
     api: {
-      dataViews,
+      dataViews$,
     },
     cleanup: () => {
       dataViewsSubscription.unsubscribe();

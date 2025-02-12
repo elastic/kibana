@@ -11,7 +11,7 @@ import { Optional } from 'utility-types';
 import { IKbnPalette, KbnPaletteType } from './types';
 
 export type KbnBasePaletteConfig = Optional<
-  Pick<IKbnPalette, 'id' | 'name' | 'colorCount' | 'legacy' | 'aliases' | 'standalone'>,
+  Pick<IKbnPalette, 'id' | 'name' | 'tag' | 'colorCount' | 'legacy' | 'aliases' | 'standalone'>,
   'legacy' | 'aliases'
 >;
 
@@ -20,6 +20,7 @@ export abstract class KbnBasePalette implements IKbnPalette {
 
   public readonly id: string;
   public readonly name: string;
+  public readonly tag?: string;
   public readonly colorCount: number;
   public readonly legacy: boolean;
   public readonly standalone: boolean;
@@ -28,6 +29,7 @@ export abstract class KbnBasePalette implements IKbnPalette {
   constructor({
     id,
     name,
+    tag,
     colorCount,
     aliases = [],
     legacy = false,
@@ -35,6 +37,7 @@ export abstract class KbnBasePalette implements IKbnPalette {
   }: KbnBasePaletteConfig) {
     this.id = id;
     this.name = name;
+    this.tag = tag;
     this.colorCount = colorCount;
     this.legacy = legacy;
     this.standalone = standalone;

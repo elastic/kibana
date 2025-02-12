@@ -53,6 +53,7 @@ const ActionIconItemComponent: React.FC<ActionIconItemProps> = ({
                 isDisabled={isDisabled}
                 onClick={onClick}
                 size="s"
+                color="text"
               />
             </EuiToolTip>
           )}

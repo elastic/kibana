@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
-import { AuthorFilter } from '../../../../../../common/siem_migrations/constants';
+import { AuthorFilter } from '../../../types';
 import * as i18n from './translations';
 
 const AUTHOR_FILTER_POPOVER_WIDTH = 150;

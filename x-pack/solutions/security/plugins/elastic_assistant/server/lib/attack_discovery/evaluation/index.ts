@@ -16,12 +16,16 @@ import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { asyncForEach } from '@kbn/std';
 import { PublicMethodsOf } from '@kbn/utility-types';
 
+import { CombinedPrompts } from '../graphs/default_attack_discovery_graph/nodes/helpers/prompts';
 import { DEFAULT_EVAL_ANONYMIZATION_FIELDS } from './constants';
 import { AttackDiscoveryGraphMetadata } from '../../langchain/graphs';
 import { DefaultAttackDiscoveryGraph } from '../graphs/default_attack_discovery_graph';
 import { getLlmType } from '../../../routes/utils';
 import { runEvaluations } from './run_evaluations';
 
+interface ConnectorWithPrompts extends Connector {
+  prompts: CombinedPrompts;
+}
 export const evaluateAttackDiscovery = async ({
   actionsClient,
   attackDiscoveryGraphs,
@@ -43,7 +47,7 @@ export const evaluateAttackDiscovery = async ({
   attackDiscoveryGraphs: AttackDiscoveryGraphMetadata[];
   alertsIndexPattern: string;
   anonymizationFields?: AnonymizationFieldResponse[];
-  connectors: Connector[];
+  connectors: ConnectorWithPrompts[];
   connectorTimeout: number;
   datasetName: string;
   esClient: ElasticsearchClient;
@@ -96,6 +100,7 @@ export const evaluateAttackDiscovery = async ({
         esClient,
         llm,
         logger,
+        prompts: connector.prompts,
         size,
       });
 

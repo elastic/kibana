@@ -21,7 +21,7 @@ import {
   guideStateSavedObjectsType,
 } from '@kbn/guided-onboarding-plugin/server/saved_objects/guided_setup';
 import { testGuideId } from '@kbn/guided-onboarding';
-import { appSearchGuideId } from '@kbn/enterprise-search-plugin/common/guided_onboarding/search_guide_config';
+import { websiteSearchGuideId } from '@kbn/enterprise-search-plugin/common/guided_onboarding/search_guide_config';
 import { API_BASE_PATH } from '@kbn/guided-onboarding-plugin/common';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
@@ -137,7 +137,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
       // create an active guide and an inactive guide
       await createGuides(kibanaServer, [
         testGuideStep1ActiveState,
-        { ...testGuideNotActiveState, guideId: appSearchGuideId },
+        { ...testGuideNotActiveState, guideId: websiteSearchGuideId },
       ]);
 
       // Create a new guide with isActive: true
@@ -162,7 +162,7 @@ export default function testPutState({ getService }: FtrProviderContext) {
 
       const searchGuideSO = await kibanaServer.savedObjects.get({
         type: guideStateSavedObjectsType,
-        id: appSearchGuideId,
+        id: websiteSearchGuideId,
       });
       expect(searchGuideSO.attributes.isActive).to.eql(false);
 

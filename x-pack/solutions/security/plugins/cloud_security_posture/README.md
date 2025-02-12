@@ -145,3 +145,20 @@ yarn cypress:cloud_security_posture:run:serverless
 ```
 
 Unlike FTR where we have to set server and runner separately, Cypress handles everything in 1 go, so just running the above the script is enough to get it running
+
+### Troubleshooting
+
+If you encounter an error related to running machine learning code, you should add the following string `'xpack.ml.enabled=false'` under the `esTestCluster` property in the `x-pack/test/functional/config.base.js` file.
+
+Example:
+```javascript
+module.exports = {
+  esTestCluster: {
+    // ...existing configuration...
+    serverArgs: [
+      // ...existing arguments...
+      'xpack.ml.enabled=false', // Add this line to disable ML
+    ],
+  },
+  // ...other configurations...
+};

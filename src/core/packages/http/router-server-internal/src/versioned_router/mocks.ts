@@ -21,6 +21,8 @@ export function createRouter(opts: CreateMockRouterOptions = {}) {
     getRoutes: jest.fn(),
     handleLegacyErrors: jest.fn(),
     emitPostValidate: jest.fn(),
+    registerRoute: jest.fn(),
+    enhanceWithContext: jest.fn((fn) => fn.bind(null, {})),
     patch: jest.fn(),
     routerPath: '',
     versioned: {} as any,

@@ -37,6 +37,10 @@ import {
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import {
+  selectDataViewsForPicker,
+  useInternalStateSelector,
+} from '../../state_management/discover_internal_state_container';
 
 const EMPTY_FIELD_COUNTS = {};
 
@@ -172,6 +176,8 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
   );
   const selectedDataViewRef = useRef<DataView | null | undefined>(selectedDataView);
   const showFieldList = sidebarState.status !== DiscoverSidebarReducerStatus.INITIAL;
+  const { savedDataViews, managedDataViews, adHocDataViews } =
+    useInternalStateSelector(selectDataViewsForPicker);
 
   useEffect(() => {
     const subscription = props.documents$.subscribe((documentState) => {
@@ -326,6 +332,9 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       ) : (
         <DataViewPicker
           currentDataViewId={selectedDataView.id}
+          adHocDataViews={adHocDataViews}
+          managedDataViews={managedDataViews}
+          savedDataViews={savedDataViews}
           onChangeDataView={onChangeDataView}
           onAddField={createField}
           onDataViewCreated={createNewDataView}
@@ -338,7 +347,16 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
         />
       )
     ) : null;
-  }, [selectedDataView, createNewDataView, onChangeDataView, createField, CustomDataViewPicker]);
+  }, [
+    selectedDataView,
+    CustomDataViewPicker,
+    adHocDataViews,
+    managedDataViews,
+    savedDataViews,
+    onChangeDataView,
+    createField,
+    createNewDataView,
+  ]);
 
   const onAddFieldToWorkspace = useCallback(
     (field: DataViewField) => {

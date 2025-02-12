@@ -25,6 +25,8 @@ import { useAssistantContext } from '../../..';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useKnowledgeBaseIndices } from '../../assistant/api/knowledge_base/use_knowledge_base_indices';
+import { Router } from '@kbn/shared-ux-router';
+import { createMemoryHistory, History } from 'history';
 
 const mockContext = {
   basePromptContexts: MOCK_QUICK_PROMPTS,
@@ -59,9 +61,17 @@ const mockDataViews = {
   getExistingIndices: jest.fn().mockResolvedValue(['index-2']),
 } as unknown as DataViewsContract;
 const queryClient = new QueryClient();
-const wrapper = (props: { children: React.ReactNode }) => (
+const Wrapper = ({
+  children,
+  history = createMemoryHistory(),
+}: {
+  children: React.ReactNode;
+  history?: History;
+}) => (
   <I18nProvider>
-    <QueryClientProvider client={queryClient}>{props.children}</QueryClientProvider>
+    <Router history={history}>
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    </Router>
   </I18nProvider>
 );
 describe('KnowledgeBaseSettingsManagement', () => {
@@ -177,7 +187,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
   it('renders loading spinner when data is not fetched', () => {
     (useKnowledgeBaseStatus as jest.Mock).mockReturnValue({ data: {}, isFetched: false });
     render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
-      wrapper,
+      wrapper: Wrapper,
     });
 
     expect(screen.getByTestId('spinning')).toBeInTheDocument();
@@ -195,7 +205,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
     });
     (isKnowledgeBaseSetup as jest.Mock).mockReturnValue(false);
     render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
-      wrapper,
+      wrapper: Wrapper,
     });
 
     expect(screen.getByTestId('setup-knowledge-base-button')).toBeInTheDocument();
@@ -203,12 +213,120 @@ describe('KnowledgeBaseSettingsManagement', () => {
 
   it('renders knowledge base table with entries', async () => {
     render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
-      wrapper,
+      wrapper: Wrapper,
     });
     waitFor(() => {
       expect(screen.getByTestId('knowledge-base-entries-table')).toBeInTheDocument();
       expect(screen.getByText('Test Entry 1')).toBeInTheDocument();
       expect(screen.getByText('Test Entry 2')).toBeInTheDocument();
+    });
+  });
+
+  it('renders entries in correct order', async () => {
+    (useKnowledgeBaseEntries as jest.Mock).mockReturnValue({
+      data: {
+        data: [
+          {
+            id: '1',
+            createdAt: '2024-10-21T18:54:14.773Z',
+            createdBy: 'u_user_id_1',
+            updatedAt: '2024-10-23T17:33:15.933Z',
+            updatedBy: 'u_user_id_1',
+            users: [{ name: 'Test User 1' }],
+            name: 'A',
+            namespace: 'default',
+            type: 'document',
+            kbResource: 'user',
+            source: 'user',
+            text: 'Very nice text',
+          },
+          {
+            id: '2',
+            createdAt: '2024-10-25T09:55:56.596Z',
+            createdBy: 'u_user_id_2',
+            updatedAt: '2024-10-25T09:55:56.596Z',
+            updatedBy: 'u_user_id_2',
+            users: [],
+            name: 'b',
+            namespace: 'default',
+            type: 'index',
+            index: 'index-1',
+            field: 'semantic_field1',
+            description: 'Test description',
+            queryDescription: 'Test query instruction',
+          },
+          {
+            id: '3',
+            createdAt: '2024-10-25T09:55:56.596Z',
+            createdBy: 'u_user_id_2',
+            updatedAt: '2024-10-25T09:55:56.596Z',
+            updatedBy: 'u_user_id_2',
+            users: [],
+            name: 'B',
+            namespace: 'default',
+            type: 'index',
+            index: 'index-1',
+            field: 'semantic_field1',
+            description: 'Test description',
+            queryDescription: 'Test query instruction',
+          },
+          {
+            id: '4',
+            createdAt: '2024-10-25T09:55:56.596Z',
+            createdBy: 'u_user_id_1',
+            updatedAt: '2024-10-25T09:55:56.596Z',
+            updatedBy: 'u_user_id_1',
+            users: [{ name: 'Test User 1' }],
+            name: 'a',
+            namespace: 'default',
+            type: 'index',
+            index: 'index-2',
+            field: 'semantic_field2',
+            description: 'Test description',
+            queryDescription: 'Test query instruction',
+          },
+        ],
+      },
+      isFetching: false,
+      refetch: jest.fn(),
+    });
+
+    render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
+      wrapper: Wrapper,
+    });
+
+    await waitFor(() => {
+      expect(screen.getByTestId('knowledge-base-entries-table')).toBeInTheDocument();
+      expect(screen.getByText('A')).toBeInTheDocument();
+      expect(screen.getByText('B')).toBeInTheDocument();
+      expect(screen.getByText('a')).toBeInTheDocument();
+      expect(screen.getByText('b')).toBeInTheDocument();
+    });
+
+    // Order ascending
+    await userEvent.click(screen.getByText('Name'));
+
+    await waitFor(() => {
+      // Upper case letters should come before lower case letters
+      expect(screen.getByText('A').compareDocumentPosition(screen.getByText('a'))).toBe(4);
+      expect(screen.getByText('B').compareDocumentPosition(screen.getByText('b'))).toBe(4);
+
+      expect(screen.getByText('A').compareDocumentPosition(screen.getByText('B'))).toBe(4);
+      expect(screen.getByText('a').compareDocumentPosition(screen.getByText('B'))).toBe(4);
+      expect(screen.getByText('a').compareDocumentPosition(screen.getByText('b'))).toBe(4);
+    });
+
+    // Order decending
+    await userEvent.click(screen.getByText('Name'));
+
+    await waitFor(() => {
+      // Lower case letters should come before upper case letters
+      expect(screen.getByText('A').compareDocumentPosition(screen.getByText('a'))).toBe(2);
+      expect(screen.getByText('B').compareDocumentPosition(screen.getByText('b'))).toBe(2);
+
+      expect(screen.getByText('A').compareDocumentPosition(screen.getByText('B'))).toBe(2);
+      expect(screen.getByText('a').compareDocumentPosition(screen.getByText('B'))).toBe(2);
+      expect(screen.getByText('a').compareDocumentPosition(screen.getByText('b'))).toBe(2);
     });
   });
 
@@ -221,7 +339,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
     });
 
     render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
-      wrapper,
+      wrapper: Wrapper,
     });
 
     await waitFor(() => {
@@ -233,6 +351,23 @@ describe('KnowledgeBaseSettingsManagement', () => {
     expect(openFlyoutMock).toHaveBeenCalled();
   });
 
+  it('uses entry_search_term as default query', async () => {
+    const rawHistory = createMemoryHistory({
+      initialEntries: ['/example?entry_search_term=testQuery'],
+    });
+    const { container } = render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
+      wrapper: (props) => <Wrapper history={rawHistory}>{props.children}</Wrapper>,
+    });
+    waitFor(() => {
+      expect(screen.getByTestId('knowledge-base-entries-table')).toBeInTheDocument();
+      expect(
+        container
+          .querySelector('input[type=search][placeholder="Search for an entry"]')
+          ?.getAttribute('value')
+      ).toEqual('testQuery');
+    });
+  });
+
   it('refreshes table on refresh button click', async () => {
     const refetchMock = jest.fn();
     (useKnowledgeBaseEntries as jest.Mock).mockReturnValue({
@@ -242,7 +377,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
     });
 
     render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
-      wrapper,
+      wrapper: Wrapper,
     });
 
     await waitFor(() => {
@@ -259,7 +394,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
       closeFlyout: closeFlyoutMock,
     });
     render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
-      wrapper,
+      wrapper: Wrapper,
     });
 
     await waitFor(() => {
@@ -282,7 +417,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
 
   it('handles delete confirmation modal actions', async () => {
     render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
-      wrapper,
+      wrapper: Wrapper,
     });
 
     await waitFor(() => {
@@ -302,7 +437,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
       closeFlyout: jest.fn(),
     });
     render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
-      wrapper,
+      wrapper: Wrapper,
     });
 
     await waitFor(() => {
@@ -342,7 +477,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
       closeFlyout: jest.fn(),
     });
     render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
-      wrapper,
+      wrapper: Wrapper,
     });
 
     await waitFor(() => {
@@ -382,7 +517,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
       closeFlyout: jest.fn(),
     });
     render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
-      wrapper,
+      wrapper: Wrapper,
     });
 
     await waitFor(() => {
@@ -422,7 +557,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
       closeFlyout: closeFlyoutMock,
     });
     render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
-      wrapper,
+      wrapper: Wrapper,
     });
 
     await waitFor(() => {
@@ -472,7 +607,7 @@ describe('KnowledgeBaseSettingsManagement', () => {
 
   it('shows warning icon for index entries with missing indices', async () => {
     render(<KnowledgeBaseSettingsManagement dataViews={mockDataViews} />, {
-      wrapper,
+      wrapper: Wrapper,
     });
 
     await waitFor(() => expect(screen.getByTestId('missing-index-icon')).toBeInTheDocument());

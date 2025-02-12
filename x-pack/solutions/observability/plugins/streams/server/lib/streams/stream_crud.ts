@@ -5,52 +5,71 @@
  * 2.0.
  */
 
-import { IndicesDataStream, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import {
+  IndicesDataStream,
+  IndicesDataStreamLifecycleWithRollover,
+  IngestPipeline,
+} from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
-import { StreamLifecycle } from '@kbn/streams-schema';
+import { UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import { deleteComponent } from './component_templates/manage_component_templates';
 import { getComponentTemplateName } from './component_templates/name';
 import { deleteDataStream } from './data_streams/manage_data_streams';
-import { DefinitionNotFound } from './errors';
 import { deleteTemplate } from './index_templates/manage_index_templates';
 import { getIndexTemplateName } from './index_templates/name';
 import { deleteIngestPipeline } from './ingest_pipelines/manage_ingest_pipelines';
 import { getProcessingPipelineName, getReroutePipelineName } from './ingest_pipelines/name';
+import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
 }
 
 interface DeleteStreamParams extends BaseParams {
-  id: string;
+  name: string;
   logger: Logger;
 }
 
-export function getDataStreamLifecycle(dataStream: IndicesDataStream): StreamLifecycle {
+export function getDataStreamLifecycle(
+  dataStream: IndicesDataStream | null
+): UnwiredIngestStreamEffectiveLifecycle {
+  if (!dataStream) {
+    return {
+      error: {
+        message: 'Data stream not found',
+      },
+    };
+  }
   if (
     dataStream.ilm_policy &&
     (!dataStream.lifecycle || typeof dataStream.prefer_ilm === 'undefined' || dataStream.prefer_ilm)
   ) {
+    return { ilm: { policy: dataStream.ilm_policy } };
+  }
+
+  const lifecycle = dataStream.lifecycle as
+    | (IndicesDataStreamLifecycleWithRollover & {
+        enabled: boolean;
+      })
+    | undefined;
+  if (lifecycle && lifecycle.enabled) {
     return {
-      type: 'ilm',
-      policy: dataStream.ilm_policy,
+      dsl: {
+        data_retention: lifecycle.data_retention ? String(lifecycle.data_retention) : undefined,
+      },
     };
   }
-  return {
-    type: 'dlm',
-    data_retention: dataStream.lifecycle?.data_retention
-      ? String(dataStream.lifecycle.data_retention)
-      : undefined,
-  };
+
+  return { disabled: {} };
 }
 
 export async function deleteUnmanagedStreamObjects({
-  id,
+  name,
   scopedClusterClient,
   logger,
 }: DeleteStreamParams) {
-  const dataStream = await getDataStream({ name: id, scopedClusterClient });
+  const dataStream = await getDataStream({ name, scopedClusterClient });
   const unmanagedAssets = await getUnmanagedElasticsearchAssets({
     dataStream,
     scopedClusterClient,
@@ -58,9 +77,9 @@ export async function deleteUnmanagedStreamObjects({
   const pipelineName = unmanagedAssets.find((asset) => asset.type === 'ingest_pipeline')?.id;
   if (pipelineName) {
     const { targetPipelineName, targetPipeline, referencesStreamManagedPipeline } =
-      await findStreamManagedPipelineReference(scopedClusterClient, pipelineName, id);
+      await findStreamManagedPipelineReference(scopedClusterClient, pipelineName, name);
     if (referencesStreamManagedPipeline) {
-      const streamManagedPipelineName = getProcessingPipelineName(id);
+      const streamManagedPipelineName = getProcessingPipelineName(name);
       const updatedProcessors = targetPipeline.processors!.filter(
         (processor) =>
           !(processor.pipeline && processor.pipeline.name === streamManagedPipelineName)
@@ -75,13 +94,13 @@ export async function deleteUnmanagedStreamObjects({
   }
   await deleteDataStream({
     esClient: scopedClusterClient.asCurrentUser,
-    name: id,
+    name,
     logger,
   });
   try {
     await deleteIngestPipeline({
       esClient: scopedClusterClient.asCurrentUser,
-      id: getProcessingPipelineName(id),
+      id: getProcessingPipelineName(name),
       logger,
     });
   } catch (e) {
@@ -92,30 +111,34 @@ export async function deleteUnmanagedStreamObjects({
   }
 }
 
-export async function deleteStreamObjects({ id, scopedClusterClient, logger }: DeleteStreamParams) {
+export async function deleteStreamObjects({
+  name,
+  scopedClusterClient,
+  logger,
+}: DeleteStreamParams) {
   await deleteDataStream({
     esClient: scopedClusterClient.asCurrentUser,
-    name: id,
+    name,
     logger,
   });
   await deleteTemplate({
     esClient: scopedClusterClient.asCurrentUser,
-    name: getIndexTemplateName(id),
+    name: getIndexTemplateName(name),
     logger,
   });
   await deleteComponent({
     esClient: scopedClusterClient.asCurrentUser,
-    name: getComponentTemplateName(id),
+    name: getComponentTemplateName(name),
     logger,
   });
   await deleteIngestPipeline({
     esClient: scopedClusterClient.asCurrentUser,
-    id: getProcessingPipelineName(id),
+    id: getProcessingPipelineName(name),
     logger,
   });
   await deleteIngestPipeline({
     esClient: scopedClusterClient.asCurrentUser,
-    id: getReroutePipelineName(id),
+    id: getReroutePipelineName(name),
     logger,
   });
 }
@@ -171,39 +194,39 @@ export async function getUnmanagedElasticsearchAssets({
 }
 
 interface CheckAccessParams extends BaseParams {
-  id: string;
+  name: string;
 }
 
 export async function checkAccess({
-  id,
+  name,
   scopedClusterClient,
 }: CheckAccessParams): Promise<{ read: boolean; write: boolean }> {
   return checkAccessBulk({
-    ids: [id],
+    names: [name],
     scopedClusterClient,
-  }).then((privileges) => privileges[id]);
+  }).then((privileges) => privileges[name]);
 }
 
 interface CheckAccessBulkParams extends BaseParams {
-  ids: string[];
+  names: string[];
 }
 
 export async function checkAccessBulk({
-  ids,
+  names,
   scopedClusterClient,
 }: CheckAccessBulkParams): Promise<Record<string, { read: boolean; write: boolean }>> {
-  if (!ids.length) {
+  if (!names.length) {
     return {};
   }
   const hasPrivilegesResponse = await scopedClusterClient.asCurrentUser.security.hasPrivileges({
-    index: [{ names: ids, privileges: ['read', 'write'] }],
+    index: [{ names, privileges: ['read', 'write'] }],
   });
 
   return Object.fromEntries(
-    ids.map((id) => {
-      const hasReadAccess = hasPrivilegesResponse.index[id].read === true;
-      const hasWriteAccess = hasPrivilegesResponse.index[id].write === true;
-      return [id, { read: hasReadAccess, write: hasWriteAccess }];
+    names.map((name) => {
+      const hasReadAccess = hasPrivilegesResponse.index[name].read === true;
+      const hasWriteAccess = hasPrivilegesResponse.index[name].write === true;
+      return [name, { read: hasReadAccess, write: hasWriteAccess }];
     })
   );
 }
@@ -278,8 +301,9 @@ async function getDataStream({
       throw e;
     }
   }
+
   if (!dataStream) {
-    throw new DefinitionNotFound(`Stream definition for ${name} not found.`);
+    throw new DefinitionNotFoundError(`Stream definition for ${name} not found.`);
   }
   return dataStream;
 }

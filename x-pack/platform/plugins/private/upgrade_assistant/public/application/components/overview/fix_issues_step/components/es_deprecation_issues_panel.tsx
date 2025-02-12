@@ -23,11 +23,13 @@ export const EsDeprecationIssuesPanel: FunctionComponent<Props> = ({ setIsFixed 
   const { data: esDeprecations, isLoading, error } = api.useLoadEsDeprecations();
 
   const criticalDeprecationsCount =
-    esDeprecations?.deprecations?.filter((deprecation) => deprecation.isCritical)?.length ?? 0;
+    esDeprecations?.migrationsDeprecations?.filter((deprecation) => deprecation.isCritical)
+      ?.length ?? 0;
 
   const warningDeprecationsCount =
-    esDeprecations?.deprecations?.filter((deprecation) => deprecation.isCritical === false)
-      ?.length ?? 0;
+    esDeprecations?.migrationsDeprecations?.filter(
+      (deprecation) => deprecation.isCritical === false
+    )?.length ?? 0;
 
   const errorMessage = error && getEsDeprecationError(error).message;
 

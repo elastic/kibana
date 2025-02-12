@@ -46,17 +46,15 @@ describe('UnifiedHistogramContainer', () => {
     expect(api).toBeDefined();
   });
 
-  it('should trigger input$ when refetch is called', async () => {
+  it('should trigger input$ when fetch is called', async () => {
     let api: UnifiedHistogramApi | undefined;
     const setApi = (ref: UnifiedHistogramApi) => {
       api = ref;
     };
-    const getCreationOptions = jest.fn(() => ({ disableAutoFetching: true }));
     const component = mountWithIntl(
       <UnifiedHistogramContainer
         services={unifiedHistogramServicesMock}
         ref={setApi}
-        getCreationOptions={getCreationOptions}
         dataView={dataViewWithTimefieldMock}
         filters={[]}
         query={{ language: 'kuery', query: '' }}
@@ -72,9 +70,9 @@ describe('UnifiedHistogramContainer', () => {
     const inputSpy = jest.fn();
     input$?.subscribe(inputSpy);
     act(() => {
-      api?.refetch();
+      api?.fetch();
     });
     expect(inputSpy).toHaveBeenCalledTimes(1);
-    expect(inputSpy).toHaveBeenCalledWith({ type: 'refetch' });
+    expect(inputSpy).toHaveBeenCalledWith({ type: 'fetch' });
   });
 });

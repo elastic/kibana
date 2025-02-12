@@ -129,6 +129,7 @@ export const getSummaryTableColumns = ({
           return (
             <EuiToolTip content={CHECK_NOW}>
               <EuiButtonIcon
+                color="text"
                 iconType="refresh"
                 aria-label={CHECK_NOW}
                 data-test-subj={`checkNowAction-${item.indexName}`}
@@ -145,6 +146,7 @@ export const getSummaryTableColumns = ({
           return (
             <EuiToolTip content={i18n.VIEW_HISTORY}>
               <EuiButtonIcon
+                color="text"
                 iconType="clockCounter"
                 aria-label={i18n.VIEW_HISTORY}
                 data-test-subj={`viewHistoryAction-${item.indexName}`}

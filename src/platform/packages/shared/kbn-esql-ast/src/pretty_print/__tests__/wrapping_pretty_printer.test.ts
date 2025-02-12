@@ -22,19 +22,19 @@ const reprint = (src: string, opts?: WrappingPrettyPrinterOptions) => {
 describe('commands', () => {
   describe('JOIN', () => {
     test('with short identifiers', () => {
-      const { text } = reprint('FROM a | RIGHT JOIN b AS c ON d, e');
+      const { text } = reprint('FROM a | RIGHT JOIN b ON d, e');
 
-      expect(text).toBe('FROM a | RIGHT JOIN b AS c ON d, e');
+      expect(text).toBe('FROM a | RIGHT JOIN b ON d, e');
     });
 
     test('with long identifiers', () => {
       const { text } = reprint(
-        'FROM aaaaaaaaaaaa | RIGHT JOIN bbbbbbbbbbbbbbbbb AS cccccccccccccccccccc ON dddddddddddddddddddddddddddddddddddddddd, eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
+        'FROM aaaaaaaaaaaa | RIGHT JOIN bbbbbbbbbbbbbbbbb ON dddddddddddddddddddddddddddddddddddddddd, eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee'
       );
 
       expect('\n' + text).toBe(`
 FROM aaaaaaaaaaaa
-  | RIGHT JOIN bbbbbbbbbbbbbbbbb AS cccccccccccccccccccc
+  | RIGHT JOIN bbbbbbbbbbbbbbbbb
         ON
           dddddddddddddddddddddddddddddddddddddddd,
           eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee`);
@@ -656,6 +656,22 @@ FROM index
             3333333333333.3335 +
           11111111111111.111 +
           11111111111111.111)`);
+      });
+
+      test('formats WHERE binary-expression', () => {
+        const query = `
+        FROM index
+        | STATS fn(11111111111111 - 11111111111111 - 11111111111111 - 11111111111111) WHERE 11111111111111 == AHA(11111111111111 + 11111111111111 + 11111111111111),
+        | LIMIT 10
+        `;
+        const text = reprint(query).text;
+
+        expect('\n' + text).toBe(`
+FROM index
+  | STATS
+      FN(11111111111111 - 11111111111111 - 11111111111111 - 11111111111111) WHERE
+        11111111111111 == AHA(11111111111111 + 11111111111111 + 11111111111111)
+  | LIMIT 10`);
       });
     });
   });

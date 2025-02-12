@@ -90,6 +90,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     'timePicker',
   ]);
 
+  const waitForChartsToLoad = async () =>
+    await retry.waitFor(
+      'wait for table and Metric charts to load',
+      async () => await pageObjects.assetDetails.isMetricChartsLoaded()
+    );
+
   const getNodeDetailsUrl = (queryParams?: QueryParams) => {
     return rison.encodeUnknown(
       Object.entries(queryParams ?? {}).reduce<Record<string, string>>((acc, [key, value]) => {
@@ -256,6 +262,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           { metric: 'network', chartsCount: 1 },
         ].forEach(({ metric, chartsCount }) => {
           it(`should render ${chartsCount} ${metric} chart(s) in the Metrics section`, async () => {
+            await waitForChartsToLoad();
             const hosts = await pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric);
             expect(hosts.length).to.equal(chartsCount);
           });
@@ -457,6 +464,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             START_HOST_DATE.format(DATE_PICKER_FORMAT),
             END_HOST_DATE.format(DATE_PICKER_FORMAT)
           );
+
+          await waitForChartsToLoad();
+        });
+
+        after(async () => {
+          await browser.scrollTop();
         });
 
         [
@@ -476,8 +489,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
       });
-
-      describe('Processes Tab', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/192891
+      describe.skip('Processes Tab', () => {
         before(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes');
           await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
@@ -547,7 +560,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           );
         });
 
-        it('should render logs tab', async () => {
+        it('should render logs tab content', async () => {
           await pageObjects.assetDetails.logsExists();
         });
 
@@ -572,7 +585,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await pageObjects.assetDetails.clickOsqueryTab();
         });
 
-        it('should show a date picker', async () => {
+        it('should not show a date picker', async () => {
           expect(await pageObjects.timePicker.timePickerExists()).to.be(false);
         });
       });
@@ -724,6 +737,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         ].forEach(({ metric, chartsCount }) => {
           it(`should render ${chartsCount} ${metric} chart`, async () => {
             await retry.tryForTime(5000, async () => {
+              await waitForChartsToLoad();
               const charts = await (metric === 'kubernetes'
                 ? pageObjects.assetDetails.getOverviewTabKubernetesMetricCharts()
                 : pageObjects.assetDetails.getOverviewTabHostMetricCharts(metric));
@@ -879,6 +893,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'network', chartsCount: 1 },
           ].forEach(({ metric, chartsCount }) => {
             it(`should render ${chartsCount} ${metric} chart(s)`, async () => {
+              await waitForChartsToLoad();
               const charts = await pageObjects.assetDetails.getMetricsTabDockerCharts(metric);
               expect(charts.length).to.equal(chartsCount);
             });

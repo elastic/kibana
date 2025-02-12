@@ -10,7 +10,7 @@
 import React from 'react';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 import TelemetryManagementSection from './telemetry_management_section';
-import { TelemetryService } from '@kbn/telemetry-plugin/public/services';
+import { mockTelemetryService } from '@kbn/telemetry-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { render } from '@testing-library/react';
 import type { DocLinksStart } from '@kbn/core/public';
@@ -21,10 +21,9 @@ describe('TelemetryManagementSectionComponent', () => {
   const docLinks = {
     legal: { privacyStatement: 'https://some-host/some-url' },
   } as unknown as DocLinksStart['links'];
-  const coreSetup = coreMock.createSetup();
 
   it('renders as expected', () => {
-    const telemetryService = new TelemetryService({
+    const telemetryService = mockTelemetryService({
       config: {
         appendServerlessChannelsSuffix: false,
         sendUsageTo: 'staging',
@@ -37,8 +36,6 @@ describe('TelemetryManagementSectionComponent', () => {
       isScreenshotMode: false,
       reportOptInStatusChange: false,
       currentKibanaVersion: 'mock_kibana_version',
-      notifications: coreStart.notifications,
-      http: coreSetup.http,
     });
 
     expect(
@@ -55,7 +52,7 @@ describe('TelemetryManagementSectionComponent', () => {
   });
 
   it('renders null because query does not match the SEARCH_TERMS', () => {
-    const telemetryService = new TelemetryService({
+    const telemetryService = mockTelemetryService({
       config: {
         appendServerlessChannelsSuffix: false,
         banner: true,
@@ -67,9 +64,7 @@ describe('TelemetryManagementSectionComponent', () => {
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,
-      notifications: coreStart.notifications,
       currentKibanaVersion: 'mock_kibana_version',
-      http: coreSetup.http,
     });
 
     const component = render(
@@ -106,7 +101,7 @@ describe('TelemetryManagementSectionComponent', () => {
   });
 
   it('renders because query matches the SEARCH_TERMS', () => {
-    const telemetryService = new TelemetryService({
+    const telemetryService = mockTelemetryService({
       config: {
         appendServerlessChannelsSuffix: false,
         banner: true,
@@ -118,9 +113,7 @@ describe('TelemetryManagementSectionComponent', () => {
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,
-      notifications: coreStart.notifications,
       currentKibanaVersion: 'mock_kibana_version',
-      http: coreSetup.http,
     });
 
     const component = mountWithIntl(
@@ -147,7 +140,7 @@ describe('TelemetryManagementSectionComponent', () => {
   });
 
   it('renders null because allowChangingOptInStatus is false', () => {
-    const telemetryService = new TelemetryService({
+    const telemetryService = mockTelemetryService({
       config: {
         appendServerlessChannelsSuffix: false,
         banner: true,
@@ -159,9 +152,7 @@ describe('TelemetryManagementSectionComponent', () => {
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,
-      notifications: coreStart.notifications,
       currentKibanaVersion: 'mock_kibana_version',
-      http: coreSetup.http,
     });
 
     const component = mountWithIntl(
@@ -182,7 +173,7 @@ describe('TelemetryManagementSectionComponent', () => {
   });
 
   it('shows the OptInExampleFlyout', () => {
-    const telemetryService = new TelemetryService({
+    const telemetryService = mockTelemetryService({
       config: {
         appendServerlessChannelsSuffix: false,
         banner: true,
@@ -194,9 +185,7 @@ describe('TelemetryManagementSectionComponent', () => {
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,
-      notifications: coreStart.notifications,
       currentKibanaVersion: 'mock_kibana_version',
-      http: coreSetup.http,
     });
 
     const component = mountWithIntl(
@@ -222,7 +211,7 @@ describe('TelemetryManagementSectionComponent', () => {
   });
 
   it('toggles the OptIn button', async () => {
-    const telemetryService = new TelemetryService({
+    const telemetryService = mockTelemetryService({
       config: {
         appendServerlessChannelsSuffix: false,
         banner: true,
@@ -234,9 +223,7 @@ describe('TelemetryManagementSectionComponent', () => {
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,
-      notifications: coreStart.notifications,
       currentKibanaVersion: 'mock_kibana_version',
-      http: coreSetup.http,
     });
 
     const component = mountWithIntl(
@@ -269,7 +256,7 @@ describe('TelemetryManagementSectionComponent', () => {
   });
 
   it('test the wrapper (for coverage purposes)', () => {
-    const telemetryService = new TelemetryService({
+    const telemetryService = mockTelemetryService({
       config: {
         appendServerlessChannelsSuffix: false,
         banner: true,
@@ -281,9 +268,7 @@ describe('TelemetryManagementSectionComponent', () => {
       },
       isScreenshotMode: false,
       reportOptInStatusChange: false,
-      notifications: coreStart.notifications,
       currentKibanaVersion: 'mock_kibana_version',
-      http: coreSetup.http,
     });
 
     expect(

@@ -124,6 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         currentUrl = await browser.getCurrentUrl();
         log.debug('Current URL: ' + currentUrl);
         expect(currentUrl).to.contain(`/history`);
+        await PageObjects.header.waitUntilLoadingHasFinished();
         expect(await PageObjects.console.isHistoryOpen()).to.be(true);
 
         // Navigate to Config tab via URL
@@ -131,6 +132,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         currentUrl = await browser.getCurrentUrl();
         log.debug('Current URL: ' + currentUrl);
         expect(currentUrl).to.contain(`/config`);
+        await PageObjects.header.waitUntilLoadingHasFinished();
         expect(await PageObjects.console.isConfigOpen()).to.be(true);
 
         // Navigate to Shell tab via URL
@@ -138,6 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         currentUrl = await browser.getCurrentUrl();
         log.debug('Current URL: ' + currentUrl);
         expect(currentUrl).to.contain(`/shell`);
+        await PageObjects.header.waitUntilLoadingHasFinished();
         expect(await PageObjects.console.isShellOpen()).to.be(true);
       });
     });

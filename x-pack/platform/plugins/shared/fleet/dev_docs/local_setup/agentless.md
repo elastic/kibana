@@ -13,8 +13,6 @@ At the time of writing, this can be achieved by adding the following to your `ki
 # Emulate cloud
 xpack.cloud.id: "123456789"
 
-# Enable agentless experimental feature flag in Fleet
-xpack.fleet.enableExperimental: ['agentless']
 # Agentless Fleet config
 xpack.fleet.agentless.enabled: true
 xpack.fleet.agentless.api.url: 'https://api.agentless.url/api/v1/ess'

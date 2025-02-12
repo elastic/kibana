@@ -41,6 +41,14 @@ export interface SAMLResponseValueParams {
   log: ToolingLog;
 }
 
+export interface SAMLCallbackParams {
+  kbnHost: string;
+  samlResponse: string;
+  sid?: string;
+  log: ToolingLog;
+  maxRetryCount?: number;
+}
+
 export interface User {
   readonly email: string;
   readonly password: string;
@@ -65,4 +73,5 @@ export interface RetryParams {
 export interface GetSessionByRole {
   role: string;
   forceNewSession: boolean;
+  spaceId?: string;
 }

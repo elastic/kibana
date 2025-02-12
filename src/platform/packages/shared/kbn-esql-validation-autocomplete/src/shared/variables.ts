@@ -112,10 +112,17 @@ export function collectVariables(
       addToVariables(oldArg, newArg, fields, variables);
     })
     .on('visitFunctionCallExpression', (ctx) => {
-      if (ctx.node.name === '=') {
-        addVariableFromAssignment(ctx.node, variables, fields);
+      const node = ctx.node;
+
+      if (node.subtype === 'binary-expression' && node.name === 'where') {
+        ctx.visitArgument(0, undefined);
+        return;
+      }
+
+      if (node.name === '=') {
+        addVariableFromAssignment(node, variables, fields);
       } else {
-        addVariableFromExpression(ctx.node, queryString, variables, fields);
+        addVariableFromExpression(node, queryString, variables, fields);
       }
     })
     .on('visitCommandOption', (ctx) => {

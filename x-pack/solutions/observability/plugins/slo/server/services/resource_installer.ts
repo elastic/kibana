@@ -10,26 +10,17 @@ import type {
   IndicesPutIndexTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { getSLOMappingsTemplate } from '../assets/component_templates/slo_mappings_template';
-import { getSLOSettingsTemplate } from '../assets/component_templates/slo_settings_template';
-import { getSLOSummaryMappingsTemplate } from '../assets/component_templates/slo_summary_mappings_template';
-import { getSLOSummarySettingsTemplate } from '../assets/component_templates/slo_summary_settings_template';
 import {
-  SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
-  SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
-  SLO_DESTINATION_INDEX_NAME,
-  SLO_INDEX_TEMPLATE_NAME,
-  SLO_INDEX_TEMPLATE_PATTERN,
-  SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
-  SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
-  SLO_SUMMARY_DESTINATION_INDEX_NAME,
-  SLO_SUMMARY_INDEX_TEMPLATE_NAME,
-  SLO_SUMMARY_INDEX_TEMPLATE_PATTERN,
-  SLO_SUMMARY_TEMP_INDEX_NAME,
+  SLI_DESTINATION_INDEX_NAME,
+  SUMMARY_DESTINATION_INDEX_NAME,
+  SUMMARY_TEMP_INDEX_NAME,
 } from '../../common/constants';
-import { getSLOIndexTemplate } from '../assets/index_templates/slo_index_templates';
-import { getSLOSummaryIndexTemplate } from '../assets/index_templates/slo_summary_index_templates';
-
+import { SLI_MAPPINGS_TEMPLATE } from '../assets/component_templates/slI_mappings_template';
+import { SLI_SETTINGS_TEMPLATE } from '../assets/component_templates/slI_settings_template';
+import { SUMMARY_MAPPINGS_TEMPLATE } from '../assets/component_templates/summary_mappings_template';
+import { SUMMARY_SETTINGS_TEMPLATE } from '../assets/component_templates/summary_settings_template';
+import { SLI_INDEX_TEMPLATE } from '../assets/index_templates/sli_index_template';
+import { SUMMARY_INDEX_TEMPLATE } from '../assets/index_templates/summary_index_template';
 import { retryTransientEsErrors } from '../utils/retry';
 
 export interface ResourceInstaller {
@@ -37,50 +28,39 @@ export interface ResourceInstaller {
 }
 
 export class DefaultResourceInstaller implements ResourceInstaller {
+  private isInstalling: boolean = false;
+
   constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
 
-  public async ensureCommonResourcesInstalled(): Promise<void> {
+  public async ensureCommonResourcesInstalled() {
+    if (this.isInstalling) {
+      return;
+    }
+    this.isInstalling = true;
+
+    let installTimeout;
     try {
+      installTimeout = setTimeout(() => (this.isInstalling = false), 60000);
+
       this.logger.info('Installing SLO shared resources');
       await Promise.all([
-        this.createOrUpdateComponentTemplate(
-          getSLOMappingsTemplate(SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME)
-        ),
-        this.createOrUpdateComponentTemplate(
-          getSLOSettingsTemplate(SLO_COMPONENT_TEMPLATE_SETTINGS_NAME)
-        ),
-        this.createOrUpdateComponentTemplate(
-          getSLOSummaryMappingsTemplate(SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME)
-        ),
-        this.createOrUpdateComponentTemplate(
-          getSLOSummarySettingsTemplate(SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME)
-        ),
+        this.createOrUpdateComponentTemplate(SLI_MAPPINGS_TEMPLATE),
+        this.createOrUpdateComponentTemplate(SLI_SETTINGS_TEMPLATE),
+        this.createOrUpdateComponentTemplate(SUMMARY_MAPPINGS_TEMPLATE),
+        this.createOrUpdateComponentTemplate(SUMMARY_SETTINGS_TEMPLATE),
       ]);
 
-      await this.createOrUpdateIndexTemplate(
-        getSLOIndexTemplate(SLO_INDEX_TEMPLATE_NAME, SLO_INDEX_TEMPLATE_PATTERN, [
-          SLO_COMPONENT_TEMPLATE_MAPPINGS_NAME,
-          SLO_COMPONENT_TEMPLATE_SETTINGS_NAME,
-        ])
-      );
+      await this.createOrUpdateIndexTemplate(SLI_INDEX_TEMPLATE);
+      await this.createOrUpdateIndexTemplate(SUMMARY_INDEX_TEMPLATE);
 
-      await this.createOrUpdateIndexTemplate(
-        getSLOSummaryIndexTemplate(
-          SLO_SUMMARY_INDEX_TEMPLATE_NAME,
-          SLO_SUMMARY_INDEX_TEMPLATE_PATTERN,
-          [
-            SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
-            SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
-          ]
-        )
-      );
-
-      await this.createIndex(SLO_DESTINATION_INDEX_NAME);
-      await this.createIndex(SLO_SUMMARY_DESTINATION_INDEX_NAME);
-      await this.createIndex(SLO_SUMMARY_TEMP_INDEX_NAME);
+      await this.createIndex(SLI_DESTINATION_INDEX_NAME);
+      await this.createIndex(SUMMARY_DESTINATION_INDEX_NAME);
+      await this.createIndex(SUMMARY_TEMP_INDEX_NAME);
     } catch (err) {
       this.logger.error(`Error while installing SLO shared resources: ${err}`);
-      throw err;
+    } finally {
+      this.isInstalling = false;
+      clearTimeout(installTimeout);
     }
   }
 

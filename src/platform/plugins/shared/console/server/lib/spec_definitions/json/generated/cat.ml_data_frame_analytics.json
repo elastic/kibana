@@ -23,11 +23,6 @@
         "version"
       ],
       "help": "__flag__",
-      "master_timeout": [
-        "30s",
-        "-1",
-        "0"
-      ],
       "s": [
         "assignment_explanation",
         "create_time",
@@ -61,8 +56,13 @@
         "pb"
       ],
       "time": [
-        "-1",
-        "0"
+        "nanos",
+        "micros",
+        "ms",
+        "s",
+        "m",
+        "h",
+        "d"
       ]
     },
     "methods": [

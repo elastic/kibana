@@ -1970,6 +1970,25 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-public.getConvertToLensModule",
+        "type": "Function",
+        "tags": [],
+        "label": "getConvertToLensModule",
+        "description": [],
+        "signature": [
+          "() => Promise<typeof ",
+          "src/platform/plugins/shared/visualizations/public/convert_to_lens/index",
+          ">"
+        ],
+        "path": "src/platform/plugins/shared/visualizations/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-public.getDataViewByIndexPatternId",
         "type": "Function",
         "tags": [],
@@ -2048,7 +2067,7 @@
         "signature": [
           "(id: string) => string"
         ],
-        "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts",
+        "path": "src/platform/plugins/shared/visualizations/public/utils/url_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2062,7 +2081,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts",
+            "path": "src/platform/plugins/shared/visualizations/public/utils/url_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2213,7 +2232,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; }[]; type: \"datatable\"; meta?: ",
+          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; variable?: string | undefined; }[]; type: \"datatable\"; meta?: ",
           "DatatableMeta",
           " | undefined; rows: ",
           {
@@ -2293,55 +2312,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-public.updateOldState",
-        "type": "Function",
-        "tags": [],
-        "label": "updateOldState",
-        "description": [],
-        "signature": [
-          "(oldState: unknown) => ",
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.SavedVisState",
-            "text": "SavedVisState"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
-          ">"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/public/legacy/vis_update_state.d.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.updateOldState.$1",
-            "type": "Unknown",
-            "tags": [],
-            "label": "oldState",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/public/legacy/vis_update_state.d.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-public.urlFor",
         "type": "Function",
         "tags": [],
@@ -2350,7 +2320,7 @@
         "signature": [
           "(id: string) => string"
         ],
-        "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts",
+        "path": "src/platform/plugins/shared/visualizations/public/utils/url_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2364,7 +2334,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts",
+            "path": "src/platform/plugins/shared/visualizations/public/utils/url_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -6258,21 +6228,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-public.COMMON_VISUALIZATION_GROUPING",
-        "type": "Array",
-        "tags": [],
-        "label": "COMMON_VISUALIZATION_GROUPING",
-        "description": [],
-        "signature": [
-          "{ id: string; getDisplayName: () => string; getIconType: () => string; order: number; }[]"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-public.DASHBOARD_VISUALIZATION_PANEL_TRIGGER",
         "type": "string",
         "tags": [],
@@ -6744,25 +6699,7 @@
             "section": "def-common.Adapters",
             "text": "Adapters"
           },
-          " | undefined; reload: () => Promise<void>; updateInput: (changes: Partial<",
-          {
-            "pluginId": "visualizations",
-            "scope": "public",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.VisualizeInput",
-            "text": "VisualizeInput"
-          },
-          ">) => void; getInput$: () => Readonly<",
-          "Observable",
-          "<",
-          {
-            "pluginId": "visualizations",
-            "scope": "public",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-public.VisualizeInput",
-            "text": "VisualizeInput"
-          },
-          ">>; reportsEmbeddableLoad: () => boolean; getVis: () => ",
+          " | undefined; reload: () => Promise<void>; reportsEmbeddableLoad: () => boolean; getVis: () => ",
           {
             "pluginId": "visualizations",
             "scope": "public",
@@ -6824,6 +6761,16 @@
           },
           " | ",
           "VisualizeOutput",
+          ">>; getInput$: () => Readonly<",
+          "Observable",
+          "<",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeInput",
+            "text": "VisualizeInput"
+          },
           ">>; getOutput$: () => Readonly<",
           "Observable",
           "<",
@@ -6862,7 +6809,15 @@
             "section": "def-public.VisualizeInput",
             "text": "VisualizeInput"
           },
-          ">; getTitle: () => string; getDescription: () => string; untilInitializationFinished: () => Promise<void>; updateOutput: (outputChanges: Partial<",
+          ">; getTitle: () => string; getDescription: () => string; updateInput: (changes: Partial<",
+          {
+            "pluginId": "visualizations",
+            "scope": "public",
+            "docId": "kibVisualizationsPluginApi",
+            "section": "def-public.VisualizeInput",
+            "text": "VisualizeInput"
+          },
+          ">) => void; untilInitializationFinished: () => Promise<void>; updateOutput: (outputChanges: Partial<",
           "VisualizeOutput",
           ">) => void; }"
         ],
@@ -6873,23 +6828,6 @@
       }
     ],
     "objects": [
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-public.convertToLensModule",
-        "type": "Object",
-        "tags": [],
-        "label": "convertToLensModule",
-        "description": [],
-        "signature": [
-          "Promise<typeof ",
-          "src/platform/plugins/shared/visualizations/public/convert_to_lens/index",
-          ">"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "visualizations",
         "id": "def-public.LegendSizeToPixels",
@@ -8718,7 +8656,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; }[]; type: \"datatable\"; meta?: ",
+          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; variable?: string | undefined; }[]; type: \"datatable\"; meta?: ",
           "DatatableMeta",
           " | undefined; rows: ",
           {
@@ -9080,7 +9018,7 @@
             "label": "mode",
             "description": [],
             "signature": [
-              "\"full\" | \"custom\" | \"dataBounds\""
+              "\"custom\" | \"full\" | \"dataBounds\""
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -13973,7 +13911,7 @@
             "label": "iconPosition",
             "description": [],
             "signature": [
-              "\"right\" | \"auto\" | \"above\" | \"below\" | \"left\" | undefined"
+              "\"right\" | \"auto\" | \"left\" | \"above\" | \"below\" | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,

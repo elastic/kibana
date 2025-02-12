@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -88,7 +88,25 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       isLoading: isOutputsLoading,
       canUseOutputPerIntegration,
       allowedOutputs,
-    } = useOutputs(packageInfo.name);
+    } = useOutputs(packagePolicy, packageInfo.name);
+
+    // Reset output if switching to agentless and the current
+    // selected output is not allowed
+    useEffect(() => {
+      if (packagePolicy.supports_agentless && packagePolicy.output_id) {
+        const currentOutput = allowedOutputs.find((o) => o.id === packagePolicy.output_id);
+        if (!currentOutput) {
+          updatePackagePolicy({
+            output_id: null,
+          });
+        }
+      }
+    }, [
+      packagePolicy.supports_agentless,
+      packagePolicy.output_id,
+      allowedOutputs,
+      updatePackagePolicy,
+    ]);
 
     // Managed policy
     const isManaged = packagePolicy.is_managed;

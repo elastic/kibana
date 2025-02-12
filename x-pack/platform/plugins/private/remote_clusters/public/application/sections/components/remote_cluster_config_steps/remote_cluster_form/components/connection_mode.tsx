@@ -8,7 +8,7 @@
 import React, { FunctionComponent } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EuiDescribedFormGroup, EuiTitle, EuiFormRow, EuiSwitch } from '@elastic/eui';
+import { EuiDescribedFormGroup, EuiTitle, EuiFormRow, EuiSwitch, EuiSpacer } from '@elastic/eui';
 
 import { SNIFF_MODE, PROXY_MODE } from '../../../../../../../common/constants';
 import { useAppContext } from '../../../../../app_context';
@@ -52,12 +52,13 @@ export const ConnectionMode: FunctionComponent<Props> = (props) => {
               id="xpack.remoteClusters.remoteClusterForm.sectionModeDescription"
               defaultMessage="Use seed nodes by default, or switch to proxy mode."
             />
+            <EuiSpacer size="l" />
             <EuiFormRow fullWidth>
               <EuiSwitch
                 label={
                   <FormattedMessage
                     id="xpack.remoteClusters.remoteClusterForm.fieldModeLabel"
-                    defaultMessage="Use proxy mode"
+                    defaultMessage="Manually enter proxy address and server name"
                   />
                 }
                 checked={mode === PROXY_MODE}

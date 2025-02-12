@@ -11,6 +11,7 @@ import { ThemeProvider, css } from '@emotion/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { action } from '@storybook/addon-actions';
 import { Controls as ControlsComponent, type ControlsProps } from './controls';
+import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 
 export default {
   title: 'Components/Graph Components/Additional Components',
@@ -26,6 +27,7 @@ export default {
       control: { type: 'boolean' },
     },
   },
+  decorators: [GlobalStylesStorybookDecorator],
 } as Meta;
 
 const Template: Story<ControlsProps> = (props) => {

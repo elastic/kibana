@@ -24,6 +24,7 @@ export type {
 } from './schema/vulnerabilities/csp_vulnerability_finding';
 export type { BenchmarksCisId } from './types/benchmark';
 export type { VulnSeverity } from './types/vulnerabilities';
+export type { MisconfigurationEvaluationStatus } from './types/misconfigurations';
 export * from './constants';
 export {
   extractErrorMessage,

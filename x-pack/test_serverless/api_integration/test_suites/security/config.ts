@@ -33,5 +33,7 @@ export default createTestConfig({
     '--xpack.dataUsage.autoops.api.url=http://localhost:9000',
     `--xpack.dataUsage.autoops.api.tls.certificate=${KBN_CERT_PATH}`,
     `--xpack.dataUsage.autoops.api.tls.key=${KBN_KEY_PATH}`,
+    // Enables /internal/cloud_security_posture/graph API
+    `--uiSettings.overrides.securitySolution:enableGraphVisualization=true`,
   ],
 });

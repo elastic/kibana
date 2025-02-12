@@ -119,6 +119,8 @@
     "@kbn/core-chrome-browser",
     "@kbn/core-capabilities-common",
     "@kbn/presentation-panel-plugin",
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/esql-variables-types",
   ],
   "exclude": ["target/**/*"]
 }

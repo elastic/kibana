@@ -24,11 +24,13 @@ export class DatasetQualityPlugin
   implements Plugin<DatasetQualityPluginSetup, DatasetQualityPluginStart>
 {
   private telemetry = new TelemetryService();
+  private isServerless = false;
 
-  constructor(context: PluginInitializerContext) {}
+  constructor(private context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: DatasetQualitySetupDeps) {
     this.telemetry.setup({ analytics: core.analytics });
+    this.isServerless = this.context.env.packageInfo.buildFlavor === 'serverless';
 
     return {};
   }
@@ -44,21 +46,27 @@ export class DatasetQualityPlugin
       http: core.http,
     });
 
+    // TODO: Remove first check once the failure store is enabled
+    const isFailureStoreEnabled = false && !this.isServerless;
+
     const DatasetQuality = createDatasetQuality({
       core,
       plugins,
       telemetryClient,
+      isFailureStoreEnabled,
     });
 
     const createDatasetQualityController = createDatasetQualityControllerLazyFactory({
       core,
       dataStreamStatsService,
+      isFailureStoreEnabled,
     });
 
     const DatasetQualityDetails = createDatasetQualityDetails({
       core,
       plugins,
       telemetryClient,
+      isFailureStoreEnabled,
     });
 
     const createDatasetQualityDetailsController = createDatasetQualityDetailsControllerLazyFactory({
@@ -66,6 +74,7 @@ export class DatasetQualityPlugin
       plugins,
       dataStreamStatsService,
       dataStreamDetailsService,
+      isFailureStoreEnabled,
     });
 
     return {

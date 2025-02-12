@@ -48,6 +48,7 @@ export default async function ({ readConfigFile }) {
         '--server.restrictInternalApis=false',
         // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
         `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
+        `--xpack.fleet.internal.registry.kibanaVersionCheckEnabled=false`,
       ],
     },
     uiSettings: {
@@ -191,6 +192,12 @@ export default async function ({ readConfigFile }) {
       },
       enterpriseSearch: {
         pathname: '/app/elasticsearch/overview',
+      },
+      elasticsearchStart: {
+        pathname: '/app/elasticsearch/start',
+      },
+      elasticsearchIndices: {
+        pathname: '/app/elasticsearch/indices',
       },
     },
 
@@ -617,6 +624,13 @@ export default async function ({ readConfigFile }) {
               'manage_slm',
               'cluster:admin/snapshot',
               'cluster:admin/repository',
+              'manage_index_templates',
+            ],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
             ],
           },
           kibana: [

@@ -8,8 +8,8 @@
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import type { DocSearchResult } from '@kbn/product-doc-base-plugin/server/services/search';
-
 import { retrieveDocumentation } from './retrieve_documentation';
+
 import { truncate, count as countTokens } from '../../utils/tokens';
 jest.mock('../../utils/tokens');
 const truncateMock = truncate as jest.MockedFn<typeof truncate>;
@@ -26,12 +26,16 @@ describe('retrieveDocumentation', () => {
   let searchDocAPI: jest.Mock;
   let retrieve: ReturnType<typeof retrieveDocumentation>;
 
-  const createResult = (parts: Partial<DocSearchResult> = {}): DocSearchResult => {
+  const createResult = (
+    parts: Partial<DocSearchResult> = {},
+    { highlights = [] }: { highlights?: string[] } = {}
+  ): DocSearchResult => {
     return {
       title: 'title',
       content: 'content',
       url: 'url',
       productName: 'kibana',
+      highlights,
       ...parts,
     };
   };
@@ -56,6 +60,7 @@ describe('retrieveDocumentation', () => {
     const result = await retrieve({
       searchTerm: 'What is Kibana?',
       products: ['kibana'],
+      tokenReductionStrategy: 'highlight',
       request,
       max: 5,
       connectorId: '.my-connector',
@@ -72,7 +77,65 @@ describe('retrieveDocumentation', () => {
       query: 'What is Kibana?',
       products: ['kibana'],
       max: 5,
+      highlights: 4,
     });
+  });
+
+  it('calls the search API with highlights=0 when using a different summary strategy', async () => {
+    searchDocAPI.mockResolvedValue({ results: [] });
+
+    await retrieve({
+      searchTerm: 'What is Kibana?',
+      products: ['kibana'],
+      tokenReductionStrategy: 'truncate',
+      request,
+      max: 5,
+      connectorId: '.my-connector',
+      functionCalling: 'simulated',
+    });
+
+    expect(searchDocAPI).toHaveBeenCalledTimes(1);
+    expect(searchDocAPI).toHaveBeenCalledWith({
+      query: 'What is Kibana?',
+      products: ['kibana'],
+      max: 5,
+      highlights: 0,
+    });
+  });
+
+  it('reduces the document length using the highlights strategy', async () => {
+    searchDocAPI.mockResolvedValue({
+      results: [
+        createResult({ content: 'content-1' }, { highlights: ['hl1-1', 'hl1-2'] }),
+        createResult({ content: 'content-2' }, { highlights: ['hl2-1', 'hl2-2'] }),
+        createResult({ content: 'content-3' }, { highlights: ['hl3-1', 'hl3-2'] }),
+      ],
+    });
+
+    countTokensMock.mockImplementation((text) => {
+      if (text === 'content-2') {
+        return 150;
+      } else {
+        return 50;
+      }
+    });
+    truncateMock.mockImplementation((val) => val);
+
+    const result = await retrieve({
+      searchTerm: 'What is Kibana?',
+      request,
+      connectorId: '.my-connector',
+      maxDocumentTokens: 100,
+      tokenReductionStrategy: 'highlight',
+    });
+
+    expect(result.documents.length).toEqual(3);
+    expect(result.documents[0].content).toEqual('content-1');
+    expect(result.documents[1].content).toEqual('hl2-1\n\nhl2-2');
+    expect(result.documents[2].content).toEqual('content-3');
+
+    expect(truncateMock).toHaveBeenCalledTimes(1);
+    expect(truncateMock).toHaveBeenCalledWith('hl2-1\n\nhl2-2', 100);
   });
 
   it('reduces the document length using the truncate strategy', async () => {

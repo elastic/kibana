@@ -34,7 +34,7 @@
     "patterns": [
       "{index}/_unfreeze"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/unfreeze-index-api.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/unfreeze-index-api.html",
     "availability": {
       "stack": true,
       "serverless": false

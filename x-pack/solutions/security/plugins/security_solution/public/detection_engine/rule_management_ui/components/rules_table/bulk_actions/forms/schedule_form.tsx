@@ -84,7 +84,7 @@ export const ScheduleForm = ({ rulesCount, onClose, onConfirm }: ScheduleFormCom
           idAria: 'bulkEditRulesScheduleIntervalSelector',
           dataTestSubj: 'bulkEditRulesScheduleIntervalSelector',
           fullWidth: true,
-          minimumValue: 1,
+          minValue: 1,
         }}
       />
       <UseField
@@ -94,7 +94,7 @@ export const ScheduleForm = ({ rulesCount, onClose, onConfirm }: ScheduleFormCom
           idAria: 'bulkEditRulesScheduleLookbackSelector',
           dataTestSubj: 'bulkEditRulesScheduleLookbackSelector',
           fullWidth: true,
-          minimumValue: 1,
+          minValue: 1,
         }}
       />
     </BulkEditFormWrapper>

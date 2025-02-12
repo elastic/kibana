@@ -16,6 +16,7 @@ const graphState: GraphState = {
   anonymizedAlerts: mockAnonymizedAlerts, // <-- mockAnonymizedAlerts is an array of objects with a pageContent property
   combinedGenerations: 'combinedGenerations',
   combinedRefinements: '',
+  continuePrompt: 'continue',
   errors: [],
   generationAttempts: 2,
   generations: ['combined', 'Generations'],

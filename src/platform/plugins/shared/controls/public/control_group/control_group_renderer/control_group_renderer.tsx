@@ -116,7 +116,7 @@ export const ControlGroupRenderer = ({
    */
   useEffect(() => {
     if (!controlGroup) return;
-    const stateChangeSubscription = controlGroup.unsavedChanges.subscribe((changes) => {
+    const stateChangeSubscription = controlGroup.unsavedChanges$.subscribe((changes) => {
       runtimeState$.next({ ...runtimeState$.getValue(), ...changes });
     });
     return () => {
@@ -168,8 +168,8 @@ export const ControlGroupRenderer = ({
       type={CONTROL_GROUP_TYPE}
       getParentApi={() => ({
         reload$,
-        dataLoading: dataLoading$,
-        viewMode: viewMode$,
+        dataLoading$,
+        viewMode$,
         query$: searchApi.query$,
         timeRange$: searchApi.timeRange$,
         unifiedSearchFilters$: searchApi.filters$,

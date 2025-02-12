@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SearchFilterConfig } from '@elastic/eui';
+import type { HorizontalAlignment, SearchFilterConfig } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -16,7 +16,6 @@ import {
   EuiIcon,
   EuiInMemoryTable,
   EuiLink,
-  EuiProgress,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -31,14 +30,16 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useStorage } from '@kbn/ml-local-storage';
-import { ELSER_ID_V1, MODEL_STATE } from '@kbn/ml-trained-models-utils';
+import { ELSER_ID_V1 } from '@kbn/ml-trained-models-utils';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { cloneDeep, isEmpty } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import useMountedState from 'react-use/lib/useMountedState';
+import useObservable from 'react-use/lib/useObservable';
+import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
+import { useEuiMaxBreakpoint } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ML_PAGES } from '../../../common/constants/locator';
 import { ML_ELSER_CALLOUT_DISMISSED } from '../../../common/types/storage';
 import type {
@@ -59,17 +60,19 @@ import type { ModelsBarStats } from '../components/stats_bar';
 import { StatsBar } from '../components/stats_bar';
 import { TechnicalPreviewBadge } from '../components/technical_preview_badge';
 import { useMlKibana } from '../contexts/kibana';
-import { useEnabledFeatures } from '../contexts/ml';
 import { useTableSettings } from '../data_frame_analytics/pages/analytics_management/components/analytics_list/use_table_settings';
 import { useRefresh } from '../routing/use_refresh';
-import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
-import { useToastNotificationService } from '../services/toast_notification_service';
 import { ModelsTableToConfigMapping } from './config_mapping';
 import { DeleteModelsModal } from './delete_models_modal';
-import { getModelStateColor } from './get_model_state';
 import { useModelActions } from './model_actions';
 import { TestDfaModelsFlyout } from './test_dfa_models_flyout';
 import { TestModelAndPipelineCreationFlyout } from './test_models';
+import { useInitTrainedModelsService } from './hooks/use_init_trained_models_service';
+import { ModelStatusIndicator } from './model_status_indicator';
+import { MLSavedObjectsSpacesList } from '../components/ml_saved_objects_spaces_list';
+import { useCanManageSpacesAndSavedObjects } from '../hooks/use_spaces';
+import { TRAINED_MODEL_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
+import { SpaceManagementContextWrapper } from '../components/space_management_context_wrapper';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.TRAINED_MODELS_MANAGE;
@@ -101,24 +104,39 @@ interface Props {
   updatePageState?: (update: Partial<ListingPageUrlState>) => void;
 }
 
-const DOWNLOAD_POLL_INTERVAL = 3000;
-
 export const ModelsList: FC<Props> = ({
   pageState: pageStateExternal,
   updatePageState: updatePageStateExternal,
 }) => {
-  const isMounted = useMountedState();
-
   const {
     services: {
+      spaces,
       application: { capabilities },
       docLinks,
     },
   } = useMlKibana();
 
+  const isInitialized = useRef<boolean>(false);
+
+  const canManageSpacesAndSavedObjects = useCanManageSpacesAndSavedObjects();
+
+  const trainedModelsService = useInitTrainedModelsService(canManageSpacesAndSavedObjects);
+
+  const items = useObservable(trainedModelsService.modelItems$, trainedModelsService.modelItems);
+  const isLoading = useObservable(trainedModelsService.isLoading$, trainedModelsService.isLoading);
+  const scheduledDeployments = useObservable(
+    trainedModelsService.scheduledDeployments$,
+    trainedModelsService.scheduledDeployments
+  );
+
+  // Navigation blocker when there are active operations
+  useUnsavedChangesPrompt({
+    hasUnsavedChanges: scheduledDeployments.length > 0,
+    blockSpaNavigation: false,
+  });
+
   const nlpElserDocUrl = docLinks.links.ml.nlpElser;
 
-  const { isNLPEnabled } = useEnabledFeatures();
   const [isElserCalloutDismissed, setIsElserCalloutDismissed] = useStorage(
     ML_ELSER_CALLOUT_DISMISSED,
     false
@@ -145,13 +163,6 @@ export const ModelsList: FC<Props> = ({
 
   const canDeleteTrainedModels = capabilities.ml.canDeleteTrainedModels as boolean;
 
-  const trainedModelsApiService = useTrainedModelsApiService();
-
-  const { displayErrorToast } = useToastNotificationService();
-
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [items, setItems] = useState<TrainedModelUIItem[]>([]);
   const [selectedModels, setSelectedModels] = useState<TrainedModelUIItem[]>([]);
   const [modelsToDelete, setModelsToDelete] = useState<TrainedModelUIItem[]>([]);
   const [modelToDeploy, setModelToDeploy] = useState<DFAModelItem | undefined>();
@@ -167,62 +178,40 @@ export const ModelsList: FC<Props> = ({
     return items.filter((i): i is NLPModelItem | DFAModelItem => !isModelDownloadItem(i));
   }, [items]);
 
-  /**
-   * Fetches trained models.
-   */
-  const fetchModelsData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const resultItems = await trainedModelsApiService.getTrainedModelsList();
+  const fetchModels = useCallback(() => {
+    trainedModelsService.fetchModels();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-      setItems((prevItems) => {
-        // Need to merge existing items with new items
-        // to preserve state and download status
-        return resultItems.map((item) => {
-          const prevItem = prevItems.find((i) => i.model_id === item.model_id);
-          return {
-            ...item,
-            ...(isBaseNLPModelItem(prevItem) && prevItem?.state === MODEL_STATE.DOWNLOADING
-              ? {
-                  state: prevItem.state,
-                  downloadState: prevItem.downloadState,
-                }
-              : {}),
-          };
-        });
-      });
+  useEffect(
+    function checkInit() {
+      if (!isInitialized.current && !isLoading) {
+        isInitialized.current = true;
+      }
+    },
+    [isLoading]
+  );
 
-      setItemIdToExpandedRowMap((prev) => {
-        // Refresh expanded rows
+  useEffect(
+    function updateExpandedRows() {
+      // Update expanded rows when items change
+      setItemIdToExpandedRowMap((prevMap) => {
         return Object.fromEntries(
-          Object.keys(prev).map((modelId) => {
-            const item = resultItems.find((i) => i.model_id === modelId);
+          Object.keys(prevMap).map((modelId) => {
+            const item = items.find((i) => i.model_id === modelId);
             return item ? [modelId, <ExpandedRow item={item as TrainedModelItem} />] : [];
           })
         );
       });
-    } catch (error) {
-      displayErrorToast(
-        error,
-        i18n.translate('xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage', {
-          defaultMessage: 'Error loading trained models',
-        })
-      );
-    }
-
-    setIsInitialized(true);
-
-    setIsLoading(false);
-
-    await fetchDownloadStatus();
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemIdToExpandedRowMap, isNLPEnabled]);
+    },
+    [items]
+  );
 
   useEffect(
     function updateOnTimerRefresh() {
       if (!refresh) return;
-      fetchModelsData();
+
+      fetchModels();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [refresh]
@@ -239,80 +228,6 @@ export const ModelsList: FC<Props> = ({
       },
     };
   }, [existingModels]);
-
-  const downLoadStatusFetchInProgress = useRef(false);
-  const abortedDownload = useRef(new Set<string>());
-
-  /**
-   * Updates model list with download status
-   */
-  const fetchDownloadStatus = useCallback(
-    /**
-     * @param downloadInProgress Set of model ids that reports download in progress
-     */
-    async (downloadInProgress: Set<string> = new Set<string>()) => {
-      // Allows only single fetch to be in progress
-      if (downLoadStatusFetchInProgress.current && downloadInProgress.size === 0) return;
-
-      try {
-        downLoadStatusFetchInProgress.current = true;
-
-        const downloadStatus = await trainedModelsApiService.getModelsDownloadStatus();
-
-        if (isMounted()) {
-          setItems((prevItems) => {
-            return prevItems.map((item) => {
-              if (!isBaseNLPModelItem(item)) {
-                return item;
-              }
-              const newItem = cloneDeep(item);
-
-              if (downloadStatus[item.model_id]) {
-                newItem.state = MODEL_STATE.DOWNLOADING;
-                newItem.downloadState = downloadStatus[item.model_id];
-              } else {
-                /* Unfortunately, model download status does not report 100% download state, only from 1 to 99. Hence, there might be 3 cases
-                 * 1. Model is not downloaded at all
-                 * 2. Model download was in progress and finished
-                 * 3. Model download was in progress and aborted
-                 */
-                delete newItem.downloadState;
-
-                if (abortedDownload.current.has(item.model_id)) {
-                  // Change downloading state to not downloaded
-                  newItem.state = MODEL_STATE.NOT_DOWNLOADED;
-                  abortedDownload.current.delete(item.model_id);
-                } else if (downloadInProgress.has(item.model_id) || !newItem.state) {
-                  // Change downloading state to downloaded
-                  newItem.state = MODEL_STATE.DOWNLOADED;
-                }
-
-                downloadInProgress.delete(item.model_id);
-              }
-              return newItem;
-            });
-          });
-        }
-
-        Object.keys(downloadStatus).forEach((modelId) => {
-          if (downloadStatus[modelId]) {
-            downloadInProgress.add(modelId);
-          }
-        });
-
-        if (isEmpty(downloadStatus)) {
-          downLoadStatusFetchInProgress.current = false;
-          return;
-        }
-
-        await new Promise((resolve) => setTimeout(resolve, DOWNLOAD_POLL_INTERVAL));
-        await fetchDownloadStatus(downloadInProgress);
-      } catch (e) {
-        downLoadStatusFetchInProgress.current = false;
-      }
-    },
-    [trainedModelsApiService, isMounted]
-  );
 
   /**
    * Unique inference types from models
@@ -348,39 +263,25 @@ export const ModelsList: FC<Props> = ({
 
   const onModelDownloadRequest = useCallback(
     async (modelId: string) => {
-      try {
-        setIsLoading(true);
-        await trainedModelsApiService.installElasticTrainedModelConfig(modelId);
-        // Need to fetch model state updates
-        await fetchModelsData();
-      } catch (e) {
-        displayErrorToast(
-          e,
-          i18n.translate('xpack.ml.trainedModels.modelsList.downloadFailed', {
-            defaultMessage: 'Failed to download "{modelId}"',
-            values: { modelId },
-          })
-        );
-        setIsLoading(true);
-      }
+      trainedModelsService.downloadModel(modelId);
     },
-    [displayErrorToast, fetchModelsData, trainedModelsApiService]
+    [trainedModelsService]
   );
 
   /**
    * Table actions
    */
   const actions = useModelActions({
-    isLoading,
-    fetchModels: fetchModelsData,
     onTestAction: setModelToTest,
     onDfaTestAction: setDfaModelToTest,
     onModelsDeleteRequest: setModelsToDelete,
     onModelDeployRequest: setModelToDeploy,
-    onLoading: setIsLoading,
     modelAndDeploymentIds,
     onModelDownloadRequest,
   });
+
+  const shouldDisableSpacesColumn =
+    !canManageSpacesAndSavedObjects || !capabilities.savedObjectsManagement?.shareIntoSpace;
 
   const toggleDetails = async (item: TrainedModelUIItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
@@ -504,62 +405,43 @@ export const ModelsList: FC<Props> = ({
     },
     {
       name: i18n.translate('xpack.ml.trainedModels.modelsList.stateHeader', {
-        defaultMessage: 'State',
+        defaultMessage: 'Model state',
       }),
       truncateText: false,
       width: '150px',
-      render: (item: TrainedModelUIItem) => {
-        if (!isBaseNLPModelItem(item)) return null;
-
-        const { state, downloadState } = item;
-        const config = getModelStateColor(state);
-        if (!config) return null;
-
-        const isProgressbarVisible = state === MODEL_STATE.DOWNLOADING && downloadState;
-
-        const label = (
-          <EuiText size="xs" color={config.color}>
-            {config.name}
-          </EuiText>
-        );
-
-        return (
-          <EuiFlexGroup direction={'column'} gutterSize={'none'} css={{ width: '100%' }}>
-            {isProgressbarVisible ? (
-              <EuiFlexItem>
-                <EuiProgress
-                  label={config.name}
-                  valueText={
-                    <>
-                      {downloadState
-                        ? (
-                            (downloadState.downloaded_parts / (downloadState.total_parts || -1)) *
-                            100
-                          ).toFixed(0) + '%'
-                        : '100%'}
-                    </>
-                  }
-                  value={downloadState?.downloaded_parts ?? 1}
-                  max={downloadState?.total_parts ?? 1}
-                  size="xs"
-                  color={config.color}
-                />
-              </EuiFlexItem>
-            ) : (
-              <EuiFlexItem grow={false}>
-                <span>{config.component ?? label}</span>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        );
-      },
+      render: (item: TrainedModelUIItem) => <ModelStatusIndicator modelId={item.model_id} />,
       'data-test-subj': 'mlModelsTableColumnDeploymentState',
     },
+    ...(canManageSpacesAndSavedObjects && spaces
+      ? [
+          {
+            name: i18n.translate('xpack.ml.jobsList.jobActionsColumn.spaces', {
+              defaultMessage: 'Spaces',
+            }),
+            'data-test-subj': 'mlTableColumnSpaces',
+            truncateText: true,
+            align: 'right' as HorizontalAlignment,
+            width: '10%',
+            render: (item: TrainedModelUIItem) => {
+              return (
+                <MLSavedObjectsSpacesList
+                  disabled={shouldDisableSpacesColumn}
+                  spacesApi={spaces}
+                  spaceIds={item.spaces}
+                  id={item.model_id}
+                  mlSavedObjectType={TRAINED_MODEL_SAVED_OBJECT_TYPE}
+                  refresh={fetchModels}
+                />
+              );
+            },
+          },
+        ]
+      : []),
     {
       name: i18n.translate('xpack.ml.trainedModels.modelsList.actionsHeader', {
         defaultMessage: 'Actions',
       }),
-      width: '200px',
+      width: '300px',
       actions,
       'data-test-subj': 'mlModelsTableColumnActions',
     },
@@ -675,6 +557,8 @@ export const ModelsList: FC<Props> = ({
   const isElserCalloutVisible =
     !isElserCalloutDismissed && items.findIndex((i) => i.model_id === ELSER_ID_V1) >= 0;
 
+  const euiMaxBreakpointXL = useEuiMaxBreakpoint('xl');
+
   const tableItems = useMemo(() => {
     if (pageState.showAll) {
       return items;
@@ -684,159 +568,170 @@ export const ModelsList: FC<Props> = ({
     }
   }, [items, pageState.showAll]);
 
-  if (!isInitialized) return null;
+  if (!isInitialized.current) {
+    return null;
+  }
 
   return (
     <>
-      <SavedObjectsWarning onCloseFlyout={fetchModelsData} forceRefresh={isLoading} />
-      <EuiFlexGroup justifyContent="spaceBetween">
-        {modelsStats ? (
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow={false}>
-                <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  label={
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.modelsList.showAllLabel"
-                      defaultMessage="Show all"
-                    />
-                  }
-                  checked={!!pageState.showAll}
-                  onChange={(e) => updatePageState({ showAll: e.target.checked })}
-                  data-test-subj="mlModelsShowAllSwitch"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        ) : null}
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            iconType={'plusInCircle'}
-            color={'primary'}
-            onClick={setIsAddModelFlyoutVisible.bind(null, true)}
-            data-test-subj="mlModelsAddTrainedModelButton"
-          >
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.addModelButtonLabel"
-              defaultMessage="Add trained model"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <div data-test-subj="mlModelsTableContainer">
-        <EuiInMemoryTable<TrainedModelUIItem>
-          tableLayout={'auto'}
-          responsiveBreakpoint={'xl'}
-          allowNeutralSort={false}
-          columns={columns}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          items={tableItems}
-          itemId={ModelsTableToConfigMapping.id}
-          loading={isLoading}
-          search={search}
-          selection={selection}
-          rowProps={(item) => ({
-            'data-test-subj': `mlModelsTableRow row-${item.model_id}`,
-          })}
-          pagination={pagination}
-          onTableChange={onTableChange}
-          sorting={sorting}
-          data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
-          childrenBetween={
-            isElserCalloutVisible ? (
-              <>
-                <EuiCallOut
-                  size="s"
-                  title={
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.modelsList.newElserModelTitle"
-                      defaultMessage="New ELSER model now available"
-                    />
-                  }
-                  onDismiss={setIsElserCalloutDismissed.bind(null, true)}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.modelsList.newElserModelDescription"
-                    defaultMessage="A new version of ELSER that shows faster performance and improved relevance is now available. {docLink} for information on how to start using it."
-                    values={{
-                      docLink: (
-                        <EuiLink href={nlpElserDocUrl} external target={'_blank'}>
-                          <FormattedMessage
-                            id="xpack.ml.trainedModels.modelsList.startDeployment.viewElserDocLink"
-                            defaultMessage="View documentation"
-                          />
-                        </EuiLink>
-                      ),
-                    }}
+      <SpaceManagementContextWrapper>
+        <SavedObjectsWarning onCloseFlyout={fetchModels} forceRefresh={isLoading} />
+        <EuiFlexGroup justifyContent="spaceBetween">
+          {modelsStats ? (
+            <EuiFlexItem>
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    label={
+                      <FormattedMessage
+                        id="xpack.ml.trainedModels.modelsList.showAllLabel"
+                        defaultMessage="Show all"
+                      />
+                    }
+                    checked={!!pageState.showAll}
+                    onChange={(e) => updatePageState({ showAll: e.target.checked })}
+                    data-test-subj="mlModelsShowAllSwitch"
                   />
-                </EuiCallOut>
-                <EuiSpacer size="m" />
-              </>
-            ) : null
-          }
-        />
-      </div>
-      {modelsToDelete.length > 0 && (
-        <DeleteModelsModal
-          onClose={(refreshList) => {
-            modelsToDelete.forEach((model) => {
-              if (isBaseNLPModelItem(model) && model.state === MODEL_STATE.DOWNLOADING) {
-                abortedDownload.current.add(model.model_id);
-              }
-            });
-
-            setItemIdToExpandedRowMap((prev) => {
-              const newMap = { ...prev };
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              iconType={'plusInCircle'}
+              color={'primary'}
+              onClick={setIsAddModelFlyoutVisible.bind(null, true)}
+              data-test-subj="mlModelsAddTrainedModelButton"
+            >
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.addModelButtonLabel"
+                defaultMessage="Add trained model"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <div data-test-subj="mlModelsTableContainer">
+          <EuiInMemoryTable<TrainedModelUIItem>
+            tableLayout={'auto'}
+            responsiveBreakpoint={'xl'}
+            allowNeutralSort={false}
+            columns={columns}
+            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+            items={tableItems}
+            itemId={ModelsTableToConfigMapping.id}
+            loading={isLoading}
+            search={search}
+            selection={selection}
+            rowProps={(item) => ({
+              'data-test-subj': `mlModelsTableRow row-${item.model_id}`,
+              // This is a workaround for https://github.com/elastic/eui/issues/8259
+              css: css`
+                ${euiMaxBreakpointXL} {
+                  min-block-size: 10.875rem;
+                }
+              `,
+            })}
+            pagination={pagination}
+            onTableChange={onTableChange}
+            sorting={sorting}
+            data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
+            childrenBetween={
+              isElserCalloutVisible ? (
+                <>
+                  <EuiCallOut
+                    size="s"
+                    title={
+                      <FormattedMessage
+                        id="xpack.ml.trainedModels.modelsList.newElserModelTitle"
+                        defaultMessage="New ELSER model now available"
+                      />
+                    }
+                    onDismiss={setIsElserCalloutDismissed.bind(null, true)}
+                  >
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.newElserModelDescription"
+                      defaultMessage="A new version of ELSER that shows faster performance and improved relevance is now available. {docLink} for information on how to start using it."
+                      values={{
+                        docLink: (
+                          <EuiLink href={nlpElserDocUrl} external target={'_blank'}>
+                            <FormattedMessage
+                              id="xpack.ml.trainedModels.modelsList.startDeployment.viewElserDocLink"
+                              defaultMessage="View documentation"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </EuiCallOut>
+                  <EuiSpacer size="m" />
+                </>
+              ) : null
+            }
+          />
+        </div>
+        {modelsToDelete.length > 0 && (
+          <DeleteModelsModal
+            onClose={(refreshList) => {
               modelsToDelete.forEach((model) => {
-                delete newMap[model.model_id];
+                trainedModelsService.removeScheduledDeployments({ modelId: model.model_id });
               });
-              return newMap;
-            });
 
-            setModelsToDelete([]);
+              setItemIdToExpandedRowMap((prev) => {
+                const newMap = { ...prev };
+                modelsToDelete.forEach((model) => {
+                  delete newMap[model.model_id];
+                });
+                return newMap;
+              });
 
-            if (refreshList) {
-              fetchModelsData();
-            }
-          }}
-          models={modelsToDelete}
-        />
-      )}
-      {modelToTest === null ? null : (
-        <TestModelAndPipelineCreationFlyout
-          model={modelToTest}
-          onClose={(refreshList?: boolean) => {
-            setModelToTest(null);
-            if (refreshList) {
-              fetchModelsData();
-            }
-          }}
-        />
-      )}
-      {dfaModelToTest === null ? null : (
-        <TestDfaModelsFlyout model={dfaModelToTest} onClose={setDfaModelToTest.bind(null, null)} />
-      )}
-      {modelToDeploy !== undefined ? (
-        <AddInferencePipelineFlyout
-          onClose={setModelToDeploy.bind(null, undefined)}
-          model={modelToDeploy}
-        />
-      ) : null}
-      {isAddModelFlyoutVisible ? (
-        <AddModelFlyout
-          modelDownloads={items.filter(isModelDownloadItem)}
-          onClose={setIsAddModelFlyoutVisible.bind(null, false)}
-          onSubmit={(modelId) => {
-            onModelDownloadRequest(modelId);
-            setIsAddModelFlyoutVisible(false);
-          }}
-        />
-      ) : null}
+              setModelsToDelete([]);
+
+              if (refreshList) {
+                fetchModels();
+              }
+            }}
+            models={modelsToDelete}
+          />
+        )}
+        {modelToTest === null ? null : (
+          <TestModelAndPipelineCreationFlyout
+            model={modelToTest}
+            onClose={(refreshList?: boolean) => {
+              setModelToTest(null);
+              if (refreshList) {
+                fetchModels();
+              }
+            }}
+          />
+        )}
+        {dfaModelToTest === null ? null : (
+          <TestDfaModelsFlyout
+            model={dfaModelToTest}
+            onClose={setDfaModelToTest.bind(null, null)}
+          />
+        )}
+        {modelToDeploy !== undefined ? (
+          <AddInferencePipelineFlyout
+            onClose={setModelToDeploy.bind(null, undefined)}
+            model={modelToDeploy}
+          />
+        ) : null}
+        {isAddModelFlyoutVisible ? (
+          <AddModelFlyout
+            modelDownloads={items.filter(isModelDownloadItem)}
+            onClose={setIsAddModelFlyoutVisible.bind(null, false)}
+            onSubmit={(modelId) => {
+              onModelDownloadRequest(modelId);
+              setIsAddModelFlyoutVisible(false);
+            }}
+          />
+        ) : null}
+      </SpaceManagementContextWrapper>
     </>
   );
 };

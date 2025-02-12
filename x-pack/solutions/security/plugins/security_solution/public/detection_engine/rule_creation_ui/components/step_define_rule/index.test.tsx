@@ -45,6 +45,7 @@ import {
 } from '../../../rule_creation/components/related_integrations/test_helpers';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 import { useMLRuleConfig } from '../../../../common/components/ml/hooks/use_ml_rule_config';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 // Set the extended default timeout for all define rule step form test
 jest.setTimeout(10 * 1000);
@@ -207,6 +208,7 @@ jest.mock('../../../../detections/containers/detection_engine/rules/use_rule_fro
 
 jest.mock('../../../../common/hooks/esql/use_esql_availability');
 jest.mock('../../../../common/components/ml/hooks/use_ml_rule_config');
+jest.mock('../../../../common/components/user_privileges');
 
 const mockUseRuleFromTimeline = useRuleFromTimeline as jest.Mock;
 const onOpenTimeline = jest.fn();
@@ -225,6 +227,9 @@ describe('StepDefineRule', () => {
       hasMlLicense: true,
       loading: false,
       mlSuppressionFields: [],
+    });
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      timelinePrivileges: { read: true },
     });
   });
 

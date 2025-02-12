@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
+import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
 import type {
   DashboardAttributes,
   DashboardUpdateIn,

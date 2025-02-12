@@ -22,8 +22,11 @@ export const APP_UI_ID = 'securitySolutionUI' as const;
 export const ASSET_INVENTORY_FEATURE_ID = 'securitySolutionAssetInventory' as const;
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 export const ATTACK_DISCOVERY_FEATURE_ID = 'securitySolutionAttackDiscovery' as const;
-export const CASES_FEATURE_ID = 'securitySolutionCasesV2' as const;
+export const CASES_FEATURE_ID = 'securitySolutionCasesV3' as const;
+export const TIMELINE_FEATURE_ID = 'securitySolutionTimeline' as const;
+export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SERVER_APP_ID = 'siem' as const;
+export const SECURITY_FEATURE_ID = 'siemV2' as const;
 export const APP_NAME = 'Security' as const;
 export const APP_ICON = 'securityAnalyticsApp' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
@@ -67,7 +70,6 @@ export const ENDPOINT_METRICS_INDEX = '.ds-metrics-endpoint.metrics-*' as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000 as const; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100 as const;
-export const SECURITY_FEATURE_ID = 'Security' as const;
 export const SECURITY_TAG_NAME = 'Security Solution' as const;
 export const SECURITY_TAG_DESCRIPTION = 'Security Solution auto-generated tag' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
@@ -211,6 +213,10 @@ export const MAX_UNASSOCIATED_NOTES = 'securitySolution:maxUnassociatedNotes' as
 export const ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
   'securitySolution:enableVisualizationsInFlyout' as const;
 
+/** This Kibana Advanced Setting allows users to enable/disable the Graph Visualizations for alerts and events */
+export const ENABLE_GRAPH_VISUALIZATION_SETTING =
+  'securitySolution:enableGraphVisualization' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -246,6 +252,7 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_create` as const;
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
+export const DETECTION_ENGINE_RULES_IMPORT_URL = `${DETECTION_ENGINE_RULES_URL}/_import` as const;
 
 export * from './entity_analytics/constants';
 
@@ -322,6 +329,7 @@ export const UNAUTHENTICATED_USER = 'Unauthenticated' as const;
  Licensing requirements
  */
 export const MINIMUM_ML_LICENSE = 'platinum' as const;
+export const MINIMUM_RULE_CUSTOMIZATION_LICENSE = 'enterprise' as const;
 
 /**
  Machine Learning constants
@@ -421,6 +429,8 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.13',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
+  SIEM_MAIN_LANDING_PAGE: 'securitySolution.siemMigrations.setupGuide.v8.18',
+  SIEM_RULE_TRANSLATION_PAGE: 'securitySolution.siemMigrations.ruleTranslationGuide.v8.18',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -428,19 +438,6 @@ export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_SOURCE_EVENT_TIME_RANGE_STORAGE_KEY =
   'securitySolution.ruleDetails.ruleExecutionLog.showSourceEventTimeRange.v8.15';
-
-// TODO: https://github.com/elastic/kibana/pull/142950
-/**
- * Error codes that can be thrown during _bulk_action API dry_run call and be processed and displayed to end user
- */
-export enum BulkActionsDryRunErrCode {
-  IMMUTABLE = 'IMMUTABLE',
-  MACHINE_LEARNING_AUTH = 'MACHINE_LEARNING_AUTH',
-  MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
-  ESQL_INDEX_PATTERN = 'ESQL_INDEX_PATTERN',
-  MANUAL_RULE_RUN_FEATURE = 'MANUAL_RULE_RUN_FEATURE',
-  MANUAL_RULE_RUN_DISABLED_RULE = 'MANUAL_RULE_RUN_DISABLED_RULE',
-}
 
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
 

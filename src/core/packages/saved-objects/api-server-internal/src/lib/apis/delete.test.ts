@@ -26,6 +26,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
 import { kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { savedObjectsExtensionsMock } from '../../mocks/saved_objects_extensions.mock';
+import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
 
 import {
   NAMESPACE_AGNOSTIC_TYPE,
@@ -50,6 +52,7 @@ describe('#delete', () => {
   let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
   let serializer: jest.Mocked<SavedObjectsSerializer>;
+  let securityExtension: jest.Mocked<ISavedObjectsSecurityExtension>;
 
   const registry = createRegistry();
   const documentMigrator = createDocumentMigrator(registry);
@@ -61,6 +64,7 @@ describe('#delete', () => {
     documentMigrator.prepareMigrations();
     migrator.migrateDocument = jest.fn().mockImplementation(documentMigrator.migrate);
     migrator.runMigrations = jest.fn().mockResolvedValue([{ status: 'skipped' }]);
+    securityExtension = savedObjectsExtensionsMock.createSecurityExtension();
     logger = loggerMock.create();
 
     // create a mock serializer "shim" so we can track function calls, but use the real serializer's implementation
@@ -79,6 +83,9 @@ describe('#delete', () => {
       serializer,
       allowedTypes,
       logger,
+      extensions: {
+        securityExtension,
+      },
     });
 
     mockGetCurrentTime.mockReturnValue(mockTimestamp);
@@ -377,6 +384,50 @@ describe('#delete', () => {
       it(`returns an empty object on success`, async () => {
         const result = await deleteSuccess(client, repository, registry, type, id);
         expect(result).toEqual({});
+      });
+    });
+
+    describe('security', () => {
+      it('calls securityExtension.authorizeDelete with the correct parameters', async () => {
+        client.get.mockResponse({
+          _source: {
+            'index-pattern': {
+              name: 'foo_name',
+            },
+          },
+          found: true,
+          _index: '.kibana',
+          _id: id,
+        });
+
+        securityExtension.includeSavedObjectNames.mockReturnValue(true);
+
+        client.delete.mockResponseOnce({
+          result: 'deleted',
+        } as estypes.DeleteResponse);
+        await repository.delete(type, id, { namespace });
+
+        expect(securityExtension.authorizeDelete).toHaveBeenLastCalledWith({
+          namespace,
+          object: { type: 'index-pattern', id, name: 'foo_name' },
+        });
+      });
+
+      it('calls securityExtension.authorizeDelete with the correct parameters when includeSavedObjectNames is false', async () => {
+        securityExtension.includeSavedObjectNames.mockReturnValue(false);
+
+        client.delete.mockResponseOnce({
+          result: 'deleted',
+        } as estypes.DeleteResponse);
+
+        await repository.delete(type, id, { namespace });
+
+        expect(client.get).toHaveBeenCalledTimes(0);
+
+        expect(securityExtension.authorizeDelete).toHaveBeenLastCalledWith({
+          namespace,
+          object: { type: 'index-pattern', id, name: undefined },
+        });
       });
     });
   });

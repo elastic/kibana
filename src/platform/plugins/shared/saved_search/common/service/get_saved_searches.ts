@@ -28,7 +28,7 @@ export interface GetSavedSearchDependencies {
 
 const getSavedSearchUrlConflictMessage = async (json: string) =>
   i18n.translate('savedSearch.legacyURLConflict.errorMessage', {
-    defaultMessage: `This search has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
+    defaultMessage: `This Discover session has the same URL as a legacy alias. Disable the alias to resolve this error : {json}`,
     values: { json },
   });
 
@@ -40,7 +40,7 @@ export const getSearchSavedObject = async (
 
   // @ts-expect-error
   if (so.error) {
-    throw new Error(`Could not locate that search (id: ${savedSearchId})`);
+    throw new Error(`Could not locate that Discover session (id: ${savedSearchId})`);
   }
 
   if (so.meta.outcome === 'conflict') {

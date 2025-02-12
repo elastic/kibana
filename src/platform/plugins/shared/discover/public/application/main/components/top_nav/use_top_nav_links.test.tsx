@@ -20,7 +20,7 @@ describe('useTopNavLinks', () => {
   const services = {
     ...createDiscoverServicesMock(),
     capabilities: {
-      discover: {
+      discover_v2: {
         save: true,
       },
     },
