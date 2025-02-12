@@ -33,6 +33,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     temperature = 0,
     modelName,
     abortSignal,
+    metadata,
   }) => {
     return from(
       executor.invoke({
@@ -46,6 +47,9 @@ export const geminiAdapter: InferenceConnectorAdapter = {
           model: modelName,
           signal: abortSignal,
           stopSequences: ['\n\nHuman:'],
+          ...(metadata?.connectorTelemetry
+            ? { telemetryMetadata: metadata.connectorTelemetry }
+            : {}),
         },
       })
     ).pipe(
