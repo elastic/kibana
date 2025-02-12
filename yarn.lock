@@ -2325,17 +2325,17 @@
   version "0.0.10"
   resolved "file:./elastic_eui_theme_borealis_0.0.10_zzz_03.tgz#8f214d0a1b9b70c5d4534871a2a72b2c9bbe52a8"
 
-"@elastic/eui-theme-common@file:./elastic_eui_theme_common_0.0.9_zzz_03.tgz":
+"@elastic/eui-theme-common@file:./elastic_eui_theme_common_0.0.9_zzz_04.tgz":
   version "0.0.9"
-  resolved "file:./elastic_eui_theme_common_0.0.9_zzz_03.tgz#723ccb04164f9eddad19ecbee9ac519678841cd2"
+  resolved "file:./elastic_eui_theme_common_0.0.9_zzz_04.tgz#723ccb04164f9eddad19ecbee9ac519678841cd2"
   dependencies:
     "@types/lodash" "^4.14.202"
     chroma-js "^2.4.2"
     lodash "^4.17.21"
 
-"@elastic/eui@file:./elastic_eui_99.2.0_borealis.0_zzz_03.tgz":
+"@elastic/eui@file:./elastic_eui_99.2.0_borealis.0_zzz_04.tgz":
   version "99.2.0-borealis.0"
-  resolved "file:./elastic_eui_99.2.0_borealis.0_zzz_03.tgz#9999e8bcd8e2eda2b24d3bb2075c58303b350194"
+  resolved "file:./elastic_eui_99.2.0_borealis.0_zzz_04.tgz#2454767eb40b665cf911eece5a91c8617d5a98e1"
   dependencies:
     "@hello-pangea/dnd" "^16.6.0"
     "@types/lodash" "^4.14.202"
