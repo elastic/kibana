@@ -7,6 +7,7 @@
 
 import type { MlEntityFieldType } from '@kbn/ml-anomaly-utils';
 import type { FrozenTierPreference } from '@kbn/ml-date-picker';
+import type { StartAllocationParams } from '../../public/application/services/ml_api_service/trained_models';
 
 export const ML_ENTITY_FIELDS_CONFIG = 'ml.singleMetricViewer.partitionFields' as const;
 export const ML_APPLY_TIME_RANGE_CONFIG = 'ml.jobSelectorFlyout.applyTimeRange';
@@ -17,6 +18,7 @@ export const ML_NOTIFICATIONS_LAST_CHECKED_AT = 'ml.notificationsLastCheckedAt';
 export const ML_OVERVIEW_PANELS = 'ml.overviewPanels';
 export const ML_OVERVIEW_PANELS_EXTENDED = 'ml.overviewPanelsExtended';
 export const ML_ELSER_CALLOUT_DISMISSED = 'ml.elserUpdateCalloutDismissed';
+export const ML_SCHEDULED_MODEL_DEPLOYMENTS = 'ml.trainedModels.scheduledModelDeployments';
 
 export type PartitionFieldConfig =
   | {
@@ -77,6 +79,7 @@ export interface MlStorageRecord {
   [ML_OVERVIEW_PANELS]: OverviewPanelsState;
   [ML_OVERVIEW_PANELS_EXTENDED]: OverviewPanelsExtendedState;
   [ML_ELSER_CALLOUT_DISMISSED]: boolean | undefined;
+  [ML_SCHEDULED_MODEL_DEPLOYMENTS]: StartAllocationParams[];
 }
 
 export type MlStorage = Partial<MlStorageRecord> | null;
@@ -101,6 +104,8 @@ export type TMlStorageMapped<T extends MlStorageKey> = T extends typeof ML_ENTIT
   ? OverviewPanelsExtendedState | undefined
   : T extends typeof ML_ELSER_CALLOUT_DISMISSED
   ? boolean | undefined
+  : T extends typeof ML_SCHEDULED_MODEL_DEPLOYMENTS
+  ? string[] | undefined
   : null;
 
 export const ML_STORAGE_KEYS = [
@@ -112,4 +117,5 @@ export const ML_STORAGE_KEYS = [
   ML_NOTIFICATIONS_LAST_CHECKED_AT,
   ML_OVERVIEW_PANELS,
   ML_ELSER_CALLOUT_DISMISSED,
+  ML_SCHEDULED_MODEL_DEPLOYMENTS,
 ] as const;
