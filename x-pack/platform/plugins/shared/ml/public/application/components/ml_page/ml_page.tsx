@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { createContext, useEffect, useMemo, useState } from 'react';
 import { createHtmlPortalNode, type HtmlPortalNode } from 'react-reverse-portal';
-import { Redirect } from 'react-router-dom';
+import { Redirect, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Subscription } from 'rxjs';
 import { EuiPageSection, EuiPageHeader } from '@elastic/eui';
@@ -19,17 +19,15 @@ import { type AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { DatePickerWrapper } from '@kbn/ml-date-picker';
-
 import * as routes from '../../routing/routes';
 import * as overviewRoutes from '../../routing/routes/overview_management'; // GOOD
 import * as anomalyDetectionRoutes from '../../routing/routes/anomaly_detection_management';
-// import * as dataViewSelectRoutes from '../../routing/routes/data_view_select';
 import * as dfaRoutes from '../../routing/routes/data_frame_analytics_management';
 import * as suppliedConfigsRoutes from '../../routing/routes/supplied_configurations';
 import * as settingsRoutes from '../../routing/routes/settings';
 import * as trainedModelsRoutes from '../../routing/routes/trained_models';
 import { MlPageWrapper } from '../../routing/ml_page_wrapper';
-import { useMlKibana, useNavigateToPath } from '../../contexts/kibana';
+import { useMlKibana, useMlManagementLocator, useNavigateToPath } from '../../contexts/kibana';
 import type { NavigateToPath } from '../../contexts/kibana';
 import type { MlRoute, PageDependencies } from '../../routing/router';
 import { useActiveRoute } from '../../routing/use_active_route';
@@ -65,6 +63,36 @@ export const MlPageControlsContext = createContext<{
 export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = React.memo(
   ({ pageDeps, entryPoint }) => {
     const navigateToPath = useNavigateToPath();
+    const { pathname, search } = useLocation();
+    const mlManagementLocator = useMlManagementLocator();
+
+    useEffect(
+      // Auto-redirect bookmarked jobs list and data frame analytics list
+      // to the new management pages, and keep the search string as much
+      function autoRedirectToManagementPages() {
+        if (mlManagementLocator) {
+          const searchString = decodeURIComponent(search);
+          let decodedSearch = search;
+
+          if (pathname === '/jobs') {
+            decodedSearch = searchString.replace(`=(jobs:`, `=('':`);
+            mlManagementLocator.navigate({
+              sectionId: 'ml',
+              appId: `anomaly_detection${decodedSearch}`,
+            });
+          }
+          if (pathname === '/data_frame_analytics') {
+            decodedSearch = searchString.replace(`=(data_frame_analytics:`, `=('':`);
+            mlManagementLocator.navigate({
+              sectionId: 'ml',
+              appId: `analytics${decodedSearch}`,
+            });
+          }
+        }
+      },
+      [pathname, navigateToPath, mlManagementLocator, search]
+    );
+
     const {
       services: {
         application: { navigateToApp },

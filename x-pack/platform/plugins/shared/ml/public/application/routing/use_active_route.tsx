@@ -58,6 +58,9 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
 
   useEffect(
     function handleNotFoundRoute() {
+      if (pathname === '/jobs' || pathname === '/data_frame_analytics') {
+        return;
+      }
       if (!activeRoute && !!pathname) {
         bannerId.current = overlays.banners.replace(
           bannerId.current,
