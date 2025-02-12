@@ -332,7 +332,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const availableDataViews = await unifiedSearch.getDataViewList(
           'discover-dataView-switch-link'
         );
-        expect(availableDataViews).to.eql(['kibana_sample_data_flights', 'logstash-*']);
+        expect(availableDataViews).to.eql(['All logs', 'kibana_sample_data_flights', 'logstash-*']);
         await dataViews.switchToAndValidate('kibana_sample_data_flights');
       });
     });
@@ -474,6 +474,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('sorting', () => {
+      beforeEach(async () => {
+        await common.navigateToApp('discover');
+        await timePicker.setDefaultAbsoluteRange();
+      });
+
       it('should sort correctly', async () => {
         const savedSearchName = 'testSorting';
 
@@ -638,6 +643,100 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
           'Sort fields\n2'
+        );
+      });
+
+      it('should sort on custom vars too', async () => {
+        const savedSearchName = 'testSortingForCustomVars';
+
+        await discover.selectTextBaseLang();
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        const testQuery =
+          'from logstash-* | sort @timestamp | limit 100 | keep bytes | eval var0 = abs(bytes) + 1';
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains an initial value', async () => {
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+          const text = await cell.getVisibleText();
+          return text === '1,624';
+        });
+
+        expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
+          'Sort fields'
+        );
+
+        await dataGrid.clickDocSortDesc('var0', 'Sort High-Low');
+
+        await discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains the highest value', async () => {
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+          const text = await cell.getVisibleText();
+          return text === '17,967';
+        });
+
+        expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
+          'Sort fields\n1'
+        );
+
+        await discover.saveSearch(savedSearchName);
+
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains the same highest value', async () => {
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+          const text = await cell.getVisibleText();
+          return text === '17,967';
+        });
+
+        await browser.refresh();
+
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains the same highest value after reload', async () => {
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+          const text = await cell.getVisibleText();
+          return text === '17,967';
+        });
+
+        await discover.clickNewSearchButton();
+
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await discover.loadSavedSearch(savedSearchName);
+
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor(
+          'first cell contains the same highest value after reopening',
+          async () => {
+            const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+            const text = await cell.getVisibleText();
+            return text === '17,967';
+          }
+        );
+
+        await dataGrid.clickDocSortDesc('var0', 'Sort Low-High');
+
+        await discover.waitUntilSearchingHasFinished();
+
+        await retry.waitFor('first cell contains the lowest value', async () => {
+          const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
+          const text = await cell.getVisibleText();
+          return text === '1';
+        });
+
+        expect(await testSubjects.getVisibleText('dataGridColumnSortingButton')).to.be(
+          'Sort fields\n1'
         );
       });
     });
