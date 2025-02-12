@@ -358,6 +358,8 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     setRequiredProviderFormFields(existingConfiguration.filter((p) => p.required || p.sensitive));
   }, [config?.providerConfig, providerSchema, secrets, selectedTaskType]);
 
+  const isInternalProvider = config?.provider === 'elasticsearch'; // To display link for model_ids for Elasticsearch provider
+
   return !isLoading ? (
     <>
       <UseField
@@ -415,6 +417,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
             setConfigEntry={onSetProviderConfigEntry}
             isEdit={isEdit}
             isPreconfigured={isPreconfigured}
+            isInternalProvider={isInternalProvider}
           />
           <EuiSpacer size="m" />
           <AdditionalOptionsFields
