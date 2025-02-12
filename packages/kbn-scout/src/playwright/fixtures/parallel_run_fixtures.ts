@@ -23,9 +23,8 @@ import {
   browserAuthFixture,
   pageObjectsParallelFixture,
   validateTagsFixture,
-  synthtraceFixture,
 } from './test';
-import type { BrowserAuthFixture, ScoutPage, PageObjects, SynthtraceFixture } from './test';
+import type { BrowserAuthFixture, ScoutPage, PageObjects } from './test';
 
 export const scoutParallelFixtures = mergeTests(
   // worker scope fixtures
@@ -36,8 +35,7 @@ export const scoutParallelFixtures = mergeTests(
   browserAuthFixture,
   scoutPageParallelFixture,
   pageObjectsParallelFixture,
-  validateTagsFixture,
-  synthtraceFixture
+  validateTagsFixture
 );
 
 export interface ScoutParallelTestFixtures {
@@ -53,7 +51,4 @@ export interface ScoutParallelWorkerFixtures extends ApiParallelWorkerFixtures {
   kbnClient: KbnClient;
   esClient: EsClient;
   scoutSpace: ScoutSpaceParallelFixture;
-  apmSynthtraceEsClient: SynthtraceFixture['apmSynthtraceEsClient'];
-  infraSynthtraceEsClient: SynthtraceFixture['infraSynthtraceEsClient'];
-  otelSynthtraceEsClient: SynthtraceFixture['otelSynthtraceEsClient'];
 }

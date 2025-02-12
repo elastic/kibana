@@ -14,5 +14,3 @@ export type { ScoutPage } from './scout_page';
 export { validateTagsFixture } from './validate_tags';
 export { pageObjectsFixture, pageObjectsParallelFixture } from './page_objects';
 export type { PageObjects } from './page_objects';
-export { synthtraceFixture } from './synthtrace';
-export type { SynthtraceFixture } from './synthtrace';
