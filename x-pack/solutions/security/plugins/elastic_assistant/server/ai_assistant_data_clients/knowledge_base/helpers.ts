@@ -8,7 +8,11 @@
 import { z } from '@kbn/zod';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
-import { QueryDslQueryContainer, SearchHit, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  QueryDslQueryContainer,
+  SearchHit,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import { AuthenticatedUser } from '@kbn/core-security-common';
 import {
   contentReferenceBlock,
@@ -218,10 +222,8 @@ export const getStructuredToolForIndexEntry = ({
         const result = await esClient.search(params);
 
         const kbDocs = result.hits.hits.map((hit) => {
-          
           const reference =
-            contentReferencesStore &&
-            contentReferencesStore.add((p) => createReference(p.id, hit));
+            contentReferencesStore && contentReferencesStore.add((p) => createReference(p.id, hit));
 
           if (indexEntry.outputFields && indexEntry.outputFields.length > 0) {
             return indexEntry.outputFields.reduce(
@@ -259,21 +261,19 @@ export const getStructuredToolForIndexEntry = ({
 const createReference = (id: string, hit: SearchHit<unknown>) => {
   const hitIndex = hit._index;
   const hitId = hit._id;
-  const esqlQuery = `FROM ${hitIndex} ${
-    hitId ? `METADATA _id\n | WHERE _id == "${hitId}"` : ''
-  }`;
+  const esqlQuery = `FROM ${hitIndex} ${hitId ? `METADATA _id\n | WHERE _id == "${hitId}"` : ''}`;
 
-  let timerange = undefined;
-  const source = hit._source as Record<string, unknown>
+  let timerange;
+  const source = hit._source as Record<string, unknown>;
 
-  if("@timestamp" in source && isString(source["@timestamp"]) && hitId){
-    timerange = {from: source["@timestamp"], to: source["@timestamp"]}
+  if ('@timestamp' in source && isString(source['@timestamp']) && hitId) {
+    timerange = { from: source['@timestamp'], to: source['@timestamp'] };
   }
 
   return esqlQueryReference({
-    id: id, 
-    query: esqlQuery, 
+    id,
+    query: esqlQuery,
     label: `Index: ${hit._index}`,
-    timerange
-  })
-}
+    timerange,
+  });
+};
