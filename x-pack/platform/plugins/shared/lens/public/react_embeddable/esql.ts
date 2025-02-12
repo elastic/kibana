@@ -14,7 +14,6 @@ import {
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { isESQLModeEnabled } from './initializers/utils';
 import type { LensEmbeddableStartServices } from './types';
-import { suggestionsApi } from '../lens_suggestions_api';
 
 export async function loadESQLAttributes({
   dataViews,
@@ -36,7 +35,12 @@ export async function loadESQLAttributes({
     return;
   }
 
-  const dataView = await getESQLAdHocDataview(`from ${indexName}`, dataViews);
+  // From this moment on there are no longer early exists before suggestions
+  // so make sure to load async modules while doing other async stuff to save some time
+  const [dataView, { suggestionsApi }] = await Promise.all([
+    getESQLAdHocDataview(`from ${indexName}`, dataViews),
+    import('../async_services'),
+  ]);
 
   const esqlQuery = getInitialESQLQuery(dataView);
 
