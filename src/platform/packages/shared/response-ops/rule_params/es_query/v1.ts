@@ -14,8 +14,8 @@ import {
   validateAggType,
   validateGroupBy,
   getComparatorSchemaType,
-  ComparatorFnNames,
-  Comparator,
+  betweenComparators,
+  validateComparator,
 } from '../common/utils';
 
 import {
@@ -23,6 +23,7 @@ import {
   MAX_SELECTABLE_GROUP_BY_TERMS,
   ES_QUERY_MAX_HITS_PER_EXECUTION,
   MAX_GROUPS,
+  Comparator,
 } from '../common/constants';
 
 const EsQueryRuleParamsSchemaProperties = {
@@ -110,18 +111,6 @@ function isEsqlQueryRule(searchType: EsQueryRuleParams['searchType']) {
   return searchType === 'esqlQuery';
 }
 
-function validateComparator(comparator: Comparator): string | undefined {
-  if (ComparatorFnNames.has(comparator)) return;
-
-  return i18n.translate('xpack.stackAlerts.esQuery.invalidComparatorErrorMessage', {
-    defaultMessage: 'invalid thresholdComparator specified: {comparator}',
-    values: {
-      comparator,
-    },
-  });
-}
-
-const betweenComparators = new Set(['between', 'notBetween']);
 // using direct type not allowed, circular reference, so body is typed to any
 function validateParams(anyParams: unknown): string | undefined {
   const {

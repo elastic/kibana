@@ -10,22 +10,19 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { buildEsQuery as kbnBuildEsQuery } from '@kbn/es-query';
+import {
+  buildEsQuery as kbnBuildEsQuery,
+  toElasticsearchQuery,
+  fromKueryExpression,
+} from '@kbn/es-query';
 
-export enum Comparator {
-  GT = '>',
-  LT = '<',
-  GT_OR_EQ = '>=',
-  LT_OR_EQ = '<=',
-  BETWEEN = 'between',
-  NOT_BETWEEN = 'notBetween',
-}
+import { Comparator } from './constants';
 
 export type ComparatorFn = (value: number, threshold: number[]) => boolean;
 
 const TimeWindowUnits = new Set(['s', 'm', 'h', 'd']);
 const AggTypes = new Set(['count', 'avg', 'min', 'max', 'sum']);
-
+export const betweenComparators = new Set(['between', 'notBetween']);
 export const jobsSelectionSchema = schema.object(
   {
     jobIds: schema.arrayOf(schema.string(), { defaultValue: [] }),
@@ -101,7 +98,7 @@ export function validateTimeWindowUnits(timeWindowUnit: string): string | undefi
   }
 
   return i18n.translate(
-    'xpack.triggersActionsUI.data.coreQueryParams.invalidTimeWindowUnitsErrorMessage',
+    'xpack.responseOps.ruleParams.coreQueryParams.invalidTimeWindowUnitsErrorMessage',
     {
       defaultMessage: 'invalid timeWindowUnit: "{timeWindowUnit}"',
       values: {
@@ -116,12 +113,15 @@ export function validateAggType(aggType: string): string | undefined {
     return;
   }
 
-  return i18n.translate('xpack.triggersActionsUI.data.coreQueryParams.invalidAggTypeErrorMessage', {
-    defaultMessage: 'invalid aggType: "{aggType}"',
-    values: {
-      aggType,
-    },
-  });
+  return i18n.translate(
+    'xpack.responseOps.ruleParams.data.coreQueryParams.invalidAggTypeErrorMessage',
+    {
+      defaultMessage: 'invalid aggType: "{aggType}"',
+      values: {
+        aggType,
+      },
+    }
+  );
 }
 
 export function validateGroupBy(groupBy: string): string | undefined {
@@ -129,7 +129,7 @@ export function validateGroupBy(groupBy: string): string | undefined {
     return;
   }
 
-  return i18n.translate('xpack.triggersActionsUI.data.coreQueryParams.invalidGroupByErrorMessage', {
+  return i18n.translate('xpack.responseOps.ruleParams.coreQueryParams.invalidGroupByErrorMessage', {
     defaultMessage: 'invalid groupBy: "{groupBy}"',
     values: {
       groupBy,
@@ -166,3 +166,27 @@ export const getComparatorSchemaType = (validate: (comparator: Comparator) => st
   );
 
 export const ComparatorFnNames = new Set(ComparatorFns.keys());
+
+export function validateKuery(query: string): string | undefined {
+  try {
+    toElasticsearchQuery(fromKueryExpression(query));
+  } catch (e) {
+    return i18n.translate(
+      'xpack.responseOps.ruleParams.coreQueryParams.invalidKQLQueryErrorMessage',
+      {
+        defaultMessage: 'Filter query is invalid.',
+      }
+    );
+  }
+}
+
+export function validateComparator(comparator: Comparator): string | undefined {
+  if (ComparatorFnNames.has(comparator)) return;
+
+  return i18n.translate('xpack.responseOps.ruleParams.invalidComparatorErrorMessage', {
+    defaultMessage: 'invalid thresholdComparator specified: {comparator}',
+    values: {
+      comparator,
+    },
+  });
+}

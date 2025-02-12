@@ -6,7 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { MAX_GROUPS } from '@kbn/triggers-actions-ui-plugin/server';
+import { MAX_GROUPS } from '@kbn/response-ops-rule-params/common';
 import type { Writable } from '@kbn/utility-types';
 import { Comparator } from '../../../common/comparator_types';
 import { ES_QUERY_MAX_HITS_PER_EXECUTION } from '../../../common';

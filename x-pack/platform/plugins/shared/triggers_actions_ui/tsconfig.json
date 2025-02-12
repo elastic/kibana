@@ -76,7 +76,8 @@
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/charts-theme",
     "@kbn/rrule",
-    "@kbn/core-notifications-browser-mocks"
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/response-ops-rule-params"
   ],
   "exclude": ["target/**/*"]
 }

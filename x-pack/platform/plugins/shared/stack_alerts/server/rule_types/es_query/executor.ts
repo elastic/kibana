@@ -20,7 +20,7 @@ import {
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 
-import { ComparatorFns } from '../../../common';
+import { ComparatorFns } from '@kbn/response-ops-rule-params/common';
 import {
   addMessages,
   EsQueryRuleActionContext,
