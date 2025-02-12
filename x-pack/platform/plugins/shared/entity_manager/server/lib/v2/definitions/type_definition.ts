@@ -29,7 +29,7 @@ export async function storeTypeDefinition({
 
   const types = await runESQLQuery('fetch type definition for conflict check', {
     esClient,
-    query: `FROM ${DEFINITIONS_ALIAS} METADATA _id | WHERE definition_type == "type" AND _id == "${type.id}" | KEEP _id`,
+    query: `FROM ${DEFINITIONS_ALIAS} METADATA _id | WHERE definition_type == "type" AND _id == "${type.id}" | KEEP _id | LIMIT 1000`,
     logger,
   });
 
@@ -65,7 +65,7 @@ export async function readTypeDefinitions(
     'fetch all type definitions',
     {
       esClient,
-      query: `FROM ${DEFINITIONS_ALIAS} METADATA _source | WHERE definition_type == "type" | KEEP _source`,
+      query: `FROM ${DEFINITIONS_ALIAS} METADATA _source | WHERE definition_type == "type" | KEEP _source | LIMIT 1000`,
       logger,
     }
   );
@@ -84,7 +84,7 @@ export async function readTypeDefinitionById(
     'fetch type definition by ID',
     {
       esClient,
-      query: `FROM ${DEFINITIONS_ALIAS} METADATA _id,_source | WHERE definition_type == "type" AND _id == "${id}" | KEEP _source`,
+      query: `FROM ${DEFINITIONS_ALIAS} METADATA _id,_source | WHERE definition_type == "type" AND _id == "${id}" | KEEP _source | LIMIT 1000`,
       logger,
     }
   );

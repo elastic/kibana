@@ -23,7 +23,7 @@ export {
 } from './impl/data_anonymization/helpers';
 
 export {
-  contentReferencesStoreFactory,
+  newContentReferencesStore,
   securityAlertReference,
   knowledgeBaseReference,
   securityAlertsPageReference,

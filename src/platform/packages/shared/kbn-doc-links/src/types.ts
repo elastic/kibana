@@ -279,6 +279,9 @@ export interface DocLinks {
   readonly server: {
     readonly protocol: string;
   };
+  readonly logging: {
+    readonly enableDeprecationHttpDebugLogs: string;
+  };
   readonly securitySolution: {
     readonly aiAssistant: string;
     readonly artifactControl: string;

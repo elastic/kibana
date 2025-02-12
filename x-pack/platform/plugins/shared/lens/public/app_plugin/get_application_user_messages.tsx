@@ -141,7 +141,7 @@ function getMissingIndexPatternsErrors(
   // Check for access to both Management app && specific indexPattern section
   const { management: isManagementEnabled } = core.application.capabilities.navLinks;
   const isIndexPatternManagementEnabled =
-    core.application.capabilities.management.kibana.indexPatterns;
+    core.application.capabilities.management?.kibana?.indexPatterns;
   const canFix = isManagementEnabled && isIndexPatternManagementEnabled;
   return [
     {
