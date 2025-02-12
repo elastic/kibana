@@ -68,12 +68,12 @@ export function getOptionDetails(
     case VersionsPickerOptionEnum.MyChanges:
       return hasResolvedValueDifferentFromSuggested
         ? {
-            title: i18n.MY_CHANGES_TITLE,
+            title: i18n.MY_CHANGES_AND_FINAL_UPDATES_TITLE,
             description: i18n.MY_CHANGES_IN_RULE_UPGRADE_WORKFLOW_EXPLANATION,
           }
         : {
-            title: i18n.MY_CHANGES_TITLE,
-            description: i18n.MY_CHANGES_EXPLANATION,
+            title: i18n.MY_CHANGES_AND_FINAL_UPDATES_TITLE,
+            description: i18n.MY_CHANGES_AND_FINAL_UPDATES_TITLE_EXPLANATION,
           };
     case VersionsPickerOptionEnum.MyOriginalChanges:
       return {

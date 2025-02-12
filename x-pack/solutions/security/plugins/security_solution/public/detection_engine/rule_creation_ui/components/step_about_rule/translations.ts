@@ -85,29 +85,22 @@ export const URL_FORMAT_INVALID = i18n.translate(
 );
 
 export const ADD_RULE_NOTE_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepAboutrule.noteHelpText',
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.noteHelpText',
   {
     defaultMessage: 'Add rule investigation guide...',
   }
 );
 
 export const ADD_RULE_SETUP_HELP_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepAboutrule.setupHelpText',
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.setupHelpText',
   {
     defaultMessage: 'Add rule setup guide...',
   }
 );
 
-export const AUTHOR_IMMUTABLE_FIELD_TOOLTIP_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepAboutrule.authorImmutableFieldTooltipText',
+export const FIELD_NOT_EDITABLE_TOOLTIP_TEXT = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldNotEditableTooltipText',
   {
-    defaultMessage: 'Author is not editable for Elastic rules',
-  }
-);
-
-export const LICENSE_IMMUTABLE_FIELD_TOOLTIP_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepAboutrule.licenseImmutableFieldTooltipText',
-  {
-    defaultMessage: 'License is not editable for Elastic rules',
+    defaultMessage: 'This field is not editable',
   }
 );

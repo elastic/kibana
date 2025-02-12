@@ -7,20 +7,22 @@
 
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
-import { CUSTOMIZATION_DISABLED_CALLOUT_DESCRIPTION } from './translations';
 import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
 
 export function CustomizationDisabledCallout() {
-  const upsellingMessage = usePrebuiltRuleCustomizationUpsellingMessage();
+  const title = usePrebuiltRuleCustomizationUpsellingMessage('prebuilt_rule_customization');
+  const description = usePrebuiltRuleCustomizationUpsellingMessage(
+    'prebuilt_rule_customization_description'
+  );
 
   // Upselling message is returned only when the license level is insufficient
-  if (!upsellingMessage) {
+  if (!title) {
     return null;
   }
 
   return (
-    <EuiCallOut title={upsellingMessage} size="s" color="primary">
-      <p>{CUSTOMIZATION_DISABLED_CALLOUT_DESCRIPTION}</p>
+    <EuiCallOut title={title} size="s" color="primary">
+      <p>{description}</p>
     </EuiCallOut>
   );
 }
