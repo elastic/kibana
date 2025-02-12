@@ -31,10 +31,7 @@ import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
 import { initLangtrace } from './service/client/instrumentation/init_langtrace';
 import { aiAssistantCapabilities } from '../common/capabilities';
-import {
-  registerKbSemanticTextMigrationTask,
-  scheduleKbSemanticTextMigrationTask,
-} from './service/task_manager_definitions/register_kb_semantic_text_migration_task';
+import { registerAndScheduleKbSemanticTextMigrationTask } from './service/task_manager_definitions/register_kb_semantic_text_migration_task';
 import { updateExistingIndexAssets } from './service/create_or_update_index_assets';
 
 export class ObservabilityAIAssistantPlugin
@@ -138,7 +135,7 @@ export class ObservabilityAIAssistantPlugin
     );
 
     // register task to migrate knowledge base entries to include semantic_text field
-    registerKbSemanticTextMigrationTask({
+    registerAndScheduleKbSemanticTextMigrationTask({
       core,
       taskManager: plugins.taskManager,
       logger: this.logger.get('kb_semantic_text_migration_task'),
@@ -148,21 +145,6 @@ export class ObservabilityAIAssistantPlugin
         `Knowledge base semantic_text migration task could not be registered: ${e.message}`
       )
     );
-
-    // schedule task to run on startup
-    core
-      .getStartServices()
-      .then(([_, pluginsStart]) =>
-        scheduleKbSemanticTextMigrationTask({
-          taskManager: pluginsStart.taskManager,
-          logger: this.logger,
-        })
-      )
-      .catch((e) => {
-        this.logger.error(
-          `Knowledge base semantic_text migration task could not be scheduled to run: ${e.message}`
-        );
-      });
 
     service.register(registerFunctions);
 

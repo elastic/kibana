@@ -8,7 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import pLimit from 'p-limit';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import pRetry from 'p-retry';
 import { KnowledgeBaseEntry } from '../../../common';
 import { resourceNames } from '..';
@@ -23,7 +23,7 @@ const TASK_TYPE = 'obs-ai-assistant:knowledge-base-migration';
 // This task will re-index all knowledge base entries without `semantic_text` field
 // to ensure the field is populated with the correct embeddings.
 // After the migration we will no longer need to use the `ml.tokens` field.
-export async function registerKbSemanticTextMigrationTask({
+export async function registerAndScheduleKbSemanticTextMigrationTask({
   taskManager,
   logger,
   core,
@@ -34,8 +34,26 @@ export async function registerKbSemanticTextMigrationTask({
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   config: ObservabilityAIAssistantConfig;
 }) {
-  const [coreStart] = await core.getStartServices();
+  const [coreStart, pluginsStart] = await core.getStartServices();
 
+  // register task
+  registerKbSemanticTextMigrationTask({ taskManager, logger, coreStart, config });
+
+  // schedule task
+  await scheduleKbSemanticTextMigrationTask({ taskManager: pluginsStart.taskManager, logger });
+}
+
+function registerKbSemanticTextMigrationTask({
+  taskManager,
+  logger,
+  coreStart,
+  config,
+}: {
+  taskManager: TaskManagerSetupContract;
+  logger: Logger;
+  coreStart: CoreStart;
+  config: ObservabilityAIAssistantConfig;
+}) {
   try {
     logger.debug(`Register task "${TASK_TYPE}"`);
     taskManager.registerTaskDefinitions({
