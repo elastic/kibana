@@ -93,7 +93,7 @@ export const GridRowTitle = React.memo(
             })}
             iconType={'arrowDown'}
             onClick={toggleIsCollapsed}
-            css={rotateAccordianArrowStyles}
+            css={accordianButtonStyles}
             size="m"
             id={`kbnGridRowHeader--${rowIndex}`}
             aria-controls={`kbnGridRow--${rowIndex}`}
@@ -149,8 +149,11 @@ export const GridRowTitle = React.memo(
   }
 );
 
-const rotateAccordianArrowStyles = ({ euiTheme }: UseEuiTheme) =>
+const accordianButtonStyles = ({ euiTheme }: UseEuiTheme) =>
   css({
+    '&:focus': {
+      backgroundColor: 'unset',
+    },
     svg: {
       transition: `transform ${euiTheme.animation.fast} ease`,
       transform: 'rotate(0deg)',
