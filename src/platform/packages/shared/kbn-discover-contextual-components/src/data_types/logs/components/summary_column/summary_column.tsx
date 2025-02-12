@@ -15,18 +15,21 @@ import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
-  ShouldShowFieldInTableHandler,
+  RESOURCE_FIELDS,
+  type ShouldShowFieldInTableHandler,
+  TRACE_FIELDS,
   getLogDocumentOverview,
   getMessageFieldWithFallbacks,
 } from '@kbn/discover-utils';
+import {
+  type LogDocument,
+  type TraceDocument,
+  getAvailableResourceFields,
+  getAvailableTraceFields,
+} from '@kbn/discover-utils/src';
 import { Resource } from './resource';
 import { Content } from './content';
-import {
-  createResourceFields,
-  createTraceFields,
-  formatJsonDocumentForContent,
-  isTraceDocument,
-} from './utils';
+import { createResourceFields, formatJsonDocumentForContent, isTraceDocument } from './utils';
 import {
   closeCellActionPopoverText,
   contentLabel,
@@ -77,8 +80,22 @@ const SummaryCell = ({
 
   const resourceFields =
     isTracesSummary && isTraceDocument(row)
-      ? createTraceFields(row, dataView, core, share)
-      : createResourceFields(row, core, share);
+      ? createResourceFields({
+          row,
+          fields: TRACE_FIELDS,
+          getAvailableFields: getAvailableTraceFields,
+          dataView,
+          core,
+          share,
+        })
+      : createResourceFields({
+          row: row as LogDocument,
+          fields: RESOURCE_FIELDS,
+          getAvailableFields: getAvailableResourceFields,
+          dataView,
+          core,
+          share,
+        });
   const shouldRenderResource = resourceFields.length > 0;
 
   return isSingleLine ? (
@@ -114,8 +131,22 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
 
   const resourceFields =
     isTracesSummary && isTraceDocument(row)
-      ? createTraceFields(row, dataView, core, share)
-      : createResourceFields(row, core, share);
+      ? createResourceFields({
+          row: row as TraceDocument,
+          fields: TRACE_FIELDS,
+          getAvailableFields: getAvailableTraceFields,
+          dataView,
+          core,
+          share,
+        })
+      : createResourceFields({
+          row: row as LogDocument,
+          fields: RESOURCE_FIELDS,
+          getAvailableFields: getAvailableResourceFields,
+          dataView,
+          core,
+          share,
+        });
   const shouldRenderResource = resourceFields.length > 0;
 
   const documentOverview = getLogDocumentOverview(row, { dataView, fieldFormats });

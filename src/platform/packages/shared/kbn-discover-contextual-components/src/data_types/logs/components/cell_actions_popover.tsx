@@ -43,8 +43,9 @@ interface CellActionsPopoverProps {
   property: string;
   /* Value for the mapping, which will be displayed */
   value: string;
+  rawValue: unknown;
   /* Optional callback to render the value */
-  renderValue?: (value: string) => React.ReactNode;
+  renderValue?: (value: unknown) => React.ReactNode;
   /* Props to forward to the trigger Badge */
   renderPopoverTrigger: (props: {
     popoverTriggerProps: {
@@ -59,6 +60,7 @@ export function CellActionsPopover({
   onFilter,
   property,
   value,
+  rawValue,
   renderValue,
   renderPopoverTrigger,
 }: CellActionsPopoverProps) {
@@ -67,7 +69,7 @@ export function CellActionsPopover({
 
   const makeFilterHandlerByOperator = (operator: '+' | '-') => () => {
     if (onFilter) {
-      onFilter(property, value, operator);
+      onFilter(property, rawValue, operator);
     }
   };
 
@@ -98,7 +100,11 @@ export function CellActionsPopover({
             `}
           >
             <strong>{property}</strong>{' '}
-            {typeof renderValue === 'function' ? renderValue(value) : value}
+            {typeof renderValue === 'function'
+              ? renderValue(rawValue)
+              : rawValue != null && typeof rawValue !== 'object'
+              ? (rawValue as React.ReactNode)
+              : value}
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -159,7 +165,10 @@ export function CellActionsPopover({
 }
 
 export interface FieldBadgeWithActionsProps
-  extends Pick<CellActionsPopoverProps, 'onFilter' | 'property' | 'value' | 'renderValue'> {
+  extends Pick<
+    CellActionsPopoverProps,
+    'onFilter' | 'property' | 'value' | 'rawValue' | 'renderValue'
+  > {
   icon?: EuiBadgeProps['iconType'];
 }
 
@@ -177,12 +186,14 @@ export function FieldBadgeWithActions({
   property,
   renderValue,
   value,
+  rawValue,
 }: FieldBadgeWithActionsPropsAndDependencies) {
   return (
     <CellActionsPopover
       onFilter={onFilter}
       property={property}
       value={value}
+      rawValue={rawValue}
       renderValue={renderValue}
       renderPopoverTrigger={({ popoverTriggerProps }) => (
         <EuiBadge {...popoverTriggerProps} color="hollow" iconType={icon} iconSide="left">

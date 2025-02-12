@@ -16,29 +16,20 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
   AGENT_NAME_FIELD,
   DATASTREAM_TYPE_FIELD,
-  DURATION_FIELDS,
   EVENT_OUTCOME_FIELD,
   FILTER_OUT_FIELDS_PREFIXES_FOR_CONTENT,
-  RESOURCE_FIELDS,
   SERVICE_NAME_FIELD,
   SPAN_DURATION_FIELD,
   TRANSACTION_DURATION_FIELD,
-  TRACE_FIELDS,
   DataTableRecord,
   getFieldValue,
 } from '@kbn/discover-utils';
-import {
-  LogDocument,
-  ResourceFields,
-  TraceFields,
-  TraceDocument,
-  getAvailableResourceFields,
-  getAvailableTraceFields,
-} from '@kbn/discover-utils/src';
+import { TraceDocument } from '@kbn/discover-utils/src';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
 import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
+import { eventOutcomeLabelMap } from '../translations';
 
 /**
  * Takes a `DataTableRecord` compatible document, and then with an array
@@ -86,12 +77,16 @@ const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_i
 export interface ResourceFieldDescriptor {
   ResourceBadge: React.ComponentType<FieldBadgeWithActionsProps>;
   Icon?: () => JSX.Element;
-  name: keyof ResourceFields | keyof TraceFields;
+  name: string;
   value: string;
+  rawValue: unknown;
 }
 
-const getResourceBadgeComponent = (
-  name: keyof ResourceFields | keyof TraceFields,
+const getResourceBadgeComponent = <
+  Document extends DataTableRecord,
+  Fields extends string & keyof Document['flattened']
+>(
+  name: Fields,
   core: CoreStart,
   share?: SharePluginStart
 ): React.ComponentType<FieldBadgeWithActionsProps> => {
@@ -104,9 +99,12 @@ const getResourceBadgeComponent = (
   return FieldBadgeWithActions;
 };
 
-const getResourceBadgeIcon = (
-  name: keyof ResourceFields | keyof TraceFields,
-  fields: Readonly<ResourceFields> | Readonly<TraceFields>
+const getResourceBadgeIcon = <
+  Document extends DataTableRecord,
+  Fields extends string & keyof Document['flattened']
+>(
+  name: Fields,
+  fields: Readonly<Record<Fields, NonNullable<Document['flattened'][Fields]>>>
 ): (() => React.JSX.Element) | undefined => {
   switch (name) {
     case SERVICE_NAME_FIELD:
@@ -114,7 +112,7 @@ const getResourceBadgeIcon = (
         const { euiTheme } = useEuiTheme();
         return (
           <AgentIcon
-            agentName={fields[AGENT_NAME_FIELD] as AgentName}
+            agentName={fields[AGENT_NAME_FIELD as Fields] as AgentName}
             size="m"
             css={css`
               margin-right: ${euiTheme.size.xs};
@@ -126,7 +124,7 @@ const getResourceBadgeIcon = (
       return () => {
         const { euiTheme } = useEuiTheme();
 
-        const value = (fields as Readonly<TraceFields>)[name];
+        const value = fields[name];
 
         const color = value === 'failure' ? 'danger' : value === 'success' ? 'success' : 'subdued';
 
@@ -147,18 +145,23 @@ const getResourceBadgeIcon = (
   }
 };
 
-const getFormattedValue = (
-  name: keyof TraceFields,
-  rawValue: string,
+const getFormattedValue = <
+  Document extends DataTableRecord,
+  Fields extends string & keyof Document['flattened']
+>(
+  name: Fields,
+  rawValue: unknown,
   dataView: DataView
 ): string => {
+  if (name === EVENT_OUTCOME_FIELD) {
+    return eventOutcomeLabelMap[rawValue as keyof typeof eventOutcomeLabelMap];
+  }
+
   const field = dataView.getFieldByName(name);
   const formatter = field && dataView.getFormatterForField(field);
 
   if (formatter) {
-    return formatter.convert(rawValue);
-  } else if (DURATION_FIELDS.includes(name)) {
-    return `${rawValue}µs`;
+    return formatter.convert(rawValue, 'html', { field });
   }
 
   return `${rawValue}`;
@@ -167,34 +170,38 @@ const getFormattedValue = (
 export const isTraceDocument = (row: DataTableRecord): row is TraceDocument =>
   getFieldValue(row, DATASTREAM_TYPE_FIELD) === 'traces';
 
-export const createTraceFields = (
-  row: TraceDocument,
-  dataView: DataView,
-  core: CoreStart,
-  share?: SharePluginStart
-): ResourceFieldDescriptor[] => {
-  const traceFields = getUnformattedFields(row, TRACE_FIELDS);
-  const availableFields = getAvailableTraceFields(traceFields);
+interface ResourceFieldsProps<
+  Document extends DataTableRecord,
+  Fields extends string & keyof Document['flattened']
+> {
+  row: Document;
+  fields: readonly Fields[];
+  getAvailableFields: (
+    doc: Readonly<Record<Fields, NonNullable<Document['flattened'][Fields]>>>
+  ) => Fields[];
+  dataView: DataView;
+  core: CoreStart;
+  share?: SharePluginStart;
+}
 
-  return availableFields.map((name) => ({
-    name,
-    value: getFormattedValue(name, traceFields[name], dataView),
-    ResourceBadge: getResourceBadgeComponent(name, core, share),
-    Icon: getResourceBadgeIcon(name, traceFields),
-  }));
-};
-
-export const createResourceFields = (
-  row: DataTableRecord,
-  core: CoreStart,
-  share?: SharePluginStart
-): ResourceFieldDescriptor[] => {
-  const resourceDoc = getUnformattedFields(row as LogDocument, RESOURCE_FIELDS);
-  const availableResourceFields = getAvailableResourceFields(resourceDoc);
+export const createResourceFields = <
+  Document extends DataTableRecord,
+  Fields extends string & keyof Document['flattened']
+>({
+  row,
+  fields,
+  getAvailableFields,
+  dataView,
+  core,
+  share,
+}: ResourceFieldsProps<Document, Fields>): ResourceFieldDescriptor[] => {
+  const resourceDoc = getUnformattedFields(row, fields);
+  const availableResourceFields = getAvailableFields(resourceDoc);
 
   return availableResourceFields.map((name) => ({
     name,
-    value: resourceDoc[name],
+    rawValue: resourceDoc[name],
+    value: getFormattedValue(name, resourceDoc[name], dataView),
     ResourceBadge: getResourceBadgeComponent(name, core, share),
     Icon: getResourceBadgeIcon(name, resourceDoc),
   }));
