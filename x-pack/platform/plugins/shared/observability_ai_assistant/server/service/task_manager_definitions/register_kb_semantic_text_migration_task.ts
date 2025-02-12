@@ -60,8 +60,8 @@ export async function registerKbSemanticTextMigrationTask({
               }
 
               if (config.disableKbSemanticTextMigration) {
-                logger.debug(
-                  'Semantic text migration is disabled via "disableKbSemanticTextMigration=true". Skipping migration.'
+                logger.info(
+                  'Semantic text migration is disabled via config "xpack.observabilityAIAssistant.disableKbSemanticTextMigration=true". Skipping migration.'
                 );
                 return;
               }
