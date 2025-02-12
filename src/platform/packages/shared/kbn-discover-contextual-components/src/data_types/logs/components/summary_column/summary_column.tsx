@@ -30,6 +30,7 @@ import {
   contentLabel,
   jsonLabel,
   resourceLabel,
+  traceLabel,
 } from '../translations';
 
 export interface SummaryColumnFactoryDeps {
@@ -125,8 +126,10 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
   const { row, dataView, fieldFormats, onFilter, closePopover, share, core, isTracesSummary } =
     props;
 
+  const isTraceDoc = isTracesSummary && isTraceDocument(row);
+
   const resourceFields = createResourceFields(
-    isTracesSummary && isTraceDocument(row)
+    isTraceDoc
       ? {
           row,
           fields: TRACE_FIELDS,
@@ -171,7 +174,7 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
       {shouldRenderResource && (
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiTitle size="xxs">
-            <span>{resourceLabel}</span>
+            <span>{isTraceDoc ? traceLabel : resourceLabel}</span>
           </EuiTitle>
           <Resource fields={resourceFields} onFilter={onFilter} />
         </EuiFlexGroup>

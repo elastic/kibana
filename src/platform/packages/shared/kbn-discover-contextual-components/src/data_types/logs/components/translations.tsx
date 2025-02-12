@@ -21,7 +21,7 @@ export const resourceLabel = i18n.translate('discover.logs.dataTable.header.popo
   defaultMessage: 'Resource',
 });
 
-export const traceLabel = i18n.translate('discover.logs.dataTable.header.popover.trace', {
+export const traceLabel = i18n.translate('discover.traces.dataTable.header.popover.trace', {
   defaultMessage: 'Trace',
 });
 
