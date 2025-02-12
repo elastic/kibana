@@ -141,7 +141,11 @@ export class ObservabilityAIAssistantPlugin
       taskManager: plugins.taskManager,
       logger: this.logger.get('kb_semantic_text_migration_task'),
       config: this.config,
-    });
+    }).catch((e) =>
+      this.logger.error(
+        `Knowledge base semantic_text migration task could not be registered: ${e.message}`
+      )
+    );
 
     // schedule task to run on startup
     core
