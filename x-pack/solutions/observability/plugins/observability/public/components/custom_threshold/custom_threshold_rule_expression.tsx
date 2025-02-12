@@ -45,6 +45,7 @@ import { ExpressionRow } from './components/expression_row';
 import { MetricsExplorerFields, GroupBy } from './components/group_by';
 import { RuleConditionChart as PreviewChart } from '../rule_condition_chart/rule_condition_chart';
 import { getSearchConfiguration } from './helpers/get_search_configuration';
+import { dashboardServiceProvider, type DashboardItem } from '../../services/dashboard_service';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -74,6 +75,7 @@ export default function Expressions(props: Props) {
     data,
     dataViews,
     dataViewEditor,
+    dashboard: dashboardService,
     unifiedSearch: {
       ui: { SearchBar },
     },
@@ -380,28 +382,18 @@ export default function Expressions(props: Props) {
     );
   };
 
-  const dashboardSavedObjectToMenuItem = (
-    savedObject: SimpleSavedObject<{
-      title: string;
-    }>
-  ) => ({
-    value: savedObject.id,
-    label: savedObject.attributes.title,
+  const getDashboardItem = (dashboard: DashboardItem) => ({
+    value: dashboard.id,
+    label: dashboard.attributes.title,
   });
 
-  const loadDashboards = useCallback(
-    async (searchString?: string) => {
-      const { savedObjects: dashboardSO } = await savedObjects.client.find<{ title: string }>({
-        type: 'dashboard',
-        search: searchString ? `${searchString}*` : undefined,
-        searchFields: ['title^3', 'description'],
-        defaultSearchOperator: 'AND',
-        perPage: 100,
-      });
-      setDashboardList(dashboardSO.map(dashboardSavedObjectToMenuItem));
-    },
-    [savedObjects]
-  );
+  const loadDashboards = useCallback(async () => {
+    const dashboards = await dashboardServiceProvider(dashboardService).fetchDashboards();
+    const dashboardOptions = (dashboards ?? []).map((dashboard: DashboardItem) =>
+      getDashboardItem(dashboard)
+    );
+    setDashboardList(dashboardOptions);
+  }, [dashboardService]);
 
   useEffect(() => {
     loadDashboards();
