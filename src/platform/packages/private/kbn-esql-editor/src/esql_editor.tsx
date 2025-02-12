@@ -126,7 +126,6 @@ export const ESQLEditor = memo(function ESQLEditor({
   const variablesService = kibana.services?.esql?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(query.esql ?? '');
-  const [codeSubmitted, setCodeSubmitted] = useState<string>(query.esql ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
   const [editorHeight, setEditorHeight] = useState(
@@ -178,7 +177,6 @@ export const ESQLEditor = memo(function ESQLEditor({
         setCodeStateOnSubmission(currentValue);
       }
       onTextLangQuerySubmit({ esql: currentValue } as AggregateQuery, abc);
-      setCodeSubmitted(currentValue ?? '');
     }
   }, [isQueryLoading, isLoading, allowQueryCancellation, abortController, onTextLangQuerySubmit]);
 
@@ -214,12 +212,11 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   useEffect(() => {
     if (editor1.current) {
-      const hasSubmittedQueryChanged = query.esql !== codeSubmitted;
-      if (code !== query.esql && hasSubmittedQueryChanged) {
+      if (code !== query.esql) {
         setCode(query.esql);
       }
     }
-  }, [code, query.esql, codeSubmitted]);
+  }, [code, query.esql]);
 
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
@@ -646,120 +643,47 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   onLayoutChangeRef.current = onLayoutChange;
 
-  const codeEditorOptions: CodeEditorProps['options'] = useMemo(() => {
-    return {
-      hover: {
-        above: false,
-      },
-      accessibilitySupport: 'off',
-      autoIndent: 'none',
-      automaticLayout: true,
-      fixedOverflowWidgets: true,
-      folding: false,
-      fontSize: 14,
-      hideCursorInOverviewRuler: true,
-      // this becomes confusing with multiple markers, so quick fixes
-      // will be proposed only within the tooltip
-      lightbulb: {
-        enabled: false,
-      },
-      lineDecorationsWidth: 20,
-      lineNumbers: 'on',
-      lineNumbersMinChars: 3,
-      minimap: { enabled: false },
-      overviewRulerLanes: 0,
-      overviewRulerBorder: false,
-      padding: {
-        top: 8,
-        bottom: 8,
-      },
-      quickSuggestions: true,
-      readOnly: isDisabled,
-      renderLineHighlight: 'line',
-      renderLineHighlightOnlyWhenFocus: true,
-      scrollbar: {
-        horizontal: 'hidden',
-        horizontalScrollbarSize: 6,
-        vertical: 'auto',
-        verticalScrollbarSize: 6,
-      },
-      scrollBeyondLastLine: false,
-      theme: ESQL_LANG_ID,
-      wordWrap: 'on',
-      wrappingIndent: 'none',
-    };
-  }, [isDisabled]);
-
-  const hoverProviderWrapped: monaco.languages.HoverProvider = useMemo(() => {
-    return {
-      provideHover: (model, position, token) => {
-        if (!hoverProvider?.provideHover) {
-          return { contents: [] };
-        }
-        return hoverProvider?.provideHover(model, position, token);
-      },
-    };
-  }, [hoverProvider]);
-
-  const editorDidMount = useMemo(
-    () => (editor: monaco.editor.IStandaloneCodeEditor) => {
-      editor1.current = editor;
-      const model = editor.getModel();
-      if (model) {
-        editorModel.current = model;
-      }
-      // this is fixing a bug between the EUIPopover and the monaco editor
-      // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
-      // to fire, the timeout is needed because otherwise it refocuses on the popover icon
-      // and the user needs to click again the editor.
-      // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
-      editor.onMouseDown(() => {
-        setTimeout(() => {
-          editor.focus();
-        }, 100);
-        if (datePickerOpenStatusRef.current) {
-          setPopoverPosition({});
-        }
-      });
-
-      editor.onDidFocusEditorText(() => {
-        onEditorFocus();
-      });
-
-      editor.onKeyDown(() => {
-        onEditorFocus();
-      });
-
-      // on CMD/CTRL + Enter submit the query
-      editor.addCommand(
-        // eslint-disable-next-line no-bitwise
-        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
-        onQuerySubmit
-      );
-
-      // on CMD/CTRL + / comment out the entire line
-      editor.addCommand(
-        // eslint-disable-next-line no-bitwise
-        monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
-        onCommentLine
-      );
-
-      setMeasuredEditorWidth(editor.getLayoutInfo().width);
-      editor.onDidLayoutChange((layoutInfoEvent) => {
-        onLayoutChangeRef.current(layoutInfoEvent);
-      });
-
-      editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
-
-      // Auto-focus the editor and move the cursor to the end.
-      if (!disableAutoFocus) {
-        editor.focus();
-        editor.setPosition({ column: Infinity, lineNumber: Infinity });
-      }
+  const codeEditorOptions: CodeEditorProps['options'] = {
+    hover: {
+      above: false,
     },
-
-    [disableAutoFocus, onCommentLine, onEditorFocus, onQuerySubmit, showSuggestionsIfEmptyQuery]
-  );
+    accessibilitySupport: 'off',
+    autoIndent: 'none',
+    automaticLayout: true,
+    fixedOverflowWidgets: true,
+    folding: false,
+    fontSize: 14,
+    hideCursorInOverviewRuler: true,
+    // this becomes confusing with multiple markers, so quick fixes
+    // will be proposed only within the tooltip
+    lightbulb: {
+      enabled: false,
+    },
+    lineDecorationsWidth: 20,
+    lineNumbers: 'on',
+    lineNumbersMinChars: 3,
+    minimap: { enabled: false },
+    overviewRulerLanes: 0,
+    overviewRulerBorder: false,
+    padding: {
+      top: 8,
+      bottom: 8,
+    },
+    quickSuggestions: true,
+    readOnly: isDisabled,
+    renderLineHighlight: 'line',
+    renderLineHighlightOnlyWhenFocus: true,
+    scrollbar: {
+      horizontal: 'hidden',
+      horizontalScrollbarSize: 6,
+      vertical: 'auto',
+      verticalScrollbarSize: 6,
+    },
+    scrollBeyondLastLine: false,
+    theme: ESQL_LANG_ID,
+    wordWrap: 'on',
+    wrappingIndent: 'none',
+  };
 
   const editorPanel = (
     <>
@@ -818,10 +742,71 @@ export const ESQLEditor = memo(function ESQLEditor({
                   options={codeEditorOptions}
                   width="100%"
                   suggestionProvider={suggestionProvider}
-                  hoverProvider={hoverProviderWrapped}
+                  hoverProvider={{
+                    provideHover: (model, position, token) => {
+                      if (!hoverProvider?.provideHover) {
+                        return { contents: [] };
+                      }
+                      return hoverProvider?.provideHover(model, position, token);
+                    },
+                  }}
                   codeActions={codeActionProvider}
                   onChange={onQueryUpdate}
-                  editorDidMount={editorDidMount}
+                  editorDidMount={(editor) => {
+                    editor1.current = editor;
+                    const model = editor.getModel();
+                    if (model) {
+                      editorModel.current = model;
+                    }
+                    // this is fixing a bug between the EUIPopover and the monaco editor
+                    // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
+                    // to fire, the timeout is needed because otherwise it refocuses on the popover icon
+                    // and the user needs to click again the editor.
+                    // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
+                    editor.onMouseDown(() => {
+                      setTimeout(() => {
+                        editor.focus();
+                      }, 100);
+                      if (datePickerOpenStatusRef.current) {
+                        setPopoverPosition({});
+                      }
+                    });
+
+                    editor.onDidFocusEditorText(() => {
+                      onEditorFocus();
+                    });
+
+                    editor.onKeyDown(() => {
+                      onEditorFocus();
+                    });
+
+                    // on CMD/CTRL + Enter submit the query
+                    editor.addCommand(
+                      // eslint-disable-next-line no-bitwise
+                      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter,
+                      onQuerySubmit
+                    );
+
+                    // on CMD/CTRL + / comment out the entire line
+                    editor.addCommand(
+                      // eslint-disable-next-line no-bitwise
+                      monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
+                      onCommentLine
+                    );
+
+                    setMeasuredEditorWidth(editor.getLayoutInfo().width);
+                    editor.onDidLayoutChange((layoutInfoEvent) => {
+                      onLayoutChangeRef.current(layoutInfoEvent);
+                    });
+
+                    editor.onDidChangeModelContent(showSuggestionsIfEmptyQuery);
+
+                    // Auto-focus the editor and move the cursor to the end.
+                    if (!disableAutoFocus) {
+                      editor.focus();
+                      editor.setPosition({ column: Infinity, lineNumber: Infinity });
+                    }
+                  }}
                 />
               </div>
             </EuiFlexItem>
