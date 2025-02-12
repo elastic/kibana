@@ -10,7 +10,6 @@
 import React, { useCallback, useMemo, useRef } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { generateFilters } from '@kbn/data-plugin/public';
-import { ChildDragDropProvider, useDragDropContext } from '@kbn/dom-drag-drop';
 import {
   UnifiedFieldListSidebarContainer,
   type UnifiedFieldListSidebarContainerProps,
@@ -50,7 +49,6 @@ export const FieldListSidebar: React.FC<FieldListSidebarProps> = ({
   onAddFieldToWorkspace,
   onRemoveFieldFromWorkspace,
 }) => {
-  const dragDropContext = useDragDropContext();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
   const filterManager = services.data?.query?.filterManager;
 
@@ -76,20 +74,18 @@ export const FieldListSidebar: React.FC<FieldListSidebarProps> = ({
   }, [unifiedFieldListContainerRef]);
 
   return (
-    <ChildDragDropProvider value={dragDropContext}>
-      <UnifiedFieldListSidebarContainer
-        ref={unifiedFieldListContainerRef}
-        variant="responsive"
-        getCreationOptions={getCreationOptions}
-        services={services}
-        dataView={dataView}
-        allFields={dataView.fields}
-        workspaceSelectedFieldNames={selectedFieldNames}
-        onAddFieldToWorkspace={onAddFieldToWorkspace}
-        onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
-        onAddFilter={onAddFilter}
-        onFieldEdited={onFieldEdited}
-      />
-    </ChildDragDropProvider>
+    <UnifiedFieldListSidebarContainer
+      ref={unifiedFieldListContainerRef}
+      variant="responsive"
+      getCreationOptions={getCreationOptions}
+      services={services}
+      dataView={dataView}
+      allFields={dataView.fields}
+      workspaceSelectedFieldNames={selectedFieldNames}
+      onAddFieldToWorkspace={onAddFieldToWorkspace}
+      onRemoveFieldFromWorkspace={onRemoveFieldFromWorkspace}
+      onAddFilter={onAddFilter}
+      onFieldEdited={onFieldEdited}
+    />
   );
 };
