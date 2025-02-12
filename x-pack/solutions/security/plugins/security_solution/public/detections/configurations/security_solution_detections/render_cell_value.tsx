@@ -70,12 +70,12 @@ export const CellValue = memo(function RenderCellValue({
   isDetails,
   isExpandable,
   isDraggable = false,
-      isExpanded,
-      colIndex,
-      eventId,
-      setCellProps,
-      truncate,
-      userProfiles,
+  isExpanded,
+  colIndex,
+  eventId,
+  setCellProps,
+  truncate,
+  userProfiles,
 }: RenderCellValueProps) {
   const isTourAnchor = useMemo(
     () =>
@@ -155,14 +155,14 @@ export const CellValue = memo(function RenderCellValue({
           header={myHeader}
           isDetails={isDetails}
           isDraggable={isDraggable}
-            isExpandable={isExpandable}
-            isExpanded={isExpanded}
-            linkValues={linkValues ?? localLinkValues}
-            rowIndex={rowIndex}
-            colIndex={colIndex}
-            rowRenderers={rowRenderers ?? defaultRowRenderers}
-            setCellProps={setCellProps}
-            scopeId={sourcererScope}
+          isExpandable={isExpandable}
+          isExpanded={isExpanded}
+          linkValues={linkValues ?? localLinkValues}
+          rowIndex={rowIndex}
+          colIndex={colIndex}
+          rowRenderers={rowRenderers ?? defaultRowRenderers}
+          setCellProps={setCellProps}
+          scopeId={sourcererScope}
           truncate={truncate}
           asPlainText={false}
           context={userProfiles}
@@ -175,12 +175,12 @@ export const CellValue = memo(function RenderCellValue({
     browserFieldsByName,
     columnHeaders,
     ecsAlert,
-      isTourAnchor,
-      browserFields,
-      finalData,
-      eventId,
-      isDetails,
-      isDraggable,
+    isTourAnchor,
+    browserFields,
+    finalData,
+    eventId,
+    isDetails,
+    isDraggable,
 
     isExpandable,
     isExpanded,
