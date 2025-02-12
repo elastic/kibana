@@ -7,6 +7,8 @@
 
 import expect from '@kbn/expect';
 import { resourceNames } from '@kbn/observability-ai-assistant-plugin/server/service';
+import AdmZip from 'adm-zip';
+import path from 'path';
 import { AI_ASSISTANT_SNAPSHOT_REPO_PATH } from '../../../../default_configs/stateful.config.base';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
@@ -30,6 +32,11 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     this.tags(['skipServerless']);
 
     before(async () => {
+      new AdmZip(`${AI_ASSISTANT_SNAPSHOT_REPO_PATH}.zip`).extractAllTo(
+        path.dirname(AI_ASSISTANT_SNAPSHOT_REPO_PATH),
+        true
+      );
+
       await importTinyElserModel(ml);
       await setupKnowledgeBase(observabilityAIAssistantAPIClient);
       await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
@@ -107,7 +114,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   }
 
   async function restoreKbSnapshot() {
-    log.debug(`Restoring snapshot of ${resourceNames.concreteIndexName.kb}`);
+    log.debug(
+      `Restoring snapshot of ${resourceNames.concreteIndexName.kb} from ${AI_ASSISTANT_SNAPSHOT_REPO_PATH}`
+    );
     const snapshotRepoName = 'snapshot-repo-8-10';
     const snapshotName = 'my_snapshot';
     await es.snapshot.createRepository({
