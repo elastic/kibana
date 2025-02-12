@@ -12,6 +12,7 @@ import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { EuiCallOut } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { DEPRECATED_ML_ROUTE_TO_NEW_ROUTE } from '../../../common/constants/locator';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { useMlKibana } from '../contexts/kibana';
 import type { MlRoute } from './router';
@@ -57,7 +58,14 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
 
   useEffect(
     function handleNotFoundRoute() {
-      if (pathname === '/jobs' || pathname === '/data_frame_analytics') {
+      // For these deprecated routes, we already direct to the management page in the ml_page.tsx
+      // so no need to show banner
+      if (
+        Object.keys(DEPRECATED_ML_ROUTE_TO_NEW_ROUTE).some(
+          // paths include /, so need to convert `/jobs` -> `jobs`
+          (path) => path === pathname.split('/')[1]
+        )
+      ) {
         return;
       }
       if (!activeRoute && !!pathname) {

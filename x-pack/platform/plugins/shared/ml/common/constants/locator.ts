@@ -7,6 +7,12 @@
 
 export const ML_APP_LOCATOR = 'ML_APP_LOCATOR';
 
+export const DEPRECATED_ML_ROUTE_TO_NEW_ROUTE = {
+  jobs: 'anomaly_detection',
+  data_frame_analytics: 'analytics',
+  trained_models: 'trained_models',
+};
+
 export const ML_PAGES = {
   ANOMALY_DETECTION_JOBS_MANAGE: '',
   ANOMALY_EXPLORER: 'explorer',
@@ -14,7 +20,7 @@ export const ML_PAGES = {
   DATA_FRAME_ANALYTICS_JOBS_MANAGE: '',
   DATA_FRAME_ANALYTICS_SOURCE_SELECTION: 'data_frame_analytics/source_selection',
   DATA_FRAME_ANALYTICS_CREATE_JOB: 'data_frame_analytics/new_job',
-  TRAINED_MODELS_MANAGE: 'trained_models',
+  TRAINED_MODELS_MANAGE: '',
   DATA_DRIFT_INDEX_SELECT: 'data_drift_index_select',
   DATA_DRIFT_CUSTOM: 'data_drift_custom',
   DATA_DRIFT: 'data_drift',

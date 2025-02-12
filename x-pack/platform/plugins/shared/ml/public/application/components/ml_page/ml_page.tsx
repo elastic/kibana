@@ -19,6 +19,7 @@ import { type AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { DatePickerWrapper } from '@kbn/ml-date-picker';
+import { DEPRECATED_ML_ROUTE_TO_NEW_ROUTE } from '../../../../common/constants/locator';
 import * as routes from '../../routing/routes';
 import * as overviewRoutes from '../../routing/routes/overview_management'; // GOOD
 import * as anomalyDetectionRoutes from '../../routing/routes/anomaly_detection_management';
@@ -78,21 +79,40 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
         if (mlManagementLocator) {
           const searchString = decodeURIComponent(search);
           let decodedSearch = search;
-
-          if (pathname === '/jobs') {
-            decodedSearch = searchString.replace(`=(jobs:`, `=('':`);
+          const oldPath = pathname.split('/')[1];
+          const newPath =
+            DEPRECATED_ML_ROUTE_TO_NEW_ROUTE[
+              oldPath as keyof typeof DEPRECATED_ML_ROUTE_TO_NEW_ROUTE
+            ];
+          if (oldPath && newPath) {
+            decodedSearch = searchString.replace(`=(${oldPath}:`, `=('':`);
             mlManagementLocator.navigate({
               sectionId: 'ml',
-              appId: `anomaly_detection${decodedSearch}`,
+              appId: `${newPath}${decodedSearch}`,
             });
+            return;
           }
-          if (pathname === '/data_frame_analytics') {
-            decodedSearch = searchString.replace(`=(data_frame_analytics:`, `=('':`);
-            mlManagementLocator.navigate({
-              sectionId: 'ml',
-              appId: `analytics${decodedSearch}`,
-            });
-          }
+          // if (pathname === '/jobs') {
+          //   decodedSearch = searchString.replace(`=(jobs:`, `=('':`);
+          //   mlManagementLocator.navigate({
+          //     sectionId: 'ml',
+          //     appId: `anomaly_detection${decodedSearch}`,
+          //   });
+          // }
+          // if (pathname === '/data_frame_analytics') {
+          //   decodedSearch = searchString.replace(`=(data_frame_analytics:`, `=('':`);
+          //   mlManagementLocator.navigate({
+          //     sectionId: 'ml',
+          //     appId: `analytics${decodedSearch}`,
+          //   });
+          // }
+          // if (pathname === '/trained_models') {
+          //   decodedSearch = searchString.replace(`=(trained_models:`, `=('':`);
+          //   mlManagementLocator.navigate({
+          //     sectionId: 'ml',
+          //     appId: `trained_models${decodedSearch}`,
+          //   });
+          // }
         }
       },
       [pathname, navigateToPath, mlManagementLocator, search]
