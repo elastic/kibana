@@ -14,6 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { TAB_ID_CONTENT, TAB_ID_GENERAL, TAB_ID_ROLES } from './constants';
+import { SecurityDisabledCallout } from './security_disabled_callout';
 import type { Space } from '../../../common';
 
 export interface EditSpaceTab {
@@ -35,6 +36,7 @@ export interface GetTabsProps {
   };
   allowFeatureVisibility: boolean;
   allowSolutionVisibility: boolean;
+  isSecurityEnabled: boolean;
 }
 
 const SuspenseEditSpaceSettingsTab = withSuspense(
@@ -68,6 +70,7 @@ export const getTabs = ({
   capabilities,
   rolesCount,
   isRoleManagementEnabled,
+  isSecurityEnabled,
   ...props
 }: GetTabsProps): EditSpaceTab[] => {
   const reloadWindow = () => {
@@ -105,12 +108,14 @@ export const getTabs = ({
           {rolesCount ?? 0}
         </EuiNotificationBadge>
       ),
-      content: (
+      content: isSecurityEnabled ? (
         <SuspenseEditSpaceAssignedRolesTab
           space={space}
           features={features}
           isReadOnly={!canUserModifyRoles}
         />
+      ) : (
+        <SecurityDisabledCallout />
       ),
     });
   }
