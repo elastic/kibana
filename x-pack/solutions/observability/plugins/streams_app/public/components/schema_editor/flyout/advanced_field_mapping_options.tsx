@@ -4,14 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiAccordion, EuiCodeBlock, EuiPanel, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiCodeBlock,
+  EuiLink,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { SchemaField } from '../types';
 
 const label = i18n.translate('xpack.streams.advancedFieldMappingOptions.label', {
-  defaultMessage: 'Advanced field mapping options',
+  defaultMessage: 'Advanced field mapping parameters',
 });
 
 export const AdvancedFieldMappingOptions = ({
@@ -34,6 +43,28 @@ export const AdvancedFieldMappingOptions = ({
   return (
     <EuiAccordion id={accordionId} buttonContent={label}>
       <EuiPanel color="subdued">
+        <EuiText size="xs">
+          <FormattedMessage
+            id="xpack.streams.advancedFieldMappingOptions.docs.label"
+            defaultMessage="Parameters can be defined with JSON. {link}"
+            values={{
+              link: (
+                <EuiLink
+                  data-test-subj="streamsAppAdvancedFieldMappingOptionsViewDocumentationLink"
+                  href="https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-params.html"
+                  target="_blank"
+                  external
+                >
+                  <FormattedMessage
+                    id="xpack.streams.indexPattern.randomSampling.learnMore"
+                    defaultMessage="View documentation."
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
+        <EuiSpacer size="s" />
         {isEditing ? (
           <CodeEditor
             height={120}
@@ -42,8 +73,12 @@ export const AdvancedFieldMappingOptions = ({
             onChange={(e) => {
               setJsonOptions(e);
               try {
-                const options = JSON.parse(e);
-                onChange({ additionalProperties: options });
+                if (e === '') {
+                  onChange({ additionalProperties: undefined });
+                } else {
+                  const options = JSON.parse(e);
+                  onChange({ additionalProperties: options });
+                }
               } catch (error: unknown) {
                 // do nothing
               }
