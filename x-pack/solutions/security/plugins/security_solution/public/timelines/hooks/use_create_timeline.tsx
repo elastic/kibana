@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { timelineActions } from '../store';
 import { useTimelineFullScreen } from '../../common/containers/use_full_screen';
@@ -14,8 +14,6 @@ import { TimelineId } from '../../../common/types/timeline';
 import { type TimelineType, TimelineTypeEnum } from '../../../common/api/timeline';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { inputsActions, inputsSelectors } from '../../common/store/inputs';
-import { sourcererActions, sourcererSelectors } from '../../sourcerer/store';
-import { SourcererScopeName } from '../../sourcerer/store/model';
 import { appActions } from '../../common/store/app';
 import type { TimeRange } from '../../common/store/inputs/model';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
@@ -23,6 +21,8 @@ import { defaultUdtHeaders } from '../components/timeline/body/column_headers/de
 import { timelineDefaults } from '../store/defaults';
 import { useSelectDataView } from '../../data_view_picker/hooks/use_select_data_view';
 import { DataViewPickerScopeName } from '../../data_view_picker/constants';
+import { useDataView } from '../../data_view_picker/hooks/use_data_view';
+import { useSelectedPatterns } from '../../data_view_picker/hooks/use_selected_patterns';
 
 export interface UseCreateTimelineParams {
   /**
@@ -50,9 +50,9 @@ export const useCreateTimeline = ({
   onClick,
 }: UseCreateTimelineParams): ((options?: { timeRange?: TimeRange }) => Promise<void>) => {
   const dispatch = useDispatch();
-  const { id: dataViewId, patternList: selectedPatterns } = useSelector(
-    sourcererSelectors.defaultDataView
-  ) ?? { id: '', patternList: [] };
+  const { dataView } = useDataView(DataViewPickerScopeName.default);
+  const dataViewId = dataView.id ?? '';
+  const selectedPatterns = useSelectedPatterns(DataViewPickerScopeName.default);
 
   const { timelineFullScreen, setTimelineFullScreen } = useTimelineFullScreen();
   const globalTimeRange = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
@@ -76,13 +76,6 @@ export const useCreateTimeline = ({
       if (id === TimelineId.active && timelineFullScreen) {
         setTimelineFullScreen(false);
       }
-      dispatch(
-        sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.timeline,
-          selectedDataViewId: dataViewId,
-          selectedPatterns,
-        })
-      );
 
       setSelectedDataView({
         id: dataViewId,
