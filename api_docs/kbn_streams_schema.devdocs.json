@@ -452,6 +452,167 @@
       },
       {
         "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.findInheritedLifecycle",
+        "type": "Function",
+        "tags": [],
+        "label": "findInheritedLifecycle",
+        "description": [],
+        "signature": [
+          "(definition: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.WiredStreamDefinition",
+            "text": "WiredStreamDefinition"
+          },
+          ", ancestors: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.WiredStreamDefinition",
+            "text": "WiredStreamDefinition"
+          },
+          "[]) => ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.WiredIngestStreamEffectiveLifecycle",
+            "text": "WiredIngestStreamEffectiveLifecycle"
+          }
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/lifecycle.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.findInheritedLifecycle.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "definition",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.WiredStreamDefinition",
+                "text": "WiredStreamDefinition"
+              }
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/lifecycle.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.findInheritedLifecycle.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "ancestors",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.WiredStreamDefinition",
+                "text": "WiredStreamDefinition"
+              },
+              "[]"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/lifecycle.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
+        "id": "def-common.findInheritingStreams",
+        "type": "Function",
+        "tags": [],
+        "label": "findInheritingStreams",
+        "description": [],
+        "signature": [
+          "(root: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.WiredStreamDefinition",
+            "text": "WiredStreamDefinition"
+          },
+          ", descendants: ",
+          {
+            "pluginId": "@kbn/streams-schema",
+            "scope": "common",
+            "docId": "kibKbnStreamsSchemaPluginApi",
+            "section": "def-common.WiredStreamDefinition",
+            "text": "WiredStreamDefinition"
+          },
+          "[]) => string[]"
+        ],
+        "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/lifecycle.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.findInheritingStreams.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "root",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.WiredStreamDefinition",
+                "text": "WiredStreamDefinition"
+              }
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/lifecycle.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/streams-schema",
+            "id": "def-common.findInheritingStreams.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "descendants",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/streams-schema",
+                "scope": "common",
+                "docId": "kibKbnStreamsSchemaPluginApi",
+                "section": "def-common.WiredStreamDefinition",
+                "text": "WiredStreamDefinition"
+              },
+              "[]"
+            ],
+            "path": "x-pack/solutions/observability/packages/kbn-streams-schema/src/helpers/lifecycle.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streams-schema",
         "id": "def-common.getAncestors",
         "type": "Function",
         "tags": [],
