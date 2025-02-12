@@ -124,7 +124,7 @@ export class CleanUpTempSummary {
     this.logger.info(`Deleting ${buckets.length} duplicate temporary documents`);
     await this.esClient.deleteByQuery(
       {
-        index: SUMMARY_DESTINATION_INDEX_PATTERN,
+        index: SUMMARY_TEMP_INDEX_NAME,
         wait_for_completion: false,
         body: {
           query: {
