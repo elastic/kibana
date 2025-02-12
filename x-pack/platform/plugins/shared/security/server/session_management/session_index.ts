@@ -681,16 +681,24 @@ export class SessionIndex {
         }
       }
 
-      await this.attachAliasToIndex();
-
       return;
     }
 
-    this.options.logger.debug(
-      'Session index already exists. Attaching alias to the index and ensuring up-to-date mappings...'
-    );
+    const isIndexNameAlias = await this.options.elasticsearchClient.indices.existsAlias({
+      name: this.aliasName,
+    });
 
-    await this.attachAliasToIndex();
+    if (!isIndexNameAlias) {
+      this.options.logger.debug(
+        'Session index already exists with no alias. Attaching alias to the index.'
+      );
+
+      await this.attachAliasToIndex();
+    }
+
+    this.options.logger.debug(
+      'Session index already exists. Ensuring up-to-date index mappings...'
+    );
 
     let indexMappingsVersion: string | undefined;
     try {
