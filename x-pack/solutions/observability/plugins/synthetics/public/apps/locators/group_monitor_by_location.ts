@@ -8,9 +8,11 @@
 import { syntheticsMonitorLocationQueryLocatorID } from '@kbn/observability-plugin/common';
 
 async function navigate({ locationId }: { locationId: string }) {
+  const locations = encodeURIComponent(JSON.stringify([locationId]));
+
   return {
     app: 'synthetics',
-    path: `?locations=${[locationId]}`,
+    path: `?locations=${[locations]}`,
     state: {},
   };
 }
