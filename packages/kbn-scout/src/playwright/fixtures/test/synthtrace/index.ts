@@ -85,7 +85,7 @@ export const synthtraceFixture = coreWorkerFixtures.extend<SynthtraceFixture>({
     await use({ index, clean });
 
     // cleanup function after all tests have ran
-    await clean();
+    await synthtraceEsClient.clean();
   },
   infraSynthtraceEsClient: async ({ esClient, config, kbnUrl }, use) => {
     const logger = createLogger(LogLevel.info);
