@@ -8742,6 +8742,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -8753,7 +8754,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -8869,6 +8871,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -8880,7 +8883,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -8944,6 +8948,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -8955,7 +8960,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -9034,6 +9040,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -9045,7 +9052,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -9169,6 +9177,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -9180,7 +9189,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -10249,6 +10259,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -10260,7 +10271,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -11536,6 +11548,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -11547,7 +11560,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -12563,6 +12577,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -12574,7 +12589,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -12656,6 +12672,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -12667,7 +12684,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -12829,6 +12847,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -12840,7 +12859,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -13822,6 +13842,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -13833,7 +13854,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -15121,6 +15143,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -15132,7 +15155,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -16146,6 +16170,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -16157,7 +16182,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -16226,6 +16252,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -16237,7 +16264,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -16251,6 +16279,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -16262,7 +16291,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -16779,6 +16809,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -16790,7 +16821,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -16925,6 +16957,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -16936,7 +16969,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -17066,6 +17100,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -17077,7 +17112,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -17186,6 +17222,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -17197,7 +17234,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -17733,6 +17771,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -17744,7 +17783,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -17822,6 +17862,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -17833,7 +17874,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18046,6 +18088,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18057,7 +18100,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18175,6 +18219,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18186,7 +18231,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18234,6 +18280,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18245,7 +18292,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18340,6 +18388,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18351,7 +18400,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18447,6 +18497,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18458,7 +18509,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18559,6 +18611,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18570,7 +18623,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18673,6 +18727,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18684,7 +18739,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18795,6 +18851,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18806,7 +18863,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18874,6 +18932,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18885,7 +18944,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18938,6 +18998,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18949,7 +19010,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -19028,6 +19090,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -19039,7 +19102,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -19114,6 +19178,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -19125,7 +19190,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -19191,6 +19257,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -19202,7 +19269,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -19269,6 +19337,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -19280,7 +19349,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -19728,6 +19798,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -19739,7 +19810,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -20210,6 +20282,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -20221,7 +20294,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -20414,6 +20488,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -20425,7 +20500,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -20500,6 +20576,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -20511,7 +20588,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -20597,6 +20675,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -20608,7 +20687,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -20742,6 +20822,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -20753,7 +20834,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -20850,6 +20932,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -20861,7 +20944,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -20922,6 +21006,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -20933,7 +21018,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -21067,6 +21153,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -21078,7 +21165,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -21245,6 +21333,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -21256,7 +21345,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -21377,6 +21467,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -21388,7 +21479,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -21455,6 +21547,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -21466,7 +21559,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -21554,6 +21648,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -21565,7 +21660,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -21693,6 +21789,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -21704,7 +21801,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -21792,6 +21890,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -21803,7 +21902,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -21989,6 +22089,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -22000,7 +22101,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -22103,6 +22205,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -22114,7 +22217,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -22665,6 +22769,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -22676,7 +22781,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -22840,6 +22946,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -22851,7 +22958,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -23106,6 +23214,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -23117,7 +23226,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -23335,6 +23445,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -23346,7 +23457,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -23394,6 +23506,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -23405,7 +23518,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -23468,6 +23582,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -23479,7 +23594,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -23628,6 +23744,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -23639,7 +23756,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -24307,6 +24425,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -24318,7 +24437,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -24517,6 +24637,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -24528,7 +24649,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -25180,6 +25302,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -25191,7 +25314,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -25311,6 +25435,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -25322,7 +25447,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -25381,6 +25507,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -25392,7 +25519,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -25538,6 +25666,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -25549,7 +25678,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -25595,6 +25725,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -25606,7 +25737,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -25702,6 +25834,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -25713,7 +25846,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -25847,6 +25981,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -25858,7 +25993,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -25922,6 +26058,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -25933,7 +26070,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -26021,6 +26159,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -26032,7 +26171,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -26165,6 +26305,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -26176,7 +26317,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -26256,6 +26398,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -26267,7 +26410,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -26281,6 +26425,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -26292,7 +26437,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -26362,6 +26508,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -26373,7 +26520,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -26434,6 +26582,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -26445,7 +26594,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -26459,6 +26609,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -26470,7 +26621,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -26526,6 +26678,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -26537,7 +26690,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -26602,6 +26756,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -26613,7 +26768,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -26627,6 +26783,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -26638,7 +26795,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -27743,6 +27901,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -27754,7 +27913,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -29907,6 +30067,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -29918,7 +30079,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -29982,6 +30144,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -29993,7 +30156,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -30007,6 +30171,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -30018,7 +30183,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -31115,6 +31281,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -31126,7 +31293,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -33263,6 +33431,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -33274,7 +33443,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -33339,6 +33509,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -33350,7 +33521,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -34056,6 +34228,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -34067,7 +34240,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -35329,6 +35503,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -35340,7 +35515,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -35354,6 +35530,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -35365,7 +35542,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -36034,6 +36212,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -36045,7 +36224,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -36244,6 +36424,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -36255,7 +36436,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -36357,6 +36539,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -36368,7 +36551,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -37557,6 +37741,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -37568,7 +37753,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -37640,6 +37826,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -37651,7 +37838,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -38289,6 +38477,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -38300,7 +38489,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -39581,6 +39771,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -39592,7 +39783,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -39606,6 +39798,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -39617,7 +39810,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -39727,6 +39921,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -39738,7 +39933,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -39900,6 +40096,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -39911,7 +40108,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -39975,6 +40173,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -39986,7 +40185,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -40088,6 +40288,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -40099,7 +40300,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -40264,6 +40466,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -40275,7 +40478,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -40352,6 +40556,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -40363,7 +40568,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -40469,6 +40675,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -40480,7 +40687,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -40660,6 +40868,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -40671,7 +40880,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -40766,6 +40976,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -40777,7 +40988,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -40922,6 +41134,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -40933,7 +41146,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -41018,6 +41232,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -41029,7 +41244,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
