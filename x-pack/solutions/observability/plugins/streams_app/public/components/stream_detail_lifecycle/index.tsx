@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import {
   IngestStreamGetResponse,
@@ -27,6 +27,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { EditLifecycleModal, LifecycleEditAction } from './modal';
 import { RetentionSummary } from './summary';
 import { RetentionMetadata } from './metadata';
+import { IlmSummary } from './ilm_summary';
 
 function useLifecycleState({
   definition,
@@ -193,6 +194,16 @@ export function StreamDetailLifecycle({
           </EuiFlexGroup>
         </EuiPanel>
       </EuiFlexItem>
+
+      <EuiSpacer size="s" />
+
+      {isIlmLifecycle(definition.effective_lifecycle) ? (
+        <EuiFlexGroup>
+          <EuiPanel hasShadow={false} hasBorder paddingSize="s">
+            <IlmSummary definition={definition} lifecycle={definition.effective_lifecycle} />
+          </EuiPanel>
+        </EuiFlexGroup>
+      ) : null}
     </>
   );
 }

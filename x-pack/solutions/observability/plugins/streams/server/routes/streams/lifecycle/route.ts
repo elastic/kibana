@@ -5,19 +5,26 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import { isIlmLifecycle, isIngestStreamDefinition } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { createServerRoute } from '../../create_server_route';
 import {
   IlmExplainLifecycleLifecycleExplain,
   IlmPolicy,
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
+import { createServerRoute } from '../../create_server_route';
+
+interface IlmPhase {
+  size_in_bytes: number;
+  move_after?: string;
+}
 
 interface IlmSummary {
-  [key: string]: { size_in_bytes: number; move_after?: string };
+  hot?: IlmPhase;
+  warm?: IlmPhase;
+  cold?: IlmPhase;
+  frozen?: IlmPhase;
+  delete?: {};
 }
 
 const lifecycleStatsRoute = createServerRoute({
@@ -82,20 +89,24 @@ const ilmSummary = (
   indicesStats: Record<string, IndicesStatsIndicesStats>
 ) => {
   const orderedPhases = [
-    { name: 'hot', phase: policy.phases.hot ?? {} },
-    { name: 'warm', phase: policy.phases.warm },
-    { name: 'cold', phase: policy.phases.cold },
-    { name: 'frozen', phase: policy.phases.frozen },
-    { name: 'delete', phase: policy.phases.delete },
+    { name: 'hot' as const, phase: policy.phases.hot ?? {} },
+    { name: 'warm' as const, phase: policy.phases.warm },
+    { name: 'cold' as const, phase: policy.phases.cold },
+    { name: 'frozen' as const, phase: policy.phases.frozen },
+    { name: 'delete' as const, phase: policy.phases.delete },
   ].filter(({ phase }) => !!phase);
 
   return orderedPhases.reduce((phases, phase, index) => {
+    if (phase.name === 'delete') {
+      phases[phase.name] = {};
+      return phases;
+    }
+
     const sizeInBytes = ilmDetails
       .filter((detail) => detail.managed && detail.phase === phase.name)
       .map((detail) => indicesStats[detail.index!])
       .reduce((size, stats) => size + (stats?.total?.store?.size_in_bytes ?? 0), 0);
     const nextPhase = orderedPhases[index + 1];
-
     phases[phase.name] = {
       size_in_bytes: sizeInBytes,
       move_after: nextPhase?.phase?.min_age?.toString(),
