@@ -118,6 +118,7 @@ describe('create', () => {
     });
 
     it('should filter out empty assignees', async () => {
+      clientArgs.services.licensingService.isAtLeastPlatinum.mockResolvedValue(false);
       await create(
         { ...theCase, assignees: [{ uid: '' }, { uid: '1' }] },
         clientArgs,
