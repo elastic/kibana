@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useState } from 'react';
-import type { CloudDataAttributes } from '@kbn/cloud-plugin/server/routes/types';
+import type { CloudDataAttributes } from '@kbn/cloud-plugin/common/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { OnboardingTopicId } from '../../constants';
 
