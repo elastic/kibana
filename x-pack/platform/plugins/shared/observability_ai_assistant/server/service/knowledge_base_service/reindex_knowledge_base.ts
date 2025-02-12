@@ -52,7 +52,7 @@ export async function reIndexKnowledgeBase({
     await esClient.asInternalUser.indices.create({ index: tempIndex });
 
     // Perform reindex to temporary index
-    logger.debug(`Reindexing knowledge base to temporary index "${tempIndex}"...`);
+    logger.debug(`Re-indexing knowledge base to temporary index "${tempIndex}"...`);
     await esClient.asInternalUser.reindex({
       body: {
         source: { index: originalIndex },
@@ -68,7 +68,7 @@ export async function reIndexKnowledgeBase({
     await createKbConcreteIndex({ logger, esClient });
 
     // Perform reindex back to original index
-    logger.debug(`Reindexing knowledge base back to original index "${originalIndex}"...`);
+    logger.debug(`Re-indexing knowledge base back to original index "${originalIndex}"...`);
     await esClient.asInternalUser.reindex({
       body: {
         source: { index: tempIndex },
@@ -86,7 +86,7 @@ export async function reIndexKnowledgeBase({
       'Re-indexing knowledge base completed successfully. Semantic text field is now supported.'
     );
   } catch (error) {
-    throw new Error(`Failed to re-index knowledge base: ${error.message}`);
+    throw new Error(`Failed to reindex knowledge base: ${error.message}`);
   }
 }
 

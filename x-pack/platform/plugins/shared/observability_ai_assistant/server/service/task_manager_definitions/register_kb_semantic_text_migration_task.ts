@@ -59,7 +59,10 @@ export async function registerKbSemanticTextMigrationTask({
                 return;
               }
 
-              if (true) {
+              if (config.disableKbSemanticTextMigration) {
+                logger.debug(
+                  'Semantic text migration is disabled via "disableKbSemanticTextMigration=true". Skipping migration.'
+                );
                 return;
               }
 

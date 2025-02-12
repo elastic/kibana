@@ -24,6 +24,70 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const retry = getService('retry');
   const log = getService('log');
 
+  describe('when the knowledge base index was created before 8.11', function () {
+    // Intentionally skipped in all serverless environnments (local and MKI)
+    // because the migration scenario being tested is not relevant to MKI and Serverless.
+    this.tags(['skipServerless']);
+
+    before(async () => {
+      await importTinyElserModel(ml);
+      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
+    });
+
+    beforeEach(async () => {
+      await deleteKbIndex();
+      await restoreKbSnapshot();
+      await createOrUpdateIndexAssets();
+    });
+
+    after(async () => {
+      await deleteKbIndex();
+      await createOrUpdateIndexAssets();
+      await deleteKnowledgeBaseModel(ml);
+      await deleteInferenceEndpoint({ es });
+    });
+
+    it('has an index created version earlier than 8.11', async () => {
+      await retry.try(async () => {
+        expect(await getKbIndexCreatedVersion()).to.be.lessThan(8110000);
+      });
+    });
+
+    function createKnowledgeBaseEntry() {
+      const knowledgeBaseEntry = {
+        id: 'my-doc-id-1',
+        title: 'My title',
+        text: 'My content',
+      };
+
+      return observabilityAIAssistantAPIClient.editor({
+        endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
+        params: { body: knowledgeBaseEntry },
+      });
+    }
+
+    it('cannot add new entries to KB', async () => {
+      const { status, body } = await createKnowledgeBaseEntry();
+
+      // @ts-expect-error
+      expect(body.message).to.eql(
+        'The knowledge base is currently being re-indexed. Please try again later'
+      );
+
+      expect(status).to.be(503);
+    });
+
+    it('can add new entries after re-indexing', async () => {
+      await runKbSemanticTextMigration();
+
+      await retry.try(async () => {
+        const { status } = await createKnowledgeBaseEntry();
+        expect(status).to.be(200);
+      });
+    });
+  });
+
   async function getKbIndexCreatedVersion() {
     const indexSettings = await es.indices.getSettings({
       index: resourceNames.concreteIndexName.kb,
@@ -79,76 +143,4 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
     expect(status).to.be(200);
   }
-
-  describe('indices created before 8.11 should be re-indexed in order to support sparse_vector fields', function () {
-    // Intentionally skipped in all serverless environnments (local and MKI)
-    // because the migration scenario being tested is not relevant to MKI and Serverless.
-    this.tags(['skipServerless']);
-
-    before(async () => {
-      try {
-        await deleteKnowledgeBaseModel(ml);
-        await deleteInferenceEndpoint({ es });
-      } catch (e) {
-        // ignore
-      }
-
-      await importTinyElserModel(ml);
-      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
-      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
-    });
-
-    beforeEach(async () => {
-      await deleteKbIndex();
-      await restoreKbSnapshot();
-      await createOrUpdateIndexAssets();
-    });
-
-    after(async () => {
-      // await deleteKbIndex();
-      // await createKbIndex();
-      // await createOrUpdateIndexAssets();
-      // await deleteKnowledgeBaseModel(ml);
-      // await deleteInferenceEndpoint({ es });
-    });
-
-    it('has knowledge base index created before 8.11', async () => {
-      await retry.try(async () => {
-        expect(await getKbIndexCreatedVersion()).to.be.lessThan(8110000);
-      });
-    });
-
-    function createKnowledgeBaseEntry() {
-      const knowledgeBaseEntry = {
-        id: 'my-doc-id-1',
-        title: 'My title',
-        text: 'My content',
-      };
-
-      return observabilityAIAssistantAPIClient.editor({
-        endpoint: 'POST /internal/observability_ai_assistant/kb/entries/save',
-        params: { body: knowledgeBaseEntry },
-      });
-    }
-
-    it('cannot add new entries to KB on the first attempt', async () => {
-      const { status, body } = await createKnowledgeBaseEntry();
-
-      // @ts-expect-error
-      expect(body.message).to.eql(
-        'The knowledge base is currently being re-indexed. Please try again later'
-      );
-
-      expect(status).to.be(503);
-    });
-
-    it('can add new entries after re-indexing', async () => {
-      await runKbSemanticTextMigration();
-
-      await retry.try(async () => {
-        const { status } = await createKnowledgeBaseEntry();
-        expect(status).to.be(200);
-      });
-    });
-  });
 }
