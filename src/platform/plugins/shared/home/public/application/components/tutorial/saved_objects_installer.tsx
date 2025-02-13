@@ -8,9 +8,7 @@
  */
 
 import { injectI18n, InjectedIntl } from '@kbn/i18n-react';
-
 import React from 'react';
-
 import {
   EuiTitle,
   EuiFlexGroup,
@@ -33,7 +31,6 @@ interface SavedObjectShape {
   version?: string;
 }
 
-// interface SavedObjectsInstallerUi {}
 interface SavedObjectInstallerProps {
   intl: InjectedIntl;
   bulkCreate: (
@@ -48,8 +45,9 @@ interface SavedObjectInstallerState {
   installStatusMsg: string;
   isInstalled: boolean;
   overwrite: boolean;
-  buttonLabel: string; // DEFAULT_BUTTON_LABEL
+  buttonLabel: string;
 }
+
 class SavedObjectsInstallerUi extends React.Component<
   SavedObjectInstallerProps,
   SavedObjectInstallerState
@@ -64,7 +62,7 @@ class SavedObjectsInstallerUi extends React.Component<
       isInstalled: false,
       overwrite: false,
       buttonLabel: this.DEFAULT_BUTTON_LABEL,
-      installStatusMsg: '', // what should I set here?
+      installStatusMsg: '',
     };
     this._isMounted = false;
   }
