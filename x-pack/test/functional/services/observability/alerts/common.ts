@@ -139,7 +139,7 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   const getNoDataStateOrFail = async () => {
-    return await testSubjects.existOrFail('alertsStateTableEmptyState');
+    return await testSubjects.existOrFail('alertsTableEmptyState');
   };
 
   // Query Bar
@@ -153,6 +153,10 @@ export function ObservabilityAlertsCommonProvider({
 
   const typeInQueryBar = retryOnStale.wrap(async (query: string) => {
     return await (await getQueryBar()).type(query);
+  });
+
+  const clickOnQueryBar = retryOnStale.wrap(async () => {
+    return await (await getQueryBar()).click();
   });
 
   const submitQuery = async (query: string) => {
@@ -382,6 +386,7 @@ export function ObservabilityAlertsCommonProvider({
   return {
     getQueryBar,
     clearQueryBar,
+    clickOnQueryBar,
     closeAlertsFlyout,
     filterForValueButtonExists,
     getAlertsFlyout,

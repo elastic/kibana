@@ -13,18 +13,18 @@ import {
 import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 import { deleteAllPrebuiltRuleAssets } from '../../../../utils/rules/prebuilt_rules/delete_all_prebuilt_rule_assets';
 import { deleteAllTimelines } from '../../../../utils/rules/prebuilt_rules/delete_all_timelines';
-import { deletePrebuiltRulesFleetPackage } from '../../../../utils/rules/prebuilt_rules/delete_prebuilt_rules_fleet_package';
+import { deletePrebuiltRulesFleetPackage } from '../../../../utils/rules/prebuilt_rules/delete_fleet_packages';
 import { installPrebuiltRulesFleetPackage } from '../../../../utils/rules/prebuilt_rules/install_prebuilt_rules_fleet_package';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
-  const retry = getService('retry');
+  const retryService = getService('retry');
 
   describe('@ess @serverless @skipInServerlessMKI install_prebuilt_rules_from_real_package', () => {
     beforeEach(async () => {
-      await deletePrebuiltRulesFleetPackage(supertest);
+      await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
       await deleteAllRules(supertest, log);
       await deleteAllTimelines(es, log);
       await deleteAllPrebuiltRuleAssets(es, log);
@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
         es,
         supertest,
         overrideExistingPackage: true,
-        retryService: retry,
+        retryService,
       });
 
       // Verify that status is updated after package installation

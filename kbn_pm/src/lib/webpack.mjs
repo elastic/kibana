@@ -14,7 +14,7 @@ import path from 'path';
 /**
  * Builds a set of packages with NX, relying on an existing build target
  * @param {string[]} packages
- * @param {{quiet: boolean, disableNXCache: boolean, verbose: boolean, log: any}} options
+ * @param {{quiet: boolean, disableNXCache: boolean, verbose: boolean, log: any, reactVersion: string}} options
  * @returns {Promise<unknown>}
  */
 export async function buildPackages(packages, options) {
@@ -47,12 +47,15 @@ export async function buildPackages(packages, options) {
 /**
  * Runs the build script in watch mode for a single package
  * @param {string} packageName
- * @param {{quiet: boolean}} options
+ * @param {{quiet: boolean, reactVersion: string}} options
  * @returns {Promise<void>}
  */
-export async function watchPackage(packageName, { quiet }) {
+export async function watchPackage(packageName, { quiet, reactVersion }) {
   await run('yarn', ['build', '--watch'], {
     cwd: path.resolve(REPO_ROOT, 'packages', packageName),
     pipe: !quiet,
+    env: {
+      REACT_VERSION: reactVersion,
+    }
   });
 }

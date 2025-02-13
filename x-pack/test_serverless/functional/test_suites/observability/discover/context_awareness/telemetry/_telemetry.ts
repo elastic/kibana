@@ -123,6 +123,111 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
       });
     });
 
+    describe('contextual profiles', () => {
+      before(async () => {
+        await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+        await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      });
+
+      it('should send EBT events when a different data source profile gets resolved', async () => {
+        await common.navigateToApp('discover');
+        await discover.selectTextBaseLang();
+        await discover.waitUntilSearchingHasFinished();
+        await monacoEditor.setCodeEditorValue('from my-example-logs | sort @timestamp desc');
+        await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        let events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_profile_resolved'],
+          withTimeoutMs: 500,
+        });
+
+        expect(events[0].properties).to.eql({
+          contextLevel: 'rootLevel',
+          profileId: 'observability-root-profile',
+        });
+
+        expect(events[1].properties).to.eql({
+          contextLevel: 'dataSourceLevel',
+          profileId: 'default-data-source-profile',
+        });
+
+        expect(events[2].properties).to.eql({
+          contextLevel: 'dataSourceLevel',
+          profileId: 'observability-logs-data-source-profile',
+        });
+
+        // should not trigger any new events after a simple refresh
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_profile_resolved'],
+          withTimeoutMs: 500,
+        });
+
+        expect(events.length).to.be(3);
+
+        // should detect a new data source profile when switching to a different data source
+        await monacoEditor.setCodeEditorValue('from my-example-* | sort @timestamp desc');
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_profile_resolved'],
+          withTimeoutMs: 500,
+        });
+
+        expect(events[3].properties).to.eql({
+          contextLevel: 'dataSourceLevel',
+          profileId: 'default-data-source-profile',
+        });
+
+        expect(events.length).to.be(4);
+      });
+
+      it('should send EBT events when a different document profile gets resolved', async () => {
+        await common.navigateToApp('discover');
+        await discover.selectTextBaseLang();
+        await monacoEditor.setCodeEditorValue('from my-example-logs | sort @timestamp desc');
+        await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
+        await testSubjects.click('querySubmitButton');
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        let events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_profile_resolved'],
+          withTimeoutMs: 500,
+        });
+
+        expect(events.length).to.be(3);
+
+        // should trigger a new event after opening the doc viewer
+        await dataGrid.clickRowToggle();
+        await discover.isShowingDocViewer();
+
+        events = await ebtUIHelper.getEvents(Number.MAX_SAFE_INTEGER, {
+          eventTypes: ['discover_profile_resolved'],
+          withTimeoutMs: 500,
+        });
+
+        expect(events.length).to.be(4);
+
+        expect(events[events.length - 1].properties).to.eql({
+          contextLevel: 'documentLevel',
+          profileId: 'observability-log-document-profile',
+        });
+      });
+    });
+
     describe('events', () => {
       beforeEach(async () => {
         await common.navigateToApp('discover');

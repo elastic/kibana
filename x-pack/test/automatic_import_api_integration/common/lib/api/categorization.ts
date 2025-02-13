@@ -9,9 +9,10 @@ import {
   CategorizationRequestBody,
   CATEGORIZATION_GRAPH_PATH,
   CategorizationResponse,
-} from '@kbn/integration-assistant-plugin/common';
+} from '@kbn/automatic-import-plugin/common';
 import { superUser } from '../authentication/users';
 import { User } from '../authentication/types';
+import { BadRequestError } from '../error/error';
 
 export const postCategorization = async ({
   supertest,
@@ -23,7 +24,7 @@ export const postCategorization = async ({
   req: CategorizationRequestBody;
   expectedHttpCode?: number;
   auth: { user: User };
-}): Promise<CategorizationResponse> => {
+}): Promise<CategorizationResponse | BadRequestError> => {
   const { body: response } = await supertest
     .post(`${CATEGORIZATION_GRAPH_PATH}`)
     .send(req)
@@ -31,6 +32,10 @@ export const postCategorization = async ({
     .set('elastic-api-version', '1')
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
+
+  if (response.statusCode === 400) {
+    return new BadRequestError(response.message);
+  }
 
   return response;
 };

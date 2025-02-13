@@ -23,7 +23,7 @@
           },
           ") => Promise<void>"
         ],
-        "path": "src/plugins/share/public/lib/download_as.ts",
+        "path": "src/platform/plugins/shared/share/public/lib/download_as.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -39,7 +39,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/share/public/lib/download_as.ts",
+            "path": "src/platform/plugins/shared/share/public/lib/download_as.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -62,7 +62,7 @@
                 "text": "DownloadableContent"
               }
             ],
-            "path": "src/plugins/share/public/lib/download_as.ts",
+            "path": "src/platform/plugins/shared/share/public/lib/download_as.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -93,7 +93,7 @@
           },
           ">) => Promise<void>"
         ],
-        "path": "src/plugins/share/public/lib/download_as.ts",
+        "path": "src/platform/plugins/shared/share/public/lib/download_as.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -117,7 +117,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/share/public/lib/download_as.ts",
+            "path": "src/platform/plugins/shared/share/public/lib/download_as.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -156,7 +156,7 @@
           "LocatorGetUrlParams",
           " | undefined, deps?: React.DependencyList) => string"
         ],
-        "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+        "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -177,7 +177,7 @@
               },
               "<P> | null | undefined"
             ],
-            "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -192,7 +192,7 @@
             "signature": [
               "P"
             ],
-            "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -208,7 +208,7 @@
               "LocatorGetUrlParams",
               " | undefined"
             ],
-            "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -223,7 +223,7 @@
             "signature": [
               "React.DependencyList"
             ],
-            "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -247,7 +247,7 @@
           "KibanaLocation",
           "<S>"
         ],
-        "path": "src/plugins/share/common/url_service/locators/types.ts",
+        "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -260,7 +260,7 @@
             "description": [
               "\nKibana application ID."
             ],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -273,7 +273,7 @@
             "description": [
               "\nA relative URL path within a Kibana application."
             ],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -289,7 +289,7 @@
             "signature": [
               "S"
             ],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -323,7 +323,7 @@
           },
           "<P>>"
         ],
-        "path": "src/plugins/share/common/url_service/locators/types.ts",
+        "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -336,7 +336,7 @@
             "description": [
               "\nUnique ID of the locator. Should be constant and unique across Kibana."
             ],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -354,7 +354,7 @@
               "KibanaLocation",
               "<object>>"
             ],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -370,7 +370,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -408,7 +408,7 @@
           },
           "<P>"
         ],
-        "path": "src/plugins/share/common/url_service/locators/types.ts",
+        "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -419,7 +419,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -437,7 +437,7 @@
               "KibanaLocation",
               "<object>>"
             ],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -453,7 +453,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -475,7 +475,7 @@
               "LocatorGetUrlParams",
               " | undefined) => Promise<string>"
             ],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -491,7 +491,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -509,7 +509,7 @@
                   "LocatorGetUrlParams",
                   " | undefined"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -528,10 +528,10 @@
             ],
             "signature": [
               "(params: P, options?: ",
-              "FormatSearchParamsOptions",
+              "GetRedirectUrlOptions",
               " | undefined) => string"
             ],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -547,7 +547,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -562,10 +562,10 @@
                   "URL serialization options."
                 ],
                 "signature": [
-                  "FormatSearchParamsOptions",
+                  "GetRedirectUrlOptions",
                   " | undefined"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -587,7 +587,7 @@
               "LocatorNavigationParams",
               " | undefined) => Promise<void>"
             ],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -603,7 +603,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -621,7 +621,7 @@
                   "LocatorNavigationParams",
                   " | undefined"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -643,7 +643,7 @@
               "LocatorNavigationParams",
               " | undefined) => void"
             ],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -659,7 +659,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -677,7 +677,7 @@
                   "LocatorNavigationParams",
                   " | undefined"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -699,7 +699,7 @@
               "LocatorGetUrlParams",
               " | undefined, deps?: React.DependencyList | undefined) => string"
             ],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -713,7 +713,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -729,7 +729,7 @@
                   "LocatorGetUrlParams",
                   " | undefined"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -744,7 +744,7 @@
                 "signature": [
                   "React.DependencyList | undefined"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -766,7 +766,7 @@
           "RedirectOptions",
           "<P>"
         ],
-        "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
+        "path": "src/platform/plugins/shared/share/common/url_service/locators/redirect/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -779,7 +779,7 @@
             "description": [
               "Locator ID."
             ],
-            "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/redirect/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -792,7 +792,7 @@
             "description": [
               "Kibana version when locator params were generated."
             ],
-            "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/redirect/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -808,7 +808,7 @@
             "signature": [
               "P"
             ],
-            "path": "src/plugins/share/common/url_service/locators/redirect/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/redirect/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -822,7 +822,7 @@
         "tags": [],
         "label": "ShareContext",
         "description": [],
-        "path": "src/plugins/share/public/types.ts",
+        "path": "src/platform/plugins/shared/share/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -833,7 +833,7 @@
             "tags": [],
             "label": "objectType",
             "description": [],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -847,9 +847,11 @@
               "\nAllows for passing contextual information that each consumer can provide to customize the share menu"
             ],
             "signature": [
-              "{ title: string; }"
+              "{ title: string; config?: Partial<Record<\"link\" | \"embed\" | \"export\", ",
+              "ShareContextObjectTypeConfig",
+              ">> | undefined; }"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -863,7 +865,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -879,7 +881,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -895,17 +897,17 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "@kbn/reporting-public",
-                "path": "packages/kbn-reporting/public/share/share_context_menu/register_pdf_png_modal_reporting.tsx"
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/app_menu_actions/get_share.tsx"
               },
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/top_nav/app_menu_actions/get_share.tsx"
+                "plugin": "@kbn/reporting-public",
+                "path": "src/platform/packages/private/kbn-reporting/public/share/share_context_menu/register_pdf_png_modal_reporting.tsx"
               }
             ]
           },
@@ -927,7 +929,7 @@
               },
               "<any>; params: any; } | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -945,7 +947,7 @@
             "signature": [
               "(() => string) | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -961,7 +963,7 @@
             "signature": [
               "{ [key: string]: unknown; }"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -972,7 +974,7 @@
             "tags": [],
             "label": "isDirty",
             "description": [],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -986,7 +988,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -996,41 +998,41 @@
             "parentPluginId": "share",
             "id": "def-public.ShareContext.showPublicUrlSwitch",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "deprecated"
+            ],
             "label": "showPublicUrlSwitch",
             "description": [],
             "signature": [
               "((anonymousUserCapabilities: ",
-              {
-                "pluginId": "@kbn/core-capabilities-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              },
+              "Capabilities",
               ") => boolean) | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
-            "deprecated": false,
+            "path": "src/platform/plugins/shared/share/public/types.ts",
+            "deprecated": true,
             "trackAdoption": false,
+            "references": [
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/app_plugin/lens_top_nav.tsx"
+              },
+              {
+                "plugin": "discover",
+                "path": "src/platform/plugins/shared/discover/public/application/main/components/top_nav/app_menu_actions/get_share.tsx"
+              }
+            ],
             "children": [
               {
                 "parentPluginId": "share",
                 "id": "def-public.ShareContext.showPublicUrlSwitch.$1",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "anonymousUserCapabilities",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-capabilities-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                    "section": "def-common.Capabilities",
-                    "text": "Capabilities"
-                  }
+                  "Capabilities"
                 ],
-                "path": "src/plugins/share/public/types.ts",
+                "path": "src/platform/plugins/shared/share/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1048,7 +1050,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1060,15 +1062,9 @@
             "label": "toasts",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.IToasts",
-                "text": "IToasts"
-              }
+              "IToasts"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1094,7 +1090,7 @@
           "EuiContextMenuPanelItemDescriptorEntry",
           ", \"name\">"
         ],
-        "path": "src/plugins/share/public/types.ts",
+        "path": "src/platform/plugins/shared/share/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1105,7 +1101,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1119,7 +1115,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1143,7 +1139,7 @@
           },
           " extends ShareMenuItemBase"
         ],
-        "path": "src/plugins/share/public/types.ts",
+        "path": "src/platform/plugins/shared/share/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1158,7 +1154,7 @@
               "EuiContextMenuPanelDescriptor",
               " | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1182,7 +1178,7 @@
           },
           " extends ShareMenuItemBase"
         ],
-        "path": "src/plugins/share/public/types.ts",
+        "path": "src/platform/plugins/shared/share/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1196,7 +1192,7 @@
             "signature": [
               "\"PDF\" | \"CSV\" | \"PNG\""
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1211,7 +1207,7 @@
               "SupportedExportTypes",
               " | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1225,7 +1221,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1239,7 +1235,7 @@
             "signature": [
               "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1253,7 +1249,7 @@
             "signature": [
               "{ id: string; dataTestSubj: string; label: string; } | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1267,7 +1263,7 @@
             "signature": [
               "React.ReactElement<any, string | React.JSXElementConstructor<any>> | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1285,7 +1281,7 @@
               "ScreenshotExportOpts",
               ") => Promise<unknown>"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1299,7 +1295,7 @@
                 "signature": [
                   "ScreenshotExportOpts"
                 ],
-                "path": "src/plugins/share/public/types.ts",
+                "path": "src/platform/plugins/shared/share/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1321,7 +1317,7 @@
               "ScreenshotExportOpts",
               ") => string | undefined) | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1335,7 +1331,7 @@
                 "signature": [
                   "ScreenshotExportOpts"
                 ],
-                "path": "src/plugins/share/public/types.ts",
+                "path": "src/platform/plugins/shared/share/public/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1351,16 +1347,10 @@
             "label": "theme",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              },
+              "ThemeServiceSetup",
               " | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1374,7 +1364,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1388,7 +1378,7 @@
             "signature": [
               "\"print\" | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1402,7 +1392,7 @@
             "signature": [
               "URL | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1416,7 +1406,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1430,7 +1420,7 @@
             "signature": [
               "{ title: string; message: string; }[] | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1462,7 +1452,7 @@
           },
           ", \"onClose\">"
         ],
-        "path": "src/plugins/share/public/types.ts",
+        "path": "src/platform/plugins/shared/share/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1476,7 +1466,7 @@
             "signature": [
               "HTMLElement"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1487,7 +1477,7 @@
             "tags": [],
             "label": "allowEmbed",
             "description": [],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1498,7 +1488,7 @@
             "tags": [],
             "label": "allowShortUrl",
             "description": [],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1513,7 +1503,7 @@
               "UrlParamExtension",
               "[] | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1527,7 +1517,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1541,7 +1531,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -1557,7 +1547,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/share/public/types.ts",
+            "path": "src/platform/plugins/shared/share/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1580,7 +1570,7 @@
           "BrowserShortUrlClient",
           ">"
         ],
-        "path": "src/plugins/share/public/types.ts",
+        "path": "src/platform/plugins/shared/share/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1595,7 +1585,7 @@
         "signature": [
           "{ readonly new_version: Readonly<{} & { enabled: boolean; }>; }"
         ],
-        "path": "src/plugins/share/server/config.ts",
+        "path": "src/platform/plugins/shared/share/server/config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1610,7 +1600,7 @@
         "signature": [
           "\"csv:quoteValues\""
         ],
-        "path": "src/plugins/share/common/constants.ts",
+        "path": "src/platform/plugins/shared/share/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1625,7 +1615,7 @@
         "signature": [
           "\"csv:separator\""
         ],
-        "path": "src/plugins/share/common/constants.ts",
+        "path": "src/platform/plugins/shared/share/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1640,7 +1630,7 @@
         "signature": [
           "Blob | { content: string; type: string; }"
         ],
-        "path": "src/plugins/share/public/lib/download_as.ts",
+        "path": "src/platform/plugins/shared/share/public/lib/download_as.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1657,7 +1647,7 @@
           " | ",
           "ShareMenuProviderLegacy"
         ],
-        "path": "src/plugins/share/public/types.ts",
+        "path": "src/platform/plugins/shared/share/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1708,7 +1698,7 @@
         },
         ") => void; }"
       ],
-      "path": "src/plugins/share/public/plugin.ts",
+      "path": "src/platform/plugins/shared/share/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "setup",
@@ -1750,7 +1740,7 @@
         },
         ">): void; }"
       ],
-      "path": "src/plugins/share/public/plugin.ts",
+      "path": "src/platform/plugins/shared/share/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "lifecycle": "start",
@@ -1773,7 +1763,7 @@
         "signature": [
           "\"csv:quoteValues\""
         ],
-        "path": "src/plugins/share/common/constants.ts",
+        "path": "src/platform/plugins/shared/share/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1788,7 +1778,7 @@
         "signature": [
           "\"csv:separator\""
         ],
-        "path": "src/plugins/share/common/constants.ts",
+        "path": "src/platform/plugins/shared/share/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1802,7 +1792,7 @@
       "tags": [],
       "label": "SharePublicSetup",
       "description": [],
-      "path": "src/plugins/share/server/plugin.ts",
+      "path": "src/platform/plugins/shared/share/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1821,7 +1811,7 @@
             "IShortUrlClient",
             ">"
           ],
-          "path": "src/plugins/share/server/plugin.ts",
+          "path": "src/platform/plugins/shared/share/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1836,7 +1826,7 @@
       "tags": [],
       "label": "SharePublicStart",
       "description": [],
-      "path": "src/plugins/share/server/plugin.ts",
+      "path": "src/platform/plugins/shared/share/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1855,7 +1845,7 @@
             "IShortUrlClient",
             ">"
           ],
-          "path": "src/plugins/share/server/plugin.ts",
+          "path": "src/platform/plugins/shared/share/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -1895,7 +1885,7 @@
           "LocatorGetUrlParams",
           " | undefined, deps?: React.DependencyList) => string"
         ],
-        "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+        "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1916,7 +1906,7 @@
               },
               "<P> | null | undefined"
             ],
-            "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1931,7 +1921,7 @@
             "signature": [
               "P"
             ],
-            "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1947,7 +1937,7 @@
               "LocatorGetUrlParams",
               " | undefined"
             ],
-            "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1962,7 +1952,7 @@
             "signature": [
               "React.DependencyList"
             ],
-            "path": "src/plugins/share/common/url_service/locators/use_locator_url.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/use_locator_url.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1982,7 +1972,7 @@
         "description": [
           "\nThe contract that is used to check anonymous access for the purposes of sharing public links. The implementation is intended to be\nprovided by the security plugin."
         ],
-        "path": "src/plugins/share/common/anonymous_access/types.ts",
+        "path": "src/platform/plugins/shared/share/common/anonymous_access/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2006,7 +1996,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "path": "src/platform/plugins/shared/share/common/anonymous_access/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2023,16 +2013,10 @@
             ],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "@kbn/core-capabilities-common",
-                "scope": "common",
-                "docId": "kibKbnCoreCapabilitiesCommonPluginApi",
-                "section": "def-common.Capabilities",
-                "text": "Capabilities"
-              },
+              "Capabilities",
               ">"
             ],
-            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "path": "src/platform/plugins/shared/share/common/anonymous_access/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -2050,7 +2034,7 @@
         "description": [
           "\nThe state of anonymous access."
         ],
-        "path": "src/plugins/share/common/anonymous_access/types.ts",
+        "path": "src/platform/plugins/shared/share/common/anonymous_access/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2063,7 +2047,7 @@
             "description": [
               "\nWhether anonymous access is enabled or not."
             ],
-            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "path": "src/platform/plugins/shared/share/common/anonymous_access/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2079,7 +2063,7 @@
             "signature": [
               "Record<string, string> | null"
             ],
-            "path": "src/plugins/share/common/anonymous_access/types.ts",
+            "path": "src/platform/plugins/shared/share/common/anonymous_access/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2113,7 +2097,7 @@
           },
           "<P>>"
         ],
-        "path": "src/plugins/share/common/url_service/locators/types.ts",
+        "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2126,7 +2110,7 @@
             "description": [
               "\nUnique ID of the locator. Should be constant and unique across Kibana."
             ],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2144,7 +2128,7 @@
               "KibanaLocation",
               "<object>>"
             ],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2160,7 +2144,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2198,7 +2182,7 @@
           },
           "<P>"
         ],
-        "path": "src/plugins/share/common/url_service/locators/types.ts",
+        "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2209,7 +2193,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2227,7 +2211,7 @@
               "KibanaLocation",
               "<object>>"
             ],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2243,7 +2227,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2265,7 +2249,7 @@
               "LocatorGetUrlParams",
               " | undefined) => Promise<string>"
             ],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2281,7 +2265,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2299,7 +2283,7 @@
                   "LocatorGetUrlParams",
                   " | undefined"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2318,10 +2302,10 @@
             ],
             "signature": [
               "(params: P, options?: ",
-              "FormatSearchParamsOptions",
+              "GetRedirectUrlOptions",
               " | undefined) => string"
             ],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2337,7 +2321,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2352,10 +2336,10 @@
                   "URL serialization options."
                 ],
                 "signature": [
-                  "FormatSearchParamsOptions",
+                  "GetRedirectUrlOptions",
                   " | undefined"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2377,7 +2361,7 @@
               "LocatorNavigationParams",
               " | undefined) => Promise<void>"
             ],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2393,7 +2377,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2411,7 +2395,7 @@
                   "LocatorNavigationParams",
                   " | undefined"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2433,7 +2417,7 @@
               "LocatorNavigationParams",
               " | undefined) => void"
             ],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2449,7 +2433,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2467,7 +2451,7 @@
                   "LocatorNavigationParams",
                   " | undefined"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2489,7 +2473,7 @@
               "LocatorGetUrlParams",
               " | undefined, deps?: React.DependencyList | undefined) => string"
             ],
-            "path": "src/plugins/share/common/url_service/locators/types.ts",
+            "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2503,7 +2487,7 @@
                 "signature": [
                   "P"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2519,7 +2503,7 @@
                   "LocatorGetUrlParams",
                   " | undefined"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -2534,7 +2518,7 @@
                 "signature": [
                   "React.DependencyList | undefined"
                 ],
-                "path": "src/plugins/share/common/url_service/locators/types.ts",
+                "path": "src/platform/plugins/shared/share/common/url_service/locators/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false

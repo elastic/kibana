@@ -38,7 +38,7 @@ import {
   superUserSpace1Auth,
   delay,
   calculateDuration,
-  getCaseUserActions,
+  findCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
   createConfiguration,
   getConfigurationRequest,
@@ -138,7 +138,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+        const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
         const { duration, ...dataWithoutDuration } = data;
@@ -156,7 +156,6 @@ export default ({ getService }: FtrProviderContext): void => {
           action: 'update',
           created_by: defaultUser,
           payload: { status: CaseStatuses.closed },
-          case_id: postedCase.id,
           comment_id: null,
           owner: 'securitySolutionFixture',
         });
@@ -177,7 +176,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+        const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const statusUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
         const data = removeServerGeneratedPropertiesFromCase(patchedCases[0]);
 
@@ -192,7 +191,6 @@ export default ({ getService }: FtrProviderContext): void => {
           action: 'update',
           created_by: defaultUser,
           payload: { status: CaseStatuses['in-progress'] },
-          case_id: postedCase.id,
           comment_id: null,
           owner: 'securitySolutionFixture',
         });
@@ -545,7 +543,7 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           params: {
             alertId: '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78',
-            index: '.siem-signals-default-000001',
+            index: 'siem-signals-default-000001',
             rule: { id: 'test-rule-id', name: 'test-index-id' },
             type: AttachmentType.alert,
             owner: 'securitySolutionFixture',
@@ -593,7 +591,7 @@ export default ({ getService }: FtrProviderContext): void => {
             caseId: postedCaseId,
             params: {
               alertId: '4679431ee0ba3209b6fcd60a255a696886fe0a7d18f5375de510ff5b68fa6b78',
-              index: '.siem-signals-default-000001',
+              index: 'siem-signals-default-000001',
               rule: { id: 'test-rule-id', name: 'test-index-id' },
               type: AttachmentType.alert,
               owner: 'securitySolutionFixture',
@@ -1528,7 +1526,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('alerts', () => {
       describe('Update', () => {
-        const defaultSignalsIndex = '.siem-signals-default-000001';
+        const defaultSignalsIndex = 'siem-signals-default-000001';
 
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/default');
@@ -1662,7 +1660,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       describe('No update', () => {
-        const defaultSignalsIndex = '.siem-signals-default-000001';
+        const defaultSignalsIndex = 'siem-signals-default-000001';
 
         beforeEach(async () => {
           await esArchiver.load('x-pack/test/functional/es_archives/cases/signals/duplicate_ids');
@@ -1681,12 +1679,12 @@ export default ({ getService }: FtrProviderContext): void => {
             });
           };
 
-          // this id exists only in .siem-signals-default-000001
+          // this id exists only in siem-signals-default-000001
           const signalIDInFirstIndex =
             'cae78067e65582a3b277c1ad46ba3cb29044242fe0d24bbf3fcde757fdd31d1c';
-          // This id exists in both .siem-signals-default-000001 and .siem-signals-default-000002
+          // This id exists in both siem-signals-default-000001 and siem-signals-default-000002
           const signalIDInSecondIndex = 'duplicate-signal-id';
-          const signalsIndex2 = '.siem-signals-default-000002';
+          const signalsIndex2 = 'siem-signals-default-000002';
 
           const individualCase = await createCase(supertest, {
             ...postCaseReq,

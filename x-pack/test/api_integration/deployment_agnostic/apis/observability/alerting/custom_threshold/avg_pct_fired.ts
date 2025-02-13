@@ -28,6 +28,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const dataViewApi = getService('dataViewApi');
   const logger = getService('log');
   const config = getService('config');
+  const spacesService = getService('spaces');
   const isServerless = config.get('serverless');
   const expectedConsumer = isServerless ? 'observability' : 'logs';
   let roleAuthc: RoleCredentials;
@@ -39,6 +40,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     const DATA_VIEW_TITLE = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const DATA_VIEW_NAME = 'data-view-name';
     const DATA_VIEW_ID = 'data-view-id';
+    const SPACE_ID = 'test-space';
     let dataForgeConfig: PartialConfig;
     let dataForgeIndices: string[];
     let actionId: string;
@@ -73,7 +75,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         name: DATA_VIEW_NAME,
         id: DATA_VIEW_ID,
         title: DATA_VIEW_TITLE,
+        spaceId: SPACE_ID,
         roleAuthc,
+      });
+      await spacesService.create({
+        id: SPACE_ID,
+        name: 'Test Space',
+        disabledFeatures: [],
+        color: '#AABBCC',
       });
     });
 
@@ -98,11 +107,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
       await dataViewApi.delete({
         id: DATA_VIEW_ID,
+        spaceId: SPACE_ID,
         roleAuthc,
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
       await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+      await spacesService.delete(SPACE_ID);
     });
 
     describe('Rule creation', () => {
@@ -111,10 +122,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           roleAuthc,
           name: 'Index Connector: Threshold API test',
           indexName: ALERT_ACTION_INDEX,
+          spaceId: SPACE_ID,
         });
 
         const createdRule = await alertingApi.createRule({
           roleAuthc,
+          spaceId: SPACE_ID,
           tags: ['observability'],
           consumer: expectedConsumer,
           name: 'Threshold rule',
@@ -174,12 +187,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           roleAuthc,
           ruleId,
           expectedStatus: 'active',
+          spaceId: SPACE_ID,
         });
         expect(executionStatus).to.be('active');
       });
 
       it('should find the created rule with correct information about the consumer', async () => {
-        const match = await alertingApi.findInRules(roleAuthc, ruleId);
+        const match = await alertingApi.findInRules(roleAuthc, ruleId, SPACE_ID);
         expect(match).not.to.be(undefined);
         expect(match.consumer).to.be(expectedConsumer);
       });
@@ -204,7 +218,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           'observability.rules.custom_threshold'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.uuid', ruleId);
-        expect(resp.hits.hits[0]._source).property('kibana.space_ids').contain('default');
+        expect(resp.hits.hits[0]._source).property('kibana.space_ids').contain(SPACE_ID);
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.tags')
           .contain('observability');
@@ -245,7 +259,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const { protocol, hostname, port } = kbnTestConfig.getUrlPartsWithStrippedDefaultPort();
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
-          `${protocol}://${hostname}${port ? `:${port}` : ''}/app/observability/alerts/${alertId}`
+          `${protocol}://${hostname}${
+            port ? `:${port}` : ''
+          }/s/${SPACE_ID}/app/observability/alerts/${alertId}`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
           `Average system.cpu.user.pct is 250%, above the threshold of 50%. (duration: 5 mins, data view: ${DATA_VIEW_NAME})`
@@ -255,10 +271,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const parsedViewInAppUrl = parseSearchParams<LogsExplorerLocatorParsedParams>(
           new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
         );
+        const viewInAppUrlPathName = new URL(resp.hits.hits[0]._source?.viewInAppUrl || '')
+          .pathname;
 
-        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOGS_EXPLORER_LOCATOR');
+        expect(viewInAppUrlPathName).contain(`/s/${SPACE_ID}/app/r`);
+
+        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('DISCOVER_APP_LOCATOR');
         expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
-          dataset: DATA_VIEW_ID,
+          dataViewId: DATA_VIEW_ID,
+          dataViewSpec: DATA_VIEW_ID,
           timeRange: { to: 'now' },
           query: { query: '', language: 'kuery' },
           filters: [],

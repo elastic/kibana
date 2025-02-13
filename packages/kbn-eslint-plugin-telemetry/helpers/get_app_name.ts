@@ -8,46 +8,23 @@
  */
 
 import { camelCase } from 'lodash';
-import path from 'path';
+import { basename, parse } from 'path';
 import { getPkgDirMap } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
 
+const APP_ALIASES: Record<string, string> = {
+  observability: 'o11y',
+};
+
 export function getAppName(fileName: string, cwd: string) {
-  const { dir } = path.parse(fileName);
+  const { dir } = parse(fileName);
   const relativePathToFile = dir.replace(cwd, '');
 
-  const packageDirs = Array.from(
-    Array.from(getPkgDirMap(REPO_ROOT).values()).reduce((acc, currentDir) => {
-      const topDirectory = currentDir.normalizedRepoRelativeDir.split('/')[0];
+  const allPaths = Array.from(getPkgDirMap(REPO_ROOT).values())
+    .map((module) => module.directory.replace(REPO_ROOT, ''))
+    .sort((a, b) => b.length - a.length);
 
-      if (topDirectory) {
-        acc.add(topDirectory);
-      }
-
-      return acc;
-    }, new Set<string>())
-  );
-
-  const relativePathArray = relativePathToFile.split('/');
-
-  const appName = camelCase(
-    packageDirs.reduce((acc, repoPath) => {
-      if (!relativePathArray[1]) return '';
-
-      if (relativePathArray[1] === 'x-pack') {
-        if (relativePathArray[3] === 'observability_solution') {
-          return relativePathArray[4];
-        }
-        return relativePathArray[3];
-      }
-
-      if (relativePathArray[1].includes(repoPath)) {
-        return relativePathArray[2];
-      }
-
-      return acc;
-    }, '')
-  );
-
-  return appName === 'observability' ? 'o11y' : appName;
+  const moduleDir = allPaths.find((path) => relativePathToFile.startsWith(path)) ?? '';
+  const moduleBasename = camelCase(basename(moduleDir));
+  return APP_ALIASES[moduleBasename] ?? moduleBasename;
 }

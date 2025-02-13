@@ -69,6 +69,7 @@ export const command = {
     const validate = args.getBooleanValue('validate') ?? true;
     const verbose = args.getBooleanValue('verbose') ?? false;
     const quiet = args.getBooleanValue('quiet') ?? false;
+    const reactVersion = process.env.REACT_18 ? '18' : '17';
     const disableNXCache = !(args.getBooleanValue('cache') ?? true);
 
     const vscodeConfig =
@@ -128,6 +129,7 @@ export const command = {
         verbose,
         disableNXCache,
         quiet,
+        reactVersion,
       });
       log.success('shared bundles built');
     });

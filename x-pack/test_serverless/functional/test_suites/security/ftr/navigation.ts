@@ -49,7 +49,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.search.hideSearch();
       await headerPage.waitUntilLoadingHasFinished();
 
-      await expect(await browser.getCurrentUrl()).contain('app/security/dashboards');
+      expect(await browser.getCurrentUrl()).contain('app/security/dashboards');
     });
 
     it('shows cases in sidebar navigation', async () => {
@@ -73,6 +73,18 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         expect(await browser.getCurrentUrl()).contain('/app/security/cases');
         await testSubjects.existOrFail('cases-all-title');
       });
+    });
+
+    it('navigates to maintenance windows', async () => {
+      await svlCommonPage.loginAsAdmin();
+      await svlSecNavigation.navigateToLandingPage();
+      await svlCommonNavigation.sidenav.openSection('category-management');
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'stack_management' });
+      await svlCommonNavigation.sidenav.clickPanelLink('management:maintenanceWindows');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
+        'Stack Management',
+        'Maintenance Windows',
+      ]);
     });
   });
 }

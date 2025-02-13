@@ -187,7 +187,7 @@ export default ({ getService }: FtrProviderContext) => {
       const model1 = getTestModel(modelIdSpace1, 'classification', dfaJobId1);
       await ml.api.createTrainedModelES(model1.model_id, model1.body);
 
-      // create trained model not linked to job, it should have the current space
+      // create trained model not linked to job, it should have * space after sync
       const model2 = getTestModel(modelIdSpace2, 'classification');
       await ml.api.createTrainedModelES(model2.model_id, model2.body);
 
@@ -199,7 +199,7 @@ export default ({ getService }: FtrProviderContext) => {
       await runSyncRequest(USER.ML_POWERUSER_ALL_SPACES, 200);
 
       await ml.api.assertTrainedModelSpaces(modelIdSpace1, [idSpace1, idSpace2]);
-      await ml.api.assertTrainedModelSpaces(modelIdSpace2, [idSpace1]);
+      await ml.api.assertTrainedModelSpaces(modelIdSpace2, ['*']);
     });
   });
 };

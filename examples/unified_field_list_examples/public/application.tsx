@@ -18,11 +18,11 @@ import { UnifiedFieldListExampleApp } from './example_app';
 export const renderApp = (
   core: CoreStart,
   deps: AppPluginStartDependencies,
-  { element, theme$ }: AppMountParameters
+  { element }: AppMountParameters
 ) => {
   ReactDOM.render(
     <I18nProvider>
-      <KibanaThemeProvider theme={{ theme$ }}>
+      <KibanaThemeProvider {...core}>
         <UnifiedFieldListExampleApp
           services={{
             core,

@@ -30,23 +30,11 @@
         ],
         "signature": [
           "(coreStart: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-server",
-            "scope": "server",
-            "docId": "kibKbnCoreLifecycleServerPluginApi",
-            "section": "def-server.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ", name: string, id: string | undefined, type: string) => ",
-          {
-            "pluginId": "@kbn/core-execution-context-common",
-            "scope": "common",
-            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-            "section": "def-common.KibanaExecutionContext",
-            "text": "KibanaExecutionContext"
-          }
+          "KibanaExecutionContext"
         ],
-        "path": "x-pack/packages/ml/route_utils/src/create_execution_context.ts",
+        "path": "x-pack/platform/packages/private/ml/route_utils/src/create_execution_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -60,15 +48,9 @@
               "Kibana CoreStart"
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "server",
-                "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-server.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
-            "path": "x-pack/packages/ml/route_utils/src/create_execution_context.ts",
+            "path": "x-pack/platform/packages/private/ml/route_utils/src/create_execution_context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -85,7 +67,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/ml/route_utils/src/create_execution_context.ts",
+            "path": "x-pack/platform/packages/private/ml/route_utils/src/create_execution_context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -102,7 +84,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/route_utils/src/create_execution_context.ts",
+            "path": "x-pack/platform/packages/private/ml/route_utils/src/create_execution_context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -119,7 +101,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/ml/route_utils/src/create_execution_context.ts",
+            "path": "x-pack/platform/packages/private/ml/route_utils/src/create_execution_context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

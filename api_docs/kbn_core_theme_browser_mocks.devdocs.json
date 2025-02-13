@@ -14,7 +14,7 @@
         "tags": [],
         "label": "themeServiceMock",
         "description": [],
-        "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+        "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -28,7 +28,7 @@
             "signature": [
               "() => jest.Mocked<ThemeServiceContract>"
             ],
-            "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+            "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -43,24 +43,12 @@
             "description": [],
             "signature": [
               "(theme?: ",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               ") => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              },
+              "ThemeServiceSetup",
               ">"
             ],
-            "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+            "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -73,15 +61,9 @@
                 "label": "theme",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-theme-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreThemeBrowserPluginApi",
-                    "section": "def-public.CoreTheme",
-                    "text": "CoreTheme"
-                  }
+                  "CoreTheme"
                 ],
-                "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+                "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -96,24 +78,12 @@
             "description": [],
             "signature": [
               "(theme?: ",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               ") => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              },
+              "ThemeServiceSetup",
               ">"
             ],
-            "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+            "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -126,15 +96,9 @@
                 "label": "theme",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-theme-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreThemeBrowserPluginApi",
-                    "section": "def-public.CoreTheme",
-                    "text": "CoreTheme"
-                  }
+                  "CoreTheme"
                 ],
-                "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+                "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -149,15 +113,9 @@
             "description": [],
             "signature": [
               "() => ",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              }
+              "CoreTheme"
             ],
-            "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+            "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -172,26 +130,14 @@
             "description": [],
             "signature": [
               "(theme?: ",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               ") => ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               ">"
             ],
-            "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+            "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -204,15 +150,9 @@
                 "label": "theme",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-theme-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreThemeBrowserPluginApi",
-                    "section": "def-public.CoreTheme",
-                    "text": "CoreTheme"
-                  }
+                  "CoreTheme"
                 ],
-                "path": "packages/core/theme/core-theme-browser-mocks/src/theme_service.mock.ts",
+                "path": "src/core/packages/theme/browser-mocks/src/theme_service.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

@@ -45,7 +45,7 @@ export interface UpdateObjectsSpacesTestCase {
   spacesToRemove: string[];
 }
 
-const TYPE = 'sharedtype';
+const TYPE = 'index-pattern';
 const createRequest = ({ objects, spacesToAdd, spacesToRemove }: UpdateObjectsSpacesTestCase) => ({
   objects: objects.map(({ id }) => ({ type: TYPE, id })),
   spacesToAdd,

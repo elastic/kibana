@@ -7,7 +7,7 @@
 {kib} supports several ways to explore the data displayed in a dashboard more in depth:
 
 * The **query bar**, using KQL expressions by default.
-* The **Time range**, that allows you to display data only for the period that you want to focus on. You can set a global time range for the entire dashboard, or specify a custom time range for each panel.
+* The **time range**, that allows you to display data only for the period that you want to focus on. You can set a global time range for the entire dashboard, or specify a custom time range for each panel.
 * **Controls**, that dashboard creators can add to help viewers filter on specific values.
 * **Filter pills**, that you can add and combine by clicking on specific parts of the dashboard visualizations, or by defining conditions manually from the filter editor. The filter editor is a good alternative if you're not comfortable with using KQL expressions in the main query bar.
 * View the data of a panel and the requests used to build it.
@@ -15,6 +15,28 @@
 //You can combine the filters with any panel filter to display the data you want to see.
 
 This section shows the most common ways for you to filter dashboard data. For more information about {kib} and {es} filtering capabilities, refer to <<kibana-concepts-analysts,{kib} concepts>>.
+
+[float]
+=== Use filter pills
+
+Use filter pills to focus in on the specific data you want.
+
+[role="screenshot"]
+image::images/dashboard_filter_pills_8.15.0.png[Filter pills, width=50%]
+
+[float]
+==== Add pills by interacting with visualizations
+
+You can interact with some panel visualizations to explore specific data more in depth. Upon clicking, filter pills are added and applied to the entire dashboard, so that surrounding panels and visualizations also reflect your browsing.
+
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt93fcc34395a310d4/6750e7e9b09fe993fbc0824a/add-filter-pills-8.17.gif[Browsing a chart creates a filter dynamically]
+
+[float]
+==== Add pills using the filter editor
+
+As an alternative to the main query bar, you can filter dashboard data by defining individual conditions on specific fields and values, and by combining these conditions together in a filter pill.
+
+image::images/dashboard-filter-editor.png[Filter editor with 2 conditions]
 
 [float]
 === Filter dashboards using the KQL query bar
@@ -40,11 +62,11 @@ image::images/dashboard-global-time-range.png[Time range menu with multiple time
 
 **To apply a panel-level time range:**
 
-. Open the panel menu, then select *Settings*.
+. Hover over the panel and click image:dashboard/images/settings-icon-hover-action.png[Settings icon, width=3%]. The *Settings* flyout appears.
 
 . Turn on *Apply a custom time range*.
 
-. Enter the time range you want to view, then *Apply* it.
+. Enter the time range you want to view, then click *Apply*.
 
 **To view and edit the time range applied to a specific panel:**
 
@@ -66,7 +88,7 @@ Filter the data with one or more options that you select.
 
 . Select the available options.
 +
-The *Exists* query returns all documents that contain an indexed value for the field. 
+Selecting _Exists_ returns all documents that contain an indexed value for the field. 
 
 . Select how to filter the options.
 
@@ -113,30 +135,7 @@ Filter the data within a specified range of time.
 . To clear the specified values, click image:images/dashboard_controlsClearSelections_8.3.0.png[The icon to clear all specified values in the Range slider].
 
 [role="screenshot"]
-image::images/dashboard_timeSliderControl_8.7.0.gif[Time slider control]
-
-[float]
-=== Use filter pills
-
-Use filter pills to focus in on the specific data you want.
-
-[role="screenshot"]
-image::images/dashboard_filter_pills_8.15.0.png[Filter pills, width=50%]
-
-[float]
-==== Add pills by interacting with visualizations
-
-You can interact with some panel visualizations to explore specific data more in depth. Upon clicking, filter pills are added and applied to the entire dashboard, so that surrounding panels and visualizations also reflect your browsing.
-
-image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt3636aae815d783f9/66c467d346b3f438b396fafa/dashboard-filter-pills.gif[Browsing a chart creates a filter dynamically]
-
-[float]
-==== Add pills using the filter editor
-
-As an alternative to the main query bar, you can filter dashboard data by defining individual conditions on specific fields and values, and by combining these conditions together in a filter pill.
-
-image::images/dashboard-filter-editor.png[Filter editor with 2 conditions]
-
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt672f3aaadf9ea5a6/6750dd6c2452f972af0a88b4/dashboard_timeslidercontrol_8.17.0.gif[Time slider control]
 
 [float]
 [[download-csv]]
@@ -145,7 +144,7 @@ image::images/dashboard-filter-editor.png[Filter editor with 2 conditions]
 
 **View the data in visualizations and the requests that collect the data:**
 
-. Open the panel menu, then select **Inspect**.
+. Open the panel menu and select **Inspect**.
 
 . View and download the panel data.
 
@@ -181,7 +180,7 @@ You can display dashboards in full screen mode to gain visual space and view or 
 
 image::images/dashboard-full-screen.png[A dashboard in full screen mode]
 
-If you need to focus on a particular panel, you can maximize it. To do that, open the panel menu, and select **More** > **Maximize**. You can minimize it again the same way.
+If you need to focus on a particular panel, you can maximize it by opening the panel menu and selecting **Maximize**. You can minimize it again the same way.
 
 TIP: When sharing a dashboard with a link while a panel is in maximized view, the generated link will also open the dashboard on the same maximized panel view.
 

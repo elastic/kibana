@@ -1,0 +1,175 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getRulePreviewLensAttributes should render without extra options 1`] = `
+Object {
+  "description": "",
+  "references": Array [],
+  "state": Object {
+    "adHocDataViews": Object {
+      "mockInternalReferenceId": Object {
+        "allowNoIndex": false,
+        "fieldAttrs": Object {},
+        "fieldFormats": Object {},
+        "id": "mockInternalReferenceId",
+        "name": ".preview.alerts-security.alerts-undefined",
+        "runtimeFieldMap": Object {},
+        "sourceFilters": Array [],
+        "timeFieldName": "@timestamp",
+        "title": ".preview.alerts-security.alerts-undefined",
+      },
+    },
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "mockLayerId": Object {
+            "columnOrder": Array [
+              "mockColumnTopValuesId",
+              "mockColumnTimestampId",
+              "mockColumnCountOfRecordsId",
+            ],
+            "columns": Object {
+              "mockColumnCountOfRecordsId": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of records",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "scale": "ratio",
+                "sourceField": "___records___",
+              },
+              "mockColumnTimestampId": Object {
+                "dataType": "date",
+                "isBucketed": true,
+                "label": "@timestamp",
+                "operationType": "date_histogram",
+                "params": Object {
+                  "dropPartials": false,
+                  "includeEmptyRows": true,
+                  "interval": "auto",
+                },
+                "scale": "interval",
+                "sourceField": "@timestamp",
+              },
+              "mockColumnTopValuesId": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top 10 values of event.category",
+                "operationType": "terms",
+                "params": Object {
+                  "exclude": Array [],
+                  "excludeIsRegex": false,
+                  "include": Array [],
+                  "includeIsRegex": false,
+                  "missingBucket": false,
+                  "orderBy": Object {
+                    "columnId": "mockColumnCountOfRecordsId",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "otherBucket": true,
+                  "parentFormat": Object {
+                    "id": "terms",
+                  },
+                  "size": 10,
+                },
+                "scale": "ordinal",
+                "sourceField": "event.category",
+              },
+            },
+            "incompleteColumns": Object {},
+            "sampling": 1,
+          },
+        },
+      },
+      "textBased": Object {
+        "layers": Object {},
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "field": "kibana.alert.rule.uuid",
+          "index": "mockInternalReferenceId",
+          "key": "kibana.alert.rule.uuid",
+          "negate": false,
+          "params": Object {
+            "query": undefined,
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "kibana.alert.rule.uuid": undefined,
+          },
+        },
+      },
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+    ],
+    "internalReferences": Array [
+      Object {
+        "id": "mockInternalReferenceId",
+        "name": "indexpattern-datasource-layer-mockLayerId",
+        "type": "index-pattern",
+      },
+    ],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "axisTitlesVisibilitySettings": Object {
+        "x": false,
+        "yLeft": false,
+        "yRight": true,
+      },
+      "layers": Array [
+        Object {
+          "accessors": Array [
+            "mockColumnCountOfRecordsId",
+          ],
+          "layerId": "mockLayerId",
+          "layerType": "data",
+          "position": "top",
+          "seriesType": "bar_stacked",
+          "showGridlines": false,
+          "splitAccessor": "mockColumnTopValuesId",
+          "xAccessor": "mockColumnTimestampId",
+        },
+      ],
+      "legend": Object {
+        "isVisible": false,
+        "legendStats": Array [
+          "currentAndLastValue",
+        ],
+        "position": "right",
+      },
+      "preferredSeriesType": "bar_stacked",
+      "title": "Empty XY chart",
+      "valueLabels": "hide",
+      "yTitle": "",
+    },
+  },
+  "title": "Rule preview",
+  "visualizationType": "lnsXY",
+}
+`;

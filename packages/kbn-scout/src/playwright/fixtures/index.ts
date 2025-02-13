@@ -7,20 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mergeTests } from '@playwright/test';
-
-import { scoutWorkerFixtures } from './worker';
-import { scoutTestFixtures } from './test';
-
-export const scoutCoreFixtures = mergeTests(scoutWorkerFixtures, scoutTestFixtures);
-
-export type {
-  EsArchiverFixture,
-  ScoutTestFixtures,
-  ScoutWorkerFixtures,
-  ScoutPage,
-  Client,
-  KbnClient,
-  KibanaUrl,
-  ToolingLog,
-} from './types';
+export * from './single_thread_fixtures';
+export * from './parallel_run_fixtures';

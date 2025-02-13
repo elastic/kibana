@@ -49,6 +49,12 @@ export async function cleanFleetIndices(esClient: Client) {
       ignore_unavailable: true,
       refresh: true,
     }),
+    esClient.deleteByQuery({
+      index: AGENT_ACTIONS_INDEX,
+      q: '*',
+      ignore_unavailable: true,
+      refresh: true,
+    }),
   ]);
 }
 

@@ -32,7 +32,7 @@
         "signature": [
           "\"home\""
         ],
-        "path": "packages/deeplinks/shared/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/shared/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -47,7 +47,7 @@
         "signature": [
           "\"home\""
         ],
-        "path": "packages/deeplinks/shared/deep_links.ts",
+        "path": "src/platform/packages/shared/deeplinks/shared/deep_links.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

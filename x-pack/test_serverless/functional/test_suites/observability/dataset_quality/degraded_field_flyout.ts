@@ -9,11 +9,12 @@ import expect from '@kbn/expect';
 import moment from 'moment';
 import { generateShortId, log, timerange } from '@kbn/apm-synthtrace-client';
 import {
+  ANOTHER_1024_CHARS,
+  CONSISTENT_TAGS,
+  MORE_THAN_1024_CHARS,
   createDegradedFieldsRecord,
   defaultNamespace,
   getInitialTestLogs,
-  ANOTHER_1024_CHARS,
-  MORE_THAN_1024_CHARS,
 } from './data';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { logsSynthMappings } from './custom_mappings/custom_synth_mappings';
@@ -55,8 +56,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const apmAppDataStreamName = `${type}-${apmAppDatasetName}-${defaultNamespace}`;
 
   describe('Degraded fields flyout', function () {
-    // see details: https://github.com/elastic/kibana/issues/202641
-    this.tags(['failsOnMKI']);
     describe('degraded field flyout open-close', () => {
       before(async () => {
         await synthtrace.index([
@@ -103,13 +102,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('testing root cause for ignored fields', () => {
+    describe('detecting root cause for ignored fields', () => {
       before(async () => {
         // Create custom component template
-        await synthtrace.createComponentTemplate(
-          customComponentTemplateName,
-          logsSynthMappings(degradedDatasetWithLimitsName)
-        );
+        await synthtrace.createComponentTemplate({
+          name: customComponentTemplateName,
+          mappings: logsSynthMappings(degradedDatasetName),
+        });
 
         // Create custom index template
         await esClient.indices.putIndexTemplate({
@@ -135,14 +134,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Install Nginx Integration and ingest logs for it
         await PageObjects.observabilityLogsExplorer.installPackage(nginxPkg);
 
-        // Create custom component template to avoid issues with LogsDB
-        await synthtrace.createComponentTemplate(
-          customComponentTemplateNameNginx,
-          logsNginxMappings(nginxAccessDatasetName)
-        );
+        // Create custom component template for Nginx to avoid issues with LogsDB
+        await synthtrace.createComponentTemplate({
+          name: customComponentTemplateNameNginx,
+          mappings: logsNginxMappings(nginxAccessDatasetName),
+        });
 
         await synthtrace.index([
-          // Ingest Degraded Logs with 25 fields
+          // Ingest Degraded Logs with 25 fields in degraded DataSet
           timerange(moment(to).subtract(count, 'minute'), moment(to))
             .interval('1m')
             .rate(1)
@@ -188,7 +187,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                     .timestamp(timestamp)
                 );
             }),
-          // Ingest Degraded Logs with 26 fields in Apm DataSet
+          // Ingest Degraded Logs with 27 fields in Apm DataSet
           timerange(moment(to).subtract(count, 'minute'), moment(to))
             .interval('1m')
             .rate(1)
@@ -207,6 +206,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                       'service.name': serviceName,
                       'trace.id': generateShortId(),
                       test_field: [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
+                      'event.ingested': new Date().toISOString(),
+                      // this works around a geoip limitation in CI
+                      tags: CONSISTENT_TAGS,
                     })
                     .timestamp(timestamp)
                 );
@@ -228,7 +230,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Set Limit of 26
         await PageObjects.datasetQuality.setDataStreamSettings(apmAppDataStreamName, {
-          'mapping.total_fields.limit': 25,
+          'mapping.total_fields.limit': 26,
         });
 
         await synthtrace.index([
@@ -280,7 +282,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                     .timestamp(timestamp)
                 );
             }),
-          // Ingest Degraded Logs with 27 fields in Apm APP DataSet
+          // Ingest Degraded Logs with 29 fields in Apm APP DataSet
           timerange(moment(to).subtract(count, 'minute'), moment(to))
             .interval('1m')
             .rate(1)
@@ -300,6 +302,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                       'trace.id': generateShortId(),
                       test_field: [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
                       'cloud.project.id': generateShortId(),
+                      // this works around a geoip limitation in CI
+                      tags: CONSISTENT_TAGS,
+                      'event.ingested': new Date().toISOString(),
                     })
                     .timestamp(timestamp)
                 );
@@ -331,13 +336,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }
         );
 
-        // Set Limit of 27
+        // Set Limit of 28
         await PageObjects.datasetQuality.setDataStreamSettings(
           PageObjects.datasetQuality.generateBackingIndexNameWithoutVersion({
             dataset: apmAppDatasetName,
           }) + '-000002',
           {
-            'mapping.total_fields.limit': 27,
+            'mapping.total_fields.limit': 28,
           }
         );
 
@@ -390,7 +395,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                     .timestamp(timestamp)
                 );
             }),
-          // Ingest Degraded Logs with 27 fields in Apm APP DataSet
+          // Ingest Degraded Logs with 29 fields in Apm APP DataSet
           timerange(moment(to).subtract(count, 'minute'), moment(to))
             .interval('1m')
             .rate(1)
@@ -410,6 +415,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                       'trace.id': generateShortId(),
                       test_field: [MORE_THAN_1024_CHARS, ANOTHER_1024_CHARS],
                       'cloud.project.id': generateShortId(),
+                      'event.ingested': new Date().toISOString(),
+                      // this works around a geoip limitation in CI
+                      tags: CONSISTENT_TAGS,
                     })
                     .timestamp(timestamp)
                 );
@@ -472,7 +480,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           // Check value in Table
           const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
-          const countColumn = table['Docs count'];
+          const countColumn = table[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
           expect(await countColumn.getCellTexts()).to.eql(['5', '5', '5']);
 
           // Check value in Flyout
@@ -492,7 +500,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           // Check value in Table
           const newTable = await PageObjects.datasetQuality.parseDegradedFieldTable();
-          const newCountColumn = newTable['Docs count'];
+          const newCountColumn = newTable[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
           expect(await newCountColumn.getCellTexts()).to.eql(['15', '15', '5', '5']);
 
           // Check value in Flyout

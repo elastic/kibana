@@ -18,6 +18,6 @@ export {
   runCheckFtrConfigsCli,
   DedicatedTaskRunner,
 } from './lib';
-export { runFtrCli } from './cli';
+export * from './cli';
 export * from './lib/docker_servers';
 export * from './public_types';
