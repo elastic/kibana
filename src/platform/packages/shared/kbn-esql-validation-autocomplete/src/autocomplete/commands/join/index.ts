@@ -9,7 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { type ESQLAstItem, type ESQLCommand } from '@kbn/esql-ast';
-import { ESQLCommand } from '@kbn/esql-ast/src/types';
 import type { ESQLCallbacks } from '../../../shared/types';
 import {
   CommandBaseDefinition,
