@@ -38,6 +38,7 @@ export function DifferentialTopNFunctionsView() {
     pageIndex = 0,
     comparisonSortDirection,
     comparisonSortField,
+    searchFunctionName = '',
   } = query;
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
@@ -126,10 +127,10 @@ export function DifferentialTopNFunctionsView() {
 
   const isNormalizedByTime = normalizationMode === NormalizationMode.Time;
 
-  function handleOnFrameClick(functionName: string) {
+  function handleOnFrameClick(value: string) {
     profilingRouter.push('/flamegraphs/flamegraph', {
       path: {},
-      query: { ...query, searchText: functionName },
+      query: { ...query, searchText: value },
     });
   }
 
@@ -144,6 +145,13 @@ export function DifferentialTopNFunctionsView() {
     profilingRouter.push('/functions/differential', {
       path: {},
       query: { ...query, ...sorting },
+    });
+  }
+
+  function handleSearchFunctionNameChange(value: string) {
+    profilingRouter.push('/functions/differential', {
+      path: {},
+      query: { ...query, searchFunctionName: value },
     });
   }
 
@@ -209,6 +217,8 @@ export function DifferentialTopNFunctionsView() {
               sortDirection={sortDirection}
               sortField={sortField}
               totalSeconds={totalSeconds}
+              searchFunctionName={searchFunctionName}
+              onSearchFunctionNameChange={handleSearchFunctionNameChange}
             />
           </AsyncComponent>
         </EuiFlexItem>

@@ -6,17 +6,23 @@
  */
 import { EuiFieldSearch } from '@elastic/eui';
 import { debounce } from 'lodash';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 interface Props {
+  value: string;
   onChange: (functionName: string) => void;
 }
 
-export function SearchFunctionsInput({ onChange }: Props) {
-  const [searchQuery, setSearchQuery] = useState('');
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const setValueDebounced = useCallback(debounce(onChange, 300), [onChange]);
+export function SearchFunctionsInput({ value, onChange }: Props) {
+  const [searchQuery, setSearchQuery] = useState(value);
+  const debouncedOnChange = useMemo(() => debounce(onChange, 500), [onChange]);
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchQuery(e.target.value);
+      debouncedOnChange(e.target.value);
+    },
+    [debouncedOnChange]
+  );
 
   return (
     <EuiFieldSearch
@@ -24,10 +30,7 @@ export function SearchFunctionsInput({ onChange }: Props) {
       placeholder="Search functions by name"
       fullWidth={true}
       value={searchQuery}
-      onChange={(e) => {
-        setSearchQuery(e.target.value);
-        setValueDebounced(e.target.value);
-      }}
+      onChange={handleSearchChange}
     />
   );
 }

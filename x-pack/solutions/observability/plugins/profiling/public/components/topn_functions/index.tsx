@@ -52,6 +52,8 @@ interface Props {
   onChangeSort: (sorting: EuiDataGridSorting['columns'][0]) => void;
   dataTestSubj?: string;
   isEmbedded?: boolean;
+  searchFunctionName: string;
+  onSearchFunctionNameChange: (functionName: string) => void;
 }
 
 export const TopNFunctionsGrid = ({
@@ -72,8 +74,9 @@ export const TopNFunctionsGrid = ({
   onChangeSort,
   dataTestSubj = 'topNFunctionsGrid',
   isEmbedded = false,
+  searchFunctionName,
+  onSearchFunctionNameChange,
 }: Props) => {
-  const [searchQuery, setSearchQuery] = useState('');
   const [selectedRow, setSelectedRow] = useState<IFunctionRow | undefined>();
   const trackProfilingEvent = useUiTracker({ app: 'profiling' });
   const calculateImpactEstimates = useCalculateImpactEstimate();
@@ -95,14 +98,14 @@ export const TopNFunctionsGrid = ({
       topNFunctions,
       totalSeconds,
       calculateImpactEstimates,
-      functionNameSearchQuery: searchQuery,
+      functionNameSearchQuery: searchFunctionName,
     });
   }, [
     baselineScaleFactor,
     calculateImpactEstimates,
     comparisonScaleFactor,
     comparisonTopNFunctions,
-    searchQuery,
+    searchFunctionName,
     topNFunctions,
     totalSeconds,
   ]);
@@ -304,7 +307,7 @@ export const TopNFunctionsGrid = ({
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <SearchFunctionsInput onChange={setSearchQuery} />
+        <SearchFunctionsInput onChange={onSearchFunctionNameChange} value={searchFunctionName} />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiDataGrid

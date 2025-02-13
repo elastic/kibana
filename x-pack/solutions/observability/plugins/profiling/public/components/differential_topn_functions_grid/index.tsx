@@ -92,6 +92,8 @@ interface Props {
   comparisonSortField: TopNComparisonFunctionSortField;
   totalSeconds: number;
   comparisonTotalSeconds: number;
+  searchFunctionName: string;
+  onSearchFunctionNameChange: (functionName: string) => void;
 }
 
 export function DifferentialTopNFunctionsGrid({
@@ -109,8 +111,9 @@ export function DifferentialTopNFunctionsGrid({
   sortDirection,
   sortField,
   totalSeconds,
+  searchFunctionName,
+  onSearchFunctionNameChange,
 }: Props) {
-  const [searchQuery, setSearchQuery] = useState('');
   const theme = useEuiTheme();
   const calculateImpactEstimates = useCalculateImpactEstimate();
   const [selectedFrame, setSelectedFrame] = useState<SelectedFrame | undefined>();
@@ -154,7 +157,7 @@ export function DifferentialTopNFunctionsGrid({
         calculateImpactEstimates,
         topNFunctions: base,
         totalSeconds,
-        functionNameSearchQuery: searchQuery,
+        functionNameSearchQuery: searchFunctionName,
       }),
       comparisonRows: getFunctionsRows({
         baselineScaleFactor,
@@ -163,7 +166,7 @@ export function DifferentialTopNFunctionsGrid({
         comparisonTopNFunctions: base,
         topNFunctions: comparison,
         totalSeconds: comparisonTotalSeconds,
-        functionNameSearchQuery: searchQuery,
+        functionNameSearchQuery: searchFunctionName,
       }),
     };
   }, [
@@ -173,7 +176,7 @@ export function DifferentialTopNFunctionsGrid({
     comparison,
     comparisonScaleFactor,
     comparisonTotalSeconds,
-    searchQuery,
+    searchFunctionName,
     totalSeconds,
   ]);
 
@@ -240,7 +243,7 @@ export function DifferentialTopNFunctionsGrid({
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
-        <SearchFunctionsInput onChange={setSearchQuery} />
+        <SearchFunctionsInput onChange={onSearchFunctionNameChange} value={searchFunctionName} />
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiDataGrid

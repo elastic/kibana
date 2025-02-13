@@ -18,7 +18,15 @@ import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 
 export function TopNFunctionsView() {
   const { query } = useProfilingParams('/functions/topn');
-  const { rangeFrom, rangeTo, kuery, sortDirection, sortField, pageIndex = 0 } = query;
+  const {
+    rangeFrom,
+    rangeTo,
+    kuery,
+    sortDirection,
+    sortField,
+    pageIndex = 0,
+    searchFunctionName = '',
+  } = query;
 
   const timeRange = useTimeRange({ rangeFrom, rangeTo });
 
@@ -42,10 +50,10 @@ export function TopNFunctionsView() {
 
   const profilingRouter = useProfilingRouter();
 
-  function handleOnFrameClick(functionName: string) {
+  function handleOnFrameClick(value: string) {
     profilingRouter.push('/flamegraphs/flamegraph', {
       path: {},
-      query: { ...query, searchText: functionName },
+      query: { ...query, searchText: value },
     });
   }
 
@@ -67,6 +75,13 @@ export function TopNFunctionsView() {
     });
   }
 
+  function handleSearchFunctionNameChange(value: string) {
+    profilingRouter.push('/functions/topn', {
+      path: {},
+      query: { ...query, searchFunctionName: value },
+    });
+  }
+
   return (
     <>
       <EuiFlexGroup direction="column">
@@ -84,6 +99,8 @@ export function TopNFunctionsView() {
                   sortField={sortField}
                   sortDirection={sortDirection}
                   onChangeSort={handleSortChange}
+                  searchFunctionName={searchFunctionName}
+                  onSearchFunctionNameChange={handleSearchFunctionNameChange}
                 />
               </AsyncComponent>
             </EuiFlexItem>
