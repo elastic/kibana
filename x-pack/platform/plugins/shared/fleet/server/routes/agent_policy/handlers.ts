@@ -323,7 +323,7 @@ export const getAutoUpgradeAgentsStatusHandler: FleetRequestHandler<
     .listAgents({
       showInactive: false,
       perPage: 0,
-      kuery: `${AGENTS_PREFIX}.policy_id:"${request.params.agentPolicyId}" AND ${AGENTS_PREFIX}.upgrade_details.state:"UPG_FAILED"`, // UPG_FAILED
+      kuery: `${AGENTS_PREFIX}.policy_id:"${request.params.agentPolicyId}" AND ${AGENTS_PREFIX}.upgrade_details.state:"UPG_FAILED"`,
       aggregations: {
         versions: {
           terms: {
@@ -343,13 +343,6 @@ export const getAutoUpgradeAgentsStatusHandler: FleetRequestHandler<
           })
       );
     });
-
-  // TODO remove
-  currentVersionsMap['8.16.3'] = {
-    version: '8.16.3',
-    agents: 0,
-    failedAgents: 1,
-  };
 
   const body: GetAutoUpgradeAgentsStatusResponse = {
     currentVersions: Object.values(currentVersionsMap),
