@@ -13,7 +13,6 @@ import { TestProviders } from '../../../../common/mock';
 import type { EuiHealthProps } from '@elastic/eui';
 import { EuiHealth } from '@elastic/eui';
 
-import { euiThemeVars } from '@kbn/ui-theme';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreLevel } from '.';
 import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
@@ -36,10 +35,9 @@ describe('RiskScore', () => {
     );
 
     expect(container).toHaveTextContent(RiskSeverity.Critical);
-
     expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
       expect.objectContaining({ color: SEVERITY_COLOR.critical }),
-      context
+      {}
     );
   });
 
@@ -98,7 +96,8 @@ describe('RiskScore', () => {
     expect(container).toHaveTextContent(RiskSeverity.Unknown);
 
     expect(EuiHealth as jest.Mock).toHaveBeenLastCalledWith(
-      expect.objectContaining({ color: euiThemeVars.euiColorMediumShade }),
+      expect.objectContaining({ color: '#aaa' }), // TODO: update with new severity palette agreement.
+      // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
       context
     );
   });
