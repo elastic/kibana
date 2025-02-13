@@ -23,10 +23,12 @@ import {
   TRANSACTION_DURATION_FIELD,
   DataTableRecord,
   getFieldValue,
+  INDEX_FIELD,
 } from '@kbn/discover-utils';
 import { TraceDocument } from '@kbn/discover-utils/src';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { testPatternAgainstAllowedList } from '@kbn/data-view-utils';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
 import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
 
@@ -148,8 +150,11 @@ const getFormattedValue = (name: FieldKey, rawValue: unknown, dataView: DataView
   return `${rawValue}`;
 };
 
+const isTracesIndex = testPatternAgainstAllowedList(['traces']);
+
 export const isTraceDocument = (row: DataTableRecord): row is TraceDocument =>
-  getFieldValue(row, DATASTREAM_TYPE_FIELD) === 'traces';
+  getFieldValue(row, DATASTREAM_TYPE_FIELD) === 'traces' ||
+  isTracesIndex(getFieldValue(row, INDEX_FIELD) as string);
 
 interface ResourceFieldsProps {
   row: DataTableRecord;

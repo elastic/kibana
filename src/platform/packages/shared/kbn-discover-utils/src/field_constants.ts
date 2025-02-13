@@ -52,3 +52,5 @@ export const DEGRADED_DOCS_FIELDS = [IGNORED_FIELD, IGNORED_FIELD_VALUES_FIELD] 
 export const ERROR_STACK_TRACE = 'error.stack_trace';
 export const ERROR_EXCEPTION_STACKTRACE_ABS_PATH = 'error.exception.stacktrace.abs_path';
 export const ERROR_LOG_STACKTRACE_ABS_PATH = 'error.log.stacktrace.abs_path';
+
+export const INDEX_FIELD = '_index';
