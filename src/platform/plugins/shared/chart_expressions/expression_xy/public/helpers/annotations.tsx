@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { Position } from '@elastic/charts';
-import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText, useEuiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { UseEuiTheme } from '@elastic/eui';
 import type {
@@ -150,7 +150,7 @@ function NumberIcon({ number }: { number: number }) {
       gutterSize="none"
       alignItems="center"
     >
-      <EuiText color="ghost" css={styles.xyAnnotationNumberIconText}>
+      <EuiText color="ghost" css={[useEuiFontSize('xxxs'), styles.xyAnnotationNumberIconText]}>
         {number < 10 ? number : `9+`}
       </EuiText>
     </EuiFlexGroup>
@@ -237,9 +237,7 @@ const styles = {
   xyAnnotationNumberIconText: ({ euiTheme }: UseEuiTheme) =>
     css({
       fontWeight: euiTheme.font.weight.medium,
-      fontSize: '9px',
       letterSpacing: '-.5px',
-      lineHeight: '11px',
     }),
   xyAnnotationIconRotate90: css({
     '&.xyAnnotationIcon_rotate90': {
