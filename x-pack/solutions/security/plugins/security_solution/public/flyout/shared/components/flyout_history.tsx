@@ -12,6 +12,7 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiPopover,
   EuiText,
   EuiTextColor,
@@ -62,7 +63,12 @@ export const FlyoutHistory: FC<HistoryProps> = memo(({ history }) => {
     () =>
       history.length > 0
         ? history.map((item, index) => {
-            return <FlyoutHistoryRow item={item} index={index} />;
+            return (
+              <>
+                <EuiHorizontalRule margin="none" />
+                <FlyoutHistoryRow item={item} index={index} />
+              </>
+            );
           })
         : [emptyHistoryMessage],
     [history, emptyHistoryMessage]

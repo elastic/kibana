@@ -35,6 +35,8 @@ import {
 } from './test_ids';
 import { HostPanelKey, UserPanelKey } from '../../entity_details/shared/constants';
 
+const MAX_WIDTH = 300; // px
+
 export interface FlyoutHistoryRowProps {
   /**
    * Flyout item to display
@@ -185,6 +187,7 @@ export const GenericHistoryRow: FC<GenericHistoryRowProps> = memo(
         icon={icon}
         css={css`
           align-items: flex-start;
+          padding: ${euiTheme.size.s} ${euiTheme.size.m};
         `}
         data-test-subj={`${index}-${dataTestSubj ?? GENERIC_HISTORY_ROW_TEST_ID}`}
       >
@@ -200,7 +203,16 @@ export const GenericHistoryRow: FC<GenericHistoryRowProps> = memo(
               `}
             >{`${name}:`}</span>
             &nbsp;
-            <span>{title}</span>
+            <span
+              css={css`
+                max-width: ${MAX_WIDTH}px;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                white-space: nowrap;
+              `}
+            >
+              {title}
+            </span>
           </EuiFlexItem>
           <EuiFlexItem
             css={css`
