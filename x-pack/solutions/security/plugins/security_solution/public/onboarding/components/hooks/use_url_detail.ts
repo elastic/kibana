@@ -20,13 +20,13 @@ const setHash = (cardId: OnboardingCardId | null) => {
   history.replaceState(null, '', cardId == null ? ' ' : `#${cardId}`);
 };
 
-const getTopicPath = (topicId: OnboardingTopicId) =>
-  topicId !== OnboardingTopicId.default ? topicId : '';
-
-const getCardHash = (cardId: OnboardingCardId | null) => (cardId ? `#${cardId}` : '');
+const getUrlDetail = (topicId: OnboardingTopicId, cardId: OnboardingCardId | null): string => {
+  return `${topicId !== OnboardingTopicId.default ? topicId : ''}${cardId ? `#${cardId}` : ''}`;
+};
 
 /**
  * This hook manages the expanded card id state in the LocalStorage and the hash in the URL.
+ * The "urlDetail" is the combination of the topicId as the path fragment followed cardId in the hash (#) parameter, in the URL
  */
 export const useUrlDetail = () => {
   const { spaceId, telemetry } = useOnboardingContext();
@@ -35,26 +35,26 @@ export const useUrlDetail = () => {
 
   const { navigateTo } = useNavigateTo();
 
-  const navigateToPath = useCallback(
-    (path?: string | null) => {
-      navigateTo({ deepLinkId: SecurityPageName.landing, path: path || undefined });
+  const navigateToDetail = useCallback(
+    (detail?: string | null) => {
+      navigateTo({ deepLinkId: SecurityPageName.landing, path: detail || undefined });
     },
     [navigateTo]
   );
 
   const setTopic = useCallback(
     (newTopicId: OnboardingTopicId) => {
-      const path = newTopicId === OnboardingTopicId.default ? null : newTopicId;
-      setStoredUrlDetail(path);
-      navigateToPath(path);
+      const detail = newTopicId === OnboardingTopicId.default ? null : newTopicId;
+      setStoredUrlDetail(detail);
+      navigateToDetail(detail);
     },
-    [setStoredUrlDetail, navigateToPath]
+    [setStoredUrlDetail, navigateToDetail]
   );
 
   const setCard = useCallback(
     (newCardId: OnboardingCardId | null) => {
       setHash(newCardId);
-      setStoredUrlDetail(`${getTopicPath(topicId)}${getCardHash(newCardId)}` || null);
+      setStoredUrlDetail(getUrlDetail(topicId, newCardId) || null);
       if (newCardId != null) {
         telemetry.reportCardOpen(newCardId);
       }
@@ -62,7 +62,7 @@ export const useUrlDetail = () => {
     [setStoredUrlDetail, topicId, telemetry]
   );
 
-  return { topicId, setTopic, setCard, navigateToPath, storedUrlDetail, setStoredUrlDetail };
+  return { topicId, setTopic, setCard, navigateToDetail, storedUrlDetail, setStoredUrlDetail };
 };
 
 interface UseSyncUrlDetailsParams {
@@ -74,7 +74,7 @@ interface UseSyncUrlDetailsParams {
  */
 export const useSyncUrlDetails = ({ pathTopicId, hashCardId }: UseSyncUrlDetailsParams) => {
   const { config, telemetry } = useOnboardingContext();
-  const { storedUrlDetail, setStoredUrlDetail, navigateToPath, setTopic } = useUrlDetail();
+  const { storedUrlDetail, setStoredUrlDetail, navigateToDetail, setTopic } = useUrlDetail();
 
   const onComplete = useCallback((cloudTopicId: OnboardingTopicId | null) => {
     if (cloudTopicId && config.has(cloudTopicId)) {
@@ -106,7 +106,7 @@ export const useSyncUrlDetails = ({ pathTopicId, hashCardId }: UseSyncUrlDetails
         setStoredUrlDetail(null);
         return;
       }
-      navigateToPath(storedUrlDetail);
+      navigateToDetail(storedUrlDetail);
     }
 
     // If nothing is stored and nothing is in the URL, let's see if we have a cloud topic (first time onboarding)

@@ -24,12 +24,7 @@ export const useCloudTopicId = ({ onComplete }: UseCloudTopicIdParams) => {
     setIsLoading(true);
     try {
       const data = await http.get<CloudDataAttributes>(URL, { version: '1' });
-      const { security } = data.onboardingData ?? {};
-      if (
-        security?.useCase === 'siem' &&
-        security?.migration?.value &&
-        security?.migration?.type === 'splunk'
-      ) {
+      if (isSiemMigrationsCloudOnboarding(data)) {
         onComplete(OnboardingTopicId.siemMigrations);
       } else {
         onComplete(null);
@@ -42,4 +37,13 @@ export const useCloudTopicId = ({ onComplete }: UseCloudTopicIdParams) => {
   }, [onComplete, http]);
 
   return { start, isLoading };
+};
+
+const isSiemMigrationsCloudOnboarding = (data: CloudDataAttributes) => {
+  const { security } = data.onboardingData ?? {};
+  return (
+    security?.useCase === 'siem' &&
+    security?.migration?.value &&
+    security?.migration?.type === 'splunk'
+  );
 };
