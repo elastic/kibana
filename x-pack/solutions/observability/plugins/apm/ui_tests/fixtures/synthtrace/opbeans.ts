@@ -9,8 +9,6 @@ import { apm, timerange } from '@kbn/apm-synthtrace-client';
 export function opbeans({ from, to }: { from: number; to: number }) {
   const range = timerange(from, to);
 
-  console.log('Staaaaaaart fixture');
-
   const opbeansJava = apm
     .service({
       name: 'opbeans-java',
