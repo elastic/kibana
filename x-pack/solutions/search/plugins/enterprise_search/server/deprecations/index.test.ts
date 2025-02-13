@@ -249,14 +249,14 @@ describe('getEnterpriseSearchPre8IndexDeprecations', () => {
       '/internal/enterprise_search/deprecations/set_enterprise_search_indices_read_only'
     );
     expect(deprecations[0].title).toMatch('Pre 8.x Enterprise Search indices compatibility');
-    expect(deprecations[0].message['content']).toContain(
+    expect(deprecations[0].message.content).toContain(
       'The following indices are found to be incompatible for upgrade'
     );
-    expect(deprecations[0].message['content']).toContain('.ent-search-index_without_datastream');
-    expect(deprecations[0].message['content']).toContain(
+    expect(deprecations[0].message.content).toContain('.ent-search-index_without_datastream');
+    expect(deprecations[0].message.content).toContain(
       'The following data streams are found to be incompatible for upgrade'
     );
-    expect(deprecations[0].message['content']).toContain('.ent-search-with_data_stream');
+    expect(deprecations[0].message.content).toContain('.ent-search-with_data_stream');
   });
 
   it('can register an index without data stream deprecations that need to be set to read only', async () => {
@@ -280,13 +280,13 @@ describe('getEnterpriseSearchPre8IndexDeprecations', () => {
       '/internal/enterprise_search/deprecations/set_enterprise_search_indices_read_only'
     );
     expect(deprecations[0].title).toMatch('Pre 8.x Enterprise Search indices compatibility');
-    expect(deprecations[0].message['content']).toContain(
+    expect(deprecations[0].message.content).toContain(
       'The following indices are found to be incompatible for upgrade'
     );
-    expect(deprecations[0].message['content']).toContain('.ent-search-index_without_datastream');
-    expect(deprecations[0].message['content']).not.toContain(
+    expect(deprecations[0].message.content).toContain('.ent-search-index_without_datastream');
+    expect(deprecations[0].message.content).not.toContain(
       'The following data streams are found to be incompatible for upgrade'
     );
-    expect(deprecations[0].message['content']).not.toContain('.ent-search-with_data_stream');
+    expect(deprecations[0].message.content).not.toContain('.ent-search-with_data_stream');
   });
 });
