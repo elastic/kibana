@@ -31,6 +31,7 @@ const legendItems: LegendItem[] = [
     dataProviderId: 'draggable-legend-item-3207fda7-d008-402a-86a0-8ad632081bad-event_dataset-flow',
     field: 'event.dataset',
     value: 'flow',
+    scopeId: 'test',
   },
   {
     color: '#2B70F7',
@@ -38,6 +39,7 @@ const legendItems: LegendItem[] = [
       'draggable-legend-item-83f6c824-811d-4ec8-b373-eba2b0de6398-event_dataset-suricata_eve',
     field: 'event.dataset',
     value: 'suricata.eve',
+    scopeId: 'test',
   },
   {
     color: '#CE0060',
@@ -45,6 +47,7 @@ const legendItems: LegendItem[] = [
       'draggable-legend-item-ec57bb8f-82cd-4e07-bd38-1d11b3f0ee5f-event_dataset-traefik_access',
     field: 'event.dataset',
     value: 'traefik.access',
+    scopeId: 'test',
   },
   {
     color: '#38007E',
@@ -52,6 +55,7 @@ const legendItems: LegendItem[] = [
       'draggable-legend-item-25d5fcd6-87ba-46b5-893e-c655d7d504e3-event_dataset-esensor',
     field: 'event.dataset',
     value: 'esensor',
+    scopeId: 'test',
   },
 ];
 

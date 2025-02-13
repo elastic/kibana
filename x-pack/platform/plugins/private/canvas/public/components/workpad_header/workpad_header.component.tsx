@@ -177,7 +177,7 @@ export const WorkpadHeader: FC<Props> = ({
                     onClick={showEmbedPanel}
                     data-test-subj="canvas-add-from-library-button"
                   />,
-                  <EditorMenu addElement={addElement} />,
+                  <EditorMenu />,
                 ],
               }}
             </Toolbar>
