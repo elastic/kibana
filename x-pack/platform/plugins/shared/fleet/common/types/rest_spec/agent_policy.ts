@@ -106,7 +106,7 @@ export interface GetFullAgentManifestResponse {
 export type FetchAllAgentPoliciesOptions = Pick<
   ListWithKuery,
   'perPage' | 'kuery' | 'sortField' | 'sortOrder'
-> & { fields?: string[] };
+> & { fields?: string[]; spaceId?: string };
 
 export type FetchAllAgentPolicyIdsOptions = Pick<ListWithKuery, 'perPage' | 'kuery'> & {
   spaceId?: string;
