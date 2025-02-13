@@ -32,7 +32,7 @@ export function generateIngestPipeline(
             {
               script: {
                 source: `
-                  if (ctx.stream?.name != params.parentName) {
+                  if (ctx["stream.name"] != params.parentName) {
                     throw new IllegalArgumentException('stream.name is not set properly - did you send the document directly to a child stream instead of the main logs stream?');
                   }
                 `,
