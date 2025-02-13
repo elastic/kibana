@@ -65,7 +65,7 @@ export interface SimulationError {
 export type DocSimulationStatus = 'parsed' | 'partially_parsed' | 'failed';
 
 export interface SimulationDocReport {
-  detected_fields: Array<{ processor_id: string; field: string }>;
+  detected_fields: Array<{ processor_id: string; name: string }>;
   errors: SimulationError[];
   status: DocSimulationStatus;
   value: FlattenRecord;
@@ -137,11 +137,7 @@ export const simulateProcessing = async ({
   );
 
   /* 5. Extract valid detected fields asserting existing mapped fields from stream and ancestors */
-  const detectedFields = await computeDetectedFields(
-    processorsMetrics,
-    streamsClient,
-    params.path.name
-  );
+  const detectedFields = await computeDetectedFields(processorsMetrics, streamsClient, params);
 
   /* 6. Derive general insights and process final response body */
   return prepareSimulationResponse(docReports, processorsMetrics, detectedFields);
@@ -311,13 +307,18 @@ const conditionallyExecuteIngestSimulation = async (
 
   const simulationBody = prepareIngestSimulationBody(simulationData, params);
 
-  // TODO: We should be using scopedClusterClient.asCurrentUser.simulate.ingest() once Kibana updates to elasticsearch-js 8.17
-  const simulationResult: IngestSimulationResult =
-    await scopedClusterClient.asCurrentUser.transport.request({
+  let simulationResult: IngestSimulationResult;
+  try {
+    // TODO: We should be using scopedClusterClient.asCurrentUser.simulate.ingest() once Kibana updates to elasticsearch-js 8.17
+    simulationResult = await scopedClusterClient.asCurrentUser.transport.request({
       method: 'POST',
       path: `_ingest/_simulate`,
       body: simulationBody,
     });
+  } catch (error) {
+    // To prevent a race condition on simulation erros, this return early and delegates the error handling to the pipeline simulation
+    return null;
+  }
 
   const entryWithError = simulationResult.docs.find(isMappingFailure);
 
@@ -354,8 +355,8 @@ const computePipelineSimulationResult = (
 
     const diff = computeSimulationDocDiff(docResult, sampleDocs[id]._source);
 
-    diff.detected_fields.forEach(({ processor_id, field }) => {
-      processorsMap[processor_id].detected_fields.push(field);
+    diff.detected_fields.forEach(({ processor_id, name }) => {
+      processorsMap[processor_id].detected_fields.push(name);
     });
 
     errors.push(...diff.errors);
@@ -374,7 +375,10 @@ const computePipelineSimulationResult = (
     };
   });
 
-  const processorsMetrics = extractProcessorMetrics(processorsMap);
+  const processorsMetrics = extractProcessorMetrics({
+    processorsMap,
+    sampleSize: docReports.length,
+  });
 
   return { docReports, processorsMetrics };
 };
@@ -395,9 +399,15 @@ const initProcessorMetricsMap = (
   return Object.fromEntries(processorMetricsEntries);
 };
 
-const extractProcessorMetrics = (processorsMap: Record<string, ProcessorMetrics>) => {
+const extractProcessorMetrics = ({
+  processorsMap,
+  sampleSize,
+}: {
+  processorsMap: Record<string, ProcessorMetrics>;
+  sampleSize: number;
+}) => {
   return mapValues(processorsMap, (metrics) => {
-    const failureRate = metrics.failure_rate / 100;
+    const failureRate = metrics.failure_rate / sampleSize;
     const successRate = 1 - failureRate;
     const detected_fields = uniq(metrics.detected_fields);
     const errors = uniqBy(metrics.errors, (error) => error.message);
@@ -471,9 +481,10 @@ const computeSimulationDocDiff = (
     const addedFields = Object.keys(flattenObject(added));
     const updatedFields = Object.keys(flattenObject(updated));
 
-    const processorDetectedFields = [...addedFields, ...updatedFields].map((field) => ({
+    // Sort list to have deterministic list of results
+    const processorDetectedFields = [...addedFields, ...updatedFields].sort().map((name) => ({
       processor_id: nextDoc.processor_id,
-      field,
+      name,
     }));
 
     diffResult.detected_fields.push(...processorDetectedFields);
@@ -551,8 +562,9 @@ const getStreamFields = async (streamsClient: StreamsClient, streamName: string)
 const computeDetectedFields = async (
   processorsMetrics: Record<string, ProcessorMetrics>,
   streamsClient: StreamsClient,
-  streamName: string
+  params: ProcessingSimulationParams
 ): Promise<DetectedField[]> => {
+  const streamName = params.path.name;
   const fields = Object.values(processorsMetrics).flatMap((metrics) => metrics.detected_fields);
 
   const uniqueFields = uniq(fields);
@@ -563,6 +575,7 @@ const computeDetectedFields = async (
   }
 
   const streamFields = await getStreamFields(streamsClient, streamName);
+  const confirmedValidDetectedFields = computeMappingProperties(params.body.detected_fields ?? []);
 
   return uniqueFields.map((name) => {
     const existingField = streamFields[name];
@@ -570,7 +583,7 @@ const computeDetectedFields = async (
       return { name, ...existingField };
     }
 
-    return { name };
+    return { name, type: confirmedValidDetectedFields[name]?.type };
   });
 };
 
