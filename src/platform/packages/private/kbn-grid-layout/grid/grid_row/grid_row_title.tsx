@@ -97,7 +97,7 @@ export const GridRowTitle = React.memo(
             size="m"
             id={`kbnGridRowHeader--${rowIndex}`}
             aria-controls={`kbnGridRow--${rowIndex}`}
-            data-test-subj={`kbnGridRowHeader--${rowIndex}`}
+            data-test-subj={`kbnGridRowTitle`}
             textProps={false}
           >
             {editTitleOpen ? null : (

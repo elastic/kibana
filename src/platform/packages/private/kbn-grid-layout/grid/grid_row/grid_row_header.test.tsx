@@ -6,9 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React from 'react';
 import { cloneDeep } from 'lodash';
+import React from 'react';
 
+import { EuiThemeProvider } from '@elastic/eui';
 import { RenderResult, act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
@@ -28,12 +29,15 @@ const toggleIsCollapsed = jest
 describe('GridRowHeader', () => {
   const renderGridRowHeader = (propsOverrides: Partial<GridRowHeaderProps> = {}) => {
     return render(
-      <GridRowHeader
-        rowIndex={0}
-        toggleIsCollapsed={() => toggleIsCollapsed(0, gridLayoutStateManagerMock)}
-        gridLayoutStateManager={gridLayoutStateManagerMock}
-        {...propsOverrides}
-      />
+      <EuiThemeProvider>
+        <GridRowHeader
+          rowIndex={0}
+          toggleIsCollapsed={() => toggleIsCollapsed(0, gridLayoutStateManagerMock)}
+          gridLayoutStateManager={gridLayoutStateManagerMock}
+          collapseButtonRef={React.createRef()}
+          {...propsOverrides}
+        />
+      </EuiThemeProvider>
     );
   };
 

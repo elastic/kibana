@@ -129,7 +129,8 @@ export const GridRow = React.memo(
 
     useEffect(() => {
       /**
-       * Set `aria-expanded` without passing as prop to `gridRowHeader` to prevent re-render
+       * Set `aria-expanded` without passing the expanded state as a prop to `GridRowHeader` in order
+       * to prevent `GridRowHeader` from rerendering when this state changes
        */
       if (!collapseButtonRef.current) return;
       collapseButtonRef.current.ariaExpanded = `${!isCollapsed}`;
