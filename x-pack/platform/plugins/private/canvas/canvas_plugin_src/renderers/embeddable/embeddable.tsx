@@ -31,7 +31,6 @@ import {
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { StartDeps } from '../../plugin';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
-import { useGetAppContext } from './use_get_app_context';
 
 const { embeddable: strings } = RendererStrings;
 
@@ -54,8 +53,6 @@ const renderReactEmbeddable = ({
 }) => {
   // wrap in functional component to allow usage of hooks
   const RendererWrapper: FC<{}> = () => {
-    const getAppContext = useGetAppContext(core);
-
     const searchApi = useMemo(() => {
       return {
         filters$: new BehaviorSubject<Filter[] | undefined>(input.filters),
@@ -70,7 +67,6 @@ const renderReactEmbeddable = ({
         maybeId={uuid}
         getParentApi={(): CanvasContainerApi => ({
           ...container,
-          getAppContext,
           getSerializedStateForChild: () => ({
             rawState: omit(input, ['disableTriggers', 'filters']),
           }),
