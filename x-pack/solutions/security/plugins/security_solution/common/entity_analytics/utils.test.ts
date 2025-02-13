@@ -21,20 +21,10 @@ describe('utils', () => {
   });
 
   describe('getDisabledEntityTypes', () => {
-    it('should return disabled entity types when serviceEntityStoreEnabled is false', () => {
-      const experimentalFeatures: ExperimentalFeatures = {
-        ...mockedExperimentalFeatures,
-        serviceEntityStoreEnabled: false,
-        assetInventoryStoreEnabled: true,
-      };
-      const disabledEntityTypes = getDisabledEntityTypes(experimentalFeatures);
-      expect(disabledEntityTypes).toEqual([EntityType.service]);
-    });
 
     it('should return disabled entity types when assetInventoryStoreEnabled is false', () => {
       const experimentalFeatures: ExperimentalFeatures = {
         ...mockedExperimentalFeatures,
-        serviceEntityStoreEnabled: true,
         assetInventoryStoreEnabled: false,
       };
       const disabledEntityTypes = getDisabledEntityTypes(experimentalFeatures);
@@ -44,7 +34,6 @@ describe('utils', () => {
     it('should return both disabled entity types when both features are false', () => {
       const experimentalFeatures: ExperimentalFeatures = {
         ...mockedExperimentalFeatures,
-        serviceEntityStoreEnabled: false,
         assetInventoryStoreEnabled: false,
       };
       const disabledEntityTypes = getDisabledEntityTypes(experimentalFeatures);
@@ -54,7 +43,6 @@ describe('utils', () => {
     it('should return no disabled entity types when both features are true', () => {
       const experimentalFeatures: ExperimentalFeatures = {
         ...mockedExperimentalFeatures,
-        serviceEntityStoreEnabled: true,
         assetInventoryStoreEnabled: true,
       };
       const disabledEntityTypes = getDisabledEntityTypes(experimentalFeatures);
