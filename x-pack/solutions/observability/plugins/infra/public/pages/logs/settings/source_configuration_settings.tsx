@@ -71,10 +71,7 @@ export const LogsSettingsPage = () => {
     [resolvedLogView]
   );
 
-  const isWriteable: boolean = useMemo(
-    () => shouldAllowEdit && logView != null && logView.origin !== 'internal',
-    [shouldAllowEdit, logView]
-  );
+  const isWriteable = shouldAllowEdit && logView != null && logView.origin !== 'internal';
 
   if ((isLoading || isUninitialized) && logView == null) {
     return <SourceLoadingPage />;
