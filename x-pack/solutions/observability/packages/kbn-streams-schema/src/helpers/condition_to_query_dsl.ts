@@ -12,31 +12,33 @@ import {
   isAndCondition,
   isOrCondition,
 } from '../models';
+import { getRealFieldName } from './namespaced_ecs';
 
 function conditionToClause(condition: FilterCondition) {
+  const realFieldName = getRealFieldName(condition.field);
   switch (condition.operator) {
     case 'neq':
-      return { bool: { must_not: { match: { [condition.field]: condition.value } } } };
+      return { bool: { must_not: { match: { [realFieldName]: condition.value } } } };
     case 'eq':
-      return { match: { [condition.field]: condition.value } };
+      return { match: { [realFieldName]: condition.value } };
     case 'exists':
-      return { exists: { field: condition.field } };
+      return { exists: { field: realFieldName } };
     case 'gt':
-      return { range: { [condition.field]: { gt: condition.value } } };
+      return { range: { [realFieldName]: { gt: condition.value } } };
     case 'gte':
-      return { range: { [condition.field]: { gte: condition.value } } };
+      return { range: { [realFieldName]: { gte: condition.value } } };
     case 'lt':
-      return { range: { [condition.field]: { lt: condition.value } } };
+      return { range: { [realFieldName]: { lt: condition.value } } };
     case 'lte':
-      return { range: { [condition.field]: { lte: condition.value } } };
+      return { range: { [realFieldName]: { lte: condition.value } } };
     case 'contains':
-      return { wildcard: { [condition.field]: `*${condition.value}*` } };
+      return { wildcard: { [realFieldName]: `*${condition.value}*` } };
     case 'startsWith':
-      return { prefix: { [condition.field]: condition.value } };
+      return { prefix: { [realFieldName]: condition.value } };
     case 'endsWith':
-      return { wildcard: { [condition.field]: `*${condition.value}` } };
+      return { wildcard: { [realFieldName]: `*${condition.value}` } };
     case 'notExists':
-      return { bool: { must_not: { exists: { field: condition.field } } } };
+      return { bool: { must_not: { exists: { field: realFieldName } } } };
     default:
       return { match_none: {} };
   }

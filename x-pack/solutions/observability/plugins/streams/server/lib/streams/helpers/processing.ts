@@ -8,6 +8,7 @@
 import { ProcessorDefinition, getProcessorConfig, getProcessorType } from '@kbn/streams-schema';
 import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import { conditionToPainless } from './condition_to_painless';
+import { getRealFieldName } from './namespaced_ecs';
 
 export function formatToIngestProcessors(
   processing: ProcessorDefinition[]
@@ -18,6 +19,7 @@ export function formatToIngestProcessors(
     return {
       [type]: {
         ...config,
+        field: getRealFieldName(config.field),
         if: conditionToPainless(config.if),
       },
     };

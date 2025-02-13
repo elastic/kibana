@@ -12,6 +12,7 @@ import {
   getFields,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { getRealFieldName } from '../../../lib/streams/helpers/namespaced_ecs';
 import { ResyncStreamsResponse } from '../../../lib/streams/client';
 import { checkAccess } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
@@ -142,9 +143,12 @@ export const sampleStreamRoute = createServerRoute({
       // This can be optimized in the future.
       runtime_mappings: condition
         ? Object.fromEntries(
-            getFields(condition).map((field) => [
-              field.name,
-              { type: field.type === 'string' ? 'keyword' : 'double' },
+            getFields(condition).flatMap((field) => [
+              [
+                getRealFieldName(field.name),
+                { type: field.type === 'string' ? 'keyword' : 'double' },
+              ],
+              [field.name, { type: field.type === 'string' ? 'keyword' : 'double' }],
             ])
           )
         : undefined,
