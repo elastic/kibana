@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { IlmPolicyDeletePhase, IlmPolicyPhase, IlmPolicyPhases } from '@kbn/streams-schema';
+
 export const parseDuration = (duration: string = '') => {
   const result = /^(\d+)([d|m|s|h])$/.exec(duration);
   if (!result) return undefined;
@@ -29,4 +31,11 @@ export function parseDurationInSeconds(duration: string = ''): number {
   }
 
   throw new Error(`Invalid duration unit [${unit}]`);
+}
+
+export function orderIlmPhases(phases: IlmPolicyPhases) {
+  const isPhase = (
+    phase?: IlmPolicyPhase | IlmPolicyDeletePhase
+  ): phase is IlmPolicyPhase | IlmPolicyDeletePhase => Boolean(phase);
+  return [phases.hot, phases.warm, phases.cold, phases.frozen, phases.delete].filter(isPhase);
 }

@@ -5,27 +5,16 @@
  * 2.0.
  */
 
-import { isIlmLifecycle, isIngestStreamDefinition } from '@kbn/streams-schema';
+import { compact, pick } from 'lodash';
+import { IlmPolicyPhases, isIlmLifecycle, isIngestStreamDefinition } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import {
   IlmExplainLifecycleLifecycleExplain,
   IlmPolicy,
+  IlmPhase,
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import { createServerRoute } from '../../create_server_route';
-
-interface IlmPhase {
-  size_in_bytes: number;
-  move_after?: string;
-}
-
-interface IlmSummary {
-  hot?: IlmPhase;
-  warm?: IlmPhase;
-  cold?: IlmPhase;
-  frozen?: IlmPhase;
-  delete?: {};
-}
 
 const lifecycleStatsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/lifecycle/_stats',
@@ -88,17 +77,22 @@ const ilmSummary = (
   ilmDetails: IlmExplainLifecycleLifecycleExplain[],
   indicesStats: Record<string, IndicesStatsIndicesStats>
 ) => {
-  const orderedPhases = [
-    { name: 'hot' as const, phase: policy.phases.hot ?? {} },
-    { name: 'warm' as const, phase: policy.phases.warm },
-    { name: 'cold' as const, phase: policy.phases.cold },
-    { name: 'frozen' as const, phase: policy.phases.frozen },
-    { name: 'delete' as const, phase: policy.phases.delete },
-  ].filter(({ phase }) => !!phase);
+  const phaseWithName = (name: keyof IlmPolicyPhases, phase?: IlmPhase) => {
+    if (!phase) return undefined;
+    return { ...pick(phase, ['min_age']), name };
+  };
 
-  return orderedPhases.reduce((phases, phase, index) => {
+  const orderedPhases = compact([
+    phaseWithName('hot' as const, policy.phases.hot),
+    phaseWithName('warm' as const, policy.phases.warm),
+    phaseWithName('cold' as const, policy.phases.cold),
+    phaseWithName('frozen' as const, policy.phases.frozen),
+    phaseWithName('delete' as const, policy.phases.delete),
+  ]);
+
+  return orderedPhases.reduce((phases, phase) => {
     if (phase.name === 'delete') {
-      phases[phase.name] = {};
+      phases[phase.name] = { name: phase.name, min_age: phase.min_age!.toString() };
       return phases;
     }
 
@@ -106,13 +100,14 @@ const ilmSummary = (
       .filter((detail) => detail.managed && detail.phase === phase.name)
       .map((detail) => indicesStats[detail.index!])
       .reduce((size, stats) => size + (stats?.total?.store?.size_in_bytes ?? 0), 0);
-    const nextPhase = orderedPhases[index + 1];
+
     phases[phase.name] = {
+      name: phase.name,
       size_in_bytes: sizeInBytes,
-      move_after: nextPhase?.phase?.min_age?.toString(),
+      min_age: phase.min_age?.toString(),
     };
     return phases;
-  }, {} as IlmSummary);
+  }, {} as IlmPolicyPhases);
 };
 
 export const lifecycleRoutes = {

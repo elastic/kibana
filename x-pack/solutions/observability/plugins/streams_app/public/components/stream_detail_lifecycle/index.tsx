@@ -200,7 +200,11 @@ export function StreamDetailLifecycle({
       {isIlmLifecycle(definition.effective_lifecycle) ? (
         <EuiFlexGroup>
           <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-            <IlmSummary definition={definition} lifecycle={definition.effective_lifecycle} />
+            <IlmSummary
+              definition={definition}
+              lifecycle={definition.effective_lifecycle}
+              ilmLocator={ilmLocator}
+            />
           </EuiPanel>
         </EuiFlexGroup>
       ) : null}

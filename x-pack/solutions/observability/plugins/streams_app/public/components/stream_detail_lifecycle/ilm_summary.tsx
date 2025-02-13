@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { last } from 'lodash';
-import React, { ReactNode } from 'react';
-import { IngestStreamGetResponse, IngestStreamLifecycleILM } from '@kbn/streams-schema';
+import { capitalize, last } from 'lodash';
+import React, { useMemo } from 'react';
+import {
+  IlmPolicyDeletePhase,
+  IlmPolicyPhase,
+  IlmPolicyPhases,
+  IngestStreamGetResponse,
+  IngestStreamLifecycleILM,
+} from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -15,19 +21,68 @@ import {
   EuiIcon,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiSpacer,
   EuiText,
+  EuiTextColor,
   formatNumber,
 } from '@elastic/eui';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
-import { parseDurationInSeconds } from './helpers';
+import { orderIlmPhases, parseDurationInSeconds } from './helpers';
+import { IlmLink } from './ilm_link';
+
+const ILM_PHASES = {
+  hot: {
+    color: '#F6726A',
+    description: () =>
+      i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseDescription', {
+        defaultMessage: 'Recent, frequently-searched data. Best indexing and search performance.',
+      }),
+  },
+  warm: {
+    color: '#FCD883',
+    description: () =>
+      i18n.translate('xpack.streams.streamDetailLifecycle.warmPhaseDescription', {
+        defaultMessage:
+          'Frequently searched data, rarely updated. Optimized for search, not indexing.',
+      }),
+  },
+  cold: {
+    color: '#A6EDEA',
+    description: () =>
+      i18n.translate('xpack.streams.streamDetailLifecycle.coldPhaseDescription', {
+        defaultMessage:
+          'Data searched infrequently, not updated. Optimized for cost savings over search performance.',
+      }),
+  },
+  frozen: {
+    color: '#61A2FF',
+    description: () =>
+      i18n.translate('xpack.streams.streamDetailLifecycle.frozenPhaseDescription', {
+        defaultMessage:
+          'Most cost-effective way to store your data and still be able to search it.',
+      }),
+  },
+  delete: {
+    color: '#DDD',
+    description: (duration?: string) =>
+      i18n.translate('xpack.streams.streamDetailLifecycle.deletePhaseDescription', {
+        defaultMessage: 'Data deleted after {duration}.',
+        values: { duration },
+      }),
+  },
+};
 
 export function IlmSummary({
   definition,
   lifecycle,
+  ilmLocator,
 }: {
   definition: IngestStreamGetResponse;
   lifecycle: IngestStreamLifecycleILM;
+  ilmLocator?: LocatorPublic<IlmLocatorParams>;
 }) {
   const {
     dependencies: {
@@ -49,11 +104,32 @@ export function IlmSummary({
     [streamsRepositoryClient, definition]
   );
 
+  const phasesWithGrow = useMemo(() => {
+    if (!value) return undefined;
+
+    const orderedPhases = orderIlmPhases(value);
+    const totalDuration = parseDurationInSeconds(last(orderedPhases)!.min_age);
+
+    return orderedPhases.map((phase, index, phases) => {
+      const nextPhase = phases[index + 1];
+      if (!nextPhase) {
+        return { ...phase, grow: phase.name === 'delete' ? false : 2 };
+      }
+
+      const phaseDuration =
+        parseDurationInSeconds(nextPhase!.min_age) - parseDurationInSeconds(phase!.min_age);
+      return {
+        ...phase,
+        grow: Math.max(2, Math.round((phaseDuration / totalDuration) * 10)),
+      };
+    });
+  }, [value]);
+
   return (
     <>
       <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
         <EuiFlexGroup alignItems="center">
-          <EuiFlexItem grow={3}>
+          <EuiFlexItem>
             <EuiText>
               <h5>
                 {i18n.translate('xpack.streams.streamDetailLifecycle.policySummar', {
@@ -61,156 +137,162 @@ export function IlmSummary({
                 })}
               </h5>
             </EuiText>
+            <EuiTextColor color="subdued">
+              Phases and details of the lifecycle applied to this stream
+            </EuiTextColor>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={1}>
-            <EuiText>{lifecycle.ilm.policy}</EuiText>
+          <EuiFlexItem grow={false}>
+            <IlmLink lifecycle={lifecycle} ilmLocator={ilmLocator} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
 
       <EuiPanel grow={true} hasShadow={false} hasBorder={false} paddingSize="s">
-        {loading || !value ? <EuiLoadingSpinner /> : <IlmTimeline summary={value} />}
+        {loading || !phasesWithGrow ? (
+          <EuiLoadingSpinner />
+        ) : (
+          <EuiFlexGroup direction="row" gutterSize="none" responsive={false}>
+            {phasesWithGrow.map((phase, index) => (
+              <EuiFlexItem grow={phase.grow as false | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10}>
+                <IlmPhase phase={phase} minAge={phasesWithGrow[index + 1]?.min_age} />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        )}
       </EuiPanel>
+
+      <EuiSpacer size="xxl" />
+
+      <PhasesLegend phases={value} />
     </>
   );
 }
 
-function PhasesDescription() {
-  const descriptions = [
-    { name: 'Hot phase', description: '' },
-    { name: 'Warm phase', description: '' },
-    { name: 'Cold phase', description: '' },
-    { name: 'Frozen phase', description: '' },
-    { name: 'Deletion', description: '' },
-  ];
-
-  return descriptions.map(({ name, description }) => <EuiText>{name}</EuiText>);
-}
-
-const phasesWithGrow = (summary) => {
-  const orderedPhases = [
-    { name: 'hot', phase: summary.hot },
-    { name: 'warm', phase: summary.warm },
-    { name: 'cold', phase: summary.cold },
-    { name: 'frozen', phase: summary.frozen },
-  ].filter(({ phase }) => !!phase);
-
-  const totalDuration = parseDurationInSeconds(last(orderedPhases)!.phase.move_after);
-
-  return orderedPhases.reduce((acc, { name, phase }, index, phases) => {
-    const moveAfterInSeconds = parseDurationInSeconds(phase.move_after);
-    if (!totalDuration || !moveAfterInSeconds) {
-      // keep in this stage indefinitely
-      acc[name] = { ...phase, grow: 2 };
-      return acc;
-    }
-    const { phase: previousPhase } = phases[index - 1] || {};
-    const prevMoveAfterInSeconds = parseDurationInSeconds(previousPhase?.move_after);
-    const grow = Math.round(((moveAfterInSeconds - prevMoveAfterInSeconds) / totalDuration) * 10);
-    acc[name] = { ...phase, grow: Math.max(grow, 2) };
-    return acc;
-  }, {});
-};
-
-function IlmTimeline({ summary }: { summary: any }) {
-  const phases = phasesWithGrow(summary);
+function IlmPhase({
+  phase,
+  minAge,
+}: {
+  phase: IlmPolicyPhase | IlmPolicyDeletePhase;
+  minAge?: string;
+}) {
+  const borderRadius =
+    phase.name === 'delete'
+      ? undefined
+      : phase.name === 'hot'
+      ? minAge
+        ? '0px 16px 16px 0px'
+        : '0px'
+      : minAge
+      ? '16px'
+      : '16px 0px 0px 16px';
 
   return (
-    <EuiFlexGroup direction="row" gutterSize="none" responsive={false}>
-      <EuiFlexItem grow={phases.hot.grow}>
-        <IlmPhase
-          name="hot"
-          sizeInBytes={phases.hot.size_in_bytes}
-          moveAfter={phases.hot.move_after}
-        />
-      </EuiFlexItem>
-      {phases.warm ? (
-        <EuiFlexItem grow={phases.warm.grow}>
-          <IlmPhase
-            name="warm"
-            sizeInBytes={phases.warm.size_in_bytes}
-            moveAfter={phases.warm.move_after}
-          />
-        </EuiFlexItem>
-      ) : null}
-      {phases.cold ? (
-        <EuiFlexItem grow={phases.cold.grow}>
-          <IlmPhase
-            name="cold"
-            sizeInBytes={phases.cold.size_in_bytes}
-            moveAfter={phases.cold.move_after}
-          />
-        </EuiFlexItem>
-      ) : null}
-      {phases.frozen ? (
-        <EuiFlexItem grow={phases.frozen.grow}>
-          <IlmPhase
-            name="frozen"
-            sizeInBytes={phases.frozen.size_in_bytes}
-            moveAfter={phases.frozen.move_after}
-          />
-        </EuiFlexItem>
-      ) : null}
-      {summary.delete ? (
-        <EuiFlexItem grow={false}>
-          <IlmPhase
-            name="delete"
-            content={<EuiIcon size="m" type="trash" />}
-            sizeInBytes={summary.delete.size_in_bytes}
-          />
-        </EuiFlexItem>
-      ) : null}
-    </EuiFlexGroup>
+    <>
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="xs"
+        style={phase.name !== 'delete' ? { borderRight: '1px dashed black' } : undefined}
+      >
+        <EuiPanel
+          paddingSize="s"
+          hasBorder={false}
+          hasShadow={false}
+          css={{
+            backgroundColor: ILM_PHASES[phase.name].color,
+            margin: '0 2px',
+            borderRadius,
+          }}
+          grow={false}
+        >
+          {phase.name === 'delete' ? (
+            <EuiText size="xs" style={{ margin: '0 2px' }}>
+              <EuiIcon size="s" style={{}} type="trash" />
+            </EuiText>
+          ) : (
+            <EuiText size="xs">
+              <b>{capitalize(phase.name)}</b>
+            </EuiText>
+          )}
+        </EuiPanel>
+        {'size_in_bytes' in phase ? (
+          <EuiPanel
+            paddingSize="s"
+            borderRadius="none"
+            hasBorder={false}
+            hasShadow={false}
+            grow={false}
+            style={{ marginBottom: '50px' }}
+          >
+            <EuiText size="xs">
+              <p>
+                <b>Size</b> {formatNumber(phase.size_in_bytes, '0.0 b')}
+              </p>
+            </EuiText>
+          </EuiPanel>
+        ) : null}
+      </EuiFlexGroup>
+
+      <EuiFlexGroup justifyContent="flexEnd">
+        {phase.name !== 'delete' ? (
+          <EuiPanel
+            paddingSize="xs"
+            style={{
+              marginRight: minAge ? '-20px' : '-5px',
+              width: '40px',
+              backgroundColor: ILM_PHASES.delete.color,
+            }}
+            grow={false}
+            hasBorder={false}
+            hasShadow={false}
+          >
+            <EuiText textAlign="center" size="xs">
+              {minAge || '∞'}
+            </EuiText>
+          </EuiPanel>
+        ) : undefined}
+      </EuiFlexGroup>
+    </>
   );
 }
 
-function IlmPhase({
-  name,
-  sizeInBytes,
-  moveAfter,
-  content,
-}: {
-  name: string;
-  sizeInBytes?: number;
-  moveAfter?: string;
-  content?: ReactNode;
-}) {
-  const colors = {
-    hot: '#F6726A',
-    warm: '#FCD883',
-    cold: '#A6EDEA',
-    frozen: '#61A2FF',
-    delete: '#CAD3E2',
-  };
+function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
+  if (!phases) return null;
+
+  const descriptions = orderIlmPhases(phases).map(({ name, min_age: minAge }) => ({
+    name,
+    description: ILM_PHASES[name].description(minAge),
+  }));
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="xs">
-      <EuiPanel
-        paddingSize="s"
-        borderRadius="none"
-        hasBorder={false}
-        hasShadow={false}
-        css={{ backgroundColor: colors[name] }}
-        grow={false}
-      >
-        <EuiText size="s">{content ? content : <b>{name}</b>}</EuiText>
-      </EuiPanel>
-      {name !== 'delete' ? (
-        <EuiPanel
-          paddingSize="s"
-          borderRadius="none"
-          hasBorder={false}
-          hasShadow={false}
-          grow={false}
-        >
-          <EuiText size="s">
-            <p>
-              <b>Size</b> {formatNumber(sizeInBytes, '0.0 b')}
-            </p>
-            <p>{moveAfter ? moveAfter : '∞'}</p>
-          </EuiText>
-        </EuiPanel>
-      ) : null}
-    </EuiFlexGroup>
+    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
+      {descriptions.map(({ name, description }) => (
+        <>
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem grow={2}>
+              <p>
+                <span
+                  style={{
+                    height: '10px',
+                    width: '10px',
+                    borderRadius: '50%',
+                    backgroundColor: ILM_PHASES[name].color,
+                    display: 'inline-block',
+                    marginRight: '10px',
+                  }}
+                ></span>
+                <b>{capitalize(name)} phase</b>
+              </p>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={8}>
+              <EuiTextColor color="subdued">{description}</EuiTextColor>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="s" />
+        </>
+      ))}
+    </EuiPanel>
   );
 }
