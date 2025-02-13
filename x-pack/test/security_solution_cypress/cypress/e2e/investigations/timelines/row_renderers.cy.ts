@@ -77,9 +77,7 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
     addNameToTimelineAndSave('Test');
 
     cy.wait('@excludedNetflow').then((interception) => {
-      expect(
-        interception?.response?.body.data.persistTimeline.timeline.excludedRowRendererIds
-      ).to.contain('netflow');
+      expect(interception?.response?.body.excludedRowRendererIds).to.contain('netflow');
     });
 
     // open modal, filter and check
@@ -93,9 +91,7 @@ describe('Row renderers', { tags: ['@ess', '@serverless'] }, () => {
     saveTimeline();
 
     cy.wait('@includedNetflow').then((interception) => {
-      expect(
-        interception?.response?.body.data.persistTimeline.timeline.excludedRowRendererIds
-      ).not.to.contain('netflow');
+      expect(interception?.response?.body.excludedRowRendererIds).not.to.contain('netflow');
     });
   });
 

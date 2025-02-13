@@ -14,6 +14,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./console'));
     loadTestFile(require.resolve('./core'));
     loadTestFile(require.resolve('./custom_integration'));
+    loadTestFile(require.resolve('./dashboards'));
     loadTestFile(require.resolve('./general'));
     loadTestFile(require.resolve('./home'));
     loadTestFile(require.resolve('./data_view_field_editor'));

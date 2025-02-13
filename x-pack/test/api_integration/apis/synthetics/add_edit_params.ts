@@ -353,5 +353,45 @@ export default function ({ getService }: FtrProviderContext) {
         expect(param.key).to.not.empty();
       });
     });
+
+    it('should handle bulk deleting params', async () => {
+      await kServer.savedObjects.clean({ types: [syntheticsParamType] });
+
+      const params = [
+        { key: 'param1', value: 'value1' },
+        { key: 'param2', value: 'value2' },
+        { key: 'param3', value: 'value3' },
+      ];
+
+      for (const param of params) {
+        await supertestAPI
+          .post(SYNTHETICS_API_URLS.PARAMS)
+          .set('kbn-xsrf', 'true')
+          .send(param)
+          .expect(200);
+      }
+
+      const getResponse = await supertestAPI
+        .get(SYNTHETICS_API_URLS.PARAMS)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      expect(getResponse.body.length).to.eql(3);
+
+      const ids = getResponse.body.map((param: any) => param.id);
+
+      await supertestAPI
+        .post(SYNTHETICS_API_URLS.PARAMS + '/_bulk_delete')
+        .set('kbn-xsrf', 'true')
+        .send({ ids })
+        .expect(200);
+
+      const getResponseAfterDelete = await supertestAPI
+        .get(SYNTHETICS_API_URLS.PARAMS)
+        .set('kbn-xsrf', 'true')
+        .expect(200);
+
+      expect(getResponseAfterDelete.body.length).to.eql(0);
+    });
   });
 }

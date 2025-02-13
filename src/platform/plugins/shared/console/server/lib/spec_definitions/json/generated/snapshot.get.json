@@ -1,0 +1,49 @@
+{
+  "snapshot.get": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "after": "",
+      "from_sort_value": "",
+      "ignore_unavailable": "__flag__",
+      "index_details": "__flag__",
+      "index_names": "__flag__",
+      "include_repository": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "order": [
+        "asc",
+        "desc"
+      ],
+      "offset": "",
+      "size": "",
+      "slm_policy_filter": "",
+      "sort": [
+        "start_time",
+        "duration",
+        "name",
+        "index_count",
+        "repository",
+        "shard_count",
+        "failed_shard_count"
+      ],
+      "verbose": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_snapshot/{repository}/{snapshot}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/get-snapshot-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

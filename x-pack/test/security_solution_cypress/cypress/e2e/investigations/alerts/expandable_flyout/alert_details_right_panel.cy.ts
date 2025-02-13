@@ -65,6 +65,15 @@ import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import { TOASTER } from '../../../../screens/alerts_detection_rules';
 import { ELASTICSEARCH_USERNAME, IS_SERVERLESS } from '../../../../env_var_names_constants';
+import {
+  goToAcknowledgedAlerts,
+  goToClosedAlerts,
+  toggleKPICharts,
+} from '../../../../tasks/alerts';
+import {
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_DETAILS,
+  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_TITLE,
+} from '../../../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 
 // We need to use the 'soc_manager' role in order to have the 'Respond' action displayed in serverless
 const isServerless = Cypress.env(IS_SERVERLESS);
@@ -171,6 +180,21 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
 
     cy.get(TOASTER).should('have.text', 'Successfully marked 1 alert as acknowledged.');
     cy.get(EMPTY_ALERT_TABLE).should('exist');
+
+    // collapsing the KPI section prevents the test from being flaky, as when the KPI is expanded, the view
+    // scrolls to the bottom of the page (for some unknown reason) and the test can't select the page filter...
+    toggleKPICharts();
+    goToAcknowledgedAlerts();
+    expandAlertAtIndexExpandableFlyout();
+
+    cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_TITLE).should(
+      'have.text',
+      'Last alert status change'
+    );
+    cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_DETAILS).should(
+      'contain.text',
+      'Alert status updated'
+    );
   });
 
   it('should mark as closed', () => {
@@ -181,6 +205,21 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
 
     cy.get(TOASTER).should('have.text', 'Successfully closed 1 alert.');
     cy.get(EMPTY_ALERT_TABLE).should('exist');
+
+    // collapsing the KPI section prevents the test from being flaky, as when the KPI is expanded, the view
+    // scrolls to the bottom of the page (for some unknown reason) and the test can't select the page filter...
+    toggleKPICharts();
+    goToClosedAlerts();
+    expandAlertAtIndexExpandableFlyout();
+
+    cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_TITLE).should(
+      'have.text',
+      'Last alert status change'
+    );
+    cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_DETAILS).should(
+      'contain.text',
+      'Alert status updated'
+    );
   });
 
   // these actions are now grouped together as we're not really testing their functionality but just the existence of the option in the dropdown

@@ -13,6 +13,7 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const config = getService('config');
 
   return {
     async clickSavedViewsButton() {
@@ -25,13 +26,15 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
 
       return button.click();
     },
-    pressEsc() {
+    async pressEsc() {
       return browser.pressKeys([Key.ESCAPE]);
     },
 
     async closeSavedViewsPopover() {
-      await testSubjects.find('savedViews-popover');
-      return this.pressEsc();
+      await retry.tryForTime(config.get('timeouts.try'), async () => {
+        await this.pressEsc();
+        await testSubjects.missingOrFail('loadViewsFlyout');
+      });
     },
 
     clickManageViewsButton() {
@@ -55,7 +58,7 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
       await testSubjects.setValue('savedViewName', name);
       await testSubjects.click('createSavedViewButton');
       await testSubjects.missingOrFail('createSavedViewButton', { timeout: 20000 });
-      await retry.tryForTime(10 * 1000, async () => {
+      await retry.tryForTime(config.get('timeouts.try'), async () => {
         await testSubjects.missingOrFail('savedViews-upsertModal');
       });
     },
@@ -71,7 +74,7 @@ export function InfraSavedViewsProvider({ getService }: FtrProviderContext) {
     },
 
     async ensureViewIsLoaded(name: string) {
-      await retry.tryForTime(5000, async () => {
+      await retry.tryForTime(config.get('timeouts.try'), async () => {
         const subject = await testSubjects.find('savedViews-openPopover');
         expect(await subject.getVisibleText()).to.be(name);
       });

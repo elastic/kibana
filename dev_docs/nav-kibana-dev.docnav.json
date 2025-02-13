@@ -183,14 +183,22 @@
           "label": "data.search"
         },
         {
-          "id": "kibDevTutorialFileService",
-          "label": "File service"
+          "id": "kibDevTutorialScreenshotting",
+          "label": "Screenshotting",
+          "items": [
+            {
+              "id": "kibDevDocsUpdatingPuppeteerAndChromium"
+            }
+          ]
         },
         {
           "id": "kibDevTutorialDataViews"
         },
         {
           "id": "kibDevTutorialDebugging"
+        },
+        {
+          "id": "kibDevTutorialDebuggingFipsTestFailures"
         },
         {
           "id": "kibDevTutorialBuildingDistributable",
@@ -265,10 +273,6 @@
               "id": "kibDevTutorialsContentManagementOnboarding"
             }
           ]
-        },
-        {
-          "id": "kibDevTutorialScreenshotting",
-          "label": "Screenshotting"
         },
         {
           "id": "kibDevTutorialAdvancedSettings",
@@ -465,9 +469,6 @@
           "id": "kibDataSearchPluginApi"
         },
         {
-          "id": "kibBfetchPluginApi"
-        },
-        {
           "id": "kibAlertingPluginApi"
         },
         {
@@ -622,9 +623,6 @@
         },
         {
           "id": "kibTelemetryCollectionManagerPluginApi"
-        },
-        {
-          "id": "kibTelemetryCollectionXpackPluginApi"
         },
         {
           "id": "kibTelemetryManagementSectionPluginApi"

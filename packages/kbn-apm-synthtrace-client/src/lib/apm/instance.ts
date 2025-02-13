@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createHash } from 'crypto';
 import { ApmError } from './apm_error';
 import { Entity } from '../entity';
 import { Metricset } from './metricset';
@@ -70,7 +69,6 @@ export class Instance extends Entity<ApmFields> {
       ...this.fields,
       'error.type': 'crash',
       'error.exception': [{ message, ...(type ? { type } : {}) }],
-      'error.grouping_name': getErrorGroupingKey(message),
     });
   }
   error({
@@ -114,8 +112,4 @@ export class Instance extends Entity<ApmFields> {
       ...metrics,
     });
   }
-}
-
-export function getErrorGroupingKey(content: string) {
-  return createHash('sha256').update(content).digest('hex');
 }

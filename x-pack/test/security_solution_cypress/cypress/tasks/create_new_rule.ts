@@ -31,7 +31,6 @@ import { convertHistoryStartToSize, getHumanizedDuration } from '../helpers/rule
 
 import {
   ABOUT_CONTINUE_BTN,
-  ALERT_SUPPRESSION_DURATION_INPUT,
   ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_FIELDS_INPUT,
   ALERT_SUPPRESSION_FIELDS_COMBO_BOX,
@@ -133,6 +132,9 @@ import {
   PREVIEW_LOGGED_REQUESTS_ACCORDION_BUTTON,
   PREVIEW_LOGGED_REQUESTS_ITEM_ACCORDION_BUTTON,
   PREVIEW_LOGGED_REQUESTS_CHECKBOX,
+  ALERT_SUPPRESSION_DURATION_VALUE_INPUT,
+  ALERT_SUPPRESSION_DURATION_UNIT_INPUT,
+  THREAT_MATCH_QUERY_REQUIRED,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
@@ -783,6 +785,9 @@ export const getCustomIndicatorQueryInput = () => cy.get(THREAT_MATCH_QUERY_INPU
 /** Returns custom query required content */
 export const getCustomQueryInvalidationText = () => cy.contains(CUSTOM_QUERY_REQUIRED);
 
+/** Returns threat match query required content */
+export const getThreatMatchQueryInvalidationText = () => cy.contains(THREAT_MATCH_QUERY_REQUIRED);
+
 /**
  * Fills in the define indicator match rules and then presses the continue button
  * @param rule The rule to use to fill in everything
@@ -951,8 +956,8 @@ export const selectDoNotSuppressForMissingFields = () => {
 };
 
 export const setAlertSuppressionDuration = (interval: number, timeUnit: 's' | 'm' | 'h') => {
-  cy.get(ALERT_SUPPRESSION_DURATION_INPUT).first().type(`{selectall}${interval}`);
-  cy.get(ALERT_SUPPRESSION_DURATION_INPUT).eq(1).select(timeUnit);
+  cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT).type(`{selectall}${interval}`);
+  cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT).select(timeUnit);
 };
 
 /**
@@ -983,7 +988,7 @@ export const interceptEsqlQueryFieldsRequest = (
       }
     });
   } else {
-    cy.intercept('POST', '/internal/bsearch?*', (req) => {
+    cy.intercept('POST', '/internal/search?*', (req) => {
       if (req.body?.batch?.[0]?.request?.params?.query?.includes?.(esqlQuery)) {
         req.alias = alias;
       }

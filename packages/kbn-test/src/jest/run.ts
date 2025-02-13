@@ -79,6 +79,11 @@ export function runJest(configName = 'jest.config.js') {
 
   if (!argv.config) {
     testFiles = argv._.map((p) => resolve(cwd, p.toString()));
+
+    if (argv.testPathPattern) {
+      testFiles.push(argv.testPathPattern);
+    }
+
     const commonTestFiles = commonBasePath(testFiles);
     const testFilesProvided = testFiles.length > 0;
 
@@ -123,7 +128,7 @@ export function runJest(configName = 'jest.config.js') {
         );
       } else {
         log.error(
-          `we no longer ship a root config file so you either need to pass a path to a test file, a folder where tests can be found, or a --config argument pointing to one of the many ${configName} files in the repository`
+          `we no longer ship a root config file so you either need to pass a path to a test file, a folder where tests can be found, a --testPathPattern argument pointing to a file/directory or a --config argument pointing to one of the many ${configName} files in the repository`
         );
       }
 

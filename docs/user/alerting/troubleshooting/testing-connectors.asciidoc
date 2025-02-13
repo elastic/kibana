@@ -18,7 +18,7 @@ image::user/alerting/images/teams-connector-test.png[Five clauses define the con
 ==== experimental[] Troubleshooting connectors with the `kbn-action` tool
 
 You can run an email action via https://github.com/pmuellr/kbn-action[kbn-action].
-In this example, it is a Cloud deployment of the {stack}:
+In this example, it is a Cloud hosted deployment of the {stack}:
 
 [source, txt]
 --------------------------------------------------

@@ -31,7 +31,7 @@
         "signature": [
           "<U extends string = string, T extends unknown = unknown>(arg: unknown, requiredAttributes?: U[]) => arg is Record<U, T>"
         ],
-        "path": "x-pack/packages/ml/is_populated_object/src/is_populated_object.ts",
+        "path": "x-pack/platform/packages/private/ml/is_populated_object/src/is_populated_object.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +45,7 @@
             "signature": [
               "unknown"
             ],
-            "path": "x-pack/packages/ml/is_populated_object/src/is_populated_object.ts",
+            "path": "x-pack/platform/packages/private/ml/is_populated_object/src/is_populated_object.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -60,7 +60,7 @@
             "signature": [
               "U[]"
             ],
-            "path": "x-pack/packages/ml/is_populated_object/src/is_populated_object.ts",
+            "path": "x-pack/platform/packages/private/ml/is_populated_object/src/is_populated_object.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

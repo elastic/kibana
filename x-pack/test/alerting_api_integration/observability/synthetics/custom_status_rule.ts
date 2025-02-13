@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import moment from 'moment';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { StatusRuleParams } from '@kbn/synthetics-plugin/common/rules/status_rule';
+import { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SyntheticsRuleHelper, SYNTHETICS_ALERT_ACTION_INDEX } from './synthetics_rule_helper';
 import { waitForDocumentInIndex } from '../helpers/alerting_wait_for_helpers';
@@ -22,7 +22,9 @@ export default function ({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const supertest = getService('supertest');
 
-  describe('SyntheticsCustomStatusRule', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/202337
+  // Failing: See https://github.com/elastic/kibana/issues/196257
+  describe.skip('SyntheticsCustomStatusRule', () => {
     const SYNTHETICS_RULE_ALERT_INDEX = '.alerts-observability.uptime.alerts-default';
 
     before(async () => {

@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/content-management-content-insights-public",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

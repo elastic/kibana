@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import path from 'path';
+
 import { FtrConfigProviderContext } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { services } from './services';
 import { PRECONFIGURED_ACTION_CONNECTORS } from '../shared';
 
@@ -13,6 +16,7 @@ export interface CreateTestConfigOptions {
   junit: { reportName: string };
   kbnTestServerArgs?: string[];
   kbnTestServerEnv?: Record<string, string>;
+  suiteTags?: { include?: string[]; exclude?: string[] };
 }
 
 export function createTestConfig(options: CreateTestConfigOptions) {
@@ -22,6 +26,8 @@ export function createTestConfig(options: CreateTestConfigOptions) {
     );
     return {
       ...svlSharedConfig.getAll(),
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
+      suiteTags: options.suiteTags,
       services: {
         ...services,
       },
@@ -32,6 +38,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           '--serverless=security',
           `--xpack.actions.preconfigured=${JSON.stringify(PRECONFIGURED_ACTION_CONNECTORS)}`,
           ...(options.kbnTestServerArgs || []),
+          `--plugin-path=${path.resolve(
+            __dirname,
+            '../../../../../test/analytics/plugins/analytics_ftr_helpers'
+          )}`,
         ],
         env: {
           ...svlSharedConfig.get('kbnTestServer.env'),

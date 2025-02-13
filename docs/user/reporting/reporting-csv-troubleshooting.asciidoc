@@ -70,8 +70,36 @@ chance of working in this use case.
 Unfortunately, lowering the scroll size will require more requests to Elasticsearch during export, which adds more time overhead, which could unintentionally create more instances of auth token expiration errors.
 
 [float]
+[[reporting-troubleshooting-inspect-query-used-for-export]]
+=== Inspecting the query used for CSV export
+
+The listing of reports in *Stack Management > Reporting* allows you to inspect the query used for CSV export. It can be helpful to see the raw responses
+from Elasticsearch, or determine if there are performance improvements to be gained by changing the way you query the data.
+
+1. Go to **Stack Management > Reporting** and click the info icon next to a report.
+2. In the footer of the report flyout, click **Actions**.
+3. Click **Inspect query in Console** in the **Actions** menu.
+4. This will open the *Console* application, pre-filled with the queries used to generate the CSV export.
+
+[role="screenshot"]
+image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt4758e67aaec715d9/67897d0be92e090a6dc626a8/inspect-query-from-csv-export.gif[Inspect the query used for CSV export]
+
+[float]
 [[reporting-troubleshooting-csv-token-expired]]
 === Token expiration
 
-To avoid token expirations, use a type of authentication that doesn't expire (such as Basic auth) or run the export using scripts that query Elasticsearch directly.
-In a custom script, you have the ability to refresh the auth token as needed, such as once before each query.
+A relatively common type of error seen for CSV exports is: `security_exception Root causes: security_exception: token expired`.
+
+This error occurs in deployments that use token-based authentication (SAML tokens) when it takes too long to create the CSV report with the authentication cached in report job details.
+
+This means that the deployment is stable, but the size of the requested report is too large to complete within the time allowed by the authentication token available to the Reporting task.
+
+[float]
+[[avoid-token-expiration]]
+==== Avoiding token expiration
+
+You can use the following workarounds for this error:
+
+* Create smaller reports. Instead of creating one report that covers a large time range, create multiple reports that cover segmented time ranges.
+* Increase `xpack.security.authc.token.timeout`, which is set to `20m` by default.
+* To avoid token expirations completely, use a type of authentication that doesn't expire (such as Basic auth), or run the export using scripts that query {es} directly.

@@ -9,7 +9,6 @@
 
 import { timerange } from '@kbn/apm-synthtrace-client';
 import { castArray } from 'lodash';
-import pidusage from 'pidusage';
 import { memoryUsage } from 'process';
 import { parentPort, workerData } from 'worker_threads';
 import { getApmEsClient } from './get_apm_es_client';
@@ -85,7 +84,7 @@ async function start() {
 
   logger.info(`Running scenario from ${bucketFrom.toISOString()} to ${bucketTo.toISOString()}`);
 
-  const { generate, bootstrap } = await scenario({ ...runOptions, logger });
+  const { generate, bootstrap, teardown } = await scenario({ ...runOptions, logger });
 
   if (bootstrap) {
     await bootstrap({
@@ -123,10 +122,16 @@ async function start() {
     return Math.round(value / 1024 ** 2).toString() + 'mb';
   }
 
+  let cpuUsage = process.cpuUsage();
+
   setInterval(async () => {
-    const stats = await pidusage(process.pid);
+    cpuUsage = process.cpuUsage(cpuUsage);
     const mem = memoryUsage();
-    logger.info(`cpu: ${stats.cpu}, memory: ${mb(mem.heapUsed)}/${mb(mem.heapTotal)}`);
+    logger.info(
+      `cpu time: (user: ${cpuUsage.user}µs, sys: ${cpuUsage.system}µs), memory: ${mb(
+        mem.heapUsed
+      )}/${mb(mem.heapTotal)}`
+    );
   }, 5000);
 
   await logger.perf('index_scenario', async () => {
@@ -137,6 +142,18 @@ async function start() {
 
     await Promise.all(promises);
   });
+
+  if (teardown) {
+    await teardown({
+      apmEsClient,
+      logsEsClient,
+      infraEsClient,
+      syntheticsEsClient,
+      otelEsClient,
+      entitiesEsClient,
+      entitiesKibanaClient,
+    });
+  }
 }
 
 parentPort!.on('message', (message) => {

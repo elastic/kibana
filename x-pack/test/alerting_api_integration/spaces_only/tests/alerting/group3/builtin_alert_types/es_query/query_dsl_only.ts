@@ -33,7 +33,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
   const { es, esTestIndexTool, esTestIndexToolOutput, createEsDocumentsInGroups, waitForDocs } =
     getRuleServices(getService);
 
-  describe('rule', () => {
+  describe('Query DSL only', () => {
     let endDate: string;
     let connectorId: string;
     const objectRemover = new ObjectRemover(supertest);

@@ -25,18 +25,9 @@ test.describe('Enable risk scores from dashboard', { tag: ['@serverless', '@ess'
     entityAnalyticsPage = await PageFactory.createEntityAnalyticsPage(page);
     await entityAnalyticsPage.navigates();
   });
-  test('host risk enable button should redirect to entity management page', async () => {
-    await entityAnalyticsPage.waitForEnableHostRiskScoreToBePresent();
-    entityAnalyticsManagementPage = await entityAnalyticsPage.enableHostRisk();
-
-    await expect(entityAnalyticsManagementPage.entityAnalyticsManagementPageTitle).toHaveText(
-      'Entity Risk Score'
-    );
-  });
-
-  test('user risk enable button should redirect to entity management page', async () => {
-    await entityAnalyticsPage.waitForEnableUserRiskScoreToBePresent();
-    entityAnalyticsManagementPage = await entityAnalyticsPage.enableUserRisk();
+  test('risk enable button should redirect to entity management page', async () => {
+    await entityAnalyticsPage.waitForEnableRiskEngineToBePresent();
+    entityAnalyticsManagementPage = await entityAnalyticsPage.enableRiskEngine();
 
     await expect(entityAnalyticsManagementPage.entityAnalyticsManagementPageTitle).toHaveText(
       'Entity Risk Score'

@@ -18,8 +18,10 @@
         "type": "Interface",
         "tags": [],
         "label": "DeprecationRegistryProvider",
-        "description": [],
-        "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+        "description": [
+          "\nProvides a method to scope the {@link DeprecationsServiceSetup | Deprecations Service} to a specific domain."
+        ],
+        "path": "src/core/packages/deprecations/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,18 +31,14 @@
             "type": "Function",
             "tags": [],
             "label": "getRegistry",
-            "description": [],
+            "description": [
+              "\nReturns the {@link DeprecationsServiceSetup | Deprecations Service} scoped to a specific domain."
+            ],
             "signature": [
               "(domainId: string) => ",
-              {
-                "pluginId": "@kbn/core-deprecations-server",
-                "scope": "server",
-                "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-server.DeprecationsServiceSetup",
-                "text": "DeprecationsServiceSetup"
-              }
+              "DeprecationsServiceSetup"
             ],
-            "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+            "path": "src/core/packages/deprecations/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -50,11 +48,13 @@
                 "type": "string",
                 "tags": [],
                 "label": "domainId",
-                "description": [],
+                "description": [
+                  "Domain ID to categorize the deprecations reported under it."
+                ],
                 "signature": [
                   "string"
                 ],
-                "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+                "path": "src/core/packages/deprecations/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -74,7 +74,7 @@
         "description": [
           "\nServer-side client that provides access to fetch all Kibana deprecations\n"
         ],
-        "path": "packages/core/deprecations/core-deprecations-server/src/request_handler_context.ts",
+        "path": "src/core/packages/deprecations/server/src/request_handler_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -84,19 +84,17 @@
             "type": "Function",
             "tags": [],
             "label": "getAllDeprecations",
-            "description": [],
+            "description": [
+              "\nFetch all Kibana deprecations."
+            ],
             "signature": [
               "() => Promise<",
-              {
-                "pluginId": "@kbn/core-deprecations-common",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                "section": "def-common.DomainDeprecationDetails",
-                "text": "DomainDeprecationDetails"
-              },
-              "[]>"
+              "DomainDeprecationDetails",
+              "<",
+              "DeprecationsDetails",
+              ">[]>"
             ],
-            "path": "packages/core/deprecations/core-deprecations-server/src/request_handler_context.ts",
+            "path": "src/core/packages/deprecations/server/src/request_handler_context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -114,7 +112,7 @@
         "description": [
           "\nCore's `deprecations` request handler context."
         ],
-        "path": "packages/core/deprecations/core-deprecations-server/src/request_handler_context.ts",
+        "path": "src/core/packages/deprecations/server/src/request_handler_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -124,17 +122,13 @@
             "type": "Object",
             "tags": [],
             "label": "client",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-deprecations-server",
-                "scope": "server",
-                "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-server.DeprecationsClient",
-                "text": "DeprecationsClient"
-              }
+            "description": [
+              "\n{@link DeprecationsClient | Deprecations client} exposed in the request handler context."
             ],
-            "path": "packages/core/deprecations/core-deprecations-server/src/request_handler_context.ts",
+            "signature": [
+              "DeprecationsClient"
+            ],
+            "path": "src/core/packages/deprecations/server/src/request_handler_context.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -150,7 +144,7 @@
         "description": [
           "\nThe deprecations service provides a way for the Kibana platform to communicate deprecated\nfeatures and configs with its users. These deprecations are only communicated\nif the deployment is using these features. Allowing for a user tailored experience\nfor upgrading the stack version.\n\nThe Deprecation service is consumed by the upgrade assistant to assist with the upgrade\nexperience.\n\nIf a deprecated feature can be resolved without manual user intervention.\nUsing correctiveActions.api allows the Upgrade Assistant to use this api to correct the\ndeprecation upon a user trigger.\n"
         ],
-        "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+        "path": "src/core/packages/deprecations/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -160,19 +154,15 @@
             "type": "Function",
             "tags": [],
             "label": "registerDeprecations",
-            "description": [],
+            "description": [
+              "\nRegisters deprecation messages or notices for a specific feature or functionality\nwithin the application. This allows developers to flag certain behaviors or APIs\nas deprecated, providing guidance and warnings for future deprecation plans.\n"
+            ],
             "signature": [
               "(deprecationContext: ",
-              {
-                "pluginId": "@kbn/core-deprecations-server",
-                "scope": "server",
-                "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-server.RegisterDeprecationsConfig",
-                "text": "RegisterDeprecationsConfig"
-              },
+              "RegisterDeprecationsConfig",
               ") => void"
             ],
-            "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+            "path": "src/core/packages/deprecations/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -182,17 +172,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "deprecationContext",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-deprecations-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                    "section": "def-server.RegisterDeprecationsConfig",
-                    "text": "RegisterDeprecationsConfig"
-                  }
+                "description": [
+                  "- The configuration object containing\ninformation about the deprecated features, including messages, corrective actions,\nand any relevant metadata to inform users or developers about the deprecation."
                 ],
-                "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+                "signature": [
+                  "RegisterDeprecationsConfig"
+                ],
+                "path": "src/core/packages/deprecations/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -209,8 +195,10 @@
         "type": "Interface",
         "tags": [],
         "label": "GetDeprecationsContext",
-        "description": [],
-        "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+        "description": [
+          "\nScoped clients and helpers to ease fetching the deprecations."
+        ],
+        "path": "src/core/packages/deprecations/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -220,17 +208,13 @@
             "type": "Object",
             "tags": [],
             "label": "esClient",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.IScopedClusterClient",
-                "text": "IScopedClusterClient"
-              }
+            "description": [
+              "Elasticsearch client scoped to the current user"
             ],
-            "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+            "signature": [
+              "IScopedClusterClient"
+            ],
+            "path": "src/core/packages/deprecations/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -240,17 +224,28 @@
             "type": "Object",
             "tags": [],
             "label": "savedObjectsClient",
+            "description": [
+              "Saved Objects client scoped to the current user and space"
+            ],
+            "signature": [
+              "SavedObjectsClientContract"
+            ],
+            "path": "src/core/packages/deprecations/server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-deprecations-server",
+            "id": "def-server.GetDeprecationsContext.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-server.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              }
+              "KibanaRequest",
+              "<unknown, unknown, unknown, any>"
             ],
-            "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+            "path": "src/core/packages/deprecations/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -263,8 +258,10 @@
         "type": "Interface",
         "tags": [],
         "label": "RegisterDeprecationsConfig",
-        "description": [],
-        "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+        "description": [
+          "\nOptions to provide when registering deprecations via {@link DeprecationsServiceSetup.registerDeprecations}."
+        ],
+        "path": "src/core/packages/deprecations/server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -274,16 +271,12 @@
             "type": "Function",
             "tags": [],
             "label": "getDeprecations",
-            "description": [],
+            "description": [
+              "\nMethod called when the user wants to list any existing deprecations.\nReturns the list of deprecation messages to warn about."
+            ],
             "signature": [
               "(context: ",
-              {
-                "pluginId": "@kbn/core-deprecations-server",
-                "scope": "server",
-                "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                "section": "def-server.GetDeprecationsContext",
-                "text": "GetDeprecationsContext"
-              },
+              "GetDeprecationsContext",
               ") => ",
               {
                 "pluginId": "@kbn/utility-types",
@@ -293,16 +286,10 @@
                 "text": "MaybePromise"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-deprecations-common",
-                "scope": "common",
-                "docId": "kibKbnCoreDeprecationsCommonPluginApi",
-                "section": "def-common.DeprecationsDetails",
-                "text": "DeprecationsDetails"
-              },
+              "DeprecationsDetails",
               "[]>"
             ],
-            "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+            "path": "src/core/packages/deprecations/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -312,17 +299,13 @@
                 "type": "Object",
                 "tags": [],
                 "label": "context",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-deprecations-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreDeprecationsServerPluginApi",
-                    "section": "def-server.GetDeprecationsContext",
-                    "text": "GetDeprecationsContext"
-                  }
+                "description": [
+                  "Scoped clients and helpers to ease fetching the deprecations."
                 ],
-                "path": "packages/core/deprecations/core-deprecations-server/src/contracts.ts",
+                "signature": [
+                  "GetDeprecationsContext"
+                ],
+                "path": "src/core/packages/deprecations/server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

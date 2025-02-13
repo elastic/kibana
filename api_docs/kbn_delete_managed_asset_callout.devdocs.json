@@ -1,0 +1,126 @@
+{
+  "id": "@kbn/delete-managed-asset-callout",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/delete-managed-asset-callout",
+        "id": "def-common.DeleteManagedAssetsCallout",
+        "type": "Function",
+        "tags": [],
+        "label": "DeleteManagedAssetsCallout",
+        "description": [],
+        "signature": [
+          "({ assetName, overrideBody, ...overrideCalloutProps }: ",
+          {
+            "pluginId": "@kbn/delete-managed-asset-callout",
+            "scope": "common",
+            "docId": "kibKbnDeleteManagedAssetCalloutPluginApi",
+            "section": "def-common.DeleteManagedAssetsCalloutProps",
+            "text": "DeleteManagedAssetsCalloutProps"
+          },
+          ") => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-management/delete_managed_assets_callout/src/callout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/delete-managed-asset-callout",
+            "id": "def-common.DeleteManagedAssetsCallout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  assetName,\n  overrideBody,\n  ...overrideCalloutProps\n}",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/delete-managed-asset-callout",
+                "scope": "common",
+                "docId": "kibKbnDeleteManagedAssetCalloutPluginApi",
+                "section": "def-common.DeleteManagedAssetsCalloutProps",
+                "text": "DeleteManagedAssetsCalloutProps"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-management/delete_managed_assets_callout/src/callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/delete-managed-asset-callout",
+        "id": "def-common.DeleteManagedAssetsCalloutProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeleteManagedAssetsCalloutProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/delete-managed-asset-callout",
+            "scope": "common",
+            "docId": "kibKbnDeleteManagedAssetCalloutPluginApi",
+            "section": "def-common.DeleteManagedAssetsCalloutProps",
+            "text": "DeleteManagedAssetsCalloutProps"
+          },
+          " extends ",
+          "EuiCallOutProps"
+        ],
+        "path": "src/platform/packages/shared/kbn-management/delete_managed_assets_callout/src/callout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/delete-managed-asset-callout",
+            "id": "def-common.DeleteManagedAssetsCalloutProps.assetName",
+            "type": "string",
+            "tags": [],
+            "label": "assetName",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-management/delete_managed_assets_callout/src/callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/delete-managed-asset-callout",
+            "id": "def-common.DeleteManagedAssetsCalloutProps.overrideBody",
+            "type": "string",
+            "tags": [],
+            "label": "overrideBody",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-management/delete_managed_assets_callout/src/callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

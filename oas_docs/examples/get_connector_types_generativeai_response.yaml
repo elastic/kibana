@@ -31,14 +31,3 @@ value:
     supported_feature_ids:
       - generativeAIForSecurity
     is_system_action_type: false
-  - id: .inference
-    name: Inference API
-    enabled: true
-    enabled_in_config: true
-    enabled_in_license: true
-    minimum_license_required: enterprise
-    supported_feature_ids:
-      - generativeAIForSecurity
-      - generativeAIForObservability
-      - generativeAIForSearchPlayground
-    is_system_action_type: false

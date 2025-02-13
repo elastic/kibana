@@ -1,0 +1,11 @@
+type: object
+description: Service
+properties:
+  name:
+    type: string
+    example: node
+    description: Name
+  environment:
+    type: string
+    example: prod
+    description: Environment

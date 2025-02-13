@@ -128,9 +128,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'data_visualizer.resultLinks.fileBeat.enabled (boolean)',
         'dev_tools.deeplinks.navLinkStatus (string?)',
         'discover.experimental.enabledProfiles (array?)',
-        'enterpriseSearch.canDeployEntSearch (boolean?)',
-        'enterpriseSearch.host (string?)',
-        'enterpriseSearch.ui.enabled (boolean?)',
         'home.disableWelcomeScreen (boolean?)',
         'management.deeplinks.navLinkStatus (string?)',
         'map.emsFileApiUrl (string?)',
@@ -163,6 +160,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'monitoring.ui.enabled (boolean?)',
         'monitoring.ui.min_interval_seconds (number?)',
         'monitoring.ui.show_license_expiration (boolean?)',
+        'monitoring.ui.logs.index (string?)',
         'newsfeed.fetchInterval (duration?)',
         'newsfeed.mainInterval (duration?)',
         'newsfeed.service.pathTemplate (string?)',
@@ -186,6 +184,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.ciBuildName (string?)',
         'telemetry.labels.performancePhase (string?)',
         'telemetry.labels.serverless (string?|never)', // Can only be set on Serverless.
+        'telemetry.localShipper (boolean?|false?)',
         'telemetry.hidePrivacyStatement (boolean?)',
         'telemetry.optIn (boolean?)',
         'telemetry.sendUsageFrom (server?|browser?)',
@@ -250,6 +249,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.performance_url (string?)',
         'xpack.cloud.users_and_roles_url (string?)',
         'xpack.cloud.projects_url (string?|never)',
+        'xpack.cloudSecurityPosture.enableExperimental (array?)',
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string?)',
         'xpack.cloud.serverless.project_name (string?)',
@@ -274,7 +274,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.infra.sources.default.fields.message (array?)',
         'xpack.index_management.enableTogglingDataRetention (boolean?|never)',
         'xpack.index_management.enableProjectLevelRetentionChecks (boolean?|never)',
-        'xpack.integration_assistant.enableExperimental (array?)',
+        'xpack.automatic_import.enableExperimental (array?)',
         /**
          * Feature flags bellow are conditional based on traditional/serverless offering
          */
@@ -319,8 +319,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
          * NOTE: The Reporting plugin is currently disabled in functional tests (see test/functional/config.base.js).
          * It will be re-enabled once #102552 is completed.
          */
-        // 'xpack.reporting.roles.allow (array)',
-        // 'xpack.reporting.roles.enabled (boolean)',
         // 'xpack.reporting.poll.jobCompletionNotifier.interval (number)',
         // 'xpack.reporting.poll.jobCompletionNotifier.intervalErrorMultiplier (number)',
         // 'xpack.reporting.poll.jobsRefresh.interval (number)',
@@ -353,6 +351,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.upgrade_assistant.featureSet.migrateSystemIndices (boolean?)',
         'xpack.upgrade_assistant.featureSet.mlSnapshots (boolean?)',
         'xpack.upgrade_assistant.featureSet.reindexCorrectiveActions (boolean?)',
+        'xpack.upgrade_assistant.featureSet.migrateDataStreams (boolean?)',
         'xpack.upgrade_assistant.ui.enabled (boolean?)',
         'xpack.observability.unsafe.alertDetails.metrics.enabled (boolean?)',
         'xpack.observability.unsafe.alertDetails.logs.enabled (boolean?)',
@@ -360,7 +359,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.alertDetails.observability.enabled (boolean?)',
         'xpack.observability.unsafe.thresholdRule.enabled (boolean?)',
         'xpack.observability_onboarding.ui.enabled (boolean?)',
-        'xpack.observabilityLogsExplorer.navigation.showAppLink (boolean?|never)',
         'xpack.observabilityAIAssistant.scope (observability?|search?)',
         'xpack.observabilityAiAssistantManagement.logSourcesEnabled (boolean?)',
         'xpack.observabilityAiAssistantManagement.spacesEnabled (boolean?)',
@@ -441,6 +439,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.ciBuildName (string?)',
         'telemetry.labels.performancePhase (string?)',
         'telemetry.labels.serverless (string?|never)', // Can only be set on Serverless.
+        'telemetry.localShipper (boolean?|false?)',
         'telemetry.hidePrivacyStatement (boolean?)',
         'telemetry.optIn (boolean?)',
         'telemetry.sendUsageFrom (server?|browser?)',

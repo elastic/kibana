@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       isNewChartsLibraryEnabled = await visChart.isNewChartsLibraryEnabled(
         'visualization:visualize:legacyHeatmapChartsLibrary'
       );
-      await visualize.initTests(isNewChartsLibraryEnabled);
+      await visualize.initTests(!isNewChartsLibraryEnabled);
       log.debug('navigateToApp visualize');
       await visualize.navigateToNewAggBasedVisualization();
       log.debug('clickHeatmapChart');
@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('Field = @timestamp');
       await visEditor.selectField('@timestamp');
       // leaving Interval set to Auto
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo(!isNewChartsLibraryEnabled);
     });
 
     it('should save and load', async function () {
@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show 6 color ranges if changed on options', async function () {
       await visEditor.clickOptionsTab();
       await visEditor.changeHeatmapColorNumbers(6);
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo(!isNewChartsLibraryEnabled);
       await visChart.waitForVisualizationRenderingStabilized();
 
       const legends = await visChart.getLegendEntries();
@@ -143,7 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('customize 2 last ranges');
       await visEditor.setCustomRangeByIndex(6, '650', '720');
       await visEditor.setCustomRangeByIndex(7, '800', '905');
-      await visEditor.clickGo(isNewChartsLibraryEnabled);
+      await visEditor.clickGo(!isNewChartsLibraryEnabled);
 
       await visChart.waitForVisualizationRenderingStabilized();
       const legends = await visChart.getLegendEntries();

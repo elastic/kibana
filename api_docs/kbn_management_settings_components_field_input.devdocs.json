@@ -22,13 +22,7 @@
             "text": "FieldInputProps"
           },
           "<",
-          {
-            "pluginId": "@kbn/core-ui-settings-common",
-            "scope": "common",
-            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
-            "section": "def-common.UiSettingsType",
-            "text": "UiSettingsType"
-          },
+          "UiSettingsType",
           "> & React.RefAttributes<",
           {
             "pluginId": "@kbn/management-settings-types",
@@ -39,7 +33,7 @@
           },
           ">>"
         ],
-        "path": "packages/kbn-management/settings/components/field_input/field_input.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/field_input.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -74,7 +68,7 @@
         "description": [
           "\nAn interface containing a collection of Kibana plugins and services required to\nrender this component."
         ],
-        "path": "packages/kbn-management/settings/components/field_input/types.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -89,16 +83,10 @@
             ],
             "signature": [
               "{ toasts: Pick<",
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.IToasts",
-                "text": "IToasts"
-              },
+              "IToasts",
               ", \"addDanger\">; }"
             ],
-            "path": "packages/kbn-management/settings/components/field_input/types.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -111,16 +99,10 @@
             "description": [],
             "signature": [
               "{ client: ",
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              },
+              "IUiSettingsClient",
               "; }"
             ],
-            "path": "packages/kbn-management/settings/components/field_input/types.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -146,7 +128,7 @@
           },
           "<T>"
         ],
-        "path": "packages/kbn-management/settings/components/field_input/field_input.tsx",
+        "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/field_input.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -162,7 +144,7 @@
             "signature": [
               "{ id: string; type: T; name: string; ariaAttributes: { ariaLabel: string; ariaDescribedBy?: string | undefined; }; }"
             ],
-            "path": "packages/kbn-management/settings/components/field_input/field_input.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/field_input.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -185,7 +167,7 @@
               },
               "<T> | undefined"
             ],
-            "path": "packages/kbn-management/settings/components/field_input/field_input.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/field_input.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -209,7 +191,7 @@
               },
               "<T> | undefined) => void"
             ],
-            "path": "packages/kbn-management/settings/components/field_input/field_input.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/field_input.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -231,7 +213,7 @@
                   },
                   "<T> | undefined"
                 ],
-                "path": "packages/kbn-management/settings/types/index.ts",
+                "path": "src/platform/packages/shared/kbn-management/settings/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -246,7 +228,7 @@
             "description": [
               "True if the input can be saved, false otherwise."
             ],
-            "path": "packages/kbn-management/settings/components/field_input/field_input.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/field_input.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -262,7 +244,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-management/settings/components/field_input/field_input.tsx",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/field_input.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -278,7 +260,7 @@
         "description": [
           "\nContextual services used by a {@link FieldInput} component."
         ],
-        "path": "packages/kbn-management/settings/components/field_input/types.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -294,7 +276,7 @@
             "signature": [
               "(value: string) => void"
             ],
-            "path": "packages/kbn-management/settings/components/field_input/types.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -310,7 +292,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-management/settings/components/field_input/types.ts",
+                "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -330,7 +312,7 @@
               "ValueValidation",
               ">"
             ],
-            "path": "packages/kbn-management/settings/components/field_input/types.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -344,7 +326,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/kbn-management/settings/components/field_input/types.ts",
+                "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -359,7 +341,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "packages/kbn-management/settings/components/field_input/types.ts",
+                "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -389,7 +371,7 @@
           },
           "<T>"
         ],
-        "path": "packages/kbn-management/settings/components/field_input/types.ts",
+        "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -419,7 +401,7 @@
               },
               "<T> | null | undefined; }"
             ],
-            "path": "packages/kbn-management/settings/components/field_input/types.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -440,7 +422,7 @@
               },
               "<T> | undefined"
             ],
-            "path": "packages/kbn-management/settings/components/field_input/types.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -451,7 +433,7 @@
             "tags": [],
             "label": "isSavingEnabled",
             "description": [],
-            "path": "packages/kbn-management/settings/components/field_input/types.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -475,7 +457,7 @@
               },
               "<T> | undefined) => void"
             ],
-            "path": "packages/kbn-management/settings/components/field_input/types.ts",
+            "path": "src/platform/packages/shared/kbn-management/settings/components/field_input/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -497,7 +479,7 @@
                   },
                   "<T> | undefined"
                 ],
-                "path": "packages/kbn-management/settings/types/index.ts",
+                "path": "src/platform/packages/shared/kbn-management/settings/types/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

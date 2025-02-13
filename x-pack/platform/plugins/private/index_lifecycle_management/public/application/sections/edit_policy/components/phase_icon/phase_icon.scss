@@ -1,0 +1,19 @@
+.ilmPhaseIcon {
+  width: $euiSizeXL;
+  height: $euiSizeXL;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  background-color: $euiColorLightestShade;
+
+  &--disabled {
+    width: $euiSize;
+    height: $euiSize;
+    margin: $euiSizeS;
+  }
+
+  &--delete {
+    background-color: $euiColorLightShade;
+  }
+}

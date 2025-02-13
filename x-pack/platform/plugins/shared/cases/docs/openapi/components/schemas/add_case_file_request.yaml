@@ -1,0 +1,13 @@
+title: Add case file request properties
+required:
+  - file
+description: Defines the file that will be attached to the case. Optional parameters will be generated automatically from the file metadata if not defined.
+type: object
+properties:
+  file:
+    description: The file being attached to the case.
+    type: string
+    format: binary
+  filename:
+    description: The desired name of the file being attached to the case, it can be different than the name of the file in the filesystem. **This should not include the file extension.**
+    type: string

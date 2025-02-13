@@ -1,0 +1,577 @@
+openapi: 3.0.3
+info:
+  title: SIEM Rules Migration API
+  version: '1'
+paths:
+  # Rule migrations APIs
+
+  /internal/siem_migrations/rules/stats:
+    get:
+      summary: Retrieves the stats for all rule migrations
+      operationId: GetAllStatsRuleMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves the rule migrations stats for all migrations stored in the system
+      tags:
+        - SIEM Rule Migrations
+      responses:
+        200:
+          description: Indicates rule migrations have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationTaskStats'
+
+  /internal/siem_migrations/rules/integrations:
+    get:
+      summary: Retrieves all related integrations for a specific migration
+      operationId: GetRuleMigrationIntegrations
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves all related integrations
+      tags:
+        - SIEM Rule Migrations
+      responses:
+        200:
+          description: Indicates that related integrations have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: The map of related integrations, with the integration id as a key
+                additionalProperties:
+                  $ref: '../../../../../common/api/detection_engine/model/rule_schema/common_attributes.schema.yaml#/components/schemas/RelatedIntegration'
+
+  ## Specific rule migration APIs
+
+  /internal/siem_migrations/rules/{migration_id}:
+    post:
+      summary: Creates a new rule migration
+      operationId: CreateRuleMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Creates a new SIEM rules migration using the original vendor rules provided
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: false
+          schema:
+            description: The migration id to create rules for
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../rule_migration.schema.yaml#/components/schemas/OriginalRule'
+      responses:
+        200:
+          description: Indicates migration have been created correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - migration_id
+                properties:
+                  migration_id:
+                    description: The migration id created.
+                    $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+
+    put:
+      summary: Updates rules of a migrations
+      operationId: UpdateRuleMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Updates rules migrations attributes
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to start
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../rule_migration.schema.yaml#/components/schemas/UpdateRuleMigrationData'
+      responses:
+        200:
+          description: Indicates rules migrations have been updated correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - updated
+                properties:
+                  updated:
+                    type: boolean
+                    description: Indicates rules migrations have been updated.
+
+    get:
+      summary: Retrieves all the rules of a migration
+      operationId: GetRuleMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves the rule documents stored in the system given the rule migration id
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to start
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: per_page
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: sort_field
+          in: query
+          required: false
+          schema:
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - name: sort_direction
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: search_term
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: ids
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              description: The rule migration id
+              $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - name: is_prebuilt
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_installed
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_fully_translated
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_partially_translated
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_untranslatable
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: is_failed
+          in: query
+          required: false
+          schema:
+            type: boolean
+
+      responses:
+        200:
+          description: Indicates rule migration have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - total
+                  - data
+                properties:
+                  total:
+                    type: number
+                    description: The total number of rules in migration.
+                  data:
+                    type: array
+                    items:
+                      $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigration'
+        204:
+          description: Indicates the migration id was not found.
+
+  /internal/siem_migrations/rules/{migration_id}/install:
+    post:
+      summary: Installs translated migration rules
+      operationId: InstallMigrationRules
+      x-codegen-enabled: true
+      description: Installs migration rules
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to install rules for
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    description: The rule migration id
+                    $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+                enabled:
+                  type: boolean
+                  description: Indicates whether installed rules should be enabled
+      responses:
+        200:
+          description: Indicates rules migrations have been installed correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - installed
+                properties:
+                  installed:
+                    type: number
+                    description: Indicates the number of successfully installed migration rules.
+
+  /internal/siem_migrations/rules/{migration_id}/start:
+    put:
+      summary: Starts a rule migration
+      operationId: StartRuleMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Starts a SIEM rules migration using the migration id provided
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to start
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - connector_id
+              properties:
+                connector_id:
+                  $ref: '../../common.schema.yaml#/components/schemas/ConnectorId'
+                langsmith_options:
+                  $ref: '../../common.schema.yaml#/components/schemas/LangSmithOptions'
+                retry:
+                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationRetryFilter'
+                  description: The optional indicator to retry the rule translation based on this filter criteria
+      responses:
+        200:
+          description: Indicates the migration start request has been processed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - started
+                properties:
+                  started:
+                    type: boolean
+                    description: Indicates the migration has been started. `false` means the migration does not need to be started.
+        204:
+          description: Indicates the migration id was not found.
+
+  /internal/siem_migrations/rules/{migration_id}/stats:
+    get:
+      summary: Gets a rule migration task stats
+      operationId: GetRuleMigrationStats
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves the stats of a SIEM rules migration using the migration id provided
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to fetch stats for
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates the migration stats has been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationTaskStats'
+        204:
+          description: Indicates the migration id was not found.
+
+  /internal/siem_migrations/rules/{migration_id}/translation_stats:
+    get:
+      summary: Gets a rule migration translation stats
+      operationId: GetRuleMigrationTranslationStats
+      x-codegen-enabled: true
+      description: Retrieves the translation stats of a SIEM rules migration using the migration id provided
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to fetch translation stats for
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates the migration stats has been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationTranslationStats'
+        204:
+          description: Indicates the migration id was not found.
+
+  /internal/siem_migrations/rules/{migration_id}/stop:
+    put:
+      summary: Stops an existing rule migration
+      operationId: StopRuleMigration
+      x-codegen-enabled: true
+      x-internal: true
+      description: Stops a running SIEM rules migration using the migration id provided
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to stop
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates migration task stop has been processed successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - stopped
+                properties:
+                  stopped:
+                    type: boolean
+                    description: Indicates the migration has been stopped.
+        204:
+          description: Indicates the migration id was not found running.
+
+  /internal/siem_migrations/rules/{migration_id}/prebuilt_rules:
+    get:
+      summary: Retrieves all prebuilt rules for a specific migration
+      operationId: GetRuleMigrationPrebuiltRules
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves all available prebuilt rules (installed and installable)
+      tags:
+        - SIEM Rule Migrations
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to retrieve prebuilt rules for
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates prebuilt rules have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: The map of prebuilt rules, with the rules id as a key
+                additionalProperties:
+                  $ref: '../../rule_migration.schema.yaml#/components/schemas/PrebuiltRuleVersion'
+
+  # Rule migration resources APIs
+
+  /internal/siem_migrations/rules/{migration_id}/resources:
+    post:
+      summary: Creates or updates rule migration resources for a migration
+      operationId: UpsertRuleMigrationResources
+      x-codegen-enabled: true
+      x-internal: true
+      description: Creates or updates resources for an existing SIEM rules migration
+      tags:
+        - SIEM Rule Migrations
+        - Resources
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to attach the resources
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceData'
+      responses:
+        200:
+          description: Indicates migration resources have been created or updated correctly.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - acknowledged
+                properties:
+                  acknowledged:
+                    type: boolean
+                    description: The request has been processed correctly.
+
+    get:
+      summary: Gets rule migration resources for a migration
+      operationId: GetRuleMigrationResources
+      x-codegen-enabled: true
+      x-internal: true
+      description: Retrieves resources for an existing SIEM rules migration
+      tags:
+        - SIEM Rule Migrations
+        - Resources
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to attach the resources
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceType'
+        - name: names
+          in: query
+          required: false
+          schema:
+            type: array
+            description: The names of the resource to retrieve
+            items:
+              type: string
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: number
+      responses:
+        200:
+          description: Indicates migration resources have been retrieved correctly
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResource'
+
+  /internal/siem_migrations/rules/{migration_id}/resources/missing:
+    get:
+      summary: Gets missing rule migration resources for a migration
+      operationId: GetRuleMigrationResourcesMissing
+      x-codegen-enabled: true
+      x-internal: true
+      description: Identifies missing resources from all the rules of an existing SIEM rules migration
+      tags:
+        - SIEM Rule Migrations
+        - Resources
+      parameters:
+        - name: migration_id
+          in: path
+          required: true
+          schema:
+            description: The migration id to attach the resources
+            $ref: '../../../../../common/api/model/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      responses:
+        200:
+          description: Indicates missing migration resources have been retrieved correctly
+          content:
+            application/json:
+              schema:
+                type: array
+                description: The identified resources missing
+                items:
+                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceBase'
+
+  /internal/siem_migrations/rules/missing_privileges:
+    get:
+      summary: Retrieves the missing privileges for a migration
+      operationId: GetRuleMigrationPrivileges
+      x-codegen-enabled: true
+      x-internal: true
+      description: Identifies the privileges required for a SIEM rules migration and returns the missing privileges
+      tags:
+        - SIEM Rule Migrations
+      responses:
+        200:
+          description: Indicates privileges have been retrieved correctly.
+          content:
+            application/json:
+              schema:
+                type: array
+                description: The missing index privileges required for the migration
+                items:
+                  type: object
+                  required:
+                    - indexName
+                    - privileges
+                  properties:
+                    indexName:
+                      type: string
+                      description: The index name of the privilege missing
+                    privileges:
+                      type: array
+                      items:
+                        type: string
+                      description: The index privileges level missing

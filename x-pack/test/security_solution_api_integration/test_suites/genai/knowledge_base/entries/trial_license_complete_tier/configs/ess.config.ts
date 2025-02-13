@@ -28,9 +28,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
               )
           ),
         '--elasticsearch.hosts=http://localhost:9220',
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-          'assistantKnowledgeBaseByDefault',
-        ])}`,
       ],
     },
     testFiles: [require.resolve('..')],
@@ -48,6 +45,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     esTestCluster: {
       ...functionalConfig.get('esTestCluster'),
       ssl: false,
+      esJavaOpts: '-Xms4g -Xmx4g',
+    },
+    mochaOpts: {
+      ...functionalConfig.get('mochaOpts'),
+      timeout: 360000 * 2,
     },
   };
 }

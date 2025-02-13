@@ -13,6 +13,7 @@ import type { LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { LogRateAnalysisDataGenerator } from './log_rate_analysis_data_generator';
+import { CreateCaseParams } from '../cases/create';
 
 export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrProviderContext) {
   const browser = getService('browser');
@@ -21,6 +22,8 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const header = getPageObject('header');
+  const dashboardPage = getPageObject('dashboard');
+  const cases = getService('cases');
 
   return {
     async assertTimeRangeSelectorSectionExists() {
@@ -266,6 +269,22 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
       );
     },
 
+    async clickAutoRunButton() {
+      await testSubjects.clickWhenNotDisabledWithoutRetry(
+        'aiopsLogRateAnalysisContentRunAnalysisButton'
+      );
+
+      await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.missingOrFail('aiopsLogRateAnalysisContentRunAnalysisButton');
+      });
+    },
+
+    async assertAutoRunButtonExists() {
+      await retry.tryForTime(5000, async () => {
+        await testSubjects.existOrFail('aiopsLogRateAnalysisContentRunAnalysisButton');
+      });
+    },
+
     async assertNoAutoRunButtonExists() {
       await testSubjects.existOrFail('aiopsLogRateAnalysisNoAutoRunContentRunAnalysisButton');
     },
@@ -370,6 +389,70 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
         { location: handle, offset: { x: 0, y: 0 } },
         { location: handle, offset: { x: dragAndDropOffsetPx, y: 0 } }
       );
+    },
+
+    async openAttachmentsMenu() {
+      await testSubjects.click('aiopsLogRateAnalysisAttachmentsMenuButton');
+    },
+
+    async clickAttachToDashboard() {
+      await testSubjects.click('aiopsLogRateAnalysisAttachToDashboardButton');
+    },
+
+    async confirmAttachToDashboard() {
+      await testSubjects.click('aiopsLogRateAnalysisAttachToDashboardSubmitButton');
+    },
+
+    async completeSaveToDashboardForm(createNew?: boolean) {
+      const dashboardSelector = await testSubjects.find('add-to-dashboard-options');
+      if (createNew) {
+        const label = await dashboardSelector.findByCssSelector(
+          `label[for="new-dashboard-option"]`
+        );
+        await label.click();
+      }
+
+      await testSubjects.click('confirmSaveSavedObjectButton');
+      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+        testSubjects
+          .missingOrFail('confirmSaveSavedObjectButton')
+          .then(() => true)
+          .catch(() => false)
+      );
+
+      // make sure the dashboard page actually loaded
+      const dashboardItemCount = await dashboardPage.getSharedItemsCount();
+      expect(dashboardItemCount).to.not.eql(undefined);
+
+      const embeddable = await testSubjects.find('aiopsEmbeddableLogRateAnalysis', 30 * 1000);
+      expect(await embeddable.isDisplayed()).to.eql(
+        true,
+        'Log rate analysis chart should be displayed in dashboard'
+      );
+    },
+
+    async attachToDashboard() {
+      await this.openAttachmentsMenu();
+      await this.clickAttachToDashboard();
+      await this.confirmAttachToDashboard();
+      await this.completeSaveToDashboardForm(true);
+    },
+
+    async assertAttachToCaseButtonDisabled() {
+      const button = await testSubjects.find('aiopsLogRateAnalysisAttachToCaseButton');
+      const isEnabled = await button.isEnabled();
+      expect(isEnabled).to.be(false);
+    },
+
+    async clickAttachToCase() {
+      await testSubjects.click('aiopsLogRateAnalysisAttachToCaseButton');
+    },
+
+    async attachToCase(params: CreateCaseParams) {
+      await this.openAttachmentsMenu();
+      await this.clickAttachToCase();
+
+      await cases.create.createCaseFromModal(params);
     },
   };
 }

@@ -10,7 +10,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getService, getPageObjects }) {
-  const { dashboard, header, visualize, common, visEditor } = getPageObjects([
+  const { dashboard, header, visualize, visEditor } = getPageObjects([
     'dashboard',
     'header',
     'visualize',
@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const modifiedMarkdownText = 'Modified markdown text';
 
   const createMarkdownVis = async (title) => {
-    await dashboardAddPanel.clickMarkdownQuickButton();
+    await dashboardAddPanel.clickAddMarkdownPanel();
     await visEditor.setMarkdownTxt(originalMarkdownText);
     await visEditor.clickGo();
     if (title) {
@@ -114,7 +114,6 @@ export default function ({ getService, getPageObjects }) {
 
       await header.waitUntilLoadingHasFinished();
       await appsMenu.clickLink('Visualize Library');
-      await common.clickConfirmOnModal();
       expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
     });
 
@@ -132,7 +131,6 @@ export default function ({ getService, getPageObjects }) {
 
       await header.waitUntilLoadingHasFinished();
       await appsMenu.clickLink('Visualize Library');
-      await common.clickConfirmOnModal();
       expect(await testSubjects.exists('visualizationLandingPage')).to.be(true);
     });
 

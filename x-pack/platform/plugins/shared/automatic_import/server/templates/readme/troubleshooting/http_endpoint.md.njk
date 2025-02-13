@@ -1,0 +1,10 @@
+### Troubleshooting HTTP endpoint
+
+If you encounter an error while ingesting data, it might be due to the data collected over a long time span. Generating a response in such cases may take longer and might cause a request timeout if the `HTTP Client Timeout` parameter is set to a small duration. To avoid this error, it is recommended to adjust the `HTTP Client Timeout` and `Interval` parameters based on the duration of data collection.
+```
+{
+  "error": {
+    "message": "failed eval: net/http: request canceled (Client.Timeout or context cancellation while reading body)"
+  }
+}
+```

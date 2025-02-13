@@ -12,29 +12,17 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { dashboard, header, visualize } = getPageObjects(['dashboard', 'header', 'visualize']);
+  const { dashboard, header } = getPageObjects(['dashboard', 'header']);
   const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
 
-  let existingDashboardPanelCount = 0;
   const dashboardTitle = 'few panels';
+  const originalPanelCount = 3; // dashboardTitle contains 3 panels
   const unsavedDashboardTitle = 'New Dashboard';
   const newDashboartTitle = 'A Wild Dashboard';
 
   describe('dashboard unsaved listing', () => {
-    const addSomePanels = async () => {
-      // add an area chart by value
-      await dashboardAddPanel.clickEditorMenuButton();
-      await dashboardAddPanel.clickAggBasedVisualizations();
-      await visualize.clickAreaChart();
-      await visualize.clickNewSearch();
-      await visualize.saveVisualizationAndReturn();
-
-      // add a metric by reference
-      await dashboardAddPanel.addVisualization('Rendering-Test: metric');
-    };
-
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -54,8 +42,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('lists unsaved changes to existing dashboards', async () => {
       await dashboard.loadSavedDashboard(dashboardTitle);
       await dashboard.switchToEditMode();
-      await addSomePanels();
-      existingDashboardPanelCount = await dashboard.getPanelCount();
+      // change dashboard by adding panel
+      await dashboardAddPanel.addVisualization('Rendering-Test: metric');
+
       await dashboard.gotoDashboardLandingPage();
       await header.waitUntilLoadingHasFinished();
       await dashboard.expectUnsavedChangesListingExists(dashboardTitle);
@@ -65,14 +54,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickUnsavedChangesContinueEditing(dashboardTitle);
       await header.waitUntilLoadingHasFinished();
       const currentPanelCount = await dashboard.getPanelCount();
-      expect(currentPanelCount).to.eql(existingDashboardPanelCount);
+      expect(currentPanelCount).to.eql(originalPanelCount + 1);
       await dashboard.gotoDashboardLandingPage();
       await header.waitUntilLoadingHasFinished();
     });
 
     it('lists unsaved changes to new dashboards', async () => {
       await dashboard.clickNewDashboard();
-      await addSomePanels();
+      // change dashboard by adding panel
+      await dashboardAddPanel.addVisualization('Rendering-Test: metric');
       await dashboard.gotoDashboardLandingPage();
       await header.waitUntilLoadingHasFinished();
       await dashboard.expectUnsavedChangesListingExists(unsavedDashboardTitle);
@@ -81,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('restores unsaved changes to new dashboards', async () => {
       await dashboard.clickUnsavedChangesContinueEditing(unsavedDashboardTitle);
       await header.waitUntilLoadingHasFinished();
-      expect(await dashboard.getPanelCount()).to.eql(2);
+      expect(await dashboard.getPanelCount()).to.eql(1);
       await dashboard.gotoDashboardLandingPage();
       await header.waitUntilLoadingHasFinished();
     });
@@ -89,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('shows a warning on create new, and restores panels if continue is selected', async () => {
       await dashboard.clickNewDashboard({ continueEditing: true, expectWarning: true });
       await header.waitUntilLoadingHasFinished();
-      expect(await dashboard.getPanelCount()).to.eql(2);
+      expect(await dashboard.getPanelCount()).to.eql(1);
       await dashboard.gotoDashboardLandingPage();
       await header.waitUntilLoadingHasFinished();
     });
@@ -117,14 +107,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.loadSavedDashboard(dashboardTitle);
       await dashboard.switchToEditMode();
       const currentPanelCount = await dashboard.getPanelCount();
-      expect(currentPanelCount).to.eql(existingDashboardPanelCount - 2);
+      expect(currentPanelCount).to.eql(originalPanelCount);
       await dashboard.gotoDashboardLandingPage();
       await header.waitUntilLoadingHasFinished();
     });
 
     it('loses unsaved changes to new dashboard upon saving', async () => {
       await dashboard.clickNewDashboard();
-      await addSomePanels();
+      // change dashboard by adding panel
+      await dashboardAddPanel.addVisualization('Rendering-Test: metric');
 
       // ensure that the unsaved listing exists first
       await dashboard.gotoDashboardLandingPage();
@@ -144,13 +135,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.switchToEditMode();
 
       // add another panel so we can delete it later
-      await dashboardAddPanel.clickEditorMenuButton();
-      await dashboardAddPanel.clickAggBasedVisualizations();
-      await visualize.clickAreaChart();
-      await visualize.clickNewSearch();
-      await visualize.saveVisualizationExpectSuccess('Wildvis', {
-        redirectToOrigin: true,
-      });
+      await dashboardAddPanel.addVisualization('Rendering-Test: heatmap');
       await header.waitUntilLoadingHasFinished();
       await dashboard.waitForRenderComplete();
 
@@ -165,7 +150,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await header.waitUntilLoadingHasFinished();
 
       // Remove the panel that was just added
-      await dashboardPanelActions.removePanelByTitle('Wildvis');
+      await dashboardPanelActions.removePanelByTitle('RenderingTest:heatmap');
       await header.waitUntilLoadingHasFinished();
 
       // Check that it now does not exist

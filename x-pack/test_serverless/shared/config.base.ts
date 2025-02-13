@@ -20,8 +20,7 @@ import { CA_CERT_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
 import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { MOCK_IDP_REALM_NAME } from '@kbn/mock-idp-utils';
 import path from 'path';
-import { defineDockerServersConfig } from '@kbn/test';
-import { dockerImage } from '@kbn/test-suites-xpack/fleet_api_integration/config.base';
+import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
 import { services } from './services';
 
 export default async () => {
@@ -66,7 +65,7 @@ export default async () => {
     dockerServers: defineDockerServersConfig({
       registry: {
         enabled: !!dockerRegistryPort,
-        image: dockerImage,
+        image: fleetPackageRegistryDockerImage,
         portInContainer: 8080,
         port: dockerRegistryPort,
         args: dockerArgs,
@@ -95,6 +94,10 @@ export default async () => {
         `xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path=${getDockerFileMountPath(jwksPath)}`,
         `xpack.security.authc.realms.jwt.jwt1.token_type=access_token`,
         'serverless.indices.validate_dot_prefixes=true',
+        // controller cluster-settings
+        `cluster.service.slow_task_logging_threshold=15s`,
+        `cluster.service.slow_task_thread_dump_timeout=5s`,
+        `serverless.search.enable_replicas_for_instant_failover=true`,
       ],
       ssl: true, // SSL is required for SAML realm
     },
@@ -108,6 +111,7 @@ export default async () => {
       serverArgs: [
         `--server.restrictInternalApis=true`,
         `--server.port=${servers.kibana.port}`,
+        `--server.prototypeHardening=true`,
         '--status.allowAnonymous=true',
         `--migrations.zdt.runOnRoles=${JSON.stringify(['ui'])}`,
         // We shouldn't embed credentials into the URL since Kibana requests to Elasticsearch should

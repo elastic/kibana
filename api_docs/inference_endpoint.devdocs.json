@@ -1,0 +1,101 @@
+{
+  "id": "inferenceEndpoint",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "inferenceEndpoint",
+      "id": "def-server.InferenceEndpointPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "InferenceEndpointPluginSetup",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/inference_endpoint/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "inferenceEndpoint",
+      "id": "def-server.InferenceEndpointPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "InferenceEndpointPluginStart",
+      "description": [],
+      "path": "x-pack/platform/plugins/shared/inference_endpoint/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "inferenceEndpoint",
+        "id": "def-common.INFERENCE_ENDPOINT_INTERNAL_API_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "INFERENCE_ENDPOINT_INTERNAL_API_VERSION",
+        "description": [],
+        "signature": [
+          "\"1\""
+        ],
+        "path": "x-pack/platform/plugins/shared/inference_endpoint/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inferenceEndpoint",
+        "id": "def-common.PLUGIN_ID",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_ID",
+        "description": [],
+        "signature": [
+          "\"inferenceEndpoint\""
+        ],
+        "path": "x-pack/platform/plugins/shared/inference_endpoint/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inferenceEndpoint",
+        "id": "def-common.PLUGIN_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "PLUGIN_NAME",
+        "description": [],
+        "signature": [
+          "\"inference-endpoint\""
+        ],
+        "path": "x-pack/platform/plugins/shared/inference_endpoint/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

@@ -36,7 +36,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('correctly parses triple quotes in JSON', async () => {
       // The below inputs are written to work _with_ ace's autocomplete unlike console's unit test
-      // counterparts in src/legacy/core_plugins/console/public/tests/src/editor.test.js
+      // counterparts in src/legacy/core_platform/plugins/shared/console/public/tests/src/editor.test.js
 
       const okInputs = [
         `{

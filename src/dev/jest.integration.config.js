@@ -11,4 +11,5 @@ module.exports = {
   preset: '@kbn/test/jest_integration',
   rootDir: '../..',
   roots: ['<rootDir>/src/dev'],
+  testPathIgnorePatterns: ['src/dev/packages'],
 };

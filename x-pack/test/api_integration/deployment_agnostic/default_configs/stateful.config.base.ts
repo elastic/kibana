@@ -13,16 +13,17 @@ import {
   MOCK_IDP_ATTRIBUTE_NAME,
 } from '@kbn/mock-idp-utils';
 import {
+  fleetPackageRegistryDockerImage,
   esTestConfig,
   kbnTestConfig,
   systemIndicesSuperuser,
   FtrConfigProviderContext,
   defineDockerServersConfig,
 } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { STATEFUL_ROLES_ROOT_PATH } from '@kbn/es';
-import { dockerImage } from '../../../fleet_api_integration/config.base';
 import { DeploymentAgnosticCommonServices, services } from '../services';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
@@ -85,10 +86,11 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
 
     return {
       servers,
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       dockerServers: defineDockerServersConfig({
         registry: {
           enabled: !!dockerRegistryPort,
-          image: dockerImage,
+          image: fleetPackageRegistryDockerImage,
           portInContainer: 8080,
           port: dockerRegistryPort,
           args: dockerArgs,
@@ -101,7 +103,10 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
       // services can be customized, but must extend DeploymentAgnosticCommonServices
       services: options.services || services,
       junit: options.junit,
-      suiteTags: options.suiteTags,
+      suiteTags: {
+        include: options.suiteTags?.include,
+        exclude: [...(options.suiteTags?.exclude || []), 'skipStateful'],
+      },
 
       esTestCluster: {
         ...xPackAPITestsConfig.get('esTestCluster'),
@@ -124,7 +129,6 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           path.resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml'),
         ],
       },
-
       kbnTestServer: {
         ...xPackAPITestsConfig.get('kbnTestServer'),
         serverArgs: [
@@ -146,6 +150,10 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
             basic: { 'cloud-basic': { order: 1 } },
           })}`,
           `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
+          '--xpack.uptime.service.password=test',
+          '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+          '--xpack.uptime.service.devUrl=mockDevUrl',
+          '--xpack.uptime.service.manifestUrl=mockDevUrl',
         ],
       },
     };
