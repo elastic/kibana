@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import type { MouseEventHandler, ReactNode } from 'react';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
   align-self: center; /* Corrects horizontal centering in IE11 */
