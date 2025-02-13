@@ -54,9 +54,9 @@ export const LinkEditor = ({
   const [selectedLinkType, setSelectedLinkType] = useState<LinkType>(
     link?.type ?? DASHBOARD_LINK_TYPE
   );
-  const [defaultLinkLabel, setDefaultLinkLabel] = useState<string | undefined>();
+  const [defaultLinkLabel, setDefaultLinkLabel] = useState<string | undefined>(link?.title);
   const [currentLinkLabel, setCurrentLinkLabel] = useState<string>(link?.label ?? '');
-  const [linkDescription, setLinkDescription] = useState<string | undefined>();
+  const [linkDescription, setLinkDescription] = useState<string | undefined>(link?.description);
   const [linkOptions, setLinkOptions] = useState<LinkOptions | undefined>(link?.options);
   const [linkDestination, setLinkDestination] = useState<string | undefined>(link?.destination);
 
