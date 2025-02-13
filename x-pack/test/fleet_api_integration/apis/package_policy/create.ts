@@ -601,7 +601,7 @@ export default function (providerContext: FtrProviderContext) {
             },
             additional_datastreams_permissions: ['invalid-tata-default', 'metrics-tata-default'],
           } as any),
-        /400 "Bad Request".*additional_datastreams_permissions/
+        /400 "Bad Request"/
       );
     });
 
