@@ -87,6 +87,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   query?: QT | Query;
   // Show when user has privileges to save. See `canShowSavedQuery(...)` lib.
   showSaveQuery?: boolean;
+  // Show the controls to save and load saved queries
+  showSavedQueryControls?: boolean;
   savedQuery?: SavedQuery;
   onQueryChange?: (payload: { dateRange: TimeRange; query?: QT | Query }) => void;
   onQuerySubmit?: (
@@ -556,6 +558,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         showQueryInput={this.props.showQueryInput}
         showFilterBar={this.props.showFilterBar}
         showSaveQuery={this.props.showSaveQuery}
+        showSavedQueryControls={this.props.showSavedQueryControls}
         isDisabled={this.props.isDisabled}
         buttonProps={{ size: this.shouldShowDatePickerAsBadge() ? 's' : 'm' }}
         indexPatterns={this.props.indexPatterns}
