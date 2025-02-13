@@ -9573,7 +9573,7 @@
                                   "additionalProperties": false,
                                   "properties": {
                                     "additional_datastreams_permissions": {
-                                      "description": "Additionnal datstream permissions, that will be added to the agent policy.",
+                                      "description": "Additional datastream permissions, that will be added to the agent policy.",
                                       "items": {
                                         "type": "string"
                                       },
@@ -10876,7 +10876,7 @@
                                 "additionalProperties": false,
                                 "properties": {
                                   "additional_datastreams_permissions": {
-                                    "description": "Additionnal datstream permissions, that will be added to the agent policy.",
+                                    "description": "Additional datastream permissions, that will be added to the agent policy.",
                                     "items": {
                                       "type": "string"
                                     },
@@ -11903,7 +11903,7 @@
                                   "additionalProperties": false,
                                   "properties": {
                                     "additional_datastreams_permissions": {
-                                      "description": "Additionnal datstream permissions, that will be added to the agent policy.",
+                                      "description": "Additional datastream permissions, that will be added to the agent policy.",
                                       "items": {
                                         "type": "string"
                                       },
@@ -13170,7 +13170,7 @@
                                 "additionalProperties": false,
                                 "properties": {
                                   "additional_datastreams_permissions": {
-                                    "description": "Additionnal datstream permissions, that will be added to the agent policy.",
+                                    "description": "Additional datastream permissions, that will be added to the agent policy.",
                                     "items": {
                                       "type": "string"
                                     },
@@ -14471,7 +14471,7 @@
                                 "additionalProperties": false,
                                 "properties": {
                                   "additional_datastreams_permissions": {
-                                    "description": "Additionnal datstream permissions, that will be added to the agent policy.",
+                                    "description": "Additional datastream permissions, that will be added to the agent policy.",
                                     "items": {
                                       "type": "string"
                                     },
@@ -15498,7 +15498,7 @@
                                 "additionalProperties": false,
                                 "properties": {
                                   "additional_datastreams_permissions": {
-                                    "description": "Additionnal datstream permissions, that will be added to the agent policy.",
+                                    "description": "Additional datastream permissions, that will be added to the agent policy.",
                                     "items": {
                                       "type": "string"
                                     },
@@ -33625,7 +33625,7 @@
                         "additionalProperties": false,
                         "properties": {
                           "additional_datastreams_permissions": {
-                            "description": "Additionnal datstream permissions, that will be added to the agent policy.",
+                            "description": "Additional datastream permissions, that will be added to the agent policy.",
                             "items": {
                               "type": "string"
                             },
@@ -34289,7 +34289,7 @@
                     "additionalProperties": false,
                     "properties": {
                       "additional_datastreams_permissions": {
-                        "description": "Additionnal datstream permissions, that will be added to the agent policy.",
+                        "description": "Additional datastream permissions, that will be added to the agent policy.",
                         "items": {
                           "type": "string"
                         },
@@ -34914,7 +34914,7 @@
                       "additionalProperties": false,
                       "properties": {
                         "additional_datastreams_permissions": {
-                          "description": "Additionnal datstream permissions, that will be added to the agent policy.",
+                          "description": "Additional datastream permissions, that will be added to the agent policy.",
                           "items": {
                             "type": "string"
                           },
@@ -35621,7 +35621,7 @@
                         "additionalProperties": false,
                         "properties": {
                           "additional_datastreams_permissions": {
-                            "description": "Additionnal datstream permissions, that will be added to the agent policy.",
+                            "description": "Additional datastream permissions, that will be added to the agent policy.",
                             "items": {
                               "type": "string"
                             },
@@ -36778,7 +36778,7 @@
                               "additionalProperties": false,
                               "properties": {
                                 "additional_datastreams_permissions": {
-                                  "description": "Additionnal datstream permissions, that will be added to the agent policy.",
+                                  "description": "Additional datastream permissions, that will be added to the agent policy.",
                                   "items": {
                                     "type": "string"
                                   },
@@ -37354,7 +37354,7 @@
                               "additionalProperties": false,
                               "properties": {
                                 "additional_datastreams_permissions": {
-                                  "description": "Additionnal datstream permissions, that will be added to the agent policy.",
+                                  "description": "Additional datastream permissions, that will be added to the agent policy.",
                                   "items": {
                                     "type": "string"
                                   },
@@ -37888,7 +37888,7 @@
                       "additionalProperties": false,
                       "properties": {
                         "additional_datastreams_permissions": {
-                          "description": "Additionnal datstream permissions, that will be added to the agent policy.",
+                          "description": "Additional datastream permissions, that will be added to the agent policy.",
                           "items": {
                             "type": "string"
                           },
@@ -38565,7 +38565,7 @@
                     "additionalProperties": false,
                     "properties": {
                       "additional_datastreams_permissions": {
-                        "description": "Additionnal datstream permissions, that will be added to the agent policy.",
+                        "description": "Additional datastream permissions, that will be added to the agent policy.",
                         "items": {
                           "type": "string"
                         },
@@ -39182,7 +39182,7 @@
                       "additionalProperties": false,
                       "properties": {
                         "additional_datastreams_permissions": {
-                          "description": "Additionnal datstream permissions, that will be added to the agent policy.",
+                          "description": "Additional datastream permissions, that will be added to the agent policy.",
                           "items": {
                             "type": "string"
                           },
