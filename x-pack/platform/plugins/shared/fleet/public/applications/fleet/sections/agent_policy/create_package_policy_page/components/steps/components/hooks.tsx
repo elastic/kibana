@@ -35,7 +35,7 @@ export function useOutputs(
       return [];
     }
     return outputsData.items.filter(
-      (output) => allowedOutputTypes.includes(output.type) && !output.is_managed
+      (output) => allowedOutputTypes.includes(output.type) && !output.is_preconfigured
     );
   }, [allowedOutputTypes, canUseOutputPerIntegration, outputsData]);
   return {
