@@ -7,6 +7,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import { selectOverviewPageState } from '../../../state';
 import {
@@ -14,7 +15,6 @@ import {
   quietFetchOverviewStatusAction,
   selectOverviewStatus,
 } from '../../../state/overview_status';
-import useDebounce from 'react-use/lib/useDebounce';
 
 export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLocation: boolean }) {
   const pageState = useSelector(selectOverviewPageState);
