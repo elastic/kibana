@@ -22,7 +22,7 @@ import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { mapValues } from 'lodash';
 import { registerSloUsageCollector } from './lib/collectors/register';
-import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
+import { registerRules } from './lib/rules/register_rules';
 import { getSloServerRouteRepository } from './routes/get_slo_server_route_repository';
 import { registerServerRoutes } from './routes/register_routes';
 import { SLORoutesDependencies } from './routes/types';
@@ -62,8 +62,6 @@ export class SLOPlugin
     core: CoreSetup<SLOPluginStartDependencies, SLOServerStart>,
     plugins: SLOPluginSetupDependencies
   ): SLOServerSetup {
-    const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
-
     const savedObjectTypes = [SO_SLO_TYPE, SO_SLO_SETTINGS_TYPE];
 
     const alertingFeatures = sloRuleTypes.map((ruleTypeId) => ({
@@ -122,15 +120,10 @@ export class SLOPlugin
       },
     });
 
-    const { ruleDataService } = plugins.ruleRegistry;
-
     core.savedObjects.registerType(slo);
     core.savedObjects.registerType(sloSettings);
 
-    registerBurnRateRule(plugins.alerting, core.http.basePath, this.logger, ruleDataService, {
-      alertsLocator,
-    });
-
+    registerRules(plugins.alerting, core.http.basePath);
     registerSloUsageCollector(plugins.usageCollection);
 
     const routeHandlerPlugins = mapValues(plugins, (value, key) => {
