@@ -95,6 +95,7 @@ export const GridRowHeader = React.memo(
           alignItems="center"
           css={headerStyles}
           className="kbnGridRowHeader"
+          data-test-subj={`kbnGridRowHeader--${rowIndex}`}
         >
           <GridRowTitle
             rowIndex={rowIndex}

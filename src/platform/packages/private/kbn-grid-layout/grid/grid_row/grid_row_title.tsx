@@ -95,9 +95,9 @@ export const GridRowTitle = React.memo(
             onClick={toggleIsCollapsed}
             css={accordianButtonStyles}
             size="m"
-            id={`kbnGridRowHeader--${rowIndex}`}
+            id={`kbnGridRowTitle--${rowIndex}`}
             aria-controls={`kbnGridRow--${rowIndex}`}
-            data-test-subj={`kbnGridRowTitle`}
+            data-test-subj={`kbnGridRowTitle--${rowIndex}`}
             textProps={false}
             flush="both"
           >

@@ -160,7 +160,7 @@ export const GridRow = React.memo(
             }
             css={[styles.fullHeight, styles.grid]}
             role="region"
-            aria-labelledby={`kbnGridRowHeader--${rowIndex}`}
+            aria-labelledby={`kbnGridRowTile--${rowIndex}`}
           >
             {/* render the panels **in order** for accessibility, using the memoized panel components */}
             {panelIdsInOrder.map((panelId) => (

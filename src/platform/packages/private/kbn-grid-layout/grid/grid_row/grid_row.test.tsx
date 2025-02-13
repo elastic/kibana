@@ -6,22 +6,25 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React from 'react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { GridRow, GridRowProps } from './grid_row';
+import React from 'react';
 import { gridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
 import { getSampleLayout } from '../test_utils/sample_layout';
+import { GridRow, GridRowProps } from './grid_row';
 
 describe('GridRow', () => {
   const renderGridRow = (propsOverrides: Partial<GridRowProps> = {}) => {
     return render(
-      <GridRow
-        rowIndex={0}
-        renderPanelContents={mockRenderPanelContents}
-        gridLayoutStateManager={gridLayoutStateManagerMock}
-        {...propsOverrides}
-      />
+      <EuiThemeProvider>
+        <GridRow
+          rowIndex={0}
+          renderPanelContents={mockRenderPanelContents}
+          gridLayoutStateManager={gridLayoutStateManagerMock}
+          {...propsOverrides}
+        />
+      </EuiThemeProvider>
     );
   };
 
@@ -36,13 +39,13 @@ describe('GridRow', () => {
   it('does not show the panels in a row that is collapsed', async () => {
     renderGridRow({ rowIndex: 1 });
 
-    expect(screen.getByTestId('kbnGridRowHeader--1').ariaExpanded).toBe('true');
+    expect(screen.getByTestId('kbnGridRowTitle--1').ariaExpanded).toBe('true');
     expect(screen.getAllByText(/panel content/)).toHaveLength(1);
 
     const collapseButton = screen.getByRole('button', { name: /toggle collapse/i });
     await userEvent.click(collapseButton);
 
-    expect(screen.getByTestId('kbnGridRowHeader--1').ariaExpanded).toBe('false');
+    expect(screen.getByTestId('kbnGridRowTitle--1').ariaExpanded).toBe('false');
     expect(screen.queryAllByText(/panel content/)).toHaveLength(0);
   });
 });
