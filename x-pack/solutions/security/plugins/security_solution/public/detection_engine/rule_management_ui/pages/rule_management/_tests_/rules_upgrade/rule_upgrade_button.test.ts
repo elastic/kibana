@@ -9,14 +9,13 @@ import {
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
 } from '../../../../../../../common/api/detection_engine';
+import { mockRuleUpgradeReviewData, renderRuleUpgradeFlyout } from './mock/rule_upgrade_flyout';
 import {
   switchToFieldEdit,
-  mockRuleUpgradeReviewData,
-  renderRuleUpgradeFlyout,
   toggleFieldAccordion,
   cancelFieldEdit,
   setResolvedName,
-} from './mock/helpers';
+} from './mock/rule_upgrade_helpers';
 
 describe('Rule Upgrade button', () => {
   describe('when there are no fields with conflicts', () => {
