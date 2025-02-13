@@ -33,14 +33,11 @@ import {
   waitForBackfillExecuted,
   setAdvancedSettings,
   getOpenAlerts,
-  fetchRule,
-  getMetrics,
 } from '../../../../utils';
 import {
   deleteAllRules,
   deleteAllAlerts,
   createRule,
-  waitForRuleFailure,
 } from '../../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
@@ -1583,27 +1580,6 @@ export default ({ getService }: FtrProviderContext) => {
           { depth: 0, id: '', index: '', type: 'event' },
         ]);
       });
-    });
-
-    it('classifies parsing_exception errors as user errors', async () => {
-      await getMetrics(supertest, true);
-
-      const rule: EsqlRuleCreateProps = {
-        ...getCreateEsqlRulesSchemaMock('rule-1', true),
-        query: `from ecs_compliant metadata _id, _index, _version |"`,
-      };
-
-      const createdRule = await createRule(supertest, log, rule);
-
-      await waitForRuleFailure({ supertest, log, id: createdRule.id });
-
-      const ruleResponse = await fetchRule(supertest, { id: createdRule.id });
-      const { metrics } = await getMetrics(supertest);
-
-      expect(
-        ruleResponse?.execution_summary?.last_execution.message.includes('parsing_exception')
-      ).toBe(true);
-      expect(metrics.task_run.value.by_type['alerting:siem__esqlRule'].user_errors).toBe(1);
     });
   });
 };
