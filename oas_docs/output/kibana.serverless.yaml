@@ -13398,6 +13398,7 @@ paths:
                                     description: Additional datastream permissions, that will be added to the agent policy.
                                     items:
                                       type: string
+                                    nullable: true
                                     type: array
                                   agents:
                                     type: number
@@ -14279,6 +14280,7 @@ paths:
                                   description: Additional datastream permissions, that will be added to the agent policy.
                                   items:
                                     type: string
+                                  nullable: true
                                   type: array
                                 agents:
                                   type: number
@@ -14968,6 +14970,7 @@ paths:
                                     description: Additional datastream permissions, that will be added to the agent policy.
                                     items:
                                       type: string
+                                    nullable: true
                                     type: array
                                   agents:
                                     type: number
@@ -15636,6 +15639,7 @@ paths:
                                   description: Additional datastream permissions, that will be added to the agent policy.
                                   items:
                                     type: string
+                                  nullable: true
                                   type: array
                                 agents:
                                   type: number
@@ -16515,6 +16519,7 @@ paths:
                                   description: Additional datastream permissions, that will be added to the agent policy.
                                   items:
                                     type: string
+                                  nullable: true
                                   type: array
                                 agents:
                                   type: number
@@ -17203,6 +17208,7 @@ paths:
                                   description: Additional datastream permissions, that will be added to the agent policy.
                                   items:
                                     type: string
+                                  nullable: true
                                   type: array
                                 agents:
                                   type: number
@@ -29603,6 +29609,7 @@ paths:
                           description: Additional datastream permissions, that will be added to the agent policy.
                           items:
                             type: string
+                          nullable: true
                           type: array
                         agents:
                           type: number
@@ -30039,6 +30046,7 @@ paths:
                       description: Additional datastream permissions, that will be added to the agent policy.
                       items:
                         type: string
+                      nullable: true
                       type: array
                     description:
                       description: Package policy description
@@ -30272,9 +30280,10 @@ paths:
                   type: object
                   properties:
                     additional_datastreams_permissions:
-                      description: Additionnal datstream permissions, that will be added to the agent policy.
+                      description: Additional datastream permissions, that will be added to the agent policy.
                       items:
                         type: string
+                      nullable: true
                       type: array
                     description:
                       type: string
@@ -30456,6 +30465,7 @@ paths:
                         description: Additional datastream permissions, that will be added to the agent policy.
                         items:
                           type: string
+                        nullable: true
                         type: array
                       agents:
                         type: number
@@ -30922,6 +30932,7 @@ paths:
                           description: Additional datastream permissions, that will be added to the agent policy.
                           items:
                             type: string
+                          nullable: true
                           type: array
                         agents:
                           type: number
@@ -31419,6 +31430,7 @@ paths:
                         description: Additional datastream permissions, that will be added to the agent policy.
                         items:
                           type: string
+                        nullable: true
                         type: array
                       agents:
                         type: number
@@ -31862,6 +31874,7 @@ paths:
                       description: Additional datastream permissions, that will be added to the agent policy.
                       items:
                         type: string
+                      nullable: true
                       type: array
                     description:
                       description: Package policy description
@@ -32089,9 +32102,10 @@ paths:
                   type: object
                   properties:
                     additional_datastreams_permissions:
-                      description: Additionnal datstream permissions, that will be added to the agent policy.
+                      description: Additional datastream permissions, that will be added to the agent policy.
                       items:
                         type: string
+                      nullable: true
                       type: array
                     description:
                       type: string
@@ -32272,6 +32286,7 @@ paths:
                         description: Additional datastream permissions, that will be added to the agent policy.
                         items:
                           type: string
+                        nullable: true
                         type: array
                       agents:
                         type: number
@@ -33045,6 +33060,7 @@ paths:
                                 description: Additional datastream permissions, that will be added to the agent policy.
                                 items:
                                   type: string
+                                nullable: true
                                 type: array
                               agents:
                                 type: number
@@ -33423,6 +33439,7 @@ paths:
                                 description: Additional datastream permissions, that will be added to the agent policy.
                                 items:
                                   type: string
+                                nullable: true
                                 type: array
                               description:
                                 description: Package policy description
