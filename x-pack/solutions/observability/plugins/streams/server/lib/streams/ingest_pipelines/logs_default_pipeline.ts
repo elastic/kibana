@@ -30,37 +30,123 @@ export const logsDefaultPipelineProcessors = [
     script: {
       lang: 'painless',
       source: `
-        if (ctx.resource?.attributes != null) return;
-        ctx.resource = [:];
-        ctx.resource.attributes = [:];
-        if (ctx.host?.name != null) {
-          ctx.resource.attributes['host.name'] = ctx.host.name;
-          ctx.host.remove('name');
-        }
-        if (ctx['host.name'] != null) {
-          ctx.resource.attributes['host.name'] = ctx['host.name'];
-          ctx.remove('host.name');
-        }
-        if (ctx.message != null) {
-          ctx.body = [:];
-          ctx.body.text = ctx.message;
-          ctx.remove('message');
-        }
-        if (ctx.log?.level != null) {
-          ctx.severity_text = ctx.log.level;
-          ctx.log.remove('level');
-        }
-        ctx.attributes = [:];
-        def keysToRemove = [];
-        for (entry in ctx.entrySet()) {
-          if (entry.getKey() != '@timestamp' && entry.getKey() != 'resource' && !entry.getKey().startsWith('_') && entry.getKey() != 'severity_text' && entry.getKey() != 'attributes' && entry.getKey() != 'resource' && entry.getKey() != 'body') {
-            ctx.attributes[entry.getKey()] = entry.getValue();
-            keysToRemove.add(entry.getKey());
+      if (ctx.resource?.attributes != null) return;
+      
+      // Initialize resource container.
+      ctx.resource = [:];
+      ctx.resource.attributes = [:];
+
+      // List of resource attribute paths as arrays.
+      def resourceAttributes = [
+        ["agent", "build", "original"],
+        ["agent", "ephemeral_id"],
+        ["agent", "id"],
+        ["agent", "name"],
+        ["agent", "type"],
+        ["agent", "version"],
+        ["cloud", "account", "id"],
+        ["cloud", "account", "name"],
+        ["cloud", "availability_zone"],
+        ["cloud", "instance", "id"],
+        ["cloud", "instance", "name"],
+        ["cloud", "machine", "type"],
+        ["cloud", "project", "id"],
+        ["cloud", "project", "name"],
+        ["cloud", "provider"],
+        ["cloud", "region"],
+        ["cloud", "service", "name"],
+        ["host", "architecture"],
+        ["host", "domain"],
+        ["host", "geo", "city_name"],
+        ["host", "geo", "continent_code"],
+        ["host", "geo", "continent_name"],
+        ["host", "geo", "country_iso_code"],
+        ["host", "geo", "country_name"],
+        ["host", "geo", "location"],
+        ["host", "geo", "name"],
+        ["host", "geo", "postal_code"],
+        ["host", "geo", "region_iso_code"],
+        ["host", "geo", "region_name"],
+        ["host", "geo", "timezone"],
+        ["host", "hostname"],
+        ["host", "id"],
+        ["host", "ip"],
+        ["host", "mac"],
+        ["host", "name"],
+        ["host", "os", "family"],
+        ["host", "os", "full"],
+        ["host", "os", "kernel"],
+        ["host", "os", "name"],
+        ["host", "os", "platform"],
+        ["host", "os", "type"],
+        ["host", "os", "version"],
+        ["host", "type"]
+      ];
+
+      // Process each resource attribute.
+      for (def resPath : resourceAttributes) {
+        // Build the full dotted key.
+        def fullKey = "";
+        for (int i = 0; i < resPath.length; i++) {
+          if (i > 0) {
+            fullKey += ".";
           }
+          fullKey += resPath[i];
         }
-        for (key in keysToRemove) {
-          ctx.remove(key);
+        
+        // Attempt to locate the attribute via nested maps.
+        def current = ctx;
+        boolean valid = true;
+        for (int i = 0; i < resPath.length - 1; i++) {
+          if (current[resPath[i]] == null || !(current[resPath[i]] instanceof Map)) {
+            valid = false;
+            break;
+          }
+          current = current[resPath[i]];
         }
+        // If the nested structure exists and the final key is not null, move its value.
+        if (valid && current[resPath[resPath.length - 1]] != null) {
+          ctx.resource.attributes[fullKey] = current[resPath[resPath.length - 1]];
+          current.remove(resPath[resPath.length - 1]);
+        }
+        
+        // Also check if the attribute exists as a top-level key (using the dotted key).
+        if (ctx.containsKey(fullKey) && ctx[fullKey] != null) {
+          ctx.resource.attributes[fullKey] = ctx[fullKey];
+          ctx.remove(fullKey);
+        }
+      }
+
+      // Process the "message" field.
+      if (ctx.message != null) {
+        ctx.body = [:];
+        ctx.body.text = ctx.message;
+        ctx.remove("message");
+      }
+
+      // Process "log.level" field.
+      if (ctx.log?.level != null) {
+        ctx.severity_text = ctx.log.level;
+        ctx.log.remove("level");
+      }
+
+      // Collect any remaining keys into ctx.attributes (except reserved ones) and remove them.
+      ctx.attributes = [:];
+      def keysToRemove = [];
+      for (entry in ctx.entrySet()) {
+        if (entry.getKey() != "@timestamp" &&
+            entry.getKey() != "resource" &&
+            !entry.getKey().startsWith("_") &&
+            entry.getKey() != "severity_text" &&
+            entry.getKey() != "attributes" &&
+            entry.getKey() != "body") {
+          ctx.attributes[entry.getKey()] = entry.getValue();
+          keysToRemove.add(entry.getKey());
+        }
+      }
+      for (key in keysToRemove) {
+        ctx.remove(key);
+      }
       `,
     },
   },
