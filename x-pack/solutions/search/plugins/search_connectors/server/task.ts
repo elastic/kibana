@@ -64,6 +64,7 @@ export function infraSyncTaskRunner(
 
           // Deploy Policies
           const connectorsToDeploy = getConnectorsToDeploy(policiesMetadata, nativeConnectors);
+
           let agentlessConnectorsDeployed = 0;
           for (const connectorMetadata of connectorsToDeploy) {
             // We try-catch to still be able to deploy other connectors if some fail
