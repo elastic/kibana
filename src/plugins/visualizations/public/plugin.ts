@@ -413,7 +413,7 @@ export class VisualizationsPlugin
     });
     embeddable.registerReactEmbeddableSavedObject<VisualizationSavedObjectAttributes>({
       onAdd: async (container, savedObject) => {
-	const { deserializeState } = await import('./embeddable/state');
+        const { deserializeState } = await import('./embeddable/state');
         const initialState = await deserializeState({
           rawState: { savedObjectId: savedObject.id },
           references: savedObject.references,
