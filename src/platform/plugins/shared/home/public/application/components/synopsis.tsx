@@ -15,8 +15,8 @@ interface SynopsisProps {
   id: string;
   description: string;
   iconUrl?: string;
-  iconType?: IconType;
   title: string;
+  iconType?: IconType;
   url?: string;
   onClick?: EuiCardProps['onClick'];
   isBeta?: boolean;
@@ -32,7 +32,7 @@ export function Synopsis({
   isBeta = false,
 }: SynopsisProps) {
   let optionalImg;
-
+  const betaBadgeProps = isBeta ? { label: 'Beta' } : undefined;
   if (iconUrl) {
     optionalImg = <img alt="" className="synopsisIcon" src={iconUrl} />;
   } else if (iconType) {
@@ -41,7 +41,7 @@ export function Synopsis({
 
   return (
     <EuiCard
-      betaBadgeProps={{ label: isBeta ? 'Beta' : null, title }} // not sure about which title to use and what to do with beta anyway
+      {...(betaBadgeProps && { betaBadgeProps })}
       className="homSynopsis__card"
       data-test-subj={`homeSynopsisLink${id.toLowerCase()}`}
       description={description}

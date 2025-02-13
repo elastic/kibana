@@ -71,7 +71,7 @@ export function HomeApp({ directories, solutions }: HomeAppProps) {
         getTutorial={getTutorial}
         replaceTemplateStrings={replaceTemplateStrings}
         tutorialId={props.match.params.id}
-        bulkCreate={savedObjectsClient.bulkCreate} // bulkCreate is deprecated - what's the alternative?
+        bulkCreate={savedObjectsClient.bulkCreate}
       />
     );
   };
@@ -88,17 +88,15 @@ export function HomeApp({ directories, solutions }: HomeAppProps) {
             </Route>
           )}
           <Route exact path="/">
-            <div style={{ border: '3px solid green' }}>
-              <Home
-                addBasePath={addBasePath}
-                directories={directories}
-                solutions={solutions}
-                localStorage={localStorage}
-                urlBasePath={getBasePath()}
-                hasUserDataView={() => dataViewsService.hasUserDataView()}
-                isCloudEnabled={isCloudEnabled}
-              />
-            </div>
+            <Home
+              addBasePath={addBasePath}
+              directories={directories}
+              solutions={solutions}
+              localStorage={localStorage}
+              urlBasePath={getBasePath()}
+              hasUserDataView={() => dataViewsService.hasUserDataView()}
+              isCloudEnabled={isCloudEnabled}
+            />
           </Route>
           <Redirect to="/" />
         </Routes>
