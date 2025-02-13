@@ -34,9 +34,9 @@ export function useOutputs(
     if (!outputsData || !canUseOutputPerIntegration) {
       return [];
     }
-    return outputsData.items.filter((output) => 
-      allowedOutputTypes.includes(output.type) && !output.is_internal
-  );
+    return outputsData.items.filter(
+      (output) => allowedOutputTypes.includes(output.type) && !output.is_internal
+    );
   }, [allowedOutputTypes, canUseOutputPerIntegration, outputsData]);
   return {
     isLoading,
