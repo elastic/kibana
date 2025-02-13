@@ -68,10 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.openPalettePanel();
       await common.sleep(1000);
       await retry.try(async () => {
-        await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_0', '10', {
-          clearWithKeyboard: true,
-          typeCharByChar: true,
-        });
+        await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_0', '10');
       });
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
@@ -104,9 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should reflect stop changes when in number to the chart', async () => {
-      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_0', '0', {
-        clearWithKeyboard: true,
-      });
+      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_0', '0');
 
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
@@ -123,14 +118,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should reflect the apply stop value without rounding', async () => {
       // target item is 5722.774804505345
       // so set a value slightly lower which can be rounded
-      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_0', '5722.7747', {
-        clearWithKeyboard: true,
-      });
+      await testSubjects.setValue('lnsPalettePanel_dynamicColoring_range_value_0', '5722.7747');
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
 
       // assert legend has a rounded value
       expect(debugState?.legend!.items).to.eql([
-        { key: '7,747 - 8,529.2', name: '7,747 - 8,529.2', color: '#61a2ff' },
+        { key: '5,722.775 - 8,529.2', name: '5,722.775 - 8,529.2', color: '#61a2ff' },
         { key: '8,529.2 - 11,335.66', name: '8,529.2 - 11,335.66', color: '#a8caff' },
         { key: '11,335.66 - 14,142.1', name: '11,335.66 - 14,142.1', color: '#e8f1ff' },
         { key: '14,142.1 - 16,948.55', name: '14,142.1 - 16,948.55', color: '#ffafa6' },
