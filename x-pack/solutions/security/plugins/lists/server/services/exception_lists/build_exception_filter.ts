@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import agent from 'elastic-apm-node';
 import { chunk } from 'lodash/fp';
 import {
   CreateExceptionListItemSchema,
@@ -33,6 +34,11 @@ import {
   MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE,
   MAXIMUM_SMALL_VALUE_LIST_SIZE,
 } from '@kbn/securitysolution-list-constants';
+import {
+  SECURITY_NUM_LARGE_LIST_EXCEPTIONS,
+  SECURITY_NUM_REGULAR_EXCEPTIONS,
+  SECURITY_NUM_SMALL_LIST_EXCEPTIONS,
+} from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/apm';
 
 import type { ListClient } from '../..';
 
@@ -320,6 +326,11 @@ export const buildExceptionFilter = async <
   unprocessedExceptions.push(...unprocessableValueListExceptions);
 
   if (exceptionsWithoutValueLists.length === 0 && exceptionsWithValueLists.length === 0) {
+    agent.setCustomContext({
+      [SECURITY_NUM_LARGE_LIST_EXCEPTIONS]: unprocessedExceptions.length,
+      [SECURITY_NUM_REGULAR_EXCEPTIONS]: 0,
+      [SECURITY_NUM_SMALL_LIST_EXCEPTIONS]: 0,
+    });
     return { filter: undefined, unprocessedExceptions };
   }
   const { orClauses, unprocessableExceptionItems } = await createOrClauses<T>({
@@ -327,6 +338,16 @@ export const buildExceptionFilter = async <
     exceptionsWithValueLists,
     exceptionsWithoutValueLists,
     listClient,
+  });
+
+  agent.setCustomContext({
+    exceptions: {
+      [SECURITY_NUM_LARGE_LIST_EXCEPTIONS]:
+        unprocessableValueListExceptions.length + unprocessableExceptionItems.length,
+      [SECURITY_NUM_REGULAR_EXCEPTIONS]: exceptionsWithoutValueLists.length,
+      [SECURITY_NUM_SMALL_LIST_EXCEPTIONS]:
+        exceptionsWithValueLists.length - unprocessableExceptionItems.length,
+    },
   });
 
   const exceptionFilter: Filter = {
