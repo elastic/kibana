@@ -65,7 +65,7 @@ export const getRegisteredDeprecations = (
         await Promise.all([
           await getCrawlerDeprecations(ctx, docsUrl),
           await getNativeConnectorDeprecations(ctx, hasAgentless, hasFleetServer, cloud, docsUrl),
-          await getEnterpriseSearchPre7IndexDeprecations(ctx, config, cloud, docsUrl),
+          await getEnterpriseSearchPre8IndexDeprecations(ctx, docsUrl, config.host),
         ]);
       return [
         ...entSearchDetails,
@@ -428,15 +428,14 @@ export async function getNativeConnectorDeprecations(
  * If there are any Enterprise Search indices that were created with Elasticsearch 7.x, they must be removed
  * or set to read-only
  */
-export async function getEnterpriseSearchPre7IndexDeprecations(
+export async function getEnterpriseSearchPre8IndexDeprecations(
   ctx: GetDeprecationsContext,
-  config: ConfigType,
-  cloud: CloudSetup,
-  docsUrl: string
+  docsUrl: string,
+  configHost?: string
 ): Promise<DeprecationsDetails[]> {
   const deprecations: DeprecationsDetails[] = [];
 
-  if (!config.host) {
+  if (!configHost) {
     return deprecations;
   }
 
@@ -448,7 +447,6 @@ export async function getEnterpriseSearchPre7IndexDeprecations(
     return deprecations;
   }
 
-  const deprecatedIndicesCount = entSearchIndices.length;
   let indicesList = '';
   let datastreamsList = '';
   for (const index of entSearchIndices) {
@@ -459,7 +457,7 @@ export async function getEnterpriseSearchPre7IndexDeprecations(
     }
   }
 
-  let message = `There are ${deprecatedIndicesCount} incompatible Enterprise Search indices.\n\n`;
+  let message = `There are ${entSearchIndices.length} incompatible Enterprise Search indices.\n\n`;
 
   if (indicesList.length > 0) {
     message +=
