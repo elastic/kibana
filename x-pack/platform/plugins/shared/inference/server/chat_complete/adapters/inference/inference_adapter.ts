@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { from, identity, switchMap, throwError } from 'rxjs';
+import { defer, identity, switchMap, throwError } from 'rxjs';
 import { isReadable, Readable } from 'stream';
 import { createInferenceInternalError } from '@kbn/inference-common';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
@@ -45,8 +45,8 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
       modelName,
     });
 
-    return from(
-      executor.invoke({
+    return defer(() => {
+      return executor.invoke({
         subAction: 'unified_completion_stream',
         subActionParams: {
           body: request,
@@ -55,8 +55,8 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
             ? { telemetryMetadata: metadata.connectorTelemetry }
             : {}),
         },
-      })
-    ).pipe(
+      });
+    }).pipe(
       switchMap((response) => {
         if (response.status === 'error') {
           return throwError(() =>

@@ -6,7 +6,7 @@
  */
 
 import { last, omit } from 'lodash';
-import { defer, switchMap, throwError, identity } from 'rxjs';
+import { defer, switchMap, throwError, identity, share } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import {
@@ -109,7 +109,7 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
     );
 
     if (stream) {
-      return inference$;
+      return inference$.pipe(share());
     } else {
       return streamToResponse(inference$);
     }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { filter, from, map, switchMap, tap, throwError } from 'rxjs';
+import { filter, map, switchMap, tap, throwError, defer } from 'rxjs';
 import { isReadable, Readable } from 'stream';
 import {
   Message,
@@ -51,12 +51,12 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
       ...(metadata?.connectorTelemetry ? { telemetryMetadata: metadata.connectorTelemetry } : {}),
     };
 
-    return from(
-      executor.invoke({
+    return defer(() => {
+      return executor.invoke({
         subAction: 'invokeStream',
         subActionParams,
-      })
-    ).pipe(
+      });
+    }).pipe(
       switchMap((response) => {
         if (response.status === 'error') {
           return throwError(() =>
