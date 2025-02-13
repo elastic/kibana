@@ -48,13 +48,19 @@ const cardIcons: CardIcons = {
   },
 };
 
-const CardIcon = ({ cardId }: { cardId: OnboardingCardId }) => {
+interface CardIconProps {
+  cardId: OnboardingCardId;
+}
+
+export const CardIcon = React.memo<CardIconProps>(({ cardId }) => {
   const isDarkMode = useDarkMode();
   const icon = cardIcons[cardId]?.[isDarkMode ? 'dark' : 'light'] || '';
 
   if (!icon) return null;
 
   return <img src={icon} alt={`${cardId}-card-icon`} width={24} height={24} />;
-};
+});
+
+CardIcon.displayName = 'CardIcon';
 
 export const getCardIcon = (cardId: OnboardingCardId) => <CardIcon cardId={cardId} />;
