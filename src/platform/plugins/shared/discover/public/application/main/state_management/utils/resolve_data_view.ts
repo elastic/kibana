@@ -95,6 +95,10 @@ export async function loadDataView({
   if (!fetchedDataView && !defaultDataView && adHocDataViews.length) {
     defaultAdHocDataView = adHocDataViews[0];
   }
+  if (!fetchedDataView && !defaultDataView && !defaultAdHocDataView) {
+    // there seems to be no data view available, this could be the case if all were deleted but they're still in cache
+    throw new NoDataViewError();
+  }
 
   return {
     // We can be certain that a data view exists due to an earlier hasData check
@@ -153,24 +157,18 @@ function resolveDataView({
       return ownDataView;
     }
 
-    if (!loadedDataView) {
-      throw new NoDataViewError();
-    }
-
-    if (loadedDataView) {
-      toastNotifications.addWarning({
-        title: warningTitle,
-        text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
-          defaultMessage:
-            'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
-          values: {
-            loadedDataViewTitle: loadedDataView.getIndexPattern(),
-            loadedDataViewId: loadedDataView.id,
-          },
-        }),
-        'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
-      });
-    }
+    toastNotifications.addWarning({
+      title: warningTitle,
+      text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
+        defaultMessage:
+          'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
+        values: {
+          loadedDataViewTitle: loadedDataView.getIndexPattern(),
+          loadedDataViewId: loadedDataView.id,
+        },
+      }),
+      'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
+    });
   }
 
   return loadedDataView;
