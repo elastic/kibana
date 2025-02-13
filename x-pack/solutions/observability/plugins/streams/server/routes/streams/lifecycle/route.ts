@@ -74,7 +74,7 @@ const lifecycleStatsRoute = createServerRoute({
         .then(({ indices }) => Object.values(indices)),
 
       scopedClusterClient.asCurrentUser.indices.stats({
-        index: dataStream.indices.map(({ index_name }) => index_name),
+        index: dataStream.indices.map(({ index_name: indexName }) => indexName),
       }),
     ]);
 
