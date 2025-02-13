@@ -155,7 +155,6 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:unenroll-inactive-agents-task',
         'fleet:unenroll_action:retry',
         'fleet:update_agent_tags:retry',
-        'fleet:upgrade_action:retry',
         'fleet:upgrade-agentless-deployments-task',
         'logs-data-telemetry',
         'obs-ai-assistant:knowledge-base-migration',
