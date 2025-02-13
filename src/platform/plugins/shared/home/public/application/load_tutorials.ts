@@ -24,8 +24,6 @@ let tutorials: Tutorial[] = [];
 let tutorialsLoaded = false;
 
 async function loadTutorials(): Promise<void> {
-  // check type
-  // ? void??
   try {
     const response = await fetch(baseUrl, {
       method: 'get',
@@ -62,7 +60,6 @@ export async function getTutorials(): Promise<Tutorial[]> {
 }
 
 export async function getTutorial(id: string): Promise<Tutorial> {
-  // undefined?
   if (!tutorialsLoaded) {
     await loadTutorials();
   }
