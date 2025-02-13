@@ -42,19 +42,17 @@ interface InstructionStep {
   status?: 'incomplete' | 'complete' | 'warning' | 'danger';
 }
 export interface InstructionVariantShape {
-  id: keyof typeof INSTRUCTION_VARIANT; // it feels more typesafe, but can be too specific if someone adds another variant in the future
+  id: keyof typeof INSTRUCTION_VARIANT;
   instructions: InstructionShape[];
   initialSelected?: boolean;
 }
 
 export interface StatusCheckConfigShape {
-  // using inside tutorial.tsx
   success: string;
   error: string;
   title: string;
   text: string;
   btnLabel: string;
-  // customStatusCheck: string;
 }
 
 interface InstructionSetProps {
@@ -115,7 +113,7 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
   }
   handleToggleVisibility = () => {
     this.setState((prevState: InstructionSetState) => ({
-      isParamFormVisible: !prevState.isParamFormVisible, // can remove !
+      isParamFormVisible: prevState.isParamFormVisible,
     }));
   };
 

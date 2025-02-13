@@ -13,43 +13,42 @@ import { NumberParameter } from './number_parameter';
 import { StringParameter } from './string_parameter';
 
 export interface ParameterFormParam {
-  id: string;
   label: string;
   type: 'string' | 'number';
+  id: string;
 }
-interface ParameterFormProps {
-  params: ParameterFormParam[];
+export interface ParameterFormProps {
+  param: ParameterFormParam;
   paramValues: { [key: string]: number | string };
   setParameter: (id: string, value: any) => void;
 }
 export class ParameterForm extends React.Component<ParameterFormProps> {
   renderInputs = () => {
-    return this.props.params.map((param) => {
-      switch (param.type) {
-        case 'number':
-          return (
-            <NumberParameter
-              key={param.id}
-              id={param.id}
-              label={param.label}
-              value={this.props.paramValues[param.id] as number}
-              setParameter={this.props.setParameter}
-            />
-          );
-        case 'string':
-          return (
-            <StringParameter
-              key={param.id}
-              id={param.id}
-              label={param.label}
-              value={this.props.paramValues[param.id] as string}
-              setParameter={this.props.setParameter}
-            />
-          );
-        default:
-          throw new Error(`Unhandled parameter type ${param.type}`);
-      }
-    });
+    const { param } = this.props;
+    switch (param.type) {
+      case 'number':
+        return (
+          <NumberParameter
+            key={param.id}
+            id={param.id}
+            label={param.label}
+            value={Number(this.props.paramValues[param.id])}
+            setParameter={this.props.setParameter}
+          />
+        );
+      case 'string':
+        return (
+          <StringParameter
+            key={param.id}
+            id={param.id}
+            label={param.label}
+            value={String(this.props.paramValues[param.id])}
+            setParameter={this.props.setParameter}
+          />
+        );
+      default:
+        throw new Error(`Unhandled parameter type ${param.type}`);
+    }
   };
 
   render() {

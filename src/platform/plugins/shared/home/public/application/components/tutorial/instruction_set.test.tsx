@@ -28,13 +28,6 @@ const instructions = [
     commands: ['do more stuff in command line'],
   },
 ];
-// const statusCheck = {
-//   success: 'success',
-//   error: 'error',
-//   title: 'title',
-//   text: 'text',
-//   btnLabel: 'label',
-// };
 const instructionVariants: InstructionVariantShape[] = [
   {
     id: 'OSX',
@@ -65,27 +58,6 @@ beforeAll(() => {
     },
   }));
 });
-
-// test('render', () => { // I think the next test checks the same thing
-//   const component = render(
-//     <IntlProvider>
-//       <InstructionSet
-//         title="title1"
-//         instructionVariants={instructionVariants}
-//         statusCheckState={StatusCheckStates.NOT_CHECKED}
-//         statusCheckConfig={statusCheck}
-//         offset={1}
-//         onStatusCheck={() => {}}
-//         paramValues={{}}
-//         replaceTemplateStrings={mockReplaceTemplateStrings}
-//         isCloudEnabled={false}
-//         setParameter={mockSetParameter}
-//         params={[]}
-//       />
-//     </IntlProvider>
-//   );
-//   expect(component).toMatchSnapshot();
-// });
 
 describe('statusCheckState', () => {
   const statusCheckConfig = {

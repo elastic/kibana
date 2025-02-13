@@ -29,7 +29,7 @@ interface IntroductionUiProps {
   exportedFieldUrl?: string;
   iconType?: string;
   isBeta?: boolean;
-  notices?: unknown; // PropTypes.node could it be an Observable? console showed it has $$typeof Symbol(react element) key, props, ref, type, _owner and _store
+  notices?: React.ReactElement;
   exportedFieldsUrl?: string;
   intl: InjectedIntl;
   basePath: IBasePath;
