@@ -13,7 +13,7 @@
       "hosts": [ "1.1.1.1" ],
       "schedule": 1,
       "tags": [ "service:smtp", "org:google" ],
-      "privateLocations": [ "Test private location 0" ],
+      "privateLocations": [],
       "wait": "30s",
       "hash": "ekrjelkjrelkjre"
     },
@@ -25,7 +25,7 @@
       "hosts": "1.1.1.1",
       "schedule": 1,
       "tags": "tag1,tag2",
-      "privateLocations": [ "Test private location 0" ],
+      "privateLocations": [],
       "wait": "1m",
       "hash": "ekrjelkjrelkjre"
     },
@@ -37,7 +37,7 @@
       "hosts": "1.1.1.1,2.2.2.2",
       "schedule": 1,
       "tags": "tag1,tag2",
-      "privateLocations": [ "Test private location 0" ],
+      "privateLocations": [],
       "unsupportedKey": {
         "nestedUnsupportedKey": "unnsuportedValue"
       },

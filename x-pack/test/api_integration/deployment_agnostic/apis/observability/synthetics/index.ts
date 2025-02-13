@@ -9,24 +9,27 @@ import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_cont
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('SyntheticsAPITests', () => {
-    loadTestFile(require.resolve('./create_monitor'));
     loadTestFile(require.resolve('./create_monitor_private_location'));
-    loadTestFile(require.resolve('./create_monitor_project'));
     loadTestFile(require.resolve('./create_monitor_project_private_location'));
+    loadTestFile(require.resolve('./create_monitor_project'));
+    loadTestFile(require.resolve('./create_monitor_public_api_private_location'));
     loadTestFile(require.resolve('./create_monitor_public_api'));
+    loadTestFile(require.resolve('./create_monitor'));
     loadTestFile(require.resolve('./create_update_params'));
     loadTestFile(require.resolve('./delete_monitor_project'));
     loadTestFile(require.resolve('./delete_monitor'));
-    loadTestFile(require.resolve('./edit_monitor'));
+    loadTestFile(require.resolve('./edit_monitor_private_location'));
+    loadTestFile(require.resolve('./edit_monitor_public_api_private_location'));
     loadTestFile(require.resolve('./edit_monitor_public_api'));
+    loadTestFile(require.resolve('./edit_monitor'));
     loadTestFile(require.resolve('./enable_default_alerting'));
     loadTestFile(require.resolve('./get_filters'));
     loadTestFile(require.resolve('./get_monitor_project'));
     loadTestFile(require.resolve('./get_monitor'));
-    loadTestFile(require.resolve('./synthetics_enablement'));
     loadTestFile(require.resolve('./inspect_monitor'));
     loadTestFile(require.resolve('./suggestions.ts'));
     loadTestFile(require.resolve('./sync_global_params'));
+    loadTestFile(require.resolve('./synthetics_enablement'));
     loadTestFile(require.resolve('./test_now_monitor'));
   });
 }
