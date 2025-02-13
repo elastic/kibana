@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import * as http from 'http';
 import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from '../../../constants';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { setupMockServer } from '../agentless_api/mock_agentless_api';
+import { setupMockServer } from './mock_agentless_api';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'svlCommonPage', 'cisAddIntegration', 'header']);
 
