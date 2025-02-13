@@ -62,7 +62,7 @@ function createIndexRequest(
           if (type === 'cartesian_shape') {
             esType = 'shape';
           }
-          if (type === 'unsupported') {
+          if (type === 'unsupported' || type === 'function_named_parameters') {
             esType = 'integer_range';
           }
           memo[name] = { type: esType } as MappingProperty;

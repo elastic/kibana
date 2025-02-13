@@ -1,0 +1,51 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx"
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/rule-data-utils",
+    "@kbn/i18n",
+    "@kbn/core",
+    "@kbn/alerting-types",
+    "@kbn/cases-components",
+    "@kbn/core-http-browser",
+    "@kbn/alerting-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/rule-registry-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/alerts-ui-shared",
+    "@kbn/field-formats-plugin",
+    "@kbn/data-plugin",
+    "@kbn/response-ops-alerts-fields-browser",
+    "@kbn/core-notifications-browser",
+    "@kbn/i18n-react",
+    "@kbn/test-jest-helpers",
+    "@kbn/ui-theme",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/core-http-browser-mocks",
+    "@kbn/core-application-browser-mocks",
+    "@kbn/response-ops-alerts-apis",
+    "@kbn/core-notifications-browser-mocks",
+    "@kbn/licensing-plugin",
+    "@kbn/core-application-browser",
+    "@kbn/core-ui-settings-browser-mocks",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/core-user-profile-browser-mocks",
+    "@kbn/utility-types-jest",
+    "@kbn/utility-types",
+  ]
+}
