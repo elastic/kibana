@@ -17,6 +17,15 @@ import {
 export class ShareMenuRegistry {
   private readonly shareMenuProviders = new Map<string, ShareMenuProvider>();
 
+  register(shareMenuProvider: ShareMenuProvider) {
+    if (this.shareMenuProviders.has(shareMenuProvider.id)) {
+      throw new Error(
+        `Share menu provider with id [${shareMenuProvider.id}] has already been registered. Use a unique id.`
+      );
+    }
+    this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
+  }
+
   public setup() {
     return {
       /**
@@ -26,14 +35,7 @@ export class ShareMenuRegistry {
        * Each share provider needs a globally unique id.
        * @param shareMenuProvider
        */
-      register: (shareMenuProvider: ShareMenuProvider) => {
-        if (this.shareMenuProviders.has(shareMenuProvider.id)) {
-          throw new Error(
-            `Share menu provider with id [${shareMenuProvider.id}] has already been registered. Use a unique id.`
-          );
-        }
-        this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
-      },
+      register: this.register.bind(this),
     };
   }
 
