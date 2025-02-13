@@ -7721,7 +7721,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-suites-src@link:test":
+"@kbn/test-suites-src@link:src/platform/test":
   version "0.0.0"
   uid ""
 
