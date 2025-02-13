@@ -64,6 +64,26 @@ const testIndices = {
     },
     data_stream: 'datastream-testing',
   },
+  '.ent-search-with_another_data_stream': {
+    settings: {
+      index: {
+        version: {
+          created: '7.0.0',
+        },
+      },
+    },
+    data_stream: 'datastream-testing-another',
+  },
+  '.ent-search-with_same_data_stream': {
+    settings: {
+      index: {
+        version: {
+          created: '7.0.0',
+        },
+      },
+    },
+    data_stream: 'datastream-testing',
+  },
 };
 
 const testIndicesWithoutDatastream = {
@@ -138,6 +158,16 @@ describe('getPreEightEnterpriseSearchIndices', () => {
         isDatastream: true,
         datastreamName: 'datastream-testing',
       },
+      {
+        name: '.ent-search-with_another_data_stream',
+        isDatastream: true,
+        datastreamName: 'datastream-testing-another',
+      },
+      {
+        name: '.ent-search-with_same_data_stream',
+        isDatastream: true,
+        datastreamName: 'datastream-testing',
+      },
     ]);
   });
 });
@@ -177,7 +207,7 @@ describe('setPreEightEnterpriseSearchIndicesReadOnly', () => {
     const result = await setPreEightEnterpriseSearchIndicesReadOnly(esClientMock);
     expect(result).toEqual('');
     expect(getIndicesMock).toHaveBeenCalledTimes(2);
-    expect(rolloverMock).toHaveBeenCalledTimes(1);
-    expect(addBlockMock).toHaveBeenCalledTimes(2);
+    expect(rolloverMock).toHaveBeenCalledTimes(2);
+    expect(addBlockMock).toHaveBeenCalledTimes(4);
   });
 });

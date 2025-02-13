@@ -53,20 +53,20 @@ export async function setPreEightEnterpriseSearchIndicesReadOnly(
   let indices = await getPreEightEnterpriseSearchIndices(esClient);
 
   // rollover any datastreams first
-  let hasOneDatastream = false;
+  const rolledOverDatastreams: { [id: string]: boolean } = {};
   for (const index of indices) {
-    if (index.isDatastream) {
-      // let indexResponse = esClient.indices.delete({ index: index.name });
+    if (index.isDatastream && !rolledOverDatastreams[index.datastreamName]) {
       const indexResponse = await esClient.indices.rollover({ alias: index.datastreamName });
 
       if (!indexResponse) {
-        return `Could not delete datastream: ${index.name}`;
+        return `Could not roll over datastream: ${index.name}`;
       }
-      hasOneDatastream = true;
+
+      rolledOverDatastreams[index.datastreamName] = true;
     }
   }
 
-  if (hasOneDatastream) {
+  if (Object.keys(rolledOverDatastreams).length > 0) {
     // we rolled over at least one datastream,
     // get the indices again
     indices = await getPreEightEnterpriseSearchIndices(esClient);

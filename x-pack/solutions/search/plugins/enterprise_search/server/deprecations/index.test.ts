@@ -259,7 +259,7 @@ describe('getEnterpriseSearchPre8IndexDeprecations', () => {
     expect(deprecations[0].message.content).toContain('.ent-search-with_data_stream');
   });
 
-  it('can register indexex without data stream deprecations that need to be set to read only', async () => {
+  it('can register an index without data stream deprecations that need to be set to read only', async () => {
     const getIndicesMock = jest.fn(() =>
       Promise.resolve([
         {
