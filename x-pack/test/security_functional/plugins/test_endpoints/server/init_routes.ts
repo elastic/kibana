@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DiagnosticResult, errors } from '@elastic/elasticsearch';
+import { type DiagnosticResult, errors } from '@elastic/elasticsearch';
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';

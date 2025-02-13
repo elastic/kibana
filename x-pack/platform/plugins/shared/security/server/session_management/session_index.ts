@@ -496,8 +496,12 @@ export class SessionIndex {
 
         indexNeedsRefresh = (await this.bulkDeleteSessions(operations)) || indexNeedsRefresh;
       }
+      shardMissingCounter = 0;
     } catch (err) {
-      if (err instanceof errors.ResponseError && err.statusCode === 503) {
+      if (
+        err instanceof errors.ResponseError &&
+        (err.statusCode === 503 || err.message.includes('no_shard_available_action_exception'))
+      ) {
         shardMissingCounter++;
         if (shardMissingCounter < 10) {
           logger.warn(
@@ -576,7 +580,9 @@ export class SessionIndex {
 
     logger.debug('Cleanup routine successfully completed.');
     return {
-      state: {},
+      state: {
+        shardMissingCounter,
+      },
     };
   }
 
