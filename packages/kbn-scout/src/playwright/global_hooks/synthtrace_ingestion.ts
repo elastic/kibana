@@ -72,6 +72,7 @@ export async function ingestSynthtraceDataHook(config: FullConfig, data: Synthtr
         log
       );
 
+      log.debug('[setup] loading apm synthtrace data');
       await Promise.all(
         apm.map((event) => {
           apmSynthtraceEsClient.index(
@@ -80,7 +81,7 @@ export async function ingestSynthtraceDataHook(config: FullConfig, data: Synthtr
         })
       );
 
-      log.debug('[setup] loading apm synthtrace data');
+      log.debug('[setup] apm synthtrace data loaded successfully');
     }
 
     if (hasInfraData) {
@@ -92,6 +93,7 @@ export async function ingestSynthtraceDataHook(config: FullConfig, data: Synthtr
         log
       );
 
+      log.debug('[setup] loading infra synthtrace data');
       await Promise.all(
         infra.map((event) => {
           infraSynthtraceEsClient.index(
@@ -100,12 +102,13 @@ export async function ingestSynthtraceDataHook(config: FullConfig, data: Synthtr
         })
       );
 
-      log.debug('[setup] loading infra synthtrace data');
+      log.debug('[setup] infra synthtrace data loaded successfully');
     }
 
     if (hasOtelData) {
       const otelSynthtraceEsClient = getOtelSynthtraceEsClient(esClient, log);
 
+      log.debug('[setup] loading otel synthtrace data');
       await Promise.all(
         otel.map((event) => {
           otelSynthtraceEsClient.index(
@@ -114,7 +117,7 @@ export async function ingestSynthtraceDataHook(config: FullConfig, data: Synthtr
         })
       );
 
-      log.debug('[setup] loading otel synthtrace data');
+      log.debug('[setup] otel synthtrace data loaded successfully');
     }
   });
 }
