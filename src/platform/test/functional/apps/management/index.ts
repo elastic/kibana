@@ -14,7 +14,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   describe('management', function () {
     before(async () => {
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/makelogs');
     });
 

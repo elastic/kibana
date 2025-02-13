@@ -51,11 +51,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     beforeEach(async () => {
-      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
@@ -65,7 +69,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.replace({});
       await unifiedFieldList.cleanSidebarLocalStorage();
@@ -453,7 +459,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should work for many fields', async () => {
-        await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/many_fields');
+        await esArchiver.loadIfNeeded(
+          'src/platform/test/functional/fixtures/es_archiver/many_fields'
+        );
         await kibanaServer.importExport.load(
           'src/platform/test/functional/fixtures/kbn_archiver/many_fields_data_view'
         );

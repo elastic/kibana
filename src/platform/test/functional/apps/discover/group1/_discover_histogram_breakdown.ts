@@ -24,8 +24,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover unified histogram breakdown', function describeIndexTests() {
     before(async () => {
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await common.navigateToApp('discover');
       await header.waitUntilLoadingHasFinished();
@@ -34,7 +38,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
     });
 
     it('should apply breakdown when selected from field stats', async () => {

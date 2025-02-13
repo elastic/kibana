@@ -20,7 +20,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // Fails in chrome 128+: See https://github.com/elastic/kibana/issues/192509
   describe.skip('overview page - Analytics apps', function describeIndexTests() {
     before(async () => {
-      await esArchiver.load('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.load(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
@@ -29,7 +31,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );

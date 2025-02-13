@@ -32,12 +32,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         to: 'Oct 23, 2018 @ 08:00:00.000',
       });
 
-      await esArchiver.load('src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights');
+      await esArchiver.load(
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
+      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
 
-      await esArchiver.load('src/platform/test/functional/fixtures/es_archiver/long_window_logstash');
+      await esArchiver.load(
+        'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
+      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
       );
@@ -48,11 +52,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.uiSettings.unset('courier:ignoreFilterIfFieldNotInIndex');
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
+      );
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/long_window_logstash');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
+      );
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/long_window_logstash_index_pattern'
       );

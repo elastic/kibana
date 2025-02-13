@@ -17,7 +17,9 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('main', () => {
     before(async () => {
-      await esArchiver.load('src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
+      await esArchiver.load(
+        'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+      );
     });
 
     after(async () => {

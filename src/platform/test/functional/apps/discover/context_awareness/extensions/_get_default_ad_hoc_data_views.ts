@@ -82,7 +82,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('fallback behaviour', function () {
       after(async () => {
-        await esArchiver.load('src/platform/test/functional/fixtures/es_archiver/discover/context_awareness');
+        await esArchiver.load(
+          'src/platform/test/functional/fixtures/es_archiver/discover/context_awareness'
+        );
         await kibanaServer.importExport.load(
           'src/platform/test/functional/fixtures/kbn_archiver/discover/context_awareness'
         );
@@ -108,7 +110,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should show the no data page when no ES data is available', async () => {
-        await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/discover/context_awareness');
+        await esArchiver.unload(
+          'src/platform/test/functional/fixtures/es_archiver/discover/context_awareness'
+        );
         await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });

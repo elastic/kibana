@@ -102,7 +102,9 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
 
       after(async () => {
-        await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/dashboard/current/data');
+        await esArchiver.unload(
+          'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
+        );
         await kibanaServer.savedObjects.cleanStandardList();
       });
 

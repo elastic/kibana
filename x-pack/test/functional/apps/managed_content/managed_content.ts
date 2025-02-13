@@ -29,7 +29,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Managed Content', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
-      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/managed_content');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/managed_content'
+      );
     });
 
     after(async () => {

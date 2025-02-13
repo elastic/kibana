@@ -43,7 +43,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/getting_started/shakespeare');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/getting_started/shakespeare'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
     });
 

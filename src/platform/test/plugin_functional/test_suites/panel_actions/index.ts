@@ -27,7 +27,9 @@ export default function ({
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/dashboard/current/data');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
@@ -38,7 +40,9 @@ export default function ({
     after(async function () {
       await dashboard.clearSavedObjectsFromAppLinks();
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/dashboard/current/data');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
+      );
     });
 
     loadTestFile(require.resolve('./panel_actions'));

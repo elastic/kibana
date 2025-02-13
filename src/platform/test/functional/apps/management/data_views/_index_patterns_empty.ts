@@ -21,7 +21,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('index pattern empty view', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/makelogs');
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();

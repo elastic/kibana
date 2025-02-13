@@ -17,7 +17,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('timefield is a date in a nested field', function () {
     before(async function () {
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/date_nested');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/date_nested'
+      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/date_nested.json'
       );
@@ -28,7 +30,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function unloadMakelogs() {
       await security.testUser.restoreDefaults();
       await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/date_nested');
-      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/date_nested');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/date_nested'
+      );
     });
 
     it('should show an error message', async function () {

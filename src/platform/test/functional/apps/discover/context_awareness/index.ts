@@ -19,7 +19,9 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
   describe('discover/context_awareness', () => {
     before(async () => {
-      await esArchiver.load('src/platform/test/functional/fixtures/es_archiver/discover/context_awareness');
+      await esArchiver.load(
+        'src/platform/test/functional/fixtures/es_archiver/discover/context_awareness'
+      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover/context_awareness'
       );
@@ -29,7 +31,9 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     });
 
     after(async () => {
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/discover/context_awareness');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/discover/context_awareness'
+      );
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/discover/context_awareness'
       );

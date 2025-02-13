@@ -29,8 +29,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('data view flyout', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover.json');
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
+      );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
 
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await common.navigateToApp('discover');

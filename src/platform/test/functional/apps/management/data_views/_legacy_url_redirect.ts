@@ -18,12 +18,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('legacy urls redirect correctly', () => {
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await kibanaServer.uiSettings.replace({});
     });
 
     after(async function afterAll() {
-      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
     });
 
     it('redirects correctly to index pattern management', async () => {

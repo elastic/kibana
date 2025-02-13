@@ -23,12 +23,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await kibanaServer.uiSettings.replace({});
     });
 
     after(async function afterAll() {
-      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
     });
 
     describe('create runtime field', function describeIndexTests() {

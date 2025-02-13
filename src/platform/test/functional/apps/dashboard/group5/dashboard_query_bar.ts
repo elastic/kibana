@@ -41,7 +41,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('causes panels to reload when refresh is clicked', async () => {
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/dashboard/current/data');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
+      );
       await queryBar.clickQuerySubmitButton();
       await retry.tryForTime(5000, async () => {
         const headers = await discover.getColumnHeaders();

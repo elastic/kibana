@@ -21,7 +21,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('visual builder tsdb check', function describeIndexTests() {
     before(async () => {
       log.info(`loading sample TSDB index...`);
-      await esArchiver.load('src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb');
+      await esArchiver.load(
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb'
+      );
       log.info(`creating the TSDB data view...`);
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_tsdb'
@@ -34,7 +36,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       log.info(`removing the TSDB index...`);
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb'
+      );
       log.info(`removing the TSDB dataView...`);
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_logs_tsdb'

@@ -22,11 +22,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('extension getAppMenu', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     it('should render the main actions and the action from root profile', async () => {

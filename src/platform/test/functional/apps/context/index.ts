@@ -18,8 +18,12 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   describe('context app', function () {
     before(async () => {
       await browser.setWindowSize(1200, 800);
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/visualize.json');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/visualize.json'
+      );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await PageObjects.common.navigateToApp('discover');
     });

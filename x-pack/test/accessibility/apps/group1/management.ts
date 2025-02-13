@@ -42,7 +42,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.settings.navigateTo();
           });
           after(async () => {
-            await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+            await esArchiver.unload(
+              'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+            );
           });
           it('index list', async () => {
             await a11y.testAppSnapshot();

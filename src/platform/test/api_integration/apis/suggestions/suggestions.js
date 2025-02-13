@@ -144,14 +144,18 @@ export default function ({ getService }) {
 
     describe('time based', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+        await esArchiver.loadIfNeeded(
+          'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+        );
         await kibanaServer.importExport.load(
           'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
         );
       });
 
       after(async () => {
-        await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+        await esArchiver.unload(
+          'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+        );
 
         await kibanaServer.importExport.unload(
           'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'

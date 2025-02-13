@@ -26,14 +26,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Discover request cancellation', () => {
     before(async () => {
-      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover');
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover');
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
       await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });

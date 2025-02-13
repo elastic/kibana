@@ -29,8 +29,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // loading back default data
       await kibanaServer.savedObjects.cleanStandardList();
 
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/long_window_logstash');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
+      );
 
       await visualize.initTests();
       log.debug('navigateToApp visualize');

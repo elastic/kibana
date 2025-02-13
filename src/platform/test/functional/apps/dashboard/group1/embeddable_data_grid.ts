@@ -22,8 +22,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard embeddable data grid', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/dashboard/current/data');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'

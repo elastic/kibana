@@ -18,11 +18,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('data view relationships', function describeIndexTests() {
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
     });
 
     it('Render relationships tab and verify count', async function () {

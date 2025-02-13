@@ -37,7 +37,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ? ['kibana_admin', 'test_logstash_reader', 'ccs_remote_search']
         : ['kibana_admin', 'test_logstash_reader'];
       await security.testUser.setRoles(roles);
-      await esNode.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esNode.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.savedObjects.clean({ types: ['saved-search', 'index-pattern'] });
       await kibanaServer.importExport.load(kbnDirectory);
       await kibanaServer.uiSettings.replace(defaultSettings);

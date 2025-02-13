@@ -31,7 +31,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await remoteEsArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await remoteEsArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     describe('Perform CCS Search in Console', () => {

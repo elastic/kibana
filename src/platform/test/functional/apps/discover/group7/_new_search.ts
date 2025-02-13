@@ -29,16 +29,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover new search action', function () {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover.json');
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
+      );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await common.navigateToApp('discover');
       await timePicker.setDefaultAbsoluteRange();
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover.json');
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover.json'
+      );
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.uiSettings.replace({});
       await kibanaServer.savedObjects.cleanStandardList();
     });

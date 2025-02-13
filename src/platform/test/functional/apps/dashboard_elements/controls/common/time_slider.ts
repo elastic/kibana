@@ -32,7 +32,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'kibana_sample_admin',
         'test_logstash_reader',
       ]);
-      await esArchiver.load('src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights');
+      await esArchiver.load(
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
+      );
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
@@ -48,7 +50,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
+      );
       await kibanaServer.uiSettings.unset('defaultIndex');
       await security.testUser.restoreDefaults();
     });

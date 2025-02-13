@@ -16,11 +16,15 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   async function loadLogstash() {
     await browser.setWindowSize(1200, 900);
-    await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+    await esArchiver.loadIfNeeded(
+      'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+    );
   }
 
   async function unloadLogstash() {
-    await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+    await esArchiver.unload(
+      'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+    );
     await kibanaServer.savedObjects.cleanStandardList();
   }
 

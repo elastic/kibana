@@ -20,12 +20,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('mgmt saved objects', function describeIndexTests() {
     before(async () => {
-      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await PageObjects.settings.navigateTo();
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await kibanaServer.savedObjects.clean({ types: ['search', 'visualization'] });
     });
 

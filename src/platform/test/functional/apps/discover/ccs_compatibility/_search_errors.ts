@@ -32,7 +32,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover search errors', () => {
     before(async () => {
       await kibanaServer.importExport.load(archiveDirectory);
-      await esNode.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esNode.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     after(async () => {

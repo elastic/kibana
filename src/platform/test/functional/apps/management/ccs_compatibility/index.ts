@@ -22,7 +22,9 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     after(async () => {
-      await remoteEsArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await remoteEsArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/makelogs');
     });
 

@@ -23,7 +23,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/date_nanos');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/date_nanos');
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/date_nanos'
+      );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'date-nanos' });
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
       await common.navigateToApp('discover');

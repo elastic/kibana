@@ -14,7 +14,9 @@ export default ({ getService, loadTestFile, getPageObject }: FtrProviderContext)
 
     before(async () => {
       await svlCommonPage.loginAsAdmin();
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/makelogs');
     });
 

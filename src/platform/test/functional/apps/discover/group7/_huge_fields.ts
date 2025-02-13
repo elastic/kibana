@@ -19,7 +19,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('test large number of fields in sidebar', function () {
     before(async function () {
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/huge_fields');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/huge_fields'
+      );
       await security.testUser.setRoles(['kibana_admin', 'test_testhuge_reader'], {
         skipBrowserRefresh: true,
       });

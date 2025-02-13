@@ -36,8 +36,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover data grid row selection', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
       await kibanaServer.uiSettings.replace(defaultSettings);
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
@@ -50,8 +54,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async function () {
       await kibanaServer.uiSettings.replace({});
-      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover');
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/discover'
+      );
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
     });
 

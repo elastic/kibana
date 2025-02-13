@@ -81,11 +81,15 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Saved queries API', function () {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     afterEach(async () => {

@@ -17,7 +17,9 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const { dashboard } = getPageObjects(['dashboard']);
 
   async function setup() {
-    await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/dashboard/current/data');
+    await esArchiver.loadIfNeeded(
+      'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
+    );
     await kibanaServer.savedObjects.cleanStandardList();
     await kibanaServer.importExport.load(
       'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
@@ -32,7 +34,9 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   }
 
   async function teardown() {
-    await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/dashboard/current/data');
+    await esArchiver.unload(
+      'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
+    );
     await security.testUser.restoreDefaults();
     await kibanaServer.savedObjects.cleanStandardList();
   }

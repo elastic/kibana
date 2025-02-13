@@ -23,11 +23,15 @@ export default function ({ getService }: FtrProviderContext) {
   describe('SQL search', () => {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
     });
     describe('post', () => {
       it('should return 200 when correctly formatted searches are provided', async () => {

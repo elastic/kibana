@@ -22,8 +22,12 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     this.tags(['skipFirefox']);
 
     before(async () => {
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/visualize.json');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/visualize.json'
+      );
       await kibanaServer.uiSettings.replace({
         'dateFormat:tz': 'Australia/North',
         defaultIndex: 'logstash-*',

@@ -20,8 +20,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('no data in visualize', function () {
     it('should show the integrations component if there is no data', async () => {
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/long_window_logstash');
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
+      );
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await common.navigateToApp('visualize');
       await header.waitUntilLoadingHasFinished();
@@ -32,8 +36,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show the no dataview component if no dataviews exist', async function () {
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/long_window_logstash');
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+      );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/long_window_logstash'
+      );
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await common.navigateToApp('visualize');
       await header.waitUntilLoadingHasFinished();

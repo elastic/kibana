@@ -11,7 +11,8 @@ import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import { DataViewType } from '@kbn/data-views-plugin/common';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-const archivePath = 'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
+const archivePath =
+  'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common', 'header', 'svlCommonPage']);
