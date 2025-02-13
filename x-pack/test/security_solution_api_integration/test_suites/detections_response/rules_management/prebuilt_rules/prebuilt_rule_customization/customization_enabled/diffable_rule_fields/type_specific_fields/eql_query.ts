@@ -5,788 +5,464 @@
  * 2.0.
  */
 
-import expect from 'expect';
-import {
-  ModeEnum,
-  ThreeWayDiffConflict,
-  ThreeWayDiffOutcome,
-  ThreeWayMergeOutcome,
-} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { ThreeWayDiffOutcome } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../../../../../../../ftr_provider_context';
-import { performUpgradePrebuiltRules, reviewPrebuiltRulesToUpgrade } from '../../../../../../utils';
+import type { TestFieldRuleUpgradeAssets } from '../test_helpers';
 import {
-  DEFAULT_TEST_RULE_ID,
-  setUpRuleUpgrade,
-} from '../../../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
+  testFieldUpgradeReview,
+  testFieldUpgradesToMergedValue,
+  testFieldUpgradesToResolvedValue,
+} from '../test_helpers';
 
 export function eqlQueryField({ getService }: FtrProviderContext): void {
-  const es = getService('es');
-  const supertest = getService('supertest');
-  const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
-
-  const deps = {
-    es,
-    supertest,
-    log,
-  };
-
   describe('"eql_query"', () => {
     describe('non-customized w/o an upgrade (AAA diff case)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'eql',
-              query: 'any where true',
-              language: 'eql',
-            },
-            patch: {},
-            upgrade: {
-              type: 'eql',
-              query: 'any where true',
-              language: 'eql',
-            },
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'eql',
+          query: 'any where true',
+          language: 'eql',
+        },
+        patch: {},
+        upgrade: {
+          type: 'eql',
+          query: 'any where true',
+          language: 'eql',
+        },
+      };
+
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'eql_query',
+          expectedDiffOutcome: ThreeWayDiffOutcome.StockValueNoUpdate,
+        },
+        getService
+      );
+
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'eql_query',
+          resolvedValue: {
+            query: 'process where process.name == "regsvr32.exe"',
+            language: 'eql',
+            filters: [],
           },
-          deps,
-        });
-      });
-
-      it('does NOT return upgrade review', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 0,
-          num_rules_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 1,
-          num_fields_with_conflicts: 0,
-          num_fields_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff.fields).not.toMatchObject({
-          eql_query: expect.anything(),
-        });
-      });
-
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 0,
-              version: 2,
-              fields: {
-                eql_query: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: {
-                    query: 'process where process.name == "regsvr32.exe"',
-                    language: 'eql',
-                    filters: [],
-                  },
-                },
-              },
-            },
-          ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
-          query: 'process where process.name == "regsvr32.exe"',
-          language: 'eql',
-        });
-        expect(upgradedRule.body).toMatchObject({
-          query: 'process where process.name == "regsvr32.exe"',
-          language: 'eql',
-        });
-      });
+          expectedFieldsAfterUpgrade: {
+            query: 'process where process.name == "regsvr32.exe"',
+            language: 'eql',
+          },
+        },
+        getService
+      );
     });
 
     describe('non-customized w/ an upgrade (AAB diff case)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'eql',
-              query: 'any where true',
-              language: 'eql',
-            },
-            patch: {},
-            upgrade: {
-              type: 'eql',
-              query: 'process where process.name == "regsvr32.exe"',
-              language: 'eql',
-            },
-          },
-          deps,
-        });
-      });
-
-      it('returns upgrade review', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 0,
-          num_rules_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 2,
-          num_fields_with_conflicts: 0,
-          num_fields_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff.fields).toMatchObject({
-          eql_query: {
-            base_version: {
-              query: 'any where true',
-              language: 'eql',
-              filters: [],
-            },
-            current_version: {
-              query: 'any where true',
-              language: 'eql',
-              filters: [],
-            },
-            target_version: {
-              query: 'process where process.name == "regsvr32.exe"',
-              language: 'eql',
-              filters: [],
-            },
-            merged_version: {
-              query: 'process where process.name == "regsvr32.exe"',
-              language: 'eql',
-              filters: [],
-            },
-            diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Target,
-            conflict: ThreeWayDiffConflict.NONE,
-            has_update: true,
-            has_base_version: true,
-          },
-        });
-      });
-
-      it('upgrades to MERGED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 0,
-              version: 2,
-              fields: {
-                eql_query: {
-                  pick_version: 'MERGED',
-                },
-              },
-            },
-          ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'eql',
+          query: 'any where true',
+          language: 'eql',
+        },
+        patch: {},
+        upgrade: {
+          type: 'eql',
           query: 'process where process.name == "regsvr32.exe"',
           language: 'eql',
-        });
-        expect(upgradedRule.body).toMatchObject({
-          query: 'process where process.name == "regsvr32.exe"',
-          language: 'eql',
-        });
-      });
+        },
+      };
 
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 0,
-              version: 2,
-              fields: {
-                eql_query: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: {
-                    query: 'resolved where true',
-                    language: 'eql',
-                    filters: [],
-                  },
-                },
-              },
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'eql_query',
+          expectedDiffOutcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+          expectedFieldDiffValues: {
+            base: {
+              query: 'any where true',
+              language: 'eql',
+              filters: [],
             },
-          ],
-        });
+            current: {
+              query: 'any where true',
+              language: 'eql',
+              filters: [],
+            },
+            target: {
+              query: 'process where process.name == "regsvr32.exe"',
+              language: 'eql',
+              filters: [],
+            },
+            merged: {
+              query: 'process where process.name == "regsvr32.exe"',
+              language: 'eql',
+              filters: [],
+            },
+          },
+        },
+        getService
+      );
 
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'eql_query',
+          expectedFieldsAfterUpgrade: {
+            query: 'process where process.name == "regsvr32.exe"',
+            language: 'eql',
+          },
+        },
+        getService
+      );
 
-        expect(response.results.updated[0]).toMatchObject({
-          query: 'resolved where true',
-          language: 'eql',
-        });
-        expect(upgradedRule.body).toMatchObject({
-          query: 'resolved where true',
-          language: 'eql',
-        });
-      });
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'eql_query',
+          resolvedValue: {
+            query: 'process where process.name == "regsvr32.exe"',
+            language: 'eql',
+            filters: [],
+          },
+          expectedFieldsAfterUpgrade: {
+            query: 'process where process.name == "regsvr32.exe"',
+            language: 'eql',
+          },
+        },
+        getService
+      );
     });
 
     describe('customized w/o an upgrade (ABA diff case)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'eql',
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'eql',
+          query: 'any where true',
+          language: 'eql',
+        },
+        patch: {
+          query: 'process where process.name == "regsvr32.exe"',
+        },
+        upgrade: {
+          type: 'eql',
+          query: 'any where true',
+          language: 'eql',
+        },
+      };
+
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'eql_query',
+          expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
+          expectedFieldDiffValues: {
+            base: {
               query: 'any where true',
               language: 'eql',
+              filters: [],
             },
-            patch: {
+            current: {
               query: 'process where process.name == "regsvr32.exe"',
+              language: 'eql',
+              filters: [],
             },
-            upgrade: {
-              type: 'eql',
+            target: {
               query: 'any where true',
               language: 'eql',
+              filters: [],
+            },
+            merged: {
+              query: 'process where process.name == "regsvr32.exe"',
+              language: 'eql',
+              filters: [],
             },
           },
-          deps,
-        });
-      });
+        },
+        getService
+      );
 
-      it('returns upgrade preview', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 0,
-          num_rules_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 1,
-          num_fields_with_conflicts: 0,
-          num_fields_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff.fields).toMatchObject({
-          eql_query: {
-            base_version: {
-              query: 'any where true',
-              language: 'eql',
-              filters: [],
-            },
-            current_version: {
-              query: 'process where process.name == "regsvr32.exe"',
-              language: 'eql',
-              filters: [],
-            },
-            target_version: {
-              query: 'any where true',
-              language: 'eql',
-              filters: [],
-            },
-            merged_version: {
-              query: 'process where process.name == "regsvr32.exe"',
-              language: 'eql',
-              filters: [],
-            },
-            diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflict.NONE,
-            has_update: false,
-            has_base_version: true,
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'eql_query',
+          expectedFieldsAfterUpgrade: {
+            query: 'process where process.name == "regsvr32.exe"',
+            language: 'eql',
           },
-        });
-      });
+        },
+        getService
+      );
 
-      it('upgrades to MERGED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                eql_query: {
-                  pick_version: 'MERGED',
-                },
-              },
-            },
-          ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
-          query: 'process where process.name == "regsvr32.exe"',
-          language: 'eql',
-        });
-        expect(upgradedRule.body).toMatchObject({
-          query: 'process where process.name == "regsvr32.exe"',
-          language: 'eql',
-        });
-      });
-
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                eql_query: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: {
-                    query: 'resolved where true',
-                    language: 'eql',
-                    filters: [],
-                  },
-                },
-              },
-            },
-          ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
-          query: 'resolved where true',
-          language: 'eql',
-        });
-        expect(upgradedRule.body).toMatchObject({
-          query: 'resolved where true',
-          language: 'eql',
-        });
-      });
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'eql_query',
+          resolvedValue: {
+            query: 'process where process.name == "regsvr32.exe"',
+            language: 'eql',
+            filters: [],
+          },
+          expectedFieldsAfterUpgrade: {
+            query: 'process where process.name == "regsvr32.exe"',
+            language: 'eql',
+          },
+        },
+        getService
+      );
     });
 
     describe('customized w/ the matching upgrade (ABB diff case)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'eql',
-              query: 'any where true',
-              language: 'eql',
-            },
-            patch: {
-              query: 'process where process.name == "regsvr32.exe"',
-            },
-            upgrade: {
-              type: 'eql',
-              query: 'process where process.name == "regsvr32.exe"',
-              language: 'eql',
-            },
-          },
-          deps,
-        });
-      });
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'eql',
+          query: 'any where true',
+          language: 'eql',
+        },
+        patch: {
+          query: 'process where process.name == "regsvr32.exe"',
+        },
+        upgrade: {
+          type: 'eql',
+          query: 'process where process.name == "regsvr32.exe"',
+          language: 'eql',
+        },
+      };
 
-      it('returns upgrade preview', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 0,
-          num_rules_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 1,
-          num_fields_with_conflicts: 0,
-          num_fields_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff.fields).toMatchObject({
-          eql_query: {
-            base_version: {
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'eql_query',
+          expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
+          expectedFieldDiffValues: {
+            base: {
               query: 'any where true',
               language: 'eql',
               filters: [],
             },
-            current_version: {
+            current: {
               query: 'process where process.name == "regsvr32.exe"',
               language: 'eql',
               filters: [],
             },
-            target_version: {
+            target: {
               query: 'process where process.name == "regsvr32.exe"',
               language: 'eql',
               filters: [],
             },
-            merged_version: {
+            merged: {
               query: 'process where process.name == "regsvr32.exe"',
               language: 'eql',
               filters: [],
             },
-            diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflict.NONE,
-            has_update: false,
-            has_base_version: true,
           },
-        });
-      });
+        },
+        getService
+      );
 
-      it('upgrades to MERGED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                eql_query: {
-                  pick_version: 'MERGED',
-                },
-              },
-            },
-          ],
-        });
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'eql_query',
+          expectedFieldsAfterUpgrade: {
+            query: 'process where process.name == "regsvr32.exe"',
+            language: 'eql',
+          },
+        },
+        getService
+      );
 
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
-          query: 'process where process.name == "regsvr32.exe"',
-          language: 'eql',
-        });
-        expect(upgradedRule.body).toMatchObject({
-          query: 'process where process.name == "regsvr32.exe"',
-          language: 'eql',
-        });
-      });
-
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                eql_query: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: {
-                    query: 'resolved where true',
-                    language: 'eql',
-                    filters: [],
-                  },
-                },
-              },
-            },
-          ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
-          query: 'resolved where true',
-          language: 'eql',
-        });
-        expect(upgradedRule.body).toMatchObject({
-          query: 'resolved where true',
-          language: 'eql',
-        });
-      });
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'eql_query',
+          resolvedValue: {
+            query: 'process where process.name == "regsvr32.exe"',
+            language: 'eql',
+            filters: [],
+          },
+          expectedFieldsAfterUpgrade: {
+            query: 'process where process.name == "regsvr32.exe"',
+            language: 'eql',
+          },
+        },
+        getService
+      );
     });
 
     describe('customized w/ an upgrade resulting in a conflict (ABC diff case, non-solvable conflict)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'eql',
-              query: 'any where true',
-              language: 'eql',
-            },
-            patch: {
-              query: 'host where host.name == "something"',
-            },
-            upgrade: {
-              type: 'eql',
-              query: 'process where process.name == "regsvr32.exe"',
-              language: 'eql',
-            },
-          },
-          deps,
-        });
-      });
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'eql',
+          query: 'any where true',
+          language: 'eql',
+        },
+        patch: {
+          query: 'host where host.name == "something"',
+        },
+        upgrade: {
+          type: 'eql',
+          query: 'process where process.name == "regsvr32.exe"',
+          language: 'eql',
+        },
+      };
 
-      it('returns upgrade preview', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 1,
-          num_rules_with_non_solvable_conflicts: 1,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 2,
-          num_fields_with_conflicts: 1,
-          num_fields_with_non_solvable_conflicts: 1,
-        });
-        expect(response.rules[0].diff.fields).toMatchObject({
-          eql_query: {
-            base_version: {
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'eql_query',
+          expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+          isSolvableConflict: false,
+          expectedFieldDiffValues: {
+            base: {
               query: 'any where true',
               language: 'eql',
               filters: [],
             },
-            current_version: {
+            current: {
               query: 'host where host.name == "something"',
               language: 'eql',
               filters: [],
             },
-            target_version: {
+            target: {
               query: 'process where process.name == "regsvr32.exe"',
               language: 'eql',
               filters: [],
             },
-            merged_version: {
+            merged: {
               query: 'host where host.name == "something"',
               language: 'eql',
               filters: [],
             },
-            diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflict.NON_SOLVABLE,
-            has_update: true,
-            has_base_version: true,
           },
-        });
-      });
+        },
+        getService
+      );
 
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                eql_query: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: {
-                    query: 'resolved where true',
-                    language: 'eql',
-                    filters: [],
-                  },
-                },
-              },
-            },
-          ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
-          query: 'resolved where true',
-          language: 'eql',
-        });
-        expect(upgradedRule.body).toMatchObject({
-          query: 'resolved where true',
-          language: 'eql',
-        });
-      });
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'eql_query',
+          resolvedValue: {
+            query: 'process where process.name == "regsvr32.exe"',
+            language: 'eql',
+            filters: [],
+          },
+          expectedFieldsAfterUpgrade: {
+            query: 'process where process.name == "regsvr32.exe"',
+            language: 'eql',
+          },
+        },
+        getService
+      );
     });
 
     describe('without historical versions', () => {
       describe('customized w/ the matching upgrade (-AA diff case)', () => {
-        beforeEach(async () => {
-          await setUpRuleUpgrade({
-            assets: {
-              installed: {
-                type: 'eql',
-                query: 'any where true',
-                language: 'eql',
-              },
-              patch: {
-                query: 'host where host.name == "something"',
-              },
-              upgrade: {
-                type: 'eql',
-                query: 'host where host.name == "something"',
-                language: 'eql',
-              },
+        const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+          installed: {
+            type: 'eql',
+            query: 'any where true',
+            language: 'eql',
+          },
+          patch: {
+            query: 'host where host.name == "something"',
+          },
+          upgrade: {
+            type: 'eql',
+            query: 'host where host.name == "something"',
+            language: 'eql',
+          },
+          removeInstalledAssets: true,
+        };
+
+        testFieldUpgradeReview(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'eql_query',
+            expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
+          },
+          getService
+        );
+
+        testFieldUpgradesToResolvedValue(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'eql_query',
+            resolvedValue: {
+              query: 'process where process.name == "regsvr32.exe"',
+              language: 'eql',
+              filters: [],
             },
-            removeInstalledAssets: true,
-            deps,
-          });
-        });
-
-        it('does NOT return upgrade review', async () => {
-          const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-          expect(response.stats).toMatchObject({
-            num_rules_to_upgrade_total: 1,
-            num_rules_with_conflicts: 0,
-            num_rules_with_non_solvable_conflicts: 0,
-          });
-          expect(response.rules[0].diff).toMatchObject({
-            num_fields_with_updates: 1,
-            num_fields_with_conflicts: 0,
-            num_fields_with_non_solvable_conflicts: 0,
-          });
-          expect(response.rules[0].diff.fields).not.toMatchObject({
-            eql_query: expect.anything(),
-          });
-        });
-
-        it('upgrades to RESOLVED value', async () => {
-          const response = await performUpgradePrebuiltRules(es, supertest, {
-            mode: ModeEnum.SPECIFIC_RULES,
-            rules: [
-              {
-                rule_id: DEFAULT_TEST_RULE_ID,
-                revision: 1,
-                version: 2,
-                fields: {
-                  eql_query: {
-                    pick_version: 'RESOLVED',
-                    resolved_value: {
-                      query: 'resolved where true',
-                      language: 'eql',
-                      filters: [],
-                    },
-                  },
-                },
-              },
-            ],
-          });
-
-          const upgradedRule = await securitySolutionApi.readRule({
-            query: { rule_id: DEFAULT_TEST_RULE_ID },
-          });
-
-          expect(response.results.updated[0]).toMatchObject({
-            query: 'resolved where true',
-            language: 'eql',
-          });
-          expect(upgradedRule.body).toMatchObject({
-            query: 'resolved where true',
-            language: 'eql',
-          });
-        });
+            expectedFieldsAfterUpgrade: {
+              query: 'process where process.name == "regsvr32.exe"',
+              language: 'eql',
+            },
+          },
+          getService
+        );
       });
 
       describe('customized w/ an upgrade (-AB diff case)', () => {
-        beforeEach(async () => {
-          await setUpRuleUpgrade({
-            assets: {
-              installed: {
-                type: 'eql',
-                query: 'any where true',
-                language: 'eql',
-              },
-              patch: {
-                query: 'host where host.name == "something"',
-              },
-              upgrade: {
-                type: 'eql',
-                query: 'process where process.name == "regsvr32.exe"',
-                language: 'eql',
-              },
-            },
-            removeInstalledAssets: true,
-            deps,
-          });
-        });
+        const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+          installed: {
+            type: 'eql',
+            query: 'any where true',
+            language: 'eql',
+          },
+          patch: {
+            query: 'host where host.name == "something"',
+          },
+          upgrade: {
+            type: 'eql',
+            query: 'process where process.name == "regsvr32.exe"',
+            language: 'eql',
+          },
+          removeInstalledAssets: true,
+        };
 
-        it('returns upgrade preview', async () => {
-          const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-          expect(response.rules).toHaveLength(1);
-          expect(response.stats).toMatchObject({
-            num_rules_to_upgrade_total: 1,
-            num_rules_with_conflicts: 1,
-            num_rules_with_non_solvable_conflicts: 0,
-          });
-          expect(response.rules[0].diff).toMatchObject({
-            num_fields_with_updates: 2,
-            num_fields_with_conflicts: 1,
-            num_fields_with_non_solvable_conflicts: 0,
-          });
-          expect(response.rules[0].diff.fields).toMatchObject({
-            eql_query: {
-              current_version: {
+        testFieldUpgradeReview(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'eql_query',
+            expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+            expectedFieldDiffValues: {
+              current: {
                 query: 'host where host.name == "something"',
                 language: 'eql',
                 filters: [],
               },
-              target_version: {
+              target: {
                 query: 'process where process.name == "regsvr32.exe"',
                 language: 'eql',
                 filters: [],
               },
-              merged_version: {
+              merged: {
                 query: 'process where process.name == "regsvr32.exe"',
                 language: 'eql',
                 filters: [],
               },
-              diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-              merge_outcome: ThreeWayMergeOutcome.Target,
-              conflict: ThreeWayDiffConflict.SOLVABLE,
-              has_update: true,
-              has_base_version: false,
             },
-          });
-        });
+          },
+          getService
+        );
 
-        it('upgrades to RESOLVED value', async () => {
-          const response = await performUpgradePrebuiltRules(es, supertest, {
-            mode: ModeEnum.SPECIFIC_RULES,
-            rules: [
-              {
-                rule_id: DEFAULT_TEST_RULE_ID,
-                revision: 1,
-                version: 2,
-                fields: {
-                  eql_query: {
-                    pick_version: 'RESOLVED',
-                    resolved_value: {
-                      query: 'resolved where true',
-                      language: 'eql',
-                      filters: [],
-                    },
-                  },
-                },
-              },
-            ],
-          });
-
-          const upgradedRule = await securitySolutionApi.readRule({
-            query: { rule_id: DEFAULT_TEST_RULE_ID },
-          });
-
-          expect(response.results.updated[0]).toMatchObject({
-            query: 'resolved where true',
-            language: 'eql',
-          });
-          expect(upgradedRule.body).toMatchObject({
-            query: 'resolved where true',
-            language: 'eql',
-          });
-        });
+        testFieldUpgradesToResolvedValue(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'eql_query',
+            resolvedValue: {
+              query: 'process where process.name == "regsvr32.exe"',
+              language: 'eql',
+              filters: [],
+            },
+            expectedFieldsAfterUpgrade: {
+              query: 'process where process.name == "regsvr32.exe"',
+              language: 'eql',
+            },
+          },
+          getService
+        );
       });
     });
   });

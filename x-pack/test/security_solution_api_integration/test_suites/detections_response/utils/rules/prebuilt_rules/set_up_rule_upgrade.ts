@@ -26,7 +26,7 @@ interface SetUpRuleUpgradeDeps {
 
 type PartialPrebuiltRuleAsset = Pick<PrebuiltRuleAsset, 'type'> & Partial<PrebuiltRuleAsset>;
 
-interface RuleUpgradeAssets {
+export interface RuleUpgradeAssets {
   installed: PartialPrebuiltRuleAsset;
   patch: Partial<RuleResponse>;
   upgrade: PartialPrebuiltRuleAsset;
@@ -39,6 +39,8 @@ interface SetUpRuleUpgradeParams {
 }
 
 export const DEFAULT_TEST_RULE_ID = 'test-rule';
+export const DEFAULT_INSTALLED_RULE_VERSION = 1;
+export const DEFAULT_RULE_UPDATE_VERSION = 2;
 
 export async function setUpRuleUpgrade({
   assets,
@@ -51,7 +53,7 @@ export async function setUpRuleUpgrade({
     await createHistoricalPrebuiltRuleAssetSavedObjects(deps.es, [
       createRuleAssetSavedObjectOfType(ruleAssets.installed.type, {
         rule_id: DEFAULT_TEST_RULE_ID,
-        version: 1,
+        version: DEFAULT_INSTALLED_RULE_VERSION,
         ...ruleAssets.installed,
       }),
     ]);
@@ -76,7 +78,7 @@ export async function setUpRuleUpgrade({
     await createHistoricalPrebuiltRuleAssetSavedObjects(deps.es, [
       createRuleAssetSavedObjectOfType(ruleAssets.upgrade.type, {
         rule_id: DEFAULT_TEST_RULE_ID,
-        version: 2,
+        version: DEFAULT_RULE_UPDATE_VERSION,
         ...ruleAssets.upgrade,
       }),
     ]);

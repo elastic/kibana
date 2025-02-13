@@ -5,245 +5,96 @@
  * 2.0.
  */
 
-import expect from 'expect';
-import {
-  ModeEnum,
-  ThreeWayDiffConflict,
-  ThreeWayDiffOutcome,
-  ThreeWayMergeOutcome,
-} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { ThreeWayDiffOutcome } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../../../../../../../ftr_provider_context';
-import { performUpgradePrebuiltRules, reviewPrebuiltRulesToUpgrade } from '../../../../../../utils';
+import type { TestFieldRuleUpgradeAssets } from '../test_helpers';
 import {
-  DEFAULT_TEST_RULE_ID,
-  setUpRuleUpgrade,
-} from '../../../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
+  testFieldUpgradeReview,
+  testFieldUpgradesToMergedValue,
+  testFieldUpgradesToResolvedValue,
+} from '../test_helpers';
 
 export function severityMappingField({ getService }: FtrProviderContext): void {
-  const es = getService('es');
-  const supertest = getService('supertest');
-  const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
-
-  const deps = {
-    es,
-    supertest,
-    log,
-  };
-
   describe('"severity_mapping"', () => {
     describe('non-customized w/o an upgrade (AAA diff case)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'query',
-              severity_mapping: [
-                {
-                  field: 'fieldA',
-                  operator: 'equals',
-                  severity: 'low',
-                  value: '10',
-                },
-              ],
-            },
-            patch: {},
-            upgrade: {
-              type: 'query',
-              severity_mapping: [
-                {
-                  field: 'fieldA',
-                  operator: 'equals',
-                  severity: 'low',
-                  value: '10',
-                },
-              ],
-            },
-          },
-          deps,
-        });
-      });
-
-      it('does NOT return upgrade review', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 0,
-          num_rules_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 1,
-          num_fields_with_conflicts: 0,
-          num_fields_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff.fields).not.toMatchObject({
-          severity_mapping: expect.anything(),
-        });
-      });
-
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          severity_mapping: [
             {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 0,
-              version: 2,
-              fields: {
-                severity_mapping: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: [
-                    {
-                      field: 'resolved',
-                      operator: 'equals',
-                      severity: 'high',
-                      value: '50',
-                    },
-                  ],
-                },
+              field: 'fieldA',
+              operator: 'equals',
+              severity: 'low',
+              value: '10',
+            },
+          ],
+        },
+        patch: {},
+        upgrade: {
+          type: 'query',
+          severity_mapping: [
+            {
+              field: 'fieldA',
+              operator: 'equals',
+              severity: 'low',
+              value: '10',
+            },
+          ],
+        },
+      };
+
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'severity_mapping',
+          expectedDiffOutcome: ThreeWayDiffOutcome.StockValueNoUpdate,
+        },
+        getService
+      );
+
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'severity_mapping',
+          resolvedValue: [
+            {
+              field: 'resolved',
+              operator: 'equals',
+              severity: 'high',
+              value: '50',
+            },
+          ],
+          expectedFieldsAfterUpgrade: {
+            severity_mapping: [
+              {
+                field: 'resolved',
+                operator: 'equals',
+                severity: 'high',
+                value: '50',
               },
-            },
-          ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
-          severity_mapping: [
-            {
-              field: 'resolved',
-              operator: 'equals',
-              severity: 'high',
-              value: '50',
-            },
-          ],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          severity_mapping: [
-            {
-              field: 'resolved',
-              operator: 'equals',
-              severity: 'high',
-              value: '50',
-            },
-          ],
-        });
-      });
+            ],
+          },
+        },
+        getService
+      );
     });
 
     describe('non-customized w/ an upgrade (AAB diff case)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'query',
-              severity_mapping: [
-                {
-                  field: 'fieldA',
-                  operator: 'equals',
-                  severity: 'low',
-                  value: '10',
-                },
-              ],
-            },
-            patch: {},
-            upgrade: {
-              type: 'query',
-              severity_mapping: [
-                {
-                  field: 'fieldB',
-                  operator: 'equals',
-                  severity: 'high',
-                  value: '20',
-                },
-              ],
-            },
-          },
-          deps,
-        });
-      });
-
-      it('returns upgrade review', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 0,
-          num_rules_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 2,
-          num_fields_with_conflicts: 0,
-          num_fields_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff.fields).toMatchObject({
-          severity_mapping: {
-            base_version: [
-              {
-                field: 'fieldA',
-                operator: 'equals',
-                severity: 'low',
-                value: '10',
-              },
-            ],
-            current_version: [
-              {
-                field: 'fieldA',
-                operator: 'equals',
-                severity: 'low',
-                value: '10',
-              },
-            ],
-            target_version: [
-              {
-                field: 'fieldB',
-                operator: 'equals',
-                severity: 'high',
-                value: '20',
-              },
-            ],
-            merged_version: [
-              {
-                field: 'fieldB',
-                operator: 'equals',
-                severity: 'high',
-                value: '20',
-              },
-            ],
-            diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Target,
-            conflict: ThreeWayDiffConflict.NONE,
-            has_update: true,
-            has_base_version: true,
-          },
-        });
-      });
-
-      it('upgrades to MERGED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          severity_mapping: [
             {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 0,
-              version: 2,
-              fields: {
-                severity_mapping: {
-                  pick_version: 'MERGED',
-                },
-              },
+              field: 'fieldA',
+              operator: 'equals',
+              severity: 'low',
+              value: '10',
             },
           ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
+        },
+        patch: {},
+        upgrade: {
+          type: 'query',
           severity_mapping: [
             {
               field: 'fieldB',
@@ -252,50 +103,75 @@ export function severityMappingField({ getService }: FtrProviderContext): void {
               value: '20',
             },
           ],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          severity_mapping: [
-            {
-              field: 'fieldB',
-              operator: 'equals',
-              severity: 'high',
-              value: '20',
-            },
-          ],
-        });
-      });
+        },
+      };
 
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 0,
-              version: 2,
-              fields: {
-                severity_mapping: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: [
-                    {
-                      field: 'resolved',
-                      operator: 'equals',
-                      severity: 'high',
-                      value: '50',
-                    },
-                  ],
-                },
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'severity_mapping',
+          expectedDiffOutcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+          expectedFieldDiffValues: {
+            base: [
+              {
+                field: 'fieldA',
+                operator: 'equals',
+                severity: 'low',
+                value: '10',
               },
-            },
-          ],
-        });
+            ],
+            current: [
+              {
+                field: 'fieldA',
+                operator: 'equals',
+                severity: 'low',
+                value: '10',
+              },
+            ],
+            target: [
+              {
+                field: 'fieldB',
+                operator: 'equals',
+                severity: 'high',
+                value: '20',
+              },
+            ],
+            merged: [
+              {
+                field: 'fieldB',
+                operator: 'equals',
+                severity: 'high',
+                value: '20',
+              },
+            ],
+          },
+        },
+        getService
+      );
 
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'severity_mapping',
+          expectedFieldsAfterUpgrade: {
+            severity_mapping: [
+              {
+                field: 'fieldB',
+                operator: 'equals',
+                severity: 'high',
+                value: '20',
+              },
+            ],
+          },
+        },
+        getService
+      );
 
-        expect(response.results.updated[0]).toMatchObject({
-          severity_mapping: [
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'severity_mapping',
+          resolvedValue: [
             {
               field: 'resolved',
               operator: 'equals',
@@ -303,139 +179,35 @@ export function severityMappingField({ getService }: FtrProviderContext): void {
               value: '50',
             },
           ],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          severity_mapping: [
-            {
-              field: 'resolved',
-              operator: 'equals',
-              severity: 'high',
-              value: '50',
-            },
-          ],
-        });
-      });
+          expectedFieldsAfterUpgrade: {
+            severity_mapping: [
+              {
+                field: 'resolved',
+                operator: 'equals',
+                severity: 'high',
+                value: '50',
+              },
+            ],
+          },
+        },
+        getService
+      );
     });
 
     describe('customized w/o an upgrade (ABA diff case)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'query',
-              severity_mapping: [
-                {
-                  field: 'fieldA',
-                  operator: 'equals',
-                  severity: 'low',
-                  value: '10',
-                },
-              ],
-            },
-            patch: {
-              severity_mapping: [
-                {
-                  field: 'fieldB',
-                  operator: 'equals',
-                  severity: 'medium',
-                  value: '30',
-                },
-              ],
-            },
-            upgrade: {
-              type: 'query',
-              severity_mapping: [
-                {
-                  field: 'fieldA',
-                  operator: 'equals',
-                  severity: 'low',
-                  value: '10',
-                },
-              ],
-            },
-          },
-          deps,
-        });
-      });
-
-      it('returns upgrade preview', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 0,
-          num_rules_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 1,
-          num_fields_with_conflicts: 0,
-          num_fields_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff.fields).toMatchObject({
-          severity_mapping: {
-            base_version: [
-              {
-                field: 'fieldA',
-                operator: 'equals',
-                severity: 'low',
-                value: '10',
-              },
-            ],
-            current_version: [
-              {
-                field: 'fieldB',
-                operator: 'equals',
-                severity: 'medium',
-                value: '30',
-              },
-            ],
-            target_version: [
-              {
-                field: 'fieldA',
-                operator: 'equals',
-                severity: 'low',
-                value: '10',
-              },
-            ],
-            merged_version: [
-              {
-                field: 'fieldB',
-                operator: 'equals',
-                severity: 'medium',
-                value: '30',
-              },
-            ],
-            diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflict.NONE,
-            has_update: false,
-            has_base_version: true,
-          },
-        });
-      });
-
-      it('upgrades to MERGED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          severity_mapping: [
             {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                severity_mapping: {
-                  pick_version: 'MERGED',
-                },
-              },
+              field: 'fieldA',
+              operator: 'equals',
+              severity: 'low',
+              value: '10',
             },
           ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
+        },
+        patch: {
           severity_mapping: [
             {
               field: 'fieldB',
@@ -444,50 +216,86 @@ export function severityMappingField({ getService }: FtrProviderContext): void {
               value: '30',
             },
           ],
-        });
-        expect(upgradedRule.body).toMatchObject({
+        },
+        upgrade: {
+          type: 'query',
           severity_mapping: [
             {
-              field: 'fieldB',
+              field: 'fieldA',
               operator: 'equals',
-              severity: 'medium',
-              value: '30',
+              severity: 'low',
+              value: '10',
             },
           ],
-        });
-      });
+        },
+      };
 
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                severity_mapping: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: [
-                    {
-                      field: 'resolved',
-                      operator: 'equals',
-                      severity: 'high',
-                      value: '50',
-                    },
-                  ],
-                },
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'severity_mapping',
+          expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
+          expectedFieldDiffValues: {
+            base: [
+              {
+                field: 'fieldA',
+                operator: 'equals',
+                severity: 'low',
+                value: '10',
               },
-            },
-          ],
-        });
+            ],
+            current: [
+              {
+                field: 'fieldB',
+                operator: 'equals',
+                severity: 'medium',
+                value: '30',
+              },
+            ],
+            target: [
+              {
+                field: 'fieldA',
+                operator: 'equals',
+                severity: 'low',
+                value: '10',
+              },
+            ],
+            merged: [
+              {
+                field: 'fieldB',
+                operator: 'equals',
+                severity: 'medium',
+                value: '30',
+              },
+            ],
+          },
+        },
+        getService
+      );
 
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'severity_mapping',
+          expectedFieldsAfterUpgrade: {
+            severity_mapping: [
+              {
+                field: 'fieldB',
+                operator: 'equals',
+                severity: 'medium',
+                value: '30',
+              },
+            ],
+          },
+        },
+        getService
+      );
 
-        expect(response.results.updated[0]).toMatchObject({
-          severity_mapping: [
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'severity_mapping',
+          resolvedValue: [
             {
               field: 'resolved',
               operator: 'equals',
@@ -495,77 +303,64 @@ export function severityMappingField({ getService }: FtrProviderContext): void {
               value: '50',
             },
           ],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          severity_mapping: [
-            {
-              field: 'resolved',
-              operator: 'equals',
-              severity: 'high',
-              value: '50',
-            },
-          ],
-        });
-      });
+          expectedFieldsAfterUpgrade: {
+            severity_mapping: [
+              {
+                field: 'resolved',
+                operator: 'equals',
+                severity: 'high',
+                value: '50',
+              },
+            ],
+          },
+        },
+        getService
+      );
     });
 
     describe('customized w/ the matching upgrade (ABB diff case)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'query',
-              severity_mapping: [
-                {
-                  field: 'fieldA',
-                  operator: 'equals',
-                  severity: 'low',
-                  value: '10',
-                },
-              ],
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          severity_mapping: [
+            {
+              field: 'fieldA',
+              operator: 'equals',
+              severity: 'low',
+              value: '10',
             },
-            patch: {
-              severity_mapping: [
-                {
-                  field: 'fieldB',
-                  operator: 'equals',
-                  severity: 'medium',
-                  value: '30',
-                },
-              ],
+          ],
+        },
+        patch: {
+          severity_mapping: [
+            {
+              field: 'fieldB',
+              operator: 'equals',
+              severity: 'medium',
+              value: '30',
             },
-            upgrade: {
-              type: 'query',
-              severity_mapping: [
-                {
-                  field: 'fieldB',
-                  operator: 'equals',
-                  severity: 'medium',
-                  value: '30',
-                },
-              ],
+          ],
+        },
+        upgrade: {
+          type: 'query',
+          severity_mapping: [
+            {
+              field: 'fieldB',
+              operator: 'equals',
+              severity: 'medium',
+              value: '30',
             },
-          },
-          deps,
-        });
-      });
+          ],
+        },
+      };
 
-      it('returns upgrade preview', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 0,
-          num_rules_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 1,
-          num_fields_with_conflicts: 0,
-          num_fields_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff.fields).toMatchObject({
-          severity_mapping: {
-            base_version: [
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'severity_mapping',
+          expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
+          expectedFieldDiffValues: {
+            base: [
               {
                 field: 'fieldA',
                 operator: 'equals',
@@ -573,7 +368,7 @@ export function severityMappingField({ getService }: FtrProviderContext): void {
                 value: '10',
               },
             ],
-            current_version: [
+            current: [
               {
                 field: 'fieldB',
                 operator: 'equals',
@@ -581,7 +376,7 @@ export function severityMappingField({ getService }: FtrProviderContext): void {
                 value: '30',
               },
             ],
-            target_version: [
+            target: [
               {
                 field: 'fieldB',
                 operator: 'equals',
@@ -589,7 +384,7 @@ export function severityMappingField({ getService }: FtrProviderContext): void {
                 value: '30',
               },
             ],
-            merged_version: [
+            merged: [
               {
                 field: 'fieldB',
                 operator: 'equals',
@@ -597,89 +392,34 @@ export function severityMappingField({ getService }: FtrProviderContext): void {
                 value: '30',
               },
             ],
-            diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflict.NONE,
-            has_update: false,
-            has_base_version: true,
           },
-        });
-      });
+        },
+        getService
+      );
 
-      it('upgrades to MERGED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                severity_mapping: {
-                  pick_version: 'MERGED',
-                },
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'severity_mapping',
+          expectedFieldsAfterUpgrade: {
+            severity_mapping: [
+              {
+                field: 'fieldB',
+                operator: 'equals',
+                severity: 'medium',
+                value: '30',
               },
-            },
-          ],
-        });
+            ],
+          },
+        },
+        getService
+      );
 
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
-          severity_mapping: [
-            {
-              field: 'fieldB',
-              operator: 'equals',
-              severity: 'medium',
-              value: '30',
-            },
-          ],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          severity_mapping: [
-            {
-              field: 'fieldB',
-              operator: 'equals',
-              severity: 'medium',
-              value: '30',
-            },
-          ],
-        });
-      });
-
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                severity_mapping: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: [
-                    {
-                      field: 'resolved',
-                      operator: 'equals',
-                      severity: 'high',
-                      value: '50',
-                    },
-                  ],
-                },
-              },
-            },
-          ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
-          severity_mapping: [
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'severity_mapping',
+          resolvedValue: [
             {
               field: 'resolved',
               operator: 'equals',
@@ -687,77 +427,65 @@ export function severityMappingField({ getService }: FtrProviderContext): void {
               value: '50',
             },
           ],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          severity_mapping: [
-            {
-              field: 'resolved',
-              operator: 'equals',
-              severity: 'high',
-              value: '50',
-            },
-          ],
-        });
-      });
+          expectedFieldsAfterUpgrade: {
+            severity_mapping: [
+              {
+                field: 'resolved',
+                operator: 'equals',
+                severity: 'high',
+                value: '50',
+              },
+            ],
+          },
+        },
+        getService
+      );
     });
 
     describe('customized w/ an upgrade resulting in a conflict (ABC diff case, non-solvable conflict)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'query',
-              severity_mapping: [
-                {
-                  field: 'fieldA',
-                  operator: 'equals',
-                  severity: 'low',
-                  value: '10',
-                },
-              ],
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          severity_mapping: [
+            {
+              field: 'fieldA',
+              operator: 'equals',
+              severity: 'low',
+              value: '10',
             },
-            patch: {
-              severity_mapping: [
-                {
-                  field: 'fieldB',
-                  operator: 'equals',
-                  severity: 'medium',
-                  value: '30',
-                },
-              ],
+          ],
+        },
+        patch: {
+          severity_mapping: [
+            {
+              field: 'fieldB',
+              operator: 'equals',
+              severity: 'medium',
+              value: '30',
             },
-            upgrade: {
-              type: 'query',
-              severity_mapping: [
-                {
-                  field: 'fieldC',
-                  operator: 'equals',
-                  severity: 'high',
-                  value: '50',
-                },
-              ],
+          ],
+        },
+        upgrade: {
+          type: 'query',
+          severity_mapping: [
+            {
+              field: 'fieldC',
+              operator: 'equals',
+              severity: 'high',
+              value: '50',
             },
-          },
-          deps,
-        });
-      });
+          ],
+        },
+      };
 
-      it('returns upgrade preview', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 1,
-          num_rules_with_non_solvable_conflicts: 1,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 2,
-          num_fields_with_conflicts: 1,
-          num_fields_with_non_solvable_conflicts: 1,
-        });
-        expect(response.rules[0].diff.fields).toMatchObject({
-          severity_mapping: {
-            base_version: [
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'severity_mapping',
+          expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+          isSolvableConflict: false,
+          expectedFieldDiffValues: {
+            base: [
               {
                 field: 'fieldA',
                 operator: 'equals',
@@ -765,7 +493,7 @@ export function severityMappingField({ getService }: FtrProviderContext): void {
                 value: '10',
               },
             ],
-            current_version: [
+            current: [
               {
                 field: 'fieldB',
                 operator: 'equals',
@@ -773,7 +501,7 @@ export function severityMappingField({ getService }: FtrProviderContext): void {
                 value: '30',
               },
             ],
-            target_version: [
+            target: [
               {
                 field: 'fieldC',
                 operator: 'equals',
@@ -781,7 +509,7 @@ export function severityMappingField({ getService }: FtrProviderContext): void {
                 value: '50',
               },
             ],
-            merged_version: [
+            merged: [
               {
                 field: 'fieldB',
                 operator: 'equals',
@@ -789,239 +517,156 @@ export function severityMappingField({ getService }: FtrProviderContext): void {
                 value: '30',
               },
             ],
-            diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflict.NON_SOLVABLE,
-            has_update: true,
-            has_base_version: true,
           },
-        });
-      });
+        },
+        getService
+      );
 
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'severity_mapping',
+          resolvedValue: [
             {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                severity_mapping: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: [
-                    {
-                      field: 'resolved',
-                      operator: 'equals',
-                      severity: 'high',
-                      value: '50',
-                    },
-                  ],
-                },
+              field: 'resolved',
+              operator: 'equals',
+              severity: 'high',
+              value: '50',
+            },
+          ],
+          expectedFieldsAfterUpgrade: {
+            severity_mapping: [
+              {
+                field: 'resolved',
+                operator: 'equals',
+                severity: 'high',
+                value: '50',
               },
-            },
-          ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
-          severity_mapping: [
-            {
-              field: 'resolved',
-              operator: 'equals',
-              severity: 'high',
-              value: '50',
-            },
-          ],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          severity_mapping: [
-            {
-              field: 'resolved',
-              operator: 'equals',
-              severity: 'high',
-              value: '50',
-            },
-          ],
-        });
-      });
+            ],
+          },
+        },
+        getService
+      );
     });
 
     describe('without historical versions', () => {
       describe('customized w/ the matching upgrade (-AA diff case)', () => {
-        beforeEach(async () => {
-          await setUpRuleUpgrade({
-            assets: {
-              installed: {
-                type: 'query',
-                severity_mapping: [
-                  {
-                    field: 'fieldA',
-                    operator: 'equals',
-                    severity: 'low',
-                    value: '10',
-                  },
-                ],
-              },
-              patch: {
-                severity_mapping: [
-                  {
-                    field: 'fieldB',
-                    operator: 'equals',
-                    severity: 'medium',
-                    value: '30',
-                  },
-                ],
-              },
-              upgrade: {
-                type: 'query',
-                severity_mapping: [
-                  {
-                    field: 'fieldB',
-                    operator: 'equals',
-                    severity: 'medium',
-                    value: '30',
-                  },
-                ],
-              },
-            },
-            removeInstalledAssets: true,
-            deps,
-          });
-        });
-
-        it('does NOT return upgrade review', async () => {
-          const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-          expect(response.stats).toMatchObject({
-            num_rules_to_upgrade_total: 1,
-            num_rules_with_conflicts: 0,
-            num_rules_with_non_solvable_conflicts: 0,
-          });
-          expect(response.rules[0].diff).toMatchObject({
-            num_fields_with_updates: 1,
-            num_fields_with_conflicts: 0,
-            num_fields_with_non_solvable_conflicts: 0,
-          });
-          expect(response.rules[0].diff.fields).not.toMatchObject({
-            severity_mapping: expect.anything(),
-          });
-        });
-
-        it('upgrades to RESOLVED value', async () => {
-          const response = await performUpgradePrebuiltRules(es, supertest, {
-            mode: ModeEnum.SPECIFIC_RULES,
-            rules: [
+        const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+          installed: {
+            type: 'query',
+            severity_mapping: [
               {
-                rule_id: DEFAULT_TEST_RULE_ID,
-                revision: 1,
-                version: 2,
-                fields: {
-                  severity_mapping: {
-                    pick_version: 'RESOLVED',
-                    resolved_value: [
-                      {
-                        field: 'resolved',
-                        operator: 'equals',
-                        severity: 'high',
-                        value: '50',
-                      },
-                    ],
-                  },
+                field: 'fieldA',
+                operator: 'equals',
+                severity: 'low',
+                value: '10',
+              },
+            ],
+          },
+          patch: {
+            severity_mapping: [
+              {
+                field: 'fieldB',
+                operator: 'equals',
+                severity: 'medium',
+                value: '30',
+              },
+            ],
+          },
+          upgrade: {
+            type: 'query',
+            severity_mapping: [
+              {
+                field: 'fieldB',
+                operator: 'equals',
+                severity: 'medium',
+                value: '30',
+              },
+            ],
+          },
+          removeInstalledAssets: true,
+        };
+
+        testFieldUpgradeReview(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'severity_mapping',
+            expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
+          },
+          getService
+        );
+
+        testFieldUpgradesToResolvedValue(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'severity_mapping',
+            resolvedValue: [
+              {
+                field: 'resolved',
+                operator: 'equals',
+                severity: 'high',
+                value: '50',
+              },
+            ],
+            expectedFieldsAfterUpgrade: {
+              severity_mapping: [
+                {
+                  field: 'resolved',
+                  operator: 'equals',
+                  severity: 'high',
+                  value: '50',
                 },
-              },
-            ],
-          });
-
-          const upgradedRule = await securitySolutionApi.readRule({
-            query: { rule_id: DEFAULT_TEST_RULE_ID },
-          });
-
-          expect(response.results.updated[0]).toMatchObject({
-            severity_mapping: [
-              {
-                field: 'resolved',
-                operator: 'equals',
-                severity: 'high',
-                value: '50',
-              },
-            ],
-          });
-          expect(upgradedRule.body).toMatchObject({
-            severity_mapping: [
-              {
-                field: 'resolved',
-                operator: 'equals',
-                severity: 'high',
-                value: '50',
-              },
-            ],
-          });
-        });
+              ],
+            },
+          },
+          getService
+        );
       });
 
       describe('customized w/ an upgrade (-AB diff case)', () => {
-        beforeEach(async () => {
-          await setUpRuleUpgrade({
-            assets: {
-              installed: {
-                type: 'query',
-                severity_mapping: [
-                  {
-                    field: 'fieldA',
-                    operator: 'equals',
-                    severity: 'low',
-                    value: '10',
-                  },
-                ],
+        const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+          installed: {
+            type: 'query',
+            severity_mapping: [
+              {
+                field: 'fieldA',
+                operator: 'equals',
+                severity: 'low',
+                value: '10',
               },
-              patch: {
-                severity_mapping: [
-                  {
-                    field: 'fieldB',
-                    operator: 'equals',
-                    severity: 'medium',
-                    value: '30',
-                  },
-                ],
+            ],
+          },
+          patch: {
+            severity_mapping: [
+              {
+                field: 'fieldB',
+                operator: 'equals',
+                severity: 'medium',
+                value: '30',
               },
-              upgrade: {
-                type: 'query',
-                severity_mapping: [
-                  {
-                    field: 'fieldC',
-                    operator: 'equals',
-                    severity: 'high',
-                    value: '50',
-                  },
-                ],
+            ],
+          },
+          upgrade: {
+            type: 'query',
+            severity_mapping: [
+              {
+                field: 'fieldC',
+                operator: 'equals',
+                severity: 'high',
+                value: '50',
               },
-            },
-            removeInstalledAssets: true,
-            deps,
-          });
-        });
+            ],
+          },
+          removeInstalledAssets: true,
+        };
 
-        it('returns upgrade preview', async () => {
-          const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-          expect(response.rules).toHaveLength(1);
-          expect(response.stats).toMatchObject({
-            num_rules_to_upgrade_total: 1,
-            num_rules_with_conflicts: 1,
-            num_rules_with_non_solvable_conflicts: 0,
-          });
-          expect(response.rules[0].diff).toMatchObject({
-            num_fields_with_updates: 2,
-            num_fields_with_conflicts: 1,
-            num_fields_with_non_solvable_conflicts: 0,
-          });
-          expect(response.rules[0].diff.fields).toMatchObject({
-            severity_mapping: {
-              current_version: [
+        testFieldUpgradeReview(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'severity_mapping',
+            expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+            expectedFieldDiffValues: {
+              current: [
                 {
                   field: 'fieldB',
                   operator: 'equals',
@@ -1029,7 +674,7 @@ export function severityMappingField({ getService }: FtrProviderContext): void {
                   value: '30',
                 },
               ],
-              target_version: [
+              target: [
                 {
                   field: 'fieldC',
                   operator: 'equals',
@@ -1037,7 +682,7 @@ export function severityMappingField({ getService }: FtrProviderContext): void {
                   value: '50',
                 },
               ],
-              merged_version: [
+              merged: [
                 {
                   field: 'fieldC',
                   operator: 'equals',
@@ -1045,65 +690,36 @@ export function severityMappingField({ getService }: FtrProviderContext): void {
                   value: '50',
                 },
               ],
-              diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-              merge_outcome: ThreeWayMergeOutcome.Target,
-              conflict: ThreeWayDiffConflict.SOLVABLE,
-              has_update: true,
-              has_base_version: false,
             },
-          });
-        });
+          },
+          getService
+        );
 
-        it('upgrades to RESOLVED value', async () => {
-          const response = await performUpgradePrebuiltRules(es, supertest, {
-            mode: ModeEnum.SPECIFIC_RULES,
-            rules: [
+        testFieldUpgradesToResolvedValue(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'severity_mapping',
+            resolvedValue: [
               {
-                rule_id: DEFAULT_TEST_RULE_ID,
-                revision: 1,
-                version: 2,
-                fields: {
-                  severity_mapping: {
-                    pick_version: 'RESOLVED',
-                    resolved_value: [
-                      {
-                        field: 'resolved',
-                        operator: 'equals',
-                        severity: 'high',
-                        value: '50',
-                      },
-                    ],
-                  },
+                field: 'resolved',
+                operator: 'equals',
+                severity: 'high',
+                value: '50',
+              },
+            ],
+            expectedFieldsAfterUpgrade: {
+              severity_mapping: [
+                {
+                  field: 'resolved',
+                  operator: 'equals',
+                  severity: 'high',
+                  value: '50',
                 },
-              },
-            ],
-          });
-
-          const upgradedRule = await securitySolutionApi.readRule({
-            query: { rule_id: DEFAULT_TEST_RULE_ID },
-          });
-
-          expect(response.results.updated[0]).toMatchObject({
-            severity_mapping: [
-              {
-                field: 'resolved',
-                operator: 'equals',
-                severity: 'high',
-                value: '50',
-              },
-            ],
-          });
-          expect(upgradedRule.body).toMatchObject({
-            severity_mapping: [
-              {
-                field: 'resolved',
-                operator: 'equals',
-                severity: 'high',
-                value: '50',
-              },
-            ],
-          });
-        });
+              ],
+            },
+          },
+          getService
+        );
       });
     });
   });

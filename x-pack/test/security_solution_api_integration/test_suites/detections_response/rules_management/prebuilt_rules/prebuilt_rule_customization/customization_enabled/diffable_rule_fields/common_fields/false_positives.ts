@@ -5,650 +5,316 @@
  * 2.0.
  */
 
-import expect from 'expect';
-import {
-  ModeEnum,
-  ThreeWayDiffConflict,
-  ThreeWayDiffOutcome,
-  ThreeWayMergeOutcome,
-} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { ThreeWayDiffOutcome } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../../../../../../../ftr_provider_context';
-import { performUpgradePrebuiltRules, reviewPrebuiltRulesToUpgrade } from '../../../../../../utils';
+import type { TestFieldRuleUpgradeAssets } from '../test_helpers';
 import {
-  DEFAULT_TEST_RULE_ID,
-  setUpRuleUpgrade,
-} from '../../../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
+  testFieldUpgradeReview,
+  testFieldUpgradesToMergedValue,
+  testFieldUpgradesToResolvedValue,
+} from '../test_helpers';
 
 export function falsePositivesField({ getService }: FtrProviderContext): void {
-  const es = getService('es');
-  const supertest = getService('supertest');
-  const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
-
-  const deps = {
-    es,
-    supertest,
-    log,
-  };
-
   describe('"false_positives"', () => {
     describe('non-customized w/o an upgrade (AAA diff case)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'query',
-              false_positives: ['example1'],
-            },
-            patch: {},
-            upgrade: {
-              type: 'query',
-              false_positives: ['example1'],
-            },
-          },
-          deps,
-        });
-      });
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          false_positives: ['example1'],
+        },
+        patch: {},
+        upgrade: {
+          type: 'query',
+          false_positives: ['example1'],
+        },
+      };
 
-      it('does NOT return upgrade review', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'false_positives',
+          expectedDiffOutcome: ThreeWayDiffOutcome.StockValueNoUpdate,
+        },
+        getService
+      );
 
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 0,
-          num_rules_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 1,
-          num_fields_with_conflicts: 0,
-          num_fields_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff.fields).not.toMatchObject({
-          false_positives: expect.anything(),
-        });
-      });
-
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 0,
-              version: 2,
-              fields: {
-                false_positives: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: ['resolved'],
-                },
-              },
-            },
-          ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
-          false_positives: ['resolved'],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          false_positives: ['resolved'],
-        });
-      });
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'false_positives',
+          resolvedValue: ['resolved'],
+          expectedFieldsAfterUpgrade: { false_positives: ['resolved'] },
+        },
+        getService
+      );
     });
 
     describe('non-customized w/ an upgrade (AAB diff case)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'query',
-              false_positives: ['example1'],
-            },
-            patch: {},
-            upgrade: {
-              type: 'query',
-              false_positives: ['example2'],
-            },
-          },
-          deps,
-        });
-      });
-
-      it('returns upgrade review', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 0,
-          num_rules_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 2,
-          num_fields_with_conflicts: 0,
-          num_fields_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff.fields).toMatchObject({
-          false_positives: {
-            base_version: ['example1'],
-            current_version: ['example1'],
-            target_version: ['example2'],
-            merged_version: ['example2'],
-            diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Target,
-            conflict: ThreeWayDiffConflict.NONE,
-            has_update: true,
-            has_base_version: true,
-          },
-        });
-      });
-
-      it('upgrades to MERGED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 0,
-              version: 2,
-              fields: {
-                false_positives: {
-                  pick_version: 'MERGED',
-                },
-              },
-            },
-          ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          false_positives: ['example1'],
+        },
+        patch: {},
+        upgrade: {
+          type: 'query',
           false_positives: ['example2'],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          false_positives: ['example2'],
-        });
-      });
+        },
+      };
 
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 0,
-              version: 2,
-              fields: {
-                false_positives: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: ['resolved'],
-                },
-              },
-            },
-          ],
-        });
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'false_positives',
+          expectedDiffOutcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+          expectedFieldDiffValues: {
+            base: ['example1'],
+            current: ['example1'],
+            target: ['example2'],
+            merged: ['example2'],
+          },
+        },
+        getService
+      );
 
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'false_positives',
+          expectedFieldsAfterUpgrade: { false_positives: ['example2'] },
+        },
+        getService
+      );
 
-        expect(response.results.updated[0]).toMatchObject({
-          false_positives: ['resolved'],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          false_positives: ['resolved'],
-        });
-      });
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'false_positives',
+          resolvedValue: ['resolved'],
+          expectedFieldsAfterUpgrade: { false_positives: ['resolved'] },
+        },
+        getService
+      );
     });
 
     describe('customized w/o an upgrade (ABA diff case)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'query',
-              false_positives: ['example1'],
-            },
-            patch: {
-              false_positives: ['example3'],
-            },
-            upgrade: {
-              type: 'query',
-              false_positives: ['example1'],
-            },
-          },
-          deps,
-        });
-      });
-
-      it('returns upgrade preview', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 0,
-          num_rules_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 1,
-          num_fields_with_conflicts: 0,
-          num_fields_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff.fields).toMatchObject({
-          false_positives: {
-            base_version: ['example1'],
-            current_version: ['example3'],
-            target_version: ['example1'],
-            merged_version: ['example3'],
-            diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflict.NONE,
-            has_update: false,
-            has_base_version: true,
-          },
-        });
-      });
-
-      it('upgrades to MERGED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                false_positives: {
-                  pick_version: 'MERGED',
-                },
-              },
-            },
-          ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          false_positives: ['example1'],
+        },
+        patch: {
           false_positives: ['example3'],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          false_positives: ['example3'],
-        });
-      });
+        },
+        upgrade: {
+          type: 'query',
+          false_positives: ['example1'],
+        },
+      };
 
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                false_positives: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: ['resolved'],
-                },
-              },
-            },
-          ],
-        });
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'false_positives',
+          expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
+          expectedFieldDiffValues: {
+            base: ['example1'],
+            current: ['example3'],
+            target: ['example1'],
+            merged: ['example3'],
+          },
+        },
+        getService
+      );
 
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'false_positives',
+          expectedFieldsAfterUpgrade: { false_positives: ['example3'] },
+        },
+        getService
+      );
 
-        expect(response.results.updated[0]).toMatchObject({
-          false_positives: ['resolved'],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          false_positives: ['resolved'],
-        });
-      });
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'false_positives',
+          resolvedValue: ['resolved'],
+          expectedFieldsAfterUpgrade: { false_positives: ['resolved'] },
+        },
+        getService
+      );
     });
 
     describe('customized w/ the matching upgrade (ABB diff case)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'query',
-              false_positives: ['example1'],
-            },
-            patch: {
-              false_positives: ['example2'],
-            },
-            upgrade: {
-              type: 'query',
-              false_positives: ['example2'],
-            },
-          },
-          deps,
-        });
-      });
-
-      it('returns upgrade preview', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 0,
-          num_rules_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 1,
-          num_fields_with_conflicts: 0,
-          num_fields_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff.fields).toMatchObject({
-          false_positives: {
-            base_version: ['example1'],
-            current_version: ['example2'],
-            target_version: ['example2'],
-            merged_version: ['example2'],
-            diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflict.NONE,
-            has_update: false,
-            has_base_version: true,
-          },
-        });
-      });
-
-      it('upgrades to MERGED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                false_positives: {
-                  pick_version: 'MERGED',
-                },
-              },
-            },
-          ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          false_positives: ['example1'],
+        },
+        patch: {
           false_positives: ['example2'],
-        });
-        expect(upgradedRule.body).toMatchObject({
+        },
+        upgrade: {
+          type: 'query',
           false_positives: ['example2'],
-        });
-      });
+        },
+      };
 
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                false_positives: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: ['resolved'],
-                },
-              },
-            },
-          ],
-        });
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'false_positives',
+          expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
+          expectedFieldDiffValues: {
+            base: ['example1'],
+            current: ['example2'],
+            target: ['example2'],
+            merged: ['example2'],
+          },
+        },
+        getService
+      );
 
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'false_positives',
+          expectedFieldsAfterUpgrade: { false_positives: ['example2'] },
+        },
+        getService
+      );
 
-        expect(response.results.updated[0]).toMatchObject({
-          false_positives: ['resolved'],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          false_positives: ['resolved'],
-        });
-      });
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'false_positives',
+          resolvedValue: ['resolved'],
+          expectedFieldsAfterUpgrade: { false_positives: ['resolved'] },
+        },
+        getService
+      );
     });
 
     describe('customized w/ an upgrade resulting in a conflict (ABC diff case, non-solvable conflict)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'query',
-              false_positives: ['example1'],
-            },
-            patch: {
-              false_positives: ['example2'],
-            },
-            upgrade: {
-              type: 'query',
-              false_positives: ['example3'],
-            },
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          false_positives: ['example1'],
+        },
+        patch: {
+          false_positives: ['example2'],
+        },
+        upgrade: {
+          type: 'query',
+          false_positives: ['example3'],
+        },
+      };
+
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'false_positives',
+          expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+          isSolvableConflict: false,
+          expectedFieldDiffValues: {
+            base: ['example1'],
+            current: ['example2'],
+            target: ['example3'],
+            merged: ['example2'],
           },
-          deps,
-        });
-      });
+        },
+        getService
+      );
 
-      it('returns upgrade preview', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 1,
-          num_rules_with_non_solvable_conflicts: 1,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 2,
-          num_fields_with_conflicts: 1,
-          num_fields_with_non_solvable_conflicts: 1,
-        });
-        expect(response.rules[0].diff.fields).toMatchObject({
-          false_positives: {
-            base_version: ['example1'],
-            current_version: ['example2'],
-            target_version: ['example3'],
-            merged_version: ['example2'],
-            diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflict.NON_SOLVABLE,
-            has_update: true,
-            has_base_version: true,
-          },
-        });
-      });
-
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                false_positives: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: ['resolved'],
-                },
-              },
-            },
-          ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
-          false_positives: ['resolved'],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          false_positives: ['resolved'],
-        });
-      });
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'false_positives',
+          resolvedValue: ['resolved'],
+          expectedFieldsAfterUpgrade: { false_positives: ['resolved'] },
+        },
+        getService
+      );
     });
 
     describe('without historical versions', () => {
       describe('customized w/ the matching upgrade (-AA diff case)', () => {
-        beforeEach(async () => {
-          await setUpRuleUpgrade({
-            assets: {
-              installed: {
-                type: 'query',
-                false_positives: ['example1'],
-              },
-              patch: {
-                false_positives: ['example2'],
-              },
-              upgrade: {
-                type: 'query',
-                false_positives: ['example2'],
-              },
-            },
-            removeInstalledAssets: true,
-            deps,
-          });
-        });
+        const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+          installed: {
+            type: 'query',
+            false_positives: ['example1'],
+          },
+          patch: {
+            false_positives: ['example2'],
+          },
+          upgrade: {
+            type: 'query',
+            false_positives: ['example2'],
+          },
+          removeInstalledAssets: true,
+        };
 
-        it('does NOT return upgrade review', async () => {
-          const response = await reviewPrebuiltRulesToUpgrade(supertest);
+        testFieldUpgradeReview(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'false_positives',
+            expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
+          },
+          getService
+        );
 
-          expect(response.stats).toMatchObject({
-            num_rules_to_upgrade_total: 1,
-            num_rules_with_conflicts: 0,
-            num_rules_with_non_solvable_conflicts: 0,
-          });
-          expect(response.rules[0].diff).toMatchObject({
-            num_fields_with_updates: 1,
-            num_fields_with_conflicts: 0,
-            num_fields_with_non_solvable_conflicts: 0,
-          });
-          expect(response.rules[0].diff.fields).not.toMatchObject({
-            false_positives: expect.anything(),
-          });
-        });
-
-        it('upgrades to RESOLVED value', async () => {
-          const response = await performUpgradePrebuiltRules(es, supertest, {
-            mode: ModeEnum.SPECIFIC_RULES,
-            rules: [
-              {
-                rule_id: DEFAULT_TEST_RULE_ID,
-                revision: 1,
-                version: 2,
-                fields: {
-                  false_positives: {
-                    pick_version: 'RESOLVED',
-                    resolved_value: ['resolved'],
-                  },
-                },
-              },
-            ],
-          });
-
-          const upgradedRule = await securitySolutionApi.readRule({
-            query: { rule_id: DEFAULT_TEST_RULE_ID },
-          });
-
-          expect(response.results.updated[0]).toMatchObject({
-            false_positives: ['resolved'],
-          });
-          expect(upgradedRule.body).toMatchObject({
-            false_positives: ['resolved'],
-          });
-        });
+        testFieldUpgradesToResolvedValue(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'false_positives',
+            resolvedValue: ['resolved'],
+            expectedFieldsAfterUpgrade: { false_positives: ['resolved'] },
+          },
+          getService
+        );
       });
 
       describe('customized w/ an upgrade (-AB diff case)', () => {
-        beforeEach(async () => {
-          await setUpRuleUpgrade({
-            assets: {
-              installed: {
-                type: 'query',
-                false_positives: ['example1'],
-              },
-              patch: {
-                false_positives: ['example2'],
-              },
-              upgrade: {
-                type: 'query',
-                false_positives: ['example3'],
-              },
+        const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+          installed: {
+            type: 'query',
+            false_positives: ['example1'],
+          },
+          patch: {
+            false_positives: ['example2'],
+          },
+          upgrade: {
+            type: 'query',
+            false_positives: ['example3'],
+          },
+          removeInstalledAssets: true,
+        };
+
+        testFieldUpgradeReview(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'false_positives',
+            expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+            expectedFieldDiffValues: {
+              current: ['example2'],
+              target: ['example3'],
+              merged: ['example3'],
             },
-            removeInstalledAssets: true,
-            deps,
-          });
-        });
+          },
+          getService
+        );
 
-        it('returns upgrade preview', async () => {
-          const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-          expect(response.rules).toHaveLength(1);
-          expect(response.stats).toMatchObject({
-            num_rules_to_upgrade_total: 1,
-            num_rules_with_conflicts: 1,
-            num_rules_with_non_solvable_conflicts: 0,
-          });
-          expect(response.rules[0].diff).toMatchObject({
-            num_fields_with_updates: 2,
-            num_fields_with_conflicts: 1,
-            num_fields_with_non_solvable_conflicts: 0,
-          });
-          expect(response.rules[0].diff.fields).toMatchObject({
-            false_positives: {
-              current_version: ['example2'],
-              target_version: ['example3'],
-              merged_version: ['example3'],
-              diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-              merge_outcome: ThreeWayMergeOutcome.Target,
-              conflict: ThreeWayDiffConflict.SOLVABLE,
-              has_update: true,
-              has_base_version: false,
-            },
-          });
-        });
-
-        it('upgrades to RESOLVED value', async () => {
-          const response = await performUpgradePrebuiltRules(es, supertest, {
-            mode: ModeEnum.SPECIFIC_RULES,
-            rules: [
-              {
-                rule_id: DEFAULT_TEST_RULE_ID,
-                revision: 1,
-                version: 2,
-                fields: {
-                  false_positives: {
-                    pick_version: 'RESOLVED',
-                    resolved_value: ['resolved'],
-                  },
-                },
-              },
-            ],
-          });
-
-          const upgradedRule = await securitySolutionApi.readRule({
-            query: { rule_id: DEFAULT_TEST_RULE_ID },
-          });
-
-          expect(response.results.updated[0]).toMatchObject({
-            false_positives: ['resolved'],
-          });
-          expect(upgradedRule.body).toMatchObject({
-            false_positives: ['resolved'],
-          });
-        });
+        testFieldUpgradesToResolvedValue(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'false_positives',
+            resolvedValue: ['resolved'],
+            expectedFieldsAfterUpgrade: { false_positives: ['resolved'] },
+          },
+          getService
+        );
       });
     });
   });

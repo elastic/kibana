@@ -163,6 +163,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('returns num of rules with non-solvable conflicts', async () => {
         await setUpRuleUpgrade({
           assets: [
+            // Name field has a non-solvable upgrade conflict
             {
               installed: {
                 rule_id: 'query-rule',
@@ -181,6 +182,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 version: 2,
               },
             },
+            // tags field values are merged resulting in a solvable upgrade conflict
             {
               installed: {
                 rule_id: 'saved-query-rule',

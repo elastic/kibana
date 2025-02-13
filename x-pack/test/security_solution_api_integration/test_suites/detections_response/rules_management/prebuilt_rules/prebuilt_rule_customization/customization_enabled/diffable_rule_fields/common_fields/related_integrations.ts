@@ -5,235 +5,86 @@
  * 2.0.
  */
 
-import expect from 'expect';
-import {
-  ModeEnum,
-  ThreeWayDiffConflict,
-  ThreeWayDiffOutcome,
-  ThreeWayMergeOutcome,
-} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { ThreeWayDiffOutcome } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { FtrProviderContext } from '../../../../../../../../ftr_provider_context';
-import { performUpgradePrebuiltRules, reviewPrebuiltRulesToUpgrade } from '../../../../../../utils';
+import type { TestFieldRuleUpgradeAssets } from '../test_helpers';
 import {
-  DEFAULT_TEST_RULE_ID,
-  setUpRuleUpgrade,
-} from '../../../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
+  testFieldUpgradeReview,
+  testFieldUpgradesToMergedValue,
+  testFieldUpgradesToResolvedValue,
+} from '../test_helpers';
 
 export function relatedIntegrationsField({ getService }: FtrProviderContext): void {
-  const es = getService('es');
-  const supertest = getService('supertest');
-  const log = getService('log');
-  const securitySolutionApi = getService('securitySolutionApi');
-
-  const deps = {
-    es,
-    supertest,
-    log,
-  };
-
   describe('"related_integrations"', () => {
     describe('non-customized w/o an upgrade (AAA diff case)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'query',
-              related_integrations: [
-                {
-                  package: 'packageA',
-                  version: '^1.0.0',
-                },
-              ],
-            },
-            patch: {},
-            upgrade: {
-              type: 'query',
-              related_integrations: [
-                {
-                  package: 'packageA',
-                  version: '^1.0.0',
-                },
-              ],
-            },
-          },
-          deps,
-        });
-      });
-
-      it('does NOT return upgrade review', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 0,
-          num_rules_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 1,
-          num_fields_with_conflicts: 0,
-          num_fields_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff.fields).not.toMatchObject({
-          related_integrations: expect.anything(),
-        });
-      });
-
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          related_integrations: [
             {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 0,
-              version: 2,
-              fields: {
-                related_integrations: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: [
-                    {
-                      package: 'resolvedPackage',
-                      version: '^1.0.0',
-                    },
-                  ],
-                },
+              package: 'packageA',
+              version: '^1.0.0',
+            },
+          ],
+        },
+        patch: {},
+        upgrade: {
+          type: 'query',
+          related_integrations: [
+            {
+              package: 'packageA',
+              version: '^1.0.0',
+            },
+          ],
+        },
+      };
+
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'related_integrations',
+          expectedDiffOutcome: ThreeWayDiffOutcome.StockValueNoUpdate,
+        },
+        getService
+      );
+
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'related_integrations',
+          resolvedValue: [
+            {
+              package: 'resolvedPackage',
+              version: '^1.0.0',
+            },
+          ],
+          expectedFieldsAfterUpgrade: {
+            related_integrations: [
+              {
+                package: 'resolvedPackage',
+                version: '^1.0.0',
               },
-            },
-          ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
-          related_integrations: [
-            {
-              package: 'resolvedPackage',
-              version: '^1.0.0',
-            },
-          ],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          related_integrations: [
-            {
-              package: 'resolvedPackage',
-              version: '^1.0.0',
-            },
-          ],
-        });
-      });
+            ],
+          },
+        },
+        getService
+      );
     });
 
     describe('non-customized w/ an upgrade (AAB diff case)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'query',
-              related_integrations: [
-                {
-                  package: 'packageA',
-                  version: '^1.0.0',
-                },
-              ],
-            },
-            patch: {},
-            upgrade: {
-              type: 'query',
-              related_integrations: [
-                {
-                  package: 'packageA',
-                  version: '^2.0.0',
-                },
-                {
-                  package: 'packageB',
-                  version: '^2.0.0',
-                },
-              ],
-            },
-          },
-          deps,
-        });
-      });
-
-      it('returns upgrade review', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 0,
-          num_rules_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 2,
-          num_fields_with_conflicts: 0,
-          num_fields_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff.fields).toMatchObject({
-          related_integrations: {
-            base_version: [
-              {
-                package: 'packageA',
-                version: '^1.0.0',
-              },
-            ],
-            current_version: [
-              {
-                package: 'packageA',
-                version: '^1.0.0',
-              },
-            ],
-            target_version: [
-              {
-                package: 'packageA',
-                version: '^2.0.0',
-              },
-              {
-                package: 'packageB',
-                version: '^2.0.0',
-              },
-            ],
-            merged_version: [
-              {
-                package: 'packageA',
-                version: '^2.0.0',
-              },
-              {
-                package: 'packageB',
-                version: '^2.0.0',
-              },
-            ],
-            diff_outcome: ThreeWayDiffOutcome.StockValueCanUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Target,
-            conflict: ThreeWayDiffConflict.NONE,
-            has_update: true,
-            has_base_version: true,
-          },
-        });
-      });
-
-      it('upgrades to MERGED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          related_integrations: [
             {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 0,
-              version: 2,
-              fields: {
-                related_integrations: {
-                  pick_version: 'MERGED',
-                },
-              },
+              package: 'packageA',
+              version: '^1.0.0',
             },
           ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
+        },
+        patch: {},
+        upgrade: {
+          type: 'query',
           related_integrations: [
             {
               package: 'packageA',
@@ -244,470 +95,357 @@ export function relatedIntegrationsField({ getService }: FtrProviderContext): vo
               version: '^2.0.0',
             },
           ],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          related_integrations: [
-            {
-              package: 'packageA',
-              version: '^2.0.0',
-            },
-            {
-              package: 'packageB',
-              version: '^2.0.0',
-            },
-          ],
-        });
-      });
+        },
+      };
 
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 0,
-              version: 2,
-              fields: {
-                related_integrations: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: [
-                    {
-                      package: 'resolvedPackage',
-                      version: '^2.0.0',
-                    },
-                  ],
-                },
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'related_integrations',
+          expectedDiffOutcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+          expectedFieldDiffValues: {
+            base: [
+              {
+                package: 'packageA',
+                version: '^1.0.0',
               },
-            },
-          ],
-        });
+            ],
+            current: [
+              {
+                package: 'packageA',
+                version: '^1.0.0',
+              },
+            ],
+            target: [
+              {
+                package: 'packageA',
+                version: '^2.0.0',
+              },
+              {
+                package: 'packageB',
+                version: '^2.0.0',
+              },
+            ],
+            merged: [
+              {
+                package: 'packageA',
+                version: '^2.0.0',
+              },
+              {
+                package: 'packageB',
+                version: '^2.0.0',
+              },
+            ],
+          },
+        },
+        getService
+      );
 
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'related_integrations',
+          expectedFieldsAfterUpgrade: {
+            related_integrations: [
+              {
+                package: 'packageA',
+                version: '^2.0.0',
+              },
+              {
+                package: 'packageB',
+                version: '^2.0.0',
+              },
+            ],
+          },
+        },
+        getService
+      );
 
-        expect(response.results.updated[0]).toMatchObject({
-          related_integrations: [
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'related_integrations',
+          resolvedValue: [
             {
               package: 'resolvedPackage',
-              version: '^2.0.0',
+              version: '^1.0.0',
             },
           ],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          related_integrations: [
-            {
-              package: 'resolvedPackage',
-              version: '^2.0.0',
-            },
-          ],
-        });
-      });
+          expectedFieldsAfterUpgrade: {
+            related_integrations: [
+              {
+                package: 'resolvedPackage',
+                version: '^1.0.0',
+              },
+            ],
+          },
+        },
+        getService
+      );
     });
 
     describe('customized w/o an upgrade (ABA diff case)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'query',
-              related_integrations: [
-                {
-                  package: 'packageA',
-                  version: '^1.0.0',
-                },
-              ],
-            },
-            patch: {
-              related_integrations: [
-                {
-                  package: 'packageB',
-                  version: '^1.0.0',
-                },
-              ],
-            },
-            upgrade: {
-              type: 'query',
-              related_integrations: [
-                {
-                  package: 'packageA',
-                  version: '^1.0.0',
-                },
-              ],
-            },
-          },
-          deps,
-        });
-      });
-
-      it('returns upgrade preview', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 0,
-          num_rules_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 1,
-          num_fields_with_conflicts: 0,
-          num_fields_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff.fields).toMatchObject({
-          related_integrations: {
-            base_version: [
-              {
-                package: 'packageA',
-                version: '^1.0.0',
-              },
-            ],
-            current_version: [
-              {
-                package: 'packageB',
-                version: '^1.0.0',
-              },
-            ],
-            target_version: [
-              {
-                package: 'packageA',
-                version: '^1.0.0',
-              },
-            ],
-            merged_version: [
-              {
-                package: 'packageB',
-                version: '^1.0.0',
-              },
-            ],
-            diff_outcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflict.NONE,
-            has_update: false,
-            has_base_version: true,
-          },
-        });
-      });
-
-      it('upgrades to MERGED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          related_integrations: [
             {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                related_integrations: {
-                  pick_version: 'MERGED',
-                },
-              },
+              package: 'packageA',
+              version: '^1.0.0',
             },
           ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
+        },
+        patch: {
           related_integrations: [
             {
               package: 'packageB',
               version: '^1.0.0',
             },
           ],
-        });
-        expect(upgradedRule.body).toMatchObject({
+        },
+        upgrade: {
+          type: 'query',
           related_integrations: [
             {
-              package: 'packageB',
+              package: 'packageA',
               version: '^1.0.0',
             },
           ],
-        });
-      });
+        },
+      };
 
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                related_integrations: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: [
-                    {
-                      package: 'resolvedPackage',
-                      version: '^1.0.0',
-                    },
-                  ],
-                },
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'related_integrations',
+          expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueNoUpdate,
+          expectedFieldDiffValues: {
+            base: [
+              {
+                package: 'packageA',
+                version: '^1.0.0',
               },
-            },
-          ],
-        });
+            ],
+            current: [
+              {
+                package: 'packageB',
+                version: '^1.0.0',
+              },
+            ],
+            target: [
+              {
+                package: 'packageA',
+                version: '^1.0.0',
+              },
+            ],
+            merged: [
+              {
+                package: 'packageB',
+                version: '^1.0.0',
+              },
+            ],
+          },
+        },
+        getService
+      );
 
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'related_integrations',
+          expectedFieldsAfterUpgrade: {
+            related_integrations: [
+              {
+                package: 'packageB',
+                version: '^1.0.0',
+              },
+            ],
+          },
+        },
+        getService
+      );
 
-        expect(response.results.updated[0]).toMatchObject({
-          related_integrations: [
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'related_integrations',
+          resolvedValue: [
             {
               package: 'resolvedPackage',
               version: '^1.0.0',
             },
           ],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          related_integrations: [
-            {
-              package: 'resolvedPackage',
-              version: '^1.0.0',
-            },
-          ],
-        });
-      });
+          expectedFieldsAfterUpgrade: {
+            related_integrations: [
+              {
+                package: 'resolvedPackage',
+                version: '^1.0.0',
+              },
+            ],
+          },
+        },
+        getService
+      );
     });
 
     describe('customized w/ the matching upgrade (ABB diff case)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'query',
-              related_integrations: [
-                {
-                  package: 'packageA',
-                  version: '^1.0.0',
-                },
-              ],
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          related_integrations: [
+            {
+              package: 'packageA',
+              version: '^1.0.0',
             },
-            patch: {
-              related_integrations: [
-                {
-                  package: 'packageB',
-                  version: '^1.0.0',
-                },
-              ],
+          ],
+        },
+        patch: {
+          related_integrations: [
+            {
+              package: 'packageB',
+              version: '^1.0.0',
             },
-            upgrade: {
-              type: 'query',
-              related_integrations: [
-                {
-                  package: 'packageB',
-                  version: '^1.0.0',
-                },
-              ],
+          ],
+        },
+        upgrade: {
+          type: 'query',
+          related_integrations: [
+            {
+              package: 'packageB',
+              version: '^1.0.0',
             },
-          },
-          deps,
-        });
-      });
+          ],
+        },
+      };
 
-      it('returns upgrade preview', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 0,
-          num_rules_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 1,
-          num_fields_with_conflicts: 0,
-          num_fields_with_non_solvable_conflicts: 0,
-        });
-        expect(response.rules[0].diff.fields).toMatchObject({
-          related_integrations: {
-            base_version: [
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'related_integrations',
+          expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
+          expectedFieldDiffValues: {
+            base: [
               {
                 package: 'packageA',
                 version: '^1.0.0',
               },
             ],
-            current_version: [
+            current: [
               {
                 package: 'packageB',
                 version: '^1.0.0',
               },
             ],
-            target_version: [
+            target: [
               {
                 package: 'packageB',
                 version: '^1.0.0',
               },
             ],
-            merged_version: [
+            merged: [
               {
                 package: 'packageB',
                 version: '^1.0.0',
               },
             ],
-            diff_outcome: ThreeWayDiffOutcome.CustomizedValueSameUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflict.NONE,
-            has_update: false,
-            has_base_version: true,
           },
-        });
-      });
+        },
+        getService
+      );
 
-      it('upgrades to MERGED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                related_integrations: {
-                  pick_version: 'MERGED',
-                },
+      testFieldUpgradesToMergedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'related_integrations',
+          expectedFieldsAfterUpgrade: {
+            related_integrations: [
+              {
+                package: 'packageB',
+                version: '^1.0.0',
               },
-            },
-          ],
-        });
+            ],
+          },
+        },
+        getService
+      );
 
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
-          related_integrations: [
-            {
-              package: 'packageB',
-              version: '^1.0.0',
-            },
-          ],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          related_integrations: [
-            {
-              package: 'packageB',
-              version: '^1.0.0',
-            },
-          ],
-        });
-      });
-
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
-            {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                related_integrations: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: [
-                    {
-                      package: 'resolvedPackage',
-                      version: '^1.0.0',
-                    },
-                  ],
-                },
-              },
-            },
-          ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
-          related_integrations: [
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'related_integrations',
+          resolvedValue: [
             {
               package: 'resolvedPackage',
               version: '^1.0.0',
             },
           ],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          related_integrations: [
-            {
-              package: 'resolvedPackage',
-              version: '^1.0.0',
-            },
-          ],
-        });
-      });
+          expectedFieldsAfterUpgrade: {
+            related_integrations: [
+              {
+                package: 'resolvedPackage',
+                version: '^1.0.0',
+              },
+            ],
+          },
+        },
+        getService
+      );
     });
 
     describe('customized w/ an upgrade resulting in a conflict (ABC diff case, non-solvable conflict)', () => {
-      beforeEach(async () => {
-        await setUpRuleUpgrade({
-          assets: {
-            installed: {
-              type: 'query',
-              related_integrations: [
-                {
-                  package: 'packageA',
-                  version: '^1.0.0',
-                },
-              ],
+      const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+        installed: {
+          type: 'query',
+          related_integrations: [
+            {
+              package: 'packageA',
+              version: '^1.0.0',
             },
-            patch: {
-              related_integrations: [
-                {
-                  package: 'packageB',
-                  version: '^1.0.0',
-                },
-              ],
+          ],
+        },
+        patch: {
+          related_integrations: [
+            {
+              package: 'packageB',
+              version: '^1.0.0',
             },
-            upgrade: {
-              type: 'query',
-              related_integrations: [
-                {
-                  package: 'packageA',
-                  version: '^2.0.0',
-                },
-                {
-                  package: 'packageB',
-                  version: '^2.0.0',
-                },
-              ],
+          ],
+        },
+        upgrade: {
+          type: 'query',
+          related_integrations: [
+            {
+              package: 'packageA',
+              version: '^2.0.0',
             },
-          },
-          deps,
-        });
-      });
+            {
+              package: 'packageB',
+              version: '^2.0.0',
+            },
+          ],
+        },
+      };
 
-      it('returns upgrade preview', async () => {
-        const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-        expect(response.stats).toMatchObject({
-          num_rules_to_upgrade_total: 1,
-          num_rules_with_conflicts: 1,
-          num_rules_with_non_solvable_conflicts: 1,
-        });
-        expect(response.rules[0].diff).toMatchObject({
-          num_fields_with_updates: 2,
-          num_fields_with_conflicts: 1,
-          num_fields_with_non_solvable_conflicts: 1,
-        });
-        expect(response.rules[0].diff.fields).toMatchObject({
-          related_integrations: {
-            base_version: [
+      testFieldUpgradeReview(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'related_integrations',
+          expectedDiffOutcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
+          isSolvableConflict: false,
+          expectedFieldDiffValues: {
+            base: [
               {
                 package: 'packageA',
                 version: '^1.0.0',
               },
             ],
-            current_version: [
+            current: [
               {
                 package: 'packageB',
                 version: '^1.0.0',
               },
             ],
-            target_version: [
+            target: [
               {
                 package: 'packageA',
                 version: '^2.0.0',
@@ -717,231 +455,152 @@ export function relatedIntegrationsField({ getService }: FtrProviderContext): vo
                 version: '^2.0.0',
               },
             ],
-            merged_version: [
+            merged: [
               {
                 package: 'packageB',
                 version: '^1.0.0',
               },
             ],
-            diff_outcome: ThreeWayDiffOutcome.CustomizedValueCanUpdate,
-            merge_outcome: ThreeWayMergeOutcome.Current,
-            conflict: ThreeWayDiffConflict.NON_SOLVABLE,
-            has_update: true,
-            has_base_version: true,
           },
-        });
-      });
+        },
+        getService
+      );
 
-      it('upgrades to RESOLVED value', async () => {
-        const response = await performUpgradePrebuiltRules(es, supertest, {
-          mode: ModeEnum.SPECIFIC_RULES,
-          rules: [
+      testFieldUpgradesToResolvedValue(
+        {
+          ruleUpgradeAssets,
+          diffableRuleFieldName: 'related_integrations',
+          resolvedValue: [
             {
-              rule_id: DEFAULT_TEST_RULE_ID,
-              revision: 1,
-              version: 2,
-              fields: {
-                related_integrations: {
-                  pick_version: 'RESOLVED',
-                  resolved_value: [
-                    {
-                      package: 'resolvedPackage',
-                      version: '^1.0.0',
-                    },
-                  ],
-                },
+              package: 'resolvedPackage',
+              version: '^1.0.0',
+            },
+          ],
+          expectedFieldsAfterUpgrade: {
+            related_integrations: [
+              {
+                package: 'resolvedPackage',
+                version: '^1.0.0',
               },
-            },
-          ],
-        });
-
-        const upgradedRule = await securitySolutionApi.readRule({
-          query: { rule_id: DEFAULT_TEST_RULE_ID },
-        });
-
-        expect(response.results.updated[0]).toMatchObject({
-          related_integrations: [
-            {
-              package: 'resolvedPackage',
-              version: '^1.0.0',
-            },
-          ],
-        });
-        expect(upgradedRule.body).toMatchObject({
-          related_integrations: [
-            {
-              package: 'resolvedPackage',
-              version: '^1.0.0',
-            },
-          ],
-        });
-      });
+            ],
+          },
+        },
+        getService
+      );
     });
 
     describe('without historical versions', () => {
       describe('customized w/ the matching upgrade (-AA diff case)', () => {
-        beforeEach(async () => {
-          await setUpRuleUpgrade({
-            assets: {
-              installed: {
-                type: 'query',
-                related_integrations: [
-                  {
-                    package: 'packageA',
-                    version: '^1.0.0',
-                  },
-                ],
-              },
-              patch: {
-                related_integrations: [
-                  {
-                    package: 'packageB',
-                    version: '^1.0.0',
-                  },
-                ],
-              },
-              upgrade: {
-                type: 'query',
-                related_integrations: [
-                  {
-                    package: 'packageB',
-                    version: '^1.0.0',
-                  },
-                ],
-              },
-            },
-            removeInstalledAssets: true,
-            deps,
-          });
-        });
-
-        it('does NOT return upgrade review', async () => {
-          const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-          expect(response.stats).toMatchObject({
-            num_rules_to_upgrade_total: 1,
-            num_rules_with_conflicts: 0,
-            num_rules_with_non_solvable_conflicts: 0,
-          });
-          expect(response.rules[0].diff).toMatchObject({
-            num_fields_with_updates: 1,
-            num_fields_with_conflicts: 0,
-            num_fields_with_non_solvable_conflicts: 0,
-          });
-          expect(response.rules[0].diff.fields).not.toMatchObject({
-            related_integrations: expect.anything(),
-          });
-        });
-
-        it('upgrades to RESOLVED value', async () => {
-          const response = await performUpgradePrebuiltRules(es, supertest, {
-            mode: ModeEnum.SPECIFIC_RULES,
-            rules: [
+        const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+          installed: {
+            type: 'query',
+            related_integrations: [
               {
-                rule_id: DEFAULT_TEST_RULE_ID,
-                revision: 1,
-                version: 2,
-                fields: {
-                  related_integrations: {
-                    pick_version: 'RESOLVED',
-                    resolved_value: [
-                      {
-                        package: 'resolvedPackage',
-                        version: '^1.0.0',
-                      },
-                    ],
-                  },
+                package: 'packageA',
+                version: '^1.0.0',
+              },
+            ],
+          },
+          patch: {
+            related_integrations: [
+              {
+                package: 'packageB',
+                version: '^1.0.0',
+              },
+            ],
+          },
+          upgrade: {
+            type: 'query',
+            related_integrations: [
+              {
+                package: 'packageB',
+                version: '^1.0.0',
+              },
+            ],
+          },
+          removeInstalledAssets: true,
+        };
+
+        testFieldUpgradeReview(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'related_integrations',
+            expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseNoUpdate,
+          },
+          getService
+        );
+
+        testFieldUpgradesToResolvedValue(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'related_integrations',
+            resolvedValue: [
+              {
+                package: 'resolvedPackage',
+                version: '^1.0.0',
+              },
+            ],
+            expectedFieldsAfterUpgrade: {
+              related_integrations: [
+                {
+                  package: 'resolvedPackage',
+                  version: '^1.0.0',
                 },
-              },
-            ],
-          });
-
-          const upgradedRule = await securitySolutionApi.readRule({
-            query: { rule_id: DEFAULT_TEST_RULE_ID },
-          });
-
-          expect(response.results.updated[0]).toMatchObject({
-            related_integrations: [
-              {
-                package: 'resolvedPackage',
-                version: '^1.0.0',
-              },
-            ],
-          });
-          expect(upgradedRule.body).toMatchObject({
-            related_integrations: [
-              {
-                package: 'resolvedPackage',
-                version: '^1.0.0',
-              },
-            ],
-          });
-        });
+              ],
+            },
+          },
+          getService
+        );
       });
 
       describe('customized w/ an upgrade (-AB diff case)', () => {
-        beforeEach(async () => {
-          await setUpRuleUpgrade({
-            assets: {
-              installed: {
-                type: 'query',
-                related_integrations: [
-                  {
-                    package: 'packageA',
-                    version: '^1.0.0',
-                  },
-                ],
+        const ruleUpgradeAssets: TestFieldRuleUpgradeAssets = {
+          installed: {
+            type: 'query',
+            related_integrations: [
+              {
+                package: 'packageA',
+                version: '^1.0.0',
               },
-              patch: {
-                related_integrations: [
-                  {
-                    package: 'packageB',
-                    version: '^1.0.0',
-                  },
-                ],
+            ],
+          },
+          patch: {
+            related_integrations: [
+              {
+                package: 'packageB',
+                version: '^1.0.0',
               },
-              upgrade: {
-                type: 'query',
-                related_integrations: [
-                  {
-                    package: 'packageA',
-                    version: '^2.0.0',
-                  },
-                  {
-                    package: 'packageB',
-                    version: '^2.0.0',
-                  },
-                ],
+            ],
+          },
+          upgrade: {
+            type: 'query',
+            related_integrations: [
+              {
+                package: 'packageA',
+                version: '^2.0.0',
               },
-            },
-            removeInstalledAssets: true,
-            deps,
-          });
-        });
+              {
+                package: 'packageB',
+                version: '^2.0.0',
+              },
+            ],
+          },
+          removeInstalledAssets: true,
+        };
 
-        it('returns upgrade preview', async () => {
-          const response = await reviewPrebuiltRulesToUpgrade(supertest);
-
-          expect(response.rules).toHaveLength(1);
-          expect(response.stats).toMatchObject({
-            num_rules_to_upgrade_total: 1,
-            num_rules_with_conflicts: 1,
-            num_rules_with_non_solvable_conflicts: 0,
-          });
-          expect(response.rules[0].diff).toMatchObject({
-            num_fields_with_updates: 2,
-            num_fields_with_conflicts: 1,
-            num_fields_with_non_solvable_conflicts: 0,
-          });
-          expect(response.rules[0].diff.fields).toMatchObject({
-            related_integrations: {
-              current_version: [
+        testFieldUpgradeReview(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'related_integrations',
+            expectedDiffOutcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
+            expectedFieldDiffValues: {
+              current: [
                 {
                   package: 'packageB',
                   version: '^1.0.0',
                 },
               ],
-              target_version: [
+              target: [
                 {
                   package: 'packageA',
                   version: '^2.0.0',
@@ -951,7 +610,7 @@ export function relatedIntegrationsField({ getService }: FtrProviderContext): vo
                   version: '^2.0.0',
                 },
               ],
-              merged_version: [
+              merged: [
                 {
                   package: 'packageA',
                   version: '^2.0.0',
@@ -961,59 +620,32 @@ export function relatedIntegrationsField({ getService }: FtrProviderContext): vo
                   version: '^2.0.0',
                 },
               ],
-              diff_outcome: ThreeWayDiffOutcome.MissingBaseCanUpdate,
-              merge_outcome: ThreeWayMergeOutcome.Target,
-              conflict: ThreeWayDiffConflict.SOLVABLE,
-              has_update: true,
-              has_base_version: false,
             },
-          });
-        });
+          },
+          getService
+        );
 
-        it('upgrades to RESOLVED value', async () => {
-          const response = await performUpgradePrebuiltRules(es, supertest, {
-            mode: ModeEnum.SPECIFIC_RULES,
-            rules: [
+        testFieldUpgradesToResolvedValue(
+          {
+            ruleUpgradeAssets,
+            diffableRuleFieldName: 'related_integrations',
+            resolvedValue: [
               {
-                rule_id: DEFAULT_TEST_RULE_ID,
-                revision: 1,
-                version: 2,
-                fields: {
-                  related_integrations: {
-                    pick_version: 'RESOLVED',
-                    resolved_value: [
-                      {
-                        package: 'resolvedPackage',
-                        version: '^1.0.0',
-                      },
-                    ],
-                  },
+                package: 'resolvedPackage',
+                version: '^1.0.0',
+              },
+            ],
+            expectedFieldsAfterUpgrade: {
+              related_integrations: [
+                {
+                  package: 'resolvedPackage',
+                  version: '^1.0.0',
                 },
-              },
-            ],
-          });
-
-          const upgradedRule = await securitySolutionApi.readRule({
-            query: { rule_id: DEFAULT_TEST_RULE_ID },
-          });
-
-          expect(response.results.updated[0]).toMatchObject({
-            related_integrations: [
-              {
-                package: 'resolvedPackage',
-                version: '^1.0.0',
-              },
-            ],
-          });
-          expect(upgradedRule.body).toMatchObject({
-            related_integrations: [
-              {
-                package: 'resolvedPackage',
-                version: '^1.0.0',
-              },
-            ],
-          });
-        });
+              ],
+            },
+          },
+          getService
+        );
       });
     });
   });
