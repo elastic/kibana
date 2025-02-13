@@ -128,9 +128,16 @@ const routes = {
           },
           '/flamegraphs': {
             element: (
-              <FlameGraphsView>
-                <Outlet />
-              </FlameGraphsView>
+              <RouteBreadcrumb
+                title={i18n.translate('xpack.profiling.breadcrumb.flamegraphs', {
+                  defaultMessage: 'Flamegraphs',
+                })}
+                href="/flamegraphs/flamegraph"
+              >
+                <FlameGraphsView>
+                  <Outlet />
+                </FlameGraphsView>
+              </RouteBreadcrumb>
             ),
             children: {
               '/flamegraphs/flamegraph': {
@@ -197,9 +204,16 @@ const routes = {
           },
           '/functions': {
             element: (
-              <FunctionsView>
-                <Outlet />
-              </FunctionsView>
+              <RouteBreadcrumb
+                title={i18n.translate('xpack.profiling.breadcrumb.functions', {
+                  defaultMessage: 'Functions',
+                })}
+                href="/functions/topn"
+              >
+                <FunctionsView>
+                  <Outlet />
+                </FunctionsView>
+              </RouteBreadcrumb>
             ),
             params: t.type({
               query: t.type({
@@ -218,7 +232,7 @@ const routes = {
                 element: (
                   <RouteBreadcrumb
                     title={i18n.translate('xpack.profiling.breadcrumb.topnFunctions', {
-                      defaultMessage: 'Top N functions',
+                      defaultMessage: 'Top N',
                     })}
                     href="/functions/topn"
                   >
@@ -233,7 +247,7 @@ const routes = {
                 element: (
                   <RouteBreadcrumb
                     title={i18n.translate('xpack.profiling.breadcrumb.differentialFunctions', {
-                      defaultMessage: 'Differential Top N functions',
+                      defaultMessage: 'Differential top N',
                     })}
                     href="/functions/differential"
                   >
