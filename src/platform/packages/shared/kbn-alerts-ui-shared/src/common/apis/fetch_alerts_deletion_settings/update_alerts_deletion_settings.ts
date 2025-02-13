@@ -8,12 +8,11 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
+import type { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import type {
   RulesSettingsAlertsDeletion,
   RulesSettingsAlertsDeletionProperties,
 } from '@kbn/alerting-types/rule_settings';
-// import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
 
 const rewriteBodyRes: RewriteRequestCase<RulesSettingsAlertsDeletion> = ({ ...rest }: any) => ({
   ...rest,
@@ -26,25 +25,7 @@ export const updateAlertsDeletionSettings = async ({
   http: HttpSetup;
   alertsDeletionSettings: RulesSettingsAlertsDeletionProperties;
 }) => {
-  // let body: string;
-  try {
-    // body = JSON.stringify({
-    // is_active_alerts_deletion_enabled: alertsDeletionSettings.isActiveAlertsDeletionEnabled,
-    // is_inactive_alerts_deletion_enabled: alertsDeletionSettings.isInactiveAlertsDeletionEnabled,
-    // active_alerts_deletion_threshold: alertsDeletionSettings.activeAlertsDeletionThreshold,
-    // inactive_alerts_deletion_threshold: alertsDeletionSettings.inactiveAlertsDeletionThreshold,
-    // });
-  } catch (e) {
-    throw new Error(`Unable to parse alert deletion settings update params: ${e}`);
-  }
-
   // TODO: https://github.com/elastic/kibana/issues/209258
-  // const res = await http.post<AsApiContract<RulesSettingsAlertDeletion>>(
-  //   `${INTERNAL_BASE_ALERTING_API_PATH}/rules/settings/_alert_deletion`,
-  //   {
-  //     body,
-  //   }
-  // );
 
   const response: AsApiContract<RulesSettingsAlertsDeletion> = await new Promise((resolve) => {
     resolve({

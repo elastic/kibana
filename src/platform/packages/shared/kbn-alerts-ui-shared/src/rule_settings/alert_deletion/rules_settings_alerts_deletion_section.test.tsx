@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { RulesSettingsAlertsDeletionSection } from './rules_settings_alerts_deletion_section';
-import { RulesSettingsAlertsDeletionProperties } from '@kbn/alerting-types/rule_settings';
+import type { RulesSettingsAlertsDeletionProperties } from '@kbn/alerting-types/rule_settings';
 
 const initialSettings: RulesSettingsAlertsDeletionProperties = {
   activeAlertsDeletionThreshold: 0,

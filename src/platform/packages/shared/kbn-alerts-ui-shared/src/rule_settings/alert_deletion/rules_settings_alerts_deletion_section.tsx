@@ -21,16 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import type { RulesSettingsAlertsDeletionProperties } from '@kbn/alerting-types/rule_settings';
-import {
-  ACTIVE_ALERT_DELETION_LABEL,
-  ALERT_DELETION_DESCRIPTION,
-  ALERT_DELETION_ERROR_PROMPT_BODY,
-  ALERT_DELETION_ERROR_PROMPT_TITLE,
-  ALERT_DELETION_TITLE,
-  DAYS_LABEL,
-  INACTIVE_ALERT_DELETION_LABEL,
-  THRESHOLD_LABEL,
-} from './translations';
+import * as i18n from './translations';
 
 interface Props {
   onChange: (key: keyof RulesSettingsAlertsDeletionProperties, value: number | boolean) => void;
@@ -47,8 +38,8 @@ export const RulesSettingsAlertsDeletionSection = memo((props: Props) => {
         data-test-subj="rulesSettingsAlertDeletionErrorPrompt"
         color="danger"
         iconType="warning"
-        title={<h4>{ALERT_DELETION_ERROR_PROMPT_TITLE}</h4>}
-        body={<p>{ALERT_DELETION_ERROR_PROMPT_BODY}</p>}
+        title={<h4>{i18n.ALERT_DELETION_ERROR_PROMPT_TITLE}</h4>}
+        body={<p>{i18n.ALERT_DELETION_ERROR_PROMPT_BODY}</p>}
       />
     );
   }
@@ -56,11 +47,11 @@ export const RulesSettingsAlertsDeletionSection = memo((props: Props) => {
   return (
     <EuiForm data-test-subj="rulesSettingsAlertDeletionSection">
       <EuiDescribedFormGroup
-        title={<h3>{ALERT_DELETION_TITLE}</h3>}
+        title={<h3>{i18n.ALERT_DELETION_TITLE}</h3>}
         description={
           <>
             <EuiText color="subdued" size="s">
-              <p>{ALERT_DELETION_DESCRIPTION}</p>
+              <p>{i18n.ALERT_DELETION_DESCRIPTION}</p>
             </EuiText>
             <EuiSpacer size="xl" />
             {/* // TODO: https://github.com/elastic/kibana/issues/209267
@@ -75,7 +66,7 @@ export const RulesSettingsAlertsDeletionSection = memo((props: Props) => {
       >
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiFormRow label={ACTIVE_ALERT_DELETION_LABEL}>
+            <EuiFormRow label={i18n.ACTIVE_ALERT_DELETION_LABEL}>
               <EuiSwitch
                 data-test-subj="rulesSettingsActiveAlertDeletionSwitch"
                 label=""
@@ -88,14 +79,14 @@ export const RulesSettingsAlertsDeletionSection = memo((props: Props) => {
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFormRow label={THRESHOLD_LABEL}>
+            <EuiFormRow label={i18n.THRESHOLD_LABEL}>
               <EuiFieldNumber
                 data-test-subj="rulesSettingsActiveAlertDeletionThreshold"
                 value={settings!.activeAlertsDeletionThreshold}
                 onChange={(e) => {
                   onChange('activeAlertsDeletionThreshold', parseInt(e.target.value, 10));
                 }}
-                append={[DAYS_LABEL]}
+                append={[i18n.DAYS_LABEL]}
                 disabled={!canWrite || !settings!.isActiveAlertsDeletionEnabled}
               />
             </EuiFormRow>
@@ -105,7 +96,7 @@ export const RulesSettingsAlertsDeletionSection = memo((props: Props) => {
 
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiFormRow label={INACTIVE_ALERT_DELETION_LABEL}>
+            <EuiFormRow label={i18n.INACTIVE_ALERT_DELETION_LABEL}>
               <EuiSwitch
                 data-test-subj="rulesSettingsInactiveAlertDeletionSwitch"
                 label=""
@@ -125,7 +116,7 @@ export const RulesSettingsAlertsDeletionSection = memo((props: Props) => {
                 onChange={(e) => {
                   onChange('inactiveAlertsDeletionThreshold', parseInt(e.target.value, 10));
                 }}
-                append={[DAYS_LABEL]}
+                append={[i18n.DAYS_LABEL]}
                 disabled={!canWrite || !settings!.isInactiveAlertsDeletionEnabled}
               />
             </EuiFormRow>

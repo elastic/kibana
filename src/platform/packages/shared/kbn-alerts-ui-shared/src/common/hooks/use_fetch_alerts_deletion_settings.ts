@@ -9,7 +9,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import type { HttpStart } from '@kbn/core-http-browser';
-import { RulesSettingsAlertsDeletion } from '@kbn/alerting-types/rule_settings';
+import type { RulesSettingsAlertsDeletion } from '@kbn/alerting-types/rule_settings';
 import { fetchAlertsDeletionSettings } from '../apis/fetch_alerts_deletion_settings';
 
 interface Props {

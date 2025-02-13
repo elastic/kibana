@@ -8,10 +8,7 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-// import { AsApiContract } from '@kbn/actions-types';
-// import { RulesSettingsAlertDeletion } from '@kbn/alerting-types';
-// import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { AsApiContract } from '@kbn/actions-types';
+import type { AsApiContract } from '@kbn/actions-types';
 import type { RulesSettingsAlertsDeletion } from '@kbn/alerting-types';
 
 const transformAlertsDeletionSettingsResponse = ({
@@ -36,9 +33,6 @@ const transformAlertsDeletionSettingsResponse = ({
 
 export const fetchAlertsDeletionSettings = async ({ http }: { http: HttpSetup }) => {
   // TODO: https://github.com/elastic/kibana/issues/209258
-  // const res = await http.get<AsApiContract<RulesSettingsAlertDeletion>>(
-  //   `${INTERNAL_BASE_ALERTING_API_PATH}/rules/settings/_alert_deletion`
-  // );
 
   const res = {
     is_active_alerts_deletion_enabled: false,

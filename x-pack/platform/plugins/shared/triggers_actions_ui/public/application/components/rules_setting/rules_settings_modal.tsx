@@ -29,7 +29,7 @@ import {
 import { useFetchFlappingSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings';
 import { useFetchAlertsDeletionSettings } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_deletion_settings';
 import { RulesSettingsAlertsDeletionSection } from '@kbn/alerts-ui-shared/src/rule_settings/alert_deletion/rules_settings_alerts_deletion_section';
-import { RulesSettingsAlertsDeletionProperties } from '@kbn/alerting-types/rule_settings';
+import type { RulesSettingsAlertsDeletionProperties } from '@kbn/alerting-types/rule_settings';
 import { useKibana } from '../../../common/lib/kibana';
 import { RulesSettingsFlappingSection } from './flapping/rules_settings_flapping_section';
 import { RulesSettingsQueryDelaySection } from './query_delay/rules_settings_query_delay_section';
@@ -195,9 +195,7 @@ export const RulesSettingsModal = memo((props: RulesSettingsModalProps) => {
   const canShowFlappingSettings = readFlappingSettingsUI;
   const canWriteQueryDelaySettings = writeQueryDelaySettingsUI && !hasQueryDelayError;
   const canShowQueryDelaySettings = readQueryDelaySettingsUI;
-  // TODO: Use real settings: https://github.com/elastic/kibana/issues/210014
-  // const canWriteAlertsDeletionSettings = writeAlertsDeletionUI && !hasAlertsDeletionError;
-  // const canShowAlertsDeletionSettings = readAlertsDeletionSettingsUI;
+  // TODO: Use actual settings: https://github.com/elastic/kibana/issues/210014
   const canWriteAlertsDeletionSettings = isAlertsDeletionSettingsEnabled && !hasAlertsDeletionError;
   const canShowAlertsDeletionSettings = isAlertsDeletionSettingsEnabled;
 
