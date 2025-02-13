@@ -12,21 +12,11 @@ import { i18n } from '@kbn/i18n';
 
 export const getNewSearchAppMenuItem = ({
   onNewSearch,
+  newSearchUrl,
 }: {
   onNewSearch: () => void;
+  newSearchUrl?: string;
 }): AppMenuActionPrimary => {
-  let isModifierKeyPressed = false;
-
-  document.addEventListener('keydown', (event: KeyboardEvent) => {
-    isModifierKeyPressed = event.metaKey || event.ctrlKey;
-    console.log(isModifierKeyPressed);
-  });
-
-  document.addEventListener('keyup', (event: KeyboardEvent) => {
-    isModifierKeyPressed = false;
-    console.log(isModifierKeyPressed);
-  });
-
   return {
     id: AppMenuActionId.new,
     type: AppMenuActionType.primary,
@@ -36,16 +26,9 @@ export const getNewSearchAppMenuItem = ({
       }),
       iconType: 'plus',
       testId: 'discoverNewButton',
+      href: newSearchUrl,
       onClick: () => {
-        const newDiscoverUrl = `${window.location.origin}/app/discover`;
-
-        if (isModifierKeyPressed) {
-          window.open(newDiscoverUrl, '_blank', 'noopener,noreferrer');
-        } else {
-          onNewSearch();
-        }
-
-        isModifierKeyPressed = false;
+        onNewSearch();
       },
     },
   };

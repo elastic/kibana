@@ -40,6 +40,7 @@ export function convertAppMenuItemToTopNavItem({
     label: appMenuItem.controlProps.label,
     description: appMenuItem.controlProps.description ?? appMenuItem.controlProps.label,
     testId: appMenuItem.controlProps.testId,
+    href: appMenuItem.controlProps.href,
     run: async (anchorElement: HTMLElement) => {
       await runAppMenuAction({
         appMenuItem,
