@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
 import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
@@ -37,8 +37,8 @@ import * as i18n from './translations';
 import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
 import { RiskScoreLevel } from '../../../entity_analytics/components/severity/common';
-import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_onboarding/risk_score_header_title';
 import { RiskScoreDocTooltip } from '../common';
+import { RiskScoreHeaderTitle } from '../../../entity_analytics/components/risk_score_onboarding/risk_score_header_title';
 
 interface HostSummaryProps {
   contextID?: string; // used to provide unique draggable context when viewing in the side panel
@@ -59,7 +59,7 @@ interface HostSummaryProps {
 }
 
 const HostRiskOverviewWrapper = styled(EuiFlexGroup)`
-  padding-top: ${({ theme }) => theme.eui.euiSizeM};
+  padding-top: ${({ theme: { euiTheme } }) => euiTheme.size.m};
   width: ${({ $width }: { $width: string }) => $width};
 `;
 
