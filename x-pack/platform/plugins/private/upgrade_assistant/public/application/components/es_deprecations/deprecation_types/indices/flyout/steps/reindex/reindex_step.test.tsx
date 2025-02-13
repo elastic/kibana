@@ -97,20 +97,26 @@ describe('ReindexStep', () => {
     expect(wrapper.exists('EuiButton')).toBe(false);
   });
 
-  it('shows get status error callout', () => {
+  it('shows fetch failed error callout', () => {
     const props = cloneDeep(defaultProps);
     props.reindexState.status = ReindexStatus.fetchFailed;
     props.reindexState.errorMessage = 'Index not found';
     const wrapper = shallow(<ReindexFlyoutStep {...props} />);
-    expect(wrapper.exists('[data-test-subj="fetchFailedCallout"]')).toBe(true);
+    expect(wrapper.find('FetchFailedCallOut').exists()).toBe(true);
+    expect(wrapper.find('FetchFailedCallOut').props()).toEqual({
+      errorMessage: 'Index not found',
+    });
   });
 
   it('shows reindexing callout', () => {
     const props = cloneDeep(defaultProps);
     props.reindexState.status = ReindexStatus.failed;
-    props.reindexState.errorMessage = 'Index not found';
+    props.reindexState.errorMessage = 'Reindex failed';
     const wrapper = shallow(<ReindexFlyoutStep {...props} />);
-    expect(wrapper.exists('[data-test-subj="reindexingFailedCallout"]')).toBe(true);
+    expect(wrapper.find('ReindexingFailedCallOut').exists()).toBe(true);
+    expect(wrapper.find('ReindexingFailedCallOut').props()).toEqual({
+      errorMessage: 'Reindex failed',
+    });
   });
 
   it('calls startReindex when button is clicked', () => {

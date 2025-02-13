@@ -26,13 +26,14 @@ exports[`WarningFlyoutStep renders 1`] = `
       >
         <EuiButton
           color="primary"
+          data-test-subj="startReindexingButton"
           disabled={false}
           fill={true}
           onClick={[MockFunction]}
         >
           <MemoizedFormattedMessage
-            defaultMessage="Start reindexing"
-            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.reindex.startButtonLabel"
+            defaultMessage="Continue reindexing"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.reindex.continueButtonLabel"
           />
         </EuiButton>
       </EuiFlexItem>
