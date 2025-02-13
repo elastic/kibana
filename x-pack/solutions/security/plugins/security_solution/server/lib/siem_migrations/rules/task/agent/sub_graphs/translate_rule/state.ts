@@ -26,7 +26,7 @@ export const translateRuleState = Annotation.Root({
     reducer: (current, value) => value ?? current,
     default: () => ({} as RuleMigrationIntegration),
   }),
-  translation_finalized: Annotation<boolean>({
+  includes_ecs_mapping: Annotation<boolean>({
     reducer: (current, value) => value ?? current,
     default: () => false,
   }),
