@@ -16,106 +16,81 @@ import { TutorialsCategory } from '../../../../common/constants';
 
 const basePathMock = httpServiceMock.createBasePath();
 
-test('render', () => {
-  const component = render(
-    <IntlProvider>
-      <Introduction
-        description="this is a great tutorial about..."
-        title="Great tutorial"
-        basePath={basePathMock}
-      />
-    </IntlProvider>
-  );
-  expect(component).toMatchSnapshot();
-});
+const commonProps = {
+  description: 'this is a great tutorial about...',
+  title: 'Great tutorial',
+  basePath: basePathMock,
+};
 
-describe('props', () => {
-  test('iconType', () => {
-    const component = render(
-      <IntlProvider>
-        <Introduction
-          description="this is a great tutorial about..."
-          title="Great tutorial"
-          basePath={basePathMock}
-          iconType="logoElastic"
-        />
+describe('Introduction component', () => {
+  test('renders with default props', () => {
+    const { getByText } = render(
+      <IntlProvider locale="en">
+        <Introduction {...commonProps} />
       </IntlProvider>
     );
-    expect(component).toMatchSnapshot();
+    expect(getByText('Great tutorial')).toBeInTheDocument();
+    expect(getByText('this is a great tutorial about...')).toBeInTheDocument();
   });
 
-  test('exportedFieldsUrl', () => {
-    const component = render(
+  test('renders with iconType', () => {
+    const { container } = render(
       <IntlProvider>
-        <Introduction
-          description="this is a great tutorial about..."
-          title="Great tutorial"
-          basePath={basePathMock}
-          exportedFieldsUrl="exported_fields_url"
-        />
+        <Introduction {...commonProps} iconType="logoElastic" />
       </IntlProvider>
     );
-    expect(component).toMatchSnapshot();
+
+    const icon = container.querySelector('[data-euiicon-type="logoElastic"]');
+    expect(icon).toBeInTheDocument();
   });
 
-  test('previewUrl', () => {
-    const component = render(
+  test('renders with exportedFieldsUrl', () => {
+    const { getByRole } = render(
       <IntlProvider>
-        <Introduction
-          description="this is a great tutorial about..."
-          title="Great tutorial"
-          basePath={basePathMock}
-          previewUrl="preview_image_url"
-        />
+        <Introduction {...commonProps} exportedFieldsUrl="exported_fields_url" />
       </IntlProvider>
     );
-    expect(component).toMatchSnapshot();
+
+    const anchorElement = getByRole('link', {
+      name: 'View exported fields (external, opens in a new tab or window)',
+    });
+    expect(anchorElement).toHaveAttribute('href', 'exported_fields_url');
+  });
+
+  test('renders with previewUrl', () => {
+    const { getByRole } = render(
+      <IntlProvider>
+        <Introduction {...commonProps} previewUrl="preview_image_url" />
+      </IntlProvider>
+    );
+    const image = getByRole('img', { name: 'screenshot of primary dashboard.' });
+    expect(image).toHaveAttribute('src', 'preview_image_url');
   });
 
   test('isBeta', () => {
-    // are we going to use isBeta in the end?
-    const component = render(
+    const { getByText } = render(
       <IntlProvider>
-        <Introduction
-          description="this is a great tutorial about..."
-          title="Great tutorial"
-          basePath={basePathMock}
-          isBeta={true}
-        />
+        <Introduction {...commonProps} isBeta={true} />
       </IntlProvider>
     );
-    expect(component).toMatchSnapshot();
+    expect(getByText('Beta')).toBeInTheDocument();
   });
 
   test('Beats badge should show', () => {
-    const component = render(
+    const { getByText } = render(
       <IntlProvider>
-        <Introduction
-          description="this is a great tutorial about..."
-          title="Great tutorial"
-          basePath={basePathMock}
-          isBeta={true}
-          category={TutorialsCategory.METRICS}
-        />
+        <Introduction {...commonProps} isBeta={true} category={TutorialsCategory.METRICS} />
       </IntlProvider>
     );
-    expect(component).toMatchSnapshot();
+    expect(getByText('Beats')).toBeInTheDocument();
   });
 
   test('Beats badge should not show', () => {
-    const component = render(
+    const { queryByText } = render(
       <IntlProvider>
-        <Introduction
-          description="this is a great tutorial about..."
-          title="Great tutorial"
-          basePath={basePathMock}
-          isBeta={true}
-          category={TutorialsCategory.SECURITY_SOLUTION}
-        />
+        <Introduction {...commonProps} category={TutorialsCategory.SECURITY_SOLUTION} />
       </IntlProvider>
     );
-    expect(component).toMatchSnapshot();
+    expect(queryByText('Beats')).not.toBeInTheDocument();
   });
 });
-/* This test file has 2 console warnings, but both belong to eui dom elements structure.
-Because we use  EuiPageHeader - description (which is a <p></p> and then passing divs inside) and another has similar logic */
