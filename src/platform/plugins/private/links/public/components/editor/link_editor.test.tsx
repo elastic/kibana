@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { prettyDOM, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { LinkEditor } from './link_editor';
@@ -32,9 +32,7 @@ describe('LinksEditor', () => {
       title: 'dashboard 01',
     },
     parentDashboardId: 'test',
-    onSave: jest.fn().mockImplementation(() => {
-      console.log('ONSAVE');
-    }),
+    onSave: jest.fn(),
     onClose: jest.fn(),
   };
 
