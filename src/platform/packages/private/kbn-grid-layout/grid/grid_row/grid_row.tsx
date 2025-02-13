@@ -8,11 +8,12 @@
  */
 
 import { cloneDeep } from 'lodash';
-import React, { useEffect, useState } from 'react';
-import { combineLatest, distinctUntilChanged, map, pairwise, skip } from 'rxjs';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { combineLatest, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
 
+import classNames from 'classnames';
 import { DragPreview } from '../drag_preview';
 import { GridPanel } from '../grid_panel';
 import { GridLayoutStateManager } from '../types';
@@ -30,13 +31,13 @@ export interface GridRowProps {
 
 export const GridRow = React.memo(
   ({ rowIndex, renderPanelContents, gridLayoutStateManager }: GridRowProps) => {
+    const collapseButtonRef = useRef<HTMLButtonElement | null>(null);
     const currentRow = gridLayoutStateManager.gridLayout$.value[rowIndex];
 
+    const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
     const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
       getKeysInOrder(currentRow.panels)
     );
-    const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
-    const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
 
     useEffect(
       () => {
@@ -69,17 +70,16 @@ export const GridRow = React.memo(
             map(([proposedGridLayout, gridLayout]) => {
               const displayedGridLayout = proposedGridLayout ?? gridLayout;
               return {
-                title: displayedGridLayout[rowIndex].title,
-                isCollapsed: displayedGridLayout[rowIndex].isCollapsed,
-                panelIds: Object.keys(displayedGridLayout[rowIndex].panels),
+                isCollapsed: displayedGridLayout[rowIndex]?.isCollapsed ?? false,
+                panelIds: Object.keys(displayedGridLayout[rowIndex]?.panels ?? {}),
               };
             }),
             pairwise()
           )
           .subscribe(([oldRowData, newRowData]) => {
-            if (oldRowData.title !== newRowData.title) setRowTitle(newRowData.title);
-            if (oldRowData.isCollapsed !== newRowData.isCollapsed)
+            if (oldRowData.isCollapsed !== newRowData.isCollapsed) {
               setIsCollapsed(newRowData.isCollapsed);
+            }
             if (
               oldRowData.panelIds.length !== newRowData.panelIds.length ||
               !(
@@ -90,7 +90,7 @@ export const GridRow = React.memo(
               setPanelIdsInOrder(
                 getKeysInOrder(
                   (gridLayoutStateManager.proposedGridLayout$.getValue() ??
-                    gridLayoutStateManager.gridLayout$.getValue())[rowIndex].panels
+                    gridLayoutStateManager.gridLayout$.getValue())[rowIndex]?.panels ?? {}
                 )
               );
             }
@@ -103,6 +103,7 @@ export const GridRow = React.memo(
          */
         const gridLayoutSubscription = gridLayoutStateManager.gridLayout$.subscribe(
           (gridLayout) => {
+            if (!gridLayout[rowIndex]) return;
             const newPanelIdsInOrder = getKeysInOrder(gridLayout[rowIndex].panels);
             if (panelIdsInOrder.join() !== newPanelIdsInOrder.join()) {
               setPanelIdsInOrder(newPanelIdsInOrder);
@@ -110,48 +111,56 @@ export const GridRow = React.memo(
           }
         );
 
-        const columnCountSubscription = gridLayoutStateManager.runtimeSettings$
-          .pipe(
-            map(({ columnCount }) => columnCount),
-            distinctUntilChanged()
-          )
-          .subscribe((columnCount) => {
-            const rowRef = gridLayoutStateManager.rowRefs.current[rowIndex];
-            if (!rowRef) return;
-            rowRef.style.setProperty('--kbnGridRowColumnCount', `${columnCount}`);
-          });
-
         return () => {
           interactionStyleSubscription.unsubscribe();
           gridLayoutSubscription.unsubscribe();
           rowStateSubscription.unsubscribe();
-          columnCountSubscription.unsubscribe();
         };
       },
       // eslint-disable-next-line react-hooks/exhaustive-deps
       [rowIndex]
     );
 
+    const toggleIsCollapsed = useCallback(() => {
+      const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
+      newLayout[rowIndex].isCollapsed = !newLayout[rowIndex].isCollapsed;
+      gridLayoutStateManager.gridLayout$.next(newLayout);
+    }, [rowIndex, gridLayoutStateManager.gridLayout$]);
+
+    useEffect(() => {
+      /**
+       * Set `aria-expanded` without passing the expanded state as a prop to `GridRowHeader` in order
+       * to prevent `GridRowHeader` from rerendering when this state changes
+       */
+      if (!collapseButtonRef.current) return;
+      collapseButtonRef.current.ariaExpanded = `${!isCollapsed}`;
+    }, [isCollapsed]);
+
     return (
-      <div css={styles.fullHeight} className="kbnGridRowContainer">
+      <div
+        css={styles.fullHeight}
+        className={classNames('kbnGridRowContainer', {
+          'kbnGridRowContainer--collapsed': isCollapsed,
+        })}
+      >
         {rowIndex !== 0 && (
           <GridRowHeader
-            isCollapsed={isCollapsed}
-            toggleIsCollapsed={() => {
-              const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
-              newLayout[rowIndex].isCollapsed = !newLayout[rowIndex].isCollapsed;
-              gridLayoutStateManager.gridLayout$.next(newLayout);
-            }}
-            rowTitle={rowTitle}
+            rowIndex={rowIndex}
+            gridLayoutStateManager={gridLayoutStateManager}
+            toggleIsCollapsed={toggleIsCollapsed}
+            collapseButtonRef={collapseButtonRef}
           />
         )}
         {!isCollapsed && (
           <div
+            id={`kbnGridRow--${rowIndex}`}
             className={'kbnGridRow'}
             ref={(element: HTMLDivElement | null) =>
               (gridLayoutStateManager.rowRefs.current[rowIndex] = element)
             }
             css={[styles.fullHeight, styles.grid]}
+            role="region"
+            aria-labelledby={`kbnGridRowTile--${rowIndex}`}
           >
             {/* render the panels **in order** for accessibility, using the memoized panel components */}
             {panelIdsInOrder.map((panelId) => (
@@ -182,10 +191,10 @@ const styles = {
     gap: 'calc(var(--kbnGridGutterSize) * 1px)',
     gridAutoRows: 'calc(var(--kbnGridRowHeight) * 1px)',
     gridTemplateColumns: `repeat(
-          var(--kbnGridRowColumnCount),
+          var(--kbnGridColumnCount),
           calc(
-            (100% - (var(--kbnGridGutterSize) * (var(--kbnGridRowColumnCount) - 1) * 1px)) /
-              var(--kbnGridRowColumnCount)
+            (100% - (var(--kbnGridGutterSize) * (var(--kbnGridColumnCount) - 1) * 1px)) /
+              var(--kbnGridColumnCount)
           )
         )`,
   }),
