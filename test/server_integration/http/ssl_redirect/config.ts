@@ -22,7 +22,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const redirectPort = httpConfig.get('servers.kibana.port') + 1234;
 
   return {
-    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
+    testConfigCategory: ScoutTestRunConfigCategory.UNIT_INTEGRATION_TEST,
     testFiles: [require.resolve('.')],
     services: {
       ...httpConfig.get('services'),
