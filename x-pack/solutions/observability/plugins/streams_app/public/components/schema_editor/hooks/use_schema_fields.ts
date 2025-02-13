@@ -138,12 +138,12 @@ export const useSchemaFields = ({
 
         refreshFields();
       } catch (error) {
-        toasts.addError(error, {
+        toasts.addError(new Error(error.body.message), {
           title: i18n.translate('xpack.streams.streamDetailSchemaEditorEditErrorToast', {
             defaultMessage: 'Something went wrong editing the {field} field',
             values: { field: field.name },
           }),
-          toastMessage: error.message,
+          toastMessage: error.body.message,
           toastLifeTimeMs: 5000,
         });
       }
