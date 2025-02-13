@@ -14,7 +14,7 @@ interface NumberParameterProps {
   id: string;
   label: string;
   value: number;
-  setParameter: (id: string, float: number) => unknown;
+  setParameter: (id: string, float: number) => void;
 }
 export function NumberParameter({ id, label, value, setParameter }: NumberParameterProps) {
   const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {

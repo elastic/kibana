@@ -29,7 +29,7 @@ interface IntroductionUiProps {
   exportedFieldUrl?: string;
   iconType?: string;
   isBeta?: boolean;
-  notices?: Array<React.ReactElement<any, string | React.JSXElementConstructor<any>>>; // although i receive notices as a react element, it doesn't get displayed. how is it used?
+  notices?: Array<React.ReactElement<any, string>> | null;
   exportedFieldsUrl?: string;
   intl: InjectedIntl;
   basePath: IBasePath;
