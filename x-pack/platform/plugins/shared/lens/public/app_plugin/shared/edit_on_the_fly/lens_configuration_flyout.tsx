@@ -88,6 +88,8 @@ export function LensEditConfigurationFlyout({
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
   const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
   const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
+  const [embeddableAttrs, setEmbeddableAttrs] =
+    useState<TypedLensSerializedState['attributes']>(attributes);
 
   const [errors, setErrors] = useState<Error[] | undefined>();
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
@@ -246,6 +248,102 @@ export function LensEditConfigurationFlyout({
     if (visualization.activeId == null) {
       return;
     }
+    if (savedObjectId) {
+      saveByRef?.(embeddableAttrs);
+      updateByRefInput?.(savedObjectId);
+    }
+
+    // check if visualization type changed, if it did, don't pass the previous visualization state
+    const prevVisState =
+      previousAttributes.current.visualizationType === visualization.activeId
+        ? previousAttributes.current.state.visualization
+        : undefined;
+    const telemetryEvents = activeVisualization.getTelemetryEventsOnSave?.(
+      visualization.state,
+      prevVisState
+    );
+    if (telemetryEvents && telemetryEvents.length) {
+      trackSaveUiCounterEvents(telemetryEvents);
+    }
+
+    onApplyCallback?.(embeddableAttrs);
+    closeFlyout?.();
+  }, [
+    visualization.activeId,
+    visualization.state,
+    savedObjectId,
+    activeVisualization,
+    onApplyCallback,
+    embeddableAttrs,
+    closeFlyout,
+    saveByRef,
+    updateByRefInput,
+  ]);
+
+  const { getUserMessages } = useApplicationUserMessages({
+    coreStart,
+    framePublicAPI,
+    activeDatasourceId: datasourceId,
+    datasourceState: datasourceStates[datasourceId],
+    datasource: datasourceMap[datasourceId],
+    dispatch,
+    visualization: activeVisualization,
+    visualizationType: visualization.activeId,
+    visualizationState: visualization,
+  });
+
+  const runQuery = useCallback(
+    async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
+      // const dsStates = Object.fromEntries(
+      //   Object.entries(datasourceStates).map(([id, ds]) => {
+      //     const dsState = ds.state;
+      //     return [id, dsState];
+      //   })
+      // );
+      // const currentAttributes: TypedLensSerializedState['attributes'] = {
+      //   ...attributes,
+      //   state: {
+      //     ...attributes.state,
+      //     visualization: visualization.state,
+      //     datasourceStates: dsStates,
+      //   },
+      //   visualizationType: visualization.activeId ?? attributes.visualizationType,
+      // };
+
+      const attrs = await getSuggestions(
+        q,
+        startDependencies,
+        datasourceMap,
+        visualizationMap,
+        adHocDataViews,
+        setErrors,
+        abortController,
+        setDataGridAttrs,
+        esqlVariables,
+        shouldUpdateAttrs,
+        embeddableAttrs
+      );
+      if (attrs) {
+        setCurrentAttributes?.(attrs);
+        setErrors([]);
+        updateSuggestion?.(attrs);
+      }
+      prevQuery.current = q;
+      setIsVisualizationLoading(false);
+    },
+    [
+      startDependencies,
+      datasourceMap,
+      visualizationMap,
+      adHocDataViews,
+      esqlVariables,
+      embeddableAttrs,
+      setCurrentAttributes,
+      updateSuggestion,
+    ]
+  );
+
+  useEffect(() => {
     const dsStates = Object.fromEntries(
       Object.entries(datasourceStates).map(([id, ds]) => {
         const dsState = ds.state;
@@ -275,108 +373,21 @@ export function LensEditConfigurationFlyout({
         datasourceStates: dsStates,
       },
       references,
-      visualizationType: visualization.activeId,
+      visualizationType: visualization.activeId ?? attributes.visualizationType,
     };
-    if (savedObjectId) {
-      saveByRef?.(attrs);
-      updateByRefInput?.(savedObjectId);
+    if (!isEqual(attrs, embeddableAttrs)) {
+      setEmbeddableAttrs(attrs);
     }
-
-    // check if visualization type changed, if it did, don't pass the previous visualization state
-    const prevVisState =
-      previousAttributes.current.visualizationType === visualization.activeId
-        ? previousAttributes.current.state.visualization
-        : undefined;
-    const telemetryEvents = activeVisualization.getTelemetryEventsOnSave?.(
-      visualization.state,
-      prevVisState
-    );
-    if (telemetryEvents && telemetryEvents.length) {
-      trackSaveUiCounterEvents(telemetryEvents);
-    }
-
-    onApplyCallback?.(attrs);
-    closeFlyout?.();
   }, [
-    visualization.activeId,
-    savedObjectId,
-    closeFlyout,
-    onApplyCallback,
-    datasourceStates,
-    textBasedMode,
-    visualization.state,
     activeVisualization,
     attributes,
     datasourceMap,
-    saveByRef,
-    updateByRefInput,
+    datasourceStates,
+    embeddableAttrs,
+    textBasedMode,
+    visualization.activeId,
+    visualization.state,
   ]);
-
-  const { getUserMessages } = useApplicationUserMessages({
-    coreStart,
-    framePublicAPI,
-    activeDatasourceId: datasourceId,
-    datasourceState: datasourceStates[datasourceId],
-    datasource: datasourceMap[datasourceId],
-    dispatch,
-    visualization: activeVisualization,
-    visualizationType: visualization.activeId,
-    visualizationState: visualization,
-  });
-
-  const runQuery = useCallback(
-    async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
-      const dsStates = Object.fromEntries(
-        Object.entries(datasourceStates).map(([id, ds]) => {
-          const dsState = ds.state;
-          return [id, dsState];
-        })
-      );
-      const currentAttributes: TypedLensSerializedState['attributes'] = {
-        ...attributes,
-        state: {
-          ...attributes.state,
-          visualization: visualization.state,
-          datasourceStates: dsStates,
-        },
-        visualizationType: visualization.activeId ?? attributes.visualizationType,
-      };
-
-      const attrs = await getSuggestions(
-        q,
-        startDependencies,
-        datasourceMap,
-        visualizationMap,
-        adHocDataViews,
-        setErrors,
-        abortController,
-        setDataGridAttrs,
-        esqlVariables,
-        shouldUpdateAttrs,
-        currentAttributes
-      );
-      if (attrs) {
-        setCurrentAttributes?.(attrs);
-        setErrors([]);
-        updateSuggestion?.(attrs);
-      }
-      prevQuery.current = q;
-      setIsVisualizationLoading(false);
-    },
-    [
-      datasourceStates,
-      attributes,
-      visualization.state,
-      visualization.activeId,
-      startDependencies,
-      datasourceMap,
-      visualizationMap,
-      adHocDataViews,
-      esqlVariables,
-      setCurrentAttributes,
-      updateSuggestion,
-    ]
-  );
 
   useEffect(() => {
     const abortController = new AbortController();
