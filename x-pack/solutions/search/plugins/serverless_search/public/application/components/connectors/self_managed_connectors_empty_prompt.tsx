@@ -30,7 +30,7 @@ import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useCreateConnector } from '../../hooks/api/use_create_connector';
 import { useConnectors } from '../../hooks/api/use_connectors';
 import { ELASTIC_MANAGED_CONNECTOR_PATH, BASE_CONNECTORS_PATH } from '../../constants';
-import { BACK_LABEL } from '../../../../common/i18n_string';
+import { COMING_SOON_LABEL } from '../../../../common/i18n_string';
 
 export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
   const connectorTypes = useConnectorTypes();
@@ -246,7 +246,7 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="accent">{BACK_LABEL}</EuiBadge>
+                <EuiBadge color="accent">{COMING_SOON_LABEL}</EuiBadge>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
