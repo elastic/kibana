@@ -32,6 +32,7 @@
     "@kbn/shared-ux-utility",
     "@kbn/elastic-agent-utils",
     "@kbn/custom-icons",
-    "@kbn/data-views-plugin", 
+    "@kbn/data-views-plugin",
+    "@kbn/data-view-utils", 
   ]
 }
