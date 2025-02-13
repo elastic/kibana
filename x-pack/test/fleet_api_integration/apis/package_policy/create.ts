@@ -13,7 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from '../space_awareness/api_helper';
-import { cleanFleetIndices } from '../space_awareness/helpers';
+import { cleanFleetIndices, expectToRejectWithError } from '../space_awareness/helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -576,6 +576,33 @@ export default function (providerContext: FtrProviderContext) {
         names: ['logs-tata-default', 'metrics-tata-default'],
         privileges: ['auto_configure', 'create_doc'],
       });
+    });
+
+    it('should throw with invalid additional_datastreams_permissions', async () => {
+      await expectToRejectWithError(
+        () =>
+          apiClient.createPackagePolicy(undefined, {
+            name: 'filetest-3-' + Date.now(),
+            description: '',
+            namespace: 'default',
+            policy_ids: [agentPolicyId],
+            enabled: true,
+            inputs: [
+              {
+                enabled: true,
+                streams: [],
+                type: 'single_input',
+              },
+            ],
+            package: {
+              name: 'filetest',
+              title: 'For File Tests',
+              version: '0.1.0',
+            },
+            additional_datastreams_permissions: ['invalid-tata-default', 'metrics-tata-default'],
+          } as any),
+        /400 "Bad Request".*additional_datastreams_permissions/
+      );
     });
 
     it('should return 200 and formatted inputs when the format=simplified query param is passed', async function () {
