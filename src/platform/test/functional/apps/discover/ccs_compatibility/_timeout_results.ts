@@ -24,18 +24,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('discover search CCS timeout', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
       await remoteEsArchiver.loadIfNeeded(
-        'test/functional/fixtures/es_archiver/logstash_functional'
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
+      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover.json');
       await kibanaServer.uiSettings.update({ 'search:timeout': 3000 });
     });
 
     after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
-      await remoteEsArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover.json');
+      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await remoteEsArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover.json');
       await kibanaServer.uiSettings.unset('search:timeout');
     });
 

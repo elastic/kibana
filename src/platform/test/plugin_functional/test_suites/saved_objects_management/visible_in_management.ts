@@ -25,13 +25,13 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   describe('types with `visibleInManagement` ', () => {
     before(async () => {
       await esArchiver.load(
-        'test/functional/fixtures/es_archiver/saved_objects_management/visible_in_management'
+        'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/visible_in_management'
       );
     });
 
     after(async () => {
       await esArchiver.unload(
-        'test/functional/fixtures/es_archiver/saved_objects_management/visible_in_management'
+        'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/visible_in_management'
       );
     });
 

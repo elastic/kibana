@@ -21,10 +21,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('_existing_indices response', () => {
     before(() =>
-      esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
+      esArchiver.load('src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
     );
     after(() =>
-      esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
+      esArchiver.unload('src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
     );
 
     it('returns an array of existing indices', async () => {

@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     this.tags('includeFirefox');
     before(async () => {
       await remoteEsArchiver.loadIfNeeded(
-        'test/functional/fixtures/es_archiver/logstash_functional'
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
       // resize the editor to allow the whole of the response to be displayed
       await browser.setWindowSize(1200, 1800);
@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await remoteEsArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await remoteEsArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     describe('Perform CCS Search in Console', () => {

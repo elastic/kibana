@@ -45,14 +45,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'kibana_sample_admin']);
 
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
-      await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
+      await esArchiver.load('src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/multi_data_view_kibana'
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/multi_data_view_kibana'
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
@@ -61,14 +61,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
-      await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
+      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
       await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/multi_data_view_kibana'
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/multi_data_view_kibana'
       );
       await security.testUser.restoreDefaults();
       await kibanaServer.uiSettings.unset('defaultIndex');

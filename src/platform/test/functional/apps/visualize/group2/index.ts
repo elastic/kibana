@@ -26,8 +26,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       });
       await browser.refresh();
 
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/long_window_logstash');
     });
 
     after(async () => {

@@ -316,7 +316,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.remote_clusters.ui.enabled (boolean?)',
         'xpack.ingest_pipelines.enableManageProcessors (boolean?|never)',
         /**
-         * NOTE: The Reporting plugin is currently disabled in functional tests (see test/functional/config.base.js).
+         * NOTE: The Reporting plugin is currently disabled in functional tests (see src/platform/test/functional/config.base.js).
          * It will be re-enabled once #102552 is completed.
          */
         // 'xpack.reporting.poll.jobCompletionNotifier.interval (number)',

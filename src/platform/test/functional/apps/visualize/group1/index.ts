@@ -21,8 +21,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await browser.setWindowSize(1280, 800);
       await kibanaServer.savedObjects.cleanStandardList();
 
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/long_window_logstash');
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/long_window_logstash');
     });
     loadTestFile(require.resolve('./_embedding_chart'));
     loadTestFile(require.resolve('./_data_table'));

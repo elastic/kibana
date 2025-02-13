@@ -22,8 +22,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const defaultSettings = {
     defaultIndex: defaultIndexPatternString,
   };
-  const localArchiveDirectory = 'test/functional/fixtures/kbn_archiver/discover';
-  const remoteArchiveDirectory = 'test/functional/fixtures/kbn_archiver/ccs/discover';
+  const localArchiveDirectory = 'src/platform/test/functional/fixtures/kbn_archiver/discover';
+  const remoteArchiveDirectory = 'src/platform/test/functional/fixtures/kbn_archiver/ccs/discover';
   const esNode = config.get('esTestCluster.ccs')
     ? getService('remoteEsArchiver' as 'esArchiver')
     : esArchiver;
@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ? ['kibana_admin', 'test_logstash_reader', 'ccs_remote_search']
         : ['kibana_admin', 'test_logstash_reader'];
       await security.testUser.setRoles(roles);
-      await esNode.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esNode.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.savedObjects.clean({ types: ['saved-search', 'index-pattern'] });
       await kibanaServer.importExport.load(kbnDirectory);
       await kibanaServer.uiSettings.replace(defaultSettings);

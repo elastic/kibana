@@ -29,13 +29,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
       // The kbn_archiver above was created from an es_archiver which intentionally had
       // 2 missing index patterns.  But that would fail to load with kbn_archiver.
       // So we unload those 2 index patterns here.
       await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana_unload'
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana_unload'
       );
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
       await kibanaServer.uiSettings.replace({

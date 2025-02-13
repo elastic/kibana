@@ -35,7 +35,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await kbnServer.savedObjects.cleanStandardList();
 
       await kbnServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_from_http_apis.json'
+        'src/platform/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_from_http_apis.json'
       );
     });
 
@@ -44,7 +44,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       // `kbnServer.importExport.unload` uses the global SOM `delete` HTTP API
       // and will throw on `hiddenFromHttpApis:true` objects
       await esArchiver.unload(
-        'test/functional/fixtures/es_archiver/saved_objects_management/hidden_from_http_apis'
+        'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/hidden_from_http_apis'
       );
     });
 

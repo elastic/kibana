@@ -24,10 +24,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('context view for date_nanos with custom timestamp', () => {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos_custom']);
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/date_nanos_custom');
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/date_nanos_custom');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/date_nanos_custom'
+        'src/platform/test/functional/fixtures/kbn_archiver/date_nanos_custom'
       );
       await kibanaServer.uiSettings.replace({ defaultIndex: TEST_INDEX_PATTERN });
       await kibanaServer.uiSettings.update({
@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async function () {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('test/functional/fixtures/es_archiver/date_nanos_custom');
+      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/date_nanos_custom');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
   });

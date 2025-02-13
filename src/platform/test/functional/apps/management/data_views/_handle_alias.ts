@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles(['kibana_admin', 'test_alias_reader']);
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/alias');
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/alias');
       await es.indices.updateAliases({
         body: {
           actions: [
@@ -79,7 +79,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.unsetTime();
         await security.testUser.restoreDefaults();
         await kibanaServer.savedObjects.cleanStandardList();
-        await esArchiver.unload('test/functional/fixtures/es_archiver/alias');
+        await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/alias');
       });
     });
   });

@@ -72,13 +72,13 @@ export default function ({ getService }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: [EVENT_ANNOTATION_GROUP_TYPE] });
 
       await kibanaServer.importExport.load(
-        'test/api_integration/fixtures/kbn_archiver/event_annotations/event_annotations.json'
+        'src/platform/test/api_integration/fixtures/kbn_archiver/event_annotations/event_annotations.json'
       );
     });
 
     after(async () => {
       await kibanaServer.importExport.unload(
-        'test/api_integration/fixtures/kbn_archiver/event_annotations/event_annotations.json'
+        'src/platform/test/api_integration/fixtures/kbn_archiver/event_annotations/event_annotations.json'
       );
 
       await kibanaServer.savedObjects.clean({ types: [EVENT_ANNOTATION_GROUP_TYPE] });

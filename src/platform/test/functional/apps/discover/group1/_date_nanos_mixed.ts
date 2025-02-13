@@ -22,10 +22,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('date_nanos_mixed', function () {
     before(async function () {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/date_nanos_mixed');
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/date_nanos_mixed');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/date_nanos_mixed'
+        'src/platform/test/functional/fixtures/kbn_archiver/date_nanos_mixed'
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'timestamp-*',
@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('test/functional/fixtures/es_archiver/date_nanos_mixed');
+      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/date_nanos_mixed');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await common.unsetTime();
     });

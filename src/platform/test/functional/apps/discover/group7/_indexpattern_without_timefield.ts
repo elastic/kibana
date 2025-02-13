@@ -28,11 +28,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'kibana_timefield']);
       await esArchiver.loadIfNeeded(
-        'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+        'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
       );
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
+        'src/platform/test/functional/fixtures/kbn_archiver/index_pattern_without_timefield'
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'without-timefield',
@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.unset('timepicker:timeDefaults');
       await kibanaServer.uiSettings.unset('defaultIndex');
       await esArchiver.unload(
-        'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+        'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
       );
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });

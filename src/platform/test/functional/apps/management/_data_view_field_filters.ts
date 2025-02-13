@@ -20,11 +20,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('data view field filters', function describeIndexTests() {
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover');
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover');
     });
 
     it('can create field filter', async function () {

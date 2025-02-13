@@ -148,12 +148,12 @@ export default function ({ getService }) {
   describe('kibana stats api', () => {
     before(async () => {
       await kibanaServer.importExport.load(
-        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+        'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );
     });
     after(async () => {
       await kibanaServer.importExport.unload(
-        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+        'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );
     });
 

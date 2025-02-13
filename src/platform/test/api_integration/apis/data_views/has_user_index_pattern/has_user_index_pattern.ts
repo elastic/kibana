@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         it('should return true if has index pattern with user data', async () => {
           await esArchiver.load(
-            'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+            'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
           );
           await supertest
             .post(config.path)
@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
           expect(response.body.result).to.be(true);
 
           await esArchiver.unload(
-            'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+            'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
           );
         });
 

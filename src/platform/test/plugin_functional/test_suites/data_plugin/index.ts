@@ -20,7 +20,7 @@ export default function ({
   describe('data plugin', () => {
     before(async () => {
       await esArchiver.loadIfNeeded(
-        'test/functional/fixtures/es_archiver/getting_started/shakespeare'
+        'src/platform/test/functional/fixtures/es_archiver/getting_started/shakespeare'
       );
       await common.navigateToApp('settings');
       await settings.createIndexPattern('shakespeare', '');

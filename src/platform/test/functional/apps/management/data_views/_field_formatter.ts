@@ -33,12 +33,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'test_field_formatters',
         'test_logstash_reader',
       ]);
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace({});
     });
 
     after(async function afterAll() {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover');
     });
 
     describe('set and change field formatter', function describeIndexTests() {

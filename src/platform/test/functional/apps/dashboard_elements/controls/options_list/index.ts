@@ -20,10 +20,10 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const { timePicker, dashboard } = getPageObjects(['timePicker', 'dashboard']);
 
   const setup = async () => {
-    await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
+    await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/dashboard/current/data');
     await kibanaServer.savedObjects.cleanStandardList();
     await kibanaServer.importExport.load(
-      'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
     );
     await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
     await kibanaServer.uiSettings.replace({
@@ -43,7 +43,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   };
 
   const teardown = async () => {
-    await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
+    await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/dashboard/current/data');
     await security.testUser.restoreDefaults();
     await kibanaServer.savedObjects.cleanStandardList();
   };

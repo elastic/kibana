@@ -26,8 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('source filters', function () {
     before(async function () {
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/visualize.json');
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/visualize.json');
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
       });
@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/visualize.json'
+        'src/platform/test/functional/fixtures/kbn_archiver/visualize.json'
       );
       await kibanaServer.uiSettings.unset('defaultIndex');
     });

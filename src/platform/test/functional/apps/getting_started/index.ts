@@ -19,11 +19,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('Getting Started ', function () {
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await esNode.loadIfNeeded('test/functional/fixtures/es_archiver/getting_started/shakespeare');
+      await esNode.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/getting_started/shakespeare');
     });
 
     after(async function () {
-      await esNode.unload('test/functional/fixtures/es_archiver/getting_started/shakespeare');
+      await esNode.unload('src/platform/test/functional/fixtures/es_archiver/getting_started/shakespeare');
     });
 
     describe('new charts library', () => {

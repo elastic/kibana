@@ -22,18 +22,18 @@ export default function ({ getService }) {
     describe('non time based', () => {
       before(async () => {
         await esArchiver.load(
-          'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+          'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
         );
         await kibanaServer.importExport.load(
-          'test/api_integration/fixtures/kbn_archiver/index_patterns/basic_kibana.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/index_patterns/basic_kibana.json'
         );
       });
       after(async () => {
         await esArchiver.unload(
-          'test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
+          'src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index'
         );
         await kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/index_patterns/basic_kibana.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/index_patterns/basic_kibana.json'
         );
       });
       it('should return 200 without a query', () =>
@@ -144,17 +144,17 @@ export default function ({ getService }) {
 
     describe('time based', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+        await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
         await kibanaServer.importExport.load(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
         );
       });
 
       after(async () => {
-        await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+        await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
 
         await kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
         );
       });
 

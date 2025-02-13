@@ -47,12 +47,12 @@ export default function ({ getService }: FtrProviderContext) {
   describe('relationships', () => {
     before(async () => {
       await kibanaServer.importExport.load(
-        'test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json'
+        'src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json'
       );
     });
     after(async () => {
       await kibanaServer.importExport.unload(
-        'test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json'
+        'src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json'
       );
     });
 

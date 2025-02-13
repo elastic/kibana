@@ -18,11 +18,11 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   async function loadLogstash() {
     await browser.setWindowSize(1200, 900);
-    await esNode.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+    await esNode.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
   }
 
   async function unloadLogstash() {
-    await esNode.unload('test/functional/fixtures/es_archiver/logstash_functional');
+    await esNode.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
   }
 
   describe('dashboard app - group 3', function () {

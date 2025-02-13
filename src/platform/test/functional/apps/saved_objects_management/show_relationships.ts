@@ -17,7 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('saved objects relationships flyout', () => {
     beforeEach(async () => {
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/saved_objects_management/show_relationships'
+        'src/platform/test/functional/fixtures/kbn_archiver/saved_objects_management/show_relationships'
       );
     });
 

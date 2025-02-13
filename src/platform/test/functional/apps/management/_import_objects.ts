@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('import objects', function describeIndexTests() {
     describe('.ndjson file', () => {
       beforeEach(async function () {
-        await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/management');
+        await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/management');
         await kibanaServer.uiSettings.replace({});
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();

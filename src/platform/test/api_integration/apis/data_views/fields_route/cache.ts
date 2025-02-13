@@ -20,10 +20,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('cache headers', () => {
     before(() =>
-      esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
+      esArchiver.load('src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
     );
     after(() =>
-      esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
+      esArchiver.unload('src/platform/test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
     );
 
     it('are present', async () => {

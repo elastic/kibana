@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const dashboardNameEnterKey = 'Dashboard Save Test with Enter Key';
 
     before(async function () {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
       await dashboard.initTests();
     });
 
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('Does not show dashboard save modal when on quick save', async function () {
-        await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+        await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
         await dashboard.gotoDashboardLandingPage();
         await dashboard.clickNewDashboard();
         await dashboard.saveDashboard('test quick save');

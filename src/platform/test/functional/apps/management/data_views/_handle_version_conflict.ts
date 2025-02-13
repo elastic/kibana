@@ -33,11 +33,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('FOO index version conflict', function describeIndexTests() {
     before(async function () {
       await browser.setWindowSize(1200, 800);
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover');
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover');
     });
 
     it('Should be able to surface version conflict notification while creating scripted field', async function () {

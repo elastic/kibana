@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       // delete .kibana index and then wait for Kibana to re-create it
       await browser.setWindowSize(1200, 800);
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/management');
+      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/management');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'f1e4c910-a2e6-11e7-bb30-233be9be6a15',
       });

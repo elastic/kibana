@@ -25,9 +25,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'kibana_large_strings']);
 
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/testlargestring.json'
+        'src/platform/test/functional/fixtures/kbn_archiver/testlargestring.json'
       );
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/hamlet');
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/hamlet');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'testlargestring' });
     });
 
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('test/functional/fixtures/es_archiver/hamlet');
+      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/hamlet');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
   });

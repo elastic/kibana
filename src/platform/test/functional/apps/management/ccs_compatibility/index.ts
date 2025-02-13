@@ -16,14 +16,14 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('management', function () {
     before(async () => {
       await remoteEsArchiver.loadIfNeeded(
-        'test/functional/fixtures/es_archiver/logstash_functional'
+        'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/makelogs');
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/makelogs');
     });
 
     after(async () => {
-      await remoteEsArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.unload('test/functional/fixtures/es_archiver/makelogs');
+      await remoteEsArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/makelogs');
     });
 
     loadTestFile(require.resolve('./_data_views_ccs'));

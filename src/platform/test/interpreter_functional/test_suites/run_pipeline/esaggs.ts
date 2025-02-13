@@ -97,12 +97,12 @@ export default function ({
     describe('loads a saved search', () => {
       before(async () => {
         await kibanaServer.importExport.load(
-          'test/functional/fixtures/kbn_archiver/saved_search.json'
+          'src/platform/test/functional/fixtures/kbn_archiver/saved_search.json'
         );
       });
       after(async () => {
         await kibanaServer.importExport.unload(
-          'test/functional/fixtures/kbn_archiver/saved_search.json'
+          'src/platform/test/functional/fixtures/kbn_archiver/saved_search.json'
         );
       });
 

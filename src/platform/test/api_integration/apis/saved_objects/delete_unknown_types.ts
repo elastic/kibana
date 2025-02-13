@@ -27,13 +27,13 @@ export default function ({ getService }: FtrProviderContext) {
       // we are injecting unknown types in this archive, so we need to relax the mappings restrictions
       await es.indices.putMapping({ index: MAIN_SAVED_OBJECT_INDEX, dynamic: true });
       await esArchiver.load(
-        'test/api_integration/fixtures/es_archiver/saved_objects/delete_unknown_types'
+        'src/platform/test/api_integration/fixtures/es_archiver/saved_objects/delete_unknown_types'
       );
     });
 
     after(async () => {
       await esArchiver.unload(
-        'test/api_integration/fixtures/es_archiver/saved_objects/delete_unknown_types'
+        'src/platform/test/api_integration/fixtures/es_archiver/saved_objects/delete_unknown_types'
       );
     });
 

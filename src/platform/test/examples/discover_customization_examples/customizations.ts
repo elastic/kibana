@@ -28,7 +28,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await common.navigateToApp('home');
       const currentUrl = await browser.getCurrentUrl();
@@ -42,7 +42,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     after(async () => {
       await kibanaServer.uiSettings.unset('defaultIndex');
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover');
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();
     });

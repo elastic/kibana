@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('annotation listing page', function () {
     before(async function () {
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/annotation_listing_page_search'
+        'src/platform/test/functional/fixtures/kbn_archiver/annotation_listing_page_search'
       );
       // we need to test the missing data view scenario, so delete one of them
       // (can't just omit it from the archive because Kibana won't import with broken references)
@@ -40,7 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function () {
       log.info(`unloading annotations and data views`);
       await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/annotation_listing_page_search'
+        'src/platform/test/functional/fixtures/kbn_archiver/annotation_listing_page_search'
       );
     });
 

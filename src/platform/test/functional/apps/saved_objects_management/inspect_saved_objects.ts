@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('saved objects inspect page', () => {
     beforeEach(async () => {
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/saved_objects_management/edit_saved_object'
+        'src/platform/test/functional/fixtures/kbn_archiver/saved_objects_management/edit_saved_object'
       );
     });
 

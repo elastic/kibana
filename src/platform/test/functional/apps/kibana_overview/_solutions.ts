@@ -19,18 +19,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('overview page - solutions', function describeIndexTests() {
     before(async () => {
-      await esArchiver.load('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.load('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
       await PageObjects.common.navigateToUrl('kibana_overview', '', { useActualUrl: true });
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
     });
 

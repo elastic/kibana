@@ -37,12 +37,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'kibana_sample_admin',
         'test_logstash_reader',
       ]);
-      await esArchiver.load('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
+      await esArchiver.load('src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
       );
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
@@ -55,9 +55,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.importExport.unload(
-        'test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
       );
-      await esArchiver.unload('test/functional/fixtures/es_archiver/kibana_sample_data_flights');
+      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights');
       await kibanaServer.uiSettings.unset('defaultIndex');
       await common.unsetTime();
       await security.testUser.restoreDefaults();

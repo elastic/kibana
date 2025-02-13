@@ -19,10 +19,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('conflicts', () => {
     before(() =>
-      esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/conflicts')
+      esArchiver.load('src/platform/test/api_integration/fixtures/es_archiver/index_patterns/conflicts')
     );
     after(() =>
-      esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/conflicts')
+      esArchiver.unload('src/platform/test/api_integration/fixtures/es_archiver/index_patterns/conflicts')
     );
 
     it('flags fields with mismatched types as conflicting', () =>

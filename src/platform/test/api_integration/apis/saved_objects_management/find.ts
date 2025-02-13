@@ -28,12 +28,12 @@ export default function ({ getService }: FtrProviderContext) {
     describe('with kibana index', () => {
       before(async () => {
         await kibanaServer.importExport.load(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
         );
       });
       after(async () => {
         await kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
         );
       });
 
@@ -100,12 +100,12 @@ export default function ({ getService }: FtrProviderContext) {
       describe('`hasReference` and `hasReferenceOperator` parameters', () => {
         before(async () => {
           await kibanaServer.importExport.load(
-            'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
+            'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
           );
         });
         after(async () => {
           await kibanaServer.importExport.unload(
-            'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
+            'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/references.json'
           );
         });
 
@@ -207,12 +207,12 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await kibanaServer.importExport.load(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/search.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/search.json'
         );
       });
       after(async () => {
         await kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/search.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/search.json'
         );
         await kibanaServer.savedObjects.cleanStandardList();
       });

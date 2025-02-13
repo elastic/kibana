@@ -27,13 +27,13 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_ID });
       await kibanaServer.importExport.load(
-        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
+        'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
         { space: SPACE_ID }
       );
 
       await kibanaServer.spaces.create({ id: `${SPACE_ID}-foo`, name: `${SPACE_ID}-foo` });
       await kibanaServer.importExport.load(
-        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
+        'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
         {
           space: `${SPACE_ID}-foo`,
         }
@@ -308,13 +308,13 @@ export default function ({ getService }: FtrProviderContext) {
     describe('`has_reference` and `has_reference_operator` parameters', () => {
       before(async () => {
         await kibanaServer.importExport.load(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
           { space: SPACE_ID }
         );
       });
       after(async () => {
         await kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
           { space: SPACE_ID }
         );
       });
@@ -383,13 +383,13 @@ export default function ({ getService }: FtrProviderContext) {
     describe('`has_no_reference` and `has_no_reference_operator` parameters', () => {
       before(async () => {
         await kibanaServer.importExport.load(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
           { space: SPACE_ID }
         );
       });
       after(async () => {
         await kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
           { space: SPACE_ID }
         );
       });
@@ -464,13 +464,13 @@ export default function ({ getService }: FtrProviderContext) {
     describe('with both `has_reference` and `has_no_reference` parameters', () => {
       before(async () => {
         await kibanaServer.importExport.load(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
           { space: SPACE_ID }
         );
       });
       after(async () => {
         await kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/references.json',
           { space: SPACE_ID }
         );
       });
@@ -513,13 +513,13 @@ export default function ({ getService }: FtrProviderContext) {
     describe('searching for special characters', () => {
       before(async () => {
         await kibanaServer.importExport.load(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/find_edgecases.json',
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/find_edgecases.json',
           { space: SPACE_ID }
         );
       });
       after(async () => {
         await kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/find_edgecases.json',
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/find_edgecases.json',
           { space: SPACE_ID }
         );
       });

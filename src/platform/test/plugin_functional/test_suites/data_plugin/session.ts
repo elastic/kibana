@@ -86,11 +86,11 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
     describe('Dashboard', () => {
       before(async () => {
         await esArchiver.loadIfNeeded(
-          'test/functional/fixtures/es_archiver/dashboard/current/data'
+          'src/platform/test/functional/fixtures/es_archiver/dashboard/current/data'
         );
         await kibanaServer.savedObjects.cleanStandardList();
         await kibanaServer.importExport.load(
-          'test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+          'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
         );
         await common.navigateToApp('dashboard');
         await dashboard.loadSavedDashboard('dashboard with filter');
@@ -102,7 +102,7 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       });
 
       after(async () => {
-        await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
+        await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/dashboard/current/data');
         await kibanaServer.savedObjects.cleanStandardList();
       });
 

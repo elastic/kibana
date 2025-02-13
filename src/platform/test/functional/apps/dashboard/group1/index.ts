@@ -15,12 +15,12 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
   async function loadCurrentData() {
     await browser.setWindowSize(1300, 900);
-    await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
-    await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');
+    await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+    await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/dashboard/current/data');
   }
 
   async function unloadCurrentData() {
-    await esArchiver.unload('test/functional/fixtures/es_archiver/dashboard/current/data');
+    await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/dashboard/current/data');
   }
 
   describe('dashboard app - group 1', function () {

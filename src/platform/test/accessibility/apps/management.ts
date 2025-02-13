@@ -29,16 +29,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data views', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-        await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+        await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+        await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover');
         await kibanaServer.uiSettings.update({
           defaultIndex: 'logstash-*',
         });
         await PageObjects.settings.navigateTo();
       });
       after(async () => {
-        await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-        await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+        await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover');
+        await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
       });
       it('index pattern page', async () => {
         await PageObjects.settings.clickKibanaIndexPatterns();

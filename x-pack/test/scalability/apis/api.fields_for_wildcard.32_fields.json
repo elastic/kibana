@@ -24,7 +24,7 @@
     "maxDuration": "5m"
   },
   "testData": {
-    "esArchives": ["test/functional/fixtures/es_archiver/kibana_sample_data_flights"]
+    "esArchives": ["src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights"]
   },
   "streams": [
     {

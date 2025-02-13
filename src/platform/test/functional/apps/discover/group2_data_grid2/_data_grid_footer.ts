@@ -32,13 +32,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('time field with date type', function () {
       before(async () => {
         await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
-        await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-        await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+        await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+        await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover');
       });
 
       after(async () => {
-        await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-        await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+        await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover');
+        await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
         await kibanaServer.savedObjects.cleanStandardList();
         await kibanaServer.uiSettings.replace({});
       });
@@ -135,13 +135,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('time field with date nano type', function () {
       before(async () => {
         await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
-        await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/date_nanos');
-        await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/date_nanos');
+        await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/date_nanos');
+        await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/date_nanos');
       });
 
       after(async () => {
-        await esArchiver.unload('test/functional/fixtures/es_archiver/date_nanos');
-        await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/date_nanos');
+        await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/date_nanos');
+        await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/date_nanos');
         await kibanaServer.savedObjects.cleanStandardList();
         await kibanaServer.uiSettings.replace({});
       });

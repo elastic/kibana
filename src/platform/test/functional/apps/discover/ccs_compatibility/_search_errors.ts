@@ -21,8 +21,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const isCcsTest = config.get('esTestCluster.ccs');
   const archiveDirectory = isCcsTest
-    ? 'test/functional/fixtures/kbn_archiver/ccs/discover.json'
-    : 'test/functional/fixtures/kbn_archiver/discover.json';
+    ? 'src/platform/test/functional/fixtures/kbn_archiver/ccs/discover.json'
+    : 'src/platform/test/functional/fixtures/kbn_archiver/discover.json';
   const esNode = isCcsTest
     ? getService('remoteEsArchiver' as 'esArchiver')
     : getService('esArchiver');
@@ -32,12 +32,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover search errors', () => {
     before(async () => {
       await kibanaServer.importExport.load(archiveDirectory);
-      await esNode.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esNode.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     after(async () => {
       await kibanaServer.importExport.unload(archiveDirectory);
-      await esNode.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esNode.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     it('exception on single shard shows warning and results', async () => {

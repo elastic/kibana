@@ -22,10 +22,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   // Failing: See https://github.com/elastic/kibana/issues/165745
   // Failing: See https://github.com/elastic/kibana/issues/165745
   describe.skip('dashboard empty state', () => {
-    const kbnDirectory = 'test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
+    const kbnDirectory = 'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana';
 
     before(async function () {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       log.debug('load kibana with no data');
       await kibanaServer.importExport.unload(kbnDirectory);
@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('adds a new data view when no data views', async () => {
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
 
       // create the new data view from the dashboards/create route in order to test that the dashboard is loaded properly as soon as the data view is created...

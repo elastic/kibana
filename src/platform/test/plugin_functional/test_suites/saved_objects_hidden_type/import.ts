@@ -17,12 +17,12 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
   describe('import', () => {
     before(() =>
       esArchiver.load(
-        'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+        'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
       )
     );
     after(() =>
       esArchiver.unload(
-        'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+        'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
       )
     );
 

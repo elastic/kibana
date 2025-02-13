@@ -24,12 +24,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const config = getService('config');
   const dataViews = getService('dataViews');
   const localArchiveDirectories = {
-    nested: 'test/functional/fixtures/kbn_archiver/date_nested.json',
-    discover: 'test/functional/fixtures/kbn_archiver/discover.json',
+    nested: 'src/platform/test/functional/fixtures/kbn_archiver/date_nested.json',
+    discover: 'src/platform/test/functional/fixtures/kbn_archiver/discover.json',
   };
   const remoteArchiveDirectories = {
-    nested: 'test/functional/fixtures/kbn_archiver/ccs/date_nested.json',
-    discover: 'test/functional/fixtures/kbn_archiver/ccs/discover.json',
+    nested: 'src/platform/test/functional/fixtures/kbn_archiver/ccs/date_nested.json',
+    discover: 'src/platform/test/functional/fixtures/kbn_archiver/ccs/discover.json',
   };
   const logstashIndexPatternString = config.get('esTestCluster.ccs')
     ? 'ftr-remote:logstash-*'
@@ -83,8 +83,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await kibanaServer.importExport.load(kbnArchives.discover);
       await kibanaServer.importExport.load(kbnArchives.nested);
-      await esNode.load('test/functional/fixtures/es_archiver/date_nested');
-      await esNode.load('test/functional/fixtures/es_archiver/logstash_functional');
+      await esNode.load('src/platform/test/functional/fixtures/es_archiver/date_nested');
+      await esNode.load('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
 
       await kibanaServer.uiSettings.replace(defaultSettings);
       log.debug('discover');
@@ -96,8 +96,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload(kbnArchives.nested);
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern', 'query'] });
       await kibanaServer.savedObjects.clean({ types: ['search', 'query'] });
-      await esNode.unload('test/functional/fixtures/es_archiver/date_nested');
-      await esNode.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esNode.unload('src/platform/test/functional/fixtures/es_archiver/date_nested');
+      await esNode.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
       await common.unsetTime();
     });
 

@@ -14,14 +14,14 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('dashboards - delete', () => {
     before(async () => {
       await kibanaServer.importExport.load(
-        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+        'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.unload(
-        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+        'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );
     });
     loadTestFile(require.resolve('./main'));

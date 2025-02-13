@@ -19,7 +19,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
     describe('saved objects with hidden type', () => {
       before(async () => {
         await esArchiver.load(
-          'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+          'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
         );
         await kibanaServer.importExport.load(
           'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_saved_objects'
@@ -27,7 +27,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       });
       after(async () => {
         await esArchiver.unload(
-          'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
+          'src/platform/test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
         );
         await kibanaServer.savedObjects.clean({
           types: ['test-hidden-importable-exportable'],

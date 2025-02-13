@@ -25,9 +25,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded(
-        'test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern'
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern'
       );
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace({});
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.clickKibanaIndexPatterns();
@@ -35,10 +35,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async function () {
       await esArchiver.unload(
-        'test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern'
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern'
       );
 
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     describe('can open and close editor', function () {

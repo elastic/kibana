@@ -23,7 +23,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_ID });
       await kibanaServer.importExport.load(
-        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
+        'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
         { space: SPACE_ID }
       );
     });
@@ -612,17 +612,17 @@ export default function ({ getService }: FtrProviderContext) {
     describe('should retain the managed property value of exported saved objects', () => {
       before(async () => {
         await kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json',
           { space: SPACE_ID }
         );
         await kibanaServer.importExport.load(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/managed_objects.json',
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/managed_objects.json',
           { space: SPACE_ID }
         );
       });
       after(async () => {
         await kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/managed_objects.json',
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/managed_objects.json',
           { space: SPACE_ID }
         );
       });

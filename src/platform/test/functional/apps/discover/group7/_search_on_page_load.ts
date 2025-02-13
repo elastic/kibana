@@ -51,13 +51,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       log.debug('load kibana index with default index pattern');
 
-      await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
+      await kibanaServer.importExport.load('src/platform/test/functional/fixtures/kbn_archiver/discover.json');
 
       // and load a set of data
-      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      await esArchiver.load('test/functional/fixtures/es_archiver/date_nested');
+      await esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.load('src/platform/test/functional/fixtures/es_archiver/date_nested');
       await kibanaServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/date_nested.json'
+        'src/platform/test/functional/fixtures/kbn_archiver/date_nested.json'
       );
 
       await kibanaServer.uiSettings.replace(defaultSettings);
@@ -65,10 +65,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
-      await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/date_nested');
-      await esArchiver.unload('test/functional/fixtures/es_archiver/date_nested');
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/discover');
+      await kibanaServer.importExport.unload('src/platform/test/functional/fixtures/kbn_archiver/date_nested');
+      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/date_nested');
+      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await kibanaServer.savedObjects.cleanStandardList();
     });

@@ -22,7 +22,7 @@
 # Make sure to run the script from kibana root directory. Some functions depend on the jq command-line utility
 # being installed.
 #
-# bash test/scripts/run_multiple_kibana_nodes.sh <function> [options]
+# bash src/platform/test/scripts/run_multiple_kibana_nodes.sh <function> [options]
 # functions:
 #   start [instances] [args] - start multiple kibanas (3 default)
 #   es [args] - run elasticsearch

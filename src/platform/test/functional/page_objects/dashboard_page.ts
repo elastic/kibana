@@ -56,8 +56,8 @@ export class DashboardPageObject extends FtrService {
     ? 'ftr-remote:logstash-*'
     : 'logstash-*';
   private readonly kibanaIndex = this.config.get('esTestCluster.ccs')
-    ? 'test/functional/fixtures/kbn_archiver/ccs/dashboard/legacy/legacy.json'
-    : 'test/functional/fixtures/kbn_archiver/dashboard/legacy/legacy.json';
+    ? 'src/platform/test/functional/fixtures/kbn_archiver/ccs/dashboard/legacy/legacy.json'
+    : 'src/platform/test/functional/fixtures/kbn_archiver/dashboard/legacy/legacy.json';
 
   public readonly APP_ID = 'dashboards';
 

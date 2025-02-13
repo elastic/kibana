@@ -17,10 +17,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, header } = getPageObjects(['common', 'discover', 'header']);
 
   describe('discover no data', () => {
-    const kbnDirectory = 'test/functional/fixtures/kbn_archiver/discover';
+    const kbnDirectory = 'src/platform/test/functional/fixtures/kbn_archiver/discover';
 
     before(async function () {
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       log.debug('load kibana with no data');
       await kibanaServer.importExport.unload(kbnDirectory);
@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
-      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await esArchiver.unload('src/platform/test/functional/fixtures/es_archiver/logstash_functional');
     });
 
     it('when no data opens integrations', async () => {

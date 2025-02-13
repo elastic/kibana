@@ -47,7 +47,7 @@ export class NewsFeedSimulatorPlugin implements Plugin {
         {
           title: { en: `You are functionally testing the newsfeed widget with fixtures!` },
           description: {
-            en: 'See test/common/platform/plugins/shared/newsfeed/newsfeed_simulation',
+            en: 'See src/platform/test/common/platform/plugins/shared/newsfeed/newsfeed_simulation',
           },
           link_text: { en: 'Generic feed-viewer could go here' },
           link_url: { en: 'https://feeds.elastic.co' },
