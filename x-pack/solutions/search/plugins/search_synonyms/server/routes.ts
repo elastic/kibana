@@ -19,6 +19,7 @@ import { fetchSynonymRule } from './lib/fetch_synonym_rule';
 import { putSynonymsSet } from './lib/put_synonyms_set';
 import { fetchUniqueRuleId } from './lib/fetch_unique_rule_id';
 import { putSynonymsRule } from './lib/put_synonyms_rule';
+import { fetchSynonymsSetExists } from './lib/fetch_synonyms_set_exists';
 
 export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
   router.get(
@@ -290,6 +291,9 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
         params: schema.object({
           synonymsSetId: schema.string(),
         }),
+        query: schema.object({
+          forceWrite: schema.boolean({ defaultValue: false }),
+        }),
       },
     },
     errorHandler(logger)(async (context, request, response) => {
@@ -313,6 +317,14 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
         });
       }
       const synonymsSetId = request.params.synonymsSetId;
+      const forceWrite = request.query.forceWrite;
+      const isExisting = await fetchSynonymsSetExists(asCurrentUser, synonymsSetId);
+      if (isExisting && !forceWrite) {
+        return response.customError({
+          statusCode: 409,
+          body: `Synonyms set ${synonymsSetId} already exists. Use forceWrite=true to overwrite it.`,
+        });
+      }
       const result = await putSynonymsSet(asCurrentUser, synonymsSetId);
       return response.ok({
         headers: {
