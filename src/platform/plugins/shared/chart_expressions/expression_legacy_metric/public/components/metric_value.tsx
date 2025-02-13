@@ -8,11 +8,10 @@
  */
 
 import React, { CSSProperties, useLayoutEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { UseEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { euiTextTruncate } from '@elastic/eui';
 import classNames from 'classnames';
+import { i18n } from '@kbn/i18n';
+import { UseEuiTheme, euiTextTruncate } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { MetricOptions, MetricStyle, MetricVisParam } from '../../common/types';
 
 interface MetricVisValueProps {
