@@ -37,6 +37,7 @@ import { useIntegrationCardList } from './use_integration_card_list';
 import { IntegrationTabId } from './types';
 import { IntegrationCardTopCallout } from './callouts/integration_card_top_callout';
 import { trackOnboardingLinkClick } from '../../../lib/telemetry';
+import { useIntegrationCardGridTabsStyles } from './integration_card_grid_tabs.styles';
 
 export interface IntegrationsCardGridTabsProps {
   installedIntegrationsCount: number;
@@ -56,7 +57,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
   ({ installedIntegrationsCount, isAgentRequired, useAvailablePackages }) => {
     const { spaceId } = useOnboardingContext();
     const scrollElement = useRef<HTMLDivElement>(null);
-    const { euiTheme, colorMode } = useEuiTheme();
+    const { colorMode } = useEuiTheme();
     const isDark = colorMode === COLOR_MODES_STANDARD.dark;
     const [toggleIdSelected, setSelectedTabIdToStorage] = useStoredIntegrationTabId(
       spaceId,
@@ -87,33 +88,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
 
     const selectedTab = useMemo(() => INTEGRATION_TABS_BY_ID[toggleIdSelected], [toggleIdSelected]);
 
-    const buttonGroupStyles = useMemo(
-      () => css`
-        button {
-          position: relative;
-        }
-        button:not(:first-child)::before {
-          position: absolute;
-          left: 0px;
-          content: ' ';
-          width: 1px;
-          height: 70%;
-          background-color: ${euiTheme.colors.darkShade};
-          top: 50%;
-          transform: translateY(-50%);
-        }
-        button[aria-pressed='true'],
-        button[aria-pressed='true'] + button {
-          &::before {
-            content: none;
-          }
-        }
-        button[aria-pressed='true'] {
-          text-decoration: none;
-        }
-      `,
-      [euiTheme.colors.darkShade]
-    );
+    const buttonGroupStyles = useIntegrationCardGridTabsStyles();
 
     const onSearchTermChanged = useCallback(
       (searchQuery: string) => {
