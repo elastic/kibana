@@ -8,14 +8,26 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { Content } from './content';
 
-test('should render content with markdown', async () => {
-  const component = render(
+test('should render Content component with markdown', async () => {
+  render(
     <Content
       text={'I am *some* [content](https://en.wikipedia.org/wiki/Content) with `markdown`'}
     />
   );
-  expect(component).toMatchSnapshot();
+
+  // Check if the italicized text is rendered
+  expect(screen.getByText('some', { selector: 'em' })).toBeInTheDocument();
+
+  // Check if the link is rendered
+  expect(screen.getByText('content', { selector: 'a' })).toBeInTheDocument();
+  expect(screen.getByText('content').closest('a')).toHaveAttribute(
+    'href',
+    'https://en.wikipedia.org/wiki/Content'
+  );
+
+  // Check if the inline code is rendered
+  expect(screen.getByText('markdown', { selector: 'code' })).toBeInTheDocument();
 });
