@@ -20,8 +20,7 @@ export interface SecurityFeatureParams {
   savedObjects: string[];
 }
 
-export type DefaultSecurityProductFeaturesConfig = Omit<
-  Record<ProductFeatureSecurityKey, ProductFeatureKibanaConfig<SecuritySubFeatureId>>,
-  ProductFeatureSecurityKey.endpointExceptions
-  // | add not generic security app features here
+export type DefaultSecurityProductFeaturesConfig = Record<
+  ProductFeatureSecurityKey,
+  ProductFeatureKibanaConfig<SecuritySubFeatureId>
 >;
