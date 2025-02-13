@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 
 export interface Props {

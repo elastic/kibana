@@ -61,14 +61,14 @@ interface InstructionSetProps {
     iconType: string;
     message: string;
     title: string;
-  }; // ?
+  };
   instructionVariants: InstructionVariantShape[];
   statusCheckConfig: StatusCheckConfigShape;
   statusCheckState: keyof typeof StatusCheckStates;
   onStatusCheck: () => void;
   offset: number;
-  param: ParameterFormParam;
-  paramValues: { [key: string]: string | number }; // ?
+  params: ParameterFormParam[];
+  paramValues: { [key: string]: string | number };
   setParameter: (paramId: string, newValue: string) => void;
   replaceTemplateStrings: (text: string) => string;
   isCloudEnabled: boolean;
@@ -88,10 +88,10 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
 
   constructor(props: InstructionSetProps) {
     super(props);
-
     this.tabs = this.initializeTabs(props.instructionVariants);
     this.state = this.initializeState(this.tabs);
   }
+
   initializeTabs(instructionVariants: InstructionVariantShape[]) {
     return instructionVariants.map((variant) => ({
       id: variant.id,
@@ -111,6 +111,7 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
 
     return initialState;
   }
+
   handleToggleVisibility = () => {
     this.setState((prevState: InstructionSetState) => ({
       isParamFormVisible: prevState.isParamFormVisible,
@@ -166,7 +167,6 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
       <>
         <EuiSpacer size="s" />
         <EuiCallOut title={message} color={color} />
-        {/* check above for colour? removing state testing inside tutorial.test */}
       </>
     );
   }
@@ -205,6 +205,7 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
     const checkStatusStep = (
       <Fragment>
         <Content text={statusCheckConfig.text} />
+
         <EuiSpacer size="s" />
         <EuiButton
           onClick={onStatusCheck}
@@ -217,6 +218,7 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
             />
           )}
         </EuiButton>
+
         {this.renderStatusCheckMessage()}
       </Fragment>
     );
@@ -280,7 +282,7 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
 
   renderHeader = () => {
     let paramsVisibilityToggle;
-    if (this.props.param) {
+    if (this.props.params) {
       paramsVisibilityToggle = (
         <EuiButton
           size="s"
@@ -328,12 +330,12 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
 
   render() {
     let paramsForm;
-    if (this.props.param && this.state.isParamFormVisible) {
+    if (this.props.params && this.state.isParamFormVisible) {
       paramsForm = (
         <>
           <EuiSpacer />
           <ParameterForm
-            param={this.props.param}
+            params={this.props.params}
             paramValues={this.props.paramValues}
             setParameter={this.props.setParameter}
           />

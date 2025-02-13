@@ -27,7 +27,7 @@ import {
 interface SavedObjectShape {
   id: string;
   type: string;
-  attributes: unknown;
+  attributes: Record<string, any>;
   version?: string;
 }
 

@@ -39,18 +39,14 @@ interface TutorialCard extends Pick<Tutorial, 'id' | 'name' | 'category'> {
   isBeta?: boolean;
   onClick?: () => void;
 }
-interface TutorialDirectoryUiTabs {
-  // should i merge tabs and state interface
-  tabs: unknown;
-}
+
 interface TutorialDirectoryUiState {
   selectedTabId: TutorialDirectoryUiProps['openTab'];
   tutorialCards: TutorialCard[];
 }
 class TutorialDirectoryUi extends React.Component<
   TutorialDirectoryUiProps,
-  TutorialDirectoryUiState,
-  TutorialDirectoryUiTabs
+  TutorialDirectoryUiState
 > {
   private _isMounted: boolean;
   tabs: Array<{ id: string; name: string; content: JSX.Element }>;
@@ -107,7 +103,6 @@ class TutorialDirectoryUi extends React.Component<
     }
 
     let tutorialCards: TutorialCard[] = tutorialConfigs.map((tutorialConfig: Tutorial) => {
-      // comment below was added 6 years ago. is it still valid?
       // add base path to SVG based icons
       let icon = tutorialConfig.euiIconType;
       if (icon && icon.includes('/')) {
@@ -122,7 +117,6 @@ class TutorialDirectoryUi extends React.Component<
         description: tutorialConfig.shortDescription,
         url: this.props.addBasePath(`#/tutorial/${tutorialConfig.id}`),
         elasticCloud: tutorialConfig.elasticCloud,
-        // Paulina : should we do something about comments below now? use or remove isBeta, it's been 7 years...
         // Beta label is skipped on the tutorial overview page for now. Too many beta labels.
         // isBeta: tutorialConfig.isBeta,
       };
@@ -159,7 +153,10 @@ class TutorialDirectoryUi extends React.Component<
     });
   }
 
-  componentDidUpdate(_prevProps: unknown, prevState: Readonly<TutorialDirectoryUiState>) {
+  componentDidUpdate(
+    _prevProps: TutorialDirectoryUiProps,
+    prevState: Readonly<TutorialDirectoryUiState>
+  ) {
     if (prevState.selectedTabId !== this.state.selectedTabId) {
       this.setBreadcrumbs();
     }

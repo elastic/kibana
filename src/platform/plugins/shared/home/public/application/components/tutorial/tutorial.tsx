@@ -79,7 +79,7 @@ interface InstructionSet {
     title: string;
   };
   statusCheck: StatusCheckConfigShape;
-  params: ParameterFormParam;
+  params: ParameterFormParam[];
 }
 interface InstructionParam {
   id: string;
@@ -88,7 +88,7 @@ interface InstructionParam {
 interface SavedObject {
   id: string;
   type: string;
-  attributes: unknown;
+  attributes: Record<string, any>;
   version: string;
 }
 interface Dashboard {
@@ -114,15 +114,15 @@ export interface Tutorial {
   customStatusCheckName: string;
   savedObjects?: SavedObject[];
   savedObjectsInstallMsg?: string;
-  artifacts?: {
+  artifacts: {
     dashboards: Dashboard[];
-    exportedFields: {
+    exportedFields?: {
       documentationUrl: string;
     };
-    application: {
+    application?: {
       label: string;
-      dashboards: unknown;
       path: string;
+      dashboards?: Dashboard[];
     };
   };
   euiIconType: string;
@@ -412,7 +412,7 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
               this.onStatusCheck(index);
             }}
             offset={currentOffset}
-            param={instructionSet.params}
+            params={instructionSet.params}
             paramValues={this.state.paramValues}
             setParameter={this.setParameter}
             replaceTemplateStrings={this.props.replaceTemplateStrings}
@@ -447,8 +447,8 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
     let label;
     let url;
     if (_.has(this.state, 'tutorial.artifacts.application')) {
-      label = this.state.tutorial?.artifacts?.application.label;
-      url = this.props.addBasePath(this.state.tutorial!.artifacts!.application.path);
+      label = this.state.tutorial!.artifacts.application!.label;
+      url = this.props.addBasePath(this.state.tutorial!.artifacts!.application!.path);
     } else if (_.has(this.state, 'tutorial.artifacts.dashboards')) {
       const overviewDashboard = this.state.tutorial?.artifacts?.dashboards.find((dashboard) => {
         return dashboard.isOverview;
@@ -471,7 +471,7 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
     }
   };
 
-  renderModuleNotices() {
+  renderModuleNotices(): Array<React.ReactElement<any, string>> | null {
     const notices = getServices().tutorialService.getModuleNotices();
     if (notices.length && this.state.tutorial?.moduleName) {
       return notices.map((ModuleNotice, index) => (
@@ -526,7 +526,7 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
       let exportedFieldsUrl;
       if (_.has(this.state, 'tutorial.artifacts.exportedFields')) {
         exportedFieldsUrl = this.props.replaceTemplateStrings(
-          this.state.tutorial.artifacts!.exportedFields.documentationUrl
+          this.state.tutorial.artifacts.exportedFields!.documentationUrl
         );
       }
 
@@ -546,7 +546,7 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
             exportedFieldsUrl={exportedFieldsUrl}
             iconType={icon}
             isBeta={this.state.tutorial.isBeta}
-            notices={this.renderModuleNotices() as React.ReactElement[]}
+            notices={this.renderModuleNotices()}
             basePath={getServices().http.basePath}
           />
 

@@ -18,37 +18,39 @@ export interface ParameterFormParam {
   id: string;
 }
 export interface ParameterFormProps {
-  param: ParameterFormParam;
+  params: ParameterFormParam[];
   paramValues: { [key: string]: number | string };
   setParameter: (id: string, value: any) => void;
 }
 export class ParameterForm extends React.Component<ParameterFormProps> {
   renderInputs = () => {
-    const { param } = this.props;
-    switch (param.type) {
-      case 'number':
-        return (
-          <NumberParameter
-            key={param.id}
-            id={param.id}
-            label={param.label}
-            value={Number(this.props.paramValues[param.id])}
-            setParameter={this.props.setParameter}
-          />
-        );
-      case 'string':
-        return (
-          <StringParameter
-            key={param.id}
-            id={param.id}
-            label={param.label}
-            value={String(this.props.paramValues[param.id])}
-            setParameter={this.props.setParameter}
-          />
-        );
-      default:
-        throw new Error(`Unhandled parameter type ${param.type}`);
-    }
+    const { params } = this.props;
+    return params.map((param) => {
+      switch (param.type) {
+        case 'number':
+          return (
+            <NumberParameter
+              key={param.id}
+              id={param.id}
+              label={param.label}
+              value={Number(this.props.paramValues[param.id])}
+              setParameter={this.props.setParameter}
+            />
+          );
+        case 'string':
+          return (
+            <StringParameter
+              key={param.id}
+              id={param.id}
+              label={param.label}
+              value={String(this.props.paramValues[param.id])}
+              setParameter={this.props.setParameter}
+            />
+          );
+        default:
+          throw new Error(`Unhandled parameter type ${param.type}`);
+      }
+    });
   };
 
   render() {
