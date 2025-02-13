@@ -14,7 +14,7 @@ import { builtinFunctions } from '../../definitions/builtin';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { aggregationFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
-import { groupingFunctionDefinitions } from '../../definitions/grouping';
+import { groupingFunctionDefinitions } from '../../definitions/generated/grouping_functions';
 import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
@@ -48,13 +48,21 @@ export const TIME_PICKER_SUGGESTION: PartialSuggestionWithText = {
 
 export const triggerCharacters = [',', '(', '=', ' '];
 
-export const fields: Array<ESQLRealField & { suggestedAs?: string }> = [
+export type TestField = ESQLRealField & { suggestedAs?: string };
+
+export const fields: TestField[] = [
   ...fieldTypes.map((type) => ({
     name: `${camelCase(type)}Field`,
     type,
   })),
   { name: 'any#Char$Field', type: 'double', suggestedAs: '`any#Char$Field`' },
   { name: 'kubernetes.something.something', type: 'double' },
+];
+
+export const lookupIndexFields: TestField[] = [
+  { name: 'booleanField', type: 'boolean' },
+  { name: 'dateField', type: 'date' },
+  { name: 'joinIndexOnlyField', type: 'text' },
 ];
 
 export const indexes = (
@@ -115,7 +123,7 @@ export const policies = [
 /**
  * Utility to filter down the function list for the given type
  * It is mainly driven by the return type, but it can be filtered upon with the last optional argument "paramsTypes"
- * jsut make sure to pass the arguments in the right order
+ * just make sure to pass the arguments in the right order
  * @param command current command context
  * @param expectedReturnType the expected type returned by the function
  * @param functionCategories
@@ -151,8 +159,6 @@ export function getFunctionSignaturesByReturnType(
   const list = [];
   if (agg) {
     list.push(...aggregationFunctionDefinitions);
-    // right now all grouping functions are agg functions too
-    list.push(...groupingFunctionDefinitions);
   }
   if (grouping) {
     list.push(...groupingFunctionDefinitions);
@@ -279,7 +285,13 @@ export function createCustomCallbackMocks(
   const finalSources = customSources || indexes;
   const finalPolicies = customPolicies || policies;
   return {
-    getColumnsFor: jest.fn(async () => finalColumnsSinceLastCommand),
+    getColumnsFor: jest.fn(async ({ query }) => {
+      if (query === 'FROM join_index') {
+        return lookupIndexFields;
+      }
+
+      return finalColumnsSinceLastCommand;
+    }),
     getSources: jest.fn(async () => finalSources),
     getPolicies: jest.fn(async () => finalPolicies),
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
