@@ -11,10 +11,10 @@ import React, { useRef } from 'react';
 import classNames from 'classnames';
 import { PanelLoader } from '@kbn/panel-loader';
 import { EuiProgress, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ExpressionRenderError } from '../types';
 import type { ExpressionRendererParams } from './use_expression_renderer';
 import { useExpressionRenderer } from './use_expression_renderer';
-import { css } from '@emotion/react';
 
 // Accept all options of the runner as props except for the
 // dom element which is provided by the component itself
