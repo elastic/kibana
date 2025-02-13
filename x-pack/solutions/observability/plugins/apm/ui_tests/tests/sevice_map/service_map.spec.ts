@@ -39,9 +39,14 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
     expect(page.url()).toContain('/app/apm/service-map');
     await page.waitForSelector('[data-test-subj="serviceMap"]');
     await expect(page.getByTestId('serviceMap').getByLabel('Loading')).not.toBeVisible();
+    await page.getByLabel('Zoom In').click();
+    await page.getByTestId('serviceMap').scrollIntoViewIfNeeded();
     await page.getByTestId('centerServiceMap').click();
     await expect(page.getByTestId('serviceMap').getByLabel('Loading')).not.toBeVisible();
-    await expect(await page.getByTestId('serviceMap')).toHaveScreenshot('service_map.png');
+    await page.waitForTimeout(500);
+    await expect(await page.getByTestId('serviceMap')).toHaveScreenshot('service_map.png', {
+      animations: 'disabled',
+    });
   });
 
   test('shows a detailed service map', async ({ page, pageObjects: { serviceMapPage } }) => {
@@ -49,9 +54,17 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
     expect(page.url()).toContain('/services/opbeans-java/service-map');
     await page.waitForSelector('[data-test-subj="serviceMap"]');
     await expect(page.getByTestId('serviceMap').getByLabel('Loading')).not.toBeVisible();
+    await page.getByLabel('Zoom out').click();
+    await page.getByTestId('serviceMap').scrollIntoViewIfNeeded();
     await page.getByTestId('centerServiceMap').click();
     await expect(page.getByTestId('serviceMap').getByLabel('Loading')).not.toBeVisible();
-    await expect(await page.getByTestId('serviceMap')).toHaveScreenshot('detailed_service_map.png');
+    await page.waitForTimeout(500);
+    await expect(await page.getByTestId('serviceMap')).toHaveScreenshot(
+      'detailed_service_map.png',
+      {
+        animations: 'disabled',
+      }
+    );
   });
 
   test('shows empty state when there is no data', async ({
@@ -60,7 +73,7 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
   }) => {
     await serviceMapPage.typeInTheSearchBar();
     await expect(page.getByTestId('serviceMap').getByLabel('Loading')).not.toBeVisible();
-    await page.getByText('No services available');
+    page.getByText('No services available');
     // search bar is still visible
     await expect(page.getByTestId('apmUnifiedSearchBar')).toBeVisible();
   });

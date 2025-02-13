@@ -85,7 +85,7 @@ export const synthtraceFixture = coreWorkerFixtures.extend<SynthtraceFixture>({
     await use({ index, clean });
 
     // cleanup function after all tests have ran
-    // await clean();
+    await clean();
   },
   infraSynthtraceEsClient: async ({ esClient, config, kbnUrl }, use) => {
     const logger = createLogger(LogLevel.info);
@@ -120,7 +120,7 @@ export const synthtraceFixture = coreWorkerFixtures.extend<SynthtraceFixture>({
     await use({ index, clean });
 
     // cleanup function after all tests have ran
-    // await synthtraceEsClient.clean();
+    await synthtraceEsClient.clean();
   },
   otelSynthtraceEsClient: async ({ esClient }, use) => {
     const logger = createLogger(LogLevel.info);
@@ -145,6 +145,6 @@ export const synthtraceFixture = coreWorkerFixtures.extend<SynthtraceFixture>({
     await use({ index, clean });
 
     // cleanup function after all tests have ran
-    // await synthtraceEsClient.clean();
+    await synthtraceEsClient.clean();
   },
 });
