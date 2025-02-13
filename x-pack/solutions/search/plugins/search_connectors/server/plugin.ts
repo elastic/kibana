@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import type {
-  PluginInitializerContext,
-  Plugin,
-  CoreStart,
-  CoreSetup,
-  Logger,
-} from '@kbn/core/server';
+import type { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
-import { isAgentlessEnabled } from '@kbn/fleet-plugin/server/services/utils/agentless';
 import { getConnectorTypes } from '../common/lib/connector_types';
 import type {
   SearchConnectorsPluginSetup as SearchConnectorsPluginSetup,
@@ -21,9 +14,6 @@ import type {
   SearchConnectorsPluginSetupDependencies,
   SearchConnectorsPluginStartDependencies,
 } from './types';
-
-import { AgentlessConnectorDeploymentsSyncService } from './task';
-import { SearchConnectorsConfig } from './config';
 
 export class SearchConnectorsPlugin
   implements
