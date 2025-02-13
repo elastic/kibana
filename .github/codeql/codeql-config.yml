@@ -84,7 +84,7 @@ paths-ignore:
   - packages/kbn-web-worker-stub
   - packages/kbn-yarn-lock-validator
   - scripts
-  - test
+  - src/platform/test
   - typings
   - x-pack/examples
   - x-pack/performance
