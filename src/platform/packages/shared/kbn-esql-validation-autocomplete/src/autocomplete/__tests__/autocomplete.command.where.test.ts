@@ -407,7 +407,7 @@ describe('WHERE <expression>', () => {
           kind: 'Issue',
           detail: 'Click to create',
           command: { id: 'esql.control.values.create', title: 'Click to create' },
-          sortText: '11A',
+          sortText: '11',
           rangeToReplace: { start: 31, end: 31 },
         });
       });

@@ -6,7 +6,7 @@ exports[`ConditionalToolTip renders correctly 1`] = `
   style="min-width: 220px;"
 >
   <div
-    style="border-bottom: 1px solid #D3DAE6; border-bottom-color: #98A2B3; padding-bottom: 4px; margin-bottom: 4px;"
+    style="border-bottom: 1px solid #E3E8F2; border-bottom-color: #8E9FBC; padding-bottom: 4px; margin-bottom: 4px;"
   >
     host-01
   </div>

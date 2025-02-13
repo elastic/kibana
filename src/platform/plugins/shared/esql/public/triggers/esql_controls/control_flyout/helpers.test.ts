@@ -75,14 +75,14 @@ describe('helpers', () => {
   describe('getRecurrentVariableName', () => {
     it('should return a new name if the name already exists', () => {
       const name = 'field';
-      const existingNames = ['field', 'field1', 'field2'];
+      const existingNames = new Set(['field', 'field1', 'field2']);
       const newName = getRecurrentVariableName(name, existingNames);
       expect(newName).toBe('field3');
     });
 
     it('should return the same name if the name does not exist', () => {
       const name = 'field';
-      const existingNames = ['field1', 'field2'];
+      const existingNames = new Set(['field1', 'field2']);
       const newName = getRecurrentVariableName(name, existingNames);
       expect(newName).toBe('field');
     });
