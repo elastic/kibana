@@ -35,7 +35,9 @@ exports[`CleanUpTempSummary deletes the duplicated temp documents 1`] = `
             },
           },
         },
+        "conflicts": "proceed",
         "index": ".slo-observability.summary-v3.4.temp",
+        "slices": "auto",
         "wait_for_completion": false,
       },
       Object {
@@ -74,7 +76,9 @@ exports[`CleanUpTempSummary deletes the duplicated temp documents 1`] = `
             },
           },
         },
+        "conflicts": "proceed",
         "index": ".slo-observability.summary-v3.4.temp",
+        "slices": "auto",
         "wait_for_completion": false,
       },
       Object {

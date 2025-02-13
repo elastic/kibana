@@ -126,6 +126,8 @@ export class CleanUpTempSummary {
       {
         index: SUMMARY_TEMP_INDEX_NAME,
         wait_for_completion: false,
+        slices: 'auto',
+        conflicts: 'proceed',
         body: {
           query: {
             bool: {
