@@ -41,6 +41,9 @@ export class ShareMenuManager {
           options.onClose?.();
         };
         const menuItems = shareRegistry.getShareMenuItems({ ...options, onClose });
+
+        console.log('menu items:: %o \n', menuItems);
+
         const anonymousAccess = anonymousAccessServiceProvider?.();
         this.toggleShareContextMenu({
           ...options,
