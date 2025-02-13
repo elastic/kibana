@@ -10,7 +10,7 @@ import { IToasts, IUiSettingsClient } from '@kbn/core/public';
 import { QueryStart } from '@kbn/data-plugin/public';
 import { actions, createMachine, interpret, InterpreterFrom, raise } from 'xstate';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';
+import { DEFAULT_ALLOWED_LOGS_BASE_PATTERNS } from '@kbn/discover-utils';
 import type { LogsExplorerCustomizations, LogsExplorerPublicEvent } from '../../../controller';
 import { ControlPanelRT } from '../../../../common/control_panels';
 import {
@@ -363,7 +363,7 @@ export const createLogsExplorerControllerStateMachine = ({
       isDataViewAllowed: (_context, event) => {
         if (event.type === 'UPDATE_DATA_SOURCE_SELECTION' && isDataViewSelection(event.data)) {
           return event.data.selection.dataView.testAgainstAllowedList(
-            uiSettings.get(OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID)
+            DEFAULT_ALLOWED_LOGS_BASE_PATTERNS
           );
         }
         return false;
@@ -371,7 +371,7 @@ export const createLogsExplorerControllerStateMachine = ({
       isDataViewNotAllowed: (_context, event) => {
         if (event.type === 'UPDATE_DATA_SOURCE_SELECTION' && isDataViewSelection(event.data)) {
           return !event.data.selection.dataView.testAgainstAllowedList(
-            uiSettings.get(OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID)
+            DEFAULT_ALLOWED_LOGS_BASE_PATTERNS
           );
         }
         return false;

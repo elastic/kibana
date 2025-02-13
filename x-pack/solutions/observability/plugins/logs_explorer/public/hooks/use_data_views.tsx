@@ -10,7 +10,7 @@ import createContainer from 'constate';
 import { useInterpret, useSelector } from '@xstate/react';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { CoreStart } from '@kbn/core/public';
-import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';
+import { DEFAULT_ALLOWED_LOGS_BASE_PATTERNS } from '@kbn/discover-utils';
 import { DataViewDescriptor } from '../../common/data_views/models/data_view_descriptor';
 import { SortOrder } from '../../common/latest';
 import { DataViewsFilterParams, createDataViewsStateMachine } from '../state_machines/data_views';
@@ -53,11 +53,8 @@ const useDataViews = ({ core, dataViewsService, events }: DataViewsContextDeps) 
 
   // Test whether a data view can be explored in Logs Explorer based on the settings
   const isDataViewAllowed: IsDataViewAllowed = useCallback(
-    (dataView) =>
-      dataView.testAgainstAllowedList(
-        core.uiSettings.get(OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID)
-      ),
-    [core.uiSettings]
+    (dataView) => dataView.testAgainstAllowedList(DEFAULT_ALLOWED_LOGS_BASE_PATTERNS),
+    []
   );
 
   // Test whether a data view can be explored in Logs Explorer based on the settings or has fallback handler

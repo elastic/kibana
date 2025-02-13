@@ -17,7 +17,12 @@ import {
   EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
+import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
+import {
+  DataTableColumnsMeta,
+  DataTableRecord,
+  ShouldShowFieldInTableHandler,
+} from '@kbn/discover-utils/types';
 import { formatFieldValue } from '@kbn/discover-utils';
 import { UnifiedDataTableContext } from '../table_context';
 import type { CustomCellRenderer } from '../types';
@@ -39,6 +44,7 @@ export const getRenderCellValueFn = ({
   externalCustomRenderers,
   isPlainRecord,
   isCompressed = true,
+  columnsMeta,
 }: {
   dataView: DataView;
   rows: DataTableRecord[] | undefined;
@@ -49,6 +55,7 @@ export const getRenderCellValueFn = ({
   externalCustomRenderers?: CustomCellRenderer;
   isPlainRecord?: boolean;
   isCompressed?: boolean;
+  columnsMeta: DataTableColumnsMeta | undefined;
 }) => {
   const UnifiedDataTableRenderCellValue = ({
     rowIndex,
@@ -60,7 +67,11 @@ export const getRenderCellValueFn = ({
     isExpanded,
   }: EuiDataGridCellValueElementProps) => {
     const row = rows ? rows[rowIndex] : undefined;
-    const field = dataView.fields.getByName(columnId);
+    const field = getDataViewFieldOrCreateFromColumnMeta({
+      dataView,
+      fieldName: columnId,
+      columnMeta: columnsMeta?.[columnId],
+    });
     const ctx = useContext(UnifiedDataTableContext);
 
     useEffect(() => {
