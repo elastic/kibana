@@ -55,6 +55,8 @@ export {
 
 export { ESQL_DARK_THEME_ID, ESQL_LIGHT_THEME_ID } from './esql';
 export {
+  CONSOLE_THEME_ID,
+  CONSOLE_OUTPUT_THEME_ID,
   getParsedRequestsProvider,
   ConsoleParsedRequestsProvider,
   createOutputParser,

@@ -9,6 +9,7 @@
 
 import React, { useCallback, useRef } from 'react';
 import { css } from '@emotion/react';
+import { CONSOLE_THEME_ID } from '@kbn/monaco';
 import { monaco, CodeEditor, CONSOLE_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { formatRequestBodyDoc } from '../../../lib/utils';
@@ -63,7 +64,7 @@ export const HistoryViewer = ({
           readOnly: true,
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode ? 'on' : 'off',
-          theme: CONSOLE_LANG_ID,
+          theme: CONSOLE_THEME_ID,
           automaticLayout: true,
         }}
       />
