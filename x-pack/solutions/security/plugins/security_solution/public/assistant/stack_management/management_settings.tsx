@@ -9,17 +9,12 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { AssistantSettingsManagement } from '@kbn/elastic-assistant/impl/assistant/settings/assistant_settings_management';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 import { i18n } from '@kbn/i18n';
-import { useAssistantContext, useFetchCurrentUserConversations } from '@kbn/elastic-assistant';
 import { SECURITY_AI_SETTINGS } from '@kbn/elastic-assistant/impl/assistant/settings/translations';
 import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
 import type { SettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
 import { useKibana } from '../../common/lib/kibana';
-export const ManagementSettings = React.memo(() => {
-  const {
-    http,
-    assistantAvailability: { isAssistantEnabled },
-  } = useAssistantContext();
 
+export const ManagementSettings = React.memo(() => {
   const {
     application: {
       navigateToApp,
@@ -31,11 +26,6 @@ export const ManagementSettings = React.memo(() => {
     chrome: { docTitle, setBreadcrumbs },
     serverless,
   } = useKibana().services;
-
-  const { data: conversations } = useFetchCurrentUserConversations({
-    http,
-    isAssistantEnabled,
-  });
 
   docTitle.change(SECURITY_AI_SETTINGS);
 
@@ -102,17 +92,13 @@ export const ManagementSettings = React.memo(() => {
     navigateToApp('home');
   }
 
-  if (conversations) {
-    return (
-      <AssistantSettingsManagement
-        dataViews={dataViews}
-        onTabChange={handleTabChange}
-        currentTab={currentTab}
-      />
-    );
-  }
-
-  return <></>;
+  return (
+    <AssistantSettingsManagement
+      dataViews={dataViews}
+      onTabChange={handleTabChange}
+      currentTab={currentTab}
+    />
+  );
 });
 
 ManagementSettings.displayName = 'ManagementSettings';

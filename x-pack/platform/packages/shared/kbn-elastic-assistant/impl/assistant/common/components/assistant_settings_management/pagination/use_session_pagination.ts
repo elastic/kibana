@@ -92,7 +92,6 @@ export const useSessionPagination = <T extends boolean>({
       any
     ) => {
       const { page, sort } = args;
-      console.log('onTableChange', args);
       setSessionStorageTableOptions({
         page,
         sort,

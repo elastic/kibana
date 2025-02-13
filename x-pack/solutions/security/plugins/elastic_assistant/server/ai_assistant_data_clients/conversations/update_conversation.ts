@@ -119,7 +119,7 @@ export const transformToUpdateScheme = (
   return {
     id,
     updated_at: updatedAt,
-    title,
+    ...(title ? { title } : {}),
     ...(apiConfig
       ? {
           api_config: {
@@ -131,36 +131,42 @@ export const transformToUpdateScheme = (
           },
         }
       : {}),
-    exclude_from_last_conversation_storage: excludeFromLastConversationStorage,
-    replacements: replacements
-      ? Object.keys(replacements).map((key) => ({
-          uuid: key,
-          value: replacements[key],
-        }))
-      : undefined,
-    messages: messages?.map((message) => ({
-      '@timestamp': message.timestamp,
-      content: message.content,
-      is_error: message.isError,
-      reader: message.reader,
-      role: message.role,
-      ...(message.metadata
-        ? {
-            metadata: {
-              ...(message.metadata.contentReferences
-                ? { content_references: message.metadata.contentReferences }
-                : {}),
-            },
-          }
-        : {}),
-      ...(message.traceData
-        ? {
-            trace_data: {
-              trace_id: message.traceData.traceId,
-              transaction_id: message.traceData.transactionId,
-            },
-          }
-        : {}),
-    })),
+    exclude_from_last_conversation_storage: excludeFromLastConversationStorage ?? false,
+    ...(replacements
+      ? {
+          replacements: Object.keys(replacements).map((key) => ({
+            uuid: key,
+            value: replacements[key],
+          })),
+        }
+      : {}),
+    ...(messages
+      ? {
+          messages: messages.map((message) => ({
+            '@timestamp': message.timestamp,
+            content: message.content,
+            is_error: message.isError,
+            reader: message.reader,
+            role: message.role,
+            ...(message.metadata
+              ? {
+                  metadata: {
+                    ...(message.metadata.contentReferences
+                      ? { content_references: message.metadata.contentReferences }
+                      : {}),
+                  },
+                }
+              : {}),
+            ...(message.traceData
+              ? {
+                  trace_data: {
+                    trace_id: message.traceData.traceId,
+                    transaction_id: message.traceData.transactionId,
+                  },
+                }
+              : {}),
+          })),
+        }
+      : {}),
   };
 };

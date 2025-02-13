@@ -28,7 +28,6 @@ import { useFlyoutModalVisibility } from '../../common/components/assistant_sett
 import { Flyout } from '../../common/components/assistant_settings_management/flyout';
 import { CANCEL, DELETE, SETTINGS_UPDATED_TOAST_TITLE } from '../../settings/translations';
 import { ConversationSettingsEditor } from '../conversation_settings/conversation_settings_editor';
-import { useConversationChanged } from '../conversation_settings/use_conversation_changed';
 import { CONVERSATION_TABLE_SESSION_STORAGE_KEY } from '../../../assistant_context/constants';
 import { useSessionPagination } from '../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { DEFAULT_PAGE_SIZE } from '../../settings/const';
@@ -59,7 +58,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   } = useAssistantContext();
 
   const { data: allPrompts, isFetched: promptsLoaded, refetch: refetchPrompts } = useFetchPrompts();
-  const [totalItemCount, setTotalItemCount] = useState(10);
+  const [totalItemCount, setTotalItemCount] = useState(5);
   const { onTableChange, pagination, sorting } = useSessionPagination<false>({
     nameSpace,
     storageKey: CONVERSATION_TABLE_SESSION_STORAGE_KEY,
@@ -84,12 +83,11 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     refetchPrompts();
     refetchConversations();
   }, [refetchPrompts, refetchConversations]);
-
   const conversationSettings = conversations;
-
   const {
     systemPromptSettings: allSystemPrompts,
     assistantStreamingEnabled,
+    // conversationSettings,
     conversationsSettingsBulkActions,
     resetSettings,
     saveSettings,
@@ -138,11 +136,6 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   // Local state for saving previously selected items so tab switching is friendlier
   // Conversation Selection State
   const [selectedConversation, setSelectedConversation] = useState<Conversation | undefined>();
-
-  const onSelectedConversationChange = useCallback((conversation?: Conversation) => {
-    setSelectedConversation(conversation);
-  }, []);
-
   const {
     isFlyoutOpen: editFlyoutVisible,
     openFlyout: openEditFlyout,
@@ -155,23 +148,23 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     openFlyout: openConfirmModal,
     closeFlyout: closeConfirmModal,
   } = useFlyoutModalVisibility();
-
-  const onConversationSelectionChange = useConversationChanged({
-    allSystemPrompts,
-    conversationSettings,
-    conversationsSettingsBulkActions,
-    defaultConnector,
-    setConversationSettings,
-    setConversationsSettingsBulkActions,
-    onSelectedConversationChange,
-  });
+  //
+  // const onConversationSelectionChange = useConversationChanged({
+  //   allSystemPrompts,
+  //   conversationSettings,
+  //   conversationsSettingsBulkActions,
+  //   defaultConnector,
+  //   setConversationSettings,
+  //   setConversationsSettingsBulkActions,
+  //   onSelectedConversationChange,
+  // });
 
   const onEditActionClicked = useCallback(
     (rowItem: ConversationTableItem) => {
       openEditFlyout();
-      onConversationSelectionChange(rowItem);
+      setSelectedConversation(rowItem);
     },
-    [onConversationSelectionChange, openEditFlyout]
+    [openEditFlyout]
   );
 
   const onConversationDeleted = useConversationDeleted({

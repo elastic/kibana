@@ -16,7 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { isEmpty } from 'lodash';
+import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 import { DataStreamApis } from '../use_data_stream_apis';
 import { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
@@ -109,11 +109,7 @@ export const AssistantHeader: React.FC<Props> = ({
               defaultConnector={defaultConnector}
               isDisabled={isDisabled}
               isSettingsModalVisible={isSettingsModalVisible}
-              selectedConversationId={
-                !isEmpty(selectedConversation?.id)
-                  ? selectedConversation?.id
-                  : selectedConversation?.title
-              }
+              selectedConversationId={selectedConversation?.id}
               setIsSettingsModalVisible={setIsSettingsModalVisible}
               onConversationSelected={onConversationSelected}
               conversations={conversations}
@@ -155,8 +151,8 @@ export const AssistantHeader: React.FC<Props> = ({
               <EuiSkeletonTitle data-test-subj="skeletonTitle" size="xs" />
             ) : (
               <AssistantTitle
-                isDisabled={isDisabled}
-                title={selectedConversation?.title}
+                isDisabled={isDisabled || selectedConversation?.title === ''}
+                title={selectedConversation?.title || NEW_CHAT}
                 selectedConversation={selectedConversation}
                 refetchCurrentUserConversations={refetchCurrentUserConversations}
               />

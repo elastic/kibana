@@ -117,16 +117,19 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           onConversationSelectionChange={onConversationSelectionChange}
         />
 
-        <ConversationSettingsEditor
-          allSystemPrompts={allSystemPrompts}
-          conversationSettings={conversationSettings}
-          conversationsSettingsBulkActions={conversationsSettingsBulkActions}
-          http={http}
-          isDisabled={isDisabled}
-          selectedConversation={selectedConversationWithApiConfig}
-          setConversationSettings={setConversationSettings}
-          setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
-        />
+        {/* TODO: double check this condition */}
+        {selectedConversationWithApiConfig && (
+          <ConversationSettingsEditor
+            allSystemPrompts={allSystemPrompts}
+            conversationSettings={conversationSettings}
+            conversationsSettingsBulkActions={conversationsSettingsBulkActions}
+            http={http}
+            isDisabled={isDisabled}
+            selectedConversation={selectedConversationWithApiConfig}
+            setConversationSettings={setConversationSettings}
+            setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
+          />
+        )}
 
         <EuiSpacer size="l" />
         <EuiTitle size={'s'}>
