@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
+import { DiagnosticResult, errors } from '@elastic/elasticsearch';
 import {
   IndicesDataStream,
   QueryDslQueryContainer,
@@ -35,6 +35,8 @@ import {
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
   streamDefinitionSchema,
+  findInheritedLifecycle,
+  findInheritingStreams,
 } from '@kbn/streams-schema';
 import { cloneDeep, keyBy, omit, orderBy } from 'lodash';
 import { AssetClient } from './assets/asset_client';
@@ -50,7 +52,7 @@ import {
   validateStreamLifecycle,
   validateStreamTypeChanges,
 } from './helpers/validate_stream';
-import { rootStreamDefinition } from './root_stream_definition';
+import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
 import { StreamsStorageClient } from './service';
 import {
   checkAccess,
@@ -63,7 +65,7 @@ import { updateDataStreamsLifecycle } from './data_streams/manage_data_streams';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
 import { SecurityError } from './errors/security_error';
-import { findInheritedLifecycle, findInheritingStreams } from './helpers/lifecycle';
+import { NameTakenError } from './errors/name_taken_error';
 import { MalformedStreamError } from './errors/malformed_stream_error';
 
 interface AcknowledgeResponse<TResult extends Result> {
@@ -78,8 +80,6 @@ export type SyncStreamResponse = AcknowledgeResponse<'updated' | 'created'>;
 export type ForkStreamResponse = AcknowledgeResponse<'created'>;
 export type ResyncStreamsResponse = AcknowledgeResponse<'updated'>;
 export type UpsertStreamResponse = AcknowledgeResponse<'updated' | 'created'>;
-
-const LOGS_ROOT_STREAM_NAME = 'logs';
 
 function isElasticsearch404(error: unknown): error is errors.ResponseError & { statusCode: 404 } {
   return isResponseError(error) && error.statusCode === 404;
@@ -311,6 +311,10 @@ export class StreamsClient {
     result: 'created' | 'updated';
     parentDefinition?: WiredStreamDefinition;
   }> {
+    if (isWiredStreamDefinition(definition)) {
+      await this.assertNoHierarchicalConflicts(definition.name);
+    }
+
     const existingDefinition = await this.getStream(definition.name).catch((error) => {
       if (isDefinitionNotFoundError(error)) {
         return undefined;
@@ -374,6 +378,47 @@ export class StreamsClient {
     };
   }
 
+  private async assertNoHierarchicalConflicts(definitionName: string) {
+    const streamNames = [...getAncestors(definitionName), definitionName];
+    const hasConflict = await Promise.all(
+      streamNames.map((streamName) => this.isStreamNameTaken(streamName))
+    );
+    const conflicts = streamNames.filter((_, index) => hasConflict[index]);
+
+    if (conflicts.length !== 0) {
+      throw new NameTakenError(
+        `Cannot create stream "${definitionName}" due to hierarchical conflicts caused by existing unwired stream definition, index or data stream: [${conflicts.join(
+          ', '
+        )}]`
+      );
+    }
+  }
+
+  private async isStreamNameTaken(streamName: string): Promise<boolean> {
+    try {
+      const definition = await this.getStream(streamName);
+      return isUnwiredStreamDefinition(definition);
+    } catch (error) {
+      if (!isDefinitionNotFoundError(error)) {
+        throw error;
+      }
+    }
+
+    try {
+      await this.dependencies.scopedClusterClient.asCurrentUser.indices.get({
+        index: streamName,
+      });
+
+      return true;
+    } catch (error) {
+      if (isElasticsearch404(error)) {
+        return false;
+      }
+
+      throw error;
+    }
+  }
+
   /**
    * Validates whether:
    * - there are no conflicting field types,
@@ -432,7 +477,7 @@ export class StreamsClient {
       }
       if (!isChildOf(definition.name, item.destination)) {
         throw new MalformedStreamIdError(
-          `The ID (${item.destination}) from the child stream must start with the parent's id (${definition.name}), followed by a dot and a name`
+          `The ID (${item.destination}) from the child stream must start with the parent's name (${definition.name}), followed by a dot and a name`
         );
       }
       await this.validateAndUpsertStream({
@@ -512,7 +557,7 @@ export class StreamsClient {
     }
     if (!isChildOf(parentDefinition.name, childDefinition.name)) {
       throw new MalformedStreamIdError(
-        `The ID (${name}) from the new stream must start with the parent's id (${parentDefinition.name}), followed by a dot and a name`
+        `The ID (${name}) from the new stream must start with the parent's name (${parentDefinition.name}), followed by a dot and a name`
       );
     }
 
@@ -574,7 +619,7 @@ export class StreamsClient {
 
       if (isIngestStreamDefinition(streamDefinition)) {
         const privileges = await checkAccess({
-          id: name,
+          name,
           scopedClusterClient: this.dependencies.scopedClusterClient,
         });
         if (!privileges.read) {
@@ -605,7 +650,7 @@ export class StreamsClient {
         assertsSchema(streamDefinitionSchema, source);
         return source;
       }),
-      checkAccess({ id: name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
+      checkAccess({ name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
         (privileges) => {
           if (!privileges.read) {
             throw new DefinitionNotFoundError(`Stream definition for ${name} not found`);
@@ -621,6 +666,22 @@ export class StreamsClient {
     return this.dependencies.scopedClusterClient.asCurrentUser.indices
       .getDataStream({ name })
       .then((response) => {
+        if (response.data_streams.length === 0) {
+          throw new errors.ResponseError({
+            meta: {
+              aborted: false,
+              attempts: 1,
+              connection: null,
+              context: null,
+              name: 'resource_not_found_exception',
+              request: {} as unknown as DiagnosticResult['meta']['request'],
+            },
+            warnings: [],
+            body: 'resource_not_found_exception',
+            statusCode: 404,
+          });
+        }
+
         const dataStream = response.data_streams[0];
         return dataStream;
       });
@@ -724,7 +785,7 @@ export class StreamsClient {
     });
 
     const privileges = await checkAccessBulk({
-      ids: streams
+      names: streams
         .filter((stream) => !isGroupStreamDefinition(stream))
         .map((stream) => stream.name),
       scopedClusterClient,
@@ -747,7 +808,7 @@ export class StreamsClient {
     if (isUnwiredStreamDefinition(definition)) {
       await deleteUnmanagedStreamObjects({
         scopedClusterClient,
-        id: definition.name,
+        name: definition.name,
         logger,
       });
     } else if (isWiredStreamDefinition(definition)) {
@@ -771,7 +832,7 @@ export class StreamsClient {
         await this.deleteStream(item.destination);
       }
 
-      await deleteStreamObjects({ scopedClusterClient, id: definition.name, logger });
+      await deleteStreamObjects({ scopedClusterClient, name: definition.name, logger });
     }
 
     await assetClient.syncAssetList({
@@ -823,7 +884,7 @@ export class StreamsClient {
       definition && isGroupStreamDefinition(definition)
         ? { write: true, read: true }
         : await checkAccess({
-            id: name,
+            name,
             scopedClusterClient: this.dependencies.scopedClusterClient,
           });
 

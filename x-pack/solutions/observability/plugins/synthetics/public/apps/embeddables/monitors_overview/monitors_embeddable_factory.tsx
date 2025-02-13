@@ -23,6 +23,7 @@ import { MonitorFilters } from './types';
 import { StatusGridComponent } from './monitors_grid_component';
 import { SYNTHETICS_MONITORS_EMBEDDABLE } from '../constants';
 import { ClientPluginsStart } from '../../../plugin';
+import { openMonitorConfiguration } from '../common/monitors_open_configuration';
 
 export const getOverviewPanelTitle = () =>
   i18n.translate('xpack.synthetics.monitors.displayName', {
@@ -77,10 +78,6 @@ export const getMonitorsEmbeddableFactory = (
           },
           onEdit: async () => {
             try {
-              const { openMonitorConfiguration } = await import(
-                '../common/monitors_open_configuration'
-              );
-
               const result = await openMonitorConfiguration({
                 coreStart,
                 pluginStart,

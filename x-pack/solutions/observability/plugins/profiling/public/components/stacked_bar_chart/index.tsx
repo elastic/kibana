@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { XYChartElementEvent } from '@elastic/charts';
+import type { CustomTooltip, SeriesIdentifier, XYChartElementEvent } from '@elastic/charts';
 import {
   Axis,
   BrushAxis,
@@ -17,6 +17,7 @@ import {
   timeFormatter,
   Tooltip,
   TooltipContainer,
+  TooltipHeader,
 } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
 import { keyBy } from 'lodash';
@@ -57,7 +58,7 @@ export function StackedBarChart({
 
   const { chartsBaseTheme, chartsTheme } = useProfilingChartsTheme();
 
-  function CustomTooltipWithSubChart() {
+  const CustomTooltipWithSubChart: CustomTooltip<{}, SeriesIdentifier> = ({ header }) => {
     if (!highlightedSample) {
       return null;
     }
@@ -69,6 +70,7 @@ export function StackedBarChart({
 
     return (
       <TooltipContainer>
+        <TooltipHeader header={header} />
         <EuiPanel>
           <SubChart
             index={highlightedSubchart.Index}
@@ -88,7 +90,7 @@ export function StackedBarChart({
         </EuiPanel>
       </TooltipContainer>
     );
-  }
+  };
 
   return (
     <Chart size={{ height }}>

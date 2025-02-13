@@ -359,7 +359,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.alertDetails.observability.enabled (boolean?)',
         'xpack.observability.unsafe.thresholdRule.enabled (boolean?)',
         'xpack.observability_onboarding.ui.enabled (boolean?)',
-        'xpack.observabilityLogsExplorer.navigation.showAppLink (boolean?|never)',
         'xpack.observabilityAIAssistant.scope (observability?|search?)',
         'xpack.observabilityAiAssistantManagement.logSourcesEnabled (boolean?)',
         'xpack.observabilityAiAssistantManagement.spacesEnabled (boolean?)',
