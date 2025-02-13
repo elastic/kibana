@@ -10,7 +10,13 @@ import {
   MappingDateProperty,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
-import { WiredStreamDefinition, isDslLifecycle, isIlmLifecycle, isRoot } from '@kbn/streams-schema';
+import {
+  WiredStreamDefinition,
+  getAdvancedParameters,
+  isDslLifecycle,
+  isIlmLifecycle,
+  isRoot,
+} from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings } from './logs_layer';
 import { getComponentTemplateName } from './name';
@@ -22,9 +28,16 @@ export function generateLayer(
 ): ClusterPutComponentTemplateRequest {
   const properties: Record<string, MappingProperty> = {};
   Object.entries(definition.ingest.wired.fields).forEach(([field, props]) => {
-    let property: MappingProperty = {
+    const property: MappingProperty = {
       type: props.type,
     };
+
+    const advancedParameters = getAdvancedParameters(field, props);
+
+    if (Object.keys(advancedParameters).length > 0) {
+      Object.assign(property, advancedParameters);
+    }
+
     if (field === '@timestamp') {
       // @timestamp can't ignore malformed dates as it's used for sorting in logsdb
       (property as MappingDateProperty).ignore_malformed = false;
@@ -33,12 +46,6 @@ export function generateLayer(
       (property as MappingDateProperty).format = props.format;
     }
 
-    if (props.additionalProperties) {
-      property = {
-        ...property,
-        ...props.additionalProperties,
-      } as MappingProperty;
-    }
     properties[field] = property;
   });
 

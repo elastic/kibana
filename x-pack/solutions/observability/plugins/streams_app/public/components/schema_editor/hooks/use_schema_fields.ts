@@ -7,7 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
-import { NamedFieldDefinitionConfig, WiredStreamGetResponse } from '@kbn/streams-schema';
+import {
+  NamedFieldDefinitionConfig,
+  WiredStreamGetResponse,
+  getAdvancedParameters,
+} from '@kbn/streams-schema';
 import { isEqual, omit } from 'lodash';
 import { useMemo, useCallback } from 'react';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
@@ -58,8 +62,8 @@ export const useSchemaFields = ({
       ([name, field]) => ({
         name,
         type: field.type,
-        format: field.format,
-        additionalProperties: field.additionalProperties,
+        format: 'format' in field ? field.format : undefined,
+        additionalParameters: getAdvancedParameters(name, field),
         parent: field.from,
         status: 'inherited',
       })
@@ -69,8 +73,8 @@ export const useSchemaFields = ({
       ([name, field]) => ({
         name,
         type: field.type,
-        format: field.format,
-        additionalProperties: field.additionalProperties,
+        format: 'format' in field ? field.format : undefined,
+        additionalParameters: getAdvancedParameters(name, field),
         parent: definition.stream.name,
         status: 'mapped',
       })

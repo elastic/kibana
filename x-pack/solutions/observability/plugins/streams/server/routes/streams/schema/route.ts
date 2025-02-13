@@ -165,7 +165,10 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     const propertiesForSimulation = Object.fromEntries(
       params.body.field_definitions.map((field) => [
         field.name,
-        { type: field.type, ...(field.format ? { format: field.format } : {}) },
+        {
+          type: field.type,
+          ...('format' in field && field.format ? { format: field.format } : {}),
+        },
       ])
     );
 
@@ -231,7 +234,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
         field.name,
         {
           type: field.type === 'match_only_text' ? 'keyword' : field.type,
-          ...(field.format ? { format: field.format } : {}),
+          ...('format' in field && field.format ? { format: field.format } : {}),
         },
       ])
     );

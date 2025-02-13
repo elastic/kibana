@@ -17,7 +17,9 @@ import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getAdvancedParameters } from '@kbn/streams-schema';
 import { SchemaField } from '../types';
+import { useKibana } from '../../../hooks/use_kibana';
 
 const label = i18n.translate('xpack.streams.advancedFieldMappingOptions.label', {
   defaultMessage: 'Advanced field mapping parameters',
@@ -32,12 +34,12 @@ export const AdvancedFieldMappingOptions = ({
   onChange: (field: Partial<SchemaField>) => void;
   isEditing: boolean;
 }) => {
+  const { core } = useKibana();
+
   const accordionId = useGeneratedHtmlId({ prefix: 'accordionID' });
 
   const [jsonOptions, setJsonOptions] = useState(() => {
-    return field.additionalProperties
-      ? JSON.stringify(field.additionalProperties, null, 2)
-      : undefined;
+    return field.additionalParameters ? JSON.stringify(field.additionalParameters, null, 2) : '';
   });
 
   return (
@@ -51,7 +53,7 @@ export const AdvancedFieldMappingOptions = ({
               link: (
                 <EuiLink
                   data-test-subj="streamsAppAdvancedFieldMappingOptionsViewDocumentationLink"
-                  href="https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-params.html"
+                  href={core.docLinks.links.elasticsearch.docsBase.concat('mapping-params.html')}
                   target="_blank"
                   external
                 >
@@ -70,15 +72,13 @@ export const AdvancedFieldMappingOptions = ({
             height={120}
             languageId="json"
             value={jsonOptions || ''}
-            onChange={(e) => {
-              setJsonOptions(e);
+            onChange={(value) => {
+              setJsonOptions(value);
               try {
-                if (e === '') {
-                  onChange({ additionalProperties: undefined });
-                } else {
-                  const options = JSON.parse(e);
-                  onChange({ additionalProperties: options });
-                }
+                onChange({
+                  additionalParameters:
+                    value === '' ? undefined : getAdvancedParameters(field.name, JSON.parse(value)),
+                });
               } catch (error: unknown) {
                 // do nothing
               }
