@@ -130,7 +130,7 @@ export class ObservabilityAIAssistantPlugin
     }));
 
     // Update existing index assets (mappings, templates, etc). This will not create assets if they do not exist.
-    updateExistingIndexAssets({ logger: this.logger, core }).catch((e) =>
+    updateExistingIndexAssets({ logger: this.logger.get('index_assets'), core }).catch((e) =>
       this.logger.error(`Index assets could not be updated: ${e.message}`)
     );
 
