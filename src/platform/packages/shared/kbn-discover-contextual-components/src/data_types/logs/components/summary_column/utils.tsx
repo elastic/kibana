@@ -29,7 +29,6 @@ import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
 import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
-import { eventOutcomeLabelMap } from '../translations';
 
 type FieldKey = keyof DataTableRecord['flattened'];
 type FieldValue = NonNullable<DataTableRecord['flattened'][FieldKey]>;
@@ -139,10 +138,6 @@ const getResourceBadgeIcon = (
 };
 
 const getFormattedValue = (name: FieldKey, rawValue: unknown, dataView: DataView): string => {
-  if (name === EVENT_OUTCOME_FIELD) {
-    return eventOutcomeLabelMap[rawValue as keyof typeof eventOutcomeLabelMap];
-  }
-
   const field = dataView.getFieldByName(name);
   const formatter = field && dataView.getFormatterForField(field);
 
