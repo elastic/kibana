@@ -10,6 +10,10 @@ import { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import {
+  ALL_ALERT_DELETION_SETTINGS_SUB_FEATURE_ID,
+  READ_ALERT_DELETION_SETTINGS_SUB_FEATURE_ID,
+} from '../../common/rules_settings';
+import {
   RULES_SETTINGS_FEATURE_ID,
   READ_FLAPPING_SETTINGS_SUB_FEATURE_ID,
   ALL_FLAPPING_SETTINGS_SUB_FEATURE_ID,
@@ -90,6 +94,43 @@ export function getRulesSettingsFeature(isServerless: boolean): KibanaFeatureCon
                   read: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
                 },
                 ui: ['readFlappingSettingsUI'],
+              },
+            ],
+          },
+        ],
+      },
+      {
+        name: i18n.translate('xpack.alerting.feature.alertDeletionSettingsSubFeatureName', {
+          defaultMessage: 'Alert deletion',
+        }),
+        privilegeGroups: [
+          {
+            groupType: 'mutually_exclusive',
+            privileges: [
+              {
+                api: [
+                  API_PRIVILEGES.READ_ALERT_DELETION_SETTINGS,
+                  API_PRIVILEGES.WRITE_ALERT_DELETION_SETTINGS,
+                ],
+                name: 'All',
+                id: ALL_ALERT_DELETION_SETTINGS_SUB_FEATURE_ID,
+                includeIn: 'all',
+                savedObject: {
+                  all: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
+                  read: [],
+                },
+                ui: ['writeAlertDeletionSettingsUI', 'readAlertDeletionSettingsUI'],
+              },
+              {
+                api: [API_PRIVILEGES.READ_ALERT_DELETION_SETTINGS],
+                name: 'Read',
+                id: READ_ALERT_DELETION_SETTINGS_SUB_FEATURE_ID,
+                includeIn: 'read',
+                savedObject: {
+                  all: [],
+                  read: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
+                },
+                ui: ['readAlertDeletionSettingsUI'],
               },
             ],
           },

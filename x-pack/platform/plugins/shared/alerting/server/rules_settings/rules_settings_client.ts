@@ -8,6 +8,7 @@
 import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { RulesSettingsFlappingClient } from './flapping/rules_settings_flapping_client';
 import { RulesSettingsQueryDelayClient } from './query_delay/rules_settings_query_delay_client';
+import { RulesSettingsAlertDeletionClient } from './alert_deletion/rules_settings_alert_deletion_client';
 
 export interface RulesSettingsClientConstructorOptions {
   readonly logger: Logger;
@@ -22,6 +23,7 @@ export class RulesSettingsClient {
   private readonly getUserName: () => Promise<string | null>;
   private readonly _flapping: RulesSettingsFlappingClient;
   private readonly _queryDelay: RulesSettingsQueryDelayClient;
+  private readonly _alertDeletion: RulesSettingsAlertDeletionClient;
   private readonly isServerless: boolean;
 
   constructor(options: RulesSettingsClientConstructorOptions) {
@@ -40,6 +42,12 @@ export class RulesSettingsClient {
       logger: this.logger,
       savedObjectsClient: this.savedObjectsClient,
       isServerless: this.isServerless,
+      getModificationMetadata: this.getModificationMetadata.bind(this),
+    });
+
+    this._alertDeletion = new RulesSettingsAlertDeletionClient({
+      logger: this.logger,
+      savedObjectsClient: this.savedObjectsClient,
       getModificationMetadata: this.getModificationMetadata.bind(this),
     });
   }
@@ -62,5 +70,9 @@ export class RulesSettingsClient {
 
   public queryDelay(): RulesSettingsQueryDelayClient {
     return this._queryDelay;
+  }
+
+  public alertDeletion(): RulesSettingsAlertDeletionClient {
+    return this._alertDeletion;
   }
 }
