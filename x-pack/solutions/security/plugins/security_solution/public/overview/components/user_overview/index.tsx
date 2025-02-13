@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { euiDarkVars as darkTheme, euiLightVars as lightTheme } from '@kbn/ui-theme';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { buildUserNamesFilter } from '../../../../common/search_strategy';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FIRST_RECORD_PAGINATION } from '../../../entity_analytics/common';
@@ -57,7 +57,7 @@ export interface UserSummaryProps {
 }
 
 const UserRiskOverviewWrapper = styled(EuiFlexGroup)`
-  padding-top: ${({ theme }) => theme.eui.euiSizeM};
+  padding-top: ${({ theme: { euiTheme } }) => euiTheme.size.m};
   width: ${({ $width }: { $width: string }) => $width};
 `;
 
