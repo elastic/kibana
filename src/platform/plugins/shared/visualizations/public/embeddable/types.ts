@@ -77,9 +77,7 @@ export const isVisualizeSavedObjectState = (
   return (
     typeof state !== 'undefined' &&
     (state as VisualizeSavedObjectInputState).savedObjectId !== undefined &&
-    !!(state as VisualizeSavedObjectInputState).savedObjectId &&
-    !('savedVis' in (state as VisualizeSavedObjectInputState)) &&
-    !('serializedVis' in (state as VisualizeSavedObjectInputState))
+    !!(state as VisualizeSavedObjectInputState).savedObjectId
   );
 };
 
