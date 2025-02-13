@@ -186,7 +186,7 @@ export const PackagePolicyBaseSchema = {
     schema.arrayOf(schema.string(), {
       validate: validateAdditionalDatastreamsPermissions,
       meta: {
-        description: 'Additionnal datstream permissions, that will be added to the agent policy.',
+        description: 'Additional datastream permissions, that will be added to the agent policy.',
       },
     })
   ),
