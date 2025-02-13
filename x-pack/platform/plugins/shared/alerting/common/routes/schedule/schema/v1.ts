@@ -11,20 +11,14 @@ import {
   validateEndDateV1,
   validateIntervalAndFrequencyV1,
   validateOnWeekDayV1,
+  validateDurationV1,
 } from '../validation';
 
 export const scheduleRequestSchema = schema.object({
-  duration: schema.number({
-    validate: (duration: number) => {
-      if (!Number.isInteger(duration) || duration === 0) {
-        return 'Invalid schedule duration. The duration must be either -1 (for indefinite) or a positive integer greater than 0.';
-      }
-    },
-    min: -1,
-  }),
   start: schema.string({
     validate: validateStartDateV1,
   }),
+  duration: schema.string({ validate: validateDurationV1 }),
   recurring: schema.maybe(
     schema.object({
       end: schema.maybe(schema.string({ validate: validateEndDateV1 })),

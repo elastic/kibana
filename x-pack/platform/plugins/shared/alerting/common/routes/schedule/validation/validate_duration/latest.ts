@@ -4,7 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { TypeOf } from '@kbn/config-schema';
-import { scheduleRequestSchemaV1 } from '..';
 
-export type ScheduleRequest = TypeOf<typeof scheduleRequestSchemaV1>;
+export * from './v1';

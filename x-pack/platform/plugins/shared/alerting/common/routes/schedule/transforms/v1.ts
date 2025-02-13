@@ -9,37 +9,51 @@ import moment from 'moment-timezone';
 import { Frequency } from '@kbn/rrule';
 import type { RRule } from '../../../../server/application/r_rule/types';
 import { ScheduleRequest } from '../types/v1';
+import { DURATION_REGEX, INTERVAL_FREQUENCY_REGEXP } from '../constants';
 
-const transformFrequency = (frequency: string) => {
+const transformFrequency = (frequency?: string) => {
   switch (frequency) {
     case 'y':
       return Frequency.YEARLY;
-    case 'M':
+    case 'm':
       return Frequency.MONTHLY;
     case 'w':
       return Frequency.WEEKLY;
     case 'd':
       return Frequency.DAILY;
-    case 'h':
-      return Frequency.HOURLY;
-    case 'm':
-      return Frequency.MINUTELY;
-    case 's':
-      return Frequency.SECONDLY;
     default:
-      throw new Error(`Invalid frequency: ${frequency}`);
+      return;
   }
 };
 
-export const transformScheduleToRRule: (schedule: ScheduleRequest) => {
+const getDurationMilliseconds = (duration: string): number => {
+  const [, durationNumber, durationUnit] = duration.match(DURATION_REGEX) ?? [];
+
+  return moment
+    .duration(durationNumber, durationUnit as moment.unitOfTime.DurationConstructor)
+    .asMilliseconds();
+};
+
+const getTimezoneForOffset = (offset: number): string[] => {
+  const now = new Date();
+  return moment.tz.names().filter((tz) => moment.tz(now, tz).utcOffset() === offset);
+};
+
+export const transformSchedule: (schedule: ScheduleRequest) => {
+  duration: number;
   rRule: RRule | undefined;
 } = (schedule) => {
-  const { recurring } = schedule ?? {};
-  const [interval, frequency] = recurring?.every?.split('') ?? [];
-  const freq = frequency ? transformFrequency(frequency) : undefined;
-  const timeZone = moment.tz.guess();
+  const { recurring, duration, start } = schedule ?? {};
+  const [, interval, frequency] = recurring?.every?.match(INTERVAL_FREQUENCY_REGEXP) ?? [];
+  const freq = transformFrequency(frequency);
+  const durationInMilliseconds = duration === '-1' ? -1 : getDurationMilliseconds(duration);
+
+  const browserTimeZone = moment.tz.guess();
+  const offset = moment.parseZone(start).format('Z');
+  const timeZoneFromStart = getTimezoneForOffset(moment.duration(offset).asMinutes());
 
   return {
+    duration: durationInMilliseconds,
     rRule: {
       byweekday: recurring?.onWeekDay,
       bymonthday: recurring?.onMonthDay,
@@ -48,8 +62,8 @@ export const transformScheduleToRRule: (schedule: ScheduleRequest) => {
       count: recurring?.occurrences,
       interval: interval ? parseInt(interval, 10) : undefined,
       freq,
-      dtstart: schedule.start,
-      tzid: `${timeZone}`,
+      dtstart: start,
+      tzid: timeZoneFromStart[0] ?? browserTimeZone,
     },
   };
 };

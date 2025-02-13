@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { WEEKDAY_REGEX } from '../../constants';
+
 export const validateOnWeekDay = (array: string[]) => {
   if (array.length === 0) {
     return 'OnWeekDay cannot be empty';
   }
 
-  const onWeekDayRegex = new RegExp('^(((\\+|-)[1-4])?(MO|TU|WE|TH|FR|SA|SU))$');
+  const onWeekDayRegex = new RegExp(WEEKDAY_REGEX);
   const invalidDays: string[] = [];
 
   array.forEach((day) => {

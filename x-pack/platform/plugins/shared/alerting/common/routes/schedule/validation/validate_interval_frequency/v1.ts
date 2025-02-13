@@ -5,35 +5,14 @@
  * 2.0.
  */
 
-const YEARLY_REGEX = /^[1-9][0-9]*y$/;
-const MONTHLY_REGEX = /^[1-9][0-9]*M$/;
-const WEEKLY_REGEX = /^[1-9][0-9]*w$/;
-const DAILY_REGEX = /^[1-9][0-9]*d$/;
-const HOURLY_REGEX = /^[1-9][0-9]*h$/;
-const MINUTELY_REGEX = /^[1-9][0-9]*m$/;
-const SECONDLY_REGEX = /^[1-9][0-9]*s$/;
+import { INTERVAL_FREQUENCY_REGEXP } from '../../constants';
 
 export function validateIntervalAndFrequency(every: string) {
-  if (every.match(YEARLY_REGEX)) {
-    return;
+  const everyRegexp = new RegExp(INTERVAL_FREQUENCY_REGEXP, 'g');
+
+  if (!everyRegexp.test(every)) {
+    return `'every' string of recurring schedule is not valid : ${every}`;
   }
-  if (every.match(MONTHLY_REGEX)) {
-    return;
-  }
-  if (every.match(WEEKLY_REGEX)) {
-    return;
-  }
-  if (every.match(DAILY_REGEX)) {
-    return;
-  }
-  if (every.match(HOURLY_REGEX)) {
-    return;
-  }
-  if (every.match(MINUTELY_REGEX)) {
-    return;
-  }
-  if (every.match(SECONDLY_REGEX)) {
-    return;
-  }
-  return 'string is not a valid every of recurring schedule: ' + every;
+
+  return;
 }

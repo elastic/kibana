@@ -5,14 +5,21 @@
  * 2.0.
  */
 
-import { ISO_DATE_PATTERN } from '../../constants';
+import { ISO_DATE_REGEX } from '../../constants';
 
 export const validateEndDate = (date: string) => {
   const parsedValue = Date.parse(date);
-  if (isNaN(parsedValue)) return `Invalid snooze end date: ${date}`;
-  if (parsedValue <= Date.now())
+
+  if (isNaN(parsedValue)) {
+    return `Invalid snooze end date: ${date}`;
+  }
+  if (parsedValue <= Date.now()) {
     return `Invalid snooze schedule end date as it is in the past: ${date}`;
-  if (!ISO_DATE_PATTERN.test(date))
+  }
+
+  if (!ISO_DATE_REGEX.test(date)) {
     return `Invalid end date format: ${date}. Use ISO 8601 YYYY-MM-DDTHH:mm:ss.sssZ`;
+  }
+
   return;
 };
