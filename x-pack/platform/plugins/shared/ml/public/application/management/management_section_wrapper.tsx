@@ -78,6 +78,7 @@ export const ManagementSectionWrapper: FC<Props> = ({
     data,
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice: false,
+    userProfile: coreStart.userProfile,
   };
 
   const check = async () => {

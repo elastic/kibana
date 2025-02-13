@@ -7,29 +7,38 @@
 
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
-import type {
-  EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiButton, EuiContextMenu, EuiPopover, useGeneratedHtmlId } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import type { MlPages } from '../../../../../common/constants/locator';
-import { ML_PAGES } from '../../../../../common/constants/locator';
-import { useJobInfoFlyouts } from '../../../jobs/components/job_details_flyout/job_details_flyout_context';
+import { useUrlState } from '@kbn/ml-url-state';
+import { ML_PAGES, type MlPages } from '../../../../../common/constants/locator';
+import { useJobInfoFlyouts } from '../../../jobs/components/job_details_flyout';
+import { useMlKibana } from '../../../contexts/kibana';
+import { getOptionsForJobSelectorMenuItems } from '../group_or_job_selector_menu/get_options_for_job_selector_menu';
 
 interface Props {
   jobId: string;
   page: MlPages;
+  onRemoveJobId: (jobOrGroupId: string[]) => void;
+  removeJobIdDisabled: boolean;
+  isSingleMetricViewerDisabled: boolean;
 }
 
-const ANOMALY_EXPLORER_TITLE = i18n.translate('xpack.ml.deepLink.anomalyExplorer', {
-  defaultMessage: 'Anomaly explorer',
-});
-const SINGLE_METRIC_VIEWER_TITLE = i18n.translate('xpack.ml.deepLink.singleMetricViewer', {
-  defaultMessage: 'Single metric viewer',
-});
-export const AnomalyDetectionInfoButton: FC<Props> = ({ jobId, page }) => {
+export const AnomalyDetectionInfoButton: FC<Props> = ({
+  jobId,
+  page,
+  onRemoveJobId,
+  removeJobIdDisabled,
+  isSingleMetricViewerDisabled,
+}) => {
   const [isPopoverOpen, setPopover] = useState(false);
+  const {
+    services: {
+      share,
+      application: { navigateToUrl },
+    },
+  } = useMlKibana();
+  const [globalState] = useUrlState('_g');
+
   const popoverId = useGeneratedHtmlId({
     prefix: 'adJobInfoContextMenu',
     suffix: jobId,
@@ -41,80 +50,48 @@ export const AnomalyDetectionInfoButton: FC<Props> = ({ jobId, page }) => {
     setPopover(false);
   };
 
-  const { setIsFlyoutOpen, setActiveJobId } = useJobInfoFlyouts();
-  const panels = useMemo(() => {
-    const viewInMenu: EuiContextMenuPanelItemDescriptor = {
-      name: i18n.translate(
-        'xpack.ml.overview.anomalyDetection.jobContextMenu.viewInSingleMetricViewer',
+  const { setActiveFlyout, setActiveJobId } = useJobInfoFlyouts();
+  const panels = useMemo(
+    () => {
+      return [
         {
-          defaultMessage: 'View in {page}',
-          values: {
-            page:
-              page === ML_PAGES.SINGLE_METRIC_VIEWER
-                ? ANOMALY_EXPLORER_TITLE
-                : SINGLE_METRIC_VIEWER_TITLE,
-          },
-        }
-      ),
-      icon: 'visLine',
-      onClick: closePopover,
-    };
-    return [
-      {
-        id: 0,
-        items: [
-          {
-            name: i18n.translate('xpack.ml.overview.anomalyDetection.jobContextMenu.jobDetails', {
-              defaultMessage: 'Job details',
-            }),
-            icon: 'editorTable',
-            onClick: () => {
-              setActiveJobId(jobId);
-              setIsFlyoutOpen(true);
-            },
-          },
-          {
-            name: i18n.translate('xpack.ml.overview.anomalyDetection.jobContextMenu.editJob', {
-              defaultMessage: 'Edit job',
-            }),
-            icon: 'pencil',
-            onClick: closePopover,
-          },
-          {
-            name: i18n.translate('xpack.ml.overview.anomalyDetection.jobContextMenu.removeJob', {
-              defaultMessage: 'Remove from {page}',
-              values: {
-                page:
-                  page === ML_PAGES.ANOMALY_EXPLORER
-                    ? ANOMALY_EXPLORER_TITLE
-                    : SINGLE_METRIC_VIEWER_TITLE,
-              },
-            }),
-            icon: 'minusInCircle',
-            onClick: closePopover,
-          },
-          {
-            isSeparator: true,
-            key: 'sep',
-          } as EuiContextMenuPanelItemDescriptor,
-          viewInMenu,
-          {
-            name: i18n.translate(
-              'xpack.ml.overview.anomalyDetection.jobContextMenu.viewDatafeedCounts',
-              {
-                defaultMessage: 'View datafeed counts',
-              }
-            ),
-            icon: 'visAreaStacked',
-            onClick: closePopover,
-          },
-        ],
-      },
-    ] as EuiContextMenuPanelDescriptor[];
-  }, [jobId, page, setActiveJobId, setIsFlyoutOpen]);
+          id: 0,
+          items: getOptionsForJobSelectorMenuItems({
+            jobId,
+            page,
+            onRemoveJobId,
+            removeJobIdDisabled,
+            showRemoveJobId: page === ML_PAGES.ANOMALY_EXPLORER,
+            isSingleMetricViewerDisabled,
+            closePopover,
+            globalState,
+            setActiveFlyout,
+            setActiveJobId,
+            navigateToUrl,
+            share,
+          }),
+        },
+      ] as EuiContextMenuPanelDescriptor[];
+    },
+    // globalState is an object with references change on every render, so we are stringifying it here
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      jobId,
+      page,
+      setActiveJobId,
+      setActiveFlyout,
+      navigateToUrl,
+      share.url.locators,
+      removeJobIdDisabled,
+      onRemoveJobId,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify(globalState),
+    ]
+  );
 
   const button = (
     <EuiButton
+      data-test-subj="mlJobSelectionBadge"
       iconType="boxesVertical"
       iconSide="right"
       onClick={onButtonClick}

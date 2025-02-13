@@ -62,10 +62,11 @@ export const AnomalyDetectionOverviewCard: FC = () => {
       appId: `anomaly_detection`,
     });
   }, [mlManagementLocator]);
-  const showEmptyState = !hasADJobs && canCreateJob && !disableCreateAnomalyDetectionJob;
+  const showEmptyState =
+    !isLoading && !hasADJobs && canCreateJob && !disableCreateAnomalyDetectionJob;
 
   const availableActions = useMemo(() => {
-    const actions: EuiButtonProps[] = [];
+    const actions: React.ReactNode[] = [];
     if (hasADJobs) {
       actions.push(
         <EuiButton

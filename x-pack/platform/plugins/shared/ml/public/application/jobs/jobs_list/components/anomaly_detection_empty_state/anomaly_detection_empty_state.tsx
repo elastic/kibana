@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import adImage from './anomaly_detection_kibana.png';
 import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { useMlKibana, useMlManagementLocator } from '../../../../contexts/kibana';
@@ -41,12 +42,9 @@ export const AnomalyDetectionEmptyState: FC = () => {
       hasBorder={true}
       hasShadow={false}
       iconSrc={adImage}
-      iconAlt={
-        <FormattedMessage
-          id="xpack.ml.overview.anomalyDetection.title"
-          defaultMessage="Anomaly detection"
-        />
-      }
+      iconAlt={i18n.translate('xpack.ml.overview.anomalyDetection.title', {
+        defaultMessage: 'Anomaly detection',
+      })}
       title={
         <FormattedMessage
           id="xpack.ml.overview.anomalyDetection.createFirstJobMessage"

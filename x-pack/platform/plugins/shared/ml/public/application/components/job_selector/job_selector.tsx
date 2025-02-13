@@ -34,7 +34,6 @@ import { FeedBackButton } from '../feedback_button';
 import { JobInfoFlyoutsProvider } from '../../jobs/components/job_details_flyout';
 import { JobInfoFlyoutsManager } from '../../jobs/components/job_details_flyout/job_details_context_manager';
 import { usePermissionCheck } from '../../capabilities/check_capabilities';
-import { useMlLocator } from '../../contexts/kibana';
 import { useCreateAndNavigateToManagementMlLink } from '../../contexts/kibana/use_create_url';
 
 export interface GroupObj {
@@ -162,7 +161,6 @@ export function JobSelector({
   };
 
   const [canCreateJob] = usePermissionCheck(['canCreateJob']);
-  const mlLocator = useMlLocator()!;
 
   const redirectToCreateJobSelectIndexPage = useCreateAndNavigateToManagementMlLink(
     ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,

@@ -56,7 +56,7 @@ export interface PageProps {
 
 export interface PageDependencies {
   history: AppMountParameters['history'];
-  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   setBreadcrumbs: ChromeStart['setBreadcrumbs'];
 }
 

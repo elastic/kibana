@@ -19,6 +19,8 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import useLifecycles from 'react-use/lib/useLifecycles';
 import useObservable from 'react-use/lib/useObservable';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ExperimentalFeatures, MlFeatures, NLPSettings } from '../../common/constants/app';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
@@ -38,7 +40,7 @@ export type MlDependencies = Omit<
 interface AppProps {
   coreStart: CoreStart;
   deps: MlDependencies;
-  appMountParams: AppMountParameters;
+  appMountParams: ManagementAppMountParams | AppMountParameters;
   isServerless: boolean;
   mlFeatures: MlFeatures;
   experimentalFeatures: ExperimentalFeatures;
@@ -66,7 +68,9 @@ export const App: FC<AppProps> = ({
 }) => {
   const pageDeps: PageDependencies = {
     history: appMountParams.history,
-    setHeaderActionMenu: appMountParams.setHeaderActionMenu,
+    setHeaderActionMenu: isPopulatedObject(appMountParams, ['setHeaderActionMenu'])
+      ? appMountParams.setHeaderActionMenu
+      : undefined,
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
   };
 

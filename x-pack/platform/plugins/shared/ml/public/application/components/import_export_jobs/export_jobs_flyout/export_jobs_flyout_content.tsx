@@ -9,7 +9,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
-  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
@@ -43,39 +42,6 @@ const LoadingSpinner: FC = () => (
       </EuiFlexItem>
     </EuiFlexGroup>
   </>
-);
-
-const SwitchTabsConfirm: FC<{ onCancel: () => void; onConfirm: () => void }> = ({
-  onCancel,
-  onConfirm,
-}) => (
-  <EuiConfirmModal
-    title={i18n.translate('xpack.ml.importExport.exportFlyout.switchTabsConfirm.title', {
-      defaultMessage: 'Change tabs?',
-    })}
-    onCancel={onCancel}
-    onConfirm={onConfirm}
-    cancelButtonText={i18n.translate(
-      'xpack.ml.importExport.exportFlyout.switchTabsConfirm.cancelButton',
-      {
-        defaultMessage: 'Cancel',
-      }
-    )}
-    confirmButtonText={i18n.translate(
-      'xpack.ml.importExport.exportFlyout.switchTabsConfirm.confirmButton',
-      {
-        defaultMessage: 'Confirm',
-      }
-    )}
-    defaultFocusedButton="confirm"
-  >
-    <p>
-      <FormattedMessage
-        id="xpack.ml.importExport.exportFlyout.switchTabsConfirm.text"
-        defaultMessage="Changing tabs will clear currently selected jobs"
-      />
-    </p>
-  </EuiConfirmModal>
 );
 
 export interface ExportJobsFlyoutContentProps {

@@ -270,7 +270,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
         <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
         <EuiFlexGroup justifyContent="spaceBetween">
           {stats}
-          <EuiFlexGroup grow={false} direction="row" gutterSize="none">
+          <EuiFlexGroup direction="row" gutterSize="none">
             <EuiFlexItem grow={false}>
               <ExportJobsFlyout isDisabled={false} currentTab={'data-frame-analytics'} />
             </EuiFlexItem>

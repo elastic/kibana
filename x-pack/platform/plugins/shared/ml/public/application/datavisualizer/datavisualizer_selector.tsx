@@ -81,7 +81,6 @@ export const DatavisualizerSelector: FC = () => {
     console.error('File data visualizer plugin not available');
     return null;
   }
-  const maxFileSize = dataVisualizer.getMaxBytesFormatted();
 
   return (
     <>

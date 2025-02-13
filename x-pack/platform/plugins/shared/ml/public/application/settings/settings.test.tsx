@@ -10,28 +10,25 @@ import React from 'react';
 
 import { Settings } from './settings';
 
-jest.mock('../components/help_menu', () => ({
-  HelpMenu: () => <div id="mockHelpMenu" />,
-}));
-
-jest.mock('../contexts/kibana', () => ({
-  useNotifications: () => ({
-    toasts: { addDanger: jest.fn(), addError: jest.fn() },
-  }),
-  useMlApi: jest.fn(),
-  useMlKibana: () => ({
-    services: {
-      docLinks: {
-        links: {
-          ml: { guide: jest.fn() },
-        },
-      },
-    },
-  }),
+jest.mock('../contexts/kibana');
+jest.mock('../contexts/kibana/use_notifications_context', () => {
+  return {
+    useNotifications: () => ({
+      toasts: { addDanger: jest.fn(), addError: jest.fn() },
+    }),
+  };
+});
+jest.mock('../services/toast_notification_service', () => ({
+  useToastNotificationService: () => {
+    return {
+      displayErrorToast: jest.fn(),
+    };
+  },
 }));
 
 jest.mock('../contexts/kibana/use_create_url', () => ({
   useCreateAndNavigateToMlLink: jest.fn(),
+  useCreateAndNavigateToManagementMlLink: jest.fn(),
 }));
 
 describe('Settings', () => {
@@ -63,4 +60,8 @@ describe('Settings', () => {
       .find('EuiButtonEmpty');
     expect(calendarCreateButton.prop('isDisabled')).toBe(isCalendarCreateDisabled);
   }
+
+  test('should render settings page with all buttons enabled when full user capabilities', () => {
+    runCheckButtonsDisabledTest(false, false, false, false);
+  });
 });

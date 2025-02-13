@@ -17,7 +17,7 @@ export const MLEmptyPromptCard = ({
   iconSrc,
   iconAlt,
   'data-test-subj': dataTestSubj,
-}: EuiEmptyPromptProps) => {
+}: EuiEmptyPromptProps & { iconSrc: string; iconAlt: string }) => {
   const { euiTheme } = useEuiTheme();
   return (
     <EuiEmptyPrompt
