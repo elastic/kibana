@@ -11,8 +11,18 @@ import { render, act, fireEvent, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
+import type {
+  DataViewField,
+  DataViewFieldMap,
+  DataViewSpec,
+  FieldSpec,
+} from '@kbn/data-views-plugin/common';
+import { invariant } from '../../../../../../../../common/utils/invariant';
+import { TIMELINES_URL } from '../../../../../../../../common/constants';
 import { RulesPage } from '../../..';
+import type { RelatedIntegration } from '../../../../../../../../common/api/detection_engine';
 import {
+  GET_ALL_INTEGRATIONS_URL,
   GET_PREBUILT_RULES_STATUS_URL,
   REVIEW_RULE_UPGRADE_URL,
   ThreeWayDiffConflict,
@@ -49,6 +59,9 @@ jest.mock('../../../../../../../detections/containers/detection_engine/lists/use
 const mockedResponses = new Map<string, unknown>();
 
 export async function renderRuleUpgradeFlyout(): Promise<ReturnType<typeof render>> {
+  // KibanaServices.get().http.fetch persists globally
+  // it's important to clear the state for the later assertions
+  (KibanaServices.get().http.fetch as jest.Mock).mockClear();
   (KibanaServices.get().http.fetch as jest.Mock).mockImplementation((requestedPath) =>
     mockedResponses.get(requestedPath)
   );
@@ -145,6 +158,67 @@ export function mockRuleUpgradeReviewData({
 }
 
 /**
+ *
+ * @param dataViews Mocked data views
+ * @param stickyFields Fields added to all data views obtained via `dataViews.create()` or `dataViews.get()`
+ */
+export function mockAvailableDataViews(
+  dataViews: DataViewSpec[],
+  stickyFields: DataViewFieldMap
+): void {
+  (KibanaServices.get().data.dataViews.getIdsWithTitle as jest.Mock).mockResolvedValue(
+    dataViews.map(({ id, title }) => ({ id, title }))
+  );
+
+  (KibanaServices.get().data.dataViews.create as jest.Mock).mockImplementation((dataViewSpec) =>
+    createMockDataView({
+      ...dataViewSpec,
+      fields: { ...(dataViewSpec.fields ?? {}), ...stickyFields },
+    })
+  );
+  (KibanaServices.get().data.dataViews.get as jest.Mock).mockImplementation((id: string) => {
+    const dataView = dataViews.find((dv) => dv.id === id);
+
+    invariant(
+      dataView,
+      `It's expected to have data view ${id} mock passed to mockAvailableDataViews() but it was not found`
+    );
+
+    return createMockDataView({
+      ...dataView,
+      fields: { ...(dataView.fields ?? {}), ...stickyFields },
+    });
+  });
+}
+
+export function mockRelatedIntegrations(relatedIntegrations: RelatedIntegration[]): void {
+  mockKibanaFetchResponse(GET_ALL_INTEGRATIONS_URL, {
+    integrations: relatedIntegrations.map((ri) => ({
+      package_name: ri.package,
+      package_title: ri.package,
+      is_installed: true,
+      is_enabled: true,
+      latest_package_version: ri.version,
+      installed_package_version: ri.version,
+      integration_name: ri.integration,
+      integration_title: ri.integration,
+    })),
+  });
+}
+
+export function mockTimelines(timelines: Array<{ id: string; title: string }>): void {
+  mockKibanaFetchResponse(TIMELINES_URL, {
+    timeline: timelines.map((t, index) => ({
+      templateTimelineId: t.id,
+      title: t.title,
+      savedObjectId: `so-id-${index}`,
+      version: '1',
+    })),
+    totalCount: timelines.length,
+  });
+}
+
+/**
  * Mocks KibanaServices.get().http.fetch() responses. Works in combination with renderRuleUpgradeFlyout.
  */
 function mockKibanaFetchResponse(path: string, mockResponse: unknown): void {
@@ -179,4 +253,26 @@ async function openRuleUpgradeFlyout(): Promise<void> {
   await act(async () => {
     fireEvent.click(await screen.findByTestId('ruleName'));
   });
+}
+
+const createMockDataView = ({ id, title, fields }: DataViewSpec) =>
+  Promise.resolve({
+    id,
+    title,
+    fields: Object.values(fields ?? {}).map(createFieldDefinition),
+    getIndexPattern: jest.fn().mockReturnValue(title),
+    toSpec: jest.fn().mockReturnValue({
+      id,
+      title,
+      fields: Object.values(fields ?? {}).map(createFieldDefinition),
+    }),
+  });
+
+function createFieldDefinition(fieldSpec: FieldSpec): Partial<DataViewField> {
+  return {
+    ...fieldSpec,
+    spec: {
+      ...fieldSpec,
+    },
+  };
 }

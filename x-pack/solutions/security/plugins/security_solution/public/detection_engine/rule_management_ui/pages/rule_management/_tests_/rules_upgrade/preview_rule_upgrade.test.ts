@@ -261,8 +261,8 @@ describe('Rule upgrade preview', () => {
     },
     {
       ruleType: 'query',
-      fieldName: 'rule_schedule',
-      humanizedFieldName: 'Rule Schedule',
+      fieldName: 'rule_name_override',
+      humanizedFieldName: 'Rule name override',
       initial: { field_name: 'fieldA' },
       customized: { field_name: 'fieldB' },
       upgrade: { field_name: 'fieldC' },

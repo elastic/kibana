@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, fireEvent, within } from '@testing-library/react';
+import { act, fireEvent, waitFor, within } from '@testing-library/react';
 
 export function toggleFieldAccordion(fieldWrapper: HTMLElement): void {
   act(() => {
@@ -27,24 +27,34 @@ export function cancelFieldEdit(wrapper: HTMLElement): void {
   });
 }
 
-interface SetResolvedNameOptions {
-  saveButtonText: string;
+export async function acceptSuggestedFieldValue(wrapper: HTMLElement): Promise<void> {
+  await act(async () => {
+    fireEvent.click(within(wrapper).getByRole('button', { name: 'Accept' }));
+  });
 }
 
-export async function setResolvedName(
-  wrapper: HTMLElement,
-  value: string,
-  options: SetResolvedNameOptions = {
-    saveButtonText: 'Save',
-  }
-): Promise<void> {
-  await act(async () => {
-    fireEvent.change(within(wrapper).getByTestId('input'), {
-      target: { value },
-    });
+export async function saveFieldValue(wrapper: HTMLElement): Promise<void> {
+  await clickFieldSaveButton(wrapper, 'Save');
+}
+
+export async function saveAndAcceptFieldValue(wrapper: HTMLElement): Promise<void> {
+  await clickFieldSaveButton(wrapper, 'Save and accept');
+}
+
+async function clickFieldSaveButton(wrapper: HTMLElement, buttonName: string): Promise<void> {
+  const saveButton = within(wrapper).getByRole('button', { name: buttonName });
+
+  expect(saveButton).toBeVisible();
+
+  await waitFor(() => expect(saveButton).toBeEnabled(), {
+    timeout: 500,
   });
 
   await act(async () => {
-    fireEvent.click(within(wrapper).getByRole('button', { name: options.saveButtonText }));
+    fireEvent.click(saveButton);
+  });
+
+  await waitFor(() => expect(saveButton).not.toBeInTheDocument(), {
+    timeout: 500,
   });
 }
