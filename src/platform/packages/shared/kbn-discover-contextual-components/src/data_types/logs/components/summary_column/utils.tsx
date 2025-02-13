@@ -39,23 +39,19 @@ type FieldValue = NonNullable<DataTableRecord['flattened'][FieldKey]>;
  * of field names, constructs an object containing extracted data from the
  * `DataTableRecord`, excluding all `undefined`/`null` cases.
  */
-const getUnformattedFields = <
-  Document extends DataTableRecord,
-  Fields extends string & keyof Document['flattened'],
-  Unformatted extends Record<Fields, NonNullable<Document['flattened'][Fields]>>
->(
-  doc: Document,
-  fields: readonly Fields[]
-): Readonly<Unformatted> =>
+const getUnformattedFields = (
+  doc: DataTableRecord,
+  fields: readonly FieldKey[]
+): Readonly<Record<FieldKey, FieldValue>> =>
   fields.reduce((acc, field) => {
     const fieldValue = getFieldValue(doc, field);
 
     if (fieldValue != null) {
-      acc[field] = fieldValue as Unformatted[Fields];
+      acc[field] = fieldValue;
     }
 
     return acc;
-  }, {} as Unformatted);
+  }, {} as Record<FieldKey, FieldValue>);
 
 const DurationIcon = () => {
   const { euiTheme } = useEuiTheme();
