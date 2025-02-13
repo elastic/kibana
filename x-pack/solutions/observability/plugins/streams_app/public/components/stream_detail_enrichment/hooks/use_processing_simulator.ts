@@ -14,7 +14,6 @@ import {
   Condition,
   processorDefinitionSchema,
   isSchema,
-  RecursiveRecord,
   FlattenRecord,
 } from '@kbn/streams-schema';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
@@ -44,7 +43,7 @@ export interface UseProcessingSimulatorReturn {
   hasLiveChanges: boolean;
   error?: IHttpFetchError<ResponseErrorBody>;
   isLoading: boolean;
-  samples: RecursiveRecord[];
+  samples: FlattenRecord[];
   simulation?: Simulation | null;
   tableColumns: TableColumn[];
   refreshSamples: () => void;
@@ -154,7 +153,7 @@ export const useProcessingSimulator = ({
     error: simulationError,
   } = useStreamsAppFetch(
     ({ signal }): Promise<Simulation> => {
-      if (!definition || isEmpty<RecursiveRecord[]>(sampleDocs) || isEmpty(liveDraftProcessors)) {
+      if (!definition || isEmpty<FlattenRecord[]>(sampleDocs) || isEmpty(liveDraftProcessors)) {
         // This is a hack to avoid loosing the previous value of the simulation once the conditions are not met. The state management refactor will fix this.
         return Promise.resolve(simulation!);
       }
