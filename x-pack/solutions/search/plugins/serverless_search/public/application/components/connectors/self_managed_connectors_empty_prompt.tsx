@@ -24,7 +24,6 @@ import {
   EuiIconPlugs,
 } from '@kbn/search-shared-ui';
 import { docLinks } from '../../../../common/doc_links';
-import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useCreateConnector } from '../../hooks/api/use_create_connector';
 import { useConnectors } from '../../hooks/api/use_connectors';
@@ -36,9 +35,6 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
   );
   const { createConnector, isLoading } = useCreateConnector();
   const { data } = useConnectors();
-  const {
-    application: { navigateToUrl },
-  } = useKibanaServices();
 
   return (
     <SearchEmptyPrompt
