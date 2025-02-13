@@ -151,7 +151,7 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
   const { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
 
   const { data, isLoading, refetch, isError } = useRiskScorePreview({
-    data_view_id: sourcererDataView.title, // TODO @nkhristinin verify this is correct
+    data_view_id: sourcererDataView?.title || '', // TODO @nkhristinin verify this is correct
     filter: filters,
     range: {
       start: from,
