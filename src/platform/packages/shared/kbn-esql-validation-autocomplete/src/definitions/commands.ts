@@ -46,6 +46,7 @@ import { suggest as suggestForJoin } from '../autocomplete/commands/join';
 import { suggest as suggestForFrom } from '../autocomplete/commands/from';
 import { suggest as suggestForRow } from '../autocomplete/commands/row';
 import { suggest as suggestForShow } from '../autocomplete/commands/show';
+import { suggest as suggestForGrok } from '../autocomplete/commands/grok';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -471,7 +472,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
-    examples: ['… | grok a "%{IP:b} %{NUMBER:c}"'],
+    examples: ['… | GROK a "%{IP:b} %{NUMBER:c}"'],
     options: [],
     modes: [],
     signature: {
@@ -481,6 +482,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
     },
+    suggest: suggestForGrok,
   },
   {
     name: 'mv_expand',
