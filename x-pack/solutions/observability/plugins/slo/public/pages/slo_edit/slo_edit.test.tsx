@@ -9,7 +9,7 @@ import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { useFetchDataViews } from '@kbn/observability-plugin/public';
-import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import { HeaderMenuPortal, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
 import React from 'react';
@@ -30,6 +30,7 @@ import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from './constants';
 import { SloEditPage } from './slo_edit';
+import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -63,6 +64,7 @@ const useUpdateSloMock = useUpdateSlo as jest.Mock;
 const useCreateRuleMock = useCreateRule as jest.Mock;
 const useFetchApmSuggestionsMock = useFetchApmSuggestions as jest.Mock;
 const usePermissionsMock = usePermissions as jest.Mock;
+const useFetcherMock = useFetcher as jest.Mock;
 
 const HeaderMenuPortalMock = HeaderMenuPortal as jest.Mock;
 HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
@@ -144,6 +146,7 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
       licensing: {
         license$: new BehaviorSubject(license),
       },
+      share: sharePluginMock.createStartContract(),
     },
   });
 };
@@ -221,6 +224,7 @@ describe('SLO Edit Page', () => {
       },
     });
     licenseMock.hasAtLeast.mockReturnValue(true);
+    useFetcherMock.mockReturnValue({ data: undefined, isLoading: false });
   });
 
   afterEach(cleanup);
