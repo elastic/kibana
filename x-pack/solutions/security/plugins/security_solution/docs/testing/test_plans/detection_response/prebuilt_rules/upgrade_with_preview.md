@@ -1,77 +1,102 @@
-# Upgrading prebuilt rules one-by-one after preview
+# Upgrading prebuilt rules one-by-one with preview <!-- omit from toc -->
 
-This is an upgrading prebuilt rules after preview workflow test plan.
+This is a test plan for the workflow of upgrading prebuilt rules one-by-one with previewing the incoming changes and user customizations in the Rule Upgrade flyout.
 
-Status: `in progress`. The current test plan matches [Rule Immutability/Customization Milestone 3 epic](https://github.com/elastic/kibana/issues/174168).
+Status: `in progress`. The current test plan matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
-## Table of Contents
+## Table of Contents <!-- omit from toc -->
+
+<!--
+Please use the "Markdown All in One" VS Code extension to keep the TOC in sync with the text:
+https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
+-->
 
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
   - [Terminology](#terminology)
   - [Assumptions](#assumptions)
-  - [Non-functional requirements](#non-functional-requirements)
   - [Functional requirements](#functional-requirements)
-  - [Scenarios](#scenarios)
-    - [Rule upgrade field preview](#rule-upgrade-field-preview)
-    - [Rule upgrade field preview Diff View options](#rule-upgrade-field-preview-diff-view-options)
-    - [Field editing](#field-editing)
-    - [Rule upgrade button](#rule-upgrade-button)
-    - [Rule upgrade after field preview](#rule-upgrade-after-field-preview)
-    - [Rule type upgrade](#rule-type-upgrade)
-    - [Concurrency control](#concurrency-control)
+- [Scenarios](#scenarios)
+  - [Rule upgrade field preview](#rule-upgrade-field-preview)
+    - [Preview non-customized field that has an upgrade (AAB)](#preview-non-customized-field-that-has-an-upgrade-aab)
+    - [Preview customized field that doesn't have an upgrade (ABA)](#preview-customized-field-that-doesnt-have-an-upgrade-aba)
+    - [Preview customized field that has a matching upgrade (ABB)](#preview-customized-field-that-has-a-matching-upgrade-abb)
+    - [Preview customized field that has an upgrade resulting in a solvable conflict (ABC, conflict solvable by diff algo)](#preview-customized-field-that-has-an-upgrade-resulting-in-a-solvable-conflict-abc-conflict-solvable-by-diff-algo)
+    - [Preview customized field that has an upgrade resulting in a non-solvable conflict (ABC, conflict non-solvable by diff algo)](#preview-customized-field-that-has-an-upgrade-resulting-in-a-non-solvable-conflict-abc-conflict-non-solvable-by-diff-algo)
+  - [Rule upgrade field preview Diff View options](#rule-upgrade-field-preview-diff-view-options)
+    - [Preview customized field that doesn't have an upgrade (AAB diff case)](#preview-customized-field-that-doesnt-have-an-upgrade-aab-diff-case)
+    - [Preview non-customized field that has an upgrade (ABA diff case)](#preview-non-customized-field-that-has-an-upgrade-aba-diff-case)
+    - [Preview customized field diff that has a matching upgrade (ABB diff case)](#preview-customized-field-diff-that-has-a-matching-upgrade-abb-diff-case)
+    - [Preview customized field diff that has an upgrade with a solvable conflict (ABC diff case, conflict solvable by diff algo)](#preview-customized-field-diff-that-has-an-upgrade-with-a-solvable-conflict-abc-diff-case-conflict-solvable-by-diff-algo)
+    - [Preview customized field diff that has an upgrade with a non-solvable conflict (ABC diff case, conflict non-solvable by diff algo)](#preview-customized-field-diff-that-has-an-upgrade-with-a-non-solvable-conflict-abc-diff-case-conflict-non-solvable-by-diff-algo)
+  - [Field editing](#field-editing)
+    - [Validation blocks saving field form when value is invalid](#validation-blocks-saving-field-form-when-value-is-invalid)
+    - [Saving unchanged field form value doesn't add up or remove anything to the field diff in Diff View](#saving-unchanged-field-form-value-doesnt-add-up-or-remove-anything-to-the-field-diff-in-diff-view)
+  - [Rule upgrade button](#rule-upgrade-button)
+    - [Rule upgrade button is disabled when num of conflicts \>= 1](#rule-upgrade-button-is-disabled-when-num-of-conflicts--1)
+    - [Rule upgrade button is disabled when num fields in edit mode \>= 1](#rule-upgrade-button-is-disabled-when-num-fields-in-edit-mode--1)
+    - [Rule upgrade button is disabled when num of conflicts \>= 1 or num fields in edit mode \>= 1](#rule-upgrade-button-is-disabled-when-num-of-conflicts--1-or-num-fields-in-edit-mode--1)
+  - [Rule upgrade after field preview](#rule-upgrade-after-field-preview)
+    - [Non-customized rule upgrade after preview (AAB diff case)](#non-customized-rule-upgrade-after-preview-aab-diff-case)
+    - [Non-customized rule upgrade after preview and customizing field values (AAB diff case)](#non-customized-rule-upgrade-after-preview-and-customizing-field-values-aab-diff-case)
+    - [Customized rule upgrade after preview customized fields that don't have upgrades (ABA diff case)](#customized-rule-upgrade-after-preview-customized-fields-that-dont-have-upgrades-aba-diff-case)
+    - [Customized rule upgrade after preview customized fields that don't have upgrades and changing that field values (ABA diff case)](#customized-rule-upgrade-after-preview-customized-fields-that-dont-have-upgrades-and-changing-that-field-values-aba-diff-case)
+    - [Customized rule upgrade after preview and accepting solvable conflicts (ABC diff case, conflict solvable by diff algo)](#customized-rule-upgrade-after-preview-and-accepting-solvable-conflicts-abc-diff-case-conflict-solvable-by-diff-algo)
+    - [Customized rule upgrade after preview and accepting edited solvable conflicts (ABC diff case, conflict solvable by diff algo)](#customized-rule-upgrade-after-preview-and-accepting-edited-solvable-conflicts-abc-diff-case-conflict-solvable-by-diff-algo)
+    - [Customized rule upgrade after preview non-solvable conflicts and accepting suggested field value (ABC diff case, non-solvable by diff algo)](#customized-rule-upgrade-after-preview-non-solvable-conflicts-and-accepting-suggested-field-value-abc-diff-case-non-solvable-by-diff-algo)
+    - [Customized rule upgrade after preview non-solvable conflicts and accepting edited field value (ABC diff case, non-solvable by diff algo)](#customized-rule-upgrade-after-preview-non-solvable-conflicts-and-accepting-edited-field-value-abc-diff-case-non-solvable-by-diff-algo)
+  - [Rule type upgrade](#rule-type-upgrade)
+    - [Non-customized rule upgrade to a different rule type after preview](#non-customized-rule-upgrade-to-a-different-rule-type-after-preview)
+    - [Customized rule upgrade to a different rule type after preview](#customized-rule-upgrade-to-a-different-rule-type-after-preview)
+  - [Concurrency control](#concurrency-control)
+    - [User gets notified after someone edited a rule being previewed](#user-gets-notified-after-someone-edited-a-rule-being-previewed)
+    - [User gets notified after a new rule versions is released](#user-gets-notified-after-a-new-rule-versions-is-released)
 
 ## Useful information
 
 ### Tickets
 
-- [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974) epic (internal)
-
-**Milestone 3 - Prebuilt Rules Customization:**
-
-- [Milestone 3 epic ticket](https://github.com/elastic/kibana/issues/174168)
-- [Tests for prebuilt rule upgrade workflow #202078](https://github.com/elastic/kibana/issues/202078)
+- [Users can Customize Prebuilt Detection Rules](https://github.com/elastic/security-team/issues/1974) (internal)
+- [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
+- [Tests for prebuilt rule upgrade workflow](https://github.com/elastic/kibana/issues/202078)
 
 ### Terminology
 
 - **CTA**: "call to action", usually a button, a link, or a callout message with a button, etc, that invites the user to do some action.
 
-  - **CTA to upgrade the prebuilt rule** - a button to upgrade the current prebuilt rule shown in a flyout
+  - **CTA to upgrade the prebuilt rule**: the button to upgrade the prebuilt rule currently shown in the Rule Upgrade flyout.
 
-- **field is non-customized**: rule's field has an original value obtained after prebuilt rule installation
+- **Non-customized field**: a prebuilt rule's field that has the original value from the originally installed prebuilt rule.
 
-- **field is customized**: rule's field has a value semantically different from ann original one obtained after prebuilt rule installation
+- **Customized field**: a prebuilt rule's field that has a value that differs from the original field value of the originally installed prebuilt rule.
 
-- **rule is installed**: rule has been installed and doesn't have any customized fields
+- **Non-customized rule**: a prebuilt rule that doesn't have any customized fields.
 
-- **rule is non-customized**: rule doesn't have any customized fields
-
-- **rule is customized**: rule has one or more customized fields
+- **Customized rule**: a prebuilt rule that has one or more customized fields.
 
 ### Assumptions
 
 - Below scenarios only apply to prebuilt detection rules.
-- A rule is shown on Rule Upgrade page when it has an upgrade.
-
-### Non-functional requirements
-
-- Notifications, rule installation and rule upgrade workflows should work:
-  - regardless of the package type: with historical rule versions or without;
-  - regardless of the package registry availability: i.e., they should also work in air-gapped environments.
-- Rule installation and upgrade workflows should work with packages containing up to 15000 historical rule versions. This is the max number of versions of all rules in the package. This limit is enforced by Fleet.
-- Kibana should not crash with Out Of Memory exception during package installation.
-- For test purposes, it should be possible to use detection rules package versions lower than the latest.
+- A prebuilt rule is shown in the Rule Upgrade table when there's a newer version of this rule in the currently installed package with prebuilt rules.
 
 ### Functional requirements
 
-- User should be able to install prebuilt rules with and without previewing what exactly they would install (rule properties).
-- User should be able to upgrade prebuilt rules with and without previewing what updates they would apply (rule properties of target rule versions).
-- If user chooses to preview a prebuilt rule to be installed/upgraded, we currently show this preview in a flyout.
-- In the prebuilt rule preview a tab that doesn't have any sections should not be displayed and a section that doesn't have any properties also should not be displayed.
-- Rule preview shows only [customizable fields](./shared_assets/customizable_rule_fields.md)
-- User should be able to upgrade a prebuilt rule with upgrades in the [non-customizable fields](./shared_assets/non_customizable_rule_fields.md)
-- Any other rule and alerting framework fields non involved in the rule upgrade workflow like `enabled` or
-  `exceptions` should stay unchanged after rule upgrade.
+- User should be able to upgrade prebuilt rules one-by-one with the ability to preview:
+  - what updates they would receive from Elastic in the latest rule version;
+  - what user customizations they would retain in the rule;
+  - are there any conflicts between the updates from Elastic and the user customizations;
+  - what they should pay attention to in case there are any conflicts.
+- A preview should be shown in the Rule Upgrade flyout.
+- The Rule Upgrade flyout should contain a few tabs:
+  - The "Updates" tab.
+  - The "Overview" tab.
+  - The "Investigation guide" tab.
+- On the "Updates" tab:
+  - We should show the updates from Elastic and the user-customized fields.
+  - We should show only those fields that are [customizable](./shared_assets/customizable_rule_fields.md).
+  - We shouldn't show technical fields and those that are [not customizable](./shared_assets/non_customizable_rule_fields.md).
+- User should be able to upgrade a prebuilt rule that has some updates to [non-customizable fields](./shared_assets/non_customizable_rule_fields.md) in the latest version.
+- Any other fields that are not involved in the rule upgrade workflow, such as `enabled` or `exceptions`, should stay unchanged after rule upgrade.
 
 ## Scenarios
 
@@ -82,7 +107,7 @@ Status: `in progress`. The current test plan matches [Rule Immutability/Customiz
 **Automation**: Jest functional test for each \<field\>.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And that rule has no customizations
 And <field> has an upgrade
 When user opens the Rule Update Flyout
@@ -101,7 +126,7 @@ Examples:
 **Automation**: Jest functional test for each \<field\>.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And <field> is customized
 And <field> has no upgrades
 When user opens the Rule Update Flyout
@@ -121,7 +146,7 @@ Examples:
 **Automation**: Jest functional test for each \<field\>.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And <field> is customized
 And <field> has an upgrade matching customization
 When user opens the Rule Update Flyout
@@ -141,7 +166,7 @@ Examples:
 **Automation**: Jest functional test for each \<field\>.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And <field> is customized
 And <field> has an upgrade resulting in a solvable conflict
 When user opens the Rule Update Flyout
@@ -171,7 +196,7 @@ Examples: <field> whose diff algo supports values merging
 **Automation**: Jest functional test for each \<field\>.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And <field> is customized
 And <field> has an upgrade resulting in a non-solvable conflict
 When user opens the Rule Update Flyout
@@ -196,7 +221,7 @@ Examples:
 **Automation**: 1 Jest integration test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And <field> is customized
 And <field> doesn't have an upgrade
 When user opens the Rule Update Flyout
@@ -214,7 +239,7 @@ Examples:
 **Automation**: 1 Jest integration test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And <field> isn't customized
 And <field> has an upgrade
 When user opens the Rule Update Flyout
@@ -236,7 +261,7 @@ Examples:
 **Automation**: 1 Jest integration test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And <field> is customized
 And <field> has a matching upgrade
 When user opens the Rule Update Flyout
@@ -259,7 +284,7 @@ Examples:
 **Automation**: 1 Jest integration test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And <field> is customized
 And <field> has an upgrade resulting in a solvable conflict
 When user opens the Rule Update Flyout
@@ -283,7 +308,7 @@ Examples:
 **Automation**: 1 Jest integration test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And <field> is customized
 And <field> has an upgrade resulting in a non-solvable conflict
 When user opens the Rule Update Flyout
@@ -312,7 +337,7 @@ Examples:
 **Automation**: 1 Jest integration test per \<field\> + \<diff case\> variation.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And <field> corresponds to a <diff case>
 And <field> appears in the Rule Update Flyout
 When user edits <field>'s in a <field> form
@@ -336,7 +361,7 @@ Examples:
 **Automation**: 1 Jest integration test per \<field\> + \<diff case\> variation.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And <field> corresponds to a <diff case>
 And <field> appears in the Rule Update Flyout
 When user opens a <field> form
@@ -361,7 +386,7 @@ Examples:
 **Automation**: 1 Cypress test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And that rule has customizations
 And it has an upgrade resulting to conflicts
 When user opens the Rule Update Flyout
@@ -377,7 +402,7 @@ Then the INACTIVE CTA becomes ACTIVE
 **Automation**: 1 Cypress test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And it has an upgrade without conflicts
 When user opens the Rule Update Flyout
 Then user should see ACTIVE CTA to upgrade the prebuilt rule
@@ -394,7 +419,7 @@ Then the INACTIVE CTA becomes ACTIVE
 **Automation**: 1 Cypress test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And that rule has customizations
 And it has an upgrade resulting to conflicts
 When user opens the Rule Update Flyout
@@ -412,7 +437,7 @@ Then user should see INACTIVE CTA
 **Automation**: Jest integration test per \<field\> and 1 bulk Cypress test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And that rule does not have any customizations
 And <field> has an upgrade
 When user opens the Rule Update Flyout
@@ -433,7 +458,7 @@ Examples:
 **Automation**: Jest integration test per \<field\> and 1 bulk Cypress test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And that rule does not have any customizations
 And <field> has an upgrade
 When user opens the Rule Update Flyout
@@ -456,7 +481,7 @@ Examples:
 **Automation**: Jest integration test per \<field\> and 1 bulk Cypress test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And that rule has <field> customized
 And it has an upgrade for <fieldB> (<fieldB> != <fieldA>)
 When user opens the Rule Update Flyout
@@ -477,7 +502,7 @@ Examples:
 **Automation**: Jest integration test per \<field\> and 1 bulk Cypress test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And that rule has <fieldA> customized
 And it has an upgrade for <fieldB> (<fieldB> != <fieldA>)
 When user opens the Rule Update Flyout
@@ -500,7 +525,7 @@ Examples:
 **Automation**: Jest integration test per \<field\> and 1 bulk Cypress test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And that rule has <field> customized
 And it has an upgrade resulting in a solvable conflict
 When user opens the Rule Update Flyout
@@ -530,7 +555,7 @@ Examples: <field> is one of
 **Automation**: Jest integration test per \<field\> and 1 bulk Cypress test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And that rule has <field> customized
 And it has an upgrade resulting in a solvable conflict
 When user opens the Rule Update Flyout
@@ -564,7 +589,7 @@ Examples: <field> is one of
 **Automation**: Jest integration test per \<field\> and 1 bulk Cypress test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And that rule has <field> customized
 And it has an upgrade resulting to a non-solvable conflict
 When user opens the Rule Update Flyout
@@ -589,7 +614,7 @@ Examples:
 **Automation**: Jest integration test per \<field\> and 1 bulk Cypress test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And that rule has <field> customized
 And it has an upgrade resulting to a non-solvable conflict
 When user opens the Rule Update Flyout
@@ -616,7 +641,7 @@ Examples:
 **Automation**: 1 Cypress test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And that rule has no customizations
 And it has an upgrade
 When user opens the Rule Update Flyout
@@ -635,7 +660,7 @@ And has upgraded field values
 **Automation**: 1 Cypress test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And that rule has customizations
 And it has an upgrade
 When user opens the Rule Update Flyout
@@ -657,7 +682,7 @@ And has upgraded field values
 **Automation**: 1 Cypress test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And that rule has an upgrade
 And <userA> opened Rule Update Preview
 And saved custom field values via field forms
@@ -671,7 +696,7 @@ And saved custom field values got discarded
 **Automation**: 1 Cypress test.
 
 ```Gherkin
-Given a prebuilt rule installed
+Given an installed prebuilt rule
 And that rule has an upgrade
 And user opened Rule Update Preview
 And saved custom field values via field forms
