@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo, Fragment } from 'react';
+import React, { useState, useMemo, Fragment } from 'react';
 import {
   EuiAccordion,
   EuiPanel,
