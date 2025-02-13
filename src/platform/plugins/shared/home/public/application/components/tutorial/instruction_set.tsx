@@ -114,7 +114,7 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
 
   handleToggleVisibility = () => {
     this.setState((prevState: InstructionSetState) => ({
-      isParamFormVisible: prevState.isParamFormVisible,
+      isParamFormVisible: !prevState.isParamFormVisible,
     }));
   };
 
