@@ -64,6 +64,7 @@ import {
 } from './preconfiguration/delete_unenrolled_agent_setting';
 import { backfillPackagePolicySupportsAgentless } from './backfill_agentless';
 import { updateDeprecatedComponentTemplates } from './setup/update_deprecated_component_templates';
+import { createOrUpdateFleetSyncedIntegrationsIndex } from './setup/fleet_synced_integrations';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -312,6 +313,9 @@ async function createSetupSideEffects(
 
   logger.debug('Update deprecated _source.mode in component templates');
   await updateDeprecatedComponentTemplates(esClient);
+
+  logger.debug('Create or update fleet-synced-integrations index');
+  await createOrUpdateFleetSyncedIntegrationsIndex(esClient);
 
   const nonFatalErrors = [
     ...preconfiguredPackagesNonFatalErrors,

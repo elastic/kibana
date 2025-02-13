@@ -7,6 +7,7 @@
 
 import { resolve } from 'path';
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -16,6 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const auditLogPath = resolve(__dirname, './plugins/audit_log/audit.log');
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [require.resolve('./tests/audit')],
     servers: xPackAPITestsConfig.get('servers'),
     security: { disableTestUser: true },
