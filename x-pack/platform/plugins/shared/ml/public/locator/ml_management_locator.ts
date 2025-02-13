@@ -32,6 +32,7 @@ import { formatTrainedModelsManagementUrl } from './formatters/trained_models';
 export class MlManagementLocatorInternal {
   private _locator: LocatorPublic<SerializableRecord> | undefined;
   private _sectionId: string = 'ml';
+  private validPaths = new Set(Object.values(ML_PAGES));
 
   constructor(share: SharePublicStart | SharePublicSetup) {
     this._locator = share.url.locators.get(MANAGEMENT_APP_LOCATOR);
@@ -39,6 +40,9 @@ export class MlManagementLocatorInternal {
 
   private getPath = (params: MlLocatorParams) => {
     let path: string = '';
+    if (!this.validPaths.has(params.page)) {
+      throw new Error('Page type is not provided or unknown');
+    }
 
     switch (params.page) {
       case ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE:
@@ -62,25 +66,6 @@ export class MlManagementLocatorInternal {
       case ML_PAGES.TRAINED_MODELS_MANAGE:
         path = formatTrainedModelsManagementUrl('', params.pageState);
         break;
-      case ML_PAGES.DATA_DRIFT_INDEX_SELECT:
-      case ML_PAGES.DATA_DRIFT_CUSTOM:
-      case ML_PAGES.DATA_DRIFT:
-      case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB:
-      case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER:
-      case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED:
-      case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_LENS:
-      case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_MAP:
-      case ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_PATTERN_ANALYSIS:
-      case ML_PAGES.OVERVIEW:
-      case ML_PAGES.SETTINGS:
-      case ML_PAGES.FILTER_LISTS_MANAGE:
-      case ML_PAGES.FILTER_LISTS_NEW:
-      case ML_PAGES.CALENDARS_MANAGE:
-      case ML_PAGES.CALENDARS_DST_MANAGE:
-      case ML_PAGES.CALENDARS_NEW:
-      case ML_PAGES.CALENDARS_DST_NEW:
-        path = formatGenericMlUrl('', params.page, params.pageState);
-        break;
       case ML_PAGES.FILTER_LISTS_EDIT:
         path = formatEditFilterUrl('', params.pageState);
         break;
@@ -91,7 +76,8 @@ export class MlManagementLocatorInternal {
         path = formatEditCalendarDstUrl('', params.pageState);
         break;
       default:
-        throw new Error('Page type is not provided or unknown');
+        path = formatGenericMlUrl('', params.page, params.pageState);
+        break;
     }
 
     return path;

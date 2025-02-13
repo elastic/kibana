@@ -15,7 +15,7 @@ import { EuiButton, EuiContextMenu, EuiPopover, useGeneratedHtmlId } from '@elas
 import { i18n } from '@kbn/i18n';
 import type { MlPages } from '../../../../../common/constants/locator';
 import { ML_PAGES } from '../../../../../common/constants/locator';
-import { useJobDetailFlyout } from '../../../jobs/components/job_details_flyout';
+import { useJobInfoFlyouts } from '../../../jobs/components/job_details_flyout/job_details_flyout_context';
 
 interface Props {
   jobId: string;
@@ -41,7 +41,7 @@ export const AnomalyDetectionInfoButton: FC<Props> = ({ jobId, page }) => {
     setPopover(false);
   };
 
-  const { setIsFlyoutOpen, setActiveJobId } = useJobDetailFlyout();
+  const { setIsFlyoutOpen, setActiveJobId } = useJobInfoFlyouts();
   const panels = useMemo(() => {
     const viewInMenu: EuiContextMenuPanelItemDescriptor = {
       name: i18n.translate(

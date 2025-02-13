@@ -14,7 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexGrid,
   EuiFlexItem,
-  EuiIcon,
   EuiImage,
   EuiLink,
   EuiPanel,
@@ -162,7 +161,7 @@ export const DatavisualizerSelector: FC = () => {
                             data-test-subj="mlDataVisualizerSelectESQLButton"
                           >
                             <FormattedMessage
-                              id="xpack.ml.datavisualizer.selector.useESQLButtonLabel"
+                              id="xpack.ml.datavisualizer.selector.tryESQLNowButtonLabel"
                               defaultMessage="Try it now!"
                             />
                           </EuiButton>

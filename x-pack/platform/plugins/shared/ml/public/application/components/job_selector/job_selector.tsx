@@ -8,6 +8,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 
 import {
+  EuiButton,
   EuiButtonEmpty,
   EuiFlexItem,
   EuiFlexGroup,
@@ -32,6 +33,9 @@ import { ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
 import { FeedBackButton } from '../feedback_button';
 import { JobInfoFlyoutsProvider } from '../../jobs/components/job_details_flyout';
 import { JobInfoFlyoutsManager } from '../../jobs/components/job_details_flyout/job_details_context_manager';
+import { usePermissionCheck } from '../../capabilities/check_capabilities';
+import { useMlLocator } from '../../contexts/kibana';
+import { useCreateAndNavigateToManagementMlLink } from '../../contexts/kibana/use_create_url';
 
 export interface GroupObj {
   groupId: string;
@@ -156,6 +160,15 @@ export function JobSelector({
     const newSelection = selectedIds.filter((id) => !jobOrGroupId.includes(id));
     applySelection({ newSelection, jobIds: newSelection, time: undefined });
   };
+
+  const [canCreateJob] = usePermissionCheck(['canCreateJob']);
+  const mlLocator = useMlLocator()!;
+
+  const redirectToCreateJobSelectIndexPage = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
+    'anomaly_detection'
+  );
+
   function renderJobSelectionBar() {
     return (
       <>
@@ -206,6 +219,21 @@ export function JobSelector({
 
           <EuiFlexItem grow={false}>
             <FeedBackButton jobIds={selectedIds} page={page} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              size="s"
+              iconType="plusInCircle"
+              fill
+              color="primary"
+              onClick={redirectToCreateJobSelectIndexPage}
+              disabled={!canCreateJob}
+            >
+              <FormattedMessage
+                id="xpack.ml.embeddables.jobSelector.createJobButtonLabel"
+                defaultMessage="Create job"
+              />
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiHorizontalRule margin="s" />
