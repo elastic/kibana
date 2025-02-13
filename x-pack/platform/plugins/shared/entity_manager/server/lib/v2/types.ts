@@ -16,6 +16,7 @@ export type InternalClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export const entityTypeDefinitionRt = z.object({
   id: z.string(),
   display_name: z.string(),
+  dashboard_id: z.string().optional(),
 });
 
 export type EntityTypeDefinition = z.TypeOf<typeof entityTypeDefinitionRt>;
