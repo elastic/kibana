@@ -287,4 +287,90 @@ describe('ReindexDetailsFlyoutStep', () => {
       </Fragment>
     `);
   });
+
+  it('renders ML anomaly index guidance', () => {
+    const reindexState = cloneDeep(defaultReindexState);
+    reindexState.meta.indexName = '.ml-anomalies-1';
+    const wrapper = shallow(
+      <ReindexDetailsFlyoutStep
+        closeFlyout={jest.fn()}
+        startReindex={jest.fn()}
+        startReadonly={jest.fn()}
+        reindexState={reindexState}
+        updateIndexState={defaultUpdateIndexState}
+      />
+    );
+
+    expect(wrapper).toMatchInlineSnapshot(`
+      <Fragment>
+        <EuiFlyoutBody>
+          <EuiText>
+            <MlAnomalyGuidance
+              indexName=".ml-anomalies-1"
+            />
+          </EuiText>
+          <EuiSpacer />
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiButtonEmpty
+                flush="left"
+                iconType="cross"
+                onClick={[MockFunction]}
+              >
+                <MemoizedFormattedMessage
+                  defaultMessage="Close"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.closeButtonLabel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiFlexGroup
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <EuiButton
+                    data-test-subj="startIndexReadonlyButton"
+                    disabled={false}
+                    onClick={[MockFunction]}
+                  >
+                    <MemoizedFormattedMessage
+                      defaultMessage="Mark as read-only"
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.startIndexReadonlyButton"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <EuiButton
+                    color="primary"
+                    data-test-subj="startReindexingButton"
+                    disabled={false}
+                    fill={true}
+                    isLoading={false}
+                    onClick={[MockFunction]}
+                  >
+                    <MemoizedFormattedMessage
+                      defaultMessage="Start reindexing"
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexButton.runReindexLabel"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </Fragment>
+    `);
+  });
 });

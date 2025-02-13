@@ -32,6 +32,9 @@ import { FrozenCallOut } from '../frozen_callout';
 import type { UpdateIndexState } from '../../../use_update_index';
 import { FetchFailedCallOut } from '../fetch_failed_callout';
 import { ReindexingFailedCallOut } from '../reindexing_failed_callout';
+import { MlAnomalyGuidance } from './ml_anomaly_guidance';
+
+const ML_ANOMALIES_PREFIX = '.ml-anomalies-';
 
 /**
  * Displays a flyout that shows the details / corrective action for a "reindex" deprecation for a given index.
@@ -53,6 +56,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   const { loadingState, status: reindexStatus, hasRequiredPrivileges, meta } = reindexState;
   const { status: updateIndexStatus } = updateIndexState;
   const { indexName } = meta;
+  const isMLAnomalyIndex = Boolean(indexName?.startsWith(ML_ANOMALIES_PREFIX));
   const loading = loadingState === LoadingState.Loading;
   const isCompleted = reindexStatus === ReindexStatus.completed || updateIndexStatus === 'complete';
   const hasFetchFailed = reindexStatus === ReindexStatus.fetchFailed;
@@ -145,7 +149,9 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
               </p>
             </Fragment>
           )}
-          {!meta.isReadonly && (
+          {!meta.isReadonly && isMLAnomalyIndex ? (
+            <MlAnomalyGuidance indexName={indexName} />
+          ) : (
             <Fragment>
               <p>
                 <FormattedMessage
