@@ -15,6 +15,7 @@ jest.mock('@kbn/search-connectors', () => {
     fetchConnectors: () => mockedFetchConnectors(),
   };
 });
+import { DeprecationDetailsMessage, DeprecationsDetails } from '@kbn/core-deprecations-common';
 import { GetDeprecationsContext } from '@kbn/core-deprecations-server';
 
 import { Connector } from '@kbn/search-connectors';
@@ -38,6 +39,12 @@ const ctx = {
 const cloud = { baseUrl: 'cloud.elastic.co', deploymentId: '123', cloudId: 'abc' } as CloudSetup;
 const notCloud = {} as CloudSetup;
 const docsUrl = 'example.com';
+
+function getMessageFromDeprecation(details: DeprecationsDetails): string {
+  const message = details.message as DeprecationDetailsMessage;
+  return message.content;
+}
+
 describe('Enterprise Search node deprecation', () => {
   it('Tells you to remove capacity if running on cloud', () => {
     const config = { host: 'example.com' } as ConfigType;
@@ -249,14 +256,16 @@ describe('getEnterpriseSearchPre8IndexDeprecations', () => {
       '/internal/enterprise_search/deprecations/set_enterprise_search_indices_read_only'
     );
     expect(deprecations[0].title).toMatch('Pre 8.x Enterprise Search indices compatibility');
-    expect(deprecations[0].message.content).toContain(
+    expect(getMessageFromDeprecation(deprecations[0])).toContain(
       'The following indices are found to be incompatible for upgrade'
     );
-    expect(deprecations[0].message.content).toContain('.ent-search-index_without_datastream');
-    expect(deprecations[0].message.content).toContain(
+    expect(getMessageFromDeprecation(deprecations[0])).toContain(
+      '.ent-search-index_without_datastream'
+    );
+    expect(getMessageFromDeprecation(deprecations[0])).toContain(
       'The following data streams are found to be incompatible for upgrade'
     );
-    expect(deprecations[0].message.content).toContain('.ent-search-with_data_stream');
+    expect(getMessageFromDeprecation(deprecations[0])).toContain('.ent-search-with_data_stream');
   });
 
   it('can register an index without data stream deprecations that need to be set to read only', async () => {
@@ -280,13 +289,17 @@ describe('getEnterpriseSearchPre8IndexDeprecations', () => {
       '/internal/enterprise_search/deprecations/set_enterprise_search_indices_read_only'
     );
     expect(deprecations[0].title).toMatch('Pre 8.x Enterprise Search indices compatibility');
-    expect(deprecations[0].message.content).toContain(
+    expect(getMessageFromDeprecation(deprecations[0])).toContain(
       'The following indices are found to be incompatible for upgrade'
     );
-    expect(deprecations[0].message.content).toContain('.ent-search-index_without_datastream');
-    expect(deprecations[0].message.content).not.toContain(
+    expect(getMessageFromDeprecation(deprecations[0])).toContain(
+      '.ent-search-index_without_datastream'
+    );
+    expect(getMessageFromDeprecation(deprecations[0])).not.toContain(
       'The following data streams are found to be incompatible for upgrade'
     );
-    expect(deprecations[0].message.content).not.toContain('.ent-search-with_data_stream');
+    expect(getMessageFromDeprecation(deprecations[0])).not.toContain(
+      '.ent-search-with_data_stream'
+    );
   });
 });
