@@ -99,6 +99,7 @@ export const GridRowTitle = React.memo(
             aria-controls={`kbnGridRow--${rowIndex}`}
             data-test-subj={`kbnGridRowTitle`}
             textProps={false}
+            flush="both"
           >
             {editTitleOpen ? null : (
               <EuiTitle size="xs">
@@ -124,7 +125,6 @@ export const GridRowTitle = React.memo(
                 defaultMessage: 'Edit section title',
               })}
               data-test-subj="kbnGridRowTitle--editor"
-              css={nudgeInputStyles}
             />
           </EuiFlexItem>
         ) : (
@@ -161,11 +161,6 @@ const accordianButtonStyles = ({ euiTheme }: UseEuiTheme) =>
         transform: 'rotate(-90deg) !important',
       },
     },
-  });
-
-const nudgeInputStyles = ({ euiTheme }: UseEuiTheme) =>
-  css({
-    marginLeft: `calc(${euiTheme.size.xxs} * -3)`, // 6px
   });
 
 GridRowTitle.displayName = 'GridRowTitle';
