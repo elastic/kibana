@@ -83,18 +83,23 @@ export abstract class Importer implements IImporter {
 
   protected abstract _createDocs(t: string, isLastPart: boolean): CreateDocsResponse<ImportDoc>;
 
-  private _initialize(index: string, mappings: MappingTypeMapping, pipelines: IngestPipeline[]) {
+  private _initialize(
+    index: string,
+    mappings: MappingTypeMapping,
+    pipelines: Array<IngestPipeline | undefined>
+  ) {
     for (let i = 0; i < pipelines.length; i++) {
       const pipeline = pipelines[i];
-      updatePipelineTimezone(pipeline);
+      if (pipeline !== undefined) {
+        updatePipelineTimezone(pipeline);
 
-      if (pipelineContainsSpecialProcessors(pipeline)) {
-        // pipeline contains processors which we know are slow
-        // so reduce the chunk size significantly to avoid timeouts
-        this._chunkSize = REDUCED_CHUNK_SIZE;
+        if (pipelineContainsSpecialProcessors(pipeline)) {
+          // pipeline contains processors which we know are slow
+          // so reduce the chunk size significantly to avoid timeouts
+          this._chunkSize = REDUCED_CHUNK_SIZE;
+        }
       }
-      // if no pipeline has been supplied,
-      // send an empty object
+
       this._pipelines.push({
         id: `${index}-${i}-pipeline`,
         pipeline,
@@ -118,7 +123,7 @@ export abstract class Importer implements IImporter {
     index: string,
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
-    pipelines: IngestPipeline[]
+    pipelines: Array<IngestPipeline | undefined>
   ) {
     this._initialize(index, mappings, pipelines);
 
@@ -253,8 +258,14 @@ export abstract class Importer implements IImporter {
   }
 
   public async deletePipelines() {
+    const ids = this._pipelines.filter((p) => p.pipeline !== undefined).map((p) => p.id);
+
+    if (ids.length === 0) {
+      return [];
+    }
+
     return await getHttp().fetch<IngestDeletePipelineResponse[]>({
-      path: `/internal/file_upload/remove_pipelines/${this._pipelines.map((p) => p.id).join(',')}`,
+      path: `/internal/file_upload/remove_pipelines/${ids.join(',')}`,
       method: 'DELETE',
       version: '1',
     });

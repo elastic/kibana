@@ -28,7 +28,7 @@ export const analyzeFileQuerySchema = schema.object({
 
 const ingestPipeline = schema.object({
   id: schema.string(),
-  pipeline: schema.any(),
+  pipeline: schema.maybe(schema.any()),
 });
 
 export const initializeImportFileBodySchema = schema.object({
@@ -44,7 +44,7 @@ export const initializeImportFileBodySchema = schema.object({
 export const importFileBodySchema = schema.object({
   index: schema.string(),
   data: schema.arrayOf(schema.any()),
-  ingestPipelineId: schema.string(),
+  ingestPipelineId: schema.maybe(schema.string()),
 });
 
 export const runtimeMappingsSchema = schema.object(

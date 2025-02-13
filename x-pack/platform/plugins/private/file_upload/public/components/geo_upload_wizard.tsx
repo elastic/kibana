@@ -109,10 +109,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
         },
       },
     };
-    const ingestPipeline = {
-      description: '',
-      processors: [],
-    };
+
     this.setState({
       importStatus: i18n.translate('xpack.fileUpload.geoUploadWizard.dataIndexingStarted', {
         defaultMessage: 'Creating index: {indexName}',
@@ -125,7 +122,7 @@ export class GeoUploadWizard extends Component<FileUploadComponentProps, State> 
       this.state.indexName,
       {},
       mappings,
-      [ingestPipeline]
+      []
     );
     if (!this._isMounted) {
       return;

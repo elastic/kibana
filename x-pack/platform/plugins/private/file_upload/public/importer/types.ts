@@ -49,7 +49,7 @@ export interface IImporter {
     index: string,
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
-    pipeline: IngestPipeline[]
+    pipeline: Array<IngestPipeline | undefined>
   ): Promise<InitializeImportResponse>;
   initializeWithoutCreate(
     index: string,
@@ -58,12 +58,12 @@ export interface IImporter {
   ): void;
   import(
     index: string,
-    ingestPipelineId: string,
+    ingestPipelineId: string | undefined,
     setImportProgress: (progress: number) => void
   ): Promise<ImportResults>;
   initialized(): boolean;
   getIndex(): string | undefined;
   getTimeField(): string | undefined;
   previewIndexTimeRange(): Promise<{ start: number | null; end: number | null }>;
-  deletePipelines(pipelineIds: string[]): Promise<IngestDeletePipelineResponse[]>;
+  deletePipelines(): Promise<IngestDeletePipelineResponse[]>;
 }
