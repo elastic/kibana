@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -17,26 +17,30 @@ export const StatusColumn: React.FunctionComponent<{
   version: string;
   percentage: number;
 }> = ({ agentPolicyId, version, percentage }) => {
-  const { data: currentVersionCounts } = useGetAutoUpgradeAgentsStatusQuery(agentPolicyId);
+  const { data: autoUpgradeAgentsStatus } = useGetAutoUpgradeAgentsStatusQuery(agentPolicyId);
 
   const calcPercentage = useCallback(
     (agents: number): number =>
-      currentVersionCounts ? Math.round((agents / currentVersionCounts.totalAgents) * 100) : 0,
-    [currentVersionCounts]
+      autoUpgradeAgentsStatus
+        ? Math.round((agents / autoUpgradeAgentsStatus.totalAgents) * 100)
+        : 0,
+    [autoUpgradeAgentsStatus]
   );
 
-  const currentPercentage = useMemo(() => {
-    let result = 0;
-    if (currentVersionCounts) {
-      const currentVersion = currentVersionCounts.currentVersions.find(
-        (value) => value.version === version
-      );
-      if (currentVersion) {
-        result = calcPercentage(currentVersion.agents);
+  const agentVersionCounts = useMemo(() => {
+    return (
+      autoUpgradeAgentsStatus?.currentVersions.find((value) => value.version === version) ?? {
+        version,
+        agents: 0,
+        failedAgents: 0,
       }
-    }
+    );
+  }, [autoUpgradeAgentsStatus, version]);
+
+  const currentPercentage = useMemo(() => {
+    const result = calcPercentage(agentVersionCounts.agents);
     return `${result}%`;
-  }, [currentVersionCounts, version, calcPercentage]);
+  }, [agentVersionCounts, calcPercentage]);
 
   const currentStatus = useMemo(() => {
     const inProgressStatus = (
@@ -63,23 +67,46 @@ export const StatusColumn: React.FunctionComponent<{
         />
       </EuiButtonEmpty>
     );
-    if (!currentVersionCounts) return inProgressStatus;
-    const currentVersion = currentVersionCounts.currentVersions.find(
-      (value) => value.version === version
-    );
-    if (currentVersion) {
-      if (currentVersion.failedAgents > 0) {
-        return failedStatus;
-      }
-      const currPercentage = calcPercentage(currentVersion.agents);
+    let statusButton = inProgressStatus;
+
+    if (agentVersionCounts.failedAgents > 0) {
+      statusButton = failedStatus;
+    } else {
+      const currPercentage = calcPercentage(agentVersionCounts.agents);
       if (currPercentage >= percentage) {
-        return completedStatus;
+        statusButton = completedStatus;
       } else {
-        return inProgressStatus;
+        statusButton = inProgressStatus;
       }
     }
-    return inProgressStatus;
-  }, [currentVersionCounts, version, percentage, calcPercentage]);
+
+    return (
+      <EuiToolTip
+        content={
+          agentVersionCounts.failedAgents === 0 ? (
+            <FormattedMessage
+              id="xpack.fleet.manageAutoUpgradeAgents.currentStatusTooltip"
+              defaultMessage="{agents} agents on target version"
+              values={{
+                agents: agentVersionCounts.agents,
+              }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.manageAutoUpgradeAgents.failedStatusTooltip"
+              defaultMessage="{failedAgents} agents failed to upgrade"
+              values={{
+                agents: agentVersionCounts.agents,
+                failedAgents: agentVersionCounts.failedAgents,
+              }}
+            />
+          )
+        }
+      >
+        {statusButton}
+      </EuiToolTip>
+    );
+  }, [agentVersionCounts, percentage, calcPercentage]);
 
   return (
     <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
