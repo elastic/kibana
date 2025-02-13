@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { injectI18n, InjectedIntl } from '@kbn/i18n-react';
 import React from 'react';
+import { injectI18n, InjectedIntl } from '@kbn/i18n-react';
 import {
   EuiTitle,
   EuiFlexGroup,
@@ -122,7 +122,7 @@ class SavedObjectsInstallerUi extends React.Component<
     });
 
     const overwriteErrors = errors.filter((savedObject) => {
-      return Boolean(savedObject.error?.statusCode === 409); // do i need this Boolean?
+      return savedObject.error?.statusCode === 409;
     });
     if (overwriteErrors.length > 0) {
       this.setState({
