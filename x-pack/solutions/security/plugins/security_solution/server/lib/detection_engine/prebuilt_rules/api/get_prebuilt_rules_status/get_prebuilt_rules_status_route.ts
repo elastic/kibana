@@ -55,6 +55,11 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
               num_prebuilt_rules_to_upgrade: upgradeableRules.length,
               num_prebuilt_rules_total_in_package: totalAvailableRules.length,
             },
+            aggregated_fields: {
+              upgradeable_rules: {
+                tags: [...new Set(upgradeableRules.flatMap((rule) => rule.current.tags))],
+              },
+            },
           };
 
           return response.ok({ body });

@@ -31,6 +31,7 @@ import { createModifiedPrebuiltRuleAssets } from './create_upgradeable_rules_pay
 import { getRuleGroups } from '../../model/rule_groups/get_rule_groups';
 import { validatePerformRuleUpgradeRequest } from './validate_perform_rule_upgrade_request';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
+import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
 
 export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -80,22 +81,28 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
             defaultPickVersion,
           });
 
-          const { mode } = request.body;
+          const { mode, dry_run: isDryRun, on_conflict: onConflict } = request.body;
 
           const versionSpecifiers = mode === ModeEnum.ALL_RULES ? undefined : request.body.rules;
+          const filter = mode === ModeEnum.ALL_RULES ? request.body.filter : undefined;
           const ruleTriadsMap = await fetchRuleVersionsTriad({
             ruleAssetsClient,
             ruleObjectsClient,
             versionSpecifiers,
+            filter,
           });
           const ruleGroups = getRuleGroups(ruleTriadsMap);
+
+          const ruleErrors = [];
 
           const { upgradeableRules, skippedRules, fetchErrors } = getUpgradeableRules({
             rawUpgradeableRules: ruleGroups.upgradeableRules,
             currentRules: ruleGroups.currentRules,
             versionSpecifiers,
             mode,
+            onConflict,
           });
+          ruleErrors.push(...fetchErrors);
 
           const { modifiedPrebuiltRuleAssets, processingErrors } = createModifiedPrebuiltRuleAssets(
             {
@@ -104,12 +111,32 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
               defaultPickVersion,
             }
           );
+          ruleErrors.push(...processingErrors);
+
+          if (isDryRun) {
+            const body: PerformRuleUpgradeResponseBody = {
+              summary: {
+                total: upgradeableRules.length + skippedRules.length,
+                skipped: skippedRules.length,
+                succeeded: modifiedPrebuiltRuleAssets.length,
+                failed: ruleErrors.length,
+              },
+              results: {
+                updated: modifiedPrebuiltRuleAssets.map((rule) =>
+                  convertPrebuiltRuleAssetToRuleResponse(rule)
+                ),
+                skipped: skippedRules,
+              },
+              errors: aggregatePrebuiltRuleErrors(ruleErrors),
+            };
+            return response.ok({ body });
+          }
 
           const { results: updatedRules, errors: installationErrors } = await upgradePrebuiltRules(
             detectionRulesClient,
             modifiedPrebuiltRuleAssets
           );
-          const ruleErrors = [...fetchErrors, ...processingErrors, ...installationErrors];
+          ruleErrors.push(...installationErrors);
 
           const { error: timelineInstallationError } = await performTimelinesInstallation(
             ctx.securitySolution

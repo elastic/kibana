@@ -12,19 +12,26 @@ import type {
 } from '../../../../../../common/api/detection_engine';
 import { ModeEnum, SkipRuleUpgradeReasonEnum } from '../../../../../../common/api/detection_engine';
 import type { PromisePoolError } from '../../../../../utils/promise_pool';
-import type { Mode } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { UpgradeConflictResolutionEnum } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import type {
+  Mode,
+  UpgradeConflictResolution,
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { RuleTriad } from '../../model/rule_groups/get_rule_groups';
+import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
 
 export const getUpgradeableRules = ({
   rawUpgradeableRules,
   currentRules,
   versionSpecifiers,
   mode,
+  onConflict = UpgradeConflictResolutionEnum.OVERWRITE,
 }: {
   rawUpgradeableRules: RuleTriad[];
   currentRules: RuleResponse[];
   versionSpecifiers?: RuleUpgradeSpecifier[];
   mode: Mode;
+  onConflict?: UpgradeConflictResolution;
 }) => {
   return withSecuritySpanSync(getUpgradeableRules.name, () => {
     const upgradeableRules = new Map(
@@ -72,6 +79,20 @@ export const getUpgradeableRules = ({
           if (upgradeableRules.has(rule.rule_id)) {
             upgradeableRules.delete(rule.rule_id);
           }
+        }
+      });
+    }
+
+    if (onConflict === UpgradeConflictResolutionEnum.SKIP) {
+      rawUpgradeableRules.forEach(({ current, base, target }) => {
+        const ruleDiff = calculateRuleDiff({ current, base, target });
+        const hasConflict = ruleDiff.ruleDiff.num_fields_with_conflicts > 0;
+        if (hasConflict) {
+          skippedRules.push({
+            rule_id: current.rule_id,
+            reason: SkipRuleUpgradeReasonEnum.CONFLICT,
+          });
+          upgradeableRules.delete(current.rule_id);
         }
       });
     }

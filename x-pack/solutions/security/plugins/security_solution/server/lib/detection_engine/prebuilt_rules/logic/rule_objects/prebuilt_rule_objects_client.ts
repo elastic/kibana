@@ -12,11 +12,24 @@ import type {
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { findRules } from '../../../rule_management/logic/search/find_rules';
-import { getExistingPrepackagedRules } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import { internalRuleToAPIResponse } from '../../../rule_management/logic/detection_rules_client/converters/internal_rule_to_api_response';
+import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
+import type {
+  FindRulesSortField,
+  PrebuiltRuleFilter,
+  SortOrder,
+} from '../../../../../../common/api/detection_engine';
+
+interface FetchAllInstalledRulesArgs {
+  page?: number;
+  perPage?: number;
+  filter?: PrebuiltRuleFilter;
+  sortField?: FindRulesSortField;
+  sortOrder?: SortOrder;
+}
 
 export interface IPrebuiltRuleObjectsClient {
-  fetchAllInstalledRules(): Promise<RuleResponse[]>;
+  fetchInstalledRules(args?: FetchAllInstalledRulesArgs): Promise<RuleResponse[]>;
   fetchInstalledRulesByIds(ruleIds: string[]): Promise<RuleResponse[]>;
 }
 
@@ -24,10 +37,28 @@ export const createPrebuiltRuleObjectsClient = (
   rulesClient: RulesClient
 ): IPrebuiltRuleObjectsClient => {
   return {
-    fetchAllInstalledRules: (): Promise<RuleResponse[]> => {
+    fetchInstalledRules: ({ page, perPage, sortField, sortOrder, filter } = {}): Promise<
+      RuleResponse[]
+    > => {
       return withSecuritySpan('IPrebuiltRuleObjectsClient.fetchInstalledRules', async () => {
-        const rulesData = await getExistingPrepackagedRules({ rulesClient });
-        const rules = rulesData.map((rule) => internalRuleToAPIResponse(rule));
+        const filterKQL = convertRulesFilterToKQL({
+          showElasticRules: true,
+          filter: filter?.name,
+          tags: filter?.tags,
+          customizationStatus: filter?.customization_status,
+        });
+
+        const rulesData = await findRules({
+          rulesClient,
+          ruleIds: filter?.rule_ids,
+          filter: filterKQL,
+          perPage,
+          page,
+          sortField,
+          sortOrder,
+          fields: undefined,
+        });
+        const rules = rulesData.data.map((rule) => internalRuleToAPIResponse(rule));
         return rules;
       });
     },
