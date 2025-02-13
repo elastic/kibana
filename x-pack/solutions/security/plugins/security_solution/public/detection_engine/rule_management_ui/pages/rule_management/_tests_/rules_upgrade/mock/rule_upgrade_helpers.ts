@@ -44,7 +44,24 @@ export async function setResolvedName(
     });
   });
 
+  const saveButton = within(wrapper).getByRole('button', { name: options.saveButtonText });
+
+  expect(saveButton).toBeVisible();
+  expect(saveButton).toBeEnabled();
+
   await act(async () => {
-    fireEvent.click(within(wrapper).getByRole('button', { name: options.saveButtonText }));
+    fireEvent.click(saveButton);
+  });
+}
+
+export async function acceptSuggestedFieldValue(wrapper: HTMLElement): Promise<void> {
+  await act(async () => {
+    fireEvent.click(within(wrapper).getByRole('button', { name: 'Accept' }));
+  });
+}
+
+export async function saveAndAcceptSuggestedFieldValue(wrapper: HTMLElement): Promise<void> {
+  await act(async () => {
+    fireEvent.click(within(wrapper).getByRole('button', { name: 'Save and accept' }));
   });
 }

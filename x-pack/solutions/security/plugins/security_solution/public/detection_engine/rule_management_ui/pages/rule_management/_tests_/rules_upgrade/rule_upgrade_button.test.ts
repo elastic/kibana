@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { screen, within } from '@testing-library/react';
 import {
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
@@ -33,13 +34,9 @@ describe('Rule Upgrade button', () => {
         conflict: ThreeWayDiffConflict.NONE,
       });
 
-      const { getByRole } = await renderRuleUpgradeFlyout();
+      await renderRuleUpgradeFlyout();
 
-      expect(
-        getByRole('button', {
-          name: 'Update',
-        })
-      ).toBeEnabled();
+      expectRuleUpgradeButtonToBeEnabled();
     });
 
     it('gets disabled after switching a field to edit mode', async () => {
@@ -56,18 +53,40 @@ describe('Rule Upgrade button', () => {
         conflict: ThreeWayDiffConflict.NONE,
       });
 
-      const { getByTestId, getByRole } = await renderRuleUpgradeFlyout();
+      const { getByTestId } = await renderRuleUpgradeFlyout();
 
       const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
 
       toggleFieldAccordion(fieldUpgradeWrapper);
       switchToFieldEdit(fieldUpgradeWrapper);
 
-      expect(
-        getByRole('button', {
-          name: 'Update',
-        })
-      ).toBeDisabled();
+      expectRuleUpgradeButtonToBeDisabled();
+    });
+
+    it('gets disabled when field value validation does not pass', async () => {
+      mockRuleUpgradeReviewData({
+        ruleType: 'query',
+        fieldName: 'name',
+        fieldVersions: {
+          base: 'Initial name',
+          current: 'Initial name',
+          target: 'Updated name',
+          merged: 'Updated name',
+        },
+        diffOutcome: ThreeWayDiffOutcome.StockValueCanUpdate,
+        conflict: ThreeWayDiffConflict.NONE,
+      });
+
+      const { getByTestId } = await renderRuleUpgradeFlyout();
+
+      const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
+
+      toggleFieldAccordion(fieldUpgradeWrapper);
+      switchToFieldEdit(fieldUpgradeWrapper);
+
+      await setResolvedName(fieldUpgradeWrapper, '');
+
+      expectRuleUpgradeButtonToBeDisabled();
     });
 
     it('gets enabled after switching to readonly mode', async () => {
@@ -84,7 +103,7 @@ describe('Rule Upgrade button', () => {
         conflict: ThreeWayDiffConflict.NONE,
       });
 
-      const { getByTestId, getByRole } = await renderRuleUpgradeFlyout();
+      const { getByTestId } = await renderRuleUpgradeFlyout();
 
       const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
 
@@ -92,11 +111,7 @@ describe('Rule Upgrade button', () => {
       switchToFieldEdit(fieldUpgradeWrapper);
       cancelFieldEdit(fieldUpgradeWrapper);
 
-      expect(
-        getByRole('button', {
-          name: 'Update',
-        })
-      ).toBeEnabled();
+      expectRuleUpgradeButtonToBeEnabled();
     });
 
     it('gets enabled after providing a resolved value', async () => {
@@ -113,7 +128,7 @@ describe('Rule Upgrade button', () => {
         conflict: ThreeWayDiffConflict.NONE,
       });
 
-      const { getByTestId, getByRole } = await renderRuleUpgradeFlyout();
+      const { getByTestId } = await renderRuleUpgradeFlyout();
 
       const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
 
@@ -121,11 +136,7 @@ describe('Rule Upgrade button', () => {
       switchToFieldEdit(fieldUpgradeWrapper);
       await setResolvedName(fieldUpgradeWrapper, 'Resolved name');
 
-      expect(
-        getByRole('button', {
-          name: 'Update',
-        })
-      ).toBeEnabled();
+      expectRuleUpgradeButtonToBeEnabled();
     });
   });
 
@@ -144,13 +155,9 @@ describe('Rule Upgrade button', () => {
         conflict: ThreeWayDiffConflict.SOLVABLE,
       });
 
-      const { getByRole } = await renderRuleUpgradeFlyout();
+      await renderRuleUpgradeFlyout();
 
-      expect(
-        getByRole('button', {
-          name: 'Update',
-        })
-      ).toBeDisabled();
+      expectRuleUpgradeButtonToBeDisabled();
     });
 
     it('is disabled with non-solvable conflict', async () => {
@@ -167,13 +174,9 @@ describe('Rule Upgrade button', () => {
         conflict: ThreeWayDiffConflict.NON_SOLVABLE,
       });
 
-      const { getByRole } = await renderRuleUpgradeFlyout();
+      await renderRuleUpgradeFlyout();
 
-      expect(
-        getByRole('button', {
-          name: 'Update',
-        })
-      ).toBeDisabled();
+      expectRuleUpgradeButtonToBeDisabled();
     });
 
     it('gets enabled after providing a resolved value', async () => {
@@ -190,7 +193,7 @@ describe('Rule Upgrade button', () => {
         conflict: ThreeWayDiffConflict.NON_SOLVABLE,
       });
 
-      const { getByTestId, getByRole } = await renderRuleUpgradeFlyout();
+      const { getByTestId } = await renderRuleUpgradeFlyout();
 
       const fieldUpgradeWrapper = getByTestId(`name-upgradeWrapper`);
 
@@ -198,11 +201,23 @@ describe('Rule Upgrade button', () => {
         saveButtonText: 'Save and accept',
       });
 
-      expect(
-        getByRole('button', {
-          name: 'Update',
-        })
-      ).toBeEnabled();
+      expectRuleUpgradeButtonToBeEnabled();
     });
   });
 });
+
+function expectRuleUpgradeButtonToBeDisabled(): void {
+  expect(
+    within(screen.getByRole('dialog')).getByRole('button', {
+      name: 'Update',
+    })
+  ).toBeDisabled();
+}
+
+function expectRuleUpgradeButtonToBeEnabled(): void {
+  expect(
+    within(screen.getByRole('dialog')).getByRole('button', {
+      name: 'Update',
+    })
+  ).toBeEnabled();
+}
