@@ -64,7 +64,7 @@ export function infraSyncTaskRunner(
 
           // Deploy Policies
           const connectorsToDeploy = getConnectorsToDeploy(policiesMetadata, nativeConnectors);
-
+          logger.info("I'm checking for a policy every minute")
           let agentlessConnectorsDeployed = 0;
           for (const connectorMetadata of connectorsToDeploy) {
             // We try-catch to still be able to deploy other connectors if some fail
@@ -144,21 +144,6 @@ export class AgentlessConnectorDeploymentsSyncService {
       agentService,
       this.logger
     );
-
-    taskManager.registerTaskDefinitions({
-      [AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_TYPE]: {
-        title: 'Agentless Connector Deployment Manager',
-        description:
-          'This task peridocally checks native connectors, agent policies and syncs them if they are out of sync',
-        timeout: '1m',
-        maxAttempts: 3,
-        createTaskRunner: infraSyncTaskRunner(
-          this.logger,
-          service,
-          searchConnectorsPluginStartDependencies.licensing
-        ),
-      },
-    });
   }
 
   public async scheduleInfraSyncTask(
