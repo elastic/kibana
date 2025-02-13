@@ -278,8 +278,8 @@ export function initializePanelsManager(
         return Object.keys(panels$.value).length;
       },
       getSerializedStateForChild: (childId: string) => {
-        const rawState = panels$.value[childId]?.explicitInput;
-        return !rawState || Object.keys(rawState).length === 0
+        const rawState = panels$.value[childId]?.explicitInput ?? {};
+        return Object.keys(rawState).length === 0
           ? undefined
           : {
               rawState,
