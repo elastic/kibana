@@ -21,7 +21,7 @@ export interface TraceSummaryProps {
 export function TraceSummary({ fieldConfiguration, fieldId }: TraceSummaryProps) {
   const { transaction } = useTransactionContext();
 
-  if (fieldId === TRANSACTION_NAME_FIELD) {
+  if (fieldId === TRANSACTION_NAME_FIELD && !fieldConfiguration.value) {
     if (transaction) {
       fieldConfiguration.value = transaction.name;
     }
