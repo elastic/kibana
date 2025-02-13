@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiSelect,
   type EuiComboBoxOptionOption,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import styled from 'styled-components';
@@ -432,9 +433,21 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       label={
                         <FormattedMessage
                           id="xpack.fleet.createPackagePolicy.stepConfigure.additionalPermissionsLabel"
-                          defaultMessage="Add a reroute processor permission"
+                          defaultMessage="Add a reroute processor permission {tooltip}"
+                          values={{
+                            tooltip: (
+                              <EuiIconTip
+                                content={
+                                  <FormattedMessage
+                                    id="xpack.fleet.createPackagePolicy.stepConfigure.additionalPermissionsToolTip"
+                                    defaultMessage="Use the reroute processor to redirect data flows to another target index or data stream."
+                                  />
+                                }
+                                position="right"
+                              />
+                            ),
+                          }}
                         />
-                        // TODO Tooltip
                       }
                     >
                       <EuiComboBox
