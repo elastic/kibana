@@ -55,6 +55,7 @@
     "@kbn/deeplinks-observability",
     "@kbn/react-kibana-context-render",
     "@kbn/apm-data-access-plugin",
+    "@kbn/ebt-tools",
     "@kbn/security-plugin-types-common"
     // add references to other TypeScript projects the plugin depends on
 

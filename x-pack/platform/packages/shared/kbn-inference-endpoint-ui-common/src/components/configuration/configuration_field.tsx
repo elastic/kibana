@@ -25,6 +25,7 @@ interface ConfigurationFieldProps {
   isLoading: boolean;
   setConfigValue: (value: number | string | boolean | null) => void;
   isEdit?: boolean;
+  isPreconfigured?: boolean;
 }
 
 interface ConfigInputFieldProps {
@@ -32,6 +33,7 @@ interface ConfigInputFieldProps {
   isLoading: boolean;
   validateAndSetConfigValue: (value: string | boolean) => void;
   isEdit?: boolean;
+  isPreconfigured?: boolean;
 }
 export const ConfigInputField: React.FC<ConfigInputFieldProps> = ({
   configEntry,
@@ -117,6 +119,7 @@ export const ConfigNumberField: React.FC<ConfigInputFieldProps> = ({
   isLoading,
   validateAndSetConfigValue,
   isEdit,
+  isPreconfigured,
 }) => {
   const { isValid, value, default_value: defaultValue, key, updatable } = configEntry;
   const [innerValue, setInnerValue] = useState(value ?? defaultValue);
@@ -126,7 +129,7 @@ export const ConfigNumberField: React.FC<ConfigInputFieldProps> = ({
   return (
     <EuiFieldNumber
       fullWidth
-      readOnly={isLoading || (isEdit && !updatable)}
+      disabled={isLoading || (isEdit && !updatable) || isPreconfigured}
       data-test-subj={`${key}-number`}
       value={innerValue as number}
       isInvalid={!isValid}
@@ -188,6 +191,7 @@ export const ConfigurationField: React.FC<ConfigurationFieldProps> = ({
   isLoading,
   setConfigValue,
   isEdit,
+  isPreconfigured,
 }) => {
   const validateAndSetConfigValue = (value: number | string | boolean) => {
     setConfigValue(ensureCorrectTyping(configEntry.type, value));
@@ -204,6 +208,7 @@ export const ConfigurationField: React.FC<ConfigurationFieldProps> = ({
           configEntry={configEntry}
           validateAndSetConfigValue={validateAndSetConfigValue}
           isEdit={isEdit}
+          isPreconfigured={isPreconfigured}
         />
       );
 

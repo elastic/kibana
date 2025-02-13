@@ -8,6 +8,8 @@
 import type { AuthenticatedUser, Logger } from '@kbn/core/server';
 import { AbortError, abortSignalToPromise } from '@kbn/kibana-utils-plugin/server';
 import type { RunnableConfig } from '@langchain/core/runnables';
+import { TELEMETRY_SIEM_MIGRATION_ID } from './util/constants';
+import { EsqlKnowledgeBase } from './util/esql_knowledge_base';
 import {
   SiemMigrationStatus,
   SiemMigrationTaskStatus,
@@ -69,11 +71,11 @@ export class RuleMigrationsTaskClient {
       return { exists: true, started: false };
     }
     const abortController = new AbortController();
-    const model = await this.createModel(connectorId, abortController);
+    const model = await this.createModel(connectorId, migrationId, abortController);
 
     // run the migration without awaiting it to execute it in the background
     this.run({ ...params, model, abortController }).catch((error) => {
-      this.logger.error(`Error executing migration ID:${migrationId}`, error);
+      this.logger.error(`Error executing migration ID:${migrationId} with error ${error}`);
     });
 
     return { exists: true, started: true };
@@ -100,6 +102,7 @@ export class RuleMigrationsTaskClient {
     const stats = { completed: 0, failed: 0 };
     const telemetryClient = new SiemMigrationTelemetryClient(
       this.dependencies.telemetry,
+      this.logger,
       migrationId,
       model.model
     );
@@ -201,7 +204,12 @@ export class RuleMigrationsTaskClient {
     telemetryClient,
   }: RuleMigrationTaskCreateAgentParams): Promise<MigrationAgent> {
     const { inferenceClient, rulesClient, savedObjectsClient } = this.dependencies;
-
+    const esqlKnowledgeBase = new EsqlKnowledgeBase(
+      connectorId,
+      migrationId,
+      inferenceClient,
+      this.logger
+    );
     const ruleMigrationsRetriever = new RuleMigrationsRetriever(migrationId, {
       data: this.data,
       rules: rulesClient,
@@ -211,9 +219,8 @@ export class RuleMigrationsTaskClient {
     await ruleMigrationsRetriever.initialize();
 
     return getRuleMigrationAgent({
-      connectorId,
       model,
-      inferenceClient,
+      esqlKnowledgeBase,
       ruleMigrationsRetriever,
       telemetryClient,
       logger: this.logger,
@@ -289,11 +296,14 @@ export class RuleMigrationsTaskClient {
 
   private async createModel(
     connectorId: string,
+    migrationId: string,
     abortController: AbortController
   ): Promise<ChatModel> {
     const { actionsClient } = this.dependencies;
     const actionsClientChat = new ActionsClientChat(connectorId, actionsClient, this.logger);
     const model = await actionsClientChat.createModel({
+      telemetryMetadata: { pluginId: TELEMETRY_SIEM_MIGRATION_ID, aggregateBy: migrationId },
+      maxRetries: 10,
       signal: abortController.signal,
       temperature: 0.05,
     });
