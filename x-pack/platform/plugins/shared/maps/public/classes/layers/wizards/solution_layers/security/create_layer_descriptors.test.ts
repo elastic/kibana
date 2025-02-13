@@ -76,7 +76,7 @@ describe('createLayerDescriptor', () => {
             ...getDefaultStaticProperties(),
             fillColor: {
               options: {
-                color: '#6092C0',
+                color: '#A6EDEA',
               },
               type: 'STATIC',
             },
@@ -155,7 +155,7 @@ describe('createLayerDescriptor', () => {
             ...getDefaultStaticProperties(),
             fillColor: {
               options: {
-                color: '#D36086',
+                color: '#61A2FF',
               },
               type: 'STATIC',
             },
@@ -231,7 +231,7 @@ describe('createLayerDescriptor', () => {
             ...getDefaultStaticProperties(),
             lineColor: {
               options: {
-                color: '#6092C0',
+                color: '#A6EDEA',
               },
               type: 'STATIC',
             },
@@ -308,7 +308,7 @@ describe('createLayerDescriptor', () => {
             ...getDefaultStaticProperties(),
             fillColor: {
               options: {
-                color: '#6092C0',
+                color: '#A6EDEA',
               },
               type: 'STATIC',
             },
@@ -387,7 +387,7 @@ describe('createLayerDescriptor', () => {
             ...getDefaultStaticProperties(),
             fillColor: {
               options: {
-                color: '#D36086',
+                color: '#61A2FF',
               },
               type: 'STATIC',
             },
@@ -457,7 +457,7 @@ describe('createLayerDescriptor', () => {
             ...getDefaultStaticProperties(),
             lineColor: {
               options: {
-                color: '#6092C0',
+                color: '#A6EDEA',
               },
               type: 'STATIC',
             },
@@ -536,7 +536,7 @@ describe('createLayerDescriptor', () => {
             ...getDefaultStaticProperties(),
             fillColor: {
               options: {
-                color: '#6092C0',
+                color: '#A6EDEA',
               },
               type: 'STATIC',
             },
@@ -615,7 +615,7 @@ describe('createLayerDescriptor', () => {
             ...getDefaultStaticProperties(),
             fillColor: {
               options: {
-                color: '#D36086',
+                color: '#61A2FF',
               },
               type: 'STATIC',
             },
@@ -685,7 +685,7 @@ describe('createLayerDescriptor', () => {
             ...getDefaultStaticProperties(),
             lineColor: {
               options: {
-                color: '#6092C0',
+                color: '#A6EDEA',
               },
               type: 'STATIC',
             },

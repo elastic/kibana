@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiProgress, EuiText } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { useEffect, useState } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../common/constants';
 import { useUiSetting$ } from '../../common/lib/kibana';
