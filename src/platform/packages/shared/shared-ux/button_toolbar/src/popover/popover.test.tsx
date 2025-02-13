@@ -38,8 +38,8 @@ describe('<ToolbarPopover />', () => {
     expect(button.prop('color')).toBe('text');
     expect(button.prop('css')).toMatchObject({
       backgroundColor: '#FFFFFF',
-      border: '1px solid #D3DAE6',
-      color: '#343741',
+      border: '1px solid #E3E8F2',
+      color: '#1D2A3E',
     });
   });
 
