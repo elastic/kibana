@@ -204,7 +204,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/200758
-    describe.skip('status', () => {
+    describe('status', () => {
       afterEach(async () => {
         await utils.cleanEngines();
       });
@@ -275,7 +275,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/209010
-    describe.skip('apply_dataview_indices', () => {
+    describe('apply_dataview_indices', () => {
       before(async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host']);
       });
