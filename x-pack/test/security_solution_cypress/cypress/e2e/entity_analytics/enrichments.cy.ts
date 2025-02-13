@@ -34,7 +34,7 @@ const CURRENT_HOST_RISK_LEVEL = 'Current host risk level';
 const ORIGINAL_HOST_RISK_LEVEL = 'Original host risk level';
 
 // this whole suite is failing on main
-describe.skip('Enrichment', { tags: ['@ess'] }, () => {
+describe('Enrichment', { tags: ['@ess'] }, () => {
   before(() => {
     cy.task('esArchiverUnload', { archiveName: 'risk_scores_new' });
     cy.task('esArchiverUnload', { archiveName: 'risk_scores_new_updated' });

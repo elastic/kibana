@@ -15,7 +15,7 @@ import { ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 import { PAGE_TITLE } from '../../../screens/entity_analytics_management';
 
 // Failing: See https://github.com/elastic/kibana/issues/206580
-describe.skip(
+describe(
   'Enable risk scores from dashboard',
   {
     tags: ['@ess', '@serverless'],

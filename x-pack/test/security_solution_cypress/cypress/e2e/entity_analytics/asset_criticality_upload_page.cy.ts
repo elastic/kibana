@@ -19,7 +19,7 @@ import { ENTITY_ANALYTICS_ASSET_CRITICALITY_URL } from '../../urls/navigation';
 
 // Failing: See https://github.com/elastic/kibana/issues/196563
 // Failing: See https://github.com/elastic/kibana/issues/196563
-describe.skip(
+describe(
   'Asset Criticality Upload page',
   {
     tags: ['@ess'],
