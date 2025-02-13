@@ -155,6 +155,7 @@ export async function getEditLensConfiguration(
     onApply,
     onCancel,
     hideTimeFilterInfo,
+    isReadOnly,
     parentApi,
   }: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap) {
@@ -226,6 +227,7 @@ export async function getEditLensConfiguration(
       onApply,
       onCancel,
       hideTimeFilterInfo,
+      isReadOnly,
       parentApi,
       panelId,
     };
