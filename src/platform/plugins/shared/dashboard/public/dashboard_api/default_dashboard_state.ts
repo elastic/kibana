@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DashboardContainerInput } from '../../common';
+import { DashboardState } from './types';
 
-export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerInput, 'id'> = {
+export const DEFAULT_DASHBOARD_STATE: DashboardState = {
   viewMode: 'view',
   timeRestore: false,
   query: { query: '', language: 'kuery' },
@@ -18,9 +18,6 @@ export const DEFAULT_DASHBOARD_INPUT: Omit<DashboardContainerInput, 'id'> = {
   panels: {},
   title: '',
   tags: [],
-  executionContext: {
-    type: 'dashboard',
-  },
 
   // options
   useMargins: true,
