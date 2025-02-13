@@ -12,6 +12,7 @@ import classNames from 'classnames';
 import { css } from '@emotion/react';
 import { transparentize, EuiButton } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import { isActiveFromUrl } from '../../utils';
 import type { NavigateToUrlFn } from '../../types';
 import { usePanel } from './panel';
 
@@ -21,12 +22,12 @@ interface Props {
   activeNodes: ChromeProjectNavigationNode[][];
 }
 
-export const NavigationItemOpenPanel: FC<Props> = ({ item }: Props) => {
+export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props) => {
   const { open: openPanel, close: closePanel, selectedNode } = usePanel();
   const { title, deepLink } = item;
   const { id, path } = item;
   const isExpanded = selectedNode?.path === path;
-  const isActive = isExpanded;
+  const isActive = isActiveFromUrl(item.path, activeNodes) || isExpanded;
 
   const dataTestSubj = classNames(`nav-item`, `nav-item-${path}`, {
     [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
@@ -57,10 +58,9 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item }: Props) => {
       iconType="arrowRight"
       size="s"
       fullWidth
-      className="sideNavItem"
       css={({ euiTheme }) => css`
         background-color: ${isActive
-          ? transparentize(euiTheme.colors.backgroundBasePlain, 0.5)
+          ? transparentize(euiTheme.colors.lightShade, 0.5)
           : 'transparent'};
         transform: none !important; /* don't translateY 1px */
         color: inherit;
