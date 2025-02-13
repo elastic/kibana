@@ -142,11 +142,11 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
   from,
   to,
 }) => {
+  const entityTypes = useRiskEngineEntityTypes();
+
   const [filters] = useState<{ bool: BoolQuery }>({
     bool: { must: [], filter: [], should: [], must_not: [] },
   });
-
-  const entityTypes = useRiskEngineEntityTypes();
 
   const { sourcererDataView } = useSourcererDataView(SourcererScopeName.detections);
 
@@ -159,9 +159,6 @@ const RiskEnginePreview: React.FC<{ includeClosedAlerts: boolean; from: string; 
     },
     exclude_alert_statuses: includeClosedAlerts ? [] : ['closed'],
   });
-
-  const hosts = getRiskiestScores(data?.scores.host, 'host.name');
-  const users = getRiskiestScores(data?.scores.user, 'user.name');
 
   if (isError) {
     return (
