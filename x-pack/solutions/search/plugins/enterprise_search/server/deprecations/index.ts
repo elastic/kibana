@@ -63,9 +63,9 @@ export const getRegisteredDeprecations = (
       const entSearchDetails = getEnterpriseSearchNodeDeprecation(config, cloud, docsUrl);
       const [crawlerDetails, nativeConnectorsDetails, entSearchIndexIncompatibility] =
         await Promise.all([
-          await getCrawlerDeprecations(ctx, docsUrl),
-          await getNativeConnectorDeprecations(ctx, hasAgentless, hasFleetServer, cloud, docsUrl),
-          await getEnterpriseSearchPre8IndexDeprecations(ctx, docsUrl, config.host),
+          getCrawlerDeprecations(ctx, docsUrl),
+          getNativeConnectorDeprecations(ctx, hasAgentless, hasFleetServer, cloud, docsUrl),
+          getEnterpriseSearchPre8IndexDeprecations(ctx, docsUrl, config.host),
         ]);
       return [
         ...entSearchDetails,
