@@ -79,7 +79,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
         if (mlManagementLocator) {
           const searchString = decodeURIComponent(search);
           let decodedSearch = search;
-          const oldPath = pathname.split('/')[1];
+          const oldPath = pathname.slice(1);
           const newPath =
             DEPRECATED_ML_ROUTE_TO_NEW_ROUTE[
               oldPath as keyof typeof DEPRECATED_ML_ROUTE_TO_NEW_ROUTE
@@ -94,27 +94,6 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
             });
             return;
           }
-          // if (pathname === '/jobs') {
-          //   decodedSearch = searchString.replace(`=(jobs:`, `=('':`);
-          //   mlManagementLocator.navigate({
-          //     sectionId: 'ml',
-          //     appId: `anomaly_detection${decodedSearch}`,
-          //   });
-          // }
-          // if (pathname === '/data_frame_analytics') {
-          //   decodedSearch = searchString.replace(`=(data_frame_analytics:`, `=('':`);
-          //   mlManagementLocator.navigate({
-          //     sectionId: 'ml',
-          //     appId: `analytics${decodedSearch}`,
-          //   });
-          // }
-          // if (pathname === '/trained_models') {
-          //   decodedSearch = searchString.replace(`=(trained_models:`, `=('':`);
-          //   mlManagementLocator.navigate({
-          //     sectionId: 'ml',
-          //     appId: `trained_models${decodedSearch}`,
-          //   });
-          // }
         }
       },
       [pathname, navigateToPath, mlManagementLocator, search]
