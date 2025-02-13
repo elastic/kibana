@@ -125,7 +125,7 @@ import {
   VisualizationSavedObjectAttributes,
 } from '../common/content_management';
 import { AddAggVisualizationPanelAction } from './actions/add_agg_vis_action';
-import type { VisualizeSerializedState } from './embeddable/types';
+import type { VisualizeRuntimeState } from './embeddable/types';
 import { getVisualizeEmbeddableFactoryLazy } from './embeddable';
 
 /**
@@ -418,7 +418,7 @@ export class VisualizationsPlugin
           rawState: { savedObjectId: savedObject.id },
           references: savedObject.references,
         });
-        container.addNewPanel<VisualizeSerializedState>({
+        container.addNewPanel<VisualizeRuntimeState>({
           panelType: VISUALIZE_EMBEDDABLE_TYPE,
           initialState,
         });
