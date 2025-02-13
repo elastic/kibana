@@ -47,7 +47,7 @@ import { renderGroupPanel } from '../../../components/alerts_table/grouping/rend
 import { getGroupStats } from '../../../components/alerts_table/grouping/get_group_stats';
 import { getAggregationsByGroupingField } from '../../../components/alerts_table/grouping/get_aggregations_by_grouping_field';
 import { DEFAULT_GROUPING_OPTIONS } from '../../../components/alerts_table/grouping/constants';
-import { ALERT_STATUS_FILTER } from '../../../components/alert_search_bar/constants';
+import { ACTIVE_ALERTS, ALERT_STATUS_FILTER } from '../../../components/alert_search_bar/constants';
 import { AlertsByGroupingAgg } from '../../../components/alerts_table/types';
 import {
   alertSearchBarStateContainer,
@@ -134,7 +134,10 @@ export function InternalRelatedAlerts({ alert }: Props) {
           <AlertsGrouping<AlertsByGroupingAgg>
             ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
             consumers={observabilityAlertFeatureIds}
-            defaultFilters={ALERT_STATUS_FILTER[alertSearchBarStateProps.status] ?? DEFAULT_FILTERS}
+            defaultFilters={
+              ALERT_STATUS_FILTER[alertSearchBarStateProps.status ?? ACTIVE_ALERTS.status] ??
+              DEFAULT_FILTERS
+            }
             from={alertSearchBarStateProps.rangeFrom}
             to={alertSearchBarStateProps.rangeTo}
             globalFilters={alertSearchBarStateProps.filters ?? DEFAULT_FILTERS}

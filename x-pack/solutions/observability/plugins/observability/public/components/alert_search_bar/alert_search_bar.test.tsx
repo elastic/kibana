@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { act, waitFor } from '@testing-library/react';
+import { Filter } from '@kbn/es-query';
 import { timefilterServiceMock } from '@kbn/data-plugin/public/query/timefilter/timefilter_service.mock';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
@@ -88,54 +89,18 @@ describe('ObservabilityAlertSearchBar', () => {
     );
   });
 
-  it('should filter active alerts', async () => {
+  it('should include defaultFilters in es query', async () => {
     const mockedOnEsQueryChange = jest.fn();
     const mockedFrom = '2022-11-15T09:38:13.604Z';
     const mockedTo = '2022-11-15T09:53:13.604Z';
-
-    await act(async () => {
-      renderComponent({
-        onEsQueryChange: mockedOnEsQueryChange,
-        rangeFrom: mockedFrom,
-        rangeTo: mockedTo,
-        status: 'active',
-      });
-    });
-
-    expect(mockedOnEsQueryChange).toHaveBeenCalledWith({
-      bool: {
-        filter: [
-          {
-            bool: {
-              minimum_should_match: 1,
-              should: [{ match_phrase: { 'kibana.alert.status': 'active' } }],
-            },
-          },
-          {
-            range: {
-              'kibana.alert.time_range': expect.objectContaining({
-                format: 'strict_date_optional_time',
-                gte: mockedFrom,
-                lte: mockedTo,
-              }),
-            },
-          },
-        ],
-        must: [],
-        must_not: [],
-        should: [],
-      },
-    });
-  });
-
-  it('should include defaultSearchQueries in es query', async () => {
-    const mockedOnEsQueryChange = jest.fn();
-    const mockedFrom = '2022-11-15T09:38:13.604Z';
-    const mockedTo = '2022-11-15T09:53:13.604Z';
-    const defaultSearchQueries = [
+    const defaultFilters: Filter[] = [
       {
-        query: 'kibana.alert.rule.uuid: 413a9631-1a29-4344-a8b4-9a1dc23421ee',
-        language: 'kuery',
+        query: {
+          match_phrase: {
+            'kibana.alert.rule.uuid': '413a9631-1a29-4344-a8b4-9a1dc23421ee',
+          },
+        },
+        meta: {},
       },
     ];
 
@@ -144,7 +109,7 @@ describe('ObservabilityAlertSearchBar', () => {
         onEsQueryChange: mockedOnEsQueryChange,
         rangeFrom: mockedFrom,
         rangeTo: mockedTo,
-        defaultSearchQueries,
+        defaultFilters,
         status: 'all',
       });
     });
@@ -152,14 +117,6 @@ describe('ObservabilityAlertSearchBar', () => {
     const esQueryChangeParams = {
       bool: {
         filter: [
-          {
-            bool: {
-              minimum_should_match: 1,
-              should: [
-                { match: { 'kibana.alert.rule.uuid': '413a9631-1a29-4344-a8b4-9a1dc23421ee' } },
-              ],
-            },
-          },
           {
             range: {
               'kibana.alert.time_range': expect.objectContaining({
@@ -169,15 +126,71 @@ describe('ObservabilityAlertSearchBar', () => {
               }),
             },
           },
+          {
+            match_phrase: {
+              'kibana.alert.rule.uuid': '413a9631-1a29-4344-a8b4-9a1dc23421ee',
+            },
+          },
         ],
         must: [],
         must_not: [],
         should: [],
       },
     };
-    expect(mockedOnEsQueryChange).toHaveBeenCalledTimes(2);
+    expect(mockedOnEsQueryChange).toHaveBeenCalledTimes(1);
     expect(mockedOnEsQueryChange).toHaveBeenNthCalledWith(1, esQueryChangeParams);
-    expect(mockedOnEsQueryChange).toHaveBeenNthCalledWith(2, esQueryChangeParams);
+  });
+
+  it('should include filterControls in es query', async () => {
+    const mockedOnEsQueryChange = jest.fn();
+    const mockedFrom = '2022-11-15T09:38:13.604Z';
+    const mockedTo = '2022-11-15T09:53:13.604Z';
+    const filterControls: Filter[] = [
+      {
+        query: {
+          match_phrase: {
+            'kibana.alert.rule.uuid': '413a9631-1a29-4344-a8b4-9a1dc23421ee',
+          },
+        },
+        meta: {},
+      },
+    ];
+
+    await act(async () => {
+      renderComponent({
+        onEsQueryChange: mockedOnEsQueryChange,
+        rangeFrom: mockedFrom,
+        rangeTo: mockedTo,
+        filterControls,
+        status: 'all',
+      });
+    });
+
+    const esQueryChangeParams = {
+      bool: {
+        filter: [
+          {
+            range: {
+              'kibana.alert.time_range': expect.objectContaining({
+                format: 'strict_date_optional_time',
+                gte: mockedFrom,
+                lte: mockedTo,
+              }),
+            },
+          },
+          {
+            match_phrase: {
+              'kibana.alert.rule.uuid': '413a9631-1a29-4344-a8b4-9a1dc23421ee',
+            },
+          },
+        ],
+        must: [],
+        must_not: [],
+        should: [],
+      },
+    };
+    expect(mockedOnEsQueryChange).toHaveBeenCalledTimes(1);
+    expect(mockedOnEsQueryChange).toHaveBeenNthCalledWith(1, esQueryChangeParams);
   });
 
   it('should include filters in es query', async () => {
