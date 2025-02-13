@@ -411,7 +411,9 @@ export class KnowledgeBaseService {
     }
 
     try {
-      await this.dependencies.esClient.asInternalUser.index<Omit<KnowledgeBaseEntry, 'id'>>({
+      await this.dependencies.esClient.asInternalUser.index<
+        Omit<KnowledgeBaseEntry, 'id'> & { namespace: string }
+      >({
         index: resourceNames.aliases.kb,
         id,
         document: {

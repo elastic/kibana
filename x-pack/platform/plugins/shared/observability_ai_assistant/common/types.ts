@@ -93,7 +93,6 @@ export interface KnowledgeBaseEntry {
   user?: {
     name: string;
   };
-  namespace?: string;
 }
 
 export interface Instruction {
