@@ -719,7 +719,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-1io4upz"
+                          class="css-10gmjt4"
                           height="2.8"
                         />
                       </div>
@@ -757,7 +757,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-1io4upz"
+                          class="css-10gmjt4"
                           height="2.8"
                         />
                       </div>
@@ -790,7 +790,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-1io4upz"
+                          class="css-10gmjt4"
                           height="2.8"
                         />
                       </div>
@@ -824,7 +824,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-1almmfe"
+                          class="css-1aksxv4"
                           height="2.2"
                         />
                       </div>
@@ -874,7 +874,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-1almmfe"
+                          class="css-1aksxv4"
                           height="2.2"
                         />
                       </div>
@@ -907,7 +907,7 @@ exports[`Netflow renders correctly against snapshot 1`] = `
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="css-1almmfe"
+                          class="css-1aksxv4"
                           height="2.2"
                         />
                       </div>
