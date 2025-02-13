@@ -99,7 +99,6 @@ export class TaskScheduling {
         enabled: modifiedTask.enabled ?? true,
       },
       {
-        apiKey: options?.apiKey,
         request: options?.request,
       }
     );
@@ -134,7 +133,6 @@ export class TaskScheduling {
     );
 
     return await this.store.bulkSchedule(modifiedTasks, {
-      apiKey: options?.apiKey,
       request: options?.request,
     });
   }

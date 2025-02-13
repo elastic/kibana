@@ -11,7 +11,7 @@
 import murmurhash from 'murmurhash';
 import { v4 } from 'uuid';
 import { Subject } from 'rxjs';
-import { omit, defaults, get, truncate } from 'lodash';
+import { omit, defaults, get } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -20,7 +20,6 @@ import {
   Logger,
   SecurityServiceStart,
   SavedObjectsServiceStart,
-  KibanaRequest,
   SPACES_EXTENSION_ID,
 } from '@kbn/core/server';
 
@@ -33,12 +32,12 @@ import {
   ElasticsearchClient,
   SECURITY_EXTENSION_ID,
 } from '@kbn/core/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { nodeBuilder } from '@kbn/es-query';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { RequestTimeoutsConfig } from './config';
 import { asOk, asErr, Result, unwrap } from './lib/result_type';
 
@@ -53,6 +52,7 @@ import {
   PartialConcreteTaskInstance,
   PartialSerializedConcreteTaskInstance,
   ApiKeyOptions,
+  TaskUserScope,
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -64,6 +64,7 @@ import { ErrorOutput } from './lib/bulk_operation_buffer';
 import { MsearchError } from './lib/msearch_error';
 import { BulkUpdateError } from './lib/bulk_update_error';
 import { TASK_SO_NAME } from './saved_objects';
+import { getUserScope } from './lib/api_key_utils';
 
 export interface StoreOpts {
   esClient: ElasticsearchClient;
@@ -79,6 +80,7 @@ export interface StoreOpts {
   requestTimeouts: RequestTimeoutsConfig;
   security: SecurityServiceStart;
   canEncryptSavedObjects?: boolean;
+  spaces?: SpacesPluginStart;
 }
 
 export interface SearchOpts {
@@ -148,6 +150,7 @@ export class TaskStore {
   private requestTimeouts: RequestTimeoutsConfig;
   private security: SecurityServiceStart;
   private canEncryptSavedObjects?: boolean;
+  private spaces?: SpacesPluginStart;
 
   /**
    * Constructs a new TaskStore.
@@ -191,58 +194,13 @@ export class TaskStore {
   }
 
   private getSoClientForCreate(options: ApiKeyOptions) {
-    let requestToUse = options.request;
-    if (options.apiKey) {
-      requestToUse = kibanaRequestFactory({
-        headers: {
-          authorization: `ApiKey ${options.apiKey}`,
-        },
-        path: '/',
-        route: { settings: {} },
-        url: { href: {}, hash: '' } as URL,
-        raw: { req: { url: '/' } } as any,
-      });
-    }
-    if (requestToUse) {
-      return this.savedObjectsService.getScopedClient(requestToUse, {
+    if (options.request) {
+      return this.savedObjectsService.getScopedClient(options.request, {
         includedHiddenTypes: [TASK_SO_NAME],
         excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
       });
     }
     return this.savedObjectsRepository;
-  }
-
-  private async createAPIKey(request?: KibanaRequest) {
-    if (!request) {
-      return null;
-    }
-
-    if (!this.canEncryptSo()) {
-      throw Error(
-        'Unable to create API keys because the Encrypted Saved Objects plugin has not been registered or is missing encryption key'
-      );
-    }
-
-    if (!this.security.authc.apiKeys.areAPIKeysEnabled()) {
-      throw Error('API keys are not enabled, cannot create API key.');
-    }
-
-    const user = this.security.authc.getCurrentUser(request);
-    if (!user) {
-      throw Error('Cannot authenticate current user.');
-    }
-
-    const apiKeyCreateResult = await this.security.authc.apiKeys.grantAsInternalUser(request, {
-      name: truncate(`TaskManager: ${user.username}}`, { length: 256 }),
-      role_descriptors: {},
-      metadata: { managed: true },
-    });
-
-    if (!apiKeyCreateResult) {
-      throw Error('Cannot create API key.');
-    }
-
-    return Buffer.from(`${apiKeyCreateResult.id}:${apiKeyCreateResult.api_key}`).toString('base64');
   }
 
   private async bulkGetDecryptedTasks(ids: string[]) {
@@ -279,7 +237,7 @@ export class TaskStore {
     const ids: string[] = [];
 
     tasks.forEach((task) => {
-      if (task.apiKey) {
+      if (task.userScope) {
         ids.push(task.id);
       }
     });
@@ -292,8 +250,8 @@ export class TaskStore {
 
     const tasksWithDecryptedApiKeys = tasks.map((task) => ({
       ...task,
-      ...(decryptedTaskMap.get(task.id)?.apiKey
-        ? { apiKey: decryptedTaskMap.get(task.id)!.apiKey }
+      ...(decryptedTaskMap.get(task.id)?.userScope
+        ? { userScope: decryptedTaskMap.get(task.id)!.userScope }
         : {}),
     }));
 
@@ -322,7 +280,16 @@ export class TaskStore {
   ): Promise<ConcreteTaskInstance> {
     this.definitions.ensureHas(taskInstance.taskType);
 
-    const apiKey = options?.apiKey || (await this.createAPIKey(options?.request));
+    let userScope: TaskUserScope | undefined;
+    try {
+      userScope =
+        options?.request &&
+        (await getUserScope(options.request, this.canEncryptSo(), this.security, this.spaces));
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+
     const soClient = this.getSoClientForCreate(options || {});
 
     let savedObject;
@@ -334,10 +301,7 @@ export class TaskStore {
         'task',
         {
           ...taskInstanceToAttributes(validatedTaskInstance, id),
-          ...(apiKey ? { apiKey } : {}),
-          // Set invalidateApiKey to true if the user passed in a request, since we do
-          // not want to invalidate a specific API key that was not created by the task manager
-          ...(apiKey ? { invalidateApiKey: !!options?.request } : {}),
+          ...(userScope ? { userScope } : {}),
         },
         { id, refresh: false }
       );
@@ -362,7 +326,16 @@ export class TaskStore {
     taskInstances: TaskInstance[],
     options?: ApiKeyOptions
   ): Promise<ConcreteTaskInstance[]> {
-    const apiKey = options?.apiKey || (await this.createAPIKey(options?.request));
+    let userScope: TaskUserScope | undefined;
+    try {
+      userScope =
+        options?.request &&
+        (await getUserScope(options.request, this.canEncryptSo(), this.security, this.spaces));
+    } catch (e) {
+      this.errors$.next(e);
+      throw e;
+    }
+
     const soClient = this.getSoClientForCreate(options || {});
 
     const objects = taskInstances.map((taskInstance) => {
@@ -374,10 +347,7 @@ export class TaskStore {
         type: 'task',
         attributes: {
           ...taskInstanceToAttributes(validatedTaskInstance, id),
-          ...(apiKey ? { apiKey } : {}),
-          // Set invalidateApiKey to true if the user passed in a request, since we do
-          // not want to invalidate a specific API key that was not created by the task manager
-          ...(apiKey ? { invalidateApiKey: !!options?.request } : {}),
+          ...(userScope ? { userScope } : {}),
         },
         id,
       };
@@ -607,8 +577,10 @@ export class TaskStore {
   public async remove(id: string): Promise<void> {
     const taskInstance = await this.get(id);
 
-    if (taskInstance.apiKey && taskInstance.invalidateApiKey) {
-      const apiKeyId = Buffer.from(taskInstance.apiKey, 'base64').toString().split(':')[0];
+    if (taskInstance.userScope?.apiKey && !taskInstance.userScope?.apiKeyCreatedByUser) {
+      const apiKeyId = Buffer.from(taskInstance.userScope.apiKey, 'base64')
+        .toString()
+        .split(':')[0];
       this.security.authc.apiKeys.invalidateAsInternalUser({ ids: [apiKeyId] });
     }
 
@@ -632,9 +604,12 @@ export class TaskStore {
 
     taskInstances.forEach((taskInstance) => {
       const unwrappedTaskInstance = unwrap(taskInstance) as ConcreteTaskInstance;
-      if (unwrappedTaskInstance.apiKey && unwrappedTaskInstance.invalidateApiKey) {
+      if (
+        unwrappedTaskInstance.userScope?.apiKey &&
+        !unwrappedTaskInstance.userScope?.apiKeyCreatedByUser
+      ) {
         apiKeyIdsToRemove.push(
-          Buffer.from(unwrappedTaskInstance.apiKey, 'base64').toString().split(':')[0]
+          Buffer.from(unwrappedTaskInstance.userScope.apiKey, 'base64').toString().split(':')[0]
         );
       }
     });
@@ -984,7 +959,7 @@ export function taskInstanceToAttributes(
   id: string
 ): SerializedConcreteTaskInstance {
   return {
-    ...omit(doc, 'id', 'version', 'apiKey', 'invalidateApiKey'),
+    ...omit(doc, 'id', 'version', 'userScope'),
     params: JSON.stringify(doc.params || {}),
     state: JSON.stringify(doc.state || {}),
     attempts: (doc as ConcreteTaskInstance).attempts || 0,
@@ -1001,7 +976,7 @@ export function partialTaskInstanceToAttributes(
   doc: PartialConcreteTaskInstance
 ): PartialSerializedConcreteTaskInstance {
   return {
-    ...omit(doc, 'id', 'version', 'apiKey', 'invalidateApiKey'),
+    ...omit(doc, 'id', 'version', 'userScope'),
     ...(doc.params ? { params: JSON.stringify(doc.params) } : {}),
     ...(doc.state ? { state: JSON.stringify(doc.state) } : {}),
     ...(doc.scheduledAt ? { scheduledAt: doc.scheduledAt.toISOString() } : {}),

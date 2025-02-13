@@ -18,6 +18,7 @@ import {
   SerializedConcreteTaskInstance,
 } from './task';
 import {
+  coreMock,
   ElasticsearchClientMock,
   elasticsearchServiceMock,
   savedObjectsServiceMock,
@@ -50,6 +51,8 @@ const serializer = savedObjectsServiceMock.createSerializer();
 const adHocTaskCounter = new AdHocTaskCounter();
 
 const randomId = () => `id-${_.random(1, 20)}`;
+
+const coreStart = coreMock.createStart();
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -117,6 +120,9 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects: true,
       });
     });
 
@@ -124,7 +130,7 @@ describe('TaskStore', () => {
       adHocTaskCounter.reset();
     });
 
-    async function testSchedule(task: unknown) {
+    async function testSchedule(task: unknown, options?: Record<string, unknown>) {
       savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
         id: 'testid',
         type,
@@ -132,7 +138,7 @@ describe('TaskStore', () => {
         references: [],
         version: '123',
       }));
-      const result = await store.schedule(task as TaskInstance);
+      const result = await store.schedule(task as TaskInstance, options);
 
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
 
@@ -294,6 +300,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -389,6 +397,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -524,6 +534,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -654,6 +666,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -811,6 +825,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -964,6 +980,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -1391,6 +1409,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -1430,6 +1450,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -1472,6 +1494,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -1535,6 +1559,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -1633,6 +1659,8 @@ describe('TaskStore', () => {
             requestTimeouts: {
               update_by_query: 1000,
             },
+            savedObjectsService: coreStart.savedObjects,
+            security: coreStart.security,
           });
 
           expect(await store.getLifecycle(task.id)).toEqual(status);
@@ -1658,6 +1686,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
 
       expect(await store.getLifecycle(randomId())).toEqual(TaskLifecycleResult.NotFound);
@@ -1681,6 +1711,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
 
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
@@ -1704,6 +1736,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -1880,6 +1914,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
 
       expect(jest.requireMock('./task_validator').TaskValidator).toHaveBeenCalledWith({
@@ -1905,6 +1941,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
 
       expect(jest.requireMock('./task_validator').TaskValidator).toHaveBeenCalledWith({
@@ -1939,6 +1977,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
     test('should pass requestTimeout', async () => {
@@ -1976,6 +2016,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 
@@ -2094,6 +2136,8 @@ describe('TaskStore', () => {
         requestTimeouts: {
           update_by_query: 1000,
         },
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
       });
     });
 

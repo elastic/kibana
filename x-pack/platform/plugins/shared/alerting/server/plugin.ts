@@ -356,12 +356,12 @@ export class AlertingPlugin {
 
             const fakeRawRequest: FakeRawRequest = {
               headers: {
-                authorization: `ApiKey ${taskInstance.apiKey}`,
+                authorization: `ApiKey ${taskInstance.userScope?.apiKey}`,
               },
               path: '/',
             };
 
-            const path = addSpaceIdToPath('/', 'default');
+            const path = addSpaceIdToPath('/', taskInstance.userScope?.spaceId || 'default');
 
             // Fake request from the API key
             const fakeRequest = kibanaRequestFactory(fakeRawRequest);

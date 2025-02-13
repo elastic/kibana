@@ -23,10 +23,11 @@ import {
   CoreStatus,
 } from '@kbn/core/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
-import {
+import type {
   EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
 } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
@@ -92,6 +93,7 @@ export type TaskManagerStartContract = Pick<
 export interface TaskManagerPluginsStart {
   cloud?: CloudStart;
   usageCollection?: UsageCollectionStart;
+  spaces?: SpacesPluginStart;
 }
 
 export interface TaskManagerPluginsSetup {
@@ -276,7 +278,7 @@ export class TaskManagerPlugin
       registerEncryptedSavedObjects: (plugin) => {
         plugin.registerType({
           type: TASK_SO_NAME,
-          attributesToEncrypt: new Set(['apiKey']),
+          attributesToEncrypt: new Set(['userScope.apiKey']),
           attributesToIncludeInAAD: new Set(['id', 'taskType']),
           enforceRandomId: false,
         });
@@ -287,7 +289,7 @@ export class TaskManagerPlugin
 
   public start(
     { savedObjects, elasticsearch, executionContext, security }: CoreStart,
-    { cloud }: TaskManagerPluginsStart
+    { cloud, spaces }: TaskManagerPluginsStart
   ): TaskManagerStartContract {
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
@@ -321,6 +323,7 @@ export class TaskManagerPlugin
       requestTimeouts: this.config.request_timeouts,
       security,
       canEncryptSavedObjects: this.canEncryptSavedObjects,
+      spaces,
     });
 
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';

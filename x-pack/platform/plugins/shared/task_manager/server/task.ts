@@ -247,6 +247,12 @@ export interface IntervalSchedule {
   interval: Interval;
 }
 
+export interface TaskUserScope {
+  apiKey: string;
+  spaceId?: string;
+  apiKeyCreatedByUser: boolean;
+}
+
 /*
  * A task instance represents all of the data required to store, fetch,
  * and execute a task.
@@ -353,9 +359,10 @@ export interface TaskInstance {
    */
   partition?: number;
 
-  apiKey?: string;
-
-  invalidateApiKey?: boolean;
+  /**
+   * Used to allow tasks to be scoped to a user via their API key
+   */
+  userScope?: TaskUserScope;
 }
 
 /**
@@ -488,8 +495,7 @@ export type SerializedConcreteTaskInstance = Omit<
   retryAt: string | null;
   runAt: string;
   partition?: number;
-  apiKey?: string;
-  invalidateApiKey?: boolean;
+  userScope?: TaskUserScope;
 };
 
 export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTaskInstance> & {
@@ -498,7 +504,6 @@ export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTa
 
 export interface ApiKeyOptions {
   request?: KibanaRequest;
-  apiKey?: string;
 }
 
 export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;
