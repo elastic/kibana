@@ -106,6 +106,10 @@ export const createPrebuiltRuleObjectsClient = (
     },
     fetchInstalledRulesByIds: ({ ruleIds, sortField = 'createdAt', sortOrder = 'desc' }) => {
       return withSecuritySpan('IPrebuiltRuleObjectsClient.fetchInstalledRulesByIds', async () => {
+        if (ruleIds.length === 0) {
+          return [];
+        }
+
         const { data } = await findRules({
           rulesClient,
           perPage: ruleIds.length,
