@@ -71,21 +71,23 @@ export function ReactExpressionRenderer({
 }
 
 const expExpressionRendererStyles = css({
-  position: 'relative',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '100%',
-  height: '100%',
-
-  '& .expExpressionRenderer__expression': {
+  '&.expExpressionRenderer': {
+    position: 'relative',
+    display: 'flex',
     width: '100%',
     height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   '&.expExpressionRenderer-isEmpty, &.expExpressionRenderer-hasError': {
     '& .expExpressionRenderer__expression': {
       display: 'none',
     },
+  },
+
+  '& .expExpressionRenderer__expression': {
+    width: '100%',
+    height: '100%',
   },
 });
