@@ -11,10 +11,12 @@ import type { Logger } from '@kbn/core/server';
 import { API_VERSIONS } from '../../../../common/constants';
 
 import type { AssetInventoryRoutesDeps } from '../types';
+import { getEntityStorePrivileges } from '../../entity_analytics/entity_store/utils/get_entity_store_privileges';
 
 export const statusAssetInventoryRoute = (
   router: AssetInventoryRoutesDeps['router'],
-  logger: Logger
+  logger: Logger,
+  getStartServices: AssetInventoryRoutesDeps['getStartServices']
 ) => {
   router.versioned
     .get({
@@ -37,11 +39,11 @@ export const statusAssetInventoryRoute = (
         const secSol = await context.securitySolution;
 
         try {
-          const entityStoreStatus = await secSol.getEntityStoreDataClient().status({
-            include_components: true,
-          });
+          const [_, { security }] = await getStartServices();
 
-          const body = await secSol.getAssetInventoryClient().status(entityStoreStatus);
+          const entityStorePrivileges = await getEntityStorePrivileges(request, security, []);
+
+          const body = await secSol.getAssetInventoryClient().status(secSol, entityStorePrivileges);
 
           return response.ok({ body });
         } catch (e) {

@@ -9,11 +9,18 @@ import type { ElasticsearchClient, Logger, IScopedClusterClient } from '@kbn/cor
 
 import type { GetEntityStoreStatusResponse } from '../../../common/api/entity_analytics/entity_store/status.gen';
 import type { ExperimentalFeatures } from '../../../common';
+import type { SecuritySolutionApiRequestHandlerContext } from '../..';
+import type { getEntityStorePrivileges } from '../entity_analytics/entity_store/utils/get_entity_store_privileges';
 
 interface AssetInventoryClientOpts {
   logger: Logger;
   clusterClient: IScopedClusterClient;
   experimentalFeatures: ExperimentalFeatures;
+}
+
+interface TransformMetadata {
+  documents_processed?: number;
+  trigger_count?: number;
 }
 
 const ASSET_INVENTORY_STATUS: Record<string, string> = {
@@ -83,50 +90,63 @@ export class AssetInventoryDataClient {
     }
   }
 
-  public async status(entityStoreStatus: GetEntityStoreStatusResponse) {
-    const entityEngineStatus = entityStoreStatus.status;
+  public async status(
+    secSolutionContext: SecuritySolutionApiRequestHandlerContext,
+    entityStorePrivileges: Awaited<ReturnType<typeof getEntityStorePrivileges>>
+  ) {
+    const hasEntityStorePrivileges = entityStorePrivileges.has_all_required;
 
     let status = ASSET_INVENTORY_STATUS.DISABLED;
 
-    if (entityEngineStatus === 'not_installed') {
-    } else {
-      console.log({ entityEngineStatus });
-      const universalEntityEngineStatus = entityStoreStatus.engines.find(
-        (engine) => engine.type === 'universal'
-      );
-      console.log({ universalEntityEngineStatus });
-      const universalTransformStatusResponse = await this.esClient.transform.getTransformStats(
-        {
-          transform_id: 'entities-v1-latest-security_universal_default',
-        },
-        { maxRetries: 0 }
-      );
-      console.log({ universalTransformStatusResponse });
-      const transformStatus = {
-        documents_indexed:
-          universalTransformStatusResponse?.transforms?.[0]?.stats?.documents_indexed,
-        documents_processed:
-          universalTransformStatusResponse?.transforms?.[0]?.stats?.documents_processed,
-        state: universalTransformStatusResponse?.transforms?.[0]?.state,
-        trigger_count: universalTransformStatusResponse?.transforms?.[0]?.stats?.trigger_count,
-      };
+    if (!hasEntityStorePrivileges) {
+      status = ASSET_INVENTORY_STATUS.INSUFFICIENT_PRIVILEGES;
+      return { status, privileges: entityStorePrivileges.privileges };
+    }
 
+    const entityStoreStatus = await secSolutionContext.getEntityStoreDataClient().status({
+      include_components: true,
+    });
+
+    const entityEngineStatus = entityStoreStatus.status;
+
+    console.log(JSON.stringify(entityStoreStatus, null, 2));
+
+    if (entityEngineStatus === 'not_installed') {
+      status = ASSET_INVENTORY_STATUS.DISABLED;
+    } else if (entityEngineStatus === 'error') {
       if (entityEngineStatus === 'installing') {
         status = ASSET_INVENTORY_STATUS.INITIALIZING;
       } else {
+        const universalEntityEngineStatus = entityStoreStatus.engines.find(
+          (engine) => engine.type === 'universal'
+        );
+        // If the universal engine is not installed, the asset inventory is disabled.
         if (!universalEntityEngineStatus) {
           status = ASSET_INVENTORY_STATUS.DISABLED;
-        } else if (universalEntityEngineStatus.status === 'started') {
-          if (transformStatus.state === 'started') {
-            if (transformStatus.trigger_count > 1) {
-              if (transformStatus.documents_indexed > 0) {
-                if (transformStatus.documents_processed > 0) {
-                  status = ASSET_INVENTORY_STATUS.READY;
-                } else {
-                  status = ASSET_INVENTORY_STATUS.EMPTY;
+        } else {
+          status = ASSET_INVENTORY_STATUS.INITIALIZING;
+          let hasDocumentsProcessedInTransforms = false;
+          let hasTransformTriggered = false;
+          for (const engine of entityStoreStatus.engines) {
+            if (engine.components) {
+              for (const component of engine.components) {
+                if (component.resource === 'transform') {
+                  if (component?.metadata?.trigger_count > 1) {
+                    hasTransformTriggered = true;
+                  }
+                  if (component?.metadata?.documents_processed > 0) {
+                    hasDocumentsProcessedInTransforms = true;
+                    break;
+                  }
                 }
               }
             }
+          }
+
+          if (hasDocumentsProcessedInTransforms) {
+            status = ASSET_INVENTORY_STATUS.READY;
+          } else if (hasTransformTriggered === true) {
+            status = ASSET_INVENTORY_STATUS.EMPTY;
           }
         }
       }
