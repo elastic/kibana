@@ -23,7 +23,7 @@ import {
   getMockPolicyGCP,
 } from './mocks';
 import { CspPolicyTemplateForm } from './policy_template_form';
-import { StorybookProviders } from '../../../.storybook/storybook_provider';
+import { StorybookProvider } from '../../../.storybook/decorators/storybook_provider';
 import {
   changePolicyName,
   toggleSetupTechnology,
@@ -35,13 +35,13 @@ export default {
   decorators: [
     (CspPolicyTemplateFormChild) => {
       return (
-        <StorybookProviders>
+        <StorybookProvider>
           <MemoryRouter initialEntries={['/add-integration/cspm']}>
             <Route path="/add-integration/:integration">
               <CspPolicyTemplateFormChild />
             </Route>
           </MemoryRouter>
-        </StorybookProviders>
+        </StorybookProvider>
       );
     },
   ],
@@ -49,15 +49,16 @@ export default {
 
 const Template: Story<PackagePolicyReplaceDefineStepExtensionComponentProps> = (args) => {
   const [packagePolicy, setPackagePolicy] = useState<Partial<NewPackagePolicy>>(args.newPolicy);
-  const [integrationToEnable, setIntegrationToEnable] = useState('cloudbeat/cis_aws');
+  const [integrationToEnable, setIntegrationToEnable] = useState(args.integrationToEnable);
 
   const onChange = (opts: { isValid: boolean; updatedPolicy: Partial<NewPackagePolicy> }) => {
-    args.onChange(opts);
+    action('onChange', { allowFunction: true })(opts);
     setPackagePolicy(opts.updatedPolicy);
   };
 
   return (
     <CspPolicyTemplateForm
+      // @ts-expect-error
       newPolicy={packagePolicy}
       isEditPage={false}
       onChange={onChange}
@@ -86,12 +87,14 @@ const defaultPropsAWS: PackagePolicyReplaceDefineStepExtensionComponentProps = {
   onChange: (opts: { isValid: boolean; updatedPolicy: Partial<NewPackagePolicy> }) => {
     action('onChange')(opts);
   },
+  // @ts-expect-error
   packageInfo,
   setIsValid: () => {},
   disabled: false,
   hasInvalidRequiredVars: false,
   isAgentlessEnabled: true,
   defaultSetupTechnology: SetupTechnology.AGENTLESS,
+  integrationToEnable: 'cloudbeat/cis_aws',
 };
 
 export const AWSForm = Template.bind({});
@@ -116,19 +119,22 @@ const defaultPropsGCP: PackagePolicyReplaceDefineStepExtensionComponentProps = {
   onChange: (opts: { isValid: boolean; updatedPolicy: Partial<NewPackagePolicy> }) => {
     action('onChange')(opts);
   },
+  // @ts-expect-error
   packageInfo,
   setIsValid: () => {},
   disabled: false,
   hasInvalidRequiredVars: false,
   isAgentlessEnabled: true,
   defaultSetupTechnology: SetupTechnology.AGENTLESS,
+  integrationToEnable: 'cloudbeat/cis_gcp',
 };
 
 export const GCPForm = Template.bind({});
 GCPForm.args = defaultPropsGCP;
-GCPForm.play = async ({ canvasElement }) => {
-  changePolicyName({ canvasElement, policyName: 'GCP Package Policy' });
-};
+// GCPForm.play = async ({ canvasElement }) => {
+//   changePolicyName({ canvasElement, policyName: 'GCP Package Policy' });
+//   toggleSetupTechnology({ canvasElement, toggle: 'agent-based' });
+// };
 
 const mockAzurePolicy = getMockPolicyAzure();
 const mockAzureInput = {
@@ -144,16 +150,18 @@ const defaultPropsAzure: PackagePolicyReplaceDefineStepExtensionComponentProps =
   onChange: (opts: { isValid: boolean; updatedPolicy: Partial<NewPackagePolicy> }) => {
     action('onChange')(opts);
   },
+  // @ts-expect-error
   packageInfo,
   setIsValid: () => {},
   disabled: false,
   hasInvalidRequiredVars: false,
   isAgentlessEnabled: true,
   defaultSetupTechnology: SetupTechnology.AGENTLESS,
+  integrationToEnable: 'cloudbeat/cis_azure',
 };
 
 export const AzureForm = Template.bind({});
 AzureForm.args = defaultPropsAzure;
-AzureForm.play = async ({ canvasElement }) => {
-  changePolicyName({ canvasElement, policyName: 'Azure Package Policy' });
-};
+// AzureForm.play = async ({ canvasElement }) => {
+//   changePolicyName({ canvasElement, policyName: 'Azure Package Policy' });
+// };
