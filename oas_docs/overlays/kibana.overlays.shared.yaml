@@ -7,39 +7,39 @@ actions:
 # Add some spaces API examples
   - target: "$.paths['/api/spaces/space']['post']"
     description: "Add example to create space API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
+    update:
+      requestBody:
+        content:
+          application/json:
             examples:
               createSpaceRequest:
                 $ref: "../examples/create_space_request.yaml"
   - target: "$.paths['/api/spaces/space/{id}']['put']"
     description: "Add example to update space API"
-    update: 
-      requestBody: 
-        content: 
-          application/json; Elastic-Api-Version=2023-10-31: 
+    update:
+      requestBody:
+        content:
+          application/json:
             examples:
               updateSpaceRequest:
                 $ref: "../examples/update_space_request.yaml"
   - target: "$.paths['/api/spaces/space/{id}']['get']"
     description: "Add example to get space API"
-    update: 
+    update:
       responses:
-        200: 
-          content: 
-            application/json; Elastic-Api-Version=2023-10-31: 
+        200:
+          content:
+            application/json:
               examples:
                 getSpaceResponseExample:
                   $ref: "../examples/get_space_response.yaml"
   - target: "$.paths['/api/spaces/space']['get']"
     description: "Add example to get all spaces API"
-    update: 
+    update:
       responses:
-        200: 
-          content: 
-            application/json; Elastic-Api-Version=2023-10-31: 
+        200:
+          content:
+            application/json:
               examples:
                 getSpacesResponseExample1:
                   $ref: "../examples/get_spaces_response1.yaml"

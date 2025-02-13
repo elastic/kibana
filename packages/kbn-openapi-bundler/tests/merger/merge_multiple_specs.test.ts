@@ -70,7 +70,9 @@ describe('OpenAPI Merger - merge paths', () => {
     });
   });
 
-  it('merges different versions of the same endpoint', async () => {
+  // We do not expect to merge different versions of the same endpoint for the foreseeable future. This might change
+  // so keeping this test around for now.
+  it.skip('merges different versions of the same endpoint', async () => {
     const spec1 = createOASDocument({
       info: {
         version: '2023-10-31',
