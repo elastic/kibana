@@ -90,6 +90,7 @@ export const EngineComponentStatus = z.object({
       })
     )
     .optional(),
+  metadata: z.unknown().optional(),
 });
 
 export type StoreStatus = z.infer<typeof StoreStatus>;
