@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
+import { Redirect, RouteComponentProps } from 'react-router-dom';
 import { Home } from './home';
 import { TutorialDirectory } from './tutorial_directory';
 import { Tutorial } from './tutorial/tutorial';

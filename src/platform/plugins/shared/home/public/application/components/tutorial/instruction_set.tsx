@@ -67,7 +67,7 @@ interface InstructionSetProps {
   statusCheckState: keyof typeof StatusCheckStates;
   onStatusCheck: () => void;
   offset: number;
-  params: ParameterFormParam[];
+  param: ParameterFormParam;
   paramValues: { [key: string]: string | number }; // ?
   setParameter: (paramId: string, newValue: string) => void;
   replaceTemplateStrings: (text: string) => string;
@@ -280,7 +280,7 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
 
   renderHeader = () => {
     let paramsVisibilityToggle;
-    if (this.props.params) {
+    if (this.props.param) {
       paramsVisibilityToggle = (
         <EuiButton
           size="s"
@@ -328,12 +328,12 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
 
   render() {
     let paramsForm;
-    if (this.props.params && this.state.isParamFormVisible) {
+    if (this.props.param && this.state.isParamFormVisible) {
       paramsForm = (
         <>
           <EuiSpacer />
           <ParameterForm
-            params={this.props.params}
+            param={this.props.param}
             paramValues={this.props.paramValues}
             setParameter={this.props.setParameter}
           />

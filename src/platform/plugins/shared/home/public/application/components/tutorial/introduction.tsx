@@ -29,7 +29,7 @@ interface IntroductionUiProps {
   exportedFieldUrl?: string;
   iconType?: string;
   isBeta?: boolean;
-  notices?: React.ReactElement;
+  notices?: Array<React.ReactElement<any, string | React.JSXElementConstructor<any>>>; // although i receive notices as a react element, it doesn't get displayed. how is it used?
   exportedFieldsUrl?: string;
   intl: InjectedIntl;
   basePath: IBasePath;
@@ -141,5 +141,5 @@ function IntroductionUI({
     </>
   );
 }
-// because description above is "Automatically get wrapped in a single paragraph tag inside an EuiText block" - lines 135-140 show an error about dom nesting because we have divs inside <p></p>
+
 export const Introduction = injectI18n(IntroductionUI);
