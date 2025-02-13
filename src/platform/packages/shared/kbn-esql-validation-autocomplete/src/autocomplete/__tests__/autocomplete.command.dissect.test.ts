@@ -56,7 +56,7 @@ describe('autocomplete.suggest', () => {
       const { assertSuggestions } = await setup();
       await assertSuggestions(
         `from a | DISSECT keywordField ${constantPattern} append_separator = /`,
-        ['":"', '";"']
+        ['":" ', '";" '].map(attachTriggerCommand)
       );
     });
 
