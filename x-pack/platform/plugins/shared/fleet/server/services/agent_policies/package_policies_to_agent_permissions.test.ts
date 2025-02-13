@@ -409,7 +409,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     });
   });
 
-  it('Add additionnal_datastream_permisions', async () => {
+  it('Add additional_datastream_permissions', async () => {
     const packagePolicies: PackagePolicy[] = [
       {
         id: 'package-policy-uuid-test-123',
