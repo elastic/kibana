@@ -10,11 +10,11 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/test/analytics/plugins/analytics_ftr_helpers'],
+  roots: ['<rootDir>/src/platform/test/analytics/plugins/analytics_ftr_helpers'],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/test/analytics/plugins/analytics_ftr_helpers',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/test/analytics/plugins/analytics_ftr_helpers/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/src/platform/test/analytics/plugins/analytics_ftr_helpers/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

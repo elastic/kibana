@@ -1,5 +1,5 @@
 {
-  "extends": "../tsconfig.base.json",
+  "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -12,17 +12,17 @@
   },
   "include": [
     "**/*",
-    "../typings/**/*",
-    "../packages/kbn-test/types/ftr_globals/**/*",
+    "../../../typings/**/*",
+    "../../../packages/kbn-test/types/ftr_globals/**/*",
     "api_integration/apis/logstash/pipeline/fixtures/*.json",
     "api_integration/apis/logstash/pipelines/fixtures/*.json",
     "api_integration/apis/telemetry/fixtures/*.json",
     "api_integration/apis/telemetry/fixtures/*.json"
-    , "../x-pack/test_serverless/functional/test_suites/common/saved_objects_management/export_transform copy.ts"  ],
+    , "../../../x-pack/test_serverless/functional/test_suites/common/saved_objects_management/export_transform copy.ts"  ],
   "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
   "kbn_references": [
     "@kbn/core",
-    { "path": "../src/setup_node_env/tsconfig.json" },
+    { "path": "../../../src/setup_node_env/tsconfig.json" },
     "@kbn/dashboard-plugin",
     "@kbn/expressions-plugin",
     "@kbn/saved-objects-management-plugin",

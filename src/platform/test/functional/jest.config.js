@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
-  roots: ['<rootDir>/test/functional'],
+  roots: ['<rootDir>/src/platform/test/functional'],
 };

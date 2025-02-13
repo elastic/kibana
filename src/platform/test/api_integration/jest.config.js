@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
-  roots: ['<rootDir>/test/api_integration'],
+  roots: ['<rootDir>/src/platform/test/api_integration'],
 };
