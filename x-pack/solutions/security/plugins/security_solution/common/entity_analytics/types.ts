@@ -21,7 +21,6 @@ export enum EntityIdentifierFields {
   hostName = 'host.name',
   userName = 'user.name',
   serviceName = 'service.name',
-  universal = 'related.entity',
 }
 
 export const EntityTypeToIdentifierField: Record<EntityType, EntityIdentifierFields> = {
