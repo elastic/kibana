@@ -95,15 +95,15 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
           metadata,
         });
       }),
+      chunksIntoMessage({
+        toolOptions: { toolChoice, tools },
+        logger,
+      }),
       retryWithExponentialBackoff({
         maxRetry: maxRetries,
         backoffMultiplier: retryConfiguration.backoffMultiplier,
         initialDelay: retryConfiguration.initialDelay,
         errorFilter: getRetryFilter(retryConfiguration.retryOn),
-      }),
-      chunksIntoMessage({
-        toolOptions: { toolChoice, tools },
-        logger,
       }),
       abortSignal ? handleCancellation(abortSignal) : identity
     );

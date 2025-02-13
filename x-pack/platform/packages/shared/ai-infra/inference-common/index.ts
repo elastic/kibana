@@ -91,13 +91,16 @@ export {
   type InferenceTaskInternalError,
   type InferenceTaskRequestError,
   type InferenceTaskAbortedError,
+  type InferenceTaskProviderError,
   createInferenceInternalError,
   createInferenceRequestError,
   createInferenceRequestAbortedError,
+  createInferenceProviderError,
   isInferenceError,
   isInferenceInternalError,
   isInferenceRequestError,
   isInferenceRequestAbortedError,
+  isInferenceProviderError,
 } from './src/errors';
 export { generateFakeToolCallId } from './src/utils';
 export { elasticModelDictionary } from './src/const';
