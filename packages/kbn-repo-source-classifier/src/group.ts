@@ -50,7 +50,12 @@ const MODULE_GROUPING_BY_PATH: Record<string, ModuleAttrs> = ['packages', 'plugi
       visibility: 'private',
     },
   }))
-  .reduce((acc, current) => ({ ...acc, ...current }), {});
+  .reduce((acc, current) => ({ ...acc, ...current }), {
+    'src/platform/test': {
+      group: 'platform',
+      visibility: 'shared',
+    },
+  });
 
 /**
  * Determine a plugin's grouping information based on the path where it is defined
