@@ -6,7 +6,15 @@
  */
 
 import { compact, pick } from 'lodash';
-import { IlmPolicyPhases, isIlmLifecycle, isIngestStreamDefinition } from '@kbn/streams-schema';
+import {
+  IlmPolicyPhases,
+  IngestStreamDefinition,
+  findInheritedLifecycle,
+  isIlmLifecycle,
+  isIngestStreamDefinition,
+  isInheritLifecycle,
+  isWiredStreamDefinition,
+} from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import {
   IlmExplainLifecycleLifecycleExplain,
@@ -15,6 +23,8 @@ import {
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import { createServerRoute } from '../../create_server_route';
+import { StreamsClient } from '../../../lib/streams/client';
+import { getDataStreamLifecycle } from '../../../lib/streams/stream_crud';
 
 const lifecycleStatsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/lifecycle/_stats',
@@ -40,7 +50,7 @@ const lifecycleStatsRoute = createServerRoute({
       throw new Error(`[${name}] is not an ingest stream`);
     }
 
-    const lifecycle = definition.ingest.lifecycle;
+    const lifecycle = await getEffectiveLifecycle({ definition, streamsClient });
     if (!isIlmLifecycle(lifecycle)) {
       throw new Error(`Only ilm lifecycle`);
     }
@@ -108,6 +118,26 @@ const ilmSummary = (
     };
     return phases;
   }, {} as IlmPolicyPhases);
+};
+
+const getEffectiveLifecycle = async ({
+  definition,
+  streamsClient,
+}: {
+  definition: IngestStreamDefinition;
+  streamsClient: StreamsClient;
+}) => {
+  if (!isInheritLifecycle(definition.ingest.lifecycle)) {
+    return definition.ingest.lifecycle;
+  }
+
+  if (isWiredStreamDefinition(definition)) {
+    const ancestors = await streamsClient.getAncestors(definition.name);
+    return findInheritedLifecycle(definition, ancestors);
+  }
+
+  const dataStream = await streamsClient.getDataStream(definition.name);
+  return getDataStreamLifecycle(dataStream);
 };
 
 export const lifecycleRoutes = {
