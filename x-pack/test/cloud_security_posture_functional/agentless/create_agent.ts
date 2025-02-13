@@ -10,6 +10,10 @@ import expect from '@kbn/expect';
 import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
+import { testSubjectIds } from '../constants/test_subject_ids';
+
+const { CIS_AWS_OPTION_TEST_ID, AWS_SINGLE_ACCOUNT_TEST_ID } = testSubjectIds;
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const mockAgentlessApiService = setupMockServer();
@@ -21,10 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'cisAddIntegration',
   ]);
 
-  const CIS_AWS_OPTION_TEST_ID = 'cisAwsTestId';
-
-  const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
-
+  // Failing: See https://github.com/elastic/kibana/issues/208495
   describe('Agentless cloud', function () {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;

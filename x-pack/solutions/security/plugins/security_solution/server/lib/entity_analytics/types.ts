@@ -94,6 +94,7 @@ export interface CalculateScoresParams {
   runtimeMappings: MappingRuntimeFields;
   weights?: RiskScoreWeights;
   alertSampleSizePerShard?: number;
+  excludeAlertStatuses?: string[];
 }
 
 export interface CalculateAndPersistScoresParams {

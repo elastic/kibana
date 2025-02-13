@@ -229,6 +229,9 @@
         },
         {
           "id": "kibDevTutorialsSolutionNavigation"
+        },
+        {
+          "id": "kbServerlessTaskManagerMonitoring"
         }
       ]
     },
