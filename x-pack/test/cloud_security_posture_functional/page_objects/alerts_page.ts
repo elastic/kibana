@@ -7,11 +7,14 @@
 
 import expect from '@kbn/expect';
 import { FtrService } from '../../functional/ftr_provider_context';
+import { testSubjectIds } from '../constants/test_subject_ids';
 
-const ALERT_TABLE_ROW_CSS_SELECTOR = '[data-test-subj="alertsTable"] .euiDataGridRow';
-const VISUALIZATIONS_SECTION_HEADER_TEST_ID = 'securitySolutionFlyoutVisualizationsHeader';
-const GRAPH_PREVIEW_CONTENT_TEST_ID = 'securitySolutionFlyoutGraphPreviewContent';
-const GRAPH_PREVIEW_LOADING_TEST_ID = 'securitySolutionFlyoutGraphPreviewLoading';
+const {
+  ALERT_TABLE_ROW_CSS_SELECTOR,
+  VISUALIZATIONS_SECTION_HEADER_TEST_ID,
+  GRAPH_PREVIEW_CONTENT_TEST_ID,
+  GRAPH_PREVIEW_LOADING_TEST_ID,
+} = testSubjectIds;
 
 export class AlertsPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
