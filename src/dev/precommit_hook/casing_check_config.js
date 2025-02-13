@@ -72,10 +72,6 @@ export const IGNORE_FILE_GLOBS = [
 
   'x-pack/solutions/observability/plugins/profiling/Makefile',
 
-  // Bazel default files
-  '**/WORKSPACE.bazel',
-  '**/BUILD.bazel',
-
   // Buildkite
   '.buildkite/**/*',
 
@@ -187,4 +183,5 @@ export const TEMPORARILY_IGNORED_PATHS = [
   'x-pack/platform/plugins/shared/screenshotting/server/assets/fonts/roboto/Roboto-Medium.ttf',
   'x-pack/platform/plugins/shared/screenshotting/server/assets/fonts/roboto/Roboto-Regular.ttf',
   'x-pack/platform/plugins/shared/screenshotting/server/assets/img/logo-grey.png',
+  'oas_docs/package-lock.json',
 ];

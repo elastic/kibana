@@ -117,6 +117,7 @@ report.asciidoc
 # Automatically generated and user-modifiable
 /tsconfig.refs.json
 *.type_check.json
+*.nx_type_check.json
 
 # Yarn local mirror content
 .yarn-local-mirror
@@ -164,3 +165,6 @@ x-pack/test/security_solution_playwright/.auth/
 x-pack/test/security_solution_playwright/.env
 .codeql
 .dependency-graph-log.json
+
+.nx/cache
+.nx/workspace-data

@@ -14,8 +14,8 @@ import { getRepoFiles } from '@kbn/get-repo-files';
 
 import { testMatch } from '../../../jest-preset';
 
-const UNIT_CONFIG_NAME = 'jest.config.js';
-const INTEGRATION_CONFIG_NAME = 'jest.integration.config.js';
+const UNIT_CONFIG_NAME = /jest\.config\.c?js$/;
+const INTEGRATION_CONFIG_NAME = /jest\.integration\.config\.js$/;
 
 const testsRe = (testMatch as string[]).map((p) => minimatch.makeRe(p));
 
@@ -25,7 +25,7 @@ const classify = (rel: string) => {
   }
 
   const basename = Path.basename(rel);
-  return basename === UNIT_CONFIG_NAME || basename === INTEGRATION_CONFIG_NAME
+  return basename.match(UNIT_CONFIG_NAME) || basename.match(INTEGRATION_CONFIG_NAME)
     ? ('config' as const)
     : undefined;
 };

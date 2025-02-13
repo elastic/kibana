@@ -71,6 +71,7 @@ export class BundleRemotesPlugin {
       );
     });
 
+    // @ts-ignore - types are resolved differently now with webpack 5 in the game
     compiler.hooks.compilation.tap('BundleRefsPlugin/populateAllowedBundleIds', (compilation) => {
       const manifestPath = this.bundle.manifestPath;
       if (!manifestPath) {
@@ -84,10 +85,11 @@ export class BundleRemotesPlugin {
         compilation.fileDependencies.add(manifestPath);
       });
 
+      // @ts-ignore - types are resolved differently now with webpack 5 in the game
       compilation.hooks.finishModules.tapPromise(
         'BundleRefsPlugin/finishModules',
-        async (modules) => {
-          const usedBundleIds = (modules as any[])
+        async (modules: any[]) => {
+          const usedBundleIds = modules
             .filter((m: any): m is BundleRemoteModule => m instanceof BundleRemoteModule)
             .map((m) => m.remote.bundleId);
 
