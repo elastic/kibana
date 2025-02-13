@@ -12,9 +12,11 @@ import {
   EuiBasicTable,
   EuiTitle,
   EuiText,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import { css } from '@emotion/react';
 import { Conversation } from '../../../assistant_context/types';
 import { ConversationTableItem, useConversationsTable } from './use_conversations_table';
 import { ConversationStreamingSwitch } from '../conversation_settings/conversation_streaming_switch';
@@ -148,21 +150,11 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     openFlyout: openConfirmModal,
     closeFlyout: closeConfirmModal,
   } = useFlyoutModalVisibility();
-  //
-  // const onConversationSelectionChange = useConversationChanged({
-  //   allSystemPrompts,
-  //   conversationSettings,
-  //   conversationsSettingsBulkActions,
-  //   defaultConnector,
-  //   setConversationSettings,
-  //   setConversationsSettingsBulkActions,
-  //   onSelectedConversationChange,
-  // });
 
   const onEditActionClicked = useCallback(
     (rowItem: ConversationTableItem) => {
-      openEditFlyout();
       setSelectedConversation(rowItem);
+      openEditFlyout();
     },
     [openEditFlyout]
   );
@@ -287,16 +279,26 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
             selectedConversation?.title == null || selectedConversation?.title === ''
           }
         >
-          <ConversationSettingsEditor
-            allSystemPrompts={allSystemPrompts}
-            conversationSettings={conversationSettings}
-            conversationsSettingsBulkActions={conversationsSettingsBulkActions}
-            http={http}
-            isDisabled={isDisabled}
-            selectedConversation={selectedConversation}
-            setConversationSettings={setConversationSettings}
-            setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
-          />
+          {selectedConversation ? (
+            <ConversationSettingsEditor
+              allSystemPrompts={allSystemPrompts}
+              conversationSettings={conversationSettings}
+              conversationsSettingsBulkActions={conversationsSettingsBulkActions}
+              http={http}
+              isDisabled={isDisabled}
+              selectedConversation={selectedConversation}
+              setConversationSettings={setConversationSettings}
+              setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
+            />
+          ) : (
+            <EuiLoadingSpinner
+              size="l"
+              css={css`
+                display: block;
+                margin: 0 auto;
+              `}
+            />
+          )}
         </Flyout>
       )}
       {deleteConfirmModalVisibility && deletedConversation?.title && (

@@ -44,12 +44,10 @@ export interface ConversationSettingsEditorProps {
 export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProps> = React.memo(
   ({
     allSystemPrompts,
-    conversationSettings,
     conversationsSettingsBulkActions,
     http,
     isDisabled = false,
     selectedConversation,
-    setConversationSettings,
     setConversationsSettingsBulkActions,
   }) => {
     const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({
@@ -63,11 +61,15 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
     const handleOnSystemPromptSelectionChange = useCallback(
       (systemPromptId?: string | undefined) => {
         if (conversationUpdates != null && conversationUpdates.apiConfig) {
+          const newSystemPromptId =
+            conversationUpdates.apiConfig.defaultSystemPromptId === systemPromptId
+              ? undefined
+              : systemPromptId;
           const updatedConversation = {
             ...conversationUpdates,
             apiConfig: {
               ...conversationUpdates.apiConfig,
-              defaultSystemPromptId: systemPromptId,
+              defaultSystemPromptId: newSystemPromptId,
             },
           };
           setConversationUpdates(updatedConversation);
@@ -85,7 +87,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
                     ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
                     : {}
                   ).apiConfig ?? {}),
-                  defaultSystemPromptId: systemPromptId,
+                  defaultSystemPromptId: newSystemPromptId,
                 },
               },
             },

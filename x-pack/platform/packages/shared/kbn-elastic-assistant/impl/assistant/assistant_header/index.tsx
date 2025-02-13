@@ -38,7 +38,7 @@ interface OwnProps {
   onCloseFlyout?: () => void;
   chatHistoryVisible?: boolean;
   setChatHistoryVisible?: React.Dispatch<React.SetStateAction<boolean>>;
-  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
+  onConversationSelected: ({ cId }: { cId: string }) => void;
   conversations: Record<string, Conversation>;
   conversationsLoaded: boolean;
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
@@ -88,7 +88,6 @@ export const AssistantHeader: React.FC<Props> = ({
     (updatedConversation: Conversation) => {
       onConversationSelected({
         cId: updatedConversation.id,
-        cTitle: updatedConversation.title,
       });
     },
     [onConversationSelected]

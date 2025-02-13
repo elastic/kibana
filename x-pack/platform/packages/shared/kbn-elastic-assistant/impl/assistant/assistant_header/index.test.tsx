@@ -87,7 +87,6 @@ describe('AssistantHeader', () => {
     });
     expect(onConversationSelected).toHaveBeenCalledWith({
       cId: alertConvo.id,
-      cTitle: alertConvo.title,
     });
   });
 

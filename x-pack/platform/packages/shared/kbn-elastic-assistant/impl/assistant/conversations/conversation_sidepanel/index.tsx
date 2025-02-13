@@ -32,7 +32,7 @@ const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 interface Props {
   currentConversation?: Conversation;
-  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
+  onConversationSelected: ({ cId }: { cId: string }) => void;
   shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
   isFetchingCurrentUserConversations: boolean;
@@ -114,7 +114,6 @@ export const ConversationSidePanel = React.memo<Props>(
           const previousConversation = getNextConversation(conversationList, conversation);
           onConversationSelected({
             cId: previousConversation.id,
-            cTitle: previousConversation.title,
           });
         }
         onConversationDeleted(conversation.id);
@@ -127,14 +126,12 @@ export const ConversationSidePanel = React.memo<Props>(
 
       onConversationSelected({
         cId: previousConversation.id,
-        cTitle: previousConversation.title,
       });
     }, [conversationList, currentConversation, onConversationSelected]);
     const onArrowDownClick = useCallback(() => {
       const nextConversation = getNextConversation(conversationList, currentConversation);
       onConversationSelected({
         cId: nextConversation.id,
-        cTitle: nextConversation.title,
       });
     }, [conversationList, currentConversation, onConversationSelected]);
 
@@ -226,7 +223,6 @@ export const ConversationSidePanel = React.memo<Props>(
                               onClick={() =>
                                 onConversationSelected({
                                   cId: conversation.id,
-                                  cTitle: conversation.title,
                                 })
                               }
                               label={conversation.title}

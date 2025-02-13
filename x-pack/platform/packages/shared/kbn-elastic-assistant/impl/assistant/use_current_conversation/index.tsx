@@ -32,10 +32,9 @@ interface UseCurrentConversation {
   currentSystemPrompt: PromptResponse | undefined;
   handleCreateConversation: () => Promise<void>;
   handleOnConversationDeleted: (cTitle: string) => Promise<void>;
-  handleOnConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
+  handleOnConversationSelected: ({ cId }: { cId: string }) => Promise<void>;
   refetchCurrentConversation: (options?: {
     cId?: string;
-    cTitle?: string;
     isStreamRefetch?: boolean;
   }) => Promise<Conversation | undefined>;
   setCurrentConversation: Dispatch<SetStateAction<Conversation | undefined>>;
@@ -57,34 +56,6 @@ export const useCurrentConversation = ({
 }: Props): UseCurrentConversation => {
   const { deleteConversation, getConversation, setApiConfig } = useConversation();
   const [currentConversation, setCurrentConversation] = useState<Conversation | undefined>();
-  useEffect(() => {
-    if (!mayUpdateConversations || !!currentConversation) return;
-    const emptyConversation = {
-      apiConfig: defaultConnector
-        ? {
-            connectorId: defaultConnector.id ?? '',
-            actionTypeId: defaultConnector.actionTypeId ?? '',
-          }
-        : undefined,
-      id: '',
-      messages: [],
-      replacements: {},
-      category: 'assistant',
-      title: '',
-    };
-    if (conversationId === '') {
-      return setCurrentConversation(emptyConversation);
-    }
-    if (conversations[conversationId]) {
-      setCurrentConversation(conversations[conversationId] ?? emptyConversation);
-    }
-  }, [
-    conversationId,
-    conversations,
-    currentConversation,
-    defaultConnector,
-    mayUpdateConversations,
-  ]);
   /**
    * START SYSTEM PROMPT
    */
@@ -125,16 +96,11 @@ export const useCurrentConversation = ({
    * @param isStreamRefetch - Are we refetching because stream completed? If so retry several times to ensure the message has updated on the server
    */
   const refetchCurrentConversation = useCallback(
-    async ({
-      cId,
-      cTitle,
-      isStreamRefetch = false,
-    }: { cId?: string; cTitle?: string; isStreamRefetch?: boolean } = {}) => {
+    async ({ cId, isStreamRefetch = false }: { cId?: string; isStreamRefetch?: boolean } = {}) => {
       if (cId === '') {
         return;
       }
-      const cConversationId =
-        cId ?? (cTitle && conversations[cTitle].id) ?? currentConversation?.id;
+      const cConversationId = cId ?? currentConversation?.id;
 
       if (cConversationId) {
         let updatedConversation = await getConversation(cConversationId);
@@ -161,15 +127,21 @@ export const useCurrentConversation = ({
         return updatedConversation;
       }
     },
-    [conversations, currentConversation?.id, getConversation]
+    [currentConversation?.id, getConversation]
   );
 
   const handleOnConversationSelected = useCallback(
-    async ({ cId, cTitle }: { cId: string; cTitle: string }) => {
+    async ({ cId }: { cId: string }) => {
       if (cId === '') {
         return setCurrentConversation({
-          // get apiConfig from currentConversation
-          ...currentConversation,
+          apiConfig: defaultConnector
+            ? {
+                connectorId: defaultConnector.id ?? '',
+                actionTypeId: defaultConnector.actionTypeId ?? '',
+              }
+            : undefined,
+          // get apiConfig from currentConversation if it exists
+          ...(currentConversation ?? {}),
           id: '',
           messages: [],
           replacements: {},
@@ -178,10 +150,14 @@ export const useCurrentConversation = ({
         });
       }
       // refetch will set the currentConversation
-      await refetchCurrentConversation({ cId, cTitle });
+      await refetchCurrentConversation({ cId });
     },
-    [currentConversation, refetchCurrentConversation]
+    [currentConversation, defaultConnector, refetchCurrentConversation]
   );
+  useEffect(() => {
+    if (!mayUpdateConversations || !!currentConversation) return;
+    handleOnConversationSelected({ cId: conversationId ?? '' });
+  }, [conversationId, handleOnConversationSelected, currentConversation, mayUpdateConversations]);
 
   const handleOnConversationDeleted = useCallback(
     async (cTitle: string) => {
@@ -195,7 +171,6 @@ export const useCurrentConversation = ({
     async () =>
       handleOnConversationSelected({
         cId: '',
-        cTitle: '',
       }),
     [handleOnConversationSelected]
   );

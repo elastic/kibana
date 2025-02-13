@@ -147,7 +147,6 @@ describe('useCurrentConversation', () => {
     await act(async () => {
       await result.current.handleOnConversationSelected({
         cId: conversationId,
-        cTitle: conversationTitle,
       });
     });
 
@@ -180,7 +179,6 @@ describe('useCurrentConversation', () => {
     await act(async () => {
       await result.current.handleOnConversationSelected({
         cId: 'bad',
-        cTitle: 'bad',
       });
     });
 
