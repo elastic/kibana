@@ -9,6 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useRadioInput } from '../../../../hooks';
 import {
   sendPostFleetServerHost,
   sendPutFleetServerHost,
@@ -23,6 +24,8 @@ import {
 import { isDiffPathProtocol } from '../../../../../../../common/services';
 import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import type { FleetServerHost } from '../../../../types';
+import type { ClientAuth, NewFleetServerHost, ValueOf } from '../../../../../../../common/types';
+import { clientAuth } from '../../../../../../../common/types';
 
 const URL_REGEX = /^(https):\/\/[^\s$.?#].[^\s]*$/gm;
 
@@ -39,6 +42,7 @@ export interface FleetServerHostSSLInputsType {
   sslESKeyInput: ReturnType<typeof useInput>;
   sslESKeySecretInput: ReturnType<typeof useSecretInput>;
   sslEsCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
+  sslClientAuthInput: ReturnType<typeof useRadioInput>;
 }
 
 const ConfirmTitle = () => (
@@ -199,7 +203,12 @@ export function useFleetServerHostsForm(
     isEditDisabled
   );
 
-  const inputs = useMemo(
+  const sslClientAuthInput = useRadioInput(
+    fleetServerHost?.ssl?.client_auth ?? clientAuth.None,
+    isEditDisabled
+  );
+
+  const inputs: FleetServerHostSSLInputsType = useMemo(
     () => ({
       nameInput,
       isDefaultInput,
@@ -213,6 +222,7 @@ export function useFleetServerHostsForm(
       sslESKeyInput,
       sslKeySecretInput,
       sslESKeySecretInput,
+      sslClientAuthInput,
     }),
     [
       nameInput,
@@ -227,6 +237,7 @@ export function useFleetServerHostsForm(
       sslESKeyInput,
       sslKeySecretInput,
       sslESKeySecretInput,
+      sslClientAuthInput,
     ]
   );
   const validate = useCallback(() => validateInputs(inputs), [inputs]);
@@ -240,7 +251,7 @@ export function useFleetServerHostsForm(
         return;
       }
       setIsLoading(true);
-      const data = {
+      const data: Partial<NewFleetServerHost> = {
         name: nameInput.value,
         host_urls: hostUrlsInput.value,
         is_default: isDefaultInput.value,
@@ -254,6 +265,9 @@ export function useFleetServerHostsForm(
           es_certificate_authorities: sslEsCertificateAuthoritiesInput.value.filter(
             (val) => val !== ''
           ),
+          ...(sslClientAuthInput.value !== clientAuth.None && {
+            client_auth: sslClientAuthInput.value as ValueOf<ClientAuth>,
+          }),
         },
         ...(((!sslKeyInput.value && sslKeySecretInput.value) ||
           (!sslESKeyInput.value && sslESKeySecretInput.value)) && {
@@ -303,9 +317,10 @@ export function useFleetServerHostsForm(
     sslKeyInput.value,
     sslCertificateAuthoritiesInput.value,
     sslEsCertificateInput.value,
-    sslEsCertificateAuthoritiesInput.value,
-    sslKeySecretInput.value,
     sslESKeyInput.value,
+    sslEsCertificateAuthoritiesInput.value,
+    sslClientAuthInput.value,
+    sslKeySecretInput.value,
     sslESKeySecretInput.value,
     fleetServerHost,
     notifications.toasts,

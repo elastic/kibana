@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import semverValid from 'semver/functions/valid';
 
 import { PRECONFIGURATION_LATEST_KEYWORD } from '../../constants';
-import type { PreconfiguredOutput } from '../../../common/types';
+import { clientAuth, type PreconfiguredOutput } from '../../../common/types';
 
 import {
   ElasticSearchSchema,
@@ -131,6 +131,13 @@ export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
           es_certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
           es_certificate: schema.maybe(schema.string()),
           es_key: schema.maybe(schema.string()),
+          client_auth: schema.maybe(
+            schema.oneOf([
+              schema.literal(clientAuth.Optional),
+              schema.literal(clientAuth.Required),
+              schema.literal(clientAuth.None),
+            ])
+          ),
         }),
       ])
     ),

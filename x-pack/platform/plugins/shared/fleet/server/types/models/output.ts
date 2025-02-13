@@ -16,6 +16,7 @@ import {
   kafkaVerificationModes,
   outputType,
 } from '../../../common/constants';
+import { clientAuth } from '../../../common/types';
 
 export function validateLogstashHost(val: string) {
   if (val.match(/^http([s]){0,1}:\/\//)) {
@@ -82,6 +83,15 @@ const BaseSchema = {
             schema.literal(kafkaVerificationModes.None),
             schema.literal(kafkaVerificationModes.Certificate),
             schema.literal(kafkaVerificationModes.Strict),
+          ])
+        ),
+        client_authentication: schema.maybe(
+          schema.oneOf([
+            schema.oneOf([
+              schema.literal(clientAuth.Optional),
+              schema.literal(clientAuth.Required),
+              schema.literal(clientAuth.None),
+            ]),
           ])
         ),
       }),

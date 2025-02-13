@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiTextArea, EuiFormRow } from '@elastic/eui';
+import { EuiTextArea, EuiFormRow, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
@@ -14,6 +14,7 @@ import { MultiRowInput } from '../multi_row_input';
 
 import { SecretFormRow } from '../edit_output_flyout/output_form_secret_form_row';
 import { useFleetStatus } from '../../../../hooks';
+import { clientAuth } from '../../../../../../../common/types';
 
 import type { FleetServerHostSSLInputsType } from './use_fleet_server_host_form';
 
@@ -93,6 +94,23 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
     onToggleSecretStorage(secretEnabled);
   };
 
+  const clientAuthenticationsOptions = [
+    {
+      id: clientAuth.None,
+      label: 'None',
+      'data-test-subj': 'clientAuthNoneRadioButton',
+    },
+    {
+      id: clientAuth.Required,
+      label: 'Required',
+      'data-test-subj': 'clientAuthUsernamePasswordRadioButton',
+    },
+    {
+      id: clientAuth.Optional,
+      label: 'Optional',
+      'data-test-subj': 'clientAuthSSLRadioButton',
+    },
+  ];
   return (
     <>
       <MultiRowInput
@@ -276,6 +294,24 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
           />
         </SecretFormRow>
       )}
+      <EuiSpacer size="m" />
+      <EuiFormRow
+        fullWidth
+        label={
+          <FormattedMessage
+            id="xpack.fleet.settings.fleetServerHosts.clientAuthenticationInputLabel"
+            defaultMessage="Client auth"
+          />
+        }
+      >
+        <EuiRadioGroup
+          style={{ flexDirection: 'row', flexWrap: 'wrap', columnGap: 30 }}
+          data-test-subj={'fleetServerHosts.clientAuthenticationRadioInput'}
+          options={clientAuthenticationsOptions}
+          compressed
+          {...inputs.sslClientAuthInput.props}
+        />
+      </EuiFormRow>
     </>
   );
 };

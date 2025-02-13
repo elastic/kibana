@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { clientAuth } from '../../../common/types';
+
 const secretRefSchema = schema.oneOf([
   schema.object({
     id: schema.string(),
@@ -39,6 +41,13 @@ export const FleetServerHostSchema = schema.object({
         es_certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
         es_certificate: schema.maybe(schema.string()),
         es_key: schema.maybe(schema.string()),
+        client_auth: schema.maybe(
+          schema.oneOf([
+            schema.literal(clientAuth.Optional),
+            schema.literal(clientAuth.Required),
+            schema.literal(clientAuth.None),
+          ])
+        ),
       }),
     ])
   ),
@@ -86,6 +95,11 @@ export const PutFleetServerHostRequestSchema = {
           es_certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
           es_certificate: schema.maybe(schema.string()),
           es_key: schema.maybe(schema.string()),
+          client_auth: schema.oneOf([
+            schema.literal(clientAuth.Optional),
+            schema.literal(clientAuth.Required),
+            schema.literal(clientAuth.None),
+          ]),
         }),
       ])
     ),

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { FleetServerHost } from '../models';
+import type { ClientAuth, FleetServerHost } from '../models';
 import type { SOSecret } from '../models';
+import type { ValueOf } from '..';
 
 import type { ListResult } from './common';
 
@@ -29,6 +30,7 @@ export interface PutFleetServerHostsRequest {
       es_certificate_authorities?: string[];
       es_certificate?: string;
       es_key?: string;
+      client_auth?: ValueOf<ClientAuth>;
     } | null;
     secrets?: {
       ssl?: {
@@ -54,6 +56,7 @@ export interface PostFleetServerHostsRequest {
       es_certificate_authorities?: string[];
       es_certificate?: string;
       es_key?: string;
+      client_auth?: ValueOf<ClientAuth>;
     } | null;
     secrets?: {
       ssl?: {

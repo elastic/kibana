@@ -416,6 +416,9 @@ function generateSSLConfigForElasticSearch(
           !fleetServerHost?.secrets?.ssl?.es_key && {
             key: fleetServerHost.ssl.es_key,
           }),
+        ...(fleetServerHost.ssl.client_auth && {
+          client_authentication: fleetServerHost.ssl.client_auth,
+        }),
       };
     }
   }
