@@ -26,47 +26,50 @@ import { useRiskSeverityColors } from '../../../../common/utils/risk_color_palet
 
 export const useGetSeverityTableColumns = (): Array<EuiBasicTableColumn<SeverityData>> => {
   const severityColors = useRiskSeverityColors();
-  return useMemo(() => [
-    {
-      field: 'key',
-      name: i18n.SEVERITY_LEVEL_COLUMN_TITLE,
-      'data-test-subj': 'severityTable-severity',
-      render: (severity: Severity) => (
-        <EuiHealth color={severityColors[severity]} textSize="xs">
-          {capitalize(severity)}
-        </EuiHealth>
-      ),
-    },
-    {
-      field: 'value',
-      name: COUNT_TABLE_TITLE,
-      dataType: 'number',
-      'data-test-subj': 'severityTable-alertCount',
-      width: '34%',
-      render: (alertCount: number) => (
-        <EuiText grow={false} size="xs">
-          <FormattedCount count={alertCount} />
-        </EuiText>
-      ),
-    },
-    {
-      field: 'key',
-      name: '',
-      'data-test-subj': 'severityTable-actions',
-      width: '16%',
-      render: (severity: Severity) => (
-        <SecurityCellActions
-          mode={CellActionsMode.INLINE}
-          visibleCellActions={0}
-          triggerId={SecurityCellActionsTrigger.DEFAULT}
-          data={{ field: ALERT_SEVERITY, value: severity }}
-          sourcererScopeId={getSourcererScopeId(TableId.alertsOnAlertsPage)}
-          disabledActionTypes={[SecurityCellActionType.SHOW_TOP_N]}
-          metadata={{ scopeId: TableId.alertsOnAlertsPage }}
-          extraActionsIconType="boxesVertical"
-          extraActionsColor="text"
-        />
-      ),
-    },
-  ], [severityColors])
+  return useMemo(
+    () => [
+      {
+        field: 'key',
+        name: i18n.SEVERITY_LEVEL_COLUMN_TITLE,
+        'data-test-subj': 'severityTable-severity',
+        render: (severity: Severity) => (
+          <EuiHealth color={severityColors[severity]} textSize="xs">
+            {capitalize(severity)}
+          </EuiHealth>
+        ),
+      },
+      {
+        field: 'value',
+        name: COUNT_TABLE_TITLE,
+        dataType: 'number',
+        'data-test-subj': 'severityTable-alertCount',
+        width: '34%',
+        render: (alertCount: number) => (
+          <EuiText grow={false} size="xs">
+            <FormattedCount count={alertCount} />
+          </EuiText>
+        ),
+      },
+      {
+        field: 'key',
+        name: '',
+        'data-test-subj': 'severityTable-actions',
+        width: '16%',
+        render: (severity: Severity) => (
+          <SecurityCellActions
+            mode={CellActionsMode.INLINE}
+            visibleCellActions={0}
+            triggerId={SecurityCellActionsTrigger.DEFAULT}
+            data={{ field: ALERT_SEVERITY, value: severity }}
+            sourcererScopeId={getSourcererScopeId(TableId.alertsOnAlertsPage)}
+            disabledActionTypes={[SecurityCellActionType.SHOW_TOP_N]}
+            metadata={{ scopeId: TableId.alertsOnAlertsPage }}
+            extraActionsIconType="boxesVertical"
+            extraActionsColor="text"
+          />
+        ),
+      },
+    ],
+    [severityColors]
+  );
 };
