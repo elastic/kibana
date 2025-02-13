@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { TheHiveSeverity, TheHiveTLP, SUB_ACTION, TheHiveTemplate } from './constants';
+import { TheHiveSeverity, TheHiveTLP, SUB_ACTION } from './constants';
 
 export const TheHiveConfigSchema = schema.object({
   url: schema.string(),
