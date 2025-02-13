@@ -88,7 +88,7 @@ export const NextSteps = ({
     });
 
   const connectorCards = packagePolicy.inputs
-    .filter((input) => !!input?.vars?.connector_id.value || !!input?.vars?.connector_name?.value)
+    .filter((input) => !!input?.vars?.connector_id?.value || !!input?.vars?.connector_name?.value)
     .map((input, index) => {
       return (
         <EuiFlexItem key={index}>
