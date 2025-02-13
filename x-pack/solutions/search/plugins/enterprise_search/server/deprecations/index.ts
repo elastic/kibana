@@ -439,9 +439,6 @@ export async function getEnterpriseSearchPre8IndexDeprecations(
     return deprecations;
   }
 
-  // TODO - find out : is this applicable only on cloud?
-  // const isCloud = !!cloud?.cloudId;
-
   const entSearchIndices = await getPreEightEnterpriseSearchIndices(ctx.esClient.asInternalUser);
   if (!entSearchIndices || entSearchIndices.length === 0) {
     return deprecations;
