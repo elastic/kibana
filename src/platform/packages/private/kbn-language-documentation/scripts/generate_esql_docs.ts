@@ -20,7 +20,8 @@ interface DocsSectionContent {
 
 (function () {
   const pathToElasticsearch = process.argv[2];
-  const { scalarFunctions, aggregationFunctions } = loadFunctionDocs(pathToElasticsearch);
+  const { scalarFunctions, aggregationFunctions, groupingFunctions } =
+    loadFunctionDocs(pathToElasticsearch);
   writeFunctionDocs(
     scalarFunctions,
     path.join(__dirname, '../src/sections/generated/scalar_functions.tsx')
@@ -28,6 +29,10 @@ interface DocsSectionContent {
   writeFunctionDocs(
     aggregationFunctions,
     path.join(__dirname, '../src/sections/generated/aggregation_functions.tsx')
+  );
+  writeFunctionDocs(
+    groupingFunctions,
+    path.join(__dirname, '../src/sections/generated/grouping_functions.tsx')
   );
 })();
 
@@ -48,6 +53,7 @@ function loadFunctionDocs(pathToElasticsearch: string) {
 
   const scalarFunctions = new Map<string, DocsSectionContent>();
   const aggregationFunctions = new Map<string, DocsSectionContent>();
+  const groupingFunctions = new Map<string, DocsSectionContent>();
 
   // Iterate over each file in the directory
   for (const file of docsFiles) {
@@ -68,7 +74,7 @@ function loadFunctionDocs(pathToElasticsearch: string) {
       const functionName = path.basename(file, '.md');
 
       // Add the function name and content to the map
-      if (functionDefinition.type === 'eval') {
+      if (functionDefinition.type === 'scalar') {
         scalarFunctions.set(functionName, {
           description: content,
           preview: functionDefinition.preview,
@@ -80,10 +86,16 @@ function loadFunctionDocs(pathToElasticsearch: string) {
           preview: functionDefinition.preview,
         });
       }
+      if (functionDefinition.type === 'grouping') {
+        groupingFunctions.set(functionName, {
+          description: content,
+          preview: functionDefinition.preview,
+        });
+      }
     }
   }
 
-  return { scalarFunctions, aggregationFunctions };
+  return { scalarFunctions, aggregationFunctions, groupingFunctions };
 }
 
 function writeFunctionDocs(functionDocs: Map<string, DocsSectionContent>, pathToDocsFile: string) {

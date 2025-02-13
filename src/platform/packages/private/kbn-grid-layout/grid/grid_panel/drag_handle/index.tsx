@@ -17,53 +17,57 @@ export interface DragHandleApi {
   setDragHandles: (refs: Array<HTMLElement | null>) => void;
 }
 
-export const DragHandle = React.forwardRef<
-  DragHandleApi,
-  {
-    gridLayoutStateManager: GridLayoutStateManager;
-    panelId: string;
-    rowIndex: number;
-  }
->(({ gridLayoutStateManager, panelId, rowIndex }, ref) => {
-  const startInteraction = useGridLayoutEvents({
-    interactionType: 'drag',
-    gridLayoutStateManager,
-    panelId,
-    rowIndex,
-  });
+export const DragHandle = React.memo(
+  React.forwardRef<
+    DragHandleApi,
+    {
+      gridLayoutStateManager: GridLayoutStateManager;
+      panelId: string;
+      rowIndex: number;
+    }
+  >(({ gridLayoutStateManager, panelId, rowIndex }, ref) => {
+    const startInteraction = useGridLayoutEvents({
+      interactionType: 'drag',
+      gridLayoutStateManager,
+      panelId,
+      rowIndex,
+    });
 
-  const [dragHandleCount, setDragHandleCount] = useState<number>(0);
-  const removeEventListenersRef = useRef<(() => void) | null>(null);
+    const [dragHandleCount, setDragHandleCount] = useState<number>(0);
+    const removeEventListenersRef = useRef<(() => void) | null>(null);
 
-  const setDragHandles = useCallback(
-    (dragHandles: Array<HTMLElement | null>) => {
-      setDragHandleCount(dragHandles.length);
-      for (const handle of dragHandles) {
-        if (handle === null) return;
-        handle.addEventListener('mousedown', startInteraction, { passive: true });
-        handle.addEventListener('touchstart', startInteraction, { passive: true });
-        handle.style.touchAction = 'none';
-      }
-      removeEventListenersRef.current = () => {
+    const setDragHandles = useCallback(
+      (dragHandles: Array<HTMLElement | null>) => {
+        setDragHandleCount(dragHandles.length);
         for (const handle of dragHandles) {
           if (handle === null) return;
-          handle.removeEventListener('mousedown', startInteraction);
-          handle.removeEventListener('touchstart', startInteraction);
+          handle.addEventListener('mousedown', startInteraction, { passive: true });
+          handle.addEventListener('touchstart', startInteraction, { passive: true });
+          handle.style.touchAction = 'none';
         }
-      };
-    },
-    [startInteraction]
-  );
+        removeEventListenersRef.current = () => {
+          for (const handle of dragHandles) {
+            if (handle === null) return;
+            handle.removeEventListener('mousedown', startInteraction);
+            handle.removeEventListener('touchstart', startInteraction);
+          }
+        };
+      },
+      [startInteraction]
+    );
 
-  useEffect(
-    () => () => {
-      // on unmount, remove all drag handle event listeners
-      removeEventListenersRef.current?.();
-    },
-    []
-  );
+    useEffect(
+      () => () => {
+        // on unmount, remove all drag handle event listeners
+        removeEventListenersRef.current?.();
+      },
+      []
+    );
 
-  useImperativeHandle(ref, () => ({ setDragHandles }), [setDragHandles]);
+    useImperativeHandle(ref, () => ({ setDragHandles }), [setDragHandles]);
 
-  return Boolean(dragHandleCount) ? null : <DefaultDragHandle onDragStart={startInteraction} />;
-});
+    return Boolean(dragHandleCount) ? null : <DefaultDragHandle onDragStart={startInteraction} />;
+  })
+);
+
+DragHandle.displayName = 'KbnGridLayoutDragHandle';
