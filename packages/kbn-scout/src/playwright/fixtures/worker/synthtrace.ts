@@ -17,18 +17,10 @@ import {
   InfraSynthtraceKibanaClient,
 } from '@kbn/apm-synthtrace';
 import { Readable } from 'stream';
-import type {
-  ApmFields,
-  Fields,
-  InfraDocument,
-  OtelDocument,
-  Serializable,
-  SynthtraceGenerator,
-} from '@kbn/apm-synthtrace-client';
+import type { ApmFields, InfraDocument, OtelDocument } from '@kbn/apm-synthtrace-client';
 import Url from 'url';
 import { coreWorkerFixtures } from './core_fixtures';
-
-type SynthtraceEvents<T extends Fields> = SynthtraceGenerator<T> | Array<Serializable<T>>;
+import type { SynthtraceEvents } from '../../global_hooks/synthtrace_ingestion';
 
 export interface SynthtraceFixture {
   apmSynthtraceEsClient: {
