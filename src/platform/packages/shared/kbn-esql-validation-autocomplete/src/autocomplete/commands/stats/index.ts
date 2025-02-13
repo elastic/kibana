@@ -7,38 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstItem, ESQLCommand, ESQLAst } from '@kbn/esql-ast';
-import { SupportedDataType, CommandDefinition } from '../../../definitions/types';
-import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
+import { CommandSuggestParams } from '../../../definitions/types';
+import type { SuggestionRawDefinition } from '../../types';
 import {
   TRIGGER_SUGGESTION_COMMAND,
   getNewVariableSuggestion,
   getFunctionSuggestions,
   getControlSuggestionIfSupported,
 } from '../../factories';
-import {
-  ESQLVariableType,
-  type ESQLControlVariable,
-  type ESQLCallbacks,
-} from '../../../shared/types';
+import { ESQLVariableType } from '../../../shared/types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { pushItUpInTheList } from '../../helper';
 import { byCompleteItem, getDateHistogramCompletionItem, getPosition } from './util';
 
-export async function suggest(
-  innerText: string,
-  command: ESQLCommand<'stats'>,
-  getColumnsByType: GetColumnsByTypeFn,
-  _columnExists: (column: string) => boolean,
-  getSuggestedVariableName: () => string,
-  _getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
-  getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
-  fullTextAst?: ESQLAst,
-  definition?: CommandDefinition<'join'>,
-  callbacks?: ESQLCallbacks,
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined,
-  supportsControls?: boolean
-): Promise<SuggestionRawDefinition[]> {
+export async function suggest({
+  innerText,
+  command,
+  getColumnsByType,
+  getSuggestedVariableName,
+  getPreferences,
+  getVariablesByType,
+  supportsControls,
+}: CommandSuggestParams<'stats'>): Promise<SuggestionRawDefinition[]> {
   const pos = getPosition(innerText, command);
 
   const columnSuggestions = pushItUpInTheList(
