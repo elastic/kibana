@@ -496,7 +496,6 @@ export class SessionIndex {
 
         indexNeedsRefresh = (await this.bulkDeleteSessions(operations)) || indexNeedsRefresh;
       }
-      shardMissingCounter = 0;
     } catch (err) {
       if (
         err instanceof errors.ResponseError &&
@@ -581,7 +580,7 @@ export class SessionIndex {
     logger.debug('Cleanup routine successfully completed.');
     return {
       state: {
-        shardMissingCounter,
+        shardMissingCounter: 0,
       },
     };
   }
