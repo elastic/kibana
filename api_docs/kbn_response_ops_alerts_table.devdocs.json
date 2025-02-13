@@ -1,0 +1,185 @@
+{
+  "id": "@kbn/response-ops-alerts-table",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-table",
+        "id": "def-public.AlertsTable",
+        "type": "Function",
+        "tags": [],
+        "label": "AlertsTable",
+        "description": [
+          "\nAn `EuiDataGrid` abstraction to render alert documents\n\nIt manages the paginated and cached fetching of alerts based on the\nprovided `ruleTypeIds` and `consumers` (the final query can be refined\nthrough the `query` and `initialSort` props). The `id` prop is required in order\nto persist the table state in `localStorage`\n"
+        ],
+        "signature": [
+          "<AC extends ",
+          "AdditionalContext",
+          ">(props: ",
+          "AlertsTableProps",
+          "<AC> & React.RefAttributes<",
+          "AlertsTableImperativeApi",
+          ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+        ],
+        "path": "packages/response-ops/alerts_table/components/alerts_table.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-table",
+            "id": "def-public.AlertsTable.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & React.RefAttributes<T>"
+            ],
+            "path": "packages/response-ops/alerts_table/utils/react.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-table",
+        "id": "def-public.AlertsTable",
+        "type": "Function",
+        "tags": [],
+        "label": "AlertsTable",
+        "description": [
+          "\nAn `EuiDataGrid` abstraction to render alert documents\n\nIt manages the paginated and cached fetching of alerts based on the\nprovided `ruleTypeIds` and `consumers` (the final query can be refined\nthrough the `query` and `initialSort` props). The `id` prop is required in order\nto persist the table state in `localStorage`\n"
+        ],
+        "signature": [
+          "<AC extends ",
+          "AdditionalContext",
+          ">(props: ",
+          "AlertsTableProps",
+          "<AC> & React.RefAttributes<",
+          "AlertsTableImperativeApi",
+          ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+        ],
+        "path": "packages/response-ops/alerts_table/components/alerts_table.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-table",
+            "id": "def-public.AlertsTable.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & React.RefAttributes<T>"
+            ],
+            "path": "packages/response-ops/alerts_table/utils/react.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-table",
+        "id": "def-public.AlertsTable",
+        "type": "Type",
+        "tags": [],
+        "label": "AlertsTable",
+        "description": [],
+        "signature": [
+          "<AC extends ",
+          "AdditionalContext",
+          ">(props: ",
+          "AlertsTableProps",
+          "<AC> & React.RefAttributes<",
+          "AlertsTableImperativeApi",
+          ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+        ],
+        "path": "packages/response-ops/alerts_table/components/alerts_table.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-table",
+            "id": "def-public.AlertsTable.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & React.RefAttributes<T>"
+            ],
+            "path": "packages/response-ops/alerts_table/utils/react.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-table",
+        "id": "def-public.AlertsTable",
+        "type": "Type",
+        "tags": [],
+        "label": "AlertsTable",
+        "description": [],
+        "signature": [
+          "<AC extends ",
+          "AdditionalContext",
+          ">(props: ",
+          "AlertsTableProps",
+          "<AC> & React.RefAttributes<",
+          "AlertsTableImperativeApi",
+          ">) => React.ReactElement<any, string | React.JSXElementConstructor<any>>"
+        ],
+        "path": "packages/response-ops/alerts_table/components/alerts_table.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-table",
+            "id": "def-public.AlertsTable.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P & React.RefAttributes<T>"
+            ],
+            "path": "packages/response-ops/alerts_table/utils/react.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
