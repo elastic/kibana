@@ -15,22 +15,36 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const monacoEditor = getService('monacoEditor');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
-  const dashboardAddPanel = getService('dashboardAddPanel');
+  const security = getService('security');
+
+  const defaultSettings = {
+    defaultIndex: 'logstash-*',
+  };
 
   describe('lens ES|QL tests', () => {
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.uiSettings.replace(defaultSettings);
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
+    });
+
+    after(async () => {
+      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
     it('should add a limit without changing the chart type or the color', async () => {
       await dashboard.navigateToApp();
-      await dashboard.clickNewDashboard();
+      // no dataviews page
+      await testSubjects.click('tryESQLLink');
       await dashboard.switchToEditMode();
-      await dashboardAddPanel.clickEditorMenuButton();
-      await dashboardAddPanel.clickAddNewPanelFromUIActionLink('ES|QL');
-      await dashboardAddPanel.expectEditorMenuClosed();
+      // edit the existing panel that is being added when the Try ES|QL CTA is clicked
+      const [panel] = await dashboard.getDashboardPanels();
+      await dashboardPanelActions.clickInlineEdit(panel);
       await dashboard.waitForRenderComplete();
 
       await monacoEditor.setCodeEditorValue(
@@ -56,7 +70,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('applyFlyoutButton');
       expect(await testSubjects.exists('xyVisChart')).to.be(true);
 
-      const [panel] = await dashboard.getDashboardPanels();
       await dashboardPanelActions.clickInlineEdit(panel);
 
       await header.waitUntilLoadingHasFinished();
