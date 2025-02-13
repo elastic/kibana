@@ -234,12 +234,13 @@ const styles = {
       height: euiTheme.size.base,
       backgroundColor: 'currentColor',
     }),
-  xyAnnotationNumberIconText: css({
-    fontWeight: 500,
-    fontSize: '9px',
-    letterSpacing: '-.5px',
-    lineHeight: '11px',
-  }),
+  xyAnnotationNumberIconText: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      fontWeight: euiTheme.font.weight.medium,
+      fontSize: '9px',
+      letterSpacing: '-.5px',
+      lineHeight: '11px',
+    }),
   xyAnnotationIconRotate90: css({
     '&.xyAnnotationIcon_rotate90': {
       transform: 'rotate(90deg) !important',
