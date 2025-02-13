@@ -12,7 +12,12 @@ import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import _ from 'lodash';
 import type { RecursivePartial } from '@kbn/utility-types';
-import { FunctionDefinition, FunctionParameterType, Signature } from '../src/definitions/types';
+import {
+  FunctionDefinition,
+  FunctionParameterType,
+  FunctionReturnType,
+  Signature,
+} from '../src/definitions/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../src/shared/constants';
 const aliasTable: Record<string, string[]> = {
   to_version: ['to_ver'],
@@ -25,6 +30,52 @@ const aliasTable: Record<string, string[]> = {
 };
 const aliases = new Set(Object.values(aliasTable).flat());
 
+const bucketParameterTypes: Array<
+  [
+    FunctionParameterType,
+    FunctionParameterType,
+    FunctionParameterType | null,
+    FunctionParameterType | null,
+    FunctionReturnType
+  ]
+> = [
+  // field   // bucket   //from    // to   //result
+  ['date', 'date_period', null, null, 'date'],
+  ['date', 'integer', 'date', 'date', 'date'],
+  // Modified time_duration to time_literal
+  ['date', 'time_literal', null, null, 'date'],
+  ['double', 'double', null, null, 'double'],
+  ['double', 'integer', 'double', 'double', 'double'],
+  ['double', 'integer', 'double', 'integer', 'double'],
+  ['double', 'integer', 'double', 'long', 'double'],
+  ['double', 'integer', 'integer', 'double', 'double'],
+  ['double', 'integer', 'integer', 'integer', 'double'],
+  ['double', 'integer', 'integer', 'long', 'double'],
+  ['double', 'integer', 'long', 'double', 'double'],
+  ['double', 'integer', 'long', 'integer', 'double'],
+  ['double', 'integer', 'long', 'long', 'double'],
+  ['integer', 'double', null, null, 'double'],
+  ['integer', 'integer', 'double', 'double', 'double'],
+  ['integer', 'integer', 'double', 'integer', 'double'],
+  ['integer', 'integer', 'double', 'long', 'double'],
+  ['integer', 'integer', 'integer', 'double', 'double'],
+  ['integer', 'integer', 'integer', 'integer', 'double'],
+  ['integer', 'integer', 'integer', 'long', 'double'],
+  ['integer', 'integer', 'long', 'double', 'double'],
+  ['integer', 'integer', 'long', 'integer', 'double'],
+  ['integer', 'integer', 'long', 'long', 'double'],
+  ['long', 'double', null, null, 'double'],
+  ['long', 'integer', 'double', 'double', 'double'],
+  ['long', 'integer', 'double', 'integer', 'double'],
+  ['long', 'integer', 'double', 'long', 'double'],
+  ['long', 'integer', 'integer', 'double', 'double'],
+  ['long', 'integer', 'integer', 'integer', 'double'],
+  ['long', 'integer', 'integer', 'long', 'double'],
+  ['long', 'integer', 'long', 'double', 'double'],
+  ['long', 'integer', 'long', 'integer', 'double'],
+  ['long', 'integer', 'long', 'long', 'double'],
+];
+
 const scalarSupportedCommandsAndOptions = {
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
@@ -36,7 +87,7 @@ const aggregationSupportedCommandsAndOptions = {
 
 // coalesce can be removed when a test is added for version type
 // (https://github.com/elastic/elasticsearch/pull/109032#issuecomment-2150033350)
-const excludedFunctions = new Set(['bucket', 'case', 'categorize']);
+const excludedFunctions = new Set(['case']);
 
 const extraFunctions: FunctionDefinition[] = [
   {
@@ -609,6 +660,38 @@ const replaceParamName = (str: string) => {
   }
 };
 
+const enrichGrouping = (
+  groupingFunctionDefinitions: FunctionDefinition[]
+): FunctionDefinition[] => {
+  return groupingFunctionDefinitions.map((op) => {
+    if (op.name === 'bucket') {
+      const signatures = [
+        ...bucketParameterTypes.map((signature) => {
+          const [fieldType, bucketType, fromType, toType, resultType] = signature;
+          return {
+            params: [
+              { name: 'field', type: fieldType },
+              { name: 'buckets', type: bucketType, constantOnly: true },
+              ...(fromType ? [{ name: 'startDate', type: fromType, constantOnly: true }] : []),
+              ...(toType ? [{ name: 'endDate', type: toType, constantOnly: true }] : []),
+            ],
+            returnType: resultType,
+          };
+        }),
+      ];
+      return {
+        ...op,
+        signatures,
+        supportedOptions: ['by'],
+      };
+    }
+    return {
+      ...op,
+      supportedOptions: ['by'],
+    };
+  });
+};
+
 const enrichOperators = (
   operatorsFunctionDefinitions: FunctionDefinition[]
 ): FunctionDefinition[] => {
@@ -686,7 +769,7 @@ const enrichOperators = (
 
 function printGeneratedFunctionsFile(
   functionDefinitions: FunctionDefinition[],
-  functionsType: 'aggregation' | 'scalar' | 'operators'
+  functionsType: 'aggregation' | 'scalar' | 'operators' | 'grouping'
 ) {
   /**
    * Deals with asciidoc internal cross-references in the function descriptions
@@ -823,6 +906,7 @@ ${functionsType === 'operators' ? `import { isNumericType } from '../../shared/e
   const scalarFunctionDefinitions: FunctionDefinition[] = [];
   const aggFunctionDefinitions: FunctionDefinition[] = [];
   const operatorDefinitions: FunctionDefinition[] = [];
+  const groupingFunctionDefinitions: FunctionDefinition[] = [];
 
   for (const ESDefinition of ESFunctionDefinitions) {
     if (aliases.has(ESDefinition.name) || excludedFunctions.has(ESDefinition.name)) {
@@ -843,6 +927,8 @@ ${functionsType === 'operators' ? `import { isNumericType } from '../../shared/e
       scalarFunctionDefinitions.push(functionDefinition);
     } else if (functionDefinition.type === 'agg') {
       aggFunctionDefinitions.push(functionDefinition);
+    } else if (functionDefinition.type === 'grouping') {
+      groupingFunctionDefinitions.push(functionDefinition);
     }
   }
 
@@ -859,5 +945,9 @@ ${functionsType === 'operators' ? `import { isNumericType } from '../../shared/e
   await writeFile(
     join(__dirname, '../src/definitions/generated/operators.ts'),
     printGeneratedFunctionsFile(enrichOperators(operatorDefinitions), 'operators')
+  );
+  await writeFile(
+    join(__dirname, '../src/definitions/generated/grouping_functions.ts'),
+    printGeneratedFunctionsFile(enrichGrouping(groupingFunctionDefinitions), 'grouping')
   );
 })();
