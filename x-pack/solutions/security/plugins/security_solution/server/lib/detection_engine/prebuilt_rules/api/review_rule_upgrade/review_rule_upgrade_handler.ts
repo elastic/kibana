@@ -10,9 +10,9 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { pickBy } from 'lodash';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import type {
+  ReviewRuleUpgradeRequestBody,
   ReviewRuleUpgradeResponseBody,
   RuleUpgradeInfoForReview,
-  RuleUpgradeStatsForReview,
   ThreeWayDiff,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { ThreeWayDiffOutcome } from '../../../../../../common/api/detection_engine/prebuilt_rules';
@@ -22,17 +22,20 @@ import { buildSiemResponse } from '../../../routes/utils';
 import { convertPrebuiltRuleAssetToRuleResponse } from '../../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response';
 import type { CalculateRuleDiffResult } from '../../logic/diff/calculate_rule_diff';
 import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
+import type { IPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
+import type { IPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
-import { fetchRuleVersionsTriad } from '../../logic/rule_versions/fetch_rule_versions_triad';
-import { getRuleGroups } from '../../model/rule_groups/get_rule_groups';
+import type { RuleVersionSpecifier } from '../../logic/rule_versions/rule_version_specifier';
+import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
 
 export const reviewRuleUpgradeHandler = async (
   context: SecuritySolutionRequestHandlerContext,
-  request: KibanaRequest,
+  request: KibanaRequest<undefined, undefined, ReviewRuleUpgradeRequestBody>,
   response: KibanaResponseFactory
 ) => {
   const siemResponse = buildSiemResponse(response);
+  const { page = 1, per_page: perPage = 10_000 } = request.body ?? {};
 
   try {
     const ctx = await context.resolve(['core', 'alerting']);
@@ -41,21 +44,23 @@ export const reviewRuleUpgradeHandler = async (
     const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
     const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
-    const ruleVersionsMap = await fetchRuleVersionsTriad({
+    const { diffResults, tags, totalUpgradeableRules } = await calculateUpgradeableRulesDiff({
       ruleAssetsClient,
       ruleObjectsClient,
-    });
-    const { upgradeableRules } = getRuleGroups(ruleVersionsMap);
-
-    const ruleDiffCalculationResults = upgradeableRules.map(({ current }) => {
-      const ruleVersions = ruleVersionsMap.get(current.rule_id);
-      invariant(ruleVersions != null, 'ruleVersions not found');
-      return calculateRuleDiff(ruleVersions);
+      page,
+      perPage,
     });
 
     const body: ReviewRuleUpgradeResponseBody = {
-      stats: calculateRuleStats(ruleDiffCalculationResults),
-      rules: calculateRuleInfos(ruleDiffCalculationResults),
+      stats: {
+        num_rules_to_upgrade_total: totalUpgradeableRules,
+        num_rules_with_conflicts: 0,
+        num_rules_with_non_solvable_conflicts: 0,
+        tags,
+      },
+      rules: calculateRuleInfos(diffResults),
+      page,
+      per_page: perPage,
     };
 
     return response.ok({ body });
@@ -67,37 +72,7 @@ export const reviewRuleUpgradeHandler = async (
     });
   }
 };
-const calculateRuleStats = (results: CalculateRuleDiffResult[]): RuleUpgradeStatsForReview => {
-  const allTags = new Set<string>();
 
-  const stats = results.reduce(
-    (acc, result) => {
-      acc.num_rules_to_upgrade_total += 1;
-
-      if (result.ruleDiff.num_fields_with_conflicts > 0) {
-        acc.num_rules_with_conflicts += 1;
-      }
-
-      if (result.ruleDiff.num_fields_with_non_solvable_conflicts > 0) {
-        acc.num_rules_with_non_solvable_conflicts += 1;
-      }
-
-      result.ruleVersions.input.current?.tags.forEach((tag) => allTags.add(tag));
-
-      return acc;
-    },
-    {
-      num_rules_to_upgrade_total: 0,
-      num_rules_with_conflicts: 0,
-      num_rules_with_non_solvable_conflicts: 0,
-    }
-  );
-
-  return {
-    ...stats,
-    tags: Array.from(allTags),
-  };
-};
 const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfoForReview[] => {
   return results.map((result) => {
     const { ruleDiff, ruleVersions } = result;
@@ -120,6 +95,7 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
       id: installedCurrentVersion.id,
       rule_id: installedCurrentVersion.rule_id,
       revision: installedCurrentVersion.revision,
+      version: installedCurrentVersion.version,
       current_rule: installedCurrentVersion,
       target_rule: targetRule,
       diff: {
@@ -136,3 +112,72 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
     };
   });
 };
+
+interface CalculateUpgradeableRulesDiffArgs {
+  ruleAssetsClient: IPrebuiltRuleAssetsClient;
+  ruleObjectsClient: IPrebuiltRuleObjectsClient;
+  page: number;
+  perPage: number;
+}
+
+const BATCH_SIZE = 100;
+
+async function calculateUpgradeableRulesDiff({
+  ruleAssetsClient,
+  ruleObjectsClient,
+  page,
+  perPage,
+}: CalculateUpgradeableRulesDiffArgs) {
+  const allLatestVersions = await ruleAssetsClient.fetchLatestVersions();
+  const latestVersionsMap = new Map(allLatestVersions.map((version) => [version.rule_id, version]));
+
+  const upgradeableRules: Array<{ rule: RuleResponse; targetVersion: RuleVersionSpecifier }> = [];
+  const allTags = new Set<string>();
+  let totalUpgradeableRules = 0;
+
+  // Fetch all installed rules that have a newer version available in batches to
+  // avoid loading all rules at once into memory. We need to iterate over all
+  // rules, even if the perPage limit is reached, to calculate the total number
+  // of upgradeable rules and all tags.
+  // TODO: Get rid of stats in this call and don't iterate over all rules. That should cover tha case when rule_ids are passed in the request.
+  let batchPage = 1;
+  while (true) {
+    const currentRulesBatch = await ruleObjectsClient.fetchAllInstalledRules({
+      page: batchPage,
+      perPage: BATCH_SIZE,
+    });
+    if (currentRulesBatch.length === 0) {
+      break;
+    }
+    currentRulesBatch.forEach((rule) => {
+      const targetVersion = latestVersionsMap.get(rule.rule_id);
+      if (targetVersion != null && rule.version < targetVersion.version) {
+        if (upgradeableRules.length < perPage) {
+          upgradeableRules.push({ rule, targetVersion });
+        }
+        rule.tags.forEach((tag) => allTags.add(tag));
+        totalUpgradeableRules += 1;
+      }
+    });
+    batchPage += 1;
+  }
+
+  // Zip current rules with their base and target versions
+  const currentRules = upgradeableRules.map(({ rule }) => rule);
+  const latestRules = await ruleAssetsClient.fetchAssetsByVersion(
+    upgradeableRules.map(({ targetVersion }) => targetVersion)
+  );
+  const baseRules = await ruleAssetsClient.fetchAssetsByVersion(currentRules);
+  const ruleVersionsMap = zipRuleVersions(currentRules, baseRules, latestRules);
+
+  // Calculate the diff between current, base, and target versions
+  const ruleDiffCalculationResults = [...ruleVersionsMap.values()].map((ruleVersions) =>
+    calculateRuleDiff(ruleVersions)
+  );
+
+  return {
+    diffResults: ruleDiffCalculationResults,
+    tags: Array.from(allTags),
+    totalUpgradeableRules,
+  };
+}
