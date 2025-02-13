@@ -191,7 +191,7 @@ export const SelfManagedWebCrawlersEmptyPrompt = () => {
         <>
           <EuiFlexItem>
             <EuiButton
-              data-test-subj="serverlessSearchEmptyConnectorsPromptCreateSelfManagedConnectorButton"
+              data-test-subj="serverlessSearchEmptyConnectorsPromptCreateSelfManagedWebCrawlerButton"
               fill
               iconType={githubIcon}
               href={'https://github.com/elastic/crawler'}
@@ -206,7 +206,7 @@ export const SelfManagedWebCrawlersEmptyPrompt = () => {
             <EuiFlexGroup direction="column" gutterSize="s" alignItems="center">
               <EuiFlexItem>
                 <EuiButton
-                  data-test-subj="serverlessSearchEmptyConnectorsPromptCreateElasticManagedConnectorButton"
+                  data-test-subj="serverlessSearchEmptyConnectorsPromptCreateElasticManagedWebCrawlerButton"
                   onClick={() =>
                     navigateToUrl(`${BASE_WEB_CRAWLERS_PATH}/${ELASTIC_MANAGED_WEB_CRAWLERS_PATH}`)
                   }
