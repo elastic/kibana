@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import {
   EuiComboBox,
@@ -73,7 +74,7 @@ export function ValueControlForm({
   onCreateControl,
   onEditControl,
 }: ValueControlFormProps) {
-  const mounted = useRef(false);
+  const isMounted = useMountedState();
   const valuesField = useMemo(() => {
     if (variableType === ESQLVariableType.VALUES) {
       return getValuesFromQueryField(queryString);
@@ -151,13 +152,6 @@ export function ValueControlForm({
       ? areValuesIntervalsValid(selectedValues.map((option) => option.label))
       : true;
   }, [variableType, selectedValues]);
-
-  useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
 
   useEffect(() => {
     const variableExists =
@@ -246,7 +240,7 @@ export function ValueControlForm({
           filter: undefined,
           dropNullColumns: true,
         }).then((results) => {
-          if (!mounted.current) {
+          if (!isMounted()) {
             return;
           }
           const columns = results.response.columns.map((col) => col.name);
@@ -273,7 +267,7 @@ export function ValueControlForm({
         setEsqlQueryErrors([e]);
       }
     },
-    [search]
+    [isMounted, search]
   );
 
   useEffect(() => {

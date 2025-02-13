@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import {
   EuiComboBox,
@@ -68,7 +69,7 @@ export function IdentifierControlForm({
   search,
   closeFlyout,
 }: IdentifierControlFormProps) {
-  const mounted = useRef(false);
+  const isMounted = useMountedState();
   const suggestedVariableName = useMemo(() => {
     const existingVariables = new Set(
       esqlVariables
@@ -107,13 +108,6 @@ export function IdentifierControlForm({
 
   const isControlInEditMode = useMemo(() => !!initialState, [initialState]);
 
-  useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-    };
-  }, []);
-
   useEffect(
     function initAvailableIdentifiersOptions() {
       if (availableIdentifiersOptions.length > 0) return;
@@ -123,7 +117,7 @@ export function IdentifierControlForm({
           esqlQuery: queryForFields,
           search,
         }).then((columns) => {
-          if (mounted.current) {
+          if (isMounted()) {
             setAvailableIdentifiersOptions(
               columns.map((col) => {
                 return {
@@ -147,7 +141,14 @@ export function IdentifierControlForm({
         setAvailableIdentifiersOptions(aggregatedFunctions);
       }
     },
-    [availableIdentifiersOptions.length, cursorPosition, queryString, search, variableType]
+    [
+      availableIdentifiersOptions.length,
+      cursorPosition,
+      isMounted,
+      queryString,
+      search,
+      variableType,
+    ]
   );
 
   useEffect(() => {
