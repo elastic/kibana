@@ -117,7 +117,8 @@
     "@kbn/data-service",
     "@kbn/ebt-tools",
     "@kbn/response-ops-rule-params",
-    "@kbn/controls-plugin"
+    "@kbn/controls-plugin",
+    "@kbn/core-http-browser"
   ],
   "exclude": ["target/**/*"]
 }
