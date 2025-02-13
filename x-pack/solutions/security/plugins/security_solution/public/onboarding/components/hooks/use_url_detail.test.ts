@@ -9,23 +9,28 @@ import { useUrlDetail, useSyncUrlDetails, getCardIdFromHash } from './use_url_de
 
 // --- Mocks for dependencies ---
 jest.mock('@kbn/security-solution-navigation', () => ({
+  ...jest.requireActual('@kbn/security-solution-navigation'),
   useNavigateTo: jest.fn(),
   SecurityPageName: { landing: 'landing' },
 }));
 
 jest.mock('./use_stored_state', () => ({
+  ...jest.requireActual('./use_stored_state'),
   useStoredUrlDetails: jest.fn(),
 }));
 
 jest.mock('./use_topic_id', () => ({
+  ...jest.requireActual('./use_topic_id'),
   useTopicId: jest.fn(),
 }));
 
 jest.mock('./use_cloud_topic_id', () => ({
+  ...jest.requireActual('./use_cloud_topic_id'),
   useCloudTopicId: jest.fn(),
 }));
 
 jest.mock('../onboarding_context', () => ({
+  ...jest.requireActual('../onboarding_context'),
   useOnboardingContext: jest.fn(),
 }));
 
