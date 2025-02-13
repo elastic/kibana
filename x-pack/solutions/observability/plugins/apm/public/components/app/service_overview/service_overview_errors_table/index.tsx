@@ -12,10 +12,11 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
 import { ErrorGroupList } from '../../error_group_overview/error_group_list';
+import type { TablesLoadedState } from '../apm_overview';
 
 interface Props {
   serviceName: string;
-  onLoadTable?: () => void;
+  onLoadTable?: (key: keyof TablesLoadedState) => void;
 }
 
 export function ServiceOverviewErrorsTable({ serviceName, onLoadTable }: Props) {

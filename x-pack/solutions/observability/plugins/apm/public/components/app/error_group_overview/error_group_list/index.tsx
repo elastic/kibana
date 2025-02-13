@@ -8,10 +8,10 @@
 import { EuiBadge, EuiIconTip, EuiToolTip, RIGHT_ALIGNMENT } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
-import React, { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { apmEnableTableSearchBar } from '@kbn/observability-plugin/common';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { FETCH_STATUS, isPending } from '../../../../hooks/use_fetcher';
+import { isPending, isSuccess } from '../../../../hooks/use_fetcher';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { asBigNumber } from '../../../../../common/utils/formatters';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
@@ -27,6 +27,7 @@ import { isTimeComparison } from '../../../shared/time_comparison/get_comparison
 import type { ErrorGroupItem } from './use_error_group_list_data';
 import { useErrorGroupListData } from './use_error_group_list_data';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
+import type { TablesLoadedState } from '../../service_overview/apm_overview';
 
 const GroupIdLink = styled(ErrorDetailLink)`
   font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
@@ -56,7 +57,7 @@ interface Props {
   comparisonEnabled?: boolean;
   saveTableOptionsToUrl?: boolean;
   showPerPageOptions?: boolean;
-  onLoadTable?: () => void;
+  onLoadTable?: (key: keyof TablesLoadedState) => void;
 }
 
 const defaultSorting = {
@@ -85,7 +86,6 @@ export function ErrorGroupList({
   const { offset, rangeFrom, rangeTo } = query;
 
   const [renderedItems, setRenderedItems] = useState<ErrorGroupItem[]>([]);
-  const hasTableLoaded = useRef(false);
   const [sorting, setSorting] = useState<TableOptions<ErrorGroupItem>['sort']>(defaultSorting);
 
   const {
@@ -103,13 +103,9 @@ export function ErrorGroupList({
   useEffect(() => {
     // this component is used both for the service overview tab and the errors tab,
     // onLoadTable will be defined if it's the service overview tab
-    if (
-      mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
-      detailedStatisticsStatus === FETCH_STATUS.SUCCESS &&
-      !hasTableLoaded.current
-    ) {
+    if (isSuccess(mainStatisticsStatus) && isSuccess(detailedStatisticsStatus)) {
       if (onLoadTable) {
-        onLoadTable();
+        onLoadTable('errors');
       } else {
         onPageReady({
           meta: {
@@ -118,15 +114,14 @@ export function ErrorGroupList({
           },
         });
       }
-      hasTableLoaded.current = true;
     }
   }, [
     mainStatisticsStatus,
     detailedStatisticsStatus,
-    onLoadTable,
     rangeFrom,
     rangeTo,
     onPageReady,
+    onLoadTable,
   ]);
 
   const columns = useMemo(() => {

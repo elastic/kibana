@@ -7,7 +7,7 @@
 import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { chartHeight } from '..';
 import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
@@ -36,6 +36,12 @@ import { useLocalStorage } from '../../../../hooks/use_local_storage';
 
 const latencyChartHeight = 200;
 
+export interface TablesLoadedState {
+  transactions: boolean;
+  dependencies: boolean;
+  errors: boolean;
+}
+
 export function ApmOverview() {
   const router = useApmRouter();
   const { serviceName, fallbackToTransactions, agentName, serverlessType } = useApmServiceContext();
@@ -45,7 +51,7 @@ export function ApmOverview() {
   } = useApmParams('/services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const [haveTablesLoaded, setHaveTablesLoaded] = useState({
+  const [haveTablesLoaded, setHaveTablesLoaded] = useState<TablesLoadedState>({
     transactions: false,
     dependencies: false,
     errors: false,
@@ -81,9 +87,9 @@ export function ApmOverview() {
     false
   );
 
-  const onLoadTable = (key: string) => {
+  const handleOnLoadTable = useCallback((key: keyof TablesLoadedState) => {
     setHaveTablesLoaded((currentValues) => ({ ...currentValues, [key]: true }));
-  };
+  }, []);
 
   return (
     <>
@@ -121,7 +127,7 @@ export function ApmOverview() {
                 kuery={kuery}
                 environment={environment}
                 fixedHeight={true}
-                onLoadTable={() => onLoadTable('transactions')}
+                onLoadTable={handleOnLoadTable}
                 start={start}
                 end={end}
                 showPerPageOptions={false}
@@ -147,7 +153,7 @@ export function ApmOverview() {
             <EuiPanel hasBorder={true}>
               <ServiceOverviewErrorsTable
                 serviceName={serviceName}
-                onLoadTable={() => onLoadTable('errors')}
+                onLoadTable={handleOnLoadTable}
               />
             </EuiPanel>
           </EuiFlexItem>
@@ -178,7 +184,7 @@ export function ApmOverview() {
             <EuiFlexItem grow={7}>
               <EuiPanel hasBorder={true}>
                 <ServiceOverviewDependenciesTable
-                  onLoadTable={() => onLoadTable('dependencies')}
+                  onLoadTable={handleOnLoadTable}
                   fixedHeight={true}
                   showPerPageOptions={false}
                   link={

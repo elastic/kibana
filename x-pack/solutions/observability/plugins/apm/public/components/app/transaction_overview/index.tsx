@@ -37,21 +37,8 @@ export function TransactionOverview() {
   } = useApmParams('/services/{serviceName}/transactions');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const [hasLoadedTable, setHasLoadedTable] = useState(false);
-  const { onPageReady } = usePerformanceContext();
   const { transactionType, fallbackToTransactions, serverlessType, serviceName } =
     useApmServiceContext();
-
-  useEffect(() => {
-    if (hasLoadedTable) {
-      onPageReady({
-        meta: {
-          rangeFrom,
-          rangeTo,
-        },
-      });
-    }
-  }, [hasLoadedTable, onPageReady, rangeFrom, rangeTo]);
 
   const history = useHistory();
 
@@ -122,7 +109,6 @@ export function TransactionOverview() {
           hideViewTransactionsLink
           numberOfTransactionsPerPage={10}
           showMaxTransactionGroupsExceededWarning
-          onLoadTable={() => setHasLoadedTable(true)}
           environment={environment}
           kuery={kuery}
           start={start}

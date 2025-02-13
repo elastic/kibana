@@ -8,6 +8,7 @@
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -30,6 +31,7 @@ import { OverviewTableContainer } from '../overview_table_container';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { getColumns } from './get_columns';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import type { TablesLoadedState } from '../../app/service_overview/apm_overview';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -55,7 +57,7 @@ interface Props {
   end: string;
   saveTableOptionsToUrl?: boolean;
   showSparkPlots?: boolean;
-  onLoadTable?: () => void;
+  onLoadTable?: (key: keyof TablesLoadedState) => void;
 }
 
 export function TransactionsTable({
@@ -91,8 +93,8 @@ export function TransactionsTable({
   const shouldShowSparkPlots = showSparkPlots ?? !isLarge;
   const { transactionType, serviceName } = useApmServiceContext();
   const [searchQuery, setSearchQueryDebounced] = useStateDebounced('');
-  const [hasTableLoaded, setHasTableLoaded] = useState(false);
   const [renderedItems, setRenderedItems] = useState<ApiResponse['transactionGroups']>([]);
+  const { onPageReady } = usePerformanceContext();
 
   const { mainStatistics, mainStatisticsStatus, detailedStatistics, detailedStatisticsStatus } =
     useTableData({
@@ -112,14 +114,20 @@ export function TransactionsTable({
   useEffect(() => {
     if (
       mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
-      detailedStatisticsStatus === FETCH_STATUS.SUCCESS &&
-      onLoadTable &&
-      !hasTableLoaded
+      detailedStatisticsStatus === FETCH_STATUS.SUCCESS
     ) {
-      onLoadTable();
-      setHasTableLoaded(true);
+      if (onLoadTable) {
+        onLoadTable('transactions');
+      } else {
+        onPageReady({
+          meta: {
+            rangeFrom: start,
+            rangeTo: end,
+          },
+        });
+      }
     }
-  }, [mainStatisticsStatus, detailedStatisticsStatus, onLoadTable, hasTableLoaded]);
+  }, [mainStatisticsStatus, detailedStatisticsStatus, onLoadTable, end, start, onPageReady]);
 
   const columns = useMemo(() => {
     return getColumns({
