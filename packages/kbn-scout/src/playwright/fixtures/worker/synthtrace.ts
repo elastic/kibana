@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   ApmSynthtraceEsClient,
   OtelSynthtraceEsClient,
-  createLogger,
-  LogLevel,
-  ApmSynthtraceKibanaClient,
   InfraSynthtraceEsClient,
-  InfraSynthtraceKibanaClient,
 } from '@kbn/apm-synthtrace';
 import { Readable } from 'stream';
 import type { ApmFields, InfraDocument, OtelDocument } from '@kbn/apm-synthtrace-client';
 import Url from 'url';
+import {
+  getApmSynthtraceEsClient,
+  getInfraSynthtraceEsClient,
+  getOtelSynthtraceEsClient,
+} from '../../../common/services/synthtrace';
 import { coreWorkerFixtures } from './core_fixtures';
 import type { SynthtraceEvents } from '../../global_hooks/synthtrace_ingestion';
 
@@ -39,8 +40,7 @@ export interface SynthtraceFixture {
 
 export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture>({
   apmSynthtraceEsClient: [
-    async ({ esClient, config, kbnUrl }, use) => {
-      const logger = createLogger(LogLevel.info);
+    async ({ esClient, config, kbnUrl, log }, use) => {
       const { username, password } = config.auth;
       const kibanaUrl = new URL(kbnUrl.get());
       const kibanaUrlWithAuth = Url.format({
@@ -50,101 +50,64 @@ export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture
         auth: `${username}:${password}`,
       });
 
-      const apmSynthtraceKibanaClient = new ApmSynthtraceKibanaClient({
-        logger,
-        target: kibanaUrlWithAuth,
-      });
-
-      const version = await apmSynthtraceKibanaClient.fetchLatestApmPackageVersion();
-      await apmSynthtraceKibanaClient.installApmPackage(version);
-      const synthtraceEsClient = new ApmSynthtraceEsClient({
-        client: esClient,
-        logger,
-        refreshAfterIndex: true,
-        version,
-      });
-
-      synthtraceEsClient.pipeline(
-        synthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
+      const apmSynthtraceEsClient = await getApmSynthtraceEsClient(
+        esClient,
+        kibanaUrlWithAuth,
+        log
       );
 
       const index = async (events: SynthtraceEvents<ApmFields>) =>
-        await synthtraceEsClient.index(
+        await apmSynthtraceEsClient.index(
           Readable.from(Array.from(events).flatMap((event) => event.serialize()))
         );
 
-      const clean = async () => await synthtraceEsClient.clean();
+      const clean = async () => await apmSynthtraceEsClient.clean();
 
       await use({ index, clean });
 
       // cleanup function after all tests have ran
-      await clean();
+      await apmSynthtraceEsClient.clean();
     },
     { scope: 'worker' },
   ],
   infraSynthtraceEsClient: [
-    async ({ esClient, config, kbnUrl }, use) => {
-      const logger = createLogger(LogLevel.info);
-      const { username, password } = config.auth;
-
-      const infraSynthtraceKibanaClient = new InfraSynthtraceKibanaClient({
-        logger,
-        target: kbnUrl.get(),
-        username,
-        password,
-      });
-
-      const version = await infraSynthtraceKibanaClient.fetchLatestSystemPackageVersion();
-      await infraSynthtraceKibanaClient.installSystemPackage(version);
-      const synthtraceEsClient = new InfraSynthtraceEsClient({
-        client: esClient,
-        logger,
-        refreshAfterIndex: true,
-      });
-
-      synthtraceEsClient.pipeline(
-        synthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
+    async ({ esClient, config, kbnUrl, log }, use) => {
+      const infraSynthtraceEsClient = await getInfraSynthtraceEsClient(
+        esClient,
+        kbnUrl.get(),
+        config.auth,
+        log
       );
 
       const index = async (events: SynthtraceEvents<InfraDocument>) =>
-        await synthtraceEsClient.index(
+        await infraSynthtraceEsClient.index(
           Readable.from(Array.from(events).flatMap((event) => event.serialize()))
         );
 
-      const clean = async () => await synthtraceEsClient.clean();
+      const clean = async () => await infraSynthtraceEsClient.clean();
 
       await use({ index, clean });
 
       // cleanup function after all tests have ran
-      await synthtraceEsClient.clean();
+      await infraSynthtraceEsClient.clean();
     },
     { scope: 'worker' },
   ],
   otelSynthtraceEsClient: [
-    async ({ esClient }, use) => {
-      const logger = createLogger(LogLevel.info);
-
-      const synthtraceEsClient = new OtelSynthtraceEsClient({
-        client: esClient,
-        logger,
-        refreshAfterIndex: true,
-      });
-
-      synthtraceEsClient.pipeline(
-        synthtraceEsClient.getDefaultPipeline({ includeSerialization: false })
-      );
+    async ({ esClient, log }, use) => {
+      const otelSynthtraceEsClient = await getOtelSynthtraceEsClient(esClient, log);
 
       const index = async (events: SynthtraceEvents<OtelDocument>) =>
-        await synthtraceEsClient.index(
+        await otelSynthtraceEsClient.index(
           Readable.from(Array.from(events).flatMap((event) => event.serialize()))
         );
 
-      const clean = async () => await synthtraceEsClient.clean();
+      const clean = async () => await otelSynthtraceEsClient.clean();
 
       await use({ index, clean });
 
       // cleanup function after all tests have ran
-      await synthtraceEsClient.clean();
+      await otelSynthtraceEsClient.clean();
     },
     { scope: 'worker' },
   ],
