@@ -43,6 +43,7 @@ import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
 import { suggest as suggestForStats } from '../autocomplete/commands/stats';
 import { suggest as suggestForWhere } from '../autocomplete/commands/where';
 import { suggest as suggestForJoin } from '../autocomplete/commands/join';
+import { suggest as suggestForFrom } from '../autocomplete/commands/from';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -208,11 +209,11 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     examples: ['from logs', 'from logs-*', 'from logs_*, events-*'],
     options: [metadataOption],
     modes: [],
-    hasRecommendedQueries: true,
     signature: {
       multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
     },
+    suggest: suggestForFrom,
   },
   {
     name: 'show',
