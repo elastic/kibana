@@ -12,11 +12,8 @@ import {
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
 } from '../../../../../../../common/api/detection_engine';
-import {
-  mockRuleUpgradeReviewData,
-  renderRuleUpgradeFlyout,
-  toggleFieldAccordion,
-} from './mock/helpers';
+import { mockRuleUpgradeReviewData, renderRuleUpgradeFlyout } from './mock/rule_upgrade_flyout';
+import { toggleFieldAccordion } from './mock/rule_upgrade_helpers';
 
 describe('Rule upgrade preview', () => {
   beforeAll(() => {

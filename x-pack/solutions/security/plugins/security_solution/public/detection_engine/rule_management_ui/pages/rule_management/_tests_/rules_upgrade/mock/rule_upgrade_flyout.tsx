@@ -6,15 +6,26 @@
  */
 
 import React from 'react';
-import { render, act, fireEvent, within, screen } from '@testing-library/react';
+import type { PropsWithChildren } from 'react';
+import { render, act, fireEvent, screen } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import { SecurityPageName } from '@kbn/deeplinks-security';
+import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
+import { RulesPage } from '../../..';
 import {
+  GET_PREBUILT_RULES_STATUS_URL,
+  REVIEW_RULE_UPGRADE_URL,
+  ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
   ThreeWayMergeOutcome,
-  ThreeWayDiffConflict,
 } from '../../../../../../../../common/api/detection_engine';
-import { reviewRuleUpgrade } from '../../../../../../rule_management/api/api';
-import { RulesPage } from '../../..';
-import { TestRuleUpgradeProviders } from './test_rule_upgrade_provides';
+import { TestProviders } from '../../../../../../../common/mock';
+import { RouterSpyStateContext } from '../../../../../../../common/utils/route/helpers';
+import { AllRulesTabs } from '../../../../../components/rules_table/rules_table_toolbar';
+import { KibanaServices } from '../../../../../../../common/lib/kibana';
+
+/** **********************************************/
+// Mocks necessary to render Rule Upgrade Flyout
 
 // Enable Prebuilt Rules Customization feature
 jest.mock('../../../../../../../../common/experimental_features', () => {
@@ -30,27 +41,27 @@ jest.mock('../../../../../../../../common/experimental_features', () => {
 });
 jest.mock('../../../../../../../detections/components/user_info');
 jest.mock('../../../../../../../detections/containers/detection_engine/lists/use_lists_config');
-jest.mock('../../../../../../rule_management/api/api', () => ({
-  getPrebuiltRulesStatus: jest.fn().mockResolvedValue({
+/** **********************************************/
+
+/**
+ * Stores KibanaServices.get().http.fetch() mocked responses.
+ */
+const mockedResponses = new Map<string, unknown>();
+
+export async function renderRuleUpgradeFlyout(): Promise<ReturnType<typeof render>> {
+  (KibanaServices.get().http.fetch as jest.Mock).mockImplementation((requestedPath) =>
+    mockedResponses.get(requestedPath)
+  );
+
+  mockKibanaFetchResponse(GET_PREBUILT_RULES_STATUS_URL, {
     stats: {
       num_prebuilt_rules_installed: 1,
       num_prebuilt_rules_to_install: 0,
       num_prebuilt_rules_to_upgrade: 1,
       num_prebuilt_rules_total_in_package: 1,
     },
-  }),
-  reviewRuleUpgrade: jest.fn().mockResolvedValue({
-    stats: {
-      num_rules_to_upgrade_total: 1,
-      num_rules_with_conflicts: 0,
-      num_rules_with_non_solvable_conflicts: 0,
-      tags: [],
-    },
-    rules: [],
-  }),
-}));
+  });
 
-export async function renderRuleUpgradeFlyout(): Promise<ReturnType<typeof render>> {
   const renderResult = render(<RulesPage />, {
     wrapper: TestRuleUpgradeProviders,
   });
@@ -58,20 +69,6 @@ export async function renderRuleUpgradeFlyout(): Promise<ReturnType<typeof rende
   await openRuleUpgradeFlyout();
 
   return renderResult;
-}
-
-export function toggleFieldAccordion(fieldWrapper: HTMLElement): void {
-  act(() => {
-    const accordionButton = within(fieldWrapper).getAllByRole('button')[0];
-
-    fireEvent.click(accordionButton);
-  });
-}
-
-async function openRuleUpgradeFlyout(): Promise<void> {
-  await act(async () => {
-    fireEvent.click(await screen.findByTestId('ruleName'));
-  });
 }
 
 interface MockRuleUpgradeReviewDataParams {
@@ -94,7 +91,7 @@ export function mockRuleUpgradeReviewData({
   diffOutcome,
   conflict,
 }: MockRuleUpgradeReviewDataParams): void {
-  (reviewRuleUpgrade as jest.Mock).mockResolvedValue({
+  mockKibanaFetchResponse(REVIEW_RULE_UPGRADE_URL, {
     stats: {
       num_rules_to_upgrade_total: 1,
       num_rules_with_conflicts:
@@ -147,36 +144,39 @@ export function mockRuleUpgradeReviewData({
   });
 }
 
-export function switchToFieldEdit(wrapper: HTMLElement): void {
-  act(() => {
-    fireEvent.click(within(wrapper).getByRole('button', { name: 'Edit' }));
-  });
+/**
+ * Mocks KibanaServices.get().http.fetch() responses. Works in combination with renderRuleUpgradeFlyout.
+ */
+function mockKibanaFetchResponse(path: string, mockResponse: unknown): void {
+  mockedResponses.set(path, mockResponse);
 }
 
-export function cancelFieldEdit(wrapper: HTMLElement): void {
-  act(() => {
-    fireEvent.click(within(wrapper).getByRole('button', { name: 'Cancel' }));
-  });
+function TestRuleUpgradeProviders({ children }: PropsWithChildren<{}>): JSX.Element {
+  return (
+    <KibanaErrorBoundaryProvider analytics={undefined}>
+      <RouterSpyStateContext.Provider
+        value={[
+          {
+            pageName: SecurityPageName.rules,
+            detailName: undefined,
+            tabName: AllRulesTabs.updates,
+            search: '',
+            pathName: '/',
+            state: undefined,
+          },
+          jest.fn(),
+        ]}
+      >
+        <MemoryRouter>
+          <TestProviders>{children}</TestProviders>
+        </MemoryRouter>
+      </RouterSpyStateContext.Provider>
+    </KibanaErrorBoundaryProvider>
+  );
 }
 
-interface SetResolvedNameOptions {
-  saveButtonText: string;
-}
-
-export async function setResolvedName(
-  wrapper: HTMLElement,
-  value: string,
-  options: SetResolvedNameOptions = {
-    saveButtonText: 'Save',
-  }
-): Promise<void> {
+async function openRuleUpgradeFlyout(): Promise<void> {
   await act(async () => {
-    fireEvent.change(within(wrapper).getByTestId('input'), {
-      target: { value },
-    });
-  });
-
-  await act(async () => {
-    fireEvent.click(within(wrapper).getByRole('button', { name: options.saveButtonText }));
+    fireEvent.click(await screen.findByTestId('ruleName'));
   });
 }

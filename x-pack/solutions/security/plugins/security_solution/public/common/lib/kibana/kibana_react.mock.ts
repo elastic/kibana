@@ -59,6 +59,7 @@ import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { calculateBounds } from '@kbn/data-plugin/common';
 import { alertingPluginMock } from '@kbn/alerting-plugin/public/mocks';
 import { createTelemetryServiceMock } from '../telemetry/telemetry_service.mock';
+import { KibanaServices } from './services';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -286,6 +287,14 @@ export const createWithKibanaMock = () => {
 
 export const createKibanaContextProviderMock = () => {
   const services = createStartServicesMock();
+
+  KibanaServices.init({
+    ...services,
+    kibanaBranch: 'test',
+    kibanaVersion: 'test',
+    buildFlavor: 'test',
+    prebuiltRulesPackageVersion: 'test',
+  });
 
   // eslint-disable-next-line react/display-name
   return ({

@@ -10,14 +10,13 @@ import {
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,
 } from '../../../../../../../common/api/detection_engine';
+import { VersionsPickerOptionEnum } from '../../../../../rule_management/components/rule_details/three_way_diff/comparison_side/versions_picker/versions_picker';
+import { mockRuleUpgradeReviewData, renderRuleUpgradeFlyout } from './mock/rule_upgrade_flyout';
 import {
-  mockRuleUpgradeReviewData,
-  renderRuleUpgradeFlyout,
   setResolvedName,
   switchToFieldEdit,
   toggleFieldAccordion,
-} from './mock/helpers';
-import { VersionsPickerOptionEnum } from '../../../../../rule_management/components/rule_details/three_way_diff/comparison_side/versions_picker/versions_picker';
+} from './mock/rule_upgrade_helpers';
 
 describe('Rule upgrade preview Diff View options', () => {
   describe('non-customized field w/ an upgrade (AAB)', () => {
