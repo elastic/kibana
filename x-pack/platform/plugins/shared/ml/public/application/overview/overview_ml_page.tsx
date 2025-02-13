@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiCardProps } from '@elastic/eui';
 import {
@@ -22,6 +22,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
@@ -31,6 +32,8 @@ import { AnomalyDetectionOverviewCard } from './components/anomaly_detection_ove
 import { DataFrameAnalyticsOverviewCard } from './components/data_frame_analytics_overview';
 import { useEnabledFeatures } from '../contexts/ml';
 import { DataVisualizerGrid } from './data_visualizer_grid';
+import { CardTitle } from '../components/overview/ml_empty_prompt_card';
+import { ESQLTryItNowCard } from '../datavisualizer/datavisualizer_selector';
 
 export const overviewPanelDefaultState = Object.freeze({
   nodes: true,
@@ -73,7 +76,7 @@ export const MLOverviewCard = ({
             onClick={() => navigateToPath(path)}
           />
         }
-        title={title}
+        title={<CardTitle>{title}</CardTitle>}
       >
         <EuiFlexItem grow={true}>
           <EuiSpacer size="m" />
@@ -96,11 +99,12 @@ export const MLOverviewCard = ({
 
 export const OverviewPage: FC = () => {
   const {
-    services: { docLinks },
+    services: { docLinks, uiSettings },
   } = useMlKibana();
   const { isADEnabled, isDFAEnabled } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.guide;
   const navigateToPath = useNavigateToPath();
+  const isEsqlEnabled = useMemo(() => uiSettings.get(ENABLE_ESQL), [uiSettings]);
 
   return (
     <>
@@ -118,11 +122,11 @@ export const OverviewPage: FC = () => {
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
               <EuiTitle size="s">
-                <h3>
+                <h2>
                   {i18n.translate('xpack.ml.overview.analyzeYourDataTitle', {
                     defaultMessage: 'Analyze your data',
                   })}
-                </h3>
+                </h2>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexGroup gutterSize="m" responsive={true} wrap={true}>
@@ -143,11 +147,11 @@ export const OverviewPage: FC = () => {
 
           <EuiFlexGroup direction="column">
             <EuiTitle size="s">
-              <h3>
+              <h2>
                 {i18n.translate('xpack.ml.overview.aiopsLabsTitle', {
                   defaultMessage: 'AIOps Labs',
                 })}
-              </h3>
+              </h2>
             </EuiTitle>
             <EuiFlexGrid gutterSize="m" columns={3}>
               <EuiFlexItem>
@@ -167,10 +171,12 @@ export const OverviewPage: FC = () => {
                     />
                   }
                   title={
-                    <FormattedMessage
-                      id="xpack.ml.overview.logRateAnalysis.title"
-                      defaultMessage="Log Rate Analysis"
-                    />
+                    <CardTitle>
+                      <FormattedMessage
+                        id="xpack.ml.overview.logRateAnalysis.title"
+                        defaultMessage="Log Rate Analysis"
+                      />
+                    </CardTitle>
                   }
                   description={
                     <>
@@ -214,10 +220,12 @@ export const OverviewPage: FC = () => {
                     />
                   }
                   title={
-                    <FormattedMessage
-                      id="xpack.ml.overview.logPatternAnalysisTitle"
-                      defaultMessage="Log Pattern Analysis"
-                    />
+                    <CardTitle>
+                      <FormattedMessage
+                        id="xpack.ml.overview.logPatternAnalysisTitle"
+                        defaultMessage="Log Pattern Analysis"
+                      />
+                    </CardTitle>
                   }
                   description={
                     <>
@@ -260,10 +268,12 @@ export const OverviewPage: FC = () => {
                     />
                   }
                   title={
-                    <FormattedMessage
-                      id="xpack.ml.overview.changePointDetection.title"
-                      defaultMessage="Change Point Detection"
-                    />
+                    <CardTitle>
+                      <FormattedMessage
+                        id="xpack.ml.overview.changePointDetection.title"
+                        defaultMessage="Change Point Detection"
+                      />
+                    </CardTitle>
                   }
                   description={
                     <>
@@ -300,13 +310,18 @@ export const OverviewPage: FC = () => {
           <EuiSpacer size="s" />
           <EuiFlexGroup direction="column">
             <EuiTitle size="s">
-              <h3>
+              <h2>
                 {i18n.translate('xpack.ml.overview.visualizeYourDataTitle', {
                   defaultMessage: 'Visualize your data',
                 })}
-              </h3>
+              </h2>
             </EuiTitle>
-            <DataVisualizerGrid />
+            <EuiFlexGroup direction="column">
+              {isEsqlEnabled ? <ESQLTryItNowCard /> : null}
+              <EuiFlexItem>
+                <DataVisualizerGrid buttonType="full" />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexGroup>
         </EuiFlexGroup>
         <HelpMenu docLink={helpLink} />

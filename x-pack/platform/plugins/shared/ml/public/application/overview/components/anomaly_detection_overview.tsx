@@ -8,7 +8,8 @@
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiButtonEmpty, EuiEmptyPrompt, EuiImage, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { MlSummaryJobs } from '../../../../common/types/anomaly_detection_jobs';
 import { ML_PAGES } from '../../../locator';
 import adImage from '../../jobs/jobs_list/components/anomaly_detection_empty_state/anomaly_detection_kibana.png';
@@ -16,6 +17,7 @@ import { usePermissionCheck } from '../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../ml_nodes_check';
 import { useMlApi, useMlLocator, useMlManagementLocator } from '../../contexts/kibana';
 import { AnomalyDetectionEmptyState } from '../../jobs/jobs_list/components/anomaly_detection_empty_state/anomaly_detection_empty_state';
+import { MLEmptyPromptCard } from '../../components/overview/ml_empty_prompt_card';
 
 export const AnomalyDetectionOverviewCard: FC = () => {
   const [canGetJobs, canCreateJob] = usePermissionCheck(['canGetJobs', 'canCreateJob']);
@@ -76,8 +78,8 @@ export const AnomalyDetectionOverviewCard: FC = () => {
           data-test-subj="multiMetricExplorerButton"
         >
           <FormattedMessage
-            id="xpack.ml.overview.anomalyDetection.multiMetricExplorerButtonText"
-            defaultMessage="Multi-metric explorer"
+            id="xpack.ml.overview.anomalyDetection.anomalyExplorerButtonText"
+            defaultMessage="Anomaly explorer"
           />
         </EuiButton>
       );
@@ -109,26 +111,20 @@ export const AnomalyDetectionOverviewCard: FC = () => {
     redirectToManageJobs,
   ]);
 
-  const { euiTheme } = useEuiTheme();
   return showEmptyState ? (
     <AnomalyDetectionEmptyState />
   ) : (
-    <EuiEmptyPrompt
-      css={{
-        '.euiEmptyPrompt__main': { height: '100%', minWidth: euiTheme.breakpoint.m },
-      }}
+    <MLEmptyPromptCard
       layout="horizontal"
       hasBorder={true}
       hasShadow={false}
-      icon={<EuiImage size="fullWidth" src={adImage} alt="anomaly_detection" />}
-      title={
-        <h4>
-          <FormattedMessage
-            id="xpack.ml.overview.anomalyDetection.createFirstJobMessage"
-            defaultMessage="Spot anomalies faster"
-          />
-        </h4>
-      }
+      iconSrc={adImage}
+      iconAlt={i18n.translate('xpack.ml.overview.anomalyDetection.title', {
+        defaultMessage: 'Anomaly detection',
+      })}
+      title={i18n.translate('xpack.ml.overview.anomalyDetection.createFirstJobMessage', {
+        defaultMessage: 'Spot anomalies faster',
+      })}
       body={
         <p>
           <FormattedMessage

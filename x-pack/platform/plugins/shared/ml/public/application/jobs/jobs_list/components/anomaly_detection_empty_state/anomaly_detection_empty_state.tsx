@@ -45,12 +45,9 @@ export const AnomalyDetectionEmptyState: FC = () => {
       iconAlt={i18n.translate('xpack.ml.overview.anomalyDetection.title', {
         defaultMessage: 'Anomaly detection',
       })}
-      title={
-        <FormattedMessage
-          id="xpack.ml.overview.anomalyDetection.createFirstJobMessage"
-          defaultMessage="Spot anomalies faster"
-        />
-      }
+      title={i18n.translate('xpack.ml.overview.anomalyDetection.createFirstJobMessage', {
+        defaultMessage: 'Spot anomalies faster',
+      })}
       body={
         <FormattedMessage
           id="xpack.ml.overview.anomalyDetection.emptyPromptText"

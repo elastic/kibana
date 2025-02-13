@@ -39,7 +39,7 @@ export const DataVisualizerGrid: FC<{ buttonType?: 'empty' | 'full' }> = ({ butt
         defaultMessage: 'Visualize data from a data view',
       })}
       description={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewTitle', {
-        defaultMessage: 'Analyze data and its shape from a data view',
+        defaultMessage: 'Analyze data, its shape, and statistical metadata from a data view.',
       })}
       iconType="dataVisualizer"
       buttonLabel={i18n.translate('xpack.ml.datavisualizer.selector.selectDataViewButtonLabel', {

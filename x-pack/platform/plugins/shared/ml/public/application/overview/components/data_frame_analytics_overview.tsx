@@ -103,12 +103,9 @@ export const DataFrameAnalyticsOverviewCard: FC = () => {
       iconAlt={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
         defaultMessage: 'Trained analysis of your data',
       })}
-      title={
-        <FormattedMessage
-          id="xpack.ml.dataFrame.analyticsList.emptyPromptTitle"
-          defaultMessage="Trained analysis of your data"
-        />
-      }
+      title={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
+        defaultMessage: 'Trained analysis of your data',
+      })}
       body={
         <FormattedMessage
           id="xpack.ml.overview.analyticsList.emptyPromptText"

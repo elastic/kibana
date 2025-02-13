@@ -19,7 +19,6 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle,
   EuiBetaBadge,
 } from '@elastic/eui';
 
@@ -33,6 +32,7 @@ import { MlPageHeader } from '../components/page_header';
 import { ML_PAGES } from '../../locator';
 import esqlImage from './images/esql-overview-ml.svg';
 import { DataVisualizerGrid } from '../overview/data_visualizer_grid';
+import { CardTitle } from '../components/overview/ml_empty_prompt_card';
 
 function startTrialDescription() {
   return (
@@ -55,6 +55,75 @@ function startTrialDescription() {
   );
 }
 
+export const ESQLTryItNowCard: FC = () => {
+  const navigateToPath = useNavigateToPath();
+
+  return (
+    <EuiFlexItem>
+      <EuiPanel hasShadow={false} hasBorder>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem>
+            <EuiImage size="fullWidth" src={esqlImage} alt={'ES|QL input image'} />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem>
+                <EuiFlexGroup gutterSize="xs">
+                  <EuiFlexItem grow={false}>
+                    <CardTitle>
+                      <FormattedMessage
+                        id="xpack.ml.datavisualizer.selector.selectESQLTitle"
+                        defaultMessage="ES|QL"
+                      />
+                    </CardTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge
+                      label=""
+                      iconType="beaker"
+                      size="m"
+                      color="hollow"
+                      tooltipContent={
+                        <FormattedMessage
+                          id="xpack.ml.datavisualizer.selector.esqlTechnicalPreviewBadge.titleMsg"
+                          defaultMessage="ES|QL data visualizer is in technical preview."
+                        />
+                      }
+                      tooltipPosition={'right'}
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText>
+                  <FormattedMessage
+                    id="xpack.ml.datavisualizer.selector.technicalPreviewBadge.contentMsg"
+                    defaultMessage="The Elasticsearch Query Language (ES|QL) provides a powerful way to filter, transform, and analyze data stored in Elastic Search."
+                  />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <div>
+                  <EuiButton
+                    fill
+                    target="_self"
+                    onClick={() => navigateToPath(ML_PAGES.DATA_VISUALIZER_ESQL)}
+                    data-test-subj="mlDataVisualizerSelectESQLButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.ml.datavisualizer.selector.tryESQLNowButtonLabel"
+                      defaultMessage="Try it now!"
+                    />
+                  </EuiButton>
+                </div>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </EuiFlexItem>
+  );
+};
 export const DatavisualizerSelector: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 
@@ -69,7 +138,6 @@ export const DatavisualizerSelector: FC = () => {
   } = useMlKibana();
   const isEsqlEnabled = useMemo(() => uiSettings.get(ENABLE_ESQL), [uiSettings]);
   const helpLink = docLinks.links.ml.guide;
-  const navigateToPath = useNavigateToPath();
 
   const startTrialVisible =
     licenseManagement !== undefined &&
@@ -105,73 +173,7 @@ export const DatavisualizerSelector: FC = () => {
         </EuiFlexGroup>
         <EuiSpacer size="xl" />
         <EuiFlexGroup direction="column">
-          {isEsqlEnabled ? (
-            <EuiFlexItem>
-              <EuiPanel hasShadow={false} hasBorder>
-                <EuiFlexGroup alignItems="center">
-                  <EuiFlexItem>
-                    <EuiImage size="fullWidth" src={esqlImage} alt={'ES|QL input image'} />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFlexGroup direction="column">
-                      <EuiFlexItem>
-                        <EuiFlexGroup gutterSize="xs">
-                          <EuiFlexItem grow={false}>
-                            <EuiTitle size="m">
-                              <h3>
-                                <FormattedMessage
-                                  id="xpack.ml.datavisualizer.selector.selectESQLTitle"
-                                  defaultMessage="ES|QL"
-                                />
-                              </h3>
-                            </EuiTitle>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiBetaBadge
-                              label=""
-                              iconType="beaker"
-                              size="m"
-                              color="hollow"
-                              tooltipContent={
-                                <FormattedMessage
-                                  id="xpack.ml.datavisualizer.selector.esqlTechnicalPreviewBadge.titleMsg"
-                                  defaultMessage="ES|QL data visualizer is in technical preview."
-                                />
-                              }
-                              tooltipPosition={'right'}
-                            />
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiText>
-                          <FormattedMessage
-                            id="xpack.ml.datavisualizer.selector.technicalPreviewBadge.contentMsg"
-                            defaultMessage="The Elasticsearch Query Language (ES|QL) provides a powerful way to filter, transform, and analyze data stored in Elastic Search."
-                          />
-                        </EuiText>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <div>
-                          <EuiButton
-                            fill
-                            target="_self"
-                            onClick={() => navigateToPath(ML_PAGES.DATA_VISUALIZER_ESQL)}
-                            data-test-subj="mlDataVisualizerSelectESQLButton"
-                          >
-                            <FormattedMessage
-                              id="xpack.ml.datavisualizer.selector.tryESQLNowButtonLabel"
-                              defaultMessage="Try it now!"
-                            />
-                          </EuiButton>
-                        </div>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            </EuiFlexItem>
-          ) : null}
+          {isEsqlEnabled ? <ESQLTryItNowCard /> : null}
           <EuiFlexItem>
             <DataVisualizerGrid buttonType="full" />
           </EuiFlexItem>

@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import dfaImage from './data_frame_analytics_kibana.png';
@@ -16,6 +16,17 @@ import { useMlKibana, useMlManagementLocator } from '../../../../../contexts/kib
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import { usePermissionCheck } from '../../../../../capabilities/check_capabilities';
 import { MLEmptyPromptCard } from '../../../../../components/overview/ml_empty_prompt_card';
+
+export const TrainedAnalysisTitle = () => (
+  <EuiTitle size="s">
+    <h3>
+      <FormattedMessage
+        id="xpack.ml.dataFrame.analyticsList.emptyPromptTitle"
+        defaultMessage="Trained analysis of your data"
+      />
+    </h3>
+  </EuiTitle>
+);
 
 export const AnalyticsEmptyPrompt: FC = () => {
   const {
@@ -47,12 +58,9 @@ export const AnalyticsEmptyPrompt: FC = () => {
       iconAlt={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
         defaultMessage: 'Trained analysis of your data',
       })}
-      title={
-        <FormattedMessage
-          id="xpack.ml.dataFrame.analyticsList.emptyPromptTitle"
-          defaultMessage="Trained analysis of your data"
-        />
-      }
+      title={i18n.translate('xpack.ml.dataFrame.analyticsList.emptyPromptTitle', {
+        defaultMessage: 'Trained analysis of your data',
+      })}
       body={
         <FormattedMessage
           id="xpack.ml.overview.analyticsList.emptyPromptText"
