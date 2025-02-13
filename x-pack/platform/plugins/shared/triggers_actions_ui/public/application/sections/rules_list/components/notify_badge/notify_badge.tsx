@@ -85,7 +85,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       return newState;
     });
   }, []);
-  const openPopover = useCallback(() => setIsPopoverOpen(true), [setIsPopoverOpen]);
+//  const openPopover = useCallback(() => setIsPopoverOpen(true), [setIsPopoverOpen]);
   const closePopover = useCallback(() => {
     setIsPopoverOpen(false);
     focusTrapButtonRef.current?.blur();
@@ -225,7 +225,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         <EuiText size="xs">{formattedSnoozeText}</EuiText>
       </EuiButton>
     );
-  }, [isLoading, isDisabled, snoozeButtonAriaLabel, openPopover, formattedSnoozeText]);
+  }, [isLoading, isDisabled, snoozeButtonAriaLabel, togglePopover, formattedSnoozeText]);
 
   const scheduledSnoozeButton = useMemo(() => {
     return (
@@ -244,7 +244,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         <EuiText size="xs">{formattedSnoozeText}</EuiText>
       </EuiButton>
     );
-  }, [isLoading, isDisabled, snoozeButtonAriaLabel, openPopover, formattedSnoozeText]);
+  }, [isLoading, isDisabled, snoozeButtonAriaLabel, togglePopover, formattedSnoozeText]);
 
   const unsnoozedButton = useMemo(() => {
     // This show on hover is needed because we need style sheets to achieve the
@@ -265,7 +265,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         buttonRef={focusTrapButtonRef}
       />
     );
-  }, [showOnHover, isLoading, isDisabled, snoozeButtonAriaLabel, isPopoverOpen, openPopover]);
+  }, [showOnHover, isLoading, isDisabled, snoozeButtonAriaLabel, isPopoverOpen, togglePopover]);
 
   const onApplyUnsnooze = useCallback(
     async (scheduleIds?: string[]) => {
@@ -300,7 +300,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         buttonRef={focusTrapButtonRef}
       />
     );
-  }, [isLoading, isDisabled, snoozeButtonAriaLabel, openPopover]);
+  }, [isLoading, isDisabled, snoozeButtonAriaLabel, togglePopover]);
 
   const button = useMemo(() => {
     if (!isSnoozeValid) {
