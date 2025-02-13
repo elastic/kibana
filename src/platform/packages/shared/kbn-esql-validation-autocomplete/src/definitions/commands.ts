@@ -193,7 +193,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Produces a row with one or more columns with values that you specify. This can be useful for testing.',
     }),
-    examples: ['row a=1', 'row a=1, b=2'],
+    examples: ['ROW a=1', 'ROW a=1, b=2'],
     signature: {
       multipleParams: true,
       // syntax check already validates part of this
