@@ -1,0 +1,45 @@
+{
+  "id": "no-results",
+  "common": {
+    "--no-results-fill-one": "var(--eui-color-accent)",
+    "--no-results-fill-two": "var(--eui-color-success)"
+  },
+  "light": {
+    "--no-results-fill-three": "#e6ebf2"
+  },
+  "dark": {
+    "--no-results-fill-three": "#2b4690"
+  },
+  "amsterdam": {
+    "common": {
+      "--no-results-fill-four": "#1ba9f5",
+      "--no-results-fill-five": "#0a89db",
+      "--no-results-fill-six": "#0d90e0",
+      "--no-results-fill-seven": "#294492",
+      "--no-results-fill-eight": "#0066b1",
+      "--no-results-fill-nine": "#7de2d1",
+      "--no-results-fill-ten": "#42d4c6",
+      "--no-results-fill-eleven": "#ff957d",
+      "--no-results-fill-twelve": "#fa744e",
+      "--no-results-fill-thirteen": "#01ada1"
+    },
+    "light": {},
+    "dark": {}
+  },
+  "borealis": {
+    "common": {
+      "--no-results-fill-four": "#2696ff",
+      "--no-results-fill-five": "#1576ec",
+      "--no-results-fill-six": "#187df1",
+      "--no-results-fill-seven": "#3431a3",
+      "--no-results-fill-eight": "#0b53c2",
+      "--no-results-fill-nine": "#fbfbc7",
+      "--no-results-fill-ten": "#c0edbc",
+      "--no-results-fill-eleven": "#ffcf98",
+      "--no-results-fill-twelve": "#ffae69",
+      "--no-results-fill-thirteen": "#7fc697"
+    },
+    "light": {},
+    "dark": {}
+  }
+}

@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import './preview.css';
+
 /* eslint-disable @typescript-eslint/no-namespace,@typescript-eslint/no-empty-interface */
 declare global {
   namespace NodeJS {
