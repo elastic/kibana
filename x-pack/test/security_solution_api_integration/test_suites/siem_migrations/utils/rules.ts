@@ -6,7 +6,10 @@
  */
 
 import SuperTest from 'supertest';
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 
 import {
@@ -19,6 +22,7 @@ import {
   GetRuleMigrationRequestQuery,
   GetRuleMigrationResponse,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
 import { assertStatusCode } from './asserts';
 
 export interface GetRuleMigrationParams {
@@ -51,7 +55,7 @@ export const migrationRulesRouteHelpersFactory = (supertest: SuperTest.Agent) =>
         .get(replaceParams(SIEM_RULE_MIGRATION_PATH, { migration_id: migrationId }))
         .query(queryParams)
         .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send();
 
@@ -68,7 +72,7 @@ export const migrationRulesRouteHelpersFactory = (supertest: SuperTest.Agent) =>
       const response = await supertest
         .post(`${SIEM_RULE_MIGRATIONS_PATH}${migrationId ? `/${migrationId}` : ''}`)
         .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(body);
 

@@ -6,11 +6,15 @@
  */
 
 import SuperTest from 'supertest';
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 
 import { SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 import { GetRuleMigrationResourcesMissingResponse } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
 import { assertStatusCode } from './asserts';
 
 export interface GetRuleMigrationMissingResourcesParams {
@@ -33,7 +37,7 @@ export const migrationResourcesRouteHelpersFactory = (supertest: SuperTest.Agent
           replaceParams(SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH, { migration_id: migrationId })
         )
         .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '1')
+        .set(ELASTIC_HTTP_VERSION_HEADER, API_VERSIONS.internal.v1)
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send();
 

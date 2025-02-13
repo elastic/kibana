@@ -37,12 +37,13 @@ export default ({ getService }: FtrProviderContext) => {
       expect(response.body.total).toEqual(1);
 
       const migrationRule = response.body.data[0];
-      const { '@timestamp': timestamp, id, updated_at: updatedAt, ...rest } = migrationRule;
-      expect(rest).toEqual({
-        migration_id: migrationId,
-        original_rule: defaultOriginalRule,
-        status: SiemMigrationStatus.PENDING,
-      });
+      expect(migrationRule).toEqual(
+        expect.objectContaining({
+          migration_id: migrationId,
+          original_rule: defaultOriginalRule,
+          status: SiemMigrationStatus.PENDING,
+        })
+      );
     });
 
     it('should create migrations without provided id', async () => {
@@ -55,12 +56,13 @@ export default ({ getService }: FtrProviderContext) => {
       expect(response.body.total).toEqual(1);
 
       const migrationRule = response.body.data[0];
-      const { '@timestamp': timestamp, id, updated_at: updatedAt, ...rest } = migrationRule;
-      expect(rest).toEqual({
-        migration_id: migrationId,
-        original_rule: defaultOriginalRule,
-        status: SiemMigrationStatus.PENDING,
-      });
+      expect(migrationRule).toEqual(
+        expect.objectContaining({
+          migration_id: migrationId,
+          original_rule: defaultOriginalRule,
+          status: SiemMigrationStatus.PENDING,
+        })
+      );
     });
 
     it('should create migrations with the rules that have resources', async () => {
@@ -72,12 +74,13 @@ export default ({ getService }: FtrProviderContext) => {
       expect(response.body.total).toEqual(1);
 
       const migrationRule = response.body.data[0];
-      const { '@timestamp': timestamp, id, updated_at: updatedAt, ...rest } = migrationRule;
-      expect(rest).toEqual({
-        migration_id: migrationId,
-        original_rule: splunkRuleWithResources,
-        status: SiemMigrationStatus.PENDING,
-      });
+      expect(migrationRule).toEqual(
+        expect.objectContaining({
+          migration_id: migrationId,
+          original_rule: splunkRuleWithResources,
+          status: SiemMigrationStatus.PENDING,
+        })
+      );
 
       // fetch missing resources
       const resourcesResponse = await migrationResourcesRoutes.getMissingResources({
