@@ -10,8 +10,8 @@
 import { SerializableRecord } from '@kbn/utility-types';
 
 import { ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
-import type { DashboardContainerInput } from '../../common';
 import type { DashboardPanel } from '../../server/content_management';
+import { DashboardState } from '../dashboard_api/types';
 
 export interface UnsavedPanelState {
   [key: string]: object | undefined;
@@ -50,7 +50,7 @@ export interface DashboardSaveOptions {
 }
 
 export type DashboardLocatorParams = Partial<
-  Omit<DashboardContainerInput, 'panels' | 'controlGroupInput' | 'executionContext'>
+  Omit<DashboardState, 'panels' | 'controlGroupInput' | 'references'>
 > & {
   /**
    * If given, the dashboard saved object with this id will be loaded. If not given,
