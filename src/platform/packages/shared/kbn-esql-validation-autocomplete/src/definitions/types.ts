@@ -8,7 +8,6 @@
  */
 
 import type {
-  ESQLAst,
   ESQLAstItem,
   ESQLCommand,
   ESQLCommandOption,
@@ -210,7 +209,7 @@ export interface CommandBaseDefinition<CommandName extends string> {
     getSuggestedVariableName: () => string,
     getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
     getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
-    fullTextAst?: ESQLAst,
+    previousCommands?: ESQLCommand[],
     definition?: CommandDefinition<CommandName>,
     callbacks?: ESQLCallbacks
   ) => Promise<SuggestionRawDefinition[]>;

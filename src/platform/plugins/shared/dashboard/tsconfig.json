@@ -43,7 +43,6 @@
     "@kbn/analytics",
     "@kbn/safer-lodash-set",
     "@kbn/task-manager-plugin",
-    "@kbn/core-execution-context-common",
     "@kbn/core-custom-branding-browser",
     "@kbn/shared-ux-router",
     "@kbn/saved-objects-management-plugin",
