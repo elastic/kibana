@@ -9,6 +9,7 @@ import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type {
   RuleResponse,
   RuleSignatureId,
+  RuleTagArray,
 } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { findRules } from '../../../rule_management/logic/search/find_rules';
@@ -19,6 +20,8 @@ import type {
   PrebuiltRuleFilter,
   SortOrder,
 } from '../../../../../../common/api/detection_engine';
+import { MAX_PREBUILT_RULES_COUNT } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
+import type { RuleVersionSpecifier } from '../rule_versions/rule_version_specifier';
 
 interface FetchAllInstalledRulesArgs {
   page?: number;
@@ -28,18 +31,31 @@ interface FetchAllInstalledRulesArgs {
   sortOrder?: SortOrder;
 }
 
+interface FetchAllInstalledRuleVersionsArgs {
+  filter?: PrebuiltRuleFilter;
+  sortField?: FindRulesSortField;
+  sortOrder?: SortOrder;
+}
+
+interface FetchInstalledRulesByIdsArgs {
+  ruleIds: RuleSignatureId[];
+  sortField?: FindRulesSortField;
+  sortOrder?: SortOrder;
+}
+
 export interface IPrebuiltRuleObjectsClient {
   fetchInstalledRules(args?: FetchAllInstalledRulesArgs): Promise<RuleResponse[]>;
-  fetchInstalledRulesByIds(ruleIds: string[]): Promise<RuleResponse[]>;
+  fetchInstalledRuleVersions(
+    args?: FetchAllInstalledRuleVersionsArgs
+  ): Promise<Array<RuleVersionSpecifier & { tags: RuleTagArray }>>;
+  fetchInstalledRulesByIds(args: FetchInstalledRulesByIdsArgs): Promise<RuleResponse[]>;
 }
 
 export const createPrebuiltRuleObjectsClient = (
   rulesClient: RulesClient
 ): IPrebuiltRuleObjectsClient => {
   return {
-    fetchInstalledRules: ({ page, perPage, sortField, sortOrder, filter } = {}): Promise<
-      RuleResponse[]
-    > => {
+    fetchInstalledRules: ({ page, perPage, sortField, sortOrder, filter } = {}) => {
       return withSecuritySpan('IPrebuiltRuleObjectsClient.fetchInstalledRules', async () => {
         const filterKQL = convertRulesFilterToKQL({
           showElasticRules: true,
@@ -62,14 +78,40 @@ export const createPrebuiltRuleObjectsClient = (
         return rules;
       });
     },
-    fetchInstalledRulesByIds: (ruleIds: RuleSignatureId[]): Promise<RuleResponse[]> => {
+    fetchInstalledRuleVersions: ({ filter, sortField, sortOrder } = {}) => {
+      return withSecuritySpan('IPrebuiltRuleObjectsClient.fetchInstalledRuleVersions', async () => {
+        const filterKQL = convertRulesFilterToKQL({
+          showElasticRules: true,
+          filter: filter?.name,
+          tags: filter?.tags,
+          customizationStatus: filter?.customization_status,
+        });
+
+        const rulesData = await findRules({
+          rulesClient,
+          ruleIds: filter?.rule_ids,
+          filter: filterKQL,
+          perPage: MAX_PREBUILT_RULES_COUNT,
+          page: 1,
+          sortField,
+          sortOrder,
+          fields: ['params.ruleId', 'params.version', 'tags'],
+        });
+        return rulesData.data.map((rule) => ({
+          rule_id: rule.params.ruleId,
+          version: rule.params.version,
+          tags: rule.tags,
+        }));
+      });
+    },
+    fetchInstalledRulesByIds: ({ ruleIds, sortField = 'createdAt', sortOrder = 'desc' }) => {
       return withSecuritySpan('IPrebuiltRuleObjectsClient.fetchInstalledRulesByIds', async () => {
         const { data } = await findRules({
           rulesClient,
           perPage: ruleIds.length,
           page: 1,
-          sortField: 'createdAt',
-          sortOrder: 'desc',
+          sortField,
+          sortOrder,
           fields: undefined,
           filter: `alert.attributes.params.ruleId:(${ruleIds.join(' or ')})`,
         });

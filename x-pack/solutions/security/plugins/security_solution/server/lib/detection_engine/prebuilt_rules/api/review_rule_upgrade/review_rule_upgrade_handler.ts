@@ -7,7 +7,6 @@
 
 import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import type {
   PrebuiltRuleFilter,
   ReviewRuleUpgradeRequestBody,
@@ -19,11 +18,11 @@ import { buildSiemResponse } from '../../../routes/utils';
 import { calculateRuleDiff } from '../../logic/diff/calculate_rule_diff';
 import type { IPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
 import { createPrebuiltRuleAssetsClient } from '../../logic/rule_assets/prebuilt_rule_assets_client';
+import type { IPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
+import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 import type { RuleVersionSpecifier } from '../../logic/rule_versions/rule_version_specifier';
 import { zipRuleVersions } from '../../logic/rule_versions/zip_rule_versions';
 import { calculateRuleUpgradeInfo } from './calculate_rule_upgrade_info';
-import type { IPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
-import { createPrebuiltRuleObjectsClient } from '../../logic/rule_objects/prebuilt_rule_objects_client';
 
 const DEFAULT_SORT: ReviewRuleUpgradeSort = {
   field: 'name',
@@ -86,8 +85,6 @@ interface CalculateUpgradeableRulesDiffArgs {
   filter: PrebuiltRuleFilter | undefined;
 }
 
-const BATCH_SIZE = 100;
-
 async function calculateUpgradeableRulesDiff({
   ruleAssetsClient,
   ruleObjectsClient,
@@ -99,43 +96,27 @@ async function calculateUpgradeableRulesDiff({
   const allLatestVersions = await ruleAssetsClient.fetchLatestVersions();
   const latestVersionsMap = new Map(allLatestVersions.map((version) => [version.rule_id, version]));
 
-  const upgradeableRules: Array<{ rule: RuleResponse; targetVersion: RuleVersionSpecifier }> = [];
-  let foundUpgradeableRules = 0;
-
-  // Fetch all installed rules that have a newer version available in batches to
-  // avoid loading all rules at once into memory. We need to iterate over all
-  // rules, even if the perPage limit is reached, to calculate the total number
-  // of upgradeable rules and all tags.
-  let batchPage = 1;
-  while (true) {
-    const currentRulesBatch = await ruleObjectsClient.fetchInstalledRules({
-      filter,
-      perPage: BATCH_SIZE,
-      page: batchPage,
-      sortField: sort.field,
-      sortOrder: sort.order,
-    });
-
-    if (currentRulesBatch.length === 0) {
-      break;
-    }
-    currentRulesBatch.forEach((rule) => {
+  const currentRuleVersions = await ruleObjectsClient.fetchInstalledRuleVersions({
+    filter,
+    sortField: sort.field,
+    sortOrder: sort.order,
+  });
+  const upgradeableRuleIds = currentRuleVersions
+    .filter((rule) => {
       const targetVersion = latestVersionsMap.get(rule.rule_id);
-      if (targetVersion != null && rule.version < targetVersion.version) {
-        // Push the rule to the list of upgradeable rules if it falls within the current page
-        if (foundUpgradeableRules >= (page - 1) * perPage && upgradeableRules.length < perPage) {
-          upgradeableRules.push({ rule, targetVersion });
-        }
-        foundUpgradeableRules += 1;
-      }
-    });
-    batchPage += 1;
-  }
+      return targetVersion != null && rule.version < targetVersion.version;
+    })
+    .map((rule) => rule.rule_id);
+  const totalUpgradeableRules = upgradeableRuleIds.length;
 
-  // Zip current rules with their base and target versions
-  const currentRules = upgradeableRules.map(({ rule }) => rule);
+  const pagedRuleIds = upgradeableRuleIds.slice((page - 1) * perPage, page * perPage);
+  const currentRules = await ruleObjectsClient.fetchInstalledRulesByIds({
+    ruleIds: pagedRuleIds,
+    sortField: sort.field,
+    sortOrder: sort.order,
+  });
   const latestRules = await ruleAssetsClient.fetchAssetsByVersion(
-    upgradeableRules.map(({ targetVersion }) => targetVersion)
+    currentRules.map(({ rule_id: ruleId }) => latestVersionsMap.get(ruleId) as RuleVersionSpecifier)
   );
   const baseRules = await ruleAssetsClient.fetchAssetsByVersion(currentRules);
   const ruleVersionsMap = zipRuleVersions(currentRules, baseRules, latestRules);
@@ -150,6 +131,6 @@ async function calculateUpgradeableRulesDiff({
 
   return {
     diffResults,
-    totalUpgradeableRules: foundUpgradeableRules,
+    totalUpgradeableRules,
   };
 }

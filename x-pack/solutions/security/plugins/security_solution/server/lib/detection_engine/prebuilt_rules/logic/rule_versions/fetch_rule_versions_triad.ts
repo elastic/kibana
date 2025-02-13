@@ -28,9 +28,9 @@ export async function fetchRuleVersionsTriad({
 }: GetRuleVersionsMapArgs): Promise<Map<string, RuleVersions>> {
   const [currentRules, latestRules] = await Promise.all([
     versionSpecifiers
-      ? ruleObjectsClient.fetchInstalledRulesByIds(
-          versionSpecifiers.map(({ rule_id: ruleId }) => ruleId)
-        )
+      ? ruleObjectsClient.fetchInstalledRulesByIds({
+          ruleIds: versionSpecifiers.map(({ rule_id: ruleId }) => ruleId),
+        })
       : ruleObjectsClient.fetchInstalledRules({
           filter,
           page: 1,
