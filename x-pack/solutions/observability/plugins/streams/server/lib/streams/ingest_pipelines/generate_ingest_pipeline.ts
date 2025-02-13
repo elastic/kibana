@@ -45,9 +45,12 @@ export function generateIngestPipeline(
           ]
         : []),
       {
-        set: {
-          field: 'stream.name',
-          value: definition.name,
+        script: {
+          source: 'ctx["stream.name"] = params.field',
+          lang: 'painless',
+          params: {
+            field: definition.name,
+          },
         },
       },
       ...((isWiredStream && formatToIngestProcessors(definition.ingest.processing)) || []),
