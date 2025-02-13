@@ -47,6 +47,7 @@ import { suggest as suggestForFrom } from '../autocomplete/commands/from';
 import { suggest as suggestForRow } from '../autocomplete/commands/row';
 import { suggest as suggestForShow } from '../autocomplete/commands/show';
 import { suggest as suggestForGrok } from '../autocomplete/commands/grok';
+import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -455,7 +456,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
-    examples: ['… | dissect a "%{b} %{c}"'],
+    examples: ['… | DISSECT a "%{b} %{c}" APPEND_SEPARATOR = ":"'],
     options: [appendSeparatorOption],
     modes: [],
     signature: {
@@ -465,6 +466,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
     },
+    suggest: suggestForDissect,
   },
   {
     name: 'grok',

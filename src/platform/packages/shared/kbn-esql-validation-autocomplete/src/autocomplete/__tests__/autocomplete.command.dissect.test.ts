@@ -19,6 +19,11 @@ describe('autocomplete.suggest', () => {
         getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
       );
       await assertSuggestions(
+        'from a | DISSECT /',
+        getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `),
+        { triggerCharacter: ' ' }
+      );
+      await assertSuggestions(
         'from a | DISSECT key/',
         getFieldNamesByType(ESQL_STRING_TYPES).map((name) => `${name} `)
       );
@@ -28,18 +33,22 @@ describe('autocomplete.suggest', () => {
       );
     });
 
-    const constantPattern = '"%{WORD:firstWord}"';
+    const constantPattern = '"%{firstWord}" ';
     it('suggests a pattern after a field name', async () => {
       const { assertSuggestions } = await setup();
-      await assertSuggestions('from a | grok keywordField /', [constantPattern]);
+      await assertSuggestions('from a | DISSECT keywordField /', [constantPattern]);
     });
 
     it('suggests an append separator or pipe after a pattern', async () => {
       const { assertSuggestions } = await setup();
       assertSuggestions(
-        `from a | dissect keywordField ${constantPattern} /`,
-        ['APPEND_SEPARATOR = $0', '| '],
+        `from a | DISSECT keywordField ${constantPattern} /`,
+        ['APPEND_SEPARATOR = ', '| '].map(attachTriggerCommand),
         { triggerCharacter: ' ' }
+      );
+      assertSuggestions(
+        `from a | DISSECT keywordField ${constantPattern} /`,
+        ['APPEND_SEPARATOR = ', '| '].map(attachTriggerCommand)
       );
     });
 
@@ -57,11 +66,6 @@ describe('autocomplete.suggest', () => {
         `from a | DISSECT keywordField ${constantPattern} append_separator = ":" /`,
         ['| ']
       );
-    });
-
-    it('suggests a pipe after a pattern', async () => {
-      const { assertSuggestions } = await setup();
-      await assertSuggestions(`from a | grok keywordField ${constantPattern} /`, ['| ']);
     });
   });
 });
