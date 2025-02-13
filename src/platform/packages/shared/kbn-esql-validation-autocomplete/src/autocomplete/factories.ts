@@ -591,16 +591,13 @@ export function getControlSuggestionIfSupported(
   if (!supportsControls) {
     return [];
   }
-  if (supportsControls) {
-    const variableType = type;
-    const variables = getVariablesByType?.(variableType) ?? [];
-    const controlSuggestion = getControlSuggestion(
-      variableType,
-      variables?.map((v) => `?${v.key}`)
-    );
-    return controlSuggestion;
-  }
-  return [];
+  const variableType = type;
+  const variables = getVariablesByType?.(variableType) ?? [];
+  const controlSuggestion = getControlSuggestion(
+    variableType,
+    variables?.map((v) => `?${v.key}`)
+  );
+  return controlSuggestion;
 }
 
 export function getControlSuggestion(

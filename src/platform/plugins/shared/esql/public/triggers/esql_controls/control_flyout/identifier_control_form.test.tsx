@@ -23,6 +23,10 @@ describe('IdentifierControlForm', () => {
   const dataMock = dataPluginMock.createStartContract();
   const searchMock = dataMock.search.search;
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('Field type', () => {
     it('should default correctly if no initial state is given', async () => {
       const { findByTestId, findByTitle } = render(

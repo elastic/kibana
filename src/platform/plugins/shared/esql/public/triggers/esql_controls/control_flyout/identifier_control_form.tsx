@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiComboBox,
@@ -39,6 +39,7 @@ import {
   getFlyoutStyling,
   getQueryForFields,
   validateVariableName,
+  getVariablePrefix,
 } from './helpers';
 import { EsqlControlType } from '../types';
 
@@ -67,30 +68,20 @@ export function IdentifierControlForm({
   search,
   closeFlyout,
 }: IdentifierControlFormProps) {
+  const mounted = useRef(false);
   const suggestedVariableName = useMemo(() => {
-    const existingVariables = esqlVariables.filter((variable) => variable.type === variableType);
+    const existingVariables = new Set(
+      esqlVariables
+        .filter((variable) => variable.type === variableType)
+        .map((variable) => variable.key)
+    );
 
     if (initialState) {
       return initialState.variableName;
     }
 
-    if (variableType === ESQLVariableType.FIELDS) {
-      return getRecurrentVariableName(
-        'field',
-        existingVariables.map((variable) => variable.key)
-      );
-    }
-
-    if (variableType === ESQLVariableType.FUNCTIONS) {
-      return getRecurrentVariableName(
-        'function',
-        existingVariables.map((variable) => variable.key)
-      );
-    }
-    return getRecurrentVariableName(
-      'variable',
-      existingVariables.map((variable) => variable.key)
-    );
+    const variablePrefix = getVariablePrefix(variableType);
+    return getRecurrentVariableName(variablePrefix, existingVariables);
   }, [esqlVariables, initialState, variableType]);
 
   const [availableIdentifiersOptions, setAvailableIdentifiersOptions] = useState<
@@ -117,25 +108,34 @@ export function IdentifierControlForm({
   const isControlInEditMode = useMemo(() => !!initialState, [initialState]);
 
   useEffect(() => {
-    if (!availableIdentifiersOptions.length) {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+
+  useEffect(
+    function initAvailableIdentifiersOptions() {
+      if (availableIdentifiersOptions.length > 0) return;
       if (variableType === ESQLVariableType.FIELDS) {
         const queryForFields = getQueryForFields(queryString, cursorPosition);
         getESQLQueryColumnsRaw({
           esqlQuery: queryForFields,
           search,
         }).then((columns) => {
-          setAvailableIdentifiersOptions(
-            columns.map((col) => {
-              return {
-                label: col.name,
-                key: col.name,
-                'data-test-subj': col.name,
-              };
-            })
-          );
+          if (mounted.current) {
+            setAvailableIdentifiersOptions(
+              columns.map((col) => {
+                return {
+                  label: col.name,
+                  key: col.name,
+                  'data-test-subj': col.name,
+                };
+              })
+            );
+          }
         });
       }
-
       if (variableType === ESQLVariableType.FUNCTIONS) {
         const aggregatedFunctions = aggregationFunctionDefinitions.map((func) => {
           return {
@@ -146,8 +146,9 @@ export function IdentifierControlForm({
         });
         setAvailableIdentifiersOptions(aggregatedFunctions);
       }
-    }
-  }, [availableIdentifiersOptions.length, variableType, cursorPosition, queryString, search]);
+    },
+    [availableIdentifiersOptions.length, cursorPosition, queryString, search, variableType]
+  );
 
   useEffect(() => {
     const variableExists =
@@ -202,12 +203,12 @@ export function IdentifierControlForm({
           (option) => option.label.trim().toLowerCase() === normalizedSearchValue
         ) === -1
       ) {
-        setAvailableIdentifiersOptions([...availableIdentifiersOptions, newOption]);
+        setAvailableIdentifiersOptions((prev) => [...prev, newOption]);
       }
 
       setSelectedIdentifiers((prevSelected) => [...prevSelected, newOption]);
     },
-    [availableIdentifiersOptions]
+    []
   );
 
   const onCreateFieldControl = useCallback(async () => {
