@@ -13,6 +13,7 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type {
   BulkUpsertAssetCriticalityRecordsResponse,
   AssetCriticalityUpsert,
+  AssetCriticalityUpsertForBulkUpload,
 } from '../../../../common/entity_analytics/asset_criticality/types';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
@@ -286,7 +287,9 @@ export class AssetCriticalityDataClient {
       const processedEntities = new Set<string>();
 
       for await (const untypedRecord of recordsStream) {
-        const record = untypedRecord as unknown as AssetCriticalityUpsert | Error;
+        const record = untypedRecord as unknown as AssetCriticalityUpsert as
+          | AssetCriticalityUpsertForBulkUpload
+          | Error;
 
         stats.total++;
         if (record instanceof Error) {
@@ -337,7 +340,13 @@ export class AssetCriticalityDataClient {
                   ? CRITICALITY_VALUES.DELETED
                   : record.criticalityLevel,
             },
-            ...getImplicitEntityFields(record),
+            ...getImplicitEntityFields({
+              ...record,
+              criticalityLevel:
+                record.criticalityLevel === 'unassigned'
+                  ? CRITICALITY_VALUES.DELETED
+                  : record.criticalityLevel,
+            }),
             '@timestamp': new Date().toISOString(),
           },
           doc_as_upsert: true,

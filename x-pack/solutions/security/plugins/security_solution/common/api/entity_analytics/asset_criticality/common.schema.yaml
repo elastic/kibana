@@ -50,7 +50,6 @@ components:
         - medium_impact
         - high_impact
         - extreme_impact
-        - unassigned
       description: The criticality level of the asset.
     CreateAssetCriticalityRecord:
       allOf:
