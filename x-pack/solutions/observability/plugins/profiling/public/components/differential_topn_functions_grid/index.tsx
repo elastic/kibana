@@ -250,7 +250,7 @@ export function DifferentialTopNFunctionsGrid({
           data-test-subj="profilingDiffTopNFunctionsGrid"
           css={css`
             .thickBorderLeft {
-              border-left: ${theme.euiTheme.border.thick} !important;
+              border-left: ${theme.euiTheme.border.thick};
             }
           `}
           aria-label={i18n.translate(
