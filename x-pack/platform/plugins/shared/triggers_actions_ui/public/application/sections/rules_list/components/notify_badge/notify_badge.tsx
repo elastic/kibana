@@ -85,7 +85,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       return newState;
     });
   }, []);
-//  const openPopover = useCallback(() => setIsPopoverOpen(true), [setIsPopoverOpen]);
+  //  const openPopover = useCallback(() => setIsPopoverOpen(true), [setIsPopoverOpen]);
   const closePopover = useCallback(() => {
     setIsPopoverOpen(false);
     focusTrapButtonRef.current?.blur();
