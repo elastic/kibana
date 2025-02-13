@@ -71,7 +71,6 @@ interface RunParams {
 
 export class AdHocTaskRunner implements CancellableTask {
   private readonly context: TaskRunnerContext;
-  private readonly executionId: string;
   private readonly internalSavedObjectsRepository: ISavedObjectsRepository;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private readonly taskInstance: ConcreteTaskInstance;
@@ -80,6 +79,7 @@ export class AdHocTaskRunner implements CancellableTask {
   private adHocRange: { start: string; end: string | undefined } | null = null;
   private alertingEventLogger: AlertingEventLogger;
   private cancelled: boolean = false;
+  private executionId: string;
   private logger: Logger;
   private ruleId: string = '';
   private ruleMonitoring: RuleMonitoringService;
@@ -203,6 +203,7 @@ export class AdHocTaskRunner implements CancellableTask {
       alertsService: this.context.alertsService,
       context: ruleTypeRunnerContext,
       executionId: this.executionId,
+      isPreview: this.taskInstance.taskType === 'ad_hoc_run-preview',
       logger: this.logger,
       maxAlerts: this.context.maxAlerts,
       rule: {
@@ -306,23 +307,10 @@ export class AdHocTaskRunner implements CancellableTask {
       const {
         params: { adHocRunParamsId, spaceId },
         startedAt,
+        taskType,
       } = this.taskInstance;
 
       const namespace = this.context.spaceIdToNamespace(spaceId);
-
-      this.alertingEventLogger.initialize({
-        context: {
-          savedObjectId: adHocRunParamsId,
-          savedObjectType: AD_HOC_RUN_SAVED_OBJECT_TYPE,
-          spaceId,
-          executionId: this.executionId,
-          taskScheduledAt: this.taskInstance.scheduledAt,
-          ...(namespace ? { namespace } : {}),
-        },
-        runDate: this.runDate,
-        // in the future we might want different types of ad hoc runs (like preview)
-        type: executionType.BACKFILL,
-      });
 
       let adHocRunData: AdHocRun;
 
@@ -350,6 +338,24 @@ export class AdHocTaskRunner implements CancellableTask {
           errorSource
         );
       }
+
+      if (adHocRunData.executionUuid) {
+        this.executionId = adHocRunData.executionUuid;
+      }
+
+      this.alertingEventLogger.initialize({
+        context: {
+          savedObjectId: adHocRunParamsId,
+          savedObjectType: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+          spaceId,
+          executionId: this.executionId,
+          taskScheduledAt: this.taskInstance.scheduledAt,
+          ...(namespace ? { namespace } : {}),
+        },
+        runDate: this.runDate,
+        // in the future we might want different types of ad hoc runs (like preview)
+        type: taskType === 'ad_hoc_run-preview' ? executionType.PREVIEW : executionType.BACKFILL,
+      });
 
       const { rule, apiKeyToUse, schedule, start, end } = adHocRunData;
       this.apiKeyToUse = apiKeyToUse;

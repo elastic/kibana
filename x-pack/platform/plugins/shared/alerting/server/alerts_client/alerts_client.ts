@@ -74,6 +74,7 @@ import { ErrorWithType } from '../lib/error_with_type';
 const CHUNK_SIZE = 10000;
 
 export interface AlertsClientParams extends CreateAlertsClientParams {
+  context: string;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   kibanaVersion: string;
   dataStreamAdapter: DataStreamAdapter;

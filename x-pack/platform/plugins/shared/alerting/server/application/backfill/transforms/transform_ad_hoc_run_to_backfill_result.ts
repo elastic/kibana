@@ -63,6 +63,7 @@ export const transformAdHocRunToBackfillResult = ({
     duration: attributes.duration,
     enabled: attributes.enabled,
     ...(attributes.end ? { end: attributes.end } : {}),
+    ...(attributes.executionUuid ? { executionUuid: attributes.executionUuid } : {}),
     rule: {
       ...attributes.rule,
       id: references[0].id,

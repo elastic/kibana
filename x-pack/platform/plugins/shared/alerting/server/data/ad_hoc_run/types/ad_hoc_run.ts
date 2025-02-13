@@ -54,6 +54,7 @@ export interface AdHocRunSO extends Record<string, unknown> {
   duration: string;
   enabled: boolean;
   end?: string;
+  executionUuid?: string;
   rule: AdHocRunSORule;
   spaceId: string;
   start: string;
@@ -68,6 +69,7 @@ export interface AdHocRun {
   duration: string;
   enabled: boolean;
   end?: string;
+  executionUuid?: string;
   id: string;
   rule: AdHocRunRule;
   spaceId: string;
