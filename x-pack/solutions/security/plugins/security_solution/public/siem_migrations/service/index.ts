@@ -7,16 +7,18 @@
 
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { StartPluginsDependencies } from '../../types';
+import type { TelemetryServiceStart } from '../../common/lib/telemetry';
 
 export type { SiemMigrationsService } from './siem_migrations_service';
 
 export const createSiemMigrationsService = async (
   coreStart: CoreStart,
-  plugins: StartPluginsDependencies
+  plugins: StartPluginsDependencies,
+  telemetry: TelemetryServiceStart
 ) => {
   const { SiemMigrationsService } = await import(
     /* webpackChunkName: "lazySiemMigrationsService" */
     './siem_migrations_service'
   );
-  return new SiemMigrationsService(coreStart, plugins);
+  return new SiemMigrationsService(coreStart, plugins, telemetry);
 };
