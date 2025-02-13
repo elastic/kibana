@@ -14,6 +14,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   ALERT_RISK_SCORE,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { getRiskEngineEntityTypes } from '../../../../common/entity_analytics/risk_engine/utils';
 import type { EntityType } from '../../../../common/search_strategy';
@@ -222,6 +223,7 @@ export const calculateRiskScores = async ({
   alertSampleSizePerShard = 10_000,
   experimentalFeatures,
   excludeAlertStatuses = [],
+  excludeAlertTags = [],
 }: {
   assetCriticalityService: AssetCriticalityService;
   esClient: ElasticsearchClient;
@@ -239,6 +241,11 @@ export const calculateRiskScores = async ({
     }
     if (!isEmpty(userFilter)) {
       filter.push(userFilter as QueryDslQueryContainer);
+    }
+    if (excludeAlertTags.length > 0) {
+      filter.push({
+        bool: { must_not: { terms: { [ALERT_WORKFLOW_TAGS]: excludeAlertTags } } },
+      });
     }
     const identifierTypes: EntityType[] = identifierType
       ? [identifierType]
