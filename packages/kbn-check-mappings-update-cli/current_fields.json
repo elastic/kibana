@@ -509,25 +509,11 @@
     "updated_by"
   ],
   "fleet-fleet-server-host": [
-    "certificate",
-    "certificate_authorities",
-    "certificate_key",
-    "es_certificate",
-    "es_certificate_authorities",
-    "es_certificate_key",
     "host_urls",
     "is_default",
     "is_internal",
     "is_preconfigured",
-    "name",
-    "proxy_id",
-    "secrets",
-    "secrets.ssl",
-    "secrets.ssl.es_key",
-    "secrets.ssl.es_key.id",
-    "secrets.ssl.key",
-    "secrets.ssl.key.id",
-    "ssl"
+    "name"
   ],
   "fleet-message-signing-keys": [],
   "fleet-package-policies": [

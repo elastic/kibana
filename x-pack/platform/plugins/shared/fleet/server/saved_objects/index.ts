@@ -1115,29 +1115,6 @@ export const getSavedObjectTypes = (
           host_urls: { type: 'keyword', index: false },
           is_preconfigured: { type: 'boolean' },
           proxy_id: { type: 'keyword' },
-          ssl: { type: 'binary' },
-          secrets: {
-            dynamic: false,
-            properties: {
-              ssl: {
-                dynamic: false,
-                properties: {
-                  key: {
-                    dynamic: false,
-                    properties: {
-                      id: { type: 'keyword' },
-                    },
-                  },
-                  es_key: {
-                    dynamic: false,
-                    properties: {
-                      id: { type: 'keyword' },
-                    },
-                  },
-                },
-              },
-            },
-          },
         },
       },
       modelVersions: {
