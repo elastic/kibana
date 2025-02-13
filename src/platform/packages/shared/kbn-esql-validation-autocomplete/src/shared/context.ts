@@ -86,7 +86,7 @@ function findCommandSubType<T extends ESQLCommandMode | ESQLCommandOption>(
   }
 }
 
-function isMarkerNode(node: ESQLSingleAstItem | undefined): boolean {
+export function isMarkerNode(node: ESQLSingleAstItem | undefined): boolean {
   return Boolean(
     node &&
       (isColumnItem(node) || isIdentifier(node) || isSourceItem(node)) &&
