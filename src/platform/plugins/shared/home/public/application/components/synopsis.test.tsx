@@ -8,58 +8,46 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
-import { Synopsis } from './synopsis';
+import { render, screen } from '@testing-library/react';
+import { Synopsis, SynopsisProps } from './synopsis';
 
-test('render', () => {
-  const component = render(
-    <Synopsis
-      id={'tutorial'}
-      description="this is a great tutorial about..."
-      title="Great tutorial"
-      url="link_to_item"
-    />
-  );
-  expect(component).toMatchSnapshot();
-});
+const defaultProps: SynopsisProps = {
+  id: 'tutorial',
+  description: 'this is a great tutorial about...',
+  title: 'Great tutorial',
+  url: 'link_to_item',
+};
+describe('Synopsis component', () => {
+  test('renders with default props', () => {
+    render(<Synopsis {...defaultProps} />);
 
-describe('props', () => {
-  test('iconType', () => {
-    const component = render(
-      <Synopsis
-        id={'tutorial'}
-        description="this is a great tutorial about..."
-        title="Great tutorial"
-        url="link_to_item"
-        iconType="logoApache"
-      />
-    );
-    expect(component).toMatchSnapshot();
+    // Check if the title is rendered
+    expect(screen.getByText('Great tutorial')).toBeInTheDocument();
+
+    // Check if the description is rendered
+    expect(screen.getByText('this is a great tutorial about...')).toBeInTheDocument();
+
+    // Check if the card element is rendered
+    expect(screen.getByTestId('homeSynopsisLinktutorial')).toBeInTheDocument();
+  });
+  test('renders with iconType', () => {
+    render(<Synopsis {...defaultProps} iconType="logoApache" />);
+
+    // Check if the icon is rendered
+    expect(screen.getByTitle('')).toBeInTheDocument();
   });
 
-  test('iconUrl', () => {
-    const component = render(
-      <Synopsis
-        id={'tutorial'}
-        description="this is a great tutorial about..."
-        title="Great tutorial"
-        url="link_to_item"
-        iconUrl="icon_url"
-      />
-    );
-    expect(component).toMatchSnapshot();
+  test('renders with iconUrl', () => {
+    render(<Synopsis {...defaultProps} iconUrl="icon_url" />);
+
+    // Check if the image is rendered
+    expect(screen.getByAltText('')).toBeInTheDocument();
   });
 
-  test('isBeta', () => {
-    const component = render(
-      <Synopsis
-        id={'tutorial'}
-        description="this is a great tutorial about..."
-        title="Great tutorial"
-        url="link_to_item"
-        isBeta={true}
-      />
-    );
-    expect(component).toMatchSnapshot();
+  test('renders with isBeta', () => {
+    render(<Synopsis {...defaultProps} isBeta={true} />);
+
+    // Check if the beta badge is rendered
+    expect(screen.getByText('Beta')).toBeInTheDocument();
   });
 });

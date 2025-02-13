@@ -11,7 +11,7 @@ import React from 'react';
 
 import { EuiCard, EuiCardProps, EuiIcon, IconType } from '@elastic/eui';
 
-interface SynopsisProps {
+export interface SynopsisProps {
   id: string;
   description: string;
   iconUrl?: string;
