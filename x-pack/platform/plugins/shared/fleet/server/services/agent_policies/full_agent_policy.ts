@@ -401,7 +401,7 @@ function generateSSLConfigForElasticSearch(
 ) {
   let config: Partial<FullAgentPolicyOutput> = {};
   // These settings are generated only for fleet server policies
-  if (!hasFleetServer) return {};
+  if (!hasFleetServer) return;
 
   if (output.type === outputType.Elasticsearch && fleetServerHost?.ssl) {
     if (fleetServerHost.ssl) {
@@ -566,7 +566,7 @@ export function transformOutputToFullPolicyOutput(
       fleetServerHost,
       hasFleetServer
     );
-    newOutput.ssl = elasticSearchSSLConfigs;
+    if (elasticSearchSSLConfigs) newOutput.ssl = elasticSearchSSLConfigs;
   }
 
   if (proxy) {
