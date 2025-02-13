@@ -43,7 +43,7 @@ export async function validatePolicyNamespaceForSpace({
   }
 }
 
-export async function validateAdditionnalDatastreamsPermissionsForSpace({
+export async function validateAdditionalDatastreamsPermissionsForSpace({
   additionalDatastreamsPermissions,
   spaceId,
 }: {

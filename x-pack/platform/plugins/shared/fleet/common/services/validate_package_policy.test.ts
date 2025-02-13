@@ -1150,6 +1150,7 @@ describe('Fleet - validationHasErrors()', () => {
       validationHasErrors({
         name: ['name error'],
         description: null,
+        additional_datastreams_permissions: null,
         namespace: null,
         inputs: {
           input1: {
@@ -1163,6 +1164,7 @@ describe('Fleet - validationHasErrors()', () => {
       validationHasErrors({
         name: null,
         description: null,
+        additional_datastreams_permissions: null,
         namespace: null,
         inputs: {
           input1: {
@@ -1176,6 +1178,7 @@ describe('Fleet - validationHasErrors()', () => {
       validationHasErrors({
         name: null,
         description: null,
+        additional_datastreams_permissions: null,
         namespace: null,
         inputs: {
           input1: {
@@ -1193,6 +1196,7 @@ describe('Fleet - validationHasErrors()', () => {
         name: null,
         description: null,
         namespace: null,
+        additional_datastreams_permissions: null,
         inputs: {
           input1: {
             vars: { foo: null, bar: null },

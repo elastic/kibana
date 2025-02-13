@@ -152,7 +152,7 @@ import { getPackageAssetsMap } from './epm/packages/get';
 import { validateAgentPolicyOutputForIntegration } from './agent_policies/outputs_helpers';
 import type { PackagePolicyClientFetchAllItemIdsOptions } from './package_policy_service';
 import {
-  validateAdditionnalDatastreamsPermissionsForSpace,
+  validateAdditionalDatastreamsPermissionsForSpace,
   validatePolicyNamespaceForSpace,
 } from './spaces/policy_namespaces';
 import { isSpaceAwarenessEnabled, isSpaceAwarenessMigrationPending } from './spaces/helpers';
@@ -322,7 +322,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         spaceId: soClient.getCurrentNamespace(),
       });
     }
-    await validateAdditionnalDatastreamsPermissionsForSpace({
+    await validateAdditionalDatastreamsPermissionsForSpace({
       additionalDatastreamsPermissions: enrichedPackagePolicy.additional_datastreams_permissions,
       spaceId: soClient.getCurrentNamespace(),
     });
@@ -998,7 +998,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         spaceId: soClient.getCurrentNamespace(),
       });
     }
-    await validateAdditionnalDatastreamsPermissionsForSpace({
+    await validateAdditionalDatastreamsPermissionsForSpace({
       additionalDatastreamsPermissions: enrichedPackagePolicy.additional_datastreams_permissions,
       spaceId: soClient.getCurrentNamespace(),
     });

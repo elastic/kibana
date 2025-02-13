@@ -183,12 +183,15 @@ export const PackagePolicyBaseSchema = {
     )
   ),
   additional_datastreams_permissions: schema.maybe(
-    schema.arrayOf(schema.string(), {
-      validate: validateAdditionalDatastreamsPermissions,
-      meta: {
-        description: 'Additionnal datstream permissions, that will be added to the agent policy.',
-      },
-    })
+    schema.oneOf([
+      schema.literal(null),
+      schema.arrayOf(schema.string(), {
+        validate: validateAdditionalDatastreamsPermissions,
+        meta: {
+          description: 'Additional datastream permissions, that will be added to the agent policy.',
+        },
+      }),
+    ])
   ),
 };
 
@@ -326,12 +329,15 @@ export const SimplifiedPackagePolicyBaseSchema = schema.object({
     )
   ),
   additional_datastreams_permissions: schema.maybe(
-    schema.arrayOf(schema.string(), {
-      validate: validateAdditionalDatastreamsPermissions,
-      meta: {
-        description: 'Additionnal datstream permissions, that will be added to the agent policy.',
-      },
-    })
+    schema.oneOf([
+      schema.literal(null),
+      schema.arrayOf(schema.string(), {
+        validate: validateAdditionalDatastreamsPermissions,
+        meta: {
+          description: 'Additional datastream permissions, that will be added to the agent policy.',
+        },
+      }),
+    ])
   ),
 });
 
