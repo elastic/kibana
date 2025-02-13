@@ -21,7 +21,6 @@ describe('utils', () => {
   });
 
   describe('getDisabledEntityTypes', () => {
-
     it('should return disabled entity types when assetInventoryStoreEnabled is false', () => {
       const experimentalFeatures: ExperimentalFeatures = {
         ...mockedExperimentalFeatures,
