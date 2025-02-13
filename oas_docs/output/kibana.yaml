@@ -58685,7 +58685,6 @@ components:
         - user
         - host
         - service
-        - universal
       type: string
     Security_Entity_Analytics_API_HostEntity:
       type: object
@@ -58761,7 +58760,6 @@ components:
         - host.name
         - user.name
         - service.name
-        - related.entity
       type: string
     Security_Entity_Analytics_API_IndexPattern:
       type: string

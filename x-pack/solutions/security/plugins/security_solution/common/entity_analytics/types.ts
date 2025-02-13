@@ -15,7 +15,6 @@ export enum EntityType {
   user = 'user',
   host = 'host',
   service = 'service',
-  universal = 'universal',
 }
 
 export enum EntityIdentifierFields {
@@ -29,5 +28,4 @@ export const EntityTypeToIdentifierField: Record<EntityType, EntityIdentifierFie
   [EntityType.host]: EntityIdentifierFields.hostName,
   [EntityType.user]: EntityIdentifierFields.userName,
   [EntityType.service]: EntityIdentifierFields.serviceName,
-  [EntityType.universal]: EntityIdentifierFields.universal,
 };
