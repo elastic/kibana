@@ -3732,6 +3732,143 @@
     "dynamic": false,
     "properties": {}
   },
+  "test-actions-export-hidden": {
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "title": {
+        "type": "text"
+      }
+    }
+  },
+  "test-deprecations-plugin": {
+    "properties": {
+      "title": {
+        "type": "text"
+      }
+    }
+  },
+  "test-export-add": {
+    "properties": {
+      "title": {
+        "type": "text"
+      }
+    }
+  },
+  "test-export-add-dep": {
+    "properties": {
+      "title": {
+        "type": "text"
+      }
+    }
+  },
+  "test-export-invalid-transform": {
+    "properties": {
+      "title": {
+        "type": "text"
+      }
+    }
+  },
+  "test-export-transform": {
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "title": {
+        "type": "text"
+      }
+    }
+  },
+  "test-export-transform-error": {
+    "properties": {
+      "title": {
+        "type": "text"
+      }
+    }
+  },
+  "test-hidden-from-http-apis-importable-exportable": {
+    "properties": {
+      "title": {
+        "type": "text"
+      }
+    }
+  },
+  "test-hidden-importable-exportable": {
+    "properties": {
+      "title": {
+        "type": "text"
+      }
+    }
+  },
+  "test-hidden-non-importable-exportable": {
+    "properties": {
+      "title": {
+        "type": "text"
+      }
+    }
+  },
+  "test-is-exportable": {
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "title": {
+        "type": "text"
+      }
+    }
+  },
+  "test-not-hidden-from-http-apis-importable-exportable": {
+    "properties": {
+      "title": {
+        "type": "text"
+      }
+    }
+  },
+  "test-not-visible-in-management": {
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "title": {
+        "type": "text"
+      }
+    }
+  },
+  "test-visible-in-management": {
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "title": {
+        "type": "text"
+      }
+    }
+  },
+  "test-with-display-name": {
+    "properties": {
+      "enabled": {
+        "type": "boolean"
+      },
+      "title": {
+        "type": "text"
+      }
+    }
+  },
+  "test_import_warning_1": {
+    "properties": {
+      "title": {
+        "type": "text"
+      }
+    }
+  },
+  "test_import_warning_2": {
+    "properties": {
+      "title": {
+        "type": "text"
+      }
+    }
+  },
   "threshold-explorer-view": {
     "dynamic": false,
     "properties": {}
