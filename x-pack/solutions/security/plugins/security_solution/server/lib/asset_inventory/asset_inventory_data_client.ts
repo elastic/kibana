@@ -98,6 +98,8 @@ export class AssetInventoryDataClient {
 
     let status = ASSET_INVENTORY_STATUS.DISABLED;
 
+    console.log(JSON.stringify(entityStorePrivileges, null, 2));
+
     if (!hasEntityStorePrivileges) {
       status = ASSET_INVENTORY_STATUS.INSUFFICIENT_PRIVILEGES;
       return { status, privileges: entityStorePrivileges.privileges };
@@ -113,7 +115,7 @@ export class AssetInventoryDataClient {
 
     if (entityEngineStatus === 'not_installed') {
       status = ASSET_INVENTORY_STATUS.DISABLED;
-    } else if (entityEngineStatus === 'error') {
+    } else {
       if (entityEngineStatus === 'installing') {
         status = ASSET_INVENTORY_STATUS.INITIALIZING;
       } else {
