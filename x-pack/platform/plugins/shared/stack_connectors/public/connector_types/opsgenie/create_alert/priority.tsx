@@ -12,6 +12,7 @@ import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import type { OpsgenieCreateAlertParams } from '../../../../server/connector_types';
 import * as i18n from './translations';
 import { EditActionCallback } from '../types';
+import { OptionalFieldLabel } from '../../../common/optional_field_label';
 
 interface PriorityComponentProps {
   priority: OpsgenieCreateAlertParams['priority'];
@@ -27,7 +28,12 @@ const PriorityComponent: React.FC<PriorityComponentProps> = ({ priority, onChang
   );
 
   return (
-    <EuiFormRow fullWidth label={i18n.PRIORITY_LABEL} data-test-subj="opsgenie-priority-row">
+    <EuiFormRow
+      fullWidth
+      label={i18n.PRIORITY_LABEL}
+      data-test-subj="opsgenie-priority-row"
+      labelAppend={OptionalFieldLabel}
+    >
       <EuiSelect
         fullWidth
         data-test-subj="opsgenie-prioritySelect"

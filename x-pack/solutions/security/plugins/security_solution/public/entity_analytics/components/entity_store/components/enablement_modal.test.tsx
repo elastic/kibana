@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { act } from 'react-dom/test-utils';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EntityStoreEnablementModal } from './enablement_modal';
 import { TestProviders } from '../../../../common/mock';
@@ -23,6 +24,11 @@ jest.mock('../hooks/use_entity_engine_privileges', () => ({
 const mockUseMissingRiskEnginePrivileges = jest.fn();
 jest.mock('../../../hooks/use_missing_risk_engine_privileges', () => ({
   useMissingRiskEnginePrivileges: () => mockUseMissingRiskEnginePrivileges(),
+}));
+
+const mockUseContractComponents = jest.fn(() => ({}));
+jest.mock('../../../../common/hooks/use_contract_component', () => ({
+  useContractComponents: () => mockUseContractComponents(),
 }));
 
 const defaultProps = {
@@ -77,8 +83,10 @@ const missingRiskEnginePrivileges: RiskEngineMissingPrivilegesResponse = {
   },
 };
 
-const renderComponent = (props = defaultProps) => {
-  return render(<EntityStoreEnablementModal {...props} />, { wrapper: TestProviders });
+const renderComponent = async (props = defaultProps) => {
+  await act(async () => {
+    return render(<EntityStoreEnablementModal {...props} />, { wrapper: TestProviders });
+  });
 };
 
 describe('EntityStoreEnablementModal', () => {
@@ -171,6 +179,17 @@ describe('EntityStoreEnablementModal', () => {
     it('should show risk engine missing privileges warning when missing privileges', () => {
       renderComponent();
       expect(screen.getByTestId('callout-missing-risk-engine-privileges')).toBeInTheDocument();
+    });
+
+    it('should render additional charges message when available', async () => {
+      const EnablementModalCalloutMock = () => <span data-test-subj="enablement-modal-test" />;
+      mockUseContractComponents.mockReturnValue({
+        EnablementModalCallout: EnablementModalCalloutMock,
+      });
+
+      await renderComponent();
+
+      expect(screen.queryByTestId('enablement-modal-test')).toBeInTheDocument();
     });
   });
 });

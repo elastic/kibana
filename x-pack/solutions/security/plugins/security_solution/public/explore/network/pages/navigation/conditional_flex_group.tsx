@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup } from '@elastic/eui';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 export const ConditionalFlexGroup = styled(EuiFlexGroup)`
   @media only screen and (min-width: 1441px) {

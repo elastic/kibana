@@ -27,6 +27,7 @@ x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
 x-pack/examples/alerting_example @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/platform/plugins/shared/alerting @elastic/response-ops
+x-pack/platform/packages/shared/alerting_rule_utils @elastic/obs-ux-management-team
 x-pack/platform/packages/private/kbn-alerting-state-types @elastic/response-ops
 src/platform/packages/shared/kbn-alerting-types @elastic/response-ops
 src/platform/packages/shared/kbn-alerts-as-data-utils @elastic/response-ops
@@ -599,6 +600,7 @@ src/platform/packages/shared/kbn-logging @elastic/kibana-core
 src/platform/packages/shared/kbn-logging-mocks @elastic/kibana-core
 x-pack/platform/plugins/shared/logs_data_access @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/logs_explorer @elastic/obs-ux-logs-team
+x-pack/platform/packages/shared/logs_overview @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/logs_shared @elastic/obs-ux-logs-team
 x-pack/platform/plugins/private/logstash @elastic/logstash
 src/platform/packages/private/kbn-managed-content-badge @elastic/kibana-visualizations
@@ -677,12 +679,10 @@ x-pack/platform/plugins/shared/observability_ai_assistant @elastic/obs-ai-assist
 x-pack/solutions/observability/packages/observability_ai/observability_ai_common @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/observability_ai/observability_ai_server @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/alert_details @elastic/obs-ux-management-team
-x-pack/platform/packages/shared/observability/alerting_rule_utils @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting_test_data @elastic/obs-ux-management-team
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/solutions/observability/packages/get_padded_alert_time_range_util @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/observability_logs_explorer @elastic/obs-ux-logs-team
-x-pack/platform/packages/shared/observability/logs_overview @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability_onboarding/e2e @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability_onboarding @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability @elastic/obs-ux-management-team
@@ -981,7 +981,7 @@ x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
 x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
 x-pack/solutions/security/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
-x-pack/solutions/security/plugins/timelines @elastic/security-threat-hunting-investigations
+x-pack/platform/plugins/shared/timelines @elastic/security-threat-hunting-investigations
 src/platform/packages/private/kbn-timelion-grammar @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-timerange @elastic/obs-ux-logs-team
 src/platform/packages/private/kbn-tinymath @elastic/kibana-visualizations
