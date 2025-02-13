@@ -280,7 +280,7 @@ function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
                     display: 'inline-block',
                     marginRight: '10px',
                   }}
-                ></span>
+                />
                 <b>{capitalize(name)} phase</b>
               </p>
             </EuiFlexItem>
