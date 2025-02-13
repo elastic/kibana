@@ -119,6 +119,8 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
   ].flat();
 };
 
+const ENT_SEARCH_INDICES_PREFIX = '.ent-search-';
+
 export const getEnrichedDeprecations = async (
   dataClient: IScopedClusterClient
 ): Promise<EnrichedDeprecationInfo[]> => {
@@ -159,13 +161,22 @@ export const getEnrichedDeprecations = async (
         }
       }
     })
-    .map((deprecation) => {
+    .flatMap((deprecation) => {
       const correctiveAction = getCorrectiveAction(
         deprecation.type,
         deprecation.message,
         deprecation.metadata as EsMetadata,
         deprecation.index
       );
+
+      if (
+        // Early exclusion of enterprise search indices that need to be reindexed
+        deprecation.index &&
+        deprecation.index.startsWith(ENT_SEARCH_INDICES_PREFIX) &&
+        correctiveAction?.type === 'reindex'
+      ) {
+        return [];
+      }
 
       // If we have found deprecation information for index/indices
       // check whether the index is open or closed.
