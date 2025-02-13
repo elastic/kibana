@@ -1,10 +1,15 @@
-# Upgrade of Prebuilt Rules
+# Upgrade of Prebuilt Rules <!-- omit from toc -->
 
 This is a test plan for the workflow of upgrading prebuilt rules.
 
-Status: `in progress`. The current test plan matches [Rule Immutability/Customization Milestone 3 epic](https://github.com/elastic/kibana/issues/174168).
+Status: `in progress`. The current test plan matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
-## Table of Contents
+## Table of Contents <!-- omit from toc -->
+
+<!--
+Use Markdown All in One in VS Code to keep the TOC in sync with the text:
+https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
+-->
 
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
@@ -12,64 +17,64 @@ Status: `in progress`. The current test plan matches [Rule Immutability/Customiz
   - [Assumptions](#assumptions)
   - [Non-functional requirements](#non-functional-requirements)
   - [Functional requirements](#functional-requirements)
-  - [Scenarios](#scenarios)
-    - [Rule installation and upgrade notifications on the Rule Management page](#rule-installation-and-upgrade-notifications-on-the-rule-management-page)
-      - [**Scenario: User is NOT notified when all installed prebuilt rules are up to date**](#scenario-user-is-not-notified-when-all-installed-prebuilt-rules-are-up-to-date)
-      - [**Scenario: User is notified when some prebuilt rules can be upgraded**](#scenario-user-is-notified-when-some-prebuilt-rules-can-be-upgraded)
-      - [**Scenario: User is notified when both rules to install and upgrade are available**](#scenario-user-is-notified-when-both-rules-to-install-and-upgrade-are-available)
-    - [Rule upgrade workflow: individual upgrade from Rule Updates table](#rule-upgrade-workflow-individual-and-bulk-updates-from-rule-updates-table)
-      - [**Scenario: User can upgrade conflict-free prebuilt rules one by one**](#scenario-user-can-upgrade-conflict-free-prebuilt-rules-one-by-one)
-      - [**Scenario: User cannot upgrade prebuilt rules one by one from Rules Update table if they have conflicts**](#scenario-user-cannot-upgrade-prebuilt-rules-one-by-one-from-rules-update-table-if-they-have-conflicts)
-    - [Rule upgrade workflow: bulk upgrade from Rule Updates table](#rule-upgrade-workflow-individual-and-bulk-updates-from-rule-updates-table)
-      - [**Scenario: User can upgrade multiple conflict-free prebuilt rules selected on the page**](#scenario-user-can-upgrade-multiple-conflict-free-prebuilt-rules-selected-on-the-page)
-      - [**Scenario: User cannot upgrade multiple prebuilt rules selected on the page when they have upgrade conflicts**](#scenario-user-cannot-upgrade-multiple-prebuilt-rules-selected-on-the-page-when-they-have-upgrade-conflicts)
-      - [**Scenario: User can upgrade all available conflict-free prebuilt rules at once**](#scenario-user-can-upgrade-all-available-conflict-free-prebuilt-rules-at-once)
-      - [**Scenario: User cannot upgrade all prebuilt rules at once if they have upgrade conflicts**](#scenario-user-cannot-upgrade-all-prebuilt-rules-at-once-if-they-have-upgrade-conflicts)
-      - [**Scenario: User can upgrade only conflict-free rules when a mix of rules with and without conflicts are selected for upgrade in the Rules Table**](#scenario-user-can-upgrade-only-conflict-free-rules-when-a-mix-of-rules-with-and-without-conflicts-are-selected-for-upgrade-in-the-rules-table)
-      - [**Scenario: User can upgrade only conflict-free rules when user attempts to upgrade all rules and only a subset contains upgrade conflicts**](#scenario-user-can-upgrade-only-conflict-free-rules-when-user-attempts-to-upgrade-all-rules-and-only-a-subset-contains-upgrade-conflicts)
-    - [Rule upgrade workflow: upgrading rules with rule type change](#rule-upgrade-workflow-upgrading-rules-with-rule-type-change)
-      - [**Scenario: User can upgrade rule with rule type change individually**](#scenario-user-can-upgrade-rule-with-rule-type-change-individually)
-      - [**Scenario: User can bulk upgrade selected rules with rule type changes**](#scenario-user-can-bulk-upgrade-selected-rules-with-rule-type-changes)
-      - [**Scenario: User can bulk upgrade all rules with rule type changes**](#scenario-user-can-bulk-upgrade-all-rules-with-rule-type-changes)
-    - [Rule upgrade workflow: rule previews](#rule-upgrade-workflow-rule-previews)
-      - [**Scenario: User can preview rules available for upgrade**](#scenario-user-can-preview-rules-available-for-upgrade)
-      - [**Scenario: User can upgrade a rule using the rule preview**](#scenario-user-can-upgrade-a-rule-using-the-rule-preview)
-      - [**Scenario: User can see correct rule information in preview before upgrading**](#scenario-user-can-see-correct-rule-information-in-preview-before-upgrading)
-      - [**Scenario: Tabs and sections without content should be hidden in preview before upgrading**](#scenario-tabs-and-sections-without-content-should-be-hidden-in-preview-before-upgrading)
-    - [Rule upgrade workflow: filtering, sorting, pagination](#rule-upgrade-workflow-filtering-sorting-pagination)
-    - [MILESTONE 2 (Legacy) - Rule upgrade workflow: viewing rule changes in JSON diff view](#milestone-2-legacy---rule-upgrade-workflow-viewing-rule-changes-in-json-diff-view)
-      - [**Scenario: User can see changes in a side-by-side JSON diff view**](#scenario-user-can-see-changes-in-a-side-by-side-json-diff-view)
-      - [**Scenario: User can see precisely how property values would change after upgrade**](#scenario-user-can-see-precisely-how-property-values-would-change-after-upgrade)
-      - [**Scenario: Rule actions and exception lists should not be shown as modified**](#scenario-rule-actions-and-exception-lists-should-not-be-shown-as-modified)
-      - [**Scenario: Dynamic properties should not be included in preview**](#scenario-dynamic-properties-should-not-be-included-in-preview)
-      - [**Scenario: Technical properties should not be included in preview**](#scenario-technical-properties-should-not-be-included-in-preview)
-      - [**Scenario: Properties with semantically equal values should not be shown as modified**](#scenario-properties-with-semantically-equal-values-should-not-be-shown-as-modified)
-      - [**Scenario: Unchanged sections of a rule should be hidden by default**](#scenario-unchanged-sections-of-a-rule-should-be-hidden-by-default)
-      - [**Scenario: Properties should be sorted alphabetically**](#scenario-properties-should-be-sorted-alphabetically)
-    - [MILESTONE 2 (Legacy) - Rule upgrade workflow: viewing rule changes in per-field diff view](#milestone-2-legacy---rule-upgrade-workflow-viewing-rule-changes-in-per-field-diff-view)
-      - [**Scenario: User can see changes in a side-by-side per-field diff view**](#scenario-user-can-see-changes-in-a-side-by-side-per-field-diff-view)
-      - [**Scenario: User can see changes when updated rule is a different rule type**](#scenario-user-can-see-changes-when-updated-rule-is-a-different-rule-type)
-      - [**Scenario: Field groupings should be rendered together in the same accordion panel**](#scenario-field-groupings-should-be-rendered-together-in-the-same-accordion-panel)
-      - [**Scenario: Undefined values are displayed with empty diffs**](#scenario-undefined-values-are-displayed-with-empty-diffs)
-      - [**Scenario: Field diff components have the same grouping and order as in rule details overview**](#scenario-field-diff-components-have-the-same-grouping-and-order-as-in-rule-details-overview)
-    - [Rule upgrade workflow: preserving rule bound data](#rule-upgrade-workflow-preserving-rule-bound-data)
-      - [**Scenario: Rule bound data is preserved after upgrading a rule to a newer version with the same rule type**](#scenario-rule-bound-data-is-preserved-after-upgrading-a-rule-to-a-newer-version-with-the-same-rule-type)
-      - [**Scenario: Rule bound data is preserved after upgrading a rule to a newer version with a different rule type**](#scenario-rule-bound-data-is-preserved-after-upgrading-a-rule-to-a-newer-version-with-a-different-rule-type)
-    - [Rule upgrade workflow: misc cases](#rule-upgrade-workflow-misc-cases)
-      - [**Scenario: User doesn't see the Rule Updates tab until the package installation is completed**](#scenario-user-doesnt-see-the-rule-updates-tab-until-the-package-installation-is-completed)
-    - [Error handling](#error-handling)
-      - [**Scenario: Error is handled when any upgrade operation on prebuilt rules fails**](#scenario-error-is-handled-when-any-upgrade-operation-on-prebuilt-rules-fails)
-    - [Rule upgrade via the Prebuilt rules API](#rule-upgrade-via-the-prebuilt-rules-api)
-      - [**Scenario: API can upgrade prebuilt rules that are outdated**](#scenario-api-can-upgrade-prebuilt-rules-that-are-outdated)
-      - [**Scenario: API does not upgrade prebuilt rules if they are up to date**](#scenario-api-does-not-upgrade-prebuilt-rules-if-they-are-up-to-date)
-    - [Authorization / RBAC](#authorization-rbac)
-      - [**Scenario: User with read privileges on Security Solution cannot upgrade prebuilt rules**](#scenario-user-with-read-privileges-on-security-solution-cannot-upgrade-prebuilt-rules)
+- [Scenarios](#scenarios)
+  - [Rule upgrade notifications on the Rule Management page](#rule-upgrade-notifications-on-the-rule-management-page)
+    - [**Scenario: User is NOT notified when all installed prebuilt rules are up to date**](#scenario-user-is-not-notified-when-all-installed-prebuilt-rules-are-up-to-date)
+    - [**Scenario: User is notified when some prebuilt rules can be upgraded**](#scenario-user-is-notified-when-some-prebuilt-rules-can-be-upgraded)
+    - [**Scenario: User is notified when both rules to install and upgrade are available**](#scenario-user-is-notified-when-both-rules-to-install-and-upgrade-are-available)
+  - [Rule upgrade workflow: individual updates from Rule Updates table](#rule-upgrade-workflow-individual-updates-from-rule-updates-table)
+    - [**Scenario: User can upgrade conflict-free prebuilt rules one by one**](#scenario-user-can-upgrade-conflict-free-prebuilt-rules-one-by-one)
+    - [**Scenario: User cannot upgrade prebuilt rules one by one from Rules Update table if they have conflicts**](#scenario-user-cannot-upgrade-prebuilt-rules-one-by-one-from-rules-update-table-if-they-have-conflicts)
+  - [Rule upgrade workflow: bulk updates from Rule Updates table](#rule-upgrade-workflow-bulk-updates-from-rule-updates-table)
+    - [**Scenario: User can upgrade multiple conflict-free prebuilt rules selected on the page**](#scenario-user-can-upgrade-multiple-conflict-free-prebuilt-rules-selected-on-the-page)
+    - [**Scenario: User cannot upgrade multiple prebuilt rules selected on the page when they have upgrade conflicts**](#scenario-user-cannot-upgrade-multiple-prebuilt-rules-selected-on-the-page-when-they-have-upgrade-conflicts)
+    - [**Scenario: User can upgrade all available conflict-free prebuilt rules at once**](#scenario-user-can-upgrade-all-available-conflict-free-prebuilt-rules-at-once)
+    - [**Scenario: User cannot upgrade all prebuilt rules at once if they have upgrade conflicts**](#scenario-user-cannot-upgrade-all-prebuilt-rules-at-once-if-they-have-upgrade-conflicts)
+    - [**Scenario: User can upgrade only conflict-free rules when a mix of rules with and without conflicts are selected for upgrade**](#scenario-user-can-upgrade-only-conflict-free-rules-when-a-mix-of-rules-with-and-without-conflicts-are-selected-for-upgrade)
+    - [**Scenario: User can upgrade only conflict-free rules when attempting to upgrade all rules**](#scenario-user-can-upgrade-only-conflict-free-rules-when-attempting-to-upgrade-all-rules)
+  - [Rule upgrade workflow: upgrading rules with rule type changes](#rule-upgrade-workflow-upgrading-rules-with-rule-type-changes)
+    - [**Scenario: User can upgrade rules with rule type changes one-by-one**](#scenario-user-can-upgrade-rules-with-rule-type-changes-one-by-one)
+    - [**Scenario: User can NOT bulk upgrade rules with rule type changes when upgrading selected rules**](#scenario-user-can-not-bulk-upgrade-rules-with-rule-type-changes-when-upgrading-selected-rules)
+    - [**Scenario: User can NOT bulk upgrade rules with rule type changes when upgrading all rules**](#scenario-user-can-not-bulk-upgrade-rules-with-rule-type-changes-when-upgrading-all-rules)
+  - [Rule upgrade workflow: rule previews](#rule-upgrade-workflow-rule-previews)
+    - [**Scenario: User can preview rules available for upgrade**](#scenario-user-can-preview-rules-available-for-upgrade)
+    - [**Scenario: User can upgrade a rule using the rule preview**](#scenario-user-can-upgrade-a-rule-using-the-rule-preview)
+    - [**Scenario: User can see correct rule information in preview before upgrading**](#scenario-user-can-see-correct-rule-information-in-preview-before-upgrading)
+    - [**Scenario: Tabs and sections without content should be hidden in preview before upgrading**](#scenario-tabs-and-sections-without-content-should-be-hidden-in-preview-before-upgrading)
+  - [Rule upgrade workflow: filtering, sorting, pagination](#rule-upgrade-workflow-filtering-sorting-pagination)
+  - [MILESTONE 2 (Legacy) - Rule upgrade workflow: viewing rule changes in JSON diff view](#milestone-2-legacy---rule-upgrade-workflow-viewing-rule-changes-in-json-diff-view)
+    - [**Scenario: User can see changes in a side-by-side JSON diff view**](#scenario-user-can-see-changes-in-a-side-by-side-json-diff-view)
+    - [**Scenario: User can see precisely how property values would change after upgrade**](#scenario-user-can-see-precisely-how-property-values-would-change-after-upgrade)
+    - [**Scenario: Rule actions and exception lists should not be shown as modified**](#scenario-rule-actions-and-exception-lists-should-not-be-shown-as-modified)
+    - [**Scenario: Dynamic properties should not be included in preview**](#scenario-dynamic-properties-should-not-be-included-in-preview)
+    - [**Scenario: Technical properties should not be included in preview**](#scenario-technical-properties-should-not-be-included-in-preview)
+    - [**Scenario: Properties with semantically equal values should not be shown as modified**](#scenario-properties-with-semantically-equal-values-should-not-be-shown-as-modified)
+    - [**Scenario: Unchanged sections of a rule should be hidden by default**](#scenario-unchanged-sections-of-a-rule-should-be-hidden-by-default)
+    - [**Scenario: Properties should be sorted alphabetically**](#scenario-properties-should-be-sorted-alphabetically)
+  - [MILESTONE 2 (Legacy) - Rule upgrade workflow: viewing rule changes in per-field diff view](#milestone-2-legacy---rule-upgrade-workflow-viewing-rule-changes-in-per-field-diff-view)
+    - [**Scenario: User can see changes in a side-by-side per-field diff view**](#scenario-user-can-see-changes-in-a-side-by-side-per-field-diff-view)
+    - [**Scenario: User can see changes when updated rule is a different rule type**](#scenario-user-can-see-changes-when-updated-rule-is-a-different-rule-type)
+    - [**Scenario: Field groupings should be rendered together in the same accordion panel**](#scenario-field-groupings-should-be-rendered-together-in-the-same-accordion-panel)
+    - [**Scenario: Undefined values are displayed with empty diffs**](#scenario-undefined-values-are-displayed-with-empty-diffs)
+    - [**Scenario: Field diff components have the same grouping and order as in rule details overview**](#scenario-field-diff-components-have-the-same-grouping-and-order-as-in-rule-details-overview)
+  - [Rule upgrade workflow: preserving rule bound data](#rule-upgrade-workflow-preserving-rule-bound-data)
+    - [**Scenario: Rule bound data is preserved after upgrading a rule to a newer version with the same rule type**](#scenario-rule-bound-data-is-preserved-after-upgrading-a-rule-to-a-newer-version-with-the-same-rule-type)
+    - [**Scenario: Rule bound data is preserved after upgrading a rule to a newer version with a different rule type**](#scenario-rule-bound-data-is-preserved-after-upgrading-a-rule-to-a-newer-version-with-a-different-rule-type)
+  - [Rule upgrade workflow: misc cases](#rule-upgrade-workflow-misc-cases)
+    - [**Scenario: User doesn't see the Rule Updates tab until the package installation is completed**](#scenario-user-doesnt-see-the-rule-updates-tab-until-the-package-installation-is-completed)
+  - [Error handling](#error-handling)
+    - [**Scenario: Error is handled when any upgrade operation on prebuilt rules fails**](#scenario-error-is-handled-when-any-upgrade-operation-on-prebuilt-rules-fails)
+  - [Rule upgrade via the Prebuilt rules API](#rule-upgrade-via-the-prebuilt-rules-api)
+    - [**Scenario: API can upgrade prebuilt rules that are outdated**](#scenario-api-can-upgrade-prebuilt-rules-that-are-outdated)
+    - [**Scenario: API does not upgrade prebuilt rules if they are up to date**](#scenario-api-does-not-upgrade-prebuilt-rules-if-they-are-up-to-date)
+  - [Authorization / RBAC](#authorization--rbac)
+    - [**Scenario: User with read privileges on Security Solution cannot upgrade prebuilt rules**](#scenario-user-with-read-privileges-on-security-solution-cannot-upgrade-prebuilt-rules)
 
 ## Useful information
 
 ### Tickets
 
-- [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974) epic
+- [Users can Customize Prebuilt Detection Rules](https://github.com/elastic/security-team/issues/1974) epic
 
 **Milestone 3 - Prebuilt Rules Customization:**
 
@@ -100,10 +105,12 @@ Status: `in progress`. The current test plan matches [Rule Immutability/Customiz
 ### Assumptions
 
 - Below scenarios only apply to prebuilt detection rules.
-- Users obtained required license to install and upgrade prebuilt rules.
-- Users have required role permissions to install and upgrade prebuilt rules.
-- EPR is available for fetching the package unless explicitly indicated otherwise.
+- EPR is available for fetching the package with prebuilt rules unless explicitly indicated otherwise.
 - Only the latest **stable** package is checked for installation/upgrade and pre-release packages are ignored.
+- Users have the required [privileges for managing detection rules](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html).
+- Users are:
+  - on the `Basic` license and higher in self-hosted and ECH environments;
+  - on the `Essentials` tier and higher in Serverless environments.
 
 ### Non-functional requirements
 
@@ -116,69 +123,61 @@ Status: `in progress`. The current test plan matches [Rule Immutability/Customiz
 
 ### Functional requirements
 
-- User should be able to upgrade prebuilt rules with and without previewing what updates they would apply (rule properties of target rule versions).
-- User should be able to upgrade prebuilt rules with and without customizations. Where the following fields support customizations
+User should be able to upgrade prebuilt rules with and without previewing what updates they would apply (rule properties of target rule versions).
 
-```Gherkin
-Examples:
-│ Rule type         │ Field name in UI                  │ Diffable rule field     │
------------------------------------------------------------------------------------
-│ All rule types    │ Rule name                         │ name                    │
-│ All rule types    │ Rule description                  │ description             │
-│ All rule types    │ Tags                              │ tags                    │
-│ All rule types    │ Default severity                  │ severity                │
-│ All rule types    │ Severity Override                 │ severity_mapping        │
-│ All rule types    │ Default risk score                │ risk_score              │
-│ All rule types    │ Risk score override               │ risk_score_mapping      │
-│ All rule types    │ Reference URLs                    │ references              │
-│ All rule types    │ False positive examples           │ false_positives         │
-│ All rule types    │ MITRE ATT&CK™ threats             │ threat                  │
-│ All rule types    │ Setup guide                       │ note                    │
-│ All rule types    │ Investigation guide               │ setup                   │
-│ All rule types    │ Related integrations              │ related_integrations    │
-│ All rule types    │ Required fields                   │ required_fields         │
-│ All rule types    │ Rule schedule                     │ rule_schedule           │
-│ All rule types    │ Max alerts per run                │ max_signals             │
-│ All rule types    │ Rule name override                │ rule_name_override      │
-│ All rule types    │ Timestamp override                │ timestamp_override      │
-│ All rule types    │ Timeline template                 │ timeline_template       │
-│ All rule types    │ Building block*                   │ building_block          │
-│ All rule types    │ Required fields                   │ investigation_fields    │
-│ All rule types    │ Data source**                     │ data_source             │
-│ All rule types    │ Suppress alerts                   │ alert_suppression       │
-│ Custom Query      │ Custom query                      │ kql_query               │
-│ Saved Query       │ Custom query                      │ kql_query               │
-│ EQL               │ EQL query                         │ eql_query               │
-│ ESQL              │ ESQL query                        │ esql_query              │
-│ Threat Match      │ Custom query                      │ kql_query               │
-│ Threat Match      │ Indicator index patterns          │ threat_index            │
-│ Threat Match      │ Indicator index query             │ threat_query            │
-│ Threat Match      │ Indicator mapping                 │ threat_mapping          │
-│ Threat Match      │ Indicator prefix override         │ threat_indicator_path   │
-│ Threshold         │ Custom query                      │ kql_query               │
-│ Threshold         │ Threshold config                  │ threshold               │
-│ Machine Learning  │ Machine Learning job              │ machine_learning_job_id │
-│ Machine Learning  │ Anomaly score threshold           │ anomaly_threshold       │
-│ New Terms         │ Custom query                      │ kql_query               │
-│ New Terms         │ Fields                            │ new_terms_fields        │
-│ New Terms         │ History Window Size               │ history_window_start    │
+User should be able to upgrade prebuilt rules with and without customizations. Where the following fields support customizations:
 
-* Building block field is used to mark alerts as building block alerts.
-** Data Source represents index patterns or a data view. Machine Learning rules don't have data_source field.
-```
+| Rule type        | Field name in UI          | Diffable rule field       |
+| ---------------- | ------------------------- | ------------------------- |
+| All rule types   | Rule name                 | `name`                    |
+| All rule types   | Rule description          | `description`             |
+| All rule types   | Tags                      | `tags`                    |
+| All rule types   | Default severity          | `severity`                |
+| All rule types   | Severity Override         | `severity_mapping`        |
+| All rule types   | Default risk score        | `risk_score`              |
+| All rule types   | Risk score override       | `risk_score_mapping`      |
+| All rule types   | Reference URLs            | `references`              |
+| All rule types   | False positive examples   | `false_positives`         |
+| All rule types   | MITRE ATT&CK™ threats     | `threat`                  |
+| All rule types   | Setup guide               | `setup`                   |
+| All rule types   | Investigation guide       | `note`                    |
+| All rule types   | Related integrations      | `related_integrations`    |
+| All rule types   | Required fields           | `required_fields`         |
+| All rule types   | Rule schedule             | `rule_schedule`           |
+| All rule types   | Max alerts per run        | `max_signals`             |
+| All rule types   | Rule name override        | `rule_name_override`      |
+| All rule types   | Timestamp override        | `timestamp_override`      |
+| All rule types   | Timeline template         | `timeline_template`       |
+| All rule types   | Building block `*`        | `building_block`          |
+| All rule types   | Investigation fields      | `investigation_fields`    |
+| All rule types   | Data source `**`          | `data_source`             |
+| All rule types   | Suppress alerts           | `alert_suppression`       |
+| Custom Query     | Custom query              | `kql_query`               |
+| Saved Query      | Custom query              | `kql_query`               |
+| EQL              | EQL query                 | `eql_query`               |
+| ESQL             | ESQL query                | `esql_query`              |
+| Threat Match     | Custom query              | `kql_query`               |
+| Threat Match     | Indicator index patterns  | `threat_index`            |
+| Threat Match     | Indicator index query     | `threat_query`            |
+| Threat Match     | Indicator mapping         | `threat_mapping`          |
+| Threat Match     | Indicator prefix override | `threat_indicator_path`   |
+| Threshold        | Custom query              | `kql_query`               |
+| Threshold        | Threshold config          | `threshold`               |
+| Machine Learning | Machine Learning job      | `machine_learning_job_id` |
+| Machine Learning | Anomaly score threshold   | `anomaly_threshold`       |
+| New Terms        | Custom query              | `kql_query`               |
+| New Terms        | Fields                    | `new_terms_fields`        |
+| New Terms        | History Window Size       | `history_window_start`    |
 
-- User should be able to upgrade prebuilt rules with upgrades in the following non-customizable fields
+- `*` Building block field is used to mark alerts as building block alerts.
+- `**` Data Source represents index patterns or a data view. Machine Learning rules don't have data_source field.
 
-```Gherkin
-Examples:
-│ Field name                        │ Diffable rule field     │
----------------------------------------------------------------
-│ Rule type                         │ type                    │
-│ Rule version                      │ version                 │
-│ Rule signature id*                │ rule_id                 │
+User should be able to upgrade prebuilt rules with updates in the following non-customizable fields:
 
-* Rule signature id stays unchanged after rule upgrades.
-```
+| Field name            | Diffable rule field |
+| --------------------- | ------------------- |
+| Rule type             | `type`              |
+| Rule version          | `version`           |
 
 ## Scenarios
 
@@ -282,7 +281,7 @@ Examples:
   | all rules on the page, e.g. 12  |
 ```
 
-#### **Scenario: User cannot upgrade selected prebuilt rules with conflicts**
+#### **Scenario: User cannot upgrade multiple prebuilt rules selected on the page when they have upgrade conflicts**
 
 **Automation**: 1 e2e test with mock rules
 
@@ -381,9 +380,9 @@ And the remaining M = Y - K rules should still be present in the table
 And user should see the number of rules available to upgrade decreased by K number of upgraded rules
 ```
 
-### Rule upgrade workflow: upgrading rules with rule type change
+### Rule upgrade workflow: upgrading rules with rule type changes
 
-#### **Scenario: User can upgrade rule with rule type change individually**
+#### **Scenario: User can upgrade rules with rule type changes one-by-one**
 
 **Automation**: 1 e2e test with mock rules
 
@@ -397,7 +396,7 @@ And the user should not be able to upgrade them directly from the table
 And there should be a message/tooltip indicating why the rule cannot be upgraded directly
 ```
 
-#### **Scenario: User can not bulk upgrade selected rules with rule type changes**
+#### **Scenario: User can NOT bulk upgrade rules with rule type changes when upgrading selected rules**
 
 **Automation**: 1 e2e test with mock rules
 
@@ -412,7 +411,7 @@ And the user should not be able to upgrade them directly from the table
 And there should be a message/tooltip indicating why the rule cannot be upgraded directly
 ```
 
-#### **Scenario: User can not bulk upgrade all rules with rule type changes**
+#### **Scenario: User can NOT bulk upgrade rules with rule type changes when upgrading all rules**
 
 **Automation**: 1 e2e test with mock rules
 
