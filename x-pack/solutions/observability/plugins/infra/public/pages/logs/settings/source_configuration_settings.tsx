@@ -15,13 +15,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Prompt } from '@kbn/observability-shared-plugin/public';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
 import type { LogView, LogViewAttributes, LogViewStatus } from '@kbn/logs-shared-plugin/common';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { LogsDeprecationCallout } from '../../../components/logs_deprecation_callout';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
@@ -120,9 +119,15 @@ const LogsSettingsPageContent = ({
     nameFormElement,
   } = useLogSourceConfigurationFormState(logView?.attributes);
 
-  const [, persistUpdates] = useAsyncFn(async () => {
-    await onUpdateLogViewAttributes(formState);
-    sourceConfigurationFormElement.resetValue();
+  const persistUpdates = useCallback(async () => {
+    try {
+      await onUpdateLogViewAttributes(formState);
+      sourceConfigurationFormElement.resetValue();
+    } catch {
+      // the error is handled in the state machine already, but without this the
+      // global promise rejection tracker would complain about it being
+      // unhandled
+    }
   }, [onUpdateLogViewAttributes, sourceConfigurationFormElement, formState]);
 
   return (
