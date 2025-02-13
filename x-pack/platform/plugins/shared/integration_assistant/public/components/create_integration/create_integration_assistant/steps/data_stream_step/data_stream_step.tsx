@@ -120,7 +120,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
       // Only executed once when the packageNames are loaded
       if (packageNames != null && integrationSettings?.name == null && integrationSettings?.title) {
         const generatedName = getNameFromTitle(integrationSettings.title);
-        if (!packageNames.has(generatedName)) {
+        if (!packageNames.has(generatedName) && isValidName(generatedName)) {
           setName(generatedName);
           setIntegrationValues({ name: generatedName });
         }
@@ -183,7 +183,7 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                   <EuiFieldText
                     name="name"
                     data-test-subj="nameInput"
-                    value={isValidName(name) ? name : ''}
+                    value={name}
                     onChange={onChange.name}
                     isInvalid={invalidFields.name}
                     isLoading={isLoadingPackageNames}
