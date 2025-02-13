@@ -31,7 +31,6 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql/codeql-config.yml
-        debug: ${{ matrix.branch != '7.17' }}
 
     # TODO: Possibly required to follow all call paths, however, when enabled, the step below runs out of memory.
     # Possible workarounds: Apply for access to the GitHub beta where we can use beefier machines, or run it ourselves on Buildkite
@@ -65,6 +64,15 @@ jobs:
         category: "/language:${{matrix.language}}"
         ref: ${{ env.CHECKOUT_REF }}
         sha: ${{ env.CHECKOUT_SHA }}
+    - name: Notify to slack on failure
+      if: ${{ failure() }}
+      uses: slackapi/slack-github-action@v2.0.0
+      with:
+        method: chat.postMessage
+        token: ${{ secrets.CODE_SCANNING_SLACK_TOKEN }}
+        payload: |
+          channel: ${{ secrets.CODE_SCANNING_SLACK_CHANNEL_ID }}
+          text: "CodeQL analysis failed for ${{ github.repository }} on ${{ github.ref }}."
   alert:
     name: Alert
     runs-on: ubuntu-latest
