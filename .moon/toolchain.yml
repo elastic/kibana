@@ -19,7 +19,6 @@ node:
   dedupeOnLockfileChange: false
   syncProjectWorkspaceDependencies: false
 
-
 # Configures how moon integrates with TypeScript.
 typescript:
   # When `syncProjectReferences` is enabled and a dependent project reference

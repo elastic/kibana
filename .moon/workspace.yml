@@ -9,7 +9,7 @@ projects:
     - plugins/**/moon.yml
     - src/**/moon.yml
     - x-pack/**/moon.yml
-#    - moon.yml # because we do linking at the root level, every project is project will appear as a dependency
+    - moon.yml # because we do linking at the root level, every project is project will appear as a dependency
   sources:
     kibana-buildkite: .buildkite/moon.yml
 vcs:
