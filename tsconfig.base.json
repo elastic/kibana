@@ -1188,8 +1188,6 @@
       "@kbn/logging-mocks/*": ["src/platform/packages/shared/kbn-logging-mocks/*"],
       "@kbn/logs-data-access-plugin": ["x-pack/platform/plugins/shared/logs_data_access"],
       "@kbn/logs-data-access-plugin/*": ["x-pack/platform/plugins/shared/logs_data_access/*"],
-      "@kbn/logs-explorer-plugin": ["x-pack/solutions/observability/plugins/logs_explorer"],
-      "@kbn/logs-explorer-plugin/*": ["x-pack/solutions/observability/plugins/logs_explorer/*"],
       "@kbn/logs-overview": ["x-pack/platform/packages/shared/logs_overview"],
       "@kbn/logs-overview/*": ["x-pack/platform/packages/shared/logs_overview/*"],
       "@kbn/logs-shared-plugin": ["x-pack/platform/plugins/shared/logs_shared"],
@@ -1504,6 +1502,12 @@
       "@kbn/resizable-layout-examples-plugin/*": ["examples/resizable_layout_examples/*"],
       "@kbn/resolver-test-plugin": ["x-pack/test/plugin_functional/plugins/resolver_test"],
       "@kbn/resolver-test-plugin/*": ["x-pack/test/plugin_functional/plugins/resolver_test/*"],
+      "@kbn/response-ops-alerts-apis": ["packages/response-ops/alerts_apis"],
+      "@kbn/response-ops-alerts-apis/*": ["packages/response-ops/alerts_apis/*"],
+      "@kbn/response-ops-alerts-fields-browser": ["packages/response-ops/alerts_fields_browser"],
+      "@kbn/response-ops-alerts-fields-browser/*": ["packages/response-ops/alerts_fields_browser/*"],
+      "@kbn/response-ops-alerts-table": ["packages/response-ops/alerts_table"],
+      "@kbn/response-ops-alerts-table/*": ["packages/response-ops/alerts_table/*"],
       "@kbn/response-ops-rule-form": ["src/platform/packages/shared/response-ops/rule_form"],
       "@kbn/response-ops-rule-form/*": ["src/platform/packages/shared/response-ops/rule_form/*"],
       "@kbn/response-ops-rule-params": ["src/platform/packages/shared/response-ops/rule_params"],
@@ -1568,6 +1572,8 @@
       "@kbn/scout/*": ["packages/kbn-scout/*"],
       "@kbn/scout-info": ["packages/kbn-scout-info"],
       "@kbn/scout-info/*": ["packages/kbn-scout-info/*"],
+      "@kbn/scout-oblt": ["x-pack/solutions/observability/packages/kbn-scout-oblt"],
+      "@kbn/scout-oblt/*": ["x-pack/solutions/observability/packages/kbn-scout-oblt/*"],
       "@kbn/scout-reporting": ["packages/kbn-scout-reporting"],
       "@kbn/scout-reporting/*": ["packages/kbn-scout-reporting/*"],
       "@kbn/screenshot-mode-example-plugin": ["examples/screenshot_mode_example"],
@@ -2096,7 +2102,9 @@
       "@kbn/zod-helpers/*": ["src/platform/packages/shared/kbn-zod-helpers/*"],
       // END AUTOMATED PACKAGE LISTING
       // Allows for importing from `kibana` package for the exported types.
-      "@emotion/core": ["typings/@emotion"]
+      "@emotion/core": [
+        "typings/@emotion"
+      ]
     },
     // Support .tsx files and transform JSX into calls to React.createElement
     "jsx": "react",
