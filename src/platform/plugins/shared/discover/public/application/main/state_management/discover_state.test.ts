@@ -441,11 +441,6 @@ describe('Test discover state actions', () => {
     expect(dataState.data$.documents$.value.result).toEqual([]);
   });
 
-  test('loadDataViewList', async () => {
-    const { state } = await getState('');
-    expect(state.internalState.getState().savedDataViews.length).toBe(3);
-  });
-
   test('loadSavedSearch with no id given an empty URL', async () => {
     const { state, getCurrentUrl } = await getState('');
     await state.actions.loadDataViewList();

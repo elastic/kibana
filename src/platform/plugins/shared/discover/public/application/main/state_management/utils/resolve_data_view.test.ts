@@ -17,7 +17,6 @@ describe('Resolve data view tests', () => {
     const result = await loadDataView({
       dataViewId,
       services,
-      savedDataViews: [],
       adHocDataViews: [],
     });
     expect(result.loadedDataView).toEqual(dataViewMock);
@@ -29,7 +28,6 @@ describe('Resolve data view tests', () => {
     const result = await loadDataView({
       dataViewId,
       services,
-      savedDataViews: [],
       adHocDataViews: [],
     });
     expect(result.loadedDataView).toEqual(dataViewMock);

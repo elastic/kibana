@@ -37,18 +37,18 @@ export async function loadDataView({
   dataViewSpec,
   services: { dataViews },
   adHocDataViews,
-  isPersisted,
 }: {
   dataViewId?: string;
   dataViewSpec?: DataViewSpec;
   services: DiscoverServices;
   adHocDataViews: DataView[];
-  isPersisted: boolean;
 }): Promise<DataViewData> {
   let fetchId: string | undefined = dataViewId;
 
   // Handle redirect with data view spec provided via history location state
   if (dataViewSpec) {
+    const dataViewList = await dataViews.getIdsWithTitle(true);
+    const isPersisted = dataViewList.find(({ id: currentId }) => currentId === dataViewSpec.id);
     if (isPersisted) {
       // If passed a spec for a persisted data view, reassign the fetchId
       fetchId = dataViewSpec.id!;
@@ -189,9 +189,7 @@ export const loadAndResolveDataView = async ({
   // Check ad hoc data views first, unless a data view spec is supplied,
   // then attempt to load one if none is found
   let fallback = false;
-  const adHocDataView = adHocDataViews.find((dv) => dv.id === dataViewId);
-  let dataView = dataViewSpec ? undefined : adHocDataView;
-  const isPersisted = !Boolean(adHocDataView);
+  let dataView = dataViewSpec ? undefined : adHocDataViews.find((dv) => dv.id === dataViewId);
 
   if (!dataView) {
     const dataViewData = await loadDataView({
@@ -199,7 +197,6 @@ export const loadAndResolveDataView = async ({
       services,
       dataViewSpec,
       adHocDataViews,
-      isPersisted,
     });
 
     fallback = !dataViewData.requestedDataViewFound;
