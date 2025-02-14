@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ApmSynthtraceEsClient,
-  OtelSynthtraceEsClient,
-  InfraSynthtraceEsClient,
-} from '@kbn/apm-synthtrace';
 import { Readable } from 'stream';
-import type { ApmFields, InfraDocument, OtelDocument } from '@kbn/apm-synthtrace-client';
+import type { ApmFields, Fields, InfraDocument, OtelDocument } from '@kbn/apm-synthtrace-client';
 import Url from 'url';
+import type { SynthtraceEsClient } from '@kbn/apm-synthtrace/src/lib/shared/base_client';
 import {
   getApmSynthtraceEsClient,
   getInfraSynthtraceEsClient,
@@ -23,20 +19,31 @@ import {
 import { coreWorkerFixtures } from './core_fixtures';
 import type { SynthtraceEvents } from '../../global_hooks/synthtrace_ingestion';
 
-export interface SynthtraceFixture {
-  apmSynthtraceEsClient: {
-    index: (events: SynthtraceEvents<ApmFields>) => Promise<void>;
-    clean: ApmSynthtraceEsClient['clean'];
-  };
-  infraSynthtraceEsClient: {
-    index: (events: SynthtraceEvents<InfraDocument>) => Promise<void>;
-    clean: InfraSynthtraceEsClient['clean'];
-  };
-  otelSynthtraceEsClient: {
-    index: (events: SynthtraceEvents<OtelDocument>) => Promise<void>;
-    clean: OtelSynthtraceEsClient['clean'];
-  };
+interface SynthtraceFixtureEsClient<TFields extends Fields> {
+  index: (events: SynthtraceEvents<TFields>) => Promise<void>;
+  clean: SynthtraceEsClient<TFields>['clean'];
 }
+
+export interface SynthtraceFixture {
+  apmSynthtraceEsClient: SynthtraceFixtureEsClient<ApmFields>;
+  infraSynthtraceEsClient: SynthtraceFixtureEsClient<InfraDocument>;
+  otelSynthtraceEsClient: SynthtraceFixtureEsClient<OtelDocument>;
+}
+
+const useSynthtraceClient = async <TFields extends Fields>(
+  client: SynthtraceEsClient<TFields>,
+  use: (client: SynthtraceFixtureEsClient<TFields>) => Promise<void>
+) => {
+  const index = async (events: SynthtraceEvents<TFields>) =>
+    await client.index(Readable.from(Array.from(events).flatMap((event) => event.serialize())));
+
+  const clean = async () => await client.clean();
+
+  await use({ index, clean });
+
+  // cleanup function after all tests have ran
+  await client.clean();
+};
 
 export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture>({
   apmSynthtraceEsClient: [
@@ -56,17 +63,7 @@ export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture
         log
       );
 
-      const index = async (events: SynthtraceEvents<ApmFields>) =>
-        await apmSynthtraceEsClient.index(
-          Readable.from(Array.from(events).flatMap((event) => event.serialize()))
-        );
-
-      const clean = async () => await apmSynthtraceEsClient.clean();
-
-      await use({ index, clean });
-
-      // cleanup function after all tests have ran
-      await apmSynthtraceEsClient.clean();
+      await useSynthtraceClient<ApmFields>(apmSynthtraceEsClient, use);
     },
     { scope: 'worker' },
   ],
@@ -79,17 +76,7 @@ export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture
         log
       );
 
-      const index = async (events: SynthtraceEvents<InfraDocument>) =>
-        await infraSynthtraceEsClient.index(
-          Readable.from(Array.from(events).flatMap((event) => event.serialize()))
-        );
-
-      const clean = async () => await infraSynthtraceEsClient.clean();
-
-      await use({ index, clean });
-
-      // cleanup function after all tests have ran
-      await infraSynthtraceEsClient.clean();
+      await useSynthtraceClient<InfraDocument>(infraSynthtraceEsClient, use);
     },
     { scope: 'worker' },
   ],
@@ -97,17 +84,7 @@ export const synthtraceFixture = coreWorkerFixtures.extend<{}, SynthtraceFixture
     async ({ esClient, log }, use) => {
       const otelSynthtraceEsClient = await getOtelSynthtraceEsClient(esClient, log);
 
-      const index = async (events: SynthtraceEvents<OtelDocument>) =>
-        await otelSynthtraceEsClient.index(
-          Readable.from(Array.from(events).flatMap((event) => event.serialize()))
-        );
-
-      const clean = async () => await otelSynthtraceEsClient.clean();
-
-      await use({ index, clean });
-
-      // cleanup function after all tests have ran
-      await otelSynthtraceEsClient.clean();
+      await useSynthtraceClient<OtelDocument>(otelSynthtraceEsClient, use);
     },
     { scope: 'worker' },
   ],
