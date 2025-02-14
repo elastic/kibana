@@ -40,9 +40,9 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
     await page.waitForSelector('[data-test-subj="serviceMap"]');
     await expect(page.getByTestId('serviceMap').getByLabel('Loading')).not.toBeVisible();
     await page.getByLabel('Zoom In').click();
-    await page.getByTestId('serviceMap').scrollIntoViewIfNeeded();
     await page.getByTestId('centerServiceMap').click();
     await expect(page.getByTestId('serviceMap').getByLabel('Loading')).not.toBeVisible();
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(1000);
     await page.getByTestId('serviceMap').click();
     await expect(await page.getByTestId('serviceMap')).toHaveScreenshot('service_map.png', {
@@ -56,9 +56,9 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
     await page.waitForSelector('[data-test-subj="serviceMap"]');
     await expect(page.getByTestId('serviceMap').getByLabel('Loading')).not.toBeVisible();
     await page.getByLabel('Zoom out').click();
-    await page.getByTestId('serviceMap').scrollIntoViewIfNeeded();
     await page.getByTestId('centerServiceMap').click();
     await expect(page.getByTestId('serviceMap').getByLabel('Loading')).not.toBeVisible();
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(1000);
     await page.getByTestId('serviceMap').click();
     await expect(await page.getByTestId('serviceMap')).toHaveScreenshot(
