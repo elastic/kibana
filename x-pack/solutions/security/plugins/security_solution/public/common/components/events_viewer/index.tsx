@@ -138,11 +138,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
   } = useSelector((state: State) => eventsViewerSelector(state, tableId));
   const inspectModalTitle = useMemo(() => <span data-test-subj="title">{title}</span>, [title]);
 
-  const {
-    uiSettings,
-    data,
-    triggersActionsUi: { getFieldBrowser },
-  } = useKibana().services;
+  const { uiSettings, data } = useKibana().services;
 
   const {
     browserFields,
@@ -556,7 +552,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                     unitCountText={unitCountText}
                     pagination={pagination}
                     totalItems={totalCountMinusDeleted}
-                    getFieldBrowser={getFieldBrowser}
                     getFieldSpec={getFieldSpec}
                     cellActionsTriggerId={cellActionsTriggerId}
                   />

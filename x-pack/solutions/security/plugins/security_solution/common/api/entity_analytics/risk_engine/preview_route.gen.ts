@@ -58,9 +58,11 @@ export const RiskScoresPreviewRequest = z.object({
   /**
    * A list of alert statuses to exclude from the risk score calculation. If unspecified, all alert statuses are included.
    */
-  excludeAlertStatuses: z
-    .array(z.enum(['open', 'closed', 'in-progress', 'acknowledged']))
-    .optional(),
+  exclude_alert_statuses: z.array(z.string()).optional(),
+  /**
+   * A list of alert tags to exclude from the risk score calculation. If unspecified, all alert tags are included.
+   */
+  exclude_alert_tags: z.array(z.string()).optional(),
 });
 
 export type RiskScoresPreviewResponse = z.infer<typeof RiskScoresPreviewResponse>;
