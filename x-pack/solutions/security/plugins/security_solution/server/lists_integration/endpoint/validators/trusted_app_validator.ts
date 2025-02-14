@@ -258,6 +258,7 @@ export class TrustedAppValidator extends BaseValidator {
     }
 
     await this.validateByPolicyItem(updatedItem);
+    await this.validateUpdateOwnerSpaceIds(_updatedItem, currentItem);
 
     if (!hasArtifactOwnerSpaceId(_updatedItem)) {
       await this.setOwnerSpaceId(_updatedItem);

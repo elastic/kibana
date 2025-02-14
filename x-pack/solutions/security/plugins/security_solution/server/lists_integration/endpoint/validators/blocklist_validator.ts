@@ -299,6 +299,7 @@ export class BlocklistValidator extends BaseValidator {
     }
 
     await this.validateByPolicyItem(updatedItem);
+    await this.validateUpdateOwnerSpaceIds(updatedItem, currentItem);
 
     if (!hasArtifactOwnerSpaceId(_updatedItem)) {
       await this.setOwnerSpaceId(_updatedItem);
