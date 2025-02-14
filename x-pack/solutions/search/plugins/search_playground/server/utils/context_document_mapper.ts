@@ -14,8 +14,10 @@ export const contextDocumentHitMapper =
   (contentField: ElasticsearchRetrieverContentField) =>
   (hit: SearchHit): Document => {
     let pageContent: string = '';
-    const makePageContentForField = (field: string) =>
-      `${field}: ${getValueForSelectedField(hit, field)}`;
+    const makePageContentForField = (field: string) => {
+      const fieldValue = getValueForSelectedField(hit, field);
+      return fieldValue.length > 0 ? `${field}: ${fieldValue}` : '';
+    };
     if (typeof contentField === 'string') {
       pageContent = makePageContentForField(contentField);
     } else {
@@ -23,7 +25,10 @@ export const contextDocumentHitMapper =
       if (typeof pageContentFieldKey === 'string') {
         pageContent = makePageContentForField(pageContentFieldKey);
       } else {
-        pageContent = pageContentFieldKey.map((field) => makePageContentForField(field)).join('\n');
+        pageContent = pageContentFieldKey
+          .map((field) => makePageContentForField(field))
+          .filter((fieldContent) => fieldContent.length > 0)
+          .join('\n');
       }
     }
 

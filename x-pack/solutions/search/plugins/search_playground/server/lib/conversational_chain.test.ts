@@ -511,7 +511,7 @@ describe('conversational chain', () => {
       expectedDocs: [
         {
           documents: [
-            { metadata: { _id: '1', _index: 'index' }, pageContent: 'field: ' },
+            { metadata: { _id: '1', _index: 'index' }, pageContent: '' },
             {
               metadata: { _id: '1', _index: 'website' },
               pageContent:

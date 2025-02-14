@@ -69,4 +69,46 @@ describe('contextDocumentHitMapper', () => {
       },
     });
   });
+  it('should not include empty field values', () => {
+    const hit = {
+      _index: 'test-index',
+      _score: 1,
+      _id: 'id',
+      _source: {
+        text: 'foo bar baz',
+        other: '',
+      },
+    };
+    const contentField = { 'test-index': ['text', 'other'] };
+    const document = contextDocumentHitMapper(contentField)(hit);
+    expect(document).toEqual({
+      pageContent: 'text: foo bar baz',
+      metadata: {
+        _score: 1,
+        _id: 'id',
+        _index: 'test-index',
+      },
+    });
+  });
+  it('should handle all empty field values', () => {
+    const hit = {
+      _index: 'test-index',
+      _score: 1,
+      _id: 'id',
+      _source: {
+        text: '',
+        other: '',
+      },
+    };
+    const contentField = { 'test-index': ['text', 'other'] };
+    const document = contextDocumentHitMapper(contentField)(hit);
+    expect(document).toEqual({
+      pageContent: '',
+      metadata: {
+        _score: 1,
+        _id: 'id',
+        _index: 'test-index',
+      },
+    });
+  });
 });
