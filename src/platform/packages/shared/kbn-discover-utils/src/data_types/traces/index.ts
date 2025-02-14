@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { discoverStorybookConfig } from './discover.webpack';
-
-module.exports = discoverStorybookConfig;
+export * from './types';
