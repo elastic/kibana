@@ -44,8 +44,7 @@ export const registerSiemRuleMigrationsUpdateRoute = (
           const { migration_id: migrationId } = req.params;
           const rulesToUpdate = req.body;
 
-          const [firstRuleToUpdate] = rulesToUpdate;
-          if (!firstRuleToUpdate) {
+          if (rulesToUpdate.length === 0) {
             return res.noContent();
           }
           const ids = rulesToUpdate.map((rule) => rule.id);
