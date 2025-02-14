@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export const AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION = '1.13.0-preview02';
+import { PREFIX } from '../shared/test_ids';
+
+export const PREVIEW_FOOTER_TEST_ID = `${PREFIX}NetworkPreviewFooter` as const;
+export const PREVIEW_FOOTER_LINK_TEST_ID = `${PREVIEW_FOOTER_TEST_ID}Link` as const;
