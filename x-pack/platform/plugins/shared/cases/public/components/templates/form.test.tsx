@@ -192,8 +192,8 @@ describe('TemplateForm', () => {
     await user.keyboard('{enter}');
     await user.paste('bar');
     await user.keyboard('{enter}');
-    const submitSpy = jest.spyOn(formState!, 'submit');
 
+    const submitSpy = jest.spyOn(formState!, 'submit');
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -248,7 +248,6 @@ describe('TemplateForm', () => {
     });
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -317,7 +316,6 @@ describe('TemplateForm', () => {
     await user.type(within(caseCategory).getByRole('combobox'), 'new {enter}');
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -377,7 +375,6 @@ describe('TemplateForm', () => {
     });
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -444,7 +441,6 @@ describe('TemplateForm', () => {
     });
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -523,7 +519,6 @@ describe('TemplateForm', () => {
     await user.selectOptions(await screen.findByTestId('categorySelect'), ['Denial of Service']);
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -626,7 +621,6 @@ describe('TemplateForm', () => {
     await user.paste('765');
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -736,7 +730,6 @@ describe('TemplateForm', () => {
     );
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -807,7 +800,6 @@ describe('TemplateForm', () => {
     await user.paste('');
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -842,7 +834,6 @@ describe('TemplateForm', () => {
     await user.paste(name);
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -877,7 +868,6 @@ describe('TemplateForm', () => {
     await user.paste(description);
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -917,7 +907,6 @@ describe('TemplateForm', () => {
     }
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
@@ -955,7 +944,6 @@ describe('TemplateForm', () => {
     await user.keyboard('{enter}');
 
     const submitSpy = jest.spyOn(formState!, 'submit');
-
     await user.click(screen.getByText('testSubmit'));
 
     await waitFor(() => {
