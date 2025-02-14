@@ -25,10 +25,11 @@ import {
   getFieldValue,
   INDEX_FIELD,
 } from '@kbn/discover-utils';
-import { TraceDocument } from '@kbn/discover-utils/src';
+import { TraceDocument, formatFieldValue } from '@kbn/discover-utils/src';
 import { EuiIcon, useEuiTheme } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { testPatternAgainstAllowedList } from '@kbn/data-view-utils';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { FieldBadgeWithActions, FieldBadgeWithActionsProps } from '../cell_actions_popover';
 import { ServiceNameBadgeWithActions } from '../service_name_badge_with_actions';
 
@@ -139,17 +140,6 @@ const getResourceBadgeIcon = (
   }
 };
 
-const getFormattedValue = (name: FieldKey, rawValue: unknown, dataView: DataView): string => {
-  const field = dataView.getFieldByName(name);
-  const formatter = field && dataView.getFormatterForField(field);
-
-  if (formatter) {
-    return formatter.convert(rawValue, 'html', { field });
-  }
-
-  return `${rawValue}`;
-};
-
 const isTracesIndex = testPatternAgainstAllowedList(['traces']);
 
 export const isTraceDocument = (row: DataTableRecord): row is TraceDocument =>
@@ -163,6 +153,7 @@ interface ResourceFieldsProps {
   dataView: DataView;
   core: CoreStart;
   share?: SharePluginStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 export const createResourceFields = ({
@@ -172,17 +163,31 @@ export const createResourceFields = ({
   dataView,
   core,
   share,
+  fieldFormats,
 }: ResourceFieldsProps): ResourceFieldDescriptor[] => {
   const resourceDoc = getUnformattedFields(row, fields);
   const availableResourceFields = getAvailableFields(resourceDoc);
 
-  return availableResourceFields.map((name) => ({
-    name,
-    rawValue: resourceDoc[name],
-    value: getFormattedValue(name, resourceDoc[name], dataView),
-    ResourceBadge: getResourceBadgeComponent(name, core, share),
-    Icon: getResourceBadgeIcon(name, resourceDoc),
-  }));
+  return availableResourceFields.map((name) => {
+    const value = formatFieldValue(
+      resourceDoc[name],
+      row.raw,
+      fieldFormats,
+      dataView,
+      dataView.getFieldByName(name),
+      'html'
+    );
+
+    return {
+      name,
+      rawValue: resourceDoc[name],
+      // TODO: formatFieldValue doesn't actually return a string in certain circumstances, change
+      // this line below once it does.
+      value: typeof value === 'string' ? value : `${value}`,
+      ResourceBadge: getResourceBadgeComponent(name, core, share),
+      Icon: getResourceBadgeIcon(name, resourceDoc),
+    };
+  });
 };
 
 /**

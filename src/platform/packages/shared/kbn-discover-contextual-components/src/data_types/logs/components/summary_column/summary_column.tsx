@@ -66,7 +66,7 @@ const SummaryCell = ({
   rowHeight: maybeNullishRowHeight,
   ...props
 }: AllSummaryColumnProps) => {
-  const { dataView, onFilter, row, share, core, isTracesSummary } = props;
+  const { dataView, onFilter, row, share, core, isTracesSummary, fieldFormats } = props;
 
   const density = maybeNullishDensity ?? DataGridDensity.COMPACT;
   const isCompressed = density === DataGridDensity.COMPACT;
@@ -83,6 +83,7 @@ const SummaryCell = ({
           dataView,
           core,
           share,
+          fieldFormats,
         }
       : {
           row,
@@ -91,6 +92,7 @@ const SummaryCell = ({
           dataView,
           core,
           share,
+          fieldFormats,
         }
   );
   const shouldRenderResource = resourceFields.length > 0;
@@ -137,6 +139,7 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
           dataView,
           core,
           share,
+          fieldFormats,
         }
       : {
           row,
@@ -145,6 +148,7 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
           dataView,
           core,
           share,
+          fieldFormats,
         }
   );
   const shouldRenderResource = resourceFields.length > 0;

@@ -13,7 +13,7 @@ import type { AgentName } from '@kbn/elastic-agent-utils';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
-import { getFieldValue } from '@kbn/discover-utils';
+import { formatFieldValue, getFieldValue } from '@kbn/discover-utils';
 import { ServiceNameBadgeWithActions } from '@kbn/discover-contextual-components';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { CellRenderersExtensionParams } from '../../../context_awareness';
@@ -32,7 +32,6 @@ export const getServiceNameCell =
     const { core, share } = useDiscoverServices();
     const serviceNameValue = getFieldValue(props.row, serviceNameField);
     const field = props.dataView.getFieldByName(serviceNameField);
-    const formatter = field && props.dataView.getFormatterForField(field);
     const agentName = getFieldValue(props.row, AGENT_NAME_FIELD) as AgentName;
 
     if (!serviceNameValue) {
@@ -45,12 +44,23 @@ export const getServiceNameCell =
       </EuiToolTip>
     );
 
+    const value = formatFieldValue(
+      serviceNameValue,
+      props.row.raw,
+      props.fieldFormats,
+      props.dataView,
+      field,
+      'html'
+    );
+
     return (
       <ServiceNameBadgeWithActions
         onFilter={actions.addFilter}
         icon={getIcon}
         rawValue={serviceNameValue}
-        value={formatter?.convert(serviceNameValue, 'html', { field }) ?? `${serviceNameValue}`}
+        // TODO: formatFieldValue doesn't actually return a string in certain circumstances, change
+        // this line below once it does.
+        value={typeof value === 'string' ? value : `${value}`}
         property={serviceNameField}
         core={core}
         share={share}
