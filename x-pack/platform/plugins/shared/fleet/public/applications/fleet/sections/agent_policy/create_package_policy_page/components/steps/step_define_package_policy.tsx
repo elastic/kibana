@@ -467,7 +467,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           });
                         }}
                         placeholder={i18n.translate(
-                          'xpack.fleet.createPackagePolicy.stepConfigure.additionalPermissionsLabel',
+                          'xpack.fleet.createPackagePolicy.stepConfigure.additionalPermissionsPlaceholder',
                           {
                             defaultMessage: 'Add a permission',
                           }
