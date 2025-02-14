@@ -521,6 +521,19 @@ describe('IndexPattern', () => {
       const dataView2 = create('test2', spec);
       expect(dataView1.sourceFilters).not.toBe(dataView2.sourceFilters);
     });
+
+    test('getting spec without fields does not modify fieldAttrs', () => {
+      const fieldAttrs = { bytes: { count: 5, customLabel: 'test_bytes' }, agent: { count: 1 } };
+      const dataView = new DataView({
+        fieldFormats: fieldFormatsMock,
+        spec: {
+          fieldAttrs,
+        },
+      });
+      const spec = dataView.toSpec(false);
+      expect(spec.fieldAttrs).toEqual({ bytes: { customLabel: fieldAttrs.bytes.customLabel } });
+      expect(JSON.parse(dataView.getAsSavedObjectBody().fieldAttrs!)).toEqual(fieldAttrs);
+    });
   });
 
   describe('should initialize from spec with field attributes', () => {
