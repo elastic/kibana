@@ -40,7 +40,8 @@ export const SYNTHETICS_RULE_TYPE_IDS = [SYNTHETICS_STATUS_RULE, SYNTHETICS_TLS_
  * SLO rule types
  */
 export const SLO_BURN_RATE_RULE_TYPE_ID = 'slo.rules.burnRate';
-export const SLO_RULE_TYPE_IDS = [SLO_BURN_RATE_RULE_TYPE_ID];
+export const SLO_HEALTH_RULE_TYPE_ID = 'slo.rules.health';
+export const SLO_RULE_TYPE_IDS = [SLO_BURN_RATE_RULE_TYPE_ID, SLO_HEALTH_RULE_TYPE_ID];
 
 /**
  * Metrics rule types

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import {
   CoreSetup,
   CoreStart,
@@ -15,12 +16,12 @@ import {
   PluginInitializerContext,
   SavedObjectsClient,
 } from '@kbn/core/server';
-import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { sloFeatureId } from '@kbn/observability-plugin/common';
+import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { mapValues } from 'lodash';
+import { getSloClientWithRequest } from './client';
 import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerRules } from './lib/rules/register_rules';
 import { getSloServerRouteRepository } from './routes/get_slo_server_route_repository';
@@ -37,7 +38,6 @@ import type {
   SLOServerSetup,
   SLOServerStart,
 } from './types';
-import { getSloClientWithRequest } from './client';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 

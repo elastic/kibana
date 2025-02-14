@@ -12,6 +12,7 @@ import type { ObservabilityApmAlert } from './generated/observability_apm_schema
 import type { ObservabilityLogsAlert } from './generated/observability_logs_schema';
 import type { ObservabilityMetricsAlert } from './generated/observability_metrics_schema';
 import type { ObservabilitySloAlert } from './generated/observability_slo_schema';
+import type { ObservabilitySloHealthAlert } from './generated/observability_slo_health_schema';
 import type { ObservabilityUptimeAlert } from './generated/observability_uptime_schema';
 import type { SecurityAlert } from './generated/security_schema';
 import type { MlAnomalyDetectionAlert } from './generated/ml_anomaly_detection_schema';
@@ -26,6 +27,7 @@ export type { ObservabilityApmAlert } from './generated/observability_apm_schema
 export type { ObservabilityLogsAlert } from './generated/observability_logs_schema';
 export type { ObservabilityMetricsAlert } from './generated/observability_metrics_schema';
 export type { ObservabilitySloAlert } from './generated/observability_slo_schema';
+export type { ObservabilitySloHealthAlert } from './generated/observability_slo_health_schema';
 export type { ObservabilityUptimeAlert } from './generated/observability_uptime_schema';
 export type { SecurityAlert } from './generated/security_schema';
 export type { StackAlert } from './generated/stack_schema';
@@ -40,6 +42,7 @@ export type AADAlert =
   | ObservabilityLogsAlert
   | ObservabilityMetricsAlert
   | ObservabilitySloAlert
+  | ObservabilitySloHealthAlert
   | ObservabilityUptimeAlert
   | SecurityAlert
   | MlAnomalyDetectionAlert

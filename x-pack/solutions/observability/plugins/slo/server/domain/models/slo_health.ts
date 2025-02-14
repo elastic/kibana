@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export const SLO_RULE_REGISTRATION_CONTEXT = 'observability.slo';
+import { sloHealthSchema } from '@kbn/slo-schema';
+import * as t from 'io-ts';
+
+type SLOHealth = t.TypeOf<typeof sloHealthSchema>;
+
+export type { SLOHealth };

@@ -13,9 +13,6 @@ import { LicenseType } from '@kbn/licensing-plugin/server';
 import { observabilityPaths, sloFeatureId } from '@kbn/observability-plugin/common';
 import { sloBurnRateParamsSchema } from '@kbn/response-ops-rule-params/slo_burn_rate';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { SLO_BURN_RATE_AAD_FIELDS } from '../../../../common/field_names/slo';
-import { SLO_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
-
 import {
   ALERT_ACTION,
   HIGH_PRIORITY_ACTION,
@@ -23,9 +20,11 @@ import {
   MEDIUM_PRIORITY_ACTION,
   SUPPRESSED_PRIORITY_ACTION,
 } from '../../../../common/constants';
-
+import { SLO_BURN_RATE_AAD_FIELDS } from '../../../../common/field_names/slo';
 import { getRuleExecutor } from './executor';
 import { sloRuleFieldMap } from './field_map';
+
+export const RULE_REGISTRATION_CONTEXT = 'observability.slo';
 
 export function sloBurnRateRuleType(basePath: IBasePath) {
   return {
@@ -83,7 +82,7 @@ export function sloBurnRateRuleType(basePath: IBasePath) {
       ],
     },
     alerts: {
-      context: SLO_RULE_REGISTRATION_CONTEXT,
+      context: RULE_REGISTRATION_CONTEXT,
       mappings: { fieldMap: { ...legacyExperimentalFieldMap, ...sloRuleFieldMap } },
       useEcs: true,
       useLegacyAlerts: true,
