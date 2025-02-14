@@ -194,7 +194,6 @@ const styles = {
       flex: '1 1 100%',
       zIndex: 1,
       minHeight: 0, // Absolute must for Firefox to scroll contents
-      // borderRadius: '4px',
       overflow: 'hidden',
     },
     '&.embPanel__content--hidden, &[data-error]': {
