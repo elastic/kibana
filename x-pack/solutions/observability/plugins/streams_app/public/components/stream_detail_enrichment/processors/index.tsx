@@ -157,6 +157,7 @@ export function AddProcessorPanel({
               <EuiButton
                 data-test-subj="streamsAppAddProcessorPanelAddProcessorButton"
                 size="s"
+                fill
                 onClick={methods.handleSubmit(handleSubmit)}
                 disabled={!methods.formState.isValid && methods.formState.isSubmitted}
               >
@@ -318,6 +319,7 @@ export function EditProcessorPanel({
               <EuiButton
                 data-test-subj="streamsAppEditProcessorPanelUpdateProcessorButton"
                 size="s"
+                fill
                 onClick={methods.handleSubmit(handleSubmit)}
                 disabled={!methods.formState.isValid}
               >

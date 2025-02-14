@@ -108,7 +108,7 @@ export const useProcessingSimulator = ({
             });
           }
         },
-        500
+        800
       ),
     []
   );

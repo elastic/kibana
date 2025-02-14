@@ -106,7 +106,7 @@ export function StreamDetailEnrichmentContent({
         paddingSize="none"
         css={css`
           display: flex;
-          overflow: auto;
+          overflow: hidden auto;
         `}
       >
         <EuiResizableContainer>
