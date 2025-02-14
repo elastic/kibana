@@ -56,6 +56,7 @@ journey(`CustomStatusAlert`, async ({ page, params }) => {
         requestMade = true;
       }
     });
+    await page.getByTestId('ruleFormStep-details').click();
     await page.waitForSelector('[data-test-subj="ruleFlyoutFooterSaveButton"]');
     await page.getByTestId('ruleFlyoutFooterSaveButton').click();
     await page.getByTestId('confirmModalConfirmButton').click();
