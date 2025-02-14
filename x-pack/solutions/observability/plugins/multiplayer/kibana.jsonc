@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/multiplayer-plugin",
+  "owner": ["@elastic/kibana"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Multiplayer for kibana.",
+  "plugin": {
+    "id": "multiplayer",
+    "browser": true,
+    "server": true,
+    "configPath": ["xpack", "multiplayer"],
+    "requiredPlugins": ["share", "observabilityShared"],
+    "optionalPlugins": ["licensing"],
+    "requiredBundles": ["kibanaUtils", "kibanaReact"]
+  }
+}
