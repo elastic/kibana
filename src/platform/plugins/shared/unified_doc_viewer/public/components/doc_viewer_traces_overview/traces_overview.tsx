@@ -15,7 +15,7 @@ import { PARENT_ID_FIELD, getTraceDocumentOverview } from '@kbn/discover-utils';
 import { spanFields, transactionFields } from './resources/fields';
 import { getFieldConfiguration } from './resources/get_field_configuration';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
-import { TransactionProvider } from '../../hooks/use_transaction';
+import { TransactionProvider } from './hooks/use_transaction';
 import { TraceSummary } from './sub_components/trace_summary';
 export type TracesOverviewProps = DocViewRenderProps;
 

@@ -11,7 +11,7 @@ import createContainer from 'constate';
 import { useState, useEffect } from 'react';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
-import { getUnifiedDocViewerServices } from '../plugin';
+import { getUnifiedDocViewerServices } from '../../../plugin';
 
 interface UseTransactionDeps {
   traceId: string;

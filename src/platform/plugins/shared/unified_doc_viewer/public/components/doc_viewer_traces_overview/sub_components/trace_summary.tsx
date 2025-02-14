@@ -10,7 +10,7 @@
 import { EuiHorizontalRule } from '@elastic/eui';
 import React from 'react';
 import { TRANSACTION_NAME_FIELD } from '@kbn/discover-utils';
-import { useTransactionContext } from '../../../hooks/use_transaction';
+import { useTransactionContext } from '../hooks/use_transaction';
 import { FieldWithActions } from './field_with_actions/field_with_actions';
 
 export interface TraceSummaryProps {

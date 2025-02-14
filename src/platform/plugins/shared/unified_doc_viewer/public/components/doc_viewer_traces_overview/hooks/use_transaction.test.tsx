@@ -10,10 +10,10 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { lastValueFrom } from 'rxjs';
-import { getUnifiedDocViewerServices } from '../plugin';
+import { getUnifiedDocViewerServices } from '../../../plugin';
 import { TransactionProvider, useTransactionContext } from './use_transaction';
 
-jest.mock('../plugin', () => ({
+jest.mock('../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
 }));
 
