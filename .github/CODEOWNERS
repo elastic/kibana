@@ -794,6 +794,7 @@ src/platform/packages/shared/kbn-saved-search-component @elastic/obs-ux-logs-tea
 src/platform/plugins/shared/saved_search @elastic/kibana-data-discovery
 packages/kbn-scout @elastic/appex-qa
 packages/kbn-scout-info @elastic/appex-qa
+x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 packages/kbn-scout-reporting @elastic/appex-qa
 examples/screenshot_mode_example @elastic/appex-sharedux
 src/platform/plugins/shared/screenshot_mode @elastic/appex-sharedux
@@ -958,7 +959,6 @@ packages/kbn-stdio-dev-helpers @elastic/kibana-operations
 packages/kbn-storybook @elastic/kibana-operations
 x-pack/solutions/observability/plugins/streams_app @simianhacker @flash1293 @dgieselaar
 x-pack/solutions/observability/plugins/streams @simianhacker @flash1293 @dgieselaar
-x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 x-pack/solutions/observability/packages/kbn-streams-schema @elastic/streams-program-team
 packages/kbn-styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
 x-pack/solutions/observability/plugins/synthetics/e2e @elastic/obs-ux-management-team
