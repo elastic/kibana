@@ -3965,7 +3965,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-rule-utils@link:x-pack/platform/packages/shared/alerting_rule_utils":
+"@kbn/alerting-rule-utils@link:x-pack/platform/packages/shared/alerting-rule-utils":
   version "0.0.0"
   uid ""
 
