@@ -17,7 +17,6 @@ import {
   EuiPageTemplate,
   EuiSpacer,
   EuiText,
-  EuiThemeAmsterdam,
 } from '@elastic/eui';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { ExpressionsContext } from './expressions_context';
@@ -43,7 +42,7 @@ export function App() {
   }, [expressions]);
 
   return (
-    <EuiProvider theme={EuiThemeAmsterdam}>
+    <EuiProvider>
       <EuiPageTemplate offset={0}>
         <EuiPageTemplate.Header pageTitle="Partial Results Demo" />
         <EuiPageTemplate.Section>

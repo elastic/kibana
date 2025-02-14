@@ -8,20 +8,13 @@
  */
 
 import * as React from 'react';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageSection,
-  EuiPageHeader,
-  EuiSpacer,
-  EuiThemeAmsterdam,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { EuiProvider } from '@elastic/eui';
 import { EsqlInspector } from './components/esql_inspector';
 
 export const App = () => {
   return (
-    <EuiProvider theme={EuiThemeAmsterdam}>
+    <EuiProvider>
       <EuiPage>
         <EuiPageBody style={{ maxWidth: 1200, margin: '0 auto' }}>
           <EuiPageHeader paddingSize="s" bottomBorder={true} pageTitle="ES|QL AST Inspector" />
