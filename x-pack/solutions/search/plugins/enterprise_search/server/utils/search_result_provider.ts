@@ -12,11 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
 
 import { ConfigType } from '..';
-import {
-  ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE,
-  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
-  AI_SEARCH_PLUGIN,
-} from '../../common/constants';
+import { ENTERPRISE_SEARCH_CONTENT_PLUGIN, AI_SEARCH_PLUGIN } from '../../common/constants';
 
 type ServiceDefinition =
   | ConnectorServerSideDefinition
@@ -46,15 +42,7 @@ export function toSearchResult({
   serviceType: string;
   url?: string;
 }) {
-  const isCrawler = serviceType === ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE;
-  const connectorTypeParam = !isCrawler
-    ? isCloud && isNative
-      ? 'native'
-      : 'connector_client'
-    : null;
-  const newUrl = isCrawler
-    ? `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/crawlers/new_crawler`
-    : `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector?connector_type=${connectorTypeParam}&service_type=${serviceType}`;
+  const newUrl = `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector`;
 
   return {
     icon: iconPath || 'logoEnterpriseSearch',
