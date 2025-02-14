@@ -94,6 +94,7 @@ export const EntityTypeToLevelField: Record<EntityType, RiskScoreFields> = {
   [EntityType.user]: RiskScoreFields.userRisk,
   [EntityType.service]: RiskScoreFields.serviceRisk,
   [EntityType.universal]: RiskScoreFields.unsupported, // We don't calculate risk for the universal entity
+  [EntityType.generic]: RiskScoreFields.unsupported, // We don't calculate risk for the generic entity
 };
 
 export const EntityTypeToScoreField: Record<EntityType, RiskScoreFields> = {
@@ -101,4 +102,5 @@ export const EntityTypeToScoreField: Record<EntityType, RiskScoreFields> = {
   [EntityType.user]: RiskScoreFields.userRiskScore,
   [EntityType.service]: RiskScoreFields.serviceRiskScore,
   [EntityType.universal]: RiskScoreFields.unsupported, // We don't calculate risk for the universal entity
+  [EntityType.generic]: RiskScoreFields.unsupported, // We don't calculate risk for the generic entity
 };

@@ -13,6 +13,7 @@ components:
         - host
         - service
         - universal
+        - generic
 
     EngineDescriptor:
       type: object

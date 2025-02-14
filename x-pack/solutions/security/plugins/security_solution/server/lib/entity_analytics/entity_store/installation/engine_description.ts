@@ -16,6 +16,7 @@ import {
   userEntityEngineDescription,
   universalEntityEngineDescription,
   serviceEntityEngineDescription,
+  genericEntityEngineDescription
 } from '../entity_definitions/entity_descriptions';
 import type { EntityStoreConfig } from '../types';
 import { buildEntityDefinitionId } from '../utils';
@@ -29,6 +30,7 @@ const engineDescriptionRegistry: Record<EntityType, EntityDescription> = {
   user: userEntityEngineDescription,
   universal: universalEntityEngineDescription,
   service: serviceEntityEngineDescription,
+  generic: genericEntityEngineDescription
 };
 
 interface EngineDescriptionParams {

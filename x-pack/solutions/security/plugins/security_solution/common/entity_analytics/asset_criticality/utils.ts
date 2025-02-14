@@ -9,7 +9,7 @@ import type { ExperimentalFeatures } from '../../experimental_features';
 import { getAllEntityTypes, getDisabledEntityTypes } from '../utils';
 import { EntityType } from '../types';
 
-const ASSET_CRITICALITY_UNAVAILABLE_TYPES = [EntityType.universal];
+const ASSET_CRITICALITY_UNAVAILABLE_TYPES = [EntityType.universal, EntityType.generic];
 
 // TODO delete this function when the universal entity support is added
 export const getAssetCriticalityEntityTypes = (experimentalFeatures: ExperimentalFeatures) => {

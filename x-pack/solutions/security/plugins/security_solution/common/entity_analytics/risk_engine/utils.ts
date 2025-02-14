@@ -28,7 +28,7 @@ export function fromEnum<EnumType extends string>(
   );
 }
 
-const RISK_ENGINE_UNAVAILABLE_TYPES = [EntityType.universal];
+const RISK_ENGINE_UNAVAILABLE_TYPES = [EntityType.universal, EntityType.generic];
 
 // TODO delete this function when the universal entity support is added
 export const getRiskEngineEntityTypes = (experimentalFeatures: ExperimentalFeatures) => {
