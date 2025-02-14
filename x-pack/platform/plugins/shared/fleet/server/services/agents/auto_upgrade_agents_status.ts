@@ -1,0 +1,72 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+export async function getAutoUpgradeAgentsStatus(
+  agentClient: AgentClientImpl,
+  agentPolicyId: string
+): Promise<GetAutoUpgradeAgentsStatusResponse> {
+  const currentVersionsMap: {
+    [version: string]: CurrentVersionCount;
+  } = {};
+  let total = 0;
+
+  await agentClient
+    .listAgents({
+      showInactive: false,
+      perPage: 0,
+      kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicyId}"`,
+      aggregations: {
+        versions: {
+          terms: {
+            field: 'local_metadata.elastic.agent.version.keyword',
+            size: 1000,
+          },
+        },
+      },
+    })
+    .then((result) => {
+      (result.aggregations?.versions as any)?.buckets.forEach(
+        (bucket: { key: string; doc_count: number }) =>
+          (currentVersionsMap[bucket.key] = {
+            version: bucket.key,
+            agents: bucket.doc_count,
+            failedAgents: 0,
+          })
+      );
+      total = result.total;
+    });
+
+  await agentClient
+    .listAgents({
+      showInactive: false,
+      perPage: 0,
+      kuery: `${AGENTS_PREFIX}.policy_id:"${request.params.agentPolicyId}" AND ${AGENTS_PREFIX}.upgrade_details.state:"UPG_FAILED"`,
+      aggregations: {
+        versions: {
+          terms: {
+            field: 'upgrade_details.target_version.keyword',
+            size: 1000,
+          },
+        },
+      },
+    })
+    .then((result) => {
+      (result.aggregations?.versions as any)?.buckets.forEach(
+        (bucket: { key: string; doc_count: number }) =>
+          (currentVersionsMap[bucket.key] = {
+            version: bucket.key,
+            agents: currentVersionsMap[bucket.key]?.agents ?? 0,
+            failedAgents: bucket.doc_count,
+          })
+      );
+    });
+
+  return {
+    currentVersions: Object.values(currentVersionsMap),
+    totalAgents: total,
+  };
+}

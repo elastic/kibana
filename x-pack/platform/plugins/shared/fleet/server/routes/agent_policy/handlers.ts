@@ -56,13 +56,12 @@ import type {
   BulkGetAgentPoliciesResponse,
   GetAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsResponse,
-  GetAutoUpgradeAgentsStatusResponse,
-  CurrentVersionCount,
 } from '../../../common/types';
 import { AgentPolicyNotFoundError, FleetUnauthorizedError, FleetError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
 import { packagePolicyToSimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
+import { getAutoUpgradeAgentsStatus } from '../../services/agents';
 
 export async function populateAssignedAgentsCount(
   agentClient: AgentClient,
@@ -288,66 +287,7 @@ export const getAutoUpgradeAgentsStatusHandler: FleetRequestHandler<
 
   const agentClient = fleetContext.agentClient.asCurrentUser;
 
-  const currentVersionsMap: {
-    [version: string]: CurrentVersionCount;
-  } = {};
-  let total = 0;
-
-  await agentClient
-    .listAgents({
-      showInactive: false,
-      perPage: 0,
-      kuery: `${AGENTS_PREFIX}.policy_id:"${request.params.agentPolicyId}"`,
-      aggregations: {
-        versions: {
-          terms: {
-            field: 'local_metadata.elastic.agent.version.keyword',
-            size: 1000,
-          },
-        },
-      },
-    })
-    .then((result) => {
-      (result.aggregations?.versions as any)?.buckets.forEach(
-        (bucket: { key: string; doc_count: number }) =>
-          (currentVersionsMap[bucket.key] = {
-            version: bucket.key,
-            agents: bucket.doc_count,
-            failedAgents: 0,
-          })
-      );
-      total = result.total;
-    });
-
-  await agentClient
-    .listAgents({
-      showInactive: false,
-      perPage: 0,
-      kuery: `${AGENTS_PREFIX}.policy_id:"${request.params.agentPolicyId}" AND ${AGENTS_PREFIX}.upgrade_details.state:"UPG_FAILED"`,
-      aggregations: {
-        versions: {
-          terms: {
-            field: 'upgrade_details.target_version.keyword',
-            size: 1000,
-          },
-        },
-      },
-    })
-    .then((result) => {
-      (result.aggregations?.versions as any)?.buckets.forEach(
-        (bucket: { key: string; doc_count: number }) =>
-          (currentVersionsMap[bucket.key] = {
-            version: bucket.key,
-            agents: currentVersionsMap[bucket.key]?.agents ?? 0,
-            failedAgents: bucket.doc_count,
-          })
-      );
-    });
-
-  const body: GetAutoUpgradeAgentsStatusResponse = {
-    currentVersions: Object.values(currentVersionsMap),
-    totalAgents: total,
-  };
+  const body = await getAutoUpgradeAgentsStatus(agentClient, request.params.agentPolicyId);
   return response.ok({
     body,
   });
@@ -441,7 +381,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const { force, space_ids: spaceIds, ...data } = request.body;
+  const { force, bumpRevision, space_ids: spaceIds, ...data } = request.body;
 
   let spaceId = fleetContext.spaceId;
 
@@ -467,7 +407,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       esClient,
       request.params.agentPolicyId,
       data,
-      { force, user, spaceId }
+      { force, bumpRevision, user, spaceId }
     );
 
     let item: any = agentPolicy;

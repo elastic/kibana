@@ -122,6 +122,7 @@ export const UpdateAgentPolicyRequestSchema = {
   ...GetOneAgentPolicyRequestSchema,
   body: NewAgentPolicySchema.extends({
     force: schema.maybe(schema.boolean()),
+    bumpRevision: schema.maybe(schema.boolean()),
   }),
 };
 

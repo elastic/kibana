@@ -9,7 +9,6 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiConfirmModal,
   EuiFieldNumber,
   EuiFlexGroup,
@@ -58,6 +57,8 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
         name: agentPolicy.name,
         namespace: agentPolicy.namespace,
         required_versions: targetVersions,
+        // required_versions are not sent to agents, so no need to bump revision
+        bumpRevision: false,
       });
       notifications.toasts.addSuccess(
         i18n.translate('xpack.fleet.manageAutoUpgradeAgents.successNotificationTitle', {
@@ -116,21 +117,6 @@ export const ManageAutoUpgradeAgentsModal: React.FunctionComponent<
     >
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          {agentCount > 0 ? (
-            <>
-              <EuiCallOut
-                iconType="iInCircle"
-                title={i18n.translate('xpack.fleet.manageAutoUpgradeAgents.calloutTitle', {
-                  defaultMessage:
-                    'This action will update {agentCount, plural, one {# agent} other {# agents}}',
-                  values: {
-                    agentCount,
-                  },
-                })}
-              />
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
           <FormattedMessage
             id="xpack.fleet.manageAutoUpgradeAgents.descriptionText"
             defaultMessage="Add the target agent version for automatic upgrades."
