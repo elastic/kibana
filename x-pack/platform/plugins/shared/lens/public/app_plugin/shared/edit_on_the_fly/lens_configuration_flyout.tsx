@@ -241,7 +241,7 @@ export function LensEditConfigurationFlyout({
 
   const currentAttributes = useCurrentAttributes({
     textBasedMode,
-    attributes,
+    initialAttributes: attributes,
     datasourceMap,
     visualizationMap,
   });

@@ -170,6 +170,12 @@ export const getSuggestions = async (
   return undefined;
 };
 
+/**
+ * Injects the ESQL query into the lens layers. This is used to keep the query in sync with the lens layers.
+ * @param attributes, the current lens attributes
+ * @param query, the new query to inject
+ * @returns the new lens attributes with the query injected
+ */
 export const injectESQLQueryIntoLensLayers = (
   attributes: TypedLensSerializedState['attributes'],
   query: AggregateQuery

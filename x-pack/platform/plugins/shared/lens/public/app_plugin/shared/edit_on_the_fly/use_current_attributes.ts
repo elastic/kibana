@@ -13,11 +13,11 @@ import type { DatasourceMap, VisualizationMap } from '../../../types';
 
 export const useCurrentAttributes = ({
   textBasedMode,
-  attributes,
+  initialAttributes,
   datasourceMap,
   visualizationMap,
 }: {
-  attributes: TypedLensSerializedState['attributes'];
+  initialAttributes: TypedLensSerializedState['attributes'];
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
   textBasedMode?: string;
@@ -25,10 +25,10 @@ export const useCurrentAttributes = ({
   const { datasourceStates, visualization } = useLensSelector((state) => state.lens);
   // use the latest activeId, but fallback to attributes
   const activeVisualization =
-    visualizationMap[visualization.activeId ?? attributes.visualizationType];
+    visualizationMap[visualization.activeId ?? initialAttributes.visualizationType];
 
   const [currentAttributes, setCurrentAttributes] =
-    useState<TypedLensSerializedState['attributes']>(attributes);
+    useState<TypedLensSerializedState['attributes']>(initialAttributes);
 
   useEffect(() => {
     const dsStates = Object.fromEntries(
@@ -53,21 +53,21 @@ export const useCurrentAttributes = ({
         })
       : [];
     const attrs: TypedLensSerializedState['attributes'] = {
-      ...attributes,
+      ...initialAttributes,
       state: {
-        ...attributes.state,
+        ...initialAttributes.state,
         visualization: visualization.state,
         datasourceStates: dsStates,
       },
       references,
-      visualizationType: visualization.activeId ?? attributes.visualizationType,
+      visualizationType: visualization.activeId ?? initialAttributes.visualizationType,
     };
     if (!isEqual(attrs, currentAttributes)) {
       setCurrentAttributes(attrs);
     }
   }, [
     activeVisualization,
-    attributes,
+    initialAttributes,
     datasourceMap,
     datasourceStates,
     currentAttributes,
