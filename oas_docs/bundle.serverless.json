@@ -26413,6 +26413,9 @@
                     "minItems": 1,
                     "type": "array"
                   },
+                  "id": {
+                    "type": "string"
+                  },
                   "is_default": {
                     "type": "boolean"
                   },
@@ -26513,13 +26516,11 @@
                         "type": "string"
                       }
                     },
-                    "required": [
-                      "client_auth"
-                    ],
                     "type": "object"
                   }
                 },
                 "required": [
+                  "id",
                   "proxy_id"
                 ],
                 "type": "object"
