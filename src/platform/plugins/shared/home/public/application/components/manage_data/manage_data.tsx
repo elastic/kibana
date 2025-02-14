@@ -120,6 +120,7 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
                   trackUiMetric(METRIC_TYPE.CLICK, `manage_data_card_${feature.id}`);
                   createAppNavigationHandler(feature.path)(event);
                 }}
+                isBeta={false}
                 title={feature.title}
                 url={addBasePath(feature.path)}
               />

@@ -139,7 +139,7 @@ describe('TutorialService', () => {
     });
     test('returns custom component', async () => {
       const service = new TutorialService();
-      const customComponent = <div>foo</div>;
+      const customComponent = { default: () => <div>foo</div> };
       service.setup().registerCustomComponent('foo', async () => customComponent);
       const customStatusCheckCallback = service.getCustomComponent('foo');
       expect(customStatusCheckCallback).toBeDefined();

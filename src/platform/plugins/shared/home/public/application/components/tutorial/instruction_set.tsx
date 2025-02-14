@@ -23,7 +23,7 @@ import {
 import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme'; // FIXME: remove this, and access style variables from EUI context
 import { Instruction } from './instruction';
-import { ParameterForm, ParameterFormParam } from './parameter_form';
+import { ParameterForm, ParameterFormProps } from './parameter_form';
 import { Content } from './content';
 import { INSTRUCTION_VARIANT, getDisplayText } from '../../..';
 import * as StatusCheckStates from './status_check_states';
@@ -67,7 +67,7 @@ interface InstructionSetProps {
   statusCheckState: keyof typeof StatusCheckStates;
   onStatusCheck: () => void;
   offset: number;
-  params: ParameterFormParam[];
+  params: ParameterFormProps['params'];
   paramValues: { [key: string]: string | number };
   setParameter: (paramId: string, newValue: string) => void;
   replaceTemplateStrings: (text: string) => string;
