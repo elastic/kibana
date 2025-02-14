@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import React, { useState } from 'react';
+import React from 'react';
 import { lastValueFrom } from 'rxjs';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { i18n } from '@kbn/i18n';
@@ -17,15 +17,16 @@ import {
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
-  EuiSuperDatePicker,
   EuiText,
 } from '@elastic/eui';
 import { AreaSeries, Axis, Chart, Settings } from '@elastic/charts';
+import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import { useKibana } from '../../hooks/use_kibana';
 import { DataStreamStats } from './hooks/use_data_stream_stats';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { ingestionRateQuery } from './helpers/ingestion_rate_query';
 import { formatBytes } from './helpers/format_bytes';
+import { StreamsAppSearchBar } from '../streams_app_search_bar';
 
 export function IngestionRate({
   definition,
@@ -43,7 +44,7 @@ export function IngestionRate({
       start: { data },
     },
   } = useKibana();
-  const [timeRange, setTimeRange] = useState({ start: 'now-2w', end: 'now' });
+  const { timeRange, setTimeRange } = useDateRange({ data });
 
   const {
     loading: isLoadingIngestionRate,
@@ -62,7 +63,13 @@ export function IngestionRate({
             aggregations: { docs_count: { buckets: Array<{ key: string; doc_count: number }> } };
           }>
         >(
-          { params: ingestionRateQuery({ ...timeRange, index: definition.stream.name }) },
+          {
+            params: ingestionRateQuery({
+              start: timeRange.from,
+              end: timeRange.to,
+              index: definition.stream.name,
+            }),
+          },
           { abortSignal: signal }
         )
       );
@@ -90,16 +97,23 @@ export function IngestionRate({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiSuperDatePicker
-              isLoading={isLoadingIngestionRate || isLoadingStats}
-              start={timeRange.start}
-              end={timeRange.end}
-              onTimeChange={({ start, end }) => setTimeRange({ start, end })}
-              onRefresh={() => {
-                refreshStats();
+            <StreamsAppSearchBar
+              dateRangeFrom={timeRange.from}
+              dateRangeTo={timeRange.to}
+              onQuerySubmit={({ dateRange }, isUpdate) => {
+                if (!isUpdate) {
+                  refreshStats();
+                  return;
+                }
+
+                if (dateRange) {
+                  setTimeRange({
+                    from: dateRange.from,
+                    to: dateRange?.to,
+                    mode: dateRange.mode,
+                  });
+                }
               }}
-              updateButtonProps={{ iconOnly: true, fill: false }}
-              width="auto"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
