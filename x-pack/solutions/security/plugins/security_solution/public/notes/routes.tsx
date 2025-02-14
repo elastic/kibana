@@ -15,12 +15,10 @@ import { NOTES_PATH, SecurityPageName } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 const NotesManagementTelemetry = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.notes}>
-      <NoteManagementPage />
-      <SpyRoute pageName={SecurityPageName.notes} />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
+  <TrackApplicationView viewId={SecurityPageName.notes}>
+    <NoteManagementPage />
+    <SpyRoute pageName={SecurityPageName.notes} />
+  </TrackApplicationView>
 );
 
 const NotesManagementContainer: React.FC = React.memo(() => {

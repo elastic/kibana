@@ -6,7 +6,15 @@
  */
 
 import type { FC, ReactNode } from 'react';
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  memo,
+} from 'react';
 
 import useObservable from 'react-use/lib/useObservable';
 import { catchError, of, timeout } from 'rxjs';
@@ -39,9 +47,10 @@ const initialState: TourContextValue = {
 
 const TourContext = createContext<TourContextValue>(initialState);
 
-export const RealTourContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
+export const RealTourContextProvider: FC<{ children: ReactNode }> = memo(({ children }) => {
   const { guidedOnboarding } = useKibana().services;
   const [hidden, setHidden] = useState(false);
+  const { pathname } = useLocation();
 
   const setAllTourStepsHidden = useCallback((h: boolean) => {
     setHidden(h);
@@ -95,12 +104,13 @@ export const RealTourContextProvider: FC<{ children: ReactNode }> = ({ children 
   const [completeStep, setCompleteStep] = useState<null | SecurityStepId>(null);
 
   useEffect(() => {
-    if (!completeStep || !guidedOnboarding?.guidedOnboardingApi) {
+    if (!completeStep || !guidedOnboarding?.guidedOnboardingApi || !isTourPath(pathname)) {
       return;
     }
     let ignore = false;
     const complete = async () => {
       await guidedOnboarding?.guidedOnboardingApi?.completeGuideStep(siemGuideId, completeStep);
+      console.log('wtf is this dog shit');
       if (!ignore) {
         setCompleteStep(null);
         _setActiveStep(1);
@@ -110,7 +120,7 @@ export const RealTourContextProvider: FC<{ children: ReactNode }> = ({ children 
     return () => {
       ignore = true;
     };
-  }, [completeStep, guidedOnboarding]);
+  }, [completeStep, guidedOnboarding, pathname]);
 
   const endTourStep = useCallback((tourId: SecurityStepId) => {
     setCompleteStep(tourId);
@@ -129,18 +139,15 @@ export const RealTourContextProvider: FC<{ children: ReactNode }> = ({ children 
   }, [activeStep, endTourStep, hidden, incrementStep, isTourShown, setAllTourStepsHidden, setStep]);
 
   return <TourContext.Provider value={context}>{children}</TourContext.Provider>;
-};
+});
 
-export const TourContextProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const { pathname } = useLocation();
+RealTourContextProvider.displayName = 'RealTourContextProvider';
 
-  const ContextProvider = useMemo(
-    () => (isTourPath(pathname) ? RealTourContextProvider : TourContext.Provider),
-    [pathname]
-  );
+export const TourContextProvider: FC<{ children: ReactNode }> = memo(({ children }) => {
+  return <RealTourContextProvider>{children}</RealTourContextProvider>;
+});
 
-  return <ContextProvider value={initialState}>{children}</ContextProvider>;
-};
+TourContextProvider.displayName = 'TourContextProvider';
 
 export const useTourContext = (): TourContextValue => {
   const ctx = useContext(TourContext);

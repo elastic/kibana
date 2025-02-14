@@ -26,13 +26,9 @@ const translatedNavTitle = i18n.translate('xpack.securitySolution.navigation.mai
 export const useSecuritySolutionNavigation = (): KibanaPageTemplateProps['solutionNav'] | null => {
   const { chrome } = useKibana().services;
   const chromeStyle$ = useMemo(() => chrome.getChromeStyle$(), [chrome]);
-  const chromeStyle = useObservable(chromeStyle$, undefined);
+  const chromeStyle = useObservable(chromeStyle$, 'classic');
 
   useBreadcrumbsNav();
-
-  if (chromeStyle === undefined) {
-    return undefined; // wait for chromeStyle to be initialized
-  }
 
   if (chromeStyle === 'project') {
     // new shared-ux 'project' navigation enabled, return null to disable the 'classic' navigation

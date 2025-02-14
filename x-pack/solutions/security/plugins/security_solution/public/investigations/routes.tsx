@@ -14,11 +14,9 @@ import { SecurityRoutePageWrapper } from '../common/components/security_route_pa
 
 const InvestigationsPage = React.memo(function InvestigationsPage() {
   return (
-    <PluginTemplateWrapper>
-      <SecurityRoutePageWrapper pageName={SecurityPageName.investigations} redirectOnMissing>
-        <Investigations />
-      </SecurityRoutePageWrapper>
-    </PluginTemplateWrapper>
+    <SecurityRoutePageWrapper pageName={SecurityPageName.investigations} redirectOnMissing>
+      <Investigations />
+    </SecurityRoutePageWrapper>
   );
 });
 

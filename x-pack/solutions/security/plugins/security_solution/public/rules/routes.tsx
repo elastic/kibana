@@ -63,55 +63,47 @@ const RulesContainerComponent: React.FC = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
 
   return (
-    <PluginTemplateWrapper>
-      <TrackApplicationView viewId={SecurityPageName.rules}>
-        <Routes>
-          <Route // Redirect to first tab if none specified
-            path="/rules/id/:detailName"
-            exact
-            render={({
-              match: {
-                params: { detailName },
-              },
-              location,
-            }) => (
-              <Redirect
-                to={{
-                  ...location,
-                  pathname: `/rules/id/${detailName}/${RuleDetailTabs.alerts}`,
-                  search: location.search,
-                }}
-              />
-            )}
-          />
-          <Route path="/rules" exact>
-            <Redirect to={`/rules/${AllRulesTabs.management}`} />
+    <TrackApplicationView viewId={SecurityPageName.rules}>
+      <Routes>
+        <Route // Redirect to first tab if none specified
+          path="/rules/id/:detailName"
+          exact
+          render={({
+            match: {
+              params: { detailName },
+            },
+            location,
+          }) => (
+            <Redirect
+              to={{
+                ...location,
+                pathname: `/rules/id/${detailName}/${RuleDetailTabs.alerts}`,
+                search: location.search,
+              }}
+            />
+          )}
+        />
+        <Route path="/rules" exact>
+          <Redirect to={`/rules/${AllRulesTabs.management}`} />
+        </Route>
+        {RulesSubRoutes.map((route) => (
+          <Route key={`rules-route-${route.path}`} path={route.path} exact={route?.exact ?? false}>
+            <route.main />
           </Route>
-          {RulesSubRoutes.map((route) => (
-            <Route
-              key={`rules-route-${route.path}`}
-              path={route.path}
-              exact={route?.exact ?? false}
-            >
-              <route.main />
-            </Route>
-          ))}
-          <Route component={NotFoundPage} />
-          <SpyRoute pageName={SecurityPageName.rules} />
-        </Routes>
-      </TrackApplicationView>
-    </PluginTemplateWrapper>
+        ))}
+        <Route component={NotFoundPage} />
+        <SpyRoute pageName={SecurityPageName.rules} />
+      </Routes>
+    </TrackApplicationView>
   );
 };
 
 const Rules = React.memo(RulesContainerComponent);
 
 const CoverageOverviewRoutes = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.coverageOverview}>
-      <CoverageOverviewPage />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
+  <TrackApplicationView viewId={SecurityPageName.coverageOverview}>
+    <CoverageOverviewPage />
+  </TrackApplicationView>
 );
 
 export const routes: SecuritySubPluginRoutes = [

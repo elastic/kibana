@@ -13,11 +13,9 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { DashboardsContainer } from './pages';
 
 export const DashboardRoutes = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.dashboards}>
-      <DashboardsContainer />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
+  <TrackApplicationView viewId={SecurityPageName.dashboards}>
+    <DashboardsContainer />
+  </TrackApplicationView>
 );
 
 export const routes: SecuritySubPluginRoutes = [

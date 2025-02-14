@@ -18,35 +18,27 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { ExploreLandingPage } from './landing';
 
 const ExploreLanding = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.exploreLanding}>
-      <ExploreLandingPage />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
+  <TrackApplicationView viewId={SecurityPageName.exploreLanding}>
+    <ExploreLandingPage />
+  </TrackApplicationView>
 );
 
 const NetworkRoutes = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.network}>
-      <NetworkContainer />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
+  <TrackApplicationView viewId={SecurityPageName.network}>
+    <NetworkContainer />
+  </TrackApplicationView>
 );
 
 const UsersRoutes = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.users}>
-      <UsersContainer />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
+  <TrackApplicationView viewId={SecurityPageName.users}>
+    <UsersContainer />
+  </TrackApplicationView>
 );
 
 const HostsRoutes = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.hosts}>
-      <HostsContainer />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
+  <TrackApplicationView viewId={SecurityPageName.hosts}>
+    <HostsContainer />
+  </TrackApplicationView>
 );
 
 export const routes: SecuritySubPluginRoutes = [

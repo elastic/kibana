@@ -33,11 +33,9 @@ const CloudDefend = () => {
   const CloudDefendRouter = cloudDefend.getCloudDefendRouter();
 
   return (
-    <PluginTemplateWrapper>
-      <SecuritySolutionPageWrapper noPadding noTimeline>
-        <CloudDefendRouter securitySolutionContext={cloudDefendSecuritySolutionContext} />
-      </SecuritySolutionPageWrapper>
-    </PluginTemplateWrapper>
+    <SecuritySolutionPageWrapper noPadding noTimeline>
+      <CloudDefendRouter securitySolutionContext={cloudDefendSecuritySolutionContext} />
+    </SecuritySolutionPageWrapper>
   );
 };
 

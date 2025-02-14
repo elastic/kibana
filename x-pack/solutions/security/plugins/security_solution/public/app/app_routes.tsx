@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import type { RouteProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
@@ -14,22 +14,50 @@ import { CASES_FEATURE_ID, CASES_PATH, ONBOARDING_PATH } from '../../common/cons
 import { NotFoundPage } from './404';
 import type { StartServices } from '../types';
 import { hasAccessToSecuritySolution } from '../helpers_access';
+import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 
 export interface AppRoutesProps {
   services: StartServices;
   subPluginRoutes: RouteProps[];
 }
 
-export const AppRoutes: React.FC<AppRoutesProps> = React.memo(({ services, subPluginRoutes }) => (
-  <Routes>
-    {subPluginRoutes.map((route, index) => {
-      return <Route key={`route-${index}`} {...route} />;
-    })}
-    <Route>
-      <RedirectRoute capabilities={services.application.capabilities} />
-    </Route>
-  </Routes>
-));
+export const AppRoutes: React.FC<AppRoutesProps> = React.memo(({ services, subPluginRoutes }) => {
+  useEffect(() => {
+    return () => console.log('AppRoutes unmounted');
+  }, []);
+  const appRoutes = useMemo(() => {
+    console.log('rerunnin');
+    return subPluginRoutes.map(({ component: Component, ...rest }, index) => {
+      console.log(rest);
+      if (!Component) {
+        console.log('no component');
+        return <Route {...rest} key={rest.path} />;
+      }
+      console.log('component, key: ', rest.path);
+      return (
+        <Route
+          {...rest}
+          key={rest.path}
+          render={(props) => {
+            return (
+              <PluginTemplateWrapper>
+                <Component {...props} services={services} />
+              </PluginTemplateWrapper>
+            );
+          }}
+        />
+      );
+    });
+  }, [services, subPluginRoutes]);
+  return (
+    <Routes>
+      {appRoutes}
+      <Route>
+        <RedirectRoute capabilities={services.application.capabilities} />
+      </Route>
+    </Routes>
+  );
+});
 AppRoutes.displayName = 'AppRoutes';
 
 export const RedirectRoute = React.memo<{ capabilities: Capabilities }>(({ capabilities }) => {

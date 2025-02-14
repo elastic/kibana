@@ -16,16 +16,14 @@ import { SecurityRoutePageWrapper } from '../common/components/security_route_pa
 
 export const SiemMigrationsRoutes = () => {
   return (
-    <PluginTemplateWrapper>
-      <SecurityRoutePageWrapper pageName={SecurityPageName.siemMigrationsRules}>
-        <Routes>
-          <Route
-            path={`${SIEM_MIGRATIONS_RULES_PATH}/:migrationId?`}
-            component={MigrationRulesPage}
-          />
-        </Routes>
-      </SecurityRoutePageWrapper>
-    </PluginTemplateWrapper>
+    <SecurityRoutePageWrapper pageName={SecurityPageName.siemMigrationsRules}>
+      <Routes>
+        <Route
+          path={`${SIEM_MIGRATIONS_RULES_PATH}/:migrationId?`}
+          component={MigrationRulesPage}
+        />
+      </Routes>
+    </SecurityRoutePageWrapper>
   );
 };
 

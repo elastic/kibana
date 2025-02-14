@@ -24,35 +24,27 @@ import { EntityAnalyticsPage } from '../entity_analytics/pages/entity_analytics_
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
 const OverviewRoutes = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.overview}>
-      <StatefulOverview />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
+  <TrackApplicationView viewId={SecurityPageName.overview}>
+    <StatefulOverview />
+  </TrackApplicationView>
 );
 
 const DetectionResponseRoutes = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.detectionAndResponse}>
-      <DetectionResponse />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
+  <TrackApplicationView viewId={SecurityPageName.detectionAndResponse}>
+    <DetectionResponse />
+  </TrackApplicationView>
 );
 
 const EntityAnalyticsRoutes = () => (
-  <PluginTemplateWrapper>
-    <SecurityRoutePageWrapper pageName={SecurityPageName.entityAnalytics}>
-      <EntityAnalyticsPage />
-    </SecurityRoutePageWrapper>
-  </PluginTemplateWrapper>
+  <SecurityRoutePageWrapper pageName={SecurityPageName.entityAnalytics}>
+    <EntityAnalyticsPage />
+  </SecurityRoutePageWrapper>
 );
 
 const DataQualityRoutes = () => (
-  <PluginTemplateWrapper>
-    <SecurityRoutePageWrapper pageName={SecurityPageName.dataQuality}>
-      <DataQuality />
-    </SecurityRoutePageWrapper>
-  </PluginTemplateWrapper>
+  <SecurityRoutePageWrapper pageName={SecurityPageName.dataQuality}>
+    <DataQuality />
+  </SecurityRoutePageWrapper>
 );
 
 export const routes: SecuritySubPluginRoutes = [

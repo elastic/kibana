@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { type ReactNode, useMemo } from 'react';
+import React, { type ReactNode, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import { EuiThemeProvider, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
@@ -71,8 +71,10 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
 
     // There is some logic in the StyledKibanaPageTemplate that checks for children presence, and we dont even need to render the children
     // solutionNavProps is momentarily initialized to undefined, this check prevents the children from being re-rendered in the initial load
-    const renderChildren = !rest.isEmptyState && solutionNavProps !== undefined;
-
+    const renderChildren = !rest.isEmptyState;
+    useEffect(() => {
+      return () => console.log('unmount');
+    }, []);
     /*
      * StyledKibanaPageTemplate is a styled EuiPageTemplate. Security solution currently passes the header
      * and page content as the children of StyledKibanaPageTemplate, as opposed to using the pageHeader prop,
@@ -84,7 +86,7 @@ export const SecuritySolutionTemplateWrapper: React.FC<SecuritySolutionTemplateW
         theme={euiTheme}
         $isShowingTimelineOverlay={isShowingTimelineOverlay}
         paddingSize="none"
-        solutionNav={solutionNavProps ?? undefined}
+        solutionNav={solutionNavProps}
         restrictWidth={false}
         {...rest}
       >

@@ -23,12 +23,10 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { EntityStoreManagementPage } from './pages/entity_store_management_page';
 
 const EntityAnalyticsManagementTelemetry = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.entityAnalyticsManagement}>
-      <EntityAnalyticsManagementPage />
-      <SpyRoute pageName={SecurityPageName.entityAnalyticsManagement} />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
+  <TrackApplicationView viewId={SecurityPageName.entityAnalyticsManagement}>
+    <EntityAnalyticsManagementPage />
+    <SpyRoute pageName={SecurityPageName.entityAnalyticsManagement} />
+  </TrackApplicationView>
 );
 
 const EntityAnalyticsManagementContainer: React.FC = React.memo(() => {
@@ -46,12 +44,10 @@ const EntityAnalyticsManagementContainer: React.FC = React.memo(() => {
 EntityAnalyticsManagementContainer.displayName = 'EntityAnalyticsManagementContainer';
 
 const EntityAnalyticsAssetClassificationTelemetry = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.entityAnalyticsAssetClassification}>
-      <EntityStoreManagementPage />
-      <SpyRoute pageName={SecurityPageName.entityAnalyticsAssetClassification} />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
+  <TrackApplicationView viewId={SecurityPageName.entityAnalyticsAssetClassification}>
+    <EntityStoreManagementPage />
+    <SpyRoute pageName={SecurityPageName.entityAnalyticsAssetClassification} />
+  </TrackApplicationView>
 );
 
 const EntityAnalyticsAssetClassificationContainer: React.FC = React.memo(() => {
@@ -71,12 +67,10 @@ EntityAnalyticsAssetClassificationContainer.displayName =
   'EntityAnalyticsAssetClassificationContainer';
 
 const EntityAnalyticsEntityStoreTelemetry = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.entityAnalyticsEntityStoreManagement}>
-      <EntityStoreManagementPage />
-      <SpyRoute pageName={SecurityPageName.entityAnalyticsEntityStoreManagement} />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
+  <TrackApplicationView viewId={SecurityPageName.entityAnalyticsEntityStoreManagement}>
+    <EntityStoreManagementPage />
+    <SpyRoute pageName={SecurityPageName.entityAnalyticsEntityStoreManagement} />
+  </TrackApplicationView>
 );
 
 const EntityAnalyticsEntityStoreContainer: React.FC = React.memo(() => {

@@ -27,20 +27,18 @@ export const RulesLandingPage = () => {
   const urlState = useGlobalQueryString();
 
   return (
-    <PluginTemplateWrapper>
-      <TrackApplicationView viewId={SecurityPageName.rulesLanding}>
-        <SecuritySolutionPageWrapper>
-          <Title title={RULES_PAGE_TITLE} />
-          <EuiSpacer size="xl" />
-          <LandingLinksIconsCategories
-            links={links}
-            categories={categories}
-            onLinkClick={trackLandingLinkClick}
-            urlState={urlState}
-          />
-          <SpyRoute pageName={SecurityPageName.rulesLanding} />
-        </SecuritySolutionPageWrapper>
-      </TrackApplicationView>
-    </PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.rulesLanding}>
+      <SecuritySolutionPageWrapper>
+        <Title title={RULES_PAGE_TITLE} />
+        <EuiSpacer size="xl" />
+        <LandingLinksIconsCategories
+          links={links}
+          categories={categories}
+          onLinkClick={trackLandingLinkClick}
+          urlState={urlState}
+        />
+        <SpyRoute pageName={SecurityPageName.rulesLanding} />
+      </SecuritySolutionPageWrapper>
+    </TrackApplicationView>
   );
 };

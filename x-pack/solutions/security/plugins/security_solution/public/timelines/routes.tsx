@@ -15,11 +15,9 @@ import { TIMELINES_PATH } from '../../common/constants';
 import { Timelines } from './pages';
 
 const TimelinesRoutes = () => (
-  <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.timelines}>
-      <Timelines />
-    </TrackApplicationView>
-  </PluginTemplateWrapper>
+  <TrackApplicationView viewId={SecurityPageName.timelines}>
+    <Timelines />
+  </TrackApplicationView>
 );
 
 export const routes: SecuritySubPluginRoutes = [

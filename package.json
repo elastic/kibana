@@ -1069,6 +1069,7 @@
     "@turf/distance": "6.0.1",
     "@turf/helpers": "6.0.1",
     "@turf/length": "^6.0.2",
+    "@welldone-software/why-did-you-render": "^7",
     "@xstate/react": "^3.2.2",
     "@xstate5/react": "npm:@xstate/react@^4.1.2",
     "@xyflow/react": "^12.4.1",

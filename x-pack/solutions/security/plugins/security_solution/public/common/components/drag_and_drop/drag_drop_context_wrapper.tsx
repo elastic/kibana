@@ -160,11 +160,7 @@ export const DragDropContextWrapperComponent: React.FC<Props> = ({ browserFields
 
 DragDropContextWrapperComponent.displayName = 'DragDropContextWrapperComponent';
 
-export const DragDropContextWrapper = React.memo(
-  DragDropContextWrapperComponent,
-  // prevent re-renders when data providers are added or removed, but all other props are the same
-  (prevProps, nextProps) => deepEqual(prevProps.children, nextProps.children)
-);
+export const DragDropContextWrapper = React.memo(DragDropContextWrapperComponent);
 
 DragDropContextWrapper.displayName = 'DragDropContextWrapper';
 

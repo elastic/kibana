@@ -15,11 +15,9 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 
 export const AttackDiscoveryRoutes = () => (
-  <PluginTemplateWrapper>
-    <SecurityRoutePageWrapper pageName={SecurityPageName.attackDiscovery}>
-      <AttackDiscoveryPage />
-    </SecurityRoutePageWrapper>
-  </PluginTemplateWrapper>
+  <SecurityRoutePageWrapper pageName={SecurityPageName.attackDiscovery}>
+    <AttackDiscoveryPage />
+  </SecurityRoutePageWrapper>
 );
 
 export const routes: SecuritySubPluginRoutes = [

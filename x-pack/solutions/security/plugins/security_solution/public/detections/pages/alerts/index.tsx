@@ -32,9 +32,12 @@ const AlertsContainerComponent: React.FC = () => {
   useReadonlyHeader(i18n.READ_ONLY_BADGE_TOOLTIP);
   return (
     <Routes>
-      <Route path={ALERTS_PATH} exact component={AlertsRoute} />
+      <Route path={ALERTS_PATH} exact render={() => <AlertsRoute />} />
       {/* Redirect to the alerts page filtered for the given alert id */}
-      <Route path={`${ALERT_DETAILS_REDIRECT_PATH}/:alertId`} component={AlertDetailsRedirect} />
+      <Route
+        path={`${ALERT_DETAILS_REDIRECT_PATH}/:alertId`}
+        render={() => <AlertDetailsRedirect />}
+      />
       <Route component={NotFoundPage} />
     </Routes>
   );

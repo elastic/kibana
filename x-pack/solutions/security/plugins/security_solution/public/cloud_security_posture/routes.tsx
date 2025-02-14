@@ -32,13 +32,11 @@ const CloudSecurityPosture = () => {
   const CloudSecurityPostureRouter = cloudSecurityPosture.getCloudSecurityPostureRouter();
 
   return (
-    <PluginTemplateWrapper>
-      <TrackApplicationView viewId="cloud_security_posture">
-        <SecuritySolutionPageWrapper noPadding noTimeline>
-          <CloudSecurityPostureRouter securitySolutionContext={cspSecuritySolutionContext} />
-        </SecuritySolutionPageWrapper>
-      </TrackApplicationView>
-    </PluginTemplateWrapper>
+    <TrackApplicationView viewId="cloud_security_posture">
+      <SecuritySolutionPageWrapper noPadding noTimeline>
+        <CloudSecurityPostureRouter securitySolutionContext={cspSecuritySolutionContext} />
+      </SecuritySolutionPageWrapper>
+    </TrackApplicationView>
   );
 };
 

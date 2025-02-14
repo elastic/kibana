@@ -44,17 +44,15 @@ export const AssetInventoryRoutes = () => {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <PluginTemplateWrapper>
-        <SecurityRoutePageWrapper pageName={SecurityPageName.assetInventory}>
-          <DataViewContext.Provider value={dataViewContextValue}>
-            <SecuritySolutionPageWrapper noPadding>
-              <Suspense fallback={<EuiLoadingSpinner />}>
-                <AllAssetsLazy rows={[]} isLoading={false} loadMore={() => {}} />
-              </Suspense>
-            </SecuritySolutionPageWrapper>
-          </DataViewContext.Provider>
-        </SecurityRoutePageWrapper>
-      </PluginTemplateWrapper>
+      <SecurityRoutePageWrapper pageName={SecurityPageName.assetInventory}>
+        <DataViewContext.Provider value={dataViewContextValue}>
+          <SecuritySolutionPageWrapper noPadding>
+            <Suspense fallback={<EuiLoadingSpinner />}>
+              <AllAssetsLazy rows={[]} isLoading={false} loadMore={() => {}} />
+            </Suspense>
+          </SecuritySolutionPageWrapper>
+        </DataViewContext.Provider>
+      </SecurityRoutePageWrapper>
     </QueryClientProvider>
   );
 };

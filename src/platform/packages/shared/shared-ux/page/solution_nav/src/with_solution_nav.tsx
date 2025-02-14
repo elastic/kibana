@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentType, ReactNode, useState } from 'react';
+import React, { ComponentType, ReactNode, useState, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
 import {
   useIsWithinBreakpoints,
@@ -46,11 +46,11 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
     const { solutionNav, children, ...propagatedProps } = props;
     const { euiTheme } = useEuiTheme();
 
-    const toggleOpenOnDesktop = () => {
+    const toggleOpenOnDesktop = useCallback(() => {
       setisSideNavOpenOnDesktop(!isSideNavOpenOnDesktop);
       // Have to store it as the opposite of the default we want
       localStorage.setItem(SOLUTION_NAV_COLLAPSED_KEY, JSON.stringify(isSideNavOpenOnDesktop));
-    };
+    }, [isSideNavOpenOnDesktop]);
 
     // Default navigation to allow collapsing
     const { canBeCollapsed = true } = solutionNav;
@@ -64,21 +64,25 @@ export const withSolutionNav = <P extends TemplateProps>(WrappedComponent: Compo
       withSolutionNavStyles
     );
 
-    const pageSideBar = (
-      <SolutionNav
-        isOpenOnDesktop={isSideNavOpenOnDesktop}
-        onCollapse={toggleOpenOnDesktop}
-        {...solutionNav}
-      />
-    );
+    const pageSideBar = useMemo(() => {
+      return (
+        <SolutionNav
+          isOpenOnDesktop={isSideNavOpenOnDesktop}
+          onCollapse={toggleOpenOnDesktop}
+          {...solutionNav}
+        />
+      );
+    }, [isSideNavOpenOnDesktop, solutionNav, toggleOpenOnDesktop]);
 
-    const pageSideBarProps: TemplateProps['pageSideBarProps'] = {
-      paddingSize: 'none' as 'none',
-      ...props.pageSideBarProps,
-      minWidth: isSidebarShrunk ? euiTheme.size.xxl : undefined,
-      className: sideBarClasses,
-      hasEmbellish: !isSidebarShrunk,
-    };
+    const pageSideBarProps: TemplateProps['pageSideBarProps'] = useMemo(() => {
+      return {
+        paddingSize: 'none' as 'none',
+        ...props.pageSideBarProps,
+        minWidth: isSidebarShrunk ? euiTheme.size.xxl : undefined,
+        className: sideBarClasses,
+        hasEmbellish: !isSidebarShrunk,
+      };
+    }, [euiTheme.size.xxl, isSidebarShrunk, props.pageSideBarProps, sideBarClasses]);
 
     return (
       <WrappedComponent
