@@ -240,7 +240,7 @@ describe('InferenceChatModel', () => {
           {
             role: 'tool',
             name: 'toolCallId',
-            response: '{ "response": 42 }',
+            response: { response: 42 },
             toolCallId: 'toolCallId',
           },
           {
@@ -319,6 +319,7 @@ describe('InferenceChatModel', () => {
     });
 
     it('uses constructor parameters', async () => {
+      const abortCtrl = new AbortController();
       const chatModel = new InferenceChatModel({
         logger,
         chatComplete,
@@ -326,6 +327,7 @@ describe('InferenceChatModel', () => {
         temperature: 0.7,
         model: 'super-duper-model',
         functionCallingMode: 'simulated',
+        signal: abortCtrl.signal,
       });
 
       const response = createResponse({ content: 'dummy' });
@@ -340,6 +342,7 @@ describe('InferenceChatModel', () => {
         functionCalling: 'simulated',
         temperature: 0.7,
         modelName: 'super-duper-model',
+        abortSignal: abortCtrl.signal,
         stream: false,
       });
     });

@@ -9,6 +9,7 @@
 
 const Path = require('path');
 const webpack = require('webpack');
+const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
@@ -19,14 +20,11 @@ const WEBPACK_SRC = require.resolve('webpack');
 
 const REPO_ROOT = Path.resolve(__dirname, '..', '..', '..', '..', '..');
 
+/** @returns {import('webpack').Configuration} */
 module.exports = (_, argv) => {
   const outputPath = argv.outputPath ? Path.resolve(argv.outputPath) : UiSharedDepsNpm.distDir;
 
   return {
-    node: {
-      child_process: 'empty',
-      fs: 'empty',
-    },
     externals: {
       module: 'module',
     },
@@ -63,12 +61,12 @@ module.exports = (_, argv) => {
         '@elastic/charts',
         '@elastic/eui',
         '@elastic/eui/optimize/es/components/provider/nested',
-        '@elastic/eui/optimize/es/services',
-        '@elastic/eui/optimize/es/services/format',
+        '@elastic/eui/optimize/es/services/theme/warning',
         '@elastic/eui/dist/eui_theme_amsterdam_light.json',
         '@elastic/eui/dist/eui_theme_amsterdam_dark.json',
         '@elastic/eui/dist/eui_theme_borealis_light.json',
         '@elastic/eui/dist/eui_theme_borealis_dark.json',
+        '@elastic/eui-theme-borealis',
         '@elastic/numeral',
         '@emotion/cache',
         '@emotion/react',
@@ -105,6 +103,7 @@ module.exports = (_, argv) => {
     },
     context: __dirname,
     devtool: 'cheap-source-map',
+    target: 'web',
     output: {
       path: outputPath,
       filename: '[name].dll.js',
@@ -112,7 +111,6 @@ module.exports = (_, argv) => {
       devtoolModuleFilenameTemplate: (info) =>
         `kbn-ui-shared-deps-npm/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
       library: '__kbnSharedDeps_npm__',
-      futureEmitAssets: true,
     },
 
     module: {
@@ -148,11 +146,15 @@ module.exports = (_, argv) => {
         react: process.env.REACT_18 === 'true' ? 'react-18' : 'react',
       },
       extensions: ['.js', '.ts'],
+      mainFields: ['browser', 'module', 'main'],
+      conditionNames: ['browser', 'module', 'import', 'require', 'default'],
     },
 
     optimization: {
+      moduleIds: process.env.NODE_ENV === 'production' ? 'deterministic' : 'natural',
+      chunkIds: process.env.NODE_ENV === 'production' ? 'deterministic' : 'natural',
       minimize: false,
-      noEmitOnErrors: true,
+      emitOnErrors: false,
     },
 
     performance: {
@@ -163,6 +165,7 @@ module.exports = (_, argv) => {
     },
 
     plugins: [
+      new NodeLibsBrowserPlugin(),
       new CleanWebpackPlugin({
         protectWebpackAssets: false,
         cleanAfterEveryBuildPatterns: [
@@ -175,6 +178,7 @@ module.exports = (_, argv) => {
       }),
       new webpack.DllPlugin({
         context: REPO_ROOT,
+        entryOnly: false,
         path: Path.resolve(outputPath, '[name]-manifest.json'),
         name: '__kbnSharedDeps_npm__',
       }),

@@ -143,6 +143,30 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
+      it('Index a doc with a stream field', async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:00.000Z',
+          message: JSON.stringify({
+            'log.level': 'info',
+            'log.logger': 'nginx',
+            message: 'test',
+            stream: 'somethingelse', // a field named stream should work as well
+          }),
+        };
+        const response = await indexDocument(esClient, 'logs', doc);
+        expect(response.result).to.eql('created');
+        const result = await fetchDocument(esClient, 'logs', response._id);
+        expect(result._index).to.match(/^\.ds\-logs-.*/);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:00.000Z',
+          message: 'test',
+          'log.level': 'info',
+          'log.logger': 'nginx',
+          'stream.name': 'logs',
+          stream: 'somethingelse',
+        });
+      });
+
       it('Fork logs to logs.nginx', async () => {
         const body = {
           stream: {

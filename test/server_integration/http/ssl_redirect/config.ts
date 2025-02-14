@@ -10,6 +10,7 @@
 import Url from 'url';
 import { readFileSync } from 'fs';
 import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 
 import { createKibanaSupertestProvider } from '../../services';
@@ -21,6 +22,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const redirectPort = httpConfig.get('servers.kibana.port') + 1234;
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.UNIT_INTEGRATION_TEST,
     testFiles: [require.resolve('.')],
     services: {
       ...httpConfig.get('services'),

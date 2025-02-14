@@ -9,6 +9,7 @@
 
 // @ts-check
 const path = require('path');
+const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 
 /**
  * @typedef {(import('./src/register_globals').LangSpecificWorkerIds)} WorkerType - list of supported languages to build workers for
@@ -43,7 +44,8 @@ const workerConfig = (languages) => ({
     entries[language] = getWorkerEntry(language);
     return entries;
   }, {}),
-  devtool: process.env.NODE_ENV === 'production' ? false : '#cheap-source-map',
+  devtool: process.env.NODE_ENV === 'production' ? false : 'cheap-source-map',
+  target: 'web',
   output: {
     path: path.resolve(__dirname, 'target_workers'),
     filename: ({ chunk }) => `${chunk.name}.editor.worker.js`,
@@ -55,6 +57,7 @@ const workerConfig = (languages) => ({
       'vscode-uri$': require.resolve('vscode-uri').replace(/\/umd\/index.js/, '/esm/index.mjs'),
     },
   },
+  plugins: [new NodeLibsBrowserPlugin()],
   stats: 'errors-only',
   module: {
     rules: [

@@ -48,8 +48,10 @@ export class StreamsPlugin
   public config: StreamsConfig;
   public logger: Logger;
   public server?: StreamsServer;
+  private isDev: boolean;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
+    this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
   }
@@ -96,6 +98,7 @@ export class StreamsPlugin
       },
       core,
       logger: this.logger,
+      runDevModeChecks: this.isDev,
     });
 
     return {};

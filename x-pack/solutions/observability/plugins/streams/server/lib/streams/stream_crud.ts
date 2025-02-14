@@ -171,13 +171,17 @@ export async function getUnmanagedElasticsearchAssets({
   const currentIndex = await scopedClusterClient.asCurrentUser.indices.get({
     index: writeIndexName,
   });
-  const ingestPipelineId = currentIndex[writeIndexName].settings?.index?.default_pipeline!;
+  const ingestPipelineId = currentIndex[writeIndexName].settings?.index?.default_pipeline;
 
   return [
-    {
-      type: 'ingest_pipeline' as const,
-      id: ingestPipelineId,
-    },
+    ...(ingestPipelineId
+      ? [
+          {
+            type: 'ingest_pipeline' as const,
+            id: ingestPipelineId,
+          },
+        ]
+      : []),
     ...componentTemplates.map((componentTemplateName) => ({
       type: 'component_template' as const,
       id: componentTemplateName,

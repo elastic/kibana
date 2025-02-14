@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
+import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from '../../../../constants';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');

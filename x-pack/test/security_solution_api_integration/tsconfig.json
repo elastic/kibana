@@ -54,5 +54,6 @@
     "@kbn/elastic-assistant-plugin",
     "@kbn/test-suites-src",
     "@kbn/openapi-common",
+    "@kbn/scout-info",
   ]
 }

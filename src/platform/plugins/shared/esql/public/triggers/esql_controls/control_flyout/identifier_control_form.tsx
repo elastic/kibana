@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useState, useMemo, useEffect } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
 import {
   EuiComboBox,
@@ -19,7 +20,11 @@ import {
 import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import {
+  ESQLVariableType,
+  ESQLControlVariable,
+  aggregationFunctionDefinitions,
+} from '@kbn/esql-validation-autocomplete';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import type { ESQLControlState, ControlWidthOptions } from '../types';
 import {
@@ -35,10 +40,11 @@ import {
   getFlyoutStyling,
   getQueryForFields,
   validateVariableName,
+  getVariablePrefix,
 } from './helpers';
 import { EsqlControlType } from '../types';
 
-interface FieldControlFormProps {
+interface IdentifierControlFormProps {
   search: ISearchGeneric;
   variableType: ESQLVariableType;
   queryString: string;
@@ -51,7 +57,7 @@ interface FieldControlFormProps {
   onCancelControl?: () => void;
 }
 
-export function FieldControlForm({
+export function IdentifierControlForm({
   variableType,
   initialState,
   queryString,
@@ -62,23 +68,28 @@ export function FieldControlForm({
   onCancelControl,
   search,
   closeFlyout,
-}: FieldControlFormProps) {
+}: IdentifierControlFormProps) {
+  const isMounted = useMountedState();
   const suggestedVariableName = useMemo(() => {
-    const existingVariables = esqlVariables.filter((variable) => variable.type === variableType);
+    const existingVariables = new Set(
+      esqlVariables
+        .filter((variable) => variable.type === variableType)
+        .map((variable) => variable.key)
+    );
 
-    return initialState
-      ? `${initialState.variableName}`
-      : getRecurrentVariableName(
-          'field',
-          existingVariables.map((variable) => variable.key)
-        );
+    if (initialState) {
+      return initialState.variableName;
+    }
+
+    const variablePrefix = getVariablePrefix(variableType);
+    return getRecurrentVariableName(variablePrefix, existingVariables);
   }, [esqlVariables, initialState, variableType]);
 
-  const [availableFieldsOptions, setAvailableFieldsOptions] = useState<EuiComboBoxOptionOption[]>(
-    []
-  );
+  const [availableIdentifiersOptions, setAvailableIdentifiersOptions] = useState<
+    EuiComboBoxOptionOption[]
+  >([]);
 
-  const [selectedFields, setSelectedFields] = useState<EuiComboBoxOptionOption[]>(
+  const [selectedIdentifiers, setSelectedIdentifiers] = useState<EuiComboBoxOptionOption[]>(
     initialState
       ? initialState.availableOptions.map((option) => {
           return {
@@ -97,36 +108,59 @@ export function FieldControlForm({
 
   const isControlInEditMode = useMemo(() => !!initialState, [initialState]);
 
-  useEffect(() => {
-    if (!availableFieldsOptions.length) {
-      const queryForFields = getQueryForFields(queryString, cursorPosition);
-      getESQLQueryColumnsRaw({
-        esqlQuery: queryForFields,
-        search,
-      }).then((columns) => {
-        setAvailableFieldsOptions(
-          columns.map((col) => {
-            return {
-              label: col.name,
-              key: col.name,
-              'data-test-subj': col.name,
-            };
-          })
-        );
-      });
-    }
-  }, [availableFieldsOptions.length, variableType, cursorPosition, queryString, search]);
+  useEffect(
+    function initAvailableIdentifiersOptions() {
+      if (availableIdentifiersOptions.length > 0) return;
+      if (variableType === ESQLVariableType.FIELDS) {
+        const queryForFields = getQueryForFields(queryString, cursorPosition);
+        getESQLQueryColumnsRaw({
+          esqlQuery: queryForFields,
+          search,
+        }).then((columns) => {
+          if (isMounted()) {
+            setAvailableIdentifiersOptions(
+              columns.map((col) => {
+                return {
+                  label: col.name,
+                  key: col.name,
+                  'data-test-subj': col.name,
+                };
+              })
+            );
+          }
+        });
+      }
+      if (variableType === ESQLVariableType.FUNCTIONS) {
+        const aggregatedFunctions = aggregationFunctionDefinitions.map((func) => {
+          return {
+            label: func.name,
+            key: func.name,
+            'data-test-subj': func.name,
+          };
+        });
+        setAvailableIdentifiersOptions(aggregatedFunctions);
+      }
+    },
+    [
+      availableIdentifiersOptions.length,
+      cursorPosition,
+      isMounted,
+      queryString,
+      search,
+      variableType,
+    ]
+  );
 
   useEffect(() => {
     const variableExists =
       esqlVariables.some((variable) => variable.key === variableName.replace('?', '')) &&
       !isControlInEditMode;
 
-    setFormIsInvalid(!selectedFields.length || !variableName || variableExists);
-  }, [esqlVariables, isControlInEditMode, selectedFields.length, variableName]);
+    setFormIsInvalid(!selectedIdentifiers.length || !variableName || variableExists);
+  }, [esqlVariables, isControlInEditMode, selectedIdentifiers.length, variableName]);
 
-  const onFieldsChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
-    setSelectedFields(selectedOptions);
+  const onIdentifiersChange = useCallback((selectedOptions: EuiComboBoxOptionOption[]) => {
+    setSelectedIdentifiers(selectedOptions);
   }, []);
 
   const onVariableNameChange = useCallback(
@@ -170,16 +204,16 @@ export function FieldControlForm({
           (option) => option.label.trim().toLowerCase() === normalizedSearchValue
         ) === -1
       ) {
-        setAvailableFieldsOptions([...availableFieldsOptions, newOption]);
+        setAvailableIdentifiersOptions((prev) => [...prev, newOption]);
       }
 
-      setSelectedFields((prevSelected) => [...prevSelected, newOption]);
+      setSelectedIdentifiers((prevSelected) => [...prevSelected, newOption]);
     },
-    [availableFieldsOptions]
+    []
   );
 
   const onCreateFieldControl = useCallback(async () => {
-    const availableOptions = selectedFields.map((field) => field.label);
+    const availableOptions = selectedIdentifiers.map((field) => field.label);
     const state = {
       availableOptions,
       selectedOptions: [availableOptions[0]],
@@ -201,7 +235,7 @@ export function FieldControlForm({
     }
     closeFlyout();
   }, [
-    selectedFields,
+    selectedIdentifiers,
     minimumWidth,
     label,
     variableName,
@@ -246,11 +280,11 @@ export function FieldControlForm({
             placeholder={i18n.translate('esql.flyout.fieldsOptions.placeholder', {
               defaultMessage: 'Select or add values',
             })}
-            options={availableFieldsOptions}
-            selectedOptions={selectedFields}
-            onChange={onFieldsChange}
+            options={availableIdentifiersOptions}
+            selectedOptions={selectedIdentifiers}
+            onChange={onIdentifiersChange}
             onCreateOption={onCreateOption}
-            data-test-subj="esqlFieldsOptions"
+            data-test-subj="esqlIdentifiersOptions"
             fullWidth
             compressed
           />

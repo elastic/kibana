@@ -437,6 +437,7 @@ describe('registerRoutes', () => {
         aService: mockService,
       },
       repository,
+      runDevModeChecks: true,
     });
   }
 });

@@ -14,6 +14,7 @@ interface RegisterRoutes {
   logger: Logger;
   dependencies: SLORoutesDependencies;
   isServerless: boolean;
+  isDev: boolean;
 }
 
 export function registerServerRoutes({
@@ -22,6 +23,7 @@ export function registerServerRoutes({
   logger,
   dependencies,
   isServerless,
+  isDev,
 }: RegisterRoutes) {
   core.http.registerRouteHandlerContext<SLORequestHandlerContext, 'slo'>(
     'slo',
@@ -37,5 +39,6 @@ export function registerServerRoutes({
     dependencies,
     core,
     logger,
+    runDevModeChecks: isDev,
   });
 }

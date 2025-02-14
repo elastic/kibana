@@ -7,6 +7,7 @@
 
 import path from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
 import { services } from './services';
 
@@ -24,6 +25,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     );
 
     return {
+      testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
       testFiles: [require.resolve(`../${name}/tests/`)],
       servers: xPackFunctionalTestsConfig.get('servers'),
       services,

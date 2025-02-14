@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFormRow, EuiHorizontalRule, EuiRange, EuiRangeProps } from '@elastic/eui';
+import { EuiFormRow, EuiHorizontalRule, EuiRange, EuiRangeProps, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { RowHeightSettings, RowHeightSettingsProps } from './row_height_settings';
@@ -30,6 +30,7 @@ export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   onChangeSampleSize?: (sampleSize: number) => void;
   lineCountInput: number;
   headerLineCountInput: number;
+  densityControl?: React.ReactNode;
 }
 
 const defaultOnChangeSampleSize = () => {};
@@ -48,12 +49,14 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   onChangeSampleSize,
   lineCountInput,
   headerLineCountInput,
+  densityControl,
 }) => {
   const [activeSampleSize, setActiveSampleSize] = useState<number | ''>(sampleSize);
   const minRangeSampleSize = Math.max(
     Math.min(RANGE_MIN_SAMPLE_SIZE, sampleSize),
     MIN_ALLOWED_SAMPLE_SIZE
   ); // flexible: allows to go lower than RANGE_MIN_SAMPLE_SIZE but greater than MIN_ALLOWED_SAMPLE_SIZE
+  const { euiTheme } = useEuiTheme();
 
   const debouncedOnChangeSampleSize = useMemo(
     () =>
@@ -93,6 +96,42 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
 
   const settings = [];
 
+  if (onChangeSampleSize) {
+    let step = minRangeSampleSize === RANGE_MIN_SAMPLE_SIZE ? RANGE_STEP_SAMPLE_SIZE : 1;
+
+    if (
+      step > 1 &&
+      ((activeSampleSize && !checkIfValueIsMultipleOfStep(activeSampleSize, step)) ||
+        !checkIfValueIsMultipleOfStep(minRangeSampleSize, step) ||
+        !checkIfValueIsMultipleOfStep(maxAllowedSampleSize, step))
+    ) {
+      step = 1; // Eui is very strict about step, so we need to switch to 1 if the value is not a multiple of the step
+    }
+
+    settings.push(
+      <>
+        <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
+          <EuiRange
+            compressed
+            fullWidth
+            min={minRangeSampleSize}
+            max={maxAllowedSampleSize}
+            step={step}
+            showInput
+            value={activeSampleSize}
+            onChange={onChangeActiveSampleSize}
+            data-test-subj="unifiedDataTableSampleSizeInput"
+            showRange
+          />
+        </EuiFormRow>
+      </>
+    );
+  }
+
+  if (Boolean(densityControl)) {
+    settings.push(densityControl);
+  }
+
   if (onChangeHeaderRowHeight && onChangeHeaderRowHeightLines) {
     settings.push(
       <RowHeightSettings
@@ -124,42 +163,26 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     );
   }
 
-  if (onChangeSampleSize) {
-    let step = minRangeSampleSize === RANGE_MIN_SAMPLE_SIZE ? RANGE_STEP_SAMPLE_SIZE : 1;
-
-    if (
-      step > 1 &&
-      ((activeSampleSize && !checkIfValueIsMultipleOfStep(activeSampleSize, step)) ||
-        !checkIfValueIsMultipleOfStep(minRangeSampleSize, step) ||
-        !checkIfValueIsMultipleOfStep(maxAllowedSampleSize, step))
-    ) {
-      step = 1; // Eui is very strict about step, so we need to switch to 1 if the value is not a multiple of the step
-    }
-
-    settings.push(
-      <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
-        <EuiRange
-          compressed
-          fullWidth
-          min={minRangeSampleSize}
-          max={maxAllowedSampleSize}
-          step={step}
-          showInput
-          value={activeSampleSize}
-          onChange={onChangeActiveSampleSize}
-          data-test-subj="unifiedDataTableSampleSizeInput"
-        />
-      </EuiFormRow>
+  // We want horizontal line after "Sample size" only if there are more controls below
+  if (settings.length > 1 && onChangeSampleSize) {
+    settings.splice(
+      1,
+      0,
+      <EuiHorizontalRule
+        margin="xs"
+        css={{
+          marginInlineStart: `-${euiTheme.size.s}`,
+          marginInlineEnd: `-${euiTheme.size.s}`,
+          inlineSize: 'unset',
+        }}
+      />
     );
   }
 
   return (
     <>
       {settings.map((setting, index) => (
-        <React.Fragment key={`setting-${index}`}>
-          {index > 0 && <EuiHorizontalRule margin="s" />}
-          {setting}
-        </React.Fragment>
+        <React.Fragment key={`setting-${index}`}>{setting}</React.Fragment>
       ))}
     </>
   );

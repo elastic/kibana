@@ -120,10 +120,10 @@ export const OPTIONALTEXT = i18n.translate(
   }
 );
 
-export const ES_MODELS_LINK_TEXT = i18n.translate(
-  'xpack.inferenceEndpointUICommon.components.esModelsLinkText',
+export const LEARN_MORE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.learnMoreText',
   {
-    defaultMessage: 'Looking for Elasticsearch model Ids',
+    defaultMessage: 'Learn more.',
   }
 );
 

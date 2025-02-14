@@ -66,7 +66,7 @@ export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
                 external
                 target="_blank"
               >
-                {LABELS.ES_MODELS_LINK_TEXT}
+                {LABELS.LEARN_MORE}
               </EuiLink>
             </>
           ) : (

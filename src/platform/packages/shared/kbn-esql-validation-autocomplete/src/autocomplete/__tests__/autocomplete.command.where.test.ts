@@ -136,6 +136,24 @@ describe('WHERE <expression>', () => {
       }
     });
 
+    test('filters suggestions based on previous commands', async () => {
+      const { assertSuggestions } = await setup();
+
+      await assertSuggestions('from a | where / | limit 3', [
+        ...getFieldNamesByType('any')
+          .map((field) => `${field} `)
+          .map(attachTriggerCommand),
+        ...allEvalFns,
+      ]);
+
+      await assertSuggestions('from a | limit 3 | where / ', [
+        ...getFieldNamesByType('any')
+          .map((field) => `${field} `)
+          .map(attachTriggerCommand),
+        ...allEvalFns.filter((fn) => fn.label !== 'QSTR' && fn.label !== 'MATCH'),
+      ]);
+    });
+
     test('suggests operators after a field name', async () => {
       const { assertSuggestions } = await setup();
 
@@ -389,7 +407,7 @@ describe('WHERE <expression>', () => {
           kind: 'Issue',
           detail: 'Click to create',
           command: { id: 'esql.control.values.create', title: 'Click to create' },
-          sortText: '11A',
+          sortText: '11',
           rangeToReplace: { start: 31, end: 31 },
         });
       });

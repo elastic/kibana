@@ -9,6 +9,7 @@ import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { registerUpdateInsightsRoute } from './update_insight';
 import { createMockEndpointAppContext, getRegisteredVersionedRouteMock } from '../../mocks';
 import { WORKFLOW_INSIGHTS_UPDATE_ROUTE } from '../../../../common/endpoint/constants';
+import type { EndpointAppContext } from '../../types';
 
 jest.mock('../../services', () => ({
   securityWorkflowInsightsService: {
@@ -21,52 +22,55 @@ const updateMock = jest.requireMock('../../services').securityWorkflowInsightsSe
 
 describe('Update Insights Route Handler', () => {
   let mockResponse: ReturnType<typeof httpServerMock.createResponseFactory>;
-  let callRoute: (
-    params: Record<string, string>,
-    body: Record<string, string>,
-    authz?: Record<string, boolean>
-  ) => Promise<void>;
 
-  beforeEach(() => {
+  const callRoute = async (
+    params: Record<string, string>,
+    body: Record<string, unknown>,
+    authz: Record<string, boolean> = {
+      canWriteWorkflowInsights: true,
+      canReadWorkflowInsights: true,
+    }
+  ) => {
     mockResponse = httpServerMock.createResponseFactory();
 
     const mockEndpointContext = createMockEndpointAppContext();
     const router = httpServiceMock.createRouter();
 
-    registerUpdateInsightsRoute(router, mockEndpointContext);
-
-    callRoute = async (params, body, authz = { canWriteWorkflowInsights: true }) => {
-      const mockContext = {
-        core: {
-          security: {
-            authc: {
-              getCurrentUser: jest
-                .fn()
-                .mockReturnValue({ username: 'test-user', roles: ['admin'] }),
-            },
+    const mockContext = {
+      ...mockEndpointContext,
+      service: {
+        ...mockEndpointContext.service,
+        getEndpointAuthz: jest.fn().mockResolvedValue(authz),
+      },
+      securitySolution: {
+        getEndpointAuthz: jest.fn().mockResolvedValue(authz),
+      },
+      core: {
+        security: {
+          authc: {
+            getCurrentUser: jest.fn().mockReturnValue({ username: 'test-user', roles: ['admin'] }),
           },
         },
-        securitySolution: {
-          getEndpointAuthz: jest.fn().mockResolvedValue(authz),
-        },
-      };
-
-      const request = httpServerMock.createKibanaRequest({
-        method: 'put',
-        path: WORKFLOW_INSIGHTS_UPDATE_ROUTE,
-        params,
-        body,
-      });
-
-      const { routeHandler } = getRegisteredVersionedRouteMock(
-        router,
-        'put',
-        WORKFLOW_INSIGHTS_UPDATE_ROUTE,
-        '1'
-      )!;
-      await routeHandler(mockContext, request, mockResponse);
+      },
     };
-  });
+
+    registerUpdateInsightsRoute(router, mockContext as unknown as EndpointAppContext);
+
+    const request = httpServerMock.createKibanaRequest({
+      method: 'put',
+      path: WORKFLOW_INSIGHTS_UPDATE_ROUTE,
+      params,
+      body,
+    });
+
+    const { routeHandler } = getRegisteredVersionedRouteMock(
+      router,
+      'put',
+      WORKFLOW_INSIGHTS_UPDATE_ROUTE,
+      '1'
+    )!;
+    await routeHandler(mockContext, request, mockResponse);
+  };
 
   describe('with valid privileges', () => {
     it('should update insight and return the updated data', async () => {
@@ -98,12 +102,36 @@ describe('Update Insights Route Handler', () => {
   });
 
   describe('with invalid privileges', () => {
-    it('should return forbidden if user lacks read privileges', async () => {
+    it('should return forbidden if user lacks write and read privileges', async () => {
       await callRoute(
         { insightId: '1' },
-        { name: 'Updated Insight' },
-        { canWriteWorkflowInsights: false }
+        { action: { type: 'remediated' } },
+        { canWriteWorkflowInsights: false, canReadWorkflowInsights: false }
       );
+
+      expect(mockResponse.forbidden).toHaveBeenCalled();
+    });
+
+    it('should allow update if user has no write privileges but read and the body only contains action.type', async () => {
+      const updateBody = { action: { type: 'remediated' } }; // Only action.type in the body
+      updateMock.mockResolvedValue({ id: 1, ...updateBody });
+      await callRoute({ insightId: '1' }, updateBody, {
+        canWriteWorkflowInsights: false,
+        canReadWorkflowInsights: true,
+      });
+
+      expect(updateMock).toHaveBeenCalledWith('1', updateBody);
+      expect(mockResponse.ok).toHaveBeenCalledWith({
+        body: { id: 1, action: { type: 'remediated' } },
+      });
+    });
+
+    it('should return forbidden if user has no write privileges but read and the body contains more than action.type', async () => {
+      const updateBody = { action: { type: 'remediated' }, value: 'changeme' };
+      await callRoute({ insightId: '1' }, updateBody, {
+        canWriteWorkflowInsights: false,
+        canReadWorkflowInsights: true,
+      });
 
       expect(mockResponse.forbidden).toHaveBeenCalled();
     });

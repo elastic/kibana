@@ -151,6 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:reassign_action:retry',
         'fleet:request_diagnostics:retry',
         'fleet:setup:upgrade_managed_package_policies',
+        'fleet:sync-integrations-task',
         'fleet:unenroll-inactive-agents-task',
         'fleet:unenroll_action:retry',
         'fleet:update_agent_tags:retry',
