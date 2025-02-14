@@ -368,11 +368,10 @@ describe('autocomplete', () => {
 
   // @TODO: get updated eval block from main
   describe('values suggestions', () => {
-    testSuggestions('FROM "i/"', ['index'], undefined, [, [{ name: 'index', hidden: false }]]);
-    testSuggestions('FROM "index/"', ['index'], undefined, [, [{ name: 'index', hidden: false }]]);
-    // TODO — re-enable these tests when we can support this case
-    testSuggestions.skip('FROM "  a/"', []);
-    testSuggestions.skip('FROM "foo b/"', []);
+    testSuggestions('FROM "i/"', []);
+    testSuggestions('FROM "index/"', []);
+    testSuggestions('FROM "  a/"', []);
+    testSuggestions('FROM "foo b/"', []);
     testSuggestions('FROM a | WHERE tags == " /"', [], ' ');
     testSuggestions('FROM a | WHERE tags == """ /"""', [], ' ');
     testSuggestions('FROM a | WHERE tags == "a/"', []);
@@ -497,12 +496,7 @@ describe('autocomplete', () => {
 
     // FROM source METADATA
     recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
-    testSuggestions('FROM index1 M/', [
-      ',',
-      'METADATA $0',
-      '| ',
-      ...recommendedQuerySuggestions.map((q) => q.queryString),
-    ]);
+    testSuggestions('FROM index1 M/', ['METADATA $0']);
 
     // FROM source METADATA field
     testSuggestions('FROM index1 METADATA _/', METADATA_FIELDS);
@@ -593,7 +587,11 @@ describe('autocomplete', () => {
     // STATS argument
     testSuggestions('FROM index1 | STATS f/', [
       'var0 = ',
-      ...getFunctionSignaturesByReturnType('stats', 'any', { scalar: true, agg: true }),
+      ...getFunctionSignaturesByReturnType('stats', 'any', {
+        scalar: true,
+        agg: true,
+        grouping: true,
+      }),
     ]);
 
     // STATS argument BY
@@ -886,12 +884,7 @@ describe('autocomplete', () => {
 
     recommendedQuerySuggestions = getRecommendedQueriesSuggestions('', 'dateField');
     // FROM source METADATA
-    testSuggestions('FROM index1 M/', [
-      ',',
-      attachAsSnippet(attachTriggerCommand('METADATA $0')),
-      '| ',
-      ...recommendedQuerySuggestions.map((q) => q.queryString),
-    ]);
+    testSuggestions('FROM index1 M/', [attachAsSnippet(attachTriggerCommand('METADATA $0'))]);
 
     describe('ENRICH', () => {
       testSuggestions(
@@ -953,9 +946,11 @@ describe('autocomplete', () => {
       'FROM a | STATS /',
       [
         'var0 = ',
-        ...getFunctionSignaturesByReturnType('stats', 'any', { scalar: true, agg: true }).map(
-          attachAsSnippet
-        ),
+        ...getFunctionSignaturesByReturnType('stats', 'any', {
+          scalar: true,
+          agg: true,
+          grouping: true,
+        }).map(attachAsSnippet),
       ].map(attachTriggerCommand)
     );
 
