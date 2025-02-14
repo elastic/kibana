@@ -49,9 +49,10 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'AI Assistant' });
       // navigate to a different section
       await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
-      await svlCommonNavigation.sidenav.expectLinkActive({ deepLinkId: 'management' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbExists({ deepLinkId: 'management' });
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+      await svlCommonNavigation.sidenav.expectLinkActive({ navId: 'management' });
+      await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Management', 'Tags']);
 
       // navigate back to serverless oblt overview
       await svlCommonNavigation.clickLogo();
@@ -65,7 +66,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it('active sidenav section is auto opened on load', async () => {
       await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+      await svlCommonNavigation.sidenav.clickPanelLink('management:tags');
       await browser.refresh();
       await svlCommonNavigation.expectExists();
       await svlCommonNavigation.sidenav.expectSectionOpen('project_settings_project_nav');
@@ -134,8 +136,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it('navigates to maintenance windows', async () => {
       await svlCommonNavigation.sidenav.openSection('project_settings_project_nav');
-      await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management' });
-      await testSubjects.click('app-card-maintenanceWindows');
+      await svlCommonNavigation.sidenav.clickLink({ navId: 'management' });
+      await svlCommonNavigation.sidenav.clickPanelLink('management:maintenanceWindows');
       await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
         'Management',
         'Maintenance Windows',
