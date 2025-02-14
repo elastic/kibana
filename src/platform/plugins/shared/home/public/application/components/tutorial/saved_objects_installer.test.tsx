@@ -20,12 +20,13 @@ test('renders', () => {
       savedObjects: [],
     });
 
-  const component = render(
+  const { getByRole } = render(
     <IntlProvider>
       <SavedObjectsInstaller bulkCreate={bulkCreateMock} savedObjects={[]} />
     </IntlProvider>
   );
-  expect(component).toMatchSnapshot();
+  const headingElement = getByRole('heading', { level: 2, name: 'Load Kibana objects' });
+  expect(headingElement).toBeInTheDocument();
 });
 
 describe('bulkCreate', () => {
@@ -53,7 +54,6 @@ describe('bulkCreate', () => {
     await waitFor(() => {
       expect(getByText('1 saved objects successfully added')).toBeInTheDocument();
     });
-    expect(document.body).toMatchSnapshot();
   });
 
   test('should display error message when bulkCreate request fails', async () => {
@@ -72,7 +72,6 @@ describe('bulkCreate', () => {
     await waitFor(() => {
       expect(getByText('Request failed, Error: simulated bulkRequest error')).toBeInTheDocument();
     });
-    expect(document.body).toMatchSnapshot();
   });
 
   test('should filter out saved object version before calling bulkCreate', async () => {

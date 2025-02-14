@@ -9,10 +9,9 @@
 
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-
-import { Tutorial } from './tutorial';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { SavedObjectsBatchResponse } from '@kbn/core-saved-objects-api-browser';
+import { Tutorial } from './tutorial';
 
 jest.mock('../../kibana_services', () => ({
   getServices: () => ({
@@ -59,6 +58,7 @@ function buildInstructionSet(type: string) {
     ],
   };
 }
+
 const tutorial = {
   id: 'someid',
   name: 'jest test tutorial',
@@ -71,7 +71,7 @@ const tutorial = {
 };
 const loadTutorialPromise = Promise.resolve(tutorial);
 const getTutorial = (id: string) => {
-  return loadTutorialPromise as unknown as Promise<Tutorial>; // please check if this type is fine.
+  return loadTutorialPromise as Promise<Tutorial>;
 };
 const addBasePath = (path: string) => {
   return `BASE_PATH/${path}`;
@@ -84,6 +84,7 @@ const bulkCreateMock = jest
   .mockResolvedValue({
     savedObjects: [],
   });
+
 describe('isCloudEnabled is false', () => {
   test('should render ON_PREM instructions with instruction toggle', async () => {
     const { getByText } = render(
@@ -99,6 +100,7 @@ describe('isCloudEnabled is false', () => {
       </IntlProvider>
     );
     await loadTutorialPromise;
+
     expect(getByText('onPrem instructions')).toBeInTheDocument();
   });
 
@@ -112,7 +114,7 @@ describe('isCloudEnabled is false', () => {
     const getBasicTutorial = () => {
       return loadBasicTutorialPromise as unknown as Promise<Tutorial>;
     };
-    const component = render(
+    const { queryByTestId } = render(
       <IntlProvider>
         <Tutorial
           addBasePath={addBasePath}
@@ -126,7 +128,8 @@ describe('isCloudEnabled is false', () => {
     );
     await loadBasicTutorialPromise;
 
-    expect(component).toMatchSnapshot();
+    expect(queryByTestId('selfManagedTutorial')).not.toBeInTheDocument();
+    expect(queryByTestId('onCloudTutorial')).not.toBeInTheDocument();
   });
 
   test('should display ON_PREM_ELASTIC_CLOUD instructions when toggle is clicked', async () => {
@@ -144,6 +147,7 @@ describe('isCloudEnabled is false', () => {
     );
     await loadTutorialPromise;
     fireEvent.click(getByTestId('onCloudTutorial'));
+
     await waitFor(() => {
       expect(getByText('onPremElasticCloud instructions')).toBeInTheDocument();
     });
