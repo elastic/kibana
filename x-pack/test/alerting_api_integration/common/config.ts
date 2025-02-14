@@ -9,6 +9,7 @@ import path from 'path';
 import getPort from 'get-port';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
 import { ExperimentalConfigKeys } from '@kbn/stack-connectors-plugin/common/experimental_features';
 import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
@@ -171,6 +172,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         : [];
 
     return {
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles: testFiles ? testFiles : [require.resolve(`../${name}/tests/`)],
       servers,
       services,
