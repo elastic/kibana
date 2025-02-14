@@ -59,6 +59,9 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
       size="s"
       fullWidth
       css={({ euiTheme }) => css`
+        * {
+          border: 1px solid hotpink;
+        }
         background-color: ${isActive
           ? transparentize(euiTheme.colors.lightShade, 0.5)
           : 'transparent'};
@@ -73,8 +76,8 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, activeNodes }: Props)
         & .euiIcon {
           position: absolute;
           right: 0;
-          top: 0;
-          transform: translateY(50%);
+          top: 25%;
+          transform: rotate(${isExpanded ? '180' : '0'}deg);
         }
       `}
       data-test-subj={dataTestSubj}
