@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
+import { useFetchAlertsIndexNamesQuery } from '@kbn/alerts-ui-shared';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -56,6 +57,10 @@ export function ObservabilityAlertSearchBar({
   const toasts = useToasts();
   const [spaceId, setSpaceId] = useState<string>();
   const queryFilter = kuery ? { query: kuery, language: 'kuery' } : undefined;
+  const { data: indexNames } = useFetchAlertsIndexNamesQuery({
+    http,
+    ruleTypeIds: OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES,
+  });
 
   const clearSavedQuery = useCallback(
     () => (setSavedQuery ? setSavedQuery(undefined) : null),
@@ -158,28 +163,30 @@ export function ObservabilityAlertSearchBar({
       </EuiFlexItem>
 
       <EuiFlexItem>
-        <AlertFilterControls
-          dataViewSpec={{
-            id: 'unified-alerts-dv',
-            title: '.alerts-*',
-          }}
-          spaceId={spaceId}
-          chainingSystem="HIERARCHICAL"
-          controlsUrlState={controlConfigs}
-          setControlsUrlState={onControlConfigsChange}
-          filters={[...filters, ...defaultFilters]}
-          onFiltersChange={onFilterControlsChange}
-          storageKey={filterControlsStorageKey}
-          disableLocalStorageSync={disableLocalStorageSync}
-          query={queryFilter}
-          services={{
-            http,
-            notifications,
-            dataViews,
-            storage: Storage,
-          }}
-          ControlGroupRenderer={ControlGroupRenderer}
-        />
+        {indexNames?.length > 0 && (
+          <AlertFilterControls
+            dataViewSpec={{
+              id: 'observability-unified-alerts-dv',
+              title: indexNames.join(','),
+            }}
+            spaceId={spaceId}
+            chainingSystem="HIERARCHICAL"
+            controlsUrlState={controlConfigs}
+            setControlsUrlState={onControlConfigsChange}
+            filters={[...filters, ...defaultFilters]}
+            onFiltersChange={onFilterControlsChange}
+            storageKey={filterControlsStorageKey}
+            disableLocalStorageSync={disableLocalStorageSync}
+            query={queryFilter}
+            services={{
+              http,
+              notifications,
+              dataViews,
+              storage: Storage,
+            }}
+            ControlGroupRenderer={ControlGroupRenderer}
+          />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
