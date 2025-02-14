@@ -9,7 +9,7 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/packages/response-ops/alerts_apis'],
-  setupFilesAfterEnv: ['<rootDir>/packages/response-ops/alerts_apis/setup_tests.ts'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/response-ops/alerts-apis'],
+  setupFilesAfterEnv: ['<rootDir>/src/platform/packages/shared/response-ops/alerts-apis/setup_tests.ts'],
 };
