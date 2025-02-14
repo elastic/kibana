@@ -1,5 +1,5 @@
 import { AssistantTool, AssistantToolParams } from "@kbn/elastic-assistant-plugin/server";
-import { APP_UI_ID } from "@kbn/security-solution-plugin/common";
+import { APP_UI_ID } from '../../../../common';
 import { tool } from "@langchain/core/tools";
 
 export const TOOL_DETAILS = {
