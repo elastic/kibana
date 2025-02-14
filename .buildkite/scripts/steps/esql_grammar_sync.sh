@@ -64,7 +64,8 @@ main () {
   report_main_step "Cloning repositories"
 
   rm -rf elasticsearch
-  git clone https://github.com/elastic/elasticsearch --depth 1
+  git clone https://github.com/nik9000/elasticsearch --depth 1
+  git checkout antlr_include
 
   cd "$KIBANA_DIR"
 
