@@ -199,12 +199,8 @@ describe('RulesFileUpload', () => {
           expect(screen.getByText(scenario.errorMessage)).toBeVisible();
         });
 
-        await act(async () => {
-          fireEvent.click(screen.getByTestId('uploadFileButton'));
-        });
-
         await waitFor(() => {
-          expect(mockCreateMigration).not.toHaveBeenCalled();
+          expect(screen.getByTestId('uploadFileButton')).toBeDisabled();
         });
       });
     });
