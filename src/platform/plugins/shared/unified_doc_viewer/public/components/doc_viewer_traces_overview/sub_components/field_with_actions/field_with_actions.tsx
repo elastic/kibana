@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
+import React from 'react';
 import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { FieldHoverActionPopover } from './field_hover_popover_action';
 
@@ -16,20 +16,16 @@ export interface FieldWithActionsProps {
   field: string;
   fieldMetadata?: PartialFieldMetadataPlain;
   formattedValue?: string;
-  icon?: ReactNode;
   label: string;
-  useBadge?: boolean;
   value?: unknown;
-  children?: ((props: { content: React.ReactNode }) => React.ReactNode) | React.ReactNode;
+  children?: (props: { content: React.ReactNode }) => React.ReactNode;
 }
 
 export function FieldWithActions({
   field,
   fieldMetadata,
   formattedValue,
-  icon,
   label,
-  useBadge = false,
   value,
   children,
   ...props
@@ -62,16 +58,7 @@ export function FieldWithActions({
               justifyContent="flexStart"
               gutterSize="xs"
             >
-              {icon}
-              {useBadge ? (
-                <EuiBadge className="eui-textTruncate" color="hollow">
-                  {formattedValue}
-                </EuiBadge>
-              ) : typeof children === 'function' ? (
-                children({ content: <FormattedValue value={formattedValue} /> })
-              ) : (
-                <FormattedValue value={formattedValue} />
-              )}
+              {children && children({ content: <FormattedValue value={formattedValue} /> })}
             </EuiFlexGroup>
           </FieldHoverActionPopover>
         </EuiFlexItem>
