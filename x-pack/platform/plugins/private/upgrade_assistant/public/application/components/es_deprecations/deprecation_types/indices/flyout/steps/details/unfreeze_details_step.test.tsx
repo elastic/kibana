@@ -85,8 +85,8 @@ describe('UnfreezeDetailsFlyoutStep', () => {
                       size="m"
                     >
                       <Memo(MemoizedFormattedMessage)
-                        defaultMessage="In order to address this issue, you must unfreeze this index and keep it as read-only. This will enable compatibility with the next major version."
-                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.mustUnfreezeText"
+                        defaultMessage="Unfreeze this index and make it read-only. This ensures that the index will remain compatible with the next major version."
+                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.option1.description"
                       />
                     </EuiText>,
                     "title": "Option 1: Unfreeze index",
@@ -96,8 +96,8 @@ describe('UnfreezeDetailsFlyoutStep', () => {
                       size="m"
                     >
                       <Memo(MemoizedFormattedMessage)
-                        defaultMessage="Alternatively, you might opt for reindexing this index. The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
-                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.canReindexText"
+                        defaultMessage="Alternatively, you can reindex the data into a new, compatible index. All existing documents will be copied over to a new index, and the old index will be removed. Depending on the size of the index and the available resources, the reindexing operation can take some time. Your data will be in read-only mode until the reindexing has completed."
+                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.option2.description"
                       />
                     </EuiText>,
                     "title": "Option 2: Reindex data",
@@ -107,15 +107,15 @@ describe('UnfreezeDetailsFlyoutStep', () => {
                       size="m"
                     >
                       <Memo(MemoizedFormattedMessage)
-                        defaultMessage="If you no longer need this data, you can also proceed by deleting this index. {indexManagementLinkHtml}"
-                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.deleteText"
+                        defaultMessage="If you no longer need it, you can also delete the index from {indexManagementLinkHtml}."
+                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.option3.description"
                         values={
                           Object {
                             "indexManagementLinkHtml": <EuiLink
                               href="undefined"
                             >
                               <Memo(MemoizedFormattedMessage)
-                                defaultMessage="Go to index management"
+                                defaultMessage="Index Management"
                                 id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.indexMgmtLink"
                               />
                             </EuiLink>,
@@ -123,7 +123,7 @@ describe('UnfreezeDetailsFlyoutStep', () => {
                         }
                       />
                     </EuiText>,
-                    "title": "Option 3: Delete this index",
+                    "title": "Option 3: Delete index",
                   },
                 ]
               }

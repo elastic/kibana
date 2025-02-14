@@ -7,6 +7,7 @@
 
 import React, { Fragment } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -135,34 +136,49 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
             rowGutterSize="m"
             listItems={[
               {
-                title: 'Option 1: Unfreeze index',
+                title: i18n.translate(
+                  'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.option1.title',
+                  {
+                    defaultMessage: 'Option 1: Unfreeze index',
+                  }
+                ),
                 description: (
                   <EuiText size="m">
                     <FormattedMessage
-                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.mustUnfreezeText"
-                      defaultMessage="In order to address this issue, you must unfreeze this index and keep it as read-only. This will enable compatibility with the next major version."
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.option1.description"
+                      defaultMessage="Unfreeze this index and make it read-only. This ensures that the index will remain compatible with the next major version."
                     />
                   </EuiText>
                 ),
               },
               {
-                title: 'Option 2: Reindex data',
+                title: i18n.translate(
+                  'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.option2.title',
+                  {
+                    defaultMessage: 'Option 2: Reindex data',
+                  }
+                ),
                 description: (
                   <EuiText size="m">
                     <FormattedMessage
-                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.canReindexText"
-                      defaultMessage="Alternatively, you might opt for reindexing this index. The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.option2.description"
+                      defaultMessage="Alternatively, you can reindex the data into a new, compatible index. All existing documents will be copied over to a new index, and the old index will be removed. Depending on the size of the index and the available resources, the reindexing operation can take some time. Your data will be in read-only mode until the reindexing has completed."
                     />
                   </EuiText>
                 ),
               },
               {
-                title: 'Option 3: Delete this index',
+                title: i18n.translate(
+                  'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.option3.title',
+                  {
+                    defaultMessage: 'Option 3: Delete index',
+                  }
+                ),
                 description: (
                   <EuiText size="m">
                     <FormattedMessage
-                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.deleteText"
-                      defaultMessage="If you no longer need this data, you can also proceed by deleting this index. {indexManagementLinkHtml}"
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.unfreeze.option3.description"
+                      defaultMessage="If you no longer need it, you can also delete the index from {indexManagementLinkHtml}."
                       values={{
                         indexManagementLinkHtml: (
                           <EuiLink
@@ -172,7 +188,7 @@ export const UnfreezeDetailsFlyoutStep: React.FunctionComponent<{
                           >
                             <FormattedMessage
                               id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.indexMgmtLink"
-                              defaultMessage="Go to index management"
+                              defaultMessage="Index Management"
                             />
                           </EuiLink>
                         ),

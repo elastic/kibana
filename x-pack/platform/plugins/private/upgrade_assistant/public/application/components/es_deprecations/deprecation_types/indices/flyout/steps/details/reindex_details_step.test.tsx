@@ -87,7 +87,7 @@ describe('ReindexDetailsFlyoutStep', () => {
                     >
                       <Memo(MemoizedFormattedMessage)
                         defaultMessage="The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
-                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexText"
+                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option1.description"
                       />
                     </EuiText>,
                     "title": "Option 1: Reindex data",
@@ -98,11 +98,11 @@ describe('ReindexDetailsFlyoutStep', () => {
                     >
                       <Memo(MemoizedFormattedMessage)
                         defaultMessage="Old indices can maintain compatibility with the next major version if they are turned into read-only mode. If you no longer need to update documents in this index (or add new ones), you might want to convert it to a read-only index. {docsLink}"
-                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.readOnlyText"
+                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option2.description"
                         values={
                           Object {
                             "docsLink": <EuiLink
-                              href="https://www.elastic.co/guide/en/kibana/mocked-test-branch/index-modules-blocks.html#index-block-settings"
+                              href="https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/index-modules-blocks.html#index-block-settings"
                               target="_blank"
                             >
                               Learn more
@@ -118,15 +118,15 @@ describe('ReindexDetailsFlyoutStep', () => {
                       size="m"
                     >
                       <Memo(MemoizedFormattedMessage)
-                        defaultMessage="If you no longer need this data, you can also proceed by deleting this index. {indexManagementLinkHtml}"
-                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.deleteText"
+                        defaultMessage="If you no longer need it, you can also delete the index from {indexManagementLinkHtml}."
+                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option3.description"
                         values={
                           Object {
                             "indexManagementLinkHtml": <EuiLink
                               href="undefined"
                             >
                               <Memo(MemoizedFormattedMessage)
-                                defaultMessage="Go to index management"
+                                defaultMessage="Index Management"
                                 id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.indexMgmtLink"
                               />
                             </EuiLink>,
@@ -134,7 +134,7 @@ describe('ReindexDetailsFlyoutStep', () => {
                         }
                       />
                     </EuiText>,
-                    "title": "Option 3: Delete this index",
+                    "title": "Option 3: Delete index",
                   },
                 ]
               }

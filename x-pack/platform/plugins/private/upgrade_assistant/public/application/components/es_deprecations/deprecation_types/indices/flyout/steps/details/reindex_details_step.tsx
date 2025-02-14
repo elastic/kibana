@@ -157,22 +157,32 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                 rowGutterSize="m"
                 listItems={[
                   {
-                    title: 'Option 1: Reindex data',
+                    title: i18n.translate(
+                      'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option1.title',
+                      {
+                        defaultMessage: 'Option 1: Reindex data',
+                      }
+                    ),
                     description: (
                       <EuiText size="m">
                         <FormattedMessage
-                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexText"
+                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option1.description"
                           defaultMessage="The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
                         />
                       </EuiText>
                     ),
                   },
                   {
-                    title: 'Option 2: Mark as read-only',
+                    title: i18n.translate(
+                      'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option2.title',
+                      {
+                        defaultMessage: 'Option 2: Mark as read-only',
+                      }
+                    ),
                     description: (
                       <EuiText size="m">
                         <FormattedMessage
-                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.readOnlyText"
+                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option2.description"
                           defaultMessage="Old indices can maintain compatibility with the next major version if they are turned into read-only mode. If you no longer need to update documents in this index (or add new ones), you might want to convert it to a read-only index. {docsLink}"
                           values={{
                             docsLink: (
@@ -194,12 +204,17 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                     ),
                   },
                   {
-                    title: 'Option 3: Delete this index',
+                    title: i18n.translate(
+                      'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option3.title',
+                      {
+                        defaultMessage: 'Option 3: Delete index',
+                      }
+                    ),
                     description: (
                       <EuiText size="m">
                         <FormattedMessage
-                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.deleteText"
-                          defaultMessage="If you no longer need this data, you can also proceed by deleting this index. {indexManagementLinkHtml}"
+                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option3.description"
+                          defaultMessage="If you no longer need it, you can also delete the index from {indexManagementLinkHtml}."
                           values={{
                             indexManagementLinkHtml: (
                               <EuiLink
@@ -209,7 +224,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
                               >
                                 <FormattedMessage
                                   id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.indexMgmtLink"
-                                  defaultMessage="Go to index management"
+                                  defaultMessage="Index Management"
                                 />
                               </EuiLink>
                             ),
