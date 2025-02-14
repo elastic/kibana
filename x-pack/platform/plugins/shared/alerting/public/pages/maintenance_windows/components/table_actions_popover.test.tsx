@@ -7,7 +7,6 @@
 
 import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { TableActionsPopover } from './table_actions_popover';
