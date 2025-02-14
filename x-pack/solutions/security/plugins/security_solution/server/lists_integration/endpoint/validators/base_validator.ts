@@ -33,7 +33,7 @@ const NO_GLOBAL_ARTIFACT_AUTHZ_MESSAGE = i18n.translate(
   'xpack.securitySolution.baseValidator.noGlobalArtifactAuthzApiMessage',
   {
     defaultMessage:
-      'Management of "ownerSpaceId" tag not allowed - missing global artifact management privilege',
+      'Management of "ownerSpaceId" tag requires global artifact management privilege',
   }
 );
 

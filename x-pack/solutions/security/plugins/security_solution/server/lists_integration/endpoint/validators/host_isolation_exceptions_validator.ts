@@ -80,6 +80,7 @@ export class HostIsolationExceptionsValidator extends BaseValidator {
     await this.validateHasWritePrivilege();
     await this.validateHostIsolationData(item);
     await this.validateByPolicyItem(item);
+    await this.validateCreateOwnerSpaceIds(item);
 
     await this.setOwnerSpaceId(item);
 
