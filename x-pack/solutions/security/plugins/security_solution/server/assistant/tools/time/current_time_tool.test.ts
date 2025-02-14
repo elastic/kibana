@@ -1,5 +1,5 @@
 import { AssistantToolParams } from "@kbn/elastic-assistant-plugin/server";
-import { CURRENT_TIME_TOOL } from "./current_time_tool"
+import { CURRENT_TIME_TOOL, CurrentTimeToolParams } from "./current_time_tool"
 
 describe('CurrentTimeTool', () => {
     const defaultArgs = {
@@ -10,10 +10,14 @@ describe('CurrentTimeTool', () => {
                 }
             }
         },
-    } as unknown as AssistantToolParams;
+    } as unknown as CurrentTimeToolParams;
 
-    it('isSupported', () => {
+    it('isSupported returns true when core is defined', () => {
         expect(CURRENT_TIME_TOOL.isSupported(defaultArgs)).toEqual(true)
+    })
+
+    it('isSupported return false when core is not defined', () => {
+        expect(CURRENT_TIME_TOOL.isSupported({} as unknown as AssistantToolParams)).toEqual(false)
     })
 
     it('name', () => {

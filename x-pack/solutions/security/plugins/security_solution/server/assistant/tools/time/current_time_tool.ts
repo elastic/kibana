@@ -1,6 +1,11 @@
 import { AssistantTool, AssistantToolParams } from "@kbn/elastic-assistant-plugin/server";
 import { APP_UI_ID } from '../../../../common';
 import { tool } from "@langchain/core/tools";
+import { CoreRequestHandlerContext } from "@kbn/core/server";
+
+export interface CurrentTimeToolParams extends AssistantToolParams {
+    core: CoreRequestHandlerContext;
+}
 
 export const TOOL_DETAILS = {
     id: 'current-time-tool',
@@ -35,12 +40,13 @@ export const CURRENT_TIME_TOOL: AssistantTool = {
     // local definitions can be overwritten by security-ai-prompt integration definitions
     description: TOOL_DETAILS.description,
     sourceRegister: APP_UI_ID,
-    isSupported: () => {
-        return true
+    isSupported: (params: AssistantToolParams): params is CurrentTimeToolParams => {
+        const { core } = params;
+        return core != null;
     },
     getTool(params: AssistantToolParams) {
         if (!this.isSupported(params)) return null;
-        const { core } = params;
+        const { core } = params as CurrentTimeToolParams;
 
         return tool(async () => {
             const settingsDateFormatTimezone = await core.uiSettings.client.get<string | undefined>('dateFormat:tz');

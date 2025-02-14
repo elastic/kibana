@@ -307,6 +307,7 @@ export const postEvaluateRoute = (
                 llm,
                 isOssModel,
                 logger,
+                core: ctx.core,
                 request: skeletonRequest,
                 alertsIndexPattern,
                 // onNewReplacements,
