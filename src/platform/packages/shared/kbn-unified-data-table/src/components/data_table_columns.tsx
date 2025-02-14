@@ -14,7 +14,7 @@ import {
   type EuiDataGridColumnCellAction,
   EuiScreenReaderOnly,
   EuiListGroupItemProps,
-  EuiDataGridColumnSortingConfig,
+  type EuiDataGridColumnSortingConfig,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
