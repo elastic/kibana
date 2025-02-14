@@ -24,7 +24,10 @@ export interface ObservabilityRuleTypeModel<Params extends RuleTypeParams = Rule
   priority?: number;
 }
 
-export function createObservabilityRuleTypeRegistry(ruleTypeRegistry: RuleTypeRegistryContract) {
+export function createObservabilityRuleTypeRegistry(
+  ruleTypeRegistry: RuleTypeRegistryContract,
+  denyList?: string[]
+) {
   const formatters: Array<{
     typeId: string;
     priority: number;
@@ -33,6 +36,7 @@ export function createObservabilityRuleTypeRegistry(ruleTypeRegistry: RuleTypeRe
 
   return {
     register: (type: ObservabilityRuleTypeModel<any>) => {
+      if (denyList && denyList.includes(type.id)) return;
       const { format, priority, ...rest } = type;
       formatters.push({ typeId: type.id, priority: priority || 0, fn: format });
       ruleTypeRegistry.register(rest);

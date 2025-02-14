@@ -88,6 +88,7 @@ import {
   createObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+import { LEGACY_UPTIME_RULE_IDS } from '../common/constants';
 
 export interface ConfigSchema {
   unsafe: {
@@ -231,8 +232,12 @@ export class Plugin
     const config = this.initContext.config.get();
     const kibanaVersion = this.initContext.env.packageInfo.version;
 
+    const isLegacyUptimeEnabled = coreSetup.uiSettings.get('observability:enableLegacyUptimeApp');
+    console.log('enabled before register', isLegacyUptimeEnabled);
+
     this.observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
-      pluginsSetup.triggersActionsUi.ruleTypeRegistry
+      pluginsSetup.triggersActionsUi.ruleTypeRegistry,
+      isLegacyUptimeEnabled ? undefined : LEGACY_UPTIME_RULE_IDS
     );
 
     const rulesLocator = pluginsSetup.share.url.locators.create(new RulesLocatorDefinition());
