@@ -22,9 +22,9 @@ jest.mock('../../kibana_services', () => ({
       getTheme: () => ({ darkMode: false }),
     },
     tutorialService: {
-      getCustomComponent: jest.fn().mockResolvedValue({
-        default: () => <div>Custom Component</div>,
-      }),
+      getCustomComponent: jest
+        .fn()
+        .mockResolvedValue({ default: () => <div>Custom Component</div> }),
     },
   }),
 }));
