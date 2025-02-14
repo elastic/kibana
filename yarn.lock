@@ -13338,10 +13338,10 @@
     classcat "^5.0.3"
     zustand "^4.4.0"
 
-"@xyflow/system@0.0.43":
-  version "0.0.43"
-  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.43.tgz#5abe99b2542fa583c15a74efcdbb78b8ed825f49"
-  integrity sha512-1zHgad1cWr1mKm2xbFaarK0Jg8WRgaQ8ubSBIo/pRdq3fEgCuqgNkL9NSAP6Rvm8zi3+Lu4JPUMN+EEx5QgX9A==
+"@xyflow/system@0.0.50":
+  version "0.0.50"
+  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.50.tgz#8517cb46e1523cc6abe620f3ad18f5a94315d7e3"
+  integrity sha512-HVUZd4LlY88XAaldFh2nwVxDOcdIBxGpQ5txzwfJPf+CAjj2BfYug1fHs2p4yS7YO8H6A3EFJQovBE8YuHkAdg==
   dependencies:
     "@types/d3-drag" "^3.0.7"
     "@types/d3-selection" "^3.0.10"
