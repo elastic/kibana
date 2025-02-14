@@ -14,12 +14,13 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { ErrorResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import pMap from 'p-map';
 
-import { MAX_CONCURRENT_TRANSFORMS_OPERATIONS } from '../../../../constants';
 import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
 import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 import type { Installation } from '../../../../../common';
 import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { retryTransientEsErrors } from '../retry';
+
+const MAX_CONCURRENT_TRANSFORMS_OPERATIONS = 5;
 
 interface FleetTransformMetadata {
   fleet_transform_version?: string;
