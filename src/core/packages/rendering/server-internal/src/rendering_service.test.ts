@@ -27,10 +27,13 @@ import {
   mockRenderingServiceParams,
   mockRenderingPrebootDeps,
   mockRenderingSetupDeps,
+  mockRenderingStartDeps,
 } from './test_helpers/params';
 import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from './types';
-import { RenderingService } from './rendering_service';
+import { RenderingService, DEFAULT_THEME_NAME_FEATURE_FLAG } from './rendering_service';
 import { AuthStatus } from '@kbn/core-http-server';
+import { DEFAULT_THEME_NAME, ThemeName } from '@kbn/core-ui-settings-common';
+import { BehaviorSubject } from 'rxjs';
 
 const BUILD_DATE = '2023-05-15T23:12:09+0000';
 const INJECTED_METADATA = {
@@ -582,6 +585,42 @@ describe('RenderingService', () => {
     renderDarkModeTestCases(async () => {
       await service.preboot(mockRenderingPrebootDeps);
       return [(await service.setup(mockRenderingSetupDeps)).render, mockRenderingSetupDeps];
+    });
+  });
+
+  describe('start()', () => {
+    it('subscribes to the featureFlags.setStringValue$ observable and updates theme name accordingly', async () => {
+      // setup and render added to assert the current theme name
+      const { render } = await service.setup(mockRenderingSetupDeps);
+      const themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
+      const getStringValue$ = jest
+        .fn()
+        .mockImplementation((_, fallback) => themeName$.asObservable());
+      service.start({
+        ...mockRenderingStartDeps,
+        featureFlags: {
+          ...mockRenderingStartDeps.featureFlags,
+          getStringValue$,
+        },
+      });
+
+      expect(getStringValue$).toHaveBeenCalledTimes(1);
+      expect(getStringValue$).toHaveBeenCalledWith(
+        DEFAULT_THEME_NAME_FEATURE_FLAG,
+        DEFAULT_THEME_NAME
+      );
+
+      const uiSettings = {
+        client: uiSettingsServiceMock.createClient(),
+        globalClient: uiSettingsServiceMock.createClient(),
+      };
+
+      let renderResult = await render(createKibanaRequest(), uiSettings);
+      expect(renderResult).toContain(',&quot;name&quot;:&quot;borealis&quot;');
+
+      themeName$.next('amsterdam');
+      renderResult = await render(createKibanaRequest(), uiSettings);
+      expect(renderResult).toContain(',&quot;name&quot;:&quot;amsterdam&quot;');
     });
   });
 });
