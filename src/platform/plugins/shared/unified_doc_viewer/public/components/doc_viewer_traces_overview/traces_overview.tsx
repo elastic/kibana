@@ -29,12 +29,19 @@ export function TracesOverview({
 }: TracesOverviewProps) {
   const parsedDoc = getTraceDocumentOverview(hit);
   const isTransaction = !parsedDoc[PARENT_ID_FIELD];
-  const detailTitle = `${isTransaction ? 'Transaction' : 'Span'} ${i18n.translate(
-    'unifiedDocViewer.docViewerTracesOverview.title',
-    {
-      defaultMessage: 'detail',
-    }
-  )}`;
+
+  const detailType = isTransaction
+    ? i18n.translate('unifiedDocViewer.docViewerTracesOverview.transactionTitle', {
+        defaultMessage: 'Transaction',
+      })
+    : i18n.translate('unifiedDocViewer.docViewerTracesOverview.spanTitle', {
+        defaultMessage: 'Span',
+      });
+
+  const detailTitle = i18n.translate('unifiedDocViewer.docViewerTracesOverview.title', {
+    defaultMessage: '{detailType} detail',
+    values: { detailType },
+  });
 
   return (
     <TransactionProvider traceId={parsedDoc['trace.id']} indexPattern={dataView.getIndexPattern()}>
