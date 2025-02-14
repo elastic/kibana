@@ -79,14 +79,21 @@ export const getCommandAutocompleteDefinitions = (
 function buildCharCompleteItem(
   label: string,
   detail: string,
-  { sortText, quoted }: { sortText?: string; quoted: boolean } = { quoted: false }
+  {
+    sortText,
+    quoted,
+    advanceCursorAndOpenSuggestions,
+  }: { sortText?: string; quoted: boolean; advanceCursorAndOpenSuggestions?: boolean } = {
+    quoted: false,
+  }
 ): SuggestionRawDefinition {
   return {
     label,
-    text: quoted ? `"${label}"` : label,
+    text: (quoted ? `"${label}"` : label) + (advanceCursorAndOpenSuggestions ? ' ' : ''),
     kind: 'Keyword',
     detail,
     sortText,
+    command: advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
   };
 }
 export const pipeCompleteItem: SuggestionRawDefinition = {
@@ -113,14 +120,14 @@ export const colonCompleteItem = buildCharCompleteItem(
   i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.colonDoc', {
     defaultMessage: 'Colon (:)',
   }),
-  { sortText: 'A', quoted: true }
+  { sortText: 'A', quoted: true, advanceCursorAndOpenSuggestions: true }
 );
 export const semiColonCompleteItem = buildCharCompleteItem(
   ';',
   i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.semiColonDoc', {
     defaultMessage: 'Semi colon (;)',
   }),
-  { sortText: 'A', quoted: true }
+  { sortText: 'A', quoted: true, advanceCursorAndOpenSuggestions: true }
 );
 
 export const listCompleteItem: SuggestionRawDefinition = {
