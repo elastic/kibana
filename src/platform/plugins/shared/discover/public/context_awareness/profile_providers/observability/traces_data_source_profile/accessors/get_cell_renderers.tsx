@@ -6,6 +6,12 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { SOURCE_COLUMN } from '@kbn/unified-data-table';
+import { getTracesSummaryColumn } from '../../../../../components/data_types/traces/summary_column';
+import type { DataSourceProfileProvider } from '../../../../profiles';
 
-export { ingestTestDataHook } from './data_ingestion';
-export { ingestSynthtraceDataHook } from './synthtrace_ingestion';
+export const getCellRenderers: DataSourceProfileProvider['profile']['getCellRenderers'] =
+  (prev) => (params) => ({
+    ...prev(params),
+    [SOURCE_COLUMN]: getTracesSummaryColumn(params),
+  });
