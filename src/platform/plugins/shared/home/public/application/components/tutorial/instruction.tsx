@@ -11,18 +11,17 @@ import React, { Suspense, useMemo } from 'react';
 import { EuiCodeBlock, EuiSpacer, EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
 import { INSTRUCTION_VARIANT } from '../../..';
 import { Content } from './content';
-
 import { getServices } from '../../kibana_services';
 
-interface InstructionProps {
-  commands?: string[];
-  paramValues: { [key: string]: string | number };
-  textPost?: string;
-  textPre?: string;
-  replaceTemplateStrings: (text: string, paramValues?: InstructionProps['paramValues']) => string;
-  customComponentName?: string;
+export interface InstructionProps {
   variantId: keyof typeof INSTRUCTION_VARIANT;
+  paramValues: { [key: string]: string | number };
   isCloudEnabled: boolean;
+  textPre?: string;
+  textPost?: string;
+  commands?: string[];
+  customComponentName?: string;
+  replaceTemplateStrings: (text: string, paramValues?: InstructionProps['paramValues']) => string;
 }
 
 export function Instruction({

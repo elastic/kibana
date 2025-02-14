@@ -10,13 +10,13 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import { Introduction } from './introduction';
+import { Introduction, IntroductionProps } from './introduction';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import { TutorialsCategory } from '../../../../common/constants';
 
 const basePathMock = httpServiceMock.createBasePath();
 
-const commonProps = {
+const commonProps: Omit<IntroductionProps, 'intl'> = {
   description: 'this is a great tutorial about...',
   title: 'Great tutorial',
   basePath: basePathMock,

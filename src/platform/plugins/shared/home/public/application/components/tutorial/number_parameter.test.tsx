@@ -8,14 +8,12 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-
-import { NumberParameter } from './number_parameter';
+import { render, fireEvent } from '@testing-library/react';
+import { NumberParameter, NumberParameterProps } from './number_parameter';
 
 describe('NumberParameter', () => {
   const mockSetParameter = jest.fn();
-
-  const defaultProps = {
+  const defaultProps: NumberParameterProps = {
     id: 'test-id',
     label: 'Test Label',
     value: 42,
@@ -27,25 +25,23 @@ describe('NumberParameter', () => {
   });
 
   test('renders with correct label and value', () => {
-    render(<NumberParameter {...defaultProps} />);
+    const { getByLabelText, getByDisplayValue } = render(<NumberParameter {...defaultProps} />);
 
-    expect(screen.getByLabelText('Test Label')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('42')).toBeInTheDocument();
+    expect(getByLabelText('Test Label')).toBeInTheDocument();
+    expect(getByDisplayValue('42')).toBeInTheDocument();
   });
 
   test('calls setParameter with correct arguments on change', () => {
-    render(<NumberParameter {...defaultProps} />);
-
-    const input = screen.getByLabelText('Test Label');
+    const { getByLabelText } = render(<NumberParameter {...defaultProps} />);
+    const input = getByLabelText('Test Label');
     fireEvent.change(input, { target: { value: '100' } });
 
     expect(mockSetParameter).toHaveBeenCalledWith('test-id', 100);
   });
 
   test('handles invalid input gracefully', () => {
-    render(<NumberParameter {...defaultProps} />);
-
-    const input = screen.getByLabelText('Test Label');
+    const { getByLabelText } = render(<NumberParameter {...defaultProps} />);
+    const input = getByLabelText('Test Label');
     fireEvent.change(input, { target: { value: 'invalid' } });
 
     expect(mockSetParameter).toHaveBeenCalledWith('test-id', NaN);

@@ -8,19 +8,19 @@
  */
 
 import React from 'react';
-
 import { EuiCard, EuiCardProps, EuiIcon, IconType } from '@elastic/eui';
 
 export interface SynopsisProps {
   id: string;
+  title: string;
   description: string;
   iconUrl?: string;
-  title: string;
   iconType?: IconType;
   url?: string;
-  onClick?: EuiCardProps['onClick'];
   isBeta?: boolean;
+  onClick?: EuiCardProps['onClick'];
 }
+
 export function Synopsis({
   id,
   description,
@@ -33,6 +33,7 @@ export function Synopsis({
 }: SynopsisProps) {
   let optionalImg;
   const betaBadgeProps = isBeta ? { label: 'Beta' } : undefined;
+
   if (iconUrl) {
     optionalImg = <img alt="" className="synopsisIcon" src={iconUrl} />;
   } else if (iconType) {

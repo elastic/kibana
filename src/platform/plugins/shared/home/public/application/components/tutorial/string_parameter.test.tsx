@@ -8,13 +8,12 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { StringParameter, Props } from './string_parameter';
+import { render, fireEvent } from '@testing-library/react';
+import { StringParameter, StringParameterProps } from './string_parameter';
 
-describe('StringParameter', () => {
+describe('StringParameter component', () => {
   const mockSetParameter = jest.fn();
-
-  const defaultProps: Props = {
+  const defaultProps: StringParameterProps = {
     id: 'test-id',
     label: 'Test Label',
     value: 'Initial Value',
@@ -26,25 +25,23 @@ describe('StringParameter', () => {
   });
 
   test('renders with correct label and value', () => {
-    render(<StringParameter {...defaultProps} />);
+    const { getByLabelText, getByDisplayValue } = render(<StringParameter {...defaultProps} />);
 
-    expect(screen.getByLabelText('Test Label')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Initial Value')).toBeInTheDocument();
+    expect(getByLabelText('Test Label')).toBeInTheDocument();
+    expect(getByDisplayValue('Initial Value')).toBeInTheDocument();
   });
 
   test('calls setParameter with correct arguments on change', () => {
-    render(<StringParameter {...defaultProps} />);
-
-    const input = screen.getByLabelText('Test Label');
+    const { getByLabelText } = render(<StringParameter {...defaultProps} />);
+    const input = getByLabelText('Test Label');
     fireEvent.change(input, { target: { value: 'New Value' } });
 
     expect(mockSetParameter).toHaveBeenCalledWith('test-id', 'New Value');
   });
 
   test('handles empty input gracefully', () => {
-    render(<StringParameter {...defaultProps} />);
-
-    const input = screen.getByLabelText('Test Label');
+    const { getByLabelText } = render(<StringParameter {...defaultProps} />);
+    const input = getByLabelText('Test Label');
     fireEvent.change(input, { target: { value: '' } });
 
     expect(mockSetParameter).toHaveBeenCalledWith('test-id', '');

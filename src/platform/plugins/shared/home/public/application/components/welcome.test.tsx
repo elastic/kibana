@@ -8,12 +8,15 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-import './welcome.test.mocks';
+import { render } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Welcome } from './welcome';
 
 test('should render a Welcome screen', () => {
-  const component = shallow(<Welcome urlBasePath="/" onSkip={() => {}} />);
-
-  expect(component).toMatchSnapshot();
+  const { getByText } = render(
+    <IntlProvider locale="en">
+      <Welcome urlBasePath="/" onSkip={() => {}} />
+    </IntlProvider>
+  );
+  expect(getByText('Welcome to Elastic')).toBeInTheDocument();
 });

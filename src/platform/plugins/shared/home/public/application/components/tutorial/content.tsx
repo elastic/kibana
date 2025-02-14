@@ -13,6 +13,7 @@ import { EuiMarkdownFormat } from '@elastic/eui';
 interface ContentProps {
   text: string;
 }
+
 export function Content({ text }: ContentProps) {
   return <EuiMarkdownFormat>{text}</EuiMarkdownFormat>;
 }

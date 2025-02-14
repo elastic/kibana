@@ -8,26 +8,28 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { Content } from './content';
 
-test('should render Content component with markdown', async () => {
-  render(
-    <Content
-      text={'I am *some* [content](https://en.wikipedia.org/wiki/Content) with `markdown`'}
-    />
-  );
+describe('Content component', () => {
+  test('should render Content component with markdown', async () => {
+    const { getByText } = render(
+      <Content
+        text={'I am *some* [content](https://en.wikipedia.org/wiki/Content) with `markdown`'}
+      />
+    );
 
-  // Check if the italicized text is rendered
-  expect(screen.getByText('some', { selector: 'em' })).toBeInTheDocument();
+    // Check if the italicized text is rendered
+    expect(getByText('some', { selector: 'em' })).toBeInTheDocument();
 
-  // Check if the link is rendered
-  expect(screen.getByText('content', { selector: 'a' })).toBeInTheDocument();
-  expect(screen.getByText('content').closest('a')).toHaveAttribute(
-    'href',
-    'https://en.wikipedia.org/wiki/Content'
-  );
+    // Check if the link is rendered
+    expect(getByText('content', { selector: 'a' })).toBeInTheDocument();
+    expect(getByText('content').closest('a')).toHaveAttribute(
+      'href',
+      'https://en.wikipedia.org/wiki/Content'
+    );
 
-  // Check if the inline code is rendered
-  expect(screen.getByText('markdown', { selector: 'code' })).toBeInTheDocument();
+    // Check if the inline code is rendered
+    expect(getByText('markdown', { selector: 'code' })).toBeInTheDocument();
+  });
 });

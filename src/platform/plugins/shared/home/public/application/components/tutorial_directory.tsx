@@ -21,7 +21,6 @@ import { HomeKibanaServices, getServices } from '../kibana_services';
 import { getTutorials } from '../load_tutorials';
 
 const SAMPLE_DATA_TAB_ID = 'sampleData';
-
 const integrationsTitle = i18n.translate('home.breadcrumbs.integrationsAppTitle', {
   defaultMessage: 'Integrations',
 });
@@ -44,6 +43,7 @@ interface TutorialDirectoryUiState {
   selectedTabId: TutorialDirectoryUiProps['openTab'];
   tutorialCards: TutorialCard[];
 }
+
 class TutorialDirectoryUi extends React.Component<
   TutorialDirectoryUiProps,
   TutorialDirectoryUiState
@@ -53,9 +53,7 @@ class TutorialDirectoryUi extends React.Component<
 
   constructor(props: TutorialDirectoryUiProps) {
     super(props);
-
     const extraTabs = getServices().addDataService.getAddDataTabs();
-
     this.tabs = [
       {
         id: SAMPLE_DATA_TAB_ID,
@@ -71,6 +69,7 @@ class TutorialDirectoryUi extends React.Component<
         content: getComponent(),
       })),
     ];
+
     this._isMounted = false;
     let openTab = SAMPLE_DATA_TAB_ID;
     if (
@@ -93,11 +92,8 @@ class TutorialDirectoryUi extends React.Component<
 
   async componentDidMount() {
     this._isMounted = true;
-
     this.setBreadcrumbs();
-
     const tutorialConfigs: Tutorial[] = await getTutorials();
-
     if (!this._isMounted) {
       return;
     }

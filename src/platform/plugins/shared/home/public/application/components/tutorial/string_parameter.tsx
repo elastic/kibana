@@ -10,13 +10,14 @@
 import React from 'react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 
-export interface Props {
+export interface StringParameterProps {
   id: string;
   label: string;
   value: string;
   setParameter: (id: string, value: string) => void;
 }
-export function StringParameter({ id, label, value, setParameter }: Props) {
+
+export function StringParameter({ id, label, value, setParameter }: StringParameterProps) {
   const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     setParameter(id, evt.target.value);
   };

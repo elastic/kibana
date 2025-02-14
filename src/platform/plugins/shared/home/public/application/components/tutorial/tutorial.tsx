@@ -14,11 +14,12 @@ import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import {
+  SimpleSavedObject,
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
 } from '@kbn/core-saved-objects-api-browser';
-import { TutorialDirectory } from '../tutorial_directory';
+import { TutorialsCategory as TutorialCategoryType } from '../../../../common/constants';
 import { CustomStatusCheckCallback } from '../../../services/tutorials/tutorial_service';
 import { Footer } from './footer';
 import { Introduction } from './introduction';
@@ -26,7 +27,7 @@ import { InstructionSet, StatusCheckConfigShape, InstructionVariantShape } from 
 import { SavedObjectsInstaller } from './saved_objects_installer';
 import * as StatusCheckStates from './status_check_states';
 import { getServices, HomeKibanaServices } from '../../kibana_services';
-import { ParameterFormParam } from './parameter_form';
+import { ParameterFormProps } from './parameter_form';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
@@ -79,17 +80,11 @@ interface InstructionSet {
     title: string;
   };
   statusCheck: StatusCheckConfigShape;
-  params: ParameterFormParam[];
+  params: ParameterFormProps['params'];
 }
 interface InstructionParam {
   id: string;
   defaultValue: string;
-}
-interface SavedObject {
-  id: string;
-  type: string;
-  attributes: Record<string, any>;
-  version: string;
 }
 interface Dashboard {
   isOverview: string;
@@ -112,7 +107,7 @@ export interface Tutorial {
     instructionSets: InstructionSet[];
   };
   customStatusCheckName: string;
-  savedObjects?: SavedObject[];
+  savedObjects?: SimpleSavedObject[];
   savedObjectsInstallMsg?: string;
   artifacts: {
     dashboards: Dashboard[];
@@ -128,7 +123,7 @@ export interface Tutorial {
   euiIconType: string;
   moduleName?: string;
   previewImagePath?: string;
-  category: (typeof TutorialDirectory)[keyof typeof TutorialDirectory];
+  category: TutorialCategoryType;
   shortDescription: string;
   longDescription: string;
   isBeta?: boolean;

@@ -9,8 +9,8 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
 import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
 import { Home } from './home';
 import { TutorialDirectory } from './tutorial_directory';
 import { Tutorial } from './tutorial/tutorial';
@@ -23,16 +23,17 @@ import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../services'
 
 const REDIRECT_TO_INTEGRATIONS_TAB_IDS = ['all', 'logging', 'metrics', 'security'];
 
-interface HomeAppProps {
+export interface HomeAppProps {
   directories: FeatureCatalogueEntry[];
   solutions: FeatureCatalogueSolution[];
-  match: {
+  match?: {
     params: {
       id: string;
       tab: string;
     };
   };
 }
+
 export function HomeApp({ directories, solutions }: HomeAppProps) {
   const {
     application,
