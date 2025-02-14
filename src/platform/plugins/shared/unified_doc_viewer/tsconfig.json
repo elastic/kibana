@@ -7,8 +7,6 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "utils/**/*",
-    "utils/**/*",
     "typings/**/*",
   ],
   "kbn_references": [
