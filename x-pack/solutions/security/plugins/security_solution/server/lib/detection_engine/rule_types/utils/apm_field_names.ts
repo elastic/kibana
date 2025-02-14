@@ -72,21 +72,6 @@ export const SECURITY_NUM_IGNORE_FIELDS_REGEX = 'security_ignore_fields_num_rege
 export const SECURITY_NUM_EXCEPTION_ITEMS = 'security_exceptions_num_total';
 
 /**
- * Number of non-value list exceptions.
- */
-export const SECURITY_NUM_REGULAR_EXCEPTIONS = 'security_exceptions_num_regular';
-
-/**
- * Number of small value list exceptions.
- */
-export const SECURITY_NUM_SMALL_LIST_EXCEPTIONS = 'security_exceptions_num_small_list';
-
-/**
- * Number of large value list exceptions.
- */
-export const SECURITY_NUM_LARGE_LIST_EXCEPTIONS = 'security_exceptions_num_large_list';
-
-/**
  * Merge strategy used by the rule to combine `_source` and `fields` when building alerts.
  */
 export const SECURITY_MERGE_STRATEGY = 'security_merge_strategy';

@@ -98,7 +98,7 @@ import {
   SECURITY_NUM_EXCEPTION_ITEMS,
   SECURITY_NUM_INDICES_MATCHING_PATTERN,
   SECURITY_QUERY_SPAN_S,
-} from './apm';
+} from './apm_field_names';
 
 export const MAX_RULE_GAP_RATIO = 4;
 

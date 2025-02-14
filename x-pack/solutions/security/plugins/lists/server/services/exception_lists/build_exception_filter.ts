@@ -38,7 +38,7 @@ import {
   SECURITY_NUM_LARGE_LIST_EXCEPTIONS,
   SECURITY_NUM_REGULAR_EXCEPTIONS,
   SECURITY_NUM_SMALL_LIST_EXCEPTIONS,
-} from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/apm';
+} from '../../apm_field_names';
 
 import type { ListClient } from '../..';
 

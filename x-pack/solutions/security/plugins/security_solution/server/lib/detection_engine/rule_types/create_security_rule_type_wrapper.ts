@@ -61,7 +61,7 @@ import {
   SECURITY_PARAMS,
   SECURITY_RULE_ID,
   SECURITY_TO,
-} from './utils/apm';
+} from './utils/apm_field_names';
 
 const aliasesFieldMap: FieldMap = {};
 Object.entries(aadFieldConversion).forEach(([key, value]) => {
