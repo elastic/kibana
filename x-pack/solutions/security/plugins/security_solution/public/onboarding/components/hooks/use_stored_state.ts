@@ -46,7 +46,7 @@ export const useStoredCompletedCardIds = (spaceId: string) =>
  * Stores the selected topic ID per space
  */
 export const useStoredUrlDetails = (spaceId: string) =>
-  useDefinedLocalStorage<string | null>(`${LocalStorageKey.urlDetails}.${spaceId}`, null);
+  useLocalStorage<string | null | undefined>(`${LocalStorageKey.urlDetails}.${spaceId}`);
 
 /**
  * Stores the selected selectable card ID per space
