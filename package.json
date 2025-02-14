@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "8.17.2",
+  "version": "8.17.3",
   "branch": "8.17",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -1209,7 +1209,7 @@
     "pbf": "3.2.1",
     "pdfmake": "^0.2.15",
     "peggy": "^1.2.0",
-    "polished": "^3.7.2",
+    "polished": "^4.3.1",
     "pretty-ms": "6.0.0",
     "prop-types": "^15.8.1",
     "proxy-from-env": "1.0.0",

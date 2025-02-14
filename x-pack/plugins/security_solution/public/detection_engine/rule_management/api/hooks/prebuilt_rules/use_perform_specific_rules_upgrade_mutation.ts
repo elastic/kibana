@@ -12,13 +12,15 @@ import type {
   UpgradeSpecificRulesRequest,
 } from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import { PERFORM_RULE_UPGRADE_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules/urls';
-import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
-import { useInvalidateFindRulesQuery } from '../use_find_rules_query';
+import { performUpgradeSpecificRules } from '../../api';
+import { useInvalidateFetchCoverageOverviewQuery } from '../use_fetch_coverage_overview_query';
 import { useInvalidateFetchRuleManagementFiltersQuery } from '../use_fetch_rule_management_filters_query';
 import { useInvalidateFetchRulesSnoozeSettingsQuery } from '../use_fetch_rules_snooze_settings_query';
-import { performUpgradeSpecificRules } from '../../api';
+import { useInvalidateFindRulesQuery } from '../use_find_rules_query';
+import { useInvalidateFetchPrebuiltRulesStatusQuery } from './use_fetch_prebuilt_rules_status_query';
 import { useInvalidateFetchPrebuiltRulesUpgradeReviewQuery } from './use_fetch_prebuilt_rules_upgrade_review_query';
-import { useInvalidateFetchCoverageOverviewQuery } from '../use_fetch_coverage_overview_query';
+import { retryOnRateLimitedError } from './retry_on_rate_limited_error';
+import { cappedExponentialBackoff } from './capped_exponential_backoff';
 
 export const PERFORM_SPECIFIC_RULES_UPGRADE_KEY = [
   'POST',
@@ -64,6 +66,8 @@ export const usePerformSpecificRulesUpgradeMutation = (
           options.onSettled(...args);
         }
       },
+      retry: retryOnRateLimitedError,
+      retryDelay: cappedExponentialBackoff,
     }
   );
 };
