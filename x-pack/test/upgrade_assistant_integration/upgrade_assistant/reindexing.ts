@@ -14,6 +14,7 @@ import {
 } from '@kbn/upgrade-assistant-plugin/common/types';
 import { generateNewIndexName } from '@kbn/upgrade-assistant-plugin/server/lib/reindexing/index_settings';
 import { getIndexState } from '@kbn/upgrade-assistant-plugin/common/get_index_state';
+import { sortBy } from 'lodash';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -218,12 +219,10 @@ export default function ({ getService }: FtrProviderContext) {
       expect(resp.body.warnings.length).to.be(2);
       // By default, all reindexing operations will replace an index with an alias (with the same name)
       // pointing to a newly created "reindexed" index.
-      expect(resp.body.warnings[0]).to.eql({
-        warningType: 'replaceIndexWithAlias',
-        flow: 'reindex',
-      });
-      // Warn for read-only resolution
-      expect(resp.body.warnings[1]).to.eql({ warningType: 'makeIndexReadonly', flow: 'readonly' });
+      expect(sortBy(resp.body.warnings, 'warningType')).to.eql([
+        { warningType: 'makeIndexReadonly', flow: 'readonly' },
+        { warningType: 'replaceIndexWithAlias', flow: 'reindex' },
+      ]);
     });
 
     it('reindexes old 7.0 index', async () => {
