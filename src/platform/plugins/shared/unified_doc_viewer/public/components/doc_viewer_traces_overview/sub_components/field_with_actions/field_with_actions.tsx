@@ -12,7 +12,6 @@ import React, { ReactNode } from 'react';
 import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { FieldHoverActionPopover } from './field_hover_popover_action';
 
-
 export interface FieldWithActionsProps {
   field: string;
   fieldMetadata?: PartialFieldMetadataPlain;
@@ -21,7 +20,7 @@ export interface FieldWithActionsProps {
   label: string;
   useBadge?: boolean;
   value?: unknown;
-  children?: (props: { content: React.ReactNode }) => React.ReactNode | React.ReactNode;
+  children?: ((props: { content: React.ReactNode }) => React.ReactNode) | React.ReactNode;
 }
 
 export function FieldWithActions({
