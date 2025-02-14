@@ -21,7 +21,7 @@ test('renders', () => {
     });
 
   const { getByRole } = render(
-    <IntlProvider>
+    <IntlProvider locale="en">
       <SavedObjectsInstaller bulkCreate={bulkCreateMock} savedObjects={[]} />
     </IntlProvider>
   );
@@ -45,7 +45,7 @@ describe('bulkCreate', () => {
       });
 
     const { getByTestId, getByText } = render(
-      <IntlProvider>
+      <IntlProvider locale="en">
         <SavedObjectsInstaller bulkCreate={bulkCreateMock} savedObjects={[savedObject]} />
       </IntlProvider>
     );
@@ -63,7 +63,7 @@ describe('bulkCreate', () => {
       .mockRejectedValue(new Error('simulated bulkRequest error'));
 
     const { getByTestId, getByText } = render(
-      <IntlProvider>
+      <IntlProvider locale="en">
         <SavedObjectsInstaller bulkCreate={bulkCreateMock} savedObjects={[savedObject]} />
       </IntlProvider>
     );
@@ -80,7 +80,7 @@ describe('bulkCreate', () => {
       savedObjects: [savedObject],
     });
     const { getByTestId } = render(
-      <IntlProvider>
+      <IntlProvider locale="en">
         <SavedObjectsInstaller
           bulkCreate={bulkCreateMock}
           savedObjects={[{ ...savedObject, version: 'foo' }]}

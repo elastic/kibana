@@ -89,7 +89,7 @@ describe('Tutorial component', () => {
   describe('when isCloudEnabled is false', () => {
     test('should render ON_PREM instructions with instruction toggle', async () => {
       const { getByText } = render(
-        <IntlProvider>
+        <IntlProvider locale="en">
           <Tutorial
             addBasePath={addBasePath}
             isCloudEnabled={false}
@@ -116,7 +116,7 @@ describe('Tutorial component', () => {
         return loadBasicTutorialPromise as unknown as Promise<Tutorial>;
       };
       const { queryByTestId } = render(
-        <IntlProvider>
+        <IntlProvider locale="en">
           <Tutorial
             addBasePath={addBasePath}
             isCloudEnabled={false}
@@ -135,7 +135,7 @@ describe('Tutorial component', () => {
 
     test('should display ON_PREM_ELASTIC_CLOUD instructions when toggle is clicked', async () => {
       const { getByTestId, getByText } = render(
-        <IntlProvider>
+        <IntlProvider locale="en">
           <Tutorial
             addBasePath={addBasePath}
             isCloudEnabled={false}
@@ -158,7 +158,7 @@ describe('Tutorial component', () => {
   describe('when isCloudEnabled is true', () => {
     test('should render ELASTIC_CLOUD instructions', async () => {
       const { getByText } = render(
-        <IntlProvider>
+        <IntlProvider locale="en">
           <Tutorial
             addBasePath={addBasePath}
             isCloudEnabled={true}
