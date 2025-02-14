@@ -28,31 +28,21 @@ jest.mock('../../../services/kibana_services', () => ({
         execute: () => {},
         isCompatible: async () => true,
       },
-    ],
-  },
-  visualizationsService: {
-    all: () => [
       {
-        name: 'myPromotedVis',
-        title: 'myPromotedVis',
-        order: 0,
-        description: 'myPromotedVis description',
-        icon: 'empty',
-        stage: 'production',
-        isDeprecated: false,
-        group: 'promoted',
-        titleInWizard: 'myPromotedVis title',
-      },
-    ],
-    getAliases: () => [
-      {
-        name: 'alias visualization',
-        title: 'Alias Visualization',
-        order: 0,
-        description: 'This is a dummy representation of aan aliased visualization.',
-        icon: 'empty',
-        stage: 'production',
-        isDeprecated: false,
+        id: 'myVis',
+        type: '',
+        order: 10,
+        grouping: [
+          {
+            id: 'visualizations',
+            order: 1000,
+            getDisplayName: () => 'Visualizations',
+          },
+        ],
+        getDisplayName: () => 'myVis',
+        getIconType: () => 'empty',
+        execute: () => {},
+        isCompatible: async () => true,
       },
     ],
   },
@@ -71,9 +61,8 @@ describe('getMenuItemGroups', () => {
     expect(groups.length).toBe(2);
 
     expect(groups[0].title).toBe('Visualizations');
-    expect(groups[0].items.length).toBe(2); // promoted vis type and vis alias
-
+    expect(groups[0].items.length).toBe(1);
     expect(groups[1].title).toBe('My group');
-    expect(groups[1].items.length).toBe(1); // add panel action
+    expect(groups[1].items.length).toBe(1);
   });
 });

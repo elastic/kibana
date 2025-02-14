@@ -21,7 +21,6 @@ import {
   keys,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { Datatable } from '@kbn/expressions-plugin/public';
 import {
   getAggregateQueryMode,
   isOfAggregateQueryType,
@@ -55,6 +54,7 @@ import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { ESQLDataGridAccordion } from './esql_data_grid_accordion';
 import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
 import { useESQLVariables } from './use_esql_variables';
+import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -138,23 +138,29 @@ export function LensEditConfigurationFlyout({
       if (isDataLoading) {
         return;
       }
-      const activeData: Record<string, Datatable> = {};
-      const adaptersTables = previousAdapters.current?.tables?.tables;
-      const [table] = Object.values(adaptersTables || {});
-      if (table) {
-        // there are cases where a query can return a big amount of columns
-        // at this case we don't suggest all columns in a table but the first
-        // MAX_NUM_OF_COLUMNS
-        setSuggestsLimitedColumns(table.columns.length >= MAX_NUM_OF_COLUMNS);
-        layers.forEach((layer) => {
-          activeData[layer] = table;
-        });
 
+      const [defaultLayerId] = Object.keys(framePublicAPI.datasourceLayers);
+      const activeData = getActiveDataFromDatatable(
+        defaultLayerId,
+        previousAdapters.current?.tables?.tables
+      );
+
+      layers.forEach((layer) => {
+        const table = activeData[layer];
+
+        if (table) {
+          // there are cases where a query can return a big amount of columns
+          // at this case we don't suggest all columns in a table but the first `MAX_NUM_OF_COLUMNS`
+          setSuggestsLimitedColumns(table.columns.length >= MAX_NUM_OF_COLUMNS);
+        }
+      });
+
+      if (Object.keys(activeData).length > 0) {
         dispatch(onActiveDataChange({ activeData }));
       }
     });
     return () => s?.unsubscribe();
-  }, [dispatch, dataLoading$, layers]);
+  }, [dispatch, dataLoading$, layers, framePublicAPI.datasourceLayers]);
 
   const attributesChanged: boolean = useMemo(() => {
     const previousAttrs = previousAttributes.current;

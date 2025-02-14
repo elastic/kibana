@@ -11,8 +11,7 @@
     "browser": true,
     "configPath": [
       "xpack",
-      "search",
-      "notebooks"
+      "searchNotebooks"
     ],
     "requiredPlugins": [
       "console"

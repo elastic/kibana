@@ -21,6 +21,7 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
 import {
   IngestStreamGetResponse,
+  isDescendantOf,
   isUnwiredStreamGetResponse,
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
@@ -36,6 +37,7 @@ import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 import { DashboardsTable } from '../stream_detail_dashboards_view/dashboard_table';
 import { AssetImage } from '../asset_image';
+import { useWiredStreams } from '../../hooks/use_wired_streams';
 
 const formatNumber = (val: number) => {
   return Number(val).toLocaleString('en', {
@@ -136,11 +138,11 @@ export function StreamDetailOverview({ definition }: { definition?: IngestStream
       ) {
         return undefined;
       }
-      return streamsRepositoryClient.fetch('GET /api/streams/{id}/_details', {
+      return streamsRepositoryClient.fetch('GET /api/streams/{name}/_details', {
         signal,
         params: {
           path: {
-            id: definition.stream.name,
+            name: definition.stream.name,
           },
           query: {
             start: String(start),
@@ -288,34 +290,18 @@ function QuickLinks({ definition }: { definition?: IngestStreamGetResponse }) {
 }
 
 function ChildStreamList({ definition }: { definition?: IngestStreamGetResponse }) {
-  const {
-    dependencies: {
-      start: {
-        streams: { streamsRepositoryClient },
-      },
-    },
-  } = useKibana();
   const router = useStreamsAppRouter();
 
-  const streamsListFetch = useStreamsAppFetch(
-    ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /api/streams', {
-        signal,
-      });
-    },
-    [streamsRepositoryClient]
-  );
+  const { wiredStreams } = useWiredStreams();
 
   const childrenStreams = useMemo(() => {
     if (!definition) {
       return [];
     }
-    return streamsListFetch.value?.streams.filter(
-      (d) => isWiredStreamDefinition(d) && d.name.startsWith(definition.stream.name)
-    );
-  }, [definition, streamsListFetch.value?.streams]);
+    return wiredStreams?.filter((d) => isDescendantOf(definition.stream.name, d.name));
+  }, [definition, wiredStreams]);
 
-  if (definition && childrenStreams?.length === 1) {
+  if (definition && childrenStreams?.length === 0) {
     return (
       <EuiFlexItem grow>
         <EuiFlexGroup alignItems="center" justifyContent="center">

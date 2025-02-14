@@ -434,21 +434,10 @@
           },
           {
             "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-common.externals.elasticeuilibservices",
+            "id": "def-common.externals.elasticeuilibservicesthemewarning",
             "type": "string",
             "tags": [],
-            "label": "'@elastic/eui/lib/services'",
-            "description": [],
-            "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ui-shared-deps-src",
-            "id": "def-common.externals.elasticeuilibservicesformat",
-            "type": "string",
-            "tags": [],
-            "label": "'@elastic/eui/lib/services/format'",
+            "label": "'@elastic/eui/lib/services/theme/warning'",
             "description": [],
             "path": "src/platform/packages/private/kbn-ui-shared-deps-src/src/definitions.js",
             "deprecated": false,

@@ -44,15 +44,12 @@ export class KibanaFramework {
     config: InfraRouteConfig<Params, Query, Body, Method>,
     handler: RequestHandler<Params, Query, Body, RequestHandlerContext>
   ) {
-    const defaultOptions = {
-      tags: ['access:infra'],
-    };
     const routeConfig = {
       path: config.path,
       validate: config.validate,
-      // Currently we have no use of custom options beyond tags, this can be extended
-      // beyond defaultOptions if it's needed.
-      options: defaultOptions,
+      security: {
+        authz: { requiredPrivileges: ['infra'] },
+      },
     };
     switch (config.method) {
       case 'get':

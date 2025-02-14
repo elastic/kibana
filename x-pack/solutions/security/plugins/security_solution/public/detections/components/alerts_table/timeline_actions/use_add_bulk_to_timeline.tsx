@@ -10,7 +10,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Filter } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
 import { dataTableActions, TableId, tableDefaults } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import type { CustomBulkAction } from '../../../../../common/types';

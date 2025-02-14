@@ -6,16 +6,17 @@
  */
 
 import React, { memo } from 'react';
-import styled from 'styled-components';
-import { EuiFlexItem, transparentize } from '@elastic/eui';
+import styled from '@emotion/styled';
+import { EuiFlexItem } from '@elastic/eui';
 import { SidePanelContentManager } from './side_panel_content_manager';
 import { useWithSidePanel } from '../../hooks/state_selectors/use_with_side_panel';
 
 const StyledEuiFlexItemWhite = styled(EuiFlexItem)`
-  background-color: ${({ theme: { eui } }) => eui.euiColorEmptyShade} !important;
-  border-radius: ${({ theme: { eui } }) => `0 ${eui.euiSizeXS} ${eui.euiSizeXS} 0`};
-  box-shadow: 0 ${({ theme: { eui } }) => eui.euiSizeXS} ${({ theme: { eui } }) => eui.euiSizeXS}
-    ${({ theme: { eui } }) => transparentize(eui.euiShadowColor, 0.04)};
+  background-color: ${({ theme: { euiTheme } }) => euiTheme.colors.backgroundBasePlain};
+  border-radius: ${({ theme: { euiTheme } }) => `0 ${euiTheme.size.xs} ${euiTheme.size.xs} 0`};
+  box-shadow: 0 ${({ theme: { euiTheme } }) => euiTheme.size.xs}
+    ${({ theme: { euiTheme } }) => euiTheme.size.xs}
+    ${({ theme: { euiTheme } }) => euiTheme.colors.borderBaseSubdued};
 `;
 
 export const SidePanelFlexItem = memo((props) => {

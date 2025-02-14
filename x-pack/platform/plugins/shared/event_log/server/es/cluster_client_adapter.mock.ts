@@ -30,6 +30,7 @@ const createClusterClientMock = () => {
     shutdown: jest.fn(),
     updateDocuments: jest.fn(),
     queryEventsByDocumentIds: jest.fn(),
+    refreshIndex: jest.fn(),
   };
   return mock;
 };

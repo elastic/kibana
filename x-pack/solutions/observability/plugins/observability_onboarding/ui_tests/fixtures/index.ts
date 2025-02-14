@@ -5,46 +5,35 @@
  * 2.0.
  */
 
-import {
-  test as base,
-  PageObjects,
-  createLazyPageObject,
-  ScoutTestFixtures,
-  ScoutWorkerFixtures,
-  KibanaUrl,
-  KbnClient,
-} from '@kbn/scout';
-import { OnboardingHomePage } from './page_objects';
-import { CustomLogsPage } from './page_objects/custom_logs';
+import { v4 as uuidv4 } from 'uuid';
+import { test as base, ObltTestFixtures, ObltWorkerFixtures } from '@kbn/scout-oblt';
+import { mergeTests } from 'playwright/test';
+import { onboardingApiFixture, OnboardingApiFixture } from './onboarding_api';
 
-export interface ExtendedScoutTestFixtures extends ScoutTestFixtures {
-  pageObjects: PageObjects & {
-    onboardingHomePage: OnboardingHomePage;
-    customLogsPage: CustomLogsPage;
-  };
+export type ExtendedScoutTestFixtures = ObltTestFixtures;
+export interface ExtendedScoutWorkerFixtures extends ObltWorkerFixtures {
+  onboardingApi: OnboardingApiFixture;
 }
 
-export const test = base.extend<ExtendedScoutTestFixtures, ScoutWorkerFixtures>({
+const testFixtures = mergeTests(base, onboardingApiFixture);
+
+export const test = testFixtures.extend<ExtendedScoutTestFixtures, ExtendedScoutWorkerFixtures>({
   pageObjects: async (
     {
       pageObjects,
-      page,
-      kbnUrl,
-      kbnClient,
     }: {
       pageObjects: ExtendedScoutTestFixtures['pageObjects'];
-      page: ExtendedScoutTestFixtures['page'];
-      kbnUrl: KibanaUrl;
-      kbnClient: KbnClient;
     },
     use: (pageObjects: ExtendedScoutTestFixtures['pageObjects']) => Promise<void>
   ) => {
     const extendedPageObjects = {
       ...pageObjects,
-      onboardingHomePage: createLazyPageObject(OnboardingHomePage, page),
-      customLogsPage: createLazyPageObject(CustomLogsPage, page, kbnUrl, kbnClient),
     };
 
     await use(extendedPageObjects);
   },
 });
+
+export const generateIntegrationName = (name: string) => `${name}_${uuidv4().slice(0, 5)}`;
+
+export * as assertionMessages from './assertion_messages';

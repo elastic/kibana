@@ -83,6 +83,7 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
       SecuritySubFeatureId.trustedApplications,
       SecuritySubFeatureId.blocklist,
       SecuritySubFeatureId.eventFilters,
+      SecuritySubFeatureId.globalArtifactManagement,
     ],
   },
 

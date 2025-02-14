@@ -7,6 +7,7 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { useCallback } from 'react';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import type { RuleMigration } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_INSTALL_PATH } from '../../../../common/siem_migrations/constants';
 import type { InstallMigrationRulesResponse } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
@@ -15,7 +16,6 @@ import * as i18n from './translations';
 import { useInvalidateGetMigrationRules } from './use_get_migration_rules';
 import { useInvalidateGetMigrationTranslationStats } from './use_get_migration_translation_stats';
 import { installMigrationRules } from '../api';
-import { useTranslatedRuleTelemetry } from '../hooks/use_translated_rule_telemetry';
 
 export const INSTALL_MIGRATION_RULE_MUTATION_KEY = ['POST', SIEM_RULE_MIGRATION_INSTALL_PATH];
 
@@ -26,25 +26,13 @@ interface InstallMigrationRuleParams {
 
 export const useInstallMigrationRule = (migrationId: string) => {
   const { addError, addSuccess } = useAppToasts();
+  const { telemetry } = useKibana().services.siemMigrations.rules;
 
-  const { reportTranslatedRuleInstall } = useTranslatedRuleTelemetry();
   const reportTelemetry = useCallback(
-    (data: InstallMigrationRuleParams, error?: Error) => {
-      const { ruleMigration, enabled } = data;
-      const prebuiltRuleId = ruleMigration.elastic_rule?.prebuilt_rule_id;
-      reportTranslatedRuleInstall({
-        migrationId,
-        ruleMigrationId: ruleMigration.id,
-        author: prebuiltRuleId ? 'elastic' : 'custom',
-        ...(prebuiltRuleId && ruleMigration.elastic_rule
-          ? { prebuiltRule: { id: prebuiltRuleId, title: ruleMigration.elastic_rule.title } }
-          : {}),
-        enabled: !!enabled,
-        result: error ? 'failed' : 'success',
-        errorMessage: error?.message,
-      });
+    ({ ruleMigration, enabled = false }: InstallMigrationRuleParams, error?: Error) => {
+      telemetry.reportTranslatedRuleInstall({ ruleMigration, enabled, error });
     },
-    [migrationId, reportTranslatedRuleInstall]
+    [telemetry]
   );
 
   const invalidateGetRuleMigrations = useInvalidateGetMigrationRules();

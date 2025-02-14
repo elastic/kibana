@@ -13,7 +13,6 @@ import { DashboardStart } from './plugin';
 import { DashboardState } from './dashboard_api/types';
 import { getDashboardApi } from './dashboard_api/get_dashboard_api';
 import { DashboardPanelState } from '../common';
-import { SavedDashboardInput } from './services/dashboard_content_management_service/types';
 
 export type Start = jest.Mocked<DashboardStart>;
 
@@ -96,9 +95,7 @@ export function buildMockDashboardApi({
       managed: false,
       dashboardInput: {
         ...initialState,
-        executionContext: { type: 'dashboard' },
-        id: savedObjectId ?? '123',
-      } as SavedDashboardInput,
+      },
       references: [],
     },
   });

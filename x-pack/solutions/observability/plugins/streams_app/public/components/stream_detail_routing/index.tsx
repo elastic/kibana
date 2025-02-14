@@ -79,7 +79,7 @@ export function StreamDetailRouting({
           closeModal={closeModal}
           clearChildUnderEdit={() => routingAppState.selectChildUnderEdit(undefined)}
           refreshDefinition={refreshDefinition}
-          id={routingAppState.childUnderEdit.child.destination}
+          name={routingAppState.childUnderEdit.child.destination}
           availableStreams={availableStreams}
         />
       )}

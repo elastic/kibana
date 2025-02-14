@@ -6,7 +6,8 @@
  */
 import type { EuiDataGridSorting } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import type { TopNFunctionSortField } from '@kbn/profiling-utils';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
@@ -15,8 +16,10 @@ import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
+import { AsyncStatus } from '../../../hooks/use_async';
 
 export function TopNFunctionsView() {
+  const { onPageReady } = usePerformanceContext();
   const { query } = useProfilingParams('/functions/topn');
   const { rangeFrom, rangeTo, kuery, sortDirection, sortField, pageIndex = 0 } = query;
 
@@ -66,7 +69,20 @@ export function TopNFunctionsView() {
       },
     });
   }
-
+  useEffect(() => {
+    if (state.status === AsyncStatus.Settled) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+        customMetrics: {
+          key1: 'totalCount',
+          value1: state.data?.TotalCount ?? 0,
+        },
+      });
+    }
+  }, [state.status, state.data, onPageReady, rangeFrom, rangeTo]);
   return (
     <>
       <EuiFlexGroup direction="column">

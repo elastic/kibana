@@ -15,7 +15,7 @@ const inferenceEndpoints = [
   {
     inference_id: 'my-elser-model-05',
     task_type: 'sparse_embedding',
-    service: 'elser',
+    service: 'elasticsearch',
     service_settings: {
       num_allocations: 1,
       num_threads: 1,

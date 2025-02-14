@@ -28,6 +28,7 @@ export const useCardStyles = () => {
 
     .headerCardTitle {
       font-weight: ${euiTheme.font.weight.semiBold};
+      font-size: 1rem;
     }
 
     ${isDarkMode

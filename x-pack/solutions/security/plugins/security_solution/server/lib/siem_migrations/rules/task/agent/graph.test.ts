@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { InferenceClient } from '@kbn/inference-plugin/server';
 import type {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
@@ -14,6 +13,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import type { RuleMigrationsRetriever } from '../retrievers';
 import type { SiemMigrationTelemetryClient } from '../rule_migrations_telemetry_client';
+import type { EsqlKnowledgeBase } from '../util/esql_knowledge_base';
 import { getRuleMigrationAgent } from './graph';
 
 describe('getRuleMigrationAgent', () => {
@@ -21,8 +21,8 @@ describe('getRuleMigrationAgent', () => {
     response: JSON.stringify({}, null, 2),
   }) as unknown as ActionsClientChatOpenAI | ActionsClientSimpleChatModel;
   const telemetryClient = {} as SiemMigrationTelemetryClient;
-  const inferenceClient = {} as InferenceClient;
-  const connectorId = 'draw_graphs';
+  const esqlKnowledgeBase = {} as EsqlKnowledgeBase;
+
   const ruleMigrationsRetriever = {} as RuleMigrationsRetriever;
   const logger = loggerMock.create();
 
@@ -30,9 +30,8 @@ describe('getRuleMigrationAgent', () => {
     try {
       await getRuleMigrationAgent({
         model,
-        inferenceClient,
+        esqlKnowledgeBase,
         ruleMigrationsRetriever,
-        connectorId,
         logger,
         telemetryClient,
       });

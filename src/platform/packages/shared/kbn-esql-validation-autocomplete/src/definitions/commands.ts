@@ -43,6 +43,9 @@ import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
 import { suggest as suggestForStats } from '../autocomplete/commands/stats';
 import { suggest as suggestForWhere } from '../autocomplete/commands/where';
 import { suggest as suggestForJoin } from '../autocomplete/commands/join';
+import { suggest as suggestForFrom } from '../autocomplete/commands/from';
+import { suggest as suggestForRow } from '../autocomplete/commands/row';
+import { suggest as suggestForShow } from '../autocomplete/commands/show';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -190,12 +193,13 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Produces a row with one or more columns with values that you specify. This can be useful for testing.',
     }),
-    examples: ['row a=1', 'row a=1, b=2'],
+    examples: ['ROW a=1', 'ROW a=1, b=2'],
     signature: {
       multipleParams: true,
       // syntax check already validates part of this
       params: [{ name: 'assignment', type: 'any' }],
     },
+    suggest: suggestForRow,
     options: [],
     modes: [],
   },
@@ -208,24 +212,25 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     examples: ['from logs', 'from logs-*', 'from logs_*, events-*'],
     options: [metadataOption],
     modes: [],
-    hasRecommendedQueries: true,
     signature: {
       multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
     },
+    suggest: suggestForFrom,
   },
   {
     name: 'show',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.showDoc', {
       defaultMessage: 'Returns information about the deployment and its capabilities',
     }),
-    examples: ['show info'],
+    examples: ['SHOW INFO'],
     options: [],
     modes: [],
     signature: {
       multipleParams: false,
       params: [{ name: 'functions', type: 'function' }],
     },
+    suggest: suggestForShow,
   },
   {
     name: 'metrics',
@@ -485,6 +490,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     examples: ['row a=[1,2,3] | mv_expand a'],
     options: [],
     modes: [],
+    preview: true,
     signature: {
       multipleParams: false,
       params: [{ name: 'column', type: 'column', innerTypes: ['any'] }],
@@ -557,6 +563,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.joinDoc', {
       defaultMessage: 'Join table with another table.',
     }),
+    preview: true,
     examples: [
       '… | LOOKUP JOIN lookup_index ON join_field',
       // TODO: Uncomment when other join types are implemented
@@ -564,12 +571,12 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       // '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field',
       // '… | <LEFT | RIGHT | LOOKUP> JOIN index AS alias ON index.field = index2.field, index.field2 = index2.field2',
     ],
-    options: [],
     modes: [],
     signature: {
-      multipleParams: false,
+      multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
     },
+    options: [onOption],
     suggest: suggestForJoin,
   },
 ];

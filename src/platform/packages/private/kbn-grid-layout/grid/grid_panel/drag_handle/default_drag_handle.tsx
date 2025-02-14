@@ -7,61 +7,58 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { UserInteractionEvent } from '../../use_grid_layout_events/types';
+import { DragHandleApi } from './use_drag_handle_api';
 
-export const DefaultDragHandle = ({
-  onDragStart,
-}: {
-  onDragStart: (e: UserInteractionEvent) => void;
-}) => {
-  const { euiTheme } = useEuiTheme();
+export const DefaultDragHandle = React.memo(
+  ({ dragHandleApi }: { dragHandleApi: DragHandleApi }) => {
+    return (
+      <button
+        onMouseDown={dragHandleApi.startDrag}
+        onTouchStart={dragHandleApi.startDrag}
+        aria-label={i18n.translate('kbnGridLayout.dragHandle.ariaLabel', {
+          defaultMessage: 'Drag to move',
+        })}
+        className="kbnGridPanel__dragHandle"
+        data-test-subj="kbnGridPanel--dragHandle"
+        css={styles}
+      >
+        <EuiIcon type="grabOmnidirectional" />
+      </button>
+    );
+  }
+);
 
-  return (
-    <button
-      onMouseDown={onDragStart}
-      onTouchStart={onDragStart}
-      aria-label={i18n.translate('kbnGridLayout.dragHandle.ariaLabel', {
-        defaultMessage: 'Drag to move',
-      })}
-      className="kbnGridPanel__dragHandle"
-      css={css`
-        opacity: 0;
-        display: flex;
-        cursor: move;
-        position: absolute;
-        align-items: center;
-        justify-content: center;
-        top: -${euiTheme.size.l};
-        width: ${euiTheme.size.l};
-        height: ${euiTheme.size.l};
-        z-index: ${euiTheme.levels.modal};
-        margin-left: ${euiTheme.size.s};
-        border: 1px solid ${euiTheme.border.color};
-        border-bottom: none;
-        background-color: ${euiTheme.colors.backgroundBasePlain};
-        border-radius: ${euiTheme.border.radius} ${euiTheme.border.radius} 0 0;
-        cursor: grab;
-        transition: ${euiTheme.animation.slow} opacity;
-        .kbnGridPanel:hover &,
-        .kbnGridPanel:focus-within &,
-        &:active,
-        &:focus {
-          opacity: 1 !important;
-        }
-        &:active {
-          cursor: grabbing;
-        }
-        .kbnGrid--static &,
-        .kbnGridPanel--expanded & {
-          display: none;
-        }
-        touch-action: none;
-      `}
-    >
-      <EuiIcon type="grabOmnidirectional" />
-    </button>
-  );
-};
+const styles = ({ euiTheme }: UseEuiTheme) =>
+  css({
+    opacity: 0,
+    display: 'flex',
+    cursor: 'grab',
+    position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+    top: `-${euiTheme.size.l}`,
+    width: euiTheme.size.l,
+    height: euiTheme.size.l,
+    zIndex: euiTheme.levels.modal,
+    marginLeft: euiTheme.size.s,
+    border: `1px solid ${euiTheme.border.color}`,
+    borderBottom: 'none',
+    backgroundColor: euiTheme.colors.backgroundBasePlain,
+    borderRadius: `${euiTheme.border.radius} ${euiTheme.border.radius} 0 0`,
+    transition: `${euiTheme.animation.slow} opacity`,
+    touchAction: 'none',
+    '.kbnGridPanel:hover &, .kbnGridPanel:focus-within &, &:active, &:focus': {
+      opacity: '1 !important',
+    },
+    '&:active': {
+      cursor: 'grabbing',
+    },
+    '.kbnGrid--static &, .kbnGridPanel--expanded &': {
+      display: 'none',
+    },
+  });
+
+DefaultDragHandle.displayName = 'KbnGridLayoutDefaultDragHandle';

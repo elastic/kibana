@@ -31,27 +31,15 @@ export const useFilterPrebuiltRulesToUpgrade = ({
         return false;
       }
 
-      if (tags && tags.length > 0) {
-        return tags.every((tag) => ruleInfo.current_rule.tags.includes(tag));
+      if (tags?.length && !tags.every((tag) => ruleInfo.current_rule.tags.includes(tag))) {
+        return false;
       }
 
-      if (ruleSource && ruleSource.length > 0) {
-        if (
-          ruleSource.includes(RuleCustomizationEnum.customized) &&
-          ruleSource.includes(RuleCustomizationEnum.not_customized)
-        ) {
-          return true;
-        } else if (
-          ruleSource.includes(RuleCustomizationEnum.customized) &&
-          ruleInfo.current_rule.rule_source.type === 'external'
-        ) {
+      if (ruleSource?.length === 1 && ruleInfo.current_rule.rule_source.type === 'external') {
+        if (ruleSource.includes(RuleCustomizationEnum.customized)) {
           return ruleInfo.current_rule.rule_source.is_customized;
-        } else if (
-          ruleSource.includes(RuleCustomizationEnum.not_customized) &&
-          ruleInfo.current_rule.rule_source.type === 'external'
-        ) {
-          return ruleInfo.current_rule.rule_source.is_customized === false;
         }
+        return ruleInfo.current_rule.rule_source.is_customized === false;
       }
 
       return true;

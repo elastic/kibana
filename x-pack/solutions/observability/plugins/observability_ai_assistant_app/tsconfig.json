@@ -84,7 +84,9 @@
     "@kbn/ai-assistant-icon",
     "@kbn/product-doc-base-plugin",
     "@kbn/rule-data-utils",
+    "@kbn/i18n-react",
     "@kbn/utility-types",
+    "@kbn/alerts-ui-shared"
   ],
   "exclude": ["target/**/*"]
 }

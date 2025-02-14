@@ -10,11 +10,12 @@
 import { ScopedHistory } from '@kbn/core-application-browser';
 
 import { ForwardedDashboardState } from './locator';
-import { convertPanelsArrayToPanelMap, DashboardContainerInput } from '../../../common';
+import { convertPanelsArrayToPanelMap } from '../../../common';
+import { DashboardState } from '../../dashboard_api/types';
 
 export const loadDashboardHistoryLocationState = (
   getScopedHistory: () => ScopedHistory
-): Partial<DashboardContainerInput> => {
+): Partial<DashboardState> => {
   const state = getScopedHistory().location.state as undefined | ForwardedDashboardState;
 
   if (!state) {

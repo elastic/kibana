@@ -60,5 +60,13 @@ describe('isNativeFunctionCallingSupported', () => {
       });
       expect(isNativeFunctionCallingSupported(connector)).toBe(false);
     });
+
+    it('returns true if the config is not exposed', () => {
+      const connector = createConnector({
+        type: InferenceConnectorType.OpenAI,
+        config: {},
+      });
+      expect(isNativeFunctionCallingSupported(connector)).toBe(true);
+    });
   });
 });

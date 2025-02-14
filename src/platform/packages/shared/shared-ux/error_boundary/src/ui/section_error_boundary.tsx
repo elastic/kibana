@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { apm } from '@elastic/apm-rum';
 import React from 'react';
 
+import { mutateError } from '../../lib';
 import type { KibanaErrorBoundaryServices } from '../../types';
-import { useErrorBoundary } from '../services/error_boundary_services';
+import { useErrorBoundary } from '../services';
 import { SectionFatalPrompt, SectionRecoverablePrompt } from './message_components';
 
 interface SectionErrorBoundaryProps {
@@ -63,8 +65,10 @@ class SectionErrorBoundaryInternal extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
-    console.error('Error caught by Kibana React Section Error Boundary'); // eslint-disable-line no-console
-    console.error(error); // eslint-disable-line no-console
+    const customError = mutateError(error);
+    apm.captureError(customError);
+    console.error('Error caught by Kibana React Error Boundary'); // eslint-disable-line no-console
+    console.error(customError); // eslint-disable-line no-console
 
     const { name, isFatal } = this.props.services.errorService.registerError(error, errorInfo);
     this.setState({ error, errorInfo, componentName: name, isFatal });

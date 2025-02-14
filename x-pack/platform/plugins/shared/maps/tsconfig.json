@@ -93,6 +93,7 @@
     "@kbn/field-utils",
     "@kbn/react-hooks",
     "@kbn/scout",
+    "@kbn/react-kibana-mount",
   ],
   "exclude": [
     "target/**/*",

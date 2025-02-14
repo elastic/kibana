@@ -27,7 +27,7 @@ import { DetectedMappingFailureError } from '../../../lib/streams/errors/detecte
 import { NonAdditiveProcessorError } from '../../../lib/streams/errors/non_additive_processor_error';
 
 const paramsSchema = z.object({
-  path: z.object({ id: z.string() }),
+  path: z.object({ name: z.string() }),
   body: z.object({
     processing: z.array(processorDefinitionSchema),
     documents: z.array(recursiveRecord),
@@ -38,7 +38,7 @@ const paramsSchema = z.object({
 type ProcessingSimulateParams = z.infer<typeof paramsSchema>;
 
 export const simulateProcessorRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{id}/processing/_simulate',
+  endpoint: 'POST /api/streams/{name}/processing/_simulate',
   options: {
     access: 'internal',
   },
@@ -53,9 +53,9 @@ export const simulateProcessorRoute = createServerRoute({
   handler: async ({ params, request, getScopedClients }) => {
     const { scopedClusterClient } = await getScopedClients({ request });
 
-    const { read } = await checkAccess({ id: params.path.id, scopedClusterClient });
+    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
     if (!read) {
-      throw new DefinitionNotFoundError(`Stream definition for ${params.path.id} not found.`);
+      throw new DefinitionNotFoundError(`Stream definition for ${params.path.name} not found.`);
     }
 
     const simulationBody = prepareSimulationBody(params);
@@ -81,7 +81,7 @@ const prepareSimulationBody = (params: ProcessingSimulateParams) => {
 
   const processors = formatToIngestProcessors(processing);
   const docs = documents.map((doc, id) => ({
-    _index: path.id,
+    _index: path.name,
     _id: id.toString(),
     _source: doc,
   }));
@@ -89,7 +89,7 @@ const prepareSimulationBody = (params: ProcessingSimulateParams) => {
   const simulationBody: any = {
     docs,
     pipeline_substitutions: {
-      [`${path.id}@stream.processing`]: {
+      [`${path.name}@stream.processing`]: {
         processors,
       },
     },
@@ -98,7 +98,7 @@ const prepareSimulationBody = (params: ProcessingSimulateParams) => {
   if (detected_fields) {
     const properties = computeMappingProperties(detected_fields);
     simulationBody.component_template_substitutions = {
-      [`${path.id}@stream.layer`]: {
+      [`${path.name}@stream.layer`]: {
         template: {
           mappings: {
             properties,

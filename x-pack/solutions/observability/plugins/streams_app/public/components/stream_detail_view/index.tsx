@@ -38,11 +38,11 @@ export function StreamDetailView() {
   } = useStreamsAppFetch(
     async ({ signal }) => {
       return streamsRepositoryClient
-        .fetch('GET /api/streams/{id}', {
+        .fetch('GET /api/streams/{name}', {
           signal,
           params: {
             path: {
-              id: key,
+              name: key,
             },
           },
         })

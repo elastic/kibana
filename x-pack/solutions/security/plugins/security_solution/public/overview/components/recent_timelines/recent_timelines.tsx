@@ -8,7 +8,7 @@
 import { EuiSpacer, EuiText, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { RecentTimelineHeader } from './header';
 import type {
   OnOpenTimeline,

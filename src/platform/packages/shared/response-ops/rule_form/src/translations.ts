@@ -240,7 +240,7 @@ export const ADD_ACTION_HEADER = i18n.translate(
   }
 );
 
-export const ADD_ACTION_OPTIONAL_TEXT = i18n.translate(
+export const OPTIONAL_LABEL = i18n.translate(
   'responseOpsRuleForm.ruleForm.ruleActions.addActionOptionalText',
   {
     defaultMessage: 'Optional',

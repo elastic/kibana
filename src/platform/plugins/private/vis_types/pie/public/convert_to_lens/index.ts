@@ -8,7 +8,7 @@
  */
 
 import {
-  convertToLensModule,
+  getConvertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
 import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
@@ -29,7 +29,7 @@ export const convertToLens: ConvertPieToLensVisualization = async (vis, timefilt
     return null;
   }
 
-  const { getColumnsFromVis } = await convertToLensModule;
+  const { getColumnsFromVis } = await getConvertToLensModule();
   const layers = getColumnsFromVis(vis, timefilter, dataView, {
     buckets: [],
     splits: ['segment'],

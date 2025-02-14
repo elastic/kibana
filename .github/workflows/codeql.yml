@@ -31,6 +31,7 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         config-file: ./.github/codeql/codeql-config.yml
+        debug: ${{ matrix.branch != '7.17' }}
 
     # TODO: Possibly required to follow all call paths, however, when enabled, the step below runs out of memory.
     # Possible workarounds: Apply for access to the GitHub beta where we can use beefier machines, or run it ourselves on Buildkite
@@ -53,8 +54,13 @@ jobs:
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@883d8588e56d1753a8a58c1c86e88976f0c23449 # v3.26.3
       env:
-        NODE_OPTIONS: "--max-old-space-size=6144"
+        NODE_OPTIONS: "--max-old-space-size=8192"
         CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES: ${{ env.CODEQL_EXTRACTOR_JAVASCRIPT_OPTION_SKIP_TYPES }}
+        # CodeQL divides the memory between ts and jvm, though most of the memory is used by the ts.
+        # We double the memory, so ts can use it in full capacity.
+        # Refer to https://github.com/github/codeql/blob/59a77a873c894bca7274a7ed7c7c6d937547e9b3/javascript/resources/tools/autobuild.sh#L7-L13
+        # 2 * 14576, considering our runner is 4 CPU/16GB.
+        CODEQL_RAM: 29152
       with:
         category: "/language:${{matrix.language}}"
         ref: ${{ env.CHECKOUT_REF }}

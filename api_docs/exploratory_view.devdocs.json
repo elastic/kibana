@@ -408,10 +408,10 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.AxesSettingsConfig",
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.AxesSettingsConfig",
                 "text": "AxesSettingsConfig"
               },
               " | undefined"
@@ -429,10 +429,10 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "lens",
-                "scope": "public",
-                "docId": "kibLensPluginApi",
-                "section": "def-public.AxesSettingsConfig",
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.AxesSettingsConfig",
                 "text": "AxesSettingsConfig"
               },
               " | undefined"

@@ -15,6 +15,7 @@ export function registerServerRoutes({
   core,
   logger,
   dependencies,
+  isDev,
 }: {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   logger: Logger;
@@ -22,11 +23,13 @@ export function registerServerRoutes({
     ObservabilityAIAssistantRouteHandlerResources,
     keyof DefaultRouteHandlerResources
   >;
+  isDev: boolean;
 }) {
   registerRoutes({
     core,
     logger,
     repository: getGlobalObservabilityAIAssistantServerRouteRepository(),
     dependencies,
+    runDevModeChecks: isDev,
   });
 }

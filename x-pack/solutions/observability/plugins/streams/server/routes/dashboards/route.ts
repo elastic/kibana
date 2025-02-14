@@ -48,13 +48,13 @@ function sanitizeDashboardAsset(asset: DashboardAsset): SanitizedDashboardAsset 
 }
 
 const listDashboardsRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{id}/dashboards',
+  endpoint: 'GET /api/streams/{name}/dashboards',
   options: {
     access: 'internal',
   },
   params: z.object({
     path: z.object({
-      id: z.string(),
+      name: z.string(),
     }),
   }),
   security: {
@@ -66,10 +66,10 @@ const listDashboardsRoute = createServerRoute({
   },
   async handler({ params, request, getScopedClients }): Promise<ListDashboardsResponse> {
     const { assetClient, streamsClient } = await getScopedClients({ request });
-    await streamsClient.ensureStream(params.path.id);
+    await streamsClient.ensureStream(params.path.name);
 
     const {
-      path: { id: streamId },
+      path: { name: streamName },
     } = params;
 
     function isDashboard(asset: Asset): asset is DashboardAsset {
@@ -79,7 +79,7 @@ const listDashboardsRoute = createServerRoute({
     return {
       dashboards: (
         await assetClient.getAssets({
-          entityId: streamId,
+          entityId: streamName,
           entityType: 'stream',
         })
       )
@@ -90,7 +90,7 @@ const listDashboardsRoute = createServerRoute({
 });
 
 const linkDashboardRoute = createServerRoute({
-  endpoint: 'PUT /api/streams/{id}/dashboards/{dashboardId}',
+  endpoint: 'PUT /api/streams/{name}/dashboards/{dashboardId}',
   options: {
     access: 'internal',
   },
@@ -103,22 +103,22 @@ const linkDashboardRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      id: z.string(),
+      name: z.string(),
       dashboardId: z.string(),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<LinkDashboardResponse> => {
     const { assetClient, streamsClient } = await getScopedClients({ request });
 
-    await streamsClient.ensureStream(params.path.id);
+    await streamsClient.ensureStream(params.path.name);
     const {
-      path: { dashboardId, id: streamId },
+      path: { dashboardId, name: streamName },
     } = params;
 
-    await streamsClient.ensureStream(streamId);
+    await streamsClient.ensureStream(streamName);
 
     await assetClient.linkAsset({
-      entityId: streamId,
+      entityId: streamName,
       entityType: 'stream',
       assetId: dashboardId,
       assetType: 'dashboard',
@@ -131,7 +131,7 @@ const linkDashboardRoute = createServerRoute({
 });
 
 const unlinkDashboardRoute = createServerRoute({
-  endpoint: 'DELETE /api/streams/{id}/dashboards/{dashboardId}',
+  endpoint: 'DELETE /api/streams/{name}/dashboards/{dashboardId}',
   options: {
     access: 'internal',
   },
@@ -144,21 +144,21 @@ const unlinkDashboardRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      id: z.string(),
+      name: z.string(),
       dashboardId: z.string(),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UnlinkDashboardResponse> => {
     const { assetClient, streamsClient } = await getScopedClients({ request });
 
-    await streamsClient.ensureStream(params.path.id);
+    await streamsClient.ensureStream(params.path.name);
 
     const {
-      path: { dashboardId, id: streamId },
+      path: { dashboardId, name: streamName },
     } = params;
 
     await assetClient.unlinkAsset({
-      entityId: streamId,
+      entityId: streamName,
       entityType: 'stream',
       assetId: dashboardId,
       assetType: 'dashboard',
@@ -171,7 +171,7 @@ const unlinkDashboardRoute = createServerRoute({
 });
 
 const suggestDashboardsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{id}/dashboards/_suggestions',
+  endpoint: 'POST /api/streams/{name}/dashboards/_suggestions',
   options: {
     access: 'internal',
   },
@@ -184,7 +184,7 @@ const suggestDashboardsRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      id: z.string(),
+      name: z.string(),
     }),
     query: z.object({
       query: z.string(),
@@ -196,7 +196,7 @@ const suggestDashboardsRoute = createServerRoute({
   handler: async ({ params, request, getScopedClients }): Promise<SuggestDashboardResponse> => {
     const { assetClient, streamsClient } = await getScopedClients({ request });
 
-    await streamsClient.ensureStream(params.path.id);
+    await streamsClient.ensureStream(params.path.name);
 
     const {
       query: { query },
@@ -224,7 +224,7 @@ const dashboardSchema = z.object({
 });
 
 const bulkDashboardsRoute = createServerRoute({
-  endpoint: `POST /api/streams/{id}/dashboards/_bulk`,
+  endpoint: `POST /api/streams/{name}/dashboards/_bulk`,
   options: {
     access: 'internal',
   },
@@ -237,7 +237,7 @@ const bulkDashboardsRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      id: z.string(),
+      name: z.string(),
     }),
     body: z.object({
       operations: z.array(
@@ -261,15 +261,15 @@ const bulkDashboardsRoute = createServerRoute({
     const { assetClient, streamsClient } = await getScopedClients({ request });
 
     const {
-      path: { id: streamId },
+      path: { name: streamName },
       body: { operations },
     } = params;
 
-    await streamsClient.ensureStream(streamId);
+    await streamsClient.ensureStream(streamName);
 
     const result = await assetClient.bulk(
       {
-        entityId: streamId,
+        entityId: streamName,
         entityType: 'stream',
       },
       operations.map((operation) => {

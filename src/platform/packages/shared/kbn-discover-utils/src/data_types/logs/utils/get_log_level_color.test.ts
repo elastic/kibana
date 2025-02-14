@@ -20,28 +20,28 @@ const euiTheme = {
 describe('getLogLevelColor', () => {
   test('should work correctly', () => {
     expect(getLogLevelColor(LogLevelCoalescedValue.debug, euiTheme as EuiThemeComputed)).toBe(
-      '#becfe3'
+      '#bdd7ff'
     );
     expect(getLogLevelColor(LogLevelCoalescedValue.info, euiTheme as EuiThemeComputed)).toBe(
-      '#90b0d1'
+      '#90bdff'
     );
     expect(getLogLevelColor(LogLevelCoalescedValue.notice, euiTheme as EuiThemeComputed)).toBe(
-      '#6092c0'
+      '#61a2ff'
     );
     expect(getLogLevelColor(LogLevelCoalescedValue.warning, euiTheme as EuiThemeComputed)).toBe(
-      '#d6bf57'
+      '#fcd883'
     );
     expect(getLogLevelColor(LogLevelCoalescedValue.error, euiTheme as EuiThemeComputed)).toBe(
-      '#e18774'
+      '#fc9a92'
     );
     expect(getLogLevelColor(LogLevelCoalescedValue.critical, euiTheme as EuiThemeComputed)).toBe(
-      '#dd7b67'
+      '#fb9188'
     );
     expect(getLogLevelColor(LogLevelCoalescedValue.alert, euiTheme as EuiThemeComputed)).toBe(
-      '#d76f5b'
+      '#fa877e'
     );
     expect(getLogLevelColor(LogLevelCoalescedValue.emergency, euiTheme as EuiThemeComputed)).toBe(
-      '#d2634e'
+      '#f87c74'
     );
     // other
     expect(getLogLevelColor(LogLevelCoalescedValue.trace, euiTheme as EuiThemeComputed)).toBe(

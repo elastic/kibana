@@ -43,11 +43,13 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
   repository,
   logger,
   dependencies,
+  runDevModeChecks,
 }: {
   core: CoreSetup;
   repository: Record<string, ServerRoute<string, RouteParamsRT | undefined, any, any, any>>;
   logger: Logger;
   dependencies: TDependencies;
+  runDevModeChecks: boolean;
 }) {
   const routes = Object.values(repository);
 
@@ -62,7 +64,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
 
     const { method, pathname, version } = parseEndpoint(endpoint);
 
-    if (isZod(params)) {
+    if (runDevModeChecks && isZod(params)) {
       const dangerousSchemas = assertAllParsableSchemas(params);
       if (dangerousSchemas.size > 0) {
         for (const { key, schema } of dangerousSchemas) {
@@ -74,7 +76,7 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
             );
           } else {
             logger.warn(
-              `Warning for ${endpoint}: schema ${typeName} at ${key} is not inspectable and could lead to runtime exceptions, convert it to a support schema`
+              `Warning for ${endpoint}: schema ${typeName} at ${key} is not inspectable and could lead to runtime exceptions, convert it to a supported schema`
             );
           }
         }

@@ -6,24 +6,9 @@
  */
 
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { TaskTypes } from '../../types';
 export const INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES = [25, 50, 100];
-
-export enum ServiceProviderKeys {
-  'alibabacloud-ai-search' = 'alibabacloud-ai-search',
-  amazonbedrock = 'amazonbedrock',
-  azureopenai = 'azureopenai',
-  azureaistudio = 'azureaistudio',
-  cohere = 'cohere',
-  elasticsearch = 'elasticsearch',
-  elastic = 'elastic',
-  elser = 'elser',
-  googleaistudio = 'googleaistudio',
-  hugging_face = 'hugging_face',
-  mistral = 'mistral',
-  openai = 'openai',
-  watsonxai = 'watsonxai',
-}
 
 export enum SortFieldInferenceEndpoint {
   endpoint = 'endpoint',

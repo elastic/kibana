@@ -454,6 +454,10 @@ export class Server {
     this.httpRateLimiter.start();
     this.status.start();
 
+    this.rendering.start({
+      featureFlags: featureFlagsStart,
+    });
+
     this.coreStart = {
       analytics: analyticsStart,
       capabilities: capabilitiesStart,

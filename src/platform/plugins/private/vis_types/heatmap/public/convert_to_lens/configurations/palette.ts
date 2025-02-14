@@ -8,7 +8,7 @@
  */
 
 import { Range } from '@kbn/expressions-plugin/common';
-import { convertToLensModule } from '@kbn/visualizations-plugin/public';
+import { getConvertToLensModule } from '@kbn/visualizations-plugin/public';
 import { HeatmapVisParams } from '../../types';
 import { getStopsWithColorsFromColorsNumber } from '../../utils/palette';
 
@@ -24,7 +24,7 @@ const isHeatmapVisParamsWithRanges = (
 
 export const getPaletteForHeatmap = async (params: HeatmapVisParams) => {
   const { getPalette, getPaletteFromStopsWithColors, getPercentageModeConfig } =
-    await convertToLensModule;
+    await getConvertToLensModule();
 
   if (isHeatmapVisParamsWithRanges(params)) {
     const percentageModeConfig = getPercentageModeConfig(params, false);

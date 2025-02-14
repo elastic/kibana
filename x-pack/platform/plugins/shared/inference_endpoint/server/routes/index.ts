@@ -8,12 +8,15 @@
 import type { IKibanaResponse, IRouter, RequestHandlerContext } from '@kbn/core/server';
 import { Logger } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  InferenceInferenceEndpointInfo,
+  InferenceTaskType,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { InferenceServicesGetResponse } from '../types';
 import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '../../common';
-import { addInferenceEndpoint } from '../lib/add_inference_endpoint';
 import { inferenceEndpointExists } from '../lib/inference_endpoint_exists';
+import { unflattenObject } from '../utils/unflatten_object';
 
 const inferenceEndpointSchema = schema.object({
   config: schema.object({
@@ -90,7 +93,20 @@ export const getInferenceServicesRoute = (
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
           const { config, secrets } = request.body;
-          const result = await addInferenceEndpoint(esClient, config, secrets);
+
+          const serviceSettings = {
+            ...unflattenObject(config?.providerConfig ?? {}),
+            ...unflattenObject(secrets?.providerSecrets ?? {}),
+          };
+
+          const result = await esClient.inference.put({
+            inference_id: config?.inferenceId ?? '',
+            task_type: config?.taskType as InferenceTaskType,
+            inference_config: {
+              service: config?.provider,
+              service_settings: serviceSettings,
+            },
+          });
 
           return response.ok({
             body: result,

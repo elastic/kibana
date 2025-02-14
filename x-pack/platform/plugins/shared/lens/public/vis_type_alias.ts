@@ -17,7 +17,7 @@ import {
 } from '../common/constants';
 import { getLensClient } from './persistence/lens_client';
 
-export const getLensAliasConfig = (): VisTypeAlias => ({
+export const lensVisTypeAlias: VisTypeAlias = {
   alias: {
     path: getBasePath(),
     app: APP_ID,
@@ -59,4 +59,4 @@ export const getLensAliasConfig = (): VisTypeAlias => ({
       },
     },
   },
-});
+};

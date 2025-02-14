@@ -24,7 +24,12 @@ import { unenrollBatch } from '../services/agents/unenroll_action_runner';
 
 import type { AgentPolicy } from '../types';
 
-import { UnenrollInactiveAgentsTask, TYPE, VERSION } from './unenroll_inactive_agents_task';
+import {
+  UnenrollInactiveAgentsTask,
+  TYPE,
+  VERSION,
+  POLICIES_BATCHSIZE,
+} from './unenroll_inactive_agents_task';
 
 jest.mock('../services');
 jest.mock('../services/agents');
@@ -162,12 +167,8 @@ describe('UnenrollInactiveAgentsTask', () => {
     });
 
     it('Should exit if there are no agents policies with unenroll_timeout set', async () => {
-      mockAgentPolicyService.list.mockResolvedValue({
-        items: [],
-        total: 0,
-        page: 1,
-        perPage: 1,
-      });
+      mockAgentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([]);
+      await runTask();
       expect(mockedUnenrollBatch).not.toHaveBeenCalled();
     });
 
@@ -175,7 +176,62 @@ describe('UnenrollInactiveAgentsTask', () => {
       mockedGetAgentsByKuery.mockResolvedValue({
         agents: [],
       } as any);
+      await runTask();
       expect(mockedUnenrollBatch).not.toHaveBeenCalled();
+    });
+
+    it('Should process large numbers of policies in batches', async () => {
+      const firstAgentPoliciesBatch = Array.from({ length: POLICIES_BATCHSIZE }, (_, i) =>
+        createAgentPolicyMock({ id: `agent-policy-${i + 1}` })
+      );
+      const secondAgentPoliciesBatch = Array.from({ length: 3 }, (_, i) =>
+        createAgentPolicyMock({
+          id: `agent-policy-${POLICIES_BATCHSIZE + 1}`,
+          unenroll_timeout: 1000,
+        })
+      );
+      mockAgentPolicyService.fetchAllAgentPolicies = jest.fn().mockResolvedValue(
+        jest.fn(async function* () {
+          yield firstAgentPoliciesBatch;
+          yield secondAgentPoliciesBatch;
+        })()
+      );
+      const secondAgentPoliciesBatchAgents = [
+        {
+          id: 'agent-501',
+          policy_id: 'agent-policy-501',
+          status: 'inactive',
+        },
+        {
+          id: 'agent-502',
+          policy_id: 'agent-policy-502',
+          status: 'inactive',
+        },
+        {
+          id: 'agent-503',
+          policy_id: 'agent-policy-503',
+          status: 'active',
+        },
+      ];
+      mockedGetAgentsByKuery
+        .mockResolvedValueOnce({
+          agents: [],
+        } as any)
+        .mockResolvedValueOnce({
+          agents: secondAgentPoliciesBatchAgents,
+        } as any);
+
+      await runTask();
+      expect(mockedUnenrollBatch).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        secondAgentPoliciesBatchAgents,
+        {
+          force: true,
+          revoke: true,
+          actionId: expect.stringContaining('UnenrollInactiveAgentsTask-'),
+        }
+      );
     });
   });
 });

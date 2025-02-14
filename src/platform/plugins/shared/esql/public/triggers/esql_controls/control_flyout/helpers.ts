@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { monaco } from '@kbn/monaco';
-import { timeUnits } from '@kbn/esql-validation-autocomplete';
+import { timeUnits, ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 
 function inKnownTimeInterval(timeIntervalUnit: string): boolean {
   return timeUnits.some((unit) => unit === timeIntervalUnit.toLowerCase());
@@ -65,10 +65,23 @@ export const areValuesIntervalsValid = (values: string[]) => {
   });
 };
 
-export const getRecurrentVariableName = (name: string, existingNames: string[]) => {
+export const getVariablePrefix = (variableType: ESQLVariableType) => {
+  switch (variableType) {
+    case ESQLVariableType.FIELDS:
+      return 'field';
+    case ESQLVariableType.FUNCTIONS:
+      return 'function';
+    case ESQLVariableType.TIME_LITERAL:
+      return 'interval';
+    default:
+      return 'variable';
+  }
+};
+
+export const getRecurrentVariableName = (name: string, existingNames: Set<string>) => {
   let newName = name;
   let i = 1;
-  while (existingNames.includes(newName)) {
+  while (existingNames.has(newName)) {
     newName = `${name}${i}`;
     i++;
   }

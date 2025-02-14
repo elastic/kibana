@@ -21,6 +21,7 @@ import type { CasePostRequest } from '../../../common/types/api';
 import { CasePostRequestRt } from '../../../common/types/api';
 import {} from '../utils';
 import { validateCustomFields } from './validators';
+import { emptyCaseAssigneesSanitizer } from './sanitizers';
 import { normalizeCreateCaseRequest } from './utils';
 
 /**
@@ -40,7 +41,8 @@ export const create = async (
   } = clientArgs;
 
   try {
-    const query = decodeWithExcessOrThrow(CasePostRequestRt)(data);
+    const rawQuery = decodeWithExcessOrThrow(CasePostRequestRt)(data);
+    const query = emptyCaseAssigneesSanitizer(rawQuery);
     const configurations = await casesClient.configure.get({ owner: data.owner });
     const customFieldsConfiguration = configurations[0]?.customFields;
 

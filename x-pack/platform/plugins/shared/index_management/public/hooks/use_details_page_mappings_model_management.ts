@@ -33,7 +33,7 @@ const getCustomInferenceIdMap = (
     const inferenceEntry = isLocalModel(model)
       ? {
           trainedModelId: model.service_settings.model_id,
-          isDeployable: model.service === Service.elser || model.service === Service.elasticsearch,
+          isDeployable: model.service === Service.elasticsearch,
           isDeployed: modelStatsById[model.inference_id]?.state === 'started',
           isDownloading: Boolean(downloadStates[model.service_settings.model_id]),
           modelStats: modelStatsById[model.inference_id],

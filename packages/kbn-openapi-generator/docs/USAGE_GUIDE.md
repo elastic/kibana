@@ -268,9 +268,11 @@ export const createEntityRoute = (router: Router): void => {
     .post({
       access: 'public',
       path: '/api/my/data/{id}',
-      options: {
-        tags: ['access:securitySolution'],
-      },
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution']
+        }
+      }
     })
     .addVersion(
       {
