@@ -622,6 +622,8 @@ export class SearchInterceptor {
     this.deps.toasts.addDanger({
       title: 'Timed out',
       text: toMountPoint(e.getErrorMessage(this.application), this.startRenderServices),
+      // TODO: explore possibility of "Infinity" without hiding the toast on mouse leave (see https://github.com/elastic/kibana/pull/210576#discussion_r1952215353)
+      toastLifeTimeMs: 1000 * 60 * 60 * 24 * 7, // 7 days
     });
   };
 
