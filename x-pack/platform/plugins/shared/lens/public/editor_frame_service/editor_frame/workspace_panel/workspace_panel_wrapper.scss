@@ -25,6 +25,7 @@
     background: $euiColorEmptyShade;
     height: 100%;
     @include euiScrollBar;
+    overflow: hidden;
     &>* {
       flex: 1 1 100%;
       display: flex;
