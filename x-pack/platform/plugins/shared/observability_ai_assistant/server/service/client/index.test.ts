@@ -44,7 +44,7 @@ interface ChunkDelta {
 
 type LlmSimulator = ReturnType<typeof createLlmSimulator>;
 
-const EXPECTED_STORED_SYSTEM_MESSAGE = `system`;
+const EXPECTED_STORED_SYSTEM_MESSAGE = `this is a system message`;
 
 const nextTick = () => {
   return new Promise(process.nextTick);
@@ -185,7 +185,7 @@ describe('Observability AI Assistant client', () => {
 
     knowledgeBaseServiceMock.getUserInstructions.mockResolvedValue([]);
 
-    functionClientMock.getInstructions.mockReturnValue(['system']);
+    functionClientMock.getInstructions.mockReturnValue([EXPECTED_STORED_SYSTEM_MESSAGE]);
     functionClientMock.getAdhocInstructions.mockReturnValue([]);
 
     return new ObservabilityAIAssistantClient({
@@ -486,7 +486,7 @@ describe('Observability AI Assistant client', () => {
               user: {
                 name: 'johndoe',
               },
-              systemMessage: 'system',
+              systemMessage: EXPECTED_STORED_SYSTEM_MESSAGE,
               messages: [
                 {
                   '@timestamp': expect.any(String),
@@ -625,7 +625,7 @@ describe('Observability AI Assistant client', () => {
           user: {
             name: 'johndoe',
           },
-          systemMessage: 'system',
+          systemMessage: EXPECTED_STORED_SYSTEM_MESSAGE,
           messages: [
             {
               '@timestamp': expect.any(String),

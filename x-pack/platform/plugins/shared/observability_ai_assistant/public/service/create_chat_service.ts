@@ -186,7 +186,6 @@ class ChatService {
 
   async initialize() {
     this.functionRegistry = new Map();
-    const systemMessages: string[] = [];
     const scopePromise = this.apiClient('GET /internal/observability_ai_assistant/functions', {
       signal: this.abortSignal,
       params: {
@@ -196,7 +195,7 @@ class ChatService {
       },
     }).then(({ functionDefinitions, systemMessage }) => {
       functionDefinitions.forEach((fn) => this.functionRegistry.set(fn.name, fn));
-      systemMessages.push(systemMessage);
+      this.systemMessage = systemMessage;
     });
 
     await Promise.all([
@@ -209,8 +208,6 @@ class ChatService {
         });
       }),
     ]);
-
-    this.systemMessage = systemMessages.join('\n');
 
     this.functions$.next(this.getFunctions());
   }

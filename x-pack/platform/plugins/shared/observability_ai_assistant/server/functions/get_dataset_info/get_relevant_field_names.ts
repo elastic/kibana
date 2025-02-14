@@ -107,7 +107,7 @@ export async function getRelevantFieldNames({
             CIRCUMSTANCES include fields not mentioned in this list.`,
           messages: [
             // remove the function request
-            ...messages.slice(0, -1),
+            ...messages.filter((msg) => !msg.message?.function_call),
             {
               '@timestamp': new Date().toISOString(),
               message: {
