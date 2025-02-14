@@ -71,12 +71,12 @@ export const ProcessorMetricBadges = ({
           color="hollow"
           title={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.detectedFields', {
             defaultMessage:
-              '{detectedFieldsCount} fields were parsed on the sampled documents:\n{detectedFields}',
+              '{detectedFieldsCount, plural, one {# field was parsed on the sampled documents: } other {# fields were parsed on the sampled documents:\n}}{detectedFields}',
             values: { detectedFieldsCount, detectedFields: detected_fields.join('\n') },
           })}
         >
           {i18n.translate('xpack.streams.processorMetricBadges.fieldsBadgeLabel', {
-            defaultMessage: '{detectedFieldsCount} fields',
+            defaultMessage: '{detectedFieldsCount, plural, one {# field } other {# fields}}',
             values: { detectedFieldsCount },
           })}
         </EuiBadge>
