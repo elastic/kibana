@@ -29,6 +29,7 @@ import {
   OperatingSystem,
 } from '@kbn/securitysolution-utils';
 import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
+import { FormattedError } from '../../../../components/formatted_error';
 import type {
   TrustedAppConditionEntry,
   NewTrustedApp,
@@ -235,7 +236,7 @@ const defaultConditionEntry = (): TrustedAppConditionEntry<ConditionEntryField.H
 });
 
 export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
-  ({ item, policies, policiesIsLoading, onChange, mode }) => {
+  ({ item, policies, policiesIsLoading, onChange, mode, error: submitError }) => {
     const getTestId = useTestIdGenerator('trustedApps-form');
     const [visited, setVisited] = useState<
       Partial<{
@@ -480,7 +481,12 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     }, [item]);
 
     return (
-      <EuiForm component="div" data-test-subj={getTestId('')}>
+      <EuiForm
+        component="div"
+        data-test-subj={getTestId('')}
+        error={submitError ? <FormattedError error={submitError} /> : undefined}
+        isInvalid={!!submitError}
+      >
         <EuiTitle size="xs">
           <h3>{DETAILS_HEADER}</h3>
         </EuiTitle>
