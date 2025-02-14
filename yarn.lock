@@ -7174,7 +7174,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-distribution-bar@link:x-pack/solutions/security/packages/distribution_bar":
+"@kbn/security-solution-distribution-bar@link:x-pack/solutions/security/packages/distribution-bar":
   version "0.0.0"
   uid ""
 
