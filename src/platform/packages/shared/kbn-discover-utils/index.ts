@@ -37,6 +37,7 @@ export {
   formatHit,
   getDocId,
   getLogDocumentOverview,
+  getTraceDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
   getShouldShowFieldHandler,
