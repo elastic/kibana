@@ -8,7 +8,6 @@ These are fields in the detection rule schema that are able to be customized on 
 | interval |
 | from |
 | to |
-| note |
 | severity |
 | tags |
 | severity_mapping |
