@@ -41,7 +41,7 @@ interface SynthtraceIngestionData {
   otel: Array<SynthtraceEvents<OtelDocument>>;
 }
 
-const getClient = (
+const getSynthtraceClient = (
   key: keyof SynthtraceIngestionData,
   esClient: EsClient,
   kbnUrl: string,
@@ -90,27 +90,25 @@ export async function ingestSynthtraceDataHook(config: FullConfig, data: Synthtr
     const kbnUrl = scoutConfig.hosts.kibana;
 
     for (const key of Object.keys(data)) {
-      if (Object.hasOwn(data, key)) {
-        const typedKey = key as keyof SynthtraceIngestionData;
-        if (data[typedKey].length > 0) {
-          const client = await getClient(typedKey, esClient, kbnUrl, scoutConfig.auth, log);
+      const typedKey = key as keyof SynthtraceIngestionData;
+      if (data[typedKey].length > 0) {
+        const client = await getSynthtraceClient(typedKey, esClient, kbnUrl, scoutConfig.auth, log);
 
-          log.debug(`[setup] ingesting ${typedKey} synthtrace data`);
+        log.debug(`[setup] ingesting ${key} synthtrace data`);
 
-          try {
-            await Promise.all(
-              data[typedKey].map((event) => {
-                return client.index(Readable.from(Array.from(event).flatMap((e) => e.serialize())));
-              })
-            );
-          } catch (e) {
-            log.debug(`[setup] error ingesting ${typedKey} synthtrace data`, e);
-          }
-
-          log.debug(`[setup] ${typedKey} synthtrace data ingested successfully`);
-        } else {
-          log.debug(`[setup] no synthtrace data to ingest for ${typedKey}`);
+        try {
+          await Promise.all(
+            data[typedKey].map((event) => {
+              return client.index(Readable.from(Array.from(event).flatMap((e) => e.serialize())));
+            })
+          );
+        } catch (e) {
+          log.debug(`[setup] error ingesting ${key} synthtrace data`, e);
         }
+
+        log.debug(`[setup] ${key} synthtrace data ingested successfully`);
+      } else {
+        log.debug(`[setup] no synthtrace data to ingest for ${key}`);
       }
     }
   });
