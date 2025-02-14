@@ -22,18 +22,18 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { Content } from './content';
 import { TutorialsCategory } from '../../../../common/constants';
 
-interface IntroductionUiProps {
+export interface IntroductionProps {
   description: string;
   title: string;
+  intl: InjectedIntl;
+  basePath: IBasePath;
   previewUrl?: string;
   exportedFieldUrl?: string;
   iconType?: string;
   isBeta?: boolean;
   notices?: Array<React.ReactElement<any, string>> | null;
   exportedFieldsUrl?: string;
-  intl: InjectedIntl;
-  basePath: IBasePath;
-  category?: unknown;
+  category?: TutorialsCategory;
 }
 
 function IntroductionUI({
@@ -47,7 +47,7 @@ function IntroductionUI({
   notices,
   basePath,
   category,
-}: IntroductionUiProps) {
+}: IntroductionProps) {
   let rightSideItems;
   if (previewUrl) {
     rightSideItems = [

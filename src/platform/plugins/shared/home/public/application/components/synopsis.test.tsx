@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { Synopsis, SynopsisProps } from './synopsis';
 
 const defaultProps: SynopsisProps = {
@@ -19,35 +19,30 @@ const defaultProps: SynopsisProps = {
 };
 describe('Synopsis component', () => {
   test('renders with default props', () => {
-    render(<Synopsis {...defaultProps} />);
+    const { getByText, getByTestId } = render(<Synopsis {...defaultProps} />);
 
-    // Check if the title is rendered
-    expect(screen.getByText('Great tutorial')).toBeInTheDocument();
-
-    // Check if the description is rendered
-    expect(screen.getByText('this is a great tutorial about...')).toBeInTheDocument();
-
-    // Check if the card element is rendered
-    expect(screen.getByTestId('homeSynopsisLinktutorial')).toBeInTheDocument();
+    expect(getByText('Great tutorial')).toBeInTheDocument();
+    expect(getByText('this is a great tutorial about...')).toBeInTheDocument();
+    expect(getByTestId('homeSynopsisLinktutorial')).toBeInTheDocument();
   });
-  test('renders with iconType', () => {
-    render(<Synopsis {...defaultProps} iconType="logoApache" />);
 
-    // Check if the icon is rendered
-    expect(screen.getByTitle('')).toBeInTheDocument();
+  test('renders with iconType', () => {
+    const { container } = render(<Synopsis {...defaultProps} iconType="logoApache" />);
+
+    const icon = container.querySelector('[data-euiicon-type="logoApache"]');
+    expect(icon).toBeInTheDocument();
   });
 
   test('renders with iconUrl', () => {
-    render(<Synopsis {...defaultProps} iconUrl="icon_url" />);
+    const { container } = render(<Synopsis {...defaultProps} iconUrl="icon_url" />);
 
-    // Check if the image is rendered
-    expect(screen.getByAltText('')).toBeInTheDocument();
+    const imgElement = container.querySelector('.synopsisIcon');
+    expect(imgElement).toHaveAttribute('src', 'icon_url');
   });
 
   test('renders with isBeta', () => {
-    render(<Synopsis {...defaultProps} isBeta={true} />);
+    const { getByText } = render(<Synopsis {...defaultProps} isBeta={true} />);
 
-    // Check if the beta badge is rendered
-    expect(screen.getByText('Beta')).toBeInTheDocument();
+    expect(getByText('Beta')).toBeInTheDocument();
   });
 });

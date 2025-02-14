@@ -26,6 +26,7 @@ test('renders', () => {
     </IntlProvider>
   );
   const headingElement = getByRole('heading', { level: 2, name: 'Load Kibana objects' });
+
   expect(headingElement).toBeInTheDocument();
 });
 

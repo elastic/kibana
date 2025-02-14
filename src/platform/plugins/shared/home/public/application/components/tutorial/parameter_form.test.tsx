@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
-
+import { render, fireEvent } from '@testing-library/react';
 import { ParameterForm, ParameterFormProps } from './parameter_form';
 
 describe('ParameterForm', () => {
@@ -21,16 +20,17 @@ describe('ParameterForm', () => {
 
   test('renders and interacts with NumberParameter correctly', () => {
     const numberProps: ParameterFormProps = {
-      param: { id: 'id-1', label: 'Parameter 1', type: 'number' },
+      params: [{ id: 'id-1', label: 'Parameter 1', type: 'number' }],
       paramValues: { 'id-1': 42 },
       setParameter: mockSetParameter,
     };
 
-    render(<ParameterForm {...numberProps} />);
+    const { getByLabelText, getByDisplayValue } = render(<ParameterForm {...numberProps} />);
 
-    const numberInput = screen.getByLabelText('Parameter 1');
+    const numberInput = getByLabelText('Parameter 1');
+
     expect(numberInput).toBeInTheDocument();
-    expect(screen.getByDisplayValue('42')).toBeInTheDocument();
+    expect(getByDisplayValue('42')).toBeInTheDocument();
 
     fireEvent.change(numberInput, { target: { value: '100' } });
     expect(mockSetParameter).toHaveBeenCalledWith('id-1', 100);
@@ -38,16 +38,17 @@ describe('ParameterForm', () => {
 
   test('renders and interacts with StringParameter correctly', () => {
     const stringProps: ParameterFormProps = {
-      param: { id: 'id-2', label: 'Parameter 2', type: 'string' },
+      params: [{ id: 'id-2', label: 'Parameter 2', type: 'string' }],
       paramValues: { 'id-2': 'Initial Value' },
       setParameter: mockSetParameter,
     };
 
-    render(<ParameterForm {...stringProps} />);
+    const { getByLabelText, getByDisplayValue } = render(<ParameterForm {...stringProps} />);
 
-    const stringInput = screen.getByLabelText('Parameter 2');
+    const stringInput = getByLabelText('Parameter 2');
+
     expect(stringInput).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Initial Value')).toBeInTheDocument();
+    expect(getByDisplayValue('Initial Value')).toBeInTheDocument();
 
     fireEvent.change(stringInput, { target: { value: 'New Value' } });
     expect(mockSetParameter).toHaveBeenCalledWith('id-2', 'New Value');

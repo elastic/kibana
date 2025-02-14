@@ -8,20 +8,19 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Footer } from './footer';
 
 test('render Footer component', () => {
-  render(
+  const { getByText, getByRole } = render(
     <IntlProvider locale="en">
       <Footer url={'/app/myapp'} label={'launch myapp'} />
     </IntlProvider>
   );
 
-  // Check if the label is rendered
-  expect(screen.getByText('launch myapp')).toBeInTheDocument();
-
-  // Check if the link is rendered with the correct URL
-  expect(screen.getByText('launch myapp').closest('a')).toHaveAttribute('href', '/app/myapp');
+  expect(
+    getByText("When all steps are complete, you're ready to explore your data.")
+  ).toBeInTheDocument();
+  expect(getByRole('link')).toHaveAttribute('href', '/app/myapp');
 });

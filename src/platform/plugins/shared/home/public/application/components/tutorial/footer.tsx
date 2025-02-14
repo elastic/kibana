@@ -15,6 +15,7 @@ interface FooterProps {
   url: string;
   label: string;
 }
+
 export function Footer({ url, label }: FooterProps) {
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">

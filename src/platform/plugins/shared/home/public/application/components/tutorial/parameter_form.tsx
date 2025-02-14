@@ -12,7 +12,7 @@ import { EuiPanel } from '@elastic/eui';
 import { NumberParameter } from './number_parameter';
 import { StringParameter } from './string_parameter';
 
-export interface ParameterFormParam {
+interface ParameterFormParam {
   label: string;
   type: 'string' | 'number';
   id: string;

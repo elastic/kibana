@@ -85,89 +85,93 @@ const bulkCreateMock = jest
     savedObjects: [],
   });
 
-describe('isCloudEnabled is false', () => {
-  test('should render ON_PREM instructions with instruction toggle', async () => {
-    const { getByText } = render(
-      <IntlProvider>
-        <Tutorial
-          addBasePath={addBasePath}
-          isCloudEnabled={false}
-          getTutorial={getTutorial}
-          replaceTemplateStrings={replaceTemplateStrings}
-          tutorialId={'my_testing_tutorial'}
-          bulkCreate={bulkCreateMock}
-        />
-      </IntlProvider>
-    );
-    await loadTutorialPromise;
+describe('Tutorial component', () => {
+  describe('when isCloudEnabled is false', () => {
+    test('should render ON_PREM instructions with instruction toggle', async () => {
+      const { getByText } = render(
+        <IntlProvider>
+          <Tutorial
+            addBasePath={addBasePath}
+            isCloudEnabled={false}
+            getTutorial={getTutorial}
+            replaceTemplateStrings={replaceTemplateStrings}
+            tutorialId={'my_testing_tutorial'}
+            bulkCreate={bulkCreateMock}
+          />
+        </IntlProvider>
+      );
+      await loadTutorialPromise;
 
-    expect(getByText('onPrem instructions')).toBeInTheDocument();
-  });
-
-  test('should not render instruction toggle when ON_PREM_ELASTIC_CLOUD instructions are not provided', async () => {
-    const loadBasicTutorialPromise = Promise.resolve({
-      name: 'jest test tutorial',
-      longDescription: 'tutorial used to drive jest tests',
-      elasticCloud: buildInstructionSet('elasticCloud'),
-      onPrem: buildInstructionSet('onPrem'),
+      expect(getByText('onPrem instructions')).toBeInTheDocument();
     });
-    const getBasicTutorial = () => {
-      return loadBasicTutorialPromise as unknown as Promise<Tutorial>;
-    };
-    const { queryByTestId } = render(
-      <IntlProvider>
-        <Tutorial
-          addBasePath={addBasePath}
-          isCloudEnabled={false}
-          getTutorial={getBasicTutorial}
-          replaceTemplateStrings={replaceTemplateStrings}
-          tutorialId={'my_testing_tutorial'}
-          bulkCreate={bulkCreateMock}
-        />
-      </IntlProvider>
-    );
-    await loadBasicTutorialPromise;
 
-    expect(queryByTestId('selfManagedTutorial')).not.toBeInTheDocument();
-    expect(queryByTestId('onCloudTutorial')).not.toBeInTheDocument();
-  });
+    test('should not render instruction toggle when ON_PREM_ELASTIC_CLOUD instructions are not provided', async () => {
+      const loadBasicTutorialPromise = Promise.resolve({
+        name: 'jest test tutorial',
+        longDescription: 'tutorial used to drive jest tests',
+        elasticCloud: buildInstructionSet('elasticCloud'),
+        onPrem: buildInstructionSet('onPrem'),
+      });
+      const getBasicTutorial = () => {
+        return loadBasicTutorialPromise as unknown as Promise<Tutorial>;
+      };
+      const { queryByTestId } = render(
+        <IntlProvider>
+          <Tutorial
+            addBasePath={addBasePath}
+            isCloudEnabled={false}
+            getTutorial={getBasicTutorial}
+            replaceTemplateStrings={replaceTemplateStrings}
+            tutorialId={'my_testing_tutorial'}
+            bulkCreate={bulkCreateMock}
+          />
+        </IntlProvider>
+      );
+      await loadBasicTutorialPromise;
 
-  test('should display ON_PREM_ELASTIC_CLOUD instructions when toggle is clicked', async () => {
-    const { getByTestId, getByText } = render(
-      <IntlProvider>
-        <Tutorial
-          addBasePath={addBasePath}
-          isCloudEnabled={false}
-          getTutorial={getTutorial}
-          replaceTemplateStrings={replaceTemplateStrings}
-          tutorialId={'my_testing_tutorial'}
-          bulkCreate={bulkCreateMock}
-        />
-      </IntlProvider>
-    );
-    await loadTutorialPromise;
-    fireEvent.click(getByTestId('onCloudTutorial'));
+      expect(queryByTestId('selfManagedTutorial')).not.toBeInTheDocument();
+      expect(queryByTestId('onCloudTutorial')).not.toBeInTheDocument();
+    });
 
-    await waitFor(() => {
-      expect(getByText('onPremElasticCloud instructions')).toBeInTheDocument();
+    test('should display ON_PREM_ELASTIC_CLOUD instructions when toggle is clicked', async () => {
+      const { getByTestId, getByText } = render(
+        <IntlProvider>
+          <Tutorial
+            addBasePath={addBasePath}
+            isCloudEnabled={false}
+            getTutorial={getTutorial}
+            replaceTemplateStrings={replaceTemplateStrings}
+            tutorialId={'my_testing_tutorial'}
+            bulkCreate={bulkCreateMock}
+          />
+        </IntlProvider>
+      );
+      await loadTutorialPromise;
+      fireEvent.click(getByTestId('onCloudTutorial'));
+
+      await waitFor(() => {
+        expect(getByText('onPremElasticCloud instructions')).toBeInTheDocument();
+      });
     });
   });
-});
 
-test('should render ELASTIC_CLOUD instructions when isCloudEnabled is true', async () => {
-  const { getByText } = render(
-    <IntlProvider>
-      <Tutorial
-        addBasePath={addBasePath}
-        isCloudEnabled={true}
-        getTutorial={getTutorial}
-        replaceTemplateStrings={replaceTemplateStrings}
-        tutorialId={'my_testing_tutorial'}
-        bulkCreate={bulkCreateMock}
-      />
-    </IntlProvider>
-  );
-  await loadTutorialPromise;
+  describe('when isCloudEnabled is true', () => {
+    test('should render ELASTIC_CLOUD instructions', async () => {
+      const { getByText } = render(
+        <IntlProvider>
+          <Tutorial
+            addBasePath={addBasePath}
+            isCloudEnabled={true}
+            getTutorial={getTutorial}
+            replaceTemplateStrings={replaceTemplateStrings}
+            tutorialId={'my_testing_tutorial'}
+            bulkCreate={bulkCreateMock}
+          />
+        </IntlProvider>
+      );
+      await loadTutorialPromise;
 
-  expect(getByText('elasticCloud instructions')).toBeInTheDocument();
+      expect(getByText('elasticCloud instructions')).toBeInTheDocument();
+    });
+  });
 });

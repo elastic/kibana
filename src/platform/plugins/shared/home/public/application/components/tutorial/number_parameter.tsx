@@ -10,12 +10,13 @@
 import React from 'react';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 
-interface NumberParameterProps {
+export interface NumberParameterProps {
   id: string;
   label: string;
   value: number;
   setParameter: (id: string, float: number) => void;
 }
+
 export function NumberParameter({ id, label, value, setParameter }: NumberParameterProps) {
   const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     setParameter(id, parseFloat(evt.target.value));
