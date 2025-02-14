@@ -29,10 +29,10 @@ export const getDocViewer =
     const parentId = params.record.flattened['parent.id'];
 
     const documentType = parentId
-      ? i18n.translate('unifiedDocViewer.docViewerTracesOverview.spanTitle', {
+      ? i18n.translate('discover.docViews.tracesOverview.spanTitle', {
           defaultMessage: 'Span',
         })
-      : i18n.translate('unifiedDocViewer.docViewerTracesOverview.transactionTitle', {
+      : i18n.translate('discover.docViews.tracesOverview.transactionTitle', {
           defaultMessage: 'Transaction',
         });
 
