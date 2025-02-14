@@ -44,7 +44,7 @@ export const getDocViewer =
       title: `Record #${recordId}`,
       docViewsRegistry: (registry: DocViewsRegistry) => {
         registry.add({
-          id: 'doc_view_overview',
+          id: 'doc_view_traces_overview',
           title: i18n.translate('discover.docViews.tracesOverview.title', {
             defaultMessage: '{documentType} overview',
             values: { documentType },
