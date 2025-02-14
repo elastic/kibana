@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import type { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
@@ -13,10 +13,11 @@ import { Redirect } from 'react-router-dom';
 import { ONBOARDING_PATH } from '../../../common/constants';
 import type { OnboardingRouteParams } from '../types';
 import { OnboardingTopicId } from '../constants';
-import { getCardIdFromHash, useUrlDetail } from './hooks/use_url_detail';
+import { getCardIdFromHash, useSyncUrlDetails } from './hooks/use_url_detail';
 import { useOnboardingContext } from './onboarding_context';
 import { OnboardingHeader } from './onboarding_header';
 import { OnboardingBody } from './onboarding_body';
+import { CenteredLoadingSpinner } from '../../common/components/centered_loading_spinner';
 
 export const OnboardingRouter = React.memo(() => {
   const { config } = useOnboardingContext();
@@ -24,7 +25,7 @@ export const OnboardingRouter = React.memo(() => {
   const topicPathParam = useMemo(() => {
     const availableTopics = [...config.values()]
       .map(({ id }) => id) // available topic ids
-      .filter((val) => val !== OnboardingTopicId.default) // except "default"
+      .filter((id) => id !== OnboardingTopicId.default) // except "default"
       .join('|');
     if (availableTopics) {
       return `/:topicId(${availableTopics})?`; // optional parameter}
@@ -43,18 +44,15 @@ OnboardingRouter.displayName = 'OnboardingRouter';
 
 type OnboardingRouteProps = RouteComponentProps<OnboardingRouteParams>;
 
-const OnboardingRoute = React.memo<OnboardingRouteProps>(({ match, location }) => {
-  const { syncUrlDetails } = useUrlDetail();
+const OnboardingRoute = React.memo<OnboardingRouteProps>(({ match: { params }, location }) => {
+  const { isLoading } = useSyncUrlDetails({
+    pathTopicId: params.topicId || null,
+    hashCardId: getCardIdFromHash(location.hash),
+  });
 
-  /**
-   * This effect syncs the URL details with the stored state, it only needs to be executed once per page load.
-   */
-  useEffect(() => {
-    const pathTopicId = match.params.topicId || null;
-    const hashCardId = getCardIdFromHash(location.hash);
-    syncUrlDetails(pathTopicId, hashCardId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  if (isLoading) {
+    return <CenteredLoadingSpinner />;
+  }
 
   return (
     <>
