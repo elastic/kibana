@@ -7,13 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-import { dynamic } from '@kbn/shared-ux-utility';
 import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { FieldHoverActionPopover } from './field_hover_popover_action';
 
-const FieldDescription = dynamic(() => import('./field_description'));
 
 export interface FieldWithActionsProps {
   field: string;
@@ -51,7 +49,7 @@ export function FieldWithActions({
             </EuiFlexItem>
             {hasFieldDescription && (
               <EuiFlexItem grow={false}>
-                <FieldDescription fieldMetadata={fieldMetadata} />
+                <EuiIconTip content={fieldMetadata.flat_name} color="subdued" />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
