@@ -69,7 +69,7 @@ export const SOLVABLE_CONFLICT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.solvableConflictDescription',
   {
     defaultMessage:
-      "We combined your changes with changes from the Elastic update. Review the suggested change to ensure it's correct.",
+      "We combined your changes with changes from the Elastic update. Review the suggested changes to ensure they're correct.",
   }
 );
 

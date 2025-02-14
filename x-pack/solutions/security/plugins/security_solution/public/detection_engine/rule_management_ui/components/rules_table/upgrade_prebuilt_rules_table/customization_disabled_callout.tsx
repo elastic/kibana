@@ -8,6 +8,7 @@
 import React from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import { usePrebuiltRuleCustomizationUpsellingMessage } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rule_customization_upselling_message';
+import * as i18n from './translations';
 
 export function CustomizationDisabledCallout() {
   const title = usePrebuiltRuleCustomizationUpsellingMessage('prebuilt_rule_customization');
@@ -22,6 +23,7 @@ export function CustomizationDisabledCallout() {
 
   return (
     <EuiCallOut title={title} size="s" color="primary">
+      <p>{i18n.MODIFIED_RULE_UPGRADE_LICENSE_INSUFFICIENT_CALLOUT_DESCRIPTION}</p>
       <p>{description}</p>
     </EuiCallOut>
   );

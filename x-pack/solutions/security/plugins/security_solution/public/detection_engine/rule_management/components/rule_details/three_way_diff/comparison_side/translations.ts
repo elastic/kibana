@@ -44,7 +44,7 @@ export const MY_CHANGES_AND_FINAL_UPDATES_TITLE = i18n.translate(
   }
 );
 
-export const MY_CHANGES_AND_FINAL_UPDATES_TITLE_EXPLANATION = i18n.translate(
+export const MY_CHANGES_AND_FINAL_UPDATES_EXPLANATION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.myChangesAndFinalUpdatesExplanation',
   {
     defaultMessage:
@@ -58,7 +58,7 @@ export const MY_CHANGES_AND_FINAL_UPDATES_TITLE_EXPLANATION = i18n.translate(
 export const MY_CHANGES_IN_RULE_UPGRADE_WORKFLOW_EXPLANATION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.versions.myChangesInRuleUpdateWorkflowOnlyExplanation',
   {
-    defaultMessage: 'View the changes you made in the {finalUpdateSectionLabel} section',
+    defaultMessage: 'View the changes you made in the {finalUpdateSectionLabel} section.',
     values: {
       finalUpdateSectionLabel: FINAL_UPDATE,
     },

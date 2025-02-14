@@ -86,7 +86,14 @@ export const RULE_TYPE_CHANGE_CALLOUT_TITLE = i18n.translate(
 export const RULE_TYPE_CHANGE_CALLOUT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeRules.ruleTypeChangeCalloutDescription',
   {
-    defaultMessage: "The rule's type will change after you update this rule.",
+    defaultMessage: 'The rule type will change if you update this rule.',
+  }
+);
+
+export const MODIFIED_RULE_UPGRADE_LICENSE_INSUFFICIENT_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.ruleUpgradeLicenseInsufficientCalloutDescription',
+  {
+    defaultMessage: 'Updating the rule will erase your changes.',
   }
 );
 

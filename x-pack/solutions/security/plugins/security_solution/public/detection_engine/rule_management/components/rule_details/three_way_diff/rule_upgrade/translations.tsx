@@ -97,7 +97,7 @@ export const RULE_HAS_SOFT_CONFLICTS_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.fieldUpgradeState.ruleHasSoftConflictsDescription',
   {
     defaultMessage:
-      'We auto-resolved the conflicts between your changes and the Elastic update. Review the resolved conflicts and do one of the following:',
+      'We auto-resolved the conflicts between your changes and the Elastic update. Review them and do one of the following:',
   }
 );
 
