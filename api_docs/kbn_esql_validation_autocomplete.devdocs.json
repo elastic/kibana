@@ -4403,6 +4403,28 @@
     "misc": [
       {
         "parentPluginId": "@kbn/esql-validation-autocomplete",
+        "id": "def-common.aggregationFunctionDefinitions",
+        "type": "Array",
+        "tags": [],
+        "label": "aggregationFunctionDefinitions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-validation-autocomplete",
+            "scope": "common",
+            "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+            "section": "def-common.FunctionDefinition",
+            "text": "FunctionDefinition"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/generated/aggregation_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-validation-autocomplete",
         "id": "def-common.ErrorTypes",
         "type": "Type",
         "tags": [],
