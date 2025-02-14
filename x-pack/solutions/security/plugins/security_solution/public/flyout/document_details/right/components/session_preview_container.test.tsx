@@ -248,7 +248,6 @@ describe('SessionPreviewContainer', () => {
     });
   });
 
-
   describe('when newExpandableFlyoutNavigationDisabled is false', () => {
     describe('when visualization in flyout flag is enabled', () => {
       beforeEach(() => {
