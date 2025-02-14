@@ -233,7 +233,6 @@ export class Plugin
     const kibanaVersion = this.initContext.env.packageInfo.version;
 
     const isLegacyUptimeEnabled = coreSetup.uiSettings.get('observability:enableLegacyUptimeApp');
-    console.log('enabled before register', isLegacyUptimeEnabled);
 
     this.observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistry(
       pluginsSetup.triggersActionsUi.ruleTypeRegistry,
