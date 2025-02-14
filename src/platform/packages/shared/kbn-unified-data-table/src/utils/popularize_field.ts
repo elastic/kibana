@@ -23,12 +23,11 @@ async function popularizeField(
     return;
   }
 
-  let prevCount = field.count || 0;
+  let prevCount = field.count;
 
   if (typeof prevCount !== 'number') {
     // Because of https://github.com/elastic/kibana/issues/211109 bug, the persisted "count" might be a string.
-    const convertedToNumber = Number(prevCount);
-    prevCount = !Number.isNaN(convertedToNumber) ? convertedToNumber : 0;
+    prevCount = Number(prevCount) || 0;
   }
 
   dataView.setFieldCount(fieldName, prevCount + 1);
