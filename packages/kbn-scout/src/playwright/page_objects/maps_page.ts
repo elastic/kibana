@@ -18,7 +18,7 @@ export class MapsPage {
     return this.page.gotoApp('maps/map');
   }
 
-  async waitForMapToLoad() {
+  async waitForRenderComplete() {
     // first wait for the top level container to be present
     await this.page.locator('div#maps-plugin').waitFor({ timeout: DEFAULT_MAP_LOADING_TIMEOUT });
     // then wait for the map to be fully rendered
