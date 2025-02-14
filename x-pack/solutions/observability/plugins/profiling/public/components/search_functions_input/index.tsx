@@ -15,7 +15,7 @@ interface Props {
 
 export function SearchFunctionsInput({ value, onChange }: Props) {
   const [searchQuery, setSearchQuery] = useState(value);
-  const debouncedOnChange = useMemo(() => debounce(onChange, 500), [onChange]);
+  const debouncedOnChange = useMemo(() => debounce(onChange, 300), [onChange]);
   const handleSearchChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setSearchQuery(e.target.value);
@@ -23,7 +23,6 @@ export function SearchFunctionsInput({ value, onChange }: Props) {
     },
     [debouncedOnChange]
   );
-
   return (
     <EuiFieldSearch
       data-test-subj="tableSearchInput"

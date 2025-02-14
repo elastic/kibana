@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import type { TopNFunctions } from '@kbn/profiling-utils';
@@ -27,6 +28,7 @@ import React, { useMemo, useState } from 'react';
 import type { GridOnScrollProps } from 'react-window';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
+import { EmptyFunctionsMessage } from '../empty_functions_message';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { LabelWithHint } from '../label_with_hint';
 import { SearchFunctionsInput } from '../search_functions_input';
@@ -301,6 +303,7 @@ export const TopNFunctionsGrid = ({
         />
       );
     }
+
     return null;
   }
 
@@ -309,7 +312,11 @@ export const TopNFunctionsGrid = ({
       <EuiFlexItem grow={false}>
         <SearchFunctionsInput onChange={onSearchFunctionNameChange} value={searchFunctionName} />
       </EuiFlexItem>
-      <EuiFlexItem>
+      <EuiFlexItem
+        css={css`
+          position: relative;
+        `}
+      >
         <EuiDataGrid
           data-test-subj={dataTestSubj}
           aria-label={i18n.translate(
@@ -338,9 +345,7 @@ export const TopNFunctionsGrid = ({
             showFullScreenSelector: showFullScreenSelector && !isDifferentialView,
             showSortSelector: false,
           }}
-          virtualizationOptions={{
-            onScroll,
-          }}
+          virtualizationOptions={{ onScroll }}
         />
         {selectedRow && (
           <FrameInformationTooltip
@@ -354,6 +359,7 @@ export const TopNFunctionsGrid = ({
             showSymbolsStatus={!isEmbedded}
           />
         )}
+        {sortedRows.length ? null : <EmptyFunctionsMessage isEmbedded={isEmbedded} />}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
