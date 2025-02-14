@@ -27,15 +27,15 @@ export const getProcessedHistory = ({
   // Step 2: remove duplicates
   // Because the lastOpen value will always be different, we're manually removing duplicates
   // by looking at the panel's information only.
-  const uniqueHistory: FlyoutPanelHistory[] = [];
-  reversedHistory.forEach((hist) => {
-    const entryDoesNotExists =
-      uniqueHistory
-        .map((h: FlyoutPanelHistory) => JSON.stringify(h.panel))
-        .indexOf(JSON.stringify(hist.panel)) === -1;
+  const uniquePanels = new Set<string>();
+  const uniqueHistory = reversedHistory.filter((hist) => {
+    const panelString = JSON.stringify(hist.panel);
+    const entryDoesNotExists = !uniquePanels.has(panelString);
     if (entryDoesNotExists) {
-      uniqueHistory.push(hist);
+      uniquePanels.add(panelString);
+      return true;
     }
+    return false;
   });
 
   // Omit the first (current opened) entry and return array of maxCount length

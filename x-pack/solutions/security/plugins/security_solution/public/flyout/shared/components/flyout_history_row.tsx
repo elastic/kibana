@@ -127,6 +127,45 @@ export const DocumentDetailsHistoryRow: FC<FlyoutHistoryRowProps> = memo(({ item
   );
 });
 
+interface RowTitleProps {
+  /**
+   * alert, event, host, user, network, rule...
+   */
+  type: string;
+  /**
+   * Actual value of the rule, host, user...
+   */
+  value: string;
+}
+
+/**
+ * Populates the generic row main text
+ */
+const RowTitle: FC<RowTitleProps> = memo(({ type, value }) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <>
+      <span
+        css={css`
+          font-weight: ${euiTheme.font.weight.semiBold};
+        `}
+      >{`${type}:`}</span>
+      &nbsp;
+      <span
+        css={css`
+          max-width: ${MAX_WIDTH}px;
+          text-overflow: ellipsis;
+          overflow: hidden;
+          white-space: nowrap;
+        `}
+      >
+        {value}
+      </span>
+    </>
+  );
+});
+
 /**
  * Row item for a rule details flyout
  */
@@ -197,22 +236,7 @@ export const GenericHistoryRow: FC<GenericHistoryRowProps> = memo(
               flex-direction: row;
             `}
           >
-            <span
-              css={css`
-                font-weight: ${euiTheme.font.weight.semiBold};
-              `}
-            >{`${name}:`}</span>
-            &nbsp;
-            <span
-              css={css`
-                max-width: ${MAX_WIDTH}px;
-                text-overflow: ellipsis;
-                overflow: hidden;
-                white-space: nowrap;
-              `}
-            >
-              {title}
-            </span>
+            <RowTitle type={name} value={title} />
           </EuiFlexItem>
           <EuiFlexItem
             css={css`
@@ -230,4 +254,5 @@ export const GenericHistoryRow: FC<GenericHistoryRowProps> = memo(
 FlyoutHistoryRow.displayName = 'FlyoutHistoryRow';
 DocumentDetailsHistoryRow.displayName = 'DocumentDetailsHistoryRow';
 RuleHistoryRow.displayName = 'RuleHistoryRow';
+RowTitle.displayName = 'RowTitle';
 GenericHistoryRow.displayName = 'GenericHistoryRow';
