@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { discoverStorybookConfig } from './discover.webpack';
-
-module.exports = discoverStorybookConfig;
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-node-libs-browser-webpack-plugin'],
+};
