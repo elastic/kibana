@@ -11,7 +11,7 @@ import { ActionsClient } from '@kbn/actions-plugin/server';
 import { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { BackfillClient } from '../../../backfill_client/backfill_client';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
-import { closeGapsPIT, findGapsSearchAfter } from '../find_gaps';
+import { findGapsSearchAfter } from '../find_gaps';
 import { Gap } from '../gap';
 import { gapStatus } from '../../../../common/constants';
 import { BackfillSchedule } from '../../../application/backfill/result/types';
