@@ -8,13 +8,8 @@
 import { AlertsClientError, ExecutorType, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { IBasePath } from '@kbn/core/server';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
-import { ALERT_ACTION } from '../../../../common/constants';
-import { SLO_ID_FIELD, SLO_REVISION_FIELD } from '../../../../common/field_names/slo';
 import { MonitorHealth } from './lib/monitor_health';
 import {
-  AlertStates,
   HealthAlertContext,
   HealthAlertData,
   HealthAlertState,
@@ -55,7 +50,7 @@ export const getExecutor = (basePath: IBasePath) =>
     );
 
     // TODO: add params for sloIds, stale and delay time
-    await monitorHealth.execute({ spaceId, basePath, startedAt });
+    await monitorHealth.execute({ spaceId, basePath, startedAt, params });
 
     const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];
     for (const recoveredAlert of recoveredAlerts) {

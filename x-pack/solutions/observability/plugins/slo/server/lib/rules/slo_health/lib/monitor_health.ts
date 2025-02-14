@@ -13,12 +13,18 @@ import {
   Logger,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
-import { TransformHealthStatus, TransformStats, TransformStatsState } from '@kbn/slo-schema';
+import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
+import {
+  Duration,
+  TransformHealthStatus,
+  TransformStats,
+  TransformStatsState,
+  toDurationUnit,
+} from '@kbn/slo-schema';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { Dictionary, find, flatMap, groupBy } from 'lodash';
 import moment from 'moment';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
-import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import {
   SLO_MODEL_VERSION,
   SUMMARY_DESTINATION_INDEX_PATTERN,
@@ -36,6 +42,7 @@ import {
   HealthAlertContext,
   HealthAlertState,
   HealthAllowedActionGroups,
+  HealthRuleParams,
   HealthRuleTypeState,
 } from '../types';
 
@@ -76,11 +83,20 @@ export class MonitorHealth {
     spaceId,
     basePath,
     startedAt,
+    params,
   }: {
     spaceId: string;
     basePath: IBasePath;
     startedAt: Date;
+    params: HealthRuleParams;
   }): Promise<void> {
+    const { sloIds, delay: maxDelay, staleTime: maxStaleTime } = params;
+    const maxStaleTimeDuration = new Duration(
+      maxStaleTime.value,
+      toDurationUnit(maxStaleTime.unit)
+    );
+    const maxDelayDuration = new Duration(maxDelay.value, toDurationUnit(maxDelay.unit));
+
     const alertLimit = this.alertsClient.getAlertLimitValue();
     let hasReachedLimit = false;
     let scheduledActionsCount = 0;
@@ -88,6 +104,7 @@ export class MonitorHealth {
     const finder = await this.soClient.createPointInTimeFinder<StoredSLODefinition>({
       type: SO_SLO_TYPE,
       perPage: BATCH_SIZE,
+      ...(!!sloIds?.length && { filter: `slo.attributes.id:(${sloIds.join(' or ')})` }),
       namespaces: [spaceId],
     });
 
@@ -133,7 +150,9 @@ export class MonitorHealth {
           rollupTransform,
           summaryTransform,
           delay,
+          maxDelayDuration,
           staleTime,
+          maxStaleTimeDuration,
           isOutdatedVersion,
           sloDefinition
         );
@@ -167,16 +186,17 @@ export class MonitorHealth {
             `/app/observability/slos/${sloDefinition.id}`
           );
 
-          const context = {
-            alertDetailsUrl,
-            reason,
-            timestamp: startedAt.toISOString(),
-            viewInAppUrl,
-            sloId: sloDefinition.id,
-            sloName: sloDefinition.name,
-          };
-
-          this.alertsClient.setAlertData({ id: alertId, context });
+          this.alertsClient.setAlertData({
+            id: alertId,
+            context: {
+              alertDetailsUrl,
+              reason,
+              timestamp: startedAt.toISOString(),
+              viewInAppUrl,
+              sloId: sloDefinition.id,
+              sloName: sloDefinition.name,
+            },
+          });
           scheduledActionsCount++;
         }
       }
@@ -238,7 +258,9 @@ export class MonitorHealth {
     rollupTransform: TransformStats,
     summaryTransform: TransformStats,
     delay: number,
+    maxDelay: Duration,
     staleTime: number,
+    maxStaleTime: Duration,
     isOutdatedVersion: boolean,
     sloDefinition: SLODefinition
   ) {
@@ -250,11 +272,11 @@ export class MonitorHealth {
       return 'failed';
     }
 
-    if (this.isDelayDegraded(delay, sloDefinition)) {
+    if (this.isDelayDegraded(delay, sloDefinition, maxDelay)) {
       return 'degraded';
     }
 
-    if (this.isStaleTimeDegraded(staleTime)) {
+    if (this.isStaleTimeDegraded(staleTime, maxStaleTime)) {
       return 'degraded';
     }
 
@@ -265,15 +287,12 @@ export class MonitorHealth {
     return 'healthy';
   }
 
-  private isStaleTimeDegraded(staleTime: number) {
-    const STALE_TIME_DEGRADED = 24 * 60 * 60 * 1000;
-    return staleTime > STALE_TIME_DEGRADED;
+  private isStaleTimeDegraded(staleTime: number, maxStaleTime: Duration) {
+    return staleTime > maxStaleTime.asSeconds();
   }
 
-  private isDelayDegraded(delay: number, sloDefinition: SLODefinition) {
-    const sloDelay = getDelayInSecondsFromSLO(sloDefinition) * 1000;
-    const DELAY_BUFFER = 5 * 60 * 1000;
-    return delay > sloDelay + 2 * DELAY_BUFFER;
+  private isDelayDegraded(delay: number, sloDefinition: SLODefinition, maxDelay: Duration) {
+    return delay > getDelayInSecondsFromSLO(sloDefinition) + maxDelay.asSeconds();
   }
 
   private isTransformHealthyRunning(transform: TransformStats) {
