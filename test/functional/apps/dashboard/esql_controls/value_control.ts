@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const comboBox = getService('comboBox');
 
-  describe('dashboard - add an value type ES|QL control', function () {
+  describe('dashboard - add a value type ES|QL control', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -86,19 +86,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // Check Lens editor has been updated accordingly
       const editorValue = await esql.getEsqlEditorQuery();
       expect(editorValue).to.contain('FROM logstash-* | WHERE geo.dest == ?geo_dest');
+    });
 
+    it('should update the Lens chart accordingly', async () => {
       // change the table to keep only the column with the control
       await esql.setEsqlEditorQuery(
         'FROM logstash-* | WHERE geo.dest == ?geo_dest | KEEP geo.dest'
       );
       // run the query
       await testSubjects.click('ESQLEditor-run-query-button');
+      await dashboard.waitForRenderComplete();
 
       // save the changes
       await testSubjects.click('applyFlyoutButton');
-    });
-
-    it('should update the Lens chart accordingly', async () => {
+      await dashboard.waitForRenderComplete();
       // change the control value
       await comboBox.set('esqlControlValuesDropdown', 'AO');
       await dashboard.waitForRenderComplete();
@@ -107,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(tableContent).to.contain('AO');
     });
 
-    it('should handle properly a query to retrieve the values that returns more than one column', async () => {
+    it('should handle properly a query to retrieve the values that return more than one column', async () => {
       const firstId = (await dashboardControls.getAllControlIds())[0];
       await dashboardControls.editExistingControl(firstId);
 

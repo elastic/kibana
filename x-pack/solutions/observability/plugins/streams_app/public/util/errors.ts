@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const getFormattedError = (error?: Error) => {
+export const getFormattedError = (error: Error) => {
   if (
     error &&
     'body' in error &&
@@ -16,4 +16,5 @@ export const getFormattedError = (error?: Error) => {
   ) {
     return new Error(error.body.message);
   }
+  return error;
 };

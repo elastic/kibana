@@ -9,7 +9,7 @@
 
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DataSourceCategory, DataSourceProfileProviderParams } from '../../../profiles';
-import { DataSourceType } from '../../../../../common/data_sources';
+import { DataSourceType, createDataViewDataSource } from '../../../../../common/data_sources';
 import { createTracesDataSourceProfileProvider } from './profile';
 
 describe('tracesDataSourceProfileProvider', () => {
@@ -27,10 +27,16 @@ describe('tracesDataSourceProfileProvider', () => {
   it('should match when the data source type is a data view for APM', () => {
     expect(
       tracesDataSourceProfileProvider.resolve({
-        dataSource: {
-          type: DataSourceType.DataView,
-          dataViewId: 'apm_static_data_view_id_default',
-        },
+        dataSource: createDataViewDataSource({ dataViewId: 'apm_static_data_view_id_default' }),
+        dataView: {
+          getIndexPattern: () => 'traces-*',
+        } as unknown as DataView,
+      } as DataSourceProfileProviderParams)
+    ).toEqual(RESOLUTION_MATCH);
+
+    expect(
+      tracesDataSourceProfileProvider.resolve({
+        dataSource: createDataViewDataSource({ dataViewId: 'apm_static_data_view_id_custom_view' }),
         dataView: {
           getIndexPattern: () => 'traces-*',
         } as unknown as DataView,
@@ -55,10 +61,7 @@ describe('tracesDataSourceProfileProvider', () => {
 
     expect(
       tracesDataSourceProfileProvider.resolve({
-        dataSource: {
-          type: DataSourceType.DataView,
-          dataViewId: 'other_view_id',
-        },
+        dataSource: createDataViewDataSource({ dataViewId: 'other_view_id' }),
         dataView: { getIndexPattern: () => 'logs-*' } as unknown as DataView,
       } as DataSourceProfileProviderParams)
     ).toEqual(RESOLUTION_MISMATCH);

@@ -347,6 +347,7 @@ describe('Fleet - validatePackagePolicy()', () => {
 
     const noErrorsValidationResults = {
       name: null,
+      additional_datastreams_permissions: null,
       description: null,
       namespace: null,
       inputs: {
@@ -395,6 +396,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: ['Name is required'],
         description: null,
         namespace: null,
+        additional_datastreams_permissions: null,
         inputs: {
           foo: {
             vars: {
@@ -461,6 +463,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: ['Name is required'],
         description: null,
         namespace: null,
+        additional_datastreams_permissions: null,
         inputs: {
           foo: {
             vars: {
@@ -514,6 +517,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
+        additional_datastreams_permissions: null,
         inputs: {},
         vars: {},
       });
@@ -530,6 +534,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
+        additional_datastreams_permissions: null,
         inputs: {},
         vars: {},
       });
@@ -549,6 +554,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
+        additional_datastreams_permissions: null,
         inputs: {},
         vars: {},
       });
@@ -564,6 +570,7 @@ describe('Fleet - validatePackagePolicy()', () => {
       ).toEqual({
         name: null,
         description: null,
+        additional_datastreams_permissions: null,
         namespace: null,
         inputs: {},
         vars: {},
@@ -602,6 +609,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         name: null,
         description: null,
         namespace: null,
+        additional_datastreams_permissions: null,
         inputs: {
           foo: {
             streams: {
@@ -730,6 +738,7 @@ describe('Fleet - validatePackagePolicy()', () => {
         )
       ).toEqual({
         description: null,
+        additional_datastreams_permissions: null,
         inputs: {
           'linux/metrics': {
             streams: {
@@ -1150,6 +1159,7 @@ describe('Fleet - validationHasErrors()', () => {
       validationHasErrors({
         name: ['name error'],
         description: null,
+        additional_datastreams_permissions: null,
         namespace: null,
         inputs: {
           input1: {
@@ -1159,10 +1169,12 @@ describe('Fleet - validationHasErrors()', () => {
         },
       })
     ).toBe(true);
+
     expect(
       validationHasErrors({
         name: null,
         description: null,
+        additional_datastreams_permissions: null,
         namespace: null,
         inputs: {
           input1: {
@@ -1176,6 +1188,7 @@ describe('Fleet - validationHasErrors()', () => {
       validationHasErrors({
         name: null,
         description: null,
+        additional_datastreams_permissions: null,
         namespace: null,
         inputs: {
           input1: {
@@ -1193,6 +1206,7 @@ describe('Fleet - validationHasErrors()', () => {
         name: null,
         description: null,
         namespace: null,
+        additional_datastreams_permissions: null,
         inputs: {
           input1: {
             vars: { foo: null, bar: null },

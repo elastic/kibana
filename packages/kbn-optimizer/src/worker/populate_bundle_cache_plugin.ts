@@ -37,6 +37,7 @@ interface InputFileSystem {
     encoding: null | undefined,
     callback: (err: Error | null, stats: Buffer) => void
   ) => void;
+  statSync: (path: string) => any;
 }
 
 /**
@@ -47,6 +48,22 @@ interface InputFileSystem {
  * across mulitple workers on machines with lots of cores.
  */
 const EXTRA_SCSS_WORK_UNITS = 100;
+
+const fileCheckCache = new Map();
+function isFile(inputFileSystem: InputFileSystem, path: string) {
+  if (fileCheckCache.has(path)) {
+    return fileCheckCache.get(path);
+  }
+
+  try {
+    const result = inputFileSystem.statSync(path).isFile();
+    fileCheckCache.set(path, result);
+    return result;
+  } catch (err) {
+    fileCheckCache.set(path, false);
+    return false; // Path does not exist or is not a file
+  }
+}
 
 export class PopulateBundleCachePlugin {
   constructor(
@@ -78,7 +95,7 @@ export class PopulateBundleCachePlugin {
             // in webpack v5 there a lot of paths collected that are not real files
             // but instead folders or partial paths.
             // Here we're verifying if what we have as indeed a filepath
-            if (Path.extname(path).length > 0) {
+            if (isFile(inputFs, path)) {
               realFileDeps.push(path);
               allFileDepsPathSet.add(path);
             }
@@ -127,7 +144,7 @@ export class PopulateBundleCachePlugin {
           for (const module of compilation.modules) {
             if (isNormalModule(module)) {
               const path = getModulePath(module);
-              if (Path.extname(path).length === 0) {
+              if (!isFile(inputFs, path)) {
                 continue;
               }
 

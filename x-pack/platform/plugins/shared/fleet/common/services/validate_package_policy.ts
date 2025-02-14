@@ -54,6 +54,7 @@ export type PackagePolicyValidationResults = {
   name: Errors;
   description: Errors;
   namespace: Errors;
+  additional_datastreams_permissions: Errors;
   inputs: Record<PackagePolicyInput['type'], PackagePolicyInputValidationResults> | null;
 } & PackagePolicyConfigValidationResults;
 
@@ -109,6 +110,9 @@ const validatePackageRequiredVars = (
   return hasMetRequiredCriteria ? null : evaluatedRequiredVars;
 };
 
+const VALIDATE_DATASTREAMS_PERMISSION_REGEX =
+  /^(logs)|(metrics)|(traces)|(synthetics)|(profiling)-(.*)$/;
+
 /*
  * Returns validation information for a given package policy and package info
  * Note: this method assumes that `packagePolicy` is correctly structured for the given package
@@ -124,6 +128,7 @@ export const validatePackagePolicy = (
     name: null,
     description: null,
     namespace: null,
+    additional_datastreams_permissions: null,
     inputs: {},
     vars: {},
   };
@@ -144,6 +149,24 @@ export const validatePackagePolicy = (
     if (!namespaceValidation.valid && namespaceValidation.error) {
       validationResults.namespace = [namespaceValidation.error];
     }
+  }
+
+  if (packagePolicy?.additional_datastreams_permissions) {
+    validationResults.additional_datastreams_permissions =
+      packagePolicy?.additional_datastreams_permissions.reduce<null | string[]>(
+        (acc, additionalDatastreamsPermission) => {
+          if (!additionalDatastreamsPermission.match(VALIDATE_DATASTREAMS_PERMISSION_REGEX)) {
+            if (!acc) {
+              acc = [];
+            }
+            acc.push(
+              `${additionalDatastreamsPermission} is not valid, should match ${VALIDATE_DATASTREAMS_PERMISSION_REGEX.toString()}`
+            );
+          }
+          return acc;
+        },
+        null
+      );
   }
 
   // Validate package-level vars

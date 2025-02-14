@@ -1,19 +1,25 @@
-# Diff Algorithms for `upgrade/_review` Endpoint
+# Test plan: diff algorithms for upgrading prebuilt rules <!-- omit from toc -->
 
-This is a test plan for the `upgrade/_review` endpoint diff algorithms that are a part of the larger prebuilt rules customization feature. These algorithms determine what fields get returned when a user makes an API request to review changes as a part of the rule update process and determine what version of those fields should be displayed by the UI.
+**Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
-Status: `in progress`.
+## Summary <!-- omit from toc -->
 
-## Table of Contents
+This is a test plan for the diff algorithms used in the workflows of upgrading prebuilt rules and specifically in the `upgrade/_review` endpoint.
+
+These algorithms determine what fields get returned when a user makes an API request to review changes as a part of the rule upgrade process and determine what version of those fields should be displayed by the UI.
+
+## Table of contents <!-- omit from toc -->
+
+<!--
+Please use the "Markdown All in One" VS Code extension to keep the TOC in sync with the text:
+https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
+-->
 
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
   - [Terminology](#terminology)
   - [Assumptions](#assumptions)
-  - [Non-functional requirements](#non-functional-requirements)
-  - [Functional requirements](#functional-requirements)
 - [Scenarios](#scenarios)
-
   - [Rule field doesn't have an update and has no custom value - `AAA`](#rule-field-doesnt-have-an-update-and-has-no-custom-value---aaa)
     - [**Scenario: `AAA` - Rule field is any type**](#scenario-aaa---rule-field-is-any-type)
   - [Rule field doesn't have an update but has a custom value - `ABA`](#rule-field-doesnt-have-an-update-but-has-a-custom-value---aba)

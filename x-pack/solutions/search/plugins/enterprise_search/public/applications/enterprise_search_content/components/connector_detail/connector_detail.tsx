@@ -97,7 +97,7 @@ export const ConnectorDetail: React.FC = () => {
     },
     {
       content: <SearchIndexDocuments />,
-      disabled: !index,
+      disabled: !index || connector?.is_native,
       id: ConnectorDetailTabId.DOCUMENTS,
       isSelected: tabId === ConnectorDetailTabId.DOCUMENTS,
       label: i18n.translate(
@@ -116,7 +116,7 @@ export const ConnectorDetail: React.FC = () => {
     },
     {
       content: <SearchIndexIndexMappings />,
-      disabled: !index,
+      disabled: !index || connector?.is_native,
       id: ConnectorDetailTabId.INDEX_MAPPINGS,
       isSelected: tabId === ConnectorDetailTabId.INDEX_MAPPINGS,
       label: i18n.translate(
@@ -140,7 +140,7 @@ export const ConnectorDetail: React.FC = () => {
       ? [
           {
             content: <ConnectorSyncRules />,
-            disabled: !index,
+            disabled: !index || connector?.is_native,
             id: ConnectorDetailTabId.SYNC_RULES,
             isSelected: tabId === ConnectorDetailTabId.SYNC_RULES,
             label: i18n.translate(
@@ -161,7 +161,7 @@ export const ConnectorDetail: React.FC = () => {
       : []),
     {
       content: <ConnectorScheduling />,
-      disabled: !connector?.index_name,
+      disabled: !connector?.index_name || connector?.is_native,
       id: ConnectorDetailTabId.SCHEDULING,
       isSelected: tabId === ConnectorDetailTabId.SCHEDULING,
       label: i18n.translate(
@@ -183,6 +183,7 @@ export const ConnectorDetail: React.FC = () => {
   const CONFIG_TAB = [
     {
       content: <ConnectorConfiguration />,
+      disabled: connector?.is_native,
       id: ConnectorDetailTabId.CONFIGURATION,
       isSelected: tabId === ConnectorDetailTabId.CONFIGURATION,
       label: i18n.translate(
@@ -203,7 +204,7 @@ export const ConnectorDetail: React.FC = () => {
 
   const PIPELINES_TAB = {
     content: <SearchIndexPipelines />,
-    disabled: !index,
+    disabled: !index || connector?.is_native,
     id: ConnectorDetailTabId.PIPELINES,
     isSelected: tabId === ConnectorDetailTabId.PIPELINES,
     label: i18n.translate(
