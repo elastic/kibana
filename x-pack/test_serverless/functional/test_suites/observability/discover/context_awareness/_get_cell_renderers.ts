@@ -37,7 +37,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('ES|QL mode', () => {
-      describe('Log Level Badge Cell', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/211174
+      describe.skip('Log Level Badge Cell', () => {
         it('should render log.level badge cell', async () => {
           const state = kbnRison.encode({
             dataSource: { type: 'esql' },
