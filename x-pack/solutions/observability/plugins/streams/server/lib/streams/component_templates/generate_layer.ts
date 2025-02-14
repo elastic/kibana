@@ -14,6 +14,7 @@ import { WiredStreamDefinition, isDslLifecycle, isIlmLifecycle, isRoot } from '@
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings } from './logs_layer';
 import { getComponentTemplateName } from './name';
+import { otelMappings, otelPrefixes } from './otel_layer';
 
 export function generateLayer(
   name: string,
@@ -33,6 +34,12 @@ export function generateLayer(
       (property as MappingDateProperty).format = props.format;
     }
     properties[field] = property;
+    if (otelPrefixes.some((prefix) => field.startsWith(prefix))) {
+      properties[field.replace(new RegExp(`^(${otelPrefixes.join('|')})`), '')] = {
+        type: 'alias',
+        path: field,
+      };
+    }
   });
 
   return {
@@ -43,7 +50,10 @@ export function generateLayer(
       mappings: {
         subobjects: false,
         dynamic: false,
-        properties,
+        properties: {
+          ...properties,
+          ...(isRoot(name) ? otelMappings : {}),
+        },
       },
     },
     version: ASSET_VERSION,

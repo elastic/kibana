@@ -18,13 +18,14 @@ import {
   isOrCondition,
   isUnaryFilterCondition,
 } from '@kbn/streams-schema';
+import { getRealFieldName } from './namespaced_ecs';
 
 function safePainlessField(conditionOrField: FilterCondition | string) {
   if (typeof conditionOrField === 'string') {
-    return `ctx.${conditionOrField.split('.').join('?.')}`;
+    return `ctx.${getRealFieldName(conditionOrField).split('.').join('?.')}`;
   }
 
-  return `ctx.${conditionOrField.field.split('.').join('?.')}`;
+  return `ctx.${getRealFieldName(conditionOrField.field).split('.').join('?.')}`;
 }
 
 function encodeValue(value: string | number | boolean) {

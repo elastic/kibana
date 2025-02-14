@@ -7,6 +7,7 @@
 
 import { FieldDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
 import { MalformedFieldsError } from '../errors/malformed_fields_error';
+import { otelMappings, otelPrefixes } from '../component_templates/otel_layer';
 
 export function validateAncestorFields({
   ancestors,
@@ -17,6 +18,9 @@ export function validateAncestorFields({
 }) {
   for (const ancestor of ancestors) {
     for (const fieldName in fields) {
+      if (!Object.hasOwn(fields, fieldName)) {
+        continue;
+      }
       if (
         Object.hasOwn(fields, fieldName) &&
         Object.entries(ancestor.ingest.wired.fields).some(
@@ -26,6 +30,23 @@ export function validateAncestorFields({
       ) {
         throw new MalformedFieldsError(
           `Field ${fieldName} is already defined with incompatible type in the parent stream ${ancestor.name}`
+        );
+      }
+      for (const prefix of otelPrefixes) {
+        const prefixedName = `${prefix}${fieldName}`;
+        if (
+          Object.prototype.hasOwnProperty.call(fields, prefixedName) ||
+          Object.prototype.hasOwnProperty.call(ancestor.ingest.wired.fields, prefixedName)
+        ) {
+          throw new MalformedFieldsError(
+            `Field ${fieldName} is an automatic alias of ${prefixedName} because of otel compat mode`
+          );
+        }
+      }
+      // check the otelMappings - they are aliases and are not allowed to have the same name as a field
+      if (Object.keys(otelMappings).some((otelFieldName) => otelFieldName === fieldName)) {
+        throw new MalformedFieldsError(
+          `Field ${fieldName} is an automatic alias of another field because of otel compat mode`
         );
       }
     }
