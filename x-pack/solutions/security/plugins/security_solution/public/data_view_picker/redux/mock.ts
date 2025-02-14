@@ -5,6 +5,23 @@
  * 2.0.
  */
 
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 import { initialDataViewPickerState, type RootState } from './reducer';
 
-export const mockDataViewPickerState: RootState = structuredClone(initialDataViewPickerState);
+const dataViewPickerState = structuredClone(initialDataViewPickerState).dataViewPicker;
+
+const mockDefaultDataViewSpec: DataViewSpec = {
+  fields: {},
+  id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+  title: '',
+};
+export const mockDataViewPickerState: RootState = {
+  dataViewPicker: {
+    ...dataViewPickerState,
+    timeline: {
+      ...dataViewPickerState.timeline,
+      dataView: mockDefaultDataViewSpec,
+    },
+  },
+};
