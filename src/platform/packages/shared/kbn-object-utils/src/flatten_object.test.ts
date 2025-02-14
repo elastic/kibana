@@ -32,7 +32,7 @@ describe('flattenObject', () => {
 
   it('should give nested object properties precedence over already flattened entries', () => {
     const flattened = flattenObject({
-      'alpha.beta' : 99,
+      'alpha.beta': 99,
       alpha: {
         gamma: {
           sigma: 1,
