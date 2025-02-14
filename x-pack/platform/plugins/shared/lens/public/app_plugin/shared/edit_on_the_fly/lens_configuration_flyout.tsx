@@ -39,11 +39,7 @@ import {
   onActiveDataChange,
   useLensDispatch,
 } from '../../../state_management';
-import {
-  EXPRESSION_BUILD_ERROR_ID,
-  extractReferencesFromState,
-  getAbsoluteDateRange,
-} from '../../../utils';
+import { EXPRESSION_BUILD_ERROR_ID, getAbsoluteDateRange } from '../../../utils';
 import { LayerConfiguration } from './layer_configuration_section';
 import type { EditConfigPanelProps } from './types';
 import { FlyoutWrapper } from './flyout_wrapper';
@@ -55,6 +51,7 @@ import { ESQLDataGridAccordion } from './esql_data_grid_accordion';
 import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
 import { useESQLVariables } from './use_esql_variables';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
+import { useCurrentAttributes } from './use_current_attributes';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -88,8 +85,6 @@ export function LensEditConfigurationFlyout({
   const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
   const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
   const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
-  const [embeddableAttrs, setEmbeddableAttrs] =
-    useState<TypedLensSerializedState['attributes']>(attributes);
 
   const [errors, setErrors] = useState<Error[] | undefined>();
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
@@ -244,12 +239,19 @@ export function LensEditConfigurationFlyout({
     [query]
   );
 
+  const currentAttributes = useCurrentAttributes({
+    textBasedMode,
+    attributes,
+    datasourceMap,
+    visualizationMap,
+  });
+
   const onApply = useCallback(() => {
     if (visualization.activeId == null) {
       return;
     }
     if (savedObjectId) {
-      saveByRef?.(embeddableAttrs);
+      saveByRef?.(currentAttributes);
       updateByRefInput?.(savedObjectId);
     }
 
@@ -266,7 +268,7 @@ export function LensEditConfigurationFlyout({
       trackSaveUiCounterEvents(telemetryEvents);
     }
 
-    onApplyCallback?.(embeddableAttrs);
+    onApplyCallback?.(currentAttributes);
     closeFlyout?.();
   }, [
     visualization.activeId,
@@ -274,7 +276,7 @@ export function LensEditConfigurationFlyout({
     savedObjectId,
     activeVisualization,
     onApplyCallback,
-    embeddableAttrs,
+    currentAttributes,
     closeFlyout,
     saveByRef,
     updateByRefInput,
@@ -294,22 +296,6 @@ export function LensEditConfigurationFlyout({
 
   const runQuery = useCallback(
     async (q: AggregateQuery, abortController?: AbortController, shouldUpdateAttrs?: boolean) => {
-      // const dsStates = Object.fromEntries(
-      //   Object.entries(datasourceStates).map(([id, ds]) => {
-      //     const dsState = ds.state;
-      //     return [id, dsState];
-      //   })
-      // );
-      // const currentAttributes: TypedLensSerializedState['attributes'] = {
-      //   ...attributes,
-      //   state: {
-      //     ...attributes.state,
-      //     visualization: visualization.state,
-      //     datasourceStates: dsStates,
-      //   },
-      //   visualizationType: visualization.activeId ?? attributes.visualizationType,
-      // };
-
       const attrs = await getSuggestions(
         q,
         startDependencies,
@@ -321,7 +307,7 @@ export function LensEditConfigurationFlyout({
         setDataGridAttrs,
         esqlVariables,
         shouldUpdateAttrs,
-        embeddableAttrs
+        currentAttributes
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -337,57 +323,11 @@ export function LensEditConfigurationFlyout({
       visualizationMap,
       adHocDataViews,
       esqlVariables,
-      embeddableAttrs,
+      currentAttributes,
       setCurrentAttributes,
       updateSuggestion,
     ]
   );
-
-  useEffect(() => {
-    const dsStates = Object.fromEntries(
-      Object.entries(datasourceStates).map(([id, ds]) => {
-        const dsState = ds.state;
-        return [id, dsState];
-      })
-    );
-    // as ES|QL queries are using adHoc dataviews, we don't want to pass references
-    const references = !textBasedMode
-      ? extractReferencesFromState({
-          activeDatasources: Object.keys(datasourceStates).reduce(
-            (acc, id) => ({
-              ...acc,
-              [id]: datasourceMap[id],
-            }),
-            {}
-          ),
-          datasourceStates,
-          visualizationState: visualization.state,
-          activeVisualization,
-        })
-      : [];
-    const attrs: TypedLensSerializedState['attributes'] = {
-      ...attributes,
-      state: {
-        ...attributes.state,
-        visualization: visualization.state,
-        datasourceStates: dsStates,
-      },
-      references,
-      visualizationType: visualization.activeId ?? attributes.visualizationType,
-    };
-    if (!isEqual(attrs, embeddableAttrs)) {
-      setEmbeddableAttrs(attrs);
-    }
-  }, [
-    activeVisualization,
-    attributes,
-    datasourceMap,
-    datasourceStates,
-    embeddableAttrs,
-    textBasedMode,
-    visualization.activeId,
-    visualization.state,
-  ]);
 
   useEffect(() => {
     const abortController = new AbortController();
