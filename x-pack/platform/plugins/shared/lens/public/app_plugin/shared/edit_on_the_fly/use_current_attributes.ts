@@ -38,20 +38,21 @@ export const useCurrentAttributes = ({
       })
     );
     // as ES|QL queries are using adHoc dataviews, we don't want to pass references
-    const references = !textBasedMode
-      ? extractReferencesFromState({
-          activeDatasources: Object.keys(datasourceStates).reduce(
-            (acc, id) => ({
-              ...acc,
-              [id]: datasourceMap[id],
-            }),
-            {}
-          ),
-          datasourceStates,
-          visualizationState: visualization.state,
-          activeVisualization,
-        })
-      : [];
+    const references =
+      !textBasedMode && visualization.state
+        ? extractReferencesFromState({
+            activeDatasources: Object.keys(datasourceStates).reduce(
+              (acc, id) => ({
+                ...acc,
+                [id]: datasourceMap[id],
+              }),
+              {}
+            ),
+            datasourceStates,
+            visualizationState: visualization.state,
+            activeVisualization,
+          })
+        : [];
     const attrs: TypedLensSerializedState['attributes'] = {
       ...initialAttributes,
       state: {
