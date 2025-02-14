@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { snoozeRuleRoute as snoozeRuleInternalRoute } from './internal/snooze_rule_route';
-export { snoozeRuleRoute } from './external/snooze_rule_route';
+export { transformSnoozeBody } from './transform_snooze_body/latest';
+export { transformSnoozeBody as transformSnoozeBodyV1 } from './transform_snooze_body/v1';

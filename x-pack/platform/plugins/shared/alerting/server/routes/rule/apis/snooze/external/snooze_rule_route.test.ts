@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { snoozeRuleRoute } from './snooze_rule_route';
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../../../../lib/license_state.mock';
-import { mockHandlerArguments } from '../../../_mock_handler_arguments';
-import { rulesClientMock } from '../../../../rules_client.mock';
-import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled';
+import { licenseStateMock } from '../../../../../lib/license_state.mock';
+import { mockHandlerArguments } from '../../../../_mock_handler_arguments';
+import { rulesClientMock } from '../../../../../rules_client.mock';
+import { RuleTypeDisabledError } from '../../../../../lib/errors/rule_type_disabled';
+import { snoozeRuleRoute } from './snooze_rule_route';
 
 const rulesClient = rulesClientMock.create();
-jest.mock('../../../../lib/license_api_access', () => ({
+jest.mock('../../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
@@ -21,13 +21,12 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
-const SNOOZE_SCHEDULE = {
-  rRule: {
-    dtstart: '2021-03-07T00:00:00.000Z',
-    tzid: 'UTC',
-    count: 1,
+const schedule = {
+  duration: '240h',
+  start: '2021-03-07T00:00:00.000Z',
+  recurring: {
+    occurrences: 1,
   },
-  duration: 864000000,
 };
 
 describe('snoozeAlertRoute', () => {
@@ -39,7 +38,7 @@ describe('snoozeAlertRoute', () => {
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_snooze"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/_snooze"`);
 
     rulesClient.snooze.mockResolvedValueOnce();
 
@@ -50,7 +49,7 @@ describe('snoozeAlertRoute', () => {
           id: '1',
         },
         body: {
-          snooze_schedule: SNOOZE_SCHEDULE,
+          schedule,
         },
       },
       ['noContent']
@@ -86,7 +85,7 @@ describe('snoozeAlertRoute', () => {
 
     const [config, handler] = router.post.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rule/{id}/_snooze"`);
+    expect(config.path).toMatchInlineSnapshot(`"/api/alerting/rule/{id}/_snooze"`);
 
     rulesClient.snooze.mockResolvedValueOnce();
 
@@ -97,8 +96,8 @@ describe('snoozeAlertRoute', () => {
           id: '1',
         },
         body: {
-          snooze_schedule: {
-            ...SNOOZE_SCHEDULE,
+          schedule: {
+            ...schedule,
             duration: -1,
           },
         },

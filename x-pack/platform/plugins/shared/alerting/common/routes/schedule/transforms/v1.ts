@@ -48,9 +48,9 @@ export const transformSchedule: (schedule: ScheduleRequest) => {
   const freq = transformFrequency(frequency);
   const durationInMilliseconds = duration === '-1' ? -1 : getDurationMilliseconds(duration);
 
-  const browserTimeZone = moment.tz.guess();
-  const offset = moment.parseZone(start).format('Z');
+  const offset = moment.parseZone(start).utcOffset();
   const timeZoneFromStart = getTimezoneForOffset(moment.duration(offset).asMinutes());
+  const browserTimeZone = moment.tz.guess();
 
   return {
     duration: durationInMilliseconds,

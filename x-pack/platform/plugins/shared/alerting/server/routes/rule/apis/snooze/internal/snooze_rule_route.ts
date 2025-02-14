@@ -8,16 +8,16 @@
 import { TypeOf } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 import {
-  snoozeBodySchema,
-  snoozeParamsSchema,
-} from '../../../../../common/routes/rule/apis/snooze';
-import { ILicenseState, RuleMutedError } from '../../../../lib';
-import { verifyAccessAndContext } from '../../../lib';
-import { AlertingRequestHandlerContext, INTERNAL_ALERTING_SNOOZE_RULE } from '../../../../types';
+  snoozeBodyInternalSchema,
+  snoozeParamsInternalSchema,
+} from '../../../../../../common/routes/rule/apis/snooze';
+import { ILicenseState, RuleMutedError } from '../../../../../lib';
+import { verifyAccessAndContext } from '../../../../lib';
+import { AlertingRequestHandlerContext, INTERNAL_ALERTING_SNOOZE_RULE } from '../../../../../types';
 import { transformSnoozeBodyV1 } from './transforms';
-import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 
-export type SnoozeRuleRequestParamsV1 = TypeOf<typeof snoozeParamsSchema>;
+export type SnoozeRuleRequestInternalParamsV1 = TypeOf<typeof snoozeParamsInternalSchema>;
 
 export const snoozeRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -29,15 +29,15 @@ export const snoozeRuleRoute = (
       security: DEFAULT_ALERTING_ROUTE_SECURITY,
       options: { access: 'internal' },
       validate: {
-        params: snoozeParamsSchema,
-        body: snoozeBodySchema,
+        params: snoozeParamsInternalSchema,
+        body: snoozeBodyInternalSchema,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
-        const params: SnoozeRuleRequestParamsV1 = req.params;
+        const params: SnoozeRuleRequestInternalParamsV1 = req.params;
         const body = transformSnoozeBodyV1(req.body);
         try {
           await rulesClient.snooze({ ...params, ...body });
