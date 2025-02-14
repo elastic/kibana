@@ -110,7 +110,7 @@ export const getFieldConfiguration = (
       title: i18n.translate('unifiedDocViewer.tracesOverview.details.spanDuration.title', {
         defaultMessage: 'Duration',
       }),
-      content: (value) => <Duration duration={value ?? 0} />,
+      content: (value) => <EuiText size="xs">{asDuration(value)}</EuiText>,
       value: attributes[SPAN_DURATION_FIELD] ?? 0,
     },
     [TRANSACTION_DURATION_FIELD]: {
