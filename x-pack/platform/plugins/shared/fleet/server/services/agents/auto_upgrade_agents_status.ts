@@ -5,8 +5,16 @@
  * 2.0.
  */
 
+import { AGENTS_PREFIX } from '../../../common';
+import type {
+  CurrentVersionCount,
+  GetAutoUpgradeAgentsStatusResponse,
+} from '../../../common/types/rest_spec/agent_policy';
+
+import type { AgentClient } from './agent_service';
+
 export async function getAutoUpgradeAgentsStatus(
-  agentClient: AgentClientImpl,
+  agentClient: AgentClient,
   agentPolicyId: string
 ): Promise<GetAutoUpgradeAgentsStatusResponse> {
   const currentVersionsMap: {
@@ -44,7 +52,7 @@ export async function getAutoUpgradeAgentsStatus(
     .listAgents({
       showInactive: false,
       perPage: 0,
-      kuery: `${AGENTS_PREFIX}.policy_id:"${request.params.agentPolicyId}" AND ${AGENTS_PREFIX}.upgrade_details.state:"UPG_FAILED"`,
+      kuery: `${AGENTS_PREFIX}.policy_id:"${agentPolicyId}" AND ${AGENTS_PREFIX}.upgrade_details.state:"UPG_FAILED"`,
       aggregations: {
         versions: {
           terms: {
