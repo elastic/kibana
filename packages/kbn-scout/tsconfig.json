@@ -28,5 +28,7 @@
     "@kbn/test-subj-selector",
     "@kbn/scout-info",
     "@kbn/scout-reporting",
+    "@kbn/apm-synthtrace",
+    "@kbn/apm-synthtrace-client",
   ]
 }

@@ -699,10 +699,6 @@ using the CURL scripts in the scripts folder.
 |Exposes services to access logs data.
 
 
-|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/logs_explorer/README.md[logsExplorer]
-|This plugin is home to the <LogsExplorer /> component and related types. It implements several of the underlying concepts that the Observability Logs Explorer app builds upon.
-
-
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/logs_shared/README.md[logsShared]
 |Exposes the shared components and APIs to access and visualize logs.
 

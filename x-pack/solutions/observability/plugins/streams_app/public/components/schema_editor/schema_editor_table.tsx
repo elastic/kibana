@@ -107,7 +107,7 @@ const createCellRenderer =
       return <FieldStatusBadge status={status} />;
     }
 
-    return field[columnId as keyof SchemaField] || EMPTY_CONTENT;
+    return <>{field[columnId as keyof SchemaField] || EMPTY_CONTENT}</>;
   };
 
 const createFieldActionsCellRenderer = (fields: SchemaField[]): EuiDataGridControlColumn => ({

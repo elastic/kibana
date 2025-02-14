@@ -83,7 +83,7 @@ export interface EditorContext {
 }
 
 export type GetColumnsByTypeFn = (
-  type: string | string[],
+  type: Readonly<string> | Readonly<string[]>,
   ignored?: string[],
   options?: {
     advanceCursor?: boolean;

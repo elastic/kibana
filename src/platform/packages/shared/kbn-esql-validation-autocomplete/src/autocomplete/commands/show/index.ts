@@ -20,7 +20,7 @@ export async function suggest({
   if (/INFO\s+$/i.test(innerText)) {
     return [{ ...pipeCompleteItem, command: TRIGGER_SUGGESTION_COMMAND }];
   }
-  // SHOW INSOF /
+  // SHOW LOLZ /
   else if (/SHOW\s+\S+\s+$/i.test(innerText)) {
     return [];
   }

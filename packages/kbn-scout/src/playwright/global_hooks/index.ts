@@ -8,3 +8,4 @@
  */
 
 export { ingestTestDataHook } from './data_ingestion';
+export { ingestSynthtraceDataHook } from './synthtrace_ingestion';

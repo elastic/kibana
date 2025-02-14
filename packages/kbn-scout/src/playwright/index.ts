@@ -32,4 +32,4 @@ export type {
 // use to tag tests
 export { tags } from './tags';
 
-export { ingestTestDataHook } from './global_hooks';
+export { ingestTestDataHook, ingestSynthtraceDataHook } from './global_hooks';

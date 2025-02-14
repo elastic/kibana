@@ -14,7 +14,8 @@ export default function ({ getPageObjects, getService }) {
   const security = getService('security');
   const retry = getService('retry');
 
-  describe('shapefile upload', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/209228
+  describe.skip('shapefile upload', () => {
     let indexName = '';
     before(async () => {
       await security.testUser.setRoles([

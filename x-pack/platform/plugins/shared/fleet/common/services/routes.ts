@@ -44,6 +44,10 @@ export const epmRouteService = {
     return EPM_API_ROUTES.LIMITED_LIST_PATTERN;
   },
 
+  getDatastreamsPath: () => {
+    return EPM_API_ROUTES.DATA_STREAMS_PATTERN;
+  },
+
   getInfoPath: (pkgName: string, pkgVersion?: string) => {
     if (pkgVersion) {
       return EPM_API_ROUTES.INFO_PATTERN.replace('{pkgName}', pkgName).replace(
