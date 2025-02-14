@@ -25,7 +25,7 @@ import { getDashboardContentManagementService } from '../services/dashboard_cont
 import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
-import { DEFAULT_DASHBOARD_INPUT } from './default_dashboard_input';
+import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 import { getSerializedState } from './get_serialized_state';
 import { openSaveModal } from './open_save_modal';
 import { initializePanelsManager } from './panels_manager';
@@ -110,7 +110,7 @@ export function getDashboardApi({
     creationOptions,
     controlGroupApi$,
     lastSavedState: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
-      ...DEFAULT_DASHBOARD_INPUT,
+      ...DEFAULT_DASHBOARD_STATE,
     },
     panelsManager,
     savedObjectId$,

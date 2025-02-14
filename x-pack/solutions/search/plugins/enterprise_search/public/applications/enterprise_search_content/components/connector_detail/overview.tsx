@@ -48,7 +48,9 @@ import { ConnectorViewLogic } from './connector_view_logic';
 
 export const ConnectorDetailOverview: React.FC = () => {
   const { indexData } = useValues(IndexViewLogic);
-  const { connector, error, isWaitingOnAgentlessDeployment } = useValues(ConnectorViewLogic);
+  const { connector, error, isWaitingOnAgentlessDeployment, connectorAgentlessPolicy } =
+    useValues(ConnectorViewLogic);
+
   const { isCloud } = useValues(KibanaLogic);
   const { showModal } = useActions(ConvertConnectorLogic);
   const { isModalVisible } = useValues(ConvertConnectorLogic);
@@ -256,7 +258,11 @@ export const ConnectorDetailOverview: React.FC = () => {
         </>
       )}
       {connector && connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE && (
-        <ConnectorStats connector={connector} indexData={indexData || undefined} />
+        <ConnectorStats
+          connector={connector}
+          indexData={indexData || undefined}
+          agentlessOverview={connectorAgentlessPolicy}
+        />
       )}
       {connector && connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE && (
         <>
