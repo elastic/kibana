@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig, StorybookConfig } from '@kbn/storybook';
+export { trackingContainmentRuleParamsSchema } from './latest';
+export { trackingContainmentRuleParamsSchema as trackingContainmentRuleParamsSchemaV1 } from './latest';
 
-export const discoverStorybookConfig: StorybookConfig = {
-  ...defaultConfig,
-  stories: ['../**/*.stories.tsx'],
-};
+export type { TrackingContainmentRuleParams } from './latest';
+export type { TrackingContainmentRuleParams as TrackingContainmentRuleParamsV1 } from './latest';
