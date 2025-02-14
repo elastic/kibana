@@ -6,7 +6,6 @@
  */
 
 import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
-import type { AnyAction } from '@reduxjs/toolkit';
 import { combineReducers, createAction, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import { DataViewPickerScopeName, SLICE_PREFIX } from '../constants';
@@ -39,7 +38,7 @@ const createDataViewSelectionSlice = <T extends string>(scopeName: T) =>
         state.dataView = action.payload;
         state.status = 'ready';
       },
-      dataViewSelectionError: (state, action: AnyAction) => {
+      dataViewSelectionError: (state, action: PayloadAction<string>) => {
         state.status = 'error';
       },
     },

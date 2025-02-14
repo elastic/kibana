@@ -72,8 +72,10 @@ export const createDataViewSelectedListener = (dependencies: {
 
       if (dataViewSpec) {
         listenerApi.dispatch(currentScopeActions.setSelectedDataView(dataViewSpec));
-      } else {
-        listenerApi.dispatch(currentScopeActions.dataViewSelectionError());
+      } else if (dataViewByIdError || adhocDataViewCreationError) {
+        listenerApi.dispatch(
+          currentScopeActions.dataViewSelectionError('An error occured when setting data view')
+        );
       }
     },
   };
