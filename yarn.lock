@@ -6561,7 +6561,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-alerting-test-data@link:x-pack/solutions/observability/packages/alerting_test_data":
+"@kbn/observability-alerting-test-data@link:x-pack/solutions/observability/packages/alerting-test-data":
   version "0.0.0"
   uid ""
 
