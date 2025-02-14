@@ -1,8 +1,15 @@
-# Installation of Prebuilt Rules
+# Test plan: installing prebuilt rules
 
-This is a test plan for the workflows of installing prebuilt rules.
+**Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
-Status: `in progress`. The current test plan matches [Rule Immutability/Customization Milestone 3 epic](https://github.com/elastic/kibana/issues/174168).
+## Summary
+
+This is a test plan for the workflows of:
+
+- installing single prebuilt rules one-by-one
+- installing multiple prebuilt rules in bulk
+
+from the Rule Installation page.
 
 ## Table of Contents
 

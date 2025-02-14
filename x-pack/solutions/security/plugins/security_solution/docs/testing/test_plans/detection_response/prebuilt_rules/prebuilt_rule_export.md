@@ -1,8 +1,20 @@
-# Detection Rule Export
+# Test plan: exporting prebuilt rules
 
-This is a test plan for the exporting of prebuilt and custom rules. This feature is an aspect of `Milestone 3` of the [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974) epic.
+**Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
-Status: `in progress`.
+## Summary
+
+This is a test plan for the workflows of:
+
+- exporting single prebuilt rules from the Rule Details page
+- exporting single prebuilt rules one-by-one from the Rule Management page
+- exporting multiple prebuilt rules in bulk from the Rule Management page
+- exporting a mixture of prebuilt and custom rules from the Rule Management page
+
+where each prebuilt rule:
+
+- can be an original (non-customized) prebuilt rule from Elastic, or
+- can be a prebuilt rule customized by the user.
 
 ## Useful information
 

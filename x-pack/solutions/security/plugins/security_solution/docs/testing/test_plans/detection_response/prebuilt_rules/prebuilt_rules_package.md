@@ -1,10 +1,12 @@
-# Prebuilt Rules Package Installation and Upgrade
+# Test plan: prebuilt rules package
 
-This is a test plan for the workflows of installing and updating the Prebuilt Rules package.
+**Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
-> For the test plans for installing and upgrading prebuilt rules, see [Installation of Prebuilt Rules](./installation.md) and [Upgrade of Prebuilt Rules](./upgrade.md).
+## Summary
 
-Status: `in progress`. The current test plan matches [Rule Immutability/Customization Milestone 3 epic](https://github.com/elastic/kibana/issues/174168).
+This is a test plan for the workflow of installing and updating the Fleet package with prebuilt rules.
+
+This workflow makes prebuilt rules available for installation and upgrade in the system by the user.
 
 ## Table of Contents
 

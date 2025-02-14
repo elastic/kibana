@@ -1,8 +1,19 @@
-# Prebuilt Rule Customization Workflows
+# Test plan: customizing prebuilt rules
 
-This is a test plan for rule customization workflows specifically related to prebuilt rules
+**Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
-Status: `in progress`.
+## Summary
+
+This is a test plan for the workflows of customizing prebuilt rules via:
+
+- editing single rules one-by-one on the Rule Editing page:
+  - initiated from the Rule Details page
+  - initiated from the Rule Management page
+- editing multiple rules in bulk on the Rule Management page via bulk actions, such as:
+  - bulk adding or removing index patterns
+  - bulk updating rule schedule
+
+as well as un-customizing prebuilt rules by reverting rule parameters back to their original values.
 
 ## Useful information
 

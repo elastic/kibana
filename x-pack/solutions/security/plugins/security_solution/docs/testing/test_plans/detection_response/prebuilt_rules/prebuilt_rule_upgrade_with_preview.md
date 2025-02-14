@@ -1,8 +1,14 @@
-# Upgrading prebuilt rules one-by-one with preview <!-- omit from toc -->
+# Test plan: upgrading prebuilt rules one-by-one with preview <!-- omit from toc -->
 
-This is a test plan for the workflow of upgrading prebuilt rules one-by-one with previewing the incoming changes and user customizations in the Rule Upgrade flyout.
+**Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
-Status: `in progress`. The current test plan matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
+## Summary
+
+This is a test plan for the workflow of:
+
+- upgrading single prebuilt rules one-by-one
+
+from the Rule Upgrade table with previewing incoming updates from Elastic and user customizations in the Rule Upgrade flyout.
 
 ## Table of Contents <!-- omit from toc -->
 

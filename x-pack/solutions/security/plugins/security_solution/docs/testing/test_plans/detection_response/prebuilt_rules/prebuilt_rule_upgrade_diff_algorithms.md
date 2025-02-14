@@ -1,8 +1,12 @@
-# Diff Algorithms for `upgrade/_review` Endpoint
+# Test plan: diff algorithms for upgrading prebuilt rules
 
-This is a test plan for the `upgrade/_review` endpoint diff algorithms that are a part of the larger prebuilt rules customization feature. These algorithms determine what fields get returned when a user makes an API request to review changes as a part of the rule update process and determine what version of those fields should be displayed by the UI.
+**Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
-Status: `in progress`.
+## Summary
+
+This is a test plan for the diff algorithms used in the workflows of upgrading prebuilt rules and specifically in the `upgrade/_review` endpoint.
+
+These algorithms determine what fields get returned when a user makes an API request to review changes as a part of the rule upgrade process and determine what version of those fields should be displayed by the UI.
 
 ## Table of Contents
 
