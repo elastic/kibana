@@ -11,7 +11,7 @@ import React from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getTraceDocumentOverview } from '@kbn/discover-utils';
+import { PARENT_ID_FIELD, getTraceDocumentOverview } from '@kbn/discover-utils';
 import { spanFieldIds, transactionFieldIds } from './resources/field_ids';
 import { getFieldConfiguration } from './resources/get_field_configuration';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
@@ -28,7 +28,7 @@ export function TracesOverview({
   onRemoveColumn,
 }: TracesOverviewProps) {
   const parsedDoc = getTraceDocumentOverview(hit);
-  const isTransaction = !parsedDoc['parent.id'];
+  const isTransaction = !parsedDoc[PARENT_ID_FIELD];
   const detailTitle = `${isTransaction ? 'Transaction' : 'Span'} ${i18n.translate(
     'unifiedDocViewer.docViewerTracesOverview.title',
     {
