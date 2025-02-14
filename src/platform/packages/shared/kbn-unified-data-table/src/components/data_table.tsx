@@ -51,6 +51,7 @@ import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { useDataGridInTableSearch } from '@kbn/data-grid-in-table-search';
+import { useDebounceFn } from '@kbn/react-hooks';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import {
   UnifiedDataTableSettings,
@@ -58,6 +59,7 @@ import {
   DataTableColumnsMeta,
   CustomCellRenderer,
   CustomGridColumnsConfiguration,
+  DataGridPaginationMode,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -79,6 +81,7 @@ import {
   ROWS_HEIGHT_OPTIONS,
   toolbarVisibility as toolbarVisibilityDefaults,
   DataGridDensity,
+  DEFAULT_PAGINATION_MODE,
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
@@ -225,6 +228,14 @@ export interface UnifiedDataTableProps {
    * Manage pagination control
    */
   isPaginationEnabled?: boolean;
+  /**
+   * Manage pagination mode
+   * @default 'standard'
+   * "standard" - Regular pagination with numbers and arrows to control the page
+   * "loadMore" - Hides the general pagination bar and shows Load more button at the bottom of the grid
+   * "infinite" - Hides the general pagination bar and loads more data as the user scrolls [Not yet implemented]
+   */
+  paginationMode?: DataGridPaginationMode;
   /**
    * List of used control columns (available: 'openDetails', 'select')
    */
@@ -461,6 +472,7 @@ export const UnifiedDataTable = ({
   sort,
   isSortEnabled = true,
   isPaginationEnabled = true,
+  paginationMode = 'standard',
   cellActionsTriggerId,
   cellActionsMetadata,
   cellActionsHandling = 'replace',
@@ -512,6 +524,7 @@ export const UnifiedDataTable = ({
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const [isFilterActive, setIsFilterActive] = useState(false);
   const [isCompareActive, setIsCompareActive] = useState(false);
+  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const displayedColumns = getDisplayedColumns(columns, dataView);
   const defaultColumns = displayedColumns.includes('_source');
   const docMap = useMemo(
@@ -1133,6 +1146,42 @@ export const UnifiedDataTable = ({
     rowLineHeight: rowLineHeightOverride,
   });
 
+  const handleItemsRendered = useCallback(
+    ({
+      visibleRowStopIndex,
+      overscanRowStopIndex,
+    }: {
+      visibleRowStopIndex: number;
+      overscanRowStopIndex: number;
+    }) => {
+      if (visibleRowStopIndex === overscanRowStopIndex) {
+        setHasScrolledToBottom(true);
+      } else {
+        setHasScrolledToBottom(false);
+      }
+    },
+    []
+  );
+
+  const { run: debouncedHandleItemsRendered } = useDebounceFn(handleItemsRendered, { wait: 200 });
+
+  const virtualizationOptions = useMemo(() => {
+    if (paginationMode === 'loadMore') {
+      return {
+        ...VIRTUALIZATION_OPTIONS,
+        onItemsRendered: debouncedHandleItemsRendered,
+      };
+    }
+
+    // Don't use row overscan when showing Document column since
+    // rendering so much DOM content in each cell impacts performance
+    if (defaultColumns) {
+      return undefined;
+    }
+
+    return VIRTUALIZATION_OPTIONS;
+  }, [debouncedHandleItemsRendered, defaultColumns, paginationMode]);
+
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
   if (!rowCount && loadingState === DataLoadingState.loading) {
@@ -1215,7 +1264,7 @@ export const UnifiedDataTable = ({
               data-test-subj="docTable"
               leadingControlColumns={leadingControlColumns}
               onColumnResize={onResize}
-              pagination={paginationObj}
+              pagination={paginationMode === DEFAULT_PAGINATION_MODE ? paginationObj : undefined}
               renderCellValue={renderCellValueWithInTableSearchSupport}
               ref={dataGridRef}
               rowCount={rowCount}
@@ -1229,9 +1278,7 @@ export const UnifiedDataTable = ({
               trailingControlColumns={trailingControlColumns}
               cellContext={cellContextWithInTableSearchSupport}
               renderCellPopover={renderCustomPopover}
-              // Don't use row overscan when showing Document column since
-              // rendering so much DOM content in each cell impacts performance
-              virtualizationOptions={defaultColumns ? undefined : VIRTUALIZATION_OPTIONS}
+              virtualizationOptions={virtualizationOptions}
             />
           )}
         </div>
@@ -1249,6 +1296,10 @@ export const UnifiedDataTable = ({
               onFetchMoreRecords={onFetchMoreRecords}
               data={data}
               fieldFormats={fieldFormats}
+              paginationMode={paginationMode}
+              hasScrolledToBottom={
+                paginationMode !== DEFAULT_PAGINATION_MODE ? hasScrolledToBottom : true
+              }
             />
           )}
         {searchTitle && (
