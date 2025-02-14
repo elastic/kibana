@@ -18,7 +18,14 @@ import type {
   Serializable,
   SynthtraceGenerator,
 } from '@kbn/apm-synthtrace-client';
-import { getLogger, createScoutConfig, measurePerformanceAsync, getEsClient } from '../../common';
+import {
+  getLogger,
+  createScoutConfig,
+  measurePerformanceAsync,
+  getEsClient,
+  ScoutLogger,
+  EsClient,
+} from '../../common';
 import { ScoutTestOptions } from '../types';
 import {
   getApmSynthtraceEsClient,
@@ -33,6 +40,30 @@ interface SynthtraceIngestionData {
   infra: Array<SynthtraceEvents<InfraDocument>>;
   otel: Array<SynthtraceEvents<OtelDocument>>;
 }
+
+const getClient = (
+  key: keyof SynthtraceIngestionData,
+  esClient: EsClient,
+  kbnUrl: string,
+  auth: { username: string; password: string },
+  log: ScoutLogger
+) => {
+  switch (key) {
+    case 'apm':
+      const kibanaUrl = new URL(kbnUrl);
+      const kibanaUrlWithAuth = Url.format({
+        protocol: kibanaUrl.protocol,
+        hostname: kibanaUrl.hostname,
+        port: kibanaUrl.port,
+        auth: `${auth.username}:${auth.password}`,
+      });
+      return getApmSynthtraceEsClient(esClient, kibanaUrlWithAuth, log);
+    case 'infra':
+      return getInfraSynthtraceEsClient(esClient, kbnUrl, auth, log);
+    case 'otel':
+      return getOtelSynthtraceEsClient(esClient, log);
+  }
+};
 
 export async function ingestSynthtraceDataHook(config: FullConfig, data: SynthtraceIngestionData) {
   const log = getLogger();
@@ -57,67 +88,30 @@ export async function ingestSynthtraceDataHook(config: FullConfig, data: Synthtr
     const scoutConfig = createScoutConfig(serversConfigDir, configName, log);
     const esClient = getEsClient(scoutConfig, log);
     const kbnUrl = scoutConfig.hosts.kibana;
-    const { username, password } = scoutConfig.auth;
-    if (hasApmData) {
-      const kibanaUrl = new URL(kbnUrl);
-      const kibanaUrlWithAuth = Url.format({
-        protocol: kibanaUrl.protocol,
-        hostname: kibanaUrl.hostname,
-        port: kibanaUrl.port,
-        auth: `${username}:${password}`,
-      });
-      const apmSynthtraceEsClient = await getApmSynthtraceEsClient(
-        esClient,
-        kibanaUrlWithAuth,
-        log
-      );
 
-      log.debug('[setup] loading apm synthtrace data');
-      await Promise.all(
-        apm.map((event) => {
-          apmSynthtraceEsClient.index(
-            Readable.from(Array.from(event).flatMap((e) => e.serialize()))
-          );
-        })
-      );
+    for (const key of Object.keys(data)) {
+      if (Object.hasOwn(data, key)) {
+        const typedKey = key as keyof SynthtraceIngestionData;
+        if (data[typedKey].length > 0) {
+          const client = await getClient(typedKey, esClient, kbnUrl, scoutConfig.auth, log);
 
-      log.debug('[setup] apm synthtrace data loaded successfully');
-    }
+          log.debug(`[setup] ingesting ${typedKey} synthtrace data`);
 
-    if (hasInfraData) {
-      const kibanaUrl = new URL(kbnUrl);
-      const infraSynthtraceEsClient = await getInfraSynthtraceEsClient(
-        esClient,
-        kibanaUrl.toString(),
-        scoutConfig.auth,
-        log
-      );
+          try {
+            await Promise.all(
+              data[typedKey].map((event) => {
+                return client.index(Readable.from(Array.from(event).flatMap((e) => e.serialize())));
+              })
+            );
+          } catch (e) {
+            log.debug(`[setup] error ingesting ${typedKey} synthtrace data`, e);
+          }
 
-      log.debug('[setup] loading infra synthtrace data');
-      await Promise.all(
-        infra.map((event) => {
-          infraSynthtraceEsClient.index(
-            Readable.from(Array.from(event).flatMap((e) => e.serialize()))
-          );
-        })
-      );
-
-      log.debug('[setup] infra synthtrace data loaded successfully');
-    }
-
-    if (hasOtelData) {
-      const otelSynthtraceEsClient = getOtelSynthtraceEsClient(esClient, log);
-
-      log.debug('[setup] loading otel synthtrace data');
-      await Promise.all(
-        otel.map((event) => {
-          otelSynthtraceEsClient.index(
-            Readable.from(Array.from(event).flatMap((e) => e.serialize()))
-          );
-        })
-      );
-
-      log.debug('[setup] otel synthtrace data loaded successfully');
+          log.debug(`[setup] ${typedKey} synthtrace data ingested successfully`);
+        } else {
+          log.debug(`[setup] no synthtrace data to ingest for ${typedKey}`);
+        }
+      }
     }
   });
 }
