@@ -37,9 +37,7 @@ interface InputFileSystem {
     encoding: null | undefined,
     callback: (err: Error | null, stats: Buffer) => void
   ) => void;
-  statSync: (
-    path: string,
-  ) => any;
+  statSync: (path: string) => any;
 }
 
 /**
@@ -56,7 +54,7 @@ function isFile(inputFileSystem: InputFileSystem, path: string) {
   if (fileCheckCache.has(path)) {
     return fileCheckCache.get(path);
   }
-  
+
   try {
     const result = inputFileSystem.statSync(path).isFile();
     fileCheckCache.set(path, result);
