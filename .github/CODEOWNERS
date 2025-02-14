@@ -1464,6 +1464,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 # Streams
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/streams @elastic/streams-program-team
+/x-pack/test/api_integration/fixtures/kbn_archiver/streams @elastic/streams-program-team
 
 ### END Observability Plugins
 
