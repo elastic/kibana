@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { ClientAuth, FleetServerHost } from '../models';
-import type { SOSecret } from '../models';
-import type { ValueOf } from '..';
+import type { FleetServerHost, NewFleetServerHost } from '../models';
 
 import type { ListResult } from './common';
 
@@ -17,54 +15,11 @@ export interface PutFleetServerHostsRequest {
   params: {
     itemId: string;
   };
-  body: {
-    name?: string;
-    host_urls?: string[];
-    is_default?: boolean;
-    is_internal?: boolean;
-    proxy_id?: string | null;
-    ssl?: {
-      certificate_authorities?: string[];
-      certificate?: string;
-      key?: string;
-      es_certificate_authorities?: string[];
-      es_certificate?: string;
-      es_key?: string;
-      client_auth?: ValueOf<ClientAuth>;
-    } | null;
-    secrets?: {
-      ssl?: {
-        key?: SOSecret;
-        es_key?: SOSecret;
-      };
-    };
-  };
+  body: Partial<NewFleetServerHost>
 }
 
 export interface PostFleetServerHostsRequest {
-  body: {
-    id?: string;
-    name?: string;
-    host_urls?: string[];
-    is_default?: boolean;
-    is_internal?: boolean;
-    proxy_id?: string | null;
-    ssl?: {
-      certificate_authorities?: string[];
-      certificate?: string;
-      key?: string;
-      es_certificate_authorities?: string[];
-      es_certificate?: string;
-      es_key?: string;
-      client_auth?: ValueOf<ClientAuth>;
-    } | null;
-    secrets?: {
-      ssl?: {
-        key?: SOSecret;
-        es_key?: SOSecret;
-      };
-    };
-  };
+  body: Partial<FleetServerHost>
 }
 
 export interface PostFleetServerHostsResponse {

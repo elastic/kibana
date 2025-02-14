@@ -69,41 +69,15 @@ export const GetOneFleetServerHostRequestSchema = {
 
 export const PutFleetServerHostRequestSchema = {
   params: schema.object({ itemId: schema.string() }),
-  body: schema.object({
+  body: FleetServerHostSchema.extends({
     name: schema.maybe(schema.string()),
     host_urls: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
     is_default: schema.maybe(schema.boolean({ defaultValue: false })),
     is_internal: schema.maybe(schema.boolean()),
     proxy_id: schema.nullable(schema.string()),
-    secrets: schema.maybe(
-      schema.object({
-        ssl: schema.maybe(
-          schema.object({
-            key: schema.maybe(secretRefSchema),
-            es_key: schema.maybe(secretRefSchema),
-          })
-        ),
-      })
-    ),
-    ssl: schema.maybe(
-      schema.oneOf([
-        schema.literal(null),
-        schema.object({
-          certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
-          certificate: schema.maybe(schema.string()),
-          key: schema.maybe(schema.string()),
-          es_certificate_authorities: schema.maybe(schema.arrayOf(schema.string())),
-          es_certificate: schema.maybe(schema.string()),
-          es_key: schema.maybe(schema.string()),
-          client_auth: schema.oneOf([
-            schema.literal(clientAuth.Optional),
-            schema.literal(clientAuth.Required),
-            schema.literal(clientAuth.None),
-          ]),
-        }),
-      ])
-    ),
-  }),
+    // remove is_preconfigured from schema
+    is_preconfigured: undefined,
+  })
 };
 
 export const GetAllFleetServerHostRequestSchema = {};
