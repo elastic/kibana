@@ -26800,6 +26800,8 @@ paths:
                     type: string
                   minItems: 1
                   type: array
+                id:
+                  type: string
                 is_default:
                   type: boolean
                 is_internal:
@@ -26864,9 +26866,8 @@ paths:
                       type: string
                     key:
                       type: string
-                  required:
-                    - client_auth
               required:
+                - id
                 - proxy_id
       responses:
         '200':
