@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ConnectionElement } from '../../../common/service_map';
+import type { ConnectionElement } from './typings';
 import { groupResourceNodes } from './group_resource_nodes';
-import expectedGroupedData from './mock_responses/group_resource_nodes_grouped.json';
-import preGroupedData from './mock_responses/group_resource_nodes_pregrouped.json';
+import expectedGroupedData from '../../server/routes/service_map/mock_responses/group_resource_nodes_grouped.json';
+import preGroupedData from '../../server/routes/service_map/mock_responses/group_resource_nodes_pregrouped.json';
 
 describe('groupResourceNodes', () => {
   it('should group external nodes', () => {
