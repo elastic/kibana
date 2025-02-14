@@ -151,7 +151,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
           title: i18n.HOST_ID,
           description:
             typeData && data.host
-              ? hostIdRenderer({ host: data.host, isDraggable, ipFilter: ip, contextID, scopeId,})
+              ? hostIdRenderer({ host: data.host, isDraggable, ipFilter: ip, contextID, scopeId })
               : getEmptyTagValue(),
         },
         {
