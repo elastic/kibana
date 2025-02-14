@@ -8,6 +8,8 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/task-manager-plugin",
   ],
   "exclude": [
     "target/**/*",
