@@ -201,6 +201,7 @@ export const filterByElasticRules = () => {
 
 export const filterByCustomRules = () => {
   cy.get(CUSTOM_RULES_BTN).click();
+  waitForRulesTableToBeRefreshed();
 };
 
 export const filterByEnabledRules = () => {
@@ -405,6 +406,21 @@ export const expectManagementTableRules = (ruleNames: string[]): void => {
   for (const ruleName of ruleNames) {
     expectToContainRule(RULES_MANAGEMENT_TABLE, ruleName);
   }
+};
+
+export const expectToContainModifiedBadge = (ruleName: string) => {
+  cy.get(RULES_MANAGEMENT_TABLE)
+    .find(RULES_ROW)
+    .should('include.text', ruleName)
+    .contains('Modified');
+};
+
+export const expectToNotContainModifiedBadge = (ruleName: string) => {
+  cy.get(RULES_MANAGEMENT_TABLE)
+    .find(RULES_ROW)
+    .should('include.text', ruleName)
+    .contains('Modified')
+    .should('not.exist');
 };
 
 const selectOverwriteExceptionsRulesImport = () => {

@@ -42,6 +42,8 @@ import {
   EXECUTION_RUN_TYPE_FILTER,
   EXECUTION_RUN_TYPE_FILTER_ITEM,
   RULE_BACKFILLS_TABLE,
+  POPOVER_ACTIONS_TRIGGER_BUTTON,
+  EXPORT_RULE_ACTION_BUTTON,
   RULE_GAPS_TABLE,
   RULE_GAPS_STATUS_FILTER,
   RULE_GAPS_DATE_FILTER_OPTION,
@@ -214,6 +216,11 @@ export const refreshRuleExecutionTable = () =>
 export const filterByRunType = (ruleType: string) => {
   cy.get(EXECUTION_RUN_TYPE_FILTER).click();
   cy.get(EXECUTION_RUN_TYPE_FILTER_ITEM).contains(ruleType).click();
+};
+
+export const exportRuleFromDetailsPage = () => {
+  cy.get(POPOVER_ACTIONS_TRIGGER_BUTTON).click();
+  cy.get(EXPORT_RULE_ACTION_BUTTON).click();
 };
 
 export const getBackfillsTableRows = () => {

@@ -27,8 +27,8 @@ Status: `in progress`.
 **Automation**: 1 cypress test and 1 integration test.
 
 ```Gherkin
-Given the import payload contains a prebuilt rule with a matching rule_id and version, identical to the published rule
-When the user imports the rule
+Given the import payload contains an unmodified prebuilt rule
+And its rule_id and version match a rule asset from the installed package
 Then the rule should be created or updated
 And the ruleSource type should be "external"
 And isCustomized should be false
@@ -39,17 +39,28 @@ And isCustomized should be false
 **Automation**: 1 cypress test and 1 integration test.
 
 ```Gherkin
-Given the import payload contains a prebuilt rule with a matching rule_id and version, modified from the published version
+Given the import payload contains a modified prebuilt rule
+And its rule_id and version match a rule asset from the installed package
 And the overwrite flag is set to true
 When the user imports the rule
 Then the rule should be created or updated
 And the ruleSource type should be "external"
 And isCustomized should be true
-
-CASE: Should work with older, newer, or identical version numbers
 ```
 
-#### Scenario: Importing a custom rule with a matching rule_id and version
+#### Scenario: Importing a custom rule with a matching prebuilt rule_id and version
+
+**Automation**: 1 cypress test and 1 integration test.
+
+```Gherkin
+Given the import payload contains a custom rule with a matching rule_id and version
+And the overwrite flag is set to true
+When the user imports the rule
+Then the rule should be updated
+And the ruleSource type should be "external"
+```
+
+#### Scenario: Importing a custom rule with a matching custom rule_id and version
 
 **Automation**: 1 cypress test and 1 integration test.
 
@@ -66,10 +77,12 @@ And the ruleSource type should be "internal"
 **Automation**: 1 integration test.
 
 ```Gherkin
-Given the import payload contains a prebuilt rule with a matching rule_id but no matching version
+Given the import payload contains a prebuilt rule
+And its rule_id matches a rule asset from the installed package
+And the version does not match the rule asset's version
 And the overwrite flag is set to true
 When the user imports the rule
-Then the rule should be created
+Then the rule should be created or updated
 And the ruleSource type should be "external"
 And isCustomized should be true
 ```
@@ -79,7 +92,8 @@ And isCustomized should be true
 **Automation**: 1 integration test.
 
 ```Gherkin
-Given the import payload contains a prebuilt rule with a non-existent rule_id
+Given the import payload contains a prebuilt rule
+And its rule_id does NOT match a rule asset from the installed package
 When the user imports the rule
 Then the rule should be created
 And the ruleSource type should be "internal"
@@ -134,11 +148,12 @@ And the "version" field should be set to 1
 **Automation**: 1 integration test.
 
 ```Gherkin
-Given the import payload contains a rule with an existing rule_id
+Given the import payload contains a rule
+And its rule_id matches a rule_id of one of the installed rules
 And the overwrite flag is set to true
 When the user imports the rule
 Then the rule should be overwritten
-And the ruleSource type should be calculated based on the rule_id and version
+And the ruleSource should be based on rule_id and version
 ```
 
 #### Scenario: Importing a rule with overwrite flag set to false
@@ -146,7 +161,8 @@ And the ruleSource type should be calculated based on the rule_id and version
 **Automation**: 1 integration test.
 
 ```Gherkin
-Given the import payload contains a rule with an existing rule_id
+Given the import payload contains a rule
+And its rule_id matches a rule_id of one of the installed rules
 And the overwrite flag is set to false
 When the user imports the rule
 Then the import should be rejected with a message "rule_id already exists"
@@ -174,7 +190,7 @@ And prebuilt rules missing versions should be rejected
 Given the import payload contains prebuilt rules
 And no rules package has been installed locally
 When the user imports the rule
-Then all rules should be created or updated as custom rules
+Then the latest prebuilt rules package should get installed automatically
 ```
 
 #### Scenario: User imports a custom rule before a prebuilt rule asset is created with the same rule_id
