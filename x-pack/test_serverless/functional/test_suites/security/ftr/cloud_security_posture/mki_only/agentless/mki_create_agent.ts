@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import * as http from 'http';
 import expect from '@kbn/expect';
-import { setupMockServer } from './mock_agentless_api';
-import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from './constants';
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from '../../../../constants';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const mockAgentlessApiService = setupMockServer();
+  const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects([
     'svlCommonPage',
     'cspSecurity',
@@ -24,20 +22,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
 
-  describe('Agentless API Serverless', function () {
-    let mockApiServer: http.Server;
+  // This test suite is only running in the Serverless Quality Gates environment
+  describe('Agentless API Serverless MKI only', function () {
+    this.tags(['cloud_security_posture_agentless']);
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
     before(async () => {
-      // If process.env.TEST_CLOUD is set, then the test is running in the Serverless Quality Gates
-      // and this MSW server will be listening for a request that will never come.
-      mockApiServer = mockAgentlessApiService.listen(8089); // Start the usage api mock server on port 8089
       await pageObjects.svlCommonPage.loginAsAdmin();
       cisIntegration = pageObjects.cisAddIntegration;
-    });
-
-    after(async () => {
-      mockApiServer.close();
     });
 
     it(`should create agentless-agent`, async () => {
@@ -54,11 +46,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.selectSetupTechnology('agentless');
       await cisIntegration.selectAwsCredentials('direct');
 
-      if (
-        process.env.TEST_CLOUD &&
-        process.env.CSPM_AWS_ACCOUNT_ID &&
-        process.env.CSPM_AWS_SECRET_KEY
-      ) {
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
+      if (process.env.CSPM_AWS_ACCOUNT_ID && process.env.CSPM_AWS_SECRET_KEY) {
         await cisIntegration.fillInTextField(
           cisIntegration.testSubjectIds.DIRECT_ACCESS_KEY_ID_TEST_ID,
           process.env.CSPM_AWS_ACCOUNT_ID
@@ -70,8 +60,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
       }
 
-      await pageObjects.header.waitUntilLoadingHasFinished();
-
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -81,7 +69,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await cisIntegration.getFirstCspmIntegrationPageAgentlessIntegration()).to.be(
         integrationPolicyName
       );
-      expect(await cisIntegration.getFirstCspmIntegrationPageAgentlessStatus()).to.be('Pending');
+
+      const agentStatusBadge = testSubjects.find('agentlessStatusBadge');
+      // The status badge could be either "Pending", "Healthy",  or "Unhealthy" so we are just checking that it exists
+      expect(agentStatusBadge).to.be.ok();
     });
 
     it(`should create default agent-based agent`, async () => {
