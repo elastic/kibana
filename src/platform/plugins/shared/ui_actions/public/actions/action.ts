@@ -175,7 +175,7 @@ export interface ActionDefinition<Context extends object = object>
   showNotification?: boolean;
 
   /**
-   * @returns an Observable that emits when this action's compatibility changes.
+   * @returns an Observable that emits when this action's compatibility should be recalculated.
    */
   getCompatibilityChangesSubject?: (context: Context) => Observable<undefined> | undefined;
 
