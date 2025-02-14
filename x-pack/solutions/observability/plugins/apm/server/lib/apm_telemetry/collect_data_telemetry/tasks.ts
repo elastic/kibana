@@ -16,7 +16,6 @@ import {
   OPEN_TELEMETRY_AGENT_NAMES,
   OPEN_TELEMETRY_BASE_AGENT_NAMES,
   RUM_AGENT_NAMES,
-  type OpenTelemetryAgentName,
 } from '@kbn/elastic-agent-utils/src/agent_names';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import {
@@ -632,14 +631,9 @@ export const tasks: TelemetryTask[] = [
         Promise.resolve({} as Record<AgentName, number>)
       );
 
-      const initOtelAgents = OPEN_TELEMETRY_AGENT_NAMES.reduce((acc, agent) => {
-        acc[agent] = 0;
-        return acc;
-      }, {} as Record<OpenTelemetryAgentName, number>);
-
       const servicesPerOtelAgents = await OPEN_TELEMETRY_BASE_AGENT_NAMES.reduce(
-        (prevJob, agentName) => {
-          return prevJob.then(async (data) => {
+        (prevJob, baseAgentName) => {
+          return prevJob.then(async (accData) => {
             const response = await telemetryClient.search({
               index: [indices.error, indices.span, indices.metric, indices.transaction],
               size: 0,
@@ -647,7 +641,7 @@ export const tasks: TelemetryTask[] = [
               timeout,
               query: {
                 bool: {
-                  filter: [{ prefix: { [AGENT_NAME]: agentName } }, range1d],
+                  filter: [{ prefix: { [AGENT_NAME]: baseAgentName } }, range1d],
                 },
               },
               aggs: {
@@ -666,22 +660,18 @@ export const tasks: TelemetryTask[] = [
                 },
               },
             });
-
-            const aggregatedServicesPerAgents = response.aggregations?.agent_name.buckets.reduce(
-              (acc, agent) => {
-                acc[agent.key as OpenTelemetryAgentName] = agent.services.value || 0;
-                return acc;
-              },
-              initOtelAgents
-            );
-
+            const aggregatedServices: Record<string, number> = {};
+            for (const bucket of response.aggregations?.agent_name.buckets ?? []) {
+              const fullAgentName = bucket.key as string;
+              aggregatedServices[fullAgentName] = bucket.services.value || 0;
+            }
             return {
-              ...data,
-              ...aggregatedServicesPerAgents,
+              ...accData,
+              ...aggregatedServices,
             };
           });
         },
-        Promise.resolve(initOtelAgents)
+        Promise.resolve({} as Record<string, number>)
       );
 
       const services = await telemetryClient.search({
@@ -932,6 +922,7 @@ export const tasks: TelemetryTask[] = [
       const size = 3;
       const toComposite = (outerKey: string | number, innerKey: string | number) =>
         `${outerKey}/${innerKey}`;
+
       const agentNameAggs = {
         [AGENT_ACTIVATION_METHOD]: {
           terms: {
@@ -1109,13 +1100,14 @@ export const tasks: TelemetryTask[] = [
               },
             },
           };
+
           return data;
         },
         Promise.resolve({} as NonNullable<APMTelemetry['agents']>)
       );
 
       const agentDataWithOtel = await OPEN_TELEMETRY_BASE_AGENT_NAMES.reduce(
-        async (prevJob, agentName) => {
+        async (prevJob, baseAgentName) => {
           const data = await prevJob;
 
           const response = await telemetryClient.search({
@@ -1125,7 +1117,7 @@ export const tasks: TelemetryTask[] = [
             timeout,
             query: {
               bool: {
-                filter: [{ prefix: { [AGENT_NAME]: agentName } }, range1d],
+                filter: [{ prefix: { [AGENT_NAME]: baseAgentName } }, range1d],
               },
             },
             sort: {
@@ -1142,64 +1134,39 @@ export const tasks: TelemetryTask[] = [
             },
           });
 
-          const { aggregations } = response;
-
-          if (!aggregations) {
+          if (!response.aggregations) {
             return data;
           }
 
-          const initAgentData = OPEN_TELEMETRY_AGENT_NAMES.reduce((acc, agent) => {
-            acc[agent] = {
-              agent: {
-                activation_method: [],
-                version: [],
-              },
-              service: {
-                framework: {
-                  name: [],
-                  version: [],
-                  composite: [],
-                },
-                language: {
-                  name: [],
-                  version: [],
-                  composite: [],
-                },
-                runtime: {
-                  name: [],
-                  version: [],
-                  composite: [],
-                },
-              },
-            };
-            return acc;
-          }, {} as NonNullable<APMTelemetry['agents']>);
+          const dynamicAgentData: NonNullable<APMTelemetry['agents']> = {};
 
-          const agentData = aggregations?.agent_name.buckets.reduce((acc, agentNamesAggs) => {
-            acc[agentNamesAggs.key as OpenTelemetryAgentName] = {
+          for (const agentBucket of response.aggregations.agent_name.buckets) {
+            const agentKey = agentBucket.key as string;
+
+            dynamicAgentData[agentKey as AgentName] = {
               agent: {
-                activation_method: agentNamesAggs[AGENT_ACTIVATION_METHOD].buckets
+                activation_method: agentBucket[AGENT_ACTIVATION_METHOD].buckets
                   .map((bucket) => bucket.key as string)
                   .slice(0, size),
-                version: agentNamesAggs[AGENT_VERSION].buckets.map(
-                  (bucket) => bucket.key as string
-                ),
+                version: agentBucket[AGENT_VERSION].buckets.map((bucket) => bucket.key as string),
               },
               service: {
                 framework: {
-                  name: agentNamesAggs[SERVICE_FRAMEWORK_NAME].buckets
+                  name: agentBucket[SERVICE_FRAMEWORK_NAME].buckets
                     .map((bucket) => bucket.key as string)
                     .slice(0, size),
-                  version: agentNamesAggs[SERVICE_FRAMEWORK_VERSION].buckets
+                  version: agentBucket[SERVICE_FRAMEWORK_VERSION].buckets
                     .map((bucket) => bucket.key as string)
                     .slice(0, size),
                   composite: sortBy(
                     flatten(
-                      agentNamesAggs[SERVICE_FRAMEWORK_NAME].buckets.map((bucket) =>
-                        bucket[SERVICE_FRAMEWORK_VERSION].buckets.map((versionBucket) => ({
-                          doc_count: versionBucket.doc_count,
-                          name: toComposite(bucket.key, versionBucket.key),
-                        }))
+                      agentBucket[SERVICE_FRAMEWORK_NAME].buckets.map((fwBucket: any) =>
+                        fwBucket[SERVICE_FRAMEWORK_VERSION].buckets.map(
+                          (versionBucket: { key: string; doc_count: number }) => ({
+                            doc_count: versionBucket.doc_count,
+                            name: `${fwBucket.key}/${versionBucket.key}`,
+                          })
+                        )
                       )
                     ),
                     'doc_count'
@@ -1209,19 +1176,21 @@ export const tasks: TelemetryTask[] = [
                     .map((composite) => composite.name),
                 },
                 language: {
-                  name: agentNamesAggs[SERVICE_LANGUAGE_NAME].buckets
+                  name: agentBucket[SERVICE_LANGUAGE_NAME].buckets
                     .map((bucket) => bucket.key as string)
                     .slice(0, size),
-                  version: agentNamesAggs[SERVICE_LANGUAGE_VERSION].buckets
+                  version: agentBucket[SERVICE_LANGUAGE_VERSION].buckets
                     .map((bucket) => bucket.key as string)
                     .slice(0, size),
                   composite: sortBy(
                     flatten(
-                      agentNamesAggs[SERVICE_LANGUAGE_NAME].buckets.map((bucket) =>
-                        bucket[SERVICE_LANGUAGE_VERSION].buckets.map((versionBucket) => ({
-                          doc_count: versionBucket.doc_count,
-                          name: toComposite(bucket.key, versionBucket.key),
-                        }))
+                      agentBucket[SERVICE_LANGUAGE_NAME].buckets.map((langBucket: any) =>
+                        langBucket[SERVICE_LANGUAGE_VERSION].buckets.map(
+                          (versionBucket: { key: string; doc_count: number }) => ({
+                            doc_count: versionBucket.doc_count,
+                            name: `${langBucket.key}/${versionBucket.key}`,
+                          })
+                        )
                       )
                     ),
                     'doc_count'
@@ -1231,19 +1200,21 @@ export const tasks: TelemetryTask[] = [
                     .map((composite) => composite.name),
                 },
                 runtime: {
-                  name: agentNamesAggs[SERVICE_RUNTIME_NAME].buckets
+                  name: agentBucket[SERVICE_RUNTIME_NAME].buckets
                     .map((bucket) => bucket.key as string)
                     .slice(0, size),
-                  version: agentNamesAggs[SERVICE_RUNTIME_VERSION].buckets
+                  version: agentBucket[SERVICE_RUNTIME_VERSION].buckets
                     .map((bucket) => bucket.key as string)
                     .slice(0, size),
                   composite: sortBy(
                     flatten(
-                      agentNamesAggs[SERVICE_RUNTIME_NAME].buckets.map((bucket) =>
-                        bucket[SERVICE_RUNTIME_VERSION].buckets.map((versionBucket) => ({
-                          doc_count: versionBucket.doc_count,
-                          name: toComposite(bucket.key, versionBucket.key),
-                        }))
+                      agentBucket[SERVICE_RUNTIME_NAME].buckets.map((runtimeBucket: any) =>
+                        runtimeBucket[SERVICE_RUNTIME_VERSION].buckets.map(
+                          (versionBucket: { key: string; doc_count: number }) => ({
+                            doc_count: versionBucket.doc_count,
+                            name: `${runtimeBucket.key}/${versionBucket.key}`,
+                          })
+                        )
                       )
                     ),
                     'doc_count'
@@ -1254,19 +1225,21 @@ export const tasks: TelemetryTask[] = [
                 },
               },
             };
-            return acc;
-          }, initAgentData);
+          }
 
           return {
             ...data,
-            ...agentData,
+            ...dynamicAgentData,
           };
         },
         Promise.resolve({} as APMTelemetry['agents'])
       );
 
       return {
-        agents: { ...agentDataWithoutOtel, ...agentDataWithOtel },
+        agents: {
+          ...agentDataWithoutOtel,
+          ...agentDataWithOtel,
+        },
       };
     },
   },
