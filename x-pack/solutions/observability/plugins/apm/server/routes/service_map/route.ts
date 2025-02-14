@@ -7,13 +7,15 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
-import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { getRequestBase } from '@kbn/apm-data-access-plugin/server/lib/helpers/create_es_client/create_apm_event_client/get_request_base';
+import type { PassThrough } from 'stream';
+import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
+import { TRACE_ID } from '../../../common/es_fields/apm';
 import { isActivePlatinumLicense } from '../../../common/license_check';
-import { invalidLicenseMessage } from '../../../common/service_map';
+import { invalidLicenseMessage } from '../../../common/service_map/utils';
 import { notifyFeatureUsage } from '../../feature';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
-import { getMlClient } from '../../lib/helpers/get_ml_client';
-import { getServiceMap } from './get_service_map';
 import type { ServiceMapServiceDependencyInfoResponse } from './get_service_map_dependency_node_info';
 import { getServiceMapDependencyNodeInfo } from './get_service_map_dependency_node_info';
 import type { ServiceMapServiceNodeInfoResponse } from './get_service_map_service_node_info';
@@ -23,24 +25,26 @@ import { environmentRt, rangeRt, kueryRt } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import type { ServiceMapResponse } from './get_service_map';
+import { getEsClient } from '../../lib/helpers/get_esql_client';
+import { getTraceSampleIds } from './get_trace_sample_ids';
+import { fetchServicePathsFromTraceIds } from './fetch_service_paths_from_trace_ids';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
   params: t.type({
     query: t.intersection([
-      t.partial({
-        serviceName: t.string,
-        serviceGroup: t.string,
-        kuery: kueryRt.props.kuery,
+      t.type({
+        traceIds: t.union([t.array(t.string), t.string]),
       }),
-      environmentRt,
       rangeRt,
     ]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<ServiceMapResponse> => {
-    const { config, context, params, logger } = resources;
+  options: {
+    arrowStream: true,
+  },
+  handler: async (resources): Promise<PassThrough> => {
+    const { config, context, params } = resources;
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
@@ -56,15 +60,85 @@ const serviceMapRoute = createApmServerRoute({
     });
 
     const {
+      query: { traceIds, start, end },
+    } = params;
+
+    const [esqlClient] = await Promise.all([getEsClient(resources)]);
+
+    const { index, filters } = getRequestBase({
+      apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction] },
+      indices: esqlClient.indices,
+    });
+
+    const entryIdsResponse = await esqlClient.esql<
+      { spanIds: string[] },
+      { transform: 'unflatten' }
+    >(
+      'get_service_paths_parent_ids',
+      {
+        query: `
+          FROM ${index.join(',')}
+          | STATS spanIds = TOP(span.id, 1, "DESC") WHERE span.destination.service.resource IS NOT NULL
+            BY service.name, agent.name, service.environment, span.destination.service.resource, event.outcome 
+          | WHERE spanIds IS NOT NULL
+          | LIMIT 10000 
+        `,
+        filter: {
+          bool: {
+            filter: [
+              ...rangeQuery(start, end),
+              ...termsQuery(TRACE_ID, ...(Array.isArray(traceIds) ? traceIds : [traceIds])),
+              ...filters,
+            ],
+          },
+        },
+        format: 'json',
+      },
+      { transform: 'unflatten' }
+    );
+
+    const spanIds = [
+      ...new Set(entryIdsResponse.hits.flatMap((p): string[] => p.spanIds).filter(Boolean)),
+    ];
+
+    return fetchServicePathsFromTraceIds({
+      index,
+      filters,
+      spanIds,
+      start,
+      end,
+      terminateAfter: config.serviceMapTerminateAfter,
+      esqlClient,
+    });
+  },
+});
+
+const serviceMapTraceSampleRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/service-map/trace-sample',
+  params: t.type({
+    query: t.intersection([
+      t.partial({
+        serviceName: t.string,
+        serviceGroup: t.string,
+        kuery: kueryRt.props.kuery,
+      }),
+      environmentRt,
+      rangeRt,
+    ]),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<{ traceIds: string[] }> => {
+    const { config, context, params, logger } = resources;
+
+    const {
       query: { serviceName, serviceGroup: serviceGroupId, environment, start, end, kuery },
     } = params;
 
     const {
       savedObjects: { client: savedObjectsClient },
-      uiSettings: { client: uiSettingsClient },
     } = await context.core;
-    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices] = await Promise.all([
-      getMlClient(resources),
+
+    const [apmEventClient, serviceGroup] = await Promise.all([
       getApmEventClient(resources),
       serviceGroupId
         ? getServiceGroup({
@@ -72,30 +146,21 @@ const serviceMapRoute = createApmServerRoute({
             serviceGroupId,
           })
         : Promise.resolve(null),
-      uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
     ]);
 
-    const searchAggregatedTransactions = await getSearchTransactionsEvents({
-      apmEventClient,
-      config,
-      start,
-      end,
-      kuery,
-    });
-    return getServiceMap({
-      mlClient,
+    logger.debug('Getting trace sample IDs');
+    const { traceIds } = await getTraceSampleIds({
       config,
       apmEventClient,
       serviceName,
       environment,
-      searchAggregatedTransactions,
-      logger: logger.get('serviceMap'),
       start,
       end,
-      maxNumberOfServices,
       serviceGroupKuery: serviceGroup?.kuery,
       kuery,
     });
+
+    return { traceIds };
   },
 });
 
@@ -179,6 +244,7 @@ const serviceMapDependencyNodeRoute = createApmServerRoute({
 });
 
 export const serviceMapRouteRepository = {
+  ...serviceMapTraceSampleRoute,
   ...serviceMapRoute,
   ...serviceMapServiceNodeRoute,
   ...serviceMapDependencyNodeRoute,

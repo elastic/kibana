@@ -4,346 +4,249 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { OperatorFunction } from 'rxjs';
+import { from, Observable, defer, skipWhen } from 'rxjs';
+import { rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { PassThrough } from 'stream';
 import {
   AGENT_NAME,
   PARENT_ID,
-  PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
+  TRANSACTION_ID,
+  SPAN_ID,
   SPAN_SUBTYPE,
   SPAN_TYPE,
   TRACE_ID,
 } from '../../../common/es_fields/apm';
-import type {
-  ConnectionNode,
-  ExternalConnectionNode,
-  ServiceConnectionNode,
-} from '../../../common/service_map';
-import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { calculateDocsPerShard } from './calculate_docs_per_shard';
+import type { EsClient } from '../../lib/helpers/get_esql_client';
 
-const SCRIPTED_METRICS_FIELDS_TO_COPY = [
-  PARENT_ID,
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  TRACE_ID,
-  PROCESSOR_EVENT,
-  SPAN_TYPE,
-  SPAN_SUBTYPE,
-  AGENT_NAME,
-];
-
-const AVG_BYTES_PER_FIELD = 55;
-
-export async function fetchServicePathsFromTraceIds({
-  apmEventClient,
-  traceIds,
+export function fetchServicePathsFromTraceIds({
+  spanIds,
   start,
   end,
   terminateAfter,
-  serviceMapMaxAllowableBytes,
-  numOfRequests,
+  esqlClient,
+  index,
+  filters,
 }: {
-  apmEventClient: APMEventClient;
-  traceIds: string[];
+  spanIds: string[];
   start: number;
   end: number;
   terminateAfter: number;
-  serviceMapMaxAllowableBytes: number;
-  numOfRequests: number;
+  esqlClient: EsClient;
+  index: string[];
+  filters: QueryDslQueryContainer[];
 }) {
-  // make sure there's a range so ES can skip shards
-  const dayInMs = 24 * 60 * 60 * 1000;
-  const startRange = start - dayInMs;
-  const endRange = end + dayInMs;
+  const stream = new PassThrough();
 
-  const serviceMapParams = {
-    apm: {
-      events: [ProcessorEvent.span, ProcessorEvent.transaction],
-    },
-    body: {
-      terminate_after: terminateAfter,
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            {
-              terms: {
-                [TRACE_ID]: traceIds,
-              },
+  if (spanIds.length === 0) {
+    stream.end();
+    return stream;
+  }
+
+  //   | STATS exit_span = MAX(exit_span)
+  //   BY trace.id, service.node.name, service.name, agent.name, service.environment, entry_transaction, processor.event, span.destination.service.resource
+  // | STATS entry_transaction = MAX(entry_transaction) WHERE processor.event == "transaction",
+  //     exit_span = VALUES(exit_span)
+  //   BY trace.id, service.node.name, service.name, agent.name, service.environment
+  defer(() =>
+    from(
+      esqlClient.esql(
+        'get_service_paths_from_trace_ids',
+        {
+          // query: `
+          //     FROM ${index.join(',')}
+          // | EVAL exit_span = CONCAT(@timestamp::string, "|",
+          //       COALESCE(span.id, transaction.id), "|",
+          //       COALESCE(span.type, "__EMPTY__"), "|",
+          //       COALESCE(span.subtype, "__EMPTY__"), "|",
+          //       COALESCE(span.destination.service.resource, "__EMPTY__"), "|",
+          //       COALESCE(parent.id, "__EMPTY__"), "|",
+          //       service.name, "|",
+          //       COALESCE(service.environment, "__EMPTY__"))
+          // | STATS exit_span = VALUES(exit_span)
+          //   BY trace.id,
+          //     service.node.name,
+          //     service.name,
+          //     agent.name,
+          //     service.environment
+          // | LIMIT ${terminateAfter}
+          // | MV_EXPAND exit_span
+          // | EVAL exit_span = SPLIT(exit_span, "|")
+          // | EVAL event.id = MV_SLICE(exit_span, 1),
+          //     span.type = MV_SLICE(exit_span, 2),
+          //     span.subtype = MV_SLICE(exit_span, 3),
+          //     span.destination.service.resource = MV_SLICE(exit_span, 4),
+          //     parent.id = MV_SLICE(exit_span, 5),
+          //     service.name = MV_SLICE(exit_span, 6),
+          //     service.environment = MV_SLICE(exit_span, 7)
+          // | EVAL span.type = CASE(span.type == "__EMPTY__", null, span.type),
+          //     span.subtype = CASE(span.subtype == "__EMPTY__", null, span.subtype),
+          //     span.destination.service.resource = CASE(span.destination.service.resource == "__EMPTY__",  null, span.destination.service.resource),
+          //     service.environment = CASE(service.environment == "__EMPTY__", null, service.environment),
+          //     parent.id = CASE(parent.id == "__EMPTY__", null, parent.id),
+          //     transactionParentIds = event.id
+          // | KEEP agent.name,
+          //     service.name,
+          //     service.environment,
+          //     event.id,
+          //     span.type,
+          //     span.subtype,
+          //     span.destination.service.resource,
+          //     parent.id,
+          //     transactionParentIds
+          //   `,
+          // query: `
+          //   FROM ${index.join(',')}
+          //   | EVAL transactions = CONCAT(@timestamp::string, "|", transaction.id, "|", COALESCE(parent.id, "__EMPTY__")),
+          //       exitSpan = CONCAT(@timestamp::string, "|", COALESCE(span.id, "__EMPTY__"), "|",
+          //         COALESCE(span.type, "__EMPTY__"), "|",
+          //         COALESCE(span.subtype, "__EMPTY__"), "|",
+          //         COALESCE(parent.id, "__EMPTY__"), "|",
+          //         COALESCE(span.destination.service.resource, "__EMPTY__"))
+          //   | STATS exitSpan = TOP(exitSpan, 3, "desc") WHERE processor.event == "span", transactions = TOP(transactions, 3, "desc") WHERE processor.event == "transaction"
+          //     BY service.node.name,
+          //       service.name,
+          //       agent.name,
+          //       service.environment
+          //   | LIMIT 10000
+          //   | MV_EXPAND transactions
+          //   | MV_EXPAND exitSpan
+          //   | EVAL tempStat = SPLIT(exitSpan, "|"),
+          //       tempTransaction = SPLIT(transactions, "|")
+          //   | EVAL span.timestamp = MV_SLICE(tempStat, 0),
+          //       span.id = MV_SLICE(tempStat, 1),
+          //       span.parent.id = MV_SLICE(tempStat, 3),
+          //       span.destination.service.resource = MV_SLICE(tempStat, 5),
+          //       transaction.timestamp = MV_SLICE(tempTransaction, 0),
+          //       transaction.id = MV_SLICE(tempTransaction, 1),
+          //       transaction.parent.id = MV_SLICE(tempTransaction, 2)
+          //   | EVAL span.timestamp = TO_DATETIME(span.timestamp),
+          //       transaction.timestamp = TO_DATETIME(transaction.timestamp),
+          //       transaction.parent.id = CASE(transaction.parent.id == "__EMPTY__", null, transaction.parent.id)
+          //   | WHERE DATE_DIFF("microseconds", transaction.timestamp, span.timestamp) >= 0
+          //   | STATS  exitSpan = MIN(exitSpan) BY
+          //       service.node.name,
+          //       service.name,
+          //       agent.name,
+          //       service.environment,
+          //       span.destination.service.resource,
+          //       transaction.id,
+          //       transaction.parent.id
+          //   | EVAL exitSpan = SPLIT(exitSpan, "|")
+          //   | EVAL span.id = MV_SLICE(exitSpan, 1),
+          //       span.type = MV_SLICE(exitSpan, 2),
+          //       span.subtype = MV_SLICE(exitSpan, 3),
+          //       parent.id = MV_SLICE(exitSpan, 4)
+          //   | EVAL span.id = CASE(span.id == "__EMPTY__", null, span.id),
+          //       span.type = CASE(span.type == "__EMPTY__", null, span.type),
+          //       span.subtype = CASE(span.subtype == "__EMPTY__", null, span.subtype),
+          //       parent.id = CASE(parent.id == "__EMPTY__", null, parent.id),
+          //       span.destination.service.resource = CASE(span.destination.service.resource == "__EMPTY__", null, span.destination.service.resource)
+          //   | KEEP agent.name,
+          //       service.name,
+          //       service.node.name,
+          //       service.environment,
+          //       span.id,
+          //       span.type,
+          //       span.subtype,
+          //       span.destination.service.resource,
+          //       parent.id,
+          //       transaction.id,
+          //       transaction.parent.id
+          // `,
+          query: `
+          FROM ${index.join(',')}
+          | LIMIT 10000
+          | KEEP agent.name,
+              service.name,
+              service.node.name,
+              service.environment,
+              span.id,
+              transaction.id,
+              span.type,
+              span.subtype,
+              span.destination.service.resource,
+              parent.id`,
+          filter: {
+            bool: {
+              filter: [...rangeQuery(start, end), ...filters, ...termsQuery(PARENT_ID, ...spanIds)],
             },
-            ...rangeQuery(startRange, endRange),
-          ],
+          },
+          format: 'arrow',
         },
+        { transform: 'none' }
+      ) as unknown as Observable<Uint8Array>
+    )
+  )
+    .pipe(flushBuffer(false))
+    .subscribe({
+      next: (event) => {
+        if (!stream.write(event)) {
+          stream.pause();
+          stream.once('drain', () => stream.resume());
+        }
       },
-    },
-  };
-  // fetch without aggs to get shard count, first
-  const serviceMapQueryDataResponse = await apmEventClient.search(
-    'get_trace_ids_shard_data',
-    serviceMapParams
-  );
-  /*
-   * Calculate how many docs we can fetch per shard.
-   * Used in both terminate_after and tracking in the map script of the scripted_metric agg
-   * to ensure we don't fetch more than we can handle.
-   *
-   * 1. Use serviceMapMaxAllowableBytes setting, which represents our baseline request circuit breaker limit.
-   * 2. Divide by numOfRequests we fire off simultaneously to calculate bytesPerRequest.
-   * 3. Divide bytesPerRequest by the average doc size to get totalNumDocsAllowed.
-   * 4. Divide totalNumDocsAllowed by totalShards to get numDocsPerShardAllowed.
-   * 5. Use the lesser of numDocsPerShardAllowed or terminateAfter.
-   */
-
-  const avgDocSizeInBytes = SCRIPTED_METRICS_FIELDS_TO_COPY.length * AVG_BYTES_PER_FIELD; // estimated doc size in bytes
-  const totalShards = serviceMapQueryDataResponse._shards.total;
-
-  const calculatedDocs = calculateDocsPerShard({
-    serviceMapMaxAllowableBytes,
-    avgDocSizeInBytes,
-    totalShards,
-    numOfRequests,
-  });
-
-  const numDocsPerShardAllowed = calculatedDocs > terminateAfter ? terminateAfter : calculatedDocs;
-
-  /*
-   * Any changes to init_script, map_script, combine_script and reduce_script
-   * must be replicated on https://github.com/elastic/elasticsearch-serverless/blob/main/distribution/archives/src/serverless-default-settings.yml
-   */
-  const serviceMapAggs = {
-    service_map: {
-      scripted_metric: {
-        params: {
-          limit: numDocsPerShardAllowed,
-          fieldsToCopy: SCRIPTED_METRICS_FIELDS_TO_COPY,
-        },
-        init_script: {
-          lang: 'painless',
-          source: `
-            state.docCount = 0;
-            state.limit = params.limit;
-            state.eventsById = new HashMap();
-            state.fieldsToCopy = params.fieldsToCopy;`,
-        },
-        map_script: {
-          lang: 'painless',
-          source: `
-            if (state.docCount >= state.limit) {
-              // Stop processing if the document limit is reached
-              return; 
-            }
-
-            def id = $('span.id', null);
-            if (id == null) {
-              id = $('transaction.id', null);
-            }
-
-            // Ensure same event isn't processed twice
-            if (id != null && !state.eventsById.containsKey(id)) {
-              def copy = new HashMap();
-              copy.id = id;
-
-              for(key in state.fieldsToCopy) {
-                def value = $(key, null);
-                if (value != null) {
-                  copy[key] = value;
-                }
-              }
-
-              state.eventsById[id] = copy;
-              state.docCount++;
-            }
-          `,
-        },
-        combine_script: {
-          lang: 'painless',
-          source: `return state;`,
-        },
-        reduce_script: {
-          lang: 'painless',
-          source: `
-            def getDestination(def event) {
-              def destination = new HashMap();
-              destination['span.destination.service.resource'] = event['span.destination.service.resource'];
-              destination['span.type'] = event['span.type'];
-              destination['span.subtype'] = event['span.subtype'];
-              return destination;
-            }
-      
-            def processAndReturnEvent(def context, def eventId) {
-              def stack = new Stack();
-              def reprocessQueue = new LinkedList();
-
-              // Avoid reprocessing the same event
-              def visited = new HashSet();
-
-              stack.push(eventId);
-
-              while (!stack.isEmpty()) {
-                def currentEventId = stack.pop();
-                def event = context.eventsById.get(currentEventId);
-
-                if (event == null || context.processedEvents.get(currentEventId) != null) {
-                  continue;
-                }
-                visited.add(currentEventId);
-
-                def service = new HashMap();
-                service['service.name'] = event['service.name'];
-                service['service.environment'] = event['service.environment'];
-                service['agent.name'] = event['agent.name'];
-                
-                def basePath = new ArrayList();
-                def parentId = event['parent.id'];
-
-                if (parentId != null && !parentId.equals(currentEventId)) {
-                  def parent = context.processedEvents.get(parentId);
-                  
-                  if (parent == null) {
-                    
-                    // Only adds the parentId to the stack if it hasn't been visited to prevent infinite loop scenarios
-                    // if the parent is null, it means it hasn't been processed yet or it could also mean that the current event
-                    // doesn't have a parent, in which case we should skip it
-                    if (!visited.contains(parentId)) {
-                      stack.push(parentId);
-                      // Add currentEventId to be reprocessed once its parent is processed
-                      reprocessQueue.add(currentEventId); 
-                    }
-
-
-                    continue;
-                  }
-
-                  // copy the path from the parent
-                  basePath.addAll(parent.path);
-                  // flag parent path for removal, as it has children
-                  context.locationsToRemove.add(parent.path);
-      
-                  // if the parent has 'span.destination.service.resource' set, and the service is different, we've discovered a service
-                  if (parent['span.destination.service.resource'] != null
-                    && parent['span.destination.service.resource'] != ""
-                    && (parent['service.name'] != event['service.name']
-                      || parent['service.environment'] != event['service.environment'])
-                  ) {
-                    def parentDestination = getDestination(parent);
-                    context.externalToServiceMap.put(parentDestination, service);
-                  }
-                }
-          
-                def lastLocation = basePath.size() > 0 ? basePath[basePath.size() - 1] : null;
-                def currentLocation = service;
-        
-                // only add the current location to the path if it's different from the last one
-                if (lastLocation == null || !lastLocation.equals(currentLocation)) {
-                  basePath.add(currentLocation);
-                }
-        
-                // if there is an outgoing span, create a new path
-                if (event['span.destination.service.resource'] != null
-                  && !event['span.destination.service.resource'].equals("")) {
-
-                  def outgoingLocation = getDestination(event);
-                  def outgoingPath = new ArrayList(basePath);
-                  outgoingPath.add(outgoingLocation);
-                  context.paths.add(outgoingPath);
-                }
-        
-                event.path = basePath;
-                context.processedEvents[currentEventId] = event;
-
-                // reprocess events which were waiting for their parents to be processed
-                while (!reprocessQueue.isEmpty()) {
-                  stack.push(reprocessQueue.remove());
-                }
-              }
-
-              return null;
-            }
-      
-            def context = new HashMap();
-      
-            context.processedEvents = new HashMap();
-            context.eventsById = new HashMap();
-            context.paths = new HashSet();
-            context.externalToServiceMap = new HashMap();
-            context.locationsToRemove = new HashSet();
-      
-            for (state in states) {
-              context.eventsById.putAll(state.eventsById);
-              state.eventsById.clear();
-            }
-
-            states.clear();
-            
-            for (entry in context.eventsById.entrySet()) {
-              processAndReturnEvent(context, entry.getKey());
-            }
-
-            context.processedEvents.clear();
-            context.eventsById.clear();
-      
-            def response = new HashMap();
-            response.paths = new HashSet();
-            response.discoveredServices = new HashSet();
-      
-            for (foundPath in context.paths) {
-              if (!context.locationsToRemove.contains(foundPath)) {
-                response.paths.add(foundPath);
-              }
-            }
-
-            context.locationsToRemove.clear();
-            context.paths.clear();
-      
-            for (entry in context.externalToServiceMap.entrySet()) {
-              def map = new HashMap();
-              map.from = entry.getKey();
-              map.to = entry.getValue();
-              response.discoveredServices.add(map);
-            }
-
-            context.externalToServiceMap.clear();
-
-            return response;
-          `,
-        },
+      error: (error) => {
+        console.error(error);
+        stream.end();
       },
-    } as const,
-  };
+      complete: () => {
+        stream.end();
+      },
+    });
 
-  const serviceMapParamsWithAggs = {
-    ...serviceMapParams,
-    body: {
-      ...serviceMapParams.body,
-      size: 1,
-      terminate_after: numDocsPerShardAllowed,
-      aggs: serviceMapAggs,
-    },
-  };
+  return stream;
+}
 
-  const serviceMapFromTraceIdsScriptResponse = await apmEventClient.search(
-    'get_service_paths_from_trace_ids',
-    serviceMapParamsWithAggs
-  );
+function flushBuffer<T extends Uint8Array>(isCloud: boolean): OperatorFunction<T, T> {
+  return (source: Observable<T>) =>
+    new Observable<T>((subscriber) => {
+      const cloudProxyBufferSize = 4096;
+      let currentBuffer: Uint8Array[] = [];
+      let currentBufferSize: number = 0;
 
-  return serviceMapFromTraceIdsScriptResponse as {
-    aggregations?: {
-      service_map: {
-        value: {
-          paths: ConnectionNode[][];
-          discoveredServices: Array<{
-            from: ExternalConnectionNode;
-            to: ServiceConnectionNode;
-          }>;
-        };
+      const flushBufferIfNeeded = () => {
+        if (currentBuffer.length > 0) {
+          for (const chunk of currentBuffer) {
+            subscriber.next(chunk as unknown as T);
+          }
+          currentBuffer = [];
+          currentBufferSize = 0;
+        }
       };
-    };
-  };
+
+      const keepAlive = () => {
+        const keepAliveBuffer = new Uint8Array();
+        subscriber.next(keepAliveBuffer as T);
+      };
+
+      const flushIntervalId = isCloud ? setInterval(flushBufferIfNeeded, 250) : undefined;
+      const keepAliveIntervalId = setInterval(keepAlive, 30_000);
+
+      source.subscribe({
+        next: (batch) => {
+          const batchSize = batch.length;
+          if (currentBufferSize + batchSize > cloudProxyBufferSize) {
+            flushBufferIfNeeded();
+          }
+          currentBuffer.push(batch);
+          currentBufferSize += batchSize;
+        },
+        error: (error) => {
+          clearInterval(flushIntervalId);
+          clearInterval(keepAliveIntervalId);
+          subscriber.error(error);
+        },
+        complete: () => {
+          flushBufferIfNeeded(); // Flush any remaining data
+          clearInterval(flushIntervalId);
+          clearInterval(keepAliveIntervalId);
+          subscriber.complete();
+        },
+      });
+    });
 }
