@@ -19,11 +19,7 @@ import type {
   OutputPreset,
   AgentlessPolicy,
 } from '../../common/types';
-import type {
-  AgentTargetVersion,
-  AgentType,
-  FleetServerAgentComponent,
-} from '../../common/types/models';
+import type { AgentType, FleetServerAgentComponent } from '../../common/types/models';
 
 import type {
   PackagePolicy,
@@ -72,7 +68,6 @@ export interface AgentPolicySOAttributes {
   global_data_tags?: Array<{ name: string; value: string | number }>;
   agentless?: AgentlessPolicy;
   version?: string;
-  required_versions?: AgentTargetVersion[] | null;
 }
 
 export interface AgentSOAttributes {

@@ -67,7 +67,7 @@ export async function createAgentAction(
     rollout_duration_seconds: newAgentAction.rollout_duration_seconds,
     total: newAgentAction.total,
     traceparent: apm.currentTraceparent,
-    isAutomatic: newAgentAction.isAutomatic,
+    is_automatic: newAgentAction.is_automatic,
   };
 
   const messageSigningService = appContextService.getMessageSigningService();
