@@ -119,6 +119,8 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
   ].flat();
 };
 
+const ENT_SEARCH_INDICES_PREFIX = '.ent-search-';
+
 export const getEnrichedDeprecations = async (
   dataClient: IScopedClusterClient
 ): Promise<EnrichedDeprecationInfo[]> => {
@@ -127,12 +129,12 @@ export const getEnrichedDeprecations = async (
 
   const systemIndicesList = convertFeaturesToIndicesArray(systemIndices.features);
 
-  const indexSettingsIndexNames = Object.keys(deprecations.index_settings).map(
-    (indexName) => indexName!
-  );
+  const indexSettingsIndexNames = Object.keys(deprecations.index_settings);
   const indexSettingsIndexStates = indexSettingsIndexNames.length
     ? await esIndicesStateCheck(dataClient.asCurrentUser, indexSettingsIndexNames)
     : {};
+
+  const deprecationsByIndex = new Map<string, EnrichedDeprecationInfo[]>();
 
   return normalizeEsResponse(deprecations)
     .filter((deprecation) => {
@@ -159,13 +161,22 @@ export const getEnrichedDeprecations = async (
         }
       }
     })
-    .map((deprecation) => {
+    .flatMap((deprecation) => {
       const correctiveAction = getCorrectiveAction(
         deprecation.type,
         deprecation.message,
         deprecation.metadata as EsMetadata,
         deprecation.index
       );
+
+      if (
+        // Early exclusion of enterprise search indices that need to be reindexed
+        deprecation.index &&
+        deprecation.index.startsWith(ENT_SEARCH_INDICES_PREFIX) &&
+        correctiveAction?.type === 'reindex'
+      ) {
+        return [];
+      }
 
       // If we have found deprecation information for index/indices
       // check whether the index is open or closed.
@@ -174,10 +185,39 @@ export const getEnrichedDeprecations = async (
           indexSettingsIndexStates[deprecation.index!] === 'closed' ? 'index-closed' : undefined;
       }
 
-      const enrichedDeprecation = _.omit(deprecation, 'metadata');
-      return {
-        ...enrichedDeprecation,
+      const enrichedDeprecation = {
+        ..._.omit(deprecation, 'metadata'),
         correctiveAction,
       };
+
+      if (deprecation.index) {
+        const indexDeprecations = deprecationsByIndex.get(deprecation.index) || [];
+        indexDeprecations.push(enrichedDeprecation);
+        deprecationsByIndex.set(deprecation.index, indexDeprecations);
+      }
+
+      return enrichedDeprecation;
+    })
+    .filter((deprecation) => {
+      if (
+        deprecation.index &&
+        deprecation.message.includes(`Index [${deprecation.index}] is a frozen index`)
+      ) {
+        // frozen indices are created in 7.x, so they are old / incompatible as well
+        // reindexing + deleting is required, so no need to bubble up this deprecation in the UI
+        const indexDeprecations = deprecationsByIndex.get(deprecation.index)!;
+        const oldIndexDeprecation: EnrichedDeprecationInfo | undefined = indexDeprecations.find(
+          (elem) =>
+            elem.type === 'index_settings' &&
+            elem.index === deprecation.index &&
+            elem.correctiveAction?.type === 'reindex'
+        );
+        if (oldIndexDeprecation) {
+          oldIndexDeprecation.frozen = true;
+          return false;
+        }
+      }
+
+      return true;
     });
 };

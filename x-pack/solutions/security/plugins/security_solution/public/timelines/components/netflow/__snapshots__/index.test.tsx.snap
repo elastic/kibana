@@ -2,8 +2,8 @@
 
 exports[`Netflow renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c11,
-.c11 * {
+  .c7,
+.c7 * {
   display: inline-block;
   max-width: 100%;
   overflow: hidden;
@@ -106,75 +106,12 @@ tr:hover .c3:focus::before {
   vertical-align: top;
 }
 
-.c13 svg {
-  position: relative;
-  top: -1px;
-}
-
-.c22 {
+.c9 {
   margin-right: 5px;
-}
-
-.c21 {
-  margin-right: 5px;
-}
-
-.c15 {
-  position: relative;
-  top: 1px;
-}
-
-.c14 {
-  margin-right: 5px;
-}
-
-.c17 {
-  background-color: #343741;
-  height: 2.8px;
-  width: 25px;
-}
-
-.c20 {
-  background-color: #343741;
-  height: 2.2px;
-  width: 25px;
-}
-
-.c19 {
-  margin-right: 5px;
-}
-
-.c16 {
-  margin: 0 2px;
-}
-
-.c16 .euiToolTipAnchor {
-  white-space: nowrap;
-}
-
-.c18 {
-  margin: 0 5px;
-}
-
-.c7 {
-  margin-right: 3px;
 }
 
 .c8 {
-  margin: 0 5px;
-}
-
-.c12 {
-  margin: 0 3px;
-}
-
-.c10 {
-  font-weight: bold;
-  margin-top: 2px;
-}
-
-.c9 {
-  margin-top: 3px;
+  margin-right: 5px;
 }
 
 .c6 {
@@ -537,7 +474,7 @@ tr:hover .c3:focus::before {
                 class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-center-row"
               >
                 <div
-                  class="euiFlexItem c7 emotion-euiFlexItem-growZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
                     class="c1"
@@ -599,7 +536,7 @@ tr:hover .c3:focus::before {
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem c7 emotion-euiFlexItem-growZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
                     class="c1"
@@ -656,7 +593,7 @@ tr:hover .c3:focus::before {
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem c7 emotion-euiFlexItem-growZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
                     class="c1"
@@ -692,7 +629,7 @@ tr:hover .c3:focus::before {
                               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                             >
                               <div
-                                class="euiText c8 emotion-euiText-xs"
+                                class="euiText emotion-euiText-xs"
                               >
                                 <span>
                                   100B
@@ -706,7 +643,7 @@ tr:hover .c3:focus::before {
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem c7 emotion-euiFlexItem-growZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
                     class="c1"
@@ -742,7 +679,7 @@ tr:hover .c3:focus::before {
                               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                             >
                               <div
-                                class="euiText c8 emotion-euiText-xs"
+                                class="euiText emotion-euiText-xs"
                               >
                                 <span>
                                   3 pkts
@@ -756,7 +693,7 @@ tr:hover .c3:focus::before {
                   </div>
                 </div>
                 <div
-                  class="euiFlexItem c7 emotion-euiFlexItem-growZero"
+                  class="euiFlexItem emotion-euiFlexItem-growZero"
                 >
                   <div
                     class="c1"
@@ -872,7 +809,7 @@ tr:hover .c3:focus::before {
               </div>
             </div>
             <div
-              class="euiFlexItem c9 emotion-euiFlexItem-growZero"
+              class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-responsive-none-center-stretch-row"
@@ -899,7 +836,7 @@ tr:hover .c3:focus::before {
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <div
-                              class="c10"
+                              class="css-fbtzpm"
                             >
                               Source
                             </div>
@@ -954,7 +891,7 @@ tr:hover .c3:focus::before {
                                                     tabindex="-1"
                                                   >
                                                     <span
-                                                      class="c11"
+                                                      class="c7"
                                                       data-test-subj="draggable-truncatable-content"
                                                     >
                                                       <a
@@ -985,7 +922,7 @@ tr:hover .c3:focus::before {
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <span
-                                          class="c12"
+                                          class="css-7g9jn5"
                                           data-test-subj="ip-port-separator"
                                         >
                                           :
@@ -995,7 +932,7 @@ tr:hover .c3:focus::before {
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          class="c13"
+                                          class="css-ggf2mo"
                                         >
                                           <a
                                             class="euiLink emotion-euiLink-primary"
@@ -1031,7 +968,7 @@ tr:hover .c3:focus::before {
                               class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                             >
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1083,7 +1020,7 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1135,7 +1072,7 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1144,7 +1081,7 @@ tr:hover .c3:focus::before {
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <span
-                                      class="c15"
+                                      class="css-19nn5cj"
                                       data-test-subj="country-flag"
                                     >
                                       🇺🇸
@@ -1197,7 +1134,7 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1249,7 +1186,7 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1308,7 +1245,7 @@ tr:hover .c3:focus::before {
                   </span>
                 </div>
                 <div
-                  class="euiFlexGroup c16 emotion-euiFlexGroup-none-center-center-column"
+                  class="euiFlexGroup emotion-euiFlexGroup-none-center-center-column"
                 >
                   <div
                     class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -1320,7 +1257,7 @@ tr:hover .c3:focus::before {
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="c17"
+                          class="css-1io4upz"
                           height="2.8"
                         />
                       </div>
@@ -1361,10 +1298,10 @@ tr:hover .c3:focus::before {
                                     class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                   >
                                     <div
-                                      class="euiText c18 emotion-euiText-xs"
+                                      class="euiText emotion-euiText-xs"
                                     >
                                       <span
-                                        class="c19"
+                                        class="css-2dse8b"
                                       >
                                         (60.00%)
                                       </span>
@@ -1383,7 +1320,7 @@ tr:hover .c3:focus::before {
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="c17"
+                          class="css-1io4upz"
                           height="2.8"
                         />
                       </div>
@@ -1424,7 +1361,7 @@ tr:hover .c3:focus::before {
                                     class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                   >
                                     <div
-                                      class="euiText c18 emotion-euiText-xs"
+                                      class="euiText emotion-euiText-xs"
                                     >
                                       <span>
                                         2 pkts
@@ -1441,7 +1378,7 @@ tr:hover .c3:focus::before {
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="c17"
+                          class="css-1io4upz"
                           height="2.8"
                         />
                       </div>
@@ -1475,7 +1412,7 @@ tr:hover .c3:focus::before {
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="c20"
+                          class="css-1almmfe"
                           height="2.2"
                         />
                       </div>
@@ -1524,10 +1461,10 @@ tr:hover .c3:focus::before {
                                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                           >
                                             <div
-                                              class="euiText c18 emotion-euiText-xs"
+                                              class="euiText emotion-euiText-xs"
                                             >
                                               <span
-                                                class="c19"
+                                                class="css-2dse8b"
                                               >
                                                 (40.00%)
                                               </span>
@@ -1550,7 +1487,7 @@ tr:hover .c3:focus::before {
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="c20"
+                          class="css-1almmfe"
                           height="2.2"
                         />
                       </div>
@@ -1591,7 +1528,7 @@ tr:hover .c3:focus::before {
                                     class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                   >
                                     <div
-                                      class="euiText c18 emotion-euiText-xs"
+                                      class="euiText emotion-euiText-xs"
                                     >
                                       <span>
                                         1 pkts
@@ -1608,7 +1545,7 @@ tr:hover .c3:focus::before {
                         class="euiFlexItem emotion-euiFlexItem-growZero"
                       >
                         <span
-                          class="c20"
+                          class="css-1almmfe"
                           height="2.2"
                         />
                       </div>
@@ -1637,7 +1574,7 @@ tr:hover .c3:focus::before {
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <div
-                              class="c10"
+                              class="css-fbtzpm"
                             >
                               Destination
                             </div>
@@ -1692,7 +1629,7 @@ tr:hover .c3:focus::before {
                                                     tabindex="-1"
                                                   >
                                                     <span
-                                                      class="c11"
+                                                      class="c7"
                                                       data-test-subj="draggable-truncatable-content"
                                                     >
                                                       <a
@@ -1723,7 +1660,7 @@ tr:hover .c3:focus::before {
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <span
-                                          class="c12"
+                                          class="css-7g9jn5"
                                           data-test-subj="ip-port-separator"
                                         >
                                           :
@@ -1733,7 +1670,7 @@ tr:hover .c3:focus::before {
                                         class="euiFlexItem emotion-euiFlexItem-growZero"
                                       >
                                         <div
-                                          class="c13"
+                                          class="css-ggf2mo"
                                         >
                                           <a
                                             class="euiLink emotion-euiLink-primary"
@@ -1769,7 +1706,7 @@ tr:hover .c3:focus::before {
                               class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
                             >
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1821,7 +1758,7 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1873,7 +1810,7 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1882,7 +1819,7 @@ tr:hover .c3:focus::before {
                                     class="euiFlexItem emotion-euiFlexItem-growZero"
                                   >
                                     <span
-                                      class="c15"
+                                      class="css-19nn5cj"
                                       data-test-subj="country-flag"
                                     >
                                       🇺🇸
@@ -1935,7 +1872,7 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -1987,7 +1924,7 @@ tr:hover .c3:focus::before {
                                 </div>
                               </div>
                               <div
-                                class="euiFlexItem c14 emotion-euiFlexItem-growZero"
+                                class="euiFlexItem emotion-euiFlexItem-growZero"
                               >
                                 <div
                                   class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
@@ -2110,7 +2047,7 @@ tr:hover .c3:focus::before {
                             class="euiBadge__text emotion-euiBadge__text"
                           >
                             <span
-                              class="c21"
+                              class="c8"
                             >
                               ja3
                             </span>
@@ -2195,7 +2132,7 @@ tr:hover .c3:focus::before {
                             class="euiBadge__text emotion-euiBadge__text"
                           >
                             <span
-                              class="c22"
+                              class="c9"
                             >
                               client cert
                             </span>
@@ -2280,7 +2217,7 @@ tr:hover .c3:focus::before {
                             class="euiBadge__text emotion-euiBadge__text"
                           >
                             <span
-                              class="c22"
+                              class="c9"
                             >
                               server cert
                             </span>

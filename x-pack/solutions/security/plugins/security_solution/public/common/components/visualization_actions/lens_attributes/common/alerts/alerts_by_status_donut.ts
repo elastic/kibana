@@ -7,11 +7,13 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { GetLensAttributes } from '../../../types';
 const layerId = uuidv4();
+const columnSeverity = uuidv4();
+const columnRecord = uuidv4();
 
-export const getAlertsByStatusAttributes: GetLensAttributes = (
+export const getAlertsByStatusAttributes: GetLensAttributes = ({
   stackByField = 'kibana.alert.workflow_status',
-  extraOptions
-) => {
+  extraOptions,
+}) => {
   return {
     title: 'Alerts',
     description: '',
@@ -22,8 +24,8 @@ export const getAlertsByStatusAttributes: GetLensAttributes = (
         layers: [
           {
             layerId,
-            primaryGroups: ['a9b43606-7ff7-46ae-a47c-85bed80fab9a'],
-            metrics: ['21cc4a49-3780-4b1a-be28-f02fa5303d24'],
+            primaryGroups: [columnSeverity],
+            metrics: [columnRecord],
             numberDisplay: 'value',
             categoryDisplay: 'hide',
             legendDisplay: 'hide',
@@ -69,7 +71,7 @@ export const getAlertsByStatusAttributes: GetLensAttributes = (
           layers: {
             [layerId]: {
               columns: {
-                'a9b43606-7ff7-46ae-a47c-85bed80fab9a': {
+                [columnSeverity]: {
                   label: 'Filters',
                   dataType: 'string',
                   operationType: 'filters',
@@ -108,7 +110,7 @@ export const getAlertsByStatusAttributes: GetLensAttributes = (
                     ],
                   },
                 },
-                '21cc4a49-3780-4b1a-be28-f02fa5303d24': {
+                [columnRecord]: {
                   label: 'Count of records',
                   dataType: 'number',
                   operationType: 'count',
@@ -124,10 +126,7 @@ export const getAlertsByStatusAttributes: GetLensAttributes = (
                   },
                 },
               },
-              columnOrder: [
-                'a9b43606-7ff7-46ae-a47c-85bed80fab9a',
-                '21cc4a49-3780-4b1a-be28-f02fa5303d24',
-              ],
+              columnOrder: [columnSeverity, columnRecord],
               sampling: 1,
               incompleteColumns: {},
             },
