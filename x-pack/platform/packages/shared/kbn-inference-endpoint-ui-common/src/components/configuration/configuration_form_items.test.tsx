@@ -37,7 +37,7 @@ describe('ConfigurationFormItems', () => {
   it('renders link when isInternalProvider is true and key is model_id', () => {
     render(<ConfigurationFormItems {...defaultProps} isInternalProvider={true} />);
 
-    const link = screen.getByRole('link', { name: /looking for elasticsearch model ids/i });
+    const link = screen.getByRole('link', { name: /Learn more./i });
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute(
       'href',
