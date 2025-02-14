@@ -132,6 +132,8 @@ export interface Tutorial {
   shortDescription: string;
   longDescription: string;
   isBeta?: boolean;
+  integrationBrowserCategories?: string;
+  completionTimeMinutes?: number;
 }
 type StatusCheckStatesType = 'HAS_DATA' | 'NO_DATA' | 'ERROR' | 'NOT_CHECKED' | 'FETCHING';
 

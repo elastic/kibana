@@ -19,15 +19,13 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import {
+  SimpleSavedObject,
   SavedObjectsBatchResponse,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkCreateOptions,
 } from '@kbn/core-saved-objects-api-browser';
 
-interface SavedObjectShape {
-  id: string;
-  type: string;
-  attributes: Record<string, any>;
+export interface SavedObjectShape extends SimpleSavedObject {
   version?: string;
 }
 
