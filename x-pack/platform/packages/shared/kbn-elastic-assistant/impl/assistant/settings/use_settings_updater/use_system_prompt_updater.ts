@@ -205,7 +205,7 @@ export const useSystemPromptUpdater = ({
         if (existingPrompt) {
           const newBulkActions = {
             ...promptsBulkActions,
-            ...(selectedSystemPrompt.name !== selectedSystemPrompt.id
+            ...(selectedSystemPrompt.id !== ''
               ? {
                   update: [
                     ...(promptsBulkActions.update ?? []).filter(

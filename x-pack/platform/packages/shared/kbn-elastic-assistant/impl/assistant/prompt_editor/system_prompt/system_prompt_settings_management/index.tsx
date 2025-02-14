@@ -234,7 +234,11 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
         onClose={onSaveCancelled}
         onSaveCancelled={onSaveCancelled}
         onSaveConfirmed={onSaveConfirmed}
-        saveButtonDisabled={selectedSystemPrompt?.name == null || selectedSystemPrompt?.name === ''}
+        saveButtonDisabled={
+          selectedSystemPrompt?.name == null ||
+          selectedSystemPrompt?.name === '' ||
+          selectedSystemPrompt?.content === ''
+        }
       >
         <SystemPromptEditor
           conversations={conversations}

@@ -71,7 +71,7 @@ export const analyzeMarkdown = (markdown: string): CodeBlockDetails[] => {
 };
 
 /**
- * Returns the new default system prompt, fallback to the default system prompt if not found
+ * Returns the new conversation default system prompt
  *
  * @param allSystemPrompts All available System Prompts
  */

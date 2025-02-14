@@ -11,7 +11,7 @@ import { PromptResponse } from '@kbn/elastic-assistant-common';
 import { InfiniteData } from '@tanstack/query-core/src/types';
 import { FetchConversationsResponse } from '../api';
 import { AIConnector } from '../../connectorland/connector_selector';
-import { getDefaultSystemPrompt } from '../use_conversation/helpers';
+import { getDefaultNewSystemPrompt, getDefaultSystemPrompt } from '../use_conversation/helpers';
 import { useConversation } from '../use_conversation';
 import { sleep } from '../helpers';
 import { Conversation } from '../../..';
@@ -56,9 +56,7 @@ export const useCurrentConversation = ({
 }: Props): UseCurrentConversation => {
   const { deleteConversation, getConversation, setApiConfig } = useConversation();
   const [currentConversation, setCurrentConversation] = useState<Conversation | undefined>();
-  /**
-   * START SYSTEM PROMPT
-   */
+
   const currentSystemPrompt = useMemo(
     () =>
       getDefaultSystemPrompt({
@@ -71,23 +69,39 @@ export const useCurrentConversation = ({
   // Write the selected system prompt to the conversation config
   const setCurrentSystemPromptId = useCallback(
     async (promptId?: string) => {
+      if (currentConversation?.id === '') {
+        return setCurrentConversation({
+          ...currentConversation,
+          apiConfig: currentConversation?.apiConfig
+            ? {
+                ...currentConversation?.apiConfig,
+                defaultSystemPromptId: promptId,
+              }
+            : undefined,
+          id: '',
+          messages: [],
+          replacements: {},
+          category: 'assistant',
+          title: '',
+        });
+      }
       if (currentConversation && currentConversation.apiConfig) {
-        await setApiConfig({
+        const updatedConversation = await setApiConfig({
           conversation: currentConversation,
           apiConfig: {
             ...currentConversation.apiConfig,
             defaultSystemPromptId: promptId,
           },
         });
+
+        if (updatedConversation) {
+          setCurrentConversation(updatedConversation);
+        }
         await refetchCurrentUserConversations();
       }
     },
     [currentConversation, refetchCurrentUserConversations, setApiConfig]
   );
-
-  /**
-   * END SYSTEM PROMPT
-   */
 
   /**
    * Refetches the current conversation, optionally by conversation ID or title.
@@ -133,15 +147,29 @@ export const useCurrentConversation = ({
   const handleOnConversationSelected = useCallback(
     async ({ cId }: { cId: string }) => {
       if (cId === '') {
+        const apiConfig = defaultConnector
+          ? {
+              connectorId: defaultConnector.id ?? '',
+              actionTypeId: defaultConnector.actionTypeId ?? '',
+            }
+          : undefined;
+
+        // Merge apiConfig from currentConversation if it exists
+        const mergedApiConfig = currentConversation?.apiConfig
+          ? currentConversation.apiConfig
+          : apiConfig;
+        const newConversationDefaultSystemPrompt = getDefaultNewSystemPrompt(allSystemPrompts);
         return setCurrentConversation({
-          apiConfig: defaultConnector
+          ...(mergedApiConfig
             ? {
-                connectorId: defaultConnector.id ?? '',
-                actionTypeId: defaultConnector.actionTypeId ?? '',
+                apiConfig: {
+                  ...mergedApiConfig,
+                  ...(newConversationDefaultSystemPrompt?.id
+                    ? { defaultSystemPromptId: newConversationDefaultSystemPrompt?.id }
+                    : {}),
+                },
               }
-            : undefined,
-          // get apiConfig from currentConversation if it exists
-          ...(currentConversation ?? {}),
+            : {}),
           id: '',
           messages: [],
           replacements: {},
@@ -152,7 +180,7 @@ export const useCurrentConversation = ({
       // refetch will set the currentConversation
       await refetchCurrentConversation({ cId });
     },
-    [currentConversation, defaultConnector, refetchCurrentConversation]
+    [allSystemPrompts, currentConversation?.apiConfig, defaultConnector, refetchCurrentConversation]
   );
   useEffect(() => {
     if (!mayUpdateConversations || !!currentConversation) return;

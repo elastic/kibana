@@ -49,6 +49,10 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
   selectedSystemPrompt,
   systemPromptSettings,
 }) => {
+  const disableFields = useMemo(
+    () => selectedSystemPrompt == null || selectedSystemPrompt.id === '',
+    [selectedSystemPrompt]
+  );
   // Prompt
   const promptContent = useMemo(
     // Fixing Cursor Jump in text area
@@ -59,8 +63,8 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
   const conversationOptions = useMemo(() => Object.values(conversations), [conversations]);
 
   const selectedConversations = useMemo(() => {
-    return selectedSystemPrompt != null ? selectedSystemPrompt.conversations : [];
-  }, [selectedSystemPrompt]);
+    return !disableFields && selectedSystemPrompt ? selectedSystemPrompt.conversations : [];
+  }, [disableFields, selectedSystemPrompt]);
 
   // Whether this system prompt should be the default for new conversations
   const isNewConversationDefault = useMemo(
@@ -82,7 +86,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
       <EuiFormRow display="rowCompressed" label={i18n.SYSTEM_PROMPT_PROMPT} fullWidth>
         <EuiTextArea
           data-test-subj={TEST_IDS.SYSTEM_PROMPT_MODAL.PROMPT_TEXT}
-          disabled={selectedSystemPrompt == null}
+          disabled={disableFields}
           onChange={onPromptContentChange}
           placeholder={i18n.SYSTEM_PROMPT_PROMPT_PLACEHOLDER}
           value={promptContent}
@@ -101,7 +105,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
       >
         <ConversationMultiSelector
           conversations={conversationOptions}
-          isDisabled={selectedSystemPrompt == null}
+          isDisabled={disableFields}
           onConversationSelectionChange={onConversationSelectionChange}
           selectedConversations={selectedConversations}
         />
@@ -110,7 +114,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
       <EuiFormRow display="rowCompressed">
         <EuiCheckbox
           data-test-subj={TEST_IDS.SYSTEM_PROMPT_MODAL.TOGGLE_ALL_DEFAULT_CONVERSATIONS}
-          disabled={selectedSystemPrompt == null}
+          disabled={disableFields}
           id={'defaultNewConversation'}
           label={
             <EuiFlexGroup alignItems="center" gutterSize={'xs'}>

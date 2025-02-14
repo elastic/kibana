@@ -129,19 +129,8 @@ export const useConversation = (): UseConversation => {
   const setApiConfig = useCallback(
     async ({ conversation, apiConfig }: SetApiConfigProps) => {
       if (conversation.id === '') {
-        return createConversationApi({
-          http,
-          conversation: {
-            apiConfig,
-            category: 'assistant',
-            title: conversation.title,
-            replacements: conversation.replacements,
-            excludeFromLastConversationStorage: conversation.excludeFromLastConversationStorage,
-            id: '',
-            messages: conversation.messages ?? [],
-          },
-          toasts,
-        });
+        // only developer should ever see this error
+        throw new Error('Conversation ID is required to set API config');
       } else {
         return updateConversation({
           http,
