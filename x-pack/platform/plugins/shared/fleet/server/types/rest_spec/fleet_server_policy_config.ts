@@ -77,7 +77,7 @@ export const PutFleetServerHostRequestSchema = {
     proxy_id: schema.nullable(schema.string()),
     // remove is_preconfigured from schema
     is_preconfigured: undefined,
-  })
+  }),
 };
 
 export const GetAllFleetServerHostRequestSchema = {};

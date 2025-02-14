@@ -15,11 +15,11 @@ export interface PutFleetServerHostsRequest {
   params: {
     itemId: string;
   };
-  body: Partial<NewFleetServerHost>
+  body: Partial<NewFleetServerHost>;
 }
 
 export interface PostFleetServerHostsRequest {
-  body: Partial<FleetServerHost>
+  body: Partial<FleetServerHost>;
 }
 
 export interface PostFleetServerHostsResponse {
