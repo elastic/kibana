@@ -117,6 +117,7 @@ export function StreamDetailLifecycle({
     stats,
     isLoading: isLoadingStats,
     refresh: refreshStats,
+    error: statsError,
   } = useDataStreamStats({ definition });
 
   const { signal } = useAbortController();
@@ -197,6 +198,7 @@ export function StreamDetailLifecycle({
               openEditModal={(action) => setOpenEditModal(action)}
               isLoadingStats={isLoadingStats}
               stats={stats}
+              statsError={statsError}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

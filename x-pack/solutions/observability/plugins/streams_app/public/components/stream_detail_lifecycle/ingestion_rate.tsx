@@ -45,7 +45,11 @@ export function IngestionRate({
   } = useKibana();
   const [timeRange, setTimeRange] = useState({ start: 'now-2w', end: 'now' });
 
-  const { loading: isLoadingIngestionRate, value: ingestionRate } = useStreamsAppFetch(
+  const {
+    loading: isLoadingIngestionRate,
+    value: ingestionRate,
+    error: ingestionRateError,
+  } = useStreamsAppFetch(
     async ({ signal }) => {
       if (!definition || isLoadingStats || !stats?.bytesPerDay) {
         return;
@@ -85,7 +89,7 @@ export function IngestionRate({
             </EuiText>
           </EuiFlexItem>
 
-          <EuiFlexItem grow={1}>
+          <EuiFlexItem grow={false}>
             <EuiSuperDatePicker
               isLoading={isLoadingIngestionRate || isLoadingStats}
               start={timeRange.start}
@@ -95,7 +99,7 @@ export function IngestionRate({
                 refreshStats();
               }}
               updateButtonProps={{ iconOnly: true, fill: false }}
-              width="full"
+              width="auto"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -103,7 +107,9 @@ export function IngestionRate({
 
       <EuiSpacer size="s" />
 
-      {isLoadingIngestionRate || isLoadingStats || !ingestionRate ? (
+      {ingestionRateError ? (
+        ingestionRateError.message
+      ) : isLoadingIngestionRate || isLoadingStats || !ingestionRate ? (
         <EuiFlexGroup
           justifyContent="center"
           alignItems="center"

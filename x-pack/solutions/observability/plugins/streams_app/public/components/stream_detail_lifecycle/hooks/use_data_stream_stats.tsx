@@ -53,5 +53,6 @@ export const useDataStreamStats = ({ definition }: { definition?: IngestStreamGe
     stats: statsFetch.value,
     isLoading: statsFetch.loading,
     refresh: statsFetch.refresh,
+    error: statsFetch.error,
   };
 };

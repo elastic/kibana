@@ -44,6 +44,7 @@ export function RetentionMetadata({
   openEditModal,
   stats,
   isLoadingStats,
+  statsError,
 }: {
   definition: IngestStreamGetResponse;
   ilmLocator?: LocatorPublic<IlmLocatorParams>;
@@ -51,6 +52,7 @@ export function RetentionMetadata({
   openEditModal: (action: LifecycleEditAction) => void;
   stats?: DataStreamStats;
   isLoadingStats: boolean;
+  statsError?: Error;
 }) {
   const [isMenuOpen, { toggle: toggleMenu, off: closeMenu }] = useBoolean(false);
   const router = useStreamsAppRouter();
@@ -183,7 +185,9 @@ export function RetentionMetadata({
           defaultMessage: 'Ingestion',
         })}
         value={
-          isLoadingStats || !stats ? (
+          statsError ? (
+            '-'
+          ) : isLoadingStats || !stats ? (
             <EuiLoadingSpinner size="s" />
           ) : stats.bytesPerDay ? (
             formatIngestionRate(stats.bytesPerDay)
@@ -197,7 +201,15 @@ export function RetentionMetadata({
         metadata={i18n.translate('xpack.streams.streamDetailLifecycle.totalDocs', {
           defaultMessage: 'Total doc count',
         })}
-        value={isLoadingStats || !stats ? <EuiLoadingSpinner size="s" /> : stats.totalDocs}
+        value={
+          statsError ? (
+            '-'
+          ) : isLoadingStats || !stats ? (
+            <EuiLoadingSpinner size="s" />
+          ) : (
+            stats.totalDocs
+          )
+        }
       />
     </EuiPanel>
   );
