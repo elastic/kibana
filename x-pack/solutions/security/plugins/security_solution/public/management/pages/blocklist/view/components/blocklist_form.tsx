@@ -29,6 +29,7 @@ import { isOneOfOperator, isOperator } from '@kbn/securitysolution-list-utils';
 import { uniq } from 'lodash';
 
 import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { isPolicySelectionTag } from '../../../../../../common/endpoint/service/artifacts/utils';
 import { FormattedError } from '../../../../components/formatted_error';
 import { OS_TITLES } from '../../../../common/translations';
 import type {
@@ -548,6 +549,13 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     const handleOnPolicyChange = useCallback(
       (change: EffectedPolicySelection) => {
         const tags = getArtifactTagsByPolicySelection(change);
+
+        // Make sure we don't drop other `tags` the artifact might have assigned to it
+        (item.tags ?? []).forEach((existingTag) => {
+          if (!isPolicySelectionTag(existingTag)) {
+            tags.push(existingTag);
+          }
+        });
 
         const nextItem = { ...item, tags };
 

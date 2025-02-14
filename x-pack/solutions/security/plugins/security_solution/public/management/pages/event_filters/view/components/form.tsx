@@ -706,10 +706,18 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
           }
 
           const tags = getTagsUpdatedBy('policySelection', policySelectionTags);
+
+          // Make sure we don't drop other `tags` the artifact might have assigned to it
+          (exception.tags ?? []).forEach((existingTag) => {
+            if (!isPolicySelectionTag(existingTag)) {
+              tags.push(existingTag);
+            }
+          });
+
           processChanged({ tags });
           if (!hasFormChanged) setHasFormChanged(true);
         },
-        [processChanged, getTagsUpdatedBy, hasFormChanged]
+        [getTagsUpdatedBy, exception.tags, processChanged, hasFormChanged]
       );
 
       const policiesSection = useMemo(
