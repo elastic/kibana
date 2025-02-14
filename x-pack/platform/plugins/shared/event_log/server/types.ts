@@ -96,6 +96,7 @@ export interface IEventLogClient {
     legacyIds?: string[]
   ): Promise<QueryEventsBySavedObjectSearchAfterResult>;
   closePointInTime(pitId: string): Promise<void>;
+  refreshIndex(): Promise<void>;
 }
 
 export interface IEventLogger {

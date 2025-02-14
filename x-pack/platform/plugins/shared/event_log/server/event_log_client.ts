@@ -226,6 +226,10 @@ export class EventLogClient implements IEventLogClient {
     });
   }
 
+  public async refreshIndex(): Promise<void> {
+    await this.esContext.esAdapter.refreshIndex();
+  }
+
   public async findEventsBySavedObjectIdsSearchAfter(
     type: string,
     ids: string[],

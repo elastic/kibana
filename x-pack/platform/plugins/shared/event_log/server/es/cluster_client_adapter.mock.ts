@@ -32,6 +32,7 @@ const createClusterClientMock = () => {
     queryEventsByDocumentIds: jest.fn(),
     queryEventsBySavedObjectsSearchAfter: jest.fn(),
     closePointInTime: jest.fn(),
+    refreshIndex: jest.fn(),
   };
   return mock;
 };
