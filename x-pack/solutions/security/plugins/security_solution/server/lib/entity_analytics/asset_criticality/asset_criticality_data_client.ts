@@ -324,34 +324,32 @@ export class AssetCriticalityDataClient {
       flushBytes,
       retries,
       refreshOnCompletion: this.getIndex(),
-      onDocument: ({ record }) => [
-        { update: { _id: createId(record) } },
-        {
-          doc: {
-            id_field: record.idField,
-            id_value: record.idValue,
-            criticality_level:
-              record.criticalityLevel === 'unassigned'
-                ? CRITICALITY_VALUES.DELETED
-                : record.criticalityLevel,
-            asset: {
-              criticality:
-                record.criticalityLevel === 'unassigned'
-                  ? CRITICALITY_VALUES.DELETED
-                  : record.criticalityLevel,
+      onDocument: ({ record }) => {
+        const criticalityLevel =
+          record.criticalityLevel === 'unassigned'
+            ? CRITICALITY_VALUES.DELETED
+            : record.criticalityLevel;
+
+        return [
+          { update: { _id: createId(record) } },
+          {
+            doc: {
+              id_field: record.idField,
+              id_value: record.idValue,
+              criticality_level: criticalityLevel,
+              asset: {
+                criticality: criticalityLevel,
+              },
+              ...getImplicitEntityFields({
+                ...record,
+                criticalityLevel,
+              }),
+              '@timestamp': new Date().toISOString(),
             },
-            ...getImplicitEntityFields({
-              ...record,
-              criticalityLevel:
-                record.criticalityLevel === 'unassigned'
-                  ? CRITICALITY_VALUES.DELETED
-                  : record.criticalityLevel,
-            }),
-            '@timestamp': new Date().toISOString(),
+            doc_as_upsert: true,
           },
-          doc_as_upsert: true,
-        },
-      ],
+        ];
+      },
       onDrop: ({ document, error }) => {
         errors.push({
           message: error?.reason || 'Unknown error',

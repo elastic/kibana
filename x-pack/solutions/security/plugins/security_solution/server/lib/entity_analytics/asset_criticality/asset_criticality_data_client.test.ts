@@ -361,9 +361,9 @@ describe('AssetCriticalityDataClient', () => {
       });
     });
 
-    it('returns valid stats for unassigned_impact', async () => {
+    it('returns valid stats for unassigned', async () => {
       const recordsStream = [
-        { idField: 'host.name', idValue: 'host1', criticalityLevel: 'unassigned_impact' },
+        { idField: 'host.name', idValue: 'host1', criticalityLevel: 'unassigned' },
       ];
 
       const result = await subject.bulkUpsertFromStream({
