@@ -97,7 +97,6 @@ export const useSettingsUpdater = (
   const [systemPromptSettings, setUpdatedSystemPromptSettings] = useState<PromptResponse[]>(
     allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system)
   );
-  console.log('systemPromptSettings', systemPromptSettings);
 
   // Anonymization
   const [anonymizationFieldsBulkActions, setAnonymizationFieldsBulkActions] =

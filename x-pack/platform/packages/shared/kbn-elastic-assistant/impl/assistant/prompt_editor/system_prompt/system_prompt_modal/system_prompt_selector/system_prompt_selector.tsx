@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { SystemPromptSettings } from '../../../../settings/use_settings_updater/use_system_prompt_updater';
 import { TEST_IDS } from '../../../../constants';
 import * as i18n from './translations';
 import { SYSTEM_PROMPT_DEFAULT_NEW_CONVERSATION } from '../translations';
@@ -28,9 +28,9 @@ export const SYSTEM_PROMPT_SELECTOR_CLASSNAME = 'systemPromptSelector';
 interface Props {
   autoFocus?: boolean;
   onSystemPromptDeleted: (systemPromptTitle: string) => void;
-  onSystemPromptSelectionChange: (systemPrompt?: PromptResponse | string) => void;
-  systemPrompts: PromptResponse[];
-  selectedSystemPrompt?: PromptResponse;
+  onSystemPromptSelectionChange: (systemPrompt?: SystemPromptSettings | string) => void;
+  systemPrompts: SystemPromptSettings[];
+  selectedSystemPrompt?: SystemPromptSettings;
   resetSettings?: () => void;
 }
 

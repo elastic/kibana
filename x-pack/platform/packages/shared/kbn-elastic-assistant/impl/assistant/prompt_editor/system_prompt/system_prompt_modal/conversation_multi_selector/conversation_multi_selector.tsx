@@ -53,12 +53,6 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
         const newConversationSelection = conversations.filter((conversation) =>
           conversationMultiSelectorOption.some((cmso) => conversation.id === cmso.id)
         );
-        console.log('handleSelectionChange', {
-          conversations,
-          selectedOptions,
-          newConversationSelection,
-          conversationMultiSelectorOption,
-        });
         onConversationSelectionChange(newConversationSelection);
       },
       [conversations, selectedOptions, onConversationSelectionChange]
@@ -70,7 +64,6 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
         if (newOptions.length === 0) {
           handleSelectionChange([]);
         } else if (options.findIndex((o) => o.id === newOptions?.[0].id) !== -1) {
-          console.log('onChange', { newOptions, options });
           handleSelectionChange(newOptions);
         }
       },
