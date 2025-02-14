@@ -20,5 +20,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.infra.featureFlags.profilingEnabled=true`,
       ],
     },
+    esTestCluster: {
+      ...functionalConfig.get('esTestCluster'),
+      serverArgs: [
+        ...functionalConfig.get('esTestCluster.serverArgs'),
+        // Enable LogsDB
+        'cluster.logsdb.enabled=true',
+      ],
+    },
   };
 }
