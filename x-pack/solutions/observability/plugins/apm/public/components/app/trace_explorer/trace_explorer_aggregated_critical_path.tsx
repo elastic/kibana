@@ -16,7 +16,6 @@ export function TraceExplorerAggregatedCriticalPath() {
   } = useApmParams('/traces/explorer/critical_path');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  // const [hasLoadedTable, setHasLoadedTable] = useState(false);
   const {
     data: { traceSamples },
     status: samplesFetchStatus,
