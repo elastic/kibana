@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getAdvancedParameters } from '@kbn/streams-schema';
 import { SchemaField } from '../types';
@@ -38,9 +38,10 @@ export const AdvancedFieldMappingOptions = ({
 
   const accordionId = useGeneratedHtmlId({ prefix: 'accordionID' });
 
-  const [jsonOptions, setJsonOptions] = useState(() => {
-    return field.additionalParameters ? JSON.stringify(field.additionalParameters, null, 2) : '';
-  });
+  const jsonOptions = useMemo(
+    () => (field.additionalParameters ? JSON.stringify(field.additionalParameters, null, 2) : ''),
+    [field.additionalParameters]
+  );
 
   return (
     <EuiAccordion id={accordionId} buttonContent={label}>
@@ -71,9 +72,8 @@ export const AdvancedFieldMappingOptions = ({
           <CodeEditor
             height={120}
             languageId="json"
-            value={jsonOptions || ''}
+            value={jsonOptions}
             onChange={(value) => {
-              setJsonOptions(value);
               try {
                 onChange({
                   additionalParameters:
