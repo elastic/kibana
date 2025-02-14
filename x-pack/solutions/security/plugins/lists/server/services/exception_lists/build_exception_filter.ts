@@ -34,12 +34,12 @@ import {
   MAXIMUM_SMALL_IP_RANGE_VALUE_LIST_DASH_SIZE,
   MAXIMUM_SMALL_VALUE_LIST_SIZE,
 } from '@kbn/securitysolution-list-constants';
+
 import {
   SECURITY_NUM_LARGE_LIST_EXCEPTIONS,
   SECURITY_NUM_REGULAR_EXCEPTIONS,
   SECURITY_NUM_SMALL_LIST_EXCEPTIONS,
 } from '../../apm_field_names';
-
 import type { ListClient } from '../..';
 
 type ExceptionEntry = Entry | EntryNested;
