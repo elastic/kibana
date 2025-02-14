@@ -69,7 +69,8 @@ export const CreateConnector: React.FC = () => {
   useEffect(() => {
     if (
       (selectedConnector && !selectedConnector.isNative && selfManagePreference === 'native') ||
-      !isAgentlessEnabled || isElasticManagedDiscontinued
+      !isAgentlessEnabled ||
+      isElasticManagedDiscontinued
     ) {
       setSelfManagePreference('selfManaged');
     }

@@ -216,7 +216,10 @@ export const StartStep: React.FC<StartStepProps> = ({
                   )}
                   checked={selfManagePreference === 'native'}
                   disabled={
-                    selectedConnector?.isNative === false || !isAgentlessEnabled || isFormDirty || isElasticManagedDiscontinued
+                    selectedConnector?.isNative === false ||
+                    !isAgentlessEnabled ||
+                    isFormDirty ||
+                    isElasticManagedDiscontinued
                   }
                   onChange={() => onSelfManagePreferenceChange('native')}
                   name="setUp"
