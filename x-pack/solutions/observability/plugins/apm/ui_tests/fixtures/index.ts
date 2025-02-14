@@ -8,10 +8,12 @@
 import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures, KibanaUrl } from '@kbn/scout';
 import { test as base, createLazyPageObject } from '@kbn/scout';
 import { ServiceMapPage } from './page_objects/service_map';
+import { ServiceInventoryPage } from './page_objects/service_inventory';
 
 export interface ExtendedScoutTestFixtures extends ScoutTestFixtures {
   pageObjects: PageObjects & {
     serviceMapPage: ServiceMapPage;
+    serviceInventoryPage: ServiceInventoryPage;
   };
 }
 
@@ -31,6 +33,7 @@ export const test = base.extend<ExtendedScoutTestFixtures, ScoutWorkerFixtures>(
     const extendedPageObjects = {
       ...pageObjects,
       serviceMapPage: createLazyPageObject(ServiceMapPage, page, kbnUrl),
+      serviceInventoryPage: createLazyPageObject(ServiceInventoryPage, page, kbnUrl),
     };
 
     await use(extendedPageObjects);
