@@ -10,14 +10,27 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useGetAutoUpgradeAgentsStatusQuery } from '../../../../../../hooks';
+import { useGetAutoUpgradeAgentsStatusQuery, useLink } from '../../../../../../hooks';
 
 export const StatusColumn: React.FunctionComponent<{
   agentPolicyId: string;
   version: string;
   percentage: number;
 }> = ({ agentPolicyId, version, percentage }) => {
+  const { getHref } = useLink();
   const { data: autoUpgradeAgentsStatus } = useGetAutoUpgradeAgentsStatusQuery(agentPolicyId);
+
+  const getAgentsHref = useCallback(
+    (failed?: boolean): string => {
+      const kuery = failed
+        ? `policy_id:"${agentPolicyId}" AND upgrade_details.state:"UPG_FAILED" AND upgrade_details.target_version:"${version}"`
+        : `policy_id:"${agentPolicyId}" AND local_metadata.elastic.agent.version:"${version}"`;
+      return getHref('agent_list', {
+        kuery,
+      });
+    },
+    [getHref, agentPolicyId, version]
+  );
 
   const calcPercentage = useCallback(
     (agents: number): number =>
@@ -44,7 +57,7 @@ export const StatusColumn: React.FunctionComponent<{
 
   const currentStatus = useMemo(() => {
     const inProgressStatus = (
-      <EuiButtonEmpty size="s" iconType="clock">
+      <EuiButtonEmpty size="s" iconType="clock" href={getAgentsHref(false)}>
         <FormattedMessage
           id="xpack.fleet.manageAutoUpgradeAgents.inProgressText"
           defaultMessage="In progress"
@@ -52,7 +65,7 @@ export const StatusColumn: React.FunctionComponent<{
       </EuiButtonEmpty>
     );
     const failedStatus = (
-      <EuiButtonEmpty size="s" iconType="errorFilled" color="danger" href="#">
+      <EuiButtonEmpty size="s" iconType="errorFilled" color="danger" href={getAgentsHref(true)}>
         <FormattedMessage
           id="xpack.fleet.manageAutoUpgradeAgents.failedText"
           defaultMessage="Upgrade failed"
@@ -60,7 +73,12 @@ export const StatusColumn: React.FunctionComponent<{
       </EuiButtonEmpty>
     );
     const completedStatus = (
-      <EuiButtonEmpty size="s" iconType="checkInCircleFilled" color="success">
+      <EuiButtonEmpty
+        size="s"
+        iconType="checkInCircleFilled"
+        color="success"
+        href={getAgentsHref(false)}
+      >
         <FormattedMessage
           id="xpack.fleet.manageAutoUpgradeAgents.completedText"
           defaultMessage="Completed"
@@ -96,7 +114,6 @@ export const StatusColumn: React.FunctionComponent<{
               id="xpack.fleet.manageAutoUpgradeAgents.failedStatusTooltip"
               defaultMessage="{failedAgents} agents failed to upgrade"
               values={{
-                agents: agentVersionCounts.agents,
                 failedAgents: agentVersionCounts.failedAgents,
               }}
             />
@@ -106,7 +123,7 @@ export const StatusColumn: React.FunctionComponent<{
         {statusButton}
       </EuiToolTip>
     );
-  }, [agentVersionCounts, percentage, calcPercentage]);
+  }, [agentVersionCounts, percentage, calcPercentage, getAgentsHref]);
 
   return (
     <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
