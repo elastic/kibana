@@ -50,22 +50,22 @@ export interface FiltersProps {
 }
 
 export const Filters = ({ onFiltersChange }: FiltersProps) => {
-  const { dataView: indexPattern, dataViewIsLoading, dataViewIsRefetching } = useDataViewContext();
+  const { dataView, dataViewIsLoading, dataViewIsRefetching } = useDataViewContext();
   const spaceId = useSpaceId();
 
   const dataViewSpec = useMemo(
     () =>
-      indexPattern
+      dataView
         ? {
             // TODO We need this hard-coded id because `ASSET_INVENTORY_INDEX_PATTERN` does not populate the filter dropdowns
             id: 'cloud_asset_inventory-2773feaf-50bb-43f8-9fa9-8f9a5f85e566',
             name: ASSET_INVENTORY_INDEX_PATTERN,
             allowNoIndex: true,
-            title: indexPattern.title,
+            title: dataView.getIndexPattern(),
             timeFieldName: '@timestamp',
           }
         : null,
-    [indexPattern]
+    [dataView]
   );
 
   if (!spaceId || !dataViewSpec) {
