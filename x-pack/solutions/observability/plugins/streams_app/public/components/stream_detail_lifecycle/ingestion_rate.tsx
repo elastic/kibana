@@ -108,7 +108,13 @@ export function IngestionRate({
       <EuiSpacer size="s" />
 
       {ingestionRateError ? (
-        ingestionRateError.message
+        <EuiFlexGroup
+          justifyContent="center"
+          alignItems="center"
+          style={{ width: '100%', height: '250px' }}
+        >
+          Failed to load ingestion rate
+        </EuiFlexGroup>
       ) : isLoadingIngestionRate || isLoadingStats || !ingestionRate ? (
         <EuiFlexGroup
           justifyContent="center"
