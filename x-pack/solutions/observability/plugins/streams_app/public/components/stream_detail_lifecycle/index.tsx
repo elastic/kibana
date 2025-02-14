@@ -28,6 +28,7 @@ import { EditLifecycleModal, LifecycleEditAction } from './modal';
 import { RetentionSummary } from './summary';
 import { RetentionMetadata } from './metadata';
 import { IlmSummary } from './ilm_summary';
+import { getFormattedError } from '../../util/errors';
 
 function useLifecycleState({
   definition,
@@ -157,7 +158,7 @@ export function StreamDetailLifecycle({
         title: i18n.translate('xpack.streams.streamDetailLifecycle.failed', {
           defaultMessage: 'Failed to update lifecycle',
         }),
-        toastMessage: 'body' in error ? error.body.message : error.message,
+        toastMessage: getFormattedError(error).message,
       });
     } finally {
       setUpdateInProgress(false);
