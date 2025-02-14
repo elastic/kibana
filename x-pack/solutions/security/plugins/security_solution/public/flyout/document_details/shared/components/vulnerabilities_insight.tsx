@@ -82,19 +82,14 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
     'newExpandableFlyoutNavigationEnabled'
   );
 
-  useEffect(() => {
-    if (telemetryKey) {
-      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, telemetryKey);
-    }
-  }, [telemetryKey, renderingId]);
-
   const { CRITICAL = 0, HIGH = 0, MEDIUM = 0, LOW = 0, NONE = 0 } = data?.count || {};
   const totalVulnerabilities = useMemo(
     () => CRITICAL + HIGH + MEDIUM + LOW + NONE,
     [CRITICAL, HIGH, MEDIUM, LOW, NONE]
   );
 
-  const hasVulnerabilitiesFindings = useMemo(
+  // this component only renders if there are findings
+  const shouldRender = useMemo(
     () =>
       hasVulnerabilitiesData({
         critical: CRITICAL,
@@ -105,6 +100,12 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
       }),
     [CRITICAL, HIGH, MEDIUM, LOW, NONE]
   );
+
+  useEffect(() => {
+    if (shouldRender && telemetryKey) {
+      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, telemetryKey);
+    }
+  }, [shouldRender, telemetryKey, renderingId]);
 
   const vulnerabilitiesStats = useMemo(
     () =>
@@ -172,7 +173,7 @@ export const VulnerabilitiesInsight: React.FC<VulnerabilitiesInsightProps> = ({
     ]
   );
 
-  if (!hasVulnerabilitiesFindings) return null;
+  if (!shouldRender) return null;
 
   return (
     <EuiFlexItem data-test-subj={dataTestSubj}>

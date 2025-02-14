@@ -758,6 +758,9 @@ src/platform/packages/private/kbn-reporting/server @elastic/appex-sharedux
 src/platform/packages/shared/kbn-resizable-layout @elastic/kibana-data-discovery
 examples/resizable_layout_examples @elastic/kibana-data-discovery
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
+packages/response-ops/alerts_apis @elastic/response-ops
+packages/response-ops/alerts_fields_browser @elastic/response-ops
+packages/response-ops/alerts_table @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_form @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_params @elastic/response-ops
 examples/response_stream @elastic/ml-ui
@@ -1317,6 +1320,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 # Streams
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/streams @elastic/streams-program-team
+/x-pack/test/api_integration/fixtures/kbn_archiver/streams @elastic/streams-program-team
 
 ### END Observability Plugins
 
