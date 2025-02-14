@@ -16,7 +16,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
 
   const utils = EntityStoreUtils(getService);
-  describe('@ess @skipInServerlessMKI Entity Store APIs', () => {
+  describe.only('@ess @skipInServerlessMKI Entity Store APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
 
     const defaults = omit('docsPerSecond', defaultOptions);
@@ -204,7 +204,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/200758
-    describe.skip('status', () => {
+    describe('status', () => {
       afterEach(async () => {
         await utils.cleanEngines();
       });
@@ -218,15 +218,23 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
+      // it always fails on ESS
       it('should return "installing" when at least one engine is being initialized', async () => {
         await utils.enableEntityStore();
 
         const { body } = await api.getEntityStoreStatus({ query: {} }).expect(200);
 
         expect(body.status).toEqual('installing');
-        expect(body.engines.length).toEqual(2);
+        expect(body.engines.length).toEqual(3);
         expect(body.engines[0].status).toEqual('installing');
         expect(body.engines[1].status).toEqual('installing');
+        expect(body.engines[2].status).toEqual('installing');
+
+        await Promise.all([
+          utils.waitForEngineStatus('host', 'started'),
+          utils.waitForEngineStatus('user', 'started'),
+          utils.waitForEngineStatus('service', 'started'),
+        ]);
       });
 
       it('should return "started" when all engines are started', async () => {
@@ -237,7 +245,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.status).toEqual('running');
         expect(body.engines.length).toEqual(2);
         expect(body.engines[0].status).toEqual('started');
-        expect(body.engines[1].status).toEqual('started');
+        expect(body.engines[2].status).toEqual('started');
       });
 
       describe('status with components', () => {
@@ -265,6 +273,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect.objectContaining({ resource: 'ingest_pipeline' }),
             expect.objectContaining({ resource: 'index_template' }),
             expect.objectContaining({ resource: 'task' }),
+            expect.objectContaining({ resource: 'task' }),
             expect.objectContaining({ resource: 'ingest_pipeline' }),
             expect.objectContaining({ resource: 'enrich_policy' }),
             expect.objectContaining({ resource: 'index' }),
@@ -275,7 +284,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/209010
-    describe.skip('apply_dataview_indices', () => {
+    describe('apply_dataview_indices', () => {
       before(async () => {
         await utils.initEntityEngineForEntityTypesAndWait(['host']);
       });
