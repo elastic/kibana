@@ -249,7 +249,7 @@ describe('query tab with unified timeline', () => {
   });
 
   describe('render', () => {
-    it.only(
+    it(
       'should render unifiedDataTable in timeline',
       async () => {
         renderTestComponents();
