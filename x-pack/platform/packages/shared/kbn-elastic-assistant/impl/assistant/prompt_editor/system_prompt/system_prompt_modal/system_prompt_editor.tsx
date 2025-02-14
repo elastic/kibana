@@ -141,6 +141,15 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
   const conversationsWithApiConfig = Object.entries(conversationSettings).reduce<
     Record<string, Conversation>
   >((acc, [key, conversation]) => {
+    console.log('apiConfig', {
+      prevConfig: conversation.apiConfig,
+      newConfig: getConversationApiConfig({
+        allSystemPrompts: systemPromptSettings,
+        connectors,
+        conversation,
+        defaultConnector,
+      }),
+    });
     acc[key] = {
       ...conversation,
       ...getConversationApiConfig({
@@ -166,11 +175,9 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
 
   const handleConversationSelectionChange = useCallback(
     (currentPromptConversations: Conversation[]) => {
-      const currentPromptConversationTitles = currentPromptConversations.map(
-        (convo) => convo.title
-      );
+      const currentPromptConversationIds = currentPromptConversations.map((convo) => convo.id);
       const getDefaultSystemPromptId = (convo: Conversation) =>
-        currentPromptConversationTitles.includes(convo.title)
+        currentPromptConversationIds.includes(convo.id)
           ? selectedSystemPrompt?.id
           : convo.apiConfig && convo.apiConfig.defaultSystemPromptId === selectedSystemPrompt?.id
           ? // remove the default System Prompt if it is assigned to a conversation
@@ -232,6 +239,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
 
             return {};
           };
+          // TODO when do we create a conversation from the system prompt editor?
           const createOperation =
             convo.id === ''
               ? {

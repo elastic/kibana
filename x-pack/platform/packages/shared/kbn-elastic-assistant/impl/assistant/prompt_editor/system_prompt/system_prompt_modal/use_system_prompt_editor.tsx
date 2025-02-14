@@ -28,9 +28,9 @@ export const useSystemPromptEditor = ({
   const { currentAppId } = useAssistantContext();
   // When top level system prompt selection changes
   const onSystemPromptSelectionChange = useCallback(
-    (systemPrompt?: PromptResponse | string) => {
+    (systemPrompt: PromptResponse | string) => {
       const isNew = typeof systemPrompt === 'string';
-      const newSelectedSystemPrompt: PromptResponse | undefined = isNew
+      const newSelectedSystemPrompt: PromptResponse = isNew
         ? {
             id: systemPrompt ?? '',
             content: '',
@@ -40,31 +40,29 @@ export const useSystemPromptEditor = ({
           }
         : systemPrompt;
 
-      if (newSelectedSystemPrompt != null) {
-        setUpdatedSystemPromptSettings((prev) => {
-          const alreadyExists = prev.some((sp) => sp.id === newSelectedSystemPrompt.id);
+      setUpdatedSystemPromptSettings((prev) => {
+        const alreadyExists = prev.some((sp) => sp.id === newSelectedSystemPrompt.id);
 
-          if (!alreadyExists) {
-            return [...prev, newSelectedSystemPrompt];
-          }
-
-          return prev;
-        });
-
-        if (isNew) {
-          setPromptsBulkActions((prev) => {
-            const newBulkActions = {
-              ...prev,
-              create: [
-                ...(promptsBulkActions.create ?? []),
-                {
-                  ...newSelectedSystemPrompt,
-                },
-              ],
-            };
-            return newBulkActions;
-          });
+        if (!alreadyExists) {
+          return [...prev, newSelectedSystemPrompt];
         }
+
+        return prev;
+      });
+
+      if (isNew) {
+        setPromptsBulkActions((prev) => {
+          const newBulkActions = {
+            ...prev,
+            create: [
+              ...(promptsBulkActions.create ?? []),
+              {
+                ...newSelectedSystemPrompt,
+              },
+            ],
+          };
+          return newBulkActions;
+        });
       }
 
       onSelectedSystemPromptChange(newSelectedSystemPrompt);

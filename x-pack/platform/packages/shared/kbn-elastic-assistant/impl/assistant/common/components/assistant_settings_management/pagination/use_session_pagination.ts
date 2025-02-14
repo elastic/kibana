@@ -64,18 +64,18 @@ export const useSessionPagination = <T extends boolean>({
 
   const pagination = useMemo(
     () =>
-      inMemory
-        ? ({
+      (inMemory
+        ? {
             initialPageSize: sessionStorageTableOptions.page.size,
             pageSizeOptions: [5, 10, DEFAULT_PAGE_SIZE, 50],
             pageIndex: sessionStorageTableOptions.page.index,
-          } as InMemoryPagination)
-        : ({
+          }
+        : {
             totalItemCount,
             pageSize: sessionStorageTableOptions.page.size ?? DEFAULT_PAGE_SIZE,
             pageSizeOptions: [5, 10, DEFAULT_PAGE_SIZE, 50],
             pageIndex: sessionStorageTableOptions.page.index,
-          } as ServerSidePagination),
+          }) as T extends true ? InMemoryPagination : ServerSidePagination,
     [inMemory, sessionStorageTableOptions, totalItemCount]
   );
 
@@ -86,11 +86,8 @@ export const useSessionPagination = <T extends boolean>({
     [sessionStorageTableOptions.sort]
   );
 
-  const onTableChange = useCallback(
-    (
-      args: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      any
-    ) => {
+  const onTableChange: UseSessionPaginationReturn<T>['onTableChange'] = useCallback(
+    (args) => {
       const { page, sort } = args;
       setSessionStorageTableOptions({
         page,

@@ -85,11 +85,10 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     refetchPrompts();
     refetchConversations();
   }, [refetchPrompts, refetchConversations]);
-  const conversationSettings = conversations;
+
   const {
     systemPromptSettings: allSystemPrompts,
     assistantStreamingEnabled,
-    // conversationSettings,
     conversationsSettingsBulkActions,
     resetSettings,
     saveSettings,
@@ -160,7 +159,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   );
 
   const onConversationDeleted = useConversationDeleted({
-    conversationSettings,
+    conversationSettings: conversations,
     conversationsSettingsBulkActions,
     setConversationSettings,
     setConversationsSettingsBulkActions,
@@ -204,7 +203,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     allSystemPrompts,
     actionTypeRegistry,
     connectors,
-    conversations: conversationSettings,
+    conversations,
     defaultConnector,
   });
 
@@ -282,7 +281,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
           {selectedConversation ? (
             <ConversationSettingsEditor
               allSystemPrompts={allSystemPrompts}
-              conversationSettings={conversationSettings}
+              conversationSettings={conversations}
               conversationsSettingsBulkActions={conversationsSettingsBulkActions}
               http={http}
               isDisabled={isDisabled}

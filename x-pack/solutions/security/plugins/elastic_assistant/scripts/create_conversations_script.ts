@@ -70,9 +70,13 @@ export const create = async () => {
               conversationsCreateUrl,
               getCreateConversationSchemaMock({
                 ...getMockConversationContent(),
+                title: 'Very very old convo',
                 apiConfig: {
-                  actionTypeId: aiConnectors[0].connector_type_id,
-                  connectorId: aiConnectors[0].id,
+                  connectorId: '476563c9-47f8-4d20-9ebf-072521c8a748',
+                  actionTypeId: '.gen-ai',
+                  defaultSystemPromptId: '5dyRAJUBQBIRhhJMj7or',
+                  model: 'gpt-4-turbo',
+                  provider: 'OpenAI',
                 },
               }),
               { headers: requestHeaders }
@@ -126,11 +130,11 @@ const getRandomISODate = () => {
   const now = new Date();
   const probabilities = [
     { chance: 3 / 10, daysAgo: Math.floor(Math.random() * 335) + 31 }, // Over a month ago
-    { chance: 1 / 10, daysAgo: 4 }, // In the last week
-    { chance: 1 / 10, daysAgo: 1 }, // Yesterday
-    { chance: 1 / 10, daysAgo: 0 }, // Today
-    { chance: 2 / 10, daysAgo: Math.floor(Math.random() * 7) + 7 }, // Two weeks ago
-    { chance: 2 / 10, daysAgo: Math.floor(Math.random() * 14) + 14 }, // Over two weeks ago
+    // { chance: 1 / 10, daysAgo: 4 }, // In the last week
+    // { chance: 1 / 10, daysAgo: 1 }, // Yesterday
+    // { chance: 1 / 10, daysAgo: 0 }, // Today
+    // { chance: 2 / 10, daysAgo: Math.floor(Math.random() * 7) + 7 }, // Two weeks ago
+    // { chance: 2 / 10, daysAgo: Math.floor(Math.random() * 14) + 14 }, // Over two weeks ago
   ];
 
   const rand = Math.random();

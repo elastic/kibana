@@ -34,6 +34,7 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
       () =>
         conversations.map((conversation) => ({
           label: conversation.title ?? '',
+          id: conversation.id,
           'data-test-subj': TEST_IDS.CONVERSATIONS_MULTISELECTOR_OPTION(conversation.title),
         })),
       [conversations]
@@ -42,6 +43,7 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
       return selectedConversations != null
         ? selectedConversations.map((conversation) => ({
             label: conversation.title,
+            id: conversation.id,
           }))
         : [];
     }, [selectedConversations]);
@@ -49,11 +51,17 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
     const handleSelectionChange = useCallback(
       (conversationMultiSelectorOption: EuiComboBoxOptionOption[]) => {
         const newConversationSelection = conversations.filter((conversation) =>
-          conversationMultiSelectorOption.some((cmso) => conversation.title === cmso.label)
+          conversationMultiSelectorOption.some((cmso) => conversation.id === cmso.id)
         );
+        console.log('handleSelectionChange', {
+          conversations,
+          selectedOptions,
+          newConversationSelection,
+          conversationMultiSelectorOption,
+        });
         onConversationSelectionChange(newConversationSelection);
       },
-      [onConversationSelectionChange, conversations]
+      [conversations, selectedOptions, onConversationSelectionChange]
     );
 
     // Callback for when user selects a conversation
@@ -61,7 +69,8 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
       (newOptions: EuiComboBoxOptionOption[]) => {
         if (newOptions.length === 0) {
           handleSelectionChange([]);
-        } else if (options.findIndex((o) => o.label === newOptions?.[0].label) !== -1) {
+        } else if (options.findIndex((o) => o.id === newOptions?.[0].id) !== -1) {
+          console.log('onChange', { newOptions, options });
           handleSelectionChange(newOptions);
         }
       },

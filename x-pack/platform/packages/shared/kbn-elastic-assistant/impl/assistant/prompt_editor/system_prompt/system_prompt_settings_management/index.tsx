@@ -18,6 +18,7 @@ import {
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { useSystemPromptUpdater } from '../../../settings/use_settings_updater/use_system_prompt_updater';
 import { useAssistantContext, useFetchCurrentUserConversations } from '../../../../..';
 import { SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY } from '../../../../assistant_context/constants';
 import { AIConnector } from '../../../../connectorland/connector_selector';
@@ -76,16 +77,21 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
 
   const {
     conversationSettings,
-    setConversationSettings,
-    systemPromptSettings,
-    setUpdatedSystemPromptSettings,
     conversationsSettingsBulkActions,
-    setConversationsSettingsBulkActions,
+    promptsBulkActions,
     resetSettings,
     saveSettings,
-    promptsBulkActions,
+    setConversationSettings,
+    setConversationsSettingsBulkActions,
     setPromptsBulkActions,
+    setUpdatedSystemPromptSettings,
   } = useSettingsUpdater(conversations, allPrompts, conversationsLoaded, promptsLoaded);
+
+  const { systemPromptSettings, setSystemPromptSettings } = useSystemPromptUpdater({
+    allPrompts,
+    http,
+    isAssistantEnabled,
+  });
 
   // System Prompt Selection State
   const [selectedSystemPrompt, setSelectedSystemPrompt] = useState<PromptResponse | undefined>();
@@ -95,9 +101,10 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
   }, []);
 
   useEffect(() => {
-    if (selectedSystemPrompt != null) {
-      setSelectedSystemPrompt(systemPromptSettings.find((p) => p.id === selectedSystemPrompt.id));
-    }
+    // TODO can i delete this??
+    // if (selectedSystemPrompt != null) {
+    //   setSelectedSystemPrompt(systemPromptSettings.find((p) => p.id === selectedSystemPrompt.id));
+    // }
   }, [selectedSystemPrompt, systemPromptSettings]);
 
   const handleSave = useCallback(
@@ -135,7 +142,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
 
   const onEditActionClicked = useCallback(
     (prompt: PromptResponse) => {
-      onSystemPromptSelectionChange(prompt);
+      // onSystemPromptSelectionChange(prompt);
       openFlyout();
     },
     [onSystemPromptSelectionChange, openFlyout]
@@ -183,7 +190,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
 
   const { getColumns, getSystemPromptsList } = useSystemPromptTable();
 
-  const { onTableChange, pagination, sorting } = useSessionPagination({
+  const { onTableChange, pagination, sorting } = useSessionPagination<true>({
     defaultTableOptions: DEFAULT_TABLE_OPTIONS,
     nameSpace,
     storageKey: SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY,
@@ -199,16 +206,6 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
         isEditEnabled: () => true,
       }),
     [getColumns, isTableLoading, onEditActionClicked, onDeleteActionClicked]
-  );
-  const systemPromptListItems = useMemo(
-    () =>
-      getSystemPromptsList({
-        connectors,
-        conversationSettings,
-        defaultConnector,
-        systemPromptSettings,
-      }),
-    [getSystemPromptsList, connectors, conversationSettings, defaultConnector, systemPromptSettings]
   );
 
   return (
@@ -228,7 +225,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
         <EuiSpacer size="s" />
         <EuiInMemoryTable
           columns={columns}
-          items={systemPromptListItems}
+          items={systemPromptSettings}
           onTableChange={onTableChange}
           pagination={pagination}
           sorting={sorting}

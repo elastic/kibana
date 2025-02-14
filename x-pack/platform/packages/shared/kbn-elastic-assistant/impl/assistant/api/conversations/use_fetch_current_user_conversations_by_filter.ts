@@ -10,14 +10,14 @@ import {
   QueryObserverResult,
   RefetchOptions,
   RefetchQueryFilters,
-  useInfiniteQuery,
+  useQuery,
 } from '@tanstack/react-query';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
 import { InfiniteData } from '@tanstack/query-core/src/types';
-import { useCallback, useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { Conversation } from '../../../assistant_context/types';
 
 export interface FetchConversationsResponse {
@@ -30,7 +30,6 @@ export interface FetchConversationsResponse {
 export interface UseFetchCurrentUserConversationsParams {
   http: HttpSetup;
   fields?: string[];
-  filter?: string;
   page?: number;
   perPage?: number;
   signal?: AbortSignal | undefined;
@@ -73,10 +72,9 @@ const formatFetchedData = (data: InfiniteData<FetchConversationsResponse> | unde
 /**
  * API call for fetching assistant conversations for the current user
  */
-export const useFetchCurrentUserConversations = ({
+export const useFetchCurrentUserConversationsByFilter = ({
   http,
   fields = query.fields,
-  filter,
   page = query.page,
   perPage = query.perPage,
   signal,
@@ -90,7 +88,6 @@ export const useFetchCurrentUserConversations = ({
       version: API_VERSIONS.public.v1,
       query: {
         fields,
-        filter,
         page: pageParam?.page ?? page,
         per_page: pageParam?.perPage ?? perPage,
       },
@@ -109,16 +106,15 @@ export const useFetchCurrentUserConversations = ({
     };
   };
 
-  const { data, fetchNextPage, hasNextPage, isFetched, isFetching, isLoading, refetch } =
-    useInfiniteQuery(
-      [ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, page, perPage, API_VERSIONS.public.v1, filter],
-      queryFn,
-      {
-        enabled: isAssistantEnabled,
-        getNextPageParam,
-        refetchOnWindowFocus,
-      }
-    );
+  const { data, isFetched, isFetching, isLoading, refetch } = useQuery(
+    [ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, page, perPage, API_VERSIONS.public.v1],
+    queryFn,
+    {
+      enabled: isAssistantEnabled,
+      getNextPageParam,
+      refetchOnWindowFocus,
+    }
+  );
   useEffect(() => {
     if (setTotalItemCount && data?.pages?.length) {
       setTotalItemCount(data?.pages[0].total ?? 0);
@@ -127,42 +123,11 @@ export const useFetchCurrentUserConversations = ({
 
   const formatted = formatFetchedData(data);
 
-  const observerRef = useRef<IntersectionObserver>();
-  const fetchNext = useCallback(
-    async ([{ isIntersecting }]: IntersectionObserverEntry[]) => {
-      if (isIntersecting && hasNextPage && !isLoading && !isFetching) {
-        await fetchNextPage();
-        observerRef.current?.disconnect();
-      }
-    },
-    [fetchNextPage, hasNextPage, isFetching, isLoading]
-  );
-
-  useEffect(() => {
-    return () => observerRef.current?.disconnect();
-  }, []);
-
-  // Attaches an intersection observer to the last element
-  // to trigger a callback to paginate when the user scrolls to it
-  const setPaginationObserver = useCallback(
-    (ref: HTMLDivElement) => {
-      observerRef.current?.disconnect();
-      observerRef.current = new IntersectionObserver(fetchNext, {
-        root: null,
-        rootMargin: '0px',
-        threshold: 0.1,
-      });
-      observerRef.current?.observe(ref);
-    },
-    [fetchNext]
-  );
-
   return {
     data: formatted ?? {},
     isLoading,
     refetch,
     isFetched,
     isFetching,
-    setPaginationObserver,
   };
 };
