@@ -44,6 +44,10 @@ export const getPolicyIdsFromArtifact = (item: Pick<ExceptionListItemSchema, 'ta
   return policyIds;
 };
 
+/**
+ * Given an Artifact tag value, utility will return a boolean indicating if that tag is
+ * tracking artifact assignment (global/per-policy)
+ */
 export const isPolicySelectionTag: TagFilter = (tag) =>
   tag.startsWith(BY_POLICY_ARTIFACT_TAG_PREFIX) || tag === GLOBAL_ARTIFACT_TAG;
 
@@ -79,13 +83,16 @@ export const getEffectedPolicySelectionByTags = (
     };
   }
   const selected: PolicyData[] = tags.reduce((acc, tag) => {
-    // edge case: a left over tag with a non-existed policy
-    // will be removed by verifying the policy exists
-    const id = tag.split(':')[1];
-    const foundPolicy = policies.find((policy) => policy.id === id);
-    if (foundPolicy !== undefined) {
-      acc.push(foundPolicy);
+    if (tag.startsWith(BY_POLICY_ARTIFACT_TAG_PREFIX)) {
+      const id = tag.split(':')[1];
+      const foundPolicy = policies.find((policy) => policy.id === id);
+
+      // edge case: a left over tag with a non-existed policy will be removed by verifying the policy exists
+      if (foundPolicy !== undefined) {
+        acc.push(foundPolicy);
+      }
     }
+
     return acc;
   }, [] as PolicyData[]);
 

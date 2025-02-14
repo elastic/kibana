@@ -29,6 +29,7 @@ import {
   OperatingSystem,
 } from '@kbn/securitysolution-utils';
 import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
+import { isPolicySelectionTag } from '../../../../../../common/endpoint/service/artifacts/utils';
 import { FormattedError } from '../../../../components/formatted_error';
 import type {
   TrustedAppConditionEntry,
@@ -303,6 +304,13 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
     const handleOnPolicyChange = useCallback(
       (change: EffectedPolicySelection) => {
         const tags = getArtifactTagsByPolicySelection(change);
+
+        // Make sure we don't drop other `tags` the artifact might have assigned to it
+        (item.tags ?? []).forEach((existingTag) => {
+          if (!isPolicySelectionTag(existingTag)) {
+            tags.push(existingTag);
+          }
+        });
 
         const nextItem = { ...item, tags };
         // Preserve old selected policies when switching to global
