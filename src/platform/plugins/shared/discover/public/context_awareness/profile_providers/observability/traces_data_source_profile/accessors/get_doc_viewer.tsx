@@ -18,7 +18,6 @@ import { DocViewerExtensionParams, DocViewerExtension } from '../../../../types'
 export const getDocViewer =
   (prev: (params: DocViewerExtensionParams) => DocViewerExtension) =>
   (params: DocViewerExtensionParams) => {
-    const recordId = params.record.id;
     const prevValue = prev(params);
     const dataStreamTypes = params.record.flattened[DATASTREAM_TYPE_FIELD];
     const dataStreamType = Array.isArray(dataStreamTypes) ? dataStreamTypes[0] : dataStreamTypes;
@@ -26,8 +25,7 @@ export const getDocViewer =
     const isTrace = dataStreamType === 'traces';
     if (!isTrace) {
       return {
-        title: `Record #${recordId}`,
-        docViewsRegistry: (registry: DocViewsRegistry) => registry,
+        ...prevValue,
       };
     }
     const parentId = params.record.flattened['parent.id'];
@@ -41,7 +39,7 @@ export const getDocViewer =
         });
 
     return {
-      title: `Record #${recordId}`,
+      ...prevValue,
       docViewsRegistry: (registry: DocViewsRegistry) => {
         registry.add({
           id: 'doc_view_traces_overview',
