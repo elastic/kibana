@@ -81,7 +81,7 @@ interface AlertSearchBarStateTransitions {
   onRangeFromChange: (rangeFrom: string) => void;
   onRangeToChange: (rangeTo: string) => void;
   onKueryChange: (kuery: string) => void;
-  onStatusChange: (status: AlertStatus) => void;
+  onStatusChange?: (status: AlertStatus) => void;
   onFiltersChange?: (filters: Filter[]) => void;
   setSavedQuery?: (savedQueryId?: SavedQuery) => void;
   onControlConfigsChange?: (controlConfigs: FilterControlConfig[]) => void;

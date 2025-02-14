@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ObservabilityAlertSearchBar } from '@kbn/observability-plugin/public';
-import type { AlertStatus } from '@kbn/observability-plugin/common/typings';
 import { EuiPanel, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import type { BoolQuery, Filter } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import {
   APM_ALERTING_CONSUMERS,
   APM_ALERTING_RULE_TYPE_IDS,
@@ -29,24 +29,19 @@ export function AlertsOverview() {
   const history = useHistory();
   const {
     path: { serviceName },
-    query: { environment, rangeFrom, rangeTo, kuery, alertStatus },
+    query: { environment, rangeFrom, rangeTo, kuery },
   } = useAnyOfApmParams('/services/{serviceName}/alerts', '/mobile-services/{serviceName}/alerts');
   const { services } = useKibana<ApmPluginStartDeps>();
-  const [alertStatusFilter, setAlertStatusFilter] = useState<AlertStatus>(ALERT_STATUS_ALL);
+  const {
+    core: { http, notifications },
+  } = useApmPluginContext();
+  const [filterControls, setFilterControls] = useState<Filter[]>([]);
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
-
-  useEffect(() => {
-    if (alertStatus) {
-      setAlertStatusFilter(alertStatus as AlertStatus);
-    }
-  }, [alertStatus]);
 
   const {
     triggersActionsUi: { getAlertsSearchBar: AlertsSearchBar },
-    notifications,
     data,
     dataViews,
-    http,
     spaces,
     uiSettings,
   } = services;
@@ -101,11 +96,11 @@ export function AlertsOverview() {
               onRangeToChange={(value) => push(history, { query: { rangeTo: value } })}
               onKueryChange={onKueryChange}
               defaultFilters={apmFilters}
-              onStatusChange={setAlertStatusFilter}
+              filterControls={filterControls}
+              onFilterControlsChange={setFilterControls}
               onEsQueryChange={setEsQuery}
               rangeTo={rangeTo}
               rangeFrom={rangeFrom}
-              status={alertStatusFilter}
               disableLocalStorageSync={true}
               services={{
                 timeFilterService,

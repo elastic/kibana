@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
 import React, { useState } from 'react';
+import { Filter } from '@kbn/es-query';
 import {
   alertSearchBarStateContainer,
   Provider,
