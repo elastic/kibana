@@ -16,7 +16,11 @@ import {
   convertFeaturesToIndicesArray,
   getESSystemIndicesMigrationStatus,
 } from '../es_system_indices_migration';
-import { type EsMetadata, getCorrectiveAction } from './get_corrective_actions';
+import {
+  type EsMetadata,
+  getCorrectiveAction,
+  isFrozenDeprecation,
+} from './get_corrective_actions';
 import { esIndicesStateCheck } from '../es_indices_state_check';
 
 /**
@@ -119,6 +123,8 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
   ].flat();
 };
 
+const ENT_SEARCH_INDICES_PREFIX = '.ent-search-';
+
 export const getEnrichedDeprecations = async (
   dataClient: IScopedClusterClient
 ): Promise<EnrichedDeprecationInfo[]> => {
@@ -159,13 +165,22 @@ export const getEnrichedDeprecations = async (
         }
       }
     })
-    .map((deprecation) => {
+    .flatMap((deprecation) => {
       const correctiveAction = getCorrectiveAction(
         deprecation.type,
         deprecation.message,
         deprecation.metadata as EsMetadata,
         deprecation.index
       );
+
+      if (
+        // Early exclusion of enterprise search indices that need to be reindexed
+        deprecation.index &&
+        deprecation.index.startsWith(ENT_SEARCH_INDICES_PREFIX) &&
+        correctiveAction?.type === 'reindex'
+      ) {
+        return [];
+      }
 
       // If we have found deprecation information for index/indices
       // check whether the index is open or closed.
@@ -188,21 +203,21 @@ export const getEnrichedDeprecations = async (
       return enrichedDeprecation;
     })
     .filter((deprecation) => {
-      if (
-        deprecation.index &&
-        deprecation.message.includes(`Index [${deprecation.index}] is a frozen index`)
-      ) {
+      if (isFrozenDeprecation(deprecation.message, deprecation.index)) {
         // frozen indices are created in 7.x, so they are old / incompatible as well
-        // reindexing + deleting is required, so no need to bubble up this deprecation in the UI
-        const indexDeprecations = deprecationsByIndex.get(deprecation.index)!;
-        const oldIndexDeprecation: EnrichedDeprecationInfo | undefined = indexDeprecations.find(
+        // no need to bubble up this deprecation IF THERE IS ANOTHER CRITICAL ONE FOR THE SAME INDEX
+        // in that case, in the critical deprecation we will propose:
+        // - reindexing => the new index will not be frozen
+        // - updating index => the operation will unfreeze the index (see routes/update_index.ts)
+        const indexDeprecations = deprecationsByIndex.get(deprecation.index!);
+        const oldIndexDeprecation: EnrichedDeprecationInfo | undefined = indexDeprecations?.find(
           (elem) =>
             elem.type === 'index_settings' &&
             elem.index === deprecation.index &&
-            elem.correctiveAction?.type === 'reindex'
+            elem.correctiveAction?.type === 'reindex' &&
+            elem.isCritical
         );
         if (oldIndexDeprecation) {
-          oldIndexDeprecation.frozen = true;
           return false;
         }
       }
