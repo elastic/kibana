@@ -179,11 +179,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           title: i18n.HOST_ID,
           description:
             data && data.host
-<<<<<<< HEAD
-              ? hostIdRenderer({ host: data.host, isDraggable, noLink: true })
-=======
-              ? hostIdRenderer({ host: data.host, noLink: true, scopeId })
->>>>>>> b2db698f03f ([SecuritySolution] Hover actions not working on the overview section of the host details page (#210819))
+              ? hostIdRenderer({ host: data.host, isDraggable, noLink: true, scopeId })
               : getEmptyTagValue(),
         },
         {
@@ -209,11 +205,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           ),
         },
       ],
-<<<<<<< HEAD
-      [data, indexNames, hostName, isDraggable]
-=======
-      [data, scopeId, indexNames, hostName]
->>>>>>> b2db698f03f ([SecuritySolution] Hover actions not working on the overview section of the host details page (#210819))
+      [data, indexNames, hostName, isDraggable, scopeId]
     );
     const firstColumn = useMemo(
       () =>
