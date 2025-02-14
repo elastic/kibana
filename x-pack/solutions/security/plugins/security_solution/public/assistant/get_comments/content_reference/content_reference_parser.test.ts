@@ -94,12 +94,15 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
   });
 
   it('eats comma separated reference on new line', () => {
-    const file = unified()
-      .use([[markdown, {}], contentReferenceParser({ contentReferences: {
-        '123': { id: '123', type: 'SecurityAlertsPage' },
-        '345': { id: '345', type: 'SecurityAlertsPage' },
-      } })])
-      .parse(`There is an empty content reference.{reference(123,
+    const file = unified().use([
+      [markdown, {}],
+      contentReferenceParser({
+        contentReferences: {
+          '123': { id: '123', type: 'SecurityAlertsPage' },
+          '345': { id: '345', type: 'SecurityAlertsPage' },
+        },
+      }),
+    ]).parse(`There is an empty content reference.{reference(123,
 345)}`) as Parent;
 
     expect(file.children[0].children).toEqual(
@@ -124,7 +127,9 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
   it('eats multiple comma separated reference', () => {
     const file = unified()
       .use([[markdown, {}], contentReferenceParser({ contentReferences: null })])
-      .parse('There is an empty{reference(123 , 789)} content reference.{reference(123,345)}') as Parent;
+      .parse(
+        'There is an empty{reference(123 , 789)} content reference.{reference(123,345)}'
+      ) as Parent;
 
     expect(file.children[0].children).toEqual(
       expect.arrayContaining([

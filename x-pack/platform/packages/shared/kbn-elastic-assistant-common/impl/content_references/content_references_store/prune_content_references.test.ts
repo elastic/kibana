@@ -18,10 +18,10 @@ describe('pruneContentReferences', () => {
 
   it('prunes content references correctly', async () => {
     const alertsPageReference1 = contentReferencesStore.add((p) =>
-      securityAlertsPageReference("abc")
+      securityAlertsPageReference('abc')
     );
     const alertsPageReference2 = contentReferencesStore.add((p) =>
-      securityAlertsPageReference("def")
+      securityAlertsPageReference('def')
     );
     contentReferencesStore.add((p) => securityAlertsPageReference(p.id)); // this one should get pruned
 
@@ -35,10 +35,10 @@ describe('pruneContentReferences', () => {
 
   it('prunes comma seperated content references correctly', async () => {
     const alertsPageReference1 = contentReferencesStore.add((p) =>
-      securityAlertsPageReference("123")
+      securityAlertsPageReference('123')
     );
     const alertsPageReference2 = contentReferencesStore.add((p) =>
-      securityAlertsPageReference("456")
+      securityAlertsPageReference('456')
     );
     contentReferencesStore.add((p) => securityAlertsPageReference(p.id)); // this one should get pruned
 
@@ -52,10 +52,10 @@ describe('pruneContentReferences', () => {
 
   it('prunes comma and space seperated content references correctly', async () => {
     const alertsPageReference1 = contentReferencesStore.add((p) =>
-      securityAlertsPageReference("123")
+      securityAlertsPageReference('123')
     );
     const alertsPageReference2 = contentReferencesStore.add((p) =>
-      securityAlertsPageReference("456")
+      securityAlertsPageReference('456')
     );
     contentReferencesStore.add((p) => securityAlertsPageReference(p.id)); // this one should get pruned
 

@@ -28,13 +28,13 @@ export const pruneContentReferences = (
     const referenceElement = match[0];
     const referenceIds = getContentReferenceIds(referenceElement as ContentReferenceBlock);
     for (const referenceId of referenceIds) {
-    if (!(referenceId in prunedStore)) {
-      const contentReference = fullStore[referenceId];
-      if (contentReference) {
-        prunedStore[referenceId] = contentReference;
+      if (!(referenceId in prunedStore)) {
+        const contentReference = fullStore[referenceId];
+        if (contentReference) {
+          prunedStore[referenceId] = contentReference;
+        }
       }
     }
-  }
   }
 
   if (isEmpty(prunedStore)) {

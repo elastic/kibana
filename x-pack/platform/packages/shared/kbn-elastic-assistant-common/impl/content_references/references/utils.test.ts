@@ -30,9 +30,9 @@ describe('utils', () => {
 
   it.each([
     ['{reference(1234)}', ['1234']],
-    ['{reference(1234,4567)}', ['1234','4567']],
+    ['{reference(1234,4567)}', ['1234', '4567']],
     ['{reference(1234 4567)}', ['1234 4567']],
-    ['{reference( 1234 , 4567 )}', ['1234','4567']],
+    ['{reference( 1234 , 4567 )}', ['1234', '4567']],
   ])('getContentReferenceIds from "%s"', (input: string, expected: string[]) => {
     const result = getContentReferenceIds(input as ContentReferenceBlock);
 

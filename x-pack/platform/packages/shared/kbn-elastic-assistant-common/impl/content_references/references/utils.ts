@@ -16,10 +16,14 @@ import { ContentReferenceBlock, ContentReferenceId } from '../types';
 export const getContentReferenceIds = (
   contentReferenceBlock: ContentReferenceBlock
 ): ContentReferenceId[] => {
-  if(!(contentReferenceBlock.startsWith('{reference(') && contentReferenceBlock.endsWith(')}'))){
+  if (!(contentReferenceBlock.startsWith('{reference(') && contentReferenceBlock.endsWith(')}'))) {
     throw new Error(`Invalid contentReferenceBlock: ${contentReferenceBlock}`);
   }
-  return contentReferenceBlock.replace('{reference(', '').replace(')}', '').split(',').map(contentReferenceId => contentReferenceId.trim()) as ContentReferenceId[];
+  return contentReferenceBlock
+    .replace('{reference(', '')
+    .replace(')}', '')
+    .split(',')
+    .map((contentReferenceId) => contentReferenceId.trim()) as ContentReferenceId[];
 };
 
 /**

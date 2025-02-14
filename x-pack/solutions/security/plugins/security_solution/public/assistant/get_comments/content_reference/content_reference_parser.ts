@@ -9,8 +9,8 @@ import type { RemarkTokenizer } from '@elastic/eui';
 import type { ContentReference, ContentReferenceBlock } from '@kbn/elastic-assistant-common';
 import type { Plugin } from 'unified';
 import type { Node } from 'unist';
-import type { StreamingOrFinalContentReferences } from './components/content_reference_component_factory';
 import { getContentReferenceIds } from '@kbn/elastic-assistant-common/impl/content_references/references/utils';
+import type { StreamingOrFinalContentReferences } from './components/content_reference_component_factory';
 
 /** A ContentReferenceNode that has been extracted from the message and the content reference details are available. */
 export interface ResolvedContentReferenceNode<T extends ContentReference> extends Node {
@@ -132,7 +132,7 @@ export const contentReferenceParser: (params: Params) => Plugin = ({ contentRefe
       const contentReferenceBlock: ContentReferenceBlock = `{reference(${contentReferenceIdString})}`;
       const contentReferenceIds = getContentReferenceIds(contentReferenceBlock);
 
-      let toEat = `${match.startsWith(' ') ? ' ' : ''}${contentReferenceBlock}`;
+      const toEat = `${match.startsWith(' ') ? ' ' : ''}${contentReferenceBlock}`;
 
       const contentReferenceParts = contentReferenceIds.map((contentReferenceId, i) => ({
         contentReferenceId: contentReferenceId.trim(),
@@ -143,42 +143,42 @@ export const contentReferenceParser: (params: Params) => Plugin = ({ contentRefe
         const { contentReferenceId, toEat } = contentReferencePart;
         const contentReference = contentReferences?.[contentReferenceId];
 
-      if (contentReferences === null) {
-        // The message is still streaming, so the content reference details are not available yet
-        const contentReferenceNode: UnresolvedContentReferenceNode = {
+        if (contentReferences === null) {
+          // The message is still streaming, so the content reference details are not available yet
+          const contentReferenceNode: UnresolvedContentReferenceNode = {
+            type: 'contentReference',
+            contentReferenceId,
+            contentReferenceCount: getContentReferenceCount(contentReferenceId),
+            contentReferenceBlock,
+            contentReference: undefined,
+          };
+
+          eat(toEat)(contentReferenceNode);
+          continue;
+        }
+
+        if (contentReference === undefined) {
+          // The message has finished streaming, but the content reference details were not found
+          const contentReferenceNode: InvalidContentReferenceNode = {
+            type: 'contentReference',
+            contentReferenceId,
+            contentReferenceCount: undefined,
+            contentReferenceBlock,
+            contentReference,
+          };
+
+          eat(toEat)(contentReferenceNode);
+          continue;
+        }
+
+        // The message has finished streaming and the content reference details were found
+        const contentReferenceNode: ResolvedContentReferenceNode<ContentReference> = {
           type: 'contentReference',
           contentReferenceId,
           contentReferenceCount: getContentReferenceCount(contentReferenceId),
           contentReferenceBlock,
-          contentReference: undefined,
-        };
-
-        eat(toEat)(contentReferenceNode);
-        continue
-      }
-
-      if (contentReference === undefined) {
-        // The message has finished streaming, but the content reference details were not found
-        const contentReferenceNode: InvalidContentReferenceNode = {
-          type: 'contentReference',
-          contentReferenceId,
-          contentReferenceCount: undefined,
-          contentReferenceBlock,
           contentReference,
         };
-
-        eat(toEat)(contentReferenceNode);
-        continue
-      }
-
-      // The message has finished streaming and the content reference details were found
-      const contentReferenceNode: ResolvedContentReferenceNode<ContentReference> = {
-        type: 'contentReference',
-        contentReferenceId,
-        contentReferenceCount: getContentReferenceCount(contentReferenceId),
-        contentReferenceBlock,
-        contentReference,
-      };
 
         eat(toEat)(contentReferenceNode);
       }
