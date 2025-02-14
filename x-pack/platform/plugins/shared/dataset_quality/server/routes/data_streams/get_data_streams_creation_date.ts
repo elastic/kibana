@@ -15,30 +15,31 @@ export async function getDataStreamsCreationDate({
   esClient: ElasticsearchClient;
   dataStreams: string[];
 }) {
-  const matchingStreamsCreationDate = await Promise.all(
-    dataStreams.map(async (name) => {
-      const [dataStream] = await dataStreamService.getMatchingDataStreams(esClient, name);
-      const oldestIndex = dataStream?.indices[0];
-      if (!oldestIndex) {
-        return { name, creationDate: undefined };
-      }
+  const matchingStreams = await dataStreamService.getMatchingDataStreams(esClient, dataStreams);
+  const streamByIndex = matchingStreams.reduce((acc, { name, indices }) => {
+    if (indices[0]) acc[indices[0].index_name] = name;
+    return acc;
+  }, {} as Record<string, string>);
 
-      // While _cat api is not recommended for application use this is the only way
-      // to retrieve the creation date in serverless for now. We should change this
-      // once a proper approach exists (see elastic/elasticsearch-serverless#3010)
-      const response = await esClient.cat.indices({
-        index: oldestIndex.index_name,
-        h: ['creation.date'],
-        format: 'json',
-      });
+  const indices = Object.keys(streamByIndex);
+  if (indices.length === 0) {
+    return {};
+  }
+  // While _cat api is not recommended for application use this is the only way
+  // to retrieve the creation date in serverless for now. We should change this
+  // once a proper approach exists (see elastic/elasticsearch-serverless#3010)
+  const catIndices = await esClient.cat.indices({
+    index: indices,
+    h: ['creation.date', 'index'],
+    format: 'json',
+  });
 
-      const creationDate = response[0]?.['creation.date'];
-      return { name, creationDate: creationDate ? Number(creationDate) : undefined };
-    })
-  );
+  return catIndices.reduce((acc, index) => {
+    const creationDate = index['creation.date'];
+    const indexName = index['index']!;
+    const stream = streamByIndex[indexName];
 
-  return matchingStreamsCreationDate.reduce((acc, { name, creationDate }) => {
-    acc[name] = creationDate;
+    acc[stream] = creationDate ? Number(creationDate) : undefined;
     return acc;
   }, {} as Record<string, number | undefined>);
 }

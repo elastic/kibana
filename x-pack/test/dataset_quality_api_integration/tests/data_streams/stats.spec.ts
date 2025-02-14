@@ -161,9 +161,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('returns creation date when specified', async () => {
-          const stats = await callApiAs('datasetQualityMonitorUser', ['logs'], true);
+          const stats = await callApiAs('datasetQualityMonitorUser', ['logs', 'synthetics'], true);
           expect(stats.body.dataStreamsStats[0].size).not.empty();
           expect(stats.body.dataStreamsStats[0].creationDate).greaterThan(0);
+          expect(stats.body.dataStreamsStats[1].size).not.empty();
+          expect(stats.body.dataStreamsStats[1].creationDate).greaterThan(0);
         });
 
         after(async () => {
