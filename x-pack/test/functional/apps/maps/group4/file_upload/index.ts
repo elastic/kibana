@@ -14,7 +14,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     before(async () => {
       await browser.setWindowSize(1600, 1000);
     });
-    
+
     loadTestFile(require.resolve('./wizard'));
     loadTestFile(require.resolve('./geojson'));
     loadTestFile(require.resolve('./shapefile'));
