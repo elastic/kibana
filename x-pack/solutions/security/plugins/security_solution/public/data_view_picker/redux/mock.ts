@@ -8,11 +8,16 @@
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 import { initialDataViewPickerState, type RootState } from './reducer';
+import { mockIndexFields } from '../../common/containers/source/mock';
 
 const dataViewPickerState = structuredClone(initialDataViewPickerState).dataViewPicker;
 
+const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
+  mockIndexFields.map((field) => [field.name, field])
+);
+
 const mockDefaultDataViewSpec: DataViewSpec = {
-  fields: {},
+  fields: mockFieldMap,
   id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
   title: '',
 };
