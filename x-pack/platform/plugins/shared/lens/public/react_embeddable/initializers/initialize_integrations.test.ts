@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { faker } from '@faker-js/faker';
 import { createEmptyLensState } from '../helper';
 import { makeEmbeddableServices, getLensRuntimeStateMock } from '../mocks';
 import { LensRuntimeState } from '../types';
@@ -54,6 +55,16 @@ describe('Dashboard services API', () => {
       );
       // * references should be at root level
       expect(references).toEqual(attributes.references);
+    });
+
+    it('should remove the searchSessionId from the serializedState', async () => {
+      const attributes = createAttributesWithReferences();
+      const api = setupIntegrationsApi({
+        attributes,
+        searchSessionId: faker.string.uuid(),
+      });
+      const { rawState } = api.serializeState();
+      expect('searchSessionId' in rawState).toBeFalsy();
     });
   });
 });
