@@ -83,8 +83,8 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
     pageSize: 1,
   });
 
-  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationEnabled'
+  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationDisabled'
   );
 
   const passedFindings = data?.count.passed || 0;

@@ -49,7 +49,7 @@ describe('<FlyoutNavigation />', () => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
     jest.mocked(useExpandableFlyoutState).mockReturnValue({} as unknown as ExpandableFlyoutState);
     jest.mocked(useExpandableFlyoutHistory).mockReturnValue([]);
-    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
+    jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
   });
 
   describe('when flyout is expandable', () => {
@@ -137,9 +137,9 @@ describe('<FlyoutNavigation />', () => {
     { id: 'id2', params: {} },
   ] as unknown as FlyoutPanelProps[];
 
-  describe('when flyout history is enabled', () => {
+  describe('when newExpandableFlyoutNavigationDisabled is false', () => {
     beforeEach(() => {
-      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(true);
+      jest.mocked(useIsExperimentalFeatureEnabled).mockReturnValue(false);
       jest.mocked(useExpandableFlyoutHistory).mockReturnValue(flyoutHistory);
     });
 

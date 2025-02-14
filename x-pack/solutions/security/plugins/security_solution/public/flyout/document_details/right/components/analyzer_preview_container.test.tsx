@@ -82,9 +82,10 @@ const renderAnalyzerPreview = (context = mockContextValue) =>
   );
 
 describe('AnalyzerPreviewContainer', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+  describe('when newExpandableFlyoutNavigationDisabled is true', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
   });
 
   it('should render component and link in header', () => {
@@ -258,10 +259,11 @@ describe('AnalyzerPreviewContainer', () => {
       ).not.toBeInTheDocument();
     });
   });
+  });
 
-  describe('when new navigation is enabled', () => {
+  describe('when newExpandableFlyoutNavigationDisabled is false', () => {
     beforeEach(() => {
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     });
     describe('when visualizationInFlyoutEnabled is enabled', () => {
       beforeEach(() => {
