@@ -31,16 +31,24 @@ export const getDocViewer =
       };
     }
     const parentId = params.record.flattened['parent.id'];
-    const documentName = parentId ? 'Span' : 'Transaction';
+
+    const documentType = parentId
+      ? i18n.translate('unifiedDocViewer.docViewerTracesOverview.spanTitle', {
+          defaultMessage: 'Span',
+        })
+      : i18n.translate('unifiedDocViewer.docViewerTracesOverview.transactionTitle', {
+          defaultMessage: 'Transaction',
+        });
 
     return {
       title: `Record #${recordId}`,
       docViewsRegistry: (registry: DocViewsRegistry) => {
         registry.add({
           id: 'doc_view_overview',
-          title: `${documentName} ${i18n.translate('discover.docViews.tracesOverview.title', {
-            defaultMessage: 'Overview',
-          })}`,
+          title: i18n.translate('discover.docViews.tracesOverview.title', {
+            defaultMessage: '{documentType} overview',
+            values: { documentType },
+          }),
           order: 0,
           component: (
             props: React.JSX.IntrinsicAttributes & DocViewRenderProps & React.RefAttributes<{}>
