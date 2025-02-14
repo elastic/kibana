@@ -55,6 +55,7 @@ export function ObservabilityAlertSearchBar({
 }: ObservabilityAlertSearchBarProps) {
   const toasts = useToasts();
   const [spaceId, setSpaceId] = useState<string>();
+  const queryFilter = kuery ? { query: kuery, language: 'kuery' } : undefined;
 
   const clearSavedQuery = useCallback(
     () => (setSavedQuery ? setSavedQuery(undefined) : null),
@@ -170,6 +171,7 @@ export function ObservabilityAlertSearchBar({
           onFiltersChange={onFilterControlsChange}
           storageKey={filterControlsStorageKey}
           disableLocalStorageSync={disableLocalStorageSync}
+          query={queryFilter}
           services={{
             http,
             notifications,
