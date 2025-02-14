@@ -102,6 +102,7 @@ packages/kbn-management/storybook/config @elastic/kibana-management
 packages/kbn-manifest @elastic/kibana-core
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-mock-idp-utils @elastic/kibana-security
+packages/kbn-node-libs-browser-webpack-plugin @elastic/kibana-operations
 packages/kbn-openapi-bundler @elastic/security-detection-rule-management
 packages/kbn-openapi-generator @elastic/security-detection-rule-management
 packages/kbn-optimizer @elastic/kibana-operations
