@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { EuiProvider, EuiThemeAmsterdam } from '@elastic/eui';
+import { EuiProvider } from '@elastic/eui';
 import { CanvasRenderedWorkpad, CanvasShareableState, Stage } from '../types';
 import { RendererSpec } from '../../types';
 import { initialCanvasShareableState, CanvasShareableStateProvider } from '../context';
@@ -44,7 +44,7 @@ export const App: FC<Props> = ({ workpad, stage }) => {
   };
 
   return (
-    <EuiProvider theme={EuiThemeAmsterdam}>
+    <EuiProvider>
       <CanvasShareableStateProvider initialState={initialState}>
         <Canvas />
       </CanvasShareableStateProvider>

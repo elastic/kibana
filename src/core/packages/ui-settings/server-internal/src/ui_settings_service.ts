@@ -18,6 +18,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
 import type {
   ReadonlyModeType,
+  ThemeName,
   UiSettingsParams,
   UiSettingsScope,
 } from '@kbn/core-ui-settings-common';
@@ -68,10 +69,16 @@ export class UiSettingsService
   public async preboot(): Promise<InternalUiSettingsServicePreboot> {
     this.log.debug('Prebooting ui settings service');
 
-    const { overrides } = await firstValueFrom(this.config$);
+    const { overrides, experimental } = await firstValueFrom(this.config$);
     this.overrides = overrides;
 
-    this.register(getCoreSettings({ isDist: this.isDist }));
+    this.register(
+      getCoreSettings({
+        isDist: this.isDist,
+        isThemeSwitcherEnabled: experimental?.themeSwitcherEnabled,
+        defaultTheme: experimental?.defaultTheme as ThemeName,
+      })
+    );
 
     return {
       createDefaultsClient: () =>
