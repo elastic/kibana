@@ -245,7 +245,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.status).toEqual('running');
         expect(body.engines.length).toEqual(2);
         expect(body.engines[0].status).toEqual('started');
-        expect(body.engines[2].status).toEqual('started');
+        expect(body.engines[1].status).toEqual('started');
       });
 
       describe('status with components', () => {
