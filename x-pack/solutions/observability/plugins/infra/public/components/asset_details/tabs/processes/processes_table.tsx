@@ -175,6 +175,7 @@ export const ProcessesTable = ({
             onSort={column.sortable ? () => updateSortableProperties(column.field) : undefined}
             isSorted={sortBy.name === column.field}
             isSortAscending={sortBy.name === column.field && sortBy.isAscending}
+            data-test-subj={`${String(column.field)}-header`}
           >
             {column.name}
           </EuiTableHeaderCell>
@@ -190,7 +191,13 @@ export const ProcessesTable = ({
           }
         `}
       >
-        {isLoading && <EuiProgress size="xs" color="primary" position="absolute" />}
+        {isLoading && (
+          <EuiTableRow>
+            <EuiTableRowCell>
+              <EuiProgress size="xs" color="primary" position="absolute" />
+            </EuiTableRowCell>
+          </EuiTableRow>
+        )}
         {isLoading && currentItems.length === 0 && !error && (
           <ProcessesTableMessage>
             <FormattedMessage

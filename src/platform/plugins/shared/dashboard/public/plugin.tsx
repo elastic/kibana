@@ -59,7 +59,6 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
-import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import {
@@ -119,7 +118,6 @@ export interface DashboardStartDependencies {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionStart;
-  visualizations: VisualizationsStart;
   customBranding: CustomBrandingStart;
   serverless?: ServerlessPluginStart;
   noDataPage?: NoDataPagePluginStart;
