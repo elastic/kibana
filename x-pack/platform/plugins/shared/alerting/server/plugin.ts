@@ -291,8 +291,6 @@ export class AlertingPlugin {
       );
     }
 
-    plugins.taskManager.registerEncryptedSavedObjects(plugins.encryptedSavedObjects);
-
     const taskManagerStartPromise = core
       .getStartServices()
       .then(([_, alertingStart]) => alertingStart.taskManager);
@@ -541,8 +539,6 @@ export class AlertingPlugin {
       licenseState,
     } = this;
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
-
-    plugins.taskManager.registerEncryptedSavedObjectsPlugin(plugins.encryptedSavedObjects);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, AD_HOC_RUN_SAVED_OBJECT_TYPE],
