@@ -513,7 +513,8 @@
     "is_default",
     "is_internal",
     "is_preconfigured",
-    "name"
+    "name",
+    "proxy_id"
   ],
   "fleet-message-signing-keys": [],
   "fleet-package-policies": [

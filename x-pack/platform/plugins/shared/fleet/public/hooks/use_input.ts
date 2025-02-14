@@ -15,7 +15,7 @@ export interface FormInput {
 
 export function validateInputs(inputs: { [k: string]: FormInput }) {
   return Object.values(inputs).reduce((acc, input) => {
-    const res = input?.validate ? input.validate() : true;
+    const res = input.validate();
 
     return acc === false ? acc : res;
   }, true);
@@ -173,6 +173,7 @@ export function useRadioInput(defaultValue: string, disabled = false) {
     setValue,
     value,
     hasChanged,
+    validate: () => true,
   };
 }
 

@@ -120,7 +120,7 @@ export const useFleetServerHost = (): FleetServerHostForm => {
     ]
   );
 
-  const validate = useCallback(() => validateInputs(inputs), [inputs]);
+  const validate = useCallback(() => validateInputs({ ...inputs }), [inputs]);
 
   const { data, resendRequest: refreshGetFleetServerHosts } = useGetFleetServerHosts();
 
