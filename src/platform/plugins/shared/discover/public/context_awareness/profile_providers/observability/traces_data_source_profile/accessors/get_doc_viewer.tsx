@@ -12,17 +12,15 @@ import React from 'react';
 import { UnifiedDocViewerTracesOverview } from '@kbn/unified-doc-viewer-plugin/public';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { DATASTREAM_TYPE_FIELD } from '@kbn/discover-utils';
+import { DATASTREAM_TYPE_FIELD, getFieldValue } from '@kbn/discover-utils';
 import { DocViewerExtensionParams, DocViewerExtension } from '../../../../types';
 
 export const getDocViewer =
   (prev: (params: DocViewerExtensionParams) => DocViewerExtension) =>
   (params: DocViewerExtensionParams) => {
     const prevValue = prev(params);
-    const dataStreamTypes = params.record.flattened[DATASTREAM_TYPE_FIELD];
-    const dataStreamType = Array.isArray(dataStreamTypes) ? dataStreamTypes[0] : dataStreamTypes;
+    const isTrace = getFieldValue(params.record, DATASTREAM_TYPE_FIELD) === 'traces';
 
-    const isTrace = dataStreamType === 'traces';
     if (!isTrace) {
       return {
         ...prevValue,
