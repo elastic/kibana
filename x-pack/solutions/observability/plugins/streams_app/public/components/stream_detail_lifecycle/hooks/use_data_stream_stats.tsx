@@ -6,7 +6,6 @@
  */
 
 import moment from 'moment';
-import { useMemo } from 'react';
 import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import { DataStreamStatServiceResponse } from '@kbn/dataset-quality-plugin/public';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -28,14 +27,13 @@ export const useDataStreamStats = ({ definition }: { definition?: IngestStreamGe
     }
 
     const client = await dataStreamsClient;
-    return client.getDataStreamsStats({
+    const {
+      dataStreamsStats: [dsStats],
+    } = await client.getDataStreamsStats({
       datasetQuery: definition.stream.name,
       includeCreationDate: true,
     });
-  }, [dataStreamsClient, definition]);
 
-  const stats = useMemo<DataStreamStats | undefined>(() => {
-    const dsStats = statsFetch.value?.dataStreamsStats[0];
     if (!dsStats || !dsStats.creationDate || !dsStats.sizeBytes) {
       return undefined;
     }
@@ -49,10 +47,10 @@ export const useDataStreamStats = ({ definition }: { definition?: IngestStreamGe
       bytesPerDay: dsStats.sizeBytes / daysSinceCreation,
       bytesPerDoc: dsStats.totalDocs ? dsStats.sizeBytes / dsStats.totalDocs : 0,
     };
-  }, [statsFetch.value]);
+  }, [dataStreamsClient, definition]);
 
   return {
-    stats,
+    stats: statsFetch.value,
     isLoading: statsFetch.loading,
     refresh: statsFetch.refresh,
   };
