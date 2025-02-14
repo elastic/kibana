@@ -1072,8 +1072,6 @@
       "@kbn/index-management-shared-types/*": ["x-pack/platform/packages/shared/index-management/index_management_shared_types/*"],
       "@kbn/index-patterns-test-plugin": ["test/plugin_functional/plugins/index_patterns"],
       "@kbn/index-patterns-test-plugin/*": ["test/plugin_functional/plugins/index_patterns/*"],
-      "@kbn/inference_integration_flyout": ["x-pack/platform/packages/private/ml/inference_integration_flyout"],
-      "@kbn/inference_integration_flyout/*": ["x-pack/platform/packages/private/ml/inference_integration_flyout/*"],
       "@kbn/inference-common": ["x-pack/platform/packages/shared/ai-infra/inference-common"],
       "@kbn/inference-common/*": ["x-pack/platform/packages/shared/ai-infra/inference-common/*"],
       "@kbn/inference-endpoint-plugin": ["x-pack/platform/plugins/shared/inference_endpoint"],
