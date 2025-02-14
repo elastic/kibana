@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { getJourneyScreenshot } from './api';
+import { getJourneyScreenshot, fetchScreenshotBlockSet } from './api';
+import { apiService } from '../../../../utils/api_service';
+import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
+import { ScreenshotBlockDoc } from '@kbn/synthetics-plugin/common/runtime_types';
+
+jest.mock('../../../../utils/api_service');
 
 describe('getJourneyScreenshot', () => {
   const url = 'http://localhost:5601/internal/uptime/journey/screenshot/checkgroup/step';
@@ -153,5 +158,42 @@ describe('getJourneyScreenshot', () => {
     });
     expect(result).toBeNull();
     expect(mockFetch).toBeCalledTimes(maxRetry + 1);
+  });
+});
+
+describe('fetchScreenshotBlockSet', () => {
+  it('should return screenshot blocks when API call is successful', async () => {
+    const mockBlocks: ScreenshotBlockDoc[] = [
+      { id: 'block1', synthetics: { blob: 'test', blob_mime: 'png' } },
+      { id: 'block2', synthetics: { blob: 'test2', blob_mime: 'png' } },
+    ];
+    (apiService.post as jest.Mock).mockResolvedValue(mockBlocks);
+
+    const result = await fetchScreenshotBlockSet(['block1', 'block2']);
+
+    expect(result).toEqual(mockBlocks);
+    expect(apiService.post).toHaveBeenCalledWith(SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT_BLOCKS, {
+      hashes: ['block1', 'block2'],
+    });
+  });
+
+  it('should return an empty array when API response is an empty string', async () => {
+    (apiService.post as jest.Mock).mockResolvedValue('');
+
+    const result = await fetchScreenshotBlockSet(['block1', 'block2']);
+
+    expect(result).toEqual([]);
+  });
+
+  it('should return an empty array when some blocks are not found', async () => {
+    const mockBlocks = [
+      { id: 'block1', data: 'data1', status: 200 },
+      { id: 'block2', status: 404 },
+    ];
+    (apiService.post as jest.Mock).mockResolvedValue(mockBlocks);
+
+    const result = await fetchScreenshotBlockSet(['block1', 'block2']);
+
+    expect(result).toEqual([]);
   });
 });

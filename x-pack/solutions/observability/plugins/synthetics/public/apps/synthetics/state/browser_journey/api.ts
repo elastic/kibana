@@ -16,6 +16,8 @@ import {
   SyntheticsJourneyApiResponseType,
   Ping,
   PingType,
+  ScreenshotBlockResponse,
+  isScreenshotBlockMultiStatusResponse,
 } from '../../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 
@@ -24,13 +26,14 @@ export interface FetchJourneyStepsParams {
 }
 
 export async function fetchScreenshotBlockSet(params: string[]): Promise<ScreenshotBlockDoc[]> {
-  const response = await apiService.post<ScreenshotBlockDoc[] | ''>(
+  const response = await apiService.post<ScreenshotBlockResponse>(
     SYNTHETICS_API_URLS.JOURNEY_SCREENSHOT_BLOCKS,
     {
       hashes: params,
     }
   );
-  return typeof response === 'string' ? [] : response;
+
+  return response === '' || isScreenshotBlockMultiStatusResponse(response) ? [] : response;
 }
 
 export async function fetchBrowserJourney(
