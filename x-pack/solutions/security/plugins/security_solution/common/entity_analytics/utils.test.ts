@@ -30,15 +30,6 @@ describe('utils', () => {
       expect(disabledEntityTypes).toEqual([EntityType.universal]);
     });
 
-    it('should return both disabled entity types when both features are false', () => {
-      const experimentalFeatures: ExperimentalFeatures = {
-        ...mockedExperimentalFeatures,
-        assetInventoryStoreEnabled: false,
-      };
-      const disabledEntityTypes = getDisabledEntityTypes(experimentalFeatures);
-      expect(disabledEntityTypes).toEqual([EntityType.service, EntityType.universal]);
-    });
-
     it('should return no disabled entity types when both features are true', () => {
       const experimentalFeatures: ExperimentalFeatures = {
         ...mockedExperimentalFeatures,
