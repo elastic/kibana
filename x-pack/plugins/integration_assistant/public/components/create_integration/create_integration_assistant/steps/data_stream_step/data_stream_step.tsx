@@ -45,7 +45,7 @@ export const InputTypeOptions: Array<EuiComboBoxOptionOption<InputType>> = [
 ];
 
 const isValidName = (name: string) => NAME_REGEX_PATTERN.test(name);
-const getNameFromTitle = (title: string) => title.toLowerCase().replaceAll(/[^a-z0-9]/g, '_');
+export const getNameFromTitle = (title: string) => title.toLowerCase().replaceAll(/[^a-z0-9]/g, '_');
 
 interface DataStreamStepProps {
   integrationSettings: State['integrationSettings'];
