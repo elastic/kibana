@@ -6,7 +6,7 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import { spaceTest, testData, assertionMessages } from '../fixtures';
+import { assertionMessages, spaceTest, testData } from '../fixtures';
 
 spaceTest.describe(
   'Discover app - value suggestions: useTimeRange enabled',
@@ -23,11 +23,7 @@ spaceTest.describe(
     });
 
     spaceTest.afterAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset(
-        'doc_table:legacy',
-        'defaultIndex',
-        'timepicker:timeDefaults'
-      );
+      await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
       await scoutSpace.savedObjects.cleanStandardList();
     });
 
