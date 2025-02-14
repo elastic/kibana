@@ -1,7 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`should render content with markdown 1`] = `
-<EuiMarkdownFormat>
-  I am *some* [content](https://en.wikipedia.org/wiki/Content) with \`markdown\`
-</EuiMarkdownFormat>
-`;
