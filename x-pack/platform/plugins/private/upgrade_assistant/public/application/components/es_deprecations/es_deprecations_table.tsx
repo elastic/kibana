@@ -31,7 +31,7 @@ import {
   MlSnapshotsTableRow,
   DefaultTableRow,
   IndexSettingsTableRow,
-  ReindexTableRow,
+  IndexTableRow,
   ClusterSettingsTableRow,
   HealthIndicatorTableRow,
 } from './deprecation_types';
@@ -125,7 +125,8 @@ const renderTableRowCells = (
       return <ClusterSettingsTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
 
     case 'reindex':
-      return <ReindexTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+    case 'unfreeze':
+      return <IndexTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
 
     case 'healthIndicator':
       return <HealthIndicatorTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
