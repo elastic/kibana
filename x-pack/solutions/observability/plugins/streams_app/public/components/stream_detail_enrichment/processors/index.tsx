@@ -179,7 +179,7 @@ export function AddProcessorPanel({
             {type === 'dissect' && <DissectProcessorForm />}
           </EuiForm>
           {processorMetrics && !isEmpty(processorMetrics.errors) && (
-            <ProcessorErrors errors={processorMetrics.errors} />
+            <ProcessorErrors metrics={processorMetrics} />
           )}
         </FormProvider>
       </EuiAccordion>
@@ -371,7 +371,7 @@ export function EditProcessorPanel({
             </EuiButton>
           </EuiForm>
           {processorMetrics && !isEmpty(processorMetrics.errors) && (
-            <ProcessorErrors errors={processorMetrics.errors} />
+            <ProcessorErrors metrics={processorMetrics} />
           )}
         </FormProvider>
       </EuiAccordion>

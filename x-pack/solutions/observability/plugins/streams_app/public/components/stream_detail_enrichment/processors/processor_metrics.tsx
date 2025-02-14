@@ -12,6 +12,7 @@ import {
   EuiBadgeGroup,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiCallOutProps,
   EuiFlexGroup,
   useEuiTheme,
 } from '@elastic/eui';
@@ -40,18 +41,41 @@ export const ProcessorMetricBadges = ({
   return (
     <EuiBadgeGroup gutterSize="xs">
       {failureRate && (
-        <EuiBadge color="hollow" iconType="warning">
+        <EuiBadge
+          color="hollow"
+          iconType="warning"
+          title={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.failureRate', {
+            defaultMessage:
+              '{failureRate} of the sampled documents were not parsed due to an error',
+            values: { failureRate },
+          })}
+        >
           {failureRate}
         </EuiBadge>
       )}
       {successRate && (
-        <EuiBadge color="hollow" iconType="check">
+        <EuiBadge
+          color="hollow"
+          iconType="check"
+          title={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.successRate', {
+            defaultMessage:
+              '{successRate} of the sampled documents were successfully parsed by this processor',
+            values: { successRate },
+          })}
+        >
           {successRate}
         </EuiBadge>
       )}
       {detectedFieldsCount > 0 && (
-        <EuiBadge color="hollow">
-          {i18n.translate('xpack.streams.processorMetricBadges.FieldsBadgeLabel', {
+        <EuiBadge
+          color="hollow"
+          title={i18n.translate('xpack.streams.processorMetricBadges.euiBadge.detectedFields', {
+            defaultMessage:
+              '{detectedFieldsCount} fields were parsed on the sampled documents:\n{detectedFields}',
+            values: { detectedFieldsCount, detectedFields: detected_fields.join('\n') },
+          })}
+        >
+          {i18n.translate('xpack.streams.processorMetricBadges.fieldsBadgeLabel', {
             defaultMessage: '{detectedFieldsCount} fields',
             values: { detectedFieldsCount },
           })}
@@ -66,13 +90,23 @@ const errorTitle = i18n.translate(
   { defaultMessage: "Processor configuration invalid or doesn't match." }
 );
 
-export const ProcessorErrors = ({ errors }: { errors: ProcessorMetrics['errors'] }) => {
+export const ProcessorErrors = ({ metrics }: { metrics: ProcessorMetrics }) => {
+  const { errors, success_rate } = metrics;
+
   const { euiTheme } = useEuiTheme();
   const [isErrorListExpanded, toggleErrorListExpanded] = useToggle(false);
 
   const visibleErrors = isErrorListExpanded ? errors : errors.slice(0, 2);
   const remainingCount = errors.length - 2;
   const shouldDisplayErrorToggle = remainingCount > 0;
+
+  const getCalloutProps = (type: ProcessorMetrics['errors'][number]['type']): EuiCallOutProps => {
+    const isWarningError = type === 'generic_processor_failure' && success_rate > 0;
+
+    return {
+      color: isWarningError ? 'warning' : 'danger',
+    };
+  };
 
   return (
     <>
@@ -84,7 +118,13 @@ export const ProcessorErrors = ({ errors }: { errors: ProcessorMetrics['errors']
         `}
       >
         {visibleErrors.map((error, id) => (
-          <EuiCallOut key={id} color="danger" iconType="warning" size="s" title={errorTitle}>
+          <EuiCallOut
+            key={id}
+            {...getCalloutProps(error.type)}
+            iconType="warning"
+            size="s"
+            title={errorTitle}
+          >
             {error.message}
           </EuiCallOut>
         ))}
