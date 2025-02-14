@@ -27,16 +27,12 @@ type ServiceDefinition =
 
 export function toSearchResult({
   iconPath,
-  isCloud,
-  isNative,
   name,
   score,
   serviceType,
   url,
 }: {
   iconPath?: string;
-  isCloud: boolean;
-  isNative?: boolean;
   name: string;
   score: number;
   serviceType: string;
@@ -60,7 +56,6 @@ export function toSearchResult({
 export function getSearchResultProvider(
   config: ConfigType,
   connectorTypes: ConnectorServerSideDefinition[],
-  isCloud: boolean
 ): GlobalSearchResultProvider {
   return {
     find: ({ term, types, tags }, { aborted$, maxResults }, { core: { capabilities } }) => {
@@ -91,7 +86,7 @@ export function getSearchResultProvider(
           ];
           const result = services
             .map((service) => {
-              const { isNative, iconPath, name, keywords, serviceType } = service;
+              const { iconPath, name, keywords, serviceType } = service;
               const url = 'url' in service ? service.url : undefined;
               let score = 0;
               const searchTerm = (term || '').toLowerCase();
@@ -111,8 +106,6 @@ export function getSearchResultProvider(
               }
               return toSearchResult({
                 iconPath,
-                isCloud,
-                isNative,
                 name,
                 score,
                 serviceType,
