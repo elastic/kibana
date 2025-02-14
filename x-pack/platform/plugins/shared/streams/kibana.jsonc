@@ -3,8 +3,8 @@
   "id": "@kbn/streams-plugin",
   "owner": "@elastic/streams-program-team",
   "description": "A manager for Streams",
-  "group": "observability",
-  "visibility": "private",
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "streams",
     "configPath": ["xpack", "streams"],
