@@ -35,7 +35,7 @@ describe('Introduction component', () => {
 
   test('renders with iconType', () => {
     const { container } = render(
-      <IntlProvider>
+      <IntlProvider locale="en">
         <Introduction {...commonProps} iconType="logoElastic" />
       </IntlProvider>
     );
@@ -46,7 +46,7 @@ describe('Introduction component', () => {
 
   test('renders with exportedFieldsUrl', () => {
     const { getByRole } = render(
-      <IntlProvider>
+      <IntlProvider locale="en">
         <Introduction {...commonProps} exportedFieldsUrl="exported_fields_url" />
       </IntlProvider>
     );
@@ -59,7 +59,7 @@ describe('Introduction component', () => {
 
   test('renders with previewUrl', () => {
     const { getByRole } = render(
-      <IntlProvider>
+      <IntlProvider locale="en">
         <Introduction {...commonProps} previewUrl="preview_image_url" />
       </IntlProvider>
     );
@@ -69,7 +69,7 @@ describe('Introduction component', () => {
 
   test('isBeta', () => {
     const { getByText } = render(
-      <IntlProvider>
+      <IntlProvider locale="en">
         <Introduction {...commonProps} isBeta={true} />
       </IntlProvider>
     );
@@ -78,7 +78,7 @@ describe('Introduction component', () => {
 
   test('Beats badge should show', () => {
     const { getByText } = render(
-      <IntlProvider>
+      <IntlProvider locale="en">
         <Introduction {...commonProps} isBeta={true} category={TutorialsCategory.METRICS} />
       </IntlProvider>
     );
@@ -87,7 +87,7 @@ describe('Introduction component', () => {
 
   test('Beats badge should not show', () => {
     const { queryByText } = render(
-      <IntlProvider>
+      <IntlProvider locale="en">
         <Introduction {...commonProps} category={TutorialsCategory.SECURITY_SOLUTION} />
       </IntlProvider>
     );
