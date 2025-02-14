@@ -132,11 +132,11 @@ export const contentReferenceParser: (params: Params) => Plugin = ({ contentRefe
       const contentReferenceBlock: ContentReferenceBlock = `{reference(${contentReferenceIdString})}`;
       const contentReferenceIds = getContentReferenceIds(contentReferenceBlock);
 
-      const toEat = `${match.startsWith(' ') ? ' ' : ''}${contentReferenceBlock}`;
+      const matchedString = `${match.startsWith(' ') ? ' ' : ''}${contentReferenceBlock}`;
 
       const contentReferenceParts = contentReferenceIds.map((contentReferenceId, i) => ({
         contentReferenceId: contentReferenceId.trim(),
-        toEat: i === 0 ? toEat : '',
+        toEat: i === 0 ? matchedString : '',
       }));
 
       for (const contentReferencePart of contentReferenceParts) {
@@ -154,10 +154,7 @@ export const contentReferenceParser: (params: Params) => Plugin = ({ contentRefe
           };
 
           eat(toEat)(contentReferenceNode);
-          continue;
-        }
-
-        if (contentReference === undefined) {
+        } else if (contentReference === undefined) {
           // The message has finished streaming, but the content reference details were not found
           const contentReferenceNode: InvalidContentReferenceNode = {
             type: 'contentReference',
@@ -168,8 +165,7 @@ export const contentReferenceParser: (params: Params) => Plugin = ({ contentRefe
           };
 
           eat(toEat)(contentReferenceNode);
-          continue;
-        }
+        } else {
 
         // The message has finished streaming and the content reference details were found
         const contentReferenceNode: ResolvedContentReferenceNode<ContentReference> = {
@@ -181,6 +177,7 @@ export const contentReferenceParser: (params: Params) => Plugin = ({ contentRefe
         };
 
         eat(toEat)(contentReferenceNode);
+      }
       }
     };
 
