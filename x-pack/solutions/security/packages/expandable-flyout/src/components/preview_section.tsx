@@ -135,12 +135,13 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
       <div
         css={css`
           position: absolute;
-          top: 0px;
-          bottom: 0px;
-          right: 0px;
+          top: 0;
+          bottom: 0;
+          right: 0;
           width: ${width};
           z-index: 1000;
           padding: ${euiTheme.size.m} ${euiTheme.size.s} 0px ${euiTheme.size.s};
+          // TODO EUI: add color with transparency
           background: ${transparentize(euiTheme.colors.shadow, 0.1)};
         `}
       >
