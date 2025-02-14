@@ -6593,7 +6593,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-browser@link:x-pack/solutions/observability/packages/utils_browser":
+"@kbn/observability-utils-browser@link:x-pack/solutions/observability/packages/utils-browser":
   version "0.0.0"
   uid ""
 

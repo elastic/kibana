@@ -709,7 +709,7 @@
     "@kbn/observability-onboarding-plugin": "link:x-pack/solutions/observability/plugins/observability_onboarding",
     "@kbn/observability-plugin": "link:x-pack/solutions/observability/plugins/observability",
     "@kbn/observability-shared-plugin": "link:x-pack/solutions/observability/plugins/observability_shared",
-    "@kbn/observability-utils-browser": "link:x-pack/solutions/observability/packages/utils_browser",
+    "@kbn/observability-utils-browser": "link:x-pack/solutions/observability/packages/utils-browser",
     "@kbn/observability-utils-common": "link:x-pack/solutions/observability/packages/utils_common",
     "@kbn/observability-utils-server": "link:x-pack/solutions/observability/packages/utils_server",
     "@kbn/oidc-provider-plugin": "link:x-pack/test/security_api_integration/plugins/oidc_provider",
