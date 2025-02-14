@@ -127,7 +127,7 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
   renderTabs = () => {
     return this.tabs.map((tab, index) => (
       <EuiTab
-        onClick={this.onSelectedTabChanged.bind(this, tab.id)}
+        onClick={() => this.onSelectedTabChanged(tab.id)}
         isSelected={tab.id === this.state.selectedTabId}
         key={index}
       >
