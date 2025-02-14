@@ -396,6 +396,22 @@ describe('IndexPattern', () => {
       indexPattern.removeRuntimeField(newField);
     });
 
+    test('add and remove a popularity score from a runtime field', () => {
+      const newField = 'new_field_test';
+      indexPattern.addRuntimeField(newField, {
+        ...runtimeWithAttrs,
+        popularity: '10',
+      });
+      expect(indexPattern.getFieldByName(newField)?.count).toEqual(10);
+      indexPattern.setFieldCount(newField, 20);
+      expect(indexPattern.getFieldByName(newField)?.count).toEqual(20);
+      indexPattern.setFieldCount(newField, null);
+      expect(indexPattern.getFieldByName(newField)?.count).toEqual(0);
+      indexPattern.setFieldCount(newField, undefined);
+      expect(indexPattern.getFieldByName(newField)?.count).toEqual(0);
+      indexPattern.removeRuntimeField(newField);
+    });
+
     test('add and remove composite runtime field as new fields', () => {
       const fieldCount = indexPattern.fields.length;
       indexPattern.addRuntimeField('new_field', runtimeCompositeWithAttrs);
