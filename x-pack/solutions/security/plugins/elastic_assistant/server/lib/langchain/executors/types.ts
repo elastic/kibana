@@ -29,6 +29,7 @@ import type { AssistantTool } from '../../../types';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
 import { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
+import { CoreRequestHandlerContext } from '@kbn/core/server';
 
 export type OnLlmResponse = (
   content: string,
@@ -50,6 +51,7 @@ export interface AgentExecutorParams<T extends boolean> {
   connectorId: string;
   conversationId?: string;
   contentReferencesStore: ContentReferencesStore | undefined;
+  core: CoreRequestHandlerContext;
   dataClients?: AssistantDataClients;
   esClient: ElasticsearchClient;
   langChainMessages: BaseMessage[];

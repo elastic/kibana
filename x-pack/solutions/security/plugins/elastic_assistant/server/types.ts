@@ -240,6 +240,7 @@ export interface AssistantToolParams {
   isEnabledKnowledgeBase: boolean;
   connectorId?: string;
   contentReferencesStore: ContentReferencesStore | undefined;
+  core : CoreRequestHandlerContext;
   description?: string;
   esClient: ElasticsearchClient;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
