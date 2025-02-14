@@ -231,7 +231,7 @@ const EntityAnalyticsRiskScoresComponent = <T extends EntityType>({
             </EuiFlexItem>
             <EuiFlexItem>
               <StyledBasicTable
-                responsive={false}
+                responsiveBreakpoint={false}
                 items={data ?? []}
                 columns={columns}
                 loading={isTableLoading}

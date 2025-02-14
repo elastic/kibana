@@ -14,6 +14,7 @@ import {
   getJsDependencyPathsMock,
 } from './bootstrap_renderer.test.mocks';
 
+import { BehaviorSubject } from 'rxjs';
 import { PackageInfo } from '@kbn/config';
 import { AuthStatus } from '@kbn/core-http-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
@@ -21,6 +22,7 @@ import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { bootstrapRendererFactory, BootstrapRenderer } from './bootstrap_renderer';
 import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
+import { DEFAULT_THEME_NAME, ThemeName } from '@kbn/core-ui-settings-common';
 
 const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
   branch: 'master',
@@ -37,12 +39,10 @@ const createPackageInfo = (parts: Partial<PackageInfo> = {}): PackageInfo => ({
 const getClientGetMockImplementation =
   ({ darkMode, name }: { darkMode?: boolean | string; name?: string } = {}) =>
   (key: string) => {
-    switch (key) {
-      case 'theme:darkMode':
-        return Promise.resolve(darkMode ?? false);
-      case 'theme:name':
-        return Promise.resolve(name ?? 'borealis');
+    if (key === 'theme:darkMode') {
+      return Promise.resolve(darkMode ?? false);
     }
+
     return Promise.resolve();
   };
 
@@ -59,6 +59,7 @@ describe('bootstrapRenderer', () => {
   let uiPlugins: UiPlugins;
   let packageInfo: PackageInfo;
   let userSettingsService: ReturnType<typeof userSettingsServiceMock.createSetupContract>;
+  const themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
 
   beforeEach(() => {
     auth = httpServiceMock.createAuth();
@@ -78,6 +79,7 @@ describe('bootstrapRenderer', () => {
       packageInfo,
       uiPlugins,
       baseHref: `/base-path/${packageInfo.buildShaShort}`, // the base href as provided by static assets module
+      themeName$,
     });
   });
 
@@ -104,9 +106,8 @@ describe('bootstrapRenderer', () => {
         uiSettingsClient,
       });
 
-      expect(uiSettingsClient.get).toHaveBeenCalledTimes(2);
+      expect(uiSettingsClient.get).toHaveBeenCalledTimes(1);
       expect(uiSettingsClient.get).toHaveBeenCalledWith('theme:darkMode');
-      expect(uiSettingsClient.get).toHaveBeenCalledWith('theme:name');
     });
 
     it('calls getThemeTag with the values from the UiSettingsClient (true/dark) when the UserSettingsService is not provided', async () => {
@@ -155,6 +156,7 @@ describe('bootstrapRenderer', () => {
         uiPlugins,
         baseHref: '/base-path',
         userSettingsService,
+        themeName$,
       });
 
       uiSettingsClient.get.mockResolvedValue(false);
@@ -181,6 +183,7 @@ describe('bootstrapRenderer', () => {
         uiPlugins,
         baseHref: '/base-path',
         userSettingsService,
+        themeName$,
       });
 
       const request = httpServerMock.createKibanaRequest();
@@ -206,6 +209,7 @@ describe('bootstrapRenderer', () => {
         uiPlugins,
         baseHref: '/base-path',
         userSettingsService,
+        themeName$,
       });
 
       const request = httpServerMock.createKibanaRequest();
@@ -231,6 +235,7 @@ describe('bootstrapRenderer', () => {
         uiPlugins,
         baseHref: '/base-path',
         userSettingsService,
+        themeName$,
       });
 
       uiSettingsClient.get.mockImplementation(
@@ -269,9 +274,8 @@ describe('bootstrapRenderer', () => {
         uiSettingsClient,
       });
 
-      expect(uiSettingsClient.get).toHaveBeenCalledTimes(2);
+      expect(uiSettingsClient.get).toHaveBeenCalledTimes(1);
       expect(uiSettingsClient.get).toHaveBeenCalledWith('theme:darkMode');
-      expect(uiSettingsClient.get).toHaveBeenCalledWith('theme:name');
     });
 
     it('calls getThemeTag with the correct parameters', async () => {
@@ -350,31 +354,40 @@ describe('bootstrapRenderer', () => {
         darkMode: false,
       });
     });
+  });
 
-    it('calls getThemeTag with `v8` theme name when buildFlavor is `serverless`', async () => {
-      renderer = bootstrapRendererFactory({
-        auth,
-        packageInfo: {
-          ...packageInfo,
-          buildFlavor: 'serverless',
-        },
-        uiPlugins,
-        baseHref: `/base-path/${packageInfo.buildShaShort}`, // the base href as provided by static assets module
-      });
+  it('calls getThemeTag with the correct theme name', async () => {
+    uiSettingsClient.get.mockImplementation(
+      getClientGetMockImplementation({
+        darkMode: true,
+      })
+    );
+    const request = httpServerMock.createKibanaRequest();
 
-      const request = httpServerMock.createKibanaRequest();
-
-      await renderer({
-        request,
-        uiSettingsClient,
-      });
-
-      expect(getThemeTagMock).toHaveBeenCalledTimes(1);
-      expect(getThemeTagMock).toHaveBeenCalledWith({
-        name: 'borealis',
-        darkMode: false,
-      });
+    await renderer({
+      request,
+      uiSettingsClient,
     });
+
+    expect(getThemeTagMock).toHaveBeenCalledTimes(1);
+    expect(getThemeTagMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: themeName$.getValue(),
+      })
+    );
+
+    themeName$.next('amsterdam');
+    await renderer({
+      request,
+      uiSettingsClient,
+    });
+
+    expect(getThemeTagMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        // 'amsterdam' is mapped to 'v8' for backwards compatibility
+        name: 'v8',
+      })
+    );
   });
 
   [false, true].forEach((isAnonymousPage) => {
