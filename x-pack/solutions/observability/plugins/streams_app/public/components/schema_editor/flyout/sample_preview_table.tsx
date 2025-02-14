@@ -42,11 +42,11 @@ const SamplePreviewTableContent = ({
 
   const { value, loading, error } = useStreamsAppFetch(
     ({ signal }) => {
-      return streamsRepositoryClient.fetch('POST /api/streams/{id}/schema/fields_simulation', {
+      return streamsRepositoryClient.fetch('POST /api/streams/{name}/schema/fields_simulation', {
         signal,
         params: {
           path: {
-            id: stream.name,
+            name: stream.name,
           },
           body: {
             field_definitions: [

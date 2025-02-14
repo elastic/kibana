@@ -236,9 +236,7 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
       .parse('No preceding space.{reference(example)}') as Parent;
 
     expect(file.children[0].children).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({ type: 'contentReference' }),
-      ])
+      expect.arrayContaining([expect.objectContaining({ type: 'contentReference' })])
     );
   });
 
@@ -249,8 +247,18 @@ Their love's a beacon, shining bright.{reference(ccaSI)}`) as Parent;
 
     expect(file.children[0].children).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ type: 'contentReference', contentReferenceId: "example", contentReferenceCount: 1, contentReference: undefined }),
-        expect.objectContaining({ type: 'contentReference', contentReferenceId: "example2", contentReferenceCount: 2, contentReference: undefined }),
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceId: 'example',
+          contentReferenceCount: 1,
+          contentReference: undefined,
+        }),
+        expect.objectContaining({
+          type: 'contentReference',
+          contentReferenceId: 'example2',
+          contentReferenceCount: 2,
+          contentReference: undefined,
+        }),
       ])
     );
   });

@@ -32,10 +32,7 @@ export const EsqlQueryReference: React.FC<Props> = ({ contentReferenceNode }) =>
         query: {
           esql: contentReferenceNode.contentReference.query,
         },
-        timeRange: {
-          from: 'now-5y',
-          to: 'now',
-        },
+        timeRange: contentReferenceNode.contentReference.timerange,
       });
 
       navigateToApp(url.app, {
