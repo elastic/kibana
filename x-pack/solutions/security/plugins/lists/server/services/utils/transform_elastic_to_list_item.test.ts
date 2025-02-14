@@ -98,5 +98,16 @@ describe('transform_elastic_to_list_item', () => {
 
       expect(result[0]['@timestamp']).toBe('1970-01-01T00:00:00.000Z');
     });
+
+    test('converts negative from number timestamp to ISO string', () => {
+      const hits = [{ _index: 'test', _source: { ...getSearchEsListItemMock(), '@timestamp': -63549289600000 } }];
+
+      const result = transformElasticHitsToListItem({
+        hits,
+        type: 'keyword',
+      });
+
+      expect(result[0]['@timestamp']).toBe('-000044-03-15T19:33:20.000Z');
+    });
   });
 });
