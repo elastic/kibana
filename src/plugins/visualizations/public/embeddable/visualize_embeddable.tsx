@@ -311,9 +311,7 @@ export const getVisualizeEmbeddableFactory: (deps: {
           linkedToLibrary$,
           (value) => linkedToLibrary$.next(value),
           (a, b) => {
-            return a === undefined || b === undefined
-              ? true
-              : a === b;
+            return a === undefined || b === undefined ? true : a === b;
           },
         ],
       }
