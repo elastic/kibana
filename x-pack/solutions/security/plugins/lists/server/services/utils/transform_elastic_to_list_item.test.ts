@@ -100,7 +100,12 @@ describe('transform_elastic_to_list_item', () => {
     });
 
     test('converts negative from number timestamp to ISO string', () => {
-      const hits = [{ _index: 'test', _source: { ...getSearchEsListItemMock(), '@timestamp': -63549289600000 } }];
+      const hits = [
+        {
+          _index: 'test',
+          _source: { ...getSearchEsListItemMock(), '@timestamp': -63549289600000 },
+        },
+      ];
 
       const result = transformElasticHitsToListItem({
         hits,
