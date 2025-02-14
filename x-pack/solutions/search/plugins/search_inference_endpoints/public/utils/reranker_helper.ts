@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-export const isProviderTechPreview = (provider: InferenceAPIConfigResponse) => {
+import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+export const isProviderTechPreview = (provider: InferenceInferenceEndpointInfo) => {
   if (hasModelId(provider)) {
     return provider.task_type === 'rerank' && provider.service_settings?.model_id?.startsWith('.');
   }
@@ -15,7 +15,7 @@ export const isProviderTechPreview = (provider: InferenceAPIConfigResponse) => {
 };
 
 function hasModelId(
-  service: InferenceAPIConfigResponse
-): service is Extract<InferenceAPIConfigResponse, { service_settings: { model_id: string } }> {
+  service: InferenceInferenceEndpointInfo
+): service is Extract<InferenceInferenceEndpointInfo, { service_settings: { model_id: string } }> {
   return 'model_id' in service.service_settings;
 }
