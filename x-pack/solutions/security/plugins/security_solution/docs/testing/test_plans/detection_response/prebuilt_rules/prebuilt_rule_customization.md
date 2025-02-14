@@ -1,8 +1,8 @@
-# Test plan: customizing prebuilt rules
+# Test plan: customizing prebuilt rules <!-- omit from toc -->
 
 **Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
-## Summary
+## Summary <!-- omit from toc -->
 
 This is a test plan for the workflows of customizing prebuilt rules via:
 
@@ -14,6 +14,41 @@ This is a test plan for the workflows of customizing prebuilt rules via:
   - bulk updating rule schedule
 
 as well as un-customizing prebuilt rules by reverting rule parameters back to their original values.
+
+## Table of contents <!-- omit from toc -->
+
+<!--
+Please use the "Markdown All in One" VS Code extension to keep the TOC in sync with the text:
+https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
+-->
+
+- [Useful information](#useful-information)
+  - [Tickets](#tickets)
+  - [Terminology](#terminology)
+  - [Assumptions](#assumptions)
+- [Scenarios](#scenarios)
+  - [Editing prebuilt rules](#editing-prebuilt-rules)
+    - [**Scenario: User can edit a non-customized prebuilt rule from the rule edit page**](#scenario-user-can-edit-a-non-customized-prebuilt-rule-from-the-rule-edit-page)
+    - [**Scenario: User can edit a customized prebuilt rule from the rule edit page**](#scenario-user-can-edit-a-customized-prebuilt-rule-from-the-rule-edit-page)
+    - [**Scenario: User can navigate to rule editing page from the rule details page**](#scenario-user-can-navigate-to-rule-editing-page-from-the-rule-details-page)
+    - [**Scenario: User can navigate to rule editing page from the rule management page**](#scenario-user-can-navigate-to-rule-editing-page-from-the-rule-management-page)
+    - [**Scenario: User can bulk edit prebuilt rules from rules management page**](#scenario-user-can-bulk-edit-prebuilt-rules-from-rules-management-page)
+  - [Detecting rule customizations](#detecting-rule-customizations)
+    - [**Scenario: is\_customized is set to true when user edits a customizable rule field**](#scenario-is_customized-is-set-to-true-when-user-edits-a-customizable-rule-field)
+    - [**Scenario: is\_customized calculation is not affected by specific fields**](#scenario-is_customized-calculation-is-not-affected-by-specific-fields)
+    - [**Scenario: User cannot change non-customizable rule fields on prebuilt rules**](#scenario-user-cannot-change-non-customizable-rule-fields-on-prebuilt-rules)
+    - [**Scenario: User can revert a customized prebuilt rule to its original state**](#scenario-user-can-revert-a-customized-prebuilt-rule-to-its-original-state)
+  - [Calculating the Modified badge in the UI](#calculating-the-modified-badge-in-the-ui)
+    - [**Scenario: Modified badge should appear on the rule details page when prebuilt rule is customized**](#scenario-modified-badge-should-appear-on-the-rule-details-page-when-prebuilt-rule-is-customized)
+    - [**Scenario: Modified badge should not appear on the rule details page when prebuilt rule isn't customized**](#scenario-modified-badge-should-not-appear-on-the-rule-details-page-when-prebuilt-rule-isnt-customized)
+    - [**Scenario: Modified badge should not appear on a custom rule's rule details page**](#scenario-modified-badge-should-not-appear-on-a-custom-rules-rule-details-page)
+    - [**Scenario: Modified badge should appear on the rule management table when prebuilt rule is modified**](#scenario-modified-badge-should-appear-on-the-rule-management-table-when-prebuilt-rule-is-modified)
+    - [**Scenario: Modified badge should not appear on the rule management table when prebuilt rule isn't customized**](#scenario-modified-badge-should-not-appear-on-the-rule-management-table-when-prebuilt-rule-isnt-customized)
+    - [**Scenario: Modified badge should not appear on the rule management table when row is a custom rule**](#scenario-modified-badge-should-not-appear-on-the-rule-management-table-when-row-is-a-custom-rule)
+    - [**Scenario: Modified badge should appear on the rule updates table when prebuilt rule is customized**](#scenario-modified-badge-should-appear-on-the-rule-updates-table-when-prebuilt-rule-is-customized)
+    - [**Scenario: Modified badge should not appear on the rule updates table when prebuilt rule isn't customized**](#scenario-modified-badge-should-not-appear-on-the-rule-updates-table-when-prebuilt-rule-isnt-customized)
+    - [**Scenario: User should be able to see only customized rules in the rule updates table**](#scenario-user-should-be-able-to-see-only-customized-rules-in-the-rule-updates-table)
+    - [**Scenario: User should be able to filter by non-customized rules on the rule updates table**](#scenario-user-should-be-able-to-filter-by-non-customized-rules-on-the-rule-updates-table)
 
 ## Useful information
 

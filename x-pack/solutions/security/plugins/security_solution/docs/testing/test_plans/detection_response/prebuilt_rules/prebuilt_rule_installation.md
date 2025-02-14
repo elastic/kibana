@@ -1,8 +1,8 @@
-# Test plan: installing prebuilt rules
+# Test plan: installing prebuilt rules <!-- omit from toc -->
 
 **Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
-## Summary
+## Summary <!-- omit from toc -->
 
 This is a test plan for the workflows of:
 
@@ -11,7 +11,12 @@ This is a test plan for the workflows of:
 
 from the Rule Installation page.
 
-## Table of Contents
+## Table of contents <!-- omit from toc -->
+
+<!--
+Please use the "Markdown All in One" VS Code extension to keep the TOC in sync with the text:
+https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
+-->
 
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
@@ -20,7 +25,7 @@ from the Rule Installation page.
   - [Non-functional requirements](#non-functional-requirements)
   - [Functional requirements](#functional-requirements)
 - [Scenarios](#scenarios)
-  - [Rule installation notifications on the Rule Management page](#rule-installation-and-upgrade-notifications-on-the-rule-management-page)
+  - [Rule installation notifications on the Rule Management page](#rule-installation-notifications-on-the-rule-management-page)
     - [**Scenario: User is NOT notified when no prebuilt rules are installed and there are no prebuilt rules assets**](#scenario-user-is-not-notified-when-no-prebuilt-rules-are-installed-and-there-are-no-prebuilt-rules-assets)
     - [**Scenario: User is NOT notified when all prebuilt rules are installed and up to date**](#scenario-user-is-not-notified-when-all-prebuilt-rules-are-installed-and-up-to-date)
     - [**Scenario: User is notified when no prebuilt rules are installed and there are rules available to install**](#scenario-user-is-notified-when-no-prebuilt-rules-are-installed-and-there-are-rules-available-to-install)
@@ -35,17 +40,17 @@ from the Rule Installation page.
     - [**Scenario: User can preview rules available for installation**](#scenario-user-can-preview-rules-available-for-installation)
     - [**Scenario: User can install a rule using the rule preview**](#scenario-user-can-install-a-rule-using-the-rule-preview)
     - [**Scenario: User can see correct rule information in preview before installing**](#scenario-user-can-see-correct-rule-information-in-preview-before-installing)
-    - [**Scenario: Tabs and sections without content should be hidden in preview before installing**](#scenario-tabs-and-sections-without-content-should-be-hidden-in-preview-before-installing)
+    - [**Scenario: Optional tabs and sections without content should be hidden in preview before installing**](#scenario-optional-tabs-and-sections-without-content-should-be-hidden-in-preview-before-installing)
   - [Rule installation workflow: filtering, sorting, pagination](#rule-installation-workflow-filtering-sorting-pagination)
   - [Rule installation workflow: misc cases](#rule-installation-workflow-misc-cases)
     - [**Scenario: User opening the Add Rules page sees a loading skeleton until the package installation is completed**](#scenario-user-opening-the-add-rules-page-sees-a-loading-skeleton-until-the-package-installation-is-completed)
     - [**Scenario: User can navigate from the Add Rules page to the Rule Management page via breadcrumbs**](#scenario-user-can-navigate-from-the-add-rules-page-to-the-rule-management-page-via-breadcrumbs)
-  - [Rule installation and upgrade via the Prebuilt rules API](#rule-installation-and-upgrade-via-the-prebuilt-rules-api)
+  - [Rule installation via the Prebuilt rules API](#rule-installation-via-the-prebuilt-rules-api)
     - [**Scenario: API can install all prebuilt rules**](#scenario-api-can-install-all-prebuilt-rules)
     - [**Scenario: API can install prebuilt rules that are not yet installed**](#scenario-api-can-install-prebuilt-rules-that-are-not-yet-installed)
-    - [**Scenario: API does not install prebuilt rules if they are up to date**](#scenario-api-does-not-installupgrade-prebuilt-rules-if-they-are-up-to-date)
+    - [**Scenario: API does not install prebuilt rules if they are up to date**](#scenario-api-does-not-install-prebuilt-rules-if-they-are-up-to-date)
   - [Error handling](#error-handling)
-    - [**Scenario: Error is handled when any operation on prebuilt rules fails**](#scenario-error-is-handled-when-any-operation-on-prebuilt-rules-fails)
+    - [**Scenario: Error is handled when any installation operation on prebuilt rules fails**](#scenario-error-is-handled-when-any-installation-operation-on-prebuilt-rules-fails)
   - [Authorization / RBAC](#authorization--rbac)
     - [**Scenario: User with read privileges on Security Solution cannot install prebuilt rules**](#scenario-user-with-read-privileges-on-security-solution-cannot-install-prebuilt-rules)
 

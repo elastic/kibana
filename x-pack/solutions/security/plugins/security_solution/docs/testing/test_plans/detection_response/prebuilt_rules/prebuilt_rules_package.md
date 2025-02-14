@@ -1,14 +1,19 @@
-# Test plan: prebuilt rules package
+# Test plan: prebuilt rules package <!-- omit from toc -->
 
 **Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
-## Summary
+## Summary <!-- omit from toc -->
 
 This is a test plan for the workflow of installing and updating the Fleet package with prebuilt rules.
 
 This workflow makes prebuilt rules available for installation and upgrade in the system by the user.
 
-## Table of Contents
+## Table of contents <!-- omit from toc -->
+
+<!--
+Please use the "Markdown All in One" VS Code extension to keep the TOC in sync with the text:
+https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
+-->
 
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
@@ -20,7 +25,7 @@ This workflow makes prebuilt rules available for installation and upgrade in the
   - [Package installation](#package-installation)
     - [**Scenario: Package is installed via Fleet**](#scenario-package-is-installed-via-fleet)
     - [**Scenario: Package is installed via bundled Fleet package in Kibana**](#scenario-package-is-installed-via-bundled-fleet-package-in-kibana)
-    - [**Scenario: Large package can be installed on a small Kibana instance**](#scenario-large-package-can-be-installed-on-a-small-kibana-instance)
+    - [**Scenario: Large package can be installed on a memory restricted Kibana instance**](#scenario-large-package-can-be-installed-on-a-memory-restricted-kibana-instance)
   - [Scenarios for the real package](#scenarios-for-the-real-package)
     - [**Scenario: User can install prebuilt rules from scratch, then install new rules and upgrade existing rules from the new package**](#scenario-user-can-install-prebuilt-rules-from-scratch-then-install-new-rules-and-upgrade-existing-rules-from-the-new-package)
   - [Kibana upgrade](#kibana-upgrade)

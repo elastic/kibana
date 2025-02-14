@@ -1,8 +1,8 @@
-# Test plan: exporting prebuilt rules
+# Test plan: exporting prebuilt rules <!-- omit from toc -->
 
 **Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
-## Summary
+## Summary <!-- omit from toc -->
 
 This is a test plan for the workflows of:
 
@@ -15,6 +15,28 @@ where each prebuilt rule:
 
 - can be an original (non-customized) prebuilt rule from Elastic, or
 - can be a prebuilt rule customized by the user.
+
+## Table of contents <!-- omit from toc -->
+
+<!--
+Please use the "Markdown All in One" VS Code extension to keep the TOC in sync with the text:
+https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
+-->
+
+- [Useful information](#useful-information)
+  - [Tickets](#tickets)
+  - [Terminology](#terminology)
+- [Scenarios](#scenarios)
+  - [Core Functionality](#core-functionality)
+    - [Scenario: Exporting prebuilt rule individually from rule details page](#scenario-exporting-prebuilt-rule-individually-from-rule-details-page)
+    - [Scenario: Exporting custom rule individually from rule details page](#scenario-exporting-custom-rule-individually-from-rule-details-page)
+    - [Scenario: Exporting prebuilt rule individually from rules management table](#scenario-exporting-prebuilt-rule-individually-from-rules-management-table)
+    - [Scenario: Exporting custom rule individually from rules management table](#scenario-exporting-custom-rule-individually-from-rules-management-table)
+    - [Scenario: Exporting prebuilt rules in bulk](#scenario-exporting-prebuilt-rules-in-bulk)
+    - [Scenario: Exporting custom rules in bulk](#scenario-exporting-custom-rules-in-bulk)
+    - [Scenario: Exporting both prebuilt and custom rules in bulk](#scenario-exporting-both-prebuilt-and-custom-rules-in-bulk)
+  - [Error Handling](#error-handling)
+    - [Scenario: Exporting beyond the export limit](#scenario-exporting-beyond-the-export-limit)
 
 ## Useful information
 

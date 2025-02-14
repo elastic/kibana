@@ -1,8 +1,8 @@
-# Test plan: importing prebuilt rules
+# Test plan: importing prebuilt rules <!-- omit from toc -->
 
 **Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
-## Summary
+## Summary <!-- omit from toc -->
 
 This is a test plan for the workflows of:
 
@@ -11,6 +11,33 @@ This is a test plan for the workflows of:
 - importing any mixture of prebuilt and custom rules
 
 from the Rule Management page.
+
+## Table of contents <!-- omit from toc -->
+
+<!--
+Please use the "Markdown All in One" VS Code extension to keep the TOC in sync with the text:
+https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
+-->
+
+- [Useful information](#useful-information)
+  - [Tickets](#tickets)
+  - [Terminology](#terminology)
+- [Scenarios](#scenarios)
+  - [Core Functionality](#core-functionality)
+    - [Scenario: Importing an unmodified prebuilt rule with a matching rule\_id and version](#scenario-importing-an-unmodified-prebuilt-rule-with-a-matching-rule_id-and-version)
+    - [Scenario: Importing a customized prebuilt rule with a matching rule\_id and version](#scenario-importing-a-customized-prebuilt-rule-with-a-matching-rule_id-and-version)
+    - [Scenario: Importing a custom rule with a matching rule\_id and version](#scenario-importing-a-custom-rule-with-a-matching-rule_id-and-version)
+    - [Scenario: Importing a prebuilt rule with a matching rule\_id but no matching version](#scenario-importing-a-prebuilt-rule-with-a-matching-rule_id-but-no-matching-version)
+    - [Scenario: Importing a prebuilt rule with a non-existent rule\_id](#scenario-importing-a-prebuilt-rule-with-a-non-existent-rule_id)
+    - [Scenario: Importing a prebuilt rule without a rule\_id field](#scenario-importing-a-prebuilt-rule-without-a-rule_id-field)
+    - [Scenario: Importing a prebuilt rule with a matching rule\_id but missing a version field](#scenario-importing-a-prebuilt-rule-with-a-matching-rule_id-but-missing-a-version-field)
+    - [Scenario: Importing an existing custom rule missing a version field](#scenario-importing-an-existing-custom-rule-missing-a-version-field)
+    - [Scenario: Importing a new custom rule missing a version field](#scenario-importing-a-new-custom-rule-missing-a-version-field)
+    - [Scenario: Importing a rule with overwrite flag set to true](#scenario-importing-a-rule-with-overwrite-flag-set-to-true)
+    - [Scenario: Importing a rule with overwrite flag set to false](#scenario-importing-a-rule-with-overwrite-flag-set-to-false)
+    - [Scenario: Importing both custom and prebuilt rules](#scenario-importing-both-custom-and-prebuilt-rules)
+    - [Scenario: Importing prebuilt rules when the rules package is not installed](#scenario-importing-prebuilt-rules-when-the-rules-package-is-not-installed)
+    - [Scenario: User imports a custom rule before a prebuilt rule asset is created with the same rule\_id](#scenario-user-imports-a-custom-rule-before-a-prebuilt-rule-asset-is-created-with-the-same-rule_id)
 
 ## Useful information
 

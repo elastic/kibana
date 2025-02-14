@@ -2,7 +2,7 @@
 
 **Status**: `in progress`, matches [Milestone 3](https://github.com/elastic/kibana/issues/174168).
 
-## Summary
+## Summary <!-- omit from toc -->
 
 This is a test plan for the workflows of:
 
@@ -11,10 +11,10 @@ This is a test plan for the workflows of:
 
 from the Rule Upgrade table without previewing incoming updates from Elastic and user customizations in the Rule Upgrade flyout.
 
-## Table of Contents <!-- omit from toc -->
+## Table of contents <!-- omit from toc -->
 
 <!--
-Use Markdown All in One in VS Code to keep the TOC in sync with the text:
+Please use the "Markdown All in One" VS Code extension to keep the TOC in sync with the text:
 https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 -->
 
