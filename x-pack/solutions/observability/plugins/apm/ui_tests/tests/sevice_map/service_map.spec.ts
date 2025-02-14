@@ -43,7 +43,8 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
     await page.getByTestId('serviceMap').scrollIntoViewIfNeeded();
     await page.getByTestId('centerServiceMap').click();
     await expect(page.getByTestId('serviceMap').getByLabel('Loading')).not.toBeVisible();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
+    await page.getByTestId('serviceMap').click();
     await expect(await page.getByTestId('serviceMap')).toHaveScreenshot('service_map.png', {
       animations: 'disabled',
     });
@@ -58,7 +59,8 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
     await page.getByTestId('serviceMap').scrollIntoViewIfNeeded();
     await page.getByTestId('centerServiceMap').click();
     await expect(page.getByTestId('serviceMap').getByLabel('Loading')).not.toBeVisible();
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
+    await page.getByTestId('serviceMap').click();
     await expect(await page.getByTestId('serviceMap')).toHaveScreenshot(
       'detailed_service_map.png',
       {
