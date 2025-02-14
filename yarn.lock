@@ -6881,7 +6881,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-fields-browser@link:packages/response-ops/alerts_fields_browser":
+"@kbn/response-ops-alerts-fields-browser@link:src/platform/packages/shared/response-ops/alerts-fields-browser":
   version "0.0.0"
   uid ""
 
