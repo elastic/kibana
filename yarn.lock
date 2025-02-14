@@ -6557,7 +6557,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-alert-details@link:x-pack/solutions/observability/packages/alert_details":
+"@kbn/observability-alert-details@link:x-pack/solutions/observability/packages/alert-details":
   version "0.0.0"
   uid ""
 
