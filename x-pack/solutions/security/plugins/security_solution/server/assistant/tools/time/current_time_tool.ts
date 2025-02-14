@@ -46,8 +46,10 @@ export const CURRENT_TIME_TOOL: AssistantTool = {
             const settingsDateFormatTimezone = await core.uiSettings.client.get<string | undefined>('dateFormat:tz');
             const timezone = settingsDateFormatTimezone === 'Browser' ? 'UTC' : settingsDateFormatTimezone ?? 'UTC';
             const currentDate = new Date();
-            const utcConversion = timezone === 'UTC' ? undefined : getTimeFormatter('UTC').format(currentDate);
-            return `Local time: ${getTimeFormatter(timezone).format(currentDate)} ${utcConversion ? `(${utcConversion})` : ''}`.trim()
+            const localTime = getTimeFormatter(timezone).format(currentDate);
+            const utcConversionRequired = timezone !== 'UTC';
+            const utcConversion = utcConversionRequired ? getTimeFormatter('UTC').format(currentDate) : undefined;
+            return `Local time: ${localTime} ${utcConversion ? `(${utcConversion})` : ''}`.trim()
         }, {
             name: TOOL_DETAILS.name,
             description: TOOL_DETAILS.description,
