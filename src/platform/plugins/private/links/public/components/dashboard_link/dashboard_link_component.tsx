@@ -188,7 +188,7 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     '&.linkCurrent': {
       borderRadius: 0,
       cursor: 'default',
-      '& span': {
+      '& .euiListGroupItem__text': {
         color: euiTheme.colors.textPrimary,
       },
     },
@@ -206,7 +206,7 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     // horizontal layout - current dashboard link styles
     '.horizontalLayoutWrapper &.linkCurrent': {
       padding: `0 ${euiTheme.size.s}`,
-      '& span': {
+      '& .euiListGroupItem__text': {
         // add bottom border for current dashboard
         boxShadow: `${euiTheme.colors.textPrimary} 0 calc(-.5 * ${euiTheme.size.xs}) inset`,
         paddingInline: 0,
@@ -215,7 +215,7 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
 
     // dashboard not found error styles
     '&.dashboardLinkError': {
-      '&.dashboardLinkError--noLabel span': {
+      '&.dashboardLinkError--noLabel .euiListGroupItem__text': {
         fontStyle: 'italic',
       },
 
