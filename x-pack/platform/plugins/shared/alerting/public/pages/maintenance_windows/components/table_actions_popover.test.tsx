@@ -32,8 +32,6 @@ jest.mock('../../../utils/kibana_react', () => {
 describe('TableActionsPopover', () => {
   let appMockRenderer: AppMockRenderer;
   const originalClipboard = global.window.navigator.clipboard;
-  // const notifications = notificationServiceMock.createStartContract();
-  // const addSuccessToastSpy = jest.spyOn(notifications.toasts, 'addSuccess');
 
   beforeEach(() => {
     jest.clearAllMocks();
