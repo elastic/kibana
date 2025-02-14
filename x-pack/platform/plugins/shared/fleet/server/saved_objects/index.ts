@@ -403,6 +403,16 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '2': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                required_versions: { type: 'flattened', index: false },
+              },
+            },
+          ],
+        },
       },
     },
     [OUTPUT_SAVED_OBJECT_TYPE]: {

@@ -187,7 +187,7 @@ export async function upgradeBatch(
     agents: agentsToUpdate.map((agent) => agent.id),
     ...rollingUpgradeOptions,
     namespaces,
-    isAutomatic: options.isAutomatic,
+    is_automatic: options.isAutomatic,
   });
 
   await createErrorActionResults(
