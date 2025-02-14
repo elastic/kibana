@@ -27,7 +27,6 @@ import { isTimeComparison } from '../../../shared/time_comparison/get_comparison
 import type { ErrorGroupItem } from './use_error_group_list_data';
 import { useErrorGroupListData } from './use_error_group_list_data';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import type { TablesLoadedState } from '../../service_overview/apm_overview';
 
 const GroupIdLink = styled(ErrorDetailLink)`
   font-family: ${({ theme }) => theme.euiTheme.font.familyCode};
@@ -57,7 +56,7 @@ interface Props {
   comparisonEnabled?: boolean;
   saveTableOptionsToUrl?: boolean;
   showPerPageOptions?: boolean;
-  onLoadTable?: (key: keyof TablesLoadedState) => void;
+  onLoadTable?: () => void;
 }
 
 const defaultSorting = {
@@ -105,7 +104,7 @@ export function ErrorGroupList({
     // onLoadTable will be defined if it's the service overview tab
     if (isSuccess(mainStatisticsStatus) && isSuccess(detailedStatisticsStatus)) {
       if (onLoadTable) {
-        onLoadTable('errors');
+        onLoadTable();
       } else {
         onPageReady({
           meta: {

@@ -87,9 +87,12 @@ export function ApmOverview() {
     false
   );
 
-  const handleOnLoadTable = useCallback((key: keyof TablesLoadedState) => {
+  const handleOnLoadTable = (key: keyof TablesLoadedState) =>
     setHaveTablesLoaded((currentValues) => ({ ...currentValues, [key]: true }));
-  }, []);
+
+  const onTransactionsTableLoad = useCallback(() => handleOnLoadTable('transactions'), []);
+  const onErrorsTableLoad = useCallback(() => handleOnLoadTable('errors'), []);
+  const onDependenciesTableLoad = useCallback(() => handleOnLoadTable('dependencies'), []);
 
   return (
     <>
@@ -127,7 +130,7 @@ export function ApmOverview() {
                 kuery={kuery}
                 environment={environment}
                 fixedHeight={true}
-                onLoadTable={handleOnLoadTable}
+                onLoadTable={onTransactionsTableLoad}
                 start={start}
                 end={end}
                 showPerPageOptions={false}
@@ -153,7 +156,7 @@ export function ApmOverview() {
             <EuiPanel hasBorder={true}>
               <ServiceOverviewErrorsTable
                 serviceName={serviceName}
-                onLoadTable={handleOnLoadTable}
+                onLoadTable={onErrorsTableLoad}
               />
             </EuiPanel>
           </EuiFlexItem>
@@ -184,7 +187,7 @@ export function ApmOverview() {
             <EuiFlexItem grow={7}>
               <EuiPanel hasBorder={true}>
                 <ServiceOverviewDependenciesTable
-                  onLoadTable={handleOnLoadTable}
+                  onLoadTable={onDependenciesTableLoad}
                   fixedHeight={true}
                   showPerPageOptions={false}
                   link={

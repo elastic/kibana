@@ -31,7 +31,6 @@ import { OverviewTableContainer } from '../overview_table_container';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { getColumns } from './get_columns';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import type { TablesLoadedState } from '../../app/service_overview/apm_overview';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -57,7 +56,7 @@ interface Props {
   end: string;
   saveTableOptionsToUrl?: boolean;
   showSparkPlots?: boolean;
-  onLoadTable?: (key: keyof TablesLoadedState) => void;
+  onLoadTable?: () => void;
 }
 
 export function TransactionsTable({
@@ -117,7 +116,7 @@ export function TransactionsTable({
       detailedStatisticsStatus === FETCH_STATUS.SUCCESS
     ) {
       if (onLoadTable) {
-        onLoadTable('transactions');
+        onLoadTable();
       } else {
         onPageReady({
           meta: {
