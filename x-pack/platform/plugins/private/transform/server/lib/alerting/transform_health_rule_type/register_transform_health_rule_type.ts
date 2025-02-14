@@ -22,14 +22,16 @@ import type { TransformHealthAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import {
+  transformHealthRuleParamsSchema,
+  type TransformHealthRuleParams,
+} from '@kbn/response-ops-rule-params/transform_health';
+import {
   PLUGIN,
   type TransformHealthStatus,
   TRANSFORM_RULE_TYPE,
   TRANSFORM_HEALTH_RESULTS,
   TRANSFORM_HEALTH_CHECK_NAMES,
 } from '../../../../common/constants';
-import type { TransformHealthRuleParams } from './schema';
-import { transformHealthRuleParams } from './schema';
 import { transformHealthServiceProvider } from './transform_health_service';
 
 export interface BaseTransformAlertResponse {
@@ -129,11 +131,11 @@ export function getTransformHealthRuleType(
     }),
     actionGroups: [TRANSFORM_ISSUE_DETECTED],
     defaultActionGroupId: TRANSFORM_ISSUE,
-    validate: { params: transformHealthRuleParams },
+    validate: { params: transformHealthRuleParamsSchema },
     schemas: {
       params: {
         type: 'config-schema',
-        schema: transformHealthRuleParams,
+        schema: transformHealthRuleParamsSchema,
       },
     },
     actionVariables: {
