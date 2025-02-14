@@ -47,7 +47,7 @@ export function TracesOverview({
         <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
           <EuiSpacer size="m" />
           <EuiTitle size="s">
-            <h1>{detailTitle}</h1>
+            <h2>{detailTitle}</h2>
           </EuiTitle>
           <EuiSpacer size="m" />
           {(isTransaction ? transactionFields : spanFields).map((fieldId) => {
