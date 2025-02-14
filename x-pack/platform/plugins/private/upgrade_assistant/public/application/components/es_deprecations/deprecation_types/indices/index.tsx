@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ReindexTableRow } from './table_row';
+export { IndexTableRow } from './table_row';

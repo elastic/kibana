@@ -12,7 +12,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 
 import { EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../../common/types';
 
-import type { ReindexStateContext } from '../context';
+import type { IndexStateContext } from '../context';
 import { ChecklistFlyoutStep } from './checklist_step';
 import { WarningsFlyoutStep } from './warnings_step';
 import { DeprecationBadge } from '../../../../shared';
@@ -22,12 +22,12 @@ import {
   uiMetricService,
 } from '../../../../../lib/ui_metric';
 
-export interface ReindexFlyoutProps extends ReindexStateContext {
+export interface IndexFlyoutProps extends IndexStateContext {
   deprecation: EnrichedDeprecationInfo;
   closeFlyout: () => void;
 }
 
-export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
+export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
   reindexState,
   startReindex,
   cancelReindex,

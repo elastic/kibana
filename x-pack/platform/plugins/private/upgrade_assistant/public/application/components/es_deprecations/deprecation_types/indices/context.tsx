@@ -10,18 +10,18 @@ import React, { createContext, useContext } from 'react';
 import { ApiService } from '../../../../lib/api';
 import { useReindexStatus, ReindexState } from './use_reindex_state';
 
-export interface ReindexStateContext {
+export interface IndexStateContext {
   reindexState: ReindexState;
   startReindex: () => Promise<void>;
   cancelReindex: () => Promise<void>;
 }
 
-const ReindexContext = createContext<ReindexStateContext | undefined>(undefined);
+const IndexContext = createContext<IndexStateContext | undefined>(undefined);
 
-export const useReindexContext = () => {
-  const context = useContext(ReindexContext);
+export const useIndexContext = () => {
+  const context = useContext(IndexContext);
   if (context === undefined) {
-    throw new Error('useReindexContext must be used within a <ReindexStatusProvider />');
+    throw new Error('useIndexContext must be used within a <IndexStatusProvider />');
   }
   return context;
 };
@@ -32,7 +32,7 @@ interface Props {
   indexName: string;
 }
 
-export const ReindexStatusProvider: React.FunctionComponent<Props> = ({
+export const IndexStatusProvider: React.FunctionComponent<Props> = ({
   api,
   indexName,
   children,
@@ -43,7 +43,7 @@ export const ReindexStatusProvider: React.FunctionComponent<Props> = ({
   });
 
   return (
-    <ReindexContext.Provider
+    <IndexContext.Provider
       value={{
         reindexState,
         startReindex,
@@ -51,6 +51,6 @@ export const ReindexStatusProvider: React.FunctionComponent<Props> = ({
       }}
     >
       {children}
-    </ReindexContext.Provider>
+    </IndexContext.Provider>
   );
 };
