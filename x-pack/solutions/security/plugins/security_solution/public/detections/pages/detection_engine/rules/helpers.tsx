@@ -43,7 +43,7 @@ import type {
   ActionsStepRule,
 } from './types';
 import { DataSourceType, AlertSuppressionDurationType } from './types';
-import { severityOptions } from '../../../../detection_engine/rule_creation_ui/components/step_about_rule/data';
+import { SeverityLevel } from '../../../../detection_engine/rule_creation_ui/components/step_about_rule/data';
 import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 import type { RuleAction, RuleResponse } from '../../../../../common/api/detection_engine';
 import { normalizeMachineLearningJobId } from '../../../../common/utils/normalize_machine_learning_job_id';
@@ -272,11 +272,14 @@ const severitySortMapping = {
 };
 
 export const fillEmptySeverityMappings = (mappings: SeverityMapping): SeverityMapping => {
-  const missingMappings: SeverityMapping = severityOptions.flatMap((so) =>
-    mappings.find((mapping) => mapping.severity === so.value) == null
-      ? [{ field: '', value: '', operator: 'equals', severity: so.value }]
-      : []
-  );
+  const missingMappings: SeverityMapping = Object.values(SeverityLevel).flatMap((severityLevel) => {
+    const isSeverityLevelInMappings = mappings.some(
+      (mapping) => mapping.severity === severityLevel
+    );
+    return isSeverityLevelInMappings
+      ? []
+      : [{ field: '', value: '', operator: 'equals', severity: severityLevel }];
+  });
   return [...mappings, ...missingMappings].sort(
     (a, b) => severitySortMapping[a.severity] - severitySortMapping[b.severity]
   );

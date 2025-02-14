@@ -32,15 +32,19 @@ export class RuleMigrationsDataIntegrationsClient extends RuleMigrationsDataBase
         id: pkg.name,
         description: pkg?.description || '',
         data_streams:
-          pkg.data_streams?.map((stream) => ({
-            dataset: stream.dataset,
-            index_pattern: `${stream.type}-${stream.dataset}-*`,
-            title: stream.title,
-          })) || [],
+          pkg.data_streams
+            ?.filter((stream) => stream.type === 'logs')
+            .map((stream) => ({
+              dataset: stream.dataset,
+              index_pattern: `${stream.type}-${stream.dataset}-*`,
+              title: stream.title,
+            })) || [],
         elser_embedding: [
           pkg.title,
           pkg.description,
-          ...(pkg.data_streams?.map((stream) => stream.title) || []),
+          ...(pkg.data_streams
+            ?.filter((stream) => stream.type === 'logs')
+            .map((stream) => stream.title) || []),
         ].join(' - '),
       }));
       await this.esClient

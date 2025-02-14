@@ -45,7 +45,8 @@ export const INTEGRATION_NAME_LABEL = i18n.translate(
 export const NO_SPACES_HELP = i18n.translate(
   'xpack.integrationAssistant.step.dataStream.noSpacesHelpText',
   {
-    defaultMessage: 'Name can only contain lowercase letters, numbers, and underscore (_)',
+    defaultMessage:
+      'Name must be at least 2 characters long, start with a letter, and can only contain lowercase letters, numbers, and underscores (_)',
   }
 );
 export const PACKAGE_NAMES_FETCH_ERROR = i18n.translate(
