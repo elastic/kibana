@@ -2321,10 +2321,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui-theme-borealis@0.0.9":
-  version "0.0.9"
-  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.9.tgz#6aea79b15091e84235555236726f1bb1fc0da2bf"
-  integrity sha512-56tzAX5Go4RuSD1fuKvHiLPumGll1NYK1dG4E9OPe7xfLXBGdLjhdXabkJfUlc5OVX2xK9RI3TOmUiimqm8SJg==
+"@elastic/eui-theme-borealis@0.0.10":
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/@elastic/eui-theme-borealis/-/eui-theme-borealis-0.0.10.tgz#ebc317c135220b2f17529fe4e7b235a66614006e"
+  integrity sha512-9VFpUfxtHLjChd7Q1HZry71+o1vEOaUnCSOJiJT6zi/sbt+J114k+GCukOChScK6xaX8ypYD4/I0olCBwZV5Vw==
 
 "@elastic/eui-theme-common@0.0.9":
   version "0.0.9"
@@ -2334,10 +2334,10 @@
     "@types/lodash" "^4.14.202"
     lodash "^4.17.21"
 
-"@elastic/eui@99.1.0-borealis.0":
-  version "99.1.0-borealis.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-99.1.0-borealis.0.tgz#b5b34c749ac56b8ecd290fb715f56ba2e5f255ab"
-  integrity sha512-akDYl5ScBNwBm1sIsPHQVPq5rJpkgjg5Qtb2F1T36eWFp9ux5EVAqoFylsLBIaUnXiwVDkDAVH604IOrR46COg==
+"@elastic/eui@99.2.0-borealis.0":
+  version "99.2.0-borealis.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-99.2.0-borealis.0.tgz#44b22bd4b2177bdf860e7d5ca5f00cea123f044a"
+  integrity sha512-cjd7+awwWoBzdqFju0v3Q6Pl/GB1Y9C+3j9nNj3u5JgK62E2z9AkQvRdL6Tv8jusFwoSR9OhC3H0bmYOKLx8mg==
   dependencies:
     "@elastic/eui-theme-common" "0.0.9"
     "@hello-pangea/dnd" "^16.6.0"
