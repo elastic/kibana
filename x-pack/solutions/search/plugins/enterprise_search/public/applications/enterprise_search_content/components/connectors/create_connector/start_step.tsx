@@ -46,6 +46,7 @@ interface StartStepProps {
   selfManagePreference: SelfManagePreference;
   setCurrentStep: Function;
   title: string;
+  isElasticManagedDiscontinued: boolean;
 }
 
 export const StartStep: React.FC<StartStepProps> = ({
@@ -54,6 +55,7 @@ export const StartStep: React.FC<StartStepProps> = ({
   setCurrentStep,
   onSelfManagePreferenceChange,
   error,
+  isElasticManagedDiscontinued,
 }) => {
   const isMediumDevice = useIsWithinBreakpoints(['xs', 's', 'm', 'l']);
   const elasticManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'elasticManagedRadioButton' });
@@ -214,7 +216,7 @@ export const StartStep: React.FC<StartStepProps> = ({
                   )}
                   checked={selfManagePreference === 'native'}
                   disabled={
-                    selectedConnector?.isNative === false || !isAgentlessEnabled || isFormDirty
+                    selectedConnector?.isNative === false || !isAgentlessEnabled || isFormDirty || isElasticManagedDiscontinued
                   }
                   onChange={() => onSelfManagePreferenceChange('native')}
                   name="setUp"
@@ -223,6 +225,7 @@ export const StartStep: React.FC<StartStepProps> = ({
               <EuiFlexItem grow={false}>
                 <ConnectorDescriptionPopover
                   showIsOnlySelfManaged={selectedConnector?.isNative === false}
+                  isElasticManagedDiscontinued={isElasticManagedDiscontinued}
                   isNative
                 />
               </EuiFlexItem>

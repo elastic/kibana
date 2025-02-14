@@ -91,11 +91,13 @@ const connectorClientPopoverPanels = [
 export interface ConnectorDescriptionPopoverProps {
   isNative: boolean;
   showIsOnlySelfManaged: boolean;
+  isElasticManagedDiscontinued?: boolean;
 }
 
 export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverProps> = ({
   isNative,
   showIsOnlySelfManaged,
+  isElasticManagedDiscontinued,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const panels = isNative ? nativePopoverPanels : connectorClientPopoverPanels;

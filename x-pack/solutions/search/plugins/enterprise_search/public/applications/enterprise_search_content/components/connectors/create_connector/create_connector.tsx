@@ -65,11 +65,11 @@ export const CreateConnector: React.FC = () => {
   const { selectedConnector, currentStep, isFormDirty } = useValues(NewConnectorLogic);
   const { setCurrentStep } = useActions(NewConnectorLogic);
   const stepStates = generateStepState(currentStep);
-
+  const isElasticManagedDiscontinued = true;
   useEffect(() => {
     if (
       (selectedConnector && !selectedConnector.isNative && selfManagePreference === 'native') ||
-      !isAgentlessEnabled
+      !isAgentlessEnabled || isElasticManagedDiscontinued
     ) {
       setSelfManagePreference('selfManaged');
     }
@@ -144,6 +144,7 @@ export const CreateConnector: React.FC = () => {
           setSelfManagePreference(preference);
         }}
         error={errorToText(error)}
+        isElasticManagedDiscontinued={isElasticManagedDiscontinued}
       />
     ),
   };
