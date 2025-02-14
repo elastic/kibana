@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { ToastsStart } from '@kbn/core/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
@@ -36,20 +36,19 @@ export async function loadDataView({
   dataViewId,
   dataViewSpec,
   services: { dataViews },
-  savedDataViews,
   adHocDataViews,
+  isPersisted,
 }: {
   dataViewId?: string;
   dataViewSpec?: DataViewSpec;
   services: DiscoverServices;
-  savedDataViews: DataViewListItem[];
   adHocDataViews: DataView[];
+  isPersisted: boolean;
 }): Promise<DataViewData> {
   let fetchId: string | undefined = dataViewId;
 
   // Handle redirect with data view spec provided via history location state
   if (dataViewSpec) {
-    const isPersisted = savedDataViews.find(({ id: currentId }) => currentId === dataViewSpec.id);
     if (isPersisted) {
       // If passed a spec for a persisted data view, reassign the fetchId
       fetchId = dataViewSpec.id!;
@@ -185,20 +184,22 @@ export const loadAndResolveDataView = async ({
   services: DiscoverServices;
 }) => {
   const { dataViews, toastNotifications } = services;
-  const { adHocDataViews, savedDataViews } = internalStateContainer.getState();
+  const { adHocDataViews } = internalStateContainer.getState();
 
   // Check ad hoc data views first, unless a data view spec is supplied,
   // then attempt to load one if none is found
   let fallback = false;
-  let dataView = dataViewSpec ? undefined : adHocDataViews.find((dv) => dv.id === dataViewId);
+  const adHocDataView = adHocDataViews.find((dv) => dv.id === dataViewId);
+  let dataView = dataViewSpec ? undefined : adHocDataView;
+  const isPersisted = !Boolean(adHocDataView);
 
   if (!dataView) {
     const dataViewData = await loadDataView({
       dataViewId,
       services,
       dataViewSpec,
-      savedDataViews,
       adHocDataViews,
+      isPersisted,
     });
 
     fallback = !dataViewData.requestedDataViewFound;

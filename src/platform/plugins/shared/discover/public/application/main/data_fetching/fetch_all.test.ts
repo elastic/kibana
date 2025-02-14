@@ -70,7 +70,6 @@ describe('test fetchAll', () => {
       getInternalState: () => ({
         dataView: undefined,
         isDataViewLoading: false,
-        savedDataViews: [],
         adHocDataViews: [],
         defaultProfileAdHocDataViewIds: [],
         expandedDoc: undefined,

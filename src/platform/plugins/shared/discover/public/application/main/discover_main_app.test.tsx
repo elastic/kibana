@@ -10,7 +10,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { DataViewListItem } from '@kbn/data-views-plugin/public';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverMainApp } from './discover_main_app';
 import { DiscoverTopNav } from './components/top_nav/discover_topnav';
@@ -27,12 +26,8 @@ discoverServiceMock.data.query.timefilter.timefilter.getTime = () => {
 
 describe('DiscoverMainApp', () => {
   test('renders', async () => {
-    const dataViewList = [dataViewMock].map((ip) => {
-      return { ...ip, ...{ attributes: { title: ip.title } } };
-    }) as unknown as DataViewListItem[];
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     stateContainer.actions.setDataView(dataViewMock);
-    stateContainer.internalState.transitions.setSavedDataViews(dataViewList);
     const props = {
       stateContainer,
     };
