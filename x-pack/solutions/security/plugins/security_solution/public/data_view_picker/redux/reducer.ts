@@ -112,3 +112,13 @@ export type DataviewPickerState = ReturnType<typeof dataViewPickerReducer>;
 export interface RootState {
   dataViewPicker: DataviewPickerState;
 }
+
+export const initialDataViewPickerState: RootState = {
+  dataViewPicker: {
+    shared: initialSharedState,
+    [DataViewPickerScopeName.default]: initialScopeState,
+    [DataViewPickerScopeName.timeline]: initialScopeState,
+    [DataViewPickerScopeName.detections]: initialScopeState,
+    [DataViewPickerScopeName.analyzer]: initialScopeState,
+  },
+};

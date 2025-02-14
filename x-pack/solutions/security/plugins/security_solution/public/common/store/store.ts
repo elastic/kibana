@@ -180,7 +180,6 @@ export const createStoreFactory = async (
     ...subPlugins.explore.store.reducer,
     timeline: timelineReducer,
     ...subPlugins.management.store.reducer,
-    dataViewPicker: dataViewPickerReducer,
   };
 
   return createStore(initialState, rootReducer, coreStart, storage, [
