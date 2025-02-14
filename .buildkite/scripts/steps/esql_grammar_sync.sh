@@ -65,7 +65,8 @@ main () {
 
   rm -rf elasticsearch
   git clone https://github.com/nik9000/elasticsearch --depth 1
-  git checkout antlr_include
+  cd elasticsearch && git checkout antlr_include
+  cd ..
 
   cd "$KIBANA_DIR"
 
