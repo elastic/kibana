@@ -928,9 +928,9 @@ x-pack/solutions/observability/packages/kbn-streams-schema @elastic/streams-prog
 x-pack/solutions/observability/packages/observability_ai/observability_ai_common @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/observability_ai/observability_ai_server @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/synthetics_test_data @elastic/obs-ux-management-team
-x-pack/solutions/observability/packages/utils_common @elastic/observability-ui
 x-pack/solutions/observability/packages/utils_server @elastic/observability-ui
 x-pack/solutions/observability/packages/utils-browser @elastic/observability-ui
+x-pack/solutions/observability/packages/utils-common @elastic/observability-ui
 x-pack/solutions/observability/plugins/apm @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/apm/ftr_e2e @elastic/obs-ux-infra_services-team
