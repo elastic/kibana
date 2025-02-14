@@ -74,7 +74,7 @@ describe('Search search provider', () => {
     title: 'Customized connector',
     type: 'Elasticsearch',
     url: {
-      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector?connector_type=connector_client&service_type=`,
+      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector`,
       prependBasePath: true,
     },
   };
