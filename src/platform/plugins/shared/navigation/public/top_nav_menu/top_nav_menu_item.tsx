@@ -72,10 +72,9 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
     !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 
   function handleClick(event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) {
-    if (isDisabled() || isModifiedEvent(event)) return;
-    if (props.href) {
-      event.preventDefault();
-    }
+    if (isDisabled()) return;
+    if (props.href && isModifiedEvent(event)) return;
+
     props.run(event.currentTarget);
     if (props.isMobileMenu) {
       props.closePopover();
