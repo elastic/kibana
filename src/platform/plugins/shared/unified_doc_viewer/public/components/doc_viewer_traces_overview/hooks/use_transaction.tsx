@@ -13,22 +13,23 @@ import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 
-interface UseTransactionDeps {
-  traceId: string;
+interface UseTransactionPrams {
+  transactionId?: string;
   indexPattern: string;
 }
 
-async function getTransactionData(
-  traceId: string,
-  indexPattern: string,
-  data: DataPublicPluginStart
-) {
+interface GetTransactionParams {
+  transactionId: string;
+  indexPattern: string;
+  data: DataPublicPluginStart;
+}
+
+async function getTransactionData({ transactionId, indexPattern, data }: GetTransactionParams) {
   return lastValueFrom(
     data.search.search({
       params: {
         index: indexPattern,
-        size: 10,
-        track_total_hits: true,
+        size: 1,
         body: {
           timeout: '20s',
           query: {
@@ -36,12 +37,17 @@ async function getTransactionData(
               must: [
                 {
                   match: {
-                    'trace.id': traceId,
+                    'transaction.id': transactionId,
                   },
                 },
                 {
                   exists: {
                     field: 'transaction.name',
+                  },
+                },
+                {
+                  term: {
+                    'processor.event': 'transaction',
                   },
                 },
               ],
@@ -53,31 +59,36 @@ async function getTransactionData(
   );
 }
 
-const useTransaction = ({ traceId, indexPattern }: UseTransactionDeps) => {
+const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) => {
   const { data } = getUnifiedDocViewerServices();
   const [transaction, setTransaction] = useState<{ [key: string]: string } | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        setLoading(true);
-        const result = await getTransactionData(traceId, indexPattern, data);
+      if (transactionId) {
+        try {
+          setLoading(true);
+          const result = await getTransactionData({ transactionId, indexPattern, data });
 
-        const resultTransactionName = result.rawResponse.hits.hits.find(
-          (hit) => hit._source.transaction?.name
-        )?._source.transaction.name;
+          const resultTransactionName = result.rawResponse.hits.hits.find(
+            (hit) => hit._source.transaction?.name
+          )?._source.transaction.name;
 
-        setTransaction(resultTransactionName ? { name: resultTransactionName } : null);
-      } catch (err) {
+          setTransaction(resultTransactionName ? { name: resultTransactionName } : null);
+        } catch (err) {
+          setTransaction({ name: '' });
+        } finally {
+          setLoading(false);
+        }
+      } else {
         setTransaction({ name: '' });
-      } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [traceId, data, indexPattern]);
+  }, [data, indexPattern, transactionId]);
 
   return { loading, transaction };
 };

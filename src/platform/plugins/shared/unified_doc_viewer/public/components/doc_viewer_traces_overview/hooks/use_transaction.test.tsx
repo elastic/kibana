@@ -41,7 +41,7 @@ beforeEach(() => {
 
 describe('useTransaction hook', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <TransactionProvider traceId="test-trace" indexPattern="test-index">
+    <TransactionProvider transactionId="test-transaction" indexPattern="test-index">
       {children}
     </TransactionProvider>
   );
@@ -84,5 +84,23 @@ describe('useTransaction hook', () => {
     expect(result.current.loading).toBe(false);
     expect(result.current.transaction).toEqual({ name: '' });
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
+  });
+
+  it('should set transaction.name as empty string and stop loading when transactionId is not provided', async () => {
+    const wrapperWithoutTransactionId = ({ children }: { children: React.ReactNode }) => (
+      <TransactionProvider transactionId={undefined} indexPattern="test-index">
+        {children}
+      </TransactionProvider>
+    );
+
+    const { result } = renderHook(() => useTransactionContext(), {
+      wrapper: wrapperWithoutTransactionId,
+    });
+
+    await waitFor(() => !result.current.loading);
+
+    expect(result.current.loading).toBe(false);
+    expect(result.current.transaction).toEqual({ name: '' });
+    expect(lastValueFrom).not.toHaveBeenCalled();
   });
 });

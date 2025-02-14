@@ -44,7 +44,10 @@ export function TracesOverview({
   });
 
   return (
-    <TransactionProvider traceId={parsedDoc['trace.id']} indexPattern={dataView.getIndexPattern()}>
+    <TransactionProvider
+      transactionId={parsedDoc['transaction.id']}
+      indexPattern={dataView.getIndexPattern()}
+    >
       <FieldActionsProvider
         columns={columns}
         filter={filter}
