@@ -23,7 +23,7 @@ import {
   USER_AGENT_VERSION_FIELD,
 } from '@kbn/discover-utils';
 
-export const spanFieldIds = [
+export const spanFields = [
   SPAN_NAME_FIELD,
   TRANSACTION_NAME_FIELD,
   SERVICE_NAME_FIELD,
@@ -34,7 +34,7 @@ export const spanFieldIds = [
   SPAN_TYPE_FIELD,
   SPAN_SUBTYPE_FIELD,
 ];
-export const transactionFieldIds = [
+export const transactionFields = [
   TRANSACTION_NAME_FIELD,
   SERVICE_NAME_FIELD,
   TRACE_ID_FIELD,

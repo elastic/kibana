@@ -12,7 +12,7 @@ import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PARENT_ID_FIELD, getTraceDocumentOverview } from '@kbn/discover-utils';
-import { spanFieldIds, transactionFieldIds } from './resources/field_ids';
+import { spanFields, transactionFields } from './resources/fields';
 import { getFieldConfiguration } from './resources/get_field_configuration';
 import { FieldActionsProvider } from '../../hooks/use_field_actions';
 import { TransactionProvider } from '../../hooks/use_transaction';
@@ -50,7 +50,7 @@ export function TracesOverview({
             <h1>{detailTitle}</h1>
           </EuiTitle>
           <EuiSpacer size="m" />
-          {(isTransaction ? transactionFieldIds : spanFieldIds).map((fieldId) => {
+          {(isTransaction ? transactionFields : spanFields).map((fieldId) => {
             const fieldConfiguration = getFieldConfiguration(parsedDoc)[fieldId];
 
             return (
