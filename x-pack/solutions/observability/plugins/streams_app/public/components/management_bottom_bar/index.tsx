@@ -63,7 +63,6 @@ export function ManagementBottomBar({
         size="s"
         iconType="cross"
         onClick={handleCancel}
-        disabled={disabled}
       >
         {i18n.translate('xpack.streams.streamDetailView.managementTab.bottomBar.cancel', {
           defaultMessage: 'Cancel changes',
