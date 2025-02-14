@@ -49,7 +49,6 @@ export const getExecutor = (basePath: IBasePath) =>
       alertsClient
     );
 
-    // TODO: add params for sloIds, stale and delay time
     await monitorHealth.execute({ spaceId, basePath, startedAt, params });
 
     const recoveredAlerts = alertsClient.getRecoveredAlerts() ?? [];

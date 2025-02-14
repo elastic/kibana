@@ -16,6 +16,6 @@ const durationSchema = schema.object({
 
 export const sloHealthParamsSchema = schema.object({
   sloIds: schema.maybe(schema.arrayOf(schema.string())),
-  delay: durationSchema,
-  staleTime: durationSchema,
+  delay: schema.maybe(durationSchema),
+  staleTime: schema.maybe(durationSchema),
 });

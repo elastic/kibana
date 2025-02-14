@@ -7,11 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public/rules/create_observability_rule_type_registry';
-import { ALERT_REASON, SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import {
+  ALERT_REASON,
+  SLO_BURN_RATE_RULE_TYPE_ID,
+  SLO_HEALTH_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
 import { lazy } from 'react';
 import { SLO_ID_FIELD, SLO_INSTANCE_ID_FIELD } from '../../common/field_names/slo';
 import { validateBurnRateRule } from '../components/burn_rate_rule_editor/validation';
 import { LazyWithContextProviders } from '../utils/get_lazy_with_context_providers';
+import { validateHealthRule } from '../components/health_rule_editor/validation';
 
 const sloBurnRateDefaultActionMessage = i18n.translate(
   'xpack.slo.rules.burnRate.defaultActionMessage',
@@ -77,6 +82,32 @@ export const registerBurnRateRuleType = (
     alertDetailsAppSection: lazyWithContextProviders(
       lazy(() => import('../components/alert_details/alert_details_app_section'))
     ),
+    priority: 100,
+  });
+
+  observabilityRuleTypeRegistry.register({
+    id: SLO_HEALTH_RULE_TYPE_ID,
+    description: i18n.translate('xpack.slo.rules.health.description', {
+      defaultMessage: 'Alert on SLO operational issues',
+    }),
+    format: ({ fields }) => {
+      return {
+        reason: fields[ALERT_REASON] ?? '-',
+        link: `/app/slos/${fields[SLO_ID_FIELD]}`,
+      };
+    },
+    iconClass: 'bell',
+    documentationUrl(docLinks) {
+      return `WHATEVER`;
+    },
+    ruleParamsExpression: lazyWithContextProviders(
+      lazy(() => import('../components/health_rule_editor'))
+    ),
+    validate: validateHealthRule,
+    requiresAppContext: false,
+    defaultActionMessage: 'SLO is not operationnaly healthy',
+    defaultRecoveryMessage: 'SLO is operationaly healthy',
+    alertDetailsAppSection: undefined,
     priority: 100,
   });
 };

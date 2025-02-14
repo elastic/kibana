@@ -19,7 +19,7 @@ import {
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { sloFeatureId } from '@kbn/observability-plugin/common';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { mapValues } from 'lodash';
 import { getSloClientWithRequest } from './client';
 import { registerSloUsageCollector } from './lib/collectors/register';
@@ -38,8 +38,6 @@ import type {
   SLOServerSetup,
   SLOServerStart,
 } from './types';
-
-const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
 export class SLOPlugin
   implements
@@ -64,7 +62,7 @@ export class SLOPlugin
   ): SLOServerSetup {
     const savedObjectTypes = [SO_SLO_TYPE, SO_SLO_SETTINGS_TYPE];
 
-    const alertingFeatures = sloRuleTypes.map((ruleTypeId) => ({
+    const alertingFeatures = SLO_RULE_TYPE_IDS.map((ruleTypeId) => ({
       ruleTypeId,
       consumers: [sloFeatureId, ALERTING_FEATURE_ID],
     }));

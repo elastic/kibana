@@ -17,6 +17,7 @@ import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import {
   Duration,
+  DurationUnit,
   TransformHealthStatus,
   TransformStats,
   TransformStatsState,
@@ -65,6 +66,8 @@ interface SummaryAggResults {
 }
 
 const BATCH_SIZE = 100;
+const DEFAULT_MAX_STALE_TIME = new Duration(1, DurationUnit.Day);
+const DEFAULT_MAX_DELAY = new Duration(5, DurationUnit.Minute);
 
 export class MonitorHealth {
   constructor(
@@ -91,11 +94,14 @@ export class MonitorHealth {
     params: HealthRuleParams;
   }): Promise<void> {
     const { sloIds, delay: maxDelay, staleTime: maxStaleTime } = params;
-    const maxStaleTimeDuration = new Duration(
-      maxStaleTime.value,
-      toDurationUnit(maxStaleTime.unit)
-    );
-    const maxDelayDuration = new Duration(maxDelay.value, toDurationUnit(maxDelay.unit));
+
+    const maxStaleTimeDuration = maxStaleTime
+      ? new Duration(maxStaleTime.value, toDurationUnit(maxStaleTime.unit))
+      : DEFAULT_MAX_STALE_TIME;
+
+    const maxDelayDuration = maxDelay
+      ? new Duration(maxDelay.value, toDurationUnit(maxDelay.unit))
+      : DEFAULT_MAX_DELAY;
 
     const alertLimit = this.alertsClient.getAlertLimitValue();
     let hasReachedLimit = false;
@@ -163,7 +169,7 @@ export class MonitorHealth {
             break;
           }
 
-          const reason = `SLO is ${status}.`;
+          const reason = `SLO is ${status}`;
           const alertId = sloDefinition.id;
 
           const { uuid } = this.alertsClient.report({
