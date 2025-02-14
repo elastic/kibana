@@ -59,7 +59,7 @@ export function useAllMonitorErrors() {
               summary: {
                 top_hits: {
                   size: 1,
-                  _source: ['error', 'state', 'monitor', '@timestamp'],
+                  _source: ['error', 'state', 'monitor', '@timestamp', 'config_id', 'observer'],
                   sort: [{ '@timestamp': 'desc' }],
                 },
               },

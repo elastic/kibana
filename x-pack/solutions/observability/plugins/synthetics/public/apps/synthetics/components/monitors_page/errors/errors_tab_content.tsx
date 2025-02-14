@@ -55,7 +55,12 @@ export const ErrorsTabContent = ({
       <EuiFlexGroup gutterSize="m" wrap={true}>
         <EuiFlexItem grow={2} css={{ minWidth: 260 }}>
           <PanelWithTitle title={ERRORS_LABEL}>
-            <ErrorsList errorStates={errorStates} upStates={upStates} loading={loading} />
+            <ErrorsList
+              errorStates={errorStates}
+              upStates={upStates}
+              loading={loading}
+              showMonitorName={true}
+            />
           </PanelWithTitle>
         </EuiFlexItem>
         <FailedTestsByStep time={time} />

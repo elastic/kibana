@@ -9,9 +9,11 @@ import { EuiSpacer } from '@elastic/eui';
 import { ErrorsTabContent } from './errors_tab_content';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { useAllMonitorErrors } from '../hooks/use_all_errors';
+import { useErrorsBreadcrumbs } from './use__errors_breadcrumbs';
 
 export const ErrorsTab = () => {
   const { errorStates, upStates, loading, monitorIds } = useAllMonitorErrors();
+  useErrorsBreadcrumbs();
 
   return (
     <div>
