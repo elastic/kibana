@@ -1689,7 +1689,9 @@
         "StartAllocationParams",
         "): ",
         "Observable",
-        "<{ acknowledge: boolean; }>; stopModelAllocation(modelId: string, deploymentsIds: string[], options?: { force: boolean; }): Promise<Record<string, { acknowledge: boolean; error?: ",
+        "<",
+        "StartTrainedModelDeploymentResponse",
+        ">; stopModelAllocation(modelId: string, deploymentsIds: string[], options?: { force: boolean; }): Promise<Record<string, { acknowledge: boolean; error?: ",
         {
           "pluginId": "@kbn/ml-error-utils",
           "scope": "common",
