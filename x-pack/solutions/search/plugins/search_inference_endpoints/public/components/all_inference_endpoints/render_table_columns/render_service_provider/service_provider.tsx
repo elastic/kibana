@@ -7,19 +7,19 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import React from 'react';
-import {
-  ELASTIC_MODEL_DEFINITIONS,
-  InferenceAPIConfigResponse,
-} from '@kbn/ml-trained-models-utils';
+import { ELASTIC_MODEL_DEFINITIONS } from '@kbn/ml-trained-models-utils';
 import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as i18n from './translations';
 
-interface ServiceProviderProps {
-  providerEndpoint: InferenceAPIConfigResponse;
+interface EndpointModelInfoProps {
+  endpointInfo: InferenceInferenceEndpointInfo;
+}
+interface ServiceProviderProps extends EndpointModelInfoProps {
+  service: ServiceProviderKeys;
 }
 
-export const ServiceProvider: React.FC<ServiceProviderProps> = ({ providerEndpoint }) => {
-  const { service } = providerEndpoint;
+export const ServiceProvider: React.FC<ServiceProviderProps> = ({ service, endpointInfo }) => {
   const provider = SERVICE_PROVIDERS[service];
 
   return provider ? (
@@ -39,7 +39,7 @@ export const ServiceProvider: React.FC<ServiceProviderProps> = ({ providerEndpoi
             </EuiText>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EndpointModelInfo providerEndpoint={providerEndpoint} />
+            <EndpointModelInfo endpointInfo={endpointInfo} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
@@ -49,8 +49,12 @@ export const ServiceProvider: React.FC<ServiceProviderProps> = ({ providerEndpoi
   );
 };
 
-const EndpointModelInfo: React.FC<ServiceProviderProps> = ({ providerEndpoint }) => {
-  const serviceSettings = providerEndpoint.service_settings;
+interface EndpointModelInfoProps {
+  endpointInfo: InferenceInferenceEndpointInfo;
+}
+
+const EndpointModelInfo: React.FC<EndpointModelInfoProps> = ({ endpointInfo }) => {
+  const serviceSettings = endpointInfo.service_settings;
   const modelId =
     'model_id' in serviceSettings
       ? serviceSettings.model_id
@@ -87,12 +91,12 @@ const EndpointModelInfo: React.FC<ServiceProviderProps> = ({ providerEndpoint })
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem>{endpointModelAtrributes(providerEndpoint)}</EuiFlexItem>
+      <EuiFlexItem>{endpointModelAtrributes(endpointInfo)}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
-function endpointModelAtrributes(endpoint: InferenceAPIConfigResponse) {
+function endpointModelAtrributes(endpoint: InferenceInferenceEndpointInfo) {
   switch (endpoint.service) {
     case ServiceProviderKeys.hugging_face:
       return huggingFaceAttributes(endpoint);
@@ -105,19 +109,19 @@ function endpointModelAtrributes(endpoint: InferenceAPIConfigResponse) {
   }
 }
 
-function huggingFaceAttributes(endpoint: InferenceAPIConfigResponse) {
+function huggingFaceAttributes(endpoint: InferenceInferenceEndpointInfo) {
   const serviceSettings = endpoint.service_settings;
   const url = 'url' in serviceSettings ? serviceSettings.url : null;
 
   return url;
 }
 
-function azureOpenAIStudioAttributes(endpoint: InferenceAPIConfigResponse) {
+function azureOpenAIStudioAttributes(endpoint: InferenceInferenceEndpointInfo) {
   const serviceSettings = endpoint.service_settings;
   return 'provider' in serviceSettings ? serviceSettings?.provider : undefined;
 }
 
-function azureOpenAIAttributes(endpoint: InferenceAPIConfigResponse) {
+function azureOpenAIAttributes(endpoint: InferenceInferenceEndpointInfo) {
   const serviceSettings = endpoint.service_settings;
 
   return 'resource_name' in serviceSettings ? serviceSettings.resource_name : undefined;
