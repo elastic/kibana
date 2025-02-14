@@ -45,6 +45,7 @@ export const SHORT_DOTS_ENABLE_ID = 'shortDots:enable';
 export const SORT_OPTIONS_ID = 'sort:options';
 export const STATE_STORE_IN_SESSION_STORAGE_ID = 'state:storeInSessionStorage';
 export const THEME_DARK_MODE_ID = 'theme:darkMode';
+export const THEME_NAME_ID = 'theme:name';
 export const TIMEPICKER_QUICK_RANGES_ID = 'timepicker:quickRanges';
 export const TIMEPICKER_REFRESH_INTERVAL_DEFAULTS_ID = 'timepicker:refreshIntervalDefaults';
 export const TIMEPICKER_TIME_DEFAULTS_ID = 'timepicker:timeDefaults';
