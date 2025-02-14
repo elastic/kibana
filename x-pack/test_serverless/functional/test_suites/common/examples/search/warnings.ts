@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const dataViewTitle = 'sample-01,sample-01-rollup';
     const fromTime = 'Jun 17, 2022 @ 00:00:00.000';
     const toTime = 'Jun 23, 2022 @ 00:00:00.000';
-    const testArchive = 'test/functional/fixtures/es_archiver/search/downsampled';
+    const testArchive = 'src/platform/test/functional/fixtures/es_archiver/search/downsampled';
     const testIndex = 'sample-01';
     const testRollupIndex = 'sample-01-rollup';
     const testRollupField = 'kubernetes.container.memory.usage.bytes';

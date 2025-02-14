@@ -108,12 +108,12 @@ export default function ({ getService }: FtrProviderContext) {
       before(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         await kibanaServer.importExport.load(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/scroll_count.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/scroll_count.json'
         );
       });
       after(async () => {
         await kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/saved_objects/scroll_count.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/scroll_count.json'
         );
         await kibanaServer.savedObjects.cleanStandardList();
       });

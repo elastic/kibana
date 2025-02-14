@@ -50,12 +50,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
     beforeEach(async () => {
       await kibanaServer.importExport.load(
-        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+        'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );
     });
     afterEach(async () => {
       await kibanaServer.importExport.unload(
-        'test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
+        'src/platform/test/api_integration/fixtures/kbn_archiver/saved_objects/basic.json'
       );
     });
 
@@ -130,12 +130,12 @@ export default function ({ getService }: FtrProviderContext) {
     describe('limit affected saved objects', () => {
       beforeEach(async () => {
         await kibanaServer.importExport.load(
-          'test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json'
         );
       });
       afterEach(async () => {
         await kibanaServer.importExport.unload(
-          'test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json'
+          'src/platform/test/api_integration/fixtures/kbn_archiver/management/saved_objects/relationships.json'
         );
       });
 

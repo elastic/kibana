@@ -106,11 +106,11 @@ node scripts/functional_test_runner --exclude-tag skipMKI
 
 When run without any arguments the `FunctionalTestRunner` automatically loads the configuration in the standard location, but you can override that behavior with the `--config` flag. List configs with multiple --config arguments.
 
-* `--config test/functional/apps/app-name/config.js` starts {es} and {kib} servers with the WebDriver tests configured to run in Chrome for a specific app. For example, 
-`--config test/functional/apps/home/config.js` starts {es} and {kib} servers with the WebDriver tests configured to run in Chrome for the home app.
-* `--config test/functional/config.firefox.js` starts {es} and {kib} servers with the WebDriver tests configured to run in Firefox.
+* `--config src/platform/test/functional/apps/app-name/config.js` starts {es} and {kib} servers with the WebDriver tests configured to run in Chrome for a specific app. For example,
+`--config src/platform/test/functional/apps/home/config.js` starts {es} and {kib} servers with the WebDriver tests configured to run in Chrome for the home app.
+* `--config src/platform/test/functional/config.firefox.js` starts {es} and {kib} servers with the WebDriver tests configured to run in Firefox.
 * `--config test/api_integration/config.js` starts {es} and {kib} servers with the api integration tests configuration.
-* `--config test/accessibility/config.ts` starts {es} and {kib} servers with the WebDriver tests configured to run an accessibility audit using https://www.deque.com/axe/[axe].
+* `--config src/platform/test/accessibility/config.ts` starts {es} and {kib} servers with the WebDriver tests configured to run an accessibility audit using https://www.deque.com/axe/[axe].
 
 There are also command line flags for `--bail` and `--grep`, which behave just like their mocha counterparts. For instance, use `--grep=foo` to run only tests that match a regular expression.
 
@@ -192,16 +192,16 @@ To run tests on Firefox locally, use `config.firefox.js`:
 
 ["source","shell"]
 -----------
-node scripts/functional_test_runner --config test/functional/config.firefox.js
+node scripts/functional_test_runner --config src/platform/test/functional/config.firefox.js
 -----------
 
 [discrete]
 ==== Using the test_user service
 
 Tests should run at the positive security boundary condition, meaning that they should be run with the minimum privileges required (and documented) and not as the superuser.
- This prevents the type of regression where additional privileges accidentally become required to perform the same action. 
- 
-The functional UI tests now default to logging in with a user named `test_user` and the roles of this user can be changed dynamically without logging in and out.  
+ This prevents the type of regression where additional privileges accidentally become required to perform the same action.
+
+The functional UI tests now default to logging in with a user named `test_user` and the roles of this user can be changed dynamically without logging in and out.
 
 In order to achieve this a new service was introduced called `createTestUserService` (see `packages/kbn-ftr-common-functional-ui-services/services/security/test_user.ts`). The purpose of this test user service is to create roles defined in the test config files and setRoles() or restoreDefaults().
 
@@ -245,7 +245,7 @@ export default function ({ getService, getPageObject }) {
         // start by clearing Saved Objects from the .kibana index
         await kibanaServer.savedObjects.cleanStandardList();
         // load some basic log data only if the index doesn't exist
-        esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/makelogs')
+        esArchiver.loadIfNeeded('src/platform/test/functional/fixtures/es_archiver/makelogs')
       ]);
       // go to the page described by `apps.visualize` in the config
       await PageObjects.common.navigateTo('visualize');
@@ -411,7 +411,7 @@ Services are intentionally generic. They can be literally anything (even nothing
 
 To create a custom service `somethingUseful`:
 
-* Create a `test/functional/services/something_useful.js` file that looks like this:
+* Create a `src/platform/test/functional/services/something_useful.js` file that looks like this:
 +
 ["source","js"]
 -----------

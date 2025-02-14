@@ -34,12 +34,18 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
     describe('context', () => {
       before(async () => {
         await svlCommonPage.loginAsAdmin();
-        await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-        await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+        await esArchiver.loadIfNeeded(
+          'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+        );
+        await kibanaServer.importExport.load(
+          'src/platform/test/functional/fixtures/kbn_archiver/discover'
+        );
       });
 
       after(async () => {
-        await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+        await kibanaServer.importExport.unload(
+          'src/platform/test/functional/fixtures/kbn_archiver/discover'
+        );
       });
 
       it('should set EBT context for telemetry events with o11y root profile', async () => {
@@ -125,12 +131,18 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
 
     describe('contextual profiles', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-        await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+        await esArchiver.loadIfNeeded(
+          'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
+        );
+        await kibanaServer.importExport.load(
+          'src/platform/test/functional/fixtures/kbn_archiver/discover'
+        );
       });
 
       after(async () => {
-        await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+        await kibanaServer.importExport.unload(
+          'src/platform/test/functional/fixtures/kbn_archiver/discover'
+        );
       });
 
       it('should send EBT events when a different data source profile gets resolved', async () => {

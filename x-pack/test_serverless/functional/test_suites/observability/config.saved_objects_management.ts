@@ -16,7 +16,9 @@ export default createTestConfig({
   junit: {
     reportName: 'Serverless Search Saved Objects Management Functional Tests',
   },
-  kbnServerArgs: findTestPluginPaths([resolve(REPO_ROOT, 'test/plugin_functional/plugins')]),
+  kbnServerArgs: findTestPluginPaths([
+    resolve(REPO_ROOT, 'src/platform/test/plugin_functional/plugins'),
+  ]),
 
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/esproject/config/elasticsearch.yml
