@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
+// import React from 'react';
+// import { shallow } from 'enzyme';
 
-import { Footer } from './footer';
+// import { Footer } from './footer';
 
-test('render', () => {
-  const component = shallow(<Footer url={'/app/myapp'} label={'launch myapp'} />);
-  expect(component).toMatchSnapshot();
-});
+// test('render', () => {
+//   const component = shallow(<Footer url={'/app/myapp'} label={'launch myapp'} />);
+//   expect(component).toMatchSnapshot();
+// });

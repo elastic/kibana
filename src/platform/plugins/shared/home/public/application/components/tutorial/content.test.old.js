@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { shallow } from 'enzyme';
+// import React from 'react';
+// import { shallow } from 'enzyme';
 
-import { Content } from './content';
+// import { Content } from './content';
 
-test('should render content with markdown', () => {
-  const component = shallow(
-    <Content
-      text={'I am *some* [content](https://en.wikipedia.org/wiki/Content) with `markdown`'}
-    />
-  );
-  expect(component).toMatchSnapshot();
-});
+// test('should render content with markdown', () => {
+//   const component = shallow(
+//     <Content
+//       text={'I am *some* [content](https://en.wikipedia.org/wiki/Content) with `markdown`'}
+//     />
+//   );
+//   expect(component).toMatchSnapshot();
+// });
