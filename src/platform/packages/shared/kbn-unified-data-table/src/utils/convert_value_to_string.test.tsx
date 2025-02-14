@@ -17,6 +17,8 @@ import { servicesMock } from '../../__mocks__/services';
 import { convertValueToString, convertNameToString } from './convert_value_to_string';
 
 describe('convertValueToString', () => {
+  jest.spyOn(dataTableContextComplexMock.dataView.fields, 'create');
+
   it('should convert a keyword value to text', () => {
     const result = convertValueToString({
       rows: dataTableContextComplexRowsMock,
@@ -24,6 +26,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'keyword_key',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -39,27 +42,13 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'text_message',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
     });
 
     expect(result.formattedString).toBe('"Hi there! I am a sample string."');
-  });
-
-  it('should convert a text value to text (not for CSV)', () => {
-    const result = convertValueToString({
-      rows: dataTableContextComplexRowsMock,
-      dataView: dataTableContextComplexMock.dataView,
-      fieldFormats: servicesMock.fieldFormats,
-      columnId: 'text_message',
-      rowIndex: 0,
-      options: {
-        compatibleWithCSV: false,
-      },
-    });
-
-    expect(result.formattedString).toBe('Hi there! I am a sample string.');
   });
 
   it('should convert a multiline text value to text', () => {
@@ -69,6 +58,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'text_message',
       rowIndex: 1,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -85,12 +75,36 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'number_price',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
     });
 
     expect(result.formattedString).toBe('10.99');
+    expect(dataTableContextComplexMock.dataView.fields.create).toHaveBeenCalledTimes(0);
+  });
+
+  it('should convert a number value as keyword override to text', () => {
+    const result = convertValueToString({
+      rows: dataTableContextComplexRowsMock,
+      dataView: dataTableContextComplexMock.dataView,
+      fieldFormats: servicesMock.fieldFormats,
+      columnId: 'number_price',
+      rowIndex: 0,
+      columnsMeta: {
+        number_price: {
+          type: 'string',
+          esType: 'keyword',
+        },
+      },
+      options: {
+        compatibleWithCSV: true,
+      },
+    });
+
+    expect(result.formattedString).toBe('10.99');
+    expect(dataTableContextComplexMock.dataView.fields.create).toHaveBeenCalledTimes(1);
   });
 
   it('should convert a date value to text', () => {
@@ -100,6 +114,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'date',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -115,6 +130,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'date_nanos',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -130,6 +146,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'date_nanos',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: false,
       },
@@ -145,6 +162,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'bool_enabled',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -160,6 +178,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'binary_blob',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -175,6 +194,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'binary_blob',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: false,
       },
@@ -190,6 +210,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'object_user.first',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -205,6 +226,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'nested_user',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -222,6 +244,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'flattened_labels',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -237,6 +260,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'range_time_frame',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -254,6 +278,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'rank_features',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -269,6 +294,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'histogram',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -284,6 +310,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'ip_addr',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -299,6 +326,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'ip_addr',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: false,
       },
@@ -314,6 +342,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'version',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -329,6 +358,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'version',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: false,
       },
@@ -344,6 +374,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'vector',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -359,6 +390,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'geo_point',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -374,6 +406,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'geo_point',
       rowIndex: 1,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -389,6 +422,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'array_tags',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -404,6 +438,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'geometry',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -421,6 +456,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'runtime_number',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -436,6 +472,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'scripted_string',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -451,6 +488,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'scripted_string',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: false,
       },
@@ -466,6 +504,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'unknown',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -481,6 +520,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'unknown',
       rowIndex: -1,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -496,6 +536,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: '_source',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: false,
       },
@@ -519,6 +560,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: '_source',
       rowIndex: 0,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -536,6 +578,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'array_tags',
       rowIndex: 1,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -550,6 +593,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'scripted_string',
       rowIndex: 1,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: true,
       },
@@ -566,6 +610,7 @@ describe('convertValueToString', () => {
       fieldFormats: servicesMock.fieldFormats,
       columnId: 'array_tags',
       rowIndex: 1,
+      columnsMeta: undefined,
       options: {
         compatibleWithCSV: false,
       },

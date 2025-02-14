@@ -279,6 +279,9 @@ export interface DocLinks {
   readonly server: {
     readonly protocol: string;
   };
+  readonly logging: {
+    readonly enableDeprecationHttpDebugLogs: string;
+  };
   readonly securitySolution: {
     readonly aiAssistant: string;
     readonly artifactControl: string;
@@ -316,7 +319,7 @@ export interface DocLinks {
     readonly detectionEngineOverview: string;
     readonly signalsMigrationApi: string;
     readonly legacyEndpointManagementApiDeprecations: string;
-    readonly legacyBulkApiDeprecations: string;
+    readonly legacyRuleManagementBulkApiDeprecations: string;
   };
   readonly query: {
     readonly eql: string;

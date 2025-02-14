@@ -79,6 +79,7 @@ describe('output preconfiguration', () => {
     const keyHash = (await hashSecret('secretKey')) as string;
     const passwordHash = (await hashSecret('secretPassword')) as string;
     const serviceTokenHash = (await hashSecret('secretServiceToken')) as string;
+    const serviceKibanaAPIKeyHash = (await hashSecret('secretKibanaAPIKey')) as string;
     mockedOutputService.bulkGet.mockImplementation(async (soClient, id): Promise<Output[]> => {
       return [
         {
@@ -221,6 +222,7 @@ describe('output preconfiguration', () => {
           hosts: ['https:es.co:80'],
           is_preconfigured: true,
           service_token: 'unsecureServiceToken',
+          kibana_api_key: 'unsecureKibanaApiKey',
         },
         {
           id: 'existing-remote-es-output-with-secrets-1',
@@ -235,6 +237,10 @@ describe('output preconfiguration', () => {
               id: '101112',
               hash: serviceTokenHash,
             },
+            kibana_api_key: {
+              id: '131415',
+              hash: serviceKibanaAPIKeyHash,
+            },
           },
         },
         {
@@ -247,6 +253,7 @@ describe('output preconfiguration', () => {
           is_preconfigured: true,
           secrets: {
             service_token: 'secretServiceToken',
+            kibana_api_key: 'secretKibanaAPIKey',
           },
         },
       ];
@@ -456,6 +463,9 @@ describe('output preconfiguration', () => {
         is_default_monitoring: false,
         hosts: ['test.fr'],
         service_token: 'serviceToken',
+        kibana_api_key: 'kibanaAPIKey',
+        kibana_url: 'http://kibana.co',
+        sync_integrations: true,
       } as PreconfiguredOutput,
     ]);
 
@@ -809,6 +819,7 @@ describe('output preconfiguration', () => {
         is_preconfigured: true,
         secrets: {
           service_token: 'secretServiceToken', // no change
+          kibana_api_key: 'secretKibanaAPIKey',
         },
       },
     ]);
@@ -898,6 +909,7 @@ describe('output preconfiguration', () => {
         hosts: ['https:es.co:80'],
         is_preconfigured: true,
         service_token: 'unsecureServiceToken',
+        kibana_api_key: 'unsecureKibanaAPIKey',
       } as PreconfiguredOutput,
     ]);
 
@@ -969,6 +981,7 @@ describe('output preconfiguration', () => {
         is_preconfigured: true,
         secrets: {
           service_token: 'secretServiceToken',
+          kibana_api_key: 'secretKibanaAPIKey',
         },
       },
     ]);
