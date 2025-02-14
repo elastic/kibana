@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { i18n } from '@kbn/i18n';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
 import { RISK_SEVERITY_COLOUR } from '../../common/utils';
@@ -22,8 +22,8 @@ import type { RiskSeverity } from '../../../../common/search_strategy';
 const DONUT_HEIGHT = 120;
 
 const DonutContainer = styled(EuiFlexItem)`
-  padding-right: ${({ theme }) => theme.eui.euiSizeXXL};
-  padding-left: ${({ theme }) => theme.eui.euiSizeM};
+  padding-right: ${({ theme: { euiTheme } }) => euiTheme.size.xxl};
+  padding-left: ${({ theme: { euiTheme } }) => euiTheme.size.m};
 `;
 
 const StyledLegendItems = styled(EuiFlexItem)`

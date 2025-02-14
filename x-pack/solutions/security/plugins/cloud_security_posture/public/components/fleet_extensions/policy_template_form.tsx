@@ -63,7 +63,6 @@ import {
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
 import {
   GCP_CREDENTIALS_TYPE,
-  GCP_SETUP_ACCESS,
   gcpField,
   getInputVarsFields,
 } from './gcp_credentials_form/gcp_credential_form';
@@ -727,7 +726,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           'gcp.credentials.type': {
             value: isAgentless
               ? GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON
-              : GCP_SETUP_ACCESS.CLOUD_SHELL,
+              : GCP_CREDENTIALS_TYPE.CREDENTIALS_NONE,
             type: 'text',
           },
         },
