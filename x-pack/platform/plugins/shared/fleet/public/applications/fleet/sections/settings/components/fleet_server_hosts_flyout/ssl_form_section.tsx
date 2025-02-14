@@ -45,7 +45,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
     setSecretsToggleState(secretEnabled);
   };
 
-  const useSecretsStorage = secretsToggleState === true;
+  const useSecretsStorage = secretsToggleState === false;
 
   useEffect(() => {
     if (!isFirstLoad) return;
@@ -164,6 +164,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
           {...inputs.sslKeyInput.formRowProps}
           useSecretsStorage={useSecretsStorage}
           onToggleSecretStorage={onToggleKeySecretAndClearValue}
+          disabled={true}
         >
           <EuiTextArea
             fullWidth
@@ -255,6 +256,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
           {...inputs.sslESKeyInput.formRowProps}
           useSecretsStorage={useSecretsStorage}
           onToggleSecretStorage={onToggleESKeySecretAndClearValue}
+          disabled={true}
         >
           <EuiTextArea
             fullWidth
