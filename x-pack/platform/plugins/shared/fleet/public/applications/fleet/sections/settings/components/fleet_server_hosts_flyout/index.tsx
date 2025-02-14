@@ -197,16 +197,16 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
               <EuiComboBox
                 fullWidth
                 data-test-subj="fleetServerHostsFlyout.proxyIdInput"
-                {...inputs.proxyIdInput.props}
-                onChange={(options) => inputs.proxyIdInput.setValue(options?.[0]?.value ?? '')}
+                {...inputs.proxyIdInput?.props}
+                onChange={(options) => inputs?.proxyIdInput?.setValue(options?.[0]?.value ?? '')}
                 selectedOptions={
-                  inputs.proxyIdInput.value !== ''
-                    ? proxiesOptions.filter((option) => option.value === inputs.proxyIdInput.value)
+                  inputs?.proxyIdInput?.value !== ''
+                    ? proxiesOptions.filter((option) => option.value === inputs.proxyIdInput?.value)
                     : []
                 }
                 options={proxiesOptions}
                 singleSelection={{ asPlainText: true }}
-                isDisabled={inputs.proxyIdInput.props.disabled}
+                isDisabled={inputs.proxyIdInput?.props.disabled}
                 isClearable={true}
                 placeholder={i18n.translate(
                   'xpack.fleet.settings.fleetServerHostsFlyout.proxyIdPlaceholder',
