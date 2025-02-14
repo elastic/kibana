@@ -36,7 +36,7 @@ export async function getDataStreamsCreationDate({
 
   return catIndices.reduce((acc, index) => {
     const creationDate = index['creation.date'];
-    const indexName = index['index']!;
+    const indexName = index.index!;
     const stream = streamByIndex[indexName];
 
     acc[stream] = creationDate ? Number(creationDate) : undefined;
