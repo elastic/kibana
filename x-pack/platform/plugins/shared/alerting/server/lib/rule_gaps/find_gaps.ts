@@ -107,23 +107,6 @@ export const findGapsSearchAfter = async ({
   } catch (err) {
     // Clean up PIT if there's an error and we created it
     logger.error(`Failed to find gaps with search after for rule ${ruleId}: ${err.message}`);
-
-    await closeGapsPIT(eventLogClient, logger, params?.pitId);
-
     throw err;
-  }
-};
-
-export const closeGapsPIT = async (
-  eventLogClient: IEventLogClient,
-  logger: Logger,
-  pitId?: string
-): Promise<void> => {
-  if (!pitId) return;
-
-  try {
-    await eventLogClient.closePointInTime(pitId);
-  } catch (err) {
-    logger.error(`Failed to close point in time: ${err.message}`);
   }
 };

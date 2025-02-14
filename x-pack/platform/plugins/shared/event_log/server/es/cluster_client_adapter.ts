@@ -126,7 +126,7 @@ const LEGACY_ID_CUTOFF_VERSION = '8.0.0';
 export interface QueryEventsBySavedObjectSearchAfterResult {
   data: IValidatedEventInternalDocInfo[];
   total: number;
-  search_after?: estypes.SortResults[];
+  search_after?: estypes.SortResults;
   pit_id?: string;
 }
 
@@ -748,9 +748,8 @@ export class ClusterClientAdapter<
         pit_id: pitId,
       };
     } catch (err) {
-      // Clean up PIT if there's an error and it was newly created
       try {
-        if (pitId && !existingPitId) {
+        if (pitId) {
           await esClient.closePointInTime({ id: pitId });
         }
       } catch (closeErr) {

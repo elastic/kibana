@@ -92,7 +92,7 @@ export type AggregateOptionsType = Pick<TypeOf<typeof queryOptionsSchema>, 'filt
 
 export type FindOptionsSearchAfterType = Omit<FindOptionsType, 'page'> & {
   pit_id?: string;
-  search_after?: estypes.SortResults[];
+  search_after?: estypes.SortResults;
 };
 
 interface EventLogServiceCtorParams {

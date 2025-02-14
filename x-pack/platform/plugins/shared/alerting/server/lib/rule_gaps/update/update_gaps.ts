@@ -277,8 +277,9 @@ export const updateGaps = async (params: UpdateGapsParams) => {
         searchAfter = nextSearchAfter;
       }
     } finally {
-      // Clean up PIT when done or if there's an error
-      closeGapsPIT(eventLogClient, logger, pitId);
+      if (pitId) {
+        await eventLogClient.closePointInTime(pitId);
+      }
     }
 
     if (hasErrors) {
