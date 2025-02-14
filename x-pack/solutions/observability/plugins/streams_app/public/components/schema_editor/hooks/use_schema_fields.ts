@@ -62,7 +62,7 @@ export const useSchemaFields = ({
       ([name, field]) => ({
         name,
         type: field.type,
-        format: 'format' in field ? field.format : undefined,
+        format: field.format,
         additionalParameters: getAdvancedParameters(name, field),
         parent: field.from,
         status: 'inherited',
@@ -73,7 +73,7 @@ export const useSchemaFields = ({
       ([name, field]) => ({
         name,
         type: field.type,
-        format: 'format' in field ? field.format : undefined,
+        format: field.format,
         additionalParameters: getAdvancedParameters(name, field),
         parent: definition.stream.name,
         status: 'mapped',

@@ -12,7 +12,7 @@ export const convertToFieldDefinitionConfig = (
   field: MappedSchemaField
 ): FieldDefinitionConfig => ({
   type: field.type,
-  ...('format' in field && field.type === 'date' ? { format: field.format as string } : {}),
+  ...(field.format && field.type === 'date' ? { format: field.format as string } : {}),
   ...(field.additionalParameters && Object.keys(field.additionalParameters).length > 0
     ? field.additionalParameters
     : {}),

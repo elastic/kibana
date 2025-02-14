@@ -21,9 +21,10 @@ export const FIELD_DEFINITION_TYPES = [
 
 export type FieldDefinitionType = (typeof FIELD_DEFINITION_TYPES)[number];
 
-// We redefine type as we only allow a subset of types
+// We redefine "first class" parameters
 export type FieldDefinitionConfig = MappingProperty & {
   type: FieldDefinitionType;
+  format?: string;
 };
 
 // Parameters that we provide a generic (JSON blob) experience for
@@ -33,10 +34,11 @@ export type FieldDefinitionConfigAdvancedParameters = Omit<
 >;
 
 export const fieldDefinitionConfigSchema: z.Schema<FieldDefinitionConfig> = z.intersection(
+  z.record(z.string(), z.unknown()),
   z.object({
     type: z.enum(FIELD_DEFINITION_TYPES),
-  }),
-  z.record(z.string(), z.unknown())
+    format: z.optional(NonEmptyString),
+  })
 );
 
 export interface FieldDefinition {
