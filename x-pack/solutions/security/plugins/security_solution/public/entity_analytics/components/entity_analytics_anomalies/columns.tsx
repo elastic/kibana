@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import * as i18n from './translations';
 import type { SecurityJob } from '../../../common/components/ml_popover/types';
@@ -17,7 +17,7 @@ import type { AnomaliesCount } from '../../../common/components/ml/anomaly/use_a
 type AnomaliesColumns = Array<EuiTableFieldDataColumnType<AnomaliesCount>>;
 
 const DarkShadeText = styled.span`
-  color: ${({ theme }) => theme.eui.euiColorDarkShade};
+  color: ${({ theme: { euiTheme } }) => euiTheme.colors.darkShade};
 `;
 
 export const useAnomaliesColumns = (

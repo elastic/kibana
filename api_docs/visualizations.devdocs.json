@@ -1970,6 +1970,25 @@
       },
       {
         "parentPluginId": "visualizations",
+        "id": "def-public.getConvertToLensModule",
+        "type": "Function",
+        "tags": [],
+        "label": "getConvertToLensModule",
+        "description": [],
+        "signature": [
+          "() => Promise<typeof ",
+          "src/platform/plugins/shared/visualizations/public/convert_to_lens/index",
+          ">"
+        ],
+        "path": "src/platform/plugins/shared/visualizations/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "visualizations",
         "id": "def-public.getDataViewByIndexPatternId",
         "type": "Function",
         "tags": [],
@@ -6809,23 +6828,6 @@
       }
     ],
     "objects": [
-      {
-        "parentPluginId": "visualizations",
-        "id": "def-public.convertToLensModule",
-        "type": "Object",
-        "tags": [],
-        "label": "convertToLensModule",
-        "description": [],
-        "signature": [
-          "Promise<typeof ",
-          "src/platform/plugins/shared/visualizations/public/convert_to_lens/index",
-          ">"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/public/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "visualizations",
         "id": "def-public.LegendSizeToPixels",

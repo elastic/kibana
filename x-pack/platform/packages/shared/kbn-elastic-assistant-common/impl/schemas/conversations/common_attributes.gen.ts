@@ -81,6 +81,15 @@ export const EsqlContentReference = BaseContentReference.merge(
      * Label of the query
      */
     label: z.string(),
+    /**
+     * Time range to select in the time picker.
+     */
+    timerange: z
+      .object({
+        from: z.string(),
+        to: z.string(),
+      })
+      .optional(),
   })
 );
 

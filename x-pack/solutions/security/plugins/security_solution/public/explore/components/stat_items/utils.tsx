@@ -28,6 +28,7 @@ export const MetricItem = styled(EuiFlexItem)`
   &.euiFlexItem {
     flex-basis: 0;
     flex-grow: 0;
+    min-width: 100px;
   }
 `;
 MetricItem.displayName = 'MetricItem';

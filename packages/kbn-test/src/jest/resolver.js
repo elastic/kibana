@@ -33,6 +33,18 @@ const STATIC_FILE_EXT =
 const IS_REACT_18 = process.env.REACT_18 === 'true';
 
 /**
+ * @param {string} str
+ * @returns
+ */
+function parseRequestOrExtSuffix(str) {
+  const rawSuffix = '?raw';
+  if (str.endsWith(rawSuffix)) {
+    return str.slice(0, -rawSuffix.length);
+  }
+  return str;
+}
+
+/**
  * @param {string} request
  * @param {import('resolve').SyncOpts} options
  * @returns
@@ -85,25 +97,27 @@ module.exports = (request, options) => {
 
   const reqExt = Path.extname(request);
   if (reqExt) {
-    const reqBasename = Path.basename(request, reqExt);
-    if ((reqExt === '.css' || reqExt === '.scss') && reqBasename.endsWith('.module')) {
+    const pRequest = parseRequestOrExtSuffix(request);
+    const pReqExt = parseRequestOrExtSuffix(reqExt);
+    const reqBasename = Path.basename(pRequest, pReqExt);
+    if ((pReqExt === '.css' || pReqExt === '.scss') && reqBasename.endsWith('.module')) {
       return CSS_MODULE_MOCK;
     }
 
-    if (reqExt === '.css' || reqExt === '.less' || reqExt === '.scss') {
+    if (pReqExt === '.css' || pReqExt === '.less' || pReqExt === '.scss') {
       return STYLE_MOCK;
     }
 
-    if (STATIC_FILE_EXT.includes(reqExt)) {
+    if (STATIC_FILE_EXT.includes(pReqExt)) {
       return FILE_MOCK;
     }
 
-    if (reqExt === '.worker' && reqBasename.endsWith('.editor')) {
+    if (pReqExt === '.worker' && reqBasename.endsWith('.editor')) {
       return WORKER_MOCK;
     }
   }
 
-  if (request.startsWith('file-loader!') || request.startsWith('!!file-loader!')) {
+  if (request.endsWith('?asUrl')) {
     return FILE_MOCK;
   }
 

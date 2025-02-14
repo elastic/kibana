@@ -23,11 +23,7 @@ exports[`Table Helpers #RowItemOverflow it returns correctly against snapshot 1`
       />
     </EuiText>
     <EuiFlexGroup
-      css={
-        Object {
-          "paddingTop": "12px",
-        }
-      }
+      css="unknown styles"
       data-test-subj="popover-additional-overflow"
     >
       <EuiFlexItem>

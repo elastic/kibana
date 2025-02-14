@@ -14,7 +14,7 @@ import { builtinFunctions } from '../../definitions/builtin';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { aggregationFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
-import { groupingFunctionDefinitions } from '../../definitions/grouping';
+import { groupingFunctionDefinitions } from '../../definitions/generated/grouping_functions';
 import * as autocomplete from '../autocomplete';
 import type { ESQLCallbacks } from '../../shared/types';
 import type { EditorContext, SuggestionRawDefinition } from '../types';
@@ -123,7 +123,7 @@ export const policies = [
 /**
  * Utility to filter down the function list for the given type
  * It is mainly driven by the return type, but it can be filtered upon with the last optional argument "paramsTypes"
- * jsut make sure to pass the arguments in the right order
+ * just make sure to pass the arguments in the right order
  * @param command current command context
  * @param expectedReturnType the expected type returned by the function
  * @param functionCategories
@@ -159,8 +159,6 @@ export function getFunctionSignaturesByReturnType(
   const list = [];
   if (agg) {
     list.push(...aggregationFunctionDefinitions);
-    // right now all grouping functions are agg functions too
-    list.push(...groupingFunctionDefinitions);
   }
   if (grouping) {
     list.push(...groupingFunctionDefinitions);

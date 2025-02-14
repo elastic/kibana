@@ -3289,7 +3289,20 @@
         "path": "x-pack/platform/plugins/shared/cases/common/constants/application.ts",
         "deprecated": true,
         "trackAdoption": false,
-        "references": [],
+        "references": [
+          {
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/public/application/explorer/alerts/alerts_panel.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/public/application/explorer/alerts/alerts_panel.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/platform/plugins/shared/ml/public/application/explorer/alerts/alerts_panel.tsx"
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -3307,20 +3320,7 @@
         "path": "x-pack/platform/plugins/shared/cases/common/constants/application.ts",
         "deprecated": true,
         "trackAdoption": false,
-        "references": [
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/public/alerting/anomaly_detection_alerts_table/register_alerts_table_configuration.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/public/alerting/anomaly_detection_alerts_table/register_alerts_table_configuration.tsx"
-          },
-          {
-            "plugin": "ml",
-            "path": "x-pack/platform/plugins/shared/ml/public/alerting/anomaly_detection_alerts_table/register_alerts_table_configuration.tsx"
-          }
-        ],
+        "references": [],
         "initialIsOpen": false
       },
       {

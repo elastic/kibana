@@ -61,12 +61,6 @@ export const UPDATE_BUTTON_LABEL = i18n.translate(
     defaultMessage: 'Update',
   }
 );
-export const UPDATE_ERROR = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.updateError',
-  {
-    defaultMessage: 'Update error',
-  }
-);
 
 export const UPDATE_FLYOUT_PER_FIELD_TOOLTIP_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.perFieldTooltip',

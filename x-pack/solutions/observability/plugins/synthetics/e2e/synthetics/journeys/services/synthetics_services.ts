@@ -68,23 +68,18 @@ export class SyntheticsServices {
       ...(data || {}),
       name,
     };
-    try {
-      const response = await axios.post(
-        this.kibanaUrl +
-          (configId
-            ? `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?id=${configId}`
-            : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS),
-        testData,
-        {
-          auth: { username: 'elastic', password: 'changeme' },
-          headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'synthetics-e2e' },
-        }
-      );
-      return response.data.id;
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.log(JSON.stringify(e));
-    }
+    const response = await axios.post(
+      this.kibanaUrl +
+        (configId
+          ? `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}?id=${configId}`
+          : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS),
+      testData,
+      {
+        auth: { username: 'elastic', password: 'changeme' },
+        headers: { 'kbn-xsrf': 'true', 'x-elastic-internal-origin': 'synthetics-e2e' },
+      }
+    );
+    return response.data.id;
   }
 
   async deleteTestMonitorByQuery(query: string) {

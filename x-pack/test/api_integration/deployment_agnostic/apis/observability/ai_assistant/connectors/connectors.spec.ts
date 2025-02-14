@@ -10,7 +10,10 @@ import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provi
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
-  describe('List connectors', () => {
+  describe('List connectors', function () {
+    // Fails on MKI: https://github.com/elastic/kibana/issues/211175
+    this.tags(['failsOnMKI']);
+
     before(async () => {
       await observabilityAIAssistantAPIClient.deleteAllActionConnectors();
     });

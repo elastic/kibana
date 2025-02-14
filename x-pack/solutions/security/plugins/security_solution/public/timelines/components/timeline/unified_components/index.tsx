@@ -5,10 +5,9 @@
  * 2.0.
  */
 import type { EuiDataGridProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiHideFor } from '@elastic/eui';
-import React, { useMemo, useCallback, useState, useRef, useEffect } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiHideFor, useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
-
 import { generateFilters } from '@kbn/data-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
@@ -16,8 +15,9 @@ import type { DataLoadingState, UnifiedDataTableProps } from '@kbn/unified-data-
 import { useColumns } from '@kbn/unified-data-table';
 import { popularizeField } from '@kbn/unified-data-table/src/utils/popularize_field';
 import type { DropType } from '@kbn/dom-drag-drop';
+import { DropOverlayWrapper, Droppable, useDragDropContext } from '@kbn/dom-drag-drop';
 import styled from 'styled-components';
-import { Droppable, DropOverlayWrapper, useDragDropContext } from '@kbn/dom-drag-drop';
+import { css } from '@emotion/react';
 import type {
   UnifiedFieldListSidebarContainerApi,
   UnifiedFieldListSidebarContainerProps,
@@ -40,7 +40,7 @@ import type {
 } from '../../../../../common/types/timeline';
 import type { inputsModel } from '../../../../common/store';
 import { getColumnHeader } from '../body/column_headers/helpers';
-import { StyledPageContentWrapper, StyledMainEuiPanel, StyledSplitFlexItem } from './styles';
+import { StyledMainEuiPanel, StyledPageContentWrapper } from './styles';
 import { DRAG_DROP_FIELD } from './data_table/translations';
 import { TimelineResizableLayout } from './resizable_layout';
 import TimelineDataTable from './data_table';
@@ -81,6 +81,7 @@ const SidebarPanelFlexGroup = styled(EuiFlexGroup)`
       .euiFlexItem:last-child {
         /* padding-right: ${(props) => (props.theme as EuiTheme).eui.euiSizeS}; */
       }
+
       .unifiedFieldListSidebar__list {
         padding-left: 0px;
       }
@@ -138,6 +139,7 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
   leadingControlColumns,
   onUpdatePageIndex,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const dispatch = useDispatch();
   const unifiedFieldListContainerRef = useRef<UnifiedFieldListSidebarContainerApi>(null);
 
@@ -397,7 +399,12 @@ const UnifiedTimelineComponent: React.FC<Props> = ({
               ) : null}
             </EuiFlexItem>
             <EuiHideFor sizes={HIDE_FOR_SIZES}>
-              <StyledSplitFlexItem grow={false} className="thinBorderSplit" />
+              <EuiFlexItem
+                grow={false}
+                css={css`
+                  border-right: ${euiTheme.border.thin};
+                `}
+              />
             </EuiHideFor>
           </SidebarPanelFlexGroup>
         }

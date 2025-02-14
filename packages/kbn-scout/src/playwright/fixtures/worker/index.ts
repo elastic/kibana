@@ -25,3 +25,6 @@ export type { UiSettingsFixture } from './ui_settings';
 
 export { scoutSpaceParallelFixture } from './scout_space';
 export type { ScoutSpaceParallelFixture } from './scout_space';
+
+export { apiFixtures } from './apis';
+export type { ApiFixtures, ApiParallelWorkerFixtures } from './apis';

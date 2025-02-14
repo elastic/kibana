@@ -568,8 +568,8 @@ exports[`GaugeComponent renders the chart 1`] = `
   <Bullet
     colorBands={
       Array [
-        "#D3DAE6",
-        "#D3DAE6",
+        "#CAD3E2",
+        "#CAD3E2",
       ]
     }
     data={

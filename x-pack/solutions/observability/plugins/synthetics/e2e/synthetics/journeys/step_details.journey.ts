@@ -21,11 +21,12 @@ journey(`StepDetailsPage`, async ({ page, params }) => {
       'https://www.google.com',
       {
         type: 'browser',
-        urls: 'https://www.google.com',
         custom_heartbeat_id: 'a47bfc4e-361a-4eb0-83f3-b5bb68781b5b',
         locations: [
           { id: 'us_central', label: 'North America - US Central', isServiceManaged: true },
         ],
+        'source.inline.script':
+          "step('step1', async ({ page }) => { await page.goto('https://www.google.com'); });",
       },
       'a47bfc4e-361a-4eb0-83f3-b5bb68781b5b'
     );

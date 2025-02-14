@@ -13,18 +13,10 @@ export const RULE_GAPS_OVERVIEW_PANEL_LABEL = i18n.translate(
     defaultMessage: 'Total rules with gaps:',
   }
 );
-
-export const RULE_GAPS_OVERVIEW_PANEL_SHOW_ALL_RULES_LABEL = i18n.translate(
-  'xpack.securitySolution.ruleGapsOverviewPanel.showAllRulesLabel',
-  {
-    defaultMessage: 'Show all rules',
-  }
-);
-
 export const RULE_GAPS_OVERVIEW_PANEL_SHOW_RULES_WITH_GAPS_LABEL = i18n.translate(
   'xpack.securitySolution.ruleGapsOverviewPanel.showRulesWithGapsLabel',
   {
-    defaultMessage: 'Show rules with gaps',
+    defaultMessage: 'Only rules with gaps',
   }
 );
 

@@ -160,7 +160,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.changePaletteTo('temperature');
       await lens.waitForVisualization();
       const styleObj = await lens.getDatatableCellStyle(0, 2);
-      expect(styleObj['background-color']).to.be('rgb(246, 249, 252)');
+      expect(styleObj['background-color']).to.be('rgb(232, 241, 255)');
     });
 
     it('should keep the coloring consistent when changing mode', async () => {
@@ -169,7 +169,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.waitForVisualization();
       // check that all remained the same
       const styleObj = await lens.getDatatableCellStyle(0, 2);
-      expect(styleObj['background-color']).to.be('rgb(246, 249, 252)');
+      expect(styleObj['background-color']).to.be('rgb(232, 241, 255)');
     });
 
     it('should keep the coloring consistent when moving to custom palette from default', async () => {
@@ -177,7 +177,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.waitForVisualization();
       // check that all remained the same
       const styleObj = await lens.getDatatableCellStyle(0, 2);
-      expect(styleObj['background-color']).to.be('rgb(246, 249, 252)');
+      expect(styleObj['background-color']).to.be('rgb(232, 241, 255)');
     });
 
     it('tweak the color stops numeric value', async () => {
@@ -202,7 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('lnsPalettePanel_dynamicColoring_reverseColors');
       await lens.waitForVisualization();
       const styleObj = await lens.getDatatableCellStyle(1, 1);
-      expect(styleObj['background-color']).to.be('rgb(200, 222, 255)');
+      expect(styleObj['background-color']).to.be('rgb(168, 202, 255)');
       // should also set text color when in cell mode
       expect(styleObj.color).to.be('rgb(0, 0, 0)');
       await lens.closePalettePanel();
