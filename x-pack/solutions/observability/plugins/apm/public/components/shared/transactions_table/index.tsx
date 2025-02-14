@@ -8,7 +8,6 @@
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidv4 } from 'uuid';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -21,7 +20,7 @@ import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useStateDebounced } from '../../../hooks/use_debounce';
-import { FETCH_STATUS, isPending, useFetcher } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, isPending, isSuccess, useFetcher } from '../../../hooks/use_fetcher';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
@@ -93,7 +92,6 @@ export function TransactionsTable({
   const { transactionType, serviceName } = useApmServiceContext();
   const [searchQuery, setSearchQueryDebounced] = useStateDebounced('');
   const [renderedItems, setRenderedItems] = useState<ApiResponse['transactionGroups']>([]);
-  const { onPageReady } = usePerformanceContext();
 
   const { mainStatistics, mainStatisticsStatus, detailedStatistics, detailedStatisticsStatus } =
     useTableData({
@@ -111,22 +109,10 @@ export function TransactionsTable({
     });
 
   useEffect(() => {
-    if (
-      mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
-      detailedStatisticsStatus === FETCH_STATUS.SUCCESS
-    ) {
-      if (onLoadTable) {
-        onLoadTable();
-      } else {
-        onPageReady({
-          meta: {
-            rangeFrom: start,
-            rangeTo: end,
-          },
-        });
-      }
+    if (isSuccess(mainStatisticsStatus) && isSuccess(detailedStatisticsStatus)) {
+      onLoadTable?.();
     }
-  }, [mainStatisticsStatus, detailedStatisticsStatus, onLoadTable, end, start, onPageReady]);
+  }, [mainStatisticsStatus, detailedStatisticsStatus, onLoadTable, end, start]);
 
   const columns = useMemo(() => {
     return getColumns({

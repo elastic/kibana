@@ -6,7 +6,9 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
-import React, { useEffect } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+
+import React, { useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { isServerlessAgentName } from '../../../../common/agent_name';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -38,6 +40,7 @@ export function TransactionOverview() {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { transactionType, fallbackToTransactions, serverlessType, serviceName } =
     useApmServiceContext();
+  const { onPageReady } = usePerformanceContext();
 
   const history = useHistory();
 
@@ -69,6 +72,15 @@ export function TransactionOverview() {
   if (hasLogsOnlySignal) {
     return <ServiceTabEmptyState id="transactionOverview" />;
   }
+
+  const handleOnLoadTable = useCallback(() => {
+    onPageReady({
+      meta: {
+        rangeFrom: start,
+        rangeTo: end,
+      },
+    });
+  }, []);
 
   return (
     <>
@@ -113,6 +125,7 @@ export function TransactionOverview() {
           start={start}
           end={end}
           saveTableOptionsToUrl
+          onLoadTable={handleOnLoadTable}
         />
       </EuiPanel>
     </>

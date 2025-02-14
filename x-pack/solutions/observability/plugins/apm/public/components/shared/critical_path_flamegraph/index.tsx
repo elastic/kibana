@@ -12,7 +12,6 @@ import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { uniqueId } from 'lodash';
 import React, { useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { isSuccess } from '../../../hooks/use_fetcher';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
@@ -29,10 +28,10 @@ export function CriticalPathFlamegraph(
     end: string;
     traceIds: string[];
     traceIdsFetchStatus: FETCH_STATUS;
+    onLoadTable?: () => void;
   } & ({ serviceName: string; transactionName: string } | {})
 ) {
-  const { start, end, traceIds, traceIdsFetchStatus } = props;
-  const { onPageReady } = usePerformanceContext();
+  const { start, end, traceIds, traceIdsFetchStatus, onLoadTable } = props;
 
   const serviceName = 'serviceName' in props ? props.serviceName : null;
   const transactionName = 'transactionName' in props ? props.transactionName : null;
@@ -68,18 +67,9 @@ export function CriticalPathFlamegraph(
 
   useEffect(() => {
     if (isSuccess(criticalPathFetchStatus) && isSuccess(traceIdsFetchStatus)) {
-      onPageReady({
-        meta: {
-          rangeFrom: start,
-          rangeTo: end,
-        },
-        customMetrics: {
-          key1: 'traceIds',
-          value1: traceIds.length,
-        },
-      });
+      onLoadTable?.();
     }
-  }, [start, end, criticalPathFetchStatus, traceIdsFetchStatus, traceIds, onPageReady]);
+  }, [start, end, criticalPathFetchStatus, traceIdsFetchStatus, traceIds, onLoadTable]);
 
   const chartThemes = useChartThemes();
 
