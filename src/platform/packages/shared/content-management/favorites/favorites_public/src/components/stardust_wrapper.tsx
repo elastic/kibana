@@ -87,6 +87,19 @@ const stardustContainerStyles = css`
   }
 `;
 
+/* Disable the animation on the button icon to not overcrowd the stardust effect */
+const euiButtonIconStylesDisableAnimation = css`
+  ${euiCanAnimate} {
+    button.euiButtonIcon:active,
+    button.euiButtonIcon:hover,
+    button.euiButtonIcon:focus {
+      animation: none;
+      transform: none;
+      background-color: transparent;
+    }
+  }
+`;
+
 export const StardustWrapper = ({
   active,
   className,
@@ -101,6 +114,7 @@ export const StardustWrapper = ({
         vertical-align: middle;
         position: relative;
         ${stardustContainerStyles}
+        ${euiButtonIconStylesDisableAnimation}
       `}
       className={classNames(className, {
         'stardust-active': active,
