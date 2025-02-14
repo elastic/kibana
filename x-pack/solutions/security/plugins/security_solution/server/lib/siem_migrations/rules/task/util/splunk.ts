@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   DEFAULT_TRANSLATION_SEVERITY,
   SPLUNK_ELASTIC_ALERT_SEVERITY_MAP,
@@ -13,7 +14,7 @@ import type { SplunkSeverity } from '../../../../../../common/siem_migrations/ty
 
 export const mapSplunkSeverityToElasticSeverity = (
   splunkSeverity?: keyof SplunkSeverity
-): string => {
+): Severity => {
   if (!splunkSeverity) {
     return DEFAULT_TRANSLATION_SEVERITY;
   }

@@ -62,8 +62,17 @@ export enum RuleTranslationResult {
   UNTRANSLATABLE = 'untranslatable',
 }
 
-export const DEFAULT_TRANSLATION_RISK_SCORE = 21;
+export const ELASTIC_SEVERITY_TO_RISK_SCORE_MAP: Record<Severity, number> = {
+  low: 21,
+  medium: 47,
+  high: 73,
+  critical: 100,
+};
+
 export const DEFAULT_TRANSLATION_SEVERITY: Severity = 'low';
+
+export const DEFAULT_TRANSLATION_RISK_SCORE =
+  ELASTIC_SEVERITY_TO_RISK_SCORE_MAP[DEFAULT_TRANSLATION_SEVERITY];
 
 export const DEFAULT_TRANSLATION_FIELDS = {
   from: 'now-360s',

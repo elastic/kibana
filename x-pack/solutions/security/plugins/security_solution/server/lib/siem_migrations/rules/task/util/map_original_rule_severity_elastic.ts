@@ -10,7 +10,7 @@ import type { SplunkSeverity } from '../../../../../../common/siem_migrations/ty
 import type { OriginalRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { mapSplunkSeverityToElasticSeverity } from './splunk';
 
-export const getElasticSeverityFromOriginalRule = (originalRule: OriginalRule): string => {
+export const getElasticSeverityFromOriginalRule = (originalRule: OriginalRule) => {
   return originalRule.query_language === 'spl' || originalRule.vendor === 'splunk'
     ? mapSplunkSeverityToElasticSeverity(originalRule.severity as keyof SplunkSeverity)
     : DEFAULT_TRANSLATION_SEVERITY;
