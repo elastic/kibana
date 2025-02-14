@@ -67,18 +67,11 @@ export function DependencyNameLink({ dependencyName, environment }: DependencyNa
     </EuiFlexGroup>
   );
 
-  return (
-    <>
-      {canViewApm && routeLinkProps ? (
-        <EuiLink
-          {...routeLinkProps}
-          data-test-subj="unifiedDocViewTracesOverviewDependencyNameLink"
-        >
-          {content}
-        </EuiLink>
-      ) : (
-        content
-      )}
-    </>
+  return canViewApm && routeLinkProps ? (
+    <EuiLink {...routeLinkProps} data-test-subj="unifiedDocViewTracesOverviewDependencyNameLink">
+      {content}
+    </EuiLink>
+  ) : (
+    content
   );
 }
