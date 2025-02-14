@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { IsoDateString, PositiveInteger } from '@kbn/securitysolution-io-ts-types';
+import { IsoDateString } from '@kbn/securitysolution-io-ts-types';
 
 export const timestamp = IsoDateString;
 export const timestampOrUndefined = t.union([IsoDateString, t.undefined]);
