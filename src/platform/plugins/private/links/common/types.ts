@@ -8,7 +8,10 @@
  */
 
 import type { SavedObjectsResolveResponse } from '@kbn/core-saved-objects-api-server';
+import type { SerializedTitles } from '@kbn/presentation-publishing';
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { CONTENT_ID } from './constants';
+import { LinksAttributes } from './content_management';
 
 export type LinksContentType = typeof CONTENT_ID;
 
@@ -18,3 +21,15 @@ export interface SharingSavedObjectProps {
   aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
   sourceId?: string;
 }
+
+export interface LinksByReferenceSerializedState {
+  savedObjectId: string;
+}
+
+export interface LinksByValueSerializedState {
+  attributes: LinksAttributes;
+}
+
+export type LinksSerializedState = SerializedTitles &
+  Partial<DynamicActionsSerializedState> &
+  (LinksByReferenceSerializedState | LinksByValueSerializedState);

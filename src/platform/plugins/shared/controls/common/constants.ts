@@ -27,6 +27,7 @@ export const DEFAULT_IGNORE_PARENT_SETTINGS = {
 } as const;
 export const DEFAULT_AUTO_APPLY_SELECTIONS = true;
 
+export const REFERENCE_NAME_PREFIX = 'controlGroup_';
 export const TIME_SLIDER_CONTROL = 'timeSlider';
 export const RANGE_SLIDER_CONTROL = 'rangeSliderControl';
 export const OPTIONS_LIST_CONTROL = 'optionsListControl';

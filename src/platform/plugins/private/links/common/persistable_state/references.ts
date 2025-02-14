@@ -67,18 +67,19 @@ export function injectReferences({
   }
 
   const { links } = attributes;
-  links.forEach((link) => {
+  const newLinks = links.map((link) => {
     if (link.type === DASHBOARD_LINK_TYPE && link.destinationRefName) {
       const reference = findReference(link.destinationRefName, references);
-      link.destination = reference.id;
-      delete link.destinationRefName;
+      const { destinationRefName, ...rest } = link;
+      return { ...rest, destination: reference.id };
     }
+    return link;
   });
 
   return {
     attributes: {
       ...attributes,
-      links,
+      links: newLinks,
     },
   };
 }
