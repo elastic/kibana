@@ -14,4 +14,4 @@ export const timestampOrUndefined = t.union([IsoDateString, t.undefined]);
 /**
  * timestamp field type as it can be returned form ES: string, number or undefined
  */
-export const timestampFromEsResponse = t.union([IsoDateString, PositiveInteger, t.undefined]);
+export const timestampFromEsResponse = t.union([IsoDateString, t.number, t.undefined]);
