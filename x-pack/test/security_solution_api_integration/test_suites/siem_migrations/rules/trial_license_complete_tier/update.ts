@@ -50,6 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
         const {
           '@timestamp': timestamp,
           updated_at: updatedAt,
+          updated_by: updatedBy,
           elastic_rule: elasticRule,
           ...rest
         } = migrationRuleDocument;
@@ -89,6 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
         const {
           '@timestamp': timestamp,
           updated_at: updatedAt,
+          updated_by: updatedBy,
           elastic_rule: elasticRule,
           ...rest
         } = migrationRuleDocument;
