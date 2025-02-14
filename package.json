@@ -711,7 +711,7 @@
     "@kbn/observability-shared-plugin": "link:x-pack/solutions/observability/plugins/observability_shared",
     "@kbn/observability-utils-browser": "link:x-pack/solutions/observability/packages/utils-browser",
     "@kbn/observability-utils-common": "link:x-pack/solutions/observability/packages/utils-common",
-    "@kbn/observability-utils-server": "link:x-pack/solutions/observability/packages/utils_server",
+    "@kbn/observability-utils-server": "link:x-pack/solutions/observability/packages/utils-server",
     "@kbn/oidc-provider-plugin": "link:x-pack/test/security_api_integration/plugins/oidc_provider",
     "@kbn/open-telemetry-instrumented-plugin": "link:test/common/plugins/otel_metrics",
     "@kbn/openapi-common": "link:src/platform/packages/shared/kbn-openapi-common",
