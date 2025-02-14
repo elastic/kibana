@@ -29,11 +29,11 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiBadge, EuiText } from '@elastic/eui';
 import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import { asDuration } from '../../../../utils';
 import { ServiceNameLink } from '../sub_components/service_name_link';
 import { TraceIdLink } from '../sub_components/trace_id_link';
 import { TransactionNameLink } from '../sub_components/transaction_name_link';
 import { Timestamp } from '../sub_components/timestamp';
-import { Duration } from '../sub_components/duration';
 import { DependencyNameLink } from '../sub_components/dependency_name_link';
 import { HttpStatusCode } from '../sub_components/http_status_code';
 
@@ -117,7 +117,7 @@ export const getFieldConfiguration = (
       title: i18n.translate('unifiedDocViewer.tracesOverview.details.transactionDuration.title', {
         defaultMessage: 'Duration',
       }),
-      content: (value) => <Duration duration={value ?? 0} />,
+      content: (value) => <EuiText size="xs">{asDuration(value)}</EuiText>,
       value: attributes[TRANSACTION_DURATION_FIELD] ?? 0,
     },
     [SPAN_TYPE_FIELD]: {
