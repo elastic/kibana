@@ -7,7 +7,7 @@
 
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useMemo } from 'react';
-import { find, some } from 'lodash/fp';
+import { find } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import { getEventDetailsAgentIdField } from '../../lib/endpoint/utils/get_event_details_agent_id_field';
 import { getHostPlatform } from '../../lib/endpoint/utils/get_host_platform';
@@ -49,11 +49,11 @@ export interface AlertResponseActionsSupport {
   /** A i18n'd string value indicating the reason why the host does is unsupported */
   unsupportedReason: string | undefined;
 
-  /**
-   * If the Event Data provide was for a SIEM alert (generated as a result of a Rule run) or
-   * just an event.
-   */
-  isAlert: boolean;
+  // /**
+  //  * If the Event Data provide was for a SIEM alert (generated as a result of a Rule run) or
+  //  * just an event.
+  //  */
+  // isAlert: boolean;
 
   /**
    * Full details around support for response actions.
@@ -87,10 +87,6 @@ type AlertAgentActionsSupported = Record<ResponseActionsApiCommandNames, boolean
 export const useAlertResponseActionsSupport = (
   eventData: TimelineEventsDetailsItem[] | null = []
 ): AlertResponseActionsSupport => {
-  const isAlert = useMemo(() => {
-    return some({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, eventData);
-  }, [eventData]);
-
   const agentType: ResponseActionAgentType | undefined = useMemo(() => {
     if ((find({ field: 'agent.type' }, eventData)?.values ?? []).includes('endpoint')) {
       return 'endpoint';
@@ -135,8 +131,8 @@ export const useAlertResponseActionsSupport = (
   }, [agentType, eventData]);
 
   const doesHostSupportResponseActions = useMemo(() => {
-    return Boolean(isFeatureEnabled && isAlert && agentId && agentType);
-  }, [agentId, agentType, isAlert, isFeatureEnabled]);
+    return Boolean(isFeatureEnabled && agentId && agentType);
+  }, [agentId, agentType, isFeatureEnabled]);
 
   const supportedActions = useMemo(() => {
     return RESPONSE_ACTION_API_COMMANDS_NAMES.reduce<AlertAgentActionsSupported>(
@@ -167,10 +163,6 @@ export const useAlertResponseActionsSupport = (
 
   const unsupportedReason = useMemo(() => {
     if (!doesHostSupportResponseActions) {
-      if (!isAlert) {
-        return RESPONSE_ACTIONS_ONLY_SUPPORTED_ON_ALERTS;
-      }
-
       if (!agentType) {
         // No message is provided for this condition because the
         // return from this hook will always default to `endpoint`
@@ -181,13 +173,12 @@ export const useAlertResponseActionsSupport = (
         return ALERT_EVENT_DATA_MISSING_AGENT_ID_FIELD(getAgentTypeName(agentType), agentIdField);
       }
     }
-  }, [agentId, agentIdField, agentType, doesHostSupportResponseActions, isAlert]);
+  }, [agentId, agentIdField, agentType, doesHostSupportResponseActions]);
 
   return useMemo<AlertResponseActionsSupport>(() => {
     return {
       isSupported: doesHostSupportResponseActions,
       unsupportedReason,
-      isAlert,
       details: {
         agentType: agentType || 'endpoint',
         agentId,
@@ -203,7 +194,6 @@ export const useAlertResponseActionsSupport = (
     agentType,
     doesHostSupportResponseActions,
     hostName,
-    isAlert,
     platform,
     supportedActions,
     unsupportedReason,
