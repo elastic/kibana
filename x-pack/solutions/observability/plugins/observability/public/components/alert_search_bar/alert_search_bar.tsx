@@ -163,7 +163,7 @@ export function ObservabilityAlertSearchBar({
       </EuiFlexItem>
 
       <EuiFlexItem>
-        {indexNames?.length > 0 && (
+        {indexNames && indexNames.length > 0 && (
           <AlertFilterControls
             dataViewSpec={{
               id: 'observability-unified-alerts-dv',
