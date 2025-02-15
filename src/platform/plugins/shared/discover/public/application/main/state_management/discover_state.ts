@@ -92,6 +92,9 @@ export interface DiscoverStateContainerParams {
    * a custom url state storage
    */
   stateStorageContainer?: IKbnUrlStateStorage;
+  /**
+   * State manager for runtime state that can't be stored in Redux
+   */
   runtimeStateManager: RuntimeStateManager;
 }
 
@@ -131,6 +134,9 @@ export interface DiscoverStateContainer {
    * Internal shared state that's used at several places in the UI
    */
   internalState: InternalStateStore;
+  /**
+   * State manager for runtime state that can't be stored in Redux
+   */
   runtimeStateManager: RuntimeStateManager;
   /**
    * State of saved search, the saved object of Discover

@@ -8,6 +8,7 @@
  */
 
 import { isEqual } from 'lodash';
+import type { InternalStateStore } from '../redux';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
@@ -26,7 +27,6 @@ import {
   isDataSourceType,
 } from '../../../../../common/data_sources';
 import { sendLoadingMsg } from '../../hooks/use_saved_search_messages';
-import { InternalStateStore } from '../redux';
 
 /**
  * Builds a subscribe function for the AppStateContainer, that is executed when the AppState changes in URL
