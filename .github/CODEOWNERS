@@ -979,7 +979,7 @@ x-pack/solutions/security/packages/connectors @elastic/security-threat-hunting-e
 x-pack/solutions/security/packages/data-stream-adapter @elastic/security-threat-hunting
 x-pack/solutions/security/packages/data-table @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/distribution-bar @elastic/kibana-cloud-security-posture
-x-pack/solutions/security/packages/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
+x-pack/solutions/security/packages/ecs-data-quality-dashboard @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/features @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/index-adapter @elastic/security-threat-hunting

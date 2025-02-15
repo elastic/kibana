@@ -463,7 +463,7 @@
     "@kbn/doc-links": "link:src/platform/packages/shared/kbn-doc-links",
     "@kbn/dom-drag-drop": "link:src/platform/packages/shared/kbn-dom-drag-drop",
     "@kbn/ebt-tools": "link:src/platform/packages/shared/kbn-ebt-tools",
-    "@kbn/ecs-data-quality-dashboard": "link:x-pack/solutions/security/packages/ecs_data_quality_dashboard",
+    "@kbn/ecs-data-quality-dashboard": "link:x-pack/solutions/security/packages/ecs-data-quality-dashboard",
     "@kbn/ecs-data-quality-dashboard-plugin": "link:x-pack/solutions/security/plugins/ecs_data_quality_dashboard",
     "@kbn/elastic-agent-utils": "link:src/platform/packages/shared/kbn-elastic-agent-utils",
     "@kbn/elastic-assistant": "link:x-pack/platform/packages/shared/kbn-elastic-assistant",
