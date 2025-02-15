@@ -117,14 +117,7 @@ export abstract class FieldFormat {
     contentType: FieldFormatsContentType = DEFAULT_CONTEXT_TYPE,
     options?: HtmlContextTypeOptions | TextContextTypeOptions
   ): string {
-    const converter = this.getConverterFor(contentType);
-
-    if (converter) {
-      return converter.call(this, value, options);
-    }
-
-    // TODO: should be "return `${value}`;", but might be a breaking change
-    return value as string;
+    return this.getConverterFor(contentType).call(this, value, options);
   }
 
   /**
