@@ -36,3 +36,15 @@ declare module '*.mdx' {
   // eslint-disable-next-line import/no-default-export
   export default MDXComponent;
 }
+
+declare module '*?asUrl' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default string;
+}
+
+declare module '*?raw' {
+  const content: string;
+  // eslint-disable-next-line import/no-default-export
+  export default string;
+}

@@ -80,7 +80,6 @@ function runTests() {
     env: {
       ...process.env,
       CYPRESS_CLI_ARGS: JSON.stringify(cypressCliArgs),
-      NODE_OPTIONS: '--openssl-legacy-provider',
     },
     encoding: 'utf8',
     stdio: 'inherit',

@@ -67,7 +67,7 @@ export class CiStatsPlugin {
         throw new Error(`Unable to find bundle entry named [${entryName}]`);
       }
 
-      const moduleCount = compilation.modules.reduce((acc, module) => {
+      const moduleCount = Array.from(compilation.modules).reduce((acc, module) => {
         if (isNormalModule(module)) {
           return acc + 1;
         }
