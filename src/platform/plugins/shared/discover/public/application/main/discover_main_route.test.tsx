@@ -176,12 +176,13 @@ function getServicesMock(
   hasUserDataView = true,
   locationState?: MainHistoryLocationState
 ) {
-  const dataViewsMock = discoverServiceMock.data.dataViews;
+  const dataViewsMock = discoverServiceMock.dataViews;
   dataViewsMock.hasData = {
     hasESData: jest.fn(() => Promise.resolve(hasESData)),
     hasUserDataView: jest.fn(() => Promise.resolve(hasUserDataView)),
     hasDataView: jest.fn(() => Promise.resolve(true)),
   };
+  dataViewsMock.clearCache = jest.fn();
   dataViewsMock.create = jest.fn().mockResolvedValue(dataViewMock);
   discoverServiceMock.core.http.get = jest.fn().mockResolvedValue({});
   discoverServiceMock.getScopedHistory = jest.fn().mockReturnValue({

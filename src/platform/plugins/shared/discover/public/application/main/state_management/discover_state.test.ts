@@ -60,7 +60,6 @@ async function getState(
   });
   nextState.appState.isEmptyURL = jest.fn(() => isEmptyUrl ?? true);
   jest.spyOn(nextState.dataState, 'fetch');
-  await nextState.actions.loadDataViewList();
   if (savedSearch) {
     nextState.savedSearchState.load = jest.fn(() => {
       nextState.savedSearchState.set(copySavedSearch(savedSearch));
