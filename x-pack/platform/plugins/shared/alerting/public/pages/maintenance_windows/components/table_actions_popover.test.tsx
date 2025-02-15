@@ -134,7 +134,7 @@ describe('TableActionsPopover', () => {
     expect(result.getByTestId('table-actions-unarchive')).toBeInTheDocument();
   });
 
-  test('it shows the success toast when a copied maintenance window id', async () => {
+  test('it shows the success toast when maintenance window id is copied', async () => {
     const result = appMockRenderer.render(
       <TableActionsPopover
         id={'123'}
