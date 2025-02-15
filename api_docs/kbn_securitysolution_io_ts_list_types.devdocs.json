@@ -11184,6 +11184,30 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
+        "id": "def-common.timestampFromEsResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "timestampFromEsResponse",
+        "description": [
+          "\ntimestamp field type as it can be returned form ES: string, number or undefined"
+        ],
+        "signature": [
+          "UnionC",
+          "<[",
+          "Type",
+          "<string, string, unknown>, ",
+          "NumberC",
+          ", ",
+          "UndefinedC",
+          "]>"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-securitysolution-io-ts-list-types/src/common/timestamp/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
         "id": "def-common.timestampOrUndefined",
         "type": "Object",
         "tags": [],
