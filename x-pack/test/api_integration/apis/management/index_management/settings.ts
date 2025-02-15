@@ -72,7 +72,6 @@ export default function ({ getService }: FtrProviderContext) {
       'query_string',
     ];
 
-
     it('should fetch an index settings', async function () {
       this.onlyEsVersion('8');
 
