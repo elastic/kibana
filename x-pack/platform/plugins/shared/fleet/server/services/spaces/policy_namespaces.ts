@@ -42,3 +42,43 @@ export async function validatePolicyNamespaceForSpace({
     );
   }
 }
+
+export async function validateAdditionalDatastreamsPermissionsForSpace({
+  additionalDatastreamsPermissions,
+  spaceId,
+}: {
+  additionalDatastreamsPermissions?: string[];
+  spaceId?: string;
+}) {
+  const experimentalFeature = appContextService.getExperimentalFeatures();
+  if (!experimentalFeature.useSpaceAwareness) {
+    return;
+  }
+  const settings = await getSpaceSettings(spaceId);
+  if (
+    !settings.allowed_namespace_prefixes ||
+    settings.allowed_namespace_prefixes.length === 0 ||
+    !additionalDatastreamsPermissions ||
+    !additionalDatastreamsPermissions.length
+  ) {
+    return;
+  }
+
+  for (const additionalDatastreamsPermission of additionalDatastreamsPermissions) {
+    let valid = false;
+    for (const allowedNamespacePrefix of settings.allowed_namespace_prefixes) {
+      if (additionalDatastreamsPermission.startsWith(allowedNamespacePrefix)) {
+        valid = true;
+        break;
+      }
+    }
+
+    if (!valid) {
+      throw new PolicyNamespaceValidationError(
+        `Invalid additionalDatastreamsPermission, supported namespace prefixes: ${settings.allowed_namespace_prefixes.join(
+          ', '
+        )}`
+      );
+    }
+  }
+}
