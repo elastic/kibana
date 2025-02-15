@@ -51,13 +51,13 @@ const i18nText = {
   updatedAtAscSort: i18n.translate(
     'contentManagement.tableList.listing.tableSortSelect.updatedAtAscLabel',
     {
-      defaultMessage: 'Least recently updated',
+      defaultMessage: 'Old to New',
     }
   ),
   updatedAtDescSort: i18n.translate(
     'contentManagement.tableList.listing.tableSortSelect.updatedAtDescLabel',
     {
-      defaultMessage: 'Recently updated',
+      defaultMessage: 'New to Old',
     }
   ),
   headerSort: i18n.translate('contentManagement.tableList.listing.tableSortSelect.headerLabel', {
