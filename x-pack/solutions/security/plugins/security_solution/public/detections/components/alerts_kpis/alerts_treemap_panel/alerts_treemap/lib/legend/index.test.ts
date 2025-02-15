@@ -18,9 +18,13 @@ import {
 } from '.';
 import type { FlattenedBucket, RawBucket } from '../../types';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { renderHook } from '@testing-library/react';
+import { useEuiTheme } from '@elastic/eui';
 
 describe('legend', () => {
-  const colorPalette = getRiskScorePalette(RISK_SCORE_STEPS);
+  const { result } = renderHook(() => useEuiTheme());
+  const euiTheme = result.current.euiTheme;
+  const colorPalette = getRiskScorePalette(RISK_SCORE_STEPS, euiTheme);
 
   describe('getLegendItemFromRawBucket', () => {
     const bucket: RawBucket = {
@@ -219,28 +223,28 @@ describe('legend', () => {
           scopeId: TableId.alertsOnAlertsPage,
         },
         {
-          color: '#da8b45',
+          color: '#ff7e62',
           count: 28,
           field: 'kibana.alert.rule.name',
           value: 'EQL process sequence',
           scopeId: TableId.alertsOnAlertsPage,
         },
         {
-          color: '#d6bf57',
+          color: '#f1d86f',
           count: 19,
           field: 'kibana.alert.rule.name',
           value: 'Endpoint Security',
           scopeId: TableId.alertsOnAlertsPage,
         },
         {
-          color: '#e7664c',
+          color: '#bd271e',
           count: 5,
           field: 'kibana.alert.rule.name',
           value: 'mimikatz process started',
           scopeId: TableId.alertsOnAlertsPage,
         },
         {
-          color: '#e7664c',
+          color: '#bd271e',
           count: 1,
           field: 'kibana.alert.rule.name',
           value: 'Threshold rule',
