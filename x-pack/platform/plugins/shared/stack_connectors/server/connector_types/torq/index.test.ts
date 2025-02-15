@@ -76,13 +76,22 @@ describe('secrets validation', () => {
 describe('config validation', () => {
   const defaultValues: Record<string, string | null> = {};
 
-  test('config validation passes with an appropriate endpoint', () => {
-    const config: Record<string, string | boolean> = {
-      webhookIntegrationUrl: 'https://hooks.torq.io/v1/test',
-    };
-    expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
-      ...defaultValues,
-      ...config,
+  const validHostnames = [
+    'https://hooks.torq.io/v1/test',
+    'https://hooks.eu.torq.io/v1/test',
+    'https://hooks.eu.west.torq.io/v1/test',
+    'https://localhost/v1/test',
+  ];
+
+  validHostnames.forEach((hostname) => {
+    test('config validation passes with an appropriate endpoint', () => {
+      const config: Record<string, string | boolean> = {
+        webhookIntegrationUrl: hostname,
+      };
+      expect(validateConfig(actionType, config, { configurationUtilities })).toEqual({
+        ...defaultValues,
+        ...config,
+      });
     });
   });
 
@@ -100,6 +109,36 @@ describe('config validation', () => {
     {
       name: 'fails when URL is not a Torq webhook endpoint',
       url: 'http://mylisteningserver:9200/endpoint',
+      errorMsg: `"error validating action type config: error configuring send to Torq action: url must begin with https://hooks.torq.io"`,
+    },
+    {
+      name: 'fails when URL is not a Torq webhook endpoint',
+      url: 'http://mylisteningserver:9200/endpoint',
+      errorMsg: `"error validating action type config: error configuring send to Torq action: url must begin with https://hooks.torq.io"`,
+    },
+    {
+      name: 'fails - ending in com and not io',
+      url: 'https://hooks.torq.com/endpoint',
+      errorMsg: `"error validating action type config: error configuring send to Torq action: url must begin with https://hooks.torq.io"`,
+    },
+    {
+      name: 'fails - ending in io.com and not io',
+      url: 'https://hooks.torq.com.io/endpoint',
+      errorMsg: `"error validating action type config: error configuring send to Torq action: url must begin with https://hooks.torq.io"`,
+    },
+    {
+      name: 'fails - should be hooks but is subdomain',
+      url: 'https://subdomain.torq.io/endpoint',
+      errorMsg: `"error validating action type config: error configuring send to Torq action: url must begin with https://hooks.torq.io"`,
+    },
+    {
+      name: 'fails - should be hooks but is subdomain 2',
+      url: 'https://subdomain.eu.torq.io/endpoint',
+      errorMsg: `"error validating action type config: error configuring send to Torq action: url must begin with https://hooks.torq.io"`,
+    },
+    {
+      name: 'fails - abruptly ends',
+      url: 'https://hooks.torq/endpoint',
       errorMsg: `"error validating action type config: error configuring send to Torq action: url must begin with https://hooks.torq.io"`,
     },
   ];
