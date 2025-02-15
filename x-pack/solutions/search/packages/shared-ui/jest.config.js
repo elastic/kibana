@@ -7,10 +7,10 @@
 
 module.exports = {
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/search/packages/shared_ui',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/search/packages/shared-ui',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/x-pack/solutions/search/packages/shared_ui/**/*.{ts,tsx}'],
+  collectCoverageFrom: ['<rootDir>/x-pack/solutions/search/packages/shared-ui/**/*.{ts,tsx}'],
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/search/packages/shared_ui'],
+  roots: ['<rootDir>/x-pack/solutions/search/packages/shared-ui'],
 };

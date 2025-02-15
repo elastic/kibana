@@ -7109,7 +7109,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-shared-ui@link:x-pack/solutions/search/packages/shared_ui":
+"@kbn/search-shared-ui@link:x-pack/solutions/search/packages/shared-ui":
   version "0.0.0"
   uid ""
 
