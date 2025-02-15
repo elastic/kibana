@@ -61,7 +61,7 @@ describe('Instruction component', () => {
     expect(getByText('echo "Hello, World!"')).toBeInTheDocument();
   });
 
-  test('should render with customComponentName', async () => {
+  test.skip('should render with customComponentName', async () => {
     // TODO
   });
 
