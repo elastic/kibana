@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// Storybook react doesn't declare this in its typings, but it's there.
-declare module '@storybook/react/standalone';
-
 // Storybook references this module. It's @ts-ignored in the codebase but when
 // built into its dist it strips that out. Add it here to avoid a type checking
 // error.

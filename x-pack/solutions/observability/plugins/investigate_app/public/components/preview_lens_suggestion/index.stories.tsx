@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ComponentMeta, ComponentStoryObj } from '@storybook/react';
+import { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import { PreviewLensSuggestion as Component } from '.';
 import { KibanaReactStorybookDecorator } from '../../../.storybook/storybook_decorator';
 
-const meta: ComponentMeta<typeof Component> = {
+const meta: Meta<typeof Component> = {
   component: Component,
   title: 'app/Molecules/PreviewLensSuggestion',
   decorators: [KibanaReactStorybookDecorator],
@@ -18,12 +18,12 @@ const meta: ComponentMeta<typeof Component> = {
 
 export default meta;
 
-const defaultProps: ComponentStoryObj<typeof Component> = {
+const defaultProps: StoryObj<typeof Component> = {
   args: {},
   render: (props) => <Component {...props} />,
 };
 
-export const PreviewLensSuggestionStory: ComponentStoryObj<typeof Component> = {
+export const PreviewLensSuggestionStory: StoryObj<typeof Component> = {
   ...defaultProps,
   args: {},
   name: 'default',

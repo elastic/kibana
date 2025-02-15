@@ -8,9 +8,8 @@
  */
 
 import React from 'react';
-import { ComponentMeta } from '@storybook/react';
+import { Meta } from '@storybook/react';
 
-import { STORYBOOK_SECTION } from '../constants';
 import { UseArray } from './use_array';
 import { useArrayStories } from './__stories__';
 
@@ -18,7 +17,7 @@ const { UseArrayBasic, UseArrayReorder, UseArrayComplex, UseArrayDynamicData } =
 
 export default {
   component: UseArray,
-  title: `${STORYBOOK_SECTION}/UseArray`,
+  title: 'Form lib/UseArray',
   decorators: [
     (Story) => {
       return (
@@ -28,6 +27,6 @@ export default {
       );
     },
   ],
-} as ComponentMeta<typeof UseArray>;
+} as Meta<typeof UseArray>;
 
 export { UseArrayBasic, UseArrayReorder, UseArrayComplex, UseArrayDynamicData };

@@ -7,23 +7,42 @@
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { storiesOf, addDecorator } from '@storybook/react';
 import { euiLightVars } from '@kbn/ui-theme';
 
 import { createItems, TEST_COLUMNS } from './test_utils';
 import { ConditionsTable } from '.';
 
-addDecorator((storyFn) => (
-  <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>{storyFn()}</ThemeProvider>
-));
+export default {
+  title: 'Components/ConditionsTable',
+  decorators: [
+    (storyFn) => (
+      <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+        {storyFn()}
+      </ThemeProvider>
+    ),
+  ],
+};
 
-storiesOf('Components/ConditionsTable', module)
-  .add('single item', () => {
+export const SingleItem = {
+  render: () => {
     return <ConditionsTable items={createItems(1)} columns={TEST_COLUMNS} badge="and" />;
-  })
-  .add('and', () => {
+  },
+
+  name: 'single item',
+};
+
+export const And = {
+  render: () => {
     return <ConditionsTable items={createItems(3)} columns={TEST_COLUMNS} badge="and" />;
-  })
-  .add('or', () => {
+  },
+
+  name: 'and',
+};
+
+export const Or = {
+  render: () => {
     return <ConditionsTable items={createItems(3)} columns={TEST_COLUMNS} badge="or" />;
-  });
+  },
+
+  name: 'or',
+};
