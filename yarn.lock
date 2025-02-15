@@ -6593,15 +6593,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-browser@link:x-pack/solutions/observability/packages/utils_browser":
+"@kbn/observability-utils-browser@link:x-pack/solutions/observability/packages/utils-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-common@link:x-pack/solutions/observability/packages/utils_common":
+"@kbn/observability-utils-common@link:x-pack/solutions/observability/packages/utils-common":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-server@link:x-pack/solutions/observability/packages/utils_server":
+"@kbn/observability-utils-server@link:x-pack/solutions/observability/packages/utils-server":
   version "0.0.0"
   uid ""
 
@@ -7177,7 +7177,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-distribution-bar@link:x-pack/solutions/security/packages/distribution_bar":
+"@kbn/security-solution-distribution-bar@link:x-pack/solutions/security/packages/distribution-bar":
   version "0.0.0"
   uid ""
 
