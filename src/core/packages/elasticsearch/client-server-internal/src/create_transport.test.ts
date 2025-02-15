@@ -12,7 +12,7 @@ import { transportConstructorMock, transportRequestMock } from './create_transpo
 import { errors } from '@elastic/elasticsearch';
 import type { BaseConnectionPool } from '@elastic/elasticsearch';
 import type { InternalUnauthorizedErrorHandler } from './retry_unauthorized';
-import { createTransport, ErrorHandlerAccessor } from './create_transport';
+import { createTransport, ErrorHandlerAccessor, transformLegacyBody } from './create_transport';
 
 const createConnectionPool = () => {
   return { _connectionPool: 'mocked' } as unknown as BaseConnectionPool;
@@ -337,6 +337,47 @@ describe('createTransport', () => {
             maxCompressedResponseSize: 272,
           })
         );
+      });
+    });
+
+    describe('transformLegacyBody', () => {
+      it('handles undefined input', () => {
+        expect(transformLegacyBody(undefined)).toBeUndefined();
+      });
+
+      it('passes through string bodies unchanged', () => {
+        const stringBody = 'test string body';
+        expect(transformLegacyBody(stringBody)).toBe(stringBody);
+      });
+
+      it('passes through regular object bodies unchanged', () => {
+        const regularBody = { foo: 'bar', baz: 123 };
+        expect(transformLegacyBody(regularBody)).toEqual(regularBody);
+      });
+
+      it('transforms legacy nested body objects', () => {
+        const legacyBody = {
+          body: { foo: 'bar', baz: 123 },
+          other: 'value',
+        };
+        expect(transformLegacyBody(legacyBody)).toEqual({
+          foo: 'bar',
+          baz: 123,
+          other: 'value',
+        });
+      });
+
+      it('correctly merges properties when transforming legacy body', () => {
+        const legacyBody = {
+          body: { foo: 'bar', shared: 'from-body' },
+          other: 'value',
+          shared: 'from-root',
+        };
+        expect(transformLegacyBody(legacyBody)).toEqual({
+          foo: 'bar',
+          shared: 'from-body',
+          other: 'value',
+        });
       });
     });
   });
