@@ -73,6 +73,8 @@ export default function ({ getService }: FtrProviderContext) {
     ];
 
     it('should fetch an index settings', async () => {
+      this.onlyEsVersion('8');
+
       const index = await createIndex();
 
       const { status, body } = await getIndexSettings(index);
