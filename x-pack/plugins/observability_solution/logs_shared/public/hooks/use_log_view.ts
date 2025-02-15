@@ -9,7 +9,12 @@ import { useInterpret, useSelector } from '@xstate/react';
 import createContainer from 'constate';
 import { useCallback, useState } from 'react';
 import { waitFor } from 'xstate/lib/waitFor';
-import { DEFAULT_LOG_VIEW, LogViewAttributes, LogViewReference } from '../../common/log_views';
+import {
+  DEFAULT_LOG_VIEW,
+  LogViewAttributes,
+  LogViewReference,
+  LogViewStatus,
+} from '../../common/log_views';
 import {
   InitializeFromUrl,
   UpdateContextInUrl,
@@ -73,7 +78,10 @@ export const useLogView = ({
 
   const logView = useSelector(logViewStateService, (state) =>
     state.matches('resolving') ||
+    state.matches('updating') ||
     state.matches('checkingStatus') ||
+    state.matches('resolutionFailed') ||
+    state.matches('checkingStatusFailed') ||
     state.matches('resolvedPersistedLogView') ||
     state.matches('resolvedInlineLogView')
       ? state.context.logView
@@ -82,16 +90,19 @@ export const useLogView = ({
 
   const resolvedLogView = useSelector(logViewStateService, (state) =>
     state.matches('checkingStatus') ||
+    state.matches('checkingStatusFailed') ||
     state.matches('resolvedPersistedLogView') ||
     state.matches('resolvedInlineLogView')
       ? state.context.resolvedLogView
       : undefined
   );
 
-  const logViewStatus = useSelector(logViewStateService, (state) =>
-    state.matches('resolvedPersistedLogView') || state.matches('resolvedInlineLogView')
+  const logViewStatus: LogViewStatus = useSelector(logViewStateService, (state) =>
+    state.matches('resolvedPersistedLogView') ||
+    state.matches('resolvedInlineLogView') ||
+    state.matches('resolutionFailed')
       ? state.context.status
-      : undefined
+      : { index: 'unknown' }
   );
 
   const isLoadingLogView = useSelector(logViewStateService, (state) => state.matches('loading'));

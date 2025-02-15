@@ -9,11 +9,14 @@ import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiTitle } from '@elastic
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import type {
+  LogDataViewReference,
+  LogIndexReference,
+  LogViewStatus,
+} from '@kbn/logs-shared-plugin/common';
 import {
   logIndexNameReferenceRT,
-  LogDataViewReference,
   logDataViewReferenceRT,
-  LogIndexReference,
   logSourcesKibanaAdvancedSettingRT,
 } from '@kbn/logs-shared-plugin/common';
 import { EuiCallOut } from '@elastic/eui';
@@ -34,7 +37,8 @@ export const IndicesConfigurationPanel = React.memo<{
   isLoading: boolean;
   isReadOnly: boolean;
   indicesFormElement: FormElement<LogIndexReference | undefined, FormValidationError>;
-}>(({ isLoading, isReadOnly, indicesFormElement }) => {
+  logViewStatus: LogViewStatus;
+}>(({ isLoading, isReadOnly, indicesFormElement, logViewStatus }) => {
   const {
     services: {
       http,
@@ -198,6 +202,7 @@ export const IndicesConfigurationPanel = React.memo<{
           />
         )}
       </EuiCheckableCard>
+      <LogViewStatusWarning logViewStatus={logViewStatus} />
       {numberOfLogsRules > 0 && indicesFormElement.isDirty && (
         <>
           <EuiSpacer size="s" />
@@ -232,6 +237,36 @@ export const IndicesConfigurationPanel = React.memo<{
   );
 });
 
+const LogViewStatusWarning: React.FC<{ logViewStatus: LogViewStatus }> = ({ logViewStatus }) => {
+  if (logViewStatus.index === 'missing') {
+    return (
+      <>
+        <EuiSpacer size="s" />
+        <EuiCallOut title={logIndicesMissingTitle} color="warning" iconType="warning">
+          {logViewStatus.reason === 'noShardsFound' ? (
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.logIndicesMissingMessage.noShardsFound"
+              defaultMessage="No shards found for the specified indices."
+            />
+          ) : logViewStatus.reason === 'noIndicesFound' ? (
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.logIndicesMissingMessage.noIndicesFound"
+              defaultMessage="No indices found for the specified pattern."
+            />
+          ) : logViewStatus.reason === 'remoteClusterNotFound' ? (
+            <FormattedMessage
+              id="xpack.infra.sourceConfiguration.logIndicesMissingMessage.remoteClusterNotFound"
+              defaultMessage="At least one remote cluster was not found."
+            />
+          ) : null}
+        </EuiCallOut>
+      </>
+    );
+  } else {
+    return null;
+  }
+};
+
 const isDataViewFormElement = isFormElementForType(
   (value): value is LogDataViewReference | undefined =>
     value == null || logDataViewReferenceRT.is(value)
@@ -241,4 +276,11 @@ const isIndexNamesFormElement = isFormElementForType(logIndexNameReferenceRT.is)
 
 const isKibanaAdvancedSettingFormElement = isFormElementForType(
   logSourcesKibanaAdvancedSettingRT.is
+);
+
+const logIndicesMissingTitle = i18n.translate(
+  'xpack.infra.sourceConfiguration.logIndicesMissingTitle',
+  {
+    defaultMessage: 'Log indices missing',
+  }
 );
