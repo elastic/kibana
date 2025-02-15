@@ -40,7 +40,7 @@ const CustomFieldsComponent: React.FC<Props> = ({
   const [error, setError] = useState<boolean>(false);
 
   const onAddCustomField = useCallback(() => {
-    if (customFields.length === MAX_CUSTOM_FIELDS_PER_CASE && !error) {
+    if (customFields.length >= MAX_CUSTOM_FIELDS_PER_CASE && !error) {
       setError(true);
       return;
     }

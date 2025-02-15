@@ -30,6 +30,8 @@ import {
   transformFieldsToESModel,
   transformESConnectorOrUseDefault,
   transformESConnectorToExternalModel,
+  transformCustomFieldsToESModel,
+  transformCustomFieldsToExternalModel,
 } from '../transform';
 import { ConnectorReferenceHandler } from '../connector_reference_handler';
 import type { CasePersistedAttributes, CaseTransformedAttributes } from '../../common/types/case';
@@ -79,7 +81,9 @@ export function transformUpdateResponseToExternalModel(
       // if externalService is null that means we intentionally updated it to null within ES so return that as a valid value
       ...(externalService !== undefined && { external_service: externalService }),
       ...(customFields !== undefined && {
-        customFields: customFields as CaseTransformedAttributes['customFields'],
+        customFields: transformCustomFieldsToExternalModel(
+          customFields
+        ) as CaseTransformedAttributes['customFields'],
       }),
     },
   };
@@ -118,11 +122,18 @@ export function transformAttributesToESModel(caseAttributes: Partial<CaseTransfo
       : {}),
   };
 
+  const transformedCustomFields = {
+    ...(caseAttributes.customFields && {
+      customFields: transformCustomFieldsToESModel(caseAttributes.customFields),
+    }),
+  };
+
   return {
     attributes: {
       ...restAttributes,
       ...transformedConnector,
       ...transformedExternalService,
+      ...transformedCustomFields,
       ...(severity && { severity: SEVERITY_EXTERNAL_TO_ESMODEL[severity] }),
       ...(status && { status: STATUS_EXTERNAL_TO_ESMODEL[status] }),
     },
@@ -178,9 +189,12 @@ export function transformSavedObjectToExternalModel(
     SEVERITY_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.severity] ?? CaseSeverity.LOW;
   const status = STATUS_ESMODEL_TO_EXTERNAL[caseSavedObjectAttributes.status] ?? CaseStatuses.open;
   const category = !caseSavedObjectAttributes.category ? null : caseSavedObjectAttributes.category;
+
   const customFields = !caseSavedObjectAttributes.customFields
     ? []
-    : (caseSavedObjectAttributes.customFields as CaseCustomFields);
+    : (transformCustomFieldsToExternalModel(
+        caseSavedObjectAttributes.customFields
+      ) as CaseCustomFields);
   const observables = caseSavedObjectAttributes.observables ?? [];
 
   return {

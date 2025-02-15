@@ -15,7 +15,7 @@ import {
 } from './utils';
 
 import type { CaseUI } from './types';
-import { CustomFieldTypes } from '../../common/types/domain';
+import { CustomFieldTypes, type CustomFieldsConfiguration } from '../../common/types/domain';
 
 const caseBeforeUpdate = {
   comments: [
@@ -186,30 +186,59 @@ describe('utils', () => {
   });
 
   describe('constructCustomFieldsFilter', () => {
+    const customFieldsConfigurationMock: CustomFieldsConfiguration = [
+      {
+        key: '957846f4-a792-45a2-bc9a-c028973dfdde',
+        label: 'Test Toggle 1',
+        type: CustomFieldTypes.TOGGLE,
+        required: false,
+      },
+      {
+        key: 'dbeb8e9c-240b-4adb-b83e-e645e86c07ed',
+        label: 'Test Toggle 2',
+        type: CustomFieldTypes.TOGGLE,
+        required: false,
+      },
+      {
+        key: 'c1f0c0a0-2aaf-11ec-8d3d-0242ac130003',
+        label: 'Test Toggle 3',
+        type: CustomFieldTypes.TOGGLE,
+        required: false,
+      },
+      {
+        key: 'e0e8c50a-8d65-4f00-b6f0-d8a131fd34b4',
+        label: 'Test Toggle 4',
+        type: CustomFieldTypes.TOGGLE,
+        required: false,
+      },
+    ];
     it('returns an empty object if the customFields is empty', () => {
-      expect(constructCustomFieldsFilter({})).toEqual({});
+      expect(constructCustomFieldsFilter({}, customFieldsConfigurationMock)).toEqual({});
     });
 
     it('returns the customFields correctly', () => {
       expect(
-        constructCustomFieldsFilter({
-          '957846f4-a792-45a2-bc9a-c028973dfdde': {
-            type: CustomFieldTypes.TOGGLE,
-            options: ['on'],
+        constructCustomFieldsFilter(
+          {
+            '957846f4-a792-45a2-bc9a-c028973dfdde': {
+              type: CustomFieldTypes.TOGGLE,
+              options: ['on'],
+            },
+            'dbeb8e9c-240b-4adb-b83e-e645e86c07ed': {
+              type: CustomFieldTypes.TOGGLE,
+              options: ['off'],
+            },
+            'c1f0c0a0-2aaf-11ec-8d3d-0242ac130003': {
+              type: CustomFieldTypes.TOGGLE,
+              options: [],
+            },
+            'e0e8c50a-8d65-4f00-b6f0-d8a131fd34b4': {
+              type: CustomFieldTypes.TOGGLE,
+              options: ['on', 'off'],
+            },
           },
-          'dbeb8e9c-240b-4adb-b83e-e645e86c07ed': {
-            type: CustomFieldTypes.TOGGLE,
-            options: ['off'],
-          },
-          'c1f0c0a0-2aaf-11ec-8d3d-0242ac130003': {
-            type: CustomFieldTypes.TOGGLE,
-            options: [],
-          },
-          'e0e8c50a-8d65-4f00-b6f0-d8a131fd34b4': {
-            type: CustomFieldTypes.TOGGLE,
-            options: ['on', 'off'],
-          },
-        })
+          customFieldsConfigurationMock
+        )
       ).toEqual({
         customFields: {
           '957846f4-a792-45a2-bc9a-c028973dfdde': [true],

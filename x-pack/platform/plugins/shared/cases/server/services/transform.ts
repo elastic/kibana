@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core/server';
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
-import type { CaseConnector, ConnectorTypeFields } from '../../common/types/domain';
+import type { SavedObjectReference } from '@kbn/core/server';
+import type {
+  CaseConnector,
+  CaseCustomFields,
+  ConnectorTypeFields,
+} from '../../common/types/domain';
+import { CustomFieldTypes } from '../../common/types/domain';
+import type { CasePersistedAttributes } from '../common/types/case';
+import type { ConnectorPersisted, ConnectorPersistedFields } from '../common/types/connectors';
 import { getNoneCaseConnector } from '../common/utils';
-import type { ConnectorPersistedFields, ConnectorPersisted } from '../common/types/connectors';
 
 export function findConnectorIdReference(
   name: string,
@@ -94,4 +100,41 @@ export function transformFieldsToESModel(connector: CaseConnector): ConnectorPer
     ],
     []
   );
+}
+
+export function transformCustomFieldsToESModel(customFields: CaseCustomFields) {
+  return customFields.map((customField) => {
+    if (customField.type === CustomFieldTypes.LIST && customField.value) {
+      const [selectedKey] = Object.keys(customField.value);
+      const [value] = Object.values(customField.value);
+      return {
+        type: CustomFieldTypes.LIST,
+        key: `${customField.key}.${selectedKey}`,
+        value,
+      };
+    }
+    return customField;
+  });
+}
+
+export function transformCustomFieldsToExternalModel(
+  customFields: NonNullable<CasePersistedAttributes['customFields']>
+) {
+  return customFields.map((customField) => {
+    if (customField.type === CustomFieldTypes.LIST && customField.value) {
+      // Derive the actual custom field key and the option key from customField.key
+      // Split the key by '.' and use the last part as the selectedKey. Everything else is the customField key.
+      // Don't simply do const [key, selectedKey] = customField.key.split('.') in case the `key` contains a '.'
+      const keyParts = customField.key.split('.');
+      const selectedKey = keyParts[keyParts.length - 1];
+      const key = keyParts.slice(0, -1).join('.');
+      const label = customField.value;
+      return {
+        ...customField,
+        key,
+        value: { [selectedKey]: label },
+      };
+    }
+    return customField;
+  });
 }

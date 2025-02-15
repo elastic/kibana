@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { NIL as UUID_NIL } from 'uuid';
 import type {
   CaseCustomFields,
   CustomFieldConfiguration,
@@ -19,6 +20,8 @@ import {
   buildCustomFieldsForRequest,
   constructRequiredKibanaPrivileges,
 } from './utils';
+
+const UUID_MAX = 'ffffffff-ffff-ffff-ffff-ffffffffffff';
 
 describe('utils', () => {
   describe('isRecordError', () => {
@@ -100,6 +103,17 @@ describe('utils', () => {
           required: true,
           defaultValue: true,
         },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.LIST,
+          label: 'list',
+          required: true,
+          options: [
+            { key: UUID_NIL, label: 'option 1' },
+            { key: UUID_MAX, label: 'option 2' },
+          ],
+          defaultValue: UUID_MAX,
+        },
       ];
 
       expect(buildCustomFieldsForRequest(customFieldsConfiguration)).toEqual([
@@ -112,6 +126,11 @@ describe('utils', () => {
           key: 'second_key',
           type: CustomFieldTypes.TOGGLE as const,
           value: true,
+        },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.LIST as const,
+          value: { [UUID_MAX]: 'option 2' },
         },
       ]);
     });
@@ -130,6 +149,16 @@ describe('utils', () => {
           label: 'toggle',
           required: true,
         },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.LIST,
+          label: 'list',
+          required: true,
+          options: [
+            { key: UUID_NIL, label: 'option 1' },
+            { key: UUID_MAX, label: 'option 2' },
+          ],
+        },
       ];
 
       expect(buildCustomFieldsForRequest(customFieldsConfiguration)).toEqual([
@@ -142,6 +171,56 @@ describe('utils', () => {
           key: 'second_key',
           type: CustomFieldTypes.TOGGLE as const,
           value: false,
+        },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.LIST as const,
+          value: { [UUID_NIL]: 'option 1' },
+        },
+      ]);
+    });
+
+    it('adds required custom list fields without default values in configuration when no option has a nil uuid', () => {
+      const customFieldsConfiguration: CustomFieldsConfiguration = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          label: 'text',
+          required: true,
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'toggle',
+          required: true,
+        },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.LIST,
+          label: 'list',
+          required: true,
+          options: [
+            { key: '1', label: 'option 1' },
+            { key: '2', label: 'option 2' },
+          ],
+        },
+      ];
+
+      expect(buildCustomFieldsForRequest(customFieldsConfiguration)).toEqual([
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT as const,
+          value: 'N/A',
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE as const,
+          value: false,
+        },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.LIST as const,
+          value: { 1: 'option 1' },
         },
       ]);
     });
@@ -173,6 +252,27 @@ describe('utils', () => {
           type: CustomFieldTypes.TOGGLE,
           label: 'toggle 2',
           required: false,
+        },
+        {
+          key: 'fifth_key',
+          type: CustomFieldTypes.LIST,
+          label: 'list',
+          required: false,
+          options: [
+            { key: UUID_NIL, label: 'option 1' },
+            { key: UUID_MAX, label: 'option 2' },
+          ],
+        },
+        {
+          key: 'sixth_key',
+          type: CustomFieldTypes.LIST,
+          label: 'list',
+          required: false,
+          options: [
+            { key: UUID_NIL, label: 'option 1' },
+            { key: UUID_MAX, label: 'option 2' },
+          ],
+          defaultValue: UUID_MAX,
         },
       ];
 
@@ -206,6 +306,27 @@ describe('utils', () => {
           type: CustomFieldTypes.TOGGLE,
           label: 'toggle 2',
           required: false,
+        },
+        {
+          key: 'fifth_key',
+          type: CustomFieldTypes.LIST,
+          label: 'list',
+          required: false,
+          options: [
+            { key: UUID_NIL, label: 'option 1' },
+            { key: UUID_MAX, label: 'option 2' },
+          ],
+        },
+        {
+          key: 'sixth_key',
+          type: CustomFieldTypes.LIST,
+          label: 'list',
+          required: false,
+          options: [
+            { key: UUID_NIL, label: 'option 1' },
+            { key: UUID_MAX, label: 'option 2' },
+          ],
+          defaultValue: UUID_MAX,
         },
       ];
 

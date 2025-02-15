@@ -34,6 +34,7 @@ import type {
   PersistableStateAttachment,
   Configuration,
   CustomFieldTypes,
+  CustomFieldsConfiguration,
 } from '../types/domain';
 import type {
   CasePatchRequest,
@@ -202,6 +203,7 @@ export type CaseUser = SnakeToCamelCase<User>;
 export interface FetchCasesProps extends ApiProps {
   queryParams?: QueryParams;
   filterOptions?: FilterOptions;
+  customFieldsConfiguration: CustomFieldsConfiguration;
 }
 
 export interface SimilarCasesProps extends ApiProps {

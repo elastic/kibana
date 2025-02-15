@@ -14,6 +14,7 @@ import {
   validateCustomFieldTypesInRequest,
   validateRequiredCustomFields,
   validateSearchCasesCustomFields,
+  validateListCustomFieldValues,
 } from './validators';
 
 describe('validators', () => {
@@ -590,7 +591,7 @@ describe('validators', () => {
     };
 
     it('does not throw when custom fields are correct', () => {
-      const newConfig = [
+      const newConfig: CustomFieldsConfiguration = [
         ...customFieldsConfiguration,
         {
           key: 'third_key',
@@ -690,6 +691,135 @@ describe('validators', () => {
           customFields: customFieldsMax,
         })
       ).toThrowErrorMatchingInlineSnapshot(`"Maximum 10 customFields are allowed."`);
+    });
+  });
+  describe('validateListCustomFieldValues', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    const customFieldsConfiguration: CustomFieldsConfiguration = [
+      {
+        key: 'first_key',
+        type: CustomFieldTypes.LIST,
+        label: 'List field',
+        required: true,
+        options: [
+          { key: 'option1', label: 'Option 1' },
+          { key: 'option2', label: 'Option 2' },
+        ],
+      },
+      {
+        key: 'second_key',
+        type: CustomFieldTypes.LIST,
+        label: 'Another list field',
+        required: true,
+        options: [
+          { key: 'option1', label: 'Option 1' },
+          { key: 'option2', label: 'Option 2' },
+        ],
+      },
+    ];
+
+    it('does not throw when custom fields are correct', () => {
+      expect(() =>
+        validateListCustomFieldValues({
+          requestCustomFields: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.LIST as const,
+              value: { option1: 'Option 1' },
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.LIST as const,
+              value: { option2: 'Option 2' },
+            },
+          ],
+          customFieldsConfiguration,
+        })
+      ).not.toThrow();
+    });
+
+    it('does not throw when custom fields are empty', () => {
+      expect(() =>
+        validateListCustomFieldValues({
+          requestCustomFields: [],
+          customFieldsConfiguration,
+        })
+      ).not.toThrow();
+    });
+
+    it('throws error when custom fields configurations is empty', () => {
+      expect(() =>
+        validateListCustomFieldValues({
+          requestCustomFields: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.LIST as const,
+              value: { option1: 'Option 1' },
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.LIST as const,
+              value: { option2: 'Option 2' },
+            },
+          ],
+          customFieldsConfiguration: [],
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"No custom fields configured."`);
+    });
+
+    it('throws error when custom fields key does not match with configuration', () => {
+      expect(() =>
+        validateListCustomFieldValues({
+          requestCustomFields: [
+            {
+              key: 'random_key',
+              type: CustomFieldTypes.LIST as const,
+              value: { option1: 'Option 1' },
+            },
+          ],
+
+          customFieldsConfiguration,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"Invalid custom field key: random_key"`);
+    });
+
+    it('throws error when custom field value is not in the list of options', () => {
+      expect(() =>
+        validateListCustomFieldValues({
+          requestCustomFields: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.LIST as const,
+              value: { invalid_option: 'Invalid Option' },
+            },
+          ],
+
+          customFieldsConfiguration,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid option key \\"invalid_option\\" supplied for custom field \\"first_key\\""`
+      );
+    });
+
+    it('throws error when custom field label does not match the configured label', () => {
+      expect(() =>
+        validateListCustomFieldValues({
+          requestCustomFields: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.LIST as const,
+              value: { option1: 'Invalid Option' },
+            },
+          ],
+
+          customFieldsConfiguration,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Label \\"Invalid Option\\" supplied for custom field \\"first_key\\" does not match the configured label for \\"option1\\". Expected \\"Option 1\\"."`
+      );
     });
   });
 });

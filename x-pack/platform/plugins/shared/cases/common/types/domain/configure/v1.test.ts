@@ -17,6 +17,7 @@ import {
   TextCustomFieldConfigurationRt,
   ToggleCustomFieldConfigurationRt,
   NumberCustomFieldConfigurationRt,
+  ListCustomFieldConfigurationRt,
 } from './v1';
 
 describe('configure', () => {
@@ -53,6 +54,17 @@ describe('configure', () => {
     label: 'Number custom field',
     type: CustomFieldTypes.NUMBER,
     required: false,
+  };
+
+  const listCustomField = {
+    key: 'list_custom_field',
+    label: 'List custom field',
+    type: CustomFieldTypes.LIST,
+    required: false,
+    options: [
+      { key: 'foo', label: 'Foo' },
+      { key: 'bar', label: 'Bar' },
+    ],
   };
 
   const templateWithAllCaseFields = {
@@ -106,7 +118,7 @@ describe('configure', () => {
     const defaultRequest = {
       connector: resilient,
       closure_type: 'close-by-user',
-      customFields: [textCustomField, toggleCustomField, numberCustomField],
+      customFields: [textCustomField, toggleCustomField, numberCustomField, listCustomField],
       templates: [],
       owner: 'cases',
       created_at: '2020-02-19T23:06:33.798Z',
@@ -136,7 +148,7 @@ describe('configure', () => {
         _tag: 'Right',
         right: {
           ...defaultRequest,
-          customFields: [textCustomField, toggleCustomField, numberCustomField],
+          customFields: [textCustomField, toggleCustomField, numberCustomField, listCustomField],
         },
       });
     });
@@ -148,7 +160,7 @@ describe('configure', () => {
         _tag: 'Right',
         right: {
           ...defaultRequest,
-          customFields: [textCustomField, toggleCustomField, numberCustomField],
+          customFields: [textCustomField, toggleCustomField, numberCustomField, listCustomField],
         },
       });
     });
@@ -156,14 +168,19 @@ describe('configure', () => {
     it('removes foo:bar attributes from custom fields', () => {
       const query = ConfigurationAttributesRt.decode({
         ...defaultRequest,
-        customFields: [{ ...textCustomField, foo: 'bar' }, toggleCustomField, numberCustomField],
+        customFields: [
+          { ...textCustomField, foo: 'bar' },
+          toggleCustomField,
+          numberCustomField,
+          listCustomField,
+        ],
       });
 
       expect(query).toStrictEqual({
         _tag: 'Right',
         right: {
           ...defaultRequest,
-          customFields: [textCustomField, toggleCustomField, numberCustomField],
+          customFields: [textCustomField, toggleCustomField, numberCustomField, listCustomField],
         },
       });
     });
@@ -419,6 +436,66 @@ describe('configure', () => {
 
     it('removes foo:bar attributes from request', () => {
       const query = NumberCustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest },
+      });
+    });
+  });
+
+  describe('ListCustomFieldConfigurationRt', () => {
+    const defaultRequest = {
+      key: 'my_list_custom_field',
+      label: 'List Custom Field',
+      type: CustomFieldTypes.LIST,
+      required: false,
+      options: [
+        { key: 'foo', label: 'Foo' },
+        { key: 'bar', label: 'Bar' },
+      ],
+    };
+
+    it('has expected attributes in request with required: false', () => {
+      const query = ListCustomFieldConfigurationRt.decode(defaultRequest);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest },
+      });
+    });
+
+    it('has expected attributes in request with defaultValue and required: true', () => {
+      const query = ListCustomFieldConfigurationRt.decode({
+        ...defaultRequest,
+        required: true,
+        defaultValue: 'foo',
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: {
+          ...defaultRequest,
+          required: true,
+          defaultValue: 'foo',
+        },
+      });
+    });
+
+    it('defaultValue fails if the type is not string', () => {
+      expect(
+        PathReporter.report(
+          ListCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            required: true,
+            defaultValue: { foo: 'bar' },
+          })
+        )[0]
+      ).toContain('Invalid value {"foo":"bar"} supplied');
+    });
+
+    it('removes foo:bar attributes from request', () => {
+      const query = ListCustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
 
       expect(query).toStrictEqual({
         _tag: 'Right',

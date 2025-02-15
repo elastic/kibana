@@ -13,6 +13,7 @@ import {
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_KEY_LENGTH,
   MAX_CUSTOM_FIELD_LABEL_LENGTH,
+  MAX_CUSTOM_FIELD_OPTION_LENGTH,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
   MAX_CUSTOM_OBSERVABLE_TYPES,
   MAX_DESCRIPTION_LENGTH,
@@ -40,6 +41,7 @@ import {
   TextCustomFieldConfigurationRt,
   ToggleCustomFieldConfigurationRt,
   NumberCustomFieldConfigurationRt,
+  ListCustomFieldConfigurationRt,
   TemplateConfigurationRt,
   ObservableTypesConfigurationRt,
 } from './v1';
@@ -643,6 +645,83 @@ describe('configure', () => {
       ).toContain(
         'The defaultValue field should be an integer between -(2^53 - 1) and 2^53 - 1, inclusive.'
       );
+    });
+  });
+
+  describe('ListCustomFieldConfigurationRt', () => {
+    const defaultRequest = {
+      key: 'my_list_custom_field',
+      label: 'List Custom Field',
+      type: CustomFieldTypes.LIST,
+      required: true,
+      options: [
+        { label: 'Option 1', key: 'option_1' },
+        { label: 'Option 2', key: 'option_2' },
+      ],
+    };
+
+    it('has expected attributes in request', () => {
+      const query = ListCustomFieldConfigurationRt.decode(defaultRequest);
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest },
+      });
+    });
+
+    it('has expected attributes in request with defaultValue', () => {
+      const query = ListCustomFieldConfigurationRt.decode({
+        ...defaultRequest,
+        defaultValue: 'option_1',
+      });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest, defaultValue: 'option_1' },
+      });
+    });
+
+    it('removes foo:bar attributes from request', () => {
+      const query = ListCustomFieldConfigurationRt.decode({ ...defaultRequest, foo: 'bar' });
+
+      expect(query).toStrictEqual({
+        _tag: 'Right',
+        right: { ...defaultRequest },
+      });
+    });
+
+    it('throws an error if the defaultValue is not type string', () => {
+      expect(
+        PathReporter.report(
+          ListCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            defaultValue: false,
+          })
+        )[0]
+      ).toContain('Invalid value false supplied');
+    });
+
+    it('limits options to 10', () => {
+      const options = new Array(11).fill({ label: 'Option 1', key: 'option_1' });
+
+      expect(
+        PathReporter.report(
+          ListCustomFieldConfigurationRt.decode({ ...defaultRequest, options })
+        )[0]
+      ).toContain('The length of the field options is too long. Array must be of length <= 10.');
+    });
+
+    it('limits option labels to 50 characters', () => {
+      const longLabel = 'x'.repeat(MAX_CUSTOM_FIELD_OPTION_LENGTH + 1);
+
+      expect(
+        PathReporter.report(
+          ListCustomFieldConfigurationRt.decode({
+            ...defaultRequest,
+            options: [{ label: longLabel, key: 'option_1' }],
+          })
+        )[0]
+      ).toContain('The length of the label is too long. The maximum length is 50.');
     });
   });
 
