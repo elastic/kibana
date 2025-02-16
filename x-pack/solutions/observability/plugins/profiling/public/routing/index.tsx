@@ -247,7 +247,7 @@ const routes = {
                 element: (
                   <RouteBreadcrumb
                     title={i18n.translate('xpack.profiling.breadcrumb.differentialFunctions', {
-                      defaultMessage: 'Differential Top N',
+                      defaultMessage: 'Differential top N',
                     })}
                     href="/functions/differential"
                   >
