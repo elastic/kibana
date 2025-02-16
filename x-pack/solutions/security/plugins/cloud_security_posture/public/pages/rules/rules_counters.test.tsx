@@ -69,14 +69,11 @@ describe('RulesCounters', () => {
   it('should not show empty state and show correct posture score', () => {
     render(<RulesCounters mutedRulesCount={0} setEnabledDisabledItemsFilter={() => {}} />);
 
-    // Check empty state is not present
     expect(
       screen.queryByTestId(RULE_COUNTERS_TEST_SUBJ.RULE_COUNTERS_EMPTY_STATE)
     ).not.toBeInTheDocument();
-    // Get the outer div by test ID
     const postureScoreContainer = screen.getByTestId(RULE_COUNTERS_TEST_SUBJ.POSTURE_SCORE_COUNTER);
 
-    // Look for the text inside the container
     expect(within(postureScoreContainer).getByText('76%')).toBeInTheDocument();
   });
 
