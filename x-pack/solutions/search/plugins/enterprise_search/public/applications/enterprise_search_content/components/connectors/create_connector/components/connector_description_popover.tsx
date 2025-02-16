@@ -91,11 +91,13 @@ const connectorClientPopoverPanels = [
 export interface ConnectorDescriptionPopoverProps {
   isNative: boolean;
   showIsOnlySelfManaged: boolean;
+  isElasticManagedDiscontinued?: boolean;
 }
 
 export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverProps> = ({
   isNative,
   showIsOnlySelfManaged,
+  isElasticManagedDiscontinued,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const panels = isNative ? nativePopoverPanels : connectorClientPopoverPanels;
@@ -126,28 +128,49 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
         hasBorder={false}
         hasShadow={false}
       >
-        {((isNative && !isAgentlessEnabled) || showIsOnlySelfManaged) && (
+        {((isNative && !isAgentlessEnabled) || showIsOnlySelfManaged) &&
+          !isElasticManagedDiscontinued && (
+            <>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiCallOut
+                    title={
+                      showIsOnlySelfManaged
+                        ? i18n.translate(
+                            'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.isOnlySelfManagedAvailableTitle',
+                            {
+                              defaultMessage:
+                                'This connector is not available as an Elastic-managed Connector',
+                            }
+                          )
+                        : i18n.translate(
+                            'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.isRunningLocallyTitle',
+                            {
+                              defaultMessage:
+                                'Elastic managed connectors are only available in Elastic Cloud',
+                            }
+                          )
+                    }
+                    size="s"
+                    iconType="warning"
+                    color="warning"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+            </>
+          )}
+        {isElasticManagedDiscontinued && (
           <>
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiCallOut
-                  title={
-                    showIsOnlySelfManaged
-                      ? i18n.translate(
-                          'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.isOnlySelfManagedAvailableTitle',
-                          {
-                            defaultMessage:
-                              'This connector is not available as an Elastic-managed Connector',
-                          }
-                        )
-                      : i18n.translate(
-                          'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.isRunningLocallyTitle',
-                          {
-                            defaultMessage:
-                              'Elastic managed connectors are only available in Elastic Cloud',
-                          }
-                        )
-                  }
+                  title={i18n.translate(
+                    'xpack.enterpriseSearch.createConnector.connectorDescriptionBadge.elasticManagedDiscontinuedTitle',
+                    {
+                      defaultMessage: 'Elastic managed Connector are no longer supported',
+                    }
+                  )}
                   size="s"
                   iconType="warning"
                   color="warning"
@@ -189,7 +212,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
             })}
           </EuiFlexGroup>
         )}
-        {isNative && !isAgentlessEnabled && (
+        {isNative && !isAgentlessEnabled && !isElasticManagedDiscontinued && (
           <>
             <EuiSpacer size="m" />
             <EuiFlexGroup direction="column" justifyContent="center">
