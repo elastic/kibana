@@ -11,9 +11,12 @@ import { timeout } from 'rxjs';
 import { Writable } from 'stream';
 import { finished } from 'stream/promises';
 import { setTimeout } from 'timers/promises';
+import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
+import { type FakeRawRequest, type Headers } from '@kbn/core-http-server';
+import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 
 import { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { Logger } from '@kbn/core/server';
+import type { IBasePath, KibanaRequest, Logger } from '@kbn/core/server';
 import {
   CancellationToken,
   KibanaShuttingDownError,
@@ -59,14 +62,14 @@ import { errorLogger } from './error_logger';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 
-interface ReportingExecuteTaskInstance {
+export interface ReportingExecuteTaskInstance {
   state: object;
   taskType: string;
   params: ReportTaskParams;
   runAt?: Date;
 }
 
-function isOutput(output: CompletedReportOutput | Error): output is CompletedReportOutput {
+export function isOutput(output: CompletedReportOutput | Error): output is CompletedReportOutput {
   return (output as CompletedReportOutput).size != null;
 }
 
@@ -108,6 +111,7 @@ export class ExecuteReportTask implements ReportingTask {
   private exportTypesRegistry: ExportTypesRegistry;
   private store?: ReportingStore;
   private eventTracker?: EventTracker;
+  private basePathService?: IBasePath;
 
   constructor(
     private reporting: ReportingCore,
@@ -121,8 +125,9 @@ export class ExecuteReportTask implements ReportingTask {
   /*
    * To be called from plugin start
    */
-  public async init(taskManager: TaskManagerStartContract) {
+  public async init(taskManager: TaskManagerStartContract, basePathService: IBasePath) {
     this.taskManagerStart = taskManager;
+    this.basePathService = basePathService;
 
     const { reporting } = this;
     const { uuid, name } = reporting.getServerInfo();
@@ -329,6 +334,7 @@ export class ExecuteReportTask implements ReportingTask {
 
   private async _performJob(
     task: ReportTaskParams,
+    fakeRequest: KibanaRequest,
     taskInstanceFields: TaskInstanceFields,
     cancellationToken: CancellationToken,
     stream: Writable
@@ -343,7 +349,14 @@ export class ExecuteReportTask implements ReportingTask {
     const queueTimeout = durationToNumber(this.config.queue.timeout);
     return Rx.lastValueFrom(
       Rx.from(
-        exportType.runTask(task.id, task.payload, taskInstanceFields, cancellationToken, stream)
+        exportType.runTask(
+          task.id,
+          task.payload,
+          taskInstanceFields,
+          fakeRequest,
+          cancellationToken,
+          stream
+        )
       ).pipe(timeout(queueTimeout)) // throw an error if a value is not emitted before timeout
     );
   }
@@ -417,6 +430,7 @@ export class ExecuteReportTask implements ReportingTask {
         params: reportTaskParams,
         retryAt: taskRetryAt,
         startedAt: taskStartedAt,
+        apiKey,
       } = taskInstance;
 
       return {
@@ -428,12 +442,17 @@ export class ExecuteReportTask implements ReportingTask {
          * If any error happens, additional retry attempts may be picked up by a separate instance
          */
         run: async () => {
+          this.logger.info(`STARTING REPORT TASK - ${JSON.stringify(reportTaskParams)}`);
           let report: SavedReport | undefined;
           const isLastAttempt = taskAttempts >= this.getMaxAttempts();
 
           // find the job in the store and set status to processing
           const task = reportTaskParams as ReportTaskParams;
           jobId = task?.id;
+
+          if (!apiKey) {
+            throw new Error(`Need API key`);
+          }
 
           try {
             if (!jobId) {
@@ -469,8 +488,8 @@ export class ExecuteReportTask implements ReportingTask {
           const { jobtype: jobType, attempts } = report;
           const maxAttempts = this.getMaxAttempts();
           const logger = this.logger.get(jobId);
-
-          logger.debug(
+          const fakeRequest = this.getFakeKibanaRequest(apiKey);
+          logger.info(
             `Starting ${jobType} report ${jobId}: attempt ${attempts} of ${maxAttempts}.`
           );
           logger.debug(`Reports running: ${this.reporting.countConcurrentReports()}.`);
@@ -498,6 +517,7 @@ export class ExecuteReportTask implements ReportingTask {
             const output = await Promise.race<TaskRunResult>([
               this._performJob(
                 task,
+                fakeRequest,
                 { retryAt: taskRetryAt, startedAt: taskStartedAt },
                 cancellationToken,
                 stream
@@ -567,6 +587,25 @@ export class ExecuteReportTask implements ReportingTask {
     return this.config.capture.maxAttempts ?? 1;
   }
 
+  private getFakeKibanaRequest(apiKey: string) {
+    const requestHeaders: Headers = {};
+
+    requestHeaders.authorization = `ApiKey ${apiKey}`;
+
+    // TODO pass spaceId
+    const path = addSpaceIdToPath('/', 'default');
+
+    const fakeRawRequest: FakeRawRequest = {
+      headers: requestHeaders,
+      path: '/',
+    };
+
+    const fakeRequest = kibanaRequestFactory(fakeRawRequest);
+    this.basePathService?.set(fakeRequest, path);
+
+    return fakeRequest;
+  }
+
   public getTaskDefinition() {
     // round up from ms to the nearest second
     const queueTimeout = Math.ceil(numberToDuration(this.config.queue.timeout).asSeconds()) + 's';
@@ -583,14 +622,14 @@ export class ExecuteReportTask implements ReportingTask {
     };
   }
 
-  public async scheduleTask(params: ReportTaskParams) {
+  public async scheduleTask(params: ReportTaskParams, apiKey: string) {
     const taskInstance: ReportingExecuteTaskInstance = {
       taskType: REPORTING_EXECUTE_TYPE,
       state: {},
       params,
     };
 
-    return await this.getTaskManagerStart().schedule(taskInstance);
+    return await this.getTaskManagerStart().schedule(taskInstance, { apiKey });
   }
 
   public getStatus() {

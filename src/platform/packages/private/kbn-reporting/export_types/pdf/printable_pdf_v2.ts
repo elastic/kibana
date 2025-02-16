@@ -12,7 +12,7 @@ import * as Rx from 'rxjs';
 import { catchError, map, mergeMap, of, takeUntil, tap } from 'rxjs';
 import { Writable } from 'stream';
 
-import { Headers } from '@kbn/core/server';
+import { Headers, KibanaRequest } from '@kbn/core/server';
 import {
   CancellationToken,
   LICENSE_TYPE_CLOUD_STANDARD,
@@ -80,23 +80,22 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
     jobId: string,
     payload: TaskPayloadPDFV2,
     taskInstanceFields: TaskInstanceFields,
+    fakeRequest: KibanaRequest,
     cancellationToken: CancellationToken,
-    stream: Writable
+    stream: Writable,
+    forceNowOverride?: string
   ) => {
     const logger = this.logger.get(`execute-job:${jobId}`);
     const apmTrans = apm.startTransaction('execute-job-pdf-v2', REPORTING_TRANSACTION_TYPE);
     const apmGetAssets = apmTrans.startSpan('get-assets', 'setup');
     let apmGeneratePdf: { end: () => void } | null | undefined;
-    const { encryptionKey } = this.config;
 
     const process$: Rx.Observable<TaskRunResult> = of(1).pipe(
-      mergeMap(() => decryptJobHeaders(encryptionKey, payload.headers, logger)),
-      mergeMap(async (headers: Headers) => {
-        const fakeRequest = this.getFakeRequest(headers, payload.spaceId, logger);
+      mergeMap(async () => {
         const uiSettingsClient = await this.getUiSettingsClient(fakeRequest);
-        return await getCustomLogo(uiSettingsClient, headers);
+        return await getCustomLogo(uiSettingsClient);
       }),
-      mergeMap(({ logo, headers }) => {
+      mergeMap(({ logo }) => {
         const { browserTimezone, layout, title, locatorParams } = payload;
 
         apmGetAssets?.end();
@@ -114,7 +113,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
             this.config,
             this.getServerInfo(),
             payload.spaceId,
-            payload.forceNow
+            forceNowOverride ? forceNowOverride : payload.forceNow
           ),
           locator,
         ]) as unknown as UrlOrUrlWithContext[];
@@ -125,7 +124,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
             title,
             logo,
             browserTimezone,
-            headers,
+            request: fakeRequest,
             layout,
             urls: urls.map((url) =>
               typeof url === 'string'

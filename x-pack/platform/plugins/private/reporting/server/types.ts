@@ -15,6 +15,10 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
 import type { ReportApiJSON } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
+import {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import type {
   PdfScreenshotOptions as BasePdfScreenshotOptions,
@@ -31,6 +35,10 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
+import {
+  PluginSetupContract as ActionsPluginSetupContract,
+  PluginStartContract as ActionsPluginStartContract,
+} from '@kbn/actions-plugin/server';
 
 /**
  * Plugin Setup Contract
@@ -51,18 +59,22 @@ export interface ReportingSetupDeps {
   features: FeaturesPluginSetup;
   screenshotMode: ScreenshotModePluginSetup;
   taskManager: TaskManagerSetupContract;
+  actions?: ActionsPluginSetupContract;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 }
 
 export interface ReportingStartDeps {
+  actions?: ActionsPluginStartContract;
   data: DataPluginStart;
   discover: DiscoverServerPluginStart;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
   screenshotting?: ScreenshottingStart;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
 
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
