@@ -15,8 +15,13 @@ import { findRules } from '../../../rule_management/logic/search/find_rules';
 import { getExistingPrepackagedRules } from '../../../rule_management/logic/search/get_existing_prepackaged_rules';
 import { internalRuleToAPIResponse } from '../../../rule_management/logic/detection_rules_client/converters/internal_rule_to_api_response';
 
+interface FetchAllInstalledRulesArgs {
+  page?: number;
+  perPage?: number;
+}
+
 export interface IPrebuiltRuleObjectsClient {
-  fetchAllInstalledRules(): Promise<RuleResponse[]>;
+  fetchAllInstalledRules(args?: FetchAllInstalledRulesArgs): Promise<RuleResponse[]>;
   fetchInstalledRulesByIds(ruleIds: string[]): Promise<RuleResponse[]>;
 }
 
@@ -24,9 +29,9 @@ export const createPrebuiltRuleObjectsClient = (
   rulesClient: RulesClient
 ): IPrebuiltRuleObjectsClient => {
   return {
-    fetchAllInstalledRules: (): Promise<RuleResponse[]> => {
+    fetchAllInstalledRules: ({ page, perPage } = {}): Promise<RuleResponse[]> => {
       return withSecuritySpan('IPrebuiltRuleObjectsClient.fetchInstalledRules', async () => {
-        const rulesData = await getExistingPrepackagedRules({ rulesClient });
+        const rulesData = await getExistingPrepackagedRules({ rulesClient, page, perPage });
         const rules = rulesData.map((rule) => internalRuleToAPIResponse(rule));
         return rules;
       });

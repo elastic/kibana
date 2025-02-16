@@ -39,6 +39,8 @@ import { UpgradeFlyoutSubHeader } from './upgrade_flyout_subheader';
 import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations';
 import * as i18n from './translations';
 import { CustomizationDisabledCallout } from './customization_disabled_callout';
+import { RULES_TABLE_INITIAL_PAGE_SIZE } from '../constants';
+import type { PaginationOptions } from '../../../../rule_management/logic';
 
 const REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL = 5 * 60 * 1000;
 
@@ -84,6 +86,10 @@ export interface UpgradePrebuiltRulesTableState {
    * The timestamp for when the rules were successfully fetched
    */
   lastUpdated: number;
+  /**
+   * Current pagination state
+   */
+  pagination: PaginationOptions;
 }
 
 export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
@@ -93,6 +99,7 @@ export interface UpgradePrebuiltRulesTableActions {
   upgradeRules: (ruleIds: RuleSignatureId[]) => void;
   upgradeAllRules: () => void;
   setFilterOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesTableFilterOptions>>;
+  setPagination: Dispatch<SetStateAction<{ page: number; perPage: number }>>;
   openRulePreview: (ruleId: string) => void;
 }
 
@@ -128,21 +135,33 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     ruleSource: [],
   });
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
+  const [pagination, setPagination] = useState({
+    page: 1,
+    perPage: RULES_TABLE_INITIAL_PAGE_SIZE,
+  });
 
   const {
-    data: { rules: ruleUpgradeInfos, stats: { tags } } = {
-      rules: [],
-      stats: { tags: [] },
-    },
+    data: upgradeReviewData,
     refetch,
     dataUpdatedAt,
     isFetched,
     isLoading,
     isRefetching,
-  } = usePrebuiltRulesUpgradeReview({
-    refetchInterval: REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL,
-    keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
-  });
+  } = usePrebuiltRulesUpgradeReview(
+    {
+      page: pagination.page,
+      per_page: pagination.perPage,
+    },
+    {
+      refetchInterval: REVIEW_PREBUILT_RULES_UPGRADE_REFRESH_INTERVAL,
+      keepPreviousData: true, // Use this option so that the state doesn't jump between "success" and "loading" on page change
+    }
+  );
+
+  const ruleUpgradeInfos = useMemo(() => upgradeReviewData?.rules ?? [], [upgradeReviewData]);
+  const tags = useMemo(() => upgradeReviewData?.stats.tags ?? [], [upgradeReviewData]);
+  const totalRulesToUpgrade = upgradeReviewData?.stats.num_rules_to_upgrade_total ?? 0;
+
   const { rulesUpgradeState, setRuleFieldResolvedValue } =
     usePrebuiltRulesUpgradeState(ruleUpgradeInfos);
   const ruleUpgradeStates = useMemo(() => Object.values(rulesUpgradeState), [rulesUpgradeState]);
@@ -399,6 +418,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       upgradeAllRules,
       setFilterOptions,
       openRulePreview,
+      setPagination,
     }),
     [refetch, upgradeRules, upgradeAllRules, openRulePreview]
   );
@@ -416,21 +436,27 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
         isUpgradingSecurityPackages,
         loadingRules,
         lastUpdated: dataUpdatedAt,
+        pagination: {
+          ...pagination,
+          total: totalRulesToUpgrade,
+        },
       },
       actions,
     }),
     [
-      ruleUpgradeInfos.length,
       filteredRuleUpgradeStates,
+      isFetched,
+      ruleUpgradeInfos.length,
       filterOptions,
       tags,
-      isFetched,
       isLoading,
       areMlJobsLoading,
       isRefetching,
       isUpgradingSecurityPackages,
       loadingRules,
       dataUpdatedAt,
+      pagination,
+      totalRulesToUpgrade,
       actions,
     ]
   );

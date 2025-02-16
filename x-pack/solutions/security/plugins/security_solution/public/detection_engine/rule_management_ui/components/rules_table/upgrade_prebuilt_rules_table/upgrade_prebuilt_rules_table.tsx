@@ -10,7 +10,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiInMemoryTable,
+  EuiBasicTable,
   EuiProgress,
   EuiSkeletonLoading,
   EuiSkeletonText,
@@ -19,7 +19,7 @@ import {
 import React, { useCallback, useState } from 'react';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
-import { RULES_TABLE_INITIAL_PAGE_SIZE, RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
+import { RULES_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
 import { RulesChangelogLink } from '../rules_changelog_link';
 import { UpgradePrebuiltRulesTableButtons } from './upgrade_prebuilt_rules_table_buttons';
 import { useUpgradePrebuiltRulesTableContext } from './upgrade_prebuilt_rules_table_context';
@@ -46,18 +46,22 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
       isLoading,
       isRefetching,
       isUpgradingSecurityPackages,
+      pagination,
     },
+    actions: { setPagination },
   } = useUpgradePrebuiltRulesTableContext();
   const [selected, setSelected] = useState<RuleUpgradeState[]>([]);
 
   const rulesColumns = useUpgradePrebuiltRulesTableColumns();
   const shouldShowProgress = isUpgradingSecurityPackages || isRefetching;
-  const [pageIndex, setPageIndex] = useState(0);
   const handleTableChange = useCallback(
-    ({ page: { index } }: CriteriaWithPagination<RuleUpgradeState>) => {
-      setPageIndex(index);
+    ({ page: { index, size } }: CriteriaWithPagination<RuleUpgradeState>) => {
+      setPagination({
+        page: index + 1,
+        perPage: size,
+      });
     },
-    [setPageIndex]
+    [setPagination]
   );
 
   return (
@@ -104,13 +108,13 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
                 </EuiFlexItem>
               </EuiFlexGroup>
 
-              <EuiInMemoryTable
+              <EuiBasicTable
                 items={ruleUpgradeStates}
-                sorting
                 pagination={{
-                  initialPageSize: RULES_TABLE_INITIAL_PAGE_SIZE,
+                  totalItemCount: pagination.total,
                   pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
-                  pageIndex,
+                  pageIndex: pagination.page - 1,
+                  pageSize: pagination.perPage,
                 }}
                 selection={{
                   selectable: () => true,
@@ -120,7 +124,7 @@ export const UpgradePrebuiltRulesTable = React.memo(() => {
                 itemId="rule_id"
                 data-test-subj="rules-upgrades-table"
                 columns={rulesColumns}
-                onTableChange={handleTableChange}
+                onChange={handleTableChange}
               />
             </>
           )

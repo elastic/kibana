@@ -23,6 +23,7 @@ import type {
   GetPrebuiltRulesStatusResponseBody,
   ReviewRuleUpgradeResponseBody,
   ReviewRuleInstallationResponseBody,
+  ReviewRuleUpgradeRequestBody,
 } from '../../../../common/api/detection_engine/prebuilt_rules';
 import type {
   BulkDuplicateRules,
@@ -637,13 +638,16 @@ export const getPrebuiltRulesStatus = async ({
  */
 export const reviewRuleUpgrade = async ({
   signal,
+  request,
 }: {
   signal: AbortSignal | undefined;
+  request: ReviewRuleUpgradeRequestBody;
 }): Promise<ReviewRuleUpgradeResponseBody> =>
   KibanaServices.get().http.fetch(REVIEW_RULE_UPGRADE_URL, {
     method: 'POST',
     version: '1',
     signal,
+    body: JSON.stringify(request),
   });
 
 /**
