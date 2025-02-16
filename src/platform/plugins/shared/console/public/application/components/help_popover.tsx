@@ -121,7 +121,7 @@ export const HelpPopover = ({ button, isOpen, closePopover, resetTour }: HelpPop
           <p>
             {i18n.translate('console.helpPopover.description', {
               defaultMessage:
-                'Console is an interactive UI for calling Elasticsearch and Kibana APIs and viewing their responses. Search your data, manage settings, and more, using Query DSL and REST API syntax.',
+                'Console is an interactive UI for calling Elasticsearch and Kibana APIs and viewing their responses. Search your data, manage settings, and more',
             })}
           </p>
         </EuiText>
