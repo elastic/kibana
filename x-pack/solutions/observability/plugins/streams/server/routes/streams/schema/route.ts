@@ -165,7 +165,10 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     const propertiesForSimulation = Object.fromEntries(
       params.body.field_definitions.map((field) => [
         field.name,
-        { type: field.type, ...(field.format ? { format: field.format } : {}) },
+        {
+          type: field.type,
+          ...(field.format ? { format: field.format } : {}),
+        },
       ])
     );
 
