@@ -50,6 +50,7 @@ import { AdditionalControls } from '../components/additional_controls';
 import { AssetInventorySearchBar } from '../components/search_bar';
 import { RiskBadge } from '../components/risk_badge';
 import { Filters } from '../components/filters/filters';
+import { EmptyState } from '../components/empty_state';
 
 import { useDataViewContext } from '../hooks/data_view_context';
 import { useStyles } from '../hooks/use_styles';
@@ -58,6 +59,13 @@ import {
   type AssetsBaseURLQuery,
   type URLQuery,
 } from '../hooks/use_asset_inventory_data_table';
+import { useFetchData } from '../hooks/use_fetch_data';
+import {
+  MAX_ASSETS_TO_LOAD,
+  LOCAL_STORAGE_DATA_TABLE_DEFAULT_COLUMN_IDS,
+  LOCAL_STORAGE_DATA_TABLE_DEFAULT_COLUMN_SETTINGS,
+  LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
+} from '../constants';
 
 const gridStyle: EuiDataGridStyle = {
   border: 'horizontal',
@@ -66,14 +74,9 @@ const gridStyle: EuiDataGridStyle = {
   header: 'underline',
 };
 
-const MAX_ASSETS_TO_LOAD = 500; // equivalent to MAX_FINDINGS_TO_LOAD in @kbn/cloud-security-posture-common
-
 const title = i18n.translate('xpack.securitySolution.assetInventory.allAssets.tableRowTypeLabel', {
   defaultMessage: 'assets',
 });
-
-const columnsLocalStorageKey = 'assetInventoryColumns';
-const LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY = 'assetInventory:dataTable:pageSize';
 
 const columnHeaders: Record<string, string> = {
   'asset.risk': i18n.translate('xpack.securitySolution.assetInventory.allAssets.risk', {
@@ -129,10 +132,7 @@ const getDefaultQuery = ({ query, filters }: AssetsBaseURLQuery): URLQuery => ({
 });
 
 export interface AllAssetsProps {
-  rows: DataTableRecord[];
-  isLoading: boolean;
   height?: number | string;
-  loadMore: () => void;
   nonPersistedFilters?: Filter[];
   hasDistributionBar?: boolean;
   /**
@@ -155,9 +155,6 @@ const getEntity = (row: DataTableRecord): EntityEcs => {
 const ASSET_INVENTORY_TABLE_ID = 'asset-inventory-table';
 
 const AllAssets = ({
-  rows,
-  isLoading,
-  loadMore,
   nonPersistedFilters,
   height,
   hasDistributionBar = true,
@@ -167,7 +164,6 @@ const AllAssets = ({
   const { euiTheme } = useEuiTheme();
   const assetInventoryDataTable = useAssetInventoryDataTable({
     paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
-    columnsLocalStorageKey,
     defaultQuery: getDefaultQuery,
     nonPersistedFilters,
   });
@@ -196,24 +192,42 @@ const AllAssets = ({
   };
 
   // -----------------------------------------------------------------------------------------
-
   const {
-    // columnsLocalStorageKey,
-    pageSize,
-    onChangeItemsPerPage,
-    setUrlQuery,
-    onSort,
     filters,
+    pageSize,
     sort,
+    query,
+    queryError,
+    urlQuery,
+    getRowsFromPages,
+    onChangeItemsPerPage,
+    onResetFilters,
+    onSort,
+    setUrlQuery,
   } = assetInventoryDataTable;
 
+  const {
+    data: rowsData,
+    // error: fetchError,
+    isFetching,
+    fetchNextPage: loadMore,
+    isLoading,
+  } = useFetchData({
+    query,
+    sort: [['@timestamp', 'desc']],
+    enabled: !queryError,
+    pageSize,
+  });
+
+  const rows = getRowsFromPages(rowsData?.pages);
+
   const [columns, setColumns] = useLocalStorage(
-    columnsLocalStorageKey,
+    LOCAL_STORAGE_DATA_TABLE_DEFAULT_COLUMN_IDS,
     defaultColumns.map((c) => c.id)
   );
 
   const [persistedSettings, setPersistedSettings] = useLocalStorage<UnifiedDataTableSettings>(
-    `${columnsLocalStorageKey}:settings`,
+    LOCAL_STORAGE_DATA_TABLE_DEFAULT_COLUMN_SETTINGS,
     {
       columns: defaultColumns.reduce((columnSettings, column) => {
         const columnDefaultSettings = column.width ? { width: column.width } : {};
@@ -389,7 +403,7 @@ const AllAssets = ({
   };
 
   const loadingState =
-    isLoading || dataViewIsLoading || dataViewIsRefetching || !dataView
+    isLoading || isFetching || dataViewIsLoading || dataViewIsRefetching || !dataView
       ? DataLoadingState.loading
       : DataLoadingState.loaded;
 
@@ -397,7 +411,7 @@ const AllAssets = ({
     <I18nProvider>
       {!dataView ? null : (
         <AssetInventorySearchBar
-          query={getDefaultQuery({ query: { query: '', language: '' }, filters: [] })}
+          query={urlQuery}
           setQuery={setUrlQuery}
           loading={loadingState === DataLoadingState.loading}
         />
@@ -438,7 +452,9 @@ const AllAssets = ({
             }}
           >
             <EuiProgress size="xs" color="accent" style={loadingStyle} />
-            {!dataView ? null : (
+            {!dataView ? null : loadingState === DataLoadingState.loaded && !rows.length ? (
+              <EmptyState onResetFilters={onResetFilters} />
+            ) : (
               <UnifiedDataTable
                 key={computeDataTableRendering.mode}
                 className={styles.gridStyle}

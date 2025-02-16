@@ -12,7 +12,7 @@ import { RISK_SEVERITY_COLOUR } from '../../entity_analytics/common/utils';
 import { getRiskLevel } from '../../../common/entity_analytics/risk_engine/risk_levels';
 
 export interface RiskBadgeProps {
-  risk: number;
+  risk?: number;
   'data-test-subj'?: string;
 }
 
@@ -39,10 +39,12 @@ const tooltips = {
 };
 
 export const RiskBadge = ({ risk, ...props }: RiskBadgeProps) => {
-  const riskLevel = getRiskLevel(risk);
+  const riskLevel = risk ? getRiskLevel(risk) : RiskSeverity.Unknown;
   const color = RISK_SEVERITY_COLOUR[riskLevel];
+  const tooltipContent = tooltips[riskLevel];
+
   return (
-    <EuiToolTip content={tooltips[riskLevel]}>
+    <EuiToolTip content={tooltipContent}>
       <EuiBadge {...props} color={color}>
         {risk}
       </EuiBadge>

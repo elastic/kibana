@@ -14,8 +14,6 @@ import { getDefaultQuery } from './utils';
 import { useBaseEsQuery } from './use_base_es_query';
 import { usePersistedQuery } from './use_persisted_query';
 
-const LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY = 'assetInventory:dataTable:columns';
-
 export interface AssetsBaseURLQuery {
   query: Query;
   filters: Filter[];
@@ -49,7 +47,6 @@ export interface AssetInventoryDataTableResult {
   onChangePage: (newPageIndex: number) => void;
   onSort: (sort: string[][]) => void;
   onResetFilters: () => void;
-  columnsLocalStorageKey: string;
   getRowsFromPages: (data: Array<{ page: DataTableRecord[] }> | undefined) => DataTableRecord[];
 }
 
@@ -59,12 +56,10 @@ export interface AssetInventoryDataTableResult {
 export const useAssetInventoryDataTable = ({
   defaultQuery = getDefaultQuery,
   paginationLocalStorageKey,
-  columnsLocalStorageKey,
   nonPersistedFilters,
 }: {
   defaultQuery?: (params: AssetsBaseURLQuery) => URLQuery;
   paginationLocalStorageKey: string;
-  columnsLocalStorageKey?: string;
   nonPersistedFilters?: Filter[];
 }): AssetInventoryDataTableResult => {
   const getPersistedDefaultQuery = usePersistedQuery<URLQuery>(defaultQuery);
@@ -172,7 +167,6 @@ export const useAssetInventoryDataTable = ({
     onChangePage,
     onSort,
     onResetFilters,
-    columnsLocalStorageKey: columnsLocalStorageKey || LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY,
     getRowsFromPages,
   };
 };
