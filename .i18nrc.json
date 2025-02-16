@@ -163,6 +163,7 @@
     "unifiedFieldList": "src/platform/packages/shared/kbn-unified-field-list",
     "unifiedHistogram": "src/platform/plugins/shared/unified_histogram",
     "unifiedDataTable": "src/platform/packages/shared/kbn-unified-data-table",
+    "unifiedTabs": "src/platform/packages/shared/kbn-unified-tabs",
     "dataGridInTableSearch": "src/platform/packages/shared/kbn-data-grid-in-table-search",
     "unsavedChangesBadge": "src/platform/packages/private/kbn-unsaved-changes-badge",
     "unsavedChangesPrompt": "src/platform/packages/shared/kbn-unsaved-changes-prompt",

@@ -1,0 +1,24 @@
+{
+  "type": "plugin",
+  "id": "@kbn/unified-tabs-examples-plugin",
+  "owner": "@elastic/kibana-data-discovery",
+  "description": "Examples of using unified tabs.",
+  "plugin": {
+    "id": "unifiedTabsExamples",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": [
+      "navigation",
+      "developerExamples",
+      "inspector",
+      "kibanaUtils",
+      "unifiedSearch",
+      "data",
+      "dataViews",
+      "dataViewFieldEditor",
+      "charts",
+      "fieldFormats",
+      "uiActions"
+    ]
+  }
+}
