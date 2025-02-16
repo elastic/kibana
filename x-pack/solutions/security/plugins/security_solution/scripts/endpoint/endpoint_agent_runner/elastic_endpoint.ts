@@ -52,6 +52,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
       version,
       useClosestVersionMatch: false,
       disk: '8G',
+      memory: '4G',
     });
 
     log.info(hostVm.info());
