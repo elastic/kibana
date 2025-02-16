@@ -36,6 +36,7 @@ export const EntityIconByType: Record<EntityType, IconType> = {
   [EntityType.host]: 'storage',
   [EntityType.service]: 'node',
   [EntityType.universal]: 'globe', // random value since we don't support universal entity type
+  [EntityType.generic]: 'globe'
 };
 
 export const sourceFieldToText = (source: string) => {
