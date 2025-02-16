@@ -10,6 +10,7 @@ import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-co
 import type { CloudSecurityPosturePageId } from '@kbn/cloud-security-posture-plugin/public';
 import { type CspSecuritySolutionContext } from '@kbn/cloud-security-posture-plugin/public';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout/src/hooks/use_expandable_flyout_api';
 import type { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
 import { useKibana } from '../common/lib/kibana';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
@@ -25,6 +26,7 @@ const CloudPostureSpyRoute = ({ pageName, ...rest }: { pageName?: CloudSecurityP
 const cspSecuritySolutionContext: CspSecuritySolutionContext = {
   getFiltersGlobalComponent: () => FiltersGlobal,
   getSpyRouteComponent: () => CloudPostureSpyRoute,
+  useExpandableFlyoutApi,
 };
 
 const CloudSecurityPosture = () => {
