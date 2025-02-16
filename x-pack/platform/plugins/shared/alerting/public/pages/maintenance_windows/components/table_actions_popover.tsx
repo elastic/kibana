@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import * as i18n from '../translations';
 import { MaintenanceWindowStatus } from '../../../../common';
+import { useKibana } from '../../../utils/kibana_react';
 
 export interface TableActionsPopoverProps {
   id: string;
@@ -28,13 +29,17 @@ export interface TableActionsPopoverProps {
   onCancelAndArchive: (id: string) => void;
 }
 type ModalType = 'cancel' | 'cancelAndArchive' | 'archive' | 'unarchive';
-type ActionType = ModalType | 'edit';
+type ActionType = ModalType | 'edit' | 'copyId';
 
 export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.memo(
   ({ id, status, isLoading, onEdit, onCancel, onArchive, onCancelAndArchive }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [modalType, setModalType] = useState<ModalType>();
+
+    const {
+      notifications: { toasts },
+    } = useKibana().services;
 
     const onButtonClick = useCallback(() => {
       setIsPopoverOpen((open) => !open);
@@ -133,6 +138,21 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
             {i18n.TABLE_ACTION_EDIT}
           </EuiContextMenuItem>
         ),
+        copyId: (
+          <EuiContextMenuItem
+            data-test-subj="table-actions-copy-id"
+            key="copy-id"
+            icon="copyClipboard"
+            onClick={() => {
+              closePopover();
+              navigator.clipboard.writeText(id).then(() => {
+                toasts.addSuccess(i18n.COPY_ID_ACTION_SUCCESS);
+              });
+            }}
+          >
+            {i18n.COPY_ID}
+          </EuiContextMenuItem>
+        ),
         cancel: (
           <EuiContextMenuItem
             data-test-subj="table-actions-cancel"
@@ -187,13 +207,13 @@ export const TableActionsPopover: React.FC<TableActionsPopoverProps> = React.mem
         ),
       };
       const statusMenuItemsMap: Record<MaintenanceWindowStatus, ActionType[]> = {
-        running: ['edit', 'cancel', 'cancelAndArchive'],
-        upcoming: ['edit', 'archive'],
-        finished: ['edit', 'archive'],
-        archived: ['unarchive'],
+        running: ['edit', 'copyId', 'cancel', 'cancelAndArchive'],
+        upcoming: ['edit', 'copyId', 'archive'],
+        finished: ['edit', 'copyId', 'archive'],
+        archived: ['copyId', 'unarchive'],
       };
       return statusMenuItemsMap[status].map((type) => menuItems[type]);
-    }, [id, status, onEdit, closePopover, showModal]);
+    }, [status, closePopover, onEdit, id, toasts, showModal]);
 
     const button = useMemo(
       () => (
