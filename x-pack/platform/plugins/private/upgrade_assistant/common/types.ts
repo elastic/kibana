@@ -51,8 +51,10 @@ export interface ReindexStatusResponse {
     reindexName: string;
     // Array of aliases pointing to the index being reindexed
     aliases: string[];
+    isReadonly: boolean;
+    isFrozen: boolean;
   };
-  warnings?: ReindexWarning[];
+  warnings?: IndexWarning[];
   reindexOp?: ReindexOperation;
   hasRequiredPrivileges?: boolean;
 }
@@ -133,10 +135,11 @@ export interface ReindexOperation {
 export type ReindexSavedObject = SavedObject<ReindexOperation>;
 
 // 8.0 -> 9.0 warnings
-export type ReindexWarningTypes = 'indexSetting' | 'replaceIndexWithAlias';
+export type IndexWarningType = 'indexSetting' | 'replaceIndexWithAlias' | 'makeIndexReadonly';
 
-export interface ReindexWarning {
-  warningType: ReindexWarningTypes;
+export interface IndexWarning {
+  warningType: IndexWarningType;
+  flow: 'reindex' | 'readonly' | 'all';
   /**
    * Optional metadata for deprecations
    *
@@ -144,7 +147,7 @@ export interface ReindexWarning {
    * For "indexSetting" we want to surface the deprecated settings.
    */
   meta?: {
-    [key: string]: string | string[];
+    [key: string]: string | string[] | boolean;
   };
 }
 
@@ -199,6 +202,10 @@ export interface ReindexAction {
   blockerForReindexing?: 'index-closed'; // 'index-closed' can be handled automatically, but requires more resources, user should be warned
 }
 
+export interface UnfreezeAction {
+  type: 'unfreeze';
+}
+
 export interface MlAction {
   type: 'mlSnapshot';
   snapshotId: string;
@@ -233,11 +240,11 @@ export interface EnrichedDeprecationInfo
     | 'ilm_policies'
     | 'templates';
   isCritical: boolean;
-  frozen?: boolean;
   status?: estypes.HealthReportIndicatorHealthStatus;
   index?: string;
   correctiveAction?:
     | ReindexAction
+    | UnfreezeAction
     | MlAction
     | IndexSettingAction
     | ClusterSettingAction

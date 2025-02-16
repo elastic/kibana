@@ -8,6 +8,7 @@
 export { MlSnapshotsTableRow } from './ml_snapshots';
 export { IndexSettingsTableRow } from './index_settings';
 export { DefaultTableRow } from './default';
-export { ReindexTableRow } from './reindex';
+export { IndexTableRow } from './indices';
+export { DataStreamTableRow } from './data_streams';
 export { ClusterSettingsTableRow } from './cluster_settings';
 export { HealthIndicatorTableRow } from './health_indicator';
