@@ -11,9 +11,11 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createTimelineMiddlewares } from '../../timelines/store/middlewares/create_timeline_middlewares';
 import { dataTableLocalStorageMiddleware } from './data_table/middleware_local_storage';
 import { userAssetTableLocalStorageMiddleware } from '../../explore/users/store/middleware_storage';
+import { listenerMiddleware } from '../../sourcerer/store/middleware';
 
 export function createMiddlewares(kibana: CoreStart, storage: Storage) {
   return [
+    listenerMiddleware.middleware,
     dataTableLocalStorageMiddleware(storage),
     userAssetTableLocalStorageMiddleware(storage),
     ...createTimelineMiddlewares(kibana),
