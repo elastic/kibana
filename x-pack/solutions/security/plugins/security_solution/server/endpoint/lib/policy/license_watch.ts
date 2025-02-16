@@ -27,6 +27,8 @@ import {
 import type { LicenseService } from '../../../../common/license/license';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
+import { stringify } from '../../utils/stringify';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 export class PolicyWatcher {
   private logger: Logger;
@@ -34,16 +36,19 @@ export class PolicyWatcher {
   private policyService: PackagePolicyClient;
   private subscription: Subscription | undefined;
   private soStart: SavedObjectsServiceStart;
+  private endpointAppContextService?: EndpointAppContextService;
   constructor(
     policyService: PackagePolicyClient,
     soStart: SavedObjectsServiceStart,
     esStart: ElasticsearchServiceStart,
-    logger: Logger
+    logger: Logger,
+    endpointAppContextService?: EndpointAppContextService
   ) {
     this.policyService = policyService;
     this.esClient = esStart.client.asInternalUser;
-    this.logger = logger;
+    this.logger = endpointAppContextService?.createLogger(this.constructor.name) || logger;
     this.soStart = soStart;
+    this.endpointAppContextService = endpointAppContextService;
   }
 
   /**
@@ -83,6 +88,12 @@ export class PolicyWatcher {
       page: number;
       perPage: number;
     };
+
+    this.logger.debug(
+      `This is how a fake request looks like for license watcher when comes from endpoint context: ${stringify(
+        this.endpointAppContextService?.savedObjects.createFakeHttpRequest()
+      )}`
+    );
 
     do {
       try {

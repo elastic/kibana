@@ -32,7 +32,7 @@ export const policyFactory = ({
       serverless,
     },
     global_manifest_version: 'latest',
-    global_telemetry_enabled: isGlobalTelemetryEnabled,
+    // global_telemetry_enabled: isGlobalTelemetryEnabled,
     windows: {
       events: {
         credential_access: true,

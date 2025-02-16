@@ -18,5 +18,5 @@ export function getTelemetryAllowChangingOptInStatus({
   telemetrySavedObject,
   configTelemetryAllowChangingOptInStatus,
 }: GetTelemetryAllowChangingOptInStatus) {
-  return telemetrySavedObject?.allowChangingOptInStatus ?? configTelemetryAllowChangingOptInStatus;
+  return true;
 }
