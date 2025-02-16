@@ -14,6 +14,7 @@ import {
 import {
   WiredStreamDefinition,
   UnwiredStreamDefinition,
+  getAdvancedParameters,
   isDslLifecycle,
   isIlmLifecycle,
   isRoot,
@@ -33,6 +34,13 @@ export function generateWiredLayer(
     const property: MappingProperty = {
       type: props.type,
     };
+
+    const advancedParameters = getAdvancedParameters(field, props);
+
+    if (Object.keys(advancedParameters).length > 0) {
+      Object.assign(property, advancedParameters);
+    }
+
     if (field === '@timestamp') {
       // @timestamp can't ignore malformed dates as it's used for sorting in logsdb
       (property as MappingDateProperty).ignore_malformed = false;
@@ -40,6 +48,7 @@ export function generateWiredLayer(
     if (props.type === 'date' && props.format) {
       (property as MappingDateProperty).format = props.format;
     }
+
     properties[field] = property;
   });
 

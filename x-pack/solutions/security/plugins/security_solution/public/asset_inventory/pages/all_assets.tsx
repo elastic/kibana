@@ -49,6 +49,7 @@ import { AssetCriticalityBadge } from '../../entity_analytics/components/asset_c
 import { AdditionalControls } from '../components/additional_controls';
 import { AssetInventorySearchBar } from '../components/search_bar';
 import { RiskBadge } from '../components/risk_badge';
+import { Filters } from '../components/filters/filters';
 
 import { useDataViewContext } from '../hooks/data_view_context';
 import { useStyles } from '../hooks/use_styles';
@@ -427,6 +428,7 @@ const AllAssets = ({
             />
           </h1>
         </EuiTitle>
+        <Filters onFiltersChange={() => {}} />
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <div
             data-test-subj={rest['data-test-subj']}

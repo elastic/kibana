@@ -25,20 +25,23 @@ import {
 const onLayoutChange = jest.fn();
 
 const renderGridLayout = (propsOverrides: Partial<GridLayoutProps> = {}) => {
-  const defaultProps: GridLayoutProps = {
+  const props = {
     accessMode: 'EDIT',
     layout: getSampleLayout(),
     gridSettings,
     renderPanelContents: mockRenderPanelContents,
     onLayoutChange,
-  };
+    ...propsOverrides,
+  } as GridLayoutProps;
 
-  const { rerender, ...rtlRest } = render(<GridLayout {...defaultProps} {...propsOverrides} />);
+  const { rerender, ...rtlRest } = render(<GridLayout {...props} />);
 
   return {
     ...rtlRest,
-    rerender: (overrides: Partial<GridLayoutProps>) =>
-      rerender(<GridLayout {...defaultProps} {...overrides} />),
+    rerender: (overrides: Partial<GridLayoutProps>) => {
+      const newProps = { ...props, ...overrides } as GridLayoutProps;
+      return rerender(<GridLayout {...newProps} />);
+    },
   };
 };
 
