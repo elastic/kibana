@@ -27,6 +27,7 @@ import { DashboardContext } from '../../dashboard_api/use_dashboard_api';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { loadDashboardApi } from '../../dashboard_api/load_dashboard_api';
 import { DashboardInternalContext } from '../../dashboard_api/use_dashboard_internal_api';
+import { first, skipWhile, take } from 'rxjs';
 
 export interface DashboardRendererProps {
   onApiAvailable?: (api: DashboardApi) => void;
@@ -73,6 +74,18 @@ export function DashboardRenderer({
           return;
         }
 
+        const dashboardCreationEndTime = performance.now();
+        console.log(
+          'Dashboard API creation time:',
+          dashboardCreationEndTime - results.creationStartTime
+        );
+        results.controlGroupApi$.pipe(skipWhile((test) => !Boolean(test))).subscribe(() => {
+          const controlsCreationEndTime = performance.now();
+          console.log(
+            'Controls API creation time',
+            controlsCreationEndTime - dashboardCreationEndTime
+          );
+        });
         cleanupDashboardApi = results.cleanup;
         setDashboardApi(results.api);
         setDashboardInternalApi(results.internalApi);
