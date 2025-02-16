@@ -47,10 +47,12 @@ export interface ChatTimelineItem
 
 export interface ChatTimelineProps {
   messages: Message[];
+  isSystem?: boolean;
   knowledgeBase: UseKnowledgeBaseResult;
   chatService: ObservabilityAIAssistantChatService;
   hasConnector: boolean;
   chatState: ChatState;
+  isConversationOwnedByCurrentUser: boolean;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   onEdit: (message: Message, messageAfterEdit: Message) => void;
   onFeedback: (feedback: Feedback) => void;
@@ -68,9 +70,11 @@ export interface ChatTimelineProps {
 
 export function ChatTimeline({
   messages,
+  isSystem,
   chatService,
   hasConnector,
   currentUser,
+  isConversationOwnedByCurrentUser,
   onEdit,
   onFeedback,
   onRegenerate,
@@ -84,7 +88,9 @@ export function ChatTimeline({
       chatService,
       hasConnector,
       messages,
+      isSystem,
       currentUser,
+      isConversationOwnedByCurrentUser,
       chatState,
       onActionClick,
     });
@@ -109,7 +115,16 @@ export function ChatTimeline({
     }
 
     return consolidatedChatItems;
-  }, [chatService, hasConnector, messages, currentUser, chatState, onActionClick]);
+  }, [
+    chatService,
+    hasConnector,
+    isSystem,
+    messages,
+    currentUser,
+    chatState,
+    isConversationOwnedByCurrentUser,
+    onActionClick,
+  ]);
 
   return (
     <EuiCommentList

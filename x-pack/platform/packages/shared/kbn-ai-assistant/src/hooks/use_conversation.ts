@@ -12,9 +12,13 @@ import type {
   ConversationCreateRequest,
   Message,
 } from '@kbn/observability-ai-assistant-plugin/common';
-import type { ObservabilityAIAssistantChatService } from '@kbn/observability-ai-assistant-plugin/public';
+import type {
+  ConversationAccess,
+  ObservabilityAIAssistantChatService,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import type { AbortableAsyncState } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UseChatResult } from '@kbn/observability-ai-assistant-plugin/public';
+import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
 import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 import { useKibana } from './use_kibana';
@@ -33,11 +37,11 @@ function createNewConversation({
     },
     labels: {},
     numeric_labels: {},
-    public: false,
   };
 }
 
 export interface UseConversationProps {
+  currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username' | 'profile_uid'>;
   initialConversationId?: string;
   initialMessages?: Message[];
   initialTitle?: string;
@@ -48,12 +52,17 @@ export interface UseConversationProps {
 
 export type UseConversationResult = {
   conversation: AbortableAsyncState<ConversationCreateRequest | Conversation | undefined>;
+  isSystem?: boolean;
+  access?: ConversationAccess;
+  isConversationOwnedByCurrentUser: boolean;
   saveTitle: (newTitle: string) => void;
+  forkConversation: () => Promise<Conversation>;
 } & Omit<UseChatResult, 'setMessages'>;
 
 const DEFAULT_INITIAL_MESSAGES: Message[] = [];
 
 export function useConversation({
+  currentUser,
   initialConversationId: initialConversationIdFromProps,
   initialMessages: initialMessagesFromProps = DEFAULT_INITIAL_MESSAGES,
   initialTitle: initialTitleFromProps,
@@ -104,6 +113,32 @@ export function useConversation({
         notifications!.toasts.addError(err, {
           title: i18n.translate('xpack.aiAssistant.errorUpdatingConversation', {
             defaultMessage: 'Could not update conversation',
+          }),
+        });
+        throw err;
+      });
+  };
+
+  const fork = () => {
+    if (!displayedConversationId || !conversation.value) {
+      throw new Error('Cannot save fork if conversation is not stored');
+    }
+    return service
+      .callApi(`POST /internal/observability_ai_assistant/conversation/{conversationId}/fork`, {
+        signal: null,
+        params: {
+          path: {
+            conversationId: displayedConversationId,
+          },
+          body: {
+            isSystem: false,
+          },
+        },
+      })
+      .catch((err) => {
+        notifications!.toasts.addError(err, {
+          title: i18n.translate('xpack.aiAssistant.errorForkingConversation', {
+            defaultMessage: 'Could not fork conversation',
           }),
         });
         throw err;
@@ -161,10 +196,29 @@ export function useConversation({
       }
     );
 
+  const isConversationOwnedByUser = (conversationUser: Conversation['user']): boolean => {
+    if (!conversationUser || !currentUser) {
+      return false;
+    }
+
+    return conversationUser.id && currentUser.profile_uid
+      ? conversationUser.id === currentUser.profile_uid
+      : conversationUser.name === currentUser.username;
+  };
   return {
     conversation,
+    isSystem: conversation.value?.system,
+    access: conversation.value?.access,
+    isConversationOwnedByCurrentUser: isConversationOwnedByUser(
+      (conversation.value as Conversation)?.user
+    ),
     state,
-    next,
+    next: (_messages: Message[]) =>
+      next(_messages, (error) => {
+        if (error) {
+          conversation.refresh();
+        }
+      }),
     stop,
     messages,
     saveTitle: (title: string) => {
@@ -182,5 +236,6 @@ export function useConversation({
           onConversationUpdate?.(nextConversation);
         });
     },
+    forkConversation: fork,
   };
 }

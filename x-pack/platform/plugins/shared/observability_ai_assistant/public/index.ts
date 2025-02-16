@@ -66,6 +66,7 @@ export {
   KnowledgeBaseEntryRole,
   concatenateChatCompletionChunks,
   StreamingChatResponseEventType,
+  ConversationAccess,
 } from '../common';
 export type {
   CompatibleJSONSchema,

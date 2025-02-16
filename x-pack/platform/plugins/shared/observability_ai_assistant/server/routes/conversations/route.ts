@@ -85,6 +85,34 @@ const createConversationRoute = createObservabilityAIAssistantServerRoute({
   },
 });
 
+const forkConversationRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/conversation/{conversationId}/fork',
+  params: t.type({
+    path: t.type({
+      conversationId: t.string,
+    }),
+    body: t.type({
+      isSystem: t.boolean,
+    }),
+  }),
+  security: {
+    authz: {
+      requiredPrivileges: ['ai_assistant'],
+    },
+  },
+  handler: async (resources): Promise<Conversation> => {
+    const { service, request, params } = resources;
+
+    const client = await service.getClient({ request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    return client.forkConversation(params.path.conversationId, params.body.isSystem);
+  },
+});
+
 const updateConversationRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'PUT /internal/observability_ai_assistant/conversation/{conversationId}',
   params: t.type({
@@ -178,4 +206,5 @@ export const conversationRoutes = {
   ...updateConversationRoute,
   ...updateConversationTitle,
   ...deleteConversationRoute,
+  ...forkConversationRoute,
 };

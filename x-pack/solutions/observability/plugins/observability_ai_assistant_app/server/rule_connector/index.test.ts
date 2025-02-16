@@ -17,7 +17,7 @@ import {
   ObsAIAssistantConnectorTypeExecutorOptions,
 } from '.';
 import { Observable } from 'rxjs';
-import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
+import { MessageRole, ConversationAccess } from '@kbn/observability-ai-assistant-plugin/public';
 import { AlertDetailsContextualInsightsService } from '@kbn/observability-plugin/server/services';
 
 const buildConversation = (contentMessage: string) => [
@@ -233,7 +233,7 @@ describe('observabilityAIAssistant rule_connector', () => {
       expect(completeMock).toHaveBeenCalledWith(
         expect.objectContaining({
           persist: true,
-          isPublic: true,
+          isSystem: true,
           connectorId: 'azure-open-ai',
           kibanaPublicUrl: 'http://kibana.com',
           messages: buildConversation(message),
@@ -265,7 +265,7 @@ describe('observabilityAIAssistant rule_connector', () => {
       expect(completeMock).toHaveBeenCalledWith(
         expect.objectContaining({
           persist: true,
-          isPublic: true,
+          access: ConversationAccess.Shared,
           connectorId: 'azure-open-ai',
           kibanaPublicUrl: 'http://kibana.com',
           messages: buildConversation(message),
@@ -301,7 +301,7 @@ describe('observabilityAIAssistant rule_connector', () => {
       expect(completeMock).toHaveBeenCalledWith(
         expect.objectContaining({
           persist: true,
-          isPublic: true,
+          access: ConversationAccess.Shared,
           connectorId: 'azure-open-ai',
           kibanaPublicUrl: 'http://kibana.com',
           messages: buildConversation(message),
@@ -310,7 +310,7 @@ describe('observabilityAIAssistant rule_connector', () => {
       expect(completeMock).toHaveBeenCalledWith(
         expect.objectContaining({
           persist: true,
-          isPublic: true,
+          access: ConversationAccess.Shared,
           connectorId: 'azure-open-ai',
           kibanaPublicUrl: 'http://kibana.com',
           messages: buildConversation(message2),

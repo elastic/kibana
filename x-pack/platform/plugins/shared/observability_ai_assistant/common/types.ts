@@ -10,6 +10,11 @@ import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { ObservabilityAIAssistantChatService } from '../public';
 import type { FunctionResponse } from './functions/types';
 
+export enum ConversationAccess {
+  Private = 'private',
+  Shared = 'shared',
+}
+
 export enum MessageRole {
   System = 'system',
   Assistant = 'assistant',
@@ -67,7 +72,8 @@ export interface Conversation {
   labels: Record<string, string>;
   numeric_labels: Record<string, number>;
   namespace: string;
-  public: boolean;
+  access?: ConversationAccess;
+  system?: boolean;
 }
 
 export type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {

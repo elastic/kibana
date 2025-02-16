@@ -57,6 +57,7 @@ import {
   KnowledgeBaseType,
   KnowledgeBaseEntryRole,
   MessageRole,
+  ConversationAccess,
 } from '../../../common/types';
 import { withoutTokenCountEvents } from '../../../common/utils/without_token_count_events';
 import { CONTEXT_FUNCTION_NAME } from '../../functions/context';
@@ -140,6 +141,17 @@ export class ObservabilityAIAssistantClient {
     };
   };
 
+  private isConversationOwnedByUser = (conversation: Conversation): boolean => {
+    const user = this.dependencies.user;
+    if (!conversation.user || !user) {
+      return false;
+    }
+
+    return conversation.user.id
+      ? conversation.user.id === user.id
+      : conversation.user.name === user.name;
+  };
+
   get = async (conversationId: string): Promise<Conversation> => {
     const conversation = await this.getConversationWithMetaFields(conversationId);
 
@@ -172,7 +184,8 @@ export class ObservabilityAIAssistantClient {
     signal,
     persist,
     kibanaPublicUrl,
-    isPublic,
+    isSystem = false,
+    access = ConversationAccess.Private,
     title: predefinedTitle,
     conversationId: predefinedConversationId,
     disableFunctions = false,
@@ -184,7 +197,8 @@ export class ObservabilityAIAssistantClient {
     persist: boolean;
     conversationId?: string;
     title?: string;
-    isPublic?: boolean;
+    access?: ConversationAccess;
+    isSystem?: boolean;
     kibanaPublicUrl?: string;
     instructions?: AdHocInstruction[];
     simulateFunctionCalling?: boolean;
@@ -314,117 +328,137 @@ export class ObservabilityAIAssistantClient {
           shareReplay()
         );
 
-        const output$ = mergeOperator(
-          // get all the events from continuing the conversation
-          nextEvents$,
-          // wait until all dependencies have completed
-          forkJoin([
-            messagesWithUpdatedSystemMessage$,
-            // get just the new messages
-            nextEvents$.pipe(withoutTokenCountEvents(), extractMessages()),
-            // count all the token count events emitted during completion
-            mergeOperator(
+        const conversationWithMetaFields$ = from(
+          this.getConversationWithMetaFields(conversationId)
+        ).pipe(
+          switchMap((conversation) => {
+            if (isConversationUpdate && !conversation) {
+              return throwError(() => createConversationNotFoundError());
+            }
+
+            if (conversation?._source && !this.isConversationOwnedByUser(conversation?._source!)) {
+              throw new Error('Cannot update conversation that is not owned by the user');
+            }
+
+            if (conversation?._source?.system) {
+              return throwError(() => new Error('Cannot update system conversation'));
+            }
+
+            return of(conversation);
+          })
+        );
+
+        const output$ = conversationWithMetaFields$.pipe(
+          switchMap((conversation) => {
+            return mergeOperator(
+              // get all the events from continuing the conversation
               nextEvents$,
-              title$.pipe(filter((value): value is TokenCountEvent => typeof value !== 'string'))
-            ).pipe(extractTokenCount()),
-            // get just the title, and drop the token count events
-            title$.pipe(filter((value): value is string => typeof value === 'string')),
-          ]).pipe(
-            switchMap(
-              ([messagesWithUpdatedSystemMessage, addedMessages, tokenCountResult, title]) => {
-                const initialMessagesWithAddedMessages =
-                  messagesWithUpdatedSystemMessage.concat(addedMessages);
+              // wait until all dependencies have completed
+              forkJoin([
+                messagesWithUpdatedSystemMessage$,
+                // get just the new messages
+                nextEvents$.pipe(withoutTokenCountEvents(), extractMessages()),
+                // count all the token count events emitted during completion
+                mergeOperator(
+                  nextEvents$,
+                  title$.pipe(
+                    filter((value): value is TokenCountEvent => typeof value !== 'string')
+                  )
+                ).pipe(extractTokenCount()),
+                // get just the title, and drop the token count events
+                title$.pipe(filter((value): value is string => typeof value === 'string')),
+              ]).pipe(
+                switchMap(
+                  ([messagesWithUpdatedSystemMessage, addedMessages, tokenCountResult, title]) => {
+                    const initialMessagesWithAddedMessages =
+                      messagesWithUpdatedSystemMessage.concat(addedMessages);
 
-                const lastMessage = last(initialMessagesWithAddedMessages);
+                    const lastMessage = last(initialMessagesWithAddedMessages);
 
-                // if a function request is at the very end, close the stream to consumer
-                // without persisting or updating the conversation. we need to wait
-                // on the function response to have a valid conversation
-                const isFunctionRequest = !!lastMessage?.message.function_call?.name;
+                    // if a function request is at the very end, close the stream to consumer
+                    // without persisting or updating the conversation. we need to wait
+                    // on the function response to have a valid conversation
+                    const isFunctionRequest = !!lastMessage?.message.function_call?.name;
 
-                if (!persist || isFunctionRequest) {
-                  return of();
-                }
+                    if (!persist || isFunctionRequest) {
+                      return of();
+                    }
 
-                if (isConversationUpdate) {
-                  return from(this.getConversationWithMetaFields(conversationId))
-                    .pipe(
-                      switchMap((conversation) => {
-                        if (!conversation) {
-                          return throwError(() => createConversationNotFoundError());
-                        }
+                    if (isConversationUpdate && conversation) {
+                      const persistedTokenCount = conversation._source?.conversation
+                        .token_count ?? {
+                        prompt: 0,
+                        completion: 0,
+                        total: 0,
+                      };
 
-                        const persistedTokenCount = conversation._source?.conversation
-                          .token_count ?? {
-                          prompt: 0,
-                          completion: 0,
-                          total: 0,
-                        };
+                      return from(
+                        this.update(
+                          conversationId,
 
-                        return from(
-                          this.update(
-                            conversationId,
+                          merge(
+                            {},
 
-                            merge(
-                              {},
+                            // base conversation without messages
+                            omit(conversation._source, 'messages'),
 
-                              // base conversation without messages
-                              omit(conversation._source, 'messages'),
+                            // update messages
+                            { messages: initialMessagesWithAddedMessages },
 
-                              // update messages
-                              { messages: initialMessagesWithAddedMessages },
+                            // update access
+                            { access },
 
-                              // update token count
-                              {
-                                conversation: {
-                                  title: title || conversation._source?.conversation.title,
-                                  token_count: {
-                                    prompt: persistedTokenCount.prompt + tokenCountResult.prompt,
-                                    completion:
-                                      persistedTokenCount.completion + tokenCountResult.completion,
-                                    total: persistedTokenCount.total + tokenCountResult.total,
-                                  },
+                            // update token count
+                            {
+                              conversation: {
+                                title: title || conversation._source?.conversation.title,
+                                token_count: {
+                                  prompt: persistedTokenCount.prompt + tokenCountResult.prompt,
+                                  completion:
+                                    persistedTokenCount.completion + tokenCountResult.completion,
+                                  total: persistedTokenCount.total + tokenCountResult.total,
                                 },
-                              }
-                            )
+                              },
+                            }
                           )
-                        );
+                        )
+                      ).pipe(
+                        map((conversationUpdated): ConversationUpdateEvent => {
+                          return {
+                            conversation: conversationUpdated.conversation,
+                            type: StreamingChatResponseEventType.ConversationUpdate,
+                          };
+                        })
+                      );
+                    }
+
+                    return from(
+                      this.create({
+                        '@timestamp': new Date().toISOString(),
+                        conversation: {
+                          title,
+                          id: conversationId,
+                          token_count: tokenCountResult,
+                        },
+                        access,
+                        system: !!isSystem,
+                        labels: {},
+                        numeric_labels: {},
+                        messages: initialMessagesWithAddedMessages,
                       })
-                    )
-                    .pipe(
-                      map((conversation): ConversationUpdateEvent => {
+                    ).pipe(
+                      map((conversationCreated): ConversationCreateEvent => {
                         return {
-                          conversation: conversation.conversation,
-                          type: StreamingChatResponseEventType.ConversationUpdate,
+                          conversation: conversationCreated.conversation,
+                          type: StreamingChatResponseEventType.ConversationCreate,
                         };
                       })
                     );
-                }
-
-                return from(
-                  this.create({
-                    '@timestamp': new Date().toISOString(),
-                    conversation: {
-                      title,
-                      id: conversationId,
-                      token_count: tokenCountResult,
-                    },
-                    public: !!isPublic,
-                    labels: {},
-                    numeric_labels: {},
-                    messages: initialMessagesWithAddedMessages,
-                  })
-                ).pipe(
-                  map((conversation): ConversationCreateEvent => {
-                    return {
-                      conversation: conversation.conversation,
-                      type: StreamingChatResponseEventType.ConversationCreate,
-                    };
-                  })
-                );
-              }
-            )
-          )
+                  }
+                )
+              )
+            );
+          })
         );
 
         return output$.pipe(
@@ -583,6 +617,10 @@ export class ObservabilityAIAssistantClient {
       throw notFound();
     }
 
+    if (!this.isConversationOwnedByUser(persistedConversation._source!)) {
+      throw new Error('Cannot update conversation that is not owned by the user');
+    }
+
     const updatedConversation: Conversation = merge(
       {},
       conversation,
@@ -648,6 +686,24 @@ export class ObservabilityAIAssistantClient {
     });
 
     return createdConversation;
+  };
+
+  forkConversation = async (conversationId: string, isSystem: boolean): Promise<Conversation> => {
+    const conversation = await this.getConversationWithMetaFields(conversationId);
+
+    if (!conversation) {
+      throw notFound();
+    }
+    const _source = conversation._source!;
+    const forkedConversation: Conversation = {
+      ..._source,
+      conversation: {
+        ..._source.conversation,
+        id: v4(),
+      },
+      system: isSystem,
+    };
+    return this.create(forkedConversation);
   };
 
   recall = async ({

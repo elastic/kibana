@@ -176,6 +176,7 @@ export const ConversationView: React.FC<ConversationViewProps> = ({
             showLinkToConversationsApp={false}
             onConversationUpdate={handleConversationUpdate}
             navigateToConversation={navigateToConversation}
+            handleRefreshConversations={handleRefreshConversations}
           />
 
           <div className={sidebarContainerClass}>
