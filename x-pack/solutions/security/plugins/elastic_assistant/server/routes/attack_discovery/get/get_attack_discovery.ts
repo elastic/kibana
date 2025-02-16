@@ -51,7 +51,7 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
         try {
           const dataClient = await assistantContext.getAttackDiscoveryDataClient();
 
-          const authenticatedUser = assistantContext.getCurrentUser();
+          const authenticatedUser = await assistantContext.getCurrentUser();
           const connectorId = decodeURIComponent(request.params.connectorId);
           if (authenticatedUser == null) {
             return resp.error({
@@ -78,12 +78,12 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
             body:
               attackDiscovery != null
                 ? {
-                    data: attackDiscovery,
-                    stats,
-                  }
+                  data: attackDiscovery,
+                  stats,
+                }
                 : {
-                    stats,
-                  },
+                  stats,
+                },
           });
         } catch (err) {
           logger.error(err);

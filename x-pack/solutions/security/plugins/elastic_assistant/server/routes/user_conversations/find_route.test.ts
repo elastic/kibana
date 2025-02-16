@@ -22,7 +22,7 @@ describe('Find user conversations route', () => {
     clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockResolvedValue(
       Promise.resolve(getFindConversationsResultWithSingleHit())
     );
-    context.elasticAssistant.getCurrentUser.mockReturnValue({
+    context.elasticAssistant.getCurrentUser.mockResolvedValueOnce({
       username: 'my_username',
       authentication_realm: {
         type: 'my_realm_type',

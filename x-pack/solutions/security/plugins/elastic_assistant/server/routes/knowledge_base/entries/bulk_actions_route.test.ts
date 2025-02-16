@@ -201,7 +201,7 @@ describe('Bulk actions knowledge base entry route', () => {
       );
     });
     test('returns 401 Unauthorized when request context getCurrentUser is not defined', async () => {
-      context.elasticAssistant.getCurrentUser.mockReturnValueOnce(null);
+      context.elasticAssistant.getCurrentUser.mockResolvedValueOnce(null);
       const response = await server.inject(
         getBulkActionKnowledgeBaseEntryRequest({
           create: [getCreateKnowledgeBaseEntrySchemaMock()],

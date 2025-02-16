@@ -30,7 +30,7 @@ describe('Post Knowledge Base Route', () => {
   beforeEach(() => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
-    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser);
+    context.elasticAssistant.getCurrentUser.mockResolvedValueOnce(mockUser);
     context.elasticAssistant.getAIAssistantKnowledgeBaseDataClient = jest.fn().mockResolvedValue({
       setupKnowledgeBase: jest.fn(),
       indexTemplateAndPattern: {
