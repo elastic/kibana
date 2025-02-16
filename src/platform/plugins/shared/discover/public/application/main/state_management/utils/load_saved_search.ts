@@ -12,7 +12,6 @@ import { cloneDeep, isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getEsqlDataView } from './get_esql_data_view';
 import { loadAndResolveDataView } from './resolve_data_view';
-import { DiscoverInternalStateContainer } from '../discover_internal_state_container';
 import { DiscoverDataStateContainer } from '../discover_data_state_container';
 import { cleanupUrlState } from './cleanup_url_state';
 import { getValidFilters } from '../../../../utils/get_valid_filters';
@@ -27,11 +26,12 @@ import {
 import { DiscoverGlobalStateContainer } from '../discover_global_state_container';
 import { DiscoverServices } from '../../../../build_services';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
+import { InternalStateStore, internalStateActions } from '../redux';
 
 interface LoadSavedSearchDeps {
   appStateContainer: DiscoverAppStateContainer;
   dataStateContainer: DiscoverDataStateContainer;
-  internalStateContainer: DiscoverInternalStateContainer;
+  internalState: InternalStateStore;
   savedSearchContainer: DiscoverSavedSearchContainer;
   globalStateContainer: DiscoverGlobalStateContainer;
   services: DiscoverServices;
@@ -49,13 +49,8 @@ export const loadSavedSearch = async (
 ): Promise<SavedSearch> => {
   addLog('[discoverState] loadSavedSearch');
   const { savedSearchId, initialAppState } = params ?? {};
-  const {
-    appStateContainer,
-    internalStateContainer,
-    savedSearchContainer,
-    globalStateContainer,
-    services,
-  } = deps;
+  const { appStateContainer, internalState, savedSearchContainer, globalStateContainer, services } =
+    deps;
 
   const appStateExists = !appStateContainer.isEmptyURL();
   const appState = appStateExists ? appStateContainer.getState() : initialAppState;
@@ -75,7 +70,7 @@ export const loadSavedSearch = async (
         dataViewId,
         query: appState?.query,
         services,
-        internalStateContainer,
+        internalState,
       })
     );
   }
@@ -110,7 +105,7 @@ export const loadSavedSearch = async (
         query: appState.query,
         savedSearch: nextSavedSearch,
         services,
-        internalStateContainer,
+        internalState,
       });
       const dataViewDifferentToAppState = stateDataView.id !== savedSearchDataViewId;
       if (
@@ -142,7 +137,7 @@ export const loadSavedSearch = async (
     nextSavedSearch = savedSearchContainer.updateWithFilterManagerFilters();
   }
 
-  internalStateContainer.transitions.resetOnSavedSearchChange();
+  internalState.dispatch(internalStateActions.resetOnSavedSearchChange());
 
   return nextSavedSearch;
 };
@@ -153,12 +148,12 @@ export const loadSavedSearch = async (
  * @param deps
  */
 function updateBySavedSearch(savedSearch: SavedSearch, deps: LoadSavedSearchDeps) {
-  const { dataStateContainer, internalStateContainer, services, setDataView } = deps;
+  const { dataStateContainer, internalState, services, setDataView } = deps;
   const savedSearchDataView = savedSearch.searchSource.getField('index')!;
 
   setDataView(savedSearchDataView);
   if (!savedSearchDataView.isPersisted()) {
-    internalStateContainer.transitions.appendAdHocDataViews(savedSearchDataView);
+    internalState.dispatch(internalStateActions.appendAdHocDataViews(savedSearchDataView));
   }
 
   // Finally notify dataStateContainer, data.query and filterManager about new derived state
@@ -196,13 +191,13 @@ const getStateDataView = async (
     query,
     savedSearch,
     services,
-    internalStateContainer,
+    internalState,
   }: {
     dataViewId?: string;
     query: DiscoverAppState['query'];
     savedSearch?: SavedSearch;
     services: DiscoverServices;
-    internalStateContainer: DiscoverInternalStateContainer;
+    internalState: InternalStateStore;
   }
 ) => {
   const { dataView, dataViewSpec } = params;
@@ -222,7 +217,7 @@ const getStateDataView = async (
     savedSearch,
     isEsqlMode: isEsqlQuery,
     services,
-    internalStateContainer,
+    internalState,
   });
 
   return result.dataView;

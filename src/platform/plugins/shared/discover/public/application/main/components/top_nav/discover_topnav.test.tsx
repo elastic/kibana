@@ -19,6 +19,7 @@ import type { SearchBarCustomization, TopNavCustomization } from '../../../../cu
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { RuntimeStateProvider, internalStateActions } from '../../state_management/redux';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
@@ -69,7 +70,7 @@ function getProps(
     mockDiscoverService.capabilities = capabilities as typeof mockDiscoverService.capabilities;
   }
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-  stateContainer.internalState.transitions.setDataView(dataViewMock);
+  stateContainer.internalState.dispatch(internalStateActions.setDataView(dataViewMock));
 
   return {
     stateContainer,
@@ -110,7 +111,9 @@ describe('Discover topnav component', () => {
     const props = getProps({ capabilities: { discover_v2: { save: true } } });
     const component = mountWithIntl(
       <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNav {...props} />
+        <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+          <DiscoverTopNav {...props} />
+        </RuntimeStateProvider>
       </DiscoverMainProvider>
     );
     const topNavMenu = component.find(TopNavMenu);
@@ -122,7 +125,9 @@ describe('Discover topnav component', () => {
     const props = getProps({ capabilities: { discover_v2: { save: false } } });
     const component = mountWithIntl(
       <DiscoverMainProvider value={props.stateContainer}>
-        <DiscoverTopNav {...props} />
+        <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+          <DiscoverTopNav {...props} />
+        </RuntimeStateProvider>
       </DiscoverMainProvider>
     );
     const topNavMenu = component.find(TopNavMenu).props();
@@ -144,7 +149,9 @@ describe('Discover topnav component', () => {
       const props = getProps();
       const component = mountWithIntl(
         <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNav {...props} />
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+            <DiscoverTopNav {...props} />
+          </RuntimeStateProvider>
         </DiscoverMainProvider>
       );
       const topNavMenu = component.find(TopNavMenu);
@@ -164,7 +171,9 @@ describe('Discover topnav component', () => {
       const props = getProps();
       const component = mountWithIntl(
         <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNav {...props} />
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+            <DiscoverTopNav {...props} />
+          </RuntimeStateProvider>
         </DiscoverMainProvider>
       );
 
@@ -176,7 +185,9 @@ describe('Discover topnav component', () => {
       const props = getProps();
       const component = mountWithIntl(
         <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNav {...props} />
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+            <DiscoverTopNav {...props} />
+          </RuntimeStateProvider>
         </DiscoverMainProvider>
       );
       const topNav = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
@@ -197,7 +208,9 @@ describe('Discover topnav component', () => {
       const props = getProps();
       const component = mountWithIntl(
         <DiscoverMainProvider value={props.stateContainer}>
-          <DiscoverTopNav {...props} />
+          <RuntimeStateProvider currentDataView={dataViewMock} adHocDataViews={[]}>
+            <DiscoverTopNav {...props} />
+          </RuntimeStateProvider>
         </DiscoverMainProvider>
       );
 

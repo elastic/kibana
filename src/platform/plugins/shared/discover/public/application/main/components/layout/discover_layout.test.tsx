@@ -40,6 +40,7 @@ import { act } from 'react-dom/test-utils';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import { PanelsToggle } from '../../../../components/panels_toggle';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
+import { RuntimeStateProvider, internalStateActions } from '../../state_management/redux';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -104,11 +105,10 @@ async function mountComponent(
     interval: 'auto',
     query,
   });
-  stateContainer.internalState.transitions.setDataView(dataView);
-  stateContainer.internalState.transitions.setDataRequestParams({
-    timeRangeAbsolute: time,
-    timeRangeRelative: time,
-  });
+  stateContainer.internalState.dispatch(internalStateActions.setDataView(dataView));
+  stateContainer.internalState.dispatch(
+    internalStateActions.setDataRequestParams({ timeRangeAbsolute: time, timeRangeRelative: time })
+  );
 
   const props = {
     dataView,
@@ -128,9 +128,11 @@ async function mountComponent(
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>
       <DiscoverMainProvider value={stateContainer}>
-        <EuiProvider>
-          <DiscoverLayout {...props} />
-        </EuiProvider>
+        <RuntimeStateProvider currentDataView={dataView} adHocDataViews={[]}>
+          <EuiProvider>
+            <DiscoverLayout {...props} />
+          </EuiProvider>
+        </RuntimeStateProvider>
       </DiscoverMainProvider>
     </KibanaContextProvider>,
     mountOptions
