@@ -15,7 +15,6 @@ import {
 import { Serializable, SerializableRecord } from '@kbn/utility-types';
 import { SavedObjectMigrationFn } from '@kbn/core/server';
 import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
-import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 
 import {
   convertPanelStateToSavedDashboardPanel,
@@ -23,10 +22,13 @@ import {
 } from './utils';
 import type { SavedDashboardPanel } from '..';
 
-type ValueOrReferenceInput = SavedObjectEmbeddableInput & {
+interface ValueOrReferenceInput {
+  id: string;
   attributes?: Serializable;
   savedVis?: Serializable;
-};
+  savedObjectId?: string;
+  title?: string;
+}
 
 // Runs the embeddable migrations on each panel
 export const migrateByValueDashboardPanels =
