@@ -29,6 +29,8 @@ import { isOneOfOperator, isOperator } from '@kbn/securitysolution-list-utils';
 import { uniq } from 'lodash';
 
 import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
+import { isPolicySelectionTag } from '../../../../../../common/endpoint/service/artifacts/utils';
+import { FormattedError } from '../../../../components/formatted_error';
 import { OS_TITLES } from '../../../../common/translations';
 import type {
   ArtifactFormComponentOnChangeCallbackProps,
@@ -113,7 +115,7 @@ function isValid(itemValidation: ItemValidation): boolean {
 
 // eslint-disable-next-line react/display-name
 export const BlockListForm = memo<ArtifactFormComponentProps>(
-  ({ item, policies, policiesIsLoading, onChange, mode }) => {
+  ({ item, policies, policiesIsLoading, onChange, mode, error: submitError }) => {
     const [nameVisited, setNameVisited] = useState(false);
     const [valueVisited, setValueVisited] = useState({ value: false }); // Use object to trigger re-render
     const warningsRef = useRef<ItemValidation>({ name: {}, value: {} });
@@ -548,6 +550,13 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
       (change: EffectedPolicySelection) => {
         const tags = getArtifactTagsByPolicySelection(change);
 
+        // Make sure we don't drop other `tags` the artifact might have assigned to it
+        (item.tags ?? []).forEach((existingTag) => {
+          if (!isPolicySelectionTag(existingTag)) {
+            tags.push(existingTag);
+          }
+        });
+
         const nextItem = { ...item, tags };
 
         // Preserve old selected policies when switching to global
@@ -565,7 +574,11 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     );
 
     return (
-      <EuiForm component="div">
+      <EuiForm
+        component="div"
+        error={submitError ? <FormattedError error={submitError} /> : undefined}
+        isInvalid={!!submitError}
+      >
         <EuiTitle size="xs">
           <h3>{DETAILS_HEADER}</h3>
         </EuiTitle>

@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { isPolicySelectionTag } from '../../../../../../common/endpoint/service/artifacts/utils';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { isValidIPv4OrCIDR } from '../../../../../../common/endpoint/utils/is_valid_ip';
 import type {
@@ -137,11 +138,18 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
           setSelectedPolicies(selection);
         }
 
-        notifyOfChange({
-          tags: getArtifactTagsByPolicySelection(selection),
+        const tags = getArtifactTagsByPolicySelection(selection);
+
+        // Make sure we don't drop other `tags` the artifact might have assigned to it
+        (exception.tags ?? []).forEach((existingTag) => {
+          if (!isPolicySelectionTag(existingTag)) {
+            tags.push(existingTag);
+          }
         });
+
+        notifyOfChange({ tags });
       },
-      [notifyOfChange]
+      [exception.tags, notifyOfChange]
     );
 
     const handleOnDescriptionChange = useCallback(
