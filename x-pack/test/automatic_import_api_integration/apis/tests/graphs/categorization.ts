@@ -34,7 +34,9 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
       if (response instanceof BadRequestError) {
-        expect(response.message).to.be("Expected property name or '}' in JSON at position 1");
+        expect(response.message).to.be(
+          "Expected property name or '}' in JSON at position 1 (line 1 column 2)"
+        );
       } else {
         expect().fail('Expected BadRequestError');
       }

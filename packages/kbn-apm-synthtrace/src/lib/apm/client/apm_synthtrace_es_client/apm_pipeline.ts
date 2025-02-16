@@ -53,8 +53,8 @@ export function apmPipeline(logger: Logger, version: string, includeSerializatio
       : [];
 
     return pipeline(
-      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       base,
+      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       ...serializationTransform,
       getIntakeDefaultsTransform(),
       fork(new PassThrough({ objectMode: true }), ...aggregators),
