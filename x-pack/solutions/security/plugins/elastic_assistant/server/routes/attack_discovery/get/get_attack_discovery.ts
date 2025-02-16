@@ -78,12 +78,12 @@ export const getAttackDiscoveryRoute = (router: IRouter<ElasticAssistantRequestH
             body:
               attackDiscovery != null
                 ? {
-                  data: attackDiscovery,
-                  stats,
-                }
+                    data: attackDiscovery,
+                    stats,
+                  }
                 : {
-                  stats,
-                },
+                    stats,
+                  },
           });
         } catch (err) {
           logger.error(err);
