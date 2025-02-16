@@ -1,0 +1,54 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { Container } from 'inversify';
+import { once } from 'lodash';
+import type { CoreDiServiceSetup, CoreDiServiceStart } from '@kbn/core-di';
+import type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from '@kbn/core-di-internal';
+import { MethodKeysOf } from '@kbn/utility-types';
+
+function createContainer() {
+  const container = new Container({ defaultScope: 'Singleton', skipBaseClassChecks: true });
+
+  for (const method of ['bind', 'get', 'getAll', 'isBound', 'load']) {
+    jest.spyOn(container, method as MethodKeysOf<Container>);
+  }
+
+  return container as jest.Mocked<Container>;
+}
+
+function createSetupContract(): jest.MockedObjectDeep<CoreDiServiceSetup> {
+  return {
+    getContainer: jest.fn().mockImplementation(once(createContainer)),
+  };
+}
+
+function createStartContract(): jest.MockedObjectDeep<CoreDiServiceStart> {
+  const getContainer = once(createContainer);
+
+  return {
+    fork: jest.fn().mockImplementation(once(() => getContainer().createChild())),
+    getContainer: jest.fn().mockImplementation(getContainer),
+  };
+}
+
+function createInternalSetupContract(): jest.MockedObjectDeep<InternalCoreDiServiceSetup> {
+  return createSetupContract();
+}
+
+function createInternalStartContract(): jest.MockedObjectDeep<InternalCoreDiServiceStart> {
+  return createStartContract();
+}
+
+export const injectionServiceMock = {
+  createSetupContract,
+  createStartContract,
+  createInternalSetupContract,
+  createInternalStartContract,
+};

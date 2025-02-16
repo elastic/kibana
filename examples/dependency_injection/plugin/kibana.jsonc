@@ -1,0 +1,12 @@
+{
+  "type": "plugin",
+  "id": "@kbn/dependency-injection-example-plugin",
+  "owner": "@elastic/core",
+  "description": "A plugin demonstrating dependency injection in Kibana",
+  "plugin": {
+    "id": "dependencyInjectionExamplePlugin",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": ["developerExamples", "dependencyInjectionExampleService"]
+  }
+}
