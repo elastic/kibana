@@ -62,7 +62,6 @@
     "@kbn/home-plugin",
     "@kbn/i18n-react",
     "@kbn/i18n",
-    "@kbn/inference_integration_flyout",
     "@kbn/inspector-plugin",
     "@kbn/json-schemas",
     "@kbn/kibana-react-plugin",

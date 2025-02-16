@@ -27,14 +27,17 @@ export const ElandPythonClient: React.FC<{
       <EuiSteps
         steps={[
           {
-            title: i18n.translate('xpack.ml.addInferenceEndpoint.elandPythonClient.step1Title', {
-              defaultMessage: 'Install the Eland Python Client',
-            }),
+            title: i18n.translate(
+              'xpack.ml.trainedModels.addModelFlyout.elandPythonClient.step1Title',
+              {
+                defaultMessage: 'Install the Eland Python Client',
+              }
+            ),
             children: (
               <EuiText>
                 <EuiText size={'s'} color={'subdued'}>
                   <FormattedMessage
-                    id="xpack.ml.addInferenceEndpoint.elandPythonClient.pipInstallLabel"
+                    id="xpack.ml.trainedModels.addModelFlyout.elandPythonClient.pipInstallLabel"
                     defaultMessage="Eland can be installed with {pipLink} from {pypiLink}:"
                     values={{
                       pipLink: (
@@ -62,7 +65,7 @@ export const ElandPythonClient: React.FC<{
 
                 <EuiText size={'s'} color={'subdued'}>
                   <FormattedMessage
-                    id="xpack.ml.addInferenceEndpoint.elandPythonClient.condaInstallLabel"
+                    id="xpack.ml.trainedModels.addModelFlyout.elandPythonClient.condaInstallLabel"
                     defaultMessage="or it can also be installed with {condaLink} from {condaForgeLink}:"
                     values={{
                       condaLink: (
@@ -91,15 +94,18 @@ export const ElandPythonClient: React.FC<{
             ),
           },
           {
-            title: i18n.translate('xpack.ml.addInferenceEndpoint.elandPythonClient.step2Title', {
-              defaultMessage: 'Importing your third-party model',
-            }),
+            title: i18n.translate(
+              'xpack.ml.trainedModels.addModelFlyout.elandPythonClient.step2Title',
+              {
+                defaultMessage: 'Importing your third-party model',
+              }
+            ),
             children: (
               <EuiText>
                 <p>
                   <EuiText size={'s'} color={'subdued'}>
                     <FormattedMessage
-                      id="xpack.ml.addInferenceEndpoint.elandPythonClient.step2Body"
+                      id="xpack.ml.trainedModels.addModelFlyout.elandPythonClient.step2Body"
                       defaultMessage="Follow the instructions on importing compatible third-party models"
                     />
                   </EuiText>
@@ -108,7 +114,7 @@ export const ElandPythonClient: React.FC<{
                 <p>
                   <b>
                     <FormattedMessage
-                      id="xpack.ml.addInferenceEndpoint.elandPythonClient.step2ExampleTitle"
+                      id="xpack.ml.trainedModels.addModelFlyout.elandPythonClient.step2ExampleTitle"
                       defaultMessage="Example import"
                     />
                   </b>
@@ -131,7 +137,7 @@ export const ElandPythonClient: React.FC<{
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty href={nlpImportModel} target={'_blank'} iconType={'help'}>
                       <FormattedMessage
-                        id="xpack.ml.addInferenceEndpoint.elandPythonClient.importModelButtonLabel"
+                        id="xpack.ml.trainedModels.addModelFlyout.elandPythonClient.importModelButtonLabel"
                         defaultMessage="Import models with Eland"
                       />
                     </EuiButtonEmpty>
@@ -139,7 +145,7 @@ export const ElandPythonClient: React.FC<{
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty href={supportedNlpModels} target={'_blank'} iconType={'help'}>
                       <FormattedMessage
-                        id="xpack.ml.addInferenceEndpoint.elandPythonClient.compatibleModelsButtonLabel"
+                        id="xpack.ml.trainedModels.addModelFlyout.elandPythonClient.compatibleModelsButtonLabel"
                         defaultMessage="Compatible NLP models"
                       />
                     </EuiButtonEmpty>
@@ -149,15 +155,18 @@ export const ElandPythonClient: React.FC<{
             ),
           },
           {
-            title: i18n.translate('xpack.ml.addInferenceEndpoint.elandPythonClient.step4Title', {
-              defaultMessage: 'Deploy your model',
-            }),
+            title: i18n.translate(
+              'xpack.ml.trainedModels.addModelFlyout.elandPythonClient.step4Title',
+              {
+                defaultMessage: 'Deploy your model',
+              }
+            ),
             children: (
               <>
                 <EuiText size={'s'} color={'subdued'}>
                   <p>
                     <FormattedMessage
-                      id="xpack.ml.addInferenceEndpoint.elandPythonClient.step4Body"
+                      id="xpack.ml.trainedModels.addModelFlyout.elandPythonClient.step4Body"
                       defaultMessage="Click “Start deployment” in the table row containing your new model to deploy and use it."
                     />
                   </p>
@@ -166,7 +175,7 @@ export const ElandPythonClient: React.FC<{
                 <EuiText size="s" color={'subdued'}>
                   <p>
                     <FormattedMessage
-                      id="xpack.ml.addInferenceEndpoint.elandPythonClient.step3Body"
+                      id="xpack.ml.trainedModels.addModelFlyout.elandPythonClient.step3Body"
                       defaultMessage="Note: The trained model list automatically refreshes with the most current imported models in your cluster. If the list is not updated, click the 'Refresh' button in the top right corner. Otherwise, revisit the instructions above to troubleshoot."
                     />
                   </p>
