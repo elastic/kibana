@@ -38,5 +38,10 @@ export const RULES_TABLE_HEADER_TEST_SUBJ = {
   RULES_TABLE_HEADER_RULE_NUMBER_SELECT_BUTTON: 'rules-table-header-rule-number-select-button',
 };
 
+export const RULES_TABLE = {
+  RULES_ROWS_ENABLE_SWITCH_BUTTON: 'rules-row-enable-switch-button',
+  RULES_ROW_SELECT_ALL_CURRENT_PAGE: 'cloud-security-fields-selector-item-all',
+};
+
 export const getCspBenchmarkRuleTableRowItemTestId = (id: string) =>
   `${CSP_RULES_TABLE_ROW_ITEM_NAME}_${id}`;
