@@ -34,6 +34,8 @@ steps:
           machineType: n2-standard-2
         timeout_in_minutes: 5
 
+      - wait: ~
+
       - command: .buildkite/scripts/steps/build_kibana.sh
         label: Build Kibana Distribution
         agents:
@@ -45,12 +47,11 @@ steps:
           diskSizeGb: 125
         if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
         timeout_in_minutes: 90
+        key: build
         retry:
           automatic:
             - exit_status: '-1'
               limit: 3
-
-      - wait: ~
 
       - command: .buildkite/scripts/steps/cloud/build_and_deploy.sh
         label: 'Build and Deploy to Cloud'
@@ -61,12 +62,14 @@ steps:
           machineType: n2-standard-2
           preemptible: true
         timeout_in_minutes: 30
+        depends_on: build
         retry:
           automatic:
             - exit_status: '-1'
               limit: 3
 
       - wait: ~
+        continue_on_failure: true
 
       - command: |
           ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
@@ -80,3 +83,12 @@ steps:
           imageProject: elastic-images-prod
           machineType: n2-standard-2
         timeout_in_minutes: 5
+
+      - command: .buildkite/scripts/lifecycle/post_build.sh
+        label: Post-Build
+        timeout_in_minutes: 10
+        agents:
+          image: family/kibana-ubuntu-2004
+          imageProject: elastic-images-prod
+          provider: gcp
+          machineType: n2-standard-2
