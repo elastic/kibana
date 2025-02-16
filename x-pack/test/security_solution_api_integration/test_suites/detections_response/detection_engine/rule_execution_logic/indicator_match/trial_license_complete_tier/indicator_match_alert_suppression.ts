@@ -2630,6 +2630,86 @@ export default ({ getService }: FtrProviderContext) => {
             expect(previewAlerts[0]?._source?.['user.asset.criticality']).toEqual('extreme_impact');
           });
         });
+
+        describe.only('preview logged requests', () => {
+          it('should not return requests property when not enabled', async () => {
+            const id = uuidv4();
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['host.something'],
+                duration: {
+                  value: 2,
+                  unit: 'h',
+                },
+                missing_fields_strategy: 'suppress',
+              },
+              from: 'now-35m',
+              interval: '30m',
+            };
+
+            const { logs } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+              invocationCount: 2,
+            });
+
+            expect(logs[0].requests).toEqual(undefined);
+          });
+
+          it('should return requests property when enable_logged_requests set to true', async () => {
+            const id = uuidv4();
+            const timestamp = '2020-10-28T06:45:00.000Z';
+            const laterTimestamp = '2020-10-28T06:50:00.000Z';
+            const doc1 = {
+              id,
+              '@timestamp': timestamp,
+              host: { name: 'host-a' },
+            };
+            const doc1WithLaterTimestamp = {
+              ...doc1,
+              '@timestamp': laterTimestamp,
+            };
+
+            await eventsFiller({ id, count: eventsCount, timestamp: [timestamp] });
+            await threatsFiller({ id, count: threatsCount, timestamp });
+
+            await indexListOfSourceDocuments([doc1, doc1WithLaterTimestamp, doc1]);
+
+            await addThreatDocuments({
+              id,
+              timestamp,
+              fields: {
+                host: {
+                  name: 'host-a',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['host.name'],
+                missing_fields_strategy: 'suppress',
+              },
+              from: 'now-35m',
+              interval: '30m',
+            };
+
+            const { logs } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+              invocationCount: 1,
+              enableLoggedRequests: true,
+            });
+
+            expect(logs[0].requests?.length).toEqual(2);
+          });
+        });
       });
     });
   });

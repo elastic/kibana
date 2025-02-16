@@ -55,6 +55,7 @@ export const indicatorMatchExecutor = async ({
   licensing,
   experimentalFeatures,
   scheduleNotificationResponseActionsService,
+  isLoggedRequestsEnabled,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -77,6 +78,7 @@ export const indicatorMatchExecutor = async ({
   licensing: LicensingPluginSetup;
   scheduleNotificationResponseActionsService: CreateRuleOptions['scheduleNotificationResponseActionsService'];
   experimentalFeatures: ExperimentalFeatures;
+  isLoggedRequestsEnabled: boolean;
 }) => {
   const ruleParams = completeRule.ruleParams;
 
@@ -117,6 +119,7 @@ export const indicatorMatchExecutor = async ({
       licensing,
       experimentalFeatures,
       scheduleNotificationResponseActionsService,
+      isLoggedRequestsEnabled,
     });
   });
 };
