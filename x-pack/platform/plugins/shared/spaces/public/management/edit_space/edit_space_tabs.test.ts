@@ -45,6 +45,7 @@ const getCapabilities = (
 describe('Edit Space Tabs: getTabs', () => {
   it('can include a Permissions tab', () => {
     const isRoleManagementEnabled = true;
+    const isSecurityEnabled = true;
     const capabilities = getCapabilities();
 
     expect(
@@ -56,6 +57,7 @@ describe('Edit Space Tabs: getTabs', () => {
         history,
         allowFeatureVisibility,
         allowSolutionVisibility,
+        isSecurityEnabled,
       }).map(({ id, name }) => ({ name, id }))
     ).toEqual([
       { id: 'general', name: 'General settings' },
@@ -66,6 +68,7 @@ describe('Edit Space Tabs: getTabs', () => {
 
   it('can include count of roles as a badge for Permissions tab', () => {
     const isRoleManagementEnabled = true;
+    const isSecurityEnabled = true;
     const capabilities = getCapabilities();
 
     const rolesTab = getTabs({
@@ -77,6 +80,7 @@ describe('Edit Space Tabs: getTabs', () => {
       history,
       allowFeatureVisibility,
       allowSolutionVisibility,
+      isSecurityEnabled,
     }).find((tab) => tab.id === 'roles');
 
     if (!rolesTab?.append) {
@@ -85,6 +89,31 @@ describe('Edit Space Tabs: getTabs', () => {
     const { getByText } = render(rolesTab.append);
 
     expect(getByText('42')).toBeInTheDocument();
+  });
+
+  it('should show a warning callout when security is disabled', () => {
+    const isRoleManagementEnabled = true;
+    const isSecurityEnabled = false;
+    const capabilities = getCapabilities();
+
+    const rolesTab = getTabs({
+      rolesCount: 0,
+      isRoleManagementEnabled,
+      capabilities,
+      space,
+      features,
+      history,
+      allowFeatureVisibility,
+      allowSolutionVisibility,
+      isSecurityEnabled,
+    }).find((tab) => tab.id === 'roles');
+
+    if (!rolesTab?.content) {
+      throw new Error('roles tab did not exist!');
+    }
+    const { getByTestId } = render(rolesTab.content);
+
+    expect(getByTestId('securityDisabledCallout')).toBeInTheDocument();
   });
 
   it('hides Permissions tab when role management is not enabled', () => {
@@ -97,6 +126,7 @@ describe('Edit Space Tabs: getTabs', () => {
         history,
         allowFeatureVisibility,
         allowSolutionVisibility,
+        isSecurityEnabled: true,
       }).map(({ id, name }) => ({ name, id }))
     ).toEqual([
       { id: 'general', name: 'General settings' },
@@ -114,6 +144,7 @@ describe('Edit Space Tabs: getTabs', () => {
         history,
         allowFeatureVisibility,
         allowSolutionVisibility,
+        isSecurityEnabled: true,
       }).map(({ id, name }) => ({ name, id }))
     ).toEqual([
       { id: 'general', name: 'General settings' },
