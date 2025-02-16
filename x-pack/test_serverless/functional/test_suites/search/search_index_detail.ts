@@ -75,8 +75,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
 
         describe('API key details', () => {
-          // see details: https://github.com/elastic/kibana/issues/208695
-          this.tags(['failsOnMKI']);
           it('should show api key', async () => {
             await pageObjects.svlApiKeys.deleteAPIKeys();
             await svlSearchNavigation.navigateToIndexDetailPage(indexName);

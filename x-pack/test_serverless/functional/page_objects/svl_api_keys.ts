@@ -29,7 +29,7 @@ export function SvlApiKeysProvider({ getService, getPageObjects }: FtrProviderCo
     },
 
     async expectAPIKeyExists() {
-      await testSubjects.existOrFail('apiKeyFormAPIKey', { timeout: 1000 });
+      await testSubjects.existOrFail('apiKeyFormAPIKey', { timeout: 5000 });
     },
 
     async expectAPIKeyAvailable() {
