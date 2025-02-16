@@ -6,12 +6,12 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { snoozeBodySchemaV1 } from '../../../../../../../common/routes/rule/apis/snooze';
+import { snoozeBodyInternalSchemaV1 } from '../../../../../../../../common/routes/rule/apis/snooze';
 
-type SnoozeBodySchema = TypeOf<typeof snoozeBodySchemaV1>;
+type SnoozeBodyInternalSchema = TypeOf<typeof snoozeBodyInternalSchemaV1>;
 
-export const transformSnoozeBody: (opts: SnoozeBodySchema) => {
-  snoozeSchedule: SnoozeBodySchema['snooze_schedule'];
+export const transformSnoozeBody: (opts: SnoozeBodyInternalSchema) => {
+  snoozeSchedule: SnoozeBodyInternalSchema['snooze_schedule'];
 } = ({ snooze_schedule: snoozeSchedule }) => ({
   snoozeSchedule,
 });

@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { snoozeRuleRoute as snoozeRuleInternalRoute } from './internal/snooze_rule_route';
-export { snoozeRuleRoute } from './external/snooze_rule_route';
+export { scheduleRequestSchema } from './latest';
+export { scheduleRequestSchema as scheduleRequestSchemaV1 } from './v1';

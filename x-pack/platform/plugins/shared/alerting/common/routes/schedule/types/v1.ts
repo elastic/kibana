@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { TypeOf } from '@kbn/config-schema';
+import { scheduleRequestSchemaV1 } from '..';
 
-export { snoozeRuleRoute as snoozeRuleInternalRoute } from './internal/snooze_rule_route';
-export { snoozeRuleRoute } from './external/snooze_rule_route';
+export type ScheduleRequest = TypeOf<typeof scheduleRequestSchemaV1>;
