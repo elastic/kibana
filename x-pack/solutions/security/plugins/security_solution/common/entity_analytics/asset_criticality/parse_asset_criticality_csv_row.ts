@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import type { CriticalityLevels } from './constants';
 import { ValidCriticalityLevels } from './constants';
-import { type AssetCriticalityUpsert, type CriticalityLevel } from './types';
+import { type AssetCriticalityUpsertForBulkUpload, type CriticalityLevel } from './types';
 import { EntityTypeToIdentifierField, type EntityType } from '../types';
 import { getAssetCriticalityEntityTypes } from './utils';
 import type { ExperimentalFeatures } from '../../experimental_features';
@@ -16,7 +16,7 @@ const MAX_COLUMN_CHARS = 1000;
 
 interface ValidRecord {
   valid: true;
-  record: AssetCriticalityUpsert;
+  record: AssetCriticalityUpsertForBulkUpload;
 }
 interface InvalidRecord {
   valid: false;

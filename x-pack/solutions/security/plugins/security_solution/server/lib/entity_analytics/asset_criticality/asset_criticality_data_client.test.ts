@@ -360,6 +360,27 @@ describe('AssetCriticalityDataClient', () => {
         },
       });
     });
+
+    it('returns valid stats for unassigned', async () => {
+      const recordsStream = [
+        { idField: 'host.name', idValue: 'host1', criticalityLevel: 'unassigned' },
+      ];
+
+      const result = await subject.bulkUpsertFromStream({
+        recordsStream: Readable.from(recordsStream),
+        retries: 3,
+        flushBytes: 1_000,
+      });
+
+      expect(result).toEqual({
+        errors: [],
+        stats: {
+          failed: 0,
+          successful: 1,
+          total: 1,
+        },
+      });
+    });
   });
 });
 

@@ -34,8 +34,18 @@ export enum CriticalityLevels {
   MEDIUM_IMPACT = 'medium_impact',
   LOW_IMPACT = 'low_impact',
 }
+export enum CriticalityLevelsForBulkUpload {
+  EXTREME_IMPACT = 'extreme_impact',
+  HIGH_IMPACT = 'high_impact',
+  MEDIUM_IMPACT = 'medium_impact',
+  LOW_IMPACT = 'low_impact',
+  UNASSIGNED = 'unassigned',
+}
 
-export const ValidCriticalityLevels = Object.values(CriticalityLevels);
+export const ValidCriticalityLevels = [
+  ...Object.values(CriticalityLevels),
+  CriticalityLevelsForBulkUpload.UNASSIGNED,
+];
 
 /**
  * CriticalityModifiers are used to adjust the risk score based on the criticality of the asset.
