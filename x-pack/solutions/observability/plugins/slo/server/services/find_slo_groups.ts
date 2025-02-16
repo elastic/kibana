@@ -12,7 +12,7 @@ import {
   Pagination,
   sloGroupWithSummaryResponseSchema,
 } from '@kbn/slo-schema';
-import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
+import { getSummaryIndices, getSloSettings } from './slo_settings';
 import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../common/constants';
 import { IllegalArgumentError } from '../errors';
 import { typedSearch } from '../utils/queries';
@@ -53,7 +53,7 @@ export class FindSLOGroups {
     const parsedFilters = parseStringFilters(filters, this.logger);
 
     const settings = await getSloSettings(this.soClient);
-    const { indices } = await getListOfSummaryIndices(this.esClient, settings);
+    const { indices } = await getSummaryIndices(this.esClient, settings);
 
     const hasSelectedTags = groupBy === 'slo.tags' && groupsFilter.length > 0;
 
