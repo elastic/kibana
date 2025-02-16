@@ -25,6 +25,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     },
     labels: {},
     numeric_labels: {},
+    systemMessage: 'this is a system message',
     messages: [
       {
         '@timestamp': new Date().toISOString(),
@@ -135,6 +136,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
           labels: conversationCreate.labels,
           numeric_labels: conversationCreate.numeric_labels,
+          systemMessage: conversationCreate.systemMessage,
           messages: conversationCreate.messages,
           namespace: 'default',
           public: conversationCreate.public,

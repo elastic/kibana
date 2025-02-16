@@ -10,6 +10,19 @@ import { Conversation } from '../../../common/types';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { conversationCreateRt, conversationUpdateRt } from '../runtime_types';
 
+// backwards compatibility for messages with system role
+const getConversationWithoutSystemMessages = (conversation: Conversation) => {
+  if (!conversation.systemMessage) {
+    conversation.systemMessage =
+      conversation.messages.find((message) => message.message.role === 'system')?.message
+        ?.content ?? '';
+  }
+  conversation.messages = conversation.messages.filter(
+    (message) => message.message.role !== 'system'
+  );
+  return conversation;
+};
+
 const getConversationRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/conversation/{conversationId}',
   params: t.type({
@@ -31,7 +44,9 @@ const getConversationRoute = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    return client.get(params.path.conversationId);
+    const conversation = await client.get(params.path.conversationId);
+    // conversation without system messages
+    return getConversationWithoutSystemMessages(conversation);
   },
 });
 
@@ -56,7 +71,12 @@ const findConversationsRoute = createObservabilityAIAssistantServerRoute({
       throw notImplemented();
     }
 
-    return client.find({ query: params?.body?.query });
+    const conversations = await client.find({ query: params?.body?.query });
+
+    return {
+      // conversations without system messages
+      conversations: conversations.map(getConversationWithoutSystemMessages),
+    };
   },
 });
 

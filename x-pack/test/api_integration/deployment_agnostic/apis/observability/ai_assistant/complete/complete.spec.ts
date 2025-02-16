@@ -39,13 +39,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     {
       '@timestamp': new Date().toISOString(),
       message: {
-        role: MessageRole.System,
-        content: 'You are a helpful assistant',
-      },
-    },
-    {
-      '@timestamp': new Date().toISOString(),
-      message: {
         role: MessageRole.User,
         content: 'Good morning, bot!',
         // make sure it doesn't 400 on `data` being set
