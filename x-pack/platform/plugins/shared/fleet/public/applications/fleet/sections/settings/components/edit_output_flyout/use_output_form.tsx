@@ -708,7 +708,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
           (syncIntegrationsInput.value &&
             ((kibanaAPIKeyInput.value && kibanaAPIKeyValid) ||
               (kibanaAPIKeySecretInput.value && kibanaAPIKeySecretValid)) &&
-            kibanaURLInputValid))
+            kibanaURLInputValid)) &&
+        sslCertificateValid &&
+        ((sslKeyInput.value && sslKeyValid) || (sslKeySecretInput.value && sslKeySecretValid))
       );
     } else {
       // validate ES
@@ -985,6 +987,21 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
               kibana_url: kibanaURLInput.value || null,
               proxy_id: proxyIdValue,
               ...shipperParams,
+              ssl: {
+                certificate: sslCertificateInput.value,
+                key: sslKeyInput.value || undefined,
+                certificate_authorities: sslCertificateAuthoritiesInput.value.filter(
+                  (val) => val !== ''
+                ),
+              },
+              ...(!sslKeyInput.value &&
+                sslKeySecretInput.value && {
+                  secrets: {
+                    ssl: {
+                      key: sslKeySecretInput.value,
+                    },
+                  },
+                }),
             } as NewRemoteElasticsearchOutput;
           case outputType.Elasticsearch:
           default:

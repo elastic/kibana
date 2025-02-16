@@ -27106,6 +27106,31 @@
                                         "type": "string"
                                       }
                                     ]
+                                  },
+                                  "ssl": {
+                                    "additionalProperties": true,
+                                    "properties": {
+                                      "key": {
+                                        "anyOf": [
+                                          {
+                                            "additionalProperties": true,
+                                            "properties": {
+                                              "id": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "id"
+                                            ],
+                                            "type": "object"
+                                          },
+                                          {
+                                            "type": "string"
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "type": "object"
                                   }
                                 },
                                 "type": "object"
@@ -28228,6 +28253,31 @@
                                 "type": "string"
                               }
                             ]
+                          },
+                          "ssl": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "key": {
+                                "anyOf": [
+                                  {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              }
+                            },
+                            "type": "object"
                           }
                         },
                         "type": "object"
@@ -29286,6 +29336,31 @@
                                       "type": "string"
                                     }
                                   ]
+                                },
+                                "ssl": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "key": {
+                                      "anyOf": [
+                                        {
+                                          "additionalProperties": true,
+                                          "properties": {
+                                            "id": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "id"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "type": "object"
                                 }
                               },
                               "type": "object"
@@ -30500,6 +30575,31 @@
                                       "type": "string"
                                     }
                                   ]
+                                },
+                                "ssl": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "key": {
+                                      "anyOf": [
+                                        {
+                                          "additionalProperties": true,
+                                          "properties": {
+                                            "id": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "id"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "type": "object"
                                 }
                               },
                               "type": "object"
@@ -31607,6 +31707,31 @@
                                 "type": "string"
                               }
                             ]
+                          },
+                          "ssl": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "key": {
+                                "anyOf": [
+                                  {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              }
+                            },
+                            "type": "object"
                           }
                         },
                         "type": "object"
@@ -32650,6 +32775,31 @@
                                       "type": "string"
                                     }
                                   ]
+                                },
+                                "ssl": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "key": {
+                                      "anyOf": [
+                                        {
+                                          "additionalProperties": true,
+                                          "properties": {
+                                            "id": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "id"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "type": "object"
                                 }
                               },
                               "type": "object"

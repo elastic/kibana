@@ -212,6 +212,14 @@ async function hashSecrets(output: PreconfiguredOutput) {
         kibana_api_key: kibanaAPIKey,
       };
     }
+    if (typeof remoteESOutput.secrets?.ssl?.key === 'string') {
+      const key = await hashSecret(remoteESOutput.secrets?.ssl?.key);
+      return {
+        ssl: {
+          key,
+        },
+      };
+    }
     return secrets;
   }
 
