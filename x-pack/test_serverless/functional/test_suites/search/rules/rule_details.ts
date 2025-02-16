@@ -292,11 +292,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await editButton.click();
         expect(await testSubjects.exists('hasActionsDisabled')).toBe(false);
 
-        await testSubjects.setValue('ruleNameInput', updatedRuleName, {
+        await testSubjects.click('ruleFormStep-details');
+        await testSubjects.setValue('ruleDetailsNameInput', updatedRuleName, {
           clearWithKeyboard: true,
         });
 
-        await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
+        await find.clickByCssSelector(
+          '[data-test-subj="ruleFlyoutFooterSaveButton"]:not(disabled)'
+        );
 
         await retry.try(async () => {
           const resultToast = await toasts.getElementByIndex(1);
@@ -314,18 +317,20 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const editButton = await testSubjects.find('openEditRuleFlyoutButton');
         await editButton.click();
 
-        await testSubjects.setValue('ruleNameInput', uuidv4(), {
+        await testSubjects.click('ruleFormStep-details');
+        await testSubjects.setValue('ruleDetailsNameInput', uuidv4(), {
           clearWithKeyboard: true,
         });
 
-        await testSubjects.click('cancelSaveEditedRuleButton');
+        await testSubjects.click('ruleFlyoutFooterCancelButton');
         await testSubjects.existOrFail('confirmRuleCloseModal');
         await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
-        await find.waitForDeletedByCssSelector('[data-test-subj="cancelSaveEditedRuleButton"]');
+        await find.waitForDeletedByCssSelector('[data-test-subj="ruleFlyoutFooterCancelButton"]');
 
         await editButton.click();
 
-        const nameInputAfterCancel = await testSubjects.find('ruleNameInput');
+        await testSubjects.click('ruleFormStep-details');
+        const nameInputAfterCancel = await testSubjects.find('ruleDetailsNameInput');
         const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
         expect(textAfterCancel).toEqual(updatedRuleName);
       });
@@ -612,11 +617,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const throttleUnitInput = await testSubjects.find('throttleUnitInput');
         expect(await throttleInput.getAttribute('value')).toEqual('2');
         expect(await throttleUnitInput.getAttribute('value')).toEqual('d');
-        await testSubjects.setValue('ruleNameInput', updatedRuleName, {
+        await testSubjects.click('ruleFormStep-details');
+        await testSubjects.setValue('ruleDetailsNameInput', updatedRuleName, {
           clearWithKeyboard: true,
         });
 
-        await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
+        await find.clickByCssSelector(
+          '[data-test-subj="ruleFlyoutFooterSaveButton"]:not(disabled)'
+        );
 
         await retry.try(async () => {
           const resultToast = await toasts.getElementByIndex(1);

@@ -127,7 +127,7 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
         get: () => {},
       },
       triggersActionsUi: {
-        getAddRuleFlyout: jest
+        getRuleFormFlyout: jest
           .fn()
           .mockReturnValue(<div data-test-subj="add-rule-flyout">Add Rule Flyout</div>),
       },

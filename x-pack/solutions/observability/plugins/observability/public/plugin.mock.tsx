@@ -27,10 +27,6 @@ const triggersActionsUiStartMock = {
       getAlertsStateTable: jest.fn(() => (
         <div data-test-subj="alerts-state-table">mocked component</div>
       )),
-      getAddRuleFlyout: jest.fn(() => <div data-test-subj="add-rule-flyout">mocked component</div>),
-      getEditRuleFlyout: jest.fn(() => (
-        <div data-test-subj="edit-rule-flyout">mocked component</div>
-      )),
       getRuleAlertsSummary: jest.fn(() => (
         <div data-test-subj="rule-alerts-summary">mocked component</div>
       )),

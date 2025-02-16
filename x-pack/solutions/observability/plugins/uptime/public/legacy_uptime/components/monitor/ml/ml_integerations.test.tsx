@@ -31,7 +31,7 @@ describe('ML Integrations', () => {
   it('renders without errors', () => {
     const wrapper = renderWithRouter(
       <KibanaContextProvider
-        services={{ ...core, triggersActionsUi: { getEditRuleFlyout: jest.fn() } }}
+        services={{ ...core, triggersActionsUi: { getRuleFormFlyout: jest.fn() } }}
       >
         <MLIntegrationComponent />
       </KibanaContextProvider>

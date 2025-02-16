@@ -283,35 +283,38 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
                 </EuiToolTip>
               ) : (
                 <Suspense fallback={null}>
-                  <EuiIcon size="l" type={actionTypeModel.iconClass} />
+                  <EuiToolTip content={actionType?.name}>
+                    <EuiIcon size="l" type={actionTypeModel.iconClass} />
+                  </EuiToolTip>
                 </Suspense>
               )}
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText>{connector.name}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                <strong>{actionType?.name}</strong>
-              </EuiText>
-            </EuiFlexItem>
-            {warning && !isOpen && (
+            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiBadge data-test-subj="warning-badge" iconType="warning" color="warning">
-                  {ACTION_WARNING_TITLE}
-                </EuiBadge>
+                <EuiText size="s">{connector.name}</EuiText>
               </EuiFlexItem>
-            )}
-            {actionTypeModel.isExperimental && (
-              <EuiFlexItem grow={false}>
-                <EuiBetaBadge
-                  alignment="middle"
-                  data-test-subj="ruleActionsSystemActionsItemBetaBadge"
-                  label={TECH_PREVIEW_LABEL}
-                  tooltipContent={TECH_PREVIEW_DESCRIPTION}
-                />
-              </EuiFlexItem>
-            )}
+              {actionTypeModel.isExperimental && (
+                <EuiFlexItem grow={false}>
+                  <EuiBetaBadge
+                    size="s"
+                    alignment="middle"
+                    data-test-subj="ruleActionsSystemActionsItemBetaBadge"
+                    iconType="beaker"
+                    label={TECH_PREVIEW_LABEL}
+                    tooltipContent={TECH_PREVIEW_DESCRIPTION}
+                  />
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs" responsive={false}>
+              {warning && !isOpen && (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={ACTION_WARNING_TITLE}>
+                    <EuiBadge data-test-subj="warning-badge" iconType="warning" color="warning" />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexGroup>
         </EuiPanel>
       }

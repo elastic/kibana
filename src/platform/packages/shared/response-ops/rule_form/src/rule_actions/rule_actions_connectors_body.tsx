@@ -365,6 +365,7 @@ export const RuleActionsConnectorsBody = ({
           const connectorCard = (
             <EuiCard
               data-test-subj="ruleActionsConnectorsModalCard"
+              data-action-type-id={actionTypeId}
               hasBorder
               isDisabled={isDisabled}
               titleSize="xs"
