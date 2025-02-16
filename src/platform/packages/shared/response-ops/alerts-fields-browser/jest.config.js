@@ -9,7 +9,9 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../..',
-  roots: ['<rootDir>/packages/response-ops/alerts_table'],
-  setupFilesAfterEnv: ['<rootDir>/packages/response-ops/alerts_table/setup_tests.ts'],
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/src/platform/packages/shared/response-ops/alerts-fields-browser'],
+  setupFilesAfterEnv: [
+    '<rootDir>/src/platform/packages/shared/response-ops/alerts-fields-browser/setup_tests.ts',
+  ],
 };

@@ -6877,15 +6877,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-apis@link:packages/response-ops/alerts_apis":
+"@kbn/response-ops-alerts-apis@link:src/platform/packages/shared/response-ops/alerts-apis":
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-fields-browser@link:packages/response-ops/alerts_fields_browser":
+"@kbn/response-ops-alerts-fields-browser@link:src/platform/packages/shared/response-ops/alerts-fields-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-table@link:packages/response-ops/alerts_table":
+"@kbn/response-ops-alerts-table@link:src/platform/packages/shared/response-ops/alerts-table":
   version "0.0.0"
   uid ""
 
