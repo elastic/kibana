@@ -45,11 +45,8 @@ import { i18n } from '@kbn/i18n';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { css } from '@emotion/react';
-import {
-  getFormattedSeverityScore,
-  ML_ANOMALY_THRESHOLD,
-  ML_SEVERITY_COLORS,
-} from '@kbn/ml-anomaly-utils';
+import { getFormattedSeverityScore } from '@kbn/ml-anomaly-utils';
+import { severityColorBands } from '@kbn/ml-anomaly-utils/get_severity_color';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
 import type { TimeBuckets as TimeBucketsClass } from '@kbn/ml-time-buckets';
 import { SwimLanePagination } from './swimlane_pagination';
@@ -79,7 +76,7 @@ declare global {
  * Ignore insignificant resize, e.g. browser scrollbar appearance.
  */
 const RESIZE_THROTTLE_TIME_MS = 500;
-const BORDER_WIDTH = 1;
+const BORDER_WIDTH = 2;
 export const CELL_HEIGHT = 30;
 const LEGEND_HEIGHT = 34;
 const X_AXIS_HEIGHT = 24;
@@ -302,13 +299,13 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
 
     const theme: PartialTheme = {
       background: {
-        color: euiTheme.colors.backgroundBasePlain,
+        color: euiTheme.colors.lightestShade,
       },
       heatmap: {
         grid: {
           stroke: {
             width: BORDER_WIDTH,
-            color: euiTheme.border.color,
+            color: euiTheme.colors.emptyShade,
           },
         },
         cell: {
@@ -318,7 +315,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
             visible: false,
           },
           border: {
-            stroke: euiTheme.colors.borderBasePlain,
+            stroke: euiTheme.colors.emptyShade,
             strokeWidth: 0,
           },
         },
@@ -480,33 +477,7 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                         timeZone="UTC"
                         colorScale={{
                           type: 'bands',
-                          bands: [
-                            {
-                              start: ML_ANOMALY_THRESHOLD.LOW,
-                              end: ML_ANOMALY_THRESHOLD.WARNING,
-                              color: ML_SEVERITY_COLORS.LOW,
-                            },
-                            {
-                              start: ML_ANOMALY_THRESHOLD.WARNING,
-                              end: ML_ANOMALY_THRESHOLD.MINOR,
-                              color: ML_SEVERITY_COLORS.WARNING,
-                            },
-                            {
-                              start: ML_ANOMALY_THRESHOLD.MINOR,
-                              end: ML_ANOMALY_THRESHOLD.MAJOR,
-                              color: ML_SEVERITY_COLORS.MINOR,
-                            },
-                            {
-                              start: ML_ANOMALY_THRESHOLD.MAJOR,
-                              end: ML_ANOMALY_THRESHOLD.CRITICAL,
-                              color: ML_SEVERITY_COLORS.MAJOR,
-                            },
-                            {
-                              start: ML_ANOMALY_THRESHOLD.CRITICAL,
-                              end: Infinity,
-                              color: ML_SEVERITY_COLORS.CRITICAL,
-                            },
-                          ],
+                          bands: severityColorBands,
                         }}
                         data={swimLanePoints}
                         xAccessor="time"
