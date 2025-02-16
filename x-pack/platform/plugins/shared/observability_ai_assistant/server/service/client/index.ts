@@ -508,6 +508,8 @@ export class ObservabilityAIAssistantClient {
 
     const options = {
       connectorId,
+      system: messages.find((message) => message.message.role === MessageRole.System)?.message
+        .content,
       messages: convertMessagesForInference(
         messages.filter((message) => message.message.role !== MessageRole.System)
       ),
