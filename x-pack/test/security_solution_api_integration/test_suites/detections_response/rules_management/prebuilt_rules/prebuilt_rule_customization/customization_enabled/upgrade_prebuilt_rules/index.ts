@@ -10,7 +10,7 @@ import { deleteAllPrebuiltRuleAssets } from '../../../../../utils';
 import { deleteAllRules } from '../../../../../../../../common/utils/security_solution';
 import { bulkUpgradeAllPrebuiltRules } from './bulk_upgrade_all_prebuilt_rules';
 import { bulkUpgradeSelectedPrebuiltRules } from './bulk_upgrade_selected_prebuilt_rules';
-import { upgradeOnePrebuiltRule } from './upgrade_one_prebuilt_rule';
+import { upgradeSinglePrebuiltRule } from './upgrade_single_prebuilt_rule';
 
 export default (context: FtrProviderContext): void => {
   const es = context.getService('es');
@@ -25,6 +25,6 @@ export default (context: FtrProviderContext): void => {
 
     bulkUpgradeAllPrebuiltRules(context);
     bulkUpgradeSelectedPrebuiltRules(context);
-    upgradeOnePrebuiltRule(context);
+    upgradeSinglePrebuiltRule(context);
   });
 };
