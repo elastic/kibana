@@ -319,6 +319,7 @@ export const langChainExecute = async ({
     abortSignal,
     dataClients,
     alertsIndexPattern: request.body.alertsIndexPattern,
+    core: context.core,
     actionsClient,
     assistantTools,
     conversationId,
