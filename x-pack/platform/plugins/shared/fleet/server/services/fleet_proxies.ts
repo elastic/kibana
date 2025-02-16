@@ -206,7 +206,7 @@ async function updateRelatedSavedObject(
   await pMap(
     fleetServerHosts,
     (fleetServerHost) =>
-      updateFleetServerHost(soClient, fleetServerHost.id, {
+      updateFleetServerHost(soClient, esClient, fleetServerHost.id, {
         ...omit(fleetServerHost, 'id'),
         proxy_id: null,
       }),

@@ -1283,6 +1283,8 @@ ssl.test: 123
         type: 'elasticsearch',
       },
       undefined,
+      undefined,
+      false,
       true
     );
 
@@ -1309,6 +1311,8 @@ ssl.test: 123
         type: 'logstash',
       },
       undefined,
+      undefined,
+      false,
       true
     );
 

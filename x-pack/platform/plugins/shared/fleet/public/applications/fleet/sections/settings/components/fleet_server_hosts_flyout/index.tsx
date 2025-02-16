@@ -35,6 +35,7 @@ import type { FleetServerHost, FleetProxy } from '../../../../types';
 import { TextInput } from '../form';
 import { ProxyWarning } from '../fleet_proxies_table/proxy_warning';
 
+import { SSLFormSection } from './ssl_form_section';
 import { useFleetServerHostsForm } from './use_fleet_server_host_form';
 
 export interface FleetServerHostsFlyoutProps {
@@ -196,16 +197,16 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
               <EuiComboBox
                 fullWidth
                 data-test-subj="fleetServerHostsFlyout.proxyIdInput"
-                {...inputs.proxyIdInput.props}
-                onChange={(options) => inputs.proxyIdInput.setValue(options?.[0]?.value ?? '')}
+                {...inputs.proxyIdInput?.props}
+                onChange={(options) => inputs?.proxyIdInput?.setValue(options?.[0]?.value ?? '')}
                 selectedOptions={
-                  inputs.proxyIdInput.value !== ''
-                    ? proxiesOptions.filter((option) => option.value === inputs.proxyIdInput.value)
+                  inputs?.proxyIdInput?.value !== ''
+                    ? proxiesOptions.filter((option) => option.value === inputs.proxyIdInput?.value)
                     : []
                 }
                 options={proxiesOptions}
                 singleSelection={{ asPlainText: true }}
-                isDisabled={inputs.proxyIdInput.props.disabled}
+                isDisabled={inputs.proxyIdInput?.props.disabled}
                 isClearable={true}
                 placeholder={i18n.translate(
                   'xpack.fleet.settings.fleetServerHostsFlyout.proxyIdPlaceholder',
@@ -230,6 +231,8 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
               }
             />
           </EuiFormRow>
+          <EuiSpacer size="l" />
+          <SSLFormSection inputs={inputs} />
         </EuiForm>
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
@@ -249,6 +252,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
               isDisabled={form.isDisabled}
               onClick={form.submit}
               data-test-subj="saveApplySettingsBtn"
+              aria-label="Save and apply settings"
             >
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHostsFlyout.saveButton"

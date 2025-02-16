@@ -8,7 +8,7 @@
 import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
 
 import type { agentPolicyStatuses } from '../../constants';
-import type { MonitoringType, PolicySecretReference, ValueOf } from '..';
+import type { MonitoringType, PolicySecretReference, SOSecret, ValueOf } from '..';
 
 import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
 import type { Output } from './output';
@@ -232,6 +232,7 @@ export interface FullAgentPolicyFleetConfig {
     certificate?: string;
     key?: string;
   };
+  secrets?: { key?: SOSecret };
 }
 
 export interface FullAgentPolicyKibanaConfig {

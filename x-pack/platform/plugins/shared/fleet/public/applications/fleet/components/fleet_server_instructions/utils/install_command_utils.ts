@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DownloadSource, FleetProxy } from '../../../../../../common/types';
+import type { DownloadSource, FleetProxy, FleetServerHost } from '../../../../../../common/types';
 import {
   getDownloadBaseUrl,
   getDownloadSourceProxyArgs,
@@ -120,7 +120,7 @@ export function getInstallCommandForPlatform({
   esOutputProxy?: FleetProxy | undefined;
   serviceToken: string;
   policyId?: string;
-  fleetServerHost?: string;
+  fleetServerHost?: FleetServerHost | null;
   isProductionDeployment?: boolean;
   sslCATrustedFingerprint?: string;
   kibanaVersion?: string;
@@ -134,7 +134,7 @@ export function getInstallCommandForPlatform({
   const commandArguments = [];
 
   if (isProductionDeployment && fleetServerHost) {
-    commandArguments.push(['url', fleetServerHost]);
+    commandArguments.push(['url', fleetServerHost?.host_urls[0]]);
   }
 
   commandArguments.push(['fleet-server-es', esOutputHost]);
@@ -148,11 +148,22 @@ export function getInstallCommandForPlatform({
   }
 
   if (isProductionDeployment) {
-    commandArguments.push(['certificate-authorities', '<PATH_TO_CA>']);
+    const certificateAuthorities = fleetServerHost?.ssl?.certificate_authorities
+      ? `'${fleetServerHost?.ssl?.certificate_authorities}'`
+      : '<PATH_TO_CA>';
+    const fleetServerCert = fleetServerHost?.ssl?.certificate
+      ? `'${fleetServerHost?.ssl?.certificate}'`
+      : '<PATH_TO_FLEET_SERVER_CERT>';
+
+    commandArguments.push(['certificate-authorities', certificateAuthorities]);
+
     if (!sslCATrustedFingerprint) {
-      commandArguments.push(['fleet-server-es-ca', '<PATH_TO_ES_CERT>']);
+      const esCert = fleetServerHost?.ssl?.es_certificate
+        ? `'${fleetServerHost?.ssl?.es_certificate}'`
+        : '<PATH_TO_ES_CERT>';
+      commandArguments.push(['fleet-server-es-ca', esCert]);
     }
-    commandArguments.push(['fleet-server-cert', '<PATH_TO_FLEET_SERVER_CERT>']);
+    commandArguments.push(['fleet-server-cert', fleetServerCert]);
     commandArguments.push(['fleet-server-cert-key', '<PATH_TO_FLEET_SERVER_CERT_KEY>']);
   }
 
