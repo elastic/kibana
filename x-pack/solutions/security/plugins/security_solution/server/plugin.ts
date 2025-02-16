@@ -119,6 +119,7 @@ import {
 
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
+import { registerPrivmonTask } from './lib/entity_analytics/privmon/task';
 import { registerEntityStoreFieldRetentionEnrichTask } from './lib/entity_analytics/entity_store/tasks';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
@@ -235,6 +236,16 @@ export class Plugin implements ISecuritySolutionPlugin {
         experimentalFeatures,
       });
     }
+
+    registerPrivmonTask({
+      experimentalFeatures,
+      getStartServices: core.getStartServices,
+      kibanaVersion: pluginContext.env.packageInfo.version,
+      logger: this.logger,
+      taskManager: plugins.taskManager,
+      telemetry: core.analytics,
+      auditLogger: plugins.security?.audit.withoutRequest,
+    });
 
     scheduleEntityAnalyticsMigration({
       getStartServices: core.getStartServices,

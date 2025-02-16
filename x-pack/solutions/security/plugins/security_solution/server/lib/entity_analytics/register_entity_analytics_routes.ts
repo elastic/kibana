@@ -10,6 +10,7 @@ import { registerRiskScoreRoutes } from './risk_score/routes';
 import { registerRiskEngineRoutes } from './risk_engine/routes';
 import type { EntityAnalyticsRoutesDeps } from './types';
 import { registerEntityStoreRoutes } from './entity_store/routes';
+import { registerPrivmonRoutes } from './privmon/routes/register_privmon_routes';
 
 export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDeps) => {
   registerAssetCriticalityRoutes(routeDeps);
@@ -18,4 +19,5 @@ export const registerEntityAnalyticsRoutes = (routeDeps: EntityAnalyticsRoutesDe
   if (!routeDeps.config.experimentalFeatures.entityStoreDisabled) {
     registerEntityStoreRoutes(routeDeps);
   }
+  registerPrivmonRoutes(routeDeps);
 };

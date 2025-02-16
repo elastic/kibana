@@ -1,0 +1,74 @@
+openapi: 3.0.0
+info:
+  version: '1'
+  title: Privileged User Monitoring API
+  description: These APIs allow the consumer to manage Privileged User Monitoring within Entity Analytics.
+paths:
+  /api/privmon/init:
+    post:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: PrivmonGetSimilarUsers
+      summary: Get Similar Users 
+      description: Get similar users based on the provided user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user
+              properties:
+                user:
+                  $ref: './common.schema.yaml#/components/schemas/PrivilegedUserIdentityFields'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivmonGetSimilarUsersSuccessResponse'
+        '400':
+          description: Task manager is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.schema.yaml#/components/schemas/TaskManagerUnavailableResponse'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrivmonGetSimilarUsersErrorResponse'
+
+components:
+  schemas:
+    PrivmonGetSimilarUsersResult:
+      type: object
+      required:
+        - users
+      properties:
+        users:
+          type: array
+          items:
+            $ref: './common.schema.yaml#/components/schemas/PrivilegedUserWithScore'
+
+    PrivmonGetSimilarUsersErrorResponse:
+      type: object
+      required:
+        - message
+        - full_error
+      properties:
+        message:
+          type: string
+        full_error:
+          type: string
+    PrivmonGetSimilarUsersSuccessResponse:
+      type: object
+      required:
+        - result
+      properties:
+        users:
+          $ref: './common.schema.yaml#/components/schemas/PrivilegedUserDoc'
