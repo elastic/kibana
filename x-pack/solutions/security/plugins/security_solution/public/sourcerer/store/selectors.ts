@@ -45,6 +45,16 @@ export const sourcererScopeSelectedDataViewId = createSelector(
   }
 );
 
+export const sourcererScopeSelectedDataViewSpec = createSelector(
+  sourcererScope,
+  (scope) => scope.dataViewSpec,
+  {
+    memoizeOptions: {
+      maxSize: SOURCERER_SCOPE_MAX_SIZE,
+    },
+  }
+);
+
 export const sourcererScopeSelectedPatterns = createSelector(
   sourcererScope,
   (scope) => scope.selectedPatterns,

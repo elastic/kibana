@@ -29,7 +29,7 @@ interface UsePickIndexPatternsProps {
   signalIndexName: string | null;
 }
 
-export type ModifiedTypes = 'modified' | 'alerts' | 'deprecated' | 'missingPatterns' | '';
+export type ModifiedTypes = 'modified' | 'alerts' | 'deprecated' | 'missingPatterns' | 'adhoc' | '';
 
 interface UsePickIndexPatterns {
   allOptions: Array<EuiComboBoxOptionOption<string>>;

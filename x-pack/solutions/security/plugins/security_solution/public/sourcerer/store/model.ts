@@ -35,6 +35,12 @@ export interface SourcererScope {
    * selectedDataViewId === null OR defaultDataView.id
    * saved timeline has pattern that is not in the default */
   missingPatterns: string[];
+
+  /**
+   * The full dataview spec that might be set, depending on the data view loading strategy.
+   * Currently only available in the legacy compatibility flow when adhoc dv is created.
+   */
+  dataViewSpec?: DataViewSpec;
 }
 
 export type SourcererScopeById = Record<SourcererScopeName, SourcererScope>;
