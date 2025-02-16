@@ -1,0 +1,64 @@
+---
+id: react/kibana_mount
+slug: /react/kibana_mount
+title: @kbn/react-kibana-mount: ToMountPoint module
+description: This module provides a utility function to convert React nodes into mount points, which can be rendered into a specified HTML element.
+tags: ['shared-ux', 'react', 'mount point']
+date: 2025-01-01
+---
+
+## Description
+
+This module provides a utility function to convert React nodes into mount points, which can be rendered into a
+specified HTML element. It leverages the Kibana rendering context to ensure that the necessary context
+providers are applied.
+
+### Usage
+
+#### First usage example: passing the `coreStart` prop:
+
+```tsx
+import React from 'react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { render } from 'react-dom';
+
+const MyComponent = () => <div>Hello, world!</div>;
+
+const mountPoint = toMountPoint(<MyComponent />, {
+  coreStart: {}, // provide your CoreStart context
+});
+
+const element = document.getElementById('root');
+mountPoint(element);
+```
+
+### Different forms of passing CoreStart service dependencies
+
+`toMountPoint` wraps `KibanaRenderContextProvider`, which encapsulates features that depend on CoreStart services. The original form of
+passing the services required each dependent service to be passed separate. This form is now deprecated:
+
+#### Second usage example: passing CoreStart service dependencies separately (deprecated):
+
+```tsx
+import React from 'react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { render } from 'react-dom';
+
+const MyComponent = () => <div>Hello, world!</div>;
+
+// NOTE: this is deprecated, avoid passing services separately!
+const mountPoint = toMountPoint(<MyComponent />, {
+  analytics: {}, // provide analytics service
+  executionContext: {}, // provide executionContext service
+  i18n: {}, // provide i18n service
+  theme: {}, // provide theme service
+  userProfile: {}, // provide user profile service
+});
+
+const element = document.getElementById('root');
+mountPoint(element);
+```
+
+We discourage passing the dependent services separately because that heavily impacts the codebase whenever new
+features are encapsulated in `KibanaRenderContextProvider`. The encouraged way to pass the CoreStart services is
+to use the `coreStart` prop, as shown in the first example.

@@ -13,12 +13,12 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import {
   KibanaRenderContextProvider,
   KibanaRenderContextProviderProps,
+  KibanaRenderContextProviderCoreStartProps,
 } from '@kbn/react-kibana-context-render';
 
-export type ToMountPointParams = Pick<
-  KibanaRenderContextProviderProps,
-  'analytics' | 'i18n' | 'theme' | 'userProfile'
->;
+export type ToMountPointParams =
+  | Pick<KibanaRenderContextProviderProps, 'analytics' | 'i18n' | 'theme' | 'userProfile'>
+  | Pick<KibanaRenderContextProviderCoreStartProps, 'coreStart'>;
 
 /**
  * MountPoint converter for react nodes.
