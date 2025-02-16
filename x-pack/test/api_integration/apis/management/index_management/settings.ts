@@ -72,24 +72,26 @@ export default function ({ getService }: FtrProviderContext) {
       'query_string',
     ];
 
-    it('should fetch an index settings', async function () {
+    describe('8.x specific tests', function () {
       this.onlyEsVersion('8');
 
-      const index = await createIndex();
+      it('should fetch an index settings', async function () {
+        const index = await createIndex();
 
-      const { status, body } = await getIndexSettings(index);
-      expect(status).to.eql(200);
+        const { status, body } = await getIndexSettings(index);
+        expect(status).to.eql(200);
 
-      // Verify we fetch the corret index settings
-      expect(body.settings.index.provided_name).to.be(index);
+        // Verify we fetch the corret index settings
+        expect(body.settings.index.provided_name).to.be(index);
 
-      // Make sure none of the settings have been removed from ES API
-      expectedIndexSettings.forEach((setting) => {
-        try {
-          expect(Object.hasOwn(body.defaults.index, setting)).to.be(true);
-        } catch {
-          throw new Error(`Expected setting "${setting}" not found.`);
-        }
+        // Make sure none of the settings have been removed from ES API
+        expectedIndexSettings.forEach((setting) => {
+          try {
+            expect(Object.hasOwn(body.defaults.index, setting)).to.be(true);
+          } catch {
+            throw new Error(`Expected setting "${setting}" not found.`);
+          }
+        });
       });
     });
 
