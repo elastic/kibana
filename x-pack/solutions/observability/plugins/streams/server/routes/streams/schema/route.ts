@@ -7,7 +7,7 @@
 import { z } from '@kbn/zod';
 import { getFlattenedObject } from '@kbn/std';
 import {
-  RecursiveRecord,
+  SampleDocument,
   fieldDefinitionConfigSchema,
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
@@ -111,7 +111,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
   }): Promise<{
     status: 'unknown' | 'success' | 'failure';
     simulationError: string | null;
-    documentsWithRuntimeFieldsApplied: RecursiveRecord[] | null;
+    documentsWithRuntimeFieldsApplied: SampleDocument[] | null;
   }> => {
     const { scopedClusterClient } = await getScopedClients({ request });
 
@@ -178,7 +178,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       _index: params.path.name,
       _id: hit._id,
       _source: Object.fromEntries(
-        Object.entries(getFlattenedObject(hit._source as RecursiveRecord)).filter(
+        Object.entries(getFlattenedObject(hit._source as SampleDocument)).filter(
           ([k]) => fieldDefinitionKeys.includes(k) || k === '@timestamp'
         )
       ),
@@ -267,7 +267,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
           if (!hit.fields) {
             return {};
           }
-          return Object.keys(hit.fields).reduce<RecursiveRecord>((acc, field) => {
+          return Object.keys(hit.fields).reduce<SampleDocument>((acc, field) => {
             acc[field] = hit.fields![field][0];
             return acc;
           }, {});

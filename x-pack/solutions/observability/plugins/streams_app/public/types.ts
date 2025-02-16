@@ -19,6 +19,10 @@ import type { SharePublicSetup, SharePublicStart } from '@kbn/share-plugin/publi
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import {
+  ObservabilityAIAssistantPublicSetup,
+  ObservabilityAIAssistantPublicStart,
+} from '@kbn/observability-ai-assistant-plugin/public';
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
@@ -30,6 +34,7 @@ export interface StreamsAppSetupDependencies {
   observabilityShared: ObservabilitySharedPluginSetup;
   unifiedSearch: {};
   share: SharePublicSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
 }
 
 export interface StreamsAppStartDependencies {
@@ -42,6 +47,7 @@ export interface StreamsAppStartDependencies {
   savedObjectsTagging: SavedObjectTaggingPluginStart;
   navigation: NavigationPublicStart;
   fieldsMetadata: FieldsMetadataPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
 export interface StreamsAppPublicSetup {}

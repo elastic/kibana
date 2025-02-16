@@ -36,3 +36,7 @@ export interface RecursiveRecord {
 export const recursiveRecord: z.ZodType<RecursiveRecord> = z.record(
   z.union([primitive, z.array(primitive), z.lazy(() => recursiveRecord)])
 );
+
+export const sampleDocument = recursiveRecord;
+
+export type SampleDocument = RecursiveRecord;

@@ -20,6 +20,7 @@ export const GrokProcessorForm = () => {
       <ProcessorFieldSelector />
       <GrokPatternsEditor />
       <EuiSpacer size="m" />
+      <EuiSpacer size="m" />
       <OptionalFieldsAccordion>
         <GrokPatternDefinition />
         <EuiSpacer size="m" />

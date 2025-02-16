@@ -17,8 +17,8 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { StreamsConfig } from '../common/config';
-
 export interface StreamsServer {
   core: CoreStart;
   config: StreamsConfig;
@@ -45,4 +45,5 @@ export interface StreamsPluginStartDependencies {
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
   alerting: AlertingServerStart;
+  inference: InferenceServerStart;
 }
