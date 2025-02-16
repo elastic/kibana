@@ -27,7 +27,7 @@ export class ActionInternal<Context extends object = object>
   public readonly showNotification?: boolean;
   public readonly disabled?: boolean;
 
-  public readonly subscribeToCompatibilityChanges?: Action<Context>['subscribeToCompatibilityChanges'];
+  public readonly getCompatibilityChangesSubject?: Action<Context>['getCompatibilityChangesSubject'];
   public readonly couldBecomeCompatible?: Action<Context>['couldBecomeCompatible'];
   public errorLogged?: boolean;
 
@@ -41,8 +41,8 @@ export class ActionInternal<Context extends object = object>
     this.disabled = this.definition.disabled;
     this.errorLogged = false;
 
-    if (this.definition.subscribeToCompatibilityChanges) {
-      this.subscribeToCompatibilityChanges = definition.subscribeToCompatibilityChanges;
+    if (this.definition.getCompatibilityChangesSubject) {
+      this.getCompatibilityChangesSubject = definition.getCompatibilityChangesSubject;
     }
     if (this.definition.couldBecomeCompatible) {
       this.couldBecomeCompatible = definition.couldBecomeCompatible;
