@@ -22,6 +22,7 @@ import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
 import { DataTableRecord, buildDataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__/data_view';
+import type { IFieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -46,7 +47,15 @@ const getSummaryProps = (
   isDetails: false,
   row: record,
   dataView: dataViewMock,
-  fieldFormats: fieldFormatsMock,
+  fieldFormats: {
+    ...fieldFormatsMock,
+    getDefaultInstance: jest
+      .fn()
+      .mockImplementation((...params: Parameters<IFieldFormatsRegistry['getDefaultInstance']>) => ({
+        ...fieldFormatsMock.getDefaultInstance(...params),
+        convert: jest.fn().mockImplementation((t: string) => String(t)),
+      })),
+  },
   setCellProps: () => {},
   closePopover: () => {},
   density: DataGridDensity.COMPACT,
