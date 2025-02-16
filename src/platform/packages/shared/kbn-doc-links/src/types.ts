@@ -386,7 +386,7 @@ export interface DocLinks {
     readonly detectionEngineOverview: string;
     readonly signalsMigrationApi: string;
     readonly legacyEndpointManagementApiDeprecations: string;
-    readonly legacyBulkApiDeprecations: string;
+    readonly legacyRuleManagementBulkApiDeprecations: string;
   };
   readonly query: {
     readonly eql: string;
