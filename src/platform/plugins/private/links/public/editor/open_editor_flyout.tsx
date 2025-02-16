@@ -18,7 +18,7 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
 import { tracksOverlays } from '@kbn/presentation-containers';
 import { apiPublishesSavedObjectId } from '@kbn/presentation-publishing';
-import { LinksLayoutType } from '../../common/content_management';
+import { LinksLayoutType, LinksTextOverflowType } from '../../common/content_management';
 import { linksClient, runSaveToLibrary } from '../content_management';
 import { coreServices } from '../services/kibana_services';
 import { LinksRuntimeState, ResolvedLink } from '../types';
@@ -82,11 +82,16 @@ export async function openEditorFlyout({
       if (!overlayTracker) editorFlyout.close();
     });
 
-    const onSaveToLibrary = async (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {
+    const onSaveToLibrary = async (
+      newLinks: ResolvedLink[],
+      newLayout: LinksLayoutType,
+      newTextOverflow: LinksTextOverflowType
+    ) => {
       const newState: LinksRuntimeState = {
         ...initialState,
         links: newLinks,
         layout: newLayout,
+        textOverflow: newTextOverflow,
       };
 
       if (initialState?.savedObjectId) {
@@ -106,11 +111,16 @@ export async function openEditorFlyout({
       }
     };
 
-    const onAddToDashboard = (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {
+    const onAddToDashboard = (
+      newLinks: ResolvedLink[],
+      newLayout: LinksLayoutType,
+      newTextOverflow: LinksTextOverflowType
+    ) => {
       const newState = {
         ...initialState,
         links: newLinks,
         layout: newLayout,
+        textOverflow: newTextOverflow,
       };
       resolve(newState);
       closeEditorFlyout(editorFlyout);
@@ -127,6 +137,7 @@ export async function openEditorFlyout({
           flyoutId={flyoutId}
           initialLinks={initialState?.links}
           initialLayout={initialState?.layout}
+          initialTextOverflow={initialState?.textOverflow}
           onClose={onCancel}
           onSaveToLibrary={onSaveToLibrary}
           onAddToDashboard={onAddToDashboard}

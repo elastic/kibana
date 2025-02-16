@@ -12,7 +12,11 @@ import userEvent from '@testing-library/user-event';
 import { render, screen, waitFor } from '@testing-library/react';
 import LinksEditor from './links_editor';
 import { LinksStrings } from '../links_strings';
-import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
+import {
+  LINKS_VERTICAL_LAYOUT,
+  LINK_TEXT_OVERFLOW_ELLIPSIS,
+  LINK_TEXT_OVERFLOW_WRAP,
+} from '../../../common/content_management';
 import { ResolvedLink } from '../../types';
 
 describe('LinksEditor', () => {
@@ -86,13 +90,30 @@ describe('LinksEditor', () => {
     });
   });
 
+  test('shows text overflow button group', async () => {
+    render(<LinksEditor {...defaultProps} />);
+    expect(
+      screen.getByTestId(`links--panelEditor--${LINK_TEXT_OVERFLOW_ELLIPSIS}`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId(`links--panelEditor--${LINK_TEXT_OVERFLOW_ELLIPSIS}`)
+    ).toHaveTextContent(LinksStrings.editor.linkEditor.getTextOverflowEllipsisLabel());
+    expect(screen.getByTestId(`links--panelEditor--${LINK_TEXT_OVERFLOW_WRAP}`)).toHaveTextContent(
+      LinksStrings.editor.linkEditor.getTextOverflowWrapLabel()
+    );
+  });
+
   test('saving by reference panels calls onSaveToLibrary', async () => {
     const orderedLinks = [...someLinks].sort((a, b) => a.order - b.order);
     render(<LinksEditor {...defaultProps} initialLinks={someLinks} isByReference />);
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
     await waitFor(() => expect(defaultProps.onSaveToLibrary).toHaveBeenCalledTimes(1));
-    expect(defaultProps.onSaveToLibrary).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
+    expect(defaultProps.onSaveToLibrary).toHaveBeenCalledWith(
+      orderedLinks,
+      LINKS_VERTICAL_LAYOUT,
+      LINK_TEXT_OVERFLOW_ELLIPSIS
+    );
   });
 
   test('saving by value panel calls onAddToDashboard', async () => {
@@ -101,6 +122,10 @@ describe('LinksEditor', () => {
     const saveButton = screen.getByTestId('links--panelEditor--saveBtn');
     await userEvent.click(saveButton);
     expect(defaultProps.onAddToDashboard).toHaveBeenCalledTimes(1);
-    expect(defaultProps.onAddToDashboard).toHaveBeenCalledWith(orderedLinks, LINKS_VERTICAL_LAYOUT);
+    expect(defaultProps.onAddToDashboard).toHaveBeenCalledWith(
+      orderedLinks,
+      LINKS_VERTICAL_LAYOUT,
+      LINK_TEXT_OVERFLOW_ELLIPSIS
+    );
   });
 });
