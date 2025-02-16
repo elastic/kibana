@@ -12,6 +12,7 @@ export const SPLUNK_RULES_COLUMNS = [
   'description',
   'action.escu.eli5',
   'action.correlationsearch.annotations',
+  'alert.severity',
 ] as const;
 
 export const RULES_SPLUNK_QUERY = `| rest /servicesNS/-/-/saved/searches
