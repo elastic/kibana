@@ -153,9 +153,44 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
+      it('successfully upserts a GroupStream from _group', async () => {
+        const response = await apiClient
+          .fetch('PUT /api/streams/{id}/_group', {
+            params: {
+              path: { id: 'test-group-3' },
+              body: {
+                group: {
+                  members: ['logs.test2'],
+                },
+              },
+            },
+          })
+          .expect(200);
+        expect(response.body).to.eql({
+          acknowledged: true,
+          result: 'created',
+        });
+      });
+
+      it('successfully reads a GroupStream from _group', async () => {
+        const response = await apiClient
+          .fetch('GET /api/streams/{id}/_group', {
+            params: {
+              path: { id: 'test-group-3' },
+            },
+          })
+          .expect(200);
+        expect(response.body).to.eql({
+          group: {
+            members: ['logs.test2'],
+          },
+        });
+      });
+
       it('successfully lists a GroupStream', async () => {
         const response = await apiClient.fetch('GET /api/streams').expect(200);
         expect(response.body.streams.some((stream) => stream.name === 'test-group')).to.eql(true);
+        expect(response.body.streams.some((stream) => stream.name === 'test-group-3')).to.eql(true);
       });
     });
   });

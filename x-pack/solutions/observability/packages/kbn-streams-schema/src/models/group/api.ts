@@ -11,7 +11,12 @@ import {
   StreamUpsertRequestBase,
   streamUpsertRequestSchemaBase,
 } from '../base/api';
-import { GroupStreamDefinitionBase, groupStreamDefinitionBaseSchema } from './base';
+import {
+  GroupBase,
+  groupBaseSchema,
+  GroupStreamDefinitionBase,
+  groupStreamDefinitionBaseSchema,
+} from './base';
 
 /**
  * Group get response
@@ -26,6 +31,20 @@ const groupStreamGetResponseSchema: z.Schema<GroupStreamGetResponse> = z.interse
     stream: groupStreamDefinitionBaseSchema,
   })
 );
+
+/**
+ * Group object get response
+ */
+
+interface GroupObjectGetResponse {
+  group: GroupBase;
+}
+
+type GroupObjectUpsertRequest = GroupObjectGetResponse;
+
+const groupObjectUpsertRequestSchema = z.object({
+  group: groupBaseSchema,
+});
 
 /**
  * Group upsert request
@@ -43,7 +62,10 @@ const groupStreamUpsertRequestSchema: z.Schema<GroupStreamUpsertRequest> = z.int
 
 export {
   type GroupStreamGetResponse,
+  type GroupObjectGetResponse,
   type GroupStreamUpsertRequest,
+  type GroupObjectUpsertRequest,
   groupStreamGetResponseSchema,
   groupStreamUpsertRequestSchema,
+  groupObjectUpsertRequestSchema,
 };
