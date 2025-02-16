@@ -433,13 +433,13 @@ interface PerformChecksParams {
 
 type PerformChecks =
   | {
-    isSuccess: true;
-    currentUser: AuthenticatedUser;
-  }
+      isSuccess: true;
+      currentUser: AuthenticatedUser;
+    }
   | {
-    isSuccess: false;
-    response: IKibanaResponse;
-  };
+      isSuccess: false;
+      response: IKibanaResponse;
+    };
 export const performChecks = async ({
   capability,
   context,

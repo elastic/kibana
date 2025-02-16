@@ -75,7 +75,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       }
 
       return contextUser;
-    }
+    };
 
     return {
       core: coreContext,

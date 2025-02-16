@@ -275,20 +275,20 @@ export const postEvaluateRoute = (
               // Skeleton request from route to pass to the agents
               // params will be passed to the actions executor
               const skeletonRequest: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody> =
-              {
-                ...request,
-                body: {
-                  alertsIndexPattern: '',
-                  allow: [],
-                  allowReplacement: [],
-                  subAction: 'invokeAI',
-                  // The actionTypeId is irrelevant when used with the invokeAI subaction
-                  actionTypeId: '.gen-ai',
-                  replacements: {},
-                  size: DEFAULT_SIZE,
-                  conversationId: '',
-                },
-              };
+                {
+                  ...request,
+                  body: {
+                    alertsIndexPattern: '',
+                    allow: [],
+                    allowReplacement: [],
+                    subAction: 'invokeAI',
+                    // The actionTypeId is irrelevant when used with the invokeAI subaction
+                    actionTypeId: '.gen-ai',
+                    replacements: {},
+                    size: DEFAULT_SIZE,
+                    conversationId: '',
+                  },
+                };
 
               const contentReferencesEnabled =
                 assistantContext.getRegisteredFeatures(
@@ -362,19 +362,19 @@ export const postEvaluateRoute = (
               const agentRunnable =
                 isOpenAI || llmType === 'inference'
                   ? await createOpenAIToolsAgent({
-                    llm,
-                    tools,
-                    prompt: formatPrompt(defaultSystemPrompt),
-                    streamRunnable: false,
-                  })
-                  : llmType && ['bedrock', 'gemini'].includes(llmType)
-                    ? createToolCallingAgent({
                       llm,
                       tools,
                       prompt: formatPrompt(defaultSystemPrompt),
                       streamRunnable: false,
                     })
-                    : await createStructuredChatAgent({
+                  : llmType && ['bedrock', 'gemini'].includes(llmType)
+                  ? createToolCallingAgent({
+                      llm,
+                      tools,
+                      prompt: formatPrompt(defaultSystemPrompt),
+                      streamRunnable: false,
+                    })
+                  : await createStructuredChatAgent({
                       llm,
                       tools,
                       prompt: formatPromptStructured(defaultSystemPrompt),

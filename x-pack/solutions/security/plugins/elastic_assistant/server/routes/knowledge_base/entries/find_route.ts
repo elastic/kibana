@@ -117,8 +117,8 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
                 (
                   (result?.data.aggregations?.global_aggs as estypes.AggregationsGlobalAggregate)
                     ?.kb_resource_aggregation as {
-                      buckets: estypes.AggregationsBuckets;
-                    }
+                    buckets: estypes.AggregationsBuckets;
+                  }
                 )?.buckets,
                 ['key', kbResource]
               ) as {
@@ -132,22 +132,22 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
                 entry == null
                   ? []
                   : [
-                    {
-                      id: bucketId,
-                      createdAt: entry.created_at,
-                      createdBy: entry.created_by,
-                      updatedAt: entry.updated_at,
-                      updatedBy: entry.updated_by,
-                      users: [],
-                      name,
-                      namespace: entry.namespace,
-                      type: DocumentEntryType.value,
-                      kbResource,
-                      source: '',
-                      required,
-                      text: `${entryCount}`,
-                    },
-                  ];
+                      {
+                        id: bucketId,
+                        createdAt: entry.created_at,
+                        createdBy: entry.created_by,
+                        updatedAt: entry.updated_at,
+                        updatedBy: entry.updated_by,
+                        users: [],
+                        name,
+                        namespace: entry.namespace,
+                        type: DocumentEntryType.value,
+                        kbResource,
+                        source: '',
+                        required,
+                        text: `${entryCount}`,
+                      },
+                    ];
               return entries;
             })
             .flat();
