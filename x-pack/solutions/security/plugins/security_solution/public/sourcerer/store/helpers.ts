@@ -62,6 +62,7 @@ export const validateSelectedPatterns = (
     const dedupeAllDefaultPatterns = ensurePatternFormat(
       (dataView ?? state.defaultDataView).title.split(',')
     );
+    // TODO: If we having missing patterns here, just create a new dataView...don't worry about missingPatterns anymore...
     missingPatterns = dedupePatterns.filter(
       (pattern) => !dedupeAllDefaultPatterns.includes(pattern)
     );
