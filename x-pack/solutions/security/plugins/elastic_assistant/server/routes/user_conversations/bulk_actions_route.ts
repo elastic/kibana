@@ -158,7 +158,7 @@ export const bulkActionConversationsRoute = (
         request.events.completed$.subscribe(() => abortController.abort());
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,
@@ -214,10 +214,10 @@ export const bulkActionConversationsRoute = (
           const created =
             docsCreated.length > 0
               ? await dataClient?.findDocuments<EsConversationSchema>({
-                  page: 1,
-                  perPage: 100,
-                  filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
-                })
+                page: 1,
+                perPage: 100,
+                filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
+              })
               : undefined;
 
           return buildBulkResponse(response, {

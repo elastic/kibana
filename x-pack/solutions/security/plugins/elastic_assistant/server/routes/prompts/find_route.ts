@@ -47,7 +47,7 @@ export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
           const { query } = request;
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
           // Perform license and authenticated user checks
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,
@@ -64,8 +64,8 @@ export const findPromptsRoute = (router: ElasticAssistantPluginRouter, logger: L
             sortOrder: query.sort_order,
             filter: query.filter
               ? `${decodeURIComponent(
-                  query.filter
-                )} and not (prompt_type: "system" and is_default: true)`
+                query.filter
+              )} and not (prompt_type: "system" and is_default: true)`
               : 'not (prompt_type: "system" and is_default: true)',
             fields: query.fields,
           });

@@ -165,7 +165,7 @@ export const bulkActionAnonymizationFieldsRoute = (
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
           // Perform license and authenticated user checks
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,
@@ -218,10 +218,10 @@ export const bulkActionAnonymizationFieldsRoute = (
           const created =
             docsCreated.length > 0
               ? await dataClient?.findDocuments<EsAnonymizationFieldsSchema>({
-                  page: 1,
-                  perPage: 1000,
-                  filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
-                })
+                page: 1,
+                perPage: 1000,
+                filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
+              })
               : undefined;
 
           return buildBulkResponse(response, {

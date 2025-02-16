@@ -433,19 +433,19 @@ interface PerformChecksParams {
 
 type PerformChecks =
   | {
-      isSuccess: true;
-      currentUser: AuthenticatedUser;
-    }
+    isSuccess: true;
+    currentUser: AuthenticatedUser;
+  }
   | {
-      isSuccess: false;
-      response: IKibanaResponse;
-    };
-export const performChecks = ({
+    isSuccess: false;
+    response: IKibanaResponse;
+  };
+export const performChecks = async ({
   capability,
   context,
   request,
   response,
-}: PerformChecksParams): PerformChecks => {
+}: PerformChecksParams): Promise<PerformChecks> => {
   const assistantResponse = buildResponse(response);
 
   if (!hasAIAssistantLicense(context.licensing.license)) {
@@ -459,7 +459,7 @@ export const performChecks = ({
     };
   }
 
-  const currentUser = context.elasticAssistant.getCurrentUser();
+  const currentUser = await context.elasticAssistant.getCurrentUser();
 
   if (currentUser == null) {
     return {

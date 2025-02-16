@@ -200,7 +200,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
           const logger = ctx.elasticAssistant.logger;
 
           // Perform license, authenticated user and FF checks
-          const checkResponse = performChecks({
+          const checkResponse = await performChecks({
             context: ctx,
             request,
             response,
@@ -311,10 +311,10 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
           const created =
             docsCreated.length > 0
               ? await kbDataClient?.findDocuments<EsKnowledgeBaseEntrySchema>({
-                  page: 1,
-                  perPage: 100,
-                  filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
-                })
+                page: 1,
+                perPage: 100,
+                filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
+              })
               : undefined;
 
           return buildBulkResponse(
