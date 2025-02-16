@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { IDataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public';
+import { formatNumber } from '@elastic/eui';
 
-export interface StreamsAppServices {
-  dataStreamsClient: Promise<IDataStreamsStatsClient>;
-}
+export const formatBytes = (value: number) => formatNumber(value, '0.0 b');

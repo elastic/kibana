@@ -26,6 +26,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiLink,
+  EuiLoadingSpinner,
   EuiPanel,
   EuiPopover,
   EuiText,
@@ -33,21 +34,28 @@ import {
 import { i18n } from '@kbn/i18n';
 import { LifecycleEditAction } from './modal';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { DataStreamStats } from './hooks/use_data_stream_stats';
+import { formatBytes } from './helpers/format_bytes';
 
 export function RetentionMetadata({
   definition,
   ilmLocator,
   lifecycleActions,
   openEditModal,
+  stats,
+  isLoadingStats,
+  statsError,
 }: {
   definition: IngestStreamGetResponse;
   ilmLocator?: LocatorPublic<IlmLocatorParams>;
   lifecycleActions: Array<{ name: string; action: LifecycleEditAction }>;
   openEditModal: (action: LifecycleEditAction) => void;
+  stats?: DataStreamStats;
+  isLoadingStats: boolean;
+  statsError?: Error;
 }) {
   const [isMenuOpen, { toggle: toggleMenu, off: closeMenu }] = useBoolean(false);
   const router = useStreamsAppRouter();
-
   const lifecycle = definition.effective_lifecycle;
 
   const contextualMenu =
@@ -171,6 +179,38 @@ export function RetentionMetadata({
           </EuiFlexGroup>
         }
       />
+      <EuiHorizontalRule margin="m" />
+      <MetadataRow
+        metadata={i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRate', {
+          defaultMessage: 'Ingestion',
+        })}
+        value={
+          statsError ? (
+            '-'
+          ) : isLoadingStats || !stats ? (
+            <EuiLoadingSpinner size="s" />
+          ) : stats.bytesPerDay ? (
+            formatIngestionRate(stats.bytesPerDay)
+          ) : (
+            '-'
+          )
+        }
+      />
+      <EuiHorizontalRule margin="m" />
+      <MetadataRow
+        metadata={i18n.translate('xpack.streams.streamDetailLifecycle.totalDocs', {
+          defaultMessage: 'Total doc count',
+        })}
+        value={
+          statsError ? (
+            '-'
+          ) : isLoadingStats || !stats ? (
+            <EuiLoadingSpinner size="s" />
+          ) : (
+            stats.totalDocs
+          )
+        }
+      />
     </EuiPanel>
   );
 }
@@ -197,3 +237,9 @@ function MetadataRow({
     </EuiFlexGroup>
   );
 }
+
+const formatIngestionRate = (bytesPerDay: number) => {
+  const perDay = formatBytes(bytesPerDay);
+  const perMonth = formatBytes(bytesPerDay * 30);
+  return `${perDay} / Day - ${perMonth} / Month`;
+};
