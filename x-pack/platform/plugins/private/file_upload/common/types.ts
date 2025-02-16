@@ -98,10 +98,19 @@ export interface HasImportPermission {
 
 export type InputData = any[];
 
-export interface ImportResponse {
+export interface InitializeImportResponse {
   success: boolean;
   id: string;
-  index?: string;
+  index: string;
+  pipelineIds: Array<string | undefined>;
+  error?: {
+    error: estypes.ErrorCause;
+  };
+}
+
+export interface ImportResponse {
+  success: boolean;
+  index: string;
   pipelineId?: string;
   docCount: number;
   failures: ImportFailure[];

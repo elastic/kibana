@@ -13,7 +13,10 @@ import { switchMap, combineLatest, BehaviorSubject, of } from 'rxjs';
 import type { HttpSetup } from '@kbn/core/public';
 import type { IImporter } from '@kbn/file-upload-plugin/public/importer/types';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
-import type { ImportResponse, IngestPipeline } from '@kbn/file-upload-plugin/common/types';
+import type {
+  IngestPipeline,
+  InitializeImportResponse,
+} from '@kbn/file-upload-plugin/common/types';
 import type {
   IndicesIndexSettings,
   MappingTypeMapping,
@@ -64,7 +67,7 @@ export class FileManager {
   private mappingsCheckSubscription: Subscription;
   private settings;
   private mappings: MappingTypeMapping | null = null;
-  private pipelines: IngestPipeline[] | null = null;
+  private pipelines: Array<IngestPipeline | undefined> = [];
   private inferenceId: string | null = null;
   private importer: IImporter | null = null;
   private timeFieldName: string | undefined | null = null;
@@ -221,7 +224,7 @@ export class FileManager {
     return createMergedMappings(files);
   }
 
-  private getPipelines(): IngestPipeline[] {
+  private getPipelines(): Array<IngestPipeline | undefined> {
     const files = this.getFiles();
     return files.map((file) => file.getPipeline());
   }
@@ -256,29 +259,32 @@ export class FileManager {
       });
     }
 
+    const createPipelines = this.pipelines.length > 0;
+
     this.setStatus({
       indexCreated: STATUS.STARTED,
-      pipelineCreated: STATUS.STARTED,
+      pipelineCreated: createPipelines ? STATUS.STARTED : STATUS.NA,
     });
 
     let indexCreated = false;
-    let pipelineCreated = false;
-    let initializeImportResp: ImportResponse | undefined;
+    let pipelinesCreated = false;
+    let initializeImportResp: InitializeImportResponse | undefined;
 
     try {
       initializeImportResp = await this.importer.initializeImport(
         indexName,
         this.settings,
         this.mappings,
-        this.pipelines[0],
         this.pipelines
       );
       this.timeFieldName = this.importer.getTimeField();
       indexCreated = initializeImportResp.index !== undefined;
-      pipelineCreated = initializeImportResp.pipelineId !== undefined;
+      pipelinesCreated = initializeImportResp.pipelineIds.length > 0;
       this.setStatus({
         indexCreated: indexCreated ? STATUS.COMPLETED : STATUS.FAILED,
-        pipelineCreated: pipelineCreated ? STATUS.COMPLETED : STATUS.FAILED,
+        ...(createPipelines
+          ? { pipelineCreated: pipelinesCreated ? STATUS.COMPLETED : STATUS.FAILED }
+          : {}),
       });
 
       if (initializeImportResp.error) {
@@ -299,7 +305,11 @@ export class FileManager {
       return null;
     }
 
-    if (!indexCreated || !pipelineCreated || !initializeImportResp) {
+    if (
+      indexCreated === false ||
+      (createPipelines && pipelinesCreated === false) ||
+      !initializeImportResp
+    ) {
       return null;
     }
 
@@ -309,16 +319,12 @@ export class FileManager {
 
     // import data
     const files = this.getFiles();
+    const createdPipelineIds = initializeImportResp.pipelineIds;
 
     try {
       await Promise.all(
         files.map(async (file, i) => {
-          await file.import(
-            initializeImportResp!.id,
-            indexName,
-            this.mappings!,
-            `${indexName}-${i}-pipeline`
-          );
+          await file.import(indexName, this.mappings!, createdPipelineIds[i] ?? undefined);
         })
       );
     } catch (error) {
@@ -345,9 +351,7 @@ export class FileManager {
         this.setStatus({
           pipelinesDeleted: STATUS.STARTED,
         });
-        await this.importer.deletePipelines(
-          this.pipelines.map((p, i) => `${indexName}-${i}-pipeline`)
-        );
+        await this.importer.deletePipelines();
         this.setStatus({
           pipelinesDeleted: STATUS.COMPLETED,
         });
@@ -461,6 +465,9 @@ export class FileManager {
       };
 
       this.pipelines.forEach((pipeline) => {
+        if (pipeline === undefined) {
+          return;
+        }
         pipeline.processors.push({
           set: {
             field: 'content',
