@@ -9,4 +9,5 @@
 
 export { useBoolean } from './src/use_boolean';
 export { useErrorTextStyle } from './src/use_error_text_style';
+export { useDebounceFn } from './src/use_debounce_fn';
 export type { UseBooleanHandlers, UseBooleanResult } from './src/use_boolean';
