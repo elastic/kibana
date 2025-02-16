@@ -57,7 +57,7 @@ export function toSearchResult({
     : `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector?connector_type=${connectorTypeParam}&service_type=${serviceType}`;
 
   return {
-    icon: iconPath || 'logoEnterpriseSearch',
+    icon: iconPath || 'logoElasticsearch',
     id: serviceType,
     score,
     title: name,

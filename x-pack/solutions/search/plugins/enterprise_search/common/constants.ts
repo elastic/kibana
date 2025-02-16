@@ -44,7 +44,7 @@ export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
     defaultMessage: 'Create search experiences with a refined set of APIs and tools.',
   }),
   URL: '/app/elasticsearch/overview',
-  LOGO: 'logoEnterpriseSearch',
+  LOGO: 'logoElasticsearch',
 };
 
 export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
@@ -58,7 +58,7 @@ export const ENTERPRISE_SEARCH_CONTENT_PLUGIN = {
       'Enterprise search offers a number of ways to easily make your data searchable. Choose from the web crawler, Elasticsearch indices, API, direct uploads, or thrid party connectors.', // TODO: Make sure this content is correct.
   }),
   URL: '/app/elasticsearch/content',
-  LOGO: 'logoEnterpriseSearch',
+  LOGO: 'logoElasticsearch',
   SUPPORT_URL: 'https://discuss.elastic.co/c/enterprise-search/',
 };
 
@@ -75,7 +75,7 @@ export const AI_SEARCH_PLUGIN = {
       'Toolkit for enabling developers to build AI search-powered applications using the Elastic platform.',
   }),
   URL: '/app/elasticsearch/ai_search',
-  LOGO: 'logoEnterpriseSearch',
+  LOGO: 'logoElasticsearch',
 };
 
 export const ANALYTICS_PLUGIN = {
@@ -129,7 +129,7 @@ export const SEARCH_EXPERIENCES_PLUGIN = {
 
 export const APPLICATIONS_PLUGIN = {
   ID: ENTERPRISE_SEARCH_APPLICATIONS_APP_ID,
-  LOGO: 'logoEnterpriseSearch',
+  LOGO: 'logoElasticsearch',
   NAME: i18n.translate('xpack.enterpriseSearch.applications.productName', {
     defaultMessage: 'Applications',
   }),
@@ -146,7 +146,7 @@ export const VECTOR_SEARCH_PLUGIN = {
       'Elasticsearch can be used as a vector database, which enables vector search and semantic search use cases.',
   }),
   ID: SEARCH_VECTOR_SEARCH,
-  LOGO: 'logoEnterpriseSearch',
+  LOGO: 'logoElasticsearch',
   NAME: i18n.translate('xpack.enterpriseSearch.vectorSearch.productName', {
     defaultMessage: 'Vector Search',
   }),
@@ -163,7 +163,7 @@ export const SEMANTIC_SEARCH_PLUGIN = {
       'Easily add semantic search to Elasticsearch with inference endpoints and the semantic_text field type, to boost search relevance.',
   }),
   ID: SEARCH_SEMANTIC_SEARCH,
-  LOGO: 'logoEnterpriseSearch',
+  LOGO: 'logoElasticsearch',
   NAME: i18n.translate('xpack.enterpriseSearch.SemanticSearch.productName', {
     defaultMessage: 'Semantic Search',
   }),
