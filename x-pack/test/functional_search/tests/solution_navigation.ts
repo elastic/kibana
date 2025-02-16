@@ -117,7 +117,7 @@ export default function searchSolutionNavigation({
         deepLinkId: 'management:index_management',
       });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Deployment' });
-      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Stack Management' });
+      await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Content' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Index Management' });
       await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
         text: 'Indices',
