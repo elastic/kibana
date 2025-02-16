@@ -6,7 +6,6 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ColorPickerPopover } from '../color_picker_popover';
 
@@ -53,8 +52,10 @@ class Interactive extends React.Component<
   }
 }
 
-storiesOf('components/Color/ColorPickerPopover', module)
-  .addParameters({
+export default {
+  title: 'components/Color/ColorPickerPopover',
+
+  parameters: {
     info: {
       inline: true,
       styles: {
@@ -67,8 +68,11 @@ storiesOf('components/Color/ColorPickerPopover', module)
         },
       },
     },
-  })
-  .add('three colors', () => (
+  },
+};
+
+export const ThreeColors = {
+  render: () => (
     <ColorPickerPopover
       value="#fff"
       anchorPosition="downCenter"
@@ -76,8 +80,13 @@ storiesOf('components/Color/ColorPickerPopover', module)
       colors={THREE_COLORS}
       ariaLabel="Color Picker"
     />
-  ))
-  .add('six colors', () => (
+  ),
+
+  name: 'three colors',
+};
+
+export const SixColors = {
+  render: () => (
     <ColorPickerPopover
       value="#fff"
       anchorPosition="downCenter"
@@ -85,8 +94,13 @@ storiesOf('components/Color/ColorPickerPopover', module)
       colors={SIX_COLORS}
       ariaLabel="Color Picker"
     />
-  ))
-  .add('six colors, value missing', () => (
+  ),
+
+  name: 'six colors',
+};
+
+export const SixColorsValueMissing = {
+  render: () => (
     <ColorPickerPopover
       value="#a1b2c3"
       anchorPosition="downCenter"
@@ -94,8 +108,16 @@ storiesOf('components/Color/ColorPickerPopover', module)
       colors={SIX_COLORS}
       ariaLabel="Color Picker"
     />
-  ))
-  .add('interactive', () => <Interactive />, {
+  ),
+
+  name: 'six colors, value missing',
+};
+
+export const _Interactive = {
+  render: () => <Interactive />,
+  name: 'interactive',
+
+  parameters: {
     info: {
       inline: true,
       source: false,
@@ -110,4 +132,5 @@ storiesOf('components/Color/ColorPickerPopover', module)
         },
       },
     },
-  });
+  },
+};

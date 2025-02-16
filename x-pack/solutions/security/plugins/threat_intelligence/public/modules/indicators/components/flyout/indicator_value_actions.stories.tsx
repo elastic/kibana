@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import { generateMockFileIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorValueActions } from './indicator_value_actions';
@@ -19,7 +19,7 @@ export default {
 const indicator: Indicator = generateMockFileIndicator();
 const field: string = 'threat.indicator.name';
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   const context = {
     kqlBarIntegration: true,
   };
@@ -32,7 +32,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const WithoutFilterInOut: Story<void> = () => {
+export const WithoutFilterInOut: StoryFn = () => {
   const context = {
     kqlBarIntegration: false,
   };

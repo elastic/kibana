@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { of } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import { generateMockFileIndicator } from '../../../../common/types/indicator';
@@ -18,7 +18,7 @@ export default {
   title: 'CommentChildren',
 };
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   const id: string = '123';
   const metadata: AttachmentMetadata = {
     indicatorName: 'indicatorName',
@@ -50,7 +50,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const Loading: Story<void> = () => {
+export const Loading: StoryFn = () => {
   const id: string = '123';
   const metadata: AttachmentMetadata = {
     indicatorName: 'indicatorName',

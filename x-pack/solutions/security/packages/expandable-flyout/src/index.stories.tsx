@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import type { Story } from '@storybook/react';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -99,7 +98,7 @@ const registeredPanels = [
   },
 ];
 
-export const Right: Story<void> = () => {
+export const Right = () => {
   const state: State = {
     panels: {
       byId: {
@@ -126,7 +125,7 @@ export const Right: Story<void> = () => {
   );
 };
 
-export const Left: Story<void> = () => {
+export const Left = () => {
   const state: State = {
     panels: {
       byId: {
@@ -155,7 +154,7 @@ export const Left: Story<void> = () => {
   );
 };
 
-export const Preview: Story<void> = () => {
+export const Preview = () => {
   const state: State = {
     panels: {
       byId: {
@@ -188,7 +187,7 @@ export const Preview: Story<void> = () => {
   );
 };
 
-export const MultiplePreviews: Story<void> = () => {
+export const MultiplePreviews = () => {
   const state: State = {
     panels: {
       byId: {
@@ -224,7 +223,7 @@ export const MultiplePreviews: Story<void> = () => {
   );
 };
 
-export const CollapsedPushMode: Story<void> = () => {
+export const CollapsedPushMode = () => {
   const state: State = {
     panels: {
       byId: {
@@ -251,7 +250,7 @@ export const CollapsedPushMode: Story<void> = () => {
   );
 };
 
-export const ExpandedPushMode: Story<void> = () => {
+export const ExpandedPushMode = () => {
   const state: State = {
     panels: {
       byId: {
@@ -280,7 +279,7 @@ export const ExpandedPushMode: Story<void> = () => {
   );
 };
 
-export const DisableTypeSelection: Story<void> = () => {
+export const DisableTypeSelection = () => {
   const state: State = {
     panels: {
       byId: {
@@ -311,7 +310,7 @@ export const DisableTypeSelection: Story<void> = () => {
   );
 };
 
-export const ResetWidths: Story<void> = () => {
+export const ResetWidths = () => {
   const state: State = {
     panels: {
       byId: {
@@ -337,7 +336,7 @@ export const ResetWidths: Story<void> = () => {
   );
 };
 
-export const DisableResizeWidthSelection: Story<void> = () => {
+export const DisableResizeWidthSelection = () => {
   const state: State = {
     panels: {
       byId: {

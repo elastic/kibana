@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { action } from '@storybook/addon-actions';
 import { KeyboardShortcutsDoc } from '../keyboard_shortcuts_doc';
 
-storiesOf('components/KeyboardShortcutsDoc', module).add('default', () => (
-  <KeyboardShortcutsDoc onClose={action('onClose')} />
-));
+export default {
+  title: 'components/KeyboardShortcutsDoc',
+};
+
+export const Default = {
+  render: () => <KeyboardShortcutsDoc onClose={action('onClose')} />,
+  name: 'default',
+};

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Story } from '@storybook/react';
+import type { StoryFn } from '@storybook/react';
 import { StoryProvidersComponent } from '../../../../mocks/story_providers';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
 import { IndicatorsFlyout } from './flyout';
@@ -16,7 +16,7 @@ export default {
   title: 'IndicatorsFlyout',
 };
 
-export const Default: Story<void> = () => {
+export const Default: StoryFn = () => {
   const mockIndicator: Indicator = generateMockIndicator();
 
   return (
@@ -29,7 +29,7 @@ export const Default: Story<void> = () => {
   );
 };
 
-export const EmptyIndicator: Story<void> = () => {
+export const EmptyIndicator: StoryFn = () => {
   return (
     <StoryProvidersComponent>
       <IndicatorsFlyout
