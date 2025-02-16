@@ -39,12 +39,12 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
     if (['user', 'host', 'service'].includes(entity.type) && !entity.name) {
       notifications.toasts.addDanger({
         title: i18n.translate(
-            'xpack.securitySolution.assetInventory.openFlyout.missingEntityNameTitle',
-            { defaultMessage: 'Missing Entity Name' }
+          'xpack.securitySolution.assetInventory.openFlyout.missingEntityNameTitle',
+          { defaultMessage: 'Missing Entity Name' }
         ),
         text: i18n.translate(
-            'xpack.securitySolution.assetInventory.openFlyout.missingEntityNameText',
-            { defaultMessage: 'Entity name is required for User, Host, and Service entities' }
+          'xpack.securitySolution.assetInventory.openFlyout.missingEntityNameText',
+          { defaultMessage: 'Entity name is required for User, Host, and Service entities' }
         ),
       });
 
@@ -54,11 +54,25 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
     }
 
     switch (entity.type) {
-      case "user": openFlyout({ right: { id: UserPanelKey, params: { userName: entity.name, scopeId, contextId } } }); break;
-      case "host": openFlyout({ right: { id: HostPanelKey, params: { hostName: entity.name, scopeId, contextId } } }); break;
-      case "service": openFlyout({ right: { id: ServicePanelKey, params: { serviceName: entity.name, scopeId, contextId } } }); break;
+      case 'user':
+        openFlyout({
+          right: { id: UserPanelKey, params: { userName: entity.name, scopeId, contextId } },
+        });
+        break;
+      case 'host':
+        openFlyout({
+          right: { id: HostPanelKey, params: { hostName: entity.name, scopeId, contextId } },
+        });
+        break;
+      case 'service':
+        openFlyout({
+          right: { id: ServicePanelKey, params: { serviceName: entity.name, scopeId, contextId } },
+        });
+        break;
 
-      default: openFlyout({ right: { id: UniversalEntityPanelKey, params: { entity } } }); break;
+      default:
+        openFlyout({ right: { id: UniversalEntityPanelKey, params: { entity } } });
+        break;
     }
 
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, ASSET_INVENTORY_EXPAND_FLYOUT_SUCCESS);
