@@ -74,6 +74,10 @@ export type EmbeddableInput = {
   executionContext?: KibanaExecutionContext;
 };
 
+export type EmbeddableStateWithTypeAndSavedObjectId = EmbeddableStateWithType & {
+  savedObjectId?: string;
+};
+
 export interface PanelState<
   E extends EmbeddableInput & { id: string } = { id: string; version?: string }
 > {

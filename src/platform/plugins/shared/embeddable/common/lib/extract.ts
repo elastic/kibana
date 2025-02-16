@@ -10,6 +10,7 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import { CommonEmbeddableStartContract, EmbeddableStateWithType } from '../types';
 import { extractBaseEmbeddableInput } from './migrate_base_input';
+import { extractSavedObjectIdRef } from './saved_object_id_references';
 
 export const getExtractFunction = (embeddables: CommonEmbeddableStartContract) => {
   return (state: EmbeddableStateWithType) => {
@@ -17,8 +18,9 @@ export const getExtractFunction = (embeddables: CommonEmbeddableStartContract) =
     const factory = embeddables.getEmbeddableFactory?.(state.type);
 
     const baseResponse = extractBaseEmbeddableInput(state);
-    let updatedInput = baseResponse.state;
-    const refs = baseResponse.references;
+    const updatedResponse = extractSavedObjectIdRef(baseResponse.state, baseResponse.references);
+    let updatedInput = updatedResponse.state;
+    const refs = updatedResponse.references;
 
     if (factory) {
       const factoryResponse = factory.extract(state);

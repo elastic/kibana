@@ -11,6 +11,7 @@ export type {
   EmbeddableInput,
   CommonEmbeddableStartContract,
   EmbeddableStateWithType,
+  EmbeddableStateWithTypeAndSavedObjectId,
   PanelState,
   EmbeddablePersistableStateService,
   EmbeddableRegistryDefinition,
