@@ -30,7 +30,7 @@ describe('useNavigateToSessionView', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
   });
 
   it('when isFlyoutOpen is true, should return callback that opens left panel', () => {
@@ -99,9 +99,9 @@ describe('useNavigateToSessionView', () => {
     });
   });
 
-  describe('when new navigation is enabled', () => {
+  describe('when newExpandableFlyoutNavigationDisabled is false', () => {
     beforeEach(() => {
-      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+      (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     });
     it('when isFlyoutOpen is true, should return callback that opens left panel', () => {
       const hookResult = renderHook(() =>

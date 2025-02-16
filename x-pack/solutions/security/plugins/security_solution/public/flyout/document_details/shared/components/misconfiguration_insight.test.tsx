@@ -48,7 +48,7 @@ const renderMisconfigurationsInsight = (fieldName: 'host.name' | 'user.name', va
 describe('MisconfigurationsInsight', () => {
   beforeEach(() => {
     jest.mocked(useExpandableFlyoutApi).mockReturnValue(mockFlyoutApi);
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
   });
 
   it('renders', () => {
@@ -60,8 +60,8 @@ describe('MisconfigurationsInsight', () => {
     expect(getByTestId(`${testId}-distribution-bar`)).toBeInTheDocument();
   });
 
-  it('open entity details panel when clicking on the count if new navigation is enabled', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+  it('open entity details panel when clicking on the count if newExpandableFlyoutNavigationDisabled is false', () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useMisconfigurationPreview as jest.Mock).mockReturnValue({
       data: { count: { passed: 1, failed: 2 } },
     });

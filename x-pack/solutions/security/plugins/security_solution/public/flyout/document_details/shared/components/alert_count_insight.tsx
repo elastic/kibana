@@ -116,8 +116,8 @@ export const AlertCountInsight: React.FC<AlertCountInsightProps> = ({
     timelinePrivileges: { read: canUseTimeline },
   } = useUserPrivileges();
 
-  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationEnabled'
+  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationDisabled'
   );
   const entityFilter = useMemo(() => ({ field: fieldName, value: name }), [fieldName, name]);
   const { to, from } = useGlobalTime();
