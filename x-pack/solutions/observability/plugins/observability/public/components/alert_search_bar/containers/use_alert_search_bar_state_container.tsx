@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/pipeable';
 import * as t from 'io-ts';
 import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
+import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, ALERT_STATUS } from '@kbn/rule-data-utils';
 import { SavedQuery, TimefilterContract } from '@kbn/data-plugin/public';
 import {
   createKbnUrlStateStorage,
@@ -50,12 +50,17 @@ export function useAlertSearchBarStateContainer(
 
   useUrlStateSyncEffect(stateContainer, urlStorageKey, replace, defaultState);
 
-  const { setRangeFrom, setRangeTo, setKuery, setStatus, setFilters, setSavedQueryId } =
-    stateContainer.transitions;
-  const { rangeFrom, rangeTo, kuery, status, filters, savedQueryId } = useContainerSelector(
-    stateContainer,
-    (state) => state
-  );
+  const {
+    setRangeFrom,
+    setRangeTo,
+    setKuery,
+    setStatus,
+    setFilters,
+    setSavedQueryId,
+    setControlConfigs,
+  } = stateContainer.transitions;
+  const { rangeFrom, rangeTo, kuery, status, filters, savedQueryId, controlConfigs } =
+    useContainerSelector(stateContainer, (state) => state);
 
   useEffect(() => {
     if (!savedQuery) {
@@ -94,6 +99,8 @@ export function useAlertSearchBarStateContainer(
     onRangeToChange: setRangeTo,
     onStatusChange: setStatus,
     onFiltersChange: setFilters,
+    onControlConfigsChange: setControlConfigs,
+    controlConfigs,
     filters,
     rangeFrom,
     rangeTo,
@@ -176,7 +183,9 @@ function initializeUrlAndStateContainer(
   const urlState = alertSearchBarState.decode(
     urlStateStorage.get<Partial<AlertSearchBarContainerState>>(urlStorageKey)
   );
-  const validUrlState = isRight(urlState) ? pipe(urlState).right : {};
+  const validUrlState: Partial<AlertSearchBarContainerState> = isRight(urlState)
+    ? pipe(urlState).right
+    : {};
   const timeFilterTime = timefilterService.getTime();
   const timeFilterState = timefilterService.isTimeTouched()
     ? {
@@ -184,6 +193,18 @@ function initializeUrlAndStateContainer(
         rangeTo: timeFilterTime.to,
       }
     : {};
+
+  // This part is for backward compatibility. Previously, we saved status in the status query
+  // parameter. Now, we save it in the controlConfigs.
+  if (validUrlState.status !== undefined && validUrlState.controlConfigs) {
+    const statusControl = validUrlState.controlConfigs.find(
+      (control) => control.fieldName === ALERT_STATUS
+    );
+    if (statusControl) {
+      statusControl.selectedOptions = [validUrlState.status];
+      validUrlState.status = undefined;
+    }
+  }
 
   const currentState = {
     ...defaultState,
