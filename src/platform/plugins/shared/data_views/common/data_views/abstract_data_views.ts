@@ -191,7 +191,9 @@ export abstract class AbstractDataView {
     this.sourceFilters = [...(spec.sourceFilters || [])];
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
-    this.fieldAttrs = new Map(Object.entries({ ...extractedFieldAttrs, ...spec.fieldAttrs }));
+    this.fieldAttrs = new Map(
+      Object.entries(cloneDeep({ ...extractedFieldAttrs, ...spec.fieldAttrs }))
+    );
     this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
@@ -365,8 +367,15 @@ export abstract class AbstractDataView {
   getAsSavedObjectBody(): DataViewAttributes {
     const stringifyOrUndefined = (obj: any) => (obj ? JSON.stringify(obj) : undefined);
 
+    const fieldAttrsWithValues: Record<string, FieldAttrSet> = {};
+    this.fieldAttrs.forEach((attrs, fieldName) => {
+      if (Object.keys(attrs).length) {
+        fieldAttrsWithValues[fieldName] = attrs;
+      }
+    });
+
     return {
-      fieldAttrs: stringifyOrUndefined(Object.fromEntries(this.fieldAttrs.entries())),
+      fieldAttrs: stringifyOrUndefined(fieldAttrsWithValues),
       title: this.getIndexPattern(),
       timeFieldName: this.timeFieldName,
       sourceFilters: stringifyOrUndefined(this.sourceFilters),
@@ -383,7 +392,7 @@ export abstract class AbstractDataView {
 
   protected toSpecShared(includeFields = true): DataViewSpec {
     // if fields aren't included, don't include count
-    const fieldAttrs = Object.fromEntries(this.fieldAttrs.entries());
+    const fieldAttrs = cloneDeep(Object.fromEntries(this.fieldAttrs.entries()));
     if (!includeFields) {
       Object.keys(fieldAttrs).forEach((key) => {
         delete fieldAttrs[key].count;

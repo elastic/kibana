@@ -307,7 +307,7 @@ export class DataViewLazy extends AbstractDataView {
         esTypes: [fieldType],
         aggregatable: true,
         searchable: true,
-        count: config.popularity ?? 0,
+        count: Number(config.popularity) || 0,
         readFromDocValues: false,
         shortDotsEnable: this.shortDotsEnable,
       });
@@ -318,7 +318,10 @@ export class DataViewLazy extends AbstractDataView {
     this.setFieldCustomDescription(fieldName, config.customDescription);
 
     if (config.popularity || config.popularity === null) {
-      this.setFieldCount(fieldName, config.popularity);
+      this.setFieldCount(
+        fieldName,
+        typeof config.popularity === 'string' ? Number(config.popularity) : config.popularity
+      );
     }
 
     if (config.format) {
