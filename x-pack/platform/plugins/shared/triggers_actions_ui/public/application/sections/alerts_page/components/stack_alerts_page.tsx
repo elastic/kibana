@@ -112,8 +112,16 @@ const PageContentComponent: React.FC<PageContentProps> = ({
   authorizedToReadAnyRules,
   ruleTypeIdsByFeatureId,
 }) => {
-  const { data, http, notifications, fieldFormats, application, licensing, settings } =
-    useKibana().services;
+  const {
+    data,
+    http,
+    notifications,
+    fieldFormats,
+    application,
+    licensing,
+    settings,
+    fieldsMetadata,
+  } = useKibana().services;
   const ruleTypeIdsByFeatureIdEntries = Object.entries(ruleTypeIdsByFeatureId);
 
   const [esQuery, setEsQuery] = useState({ bool: {} } as { bool: BoolQuery });
@@ -271,6 +279,7 @@ const PageContentComponent: React.FC<PageContentProps> = ({
               application,
               licensing,
               settings,
+              fieldsMetadata,
             }}
           />
         </EuiFlexGroup>

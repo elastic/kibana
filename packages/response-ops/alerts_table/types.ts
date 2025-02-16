@@ -55,6 +55,7 @@ import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { Case } from './apis/bulk_get_cases';
 
 export interface Consumer {
@@ -248,6 +249,7 @@ export interface AlertsTableProps<AC extends AdditionalContext = AdditionalConte
     application: ApplicationStart;
     licensing: LicensingPluginStart;
     settings: SettingsStart;
+    fieldsMetadata: FieldsMetadataPublicStart;
     /**
      * The cases service is optional: cases features will be disabled if not provided
      */

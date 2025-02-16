@@ -22,6 +22,7 @@ import {
 import React, { useCallback } from 'react';
 
 import type { BrowserFields } from '@kbn/rule-registry-plugin/common';
+import { FindFieldsMetadataResponsePayload } from '@kbn/fields-metadata-plugin/common/fields_metadata/v1';
 import type { FieldBrowserProps } from '../../types';
 import { Search } from '../search';
 
@@ -86,6 +87,8 @@ export type FieldBrowserModalProps = Pick<
    * of the popover.
    */
   restoreFocusTo: React.MutableRefObject<HTMLButtonElement | null>;
+
+  fieldsMetadata?: FindFieldsMetadataResponsePayload['fields'];
 };
 
 /**
@@ -109,6 +112,7 @@ const FieldBrowserModalComponent: React.FC<FieldBrowserModalProps> = ({
   searchInput,
   selectedCategoryIds,
   width = FIELD_BROWSER_WIDTH,
+  fieldsMetadata,
 }) => {
   const closeAndRestoreFocus = useCallback(() => {
     onHide();
@@ -182,6 +186,7 @@ const FieldBrowserModalComponent: React.FC<FieldBrowserModalProps> = ({
             onToggleColumn={onToggleColumn}
             getFieldTableColumns={getFieldTableColumns}
             onHide={onHide}
+            fieldsMetadata={fieldsMetadata}
           />
         </EuiModalBody>
 

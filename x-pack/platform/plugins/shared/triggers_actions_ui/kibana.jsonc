@@ -22,6 +22,7 @@
       "kibanaUtils",
       "unifiedSearch",
       "fieldFormats",
+      "fieldsMetadata",
       "dataViews",
       "dataViewEditor",
       "alerting",

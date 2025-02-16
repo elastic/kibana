@@ -33,6 +33,7 @@ import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { RuleAction } from '@kbn/alerting-plugin/common';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/src/common/type_registry';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { RuleUiAction } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 
@@ -169,6 +170,7 @@ interface PluginsStart {
   serverless?: ServerlessPluginStart;
   fieldFormats: FieldFormatsRegistry;
   lens: LensPublicStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export class Plugin
@@ -306,6 +308,7 @@ export class Plugin
           isServerless: !!pluginsStart.serverless,
           fieldFormats: pluginsStart.fieldFormats,
           lens: pluginsStart.lens,
+          fieldsMetadata: pluginsStart.fieldsMetadata,
         });
       },
     });
@@ -402,6 +405,7 @@ export class Plugin
             isServerless: !!pluginsStart.serverless,
             fieldFormats: pluginsStart.fieldFormats,
             lens: pluginsStart.lens,
+            fieldsMetadata: pluginsStart.fieldsMetadata,
           });
         },
       });

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
 import {
   ALERT_CASE_IDS,
   ALERT_MAINTENANCE_WINDOW_IDS,
@@ -15,6 +14,7 @@ import {
 } from '@kbn/rule-data-utils';
 import type { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { isEmpty } from 'lodash/fp';
+import { FindFieldsMetadataResponsePayload } from '@kbn/fields-metadata-plugin/common/fields_metadata/v1';
 import { CASES, MAINTENANCE_WINDOWS } from './translations';
 
 export const FIELD_BROWSER_WIDTH = 925;
@@ -195,8 +195,10 @@ export const getCategory = (fieldName: string) => {
   return fieldNameArray?.[0] ?? '(unknown)';
 };
 
-export const getDescription = (fieldName: string, ecsFlat: Record<string, EcsMetadata>) =>
-  ecsFlat[fieldName]?.description ?? '';
+export const getDescription = (
+  fieldName: string,
+  fieldsMetadata?: FindFieldsMetadataResponsePayload['fields']
+) => fieldsMetadata?.[fieldName]?.description ?? '';
 
 /** Returns example text, or an empty string if the field does not have an example */
 export const getExampleText = (example: string | number | null | undefined): string =>

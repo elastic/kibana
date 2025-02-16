@@ -33,6 +33,9 @@ export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
   onToggleColumn,
   options,
   width,
+  services: {
+    fieldsMetadata: { useFieldsMetadata },
+  },
 }) => {
   const initialCategories = useMemo(
     () => options?.preselectedCategoryIds ?? [],
@@ -123,6 +126,12 @@ export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
     [setFilterSelectedEnabled]
   );
 
+  const fieldsMetadata = useFieldsMetadata({
+    fieldNames: filteredBrowserFields
+      ? Object.values(filteredBrowserFields).flatMap(({ fields }) => Object.keys(fields ?? {}))
+      : undefined,
+  });
+
   return (
     <div css={styles.buttonContainer} data-test-subj="fields-browser-button-container">
       <EuiToolTip content={i18n.FIELDS_BROWSER}>
@@ -146,6 +155,7 @@ export const FieldBrowserComponent: React.FC<FieldBrowserProps> = ({
           filteredBrowserFields={
             filteredBrowserFields != null ? filteredBrowserFields : browserFields
           }
+          fieldsMetadata={fieldsMetadata.fieldsMetadata}
           filterSelectedEnabled={filterSelectedEnabled}
           isSearching={isSearching}
           setSelectedCategoryIds={setSelectedCategoryIds}
