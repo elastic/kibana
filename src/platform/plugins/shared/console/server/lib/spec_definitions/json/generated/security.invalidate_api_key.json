@@ -12,7 +12,7 @@
     "patterns": [
       "_security/api_key"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-invalidate-api-key.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-security-invalidate-api-key",
     "availability": {
       "stack": true,
       "serverless": true

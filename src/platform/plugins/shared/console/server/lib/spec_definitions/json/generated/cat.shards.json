@@ -42,7 +42,7 @@
       "_cat/shards",
       "_cat/shards/{index}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-shards.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-shards",
     "availability": {
       "stack": true,
       "serverless": false

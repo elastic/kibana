@@ -12,7 +12,7 @@
     "patterns": [
       "_ml/anomaly_detectors/_validate/detector"
     ],
-    "documentation": "https://www.elastic.co/guide/en/machine-learning/current/ml-jobs.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch",
     "availability": {
       "stack": false,
       "serverless": false

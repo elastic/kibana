@@ -80,7 +80,7 @@
     "patterns": [
       "{index}/_fleet/_fleet_search"
     ],
-    "documentation": null,
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-fleet-search",
     "availability": {
       "stack": true,
       "serverless": false

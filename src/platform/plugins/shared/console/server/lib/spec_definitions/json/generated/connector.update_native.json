@@ -12,7 +12,7 @@
     "patterns": [
       "_connector/{connector_id}/_native"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/update-connector-native-api.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/update-connector-native-api.html",
     "availability": {
       "stack": true,
       "serverless": true
