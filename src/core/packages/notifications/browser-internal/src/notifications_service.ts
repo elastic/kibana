@@ -19,6 +19,10 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import type { NotificationsSetup, NotificationsStart } from '@kbn/core-notifications-browser';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { showErrorDialog, ToastsService } from './toasts';
+import {
+  ProductInterceptService,
+  EventReporter as ProductInterceptEventReporter,
+} from './product_intercept_dialog';
 import { EventReporter, eventTypes } from './toasts/telemetry';
 
 export interface SetupDeps {
@@ -38,11 +42,13 @@ export interface StartDeps {
 /** @public */
 export class NotificationsService {
   private readonly toasts: ToastsService;
+  private readonly productIntercepts: ProductInterceptService;
   private uiSettingsErrorSubscription?: Subscription;
   private targetDomElement?: HTMLElement;
 
   constructor() {
     this.toasts = new ToastsService();
+    this.productIntercepts = new ProductInterceptService();
   }
 
   public setup({ uiSettings, analytics }: SetupDeps): NotificationsSetup {
@@ -50,7 +56,10 @@ export class NotificationsService {
       analytics.registerEventType(eventType);
     });
 
-    const notificationSetup = { toasts: this.toasts.setup({ uiSettings }) };
+    const notificationSetup = {
+      toasts: this.toasts.setup({ uiSettings }),
+      productIntercepts: this.productIntercepts.setup(),
+    };
 
     this.uiSettingsErrorSubscription = uiSettings.getUpdateErrors$().subscribe((error: Error) => {
       notificationSetup.toasts.addDanger({
@@ -85,6 +94,17 @@ export class NotificationsService {
           openModal: overlays.openModal,
           ...startDeps,
         }),
+      productIntercepts: this.productIntercepts.start({
+        eventReporter: new ProductInterceptEventReporter({ analytics: startDeps.analytics }),
+        overlays,
+        targetDomElement: (() => {
+          // create container to hold product intercept dialog
+          const productInterceptContainer = document.createElement('div');
+          targetDomElement.appendChild(productInterceptContainer);
+          return productInterceptContainer;
+        })(),
+        ...startDeps,
+      }),
     };
   }
 
