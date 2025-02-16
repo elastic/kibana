@@ -243,6 +243,12 @@ export async function syncUnwiredStreamDefinitionObjects({
       logger,
       isServerless,
     });
+  } else {
+    await upsertComponent({
+      logger,
+      esClient: scopedClusterClient.asCurrentUser,
+      component: generateUnwiredLayer(definition, isServerless),
+    });
   }
 }
 
