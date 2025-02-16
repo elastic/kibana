@@ -13,6 +13,7 @@ import type {
 } from '@kbn/cell-actions';
 import React, { useMemo } from 'react';
 import type { CellActionFieldValue, CellActionsData } from '@kbn/cell-actions/src/types';
+import type { EuiButtonIconProps } from '@elastic/eui';
 import type { SecurityCellActionMetadata } from '../../../app/actions/types';
 import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../app/actions/constants';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
@@ -42,6 +43,8 @@ export interface SecurityCellActionsProps
   triggerId: SecurityCellActionsTrigger;
   disabledActionTypes?: SecurityCellActionType[];
   metadata?: SecurityCellActionMetadata;
+  extraActionsIconType?: EuiButtonIconProps['iconType'];
+  extraActionsColor?: EuiButtonIconProps['color'];
 }
 
 export interface UseDataGridColumnsSecurityCellActionsProps

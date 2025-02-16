@@ -64,7 +64,7 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
   );
 
   return (
-    <EuiFlexGroup gutterSize="s" data-test-subj="severity-level-chart">
+    <EuiFlexGroup gutterSize="none" data-test-subj="severity-level-chart">
       <EuiFlexItem>
         <EuiInMemoryTable
           data-test-subj="severity-level-table"

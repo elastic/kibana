@@ -12,11 +12,17 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
-import { DefaultDraggable } from '../../../../common/components/draggables';
 import { FormattedCount } from '../../../../common/components/formatted_number';
 import { COUNT_TABLE_TITLE } from '../alerts_count_panel/translations';
 import * as i18n from './translations';
 import { useRiskSeverityColors } from '../../../../common/utils/risk_color_palette';
+import {
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+  SecurityCellActions,
+  SecurityCellActionType,
+} from '../../../../common/components/cell_actions';
+import { getSourcererScopeId } from '../../../../helpers';
 
 export const useGetSeverityTableColumns = (): Array<EuiBasicTableColumn<SeverityData>> => {
   const severityColors = useRiskSeverityColors();
@@ -28,16 +34,7 @@ export const useGetSeverityTableColumns = (): Array<EuiBasicTableColumn<Severity
         'data-test-subj': 'severityTable-severity',
         render: (severity: Severity) => (
           <EuiHealth color={severityColors[severity]} textSize="xs">
-            <DefaultDraggable
-              isDraggable={false}
-              field={ALERT_SEVERITY}
-              hideTopN
-              id={`alert-severity-draggable-${severity}`}
-              value={capitalize(severity)}
-              queryValue={severity}
-              tooltipContent={null}
-              scopeId={TableId.alertsOnAlertsPage}
-            />
+            {capitalize(severity)}
           </EuiHealth>
         ),
       },
@@ -46,11 +43,30 @@ export const useGetSeverityTableColumns = (): Array<EuiBasicTableColumn<Severity
         name: COUNT_TABLE_TITLE,
         dataType: 'number',
         'data-test-subj': 'severityTable-alertCount',
-        width: '45%',
+        width: '34%',
         render: (alertCount: number) => (
           <EuiText grow={false} size="xs">
             <FormattedCount count={alertCount} />
           </EuiText>
+        ),
+      },
+      {
+        field: 'key',
+        name: '',
+        'data-test-subj': 'severityTable-actions',
+        width: '16%',
+        render: (severity: Severity) => (
+          <SecurityCellActions
+            mode={CellActionsMode.INLINE}
+            visibleCellActions={0}
+            triggerId={SecurityCellActionsTrigger.DEFAULT}
+            data={{ field: ALERT_SEVERITY, value: severity }}
+            sourcererScopeId={getSourcererScopeId(TableId.alertsOnAlertsPage)}
+            disabledActionTypes={[SecurityCellActionType.SHOW_TOP_N]}
+            metadata={{ scopeId: TableId.alertsOnAlertsPage }}
+            extraActionsIconType="boxesVertical"
+            extraActionsColor="text"
+          />
         ),
       },
     ],

@@ -56,9 +56,14 @@ const DraggableLegendComponent: React.FC<{
   height: number | undefined;
   legendItems: LegendItem[];
   minWidth?: number;
-}> = ({ className, height = 0, legendItems, minWidth = DEFAULT_WIDTH }) => {
-  const styles = useStyles(height === 0 ? MIN_LEGEND_HEIGHT : height, minWidth);
-
+  isInlineActions?: boolean;
+}> = ({
+  className,
+  height = 0,
+  legendItems,
+  minWidth = DEFAULT_WIDTH,
+  isInlineActions = false,
+}) => {
   if (legendItems.length === 0) {
     return null;
   }
@@ -73,7 +78,7 @@ const DraggableLegendComponent: React.FC<{
         <EuiFlexGroup direction="column" gutterSize="none">
           {legendItems.map((item) => (
             <EuiFlexItem key={item.dataProviderId} grow={false}>
-              <DraggableLegendItem legendItem={item} />
+              <DraggableLegendItem legendItem={item} isInlineActions={isInlineActions} />
               <EuiSpacer data-test-subj="draggable-legend-spacer" size="s" />
             </EuiFlexItem>
           ))}
