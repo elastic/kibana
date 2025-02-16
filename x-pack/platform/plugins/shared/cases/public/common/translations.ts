@@ -33,6 +33,10 @@ export const NAME = i18n.translate('xpack.cases.caseView.name', {
   defaultMessage: 'Name',
 });
 
+export const INCREMENTAL_ID = i18n.translate('xpack.cases.caseView.incremental_id', {
+  defaultMessage: 'Incremental Id',
+});
+
 export const CREATED_ON = i18n.translate('xpack.cases.caseView.createdOn', {
   defaultMessage: 'Created on',
 });

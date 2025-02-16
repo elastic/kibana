@@ -47,6 +47,7 @@ import { registerCaseFileKinds } from './files';
 import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
+import { CasesIdIncrementerTask } from './tasks/incremental_id';
 
 export class CasePlugin
   implements
@@ -66,6 +67,7 @@ export class CasePlugin
   private persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   private externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   private userProfileService: UserProfileService;
+  private casesIdIncrementerTask?: CasesIdIncrementerTask;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.caseConfig = initializerContext.config.get<ConfigType>();
@@ -83,7 +85,7 @@ export class CasePlugin
         core
       )}] and plugins [${Object.keys(plugins)}]`
     );
-
+    this.casesIdIncrementerTask = new CasesIdIncrementerTask(plugins, this.logger);
     registerInternalAttachments(
       this.externalReferenceAttachmentTypeRegistry,
       this.persistableStateAttachmentTypeRegistry
@@ -110,10 +112,19 @@ export class CasePlugin
       lensEmbeddableFactory: this.lensEmbeddableFactory,
     });
 
+    const getSpaceId = (request?: KibanaRequest) => {
+      if (!request) {
+        return DEFAULT_SPACE_ID;
+      }
+
+      return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    };
+
     core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'cases'>(
       APP_ID,
       this.createRouteHandlerContext({
         core,
+        spaces: plugins.spaces,
       })
     );
 
@@ -136,7 +147,7 @@ export class CasePlugin
       router,
       routes: [
         ...getExternalRoutes({ isServerless, docLinks: core.docLinks }),
-        ...getInternalRoutes(this.userProfileService),
+        ...getInternalRoutes(this.userProfileService, this.casesIdIncrementerTask),
       ],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
@@ -149,14 +160,6 @@ export class CasePlugin
     const getCasesClient = async (request: KibanaRequest): Promise<CasesClient> => {
       const [coreStart] = await core.getStartServices();
       return this.getCasesClientWithRequest(coreStart)(request);
-    };
-
-    const getSpaceId = (request?: KibanaRequest) => {
-      if (!request) {
-        return DEFAULT_SPACE_ID;
-      }
-
-      return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
 
     const isServerlessSecurity =
@@ -185,9 +188,9 @@ export class CasePlugin
 
   public start(core: CoreStart, plugins: CasesServerStartDependencies): CasesServerStart {
     this.logger.debug(`Starting Case Workflow`);
-
     if (plugins.taskManager) {
       scheduleCasesTelemetryTask(plugins.taskManager, this.logger);
+      this.casesIdIncrementerTask?.scheduleIncrementIdTask(plugins.taskManager, core);
     }
 
     this.userProfileService.initialize({
@@ -237,8 +240,10 @@ export class CasePlugin
 
   private createRouteHandlerContext = ({
     core,
+    spaces,
   }: {
     core: CoreSetup;
+    spaces: CasesServerSetupDependencies['spaces'];
   }): IContextProvider<CasesRequestHandlerContext, 'cases'> => {
     return async (context, request, response) => {
       return {
@@ -252,6 +257,7 @@ export class CasePlugin
             savedObjectsService: savedObjects,
           });
         },
+        spaces,
       };
     };
   };

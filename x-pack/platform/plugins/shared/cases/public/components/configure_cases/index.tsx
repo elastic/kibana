@@ -58,6 +58,7 @@ import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
 import { ObservableTypes } from '../observable_types';
 import { ObservableTypesForm } from '../observable_types/form';
+import { useInitIncrementalId } from '../../containers/use_init_incremental_id';
 
 const sectionWrapperCss = css`
   box-sizing: content-box;
@@ -114,6 +115,9 @@ const addNewCustomFieldToTemplates = ({
 
 export const ConfigureCases: React.FC = React.memo(() => {
   const { permissions } = useCasesContext();
+  // TODO: put behind some button or action here
+  // TODO: This doesn't initialize the task, just adds the current space to the existing task list
+  // Also add disclaimer in button section that id sequence matching case creation order is not guaranteed
   const { triggersActionsUi } = useKibana().services;
   useCasesBreadcrumbs(CasesDeepLinkId.casesConfigure);
   const license = useLicense();
@@ -175,6 +179,12 @@ export const ConfigureCases: React.FC = React.memo(() => {
     },
     [refetchActionTypes, refetchCaseConfigure, refetchConnectors, setEditedConnectorItem]
   );
+
+  const { mutate: postIncrementId } = useInitIncrementalId();
+
+  useEffect(() => {
+    postIncrementId();
+  }, [postIncrementId]);
 
   const onConnectorCreated = useCallback(
     async (createdConnector: ActionConnector) => {
