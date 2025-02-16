@@ -20,8 +20,8 @@ export type TutorialModuleNoticeComponent = React.FC<{
   moduleName: string;
 }>;
 
-type CustomStatusCheckCallback = () => Promise<boolean>;
-type CustomComponent = () => Promise<React.ReactNode>;
+export type CustomStatusCheckCallback = () => Promise<boolean>;
+type CustomComponent = () => Promise<{ default: React.ComponentType<any> }>;
 
 export class TutorialService {
   private tutorialVariables: TutorialVariables = {};
