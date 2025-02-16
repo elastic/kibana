@@ -209,13 +209,12 @@ export const initUiSettings = (
     },
     [ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING]: {
       name: enableVisualizationsInFlyoutLabel,
-      value: false,
+      value: true,
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutDescription',
         {
           defaultMessage:
-            '<em>[technical preview]</em> Enable visualizations (analyzer and session viewer) in flyout.',
-          values: { em: (chunks) => `<em>${chunks}</em>` },
+            'Enable visualizations (analyzer and session viewer) in document details flyout.',
         }
       ),
       type: 'boolean',
