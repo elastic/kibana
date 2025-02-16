@@ -17,21 +17,21 @@ const elasticInferenceError =
 describe('convertUpstreamError', () => {
   it('extracts status code from a connector request error', () => {
     const error = convertUpstreamError(connectorError);
-    expect(error.code).toEqual(InferenceTaskErrorCode.internalError);
+    expect(error.code).toEqual(InferenceTaskErrorCode.providerError);
     expect(error.message).toEqual(connectorError);
     expect(error.status).toEqual(400);
   });
 
   it('extracts status code from a ES inference chat_completion error', () => {
     const error = convertUpstreamError(elasticInferenceError);
-    expect(error.code).toEqual(InferenceTaskErrorCode.internalError);
+    expect(error.code).toEqual(InferenceTaskErrorCode.providerError);
     expect(error.message).toEqual(elasticInferenceError);
     expect(error.status).toEqual(401);
   });
 
   it('supports errors', () => {
     const error = convertUpstreamError(new Error(connectorError));
-    expect(error.code).toEqual(InferenceTaskErrorCode.internalError);
+    expect(error.code).toEqual(InferenceTaskErrorCode.providerError);
     expect(error.message).toEqual(connectorError);
     expect(error.status).toEqual(400);
   });
@@ -39,7 +39,7 @@ describe('convertUpstreamError', () => {
   it('process generic messages', () => {
     const message = 'some error message';
     const error = convertUpstreamError(message);
-    expect(error.code).toEqual(InferenceTaskErrorCode.internalError);
+    expect(error.code).toEqual(InferenceTaskErrorCode.providerError);
     expect(error.message).toEqual(message);
     expect(error.status).toBe(undefined);
   });

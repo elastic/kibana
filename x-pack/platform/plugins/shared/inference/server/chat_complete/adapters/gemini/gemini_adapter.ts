@@ -6,7 +6,7 @@
  */
 
 import * as Gemini from '@google/generative-ai';
-import { from, map, switchMap, throwError } from 'rxjs';
+import { defer, map, switchMap, throwError } from 'rxjs';
 import { isReadable, Readable } from 'stream';
 import {
   createInferenceInternalError,
@@ -35,8 +35,8 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     abortSignal,
     metadata,
   }) => {
-    return from(
-      executor.invoke({
+    return defer(() => {
+      return executor.invoke({
         subAction: 'invokeStream',
         subActionParams: {
           messages: messagesToGemini({ messages }),
@@ -51,8 +51,8 @@ export const geminiAdapter: InferenceConnectorAdapter = {
             ? { telemetryMetadata: metadata.connectorTelemetry }
             : {}),
         },
-      })
-    ).pipe(
+      });
+    }).pipe(
       switchMap((response) => {
         if (response.status === 'error') {
           return throwError(() =>
