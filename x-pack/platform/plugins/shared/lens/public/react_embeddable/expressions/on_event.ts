@@ -34,6 +34,38 @@ export const prepareEventHandler =
     disableTriggers: boolean | undefined
   ) =>
   async (event: ExpressionRendererEvent) => {
+    if (event.name === 'navigate') {
+      const context = event.data.data[0];
+      const field = context.table.columns[context.column].meta.field;
+      const value = context.value;
+      const index = context.table.meta.source;
+
+      uiActions.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+        field,
+        filters: [
+          {
+            meta: {
+              index,
+              type: 'phrase',
+              key: field,
+              params: {
+                query: value,
+              },
+              disabled: false,
+              negate: false,
+              alias: null,
+            },
+            query: {
+              match_phrase: {
+                [field]: value,
+              },
+            },
+          },
+        ],
+        embeddable: api,
+      });
+    }
+
     if (!uiActions?.getTrigger || disableTriggers) {
       return;
     }

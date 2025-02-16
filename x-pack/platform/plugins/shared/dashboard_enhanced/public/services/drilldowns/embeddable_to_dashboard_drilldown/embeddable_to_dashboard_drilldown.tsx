@@ -26,6 +26,7 @@ import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboar
 
 export type Context = ApplyGlobalFilterActionContext & {
   embeddable: Partial<PublishesUnifiedSearch & HasParentApi<Partial<PublishesUnifiedSearch>>>;
+  field?: string;
 };
 export type Params = AbstractDashboardDrilldownParams;
 
@@ -39,7 +40,16 @@ export type Params = AbstractDashboardDrilldownParams;
 export class EmbeddableToDashboardDrilldown extends AbstractDashboardDrilldown<Context> {
   public readonly id = EMBEDDABLE_TO_DASHBOARD_DRILLDOWN;
 
-  public readonly supportedTriggers = () => [APPLY_FILTER_TRIGGER, IMAGE_CLICK_TRIGGER];
+  public readonly supportedTriggers = () => [
+    APPLY_FILTER_TRIGGER,
+    IMAGE_CLICK_TRIGGER,
+    'NAVIGATE_TRIGGER',
+  ];
+
+  public async isCompatible(config: Config, context: Context): Promise<boolean> {
+    if (!context.field || !config.breakdownField) return true;
+    return context.field === config.breakdownField;
+  }
 
   protected async getLocation(
     config: Config,

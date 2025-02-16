@@ -40,6 +40,11 @@ export { lightenColor } from './services/palettes/lighten_color';
 export { decreaseOpacity } from './services/palettes/decrease_opacity';
 export { useActiveCursor } from './services/active_cursor';
 
+export interface NavigateTriggerEvent {
+  name: 'navigate';
+  data: ValueClickContext['data'];
+}
+
 export interface ClickTriggerEvent {
   name: 'filter';
   data: ValueClickContext['data'];

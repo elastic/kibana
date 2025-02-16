@@ -101,6 +101,27 @@ export const createGridFilterHandler =
     onClickValue(data);
   };
 
+export const createGridNavigationHandler =
+  (
+    tableRef: React.MutableRefObject<Datatable>,
+    onClickValue: (data: ClickTriggerEvent['data']) => void
+  ) =>
+  (_field: string, value: unknown, colIndex: number, rowIndex: number, negate: boolean = false) => {
+    const data: ClickTriggerEvent['data'] = {
+      negate,
+      data: [
+        {
+          row: rowIndex,
+          column: colIndex,
+          value,
+          table: tableRef.current,
+        },
+      ],
+    };
+
+    onClickValue(data);
+  };
+
 export const createTransposeColumnFilterHandler =
   (
     onClickValue: (data: ClickTriggerEvent['data']) => void,
