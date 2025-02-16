@@ -34,14 +34,24 @@ export const panelsReducer = createReducer(initialPanelsState, (builder) => {
       state.byId[id].left = left;
       state.byId[id].preview = preview ? [preview] : undefined;
       if (right) {
-        state.byId[id].history?.push(right);
+        state.byId[id].history?.push({
+          lastOpen: Date.now(),
+          panel: right,
+        });
       }
     } else {
       state.byId[id] = {
         left,
         right,
         preview: preview ? [preview] : undefined,
-        history: right ? [right] : [],
+        history: right
+          ? [
+              {
+                lastOpen: Date.now(),
+                panel: right,
+              },
+            ]
+          : [],
       };
     }
 
@@ -154,7 +164,14 @@ export const panelsReducer = createReducer(initialPanelsState, (builder) => {
         right,
         left,
         preview: preview ? [preview] : undefined,
-        history: right ? [right] : [], // update history only when loading flyout on refresh
+        history: right
+          ? [
+              {
+                lastOpen: Date.now(),
+                panel: right,
+              },
+            ]
+          : [], // update history only when loading flyout on refresh
       };
     }
 
