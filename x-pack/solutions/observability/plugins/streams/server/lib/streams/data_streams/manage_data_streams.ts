@@ -129,6 +129,10 @@ export async function updateDataStreamsLifecycle({
     const dataStreams = await esClient.indices.getDataStream({ name: names });
     const isIlm = isIlmLifecycle(lifecycle);
 
+    await Promise.all(
+      names.map((name) => retryTransientEsErrors(() => esClient.ilm.removePolicy({ index: name })))
+    );
+
     for (const dataStream of dataStreams.data_streams) {
       logger.debug(`updating settings for data stream ${dataStream.name} backing indices`);
       await retryTransientEsErrors(

@@ -98,3 +98,24 @@ export const isDisabledLifecycle = createIsNarrowSchema(
   ingestStreamEffectiveLifecycleSchema,
   disabledLifecycleSchema
 );
+
+type PhaseName = 'hot' | 'warm' | 'cold' | 'frozen' | 'delete';
+
+export interface IlmPolicyPhase {
+  name: PhaseName;
+  size_in_bytes: number;
+  min_age?: string;
+}
+
+export interface IlmPolicyDeletePhase {
+  name: PhaseName;
+  min_age: string;
+}
+
+export interface IlmPolicyPhases {
+  hot?: IlmPolicyPhase;
+  warm?: IlmPolicyPhase;
+  cold?: IlmPolicyPhase;
+  frozen?: IlmPolicyPhase;
+  delete?: IlmPolicyDeletePhase;
+}

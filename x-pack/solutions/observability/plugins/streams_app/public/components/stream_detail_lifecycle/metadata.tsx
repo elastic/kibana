@@ -33,6 +33,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { LifecycleEditAction } from './modal';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { IlmLink } from './ilm_link';
 
 export function RetentionMetadata({
   definition,
@@ -88,19 +89,7 @@ export function RetentionMetadata({
 
   const ilmLink = isIlmLifecycle(lifecycle) ? (
     <EuiBadge color="hollow">
-      <EuiLink
-        target="_blank"
-        data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
-        href={ilmLocator?.getRedirectUrl({
-          page: 'policy_edit',
-          policyName: lifecycle.ilm.policy,
-        })}
-      >
-        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel', {
-          defaultMessage: 'ILM Policy: {name}',
-          values: { name: lifecycle.ilm.policy },
-        })}
-      </EuiLink>
+      <IlmLink lifecycle={lifecycle} ilmLocator={ilmLocator} />
     </EuiBadge>
   ) : null;
 
