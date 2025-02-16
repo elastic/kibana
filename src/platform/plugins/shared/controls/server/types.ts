@@ -7,15 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddableSetup, EmbeddableStart } from './plugin';
+import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
+import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 
-export type { EmbeddableSetup, EmbeddableStart };
-
-export type { EnhancementRegistryDefinition, EmbeddableRegistryItem } from './types';
-
-export type { EmbeddableRegistryDefinition } from '../common';
-
-export const plugin = async () => {
-  const { EmbeddableServerPlugin } = await import('./plugin');
-  return new EmbeddableServerPlugin();
-};
+export type ControlsPersistableStateService = PersistableStateService<EmbeddableStateWithType>;
+export type ControlsSetup = ControlsPersistableStateService;
+export type ControlsStart = ControlsPersistableStateService;

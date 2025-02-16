@@ -8,6 +8,7 @@
  */
 
 import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import { createControlsSetupMock } from '@kbn/controls-plugin/server/mocks';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 
@@ -23,6 +24,7 @@ import { createDashboardSavedObjectTypeMigrations } from '../dashboard_saved_obj
 const mockContext = savedObjectsServiceMock.createMigrationContext();
 const migrations = createDashboardSavedObjectTypeMigrations({
   embeddable: createEmbeddableSetupMock(),
+  controls: createControlsSetupMock(),
 });
 
 test('dashboard migration 7.3.0 migrates filters to query on search source', () => {

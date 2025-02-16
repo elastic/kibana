@@ -7,26 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectReference } from '@kbn/core/types';
-import {
-  EmbeddableInput,
-  EmbeddablePersistableStateService,
-  EmbeddableStateWithType,
-} from '@kbn/embeddable-plugin/common/types';
+import type { SavedObjectReference } from '@kbn/core/server';
+import { EmbeddableInput, EmbeddableStateWithType } from '@kbn/embeddable-plugin/common/types';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 
+import { EmbeddableRegistryItem } from '@kbn/embeddable-plugin/server/types';
 import type { ControlPanelsState, SerializedControlState } from '../../common';
 import {
   makeControlOrdersZeroBased,
   removeHideExcludeAndHideExists,
 } from './control_group_migrations';
 import { SerializableControlGroupState } from './types';
+import { ControlsPersistableStateService } from '../types';
 
 const getPanelStatePrefix = (state: SerializedControlState) => `${state.explicitInput.id}:`;
 
 export const createControlGroupInject = (
-  persistableStateService: EmbeddablePersistableStateService
-): EmbeddablePersistableStateService['inject'] => {
+  getControlsFactory: (controlsFactoryId: string) => EmbeddableRegistryItem
+): ControlsPersistableStateService['inject'] => {
   return (state: EmbeddableStateWithType, references: SavedObjectReference[]) => {
     const workingState = { ...state } as EmbeddableStateWithType | SerializableControlGroupState;
 
@@ -46,8 +44,8 @@ export const createControlGroupInject = (
           .map((reference) => ({ ...reference, name: reference.name.replace(prefix, '') }));
 
         const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
-
-        const { type, ...injectedState } = persistableStateService.inject(
+        const factory = getControlsFactory(workingPanels[key].type);
+        const { type, ...injectedState } = factory.inject(
           { ...workingPanels[key].explicitInput, type: workingPanels[key].type },
           panelReferences
         );
@@ -59,8 +57,8 @@ export const createControlGroupInject = (
 };
 
 export const createControlGroupExtract = (
-  persistableStateService: EmbeddablePersistableStateService
-): EmbeddablePersistableStateService['extract'] => {
+  getControlsFactory: (controlsFactoryId: string) => EmbeddableRegistryItem
+): ControlsPersistableStateService['extract'] => {
   return (state: EmbeddableStateWithType) => {
     const workingState = { ...state } as EmbeddableStateWithType | SerializableControlGroupState;
     const references: SavedObjectReference[] = [];
@@ -72,7 +70,8 @@ export const createControlGroupExtract = (
       for (const [key, panel] of Object.entries(workingState.panels)) {
         const prefix = getPanelStatePrefix(panel);
 
-        const { state: panelState, references: panelReferences } = persistableStateService.extract({
+        const factory = getControlsFactory(panel.type);
+        const { state: panelState, references: panelReferences } = factory.extract({
           ...panel.explicitInput,
           type: panel.type,
         });

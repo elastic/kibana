@@ -16,6 +16,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { CoreSetup, Logger, SavedObjectReference } from '@kbn/core/server';
+import type { ControlsSetup } from '@kbn/controls-plugin/server';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
 import {
@@ -43,9 +44,10 @@ export function initializeDashboardTelemetryTask(
   logger: Logger,
   core: CoreSetup,
   taskManager: TaskManagerSetupContract,
+  controls: ControlsSetup,
   embeddable: EmbeddableSetup
 ) {
-  registerDashboardTelemetryTask(logger, core, taskManager, embeddable);
+  registerDashboardTelemetryTask(logger, core, taskManager, controls, embeddable);
 }
 
 export function scheduleDashboardTelemetry(logger: Logger, taskManager: TaskManagerStartContract) {
@@ -56,6 +58,7 @@ function registerDashboardTelemetryTask(
   logger: Logger,
   core: CoreSetup,
   taskManager: TaskManagerSetupContract,
+  controls: ControlsSetup,
   embeddable: EmbeddableSetup
 ) {
   taskManager.registerTaskDefinitions({
@@ -63,7 +66,7 @@ function registerDashboardTelemetryTask(
       title: 'Dashboard telemetry collection task',
       timeout: '2m',
       stateSchemaByVersion,
-      createTaskRunner: dashboardTaskRunner(logger, core, embeddable),
+      createTaskRunner: dashboardTaskRunner(logger, core, controls, embeddable),
     },
   });
 }
@@ -81,7 +84,12 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
   }
 }
 
-export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable: EmbeddableSetup) {
+export function dashboardTaskRunner(
+  logger: Logger,
+  core: CoreSetup,
+  controls: ControlsSetup,
+  embeddable: EmbeddableSetup
+) {
   return ({ taskInstance }: RunContext) => {
     const state = taskInstance.state as LatestTaskStateSchema;
 
@@ -93,14 +101,9 @@ export function dashboardTaskRunner(logger: Logger, core: CoreSetup, embeddable:
     return {
       async run() {
         let dashboardData = getEmptyDashboardData();
-        const controlsCollector = controlsCollectorFactory(embeddable);
+        const controlsCollector = controlsCollectorFactory(controls);
         const processDashboards = (dashboards: DashboardSavedObjectAttributesAndReferences[]) => {
           for (const dashboard of dashboards) {
-            // TODO is this injecting references really necessary?
-            // const attributes = injectReferences(dashboard, {
-            //   embeddablePersistableStateService: embeddable,
-            // });
-
             dashboardData = controlsCollector(dashboard.attributes, dashboardData);
 
             try {
