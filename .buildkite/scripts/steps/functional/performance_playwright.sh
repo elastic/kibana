@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
+echo "Running Kibana setup scripts"
 
 source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/common/setup_bazel.sh
