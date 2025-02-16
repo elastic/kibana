@@ -8,6 +8,7 @@
  */
 
 import { KnownTypeToMetadata, SettingType } from '@kbn/management-settings-types';
+import { UiSettingsSolution } from '@kbn/core-ui-settings-common';
 
 type Settings = {
   [key in Exclude<SettingType, 'json' | 'markdown'>]: KnownTypeToMetadata<key>;
@@ -20,11 +21,13 @@ type Settings = {
  */
 export const getSettingsMock = (
   requiresPageReload: boolean = false,
-  readonly: boolean = false
+  readonly: boolean = false,
+  solution?: UiSettingsSolution
 ): Settings => {
   const defaults = {
     requiresPageReload,
     readonly,
+    solution,
   };
 
   return {
@@ -135,11 +138,13 @@ export const getSettingsMock = (
  */
 export const getGlobalSettingsMock = (
   requiresPageReload: boolean = false,
-  readonly: boolean = false
+  readonly: boolean = false,
+  solution?: UiSettingsSolution
 ) => {
   const defaults = {
     requiresPageReload,
     readonly,
+    solution,
   };
   return {
     globalString: {
