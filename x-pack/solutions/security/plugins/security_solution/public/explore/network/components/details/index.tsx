@@ -38,6 +38,7 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { OverviewDescriptionList } from '../../../../common/components/overview_description_list';
+import type { SourcererScopeName } from '../../../../sourcerer/store/model';
 
 export interface IpOverviewProps {
   anomaliesData: Anomalies | null;
@@ -52,6 +53,7 @@ export interface IpOverviewProps {
   isLoadingAnomaliesData: boolean;
   loading: boolean;
   narrowDateRange: NarrowDateRange;
+  scopeId: SourcererScopeName;
   startDate: string;
   type: networkModel.NetworkType;
   indexPatterns: string[];
@@ -73,6 +75,7 @@ export const IpOverview = React.memo<IpOverviewProps>(
     isLoadingAnomaliesData,
     anomaliesData,
     narrowDateRange,
+    scopeId,
     indexPatterns,
     jobNameById,
   }) => {
@@ -148,14 +151,14 @@ export const IpOverview = React.memo<IpOverviewProps>(
           title: i18n.HOST_ID,
           description:
             typeData && data.host
-              ? hostIdRenderer({ host: data.host, isDraggable, ipFilter: ip, contextID })
+              ? hostIdRenderer({ host: data.host, isDraggable, ipFilter: ip, contextID, scopeId })
               : getEmptyTagValue(),
         },
         {
           title: i18n.HOST_NAME,
           description:
             typeData && data.host
-              ? hostNameRenderer(data.host, ip, contextID, isDraggable)
+              ? hostNameRenderer(scopeId, data.host, ip, contextID, isDraggable)
               : getEmptyTagValue(),
         },
       ],
