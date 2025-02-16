@@ -72,7 +72,7 @@ describe('useDynamicEntityFlyout', () => {
       });
     });
 
-    expect(openFlyoutMock).toHaveBeenCalledTimes(1)
+    expect(openFlyoutMock).toHaveBeenCalledTimes(1);
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: UniversalEntityPanelKey,
@@ -94,7 +94,7 @@ describe('useDynamicEntityFlyout', () => {
       });
     });
 
-    expect(openFlyoutMock).toHaveBeenCalledTimes(1)
+    expect(openFlyoutMock).toHaveBeenCalledTimes(1);
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: UserPanelKey,
@@ -116,7 +116,7 @@ describe('useDynamicEntityFlyout', () => {
       });
     });
 
-    expect(openFlyoutMock).toHaveBeenCalledTimes(1)
+    expect(openFlyoutMock).toHaveBeenCalledTimes(1);
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: HostPanelKey,
@@ -138,7 +138,7 @@ describe('useDynamicEntityFlyout', () => {
       });
     });
 
-    expect(openFlyoutMock).toHaveBeenCalledTimes(1)
+    expect(openFlyoutMock).toHaveBeenCalledTimes(1);
     expect(openFlyoutMock).toHaveBeenCalledWith({
       right: {
         id: ServicePanelKey,
@@ -187,6 +187,8 @@ describe('useDynamicEntityFlyout', () => {
       })
     );
     expect(onFlyoutCloseMock).toHaveBeenCalled();
+
+    expect(openFlyoutMock).toHaveBeenCalledTimes(0);
   });
 
   it('should close the flyout when closeDynamicFlyout is called', () => {
@@ -199,5 +201,6 @@ describe('useDynamicEntityFlyout', () => {
     });
 
     expect(closeFlyoutMock).toHaveBeenCalled();
+    expect(openFlyoutMock).toHaveBeenCalledTimes(0);
   });
 });
