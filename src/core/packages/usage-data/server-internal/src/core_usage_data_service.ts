@@ -280,6 +280,7 @@ export class CoreUsageDataService
           rewriteBasePath: http.rewriteBasePath,
           keepaliveTimeout: http.keepaliveTimeout,
           socketTimeout: http.socketTimeout,
+          protocol: http.protocol,
           compression: {
             enabled: http.compression.enabled,
             referrerWhitelistConfigured: isConfigured.array(http.compression.referrerWhitelist),
