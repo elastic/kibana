@@ -52,8 +52,7 @@ export const DiscoverTopNav = ({
   const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, setHeaderActionMenu } =
     services;
   const query = useAppStateSelector((state) => state.query);
-  const { savedDataViews, managedDataViews, adHocDataViews } =
-    useInternalStateSelector(selectDataViewsForPicker);
+  const { managedDataViews, adHocDataViews } = useInternalStateSelector(selectDataViewsForPicker);
   const dataView = useInternalStateSelector((state) => state.dataView!);
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
@@ -191,7 +190,6 @@ export const DiscoverTopNav = ({
       textBasedLanguages: supportedTextBasedLanguages,
       adHocDataViews,
       managedDataViews,
-      savedDataViews,
       onEditDataView: stateContainer.actions.onDataViewEdited,
     };
   }, [
@@ -200,7 +198,6 @@ export const DiscoverTopNav = ({
     createNewDataView,
     dataView,
     managedDataViews,
-    savedDataViews,
     stateContainer,
     uiSettings,
   ]);
