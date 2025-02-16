@@ -1809,6 +1809,7 @@ class AgentPolicyService {
       sortOrder = 'asc',
       sortField = 'created_at',
       fields = [],
+      spaceId,
     }: FetchAllAgentPoliciesOptions = {}
   ): Promise<AsyncIterable<AgentPolicy[]>> {
     const savedObjectType = await getAgentPolicySavedObjectType();
@@ -1821,6 +1822,7 @@ class AgentPolicyService {
         perPage,
         fields,
         filter: kuery ? normalizeKuery(savedObjectType, kuery) : undefined,
+        namespaces: spaceId ? [spaceId] : undefined,
       },
       resultsMapper(data) {
         return data.saved_objects.map((agentPolicySO) => {

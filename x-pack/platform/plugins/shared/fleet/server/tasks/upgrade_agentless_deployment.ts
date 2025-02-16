@@ -127,9 +127,16 @@ export class UpgradeAgentlessDeploymentsTask {
             `${LOGGER_SUBJECT} processing agentless agent ${JSON.stringify(agentlessAgent.agent)}`
           );
 
+          if (this.abortController.signal.aborted) {
+            this.abortController.abort('Task runner canceled!');
+          }
           return processFunction(agentPolicy, agentlessAgent);
         })
       );
+
+      if (this.abortController.signal.aborted) {
+        this.abortController.abort('Task runner canceled!');
+      }
     }
   };
 
@@ -145,13 +152,15 @@ export class UpgradeAgentlessDeploymentsTask {
       const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
         kuery: policiesKuery,
         perPage: BATCH_SIZE,
+        fields: ['id', 'package_policies', 'agents'],
+        spaceId: '*',
       });
       this.logger.info(
         `[${LOGGER_SUBJECT}] running task to upgrade agentless deployments with kuery: ${policiesKuery}`
       );
 
       for await (const agentPolicyPageResults of agentPolicyFetcher) {
-        this.logger.debug(
+        this.logger.info(
           `[${LOGGER_SUBJECT}] Found "${agentPolicyPageResults.length}" agentless policies`
         );
 
@@ -193,6 +202,10 @@ export class UpgradeAgentlessDeploymentsTask {
         } catch (e) {
           this.logger.error(`${LOGGER_SUBJECT} Failed to get agentless agents error: ${e}`);
         }
+
+        if (this.abortController.signal.aborted) {
+          this.abortController.abort('Task runner canceled!');
+        }
       }
     } catch (e) {
       this.logger.error(`${LOGGER_SUBJECT} Failed to get agentless policies error: ${e}`);
@@ -201,7 +214,7 @@ export class UpgradeAgentlessDeploymentsTask {
   };
 
   private upgradeAgentlessDeployments = async (agentPolicy: AgentPolicy, agent: Agent) => {
-    this.logger.debug(`${agentPolicy.id} agentless policy id`);
+    this.logger.info(`${agentPolicy.id} agentless policy id`);
 
     let latestAgentVersion;
     const currentAgentVersion = agent.agent?.version;
@@ -219,6 +232,7 @@ export class UpgradeAgentlessDeploymentsTask {
 
     // Compare the current agent version with the latest agent version And upgrade if necessary
     if (
+      agent.status === 'online' &&
       latestAgentVersion &&
       currentAgentVersion &&
       semverLt(currentAgentVersion, latestAgentVersion)
@@ -251,12 +265,12 @@ export class UpgradeAgentlessDeploymentsTask {
   public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
     const cloudSetup = appContextService.getCloud();
     if (!this.startedTaskRunner) {
-      this.logger.debug(`${LOGGER_SUBJECT} runTask Aborted. Task not started yet`);
+      this.logger.info(`${LOGGER_SUBJECT} runTask Aborted. Task not started yet`);
       return;
     }
 
     if (taskInstance.id !== this.taskId) {
-      this.logger.debug(
+      this.logger.info(
         `${LOGGER_SUBJECT} Outdated task version: Received [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
       );
       return getDeleteTaskRunResult();
