@@ -61,11 +61,11 @@ export function extractReferences(
 
   const panels = parsedAttributes.panels;
 
-  const panelMissingType = Object.values(panels).find((panel) => panel.type === undefined);
+  const panelMissingType = Object.entries(panels).find(
+    ([panelId, panel]) => panel.type === undefined
+  );
   if (panelMissingType) {
-    throw new Error(
-      `"type" attribute is missing from panel "${panelMissingType.explicitInput.id}"`
-    );
+    throw new Error(`"type" attribute is missing from panel "${panelMissingType[0]}"`);
   }
 
   const extract = createExtract(deps.embeddablePersistableStateService);

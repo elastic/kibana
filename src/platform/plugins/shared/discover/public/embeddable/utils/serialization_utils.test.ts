@@ -125,7 +125,6 @@ describe('Serialization utils', () => {
 
       expect(serializedState).toEqual({
         rawState: {
-          id: uuid,
           type: 'search',
           attributes: {
             ...toSavedSearchAttributes(savedSearch, searchSource.serialize().searchSourceJSON),

@@ -9,7 +9,6 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import {
-  EmbeddableInput,
   EmbeddablePersistableStateService,
   EmbeddableStateWithType,
 } from '@kbn/embeddable-plugin/common';
@@ -89,7 +88,7 @@ export const createInject = (
           panelReferences
         );
 
-        workingState.panels[key].explicitInput = injectedState as EmbeddableInput;
+        workingState.panels[key].explicitInput = injectedState;
       }
     }
 
@@ -118,16 +117,17 @@ export const createExtract = (
          * TODO move this logic into the persistable state service extract method for each panel type
          * that could be by value or by reference.
          */
-        if (panel.explicitInput.savedObjectId) {
+        const savedObjectId = (panel.explicitInput as { savedObjectId?: string }).savedObjectId;
+        if (savedObjectId) {
           panel.panelRefName = `panel_${id}`;
 
           references.push({
             name: `${id}:panel_${id}`,
             type: panel.type,
-            id: panel.explicitInput.savedObjectId as string,
+            id: savedObjectId,
           });
 
-          delete panel.explicitInput.savedObjectId;
+          delete (panel.explicitInput as { savedObjectId?: string }).savedObjectId;
         }
 
         const { state: panelState, references: panelReferences } = persistableStateService.extract({
@@ -138,7 +138,7 @@ export const createExtract = (
         references.push(...prefixReferencesFromPanel(id, panelReferences));
 
         const { type, ...restOfState } = panelState;
-        workingState.panels[id].explicitInput = restOfState as EmbeddableInput;
+        workingState.panels[id].explicitInput = restOfState;
       }
     }
 

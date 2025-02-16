@@ -11,7 +11,6 @@ export type {
   EmbeddableInput,
   CommonEmbeddableStartContract,
   EmbeddableStateWithType,
-  PanelState,
   EmbeddablePersistableStateService,
   EmbeddableRegistryDefinition,
 } from './types';

@@ -123,7 +123,6 @@ export const serializeState = ({
   }
 
   const { state, references } = extract({
-    id: uuid,
     type: SEARCH_EMBEDDABLE_TYPE,
     attributes: {
       ...savedSearchAttributes,

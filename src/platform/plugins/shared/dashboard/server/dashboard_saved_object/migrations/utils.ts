@@ -8,41 +8,43 @@
  */
 
 import { omit } from 'lodash';
-import type { EmbeddableInput, SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 import type { SavedDashboardPanel } from '../schema';
 import type { DashboardPanelState } from '../../../common';
 
-export function convertSavedDashboardPanelToPanelState<
-  TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
->(savedDashboardPanel: SavedDashboardPanel): DashboardPanelState<TEmbeddableInput> {
+export function convertSavedDashboardPanelToPanelState<PanelState = object>(
+  savedDashboardPanel: SavedDashboardPanel
+): DashboardPanelState<PanelState> {
   return {
     type: savedDashboardPanel.type,
     gridData: savedDashboardPanel.gridData,
     panelRefName: savedDashboardPanel.panelRefName,
     explicitInput: {
-      id: savedDashboardPanel.panelIndex,
       ...(savedDashboardPanel.id !== undefined && { savedObjectId: savedDashboardPanel.id }),
       ...(savedDashboardPanel.title !== undefined && { title: savedDashboardPanel.title }),
       ...savedDashboardPanel.embeddableConfig,
-    } as TEmbeddableInput,
+    } as PanelState,
     version: savedDashboardPanel.version,
   };
 }
 
 export function convertPanelStateToSavedDashboardPanel(
+  panelId: string,
   panelState: DashboardPanelState
 ): SavedDashboardPanel {
-  const savedObjectId = (panelState.explicitInput as SavedObjectEmbeddableInput).savedObjectId;
-  const panelIndex = panelState.explicitInput.id;
+  const savedObjectId = (panelState.explicitInput as { savedObjectId?: string }).savedObjectId;
+  const title = (panelState.explicitInput as { title?: string }).title;
   return {
     type: panelState.type,
     gridData: {
       ...panelState.gridData,
-      i: panelIndex,
+      i: panelId,
     },
-    panelIndex,
-    embeddableConfig: omit(panelState.explicitInput, ['id', 'savedObjectId', 'title']),
-    ...(panelState.explicitInput.title !== undefined && { title: panelState.explicitInput.title }),
+    panelIndex: panelId,
+    embeddableConfig: omit(
+      panelState.explicitInput as { id: string; savedObjectId?: string; title?: string },
+      ['id', 'savedObjectId', 'title']
+    ),
+    ...(title !== undefined && { title }),
     ...(savedObjectId !== undefined && { id: savedObjectId }),
     ...(panelState.panelRefName !== undefined && { panelRefName: panelState.panelRefName }),
     ...(panelState.version !== undefined && { version: panelState.version }),
