@@ -21,6 +21,7 @@ import {
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual, isFunction } from 'lodash';
 import { i18n } from '@kbn/i18n';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { VIEW_MODE } from '../../../../common/constants';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { updateSavedSearch } from './utils/update_saved_search';
@@ -310,14 +311,16 @@ export function getSavedSearchContainer({
   const load = async (id: string): Promise<SavedSearch> => {
     addLog('[savedSearch] load', { id });
 
-    const loadedSavedSearch = await services.savedSearch.get(id);
-
-    restoreStateFromSavedSearch({
-      savedSearch: loadedSavedSearch,
-      timefilter: services.timefilter,
-    });
-
-    return set(loadedSavedSearch);
+    try {
+      const loadedSavedSearch = await services.savedSearch.get(id);
+      restoreStateFromSavedSearch({
+        savedSearch: loadedSavedSearch,
+        timefilter: services.timefilter,
+      });
+      return set(loadedSavedSearch);
+    } catch (e) {
+      throw new SavedObjectNotFound('Discover session', id);
+    }
   };
 
   return {

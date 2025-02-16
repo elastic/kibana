@@ -14,6 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
   const { common, header } = getPageObjects(['common', 'discover', 'header']);
 
   describe('discover no data', () => {
@@ -25,6 +26,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('load kibana with no data');
       await kibanaServer.importExport.unload(kbnDirectory);
       await common.navigateToApp('discover');
+    });
+
+    beforeEach(async () => {
+      await browser.clearLocalStorage();
     });
 
     after(async () => {

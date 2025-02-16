@@ -24,6 +24,7 @@ import { mockCustomizationContext } from '../../customizations/__mocks__/customi
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { MainHistoryLocationState } from '../../../common';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
 
 let mockCustomizationService: DiscoverCustomizationService | undefined;
 
@@ -176,6 +177,7 @@ function getServicesMock(
   hasUserDataView = true,
   locationState?: MainHistoryLocationState
 ) {
+  discoverServiceMock.storage.clear();
   const dataViewsMock = discoverServiceMock.data.dataViews;
   dataViewsMock.hasData = {
     hasESData: jest.fn(() => Promise.resolve(hasESData)),
@@ -189,5 +191,9 @@ function getServicesMock(
       state: locationState,
     },
   });
+  discoverServiceMock.core.security.authc.getCurrentUser = jest.fn().mockResolvedValue('test');
+  discoverServiceMock.spaces = {
+    getActiveSpace: jest.fn().mockResolvedValue('test'),
+  } as unknown as SpacesApi;
   return discoverServiceMock;
 }

@@ -119,6 +119,7 @@ export interface DiscoverServices {
   dataViewEditor: DataViewEditorStart;
   dataVisualizer?: DataVisualizerPluginStart;
   http: HttpStart;
+  sessionStorage: Storage;
   storage: Storage;
   spaces?: SpacesApi;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
@@ -208,6 +209,7 @@ export const buildServices = memoize(
       notifications: core.notifications,
       uiSettings: core.uiSettings,
       settings: core.settings,
+      sessionStorage: new Storage(sessionStorage),
       storage,
       trackUiMetric: usageCollection?.reportUiCounter.bind(usageCollection, 'discover'),
       dataViewFieldEditor: plugins.dataViewFieldEditor,
