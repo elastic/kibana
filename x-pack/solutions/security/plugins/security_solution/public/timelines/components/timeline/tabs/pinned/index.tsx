@@ -13,6 +13,8 @@ import deepEqual from 'fast-deep-equal';
 import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { useDataView } from '../../../../../data_view_picker/hooks/use_data_view';
+import { useSelectedPatterns } from '../../../../../data_view_picker/hooks/use_selected_patterns';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import {
   DocumentDetailsLeftPanelKey,
@@ -26,7 +28,6 @@ import { requiredFieldsForActions } from '../../../../../detections/components/a
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import type { TimelineModel } from '../../../../store/model';
 import type { State } from '../../../../../common/store';
 import { TimelineTabs } from '../../../../../../common/types/timeline';
@@ -78,9 +79,9 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
   const [pageIndex, setPageIndex] = useState(0);
 
   const { telemetry } = useKibana().services;
-  const { dataViewId, sourcererDataView, selectedPatterns } = useSourcererDataView(
-    SourcererScopeName.timeline
-  );
+
+  const selectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+  const { dataView } = useDataView(SourcererScopeName.timeline);
 
   const filterQuery = useMemo(() => {
     if (isEmpty(pinnedEventIds)) {
@@ -144,11 +145,11 @@ export const PinnedTabContentComponent: React.FC<Props> = ({
       endDate: '',
       id: `pinned-${timelineId}`,
       indexNames: selectedPatterns,
-      dataViewId,
+      dataViewId: dataView.id ?? '',
       fields: timelineQueryFields,
       limit: itemsPerPage,
       filterQuery,
-      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings: dataView.runtimeFieldMap as RunTimeMappings,
       skip: filterQuery === '',
       startDate: '',
       sort: timelineQuerySortField,

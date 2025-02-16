@@ -8,13 +8,13 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
+import { DataViewPickerScopeName } from '../../../data_view_picker/constants';
+import { useSelectDataView } from '../../../data_view_picker/hooks/use_select_data_view';
 import type { Note } from '../../../../common/api/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import { createNote } from '../notes/helpers';
 
 import { InputsModelId } from '../../../common/store/inputs/constants';
-import { sourcererActions } from '../../../sourcerer/store';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import {
   addNotes as dispatchAddNotes,
   updateNote as dispatchUpdateNote,
@@ -36,6 +36,7 @@ import type { UpdateTimeline } from './types';
 
 export const useUpdateTimeline = () => {
   const dispatch = useDispatch();
+  const selectDataView = useSelectDataView();
 
   return useCallback(
     ({
@@ -58,13 +59,11 @@ export const useUpdateTimeline = () => {
         _timeline = { ...timeline, updated: undefined, changed: true, version: null };
       }
       if (!isEmpty(_timeline.indexNames)) {
-        dispatch(
-          sourcererActions.setSelectedDataView({
-            id: SourcererScopeName.timeline,
-            selectedDataViewId: _timeline.dataViewId,
-            selectedPatterns: _timeline.indexNames,
-          })
-        );
+        selectDataView({
+          id: _timeline.dataViewId,
+          patterns: _timeline.indexNames,
+          scope: DataViewPickerScopeName.timeline,
+        });
       }
       if (
         _timeline.status === TimelineStatusEnum.immutable &&
@@ -138,6 +137,6 @@ export const useUpdateTimeline = () => {
         );
       }
     },
-    [dispatch]
+    [dispatch, selectDataView]
   );
 };

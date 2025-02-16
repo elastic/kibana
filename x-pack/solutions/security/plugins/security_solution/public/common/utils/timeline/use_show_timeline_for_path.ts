@@ -8,9 +8,9 @@
 import { useCallback, useMemo } from 'react';
 import { matchPath } from 'react-router-dom';
 
+import { useDataView } from '../../../data_view_picker/hooks/use_data_view';
 import { getLinksWithHiddenTimeline } from '../../links';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
-import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useKibana } from '../../lib/kibana';
 import { hasAccessToSecuritySolution } from '../../../helpers_access';
 
@@ -21,13 +21,14 @@ const isTimelinePathVisible = (currentPath: string): boolean => {
 };
 
 export const useShowTimelineForGivenPath = () => {
-  const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.timeline);
+  const { indicesExist, dataView } = useDataView(SourcererScopeName.timeline);
   const {
     services: {
       application: { capabilities },
     },
   } = useKibana();
   const userHasSecuritySolutionVisible = hasAccessToSecuritySolution(capabilities);
+  const dataViewId = dataView?.id ?? '';
 
   const isTimelineAllowed = useMemo(
     () => userHasSecuritySolutionVisible && (indicesExist || dataViewId === null),
