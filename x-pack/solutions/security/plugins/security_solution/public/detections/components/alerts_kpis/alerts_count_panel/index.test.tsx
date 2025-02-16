@@ -10,12 +10,9 @@ import { act } from '@testing-library/react';
 import { mount } from 'enzyme';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { AlertsCountPanel } from '.';
-
-import type { Status } from '../../../../../common/api/detection_engine';
 import { DEFAULT_STACK_BY_FIELD, DEFAULT_STACK_BY_FIELD1 } from '../common/config';
 import { TestProviders } from '../../../../common/mock';
 import { ChartContextMenu } from '../chart_panels/chart_context_menu';
-import { COUNTS } from '../chart_panels/chart_select/translations';
 import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 
 const from = '2022-07-28T08:20:18.966Z';
@@ -46,18 +43,17 @@ jest.mock('../common/hooks', () => ({
 
 const mockSetIsExpanded = jest.fn();
 const defaultProps = {
-  inspectTitle: COUNTS,
-  signalIndexName: 'signalIndexName',
-  stackByField0: DEFAULT_STACK_BY_FIELD,
-  stackByField1: DEFAULT_STACK_BY_FIELD1,
+  chartOptionsContextMenu: jest.fn(),
+  extraActions: [{ id: 'resetGroupByFields' }] as Action[],
+  filters: [],
+  panelHeight: 300,
   setStackByField0: jest.fn(),
   setStackByField1: jest.fn(),
+  stackByField0: DEFAULT_STACK_BY_FIELD,
+  stackByField1: DEFAULT_STACK_BY_FIELD1,
+  title: <div>{'test'}</div>,
   isExpanded: true,
   setIsExpanded: mockSetIsExpanded,
-  showBuildingBlockAlerts: false,
-  showOnlyThreatIndicatorAlerts: false,
-  status: 'open' as Status,
-  extraActions: [{ id: 'resetGroupByFields' }] as Action[],
 };
 
 describe('AlertsCountPanel', () => {
@@ -77,25 +73,11 @@ describe('AlertsCountPanel', () => {
     });
   });
 
-  it('renders with the specified `alignHeader` alignment', async () => {
-    await act(async () => {
-      const wrapper = mount(
-        <TestProviders>
-          <AlertsCountPanel {...defaultProps} alignHeader="flexEnd" />
-        </TestProviders>
-      );
-
-      expect(
-        wrapper.find('[data-test-subj="headerSectionInnerFlexGroup"]').last().getDOMNode().className
-      ).toContain('flexEnd');
-    });
-  });
-
   it('renders the inspect button by default', async () => {
     await act(async () => {
       const wrapper = mount(
         <TestProviders>
-          <AlertsCountPanel {...defaultProps} alignHeader="flexEnd" />
+          <AlertsCountPanel {...defaultProps} />
         </TestProviders>
       );
 
@@ -152,6 +134,7 @@ describe('AlertsCountPanel', () => {
         expect(wrapper.find('[data-test-subj="visualization-embeddable"]').exists()).toEqual(true);
       });
     });
+
     it('when isExpanded is false, hide counts panel', async () => {
       await act(async () => {
         const wrapper = mount(

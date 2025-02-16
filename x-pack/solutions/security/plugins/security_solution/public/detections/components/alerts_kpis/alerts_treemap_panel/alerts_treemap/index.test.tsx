@@ -8,7 +8,6 @@
 import { render, screen } from '@testing-library/react';
 import { Settings } from '@elastic/charts';
 import React from 'react';
-
 import { TestProviders } from '../../../../../common/mock';
 import {
   mockAlertSearchResponse,
@@ -23,7 +22,6 @@ import { AlertsTreemap } from '.';
 const defaultProps: Props = {
   data: mockAlertSearchResponse,
   maxBuckets: 1000,
-  minChartHeight: 370,
   stackByField0: 'kibana.alert.rule.name',
   stackByField1: 'host.name',
 };

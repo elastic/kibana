@@ -7,34 +7,40 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
-
+import { css } from '@emotion/react';
 import * as i18n from '../translations';
-
-const NoDataLabel = styled(EuiText)`
-  text-align: center;
-`;
 
 interface Props {
   reason?: string;
 }
 
 const NoDataComponent: React.FC<Props> = ({ reason }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="none">
-    <EuiFlexItem grow={true}>
-      <NoDataLabel color="subdued" data-test-subj="noDataLabel" size="xs">
+  <EuiFlexGroup direction="column" gutterSize="xs">
+    <EuiFlexItem>
+      <EuiText
+        color="subdued"
+        data-test-subj="noDataLabel"
+        size="xs"
+        css={css`
+          text-align: center;
+        `}
+      >
         {i18n.NO_DATA_LABEL}
-      </NoDataLabel>
-
-      {reason != null && (
-        <>
-          <EuiSpacer size="s" />
-          <NoDataLabel color="subdued" data-test-subj="reasonLabel" size="xs">
-            {reason}
-          </NoDataLabel>
-        </>
-      )}
+      </EuiText>
     </EuiFlexItem>
+
+    {reason != null && (
+      <EuiFlexItem
+        css={css`
+          text-align: center;
+        `}
+      >
+        <EuiSpacer size="s" />
+        <EuiText color="subdued" data-test-subj="reasonLabel" size="xs">
+          {reason}
+        </EuiText>
+      </EuiFlexItem>
+    )}
   </EuiFlexGroup>
 );
 

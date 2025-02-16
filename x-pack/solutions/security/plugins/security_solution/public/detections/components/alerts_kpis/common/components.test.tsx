@@ -60,7 +60,7 @@ describe('components', () => {
     test('it has a hidden overflow-x', () => {
       render(
         <TestProviders>
-          <KpiPanel data-test-subj="test" $toggleStatus={true}>
+          <KpiPanel data-test-subj="test" toggleStatus={true}>
             {'test'}
           </KpiPanel>
         </TestProviders>
@@ -72,25 +72,13 @@ describe('components', () => {
     test('it has a hidden overflow-y by default', () => {
       render(
         <TestProviders>
-          <KpiPanel data-test-subj="test" $toggleStatus={true}>
+          <KpiPanel data-test-subj="test" toggleStatus={true}>
             {'test'}
           </KpiPanel>
         </TestProviders>
       );
 
       expect(screen.getByTestId('test')).toHaveStyleRule('overflow-y', 'hidden');
-    });
-
-    test('it uses the `$overflowY` prop for the value of overflow-y when provided', () => {
-      render(
-        <TestProviders>
-          <KpiPanel data-test-subj="test" $overflowY="auto" $toggleStatus={true}>
-            {'test'}
-          </KpiPanel>
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId('test')).toHaveStyleRule('overflow-y', 'auto');
     });
   });
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { EuiComboBox } from '@elastic/eui';
 import { EuiProgress } from '@elastic/eui';
 import type { Filter, Query } from '@kbn/es-query';
@@ -13,7 +12,7 @@ import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import React, { useEffect, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-
+import { i18n } from '@kbn/i18n';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { AlertsTreemap, DEFAULT_MIN_CHART_HEIGHT } from './alerts_treemap';
 import { KpiPanel } from '../common/components';
@@ -27,23 +26,21 @@ import { DEFAULT_STACK_BY_FIELD0_SIZE, getAlertsRiskQuery } from './alerts_treem
 import type { AlertsTreeMapAggregation } from './alerts_treemap/types';
 import { useKibana } from '../../../../common/lib/kibana';
 
+const TREEMAP = i18n.translate('xpack.securitySolution.components.chartSelect.treemapOption', {
+  defaultMessage: 'Treemap',
+});
+
 const DEFAULT_HEIGHT = DEFAULT_MIN_CHART_HEIGHT + 134; // px
-
-const COLLAPSED_HEIGHT = 64; // px
-
 const ALERTS_TREEMAP_ID = 'alerts-treemap';
 
 export interface Props {
-  addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
-  alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
-  chartOptionsContextMenu?: (queryId: string) => React.ReactNode;
-  inspectTitle: string;
+  addFilter: ({ field, value }: { field: string; value: string | number }) => void;
+  chartOptionsContextMenu: (queryId: string) => React.ReactNode;
   isPanelExpanded: boolean;
-  filters?: Filter[];
-  height?: number;
-  query?: Query;
+  filters: Filter[];
+  height: number;
+  query: Query;
   riskSubAggregationField: string;
-  runtimeMappings?: MappingRuntimeFields;
   setIsPanelExpanded: (value: boolean) => void;
   setStackByField0: (stackBy: string) => void;
   setStackByField0ComboboxInputRef?: (inputRef: HTMLInputElement | null) => void;
@@ -54,21 +51,17 @@ export interface Props {
   stackByField0ComboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
   stackByField1: string | undefined;
   stackByField1ComboboxRef?: React.RefObject<EuiComboBox<string | number | string[] | undefined>>;
-  stackByWidth?: number;
   title: React.ReactNode;
 }
 
 const AlertsTreemapPanelComponent: React.FC<Props> = ({
   addFilter,
-  alignHeader,
   chartOptionsContextMenu,
-  inspectTitle,
   isPanelExpanded,
   filters,
   height = DEFAULT_HEIGHT,
   query,
   riskSubAggregationField,
-  runtimeMappings,
   setIsPanelExpanded,
   setStackByField0,
   setStackByField0ComboboxInputRef,
@@ -79,7 +72,6 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
   stackByField0ComboboxRef,
   stackByField1,
   stackByField1ComboboxRef,
-  stackByWidth,
   title,
 }: Props) => {
   const { to, from, deleteQuery, setQuery } = useGlobalTime();
@@ -116,7 +108,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
       additionalFilters,
       from,
       riskSubAggregationField,
-      runtimeMappings,
+      runtimeMappings: undefined,
       stackByField0,
       stackByField1,
       to,
@@ -132,7 +124,7 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
         additionalFilters,
         from,
         riskSubAggregationField,
-        runtimeMappings,
+        runtimeMappings: undefined,
         stackByField0,
         stackByField1,
         to,
@@ -142,7 +134,6 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
     additionalFilters,
     from,
     riskSubAggregationField,
-    runtimeMappings,
     setAlertsQuery,
     stackByField0,
     stackByField1,
@@ -161,19 +152,12 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
 
   return (
     <InspectButtonContainer>
-      <KpiPanel
-        className="eui-yScroll"
-        data-test-subj="treemapPanel"
-        hasBorder
-        height={isPanelExpanded ? height : COLLAPSED_HEIGHT}
-        $overflowY={isPanelExpanded ? 'auto' : 'hidden'}
-        $toggleStatus
-      >
+      <KpiPanel height={height} toggleStatus data-test-subj="treemapPanel">
         <HeaderSection
-          alignHeader={alignHeader}
+          alignHeader="flexStart"
           hideSubtitle
           id={uniqueQueryId}
-          inspectTitle={inspectTitle}
+          inspectTitle={TREEMAP}
           outerDirection="row"
           showInspectButton={chartOptionsContextMenu == null}
           title={title}
@@ -192,7 +176,6 @@ const AlertsTreemapPanelComponent: React.FC<Props> = ({
               stackByField0ComboboxRef={stackByField0ComboboxRef}
               stackByField1={stackByField1}
               stackByField1ComboboxRef={stackByField1ComboboxRef}
-              stackByWidth={stackByWidth}
               uniqueQueryId={uniqueQueryId}
             />
           )}
