@@ -250,10 +250,14 @@ export const createCustomThresholdExecutor = ({
 
         const groups = groupByKeysObjectMapping[group];
 
+        const grouping: Record<string, string> = {};
+        groups?.forEach((groupObj) => (grouping[groupObj.field] = groupObj.value));
+
         const { uuid, start } = alertsClient.report({
           id: `${group}`,
           actionGroup: actionGroupId,
           payload: {
+            ...grouping,
             [ALERT_REASON]: reason,
             [ALERT_EVALUATION_VALUES]: evaluationValues,
             [ALERT_EVALUATION_THRESHOLD]: threshold,

@@ -263,6 +263,12 @@ export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
    * Optional function to format each alert in summarizedAlerts right after fetching them.
    */
   formatAlert?: FormatAlert<AlertData>;
+
+  /**
+   * Optional list of runtime fields from the rule to add alert's runtime mappings.
+   * Example: ['params.groupBy']
+   */
+  ruleFieldsToAddAlertRuntimeMappings?: string[];
 }
 
 export interface RuleType<

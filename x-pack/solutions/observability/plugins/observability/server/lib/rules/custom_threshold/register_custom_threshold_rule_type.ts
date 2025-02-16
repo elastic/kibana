@@ -45,6 +45,7 @@ export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts<CustomThresholdAle
   useEcs: true,
   useLegacyAlerts: false,
   shouldWrite: true,
+  ruleFieldsToAddAlertRuntimeMappings: ['params.groupBy'],
 };
 
 export function thresholdRuleType(
