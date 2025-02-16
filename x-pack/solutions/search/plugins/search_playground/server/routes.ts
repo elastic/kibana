@@ -12,12 +12,13 @@ import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../common';
 import { sendMessageEvent, SendMessageEventData } from './analytics/events';
 import { fetchFields } from './lib/fetch_query_source_fields';
-import { AssistClientOptionsWithClient, createAssist as Assist } from './utils/assist';
+import { createAssist as Assist } from './utils/assist';
 import { ConversationalChain } from './lib/conversational_chain';
 import { errorHandler } from './utils/error_handler';
 import { handleStreamResponse } from './utils/handle_stream_response';
 import {
   APIRoutes,
+  ElasticsearchRetrieverContentField,
   SearchPlaygroundPluginStart,
   SearchPlaygroundPluginStartDependencies,
 } from './types';
@@ -26,6 +27,7 @@ import { fetchIndices } from './lib/fetch_indices';
 import { isNotNullish } from '../common/is_not_nullish';
 import { MODELS } from '../common/models';
 import { ContextLimitError } from './lib/errors';
+import { parseSourceFields } from './utils/parse_source_fields';
 
 export function createRetriever(esQuery: string) {
   return (question: string) => {
@@ -113,7 +115,7 @@ export function defineRoutes({
       const { client } = (await context.core).elasticsearch;
       const aiClient = Assist({
         es_client: client.asCurrentUser,
-      } as AssistClientOptionsWithClient);
+      });
       const { messages, data } = request.body;
       const { chatModel, chatPrompt, questionRewritePrompt, connector } = await getChatParams(
         {
@@ -125,15 +127,10 @@ export function defineRoutes({
         { actions, logger, request }
       );
 
-      let sourceFields = {};
+      let sourceFields: ElasticsearchRetrieverContentField;
 
       try {
-        sourceFields = JSON.parse(data.source_fields);
-        sourceFields = Object.keys(sourceFields).reduce((acc, key) => {
-          // @ts-ignore
-          acc[key] = sourceFields[key][0];
-          return acc;
-        }, {});
+        sourceFields = parseSourceFields(data.source_fields);
       } catch (e) {
         logger.error('Failed to parse the source fields', e);
         throw Error(e);
