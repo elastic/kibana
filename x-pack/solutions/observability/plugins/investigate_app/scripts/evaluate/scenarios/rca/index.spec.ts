@@ -20,6 +20,7 @@ import {
   logger,
 } from '@kbn/observability-ai-assistant-app-plugin/scripts/evaluation/services';
 import { RCAClient } from '../../rca_client';
+import { it } from '../../averaging';
 
 type ToolCallMessage =
   | EndProcessToolMessage
@@ -85,29 +86,34 @@ describe('Root cause analysis', () => {
     return { report: report[0], observations, errors, entities, other };
   }
 
-  it('can accurately pinpoint the root cause of cartservice bad entrypoint failure', async () => {
-    const alert = await rcaChatClient.getAlert(ALERT_FIXTURE_ID);
-    const connectorId = chatClient.getConnectorId();
-    const { from, to } = await rcaChatClient.getTimeRange({
-      fromOffset: 'now-15m',
-      toOffset: 'now+15m',
-      alert,
-    });
-    const investigationId = await rcaChatClient.createInvestigation({
-      alertId: ALERT_FIXTURE_ID,
-      from,
-      to,
-    });
-    investigations.push(investigationId);
-    const events = await rcaChatClient.rootCauseAnalysis({
-      investigationId,
-      from: new Date(from).toISOString(),
-      to: new Date(to).toISOString(),
-      alert,
-      connectorId,
-    });
-    const { report, entities, errors } = categorizeEvents(events);
-    const prompt = `
+  it(
+    {
+      name: 'can accurately pinpoint the root cause of cartservice bad entrypoint failure',
+      testCount: 2,
+    },
+    async function () {
+      const alert = await rcaChatClient.getAlert(ALERT_FIXTURE_ID);
+      const connectorId = chatClient.getConnectorId();
+      const { from, to } = await rcaChatClient.getTimeRange({
+        fromOffset: 'now-15m',
+        toOffset: 'now+15m',
+        alert,
+      });
+      const investigationId = await rcaChatClient.createInvestigation({
+        alertId: ALERT_FIXTURE_ID,
+        from,
+        to,
+      });
+      investigations.push(investigationId);
+      const events = await rcaChatClient.rootCauseAnalysis({
+        investigationId,
+        from: new Date(from).toISOString(),
+        to: new Date(to).toISOString(),
+        alert,
+        connectorId,
+      });
+      const { report, entities, errors } = categorizeEvents(events);
+      const prompt = `
     An investigation was performed by the Observability AI Assistant to identify the root cause of an alert for the controller service. Here is the alert:         
     
     ${JSON.stringify(alert)}
@@ -122,25 +128,26 @@ describe('Root cause analysis', () => {
     During the course of the investigation, the Observability AI Assistant encountered ${
       errors.length
     } errors when attempting to analyze the entities.${
-      errors.length
-        ? ' These errors were failures to retrieve data from the entities and do not reflect issues in the system being evaluated'
-        : ''
-    }.
+        errors.length
+          ? ' These errors were failures to retrieve data from the entities and do not reflect issues in the system being evaluated'
+          : ''
+      }.
 
     A report was written by the Observability AI Assistant detailing issues throughout the system, including the controller service and it's dependencies. The report includes a hypothesis about the underlying root cause of the system failure. Here is the report:
 
     ${report.response.report}
     `;
 
-    const conversation = await chatClient.complete({ messages: prompt });
+      const conversation = await chatClient.complete({ messages: prompt });
 
-    await chatClient.evaluate(conversation, [
-      'Effectively reflects the actual root cause in the report. The actual root cause of the system failure was a misconfiguration related to the `cartservice`. A bad container entrypoint was configured for the cart service, causing it to fail to start',
-      'Analyzes the cartservice during the course of the investigation.',
-      'Analyzes each entity only once.',
-      'The Observability AI Assistant encountered 0 errors when attempting to analyze the system failure.',
-    ]);
-  });
+      await chatClient.evaluate(conversation, [
+        'Effectively reflects the actual root cause in the report. The actual root cause of the system failure was a misconfiguration related to the `cartservice`. A bad container entrypoint was configured for the cart service, causing it to fail to start',
+        'Analyzes the cartservice during the course of the investigation.',
+        'Analyzes each entity only once.',
+        'The Observability AI Assistant encountered 0 errors when attempting to analyze the system failure.',
+      ]);
+    }
+  );
 
   after(async () => {
     for (const investigationId of investigations) {
