@@ -58,9 +58,9 @@ export const ProcessorOutcomePreview = ({
     const filterDocuments = (filter: DocsFilterOption) => {
       switch (filter) {
         case 'outcome_filter_matched':
-          return simulation.documents.filter((doc) => doc.isMatch);
+          return simulation.documents.filter((doc) => doc.status === 'parsed');
         case 'outcome_filter_unmatched':
-          return simulation.documents.filter((doc) => !doc.isMatch);
+          return simulation.documents.filter((doc) => doc.status !== 'parsed');
         case 'outcome_filter_all':
         default:
           return simulation.documents;

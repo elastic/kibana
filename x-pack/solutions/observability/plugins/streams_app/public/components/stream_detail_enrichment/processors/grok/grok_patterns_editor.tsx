@@ -65,7 +65,7 @@ export const GrokPatternsEditor = () => {
         { defaultMessage: 'Grok patterns editor' }
       )}
     >
-      <EuiPanel color="subdued" paddingSize="s">
+      <EuiPanel color="subdued" paddingSize="none">
         <SortableList onDragItem={handlerPatternDrag}>
           {fieldsWithError.map((field, idx) => (
             <DraggablePatternInput
@@ -132,7 +132,7 @@ const DraggablePatternInput = ({
           <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
             <EuiPanel
               color="transparent"
-              paddingSize="xs"
+              paddingSize="s"
               {...provided.dragHandleProps}
               aria-label={i18n.translate(
                 'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditor.dragHandleLabel',

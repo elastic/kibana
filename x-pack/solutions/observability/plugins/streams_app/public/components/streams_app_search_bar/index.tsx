@@ -59,6 +59,7 @@ export function StreamsAppSearchBar({
       showQueryMenu={false}
       showDatePicker={Boolean(dateRangeFrom && dateRangeTo)}
       showSubmitButton={true}
+      submitButtonStyle="iconOnly"
       dateRangeFrom={dateRangeFrom}
       dateRangeTo={dateRangeTo}
       onRefresh={onRefresh}

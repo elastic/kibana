@@ -6,6 +6,7 @@
  */
 
 export * from './type_guards';
+export * from './fields';
 export * from './hierarchy';
 export * from './lifecycle';
 export * from './condition_fields';

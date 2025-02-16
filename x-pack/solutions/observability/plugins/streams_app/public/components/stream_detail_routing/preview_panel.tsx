@@ -84,7 +84,6 @@ export function PreviewPanel({
             )}
           </EuiText>
         </>
-        ;
       </PreviewPanelIllustration>
     );
   }

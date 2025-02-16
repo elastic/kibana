@@ -7,7 +7,12 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { ProcessorDefinition, ProcessorType, getProcessorType } from '@kbn/streams-schema';
+import {
+  ProcessorDefinition,
+  ProcessorDefinitionWithId,
+  ProcessorType,
+  getProcessorType,
+} from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import {
@@ -134,7 +139,15 @@ const toAPIDefinition = (processor: ProcessorDefinitionWithUIAttributes): Proces
   return processorConfig;
 };
 
+const toSimulateDefinition = (
+  processor: ProcessorDefinitionWithUIAttributes
+): ProcessorDefinitionWithId => {
+  const { status, type, ...processorConfig } = processor;
+  return processorConfig;
+};
+
 export const processorConverter = {
   toAPIDefinition,
+  toSimulateDefinition,
   toUIDefinition,
 };
