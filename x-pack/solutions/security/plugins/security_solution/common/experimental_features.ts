@@ -115,11 +115,6 @@ export const allowedExperimentalValues = Object.freeze({
   assistantModelEvaluation: false,
 
   /**
-   * Enables filtering of Attack Discovery alerts in a flyout
-   */
-  attackDiscoveryAlertFiltering: false,
-
-  /**
    * Enables content references (citations) in the AI Assistant
    */
   contentReferencesEnabled: false,
