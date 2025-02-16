@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCheckbox,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
@@ -18,6 +19,8 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
+  EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -31,12 +34,20 @@ interface CreateSynonymsSetModalProps {
 export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps) => {
   const titleId = useGeneratedHtmlId({ prefix: 'createSynonymsSetModalTitle' });
   const formId = useGeneratedHtmlId({ prefix: 'createSynonymsSetModalForm' });
+  const overwriteId = useGeneratedHtmlId({ prefix: 'createSynonymsSetModalOverwrite' });
 
   const [name, setName] = useState('');
   const [rawName, setRawName] = useState('');
-  const { mutate: createSynonymsSet } = usePutSynonymsSet(() => {
-    onClose();
-  });
+  const [error, setError] = useState(false);
+  const [forceWrite, setForceWrite] = useState(false);
+  const { mutate: createSynonymsSet } = usePutSynonymsSet(
+    () => {
+      onClose();
+    },
+    () => {
+      setError(true);
+    }
+  );
   return (
     <EuiModal onClose={onClose}>
       <EuiModalHeader>
@@ -54,17 +65,27 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
           component="form"
           onSubmit={(e) => {
             e.preventDefault();
-            createSynonymsSet({ synonymsSetId: name });
+            createSynonymsSet({ synonymsSetId: name, forceWrite });
           }}
         >
           <EuiFormRow
+            fullWidth
             label={i18n.translate('xpack.searchSynonyms.createSynonymsSetModal.nameLabel', {
               defaultMessage: 'Name',
             })}
             helpText={
-              !!rawName
+              !!rawName && !error
                 ? i18n.translate('xpack.searchSynonyms.createSynonymsSetModal.nameHelpText', {
                     defaultMessage: 'Your synonyms set will be named: {name}',
+                    values: { name },
+                  })
+                : undefined
+            }
+            isInvalid={error}
+            error={
+              error
+                ? i18n.translate('xpack.searchSynonyms.createSynonymsSetModal.nameErrorText', {
+                    defaultMessage: 'A synonym with id {name} already exists.',
                     values: { name },
                   })
                 : undefined
@@ -76,9 +97,41 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
               onChange={(e) => {
                 setRawName(e.target.value);
                 setName(formatSynonymsSetName(e.target.value));
+                setError(false);
+                setForceWrite(false);
               }}
             />
           </EuiFormRow>
+          {error && (
+            <>
+              <EuiSpacer size="s" />
+              <EuiFormRow fullWidth>
+                <EuiText
+                  color="danger"
+                  data-test-subj="searchSynonymsCreateSynonymsSetModalError"
+                  size="s"
+                >
+                  <p>
+                    <FormattedMessage
+                      id="xpack.searchSynonyms.createSynonymsSetModal.error"
+                      defaultMessage="Creating a synonyms set with same name will overwrite the existing synonyms."
+                    />
+                  </p>
+                </EuiText>
+              </EuiFormRow>
+              <EuiFormRow fullWidth>
+                <EuiCheckbox
+                  id={overwriteId}
+                  data-test-subj="searchSynonymsCreateSynonymsSetModalForceWrite"
+                  label={i18n.translate('xpack.searchSynonyms.createSynonymsSetModal.forceWrite', {
+                    defaultMessage: 'I understand the risks. Overwrite the existing synonym set.',
+                  })}
+                  checked={forceWrite}
+                  onChange={() => setForceWrite(!forceWrite)}
+                />
+              </EuiFormRow>
+            </>
+          )}
         </EuiForm>
       </EuiModalBody>
 
@@ -96,9 +149,9 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
           data-test-subj="searchSynonymsCreateSynonymsSetModalCreateButton"
           form={formId}
           fill
-          disabled={!name}
+          disabled={!name || (error && !forceWrite)}
           onClick={() => {
-            createSynonymsSet({ synonymsSetId: name });
+            createSynonymsSet({ synonymsSetId: name, forceWrite });
           }}
         >
           <FormattedMessage
