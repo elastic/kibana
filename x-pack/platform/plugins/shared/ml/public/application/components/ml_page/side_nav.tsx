@@ -8,10 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import type { EuiSideNavItemType } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-change-point-detection/constants';
 import { useUrlState } from '@kbn/ml-url-state';
-import { NotificationsIndicator } from './notifications_indicator';
 import type { MlLocatorParams } from '../../../../common/types/locator';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { isFullLicense } from '../../license';
@@ -85,26 +84,13 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             testSubj: 'mlMainTab overview',
           },
           {
-            id: 'notifications',
-            pathId: ML_PAGES.NOTIFICATIONS,
-            name: disableLinks ? (
-              i18n.translate('xpack.ml.navMenu.notificationsTabLinkText', {
-                defaultMessage: 'Notifications',
-              })
-            ) : (
-              <NotificationsIndicator />
-            ),
-            disabled: disableLinks,
-            testSubj: 'mlMainTab notifications',
-          },
-          {
-            id: 'memory_usage',
-            pathId: ML_PAGES.MEMORY_USAGE,
-            name: i18n.translate('xpack.ml.navMenu.memoryUsageText', {
-              defaultMessage: 'Memory Usage',
+            id: 'datavisualizer',
+            name: i18n.translate('xpack.ml.navMenu.dataVisualizerTabLinkText', {
+              defaultMessage: 'Data Visualizer',
             }),
-            disabled: disableLinks || !canViewMlNodes,
-            testSubj: 'mlMainTab nodesOverview',
+            disabled: false,
+            pathId: ML_PAGES.DATA_VISUALIZER,
+            testSubj: 'mlMainTab dataVisualizer',
           },
         ],
       },
@@ -115,15 +101,6 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         }),
         disabled: disableLinks,
         items: [
-          {
-            id: 'anomaly_detection',
-            name: i18n.translate('xpack.ml.navMenu.anomalyDetection.jobsManagementText', {
-              defaultMessage: 'Jobs',
-            }),
-            disabled: disableLinks,
-            pathId: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-            testSubj: 'mlMainTab anomalyDetection',
-          },
           {
             id: 'anomaly_explorer',
             name: i18n.translate('xpack.ml.navMenu.anomalyDetection.anomalyExplorerText', {
@@ -142,28 +119,6 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             disabled: disableLinks,
             testSubj: 'mlMainTab singleMetricViewer',
           },
-          {
-            id: 'settings',
-            pathId: ML_PAGES.SETTINGS,
-            name: i18n.translate('xpack.ml.navMenu.settingsTabLinkText', {
-              defaultMessage: 'Settings',
-            }),
-            disabled: disableLinks,
-            testSubj: 'mlMainTab settings',
-            highlightNestedRoutes: true,
-          },
-          {
-            id: 'supplied_cofigurations',
-            name: i18n.translate(
-              'xpack.ml.navMenu.anomalyDetection.suppliedConfigurationsLinkText',
-              {
-                defaultMessage: 'Supplied Configurations',
-              }
-            ),
-            disabled: disableLinks,
-            pathId: ML_PAGES.SUPPLIED_CONFIGURATIONS,
-            testSubj: 'mlMainTab suppliedConfigurations',
-          },
         ],
       },
       {
@@ -173,15 +128,6 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         }),
         disabled: disableLinks,
         items: [
-          {
-            id: 'data_frame_analytics_jobs',
-            pathId: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
-            name: i18n.translate('xpack.ml.navMenu.dataFrameAnalytics.jobsManagementText', {
-              defaultMessage: 'Jobs',
-            }),
-            disabled: disableLinks,
-            testSubj: 'mlMainTab dataFrameAnalytics',
-          },
           {
             id: 'data_frame_analytics_results_explorer',
             pathId: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
@@ -199,75 +145,6 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab dataFrameAnalyticsMap',
-          },
-        ],
-      },
-      {
-        id: 'model_management',
-        name: i18n.translate('xpack.ml.navMenu.modelManagementText', {
-          defaultMessage: 'Model Management',
-        }),
-        disabled: disableLinks,
-        items: [
-          {
-            id: 'trained_models',
-            pathId: ML_PAGES.TRAINED_MODELS_MANAGE,
-            name: i18n.translate('xpack.ml.navMenu.trainedModelsText', {
-              defaultMessage: 'Trained Models',
-            }),
-            disabled: disableLinks,
-            testSubj: 'mlMainTab trainedModels',
-          },
-        ],
-      },
-      {
-        id: 'datavisualizer',
-        name: i18n.translate('xpack.ml.navMenu.dataVisualizerTabLinkText', {
-          defaultMessage: 'Data Visualizer',
-        }),
-        disabled: false,
-        pathId: ML_PAGES.DATA_VISUALIZER,
-        testSubj: 'mlMainTab dataVisualizer',
-        items: [
-          {
-            id: 'filedatavisualizer',
-            pathId: ML_PAGES.DATA_VISUALIZER_FILE,
-            name: i18n.translate('xpack.ml.navMenu.fileDataVisualizerLinkText', {
-              defaultMessage: 'File',
-            }),
-            disabled: false,
-            testSubj: 'mlMainTab fileDataVisualizer',
-          },
-          {
-            id: 'data_view_datavisualizer',
-            pathId: ML_PAGES.DATA_VISUALIZER_INDEX_SELECT,
-            name: i18n.translate('xpack.ml.navMenu.dataViewDataVisualizerLinkText', {
-              defaultMessage: 'Data View',
-            }),
-            disabled: false,
-            testSubj: 'mlMainTab indexDataVisualizer',
-            relatedRouteIds: ['data_view_datavisualizer'],
-          },
-          {
-            id: 'esql_datavisualizer',
-            pathId: ML_PAGES.DATA_VISUALIZER_ESQL,
-            name: i18n.translate('xpack.ml.navMenu.esqlDataVisualizerLinkText', {
-              defaultMessage: 'ES|QL',
-            }),
-            disabled: false,
-            testSubj: 'mlMainTab esqlDataVisualizer',
-            relatedRouteIds: ['data_view_datavisualizer_esql'],
-          },
-
-          {
-            id: 'data_drift',
-            pathId: ML_PAGES.DATA_DRIFT_INDEX_SELECT,
-            name: i18n.translate('xpack.ml.navMenu.dataComparisonText', {
-              defaultMessage: 'Data Drift',
-            }),
-            disabled: disableLinks,
-            testSubj: 'mlMainTab dataDrift',
-            relatedRouteIds: ['data_drift'],
           },
         ],
       },

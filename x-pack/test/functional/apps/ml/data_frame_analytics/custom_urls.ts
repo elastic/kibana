@@ -89,8 +89,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('opens the custom URLs tab in the edit job flyout', async () => {
         await ml.testExecution.logTestStep('load the analytics management page');
-        await ml.navigation.navigateToMl();
-        await ml.navigation.navigateToDataFrameAnalytics();
+        await ml.navigation.navigateToStackManagementMlSection('analytics', 'mlAnalyticsJobList');
         await ml.dataFrameAnalyticsTable.waitForAnalyticsToLoad();
 
         await ml.testExecution.logTestStep('open the custom URLs tab in the edit job flyout');

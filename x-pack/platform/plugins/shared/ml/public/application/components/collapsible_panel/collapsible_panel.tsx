@@ -100,7 +100,7 @@ export const CollapsiblePanel: FC<PropsWithChildren<CollapsiblePanelProps>> = ({
 
 export interface StatEntry {
   label: string;
-  value: number;
+  value: number | string;
   'data-test-subj'?: string;
 }
 
