@@ -197,6 +197,31 @@ export const ScreenshotBlockDocType = t.type({
 
 export type ScreenshotBlockDoc = t.TypeOf<typeof ScreenshotBlockDocType>;
 
+export const ScreenshotBlockMultiStatusResponseCodec = t.array(
+  t.type({
+    id: t.string,
+    status: t.number,
+  })
+);
+
+export type ScreenshotBlockMultiStatusResponse = t.TypeOf<
+  typeof ScreenshotBlockMultiStatusResponseCodec
+>;
+
+export const ScreenshotBlockResponseCodec = t.union([
+  t.array(ScreenshotBlockDocType),
+  ScreenshotBlockMultiStatusResponseCodec,
+  t.literal(''),
+]);
+
+export type ScreenshotBlockResponse = t.TypeOf<typeof ScreenshotBlockResponseCodec>;
+
+export function isScreenshotBlockMultiStatusResponse(
+  data: unknown
+): data is ScreenshotBlockMultiStatusResponse {
+  return isRight(ScreenshotBlockMultiStatusResponseCodec.decode(data));
+}
+
 export interface PendingBlock {
   status: 'pending' | 'loading';
 }

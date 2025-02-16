@@ -109,7 +109,7 @@
     "@kbn/apm-data-access-plugin",
     "@kbn/charts-theme",
     "@kbn/charts-plugin",
-    "@kbn/response-ops-rule-params"
+    "@kbn/response-ops-rule-params",
   ],
   "exclude": ["target/**/*"]
 }
