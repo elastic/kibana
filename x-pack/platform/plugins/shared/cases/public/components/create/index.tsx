@@ -25,11 +25,7 @@ export const CreateCase = React.memo<CreateCaseFormProps>(
 
     return (
       <EuiPageSection restrictWidth={true}>
-        <HeaderPage
-          showBackButton={true}
-          data-test-subj="case-create-title"
-          title={i18n.CREATE_CASE_TITLE}
-        />
+        <HeaderPage data-test-subj="case-create-title" title={i18n.CREATE_CASE_TITLE} />
         <CreateCaseForm
           afterCaseCreated={afterCaseCreated}
           onCancel={onCancel}
