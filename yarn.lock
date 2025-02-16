@@ -7021,6 +7021,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/scout-security@link:x-pack/solutions/security/packages/kbn-scout-security":
+  version "0.0.0"
+  uid ""
+
 "@kbn/scout@link:packages/kbn-scout":
   version "0.0.0"
   uid ""

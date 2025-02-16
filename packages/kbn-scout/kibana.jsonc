@@ -1,5 +1,5 @@
 {
-  "type": "test-helper",
+  "type": "shared-common",
   "id": "@kbn/scout",
   "owner": "@elastic/appex-qa",
   "devOnly": true
