@@ -11,6 +11,7 @@ import React, { useRef } from 'react';
 import classNames from 'classnames';
 import { PanelLoader } from '@kbn/panel-loader';
 import { EuiProgress, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ExpressionRenderError } from '../types';
 import type { ExpressionRendererParams } from './use_expression_renderer';
 import { useExpressionRenderer } from './use_expression_renderer';
@@ -58,7 +59,7 @@ export function ReactExpressionRenderer({
   }
 
   return (
-    <div {...dataAttrs} className={classes}>
+    <div {...dataAttrs} className={classes} css={expExpressionRendererStyles}>
       {isEmpty && <PanelLoader />}
       {isLoading && (
         <EuiProgress size="xs" color="accent" position="absolute" css={{ zIndex: 1 }} />
@@ -68,3 +69,25 @@ export function ReactExpressionRenderer({
     </div>
   );
 }
+
+const expExpressionRendererStyles = css({
+  '&.expExpressionRenderer': {
+    position: 'relative',
+    display: 'flex',
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+
+  '&.expExpressionRenderer-isEmpty, &.expExpressionRenderer-hasError': {
+    '& .expExpressionRenderer__expression': {
+      display: 'none',
+    },
+  },
+
+  '& .expExpressionRenderer__expression': {
+    width: '100%',
+    height: '100%',
+  },
+});
