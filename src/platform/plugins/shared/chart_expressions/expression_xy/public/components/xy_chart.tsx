@@ -342,7 +342,12 @@ export function XYChart({
 
   if (dataLayers.length === 0) {
     return (
-      <EmptyPlaceholder className="xyChart__empty" icon={icon} renderComplete={onRenderChange} />
+      <EmptyPlaceholder
+        className="xyChart__empty"
+        icon={icon}
+        renderComplete={onRenderChange}
+        css={xyChartEmptyStyles}
+      />
     );
   }
 
@@ -820,6 +825,7 @@ export function XYChart({
                 className="xyChart__empty"
                 icon={icon}
                 renderComplete={onRenderChange}
+                css={xyChartEmptyStyles}
               />
             }
             onRenderChange={onRenderChange}
@@ -1065,3 +1071,11 @@ function getLegendTitle(
     ? getColumnByAccessor(layer.splitAccessors?.[0], layer?.table.columns)?.name
     : defaultLegendTitle;
 }
+
+const xyChartEmptyStyles = css({
+  height: '100%',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  justifyContent: 'center',
+});
