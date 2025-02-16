@@ -35,6 +35,15 @@ export const observabilityRuleCreationValidConsumers: RuleCreationValidConsumer[
 
 export const EventsAsUnit = 'events';
 
+export const LEGACY_UPTIME_MONITOR_STATUS_RULE_ID = 'xpack.uptime.alerts.monitorStatus';
+export const LEGACY_UPTIME_TLS_RULE_ID = 'xpack.uptime.alerts.tlsCertificate';
+export const LEGACY_UPTIME_DURATION_ANOMALY_RULE_ID = 'xpack.uptime.alerts.durationAnomaly';
+export const LEGACY_UPTIME_RULE_IDS = [
+  LEGACY_UPTIME_MONITOR_STATUS_RULE_ID,
+  LEGACY_UPTIME_TLS_RULE_ID,
+  LEGACY_UPTIME_DURATION_ANOMALY_RULE_ID,
+];
+
 export const OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES = [
   ...OBSERVABILITY_RULE_TYPE_IDS,
   ...STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
