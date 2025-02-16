@@ -63,6 +63,19 @@ export function buildKueryForInactiveAgents() {
   return 'status:inactive';
 }
 
+export function buildKueryForActiveAgents() {
+  const activeStatus = [
+    'online',
+    'offline',
+    'enrolling',
+    'updating',
+    'degraded',
+    'error',
+    'orphaned',
+  ]; // excluded: unenrolling, unenrolled, inactive, uninstalled
+  return `(${activeStatus.map((s) => `status:${s}`).join(' or ')})`;
+}
+
 export const AGENT_UPDATING_TIMEOUT_HOURS = 2;
 
 export function isStuckInUpdating(agent: Agent): boolean {
