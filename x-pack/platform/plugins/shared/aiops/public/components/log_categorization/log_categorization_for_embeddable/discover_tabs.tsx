@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Category } from '@kbn/aiops-log-pattern-analysis/types';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { OpenInDiscover } from '../category_table/use_open_in_discover';
 import { EmbeddableMenu } from './embeddable_menu';
 import type { RandomSampler } from '../sampling_menu';

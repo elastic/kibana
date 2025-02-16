@@ -11,149 +11,147 @@ Object {
   ],
   \\"ignore_unavailable\\": true,
   \\"track_total_hits\\": false,
-  \\"body\\": {
-    \\"aggregations\\": {
-      \\"user_id\\": {
-        \\"terms\\": {
-          \\"field\\": \\"user.id\\",
-          \\"size\\": 10,
-          \\"order\\": {
-            \\"timestamp\\": \\"desc\\"
-          }
-        },
-        \\"aggs\\": {
-          \\"timestamp\\": {
-            \\"max\\": {
-              \\"field\\": \\"@timestamp\\"
-            }
-          }
+  \\"aggregations\\": {
+    \\"user_id\\": {
+      \\"terms\\": {
+        \\"field\\": \\"user.id\\",
+        \\"size\\": 10,
+        \\"order\\": {
+          \\"timestamp\\": \\"desc\\"
         }
       },
-      \\"user_domain\\": {
-        \\"terms\\": {
-          \\"field\\": \\"user.domain\\",
-          \\"size\\": 10,
-          \\"order\\": {
-            \\"timestamp\\": \\"desc\\"
-          }
-        },
-        \\"aggs\\": {
-          \\"timestamp\\": {
-            \\"max\\": {
-              \\"field\\": \\"@timestamp\\"
-            }
-          }
-        }
-      },
-      \\"user_name\\": {
-        \\"terms\\": {
-          \\"field\\": \\"user.name\\",
-          \\"size\\": 10,
-          \\"order\\": {
-            \\"timestamp\\": \\"desc\\"
-          }
-        },
-        \\"aggs\\": {
-          \\"timestamp\\": {
-            \\"max\\": {
-              \\"field\\": \\"@timestamp\\"
-            }
-          }
-        }
-      },
-      \\"host_os_name\\": {
-        \\"terms\\": {
-          \\"field\\": \\"host.os.name\\",
-          \\"size\\": 10,
-          \\"order\\": {
-            \\"timestamp\\": \\"desc\\"
-          }
-        },
-        \\"aggs\\": {
-          \\"timestamp\\": {
-            \\"max\\": {
-              \\"field\\": \\"@timestamp\\"
-            }
-          }
-        }
-      },
-      \\"host_ip\\": {
-        \\"terms\\": {
-          \\"script\\": {
-            \\"source\\": \\"doc['host.ip']\\",
-            \\"lang\\": \\"painless\\"
-          },
-          \\"size\\": 10,
-          \\"order\\": {
-            \\"timestamp\\": \\"desc\\"
-          }
-        },
-        \\"aggs\\": {
-          \\"timestamp\\": {
-            \\"max\\": {
-              \\"field\\": \\"@timestamp\\"
-            }
-          }
-        }
-      },
-      \\"host_os_family\\": {
-        \\"terms\\": {
-          \\"field\\": \\"host.os.family\\",
-          \\"size\\": 10,
-          \\"order\\": {
-            \\"timestamp\\": \\"desc\\"
-          }
-        },
-        \\"aggs\\": {
-          \\"timestamp\\": {
-            \\"max\\": {
-              \\"field\\": \\"@timestamp\\"
-            }
+      \\"aggs\\": {
+        \\"timestamp\\": {
+          \\"max\\": {
+            \\"field\\": \\"@timestamp\\"
           }
         }
       }
     },
-    \\"query\\": {
-      \\"bool\\": {
-        \\"filter\\": [
-          {
-            \\"bool\\": {
-              \\"must\\": [],
-              \\"filter\\": [
-                {
-                  \\"match_all\\": {}
-                },
-                {
-                  \\"match_phrase\\": {
-                    \\"user.name\\": {
-                      \\"query\\": \\"test_user\\"
-                    }
+    \\"user_domain\\": {
+      \\"terms\\": {
+        \\"field\\": \\"user.domain\\",
+        \\"size\\": 10,
+        \\"order\\": {
+          \\"timestamp\\": \\"desc\\"
+        }
+      },
+      \\"aggs\\": {
+        \\"timestamp\\": {
+          \\"max\\": {
+            \\"field\\": \\"@timestamp\\"
+          }
+        }
+      }
+    },
+    \\"user_name\\": {
+      \\"terms\\": {
+        \\"field\\": \\"user.name\\",
+        \\"size\\": 10,
+        \\"order\\": {
+          \\"timestamp\\": \\"desc\\"
+        }
+      },
+      \\"aggs\\": {
+        \\"timestamp\\": {
+          \\"max\\": {
+            \\"field\\": \\"@timestamp\\"
+          }
+        }
+      }
+    },
+    \\"host_os_name\\": {
+      \\"terms\\": {
+        \\"field\\": \\"host.os.name\\",
+        \\"size\\": 10,
+        \\"order\\": {
+          \\"timestamp\\": \\"desc\\"
+        }
+      },
+      \\"aggs\\": {
+        \\"timestamp\\": {
+          \\"max\\": {
+            \\"field\\": \\"@timestamp\\"
+          }
+        }
+      }
+    },
+    \\"host_ip\\": {
+      \\"terms\\": {
+        \\"script\\": {
+          \\"source\\": \\"doc['host.ip']\\",
+          \\"lang\\": \\"painless\\"
+        },
+        \\"size\\": 10,
+        \\"order\\": {
+          \\"timestamp\\": \\"desc\\"
+        }
+      },
+      \\"aggs\\": {
+        \\"timestamp\\": {
+          \\"max\\": {
+            \\"field\\": \\"@timestamp\\"
+          }
+        }
+      }
+    },
+    \\"host_os_family\\": {
+      \\"terms\\": {
+        \\"field\\": \\"host.os.family\\",
+        \\"size\\": 10,
+        \\"order\\": {
+          \\"timestamp\\": \\"desc\\"
+        }
+      },
+      \\"aggs\\": {
+        \\"timestamp\\": {
+          \\"max\\": {
+            \\"field\\": \\"@timestamp\\"
+          }
+        }
+      }
+    }
+  },
+  \\"query\\": {
+    \\"bool\\": {
+      \\"filter\\": [
+        {
+          \\"bool\\": {
+            \\"must\\": [],
+            \\"filter\\": [
+              {
+                \\"match_all\\": {}
+              },
+              {
+                \\"match_phrase\\": {
+                  \\"user.name\\": {
+                    \\"query\\": \\"test_user\\"
                   }
                 }
-              ],
-              \\"should\\": [],
-              \\"must_not\\": []
-            }
-          },
-          {
-            \\"term\\": {
-              \\"user.name\\": \\"bastion00.siem.estc.dev\\"
-            }
-          },
-          {
-            \\"range\\": {
-              \\"@timestamp\\": {
-                \\"format\\": \\"strict_date_optional_time\\",
-                \\"gte\\": \\"2020-09-02T15:17:13.678Z\\",
-                \\"lte\\": \\"2020-09-03T15:17:13.678Z\\"
               }
+            ],
+            \\"should\\": [],
+            \\"must_not\\": []
+          }
+        },
+        {
+          \\"term\\": {
+            \\"user.name\\": \\"bastion00.siem.estc.dev\\"
+          }
+        },
+        {
+          \\"range\\": {
+            \\"@timestamp\\": {
+              \\"format\\": \\"strict_date_optional_time\\",
+              \\"gte\\": \\"2020-09-02T15:17:13.678Z\\",
+              \\"lte\\": \\"2020-09-03T15:17:13.678Z\\"
             }
           }
-        ]
-      }
-    },
-    \\"size\\": 0
-  }
+        }
+      ]
+    }
+  },
+  \\"size\\": 0
 }",
     ],
   },

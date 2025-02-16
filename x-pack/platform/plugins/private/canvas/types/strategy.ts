@@ -6,7 +6,7 @@
  */
 
 import { TransportResult } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import type { IKibanaSearchRequest } from '@kbn/search-types';
 import { ExpressionValueFilter } from '.';
 export interface EssqlSearchStrategyRequest extends IKibanaSearchRequest {

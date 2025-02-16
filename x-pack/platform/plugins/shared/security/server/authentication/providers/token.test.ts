@@ -72,7 +72,8 @@ describe('TokenAuthenticationProvider', () => {
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.asInternalUser.security.getToken).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.asInternalUser.security.getToken).toHaveBeenCalledWith({
-        body: { grant_type: 'password', ...credentials },
+        grant_type: 'password',
+        ...credentials,
       });
     });
 
@@ -92,7 +93,8 @@ describe('TokenAuthenticationProvider', () => {
       expect(mockOptions.client.asScoped).not.toHaveBeenCalled();
       expect(mockOptions.client.asInternalUser.security.getToken).toHaveBeenCalledTimes(1);
       expect(mockOptions.client.asInternalUser.security.getToken).toHaveBeenCalledWith({
-        body: { grant_type: 'password', ...credentials },
+        grant_type: 'password',
+        ...credentials,
       });
 
       expect(request.headers).not.toHaveProperty('authorization');

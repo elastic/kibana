@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  SearchResponse,
-  SearchTotalHits,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import type { HostMetadata } from '../../../../../common/endpoint/types';
 import type { HostListQueryResult, HostQueryResult } from '../../../types';
 

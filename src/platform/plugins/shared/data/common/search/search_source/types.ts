@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { Serializable, SerializableRecord } from '@kbn/utility-types';

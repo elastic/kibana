@@ -645,12 +645,10 @@ export default ({ getService }: FtrProviderContext): void => {
       const getAllCasesSortedByCreatedAtAsc = async () => {
         const cases = await es.search<CaseAttributes>({
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-          body: {
-            size: 10000,
-            sort: [{ 'cases.created_at': { unmapped_type: 'date', order: 'asc' } }],
-            query: {
-              term: { type: 'cases' },
-            },
+          size: 10000,
+          sort: [{ 'cases.created_at': { unmapped_type: 'date', order: 'asc' } }],
+          query: {
+            term: { type: 'cases' },
           },
         });
         return cases.hits.hits.map((hit) => hit._source);

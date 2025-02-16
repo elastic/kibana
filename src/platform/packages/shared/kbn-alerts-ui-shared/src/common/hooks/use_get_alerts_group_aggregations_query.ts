@@ -16,7 +16,7 @@ import type {
   AggregationsAggregationContainer,
   QueryDslQueryContainer,
   SortCombinations,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { BASE_RAC_ALERTS_API_PATH } from '../constants';
 
 export interface UseGetAlertsGroupAggregationsQueryProps {

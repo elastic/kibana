@@ -47,33 +47,31 @@ async function getMobileHttpErrorsTimeseries({
   });
   const response = await apmEventClient.search('get_mobile_http_errors', {
     apm: { events: [ProcessorEvent.error] },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            ...termQuery(SERVICE_NAME, serviceName),
-            ...environmentQuery(environment),
-            ...rangeQuery(start, end),
-            ...rangeQuery(400, 599, HTTP_RESPONSE_STATUS_CODE),
-            ...kqlQuery(kuery),
-          ],
-          must_not: {
-            term: { 'error.type': 'crash' },
-          },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          ...termQuery(SERVICE_NAME, serviceName),
+          ...environmentQuery(environment),
+          ...rangeQuery(start, end),
+          ...rangeQuery(400, 599, HTTP_RESPONSE_STATUS_CODE),
+          ...kqlQuery(kuery),
+        ],
+        must_not: {
+          term: { 'error.type': 'crash' },
         },
       },
-      aggs: {
-        timeseries: {
-          histogram: {
-            field: '@timestamp',
-            min_doc_count: 0,
-            interval: bucketSize,
-            extended_bounds: {
-              min: start,
-              max: end,
-            },
+    },
+    aggs: {
+      timeseries: {
+        histogram: {
+          field: '@timestamp',
+          min_doc_count: 0,
+          interval: bucketSize,
+          extended_bounds: {
+            min: start,
+            max: end,
           },
         },
       },

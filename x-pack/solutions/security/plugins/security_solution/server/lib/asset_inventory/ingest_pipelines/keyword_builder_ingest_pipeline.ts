@@ -50,7 +50,7 @@ export const buildIngestPipeline = (): IngestProcessorContainer[] => {
                   String key = entry.getKey().replace("\\"", "\\\\\\"");
                   Object value = entry.getValue();
                   json.append("\\"").append(key).append("\\":");
-                  
+
                   if (value instanceof String) {
                       String escapedValue = ((String) value).replace("\\"", "\\\\\\"").replace("=", ":");
                       json.append("\\"").append(escapedValue).append("\\"");
@@ -104,7 +104,7 @@ export const buildIngestPipeline = (): IngestProcessorContainer[] => {
           def keywords = [];
           for (key in ctx.entities.metadata.keySet()) {
             def value = ctx.entities.metadata[key];
-            def metadata = jsonFromMap([key: value]);  
+            def metadata = jsonFromMap([key: value]);
             keywords.add(metadata);
           }
 
@@ -133,14 +133,12 @@ export const createKeywordBuilderPipeline = async ({
 }) => {
   const pipeline = {
     id: PIPELINE_ID,
-    body: {
-      _meta: {
-        managed_by: 'entity_store',
-        managed: true,
-      },
-      description: `Serialize entities.metadata into a keyword field`,
-      processors: buildIngestPipeline(),
+    _meta: {
+      managed_by: 'entity_store',
+      managed: true,
     },
+    description: `Serialize entities.metadata into a keyword field`,
+    processors: buildIngestPipeline(),
   };
 
   logger.debug(`Attempting to create pipeline: ${JSON.stringify(pipeline)}`);

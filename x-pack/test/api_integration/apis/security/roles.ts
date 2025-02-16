@@ -129,16 +129,14 @@ export default function ({ getService }: FtrProviderContext) {
         it('should fail when role already exists', async () => {
           await es.security.putRole({
             name: 'test_role',
-            body: {
-              cluster: ['monitor'],
-              indices: [
-                {
-                  names: ['beats-*'],
-                  privileges: ['write'],
-                },
-              ],
-              run_as: ['reporting_user'],
-            },
+            cluster: ['monitor'],
+            indices: [
+              {
+                names: ['beats-*'],
+                privileges: ['write'],
+              },
+            ],
+            run_as: ['reporting_user'],
           });
 
           await supertest
@@ -162,30 +160,28 @@ export default function ({ getService }: FtrProviderContext) {
       it('should update a role with elasticsearch, kibana and other applications privileges', async () => {
         await es.security.putRole({
           name: 'role_to_update',
-          body: {
-            cluster: ['monitor'],
-            indices: [
-              {
-                names: ['beats-*'],
-                privileges: ['write'],
-              },
-            ],
-            applications: [
-              {
-                application: 'kibana-.kibana',
-                privileges: ['read'],
-                resources: ['*'],
-              },
-              {
-                application: 'logstash-default',
-                privileges: ['logstash-privilege'],
-                resources: ['*'],
-              },
-            ],
-            run_as: ['reporting_user'],
-            metadata: {
-              bar: 'old-metadata',
+          cluster: ['monitor'],
+          indices: [
+            {
+              names: ['beats-*'],
+              privileges: ['write'],
             },
+          ],
+          applications: [
+            {
+              application: 'kibana-.kibana',
+              privileges: ['read'],
+              resources: ['*'],
+            },
+            {
+              application: 'logstash-default',
+              privileges: ['logstash-privilege'],
+              resources: ['*'],
+            },
+          ],
+          run_as: ['reporting_user'],
+          metadata: {
+            bar: 'old-metadata',
           },
         });
 
@@ -266,16 +262,14 @@ export default function ({ getService }: FtrProviderContext) {
       when using ${basic ? 'basic' : 'trial'} license`, async () => {
         await es.security.putRole({
           name: 'role_to_update_with_dls_fls',
-          body: {
-            cluster: ['monitor'],
-            indices: [
-              {
-                names: ['beats-*'],
-                privileges: ['write'],
-              },
-            ],
-            run_as: ['reporting_user'],
-          },
+          cluster: ['monitor'],
+          indices: [
+            {
+              names: ['beats-*'],
+              privileges: ['write'],
+            },
+          ],
+          run_as: ['reporting_user'],
         });
 
         await supertest
@@ -319,43 +313,41 @@ export default function ({ getService }: FtrProviderContext) {
       it('should get roles', async () => {
         await es.security.putRole({
           name: 'role_to_get',
-          body: {
-            cluster: ['manage'],
-            indices: [
-              {
-                names: ['logstash-*'],
-                privileges: ['read', 'view_index_metadata'],
-                allow_restricted_indices: false,
-              },
-            ],
-            applications: [
-              {
-                application: 'kibana-.kibana',
-                privileges: ['read'],
-                resources: ['*'],
-              },
-              {
-                application: 'kibana-.kibana',
-                privileges: [
-                  'feature_dashboard_v2.read',
-                  'feature_discover_v2.all',
-                  'feature_ml.all',
-                ],
-                resources: ['space:marketing', 'space:sales'],
-              },
-              {
-                application: 'logstash-default',
-                privileges: ['logstash-privilege'],
-                resources: ['*'],
-              },
-            ],
-            run_as: ['watcher_user'],
-            metadata: {
-              foo: 'test-metadata',
+          cluster: ['manage'],
+          indices: [
+            {
+              names: ['logstash-*'],
+              privileges: ['read', 'view_index_metadata'],
+              allow_restricted_indices: false,
             },
-            transient_metadata: {
-              enabled: true,
+          ],
+          applications: [
+            {
+              application: 'kibana-.kibana',
+              privileges: ['read'],
+              resources: ['*'],
             },
+            {
+              application: 'kibana-.kibana',
+              privileges: [
+                'feature_dashboard_v2.read',
+                'feature_discover_v2.all',
+                'feature_ml.all',
+              ],
+              resources: ['space:marketing', 'space:sales'],
+            },
+            {
+              application: 'logstash-default',
+              privileges: ['logstash-privilege'],
+              resources: ['*'],
+            },
+          ],
+          run_as: ['watcher_user'],
+          metadata: {
+            foo: 'test-metadata',
+          },
+          transient_metadata: {
+            enabled: true,
           },
         });
 
@@ -404,65 +396,61 @@ export default function ({ getService }: FtrProviderContext) {
       it('should get roles by space id', async () => {
         await es.security.putRole({
           name: 'space_role_not_to_get',
-          body: {
-            cluster: ['manage'],
-            indices: [
-              {
-                names: ['logstash-*'],
-                privileges: ['read', 'view_index_metadata'],
-                allow_restricted_indices: false,
-              },
-            ],
-            applications: [
-              {
-                application: 'kibana-.kibana',
-                privileges: [
-                  'feature_dashboard_v2.read',
-                  'feature_discover_v2.all',
-                  'feature_ml.all',
-                ],
-                resources: ['space:marketing', 'space:sales'],
-              },
-            ],
-            run_as: ['watcher_user'],
-            metadata: {
-              foo: 'test-metadata',
+          cluster: ['manage'],
+          indices: [
+            {
+              names: ['logstash-*'],
+              privileges: ['read', 'view_index_metadata'],
+              allow_restricted_indices: false,
             },
-            transient_metadata: {
-              enabled: true,
+          ],
+          applications: [
+            {
+              application: 'kibana-.kibana',
+              privileges: [
+                'feature_dashboard_v2.read',
+                'feature_discover_v2.all',
+                'feature_ml.all',
+              ],
+              resources: ['space:marketing', 'space:sales'],
             },
+          ],
+          run_as: ['watcher_user'],
+          metadata: {
+            foo: 'test-metadata',
+          },
+          transient_metadata: {
+            enabled: true,
           },
         });
 
         await es.security.putRole({
           name: 'space_role_to_get',
-          body: {
-            cluster: ['manage'],
-            indices: [
-              {
-                names: ['logstash-*'],
-                privileges: ['read', 'view_index_metadata'],
-                allow_restricted_indices: false,
-              },
-            ],
-            applications: [
-              {
-                application: 'kibana-.kibana',
-                privileges: [
-                  'feature_dashboard_v2.read',
-                  'feature_discover_v2.all',
-                  'feature_ml.all',
-                ],
-                resources: ['space:engineering', 'space:sales'],
-              },
-            ],
-            run_as: ['watcher_user'],
-            metadata: {
-              foo: 'test-metadata',
+          cluster: ['manage'],
+          indices: [
+            {
+              names: ['logstash-*'],
+              privileges: ['read', 'view_index_metadata'],
+              allow_restricted_indices: false,
             },
-            transient_metadata: {
-              enabled: true,
+          ],
+          applications: [
+            {
+              application: 'kibana-.kibana',
+              privileges: [
+                'feature_dashboard_v2.read',
+                'feature_discover_v2.all',
+                'feature_ml.all',
+              ],
+              resources: ['space:engineering', 'space:sales'],
             },
+          ],
+          run_as: ['watcher_user'],
+          metadata: {
+            foo: 'test-metadata',
+          },
+          transient_metadata: {
+            enabled: true,
           },
         });
 
@@ -540,39 +528,37 @@ export default function ({ getService }: FtrProviderContext) {
       it('should query roles by name', async () => {
         await es.security.putRole({
           name: 'role_to_query',
-          body: {
-            cluster: ['manage'],
-            indices: [
-              {
-                names: ['logstash-*'],
-                privileges: ['read', 'view_index_metadata'],
-                allow_restricted_indices: false,
-              },
-            ],
-            applications: [
-              {
-                application: 'kibana-.kibana',
-                privileges: ['read'],
-                resources: ['*'],
-              },
-              {
-                application: 'kibana-.kibana',
-                privileges: ['feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
-                resources: ['space:marketing', 'space:sales'],
-              },
-              {
-                application: 'logstash-default',
-                privileges: ['logstash-privilege'],
-                resources: ['*'],
-              },
-            ],
-            run_as: ['watcher_user'],
-            metadata: {
-              foo: 'test-metadata',
+          cluster: ['manage'],
+          indices: [
+            {
+              names: ['logstash-*'],
+              privileges: ['read', 'view_index_metadata'],
+              allow_restricted_indices: false,
             },
-            transient_metadata: {
-              enabled: true,
+          ],
+          applications: [
+            {
+              application: 'kibana-.kibana',
+              privileges: ['read'],
+              resources: ['*'],
             },
+            {
+              application: 'kibana-.kibana',
+              privileges: ['feature_dashboard.read', 'feature_discover.all', 'feature_ml.all'],
+              resources: ['space:marketing', 'space:sales'],
+            },
+            {
+              application: 'logstash-default',
+              privileges: ['logstash-privilege'],
+              resources: ['*'],
+            },
+          ],
+          run_as: ['watcher_user'],
+          metadata: {
+            foo: 'test-metadata',
+          },
+          transient_metadata: {
+            enabled: true,
           },
         });
 

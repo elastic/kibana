@@ -148,7 +148,10 @@ export async function getServiceInstancesTransactionStatistics<T extends true | 
     apm: {
       events: [getProcessorEventForTransactions(searchAggregatedTransactions)],
     },
-    body: { size: 0, track_total_hits: false, query, aggs },
+    size: 0,
+    track_total_hits: false,
+    query,
+    aggs,
   });
 
   const bucketSizeInMinutes = bucketSize / 60;

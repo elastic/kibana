@@ -16,18 +16,16 @@ export class SloEsClient {
   public async getSLOSummaryDataById(id: string) {
     return await this.esClient.search({
       index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: { 'slo.id': id },
-              },
-              {
-                term: { isTempDoc: false },
-              },
-            ],
-          },
+      query: {
+        bool: {
+          filter: [
+            {
+              term: { 'slo.id': id },
+            },
+            {
+              term: { isTempDoc: false },
+            },
+          ],
         },
       },
     });
@@ -36,15 +34,13 @@ export class SloEsClient {
   public async getSLORollupDataById(id: string) {
     return await this.esClient.search({
       index: SLI_DESTINATION_INDEX_PATTERN,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                term: { 'slo.id': id },
-              },
-            ],
-          },
+      query: {
+        bool: {
+          filter: [
+            {
+              term: { 'slo.id': id },
+            },
+          ],
         },
       },
     });

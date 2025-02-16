@@ -13,20 +13,18 @@ type RuleDataClient = PublicContract<IRuleDataClient>;
 
 export const fetchAlertByAlertUUID = async (ruleDataClient: RuleDataClient, alertUuid: string) => {
   const request = {
-    body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              term: {
-                [ALERT_UUID]: alertUuid,
-              },
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              [ALERT_UUID]: alertUuid,
             },
-          ],
-        },
+          },
+        ],
       },
-      size: 1,
     },
+    size: 1,
     allow_no_indices: true,
   };
   const { hits } = await ruleDataClient.getReader().search(request);

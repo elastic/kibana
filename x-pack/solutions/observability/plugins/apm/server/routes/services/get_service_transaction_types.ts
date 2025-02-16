@@ -39,18 +39,16 @@ export async function getServiceTransactionTypes({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [{ term: { [SERVICE_NAME]: serviceName } }, ...rangeQuery(start, end)],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [{ term: { [SERVICE_NAME]: serviceName } }, ...rangeQuery(start, end)],
       },
-      aggs: {
-        types: {
-          terms: { field: TRANSACTION_TYPE, size: 100 },
-        },
+    },
+    aggs: {
+      types: {
+        terms: { field: TRANSACTION_TYPE, size: 100 },
       },
     },
   };

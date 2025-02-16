@@ -16,10 +16,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   async function createToken() {
     const { access_token: accessToken, authentication } = await es.security.getToken({
-      body: {
-        grant_type: 'password',
-        ...adminTestUser,
-      },
+      grant_type: 'password',
+      ...adminTestUser,
     });
 
     return {
@@ -75,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('rejects invalidated access token via authorization Bearer header', async () => {
       const { accessToken } = await createToken();
-      await es.security.invalidateToken({ body: { token: accessToken } });
+      await es.security.invalidateToken({ token: accessToken });
 
       await supertest
         .get('/internal/security/me')

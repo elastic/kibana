@@ -55,7 +55,7 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
     else if (request.query.fleetServerSetup && !isServerless) {
       const esClient = (await context.core).elasticsearch.client.asCurrentUser;
       const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
-        body: { cluster: ['manage_service_account'] },
+        cluster: ['manage_service_account'],
       });
 
       if (!hasAllPrivileges) {

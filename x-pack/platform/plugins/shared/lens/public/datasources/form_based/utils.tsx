@@ -23,7 +23,7 @@ import {
   SearchResponseWarningsBadgePopoverContent,
 } from '@kbn/search-response-warnings';
 
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { isQueryValid } from '@kbn/visualization-ui-components';
 import { getOriginalId } from '@kbn/transpose-utils';
 import type { DateRange } from '../../../common/types';

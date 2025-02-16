@@ -29,32 +29,30 @@ export const useStepWaterfallMetrics = ({ checkGroup, hasNavigationRequest, step
     hasNavigationRequest
       ? createEsParams({
           index: heartbeatIndices!,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    term: {
-                      'synthetics.step.index': stepIndex,
-                    },
+          query: {
+            bool: {
+              filter: [
+                {
+                  term: {
+                    'synthetics.step.index': stepIndex,
                   },
-                  {
-                    term: {
-                      'monitor.check_group': checkGroup,
-                    },
+                },
+                {
+                  term: {
+                    'monitor.check_group': checkGroup,
                   },
-                  {
-                    term: {
-                      'synthetics.type': 'step/metrics',
-                    },
+                },
+                {
+                  term: {
+                    'synthetics.type': 'step/metrics',
                   },
-                ],
-              },
+                },
+              ],
             },
-            fields: ['browser.*'],
-            size: 1000,
-            _source: false,
           },
+          fields: ['browser.*'],
+          size: 1000,
+          _source: false,
         })
       : {},
     [heartbeatIndices, checkGroup, hasNavigationRequest],

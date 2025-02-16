@@ -18,7 +18,7 @@ import {
   type TrackTotalHitsSearchResponse,
   ANALYSIS_CONFIG_TYPE,
 } from '@kbn/ml-data-frame-analytics-utils';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { Dictionary } from '../../../../common/types/common';
 import type { MlApi } from '../../services/ml_api_service';
 

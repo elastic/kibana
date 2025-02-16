@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
 import { getEsClientTlsSettings } from './ssl';
@@ -24,6 +24,8 @@ export function getOtelSynthtraceEsClient({
   const client = new Client({
     node: target,
     tls: getEsClientTlsSettings(target),
+    Connection: HttpConnection,
+    requestTimeout: 30_000,
   });
 
   return new OtelSynthtraceEsClient({

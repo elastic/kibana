@@ -7,7 +7,7 @@
 
 import objectHash from 'object-hash';
 import type { Moment } from 'moment';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { CompleteRule, EsqlRuleParams } from '../../../rule_schema';
 import type { SignalSource } from '../../types';

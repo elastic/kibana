@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { buildEsQuery } from '@kbn/es-query';
 import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
-import { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { lastValueFrom } from 'rxjs';
 import { RequestStatistics, RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { ISearchGeneric } from '@kbn/search-types';
@@ -102,7 +102,7 @@ export const getEqlFn = ({
         query: args.query,
         size: args.size,
         fields: args.field,
-      } as unknown as Required<EqlSearchRequest>['body'];
+      } as EqlSearchRequest;
 
       if (input) {
         const dataview = args.index ? await dataViews.create({ title: args.index }) : undefined;
@@ -150,8 +150,8 @@ export const getEqlFn = ({
           search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
             {
               params: {
+                ...dsl,
                 index: args.index,
-                body: dsl,
               },
             },
             { abortSignal, strategy: EQL_SEARCH_STRATEGY }

@@ -15,12 +15,10 @@ export function ConsoleProvider({ getService }: FtrProviderContext) {
   const createIndex = async (indexName: string) => {
     await client.indices.create({
       index: indexName,
-      body: {
-        mappings: {
-          properties: {
-            foo: {
-              type: 'text',
-            },
+      mappings: {
+        properties: {
+          foo: {
+            type: 'text',
           },
         },
       },
@@ -37,26 +35,22 @@ export function ConsoleProvider({ getService }: FtrProviderContext) {
   const createLegacyTemplate = async (templateName: string) => {
     await client.indices.putTemplate({
       name: templateName,
-      body: {
-        index_patterns: ['*'],
-      },
+      index_patterns: ['*'],
     });
   };
 
   const createComponentTemplate = async (templateName: string) => {
     await client.cluster.putComponentTemplate({
       name: templateName,
-      body: {
-        template: {
-          mappings: {
-            properties: {
-              '@timestamp': {
-                type: 'date',
-                format: 'date_optional_time||epoch_millis',
-              },
-              message: {
-                type: 'wildcard',
-              },
+      template: {
+        mappings: {
+          properties: {
+            '@timestamp': {
+              type: 'date',
+              format: 'date_optional_time||epoch_millis',
+            },
+            message: {
+              type: 'wildcard',
             },
           },
         },
@@ -71,12 +65,10 @@ export function ConsoleProvider({ getService }: FtrProviderContext) {
   ) => {
     await client.indices.putIndexTemplate({
       name: templateName,
-      body: {
-        index_patterns: indexPatterns,
-        data_stream: {},
-        composed_of: composedOf,
-        priority: 500,
-      },
+      index_patterns: indexPatterns,
+      data_stream: {},
+      composed_of: composedOf,
+      priority: 500,
     });
   };
 

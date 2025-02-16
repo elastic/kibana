@@ -8,7 +8,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { TIMEOUT } from './constants';
 
 /**

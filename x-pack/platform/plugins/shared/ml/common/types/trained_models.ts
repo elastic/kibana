@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type {
   InferenceInferenceEndpointInfo,
   MlInferenceConfigCreateContainer,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type {
   ModelDefinitionResponse,
   ModelState,
@@ -182,18 +182,18 @@ export interface StartTrainedModelDeploymentResponse {
 export interface AllocatedModel {
   key: string;
   deployment_id: string;
-  allocation_status: {
+  allocation_status?: {
     target_allocation_count: number;
     state: string;
     allocation_count: number;
   };
-  number_of_allocations: number;
-  threads_per_allocation: number;
+  number_of_allocations?: number;
+  threads_per_allocation?: number;
   /**
    * Not required for rendering in the Model stats
    */
   model_id?: string;
-  state: string;
+  state?: string;
   reason?: string;
   model_size_bytes: number;
   required_native_memory_bytes: number;

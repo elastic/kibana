@@ -145,7 +145,10 @@ export const setupOptionsListSuggestionsRoute = (
     /**
      * Run ES query
      */
-    const rawEsResult = await esClient.search({ index, body }, { signal: abortController.signal });
+    const rawEsResult = await esClient.search(
+      { index, ...body },
+      { signal: abortController.signal }
+    );
 
     /**
      * Parse ES response into Options List Response

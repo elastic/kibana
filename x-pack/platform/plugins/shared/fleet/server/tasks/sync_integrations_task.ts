@@ -210,10 +210,8 @@ export class SyncIntegrationsTask {
       {
         id: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
         index: FLEET_SYNCED_INTEGRATIONS_INDEX_NAME,
-        body: {
-          doc: newDoc,
-          doc_as_upsert: true,
-        },
+        doc: newDoc,
+        doc_as_upsert: true,
       },
       { signal: this.abortController.signal }
     );

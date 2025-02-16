@@ -146,11 +146,9 @@ export async function runSemanticTextKnowledgeBaseMigration({
           refresh: 'wait_for',
           index: resourceNames.aliases.kb,
           id: hit._id,
-          body: {
-            doc: {
-              ...hit._source,
-              semantic_text: hit._source.text,
-            },
+          doc: {
+            ...hit._source,
+            semantic_text: hit._source.text,
           },
         });
       });

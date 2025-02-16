@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 
@@ -27,6 +27,7 @@ export function getEsClient({
     },
     requestTimeout: 120000,
     auth,
+    Connection: HttpConnection,
   });
 
   const originalSearch = client.search.bind(client);

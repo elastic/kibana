@@ -703,9 +703,7 @@ export class AIAssistantService {
     const existingAnonymizationFields = await (
       await dataClient?.getReader()
     ).search({
-      body: {
-        size: 1,
-      },
+      size: 1,
       allow_no_indices: true,
     });
     if (existingAnonymizationFields.hits.total.value === 0) {

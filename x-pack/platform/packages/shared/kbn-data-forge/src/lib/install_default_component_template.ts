@@ -20,7 +20,7 @@ const eventIngestedCommonComponentTemplate = {
         event: {
           properties: {
             ingested: {
-              type: 'date',
+              type: 'date' as const,
             },
           },
         },

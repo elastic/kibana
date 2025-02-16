@@ -9,7 +9,7 @@ import type {
   IndicesIndexSettings,
   IngestDeletePipelineResponse,
   MappingTypeMapping,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 
 import type { ImportFailure, IngestPipeline, ImportDoc, ImportResponse } from '../../common/types';
 

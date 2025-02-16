@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  SnapshotConfig,
-  SnapshotConfigEs,
-  SnapshotRetention,
-  SnapshotRetentionEs,
-} from './snapshot';
+import type { SlmRetention } from '@elastic/elasticsearch/lib/api/types';
+import { SnapshotConfig, SnapshotConfigEs, SnapshotRetention } from './snapshot';
 export interface SlmPolicyPayload {
   name: string;
   snapshotName: string;
@@ -58,7 +54,7 @@ export interface SlmPolicyEs {
     schedule: string;
     repository: string;
     config?: SnapshotConfigEs;
-    retention?: SnapshotRetentionEs;
+    retention?: SlmRetention;
   };
   next_execution: string;
   next_execution_millis: number;

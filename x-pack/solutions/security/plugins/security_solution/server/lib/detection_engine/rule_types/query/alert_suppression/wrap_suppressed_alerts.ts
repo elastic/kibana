@@ -6,7 +6,7 @@
  */
 
 import objectHash from 'object-hash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import {
   ALERT_SUPPRESSION_TERMS,
   ALERT_SUPPRESSION_DOCS_COUNT,

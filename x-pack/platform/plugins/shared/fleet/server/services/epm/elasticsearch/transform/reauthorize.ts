@@ -59,7 +59,7 @@ async function reauthorizeAndStartTransform({
         esClient.transform.updateTransform(
           {
             transform_id: transformId,
-            body: { _meta: meta },
+            _meta: meta,
           },
           { ...(secondaryAuth ? secondaryAuth : {}) }
         ),

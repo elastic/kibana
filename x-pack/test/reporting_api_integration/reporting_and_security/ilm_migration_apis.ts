@@ -172,7 +172,7 @@ export default function ({ getService }: FtrProviderContext) {
       // customize the lifecycle policy
       await es.ilm.putLifecycle({
         name: ILM_POLICY_NAME,
-        body: customLifecycle,
+        ...customLifecycle,
       });
 
       await runMigrate();

@@ -73,15 +73,13 @@ export function registerAppRoutes({
           index,
           cluster,
         } = await client.asCurrentUser.security.hasPrivileges({
-          body: {
-            cluster: APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
-            index: [
-              {
-                names: [DEPRECATION_LOGS_INDEX],
-                privileges: APP_LOGS_COUNT_INDEX_PRIVILEGES,
-              },
-            ],
-          },
+          cluster: APP_LOGS_COUNT_CLUSTER_PRIVILEGES,
+          index: [
+            {
+              names: [DEPRECATION_LOGS_INDEX],
+              privileges: APP_LOGS_COUNT_INDEX_PRIVILEGES,
+            },
+          ],
         });
 
         if (!hasAllPrivileges) {

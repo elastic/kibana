@@ -9,7 +9,7 @@ import { omit } from 'lodash';
 import { Observable } from 'rxjs';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { IClusterClient, KibanaRequest } from '@kbn/core/server';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 
 import { KueryNode } from '@kbn/es-query';

@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { RawRule, RawRuleAction } from '@kbn/alerting-plugin/server/types';
 import { FILEBEAT_7X_INDICATOR_PATH } from '@kbn/alerting-plugin/server/saved_objects/migrations';
 import type { SavedObjectReference } from '@kbn/core/server';
@@ -211,11 +211,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       const searchResult = await es.search<{ alert: RawRule }>(
         {
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-          body: {
-            query: {
-              term: {
-                _id: 'alert:74f3e6d7-b7bb-477d-ac28-92ee22728e6e',
-              },
+          query: {
+            term: {
+              _id: 'alert:74f3e6d7-b7bb-477d-ac28-92ee22728e6e',
             },
           },
         },
@@ -231,11 +229,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       const searchResult = await es.search<{ alert: RawRule; references: {} }>(
         {
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-          body: {
-            query: {
-              term: {
-                _id: 'alert:9c003b00-00ee-11ec-b067-2524946ba327',
-              },
+          query: {
+            term: {
+              _id: 'alert:9c003b00-00ee-11ec-b067-2524946ba327',
             },
           },
         },
@@ -449,11 +445,9 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       const searchResult = await es.search<{ alert: RawRule }>(
         {
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-          body: {
-            query: {
-              term: {
-                _id: 'alert:4d973df0-23df-11ed-8ae4-e988ad0f6fa7',
-              },
+          query: {
+            term: {
+              _id: 'alert:4d973df0-23df-11ed-8ae4-e988ad0f6fa7',
             },
           },
         },
@@ -588,17 +582,15 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       const response = await es.search<{ alert: RawRule }>(
         {
           index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-          body: {
-            query: {
-              bool: {
-                must: [
-                  {
-                    term: {
-                      'alert.alertTypeId': '.es-query',
-                    },
+          query: {
+            bool: {
+              must: [
+                {
+                  term: {
+                    'alert.alertTypeId': '.es-query',
                   },
-                ],
-              },
+                },
+              ],
             },
           },
         },
@@ -699,7 +691,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
       const { docs } = await es.mget<{ alert: RawRule }>({
         index: ALERTING_CASES_SAVED_OBJECT_INDEX,
-        body: { ids: [securityCustomRuleId, securityImmutableRuleId, nonSecurityRuleId] },
+        ids: [securityCustomRuleId, securityImmutableRuleId, nonSecurityRuleId],
       });
 
       const securityCustomRuleMuteAll =

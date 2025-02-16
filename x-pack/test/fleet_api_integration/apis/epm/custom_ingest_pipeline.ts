@@ -58,7 +58,7 @@ export default function (providerContext: FtrProviderContext) {
       it('Should write doc correctly', async () => {
         const res = await es.index({
           index: 'logs-log.log-test',
-          body: {
+          document: {
             '@timestamp': '2020-01-01T09:09:00',
             message: 'hello',
           },
@@ -141,7 +141,7 @@ export default function (providerContext: FtrProviderContext) {
       it('Should write doc correctly', async () => {
         const res = await es.index({
           index: 'logs-log.log-test',
-          body: {
+          document: {
             '@timestamp': '2020-01-01T09:09:00',
             message: 'hello',
           },

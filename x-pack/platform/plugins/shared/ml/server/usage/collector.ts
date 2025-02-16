@@ -96,25 +96,23 @@ export function registerCollector(
         {
           index: alertIndex,
           size: 0,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  { term: { type: 'alert' } },
-                  {
-                    term: {
-                      'alert.alertTypeId': ML_ALERT_TYPES.ANOMALY_DETECTION,
-                    },
+          query: {
+            bool: {
+              filter: [
+                { term: { type: 'alert' } },
+                {
+                  term: {
+                    'alert.alertTypeId': ML_ALERT_TYPES.ANOMALY_DETECTION,
                   },
-                ],
-              },
-            },
-            aggs: {
-              count_by_result_type: {
-                terms: {
-                  field: 'alert.params.resultType',
-                  size: 3,
                 },
+              ],
+            },
+          },
+          aggs: {
+            count_by_result_type: {
+              terms: {
+                field: 'alert.params.resultType',
+                size: 3,
               },
             },
           },
@@ -143,18 +141,16 @@ export function registerCollector(
         {
           index: alertIndex,
           size: 10000,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  { term: { type: 'alert' } },
-                  {
-                    term: {
-                      'alert.alertTypeId': ML_ALERT_TYPES.AD_JOBS_HEALTH,
-                    },
+          query: {
+            bool: {
+              filter: [
+                { term: { type: 'alert' } },
+                {
+                  term: {
+                    'alert.alertTypeId': ML_ALERT_TYPES.AD_JOBS_HEALTH,
                   },
-                ],
-              },
+                },
+              ],
             },
           },
         },

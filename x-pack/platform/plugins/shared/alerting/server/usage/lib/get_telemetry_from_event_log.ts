@@ -14,7 +14,7 @@ import type {
   AggregationsTermsAggregateBase,
   AggregationsStringTermsBucketKeys,
   AggregationsBuckets,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   NUM_ALERTING_RULE_TYPES,
@@ -137,21 +137,19 @@ export async function getExecutionsPerDayCount({
     const query = {
       index: eventLogIndex,
       size: 0,
-      body: {
-        query: getProviderAndActionFilterForTimeRange('execute'),
-        aggs: {
-          ...eventLogAggs,
-          by_rule_type_id: {
-            terms: {
-              field: 'rule.category',
-              size: NUM_ALERTING_RULE_TYPES,
-            },
-            aggs: eventLogAggs,
+      query: getProviderAndActionFilterForTimeRange('execute'),
+      aggs: {
+        ...eventLogAggs,
+        by_rule_type_id: {
+          terms: {
+            field: 'rule.category',
+            size: NUM_ALERTING_RULE_TYPES,
           },
-          by_execution_status: {
-            terms: {
-              field: 'event.outcome',
-            },
+          aggs: eventLogAggs,
+        },
+        by_execution_status: {
+          terms: {
+            field: 'event.outcome',
           },
         },
       },
@@ -224,14 +222,12 @@ export async function getExecutionTimeoutsPerDayCount({
     const query = {
       index: eventLogIndex,
       size: 0,
-      body: {
-        query: getProviderAndActionFilterForTimeRange('execute-timeout'),
-        aggs: {
-          by_rule_type_id: {
-            terms: {
-              field: 'rule.category',
-              size: NUM_ALERTING_RULE_TYPES,
-            },
+      query: getProviderAndActionFilterForTimeRange('execute-timeout'),
+      aggs: {
+        by_rule_type_id: {
+          terms: {
+            field: 'rule.category',
+            size: NUM_ALERTING_RULE_TYPES,
           },
         },
       },

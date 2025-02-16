@@ -82,22 +82,20 @@ export async function getTransaction({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 1,
-      terminate_after: 1,
-      query: {
-        bool: {
-          filter: asMutableArray([
-            { term: { [TRANSACTION_ID]: transactionId } },
-            ...termQuery(TRACE_ID, traceId),
-            ...rangeQuery(start, end),
-          ]),
-        },
+    track_total_hits: false,
+    size: 1,
+    terminate_after: 1,
+    query: {
+      bool: {
+        filter: asMutableArray([
+          { term: { [TRANSACTION_ID]: transactionId } },
+          ...termQuery(TRACE_ID, traceId),
+          ...rangeQuery(start, end),
+        ]),
       },
-      fields: [...requiredFields, ...optionalFields],
-      _source: [SPAN_LINKS, TRANSACTION_AGENT_MARKS],
     },
+    fields: [...requiredFields, ...optionalFields],
+    _source: [SPAN_LINKS, TRANSACTION_AGENT_MARKS],
   });
 
   const hit = maybe(resp.hits.hits[0]);

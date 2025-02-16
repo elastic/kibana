@@ -594,7 +594,7 @@ export const createListsIndices = async (es: Client) => {
  */
 export const createListBypassingChecks = async ({ es, id }: { es: Client; id: string }) => {
   const createdAt = new Date().toISOString();
-  const body = {
+  const document = {
     created_at: createdAt,
     created_by: 'mock-user',
     description: 'mock-description',
@@ -608,7 +608,7 @@ export const createListBypassingChecks = async ({ es, id }: { es: Client; id: st
   };
 
   const response = await es.create({
-    body,
+    document,
     id,
     index: '.lists-default',
     refresh: 'wait_for',
@@ -617,7 +617,7 @@ export const createListBypassingChecks = async ({ es, id }: { es: Client; id: st
   return {
     _version: encodeHitVersion(response),
     id: response._id,
-    ...body,
+    ...document,
   };
 };
 
@@ -638,7 +638,7 @@ export const createListItemBypassingChecks = async ({
   value: string;
 }) => {
   const createdAt = new Date().toISOString();
-  const body = {
+  const document = {
     created_at: createdAt,
     created_by: 'mock-user',
     tie_breaker_id: uuidv4(),
@@ -649,7 +649,7 @@ export const createListItemBypassingChecks = async ({
   };
 
   const response = await es.create({
-    body,
+    document,
     id,
     index: '.items-default',
     refresh: 'wait_for',
@@ -658,7 +658,7 @@ export const createListItemBypassingChecks = async ({
   return {
     _version: encodeHitVersion(response),
     id: response._id,
-    ...body,
+    ...document,
   };
 };
 
@@ -718,13 +718,11 @@ const createReindexedBootstrapIndex = async (esClient: Client, index: string): P
     await esClient.indices.create(
       {
         index: `.reindexed-v8-${index}-000001`,
-        body: {
-          aliases: {
-            [`.${index}`]: {
-              is_write_index: true,
-            },
-            [`.${index}-000001`]: {},
+        aliases: {
+          [`.${index}`]: {
+            is_write_index: true,
           },
+          [`.${index}-000001`]: {},
         },
       },
       { meta: true }

@@ -15,7 +15,7 @@ import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/us
 import { MonitoringStats } from '../monitoring';
 import { configSchema, TaskManagerConfig } from '../config';
 import { backgroundTaskUtilizationRoute } from './background_task_utilization';
-import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
 
 const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
@@ -118,15 +118,13 @@ describe('backgroundTaskUtilizationRoute', () => {
     await handler(context, req, res);
 
     expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-      body: {
-        application: [
-          {
-            application: `kibana-foo`,
-            resources: ['*'],
-            privileges: [`api:8.0:taskManager`],
-          },
-        ],
-      },
+      application: [
+        {
+          application: `kibana-foo`,
+          resources: ['*'],
+          privileges: [`api:8.0:taskManager`],
+        },
+      ],
     });
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(1);
     expect(mockUsageCounter.incrementCounter).toHaveBeenNthCalledWith(1, {
@@ -158,15 +156,13 @@ describe('backgroundTaskUtilizationRoute', () => {
     await handler(context, req, res);
 
     expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-      body: {
-        application: [
-          {
-            application: `kibana-foo`,
-            resources: ['*'],
-            privileges: [`api:8.0:taskManager`],
-          },
-        ],
-      },
+      application: [
+        {
+          application: `kibana-foo`,
+          resources: ['*'],
+          privileges: [`api:8.0:taskManager`],
+        },
+      ],
     });
 
     expect(mockUsageCounter.incrementCounter).toHaveBeenCalledTimes(2);

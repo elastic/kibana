@@ -38,8 +38,8 @@ export function defineCreateOrUpdateUserRoutes({ router }: RouteDefinitionParams
       try {
         const esClient = (await context.core).elasticsearch.client;
         await esClient.asCurrentUser.security.putUser({
+          ...request.body,
           username: request.params.username,
-          body: request.body,
         });
 
         return response.ok({ body: request.body });

@@ -330,7 +330,7 @@ export class EsoModelVersionExample
           const objectsCreated = await Promise.all(
             documentVersionConstants.map(async (obj) => {
               const createdDoc: WriteResponseBase =
-                await elasticsearch.client.asInternalUser.create(obj);
+                await elasticsearch.client.asInternalUser.create<unknown>(obj);
               const parts = createdDoc._id.split(':', 2);
               return { type: parts[0], id: parts[1] };
             })

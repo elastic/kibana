@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import DateMath from '@kbn/datemath';
 import { EXCLUDE_RUN_ONCE_FILTER, FINAL_SUMMARY_FILTER } from '../constants/client_defaults';
 import type { CertificatesResults } from '../../server/queries/get_certs';
@@ -47,136 +47,132 @@ export const getCertsRequestBody = ({
   const sort = SortFields[sortBy as keyof typeof SortFields];
 
   const searchRequest = createEsQuery({
-    body: {
-      from: (pageIndex ?? 0) * size,
-      size,
-      sort: asMutableArray([
-        {
-          [sort]: {
-            order: direction,
-          },
+    from: (pageIndex ?? 0) * size,
+    size,
+    sort: asMutableArray([
+      {
+        [sort]: {
+          order: direction,
         },
-      ]) as estypes.SortCombinations[],
-      query: {
-        bool: {
-          ...(search
-            ? {
-                minimum_should_match: 1,
-                should: [
-                  {
-                    multi_match: {
-                      query: escape(search),
-                      type: 'phrase_prefix' as const,
-                      fields: [
-                        'monitor.id.text',
-                        'monitor.name.text',
-                        'url.full.text',
-                        'tls.server.x509.subject.common_name.text',
-                        'tls.server.x509.issuer.common_name.text',
-                      ],
-                    },
+      },
+    ]) as estypes.SortCombinations[],
+    query: {
+      bool: {
+        ...(search
+          ? {
+              minimum_should_match: 1,
+              should: [
+                {
+                  multi_match: {
+                    query: escape(search),
+                    type: 'phrase_prefix' as const,
+                    fields: [
+                      'monitor.id.text',
+                      'monitor.name.text',
+                      'url.full.text',
+                      'tls.server.x509.subject.common_name.text',
+                      'tls.server.x509.issuer.common_name.text',
+                    ],
                   },
-                ],
-              }
-            : {}),
-          filter: [
-            FINAL_SUMMARY_FILTER,
-            EXCLUDE_RUN_ONCE_FILTER,
-            ...(filters ? [filters] : []),
-            ...(monitorIds && monitorIds.length > 0
-              ? [{ terms: { 'monitor.id': monitorIds } }]
-              : []),
-            {
-              exists: {
-                field: 'tls.server.hash.sha256',
-              },
-            },
-            {
-              range: {
-                'monitor.timespan': {
-                  gte: absoluteDate(from),
-                  lte: absoluteDate(to),
                 },
+              ],
+            }
+          : {}),
+        filter: [
+          FINAL_SUMMARY_FILTER,
+          EXCLUDE_RUN_ONCE_FILTER,
+          ...(filters ? [filters] : []),
+          ...(monitorIds && monitorIds.length > 0 ? [{ terms: { 'monitor.id': monitorIds } }] : []),
+          {
+            exists: {
+              field: 'tls.server.hash.sha256',
+            },
+          },
+          {
+            range: {
+              'monitor.timespan': {
+                gte: absoluteDate(from),
+                lte: absoluteDate(to),
               },
             },
-            {
-              bool: {
-                // these notValidBefore and notValidAfter should be inside should block, since
-                // we want to match either of the condition, making ir an OR operation
-                minimum_should_match: 1,
-                should: [
-                  ...(notValidBefore
-                    ? [
-                        {
-                          range: {
-                            'tls.certificate_not_valid_before': {
-                              lte: absoluteDate(notValidBefore),
-                            },
+          },
+          {
+            bool: {
+              // these notValidBefore and notValidAfter should be inside should block, since
+              // we want to match either of the condition, making ir an OR operation
+              minimum_should_match: 1,
+              should: [
+                ...(notValidBefore
+                  ? [
+                      {
+                        range: {
+                          'tls.certificate_not_valid_before': {
+                            lte: absoluteDate(notValidBefore),
                           },
                         },
-                      ]
-                    : []),
-                  ...(notValidAfter
-                    ? [
-                        {
-                          range: {
-                            'tls.certificate_not_valid_after': {
-                              lte: absoluteDate(notValidAfter),
-                            },
+                      },
+                    ]
+                  : []),
+                ...(notValidAfter
+                  ? [
+                      {
+                        range: {
+                          'tls.certificate_not_valid_after': {
+                            lte: absoluteDate(notValidAfter),
                           },
                         },
-                      ]
-                    : []),
-                ],
-              },
+                      },
+                    ]
+                  : []),
+              ],
             },
-          ] as estypes.QueryDslQueryContainer,
-        },
+          },
+        ] as estypes.QueryDslQueryContainer,
       },
-      _source: [
-        '@timestamp',
-        'config_id',
-        'monitor.id',
-        'monitor.name',
-        'monitor.type',
-        'url.full',
-        'observer.geo.name',
-        'tls.server.x509.issuer.common_name',
-        'tls.server.x509.subject.common_name',
-        'tls.server.hash.sha1',
-        'tls.server.hash.sha256',
-        'tls.server.x509.not_after',
-        'tls.server.x509.not_before',
-        'service',
-        'labels',
-        'tags',
-        'error',
-      ],
-      collapse: {
-        field: 'tls.server.hash.sha256',
-        inner_hits: {
-          size: 100,
-          _source: {
-            includes: ['monitor.id', 'monitor.name', 'url.full', 'config_id'],
-          },
-          collapse: {
-            field: 'monitor.id',
-          },
-          name: 'monitors',
-          sort: [{ 'monitor.id': 'asc' as const }],
+    },
+    _source: [
+      '@timestamp',
+      'config_id',
+      'monitor.id',
+      'monitor.name',
+      'monitor.type',
+      'url.full',
+      'observer.geo.name',
+      'tls.server.x509.issuer.common_name',
+      'tls.server.x509.subject.common_name',
+      'tls.server.hash.sha1',
+      'tls.server.hash.sha256',
+      'tls.server.x509.not_after',
+      'tls.server.x509.not_before',
+      'service',
+      'labels',
+      'tags',
+      'error',
+    ],
+    collapse: {
+      field: 'tls.server.hash.sha256',
+      inner_hits: {
+        size: 100,
+        _source: {
+          includes: ['monitor.id', 'monitor.name', 'url.full', 'config_id'],
         },
+        collapse: {
+          field: 'monitor.id',
+        },
+        name: 'monitors',
+        sort: [{ 'monitor.id': 'asc' as const }],
       },
-      aggs: {
-        total: {
-          cardinality: {
-            field: 'tls.server.hash.sha256',
-          },
+    },
+    aggs: {
+      total: {
+        cardinality: {
+          field: 'tls.server.hash.sha256',
         },
       },
     },
   });
 
-  return searchRequest.body;
+  return searchRequest;
 };
 
 export const processCertsResult = (result: CertificatesResults): CertResult => {

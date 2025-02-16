@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { get } from 'lodash';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import {
@@ -563,7 +563,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
   ): Promise<Array<SearchHit<T>>> {
     const searchResult = await es.search({
       index,
-      body: { query: { match_all: {} } },
+      query: { match_all: {} },
     });
     return searchResult.hits.hits as Array<SearchHit<T>>;
   }

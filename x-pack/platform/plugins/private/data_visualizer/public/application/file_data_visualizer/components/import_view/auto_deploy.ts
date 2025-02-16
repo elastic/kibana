@@ -8,7 +8,7 @@
 import type {
   InferenceInferenceEndpointInfo,
   InferenceInferenceResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { HttpSetup } from '@kbn/core/public';
 
 const POLL_INTERVAL = 5; // seconds

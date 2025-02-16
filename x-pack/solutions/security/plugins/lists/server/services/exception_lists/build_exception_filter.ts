@@ -26,7 +26,7 @@ import {
   entriesNested,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { Filter } from '@kbn/es-query';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { partition } from 'lodash';
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 import {

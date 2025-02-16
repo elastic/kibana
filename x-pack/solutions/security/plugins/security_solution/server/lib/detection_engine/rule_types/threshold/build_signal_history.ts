@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import { ALERT_ORIGINAL_TIME } from '../../../../../common/field_maps/field_names';
 

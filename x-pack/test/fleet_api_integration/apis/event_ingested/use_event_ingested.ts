@@ -63,17 +63,15 @@ export default function (providerContext: FtrProviderContext) {
     it('should correctly update the event ingested pipeline', async () => {
       await es.ingest.putPipeline({
         id: FLEET_EVENT_INGESTED_PIPELINE_ID,
-        body: {
-          description: 'Test PIPELINE WITHOUT version',
-          processors: [
-            {
-              set: {
-                field: 'my-keyword-field',
-                value: 'foo',
-              },
+        description: 'Test PIPELINE WITHOUT version',
+        processors: [
+          {
+            set: {
+              field: 'my-keyword-field',
+              value: 'foo',
             },
-          ],
-        },
+          },
+        ],
       });
       await supertestWithoutAuth
         .post(`/api/fleet/setup`)

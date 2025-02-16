@@ -8,10 +8,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import type {
-  ExpandWildcard,
-  MappingRuntimeFields,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ExpandWildcard, MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { QueryDslQueryContainer } from '../../../common/types';
 import { convertEsError } from './errors';
 

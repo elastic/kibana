@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { HttpSetup } from '@kbn/core/public';
-import type { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import {
   IExecutionLog,
   ExecutionLogSortFields,

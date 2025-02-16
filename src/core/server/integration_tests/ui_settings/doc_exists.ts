@@ -24,9 +24,7 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
     await esClient.deleteByQuery({
       index: savedObjectsIndex,
       conflicts: 'proceed',
-      body: {
-        query: { match_all: {} },
-      },
+      query: { match_all: {} },
       refresh: true,
       wait_for_completion: true,
     });

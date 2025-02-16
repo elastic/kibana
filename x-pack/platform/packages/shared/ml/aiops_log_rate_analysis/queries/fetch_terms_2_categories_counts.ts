@@ -7,7 +7,7 @@
 
 import { uniq } from 'lodash';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
@@ -33,7 +33,7 @@ const getTerm2CategoryCountRequest = (
   category: Category,
   from: number | undefined,
   to: number | undefined
-): estypes.SearchRequest['body'] => {
+): estypes.SearchRequest => {
   const query = getQueryWithParams({
     params,
   });

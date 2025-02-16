@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client } from '@elastic/elasticsearch';
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { ApmSynthtraceEsClient } from '../../..';
 import { Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
@@ -26,6 +26,8 @@ export function getApmEsClient({
   const client = new Client({
     node: target,
     tls: getEsClientTlsSettings(target),
+    Connection: HttpConnection,
+    requestTimeout: 30_000,
   });
 
   const apmEsClient = new ApmSynthtraceEsClient({

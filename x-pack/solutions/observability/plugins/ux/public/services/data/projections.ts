@@ -62,10 +62,8 @@ export function getRumPageLoadTransactionsProjection({
   };
 
   return {
-    body: {
-      query: {
-        bool,
-      },
+    query: {
+      bool,
     },
   };
 }
@@ -103,21 +101,17 @@ export function getRumPageExitTransactionsProjection({
   };
 
   return {
-    body: {
-      query: {
-        bool,
-      },
+    query: {
+      bool,
     },
   };
 }
 
 export interface RumErrorsProjection {
-  body: {
-    query: {
-      bool: {
-        filter: QueryDslQueryContainer[];
-        must_not: QueryDslQueryContainer[];
-      };
+  query: {
+    bool: {
+      filter: QueryDslQueryContainer[];
+      must_not: QueryDslQueryContainer[];
     };
   };
 }
@@ -134,30 +128,28 @@ export function getRumErrorsProjection({
   end: number;
 }): RumErrorsProjection {
   return {
-    body: {
-      query: {
-        bool: {
-          filter: [
-            ...rangeQuery(start, end),
-            { term: { [AGENT_NAME]: 'rum-js' } },
-            {
-              terms: {
-                [PROCESSOR_EVENT]: [ProcessorEvent.error],
-              },
+    query: {
+      bool: {
+        filter: [
+          ...rangeQuery(start, end),
+          { term: { [AGENT_NAME]: 'rum-js' } },
+          {
+            terms: {
+              [PROCESSOR_EVENT]: [ProcessorEvent.error],
             },
-            ...getEsFilter(setup.uiFilters),
-            ...(urlQuery
-              ? [
-                  {
-                    wildcard: {
-                      'url.full': `*${urlQuery}*`,
-                    },
+          },
+          ...getEsFilter(setup.uiFilters),
+          ...(urlQuery
+            ? [
+                {
+                  wildcard: {
+                    'url.full': `*${urlQuery}*`,
                   },
-                ]
-              : []),
-          ],
-          must_not: [...getEsFilter(setup.uiFilters, true)],
-        },
+                },
+              ]
+            : []),
+        ],
+        must_not: [...getEsFilter(setup.uiFilters, true)],
       },
     },
   };

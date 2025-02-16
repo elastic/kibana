@@ -30,22 +30,20 @@ export default function (providerContext: FtrProviderContext) {
           Buffer.from(apiKeyRes.api_key).toString('base64')
         ).security.hasPrivileges(
           {
-            body: {
-              cluster: ['monitor'],
-              index: [
-                {
-                  names: [
-                    'logs-*-*',
-                    'metrics-*-*',
-                    'traces-*-*',
-                    'synthetics-*-*',
-                    '.logs-endpoint.diagnostic.collection-*',
-                    '.logs-endpoint.action.responses-*',
-                  ],
-                  privileges: ['auto_configure', 'create_doc'],
-                },
-              ],
-            },
+            cluster: ['monitor'],
+            index: [
+              {
+                names: [
+                  'logs-*-*',
+                  'metrics-*-*',
+                  'traces-*-*',
+                  'synthetics-*-*',
+                  '.logs-endpoint.diagnostic.collection-*',
+                  '.logs-endpoint.action.responses-*',
+                ],
+                privileges: ['auto_configure', 'create_doc'],
+              },
+            ],
           },
           { meta: true }
         );

@@ -11,7 +11,7 @@
 
 import { SerializableRecord } from '@kbn/utility-types';
 import { IFieldSubType } from '@kbn/es-query';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
 import { RuntimePrimitiveTypes, RuntimeType } from '../../common/types';
 
 // types for REST responses. separate but similar to other types to draw attention to REST api return changes

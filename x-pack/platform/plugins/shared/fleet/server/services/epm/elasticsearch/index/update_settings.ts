@@ -25,7 +25,7 @@ export async function updateIndexSettings(
       await retryTransientEsErrors(() =>
         esClient.indices.putSettings({
           index,
-          body: settings,
+          settings,
         })
       );
     } catch (err) {

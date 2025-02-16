@@ -6,7 +6,7 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
@@ -97,8 +97,8 @@ describe('Kibana user deprecation routes', () => {
       expect(
         mockContext.core.elasticsearch.client.asCurrentUser.security.putUser
       ).toHaveBeenCalledWith({
+        ...createMockUser({ username: 'userA', roles: ['roleA', 'kibana_admin'] }),
         username: 'userA',
-        body: createMockUser({ username: 'userA', roles: ['roleA', 'kibana_admin'] }),
       });
     });
 
@@ -138,20 +138,20 @@ describe('Kibana user deprecation routes', () => {
       expect(
         mockContext.core.elasticsearch.client.asCurrentUser.security.putUser
       ).toHaveBeenCalledWith({
+        ...createMockUser({ username: 'userB', roles: ['roleB', 'kibana_admin'] }),
         username: 'userB',
-        body: createMockUser({ username: 'userB', roles: ['roleB', 'kibana_admin'] }),
       });
       expect(
         mockContext.core.elasticsearch.client.asCurrentUser.security.putUser
       ).toHaveBeenCalledWith({
+        ...createMockUser({ username: 'userD', roles: ['kibana_admin'] }),
         username: 'userD',
-        body: createMockUser({ username: 'userD', roles: ['kibana_admin'] }),
       });
       expect(
         mockContext.core.elasticsearch.client.asCurrentUser.security.putUser
       ).toHaveBeenCalledWith({
+        ...createMockUser({ username: 'userE', roles: ['kibana_admin', 'roleE'] }),
         username: 'userE',
-        body: createMockUser({ username: 'userE', roles: ['kibana_admin', 'roleE'] }),
       });
     });
   });
@@ -212,7 +212,7 @@ describe('Kibana user deprecation routes', () => {
         mockContext.core.elasticsearch.client.asCurrentUser.security.putRoleMapping
       ).toHaveBeenCalledWith({
         name: 'mappingA',
-        body: createMockRoleMapping({ roles: ['roleA', 'kibana_admin'] }),
+        ...createMockRoleMapping({ roles: ['roleA', 'kibana_admin'] }),
       });
     });
 
@@ -250,19 +250,19 @@ describe('Kibana user deprecation routes', () => {
         mockContext.core.elasticsearch.client.asCurrentUser.security.putRoleMapping
       ).toHaveBeenCalledWith({
         name: 'mappingB',
-        body: createMockRoleMapping({ roles: ['roleB', 'kibana_admin'] }),
+        ...createMockRoleMapping({ roles: ['roleB', 'kibana_admin'] }),
       });
       expect(
         mockContext.core.elasticsearch.client.asCurrentUser.security.putRoleMapping
       ).toHaveBeenCalledWith({
         name: 'mappingD',
-        body: createMockRoleMapping({ roles: ['kibana_admin'] }),
+        ...createMockRoleMapping({ roles: ['kibana_admin'] }),
       });
       expect(
         mockContext.core.elasticsearch.client.asCurrentUser.security.putRoleMapping
       ).toHaveBeenCalledWith({
         name: 'mappingE',
-        body: createMockRoleMapping({ roles: ['kibana_admin', 'roleE'] }),
+        ...createMockRoleMapping({ roles: ['kibana_admin', 'roleE'] }),
       });
     });
   });

@@ -76,35 +76,34 @@ export async function getAggregatedCriticalPath({
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
-    body: {
-      size: 0,
-      track_total_hits: false,
-      query: {
-        bool: {
-          filter: [
-            ...termsQuery(TRACE_ID, ...traceIds),
-            // we need a range query to allow ES to skip shards based on the time range,
-            // but we need enough padding to make sure we get the full trace
-            ...rangeQuery(start - TWO_DAYS_MS, end + TWO_DAYS_MS),
-          ],
-        },
+    size: 0,
+    track_total_hits: false,
+    query: {
+      bool: {
+        filter: [
+          ...termsQuery(TRACE_ID, ...traceIds),
+          // we need a range query to allow ES to skip shards based on the time range,
+          // but we need enough padding to make sure we get the full trace
+          ...rangeQuery(start - TWO_DAYS_MS, end + TWO_DAYS_MS),
+        ],
       },
-      aggs: {
-        critical_path: {
-          scripted_metric: {
-            params: {
-              // can't send null parameters to ES. undefined will be removed during JSON serialisation
-              serviceName: serviceName || undefined,
-              transactionName: transactionName || undefined,
-            },
-            init_script: {
-              source: `
+    },
+    aggs: {
+      critical_path: {
+        scripted_metric: {
+          params: {
+            // can't send null parameters to ES. undefined will be removed during JSON serialisation
+            serviceName: serviceName || undefined,
+            transactionName: transactionName || undefined,
+          },
+          init_script: {
+            source: `
                 state.eventsById = [:];
                 state.metadataByOperationId = [:];
               `,
-            },
-            map_script: {
-              source: `
+          },
+          map_script: {
+            source: `
                 String toHash (def item) {
                   long FNV_32_INIT = 0x811c9dc5L;
                   long FNV_32_PRIME = 0x01000193L;
@@ -164,12 +163,12 @@ export async function getAggregatedCriticalPath({
                 }
                 state.eventsById.put(id, map);
               `,
-            },
-            combine_script: {
-              source: 'return state;',
-            },
-            reduce_script: {
-              source: `
+          },
+          combine_script: {
+            source: 'return state;',
+          },
+          reduce_script: {
+            source: `
                 String toHash (def item) {
                   long FNV_32_INIT = 0x811c9dc5L;
                   long FNV_32_PRIME = 0x01000193L;
@@ -401,7 +400,6 @@ export async function getAggregatedCriticalPath({
                   "rootNodes": rootNodes,
                   "operationIdByNodeId": operationIdByNodeId
                 ];`,
-            },
           },
         },
       },

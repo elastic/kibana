@@ -57,35 +57,33 @@ export async function getThroughput({
     apm: {
       sources: [{ documentType, rollupInterval }],
     },
-    body: {
-      track_total_hits: false,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [TRANSACTION_TYPE]: transactionType } },
-            ...rangeQuery(startWithOffset, endWithOffset),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            ...termQuery(TRANSACTION_NAME, transactionName),
-            ...(filters?.filter ?? []),
-          ],
-          must_not: [...(filters?.must_not ?? [])],
-        },
+    track_total_hits: false,
+    size: 0,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          { term: { [TRANSACTION_TYPE]: transactionType } },
+          ...rangeQuery(startWithOffset, endWithOffset),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          ...termQuery(TRANSACTION_NAME, transactionName),
+          ...(filters?.filter ?? []),
+        ],
+        must_not: [...(filters?.must_not ?? [])],
       },
-      aggs: {
-        timeseries: {
-          date_histogram: {
-            field: '@timestamp',
-            fixed_interval: `${bucketSizeInSeconds}s`,
-            min_doc_count: 0,
-            extended_bounds: { min: startWithOffset, max: endWithOffset },
-          },
-          aggs: {
-            throughput: {
-              rate: { unit: 'minute' as const },
-            },
+    },
+    aggs: {
+      timeseries: {
+        date_histogram: {
+          field: '@timestamp',
+          fixed_interval: `${bucketSizeInSeconds}s`,
+          min_doc_count: 0,
+          extended_bounds: { min: startWithOffset, max: endWithOffset },
+        },
+        aggs: {
+          throughput: {
+            rate: { unit: 'minute' as const },
           },
         },
       },

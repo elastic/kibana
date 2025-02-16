@@ -12,7 +12,7 @@ import {
   AggregationsValueCountAggregate,
   MsearchMultisearchBody,
   QueryDslQueryContainer,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
   ALL_VALUE,

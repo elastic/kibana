@@ -8,7 +8,7 @@
 import { isEmpty, partition } from 'lodash';
 import agent from 'elastic-apm-node';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';

@@ -212,7 +212,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
           hits: { hits: activeAlerts },
         } = await es.search({
           index: alertAsDataIndex,
-          body: { query: { match_all: {} } },
+          query: { match_all: {} },
         });
 
         expect(activeAlerts.length).eql(2);
@@ -227,7 +227,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         hits: { hits: untrackedAlerts },
       } = await es.search({
         index: alertAsDataIndex,
-        body: { query: { match_all: {} } },
+        query: { match_all: {} },
       });
       expect(untrackedAlerts.length).eql(2);
       untrackedAlerts.forEach((untrackedAlert: any) => {

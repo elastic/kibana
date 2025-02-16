@@ -145,7 +145,6 @@ export default function ({ getService }: FtrProviderContext) {
               },
             },
             lifecycle: {
-              // @ts-expect-error @elastic/elasticsearch enabled prop is still not in the ES types
               enabled: true,
               data_retention: '2d',
             },

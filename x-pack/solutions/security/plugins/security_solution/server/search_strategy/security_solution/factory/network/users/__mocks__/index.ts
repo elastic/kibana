@@ -132,38 +132,36 @@ export const formattedSearchStrategyResponse = {
           ],
           ignore_unavailable: true,
           track_total_hits: false,
-          body: {
-            aggs: {
-              user_count: { cardinality: { field: 'user.name' } },
-              users: {
-                terms: { field: 'user.name', size: 10, order: { _key: 'asc' } },
-                aggs: {
-                  id: { terms: { field: 'user.id' } },
-                  groupId: { terms: { field: 'user.group.id' } },
-                  groupName: { terms: { field: 'user.group.name' } },
-                },
+          aggs: {
+            user_count: { cardinality: { field: 'user.name' } },
+            users: {
+              terms: { field: 'user.name', size: 10, order: { _key: 'asc' } },
+              aggs: {
+                id: { terms: { field: 'user.id' } },
+                groupId: { terms: { field: 'user.group.id' } },
+                groupName: { terms: { field: 'user.group.name' } },
               },
             },
-            query: {
-              bool: {
-                filter: [
-                  { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: '2020-09-13T10:16:46.870Z',
-                        lte: '2020-09-14T10:16:46.870Z',
-                        format: 'strict_date_optional_time',
-                      },
+          },
+          query: {
+            bool: {
+              filter: [
+                { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: '2020-09-13T10:16:46.870Z',
+                      lte: '2020-09-14T10:16:46.870Z',
+                      format: 'strict_date_optional_time',
                     },
                   },
-                  { term: { 'source.ip': '10.142.0.7' } },
-                ],
-                must_not: [{ term: { 'event.category': 'authentication' } }],
-              },
+                },
+                { term: { 'source.ip': '10.142.0.7' } },
+              ],
+              must_not: [{ term: { 'event.category': 'authentication' } }],
             },
-            size: 0,
           },
+          size: 0,
         },
         null,
         2
@@ -177,38 +175,36 @@ export const formattedSearchStrategyResponse = {
 export const expectedDsl = {
   allow_no_indices: true,
   track_total_hits: false,
-  body: {
-    aggs: {
-      user_count: { cardinality: { field: 'user.name' } },
-      users: {
-        aggs: {
-          groupId: { terms: { field: 'user.group.id' } },
-          groupName: { terms: { field: 'user.group.name' } },
-          id: { terms: { field: 'user.id' } },
-        },
-        terms: { field: 'user.name', order: { _key: 'asc' }, size: 10 },
+  aggs: {
+    user_count: { cardinality: { field: 'user.name' } },
+    users: {
+      aggs: {
+        groupId: { terms: { field: 'user.group.id' } },
+        groupName: { terms: { field: 'user.group.name' } },
+        id: { terms: { field: 'user.id' } },
       },
+      terms: { field: 'user.name', order: { _key: 'asc' }, size: 10 },
     },
-    query: {
-      bool: {
-        filter: [
-          { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
-          {
-            range: {
-              '@timestamp': {
-                format: 'strict_date_optional_time',
-                gte: '2020-09-13T10:16:46.870Z',
-                lte: '2020-09-14T10:16:46.870Z',
-              },
+  },
+  query: {
+    bool: {
+      filter: [
+        { bool: { must: [], filter: [{ match_all: {} }], should: [], must_not: [] } },
+        {
+          range: {
+            '@timestamp': {
+              format: 'strict_date_optional_time',
+              gte: '2020-09-13T10:16:46.870Z',
+              lte: '2020-09-14T10:16:46.870Z',
             },
           },
-          { term: { 'source.ip': '10.142.0.7' } },
-        ],
-        must_not: [{ term: { 'event.category': 'authentication' } }],
-      },
+        },
+        { term: { 'source.ip': '10.142.0.7' } },
+      ],
+      must_not: [{ term: { 'event.category': 'authentication' } }],
     },
-    size: 0,
   },
+  size: 0,
   ignore_unavailable: true,
   index: [
     'apm-*-transaction*',

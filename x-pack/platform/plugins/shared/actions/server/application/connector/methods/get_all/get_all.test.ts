@@ -842,62 +842,29 @@ describe('getAllUnsecured()', () => {
     expect(scopedClusterClient.asInternalUser.search).toHaveBeenCalledWith({
       index: kibanaIndices,
       ignore_unavailable: true,
-      body: {
-        aggs: {
-          '1': {
-            filter: {
-              bool: {
-                must: {
-                  nested: {
-                    path: 'references',
-                    query: {
-                      bool: {
-                        filter: {
-                          bool: {
-                            must: [
-                              {
-                                term: {
-                                  'references.id': '1',
-                                },
+      aggs: {
+        '1': {
+          filter: {
+            bool: {
+              must: {
+                nested: {
+                  path: 'references',
+                  query: {
+                    bool: {
+                      filter: {
+                        bool: {
+                          must: [
+                            {
+                              term: {
+                                'references.id': '1',
                               },
-                              {
-                                term: {
-                                  'references.type': 'action',
-                                },
+                            },
+                            {
+                              term: {
+                                'references.type': 'action',
                               },
-                            ],
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-          testPreconfigured: {
-            filter: {
-              bool: {
-                must: {
-                  nested: {
-                    path: 'references',
-                    query: {
-                      bool: {
-                        filter: {
-                          bool: {
-                            must: [
-                              {
-                                term: {
-                                  'references.id': 'testPreconfigured',
-                                },
-                              },
-                              {
-                                term: {
-                                  'references.type': 'action',
-                                },
-                              },
-                            ],
-                          },
+                            },
+                          ],
                         },
                       },
                     },
@@ -907,10 +874,41 @@ describe('getAllUnsecured()', () => {
             },
           },
         },
-        size: 0,
-        query: {
-          match_all: {},
+        testPreconfigured: {
+          filter: {
+            bool: {
+              must: {
+                nested: {
+                  path: 'references',
+                  query: {
+                    bool: {
+                      filter: {
+                        bool: {
+                          must: [
+                            {
+                              term: {
+                                'references.id': 'testPreconfigured',
+                              },
+                            },
+                            {
+                              term: {
+                                'references.type': 'action',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
+      },
+      size: 0,
+      query: {
+        match_all: {},
       },
     });
 
@@ -1020,62 +1018,29 @@ describe('getAllUnsecured()', () => {
     expect(scopedClusterClient.asInternalUser.search).toHaveBeenCalledWith({
       index: kibanaIndices,
       ignore_unavailable: true,
-      body: {
-        aggs: {
-          '1': {
-            filter: {
-              bool: {
-                must: {
-                  nested: {
-                    path: 'references',
-                    query: {
-                      bool: {
-                        filter: {
-                          bool: {
-                            must: [
-                              {
-                                term: {
-                                  'references.id': '1',
-                                },
+      aggs: {
+        '1': {
+          filter: {
+            bool: {
+              must: {
+                nested: {
+                  path: 'references',
+                  query: {
+                    bool: {
+                      filter: {
+                        bool: {
+                          must: [
+                            {
+                              term: {
+                                'references.id': '1',
                               },
-                              {
-                                term: {
-                                  'references.type': 'action',
-                                },
+                            },
+                            {
+                              term: {
+                                'references.type': 'action',
                               },
-                            ],
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-          testPreconfigured: {
-            filter: {
-              bool: {
-                must: {
-                  nested: {
-                    path: 'references',
-                    query: {
-                      bool: {
-                        filter: {
-                          bool: {
-                            must: [
-                              {
-                                term: {
-                                  'references.id': 'testPreconfigured',
-                                },
-                              },
-                              {
-                                term: {
-                                  'references.type': 'action',
-                                },
-                              },
-                            ],
-                          },
+                            },
+                          ],
                         },
                       },
                     },
@@ -1085,10 +1050,41 @@ describe('getAllUnsecured()', () => {
             },
           },
         },
-        size: 0,
-        query: {
-          match_all: {},
+        testPreconfigured: {
+          filter: {
+            bool: {
+              must: {
+                nested: {
+                  path: 'references',
+                  query: {
+                    bool: {
+                      filter: {
+                        bool: {
+                          must: [
+                            {
+                              term: {
+                                'references.id': 'testPreconfigured',
+                              },
+                            },
+                            {
+                              term: {
+                                'references.type': 'action',
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
+      },
+      size: 0,
+      query: {
+        match_all: {},
       },
     });
 

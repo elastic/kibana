@@ -194,14 +194,12 @@ export async function getIncomingDataByAgentsId({
 
   try {
     const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
-      body: {
-        index: [
-          {
-            names: [dataStreamPattern],
-            privileges: ['read'],
-          },
-        ],
-      },
+      index: [
+        {
+          names: [dataStreamPattern],
+          privileges: ['read'],
+        },
+      ],
     });
 
     if (!hasAllPrivileges) {
@@ -216,32 +214,30 @@ export async function getIncomingDataByAgentsId({
           _source: returnDataPreview,
           timeout: '5s',
           size: returnDataPreview ? MAX_AGENT_DATA_PREVIEW_SIZE : 0,
-          body: {
-            query: {
-              bool: {
-                filter: [
-                  {
-                    terms: {
-                      'agent.id': agentsIds,
-                    },
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    'agent.id': agentsIds,
                   },
-                  {
-                    range: {
-                      '@timestamp': {
-                        gte: 'now-5m',
-                        lte: 'now',
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-            aggs: {
-              agent_ids: {
-                terms: {
-                  field: 'agent.id',
-                  size: agentsIds.length,
                 },
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 'now-5m',
+                      lte: 'now',
+                    },
+                  },
+                },
+              ],
+            },
+          },
+          aggs: {
+            agent_ids: {
+              terms: {
+                field: 'agent.id',
+                size: agentsIds.length,
               },
             },
           },

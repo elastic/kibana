@@ -39,37 +39,35 @@ export const buildHostDetailsQuery = ({
     index: defaultIndex,
     ignore_unavailable: true,
     track_total_hits: false,
-    body: {
-      aggregations: {
-        ...buildFieldsTermAggregation(esFields.filter((field) => !['@timestamp'].includes(field))),
-        endpoint_id: {
-          filter: {
-            term: {
-              'agent.type': 'endpoint',
-            },
+    aggregations: {
+      ...buildFieldsTermAggregation(esFields.filter((field) => !['@timestamp'].includes(field))),
+      endpoint_id: {
+        filter: {
+          term: {
+            'agent.type': 'endpoint',
           },
-          aggs: {
-            value: {
-              terms: {
-                field: 'agent.id',
-              },
+        },
+        aggs: {
+          value: {
+            terms: {
+              field: 'agent.id',
             },
           },
         },
       },
-      query: { bool: { filter } },
-      _source: false,
-      fields: [
-        ...esFields,
-        'agent.type',
-        'agent.id',
-        {
-          field: '@timestamp',
-          format: 'strict_date_optional_time',
-        },
-      ],
-      size: 0,
     },
+    query: { bool: { filter } },
+    _source: false,
+    fields: [
+      ...esFields,
+      'agent.type',
+      'agent.id',
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
+    size: 0,
   };
 
   return dslQuery;

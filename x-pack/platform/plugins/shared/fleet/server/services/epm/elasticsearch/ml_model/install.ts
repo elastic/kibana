@@ -86,8 +86,8 @@ async function handleMlModelInstall({
           {
             model_id: mlModel.installationName,
             defer_definition_decompression: true,
+            // @ts-expect-error timeout is not declared
             timeout: '45s',
-            // @ts-expect-error expects an object not a string
             body: mlModel.content,
           },
           {

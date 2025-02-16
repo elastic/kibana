@@ -24,38 +24,36 @@ describe('buildSignalsSearchQuery', () => {
       })
     ).toEqual({
       index,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                bool: {
-                  should: [
-                    {
-                      match: {
-                        'signal.rule.rule_id': ruleId,
-                      },
+      query: {
+        bool: {
+          filter: [
+            {
+              bool: {
+                should: [
+                  {
+                    match: {
+                      'signal.rule.rule_id': ruleId,
                     },
-                    {
-                      match: {
-                        [ALERT_RULE_RULE_ID]: ruleId,
-                      },
-                    },
-                  ],
-                  minimum_should_match: 1,
-                },
-              },
-              {
-                range: {
-                  '@timestamp': {
-                    gt: from,
-                    lte: to,
-                    format: 'epoch_millis',
                   },
+                  {
+                    match: {
+                      [ALERT_RULE_RULE_ID]: ruleId,
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            {
+              range: {
+                '@timestamp': {
+                  gt: from,
+                  lte: to,
+                  format: 'epoch_millis',
                 },
               },
-            ],
-          },
+            },
+          ],
         },
       },
     });

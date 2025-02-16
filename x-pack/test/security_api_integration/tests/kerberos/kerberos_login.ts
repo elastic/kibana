@@ -457,7 +457,7 @@ export default function ({ getService }: FtrProviderContext) {
         // some period of time.
         const esResponse = await getService('es').deleteByQuery({
           index: '.security-tokens',
-          body: { query: { match: { doc_type: 'token' } } },
+          query: { match: { doc_type: 'token' } },
           refresh: true,
         });
         expect(esResponse).to.have.property('deleted').greaterThan(0);

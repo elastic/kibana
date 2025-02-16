@@ -137,48 +137,46 @@ export async function createDataStream(es: Client, name: string) {
   // A data stream requires an index template before it can be created.
   await es.indices.putIndexTemplate({
     name,
-    body: {
-      index_patterns: [name + '*'],
-      template: {
-        mappings: {
-          properties: {
-            '@timestamp': {
-              type: 'date',
-            },
-            source: {
-              type: 'keyword',
-            },
-            reference: {
-              type: 'keyword',
-            },
-            params: {
-              enabled: false,
-              type: 'object',
-            },
-            host: {
-              properties: {
-                hostname: {
-                  type: 'text',
-                  fields: {
-                    keyword: {
-                      type: 'keyword',
-                      ignore_above: 256,
-                    },
+    index_patterns: [name + '*'],
+    template: {
+      mappings: {
+        properties: {
+          '@timestamp': {
+            type: 'date',
+          },
+          source: {
+            type: 'keyword',
+          },
+          reference: {
+            type: 'keyword',
+          },
+          params: {
+            enabled: false,
+            type: 'object',
+          },
+          host: {
+            properties: {
+              hostname: {
+                type: 'text',
+                fields: {
+                  keyword: {
+                    type: 'keyword',
+                    ignore_above: 256,
                   },
                 },
-                id: {
-                  type: 'keyword',
-                },
-                name: {
-                  type: 'keyword',
-                },
+              },
+              id: {
+                type: 'keyword',
+              },
+              name: {
+                type: 'keyword',
               },
             },
           },
         },
       },
-      data_stream: {},
     },
+    data_stream: {},
   });
 
   await es.indices.createDataStream({ name });

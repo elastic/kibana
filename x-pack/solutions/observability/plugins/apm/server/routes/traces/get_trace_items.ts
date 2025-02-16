@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import type { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer, Sort } from '@elastic/elasticsearch/lib/api/types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { last, omit } from 'lodash';
@@ -118,18 +118,16 @@ export async function getTraceItems({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 1000,
-      query: {
-        bool: {
-          filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
-          must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
-        },
+    track_total_hits: false,
+    size: 1000,
+    query: {
+      bool: {
+        filter: [{ term: { [TRACE_ID]: traceId } }, ...rangeQuery(start, end)],
+        must_not: { terms: { [ERROR_LOG_LEVEL]: excludedLogLevels } },
       },
-      fields: [...requiredFields, ...optionalFields],
-      _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
     },
+    fields: [...requiredFields, ...optionalFields],
+    _source: [ERROR_LOG_MESSAGE, ERROR_EXC_MESSAGE, ERROR_EXC_HANDLED, ERROR_EXC_TYPE],
   });
 
   const traceResponsePromise = getTraceDocsPaginated({
@@ -341,7 +339,7 @@ async function getTraceDocsPerPage({
     apm: {
       events: [ProcessorEvent.span, ProcessorEvent.transaction],
     },
-    body,
+    ...body,
   });
 
   return {

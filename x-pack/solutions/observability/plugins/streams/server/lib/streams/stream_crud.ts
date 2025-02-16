@@ -86,9 +86,7 @@ export async function deleteUnmanagedStreamObjects({
       );
       await scopedClusterClient.asCurrentUser.ingest.putPipeline({
         id: targetPipelineName,
-        body: {
-          processors: updatedProcessors,
-        },
+        processors: updatedProcessors,
       });
     }
   }

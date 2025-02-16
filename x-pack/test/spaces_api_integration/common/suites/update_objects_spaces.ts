@@ -104,11 +104,9 @@ export function updateObjectsSpacesTestSuiteFactory(
               }
               const searchResponse = await es.search({
                 index: ALL_SAVED_OBJECT_INDICES,
-                body: {
-                  size: 0,
-                  query: { terms: { type: ['legacy-url-alias'] } },
-                  track_total_hits: true,
-                },
+                size: 0,
+                query: { terms: { type: ['legacy-url-alias'] } },
+                track_total_hits: true,
               });
               expect((searchResponse.hits.total as SearchTotalHits).value).to.eql(
                 // Six aliases exist in the test fixtures

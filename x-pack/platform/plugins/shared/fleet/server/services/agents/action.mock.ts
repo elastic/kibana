@@ -150,6 +150,7 @@ export function createClientMock() {
     { items: [] }
   );
 
+  // @ts-expect-error not matching returned types
   esClientMock.mget.mockResponseImplementation((params) => {
     // @ts-expect-error
     const docs = params?.docs.map(({ _id }) => {

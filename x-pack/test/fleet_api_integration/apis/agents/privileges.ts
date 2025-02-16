@@ -216,7 +216,7 @@ export default function (providerContext: FtrProviderContext) {
           id: 'file1',
           refresh: true,
           op_type: 'create',
-          body: {
+          document: {
             '@timestamp': new Date().toISOString(),
             upload_id: 'file1',
             action_id: `fleet_uploads_test-file1-action`,

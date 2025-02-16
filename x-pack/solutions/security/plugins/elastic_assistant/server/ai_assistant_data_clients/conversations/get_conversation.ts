@@ -47,24 +47,22 @@ export const getConversation = async ({
     : [];
   try {
     const response = await esClient.search<EsConversationSchema>({
-      body: {
-        query: {
-          bool: {
-            must: [
-              {
-                bool: {
-                  should: [
-                    {
-                      term: {
-                        _id: id,
-                      },
+      query: {
+        bool: {
+          must: [
+            {
+              bool: {
+                should: [
+                  {
+                    term: {
+                      _id: id,
                     },
-                  ],
-                },
+                  },
+                ],
               },
-              ...filterByUser,
-            ],
-          },
+            },
+            ...filterByUser,
+          ],
         },
       },
       _source: true,

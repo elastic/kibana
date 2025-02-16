@@ -101,23 +101,21 @@ export async function getErrorSampleDetails({
         },
       ],
     },
-    body: {
-      track_total_hits: false,
-      size: 1,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            { term: { [ERROR_ID]: errorId } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-          ],
-        },
+    track_total_hits: false,
+    size: 1,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          { term: { [ERROR_ID]: errorId } },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+        ],
       },
-      fields: [...requiredFields, ...optionalFields],
-      _source: [ERROR_EXCEPTION, 'error.log'],
     },
+    fields: [...requiredFields, ...optionalFields],
+    _source: [ERROR_EXCEPTION, 'error.log'],
   };
 
   const resp = await apmEventClient.search('get_error_sample_details', params);

@@ -37,32 +37,30 @@ const hasOTelMetrics = async ({
     apm: {
       events: [ProcessorEvent.metric],
     },
-    body: {
-      track_total_hits: false,
-      size: 1,
-      query: {
-        bool: {
-          filter: [
-            { term: { [SERVICE_NAME]: serviceName } },
-            ...rangeQuery(start, end),
-            ...environmentQuery(environment),
-            ...kqlQuery(kuery),
-            {
-              bool: {
-                should: [
-                  { exists: { field: METRIC_OTEL_JVM_PROCESS_CPU_PERCENT } },
-                  { exists: { field: METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE } },
-                  { exists: { field: METRIC_OTEL_JVM_PROCESS_THREADS_COUNT } },
-                  { exists: { field: METRIC_OTEL_SYSTEM_CPU_UTILIZATION } },
-                  { exists: { field: METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION } },
-                ],
-              },
+    track_total_hits: false,
+    size: 1,
+    query: {
+      bool: {
+        filter: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          ...rangeQuery(start, end),
+          ...environmentQuery(environment),
+          ...kqlQuery(kuery),
+          {
+            bool: {
+              should: [
+                { exists: { field: METRIC_OTEL_JVM_PROCESS_CPU_PERCENT } },
+                { exists: { field: METRIC_OTEL_JVM_PROCESS_MEMORY_USAGE } },
+                { exists: { field: METRIC_OTEL_JVM_PROCESS_THREADS_COUNT } },
+                { exists: { field: METRIC_OTEL_SYSTEM_CPU_UTILIZATION } },
+                { exists: { field: METRIC_OTEL_SYSTEM_MEMORY_UTILIZATION } },
+              ],
             },
-          ],
-        },
+          },
+        ],
       },
-      _source: false,
     },
+    _source: false,
   };
 
   const response = await apmEventClient.search('has_otel_process_metrics', params);

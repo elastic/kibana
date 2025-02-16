@@ -34,10 +34,10 @@ export const createConversation = async ({
   logger,
 }: CreateConversationParams): Promise<ConversationResponse | null> => {
   const createdAt = new Date().toISOString();
-  const body = transformToCreateScheme(createdAt, spaceId, user, conversation);
+  const document = transformToCreateScheme(createdAt, spaceId, user, conversation);
   try {
     const response = await esClient.create({
-      body,
+      document,
       id: conversation?.id || uuidv4(),
       index: conversationIndex,
       refresh: 'wait_for',

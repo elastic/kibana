@@ -92,42 +92,40 @@ describe('fetchKibanaVersions', () => {
       index:
         '*:.monitoring-kibana-*,.monitoring-kibana-*,*:metrics-kibana.stack_monitoring.stats-*,metrics-kibana.stack_monitoring.stats-*',
       filter_path: ['aggregations'],
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              { terms: { cluster_uuid: ['cluster123'] } },
-              {
-                bool: {
-                  should: [
-                    { term: { type: 'kibana_stats' } },
-                    { term: { 'metricset.name': 'stats' } },
-                    { term: { 'data_stream.dataset': 'kibana.stack_monitoring.stats' } },
-                  ],
-                  minimum_should_match: 1,
-                },
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { terms: { cluster_uuid: ['cluster123'] } },
+            {
+              bool: {
+                should: [
+                  { term: { type: 'kibana_stats' } },
+                  { term: { 'metricset.name': 'stats' } },
+                  { term: { 'data_stream.dataset': 'kibana.stack_monitoring.stats' } },
+                ],
+                minimum_should_match: 1,
               },
-              { range: { timestamp: { gte: 'now-2m' } } },
-            ],
-          },
+            },
+            { range: { timestamp: { gte: 'now-2m' } } },
+          ],
         },
-        aggs: {
-          index: { terms: { field: '_index', size: 1 } },
-          cluster: {
-            terms: { field: 'cluster_uuid', size: 1 },
-            aggs: {
-              group_by_kibana: {
-                terms: { field: 'kibana_stats.kibana.uuid', size: 10 },
-                aggs: {
-                  group_by_version: {
-                    terms: {
-                      field: 'kibana_stats.kibana.version',
-                      size: 1,
-                      order: { latest_report: 'desc' },
-                    },
-                    aggs: { latest_report: { max: { field: 'timestamp' } } },
+      },
+      aggs: {
+        index: { terms: { field: '_index', size: 1 } },
+        cluster: {
+          terms: { field: 'cluster_uuid', size: 1 },
+          aggs: {
+            group_by_kibana: {
+              terms: { field: 'kibana_stats.kibana.uuid', size: 10 },
+              aggs: {
+                group_by_version: {
+                  terms: {
+                    field: 'kibana_stats.kibana.version',
+                    size: 1,
+                    order: { latest_report: 'desc' },
                   },
+                  aggs: { latest_report: { max: { field: 'timestamp' } } },
                 },
               },
             },

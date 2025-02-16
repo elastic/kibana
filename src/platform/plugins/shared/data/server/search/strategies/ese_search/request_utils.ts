@@ -8,7 +8,7 @@
  */
 
 import { IUiSettingsClient } from '@kbn/core/server';
-import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { AsyncSearchGetRequest } from '@elastic/elasticsearch/lib/api/types';
 import { AsyncSearchSubmitRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ISearchOptions } from '@kbn/search-types';
 import { UI_SETTINGS } from '../../../../common';
@@ -39,7 +39,6 @@ export async function getDefaultAsyncSubmitParams(
 ): Promise<
   Pick<
     AsyncSearchSubmitRequest,
-    // @ts-expect-error 'keep_alive' has been removed from the spec due to a misunderstanding, but it still works
     | 'batched_reduce_size'
     | 'ccs_minimize_roundtrips'
     | 'keep_alive'

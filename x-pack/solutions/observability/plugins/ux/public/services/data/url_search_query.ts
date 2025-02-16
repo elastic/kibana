@@ -21,25 +21,23 @@ export function urlSearchQuery(restFilters: any, uxQuery: any, searchValue: stri
     end: callDateMath(uxQuery?.end),
   });
   const params = mergeProjection(projection, {
-    body: {
-      size: 0,
-      aggs: {
-        totalUrls: {
-          cardinality: {
-            field: TRANSACTION_URL,
-          },
+    size: 0,
+    aggs: {
+      totalUrls: {
+        cardinality: {
+          field: TRANSACTION_URL,
         },
-        urls: {
-          terms: {
-            field: TRANSACTION_URL,
-            size: 10,
-          },
-          aggs: {
-            medianPLD: {
-              percentiles: {
-                field: TRANSACTION_DURATION,
-                percents: [Number(uxQuery?.percentile)],
-              },
+      },
+      urls: {
+        terms: {
+          field: TRANSACTION_URL,
+          size: 10,
+        },
+        aggs: {
+          medianPLD: {
+            percentiles: {
+              field: TRANSACTION_DURATION,
+              percents: [Number(uxQuery?.percentile)],
             },
           },
         },

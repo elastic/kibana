@@ -100,7 +100,8 @@ function onPackagePolicyDelete({
 
       try {
         await internalESClient.security.invalidateApiKey({
-          body: { ids: [agentConfigApiKeyId, sourceMapApiKeyId], owner: true },
+          ids: [agentConfigApiKeyId, sourceMapApiKeyId],
+          owner: true,
         });
       } catch (e) {
         logger.error(

@@ -8,7 +8,7 @@
  */
 
 import _ from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { aggTopMetricsFnName } from './top_metrics_fn';
 import { IMetricAggConfig, MetricAggType } from './metric_agg_type';

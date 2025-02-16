@@ -6,7 +6,7 @@
  */
 
 import { chunk, get } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, IKibanaResponse } from '@kbn/core/server';
 import {
   transformError,
@@ -218,7 +218,7 @@ const addIndexAliases = async ({
       };
     }),
   };
-  await esClient.indices.updateAliases({ body: aliasActions });
+  await esClient.indices.updateAliases(aliasActions);
 };
 
 /**

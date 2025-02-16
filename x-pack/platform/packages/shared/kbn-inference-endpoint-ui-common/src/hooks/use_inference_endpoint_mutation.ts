@@ -9,7 +9,7 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import { useMutation } from '@tanstack/react-query';
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { IToasts } from '@kbn/core/public';
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import * as i18n from '../translations';
 import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION, InferenceEndpoint } from '../types/types';
 

@@ -77,16 +77,14 @@ export function useInlineErrors({
   const { data } = useEsSearch(
     {
       index: doFetch ? SYNTHETICS_INDEX_PATTERN : '',
-      body: {
-        size: 1000,
-        query: {
-          bool: {
-            filter: getInlineErrorFilters(),
-          },
+      size: 1000,
+      query: {
+        bool: {
+          filter: getInlineErrorFilters(),
         },
-        collapse: { field: 'monitor.id' },
-        sort: sortFieldMap[sortField] ? [{ [sortFieldMap[sortField]]: sortOrder }] : undefined,
       },
+      collapse: { field: 'monitor.id' },
+      sort: sortFieldMap[sortField] ? [{ [sortFieldMap[sortField]]: sortOrder }] : undefined,
     },
     [syntheticsMonitors, lastRefresh, doFetch, sortField, sortOrder],
     { name: 'getInvalidMonitors' }

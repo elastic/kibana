@@ -6,7 +6,7 @@
  */
 
 import { merge } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { requiredOptional } from '@kbn/zod-helpers';
 import { EVENT_KIND } from '@kbn/rule-data-utils';
 

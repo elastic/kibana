@@ -36,37 +36,35 @@ export async function getClusterRuleDataForClusters(
         index: indexPatterns,
         size: 0,
         ignore_unavailable: true,
-        body: {
-          query: createQuery({
-            type,
-            dsDataset: getKibanaDataset(dataset),
-            metricset: dataset,
-            start,
-            end,
-            clusterUuid,
-            metric,
-          }),
-          aggs: {
-            indices: {
-              terms: {
-                field: '_index',
-                size: 1,
-              },
+        query: createQuery({
+          type,
+          dsDataset: getKibanaDataset(dataset),
+          metricset: dataset,
+          start,
+          end,
+          clusterUuid,
+          metric,
+        }),
+        aggs: {
+          indices: {
+            terms: {
+              field: '_index',
+              size: 1,
             },
-            overdue_count: {
-              max: {
-                field: 'kibana.cluster_rules.overdue.count',
-              },
+          },
+          overdue_count: {
+            max: {
+              field: 'kibana.cluster_rules.overdue.count',
             },
-            overdue_delay_p50: {
-              max: {
-                field: 'kibana.cluster_rules.overdue.delay.p50',
-              },
+          },
+          overdue_delay_p50: {
+            max: {
+              field: 'kibana.cluster_rules.overdue.delay.p50',
             },
-            overdue_delay_p99: {
-              max: {
-                field: 'kibana.cluster_rules.overdue.delay.p99',
-              },
+          },
+          overdue_delay_p99: {
+            max: {
+              field: 'kibana.cluster_rules.overdue.delay.p99',
             },
           },
         },

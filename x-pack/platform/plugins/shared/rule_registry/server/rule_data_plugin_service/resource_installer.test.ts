@@ -13,7 +13,7 @@ import {
   IndicesGetDataStreamResponse,
   IndicesDataStreamIndex,
   IndicesDataStream,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 
 import { Dataset } from './index_options';
 import { IndexInfo } from './index_info';

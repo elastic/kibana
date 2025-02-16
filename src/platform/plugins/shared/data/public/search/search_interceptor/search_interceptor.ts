@@ -31,7 +31,12 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import { estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import type {
+  AsyncSearchGetResponse,
+  ErrorResponseBase,
+  SqlGetAsyncResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
@@ -59,11 +64,6 @@ import type {
 } from '@kbn/search-types';
 import { createEsError, isEsError, renderSearchError } from '@kbn/search-errors';
 import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
-import {
-  AsyncSearchGetResponse,
-  ErrorResponseBase,
-  SqlGetAsyncResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,

@@ -82,7 +82,7 @@ describe('EQL search strategy', () => {
       } as unknown as SearchStrategyDependencies;
       params = {
         index: 'logstash-*',
-        body: { query: 'process where 1 == 1' },
+        query: 'process where 1 == 1',
       };
       options = { ignore: [400] };
     });
@@ -94,7 +94,7 @@ describe('EQL search strategy', () => {
         const [[request, requestOptions]] = mockEqlSearch.mock.calls;
 
         expect(request).toEqual({
-          body: { query: 'process where 1 == 1' },
+          query: 'process where 1 == 1',
           ignore_unavailable: true,
           index: 'logstash-*',
           keep_alive: '60000ms',
@@ -271,6 +271,7 @@ describe('EQL search strategy', () => {
 
       it('passes transport options for search without id', async () => {
         const eqlSearch = eqlSearchStrategyProvider(mockSearchConfig, mockLogger);
+        // @ts-expect-error missing required `query`
         const eql: EqlSearchStrategyRequest = { params: { index: 'all' } };
         await firstValueFrom(eqlSearch.search(eql, { transport: { ignore: [400] } }, mockDeps));
         const [[_params, requestOptions]] = mockEqlSearch.mock.calls;
@@ -282,6 +283,7 @@ describe('EQL search strategy', () => {
         it('passes along a timestamp_field argument', async () => {
           const eqlSearch = eqlSearchStrategyProvider(mockSearchConfig, mockLogger);
           const request: EqlSearchStrategyRequest = {
+            // @ts-expect-error missing required `query`
             params: { index: 'all', timestamp_field: 'timestamp' },
           };
 
@@ -294,6 +296,7 @@ describe('EQL search strategy', () => {
         it('passes along an event_category_field argument', async () => {
           const eqlSearch = eqlSearchStrategyProvider(mockSearchConfig, mockLogger);
           const request: EqlSearchStrategyRequest = {
+            // @ts-expect-error missing required `query`
             params: { index: 'all', event_category_field: 'event_category' },
           };
 
@@ -308,6 +311,7 @@ describe('EQL search strategy', () => {
         it('passes along a tiebreaker_field argument', async () => {
           const eqlSearch = eqlSearchStrategyProvider(mockSearchConfig, mockLogger);
           const request: EqlSearchStrategyRequest = {
+            // @ts-expect-error missing required `query`
             params: { index: 'all', tiebreaker_field: 'event_category' },
           };
 

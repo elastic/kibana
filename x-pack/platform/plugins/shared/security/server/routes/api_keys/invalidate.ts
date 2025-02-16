@@ -48,9 +48,7 @@ export function defineInvalidateApiKeysRoutes({ router }: RouteDefinitionParams)
                 }
 
                 // Send the request to invalidate the API key and return an error if it could not be deleted.
-                await esClient.asCurrentUser.security.invalidateApiKey({
-                  body,
-                });
+                await esClient.asCurrentUser.security.invalidateApiKey(body);
                 return { key, error: undefined };
               } catch (error) {
                 return { key, error: wrapError(error) };
