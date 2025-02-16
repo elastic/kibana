@@ -26,6 +26,7 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('KSPM K8S', () => {
       it('KSPM K8S Workflow', async () => {
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();

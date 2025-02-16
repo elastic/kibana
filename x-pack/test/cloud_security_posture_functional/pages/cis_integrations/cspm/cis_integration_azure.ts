@@ -46,6 +46,7 @@ export default function (providerContext: FtrProviderContext) {
       it('Azure Organization ARM Template Workflow', async () => {
         await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE);
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
@@ -65,6 +66,8 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
         await cisIntegration.selectValue(AZURE_CREDENTIAL_SELECTOR, 'managed_identity');
+        await cisIntegration.inputUniqueIntegrationName();
+
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
@@ -94,6 +97,8 @@ export default function (providerContext: FtrProviderContext) {
           CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
           clientSecret
         );
+        await cisIntegration.inputUniqueIntegrationName();
+
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
@@ -141,6 +146,7 @@ export default function (providerContext: FtrProviderContext) {
           CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
           clientCertificatePassword
         );
+        await cisIntegration.inputUniqueIntegrationName();
 
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
@@ -171,6 +177,7 @@ export default function (providerContext: FtrProviderContext) {
       it('Azure Single ARM Template Workflow', async () => {
         await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(CIS_AZURE_SINGLE_SUB_TEST_ID);
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
@@ -191,6 +198,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_AZURE_SINGLE_SUB_TEST_ID);
         await cisIntegration.clickOptionButton(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
         await cisIntegration.selectValue(AZURE_CREDENTIAL_SELECTOR, 'managed_identity');
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
@@ -220,6 +228,7 @@ export default function (providerContext: FtrProviderContext) {
           CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
           clientSecret
         );
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
@@ -267,7 +276,7 @@ export default function (providerContext: FtrProviderContext) {
           CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
           clientCertificatePassword
         );
-
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();

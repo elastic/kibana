@@ -52,6 +52,7 @@ export default function (providerContext: FtrProviderContext) {
       });
       it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegrationAws.getPostInstallCloudFormationModal()) !== undefined).to.be(
@@ -84,6 +85,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.fillInTextField(ROLE_ARN_TEST_ID, roleArn);
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -120,6 +122,7 @@ export default function (providerContext: FtrProviderContext) {
           DIRECT_ACCESS_SECRET_KEY_TEST_ID,
           directAccessSecretKey
         );
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
@@ -154,6 +157,7 @@ export default function (providerContext: FtrProviderContext) {
           TEMP_ACCESS_SESSION_TOKEN_TEST_ID,
           tempAccessSessionToken
         );
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
@@ -187,6 +191,7 @@ export default function (providerContext: FtrProviderContext) {
           SHARED_CREDETIALS_PROFILE_NAME_TEST_ID,
           sharedCredentialProfileName
         );
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
@@ -209,6 +214,7 @@ export default function (providerContext: FtrProviderContext) {
       it('CIS_AWS Single Cloud Formation workflow', async () => {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
@@ -227,6 +233,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.fillInTextField(ROLE_ARN_TEST_ID, roleArn);
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
@@ -255,6 +262,7 @@ export default function (providerContext: FtrProviderContext) {
           DIRECT_ACCESS_SECRET_KEY_TEST_ID,
           directAccessSecretKey
         );
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
@@ -290,6 +298,7 @@ export default function (providerContext: FtrProviderContext) {
           TEMP_ACCESS_SESSION_TOKEN_TEST_ID,
           tempAccessSessionToken
         );
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
@@ -324,6 +333,7 @@ export default function (providerContext: FtrProviderContext) {
           SHARED_CREDETIALS_PROFILE_NAME_TEST_ID,
           sharedCredentialProfileName
         );
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
           await pageObjects.header.waitUntilLoadingHasFinished();
