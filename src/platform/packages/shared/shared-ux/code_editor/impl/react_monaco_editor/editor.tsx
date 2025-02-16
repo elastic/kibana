@@ -27,7 +27,12 @@
  * THE SOFTWARE.
  */
 
-import { monaco as monacoEditor, monaco, defaultThemesResolvers } from '@kbn/monaco';
+import {
+  monaco as monacoEditor,
+  monaco,
+  defaultThemesResolvers,
+  initializeSupportedLanguages,
+} from '@kbn/monaco';
 import { useEuiTheme } from '@elastic/eui';
 import * as React from 'react';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
@@ -175,6 +180,11 @@ export function MonacoEditor({
   };
 
   useEffect(() => {
+    // initialize supported languages
+    initializeSupportedLanguages();
+  });
+
+  useEffect(() => {
     // register default theme code editor theme
     Object.entries(defaultThemesResolvers).forEach(([themeId, themeResolver]) => {
       monaco.editor.defineTheme(themeId, themeResolver(euiTheme));
@@ -184,7 +194,7 @@ export function MonacoEditor({
     monaco.languages.getLanguages().forEach(({ id: languageId }) => {
       let languageThemeResolver;
       if (Boolean((languageThemeResolver = monaco.editor.getLanguageThemeResolver(languageId)))) {
-        monaco.editor.defineTheme(languageId, languageThemeResolver(euiTheme));
+        monaco.editor.defineTheme(languageId, languageThemeResolver!(euiTheme));
       }
     });
   }, [euiTheme]);

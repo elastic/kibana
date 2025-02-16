@@ -27,7 +27,7 @@ import {
   EuiButtonIcon,
   EuiToolTip,
 } from '@elastic/eui';
-import { CONSOLE_THEME_ID, CONSOLE_OUTPUT_LANG_ID, monaco } from '@kbn/monaco';
+import { CONSOLE_OUTPUT_THEME_ID, CONSOLE_OUTPUT_LANG_ID, monaco } from '@kbn/monaco';
 import {
   getStatusCodeDecorations,
   isJSONContentType,
@@ -191,7 +191,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
           readOnly: true,
           fontSize: readOnlySettings.fontSize,
           wordWrap: readOnlySettings.wrapMode === true ? 'on' : 'off',
-          theme: CONSOLE_THEME_ID,
+          theme: CONSOLE_OUTPUT_THEME_ID,
           automaticLayout: true,
         }}
       />
