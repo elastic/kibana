@@ -161,13 +161,11 @@ async function tryGettingPipeline({
     });
 }
 
-type UnwrapPromise<T extends Promise<any>> = T extends Promise<infer Value> ? Value : never;
-
 async function ensureStreamManagedPipelineReference(
   scopedClusterClient: IScopedClusterClient,
   pipelineName: string | undefined,
-  definition: StreamDefinition
-  unmanagedAssets: UnwrapPromise<ReturnType<typeof getUnmanagedElasticsearchAssets>>
+  definition: StreamDefinition,
+  unmanagedAssets: ElasticsearchAsset[]
 ) {
   const streamManagedPipelineName = getProcessingPipelineName(definition.name);
   if (pipelineName === streamManagedPipelineName) {
@@ -199,16 +197,15 @@ async function ensureStreamManagedPipelineReference(
         },
       },
     };
-    executionPlan.push({
-      method: 'PUT',
-      path: `/_index_template/${indexTemplateAsset.id}`,
-      body: updatedTemplate as unknown as Record<string, unknown>,
+
+    await scopedClusterClient.asCurrentUser.indices.putIndexTemplate({
+      name: indexTemplateAsset.id,
+      ...updatedTemplate,
     });
 
     // rollover the data stream to apply the new default pipeline
-    executionPlan.push({
-      method: 'POST',
-      path: `/${definition.name}/_rollover`,
+    await scopedClusterClient.asCurrentUser.indices.rollover({
+      alias: definition.name,
     });
     return;
   }
@@ -259,7 +256,6 @@ export async function syncUnwiredStreamDefinitionObjects({
     scopedClusterClient,
     pipelineName,
     definition,
-    executionPlan,
     unmanagedAssets
   );
 
