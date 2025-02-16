@@ -11,6 +11,7 @@ import type { FleetAuthzRouter } from '../../services/security';
 import { API_VERSIONS } from '../../../common/constants';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 import { AGENT_POLICY_API_ROUTES } from '../../constants';
+import { type FleetConfigType } from '../../config';
 import {
   GetAgentPoliciesRequestSchema,
   GetOneAgentPolicyRequestSchema,
@@ -32,9 +33,12 @@ import {
   GetAgentPolicyOutputsResponseSchema,
   GetListAgentPolicyOutputsResponseSchema,
   GetListAgentPolicyOutputsRequestSchema,
+  GetAutoUpgradeAgentsStatusRequestSchema,
+  GetAutoUpgradeAgentsStatusResponseSchema,
 } from '../../types';
 
 import { K8S_API_ROUTES } from '../../../common/constants';
+import { parseExperimentalConfigValue } from '../../../common/experimental_features';
 
 import { genericErrorResponse } from '../schema/errors';
 import { ListResponseSchema } from '../schema/utils';
@@ -53,9 +57,10 @@ import {
   bulkGetAgentPoliciesHandler,
   GetAgentPolicyOutputsHandler,
   GetListAgentPolicyOutputsHandler,
+  getAutoUpgradeAgentsStatusHandler,
 } from './handlers';
 
-export const registerRoutes = (router: FleetAuthzRouter) => {
+export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType) => {
   // List - Fleet Server needs access to run setup
   router.versioned
     .get({
@@ -176,6 +181,41 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       getOneAgentPolicyHandler
     );
+
+  const experimentalFeatures = parseExperimentalConfigValue(config.enableExperimental);
+  if (experimentalFeatures.enableAutomaticAgentUpgrades) {
+    router.versioned
+      .get({
+        path: AGENT_POLICY_API_ROUTES.AUTO_UPGRADE_AGENTS_STATUS_PATTERN,
+        security: {
+          authz: {
+            requiredPrivileges: [FLEET_API_PRIVILEGES.AGENTS.READ],
+          },
+        },
+        summary: `Get auto upgrade agent status`,
+        description: `Get auto upgrade agent status`,
+        options: {
+          tags: ['oas-tag:Elastic Agent policies'],
+        },
+      })
+      .addVersion(
+        {
+          version: API_VERSIONS.public.v1,
+          validate: {
+            request: GetAutoUpgradeAgentsStatusRequestSchema,
+            response: {
+              200: {
+                body: () => GetAutoUpgradeAgentsStatusResponseSchema,
+              },
+              400: {
+                body: genericErrorResponse,
+              },
+            },
+          },
+        },
+        getAutoUpgradeAgentsStatusHandler
+      );
+  }
 
   // Create
   router.versioned

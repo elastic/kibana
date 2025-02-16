@@ -65,7 +65,8 @@ export async function generateAgent(
   status: string,
   id: string,
   policyId: string,
-  version?: string
+  version?: string,
+  upgradeDetails?: any
 ) {
   let data: any = {};
   const { getService } = providerContext;
@@ -121,6 +122,7 @@ export async function generateAgent(
         },
       },
       ...data,
+      ...(upgradeDetails ? { upgrade_details: upgradeDetails } : {}),
     },
     refresh: 'wait_for',
   });
