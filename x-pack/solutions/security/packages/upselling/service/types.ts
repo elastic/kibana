@@ -29,4 +29,5 @@ export type UpsellingMessageId =
   | 'alert_suppression_rule_form'
   | 'alert_suppression_rule_details'
   | 'note_management_user_filter'
-  | 'prebuilt_rule_customization';
+  | 'prebuilt_rule_customization'
+  | 'prebuilt_rule_customization_description';

@@ -44,7 +44,7 @@ export const BULK_UPDATE_ALL_RULES_BUTTON_TOOLTIP_CONFLICTS = i18n.translate(
 export const BULK_UPDATE_SELECTED_RULES_BUTTON_TOOLTIP_CONFLICTS = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.upgradeRules.bulkButtons.selectedRules.conflicts',
   {
-    defaultMessage: 'All selected rules have conflicts. Update them individually.',
+    defaultMessage: 'The selected rules have conflicts that must be manually resolved.',
   }
 );
 
@@ -58,7 +58,7 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
 export const UPDATE_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.updateButtonLabel',
   {
-    defaultMessage: 'Update',
+    defaultMessage: 'Update rule',
   }
 );
 
@@ -86,7 +86,14 @@ export const RULE_TYPE_CHANGE_CALLOUT_TITLE = i18n.translate(
 export const RULE_TYPE_CHANGE_CALLOUT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeRules.ruleTypeChangeCalloutDescription',
   {
-    defaultMessage: 'Elastic update has rule type changed.',
+    defaultMessage: 'The rule type will change if you update this rule.',
+  }
+);
+
+export const MODIFIED_RULE_UPGRADE_LICENSE_INSUFFICIENT_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.ruleUpgradeLicenseInsufficientCalloutDescription',
+  {
+    defaultMessage: 'Updating the rule will erase your changes.',
   }
 );
 
@@ -94,14 +101,14 @@ export const RULE_TYPE_CHANGE_WITH_CUSTOMIZATIONS_CALLOUT_DESCRIPTION = i18n.tra
   'xpack.securitySolution.detectionEngine.upgradeRules.ruleTypeChangeWithCustomizationCalloutDescription',
   {
     defaultMessage:
-      'Your customization will be lost at update. Please take note of your customization or clone this rule before updating.',
+      'Updating the rule will erase your changes. To save them, first duplicate the rule, then update it.',
   }
 );
 
 export const LAST_UPDATE = i18n.translate(
   'xpack.securitySolution.detectionEngine.upgradeFlyout.header.lastUpdate',
   {
-    defaultMessage: 'Last update',
+    defaultMessage: 'Last updated',
   }
 );
 
@@ -168,11 +175,3 @@ export const RULE_NEW_VERSION_DETECTED_WARNING_DESCRIPTION = (ruleName: string) 
       values: { ruleName },
     }
   );
-
-export const CUSTOMIZATION_DISABLED_CALLOUT_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.upgradeRules.customizationDisabledCalloutDescription',
-  {
-    defaultMessage:
-      'Prebuilt rule customization is disabled. Only updates to Elastic version are available.',
-  }
-);

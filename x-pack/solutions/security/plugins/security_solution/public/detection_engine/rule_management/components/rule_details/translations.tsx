@@ -33,7 +33,7 @@ export const INVESTIGATION_GUIDE_TAB_LABEL = i18n.translate(
 export const UPDATES_TAB_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.updatesTabLabel',
   {
-    defaultMessage: 'Updates',
+    defaultMessage: 'Elastic update overview',
   }
 );
 
@@ -117,14 +117,14 @@ export const BUILDING_BLOCK_FIELD_LABEL = i18n.translate(
 export const BUILDING_BLOCK_ENABLED_FIELD_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.buildingBlockFieldDescription',
   {
-    defaultMessage: 'All generated alerts will be marked as "building block" alerts',
+    defaultMessage: 'All generated alerts will be marked as building block alerts',
   }
 );
 
 export const BUILDING_BLOCK_DISABLED_FIELD_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.buildingBlockDisabledFieldDescription',
   {
-    defaultMessage: 'Will not mark alerts as "building block" alerts',
+    defaultMessage: 'Will not mark alerts as building block alerts',
   }
 );
 
