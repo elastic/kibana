@@ -794,7 +794,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 type: 'query',
                 query: 'query string = true',
                 language: 'kuery',
-                filters: [{ field: 'query' }],
+                filters: [{ query: 'query' }],
               }),
             ];
             await createHistoricalPrebuiltRuleAssetSavedObjects(es, updatedRuleAssetSavedObjects);
@@ -820,7 +820,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 type: KqlQueryType.inline_query,
                 query: 'query string = true',
                 language: 'kuery',
-                filters: [{ field: 'query' }],
+                filters: [{ query: 'query' }],
               },
               merged_version: {
                 type: KqlQueryType.inline_query,
