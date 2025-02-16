@@ -37,6 +37,7 @@ import {
   streamDefinitionSchema,
   findInheritedLifecycle,
   findInheritingStreams,
+  getAncestorsAndSelf,
 } from '@kbn/streams-schema';
 import { cloneDeep, keyBy, omit, orderBy } from 'lodash';
 import { AssetClient } from './assets/asset_client';
@@ -194,7 +195,7 @@ export class StreamsClient {
   }
 
   private async syncStreamObjects({ definition }: { definition: StreamDefinition }) {
-    const { logger, scopedClusterClient } = this.dependencies;
+    const { logger, scopedClusterClient, isServerless } = this.dependencies;
 
     if (isWiredStreamDefinition(definition)) {
       await syncWiredStreamDefinitionObjects({
@@ -216,6 +217,7 @@ export class StreamsClient {
         definition,
         scopedClusterClient,
         logger,
+        isServerless,
         dataStream: await this.getDataStream(definition.name),
       });
 
@@ -379,7 +381,7 @@ export class StreamsClient {
   }
 
   private async assertNoHierarchicalConflicts(definitionName: string) {
-    const streamNames = [...getAncestors(definitionName), definitionName];
+    const streamNames = getAncestorsAndSelf(definitionName);
     const hasConflict = await Promise.all(
       streamNames.map((streamName) => this.isStreamNameTaken(streamName))
     );

@@ -7,16 +7,24 @@
 
 import {
   ClusterPutComponentTemplateRequest,
+  IndicesIndexTemplate,
   MappingDateProperty,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
-import { WiredStreamDefinition, isDslLifecycle, isIlmLifecycle, isRoot } from '@kbn/streams-schema';
+import {
+  WiredStreamDefinition,
+  UnwiredStreamDefinition,
+  isDslLifecycle,
+  isIlmLifecycle,
+  isRoot,
+  IngestStreamDefinition,
+  isWiredStreamDefinition,
+} from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings } from './logs_layer';
-import { getComponentTemplateName } from './name';
+import { getBaseLayerComponentName, getStreamLayerComponentName } from './name';
 
-export function generateLayer(
-  name: string,
+export function generateWiredLayer(
   definition: WiredStreamDefinition,
   isServerless: boolean
 ): ClusterPutComponentTemplateRequest {
@@ -36,7 +44,7 @@ export function generateLayer(
   });
 
   return {
-    name: getComponentTemplateName(name),
+    name: getStreamLayerComponentName(definition.name),
     template: {
       lifecycle: getTemplateLifecycle(definition, isServerless),
       settings: getTemplateSettings(definition, isServerless),
@@ -49,12 +57,54 @@ export function generateLayer(
     version: ASSET_VERSION,
     _meta: {
       managed: true,
-      description: `Default settings for the ${name} stream`,
+      description: `Default settings for the ${definition.name} stream`,
     },
   };
 }
 
-function getTemplateLifecycle(definition: WiredStreamDefinition, isServerless: boolean) {
+export function generateUnwiredBaseLayer(
+  definition: UnwiredStreamDefinition,
+  existingTemplate: IndicesIndexTemplate
+): ClusterPutComponentTemplateRequest {
+  return {
+    name: getBaseLayerComponentName(definition.name),
+    template: {
+      lifecycle: existingTemplate.template?.lifecycle,
+      settings: existingTemplate.template?.settings,
+      mappings: existingTemplate.template?.mappings,
+    },
+    version: ASSET_VERSION,
+    _meta: {
+      managed: true,
+      description: `Base settings for the ${definition.name} stream`,
+    },
+  };
+}
+
+export function generateUnwiredLayer(
+  definition: UnwiredStreamDefinition,
+  isServerless: boolean
+): ClusterPutComponentTemplateRequest {
+  return {
+    name: getStreamLayerComponentName(definition.name),
+    template: {
+      lifecycle: getTemplateLifecycle(definition, isServerless),
+      settings: getTemplateSettings(definition, isServerless),
+      mappings: {
+        subobjects: false,
+        dynamic: false,
+        properties: {},
+      },
+    },
+    version: ASSET_VERSION,
+    _meta: {
+      managed: true,
+      description: `Default settings for the ${definition.name} stream`,
+    },
+  };
+}
+
+function getTemplateLifecycle(definition: IngestStreamDefinition, isServerless: boolean) {
   const lifecycle = definition.ingest.lifecycle;
   if (isServerless) {
     // dlm cannot be disabled in serverless
@@ -77,8 +127,9 @@ function getTemplateLifecycle(definition: WiredStreamDefinition, isServerless: b
   return undefined;
 }
 
-function getTemplateSettings(definition: WiredStreamDefinition, isServerless: boolean) {
-  const baseSettings = isRoot(definition.name) ? logsSettings : {};
+function getTemplateSettings(definition: IngestStreamDefinition, isServerless: boolean) {
+  const baseSettings =
+    isWiredStreamDefinition(definition) && isRoot(definition.name) ? logsSettings : {};
   const lifecycle = definition.ingest.lifecycle;
 
   if (isServerless) {

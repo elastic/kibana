@@ -6,13 +6,18 @@
  */
 
 import { getAncestorsAndSelf } from '@kbn/streams-schema';
+import { IndicesIndexTemplate } from '@elastic/elasticsearch/lib/api/types';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { getProcessingPipelineName } from '../ingest_pipelines/name';
 import { getIndexTemplateName } from './name';
+import {
+  getBaseLayerComponentName,
+  getStreamLayerComponentName,
+} from '../component_templates/name';
 
 export function generateIndexTemplate(name: string, isServerless: boolean) {
   const composedOf = getAncestorsAndSelf(name).reduce((acc, ancestorName) => {
-    return [...acc, `${ancestorName}@stream.layer`];
+    return [...acc, getStreamLayerComponentName(ancestorName)];
   }, [] as string[]);
 
   return {
@@ -43,6 +48,37 @@ export function generateIndexTemplate(name: string, isServerless: boolean) {
           },
         },
       },
+    },
+    allow_auto_create: true,
+    // ignore missing component templates to be more robust against out-of-order syncs
+    ignore_missing_component_templates: composedOf,
+  };
+}
+
+export function generateUnwiredIndexTemplate(
+  name: string,
+  existingTemplate: IndicesIndexTemplate,
+  isServerless: boolean
+) {
+  const composedOf = [
+    ...existingTemplate.composed_of,
+    getBaseLayerComponentName(name),
+    getStreamLayerComponentName(name),
+  ];
+
+  return {
+    name: getIndexTemplateName(name),
+    index_patterns: [name],
+    composed_of: composedOf,
+    priority: (existingTemplate.priority ?? 0) + 100,
+    version: ASSET_VERSION,
+    _meta: {
+      managed: true,
+      description: `The index template for ${name} stream`,
+    },
+    data_stream: {
+      hidden: false,
+      failure_store: isServerless ? undefined : true, // TODO: Enable failure store for serverless once it is rolled out
     },
     allow_auto_create: true,
     // ignore missing component templates to be more robust against out-of-order syncs

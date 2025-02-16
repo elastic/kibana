@@ -7,9 +7,11 @@
 
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import {
+  ElasticsearchAsset,
   StreamDefinition,
   UnwiredStreamDefinition,
   WiredStreamDefinition,
+  isInheritLifecycle,
 } from '@kbn/streams-schema';
 import { isResponseError } from '@kbn/es-errors';
 import {
@@ -18,7 +20,11 @@ import {
   IngestProcessorContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { set } from '@kbn/safer-lodash-set';
-import { generateLayer } from '../component_templates/generate_layer';
+import {
+  generateUnwiredBaseLayer,
+  generateUnwiredLayer,
+  generateWiredLayer,
+} from '../component_templates/generate_layer';
 import { upsertComponent } from '../component_templates/manage_component_templates';
 import { upsertIngestPipeline } from '../ingest_pipelines/manage_ingest_pipelines';
 import {
@@ -27,13 +33,17 @@ import {
 } from '../ingest_pipelines/generate_ingest_pipeline';
 import { generateReroutePipeline } from '../ingest_pipelines/generate_reroute_pipeline';
 import { upsertTemplate } from '../index_templates/manage_index_templates';
-import { generateIndexTemplate } from '../index_templates/generate_index_template';
+import {
+  generateIndexTemplate,
+  generateUnwiredIndexTemplate,
+} from '../index_templates/generate_index_template';
 import {
   rolloverDataStreamIfNecessary,
   upsertDataStream,
 } from '../data_streams/manage_data_streams';
 import { getUnmanagedElasticsearchAssets } from '../stream_crud';
 import { getProcessingPipelineName } from '../ingest_pipelines/name';
+import { getIndexTemplateName } from '../index_templates/name';
 
 interface SyncStreamParamsBase {
   scopedClusterClient: IScopedClusterClient;
@@ -49,7 +59,7 @@ export async function syncWiredStreamDefinitionObjects({
   definition: WiredStreamDefinition;
   isServerless: boolean;
 }) {
-  const componentTemplate = generateLayer(definition.name, definition, isServerless);
+  const componentTemplate = generateWiredLayer(definition, isServerless);
   await upsertComponent({
     esClient: scopedClusterClient.asCurrentUser,
     logger,
@@ -89,12 +99,6 @@ export async function syncWiredStreamDefinitionObjects({
     logger,
     mappings: componentTemplate.template.mappings?.properties,
   });
-}
-
-interface ExecutionPlanStep {
-  method: string;
-  path: string;
-  body?: Record<string, unknown>;
 }
 
 async function findStreamManagedPipelineReference(
@@ -159,8 +163,7 @@ async function tryGettingPipeline({
 async function ensureStreamManagedPipelineReference(
   scopedClusterClient: IScopedClusterClient,
   pipelineName: string,
-  definition: StreamDefinition,
-  executionPlan: ExecutionPlanStep[]
+  definition: StreamDefinition
 ) {
   const streamManagedPipelineName = getProcessingPipelineName(definition.name);
   const { targetPipelineName, targetPipeline, referencesStreamManagedPipeline } =
@@ -175,15 +178,14 @@ async function ensureStreamManagedPipelineReference(
           "Call the stream's managed pipeline - do not change this manually but instead use the streams UI or API",
       },
     };
-    executionPlan.push({
-      method: 'PUT',
-      path: `/_ingest/pipeline/${targetPipelineName}`,
-      body: set(
-        { ...targetPipeline },
+
+    await scopedClusterClient.asCurrentUser.ingest.putPipeline(
+      set(
+        { ...targetPipeline, id: targetPipelineName },
         'processors',
         (targetPipeline.processors || []).concat(callStreamManagedPipelineProcessor)
-      ),
-    });
+      )
+    );
   }
 }
 
@@ -191,9 +193,12 @@ export async function syncUnwiredStreamDefinitionObjects({
   definition,
   dataStream,
   scopedClusterClient,
+  logger,
+  isServerless,
 }: SyncStreamParamsBase & {
   dataStream: IndicesDataStream;
   definition: UnwiredStreamDefinition;
+  isServerless: boolean;
 }) {
   if (definition.ingest.routing.length) {
     throw new Error('Unmanaged streams cannot have managed children, coming soon');
@@ -202,7 +207,6 @@ export async function syncUnwiredStreamDefinitionObjects({
     dataStream,
     scopedClusterClient,
   });
-  const executionPlan: ExecutionPlanStep[] = [];
   const streamManagedPipelineName = getProcessingPipelineName(definition.name);
   const pipelineName = unmanagedAssets.find((asset) => asset.type === 'ingest_pipeline')?.id;
   if (!pipelineName) {
@@ -211,19 +215,13 @@ export async function syncUnwiredStreamDefinitionObjects({
   if (pipelineName === streamManagedPipelineName) {
     throw new Error('Unmanaged stream cannot have the @stream pipeline as the default pipeline');
   }
-  await ensureStreamManagedPipelineReference(
-    scopedClusterClient,
-    pipelineName,
-    definition,
-    executionPlan
-  );
+  await ensureStreamManagedPipelineReference(scopedClusterClient, pipelineName, definition);
 
   if (definition.ingest.processing.length) {
     // if the stream has processing, we need to create or update the stream managed pipeline
-    executionPlan.push({
-      method: 'PUT',
-      path: `/_ingest/pipeline/${streamManagedPipelineName}`,
-      body: generateClassicIngestPipelineBody(definition),
+    await scopedClusterClient.asCurrentUser.ingest.putPipeline({
+      id: streamManagedPipelineName,
+      ...generateClassicIngestPipelineBody(definition),
     });
   } else {
     const pipelineExists = Boolean(
@@ -231,25 +229,75 @@ export async function syncUnwiredStreamDefinitionObjects({
     );
     // no processing, just delete the pipeline if it exists. The reference to the pipeline won't break anything
     if (pipelineExists) {
-      executionPlan.push({
-        method: 'DELETE',
-        path: `/_ingest/pipeline/${streamManagedPipelineName}`,
+      await scopedClusterClient.asCurrentUser.ingest.deletePipeline({
+        id: streamManagedPipelineName,
       });
     }
   }
 
-  await executePlan(executionPlan, scopedClusterClient);
-}
-
-async function executePlan(
-  executionPlan: ExecutionPlanStep[],
-  scopedClusterClient: IScopedClusterClient
-) {
-  for (const step of executionPlan) {
-    await scopedClusterClient.asCurrentUser.transport.request({
-      method: step.method,
-      path: step.path,
-      body: step.body,
+  if (requiresTemplateForking(definition)) {
+    await ensureForkedIndexTemplate({
+      unmanagedAssets,
+      definition,
+      scopedClusterClient,
+      logger,
+      isServerless,
     });
   }
+}
+
+async function ensureForkedIndexTemplate({
+  definition,
+  unmanagedAssets,
+  scopedClusterClient,
+  logger,
+  isServerless,
+}: {
+  definition: UnwiredStreamDefinition;
+  unmanagedAssets: ElasticsearchAsset[];
+  scopedClusterClient: IScopedClusterClient;
+  logger: Logger;
+  isServerless: boolean;
+}) {
+  const forkedTemplate = unmanagedAssets.find(
+    ({ type, id }) => type === 'index_template' && id === getIndexTemplateName(definition.name)
+  );
+  if (forkedTemplate) {
+    return;
+  }
+
+  const template = unmanagedAssets.find(({ type }) => type === 'index_template');
+  if (!template) {
+    throw new Error(`Could not find index template for stream [${definition.name}]`);
+  }
+
+  const {
+    index_templates: [{ index_template: indexTemplate }],
+  } = await scopedClusterClient.asCurrentUser.indices.getIndexTemplate({
+    name: template.id,
+  });
+
+  await Promise.all([
+    upsertComponent({
+      logger,
+      esClient: scopedClusterClient.asCurrentUser,
+      component: generateUnwiredBaseLayer(definition, indexTemplate),
+    }),
+    upsertComponent({
+      logger,
+      esClient: scopedClusterClient.asCurrentUser,
+      component: generateUnwiredLayer(definition, isServerless),
+    }),
+
+    upsertTemplate({
+      logger,
+      esClient: scopedClusterClient.asCurrentUser,
+      template: generateUnwiredIndexTemplate(definition.name, indexTemplate, isServerless),
+    }),
+  ]);
+}
+
+function requiresTemplateForking(definition: UnwiredStreamDefinition) {
+  const hasLifecycleChange = !isInheritLifecycle(definition.ingest.lifecycle);
+  return hasLifecycleChange;
 }

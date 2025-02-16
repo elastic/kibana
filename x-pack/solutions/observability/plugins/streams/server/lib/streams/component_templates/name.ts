@@ -5,6 +5,10 @@
  * 2.0.
  */
 
-export function getComponentTemplateName(name: string) {
+export function getStreamLayerComponentName(name: string) {
   return `${name}@stream.layer`;
+}
+
+export function getBaseLayerComponentName(name: string) {
+  return `${name}@base`;
 }

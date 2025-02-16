@@ -14,13 +14,13 @@ import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import { UnwiredIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import { deleteComponent } from './component_templates/manage_component_templates';
-import { getComponentTemplateName } from './component_templates/name';
 import { deleteDataStream } from './data_streams/manage_data_streams';
 import { deleteTemplate } from './index_templates/manage_index_templates';
 import { getIndexTemplateName } from './index_templates/name';
 import { deleteIngestPipeline } from './ingest_pipelines/manage_ingest_pipelines';
 import { getProcessingPipelineName, getReroutePipelineName } from './ingest_pipelines/name';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
+import { getStreamLayerComponentName } from './component_templates/name';
 
 interface BaseParams {
   scopedClusterClient: IScopedClusterClient;
@@ -128,7 +128,7 @@ export async function deleteStreamObjects({
   });
   await deleteComponent({
     esClient: scopedClusterClient.asCurrentUser,
-    name: getComponentTemplateName(name),
+    name: getStreamLayerComponentName(name),
     logger,
   });
   await deleteIngestPipeline({
