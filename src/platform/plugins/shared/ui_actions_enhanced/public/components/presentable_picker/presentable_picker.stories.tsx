@@ -8,12 +8,15 @@
  */
 
 import React from 'react';
-import { storiesOf } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { PresentablePicker } from './presentable_picker';
 
-storiesOf('components/PresentablePicker', module)
-  .add('One item', () => (
+export default {
+  title: 'components/PresentablePicker',
+};
+
+export const OneItem = {
+  render: () => (
     <PresentablePicker
       items={[
         {
@@ -28,8 +31,13 @@ storiesOf('components/PresentablePicker', module)
       context={{}}
       onSelect={action('onSelect')}
     />
-  ))
-  .add('Items are sorted', () => (
+  ),
+
+  name: 'One item',
+};
+
+export const ItemsAreSorted = {
+  render: () => (
     <PresentablePicker
       items={[
         {
@@ -52,8 +60,13 @@ storiesOf('components/PresentablePicker', module)
       context={{}}
       onSelect={action('onSelect')}
     />
-  ))
-  .add('Items are sorted - 2', () => (
+  ),
+
+  name: 'Items are sorted',
+};
+
+export const ItemsAreSorted2 = {
+  render: () => (
     <PresentablePicker
       items={[
         {
@@ -76,8 +89,13 @@ storiesOf('components/PresentablePicker', module)
       context={{}}
       onSelect={action('onSelect')}
     />
-  ))
-  .add('Two items', () => (
+  ),
+
+  name: 'Items are sorted - 2',
+};
+
+export const TwoItems = {
+  render: () => (
     <PresentablePicker
       items={[
         {
@@ -100,8 +118,13 @@ storiesOf('components/PresentablePicker', module)
       context={{}}
       onSelect={action('onSelect')}
     />
-  ))
-  .add('Beta badge', () => (
+  ),
+
+  name: 'Two items',
+};
+
+export const BetaBadge = {
+  render: () => (
     <PresentablePicker
       items={[
         {
@@ -125,8 +148,13 @@ storiesOf('components/PresentablePicker', module)
       context={{}}
       onSelect={action('onSelect')}
     />
-  ))
-  .add('Incompatible license', () => (
+  ),
+
+  name: 'Beta badge',
+};
+
+export const IncompatibleLicense = {
+  render: () => (
     <PresentablePicker
       items={[
         {
@@ -151,4 +179,7 @@ storiesOf('components/PresentablePicker', module)
       context={{}}
       onSelect={action('onSelect')}
     />
-  ));
+  ),
+
+  name: 'Incompatible license',
+};

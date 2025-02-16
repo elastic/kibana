@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { ComponentStory, ComponentStoryObj } from '@storybook/react';
+import { StoryFn, StoryObj } from '@storybook/react';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
-import { KibanaReactStorybookDecorator } from '../utils/storybook_decorator.stories';
+import { KibanaReactStorybookDecorator } from '../../.storybook/decorator';
 import { PromptEditor as Component, PromptEditorProps } from './prompt_editor';
 
 /*
@@ -29,11 +29,11 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: PromptEditorProps) => {
+const Template: StoryFn<typeof Component> = (props: PromptEditorProps) => {
   return <Component {...props} />;
 };
 
-export const PromptEditorDisabled: ComponentStoryObj<typeof Component> = {
+export const PromptEditorDisabled: StoryObj<typeof Component> = {
   args: {
     disabled: true,
     hidden: false,
@@ -48,7 +48,7 @@ export const PromptEditorDisabled: ComponentStoryObj<typeof Component> = {
   render: Template,
 };
 
-export const PromptEditorLoading: ComponentStoryObj<typeof Component> = {
+export const PromptEditorLoading: StoryObj<typeof Component> = {
   args: {
     disabled: false,
     hidden: false,
@@ -63,7 +63,7 @@ export const PromptEditorLoading: ComponentStoryObj<typeof Component> = {
   render: Template,
 };
 
-export const PromptEditorWithInitialContent: ComponentStoryObj<typeof Component> = {
+export const PromptEditorWithInitialContent: StoryObj<typeof Component> = {
   args: {
     disabled: false,
     hidden: false,
@@ -78,7 +78,7 @@ export const PromptEditorWithInitialContent: ComponentStoryObj<typeof Component>
   render: Template,
 };
 
-export const PromptEditorWithInitialFunction: ComponentStoryObj<typeof Component> = {
+export const PromptEditorWithInitialFunction: StoryObj<typeof Component> = {
   args: {
     disabled: false,
     hidden: false,

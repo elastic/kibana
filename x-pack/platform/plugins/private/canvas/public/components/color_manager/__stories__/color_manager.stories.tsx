@@ -6,7 +6,6 @@
  */
 
 import { action } from '@storybook/addon-actions';
-import { storiesOf } from '@storybook/react';
 import React from 'react';
 import { ColorManager } from '../color_manager';
 
@@ -43,8 +42,10 @@ class Interactive extends React.Component<{}, { hasButtons: boolean; value: stri
   }
 }
 
-storiesOf('components/Color/ColorManager', module)
-  .addParameters({
+export default {
+  title: 'components/Color/ColorManager',
+
+  parameters: {
     info: {
       inline: true,
       styles: {
@@ -57,8 +58,11 @@ storiesOf('components/Color/ColorManager', module)
         },
       },
     },
-  })
-  .add('default', () => (
+  },
+};
+
+export const Default = {
+  render: () => (
     <>
       <ColorManager key="1" onChange={action('onChange')} value="blue" />
       <ColorManager key="2" onChange={action('onChange')} value="#abc" />
@@ -68,8 +72,13 @@ storiesOf('components/Color/ColorManager', module)
       <ColorManager key="6" onChange={action('onChange')} value="rgb(50, 100, 150)" />
       <ColorManager key="7" onChange={action('onChange')} value="rgba(50, 100, 150, .5)" />
     </>
-  ))
-  .add('invalid colors', () => (
+  ),
+
+  name: 'default',
+};
+
+export const InvalidColors = {
+  render: () => (
     <>
       <ColorManager key="1" onChange={action('onChange')} value="elastic" />
       <ColorManager key="2" onChange={action('onChange')} value="#xyz" />
@@ -79,8 +88,13 @@ storiesOf('components/Color/ColorManager', module)
       <ColorManager key="6" onChange={action('onChange')} value="rgb(a,b,c)" />
       <ColorManager key="7" onChange={action('onChange')} value="rgba(w,x,y,z)" />
     </>
-  ))
-  .add('with buttons', () => (
+  ),
+
+  name: 'invalid colors',
+};
+
+export const WithButtons = {
+  render: () => (
     <>
       <ColorManager
         hasButtons={true}
@@ -105,8 +119,16 @@ storiesOf('components/Color/ColorManager', module)
         value="#abcdef"
       />
     </>
-  ))
-  .add('interactive', () => <Interactive />, {
+  ),
+
+  name: 'with buttons',
+};
+
+export const _Interactive = {
+  render: () => <Interactive />,
+  name: 'interactive',
+
+  parameters: {
     info: {
       inline: true,
       source: false,
@@ -121,4 +143,5 @@ storiesOf('components/Color/ColorManager', module)
         },
       },
     },
-  });
+  },
+};
