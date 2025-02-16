@@ -6,7 +6,12 @@
  */
 import { type AggregateQuery, type Query, isOfAggregateQueryType } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
-import { getESQLQueryVariables } from '@kbn/esql-utils';
+import { ENABLE_ESQL, getESQLQueryVariables } from '@kbn/esql-utils';
+import type { LensEmbeddableStartServices } from '../types';
+
+export function isESQLModeEnabled({ uiSettings }: Pick<LensEmbeddableStartServices, 'uiSettings'>) {
+  return uiSettings.get(ENABLE_ESQL);
+}
 
 export function getEmbeddableVariables(
   query: Query | AggregateQuery,
