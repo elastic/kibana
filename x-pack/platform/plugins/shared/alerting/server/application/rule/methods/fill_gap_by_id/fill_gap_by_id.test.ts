@@ -305,4 +305,16 @@ describe('fillGapById', () => {
     );
     expect(scheduleBackfill).not.toHaveBeenCalled();
   });
+
+  it('should refresh event log after fill gap', async () => {
+    const params = { ruleId: '1', gapId: 'gap1' };
+    const gap = getMockGap();
+
+    (findGapsById as jest.Mock).mockResolvedValue([gap]);
+    (scheduleBackfill as jest.Mock).mockResolvedValue('success');
+
+    await rulesClient.fillGapById(params);
+
+    expect(eventLogClient.refreshIndex).toHaveBeenCalled();
+  });
 });
