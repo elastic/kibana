@@ -25,6 +25,7 @@ export class PaletteService {
   public setup(theme: CoreTheme) {
     return {
       getPalettes: async (): Promise<PaletteRegistry> => {
+        debugger;
         if (!this.palettes) {
           const { buildPalettes } = await import('./palettes');
           this.palettes = buildPalettes(theme);
