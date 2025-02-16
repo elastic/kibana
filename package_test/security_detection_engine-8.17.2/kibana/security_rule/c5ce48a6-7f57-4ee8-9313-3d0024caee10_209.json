@@ -1,0 +1,104 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the installation of custom Application Compatibility Shim databases. This Windows functionality has been abused by attackers to stealthily gain persistence and arbitrary code execution in legitimate Windows processes.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.registry-*",
+      "winlogbeat-*",
+      "logs-windows.sysmon_operational-*",
+      "logs-m365_defender.event-*",
+      "logs-sentinel_one_cloud_funnel.*",
+      "endgame-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Installation of Custom Shim Databases",
+    "query": "registry where host.os.type == \"windows\" and event.type == \"change\" and\n    registry.path : (\n        \"HKLM\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\AppCompatFlags\\\\Custom\\\\*.sdb\",\n        \"\\\\REGISTRY\\\\MACHINE\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\AppCompatFlags\\\\Custom\\\\*.sdb\",\n        \"MACHINE\\\\SOFTWARE\\\\Microsoft\\\\Windows NT\\\\CurrentVersion\\\\AppCompatFlags\\\\Custom\\\\*.sdb\"\n    ) and\n    not process.executable : \n                       (\"?:\\\\Program Files (x86)\\\\DesktopCentral_Agent\\\\swrepository\\\\1\\\\swuploads\\\\SAP-SLC\\\\SAPSetupSLC02_14-80001954\\\\Setup\\\\NwSapSetup.exe\", \n                        \"?:\\\\$WINDOWS.~BT\\\\Sources\\\\SetupPlatform.exe\", \n                         \"?:\\\\Program Files (x86)\\\\SAP\\\\SAPsetup\\\\setup\\\\NwSapSetup.exe\", \n                         \"?:\\\\Program Files (x86)\\\\SAP\\\\SapSetup\\\\OnRebootSvc\\\\NWSAPSetupOnRebootInstSvc.exe\", \n                         \"?:\\\\Program Files (x86)\\\\Kaspersky Lab\\\\Kaspersky Security for Windows Server\\\\kavfs.exe\")\n",
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^1.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.executable",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "registry.path",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "c5ce48a6-7f57-4ee8-9313-3d0024caee10",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Persistence",
+      "Data Source: Elastic Defend",
+      "Data Source: Sysmon",
+      "Data Source: Microsoft Defender for Endpoint",
+      "Data Source: SentinelOne",
+      "Data Source: Elastic Endgame"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1546",
+            "name": "Event Triggered Execution",
+            "reference": "https://attack.mitre.org/techniques/T1546/",
+            "subtechnique": [
+              {
+                "id": "T1546.011",
+                "name": "Application Shimming",
+                "reference": "https://attack.mitre.org/techniques/T1546/011/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 209
+  },
+  "id": "c5ce48a6-7f57-4ee8-9313-3d0024caee10_209",
+  "type": "security-rule"
+}

@@ -1,0 +1,87 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects attempts to execute a program on the host from the Windows Subsystem for Linux. Adversaries may enable and use WSL for Linux to avoid detection.",
+        "from": "now-9m",
+        "index": [
+            "winlogbeat-*",
+            "logs-endpoint.events.*",
+            "logs-windows.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Execution via Windows Subsystem for Linux",
+        "query": "process where host.os.type == \"windows\" and event.type : \"start\" and\n process.parent.executable : \n    (\"?:\\\\Windows\\\\System32\\\\wsl.exe\", \n     \"?:\\\\Program Files*\\\\WindowsApps\\\\MicrosoftCorporationII.WindowsSubsystemForLinux_*\\\\wsl.exe\", \n     \"?:\\\\Windows\\\\System32\\\\wslhost.exe\", \n     \"?:\\\\Program Files*\\\\WindowsApps\\\\MicrosoftCorporationII.WindowsSubsystemForLinux_*\\\\wslhost.exe\") and \n  not process.executable : \n           (\"?:\\\\Windows\\\\System32\\\\conhost.exe\", \n            \"?:\\\\Windows\\\\System32\\\\lxss\\\\wslhost.exe\", \n            \"?:\\\\Windows\\\\Sys*\\\\wslconfig.exe\", \n            \"?:\\\\Program Files*\\\\WindowsApps\\\\MicrosoftCorporationII.WindowsSubsystemForLinux_*\\\\wsl*.exe\", \n            \"?:\\\\Windows\\\\System32\\\\WerFault.exe\", \n            \"?:\\\\Program Files\\\\*\", \n            \"?:\\\\Program Files (x86)\\\\*\")\n",
+        "references": [
+            "https://learn.microsoft.com/en-us/windows/wsl/wsl-config"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            },
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.executable",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "db7dbad5-08d2-4d25-b9b1-d3a1e4a15efd",
+        "severity": "medium",
+        "tags": [
+            "Elastic",
+            "Host",
+            "Windows",
+            "Threat Detection",
+            "Defense Evasion",
+            "Elastic Endgame"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1202",
+                        "name": "Indirect Command Execution",
+                        "reference": "https://attack.mitre.org/techniques/T1202/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "db7dbad5-08d2-4d25-b9b1-d3a1e4a15efd_2",
+    "type": "security-rule"
+}

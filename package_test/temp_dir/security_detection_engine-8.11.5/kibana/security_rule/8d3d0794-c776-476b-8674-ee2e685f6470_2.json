@@ -1,0 +1,97 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule detects when an interactive shell is spawned inside a running container. This could indicate a potential container breakout attempt or an attacker's attempt to gain unauthorized access to the underlying host.",
+        "false_positives": [
+            "Legitimate users and processes, such as system administration tools, may utilize shell utilities inside a container resulting in false positives."
+        ],
+        "from": "now-6m",
+        "index": [
+            "logs-cloud_defend*"
+        ],
+        "interval": "5m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Suspicious Interactive Shell Spawned From Inside A Container",
+        "query": "process where container.id: \"*\" and\nevent.type== \"start\" and \n\n/*D4C consolidates closely spawned event.actions, this excludes end actions to only capture ongoing processes*/\nevent.action in (\"fork\", \"exec\") and event.action != \"end\"\n and process.entry_leader.same_as_process== false and\n(\n(process.executable: \"*/*sh\" and process.args: (\"-i\", \"-it\")) or\nprocess.args: \"*/*sh\"\n)\n",
+        "related_integrations": [
+            {
+                "package": "cloud_defend",
+                "version": "^1.0.5"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "container.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.entry_leader.same_as_process",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "8d3d0794-c776-476b-8674-ee2e685f6470",
+        "severity": "high",
+        "tags": [
+            "Data Source: Elastic Defend for Containers",
+            "Domain: Container",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Execution"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1059",
+                        "name": "Command and Scripting Interpreter",
+                        "reference": "https://attack.mitre.org/techniques/T1059/",
+                        "subtechnique": [
+                            {
+                                "id": "T1059.004",
+                                "name": "Unix Shell",
+                                "reference": "https://attack.mitre.org/techniques/T1059/004/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "8d3d0794-c776-476b-8674-ee2e685f6470_2",
+    "type": "security-rule"
+}

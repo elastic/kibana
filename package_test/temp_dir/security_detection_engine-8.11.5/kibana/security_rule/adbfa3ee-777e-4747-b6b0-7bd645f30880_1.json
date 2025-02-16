@@ -1,0 +1,108 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies suspicious child processes of communications apps, which can indicate a potential masquerading as the communication app or the exploitation of a vulnerability on the application causing it to execute code.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Suspicious Communication App Child Process",
+        "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n  (\n    /* Slack */\n    (process.parent.name : \"slack.exe\" and not\n      (\n        (\n          process.executable : (\n            \"?:\\\\Program Files\\\\*\",\n            \"?:\\\\Program Files (x86)\\\\*\",\n            \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\",\n            \"?:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Zoom\\\\bin\\\\Zoom.exe\",\n            \"?:\\\\Windows\\\\System32\\\\rundll32.exe\",\n            \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Mozilla Firefox\\\\firefox.exe\",\n            \"?:\\\\Windows\\\\System32\\\\notepad.exe\",\n            \"?:\\\\Windows\\\\System32\\\\WerFault.exe\"\n          ) and process.code_signature.trusted == true  \n        ) or\n        (\n          process.code_signature.subject_name : (\n            \"Slack Technologies, Inc.\",\n            \"Slack Technologies, LLC\"\n          ) and process.code_signature.trusted == true\n        ) or\n        (\n          (process.name : \"powershell.exe\" and process.command_line : \"powershell.exe -c Invoke-WebRequest -Uri https://slackb.com/*\") or\n          (process.name : \"cmd.exe\" and process.command_line : \"C:\\\\WINDOWS\\\\system32\\\\cmd.exe /d /s /c \\\"%windir%\\\\System32\\\\rundll32.exe User32.dll,SetFocus 0\\\"\")\n        )\n      )\n    ) or\n\n    /* WebEx */\n    (process.parent.name : (\"CiscoCollabHost.exe\", \"WebexHost.exe\") and not\n      (\n        (\n          process.executable : (\n            \"?:\\\\Program Files\\\\*\",\n            \"?:\\\\Program Files (x86)\\\\*\",\n            \"?:\\\\Windows\\\\System32\\\\WerFault.exe\"\n          ) and process.code_signature.trusted == true  \n        ) or\n        (\n          process.code_signature.subject_name : (\n            \"Cisco Systems, Inc.\",\n            \"Cisco WebEx LLC\",\n            \"Cisco Systems Inc.\"\n          ) and process.code_signature.trusted == true\n        )\n      )\n    ) or\n\n    /* Teams */\n    (process.parent.name : \"Teams.exe\" and not\n      (\n        (\n          process.executable : (\n            \"?:\\\\Program Files\\\\*\",\n            \"?:\\\\Program Files (x86)\\\\*\",\n            \"?:\\\\Windows\\\\System32\\\\WerFault.exe\"\n          ) and process.code_signature.trusted == true  \n        ) or\n        (\n          process.code_signature.subject_name : (\n            \"Microsoft Corporation\",\n            \"Microsoft 3rd Party Application Component\"\n          ) and process.code_signature.trusted == true\n        ) or\n        (\n          (process.name : \"taskkill.exe\" and process.args : \"Teams.exe\")\n        )\n      )\n    ) or\n\n    /* Discord */\n    (process.parent.name : \"Discord.exe\" and not\n      (\n        (\n          process.executable : (\n            \"?:\\\\Program Files\\\\*\",\n            \"?:\\\\Program Files (x86)\\\\*\",\n            \"?:\\\\Windows\\\\System32\\\\reg.exe\",\n            \"?:\\\\Windows\\\\SysWOW64\\\\reg.exe\",\n            \"?:\\\\Windows\\\\System32\\\\WerFault.exe\"\n          ) and process.code_signature.trusted == true  \n        ) or\n        (\n          process.code_signature.subject_name : (\n            \"Discord Inc.\"\n          ) and process.code_signature.trusted == true\n        ) or\n        (\n          process.name : \"cmd.exe\" and process.command_line : (\n            \"C:\\\\WINDOWS\\\\system32\\\\cmd.exe /d /s /c \\\"chcp\\\"\",\n            \"C:\\\\WINDOWS\\\\system32\\\\cmd.exe /q /d /s /c \\\"C:\\\\Program^ Files\\\\NVIDIA^ Corporation\\\\NVSMI\\\\nvidia-smi.exe\\\"\"\n          )\n        )\n      )\n    ) or\n\n    /* WhatsApp */\n    (process.parent.name : \"Whatsapp.exe\" and not\n      (\n        (\n          process.executable : (\n            \"?:\\\\Program Files\\\\*\",\n            \"?:\\\\Program Files (x86)\\\\*\",\n            \"?:\\\\Windows\\\\System32\\\\WerFault.exe\",\n            \"?:\\\\Windows\\\\System32\\\\reg.exe\",\n            \"?:\\\\Windows\\\\SysWOW64\\\\reg.exe\"\n          ) and process.code_signature.trusted == true  \n        ) or\n        (\n          process.code_signature.subject_name : (\n            \"WhatsApp LLC\",\n            \"WhatsApp, Inc\",\n            \"24803D75-212C-471A-BC57-9EF86AB91435\"\n          ) and process.code_signature.trusted == true\n        ) or\n        (\n          (process.name : \"cmd.exe\" and process.command_line : \"C:\\\\Windows\\\\system32\\\\cmd.exe /d /s /c \\\"C:\\\\Windows\\\\system32\\\\wbem\\\\wmic.exe*\")\n        )\n      )\n    ) or\n\n    /* Zoom */\n    (process.parent.name : \"Zoom.exe\" and not\n      (\n        (\n          process.executable : (\n            \"?:\\\\Program Files\\\\*\",\n            \"?:\\\\Program Files (x86)\\\\*\",\n            \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\",\n            \"?:\\\\Windows\\\\System32\\\\WerFault.exe\"\n          ) and process.code_signature.trusted == true  \n        ) or\n        (\n          process.code_signature.subject_name : (\n            \"Zoom Video Communications, Inc.\"\n          ) and process.code_signature.trusted == true\n        )\n      )\n    ) or\n\n    /* Outlook */\n    (process.parent.name : \"outlook.exe\" and not\n      (\n        (\n          process.executable : (\n            \"?:\\\\Program Files\\\\*\",\n            \"?:\\\\Program Files (x86)\\\\*\",\n            \"?:\\\\Windows\\\\System32\\\\WerFault.exe\",\n            \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Microsoft\\\\Teams\\\\current\\\\Teams.exe\",\n            \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Temp\\\\NewOutlookInstall\\\\NewOutlookInstaller.exe\",\n            \"?:\\\\Users\\\\*\\\\AppData\\\\Local\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe\",\n            \"?:\\\\Users\\\\*\\\\AppData\\\\Roaming\\\\Zoom\\\\bin\\\\Zoom.exe\",\n            \"?:\\\\Windows\\\\System32\\\\IME\\\\SHARED\\\\IMEWDBLD.EXE\",\n            \"?:\\\\Windows\\\\System32\\\\spool\\\\drivers\\\\x64\\\\*\",\n            \"?:\\\\Windows\\\\System32\\\\prevhost.exe\",\n            \"?:\\\\Windows\\\\System32\\\\dwwin.exe\",\n            \"?:\\\\Windows\\\\System32\\\\notepad.exe\",\n            \"?:\\\\Windows\\\\explorer.exe\"\n          ) and process.code_signature.trusted == true  \n        )\n      )\n    ) or\n\n    /* Thunderbird */\n    (process.parent.name : \"thunderbird.exe\" and not\n      (\n        (\n          process.executable : (\n            \"?:\\\\Program Files\\\\*\",\n            \"?:\\\\Program Files (x86)\\\\*\",\n            \"?:\\\\Windows\\\\System32\\\\WerFault.exe\"\n          ) and process.code_signature.trusted == true  \n        ) or\n        (\n          process.code_signature.subject_name : (\n            \"Mozilla Corporation\"\n          ) and process.code_signature.trusted == true\n        )\n      )\n    )\n  )\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.args",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.subject_name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.trusted",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.command_line",
+                "type": "wildcard"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "adbfa3ee-777e-4747-b6b0-7bd645f30880",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Rule Type: BBR",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1036",
+                        "name": "Masquerading",
+                        "reference": "https://attack.mitre.org/techniques/T1036/"
+                    },
+                    {
+                        "id": "T1055",
+                        "name": "Process Injection",
+                        "reference": "https://attack.mitre.org/techniques/T1055/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "adbfa3ee-777e-4747-b6b0-7bd645f30880_1",
+    "type": "security-rule"
+}

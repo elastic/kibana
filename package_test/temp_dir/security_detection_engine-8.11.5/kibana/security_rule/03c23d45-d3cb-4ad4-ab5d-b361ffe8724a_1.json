@@ -1,0 +1,90 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This threshold rule monitors for the rapid execution of unix utilities that are capable of conducting network scans. Adversaries may leverage built-in tools such as ping, netcat or socat to execute ping sweeps across the network while attempting to evade detection or due to the lack of network mapping tools available on the compromised host.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Potential Network Scan Executed From Host",
+        "query": "host.os.type:linux and event.action:exec and event.type:start and \nprocess.name:(ping or nping or hping or hping2 or hping3 or nc or ncat or netcat or socat)\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "03c23d45-d3cb-4ad4-ab5d-b361ffe8724a",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Discovery",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0007",
+                    "name": "Discovery",
+                    "reference": "https://attack.mitre.org/tactics/TA0007/"
+                },
+                "technique": [
+                    {
+                        "id": "T1046",
+                        "name": "Network Service Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1046/"
+                    }
+                ]
+            }
+        ],
+        "threshold": {
+            "cardinality": [
+                {
+                    "field": "process.args",
+                    "value": 100
+                }
+            ],
+            "field": [
+                "host.id",
+                "process.parent.entity_id",
+                "process.executable"
+            ],
+            "value": 1
+        },
+        "timestamp_override": "event.ingested",
+        "type": "threshold",
+        "version": 1
+    },
+    "id": "03c23d45-d3cb-4ad4-ab5d-b361ffe8724a_1",
+    "type": "security-rule"
+}

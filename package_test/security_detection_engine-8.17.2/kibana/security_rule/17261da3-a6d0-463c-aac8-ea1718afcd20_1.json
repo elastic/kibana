@@ -1,0 +1,41 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies multiple successive failed attempts to use denied model resources within AWS Bedrock. This could indicated attempts to bypass limitations of other approved models, or to force an impact on the environment by incurring exhorbitant costs.",
+    "false_positives": [
+      "Legitimate misunderstanding by users or overly strict policies"
+    ],
+    "from": "now-60m",
+    "interval": "10m",
+    "language": "esql",
+    "license": "Elastic License v2",
+    "name": "AWS Bedrock Detected Multiple Attempts to use Denied Models by a Single User",
+    "query": "from logs-aws_bedrock.invocation-*\n| where gen_ai.response.error_code == \"AccessDeniedException\"\n| stats total_denials = count(*) by user.id, gen_ai.request.model.id, cloud.account.id\n| where total_denials > 3\n| sort total_denials desc\n",
+    "references": [
+      "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-components.html",
+      "https://atlas.mitre.org/techniques/AML.T0015",
+      "https://atlas.mitre.org/techniques/AML.T0034",
+      "https://www.elastic.co/security-labs/elastic-advances-llm-security"
+    ],
+    "risk_score": 73,
+    "rule_id": "17261da3-a6d0-463c-aac8-ea1718afcd20",
+    "setup": "## Setup\n\nThis rule requires that guardrails are configured in AWS Bedrock. For more information, see the AWS Bedrock documentation:\n\nhttps://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-create.html\n",
+    "severity": "high",
+    "tags": [
+      "Domain: LLM",
+      "Data Source: AWS Bedrock",
+      "Data Source: AWS S3",
+      "Resources: Investigation Guide",
+      "Use Case: Policy Violation",
+      "Mitre Atlas: T0015",
+      "Mitre Atlas: T0034"
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "esql",
+    "version": 1
+  },
+  "id": "17261da3-a6d0-463c-aac8-ea1718afcd20_1",
+  "type": "security-rule"
+}

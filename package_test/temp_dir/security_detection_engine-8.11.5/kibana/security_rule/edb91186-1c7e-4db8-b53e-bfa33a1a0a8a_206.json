@@ -1,0 +1,75 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects attempts to deactivate an Okta application. An adversary may attempt to modify, deactivate, or delete an Okta application in order to weaken an organization's security controls or disrupt their business operations.",
+        "false_positives": [
+            "Consider adding exceptions to this rule to filter false positives if your organization's Okta applications are regularly deactivated and the behavior is expected."
+        ],
+        "index": [
+            "filebeat-*",
+            "logs-okta*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Attempt to Deactivate an Okta Application",
+        "note": "## Triage and analysis\n\n### Investigating Attempt to Deactivate an Okta Application\n\nThis rule detects attempts to deactivate an Okta application. Unauthorized deactivation could lead to disruption of services and pose a significant risk to the organization.\n\n#### Possible investigation steps:\n- Identify the actor associated with the deactivation attempt by examining the `okta.actor.id`, `okta.actor.type`, `okta.actor.alternate_id`, and `okta.actor.display_name` fields.\n- Determine the client used by the actor. Review the `okta.client.ip`, `okta.client.user_agent.raw_user_agent`, `okta.client.zone`, `okta.client.device`, and `okta.client.id` fields.\n- If the client is a device, check the `okta.device.id`, `okta.device.name`, `okta.device.os_platform`, `okta.device.os_version`, and `okta.device.managed` fields.\n- Understand the context of the event from the `okta.debug_context.debug_data` and `okta.authentication_context` fields.\n- Check the `okta.outcome.result` and `okta.outcome.reason` fields to see if the attempt was successful or failed.\n- Review the past activities of the actor involved in this action by checking their previous actions logged in the `okta.target` field.\n- Analyze the `okta.transaction.id` and `okta.transaction.type` fields to understand the context of the transaction.\n- Evaluate the actions that happened just before and after this event in the `okta.event_type` field to help understand the full context of the activity.\n\n### False positive analysis:\n- It might be a false positive if the action was part of a planned activity, performed by an authorized person, or if the `okta.outcome.result` field shows a failure.\n- An unsuccessful attempt might also indicate an authorized user having trouble rather than a malicious activity.\n\n### Response and remediation:\n- If unauthorized deactivation attempts are confirmed, initiate the incident response process.\n- Block the IP address or device used in the attempts if they appear suspicious, using the data from the `okta.client.ip` and `okta.device.id` fields.\n- Reset the user's password and enforce MFA re-enrollment, if applicable.\n- Conduct a review of Okta policies and ensure they are in accordance with security best practices.\n- If the deactivated application was crucial for business operations, coordinate with the relevant team to reactivate it and minimize the impact.",
+        "query": "event.dataset:okta.system and event.action:application.lifecycle.deactivate\n",
+        "references": [
+            "https://help.okta.com/en/prod/Content/Topics/Apps/Apps_Apps.htm",
+            "https://developer.okta.com/docs/reference/api/system-log/",
+            "https://developer.okta.com/docs/reference/api/event-types/",
+            "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy"
+        ],
+        "related_integrations": [
+            {
+                "package": "okta",
+                "version": "^2.0.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "edb91186-1c7e-4db8-b53e-bfa33a1a0a8a",
+        "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "low",
+        "tags": [
+            "Use Case: Identity and Access Audit",
+            "Data Source: Okta",
+            "Tactic: Impact"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0040",
+                    "name": "Impact",
+                    "reference": "https://attack.mitre.org/tactics/TA0040/"
+                },
+                "technique": [
+                    {
+                        "id": "T1489",
+                        "name": "Service Stop",
+                        "reference": "https://attack.mitre.org/techniques/T1489/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 206
+    },
+    "id": "edb91186-1c7e-4db8-b53e-bfa33a1a0a8a_206",
+    "type": "security-rule"
+}

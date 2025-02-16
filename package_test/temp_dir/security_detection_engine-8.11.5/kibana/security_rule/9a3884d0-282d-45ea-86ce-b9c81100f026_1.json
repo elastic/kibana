@@ -1,0 +1,90 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies an unsigned Windows Background Intelligent Transfer Service (BITS) client process. Attackers may abuse BITS functionality to download or upload data using the BITS service.",
+        "from": "now-119m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Unsigned BITS Service Client Process",
+        "query": "library where dll.name : \"Bitsproxy.dll\" and process.executable != null and\nnot process.code_signature.trusted == true\n",
+        "references": [
+            "https://web.archive.org/web/20230531215706/https://blog.menasec.net/2021/05/hunting-for-suspicious-usage-of.html",
+            "https://www.elastic.co/blog/hunting-for-persistence-using-elastic-security-part-2"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "dll.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.trusted",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "9a3884d0-282d-45ea-86ce-b9c81100f026",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Defense Evasion",
+            "Rule Type: BBR",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1197",
+                        "name": "BITS Jobs",
+                        "reference": "https://attack.mitre.org/techniques/T1197/"
+                    },
+                    {
+                        "id": "T1036",
+                        "name": "Masquerading",
+                        "reference": "https://attack.mitre.org/techniques/T1036/",
+                        "subtechnique": [
+                            {
+                                "id": "T1036.001",
+                                "name": "Invalid Code Signature",
+                                "reference": "https://attack.mitre.org/techniques/T1036/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "9a3884d0-282d-45ea-86ce-b9c81100f026_1",
+    "type": "security-rule"
+}

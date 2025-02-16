@@ -1,0 +1,60 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects when an AWS IAM login profile is added to a root user account and is self-assigned. Adversaries, with temporary access to the root account, may add a login profile to the root user account to maintain access even if the original access key is rotated or disabled.",
+    "from": "now-9m",
+    "language": "esql",
+    "license": "Elastic License v2",
+    "name": "AWS IAM Login Profile Added for Root",
+    "note": "## Investigating AWS IAM Login Profile Added for Root\n\nThis rule detects when a login profile is added to the AWS root account. Adding a login profile to the root account, especially if self-assigned, is highly suspicious as it might indicate an adversary trying to establish persistence in the environment.\n\n### Possible Investigation Steps\n\n- **Identify the Source and Context of the Action**:\n    - Examine the `source.address` field to identify the IP address from which the request originated.\n        - Check the geographic location (`source.address`) to determine if the access is from an expected or unexpected region.\n    - Look at the `user_agent.original` field to identify the tool or browser used for this action.\n        - For example, a user agent like `Mozilla/5.0` might indicate interactive access, whereas `aws-cli` or SDKs suggest scripted activity.\n\n- **Confirm Root User and Request Details**:\n    - Validate the root user's identity through `aws.cloudtrail.user_identity.arn` and ensure this activity aligns with legitimate administrative actions.\n    - Review `aws.cloudtrail.user_identity.access_key_id` to identify if the action was performed using temporary or permanent credentials. This access key could be used to pivot into other actions.\n\n- **Analyze the Login Profile Creation**:\n    - Review the `aws.cloudtrail.request_parameters` and `aws.cloudtrail.response_elements` fields for details of the created login profile.\n        - For example, confirm the `userName` of the profile and whether `passwordResetRequired` is set to `true`.\n    - Compare the `@timestamp` of this event with other recent actions by the root account to identify potential privilege escalation or abuse.\n\n- **Correlate with Other Events**:\n    - Investigate for related IAM activities, such as:\n        - `CreateAccessKey` or `AttachUserPolicy` events targeting the root account.\n        - Unusual data access, privilege escalation, or management console logins.\n    - Check for any anomalies involving the same `source.address` or `aws.cloudtrail.user_identity.access_key_id` in the environment.\n\n- **Evaluate Policy and Permissions**:\n    - Verify the current security policies for the root account:\n        - Ensure password policies enforce complexity and rotation requirements.\n        - Check if MFA is enforced on the root account.\n    - Assess the broader IAM configuration for deviations from least privilege principles.\n\n### False Positive Analysis\n\n- **Routine Administrative Tasks**: Adding a login profile might be a legitimate action during certain administrative processes. Verify with the relevant AWS administrators if this event aligns with routine account maintenance or emergency recovery scenarios.\n\n- **Automation**: If the action is part of an approved automation process (e.g., account recovery workflows), consider excluding these activities from alerting using specific user agents, IP addresses, or session attributes.\n\n### Response and Remediation\n\n- **Immediate Access Review**:\n    - Disable the newly created login profile (`aws iam delete-login-profile`) if it is determined to be unauthorized.\n    - Rotate or disable the credentials associated with the root account to prevent further abuse.\n\n- **Enhance Monitoring and Alerts**:\n    - Enable real-time monitoring and alerting for IAM actions involving the root account.\n    - Increase the logging verbosity for root account activities.\n\n- **Review and Update Security Policies**:\n    - Enforce MFA for all administrative actions, including root account usage.\n    - Restrict programmatic access to the root account by disabling access keys unless absolutely necessary.\n\n- **Conduct Post-Incident Analysis**:\n    - Investigate how the credentials for the root account were compromised or misused.\n    - Strengthen the security posture by implementing account-specific guardrails and continuous monitoring.\n\n### Additional Resources\n\n- AWS documentation on [Login Profile Management](https://docs.aws.amazon.com/IAM/latest/APIReference/API_CreateLoginProfile.html).\n",
+    "query": "from logs-aws.cloudtrail* metadata _id, _version, _index\n| where\n    // filter for CloudTrail logs from IAM\n    event.dataset == \"aws.cloudtrail\"\n    and event.provider == \"iam.amazonaws.com\"\n\n    // filter for successful CreateLoginProfile API call\n    and event.action == \"CreateLoginProfile\"\n    and event.outcome == \"success\"\n\n    // filter for Root member account\n    and aws.cloudtrail.user_identity.type == \"Root\"\n\n    // filter for an access key existing which sources from AssumeRoot\n    and aws.cloudtrail.user_identity.access_key_id IS NOT NULL\n\n    // filter on the request parameters not including UserName which assumes self-assignment\n    and NOT TO_LOWER(aws.cloudtrail.request_parameters) LIKE \"*username*\"\n| keep\n    @timestamp,\n    aws.cloudtrail.request_parameters,\n    aws.cloudtrail.response_elements,\n    aws.cloudtrail.user_identity.type,\n    aws.cloudtrail.user_identity.arn,\n    aws.cloudtrail.user_identity.access_key_id,\n    cloud.account.id,\n    event.action,\n    source.address\n",
+    "risk_score": 73,
+    "rule_id": "c04be7e0-b0fc-11ef-a826-f661ea17fbce",
+    "severity": "high",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS IAM",
+      "Use Case: Identity and Access Audit",
+      "Tactic: Persistence",
+      "Resources: Investigation Guide"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1078",
+            "name": "Valid Accounts",
+            "reference": "https://attack.mitre.org/techniques/T1078/",
+            "subtechnique": [
+              {
+                "id": "T1078.004",
+                "name": "Cloud Accounts",
+                "reference": "https://attack.mitre.org/techniques/T1078/004/"
+              }
+            ]
+          },
+          {
+            "id": "T1098",
+            "name": "Account Manipulation",
+            "reference": "https://attack.mitre.org/techniques/T1098/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "esql",
+    "version": 1
+  },
+  "id": "c04be7e0-b0fc-11ef-a826-f661ea17fbce_1",
+  "type": "security-rule"
+}

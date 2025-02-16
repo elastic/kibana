@@ -1,0 +1,194 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies the use of Cmdlets and methods related to discovery activities. Attackers can use these to perform various situational awareness related activities, like enumerating users, shares, sessions, domain trusts, groups, etc.",
+        "from": "now-119m",
+        "index": [
+            "winlogbeat-*",
+            "logs-windows.*"
+        ],
+        "interval": "60m",
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "PowerShell Script with Discovery Capabilities",
+        "note": "",
+        "query": "event.category:process and host.os.type:windows and\n  powershell.file.script_block_text : (\n    (\n      (\"Get-ItemProperty\" or \"Get-Item\") and \"-Path\"\n    ) or\n    (\n      \"Get-ADDefaultDomainPasswordPolicy\" or\n      \"Get-ADDomain\" or \"Get-ComputerInfo\" or\n      \"Get-Disk\" or \"Get-DnsClientCache\" or\n      \"Get-GPOReport\" or \"Get-HotFix\" or\n      \"Get-LocalUser\" or \"Get-NetFirewallProfile\" or\n      \"get-nettcpconnection\" or \"Get-NetAdapter\" or\n      \"Get-PhysicalDisk\" or \"Get-Process\" or\n      \"Get-PSDrive\" or \"Get-Service\" or\n      \"Get-SmbShare\" or \"Get-WinEvent\"\n    ) or\n    (\n      (\"Get-WmiObject\" or \"gwmi\" or \"Get-CimInstance\" or\n       \"gcim\" or \"Management.ManagementObjectSearcher\" or\n       \"System.Management.ManagementClass\" or\n       \"[WmiClass]\" or \"[WMI]\") and\n      (\n        \"AntiVirusProduct\" or \"CIM_BIOSElement\" or \"CIM_ComputerSystem\" or \"CIM_Product\" or \"CIM_DiskDrive\" or\n        \"CIM_LogicalDisk\" or \"CIM_NetworkAdapter\" or \"CIM_StorageVolume\" or \"CIM_OperatingSystem\" or\n        \"CIM_Process\" or \"CIM_Service\" or \"MSFT_DNSClientCache\" or \"Win32_BIOS\" or \"Win32_ComputerSystem\" or\n        \"Win32_ComputerSystemProduct\" or \"Win32_DiskDrive\" or \"win32_environment\" or \"Win32_Group\" or\n        \"Win32_groupuser\" or \"Win32_IP4RouteTable\" or \"Win32_logicaldisk\" or \"Win32_MappedLogicalDisk\" or\n        \"Win32_NetworkAdapterConfiguration\" or \"win32_ntdomain\" or \"Win32_OperatingSystem\" or\n        \"Win32_PnPEntity\" or \"Win32_Process\" or \"Win32_Product\" or \"Win32_quickfixengineering\" or\n        \"win32_service\" or \"Win32_Share\" or \"Win32_UserAccount\"\n      )\n    ) or\n    (\n      (\"ADSI\" and \"WinNT\") or\n      (\"Get-ChildItem\" and \"sysmondrv.sys\") or\n      (\"::GetIPGlobalProperties()\" and \"GetActiveTcpConnections()\") or\n      (\"ServiceProcess.ServiceController\" and \"::GetServices\") or\n      (\"Diagnostics.Process\" and \"::GetProcesses\") or\n      (\"DirectoryServices.Protocols.GroupPolicy\" and \".GetGPOReport()\") or\n      (\"DirectoryServices.AccountManagement\" and \"PrincipalSearcher\") or\n      (\"NetFwTypeLib.NetFwMgr\" and \"CurrentProfile\") or\n      (\"NetworkInformation.NetworkInterface\" and \"GetAllNetworkInterfaces\") or\n      (\"Automation.PSDriveInfo\") or\n      (\"Microsoft.Win32.RegistryHive\")\n    ) or\n    (\n      \"Get-ItemProperty\" and\n      (\n        \"\\Control\\SecurityProviders\\WDigest\" or\n        \"\\microsoft\\windows\\currentversion\\explorer\\runmru\" or\n        \"\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\Kerberos\\Parameters\" or\n        \"\\Microsoft\\Windows\\CurrentVersion\\Uninstall\" or\n        \"\\Microsoft\\Windows\\WindowsUpdate\" or\n        \"Policies\\Microsoft\\Windows\\Installer\" or\n        \"Software\\Microsoft\\Windows\\CurrentVersion\\Policies\" or\n        (\"\\Services\\SharedAccess\\Parameters\\FirewallPolicy\" and \"EnableFirewall\") or\n        (\"Microsoft\\Windows\\CurrentVersion\\Internet Settings\" and \"proxyEnable\")\n      )\n    ) or\n    (\n      (\"Directoryservices.Activedirectory\" or\n      \"DirectoryServices.AccountManagement\") and \n      (\n        \"Domain Admins\" or \"DomainControllers\" or\n        \"FindAllGlobalCatalogs\" or \"GetAllTrustRelationships\" or\n        \"GetCurrentDomain\" or \"GetCurrentForest\"\n      ) or\n      \"DirectoryServices.DirectorySearcher\" and\n      (\n        \"samAccountType=805306368\" or\n        \"samAccountType=805306369\" or\n        \"objectCategory=group\" or\n        \"objectCategory=groupPolicyContainer\" or\n        \"objectCategory=site\" or\n        \"objectCategory=subnet\" or\n        \"objectClass=trustedDomain\"\n      )\n    ) or\n    (\n      \"Get-Process\" and\n      (\n        \"mcshield\" or \"windefend\" or \"savservice\" or\n        \"TMCCSF\" or \"symantec antivirus\" or\n        \"CSFalcon\" or \"TmPfw\" or \"kvoop\"\n      )\n    )\n  ) and\n  not user.id : (\"S-1-5-18\" or \"S-1-5-19\" or \"S-1-5-20\") and\n  not file.path : (\n        ?\\:\\\\\\\\Program?Files\\\\\\\\WindowsPowerShell\\\\\\\\Modules\\\\\\\\*.psd1 or\n        ?\\:\\\\\\\\Program?Files\\\\\\\\WindowsPowerShell\\\\\\\\Modules\\\\\\\\*.psm1 or\n        ?\\:\\\\\\\\Program?Files\\\\\\\\Microsoft?Azure?AD?Sync\\\\\\\\Extensions\\\\\\\\AADConnector.psm1* or\n        *ServiceNow?MID?Server*agent\\\\\\\\scripts\\\\\\\\PowerShell\\\\\\\\*.psm1 or\n        ?\\:\\\\\\\\*\\\\\\\\IMECache\\\\\\\\HealthScripts\\\\\\\\*\\\\\\\\detect.ps1\n      ) and\n  not (\n    file.path : (\n      ?\\:\\\\\\\\*\\\\\\\\TEMP\\\\\\\\SDIAG* or\n      ?\\:\\\\\\\\TEMP\\\\\\\\SDIAG* or\n      ?\\:\\\\\\\\Temp\\\\\\\\SDIAG* or\n      ?\\:\\\\\\\\temp\\\\\\\\SDIAG* or\n      ?\\:\\\\\\\\Users\\\\\\\\*\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\SDIAG* or\n      ?\\:\\\\\\\\Users\\\\\\\\*\\\\\\\\AppData\\\\\\\\Local\\\\\\\\Temp\\\\\\\\*\\\\\\\\SDIAG*\n    ) and file.name : \"CL_Utility.ps1\"\n  )\n",
+        "related_integrations": [
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "powershell.file.script_block_text",
+                "type": "unknown"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "1e0a3f7c-21e7-4bb1-98c7-2036612fb1be",
+        "setup": "The 'PowerShell Script Block Logging' logging policy must be enabled.\nSteps to implement the logging policy with Advanced Audit Configuration:\n\n```\nComputer Configuration \u003e\nAdministrative Templates \u003e\nWindows PowerShell \u003e\nTurn on PowerShell Script Block Logging (Enable)\n```\n\nSteps to implement the logging policy via registry:\n\n```\nreg add \"hklm\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging\" /v EnableScriptBlockLogging /t REG_DWORD /d 1\n```",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Collection",
+            "Tactic: Discovery",
+            "Data Source: PowerShell Logs",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0007",
+                    "name": "Discovery",
+                    "reference": "https://attack.mitre.org/tactics/TA0007/"
+                },
+                "technique": [
+                    {
+                        "id": "T1087",
+                        "name": "Account Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1087/",
+                        "subtechnique": [
+                            {
+                                "id": "T1087.001",
+                                "name": "Local Account",
+                                "reference": "https://attack.mitre.org/techniques/T1087/001/"
+                            },
+                            {
+                                "id": "T1087.002",
+                                "name": "Domain Account",
+                                "reference": "https://attack.mitre.org/techniques/T1087/002/"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "T1482",
+                        "name": "Domain Trust Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1482/"
+                    },
+                    {
+                        "id": "T1082",
+                        "name": "System Information Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1082/"
+                    },
+                    {
+                        "id": "T1083",
+                        "name": "File and Directory Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1083/"
+                    },
+                    {
+                        "id": "T1615",
+                        "name": "Group Policy Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1615/"
+                    },
+                    {
+                        "id": "T1135",
+                        "name": "Network Share Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1135/"
+                    },
+                    {
+                        "id": "T1201",
+                        "name": "Password Policy Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1201/"
+                    },
+                    {
+                        "id": "T1057",
+                        "name": "Process Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1057/"
+                    },
+                    {
+                        "id": "T1518",
+                        "name": "Software Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1518/",
+                        "subtechnique": [
+                            {
+                                "id": "T1518.001",
+                                "name": "Security Software Discovery",
+                                "reference": "https://attack.mitre.org/techniques/T1518/001/"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "T1012",
+                        "name": "Query Registry",
+                        "reference": "https://attack.mitre.org/techniques/T1012/"
+                    },
+                    {
+                        "id": "T1082",
+                        "name": "System Information Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1082/"
+                    },
+                    {
+                        "id": "T1049",
+                        "name": "System Network Connections Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1049/"
+                    },
+                    {
+                        "id": "T1007",
+                        "name": "System Service Discovery",
+                        "reference": "https://attack.mitre.org/techniques/T1007/"
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0002",
+                    "name": "Execution",
+                    "reference": "https://attack.mitre.org/tactics/TA0002/"
+                },
+                "technique": [
+                    {
+                        "id": "T1059",
+                        "name": "Command and Scripting Interpreter",
+                        "reference": "https://attack.mitre.org/techniques/T1059/",
+                        "subtechnique": [
+                            {
+                                "id": "T1059.001",
+                                "name": "PowerShell",
+                                "reference": "https://attack.mitre.org/techniques/T1059/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "query",
+        "version": 3
+    },
+    "id": "1e0a3f7c-21e7-4bb1-98c7-2036612fb1be_3",
+    "type": "security-rule"
+}

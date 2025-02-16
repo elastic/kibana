@@ -1,0 +1,88 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the creation of a DNS record that is potentially meant to enable WPAD spoofing. Attackers can disable the Global Query Block List (GQBL) and create a \"wpad\" record to exploit hosts running WPAD with default settings for privilege escalation and lateral movement.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-system.*",
+      "logs-windows.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Potential WPAD Spoofing via DNS Record Creation",
+    "query": "any where host.os.type == \"windows\" and event.action in (\"Directory Service Changes\", \"directory-service-object-modified\") and\n    event.code == \"5137\" and winlog.event_data.ObjectDN : \"DC=wpad,*\"\n",
+    "references": [
+      "https://www.thehacker.recipes/ad/movement/mitm-and-coerced-authentications/wpad-spoofing#through-adidns-spoofing",
+      "https://cube0x0.github.io/Pocing-Beyond-DA/"
+    ],
+    "related_integrations": [
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.code",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "winlog.event_data.ObjectDN",
+        "type": "unknown"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "894326d2-56c0-4342-b553-4abfaf421b5b",
+    "setup": "## Setup\n\nThe 'Audit Directory Service Changes' logging policy must be configured for (Success, Failure).\nSteps to implement the logging policy with Advanced Audit Configuration:\n\n```\nComputer Configuration >\nPolicies >\nWindows Settings >\nSecurity Settings >\nAdvanced Audit Policies Configuration >\nAudit Policies >\nDS Access >\nAudit Directory Service Changes (Success,Failure)\n```\n\nThe above policy does not cover the target object by default (we still need it to be configured to generate events), so we need to set up an AuditRule using https://github.com/OTRF/Set-AuditRule.\n\n```\nSet-AuditRule -AdObjectPath 'AD:\\CN=MicrosoftDNS,DC=DomainDNSZones,DC=Domain,DC=com' -WellKnownSidType WorldSid -Rights CreateChild -InheritanceFlags Descendents -AttributeGUID e0fa1e8c-9b45-11d0-afdd-00c04fd930c9 -AuditFlags Success\n```\n",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Credential Access",
+      "Data Source: Active Directory",
+      "Use Case: Active Directory Monitoring"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1557",
+            "name": "Adversary-in-the-Middle",
+            "reference": "https://attack.mitre.org/techniques/T1557/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 2
+  },
+  "id": "894326d2-56c0-4342-b553-4abfaf421b5b_2",
+  "type": "security-rule"
+}

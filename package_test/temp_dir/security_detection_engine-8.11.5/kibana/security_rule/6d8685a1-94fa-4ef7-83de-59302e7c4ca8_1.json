@@ -1,0 +1,96 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "This rule detects potential privilege escalation attempts through Looney Tunables (CVE-2023-4911). Looney Tunables is a buffer overflow vulnerability in GNU C Library's dynamic loader's processing of the GLIBC_TUNABLES environment variable.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Privilege Escalation via CVE-2023-4911",
+        "note": "## Setup\nElastic Defend integration does not collect environment variable logging by default.\nIn order to capture this behavior, this rule requires a specific configuration option set within the advanced settings\nof the Elastic Defend integration.\nTo set up environment variable capture for an Elastic Agent policy:\n- Go to Security \u2192 Manage \u2192 Policies.\n- Select an Elastic Agent policy.\n- Click Show advanced settings.\n- Scroll down or search for linux.advanced.capture_env_vars.\n- Enter the names of env vars you want to capture, separated by commas.\n- For this rule the linux.advanced.capture_env_vars variable should be set to \"GLIBC_TUNABLES\".\n- Click Save.\nAfter saving the integration change, the Elastic Agents running this policy will be updated and\nthe rule will function properly.\nFor more information on capturing environment variables refer - https://www.elastic.co/guide/en/security/current/environment-variable-capture.html",
+        "query": "sequence by host.id, process.parent.entity_id, process.executable with maxspan=5s\n [process where host.os.type == \"linux\" and event.action == \"exec\" and event.type == \"start\" and \n  process.env_vars : \"*GLIBC_TUNABLES=glibc.*=glibc.*=*\"] with runs=5\n",
+        "references": [
+            "https://blog.qualys.com/vulnerabilities-threat-research/2023/10/03/cve-2023-4911-looney-tunables-local-privilege-escalation-in-the-glibcs-ld-so"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.env_vars",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.parent.entity_id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "6d8685a1-94fa-4ef7-83de-59302e7c4ca8",
+        "setup": "Elastic Defend integration does not collect environment variable logging by default.\nIn order to capture this behavior, this rule requires a specific configuration option set within the advanced settings\nof the Elastic Defend integration.\nTo set up environment variable capture for an Elastic Agent policy:\nGo to Security \u2192 Manage \u2192 Policies.Select an Elastic Agent policy.Click Show advanced settings.Scroll down or search for linux.advanced.capture_env_vars.Enter the names of env vars you want to capture, separated by commas.For this rule the linux.advanced.capture_env_vars variable should be set to \"GLIBC_TUNABLES\".Click Save.\nAfter saving the integration change, the Elastic Agents running this policy will be updated and\nthe rule will function properly.\nFor more information on capturing environment variables refer - https://www.elastic.co/guide/en/security/current/environment-variable-capture.html",
+        "severity": "high",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Privilege Escalation",
+            "Use Case: Vulnerability",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0004",
+                    "name": "Privilege Escalation",
+                    "reference": "https://attack.mitre.org/tactics/TA0004/"
+                },
+                "technique": [
+                    {
+                        "id": "T1068",
+                        "name": "Exploitation for Privilege Escalation",
+                        "reference": "https://attack.mitre.org/techniques/T1068/"
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 1
+    },
+    "id": "6d8685a1-94fa-4ef7-83de-59302e7c4ca8_1",
+    "type": "security-rule"
+}

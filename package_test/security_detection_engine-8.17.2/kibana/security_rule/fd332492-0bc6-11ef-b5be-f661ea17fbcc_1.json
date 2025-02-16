@@ -1,0 +1,104 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects the first occurrence of a user identity accessing AWS Systems Manager (SSM) SecureString parameters using the GetParameter or GetParameters API actions with credentials in the request parameters. This could indicate that the user is accessing sensitive information. This rule detects when a user accesses a SecureString parameter with the `withDecryption` parameter set to true. This is a [NewTerms](https://www.elastic.co/guide/en/security/current/rules-ui-create.html#create-new-terms-rule) rule that detects the first occurrence of a specific AWS ARN accessing SecureString parameters with decryption within the last 10 days.",
+    "false_positives": [
+      "Users may legitimately access AWS Systems Manager (SSM) parameters using the GetParameter, GetParameters, or DescribeParameters API actions with credentials in the request parameters. Ensure that the user has a legitimate reason to access the parameters and that the credentials are secured."
+    ],
+    "from": "now-9m",
+    "history_window_start": "now-10d",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "AWS Systems Manager SecureString Parameter Request with Decryption Flag",
+    "new_terms_fields": [
+      "aws.cloudtrail.user_identity.arn"
+    ],
+    "note": "\n## Triage and Analysis\n\n### Investigating AWS Systems Manager SecureString Parameter Request with Decryption Flag\n\nThis rule detects when an AWS resource accesses SecureString parameters within AWS Systems Manager (SSM) with the decryption flag set to true. SecureStrings are encrypted using a KMS key, and accessing these with decryption can indicate attempts to access sensitive data.\n\nAdversaries may target SecureStrings to retrieve sensitive information such as encryption keys, passwords, and other credentials that are stored securely. Accessing these parameters with decryption enabled is particularly concerning because it implies the adversary is attempting to bypass the encryption to obtain plain text values that can be immediately used or exfiltrated. This behavior might be part of a larger attack strategy aimed at escalating privileges or moving laterally within an environment to access protected data or critical infrastructure.\n\n#### Possible Investigation Steps\n\n- **Review the Access Event**: Identify the specific API call (`GetParameter` or `GetParameters`) that triggered the rule. Examine the `request_parameters` for `withDecryption` set to true and the name of the accessed parameter.\n- **Verify User Identity and Access Context**: Check the `user_identity` details to understand who accessed the parameter and their role within the organization. This includes checking the ARN and access key ID to determine if the access was authorized.\n- **Contextualize with User Behavior**: Assess whether the access pattern fits the user’s normal behavior or job responsibilities. Investigate any out-of-pattern activities around the time of the event.\n- **Analyze Geographic and IP Context**: Using the `source.ip` and `source.geo` information, verify if the request came from a trusted location or if there are any anomalies that suggest a compromised account.\n- **Inspect Related CloudTrail Events**: Look for other related events in CloudTrail to see if there was unusual activity before or after this event, such as unusual login attempts, changes to permissions, or other API calls that could indicate broader unauthorized actions.\n\n### False Positive Analysis\n\n- **Legitimate Administrative Use**: Verify if the decryption of SecureString parameters is a common practice for the user’s role, particularly if used in automation scripts or deployment processes like those involving Terraform or similar tools.\n\n### Response and Remediation\n\n- **Immediate Verification**: Contact the user or team responsible for the API call to verify their intent and authorization.\n- **Review and Revise Permissions**: If the access was unauthorized, review the permissions assigned to the user or role to ensure they align with the principle of least privilege.\n- **Audit Parameter Access Policies**: Ensure that policies governing access to SecureString parameters are strict and audit logs are enabled to track access with decryption.\n- **Incident Response**: If suspicious activity is confirmed, follow through with your organization's incident response plan to mitigate any potential security issues.\n- **Enhanced Monitoring and Alerting**: Strengthen monitoring rules to detect unusual accesses to SecureString parameters, especially those that involve decryption.\n\n### Additional Information\n\nThis rule focuses solely on SecureStrings in AWS Systems Manager (SSM) parameters. SecureStrings are encrypted using an AWS Key Management Service (KMS) key. When a user accesses a SecureString parameter, they can specify whether the parameter should be decrypted. If the user specifies that the parameter should be decrypted, the decrypted value is returned in the response.\n",
+    "query": "event.dataset: aws.cloudtrail\n    and event.provider: \"ssm.amazonaws.com\"\n    and event.action: (GetParameters or GetParameter)\n    and event.outcome: success\n    and aws.cloudtrail.request_parameters: *withDecryption=true*\n",
+    "references": [
+      "https://docs.aws.amazon.com/vsts/latest/userguide/systemsmanager-getparameter.html",
+      "https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.request_parameters",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "fd332492-0bc6-11ef-b5be-f661ea17fbcc",
+    "setup": "This rule requires that AWS CloudTrail logs are ingested into the Elastic Stack. Ensure that the AWS integration is properly configured to collect AWS CloudTrail logs. This rule also requires event logging for AWS Systems Manager (SSM) API actions which can be enabled in CloudTrail's data events settings.\n",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS Systems Manager",
+      "Tactic: Credential Access",
+      "Resources: Investigation Guide"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1555",
+            "name": "Credentials from Password Stores",
+            "reference": "https://attack.mitre.org/techniques/T1555/",
+            "subtechnique": [
+              {
+                "id": "T1555.006",
+                "name": "Cloud Secrets Management Stores",
+                "reference": "https://attack.mitre.org/techniques/T1555/006/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "new_terms",
+    "version": 1
+  },
+  "id": "fd332492-0bc6-11ef-b5be-f661ea17fbcc_1",
+  "type": "security-rule"
+}

@@ -1,0 +1,118 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the execution of the Windows Command Shell process (cmd.exe) with suspicious argument values. This behavior is often observed during malware installation.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-windows.*",
+      "logs-system.security*",
+      "logs-windows.sysmon_operational-*",
+      "logs-sentinel_one_cloud_funnel.*",
+      "logs-m365_defender.event-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Suspicious Windows Command Shell Arguments",
+    "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n process.name : \"cmd.exe\" and \n (\n\n  process.command_line : (\"*).Run(*\", \"*GetObject*\", \"* curl*regsvr32*\", \"*echo*wscript*\", \"*echo*ZONE.identifier*\",\n  \"*ActiveXObject*\", \"*dir /s /b *echo*\", \"*unescape(*\",  \"*findstr*TVNDRgAAAA*\", \"*findstr*passw*\", \"*start*\\\\\\\\*\\\\DavWWWRoot\\\\*\",\n  \"* explorer*%CD%*\", \"*%cd%\\\\*.js*\", \"*attrib*%CD%*\", \"*/?cMD<*\", \"*/AutoIt3ExecuteScript*..*\", \"*&cls&cls&cls&cls&cls&*\",\n  \"*&#*;&#*;&#*;&#*;*\", \"* &&s^eT*\", \"*& ChrW(*\", \"*&explorer /root*\", \"*start __ & __\\\\*\", \"*findstr /V /L *forfiles*\",\n  \"*=wscri& set *\", \"*http*!COmpUternaME!*\", \"*start *.pdf * start /min cmd.exe /c *\\\\\\\\*\", \"*pip install*System.Net.WebClient*\",\n  \"*Invoke-WebReques*Start-Process*\", \"*-command (Invoke-webrequest*\", \"*copy /b *\\\\\\\\* ping *-n*\", \"*echo*.ToCharArray*\") or\n\n  (process.args : \"echo\" and process.parent.name : (\"wscript.exe\", \"mshta.exe\")) or\n\n  process.args : (\"1>?:\\\\*.vbs\", \"1>?:\\\\*.js\") or\n\n  (process.args : \"explorer.exe\" and process.args : \"type\" and process.args : \">\" and process.args : \"start\") or\n\n  (process.parent.name : \"explorer.exe\" and\n   process.command_line :\n           (\"*&&S^eT *\",\n            \"*&& set *&& set *&& set *&& set *&& set *&& call*\",\n            \"**\\\\u00??\\\\u00??\\\\u00??\\\\u00??\\\\u00??\\\\u00??\\\\u00??\\\\u00??*\")) or\n\n   (process.parent.name : \"explorer.exe\" and process.args : \"copy\" and process.args : \"&&\" and process.args : \"\\\\\\\\*@*\\\\*\")\n  ) and\n\n  /* false positives */\n  not (process.args : \"%TEMP%\\\\Spiceworks\\\\*\" and process.parent.name : \"wmiprvse.exe\") and\n  not process.parent.executable :\n                (\"?:\\\\Perl64\\\\bin\\\\perl.exe\",\n                 \"?:\\\\Program Files\\\\nodejs\\\\node.exe\",\n                 \"?:\\\\Program Files\\\\HP\\\\RS\\\\pgsql\\\\bin\\\\pg_dumpall.exe\",\n                 \"?:\\\\Program Files (x86)\\\\PRTG Network Monitor\\\\64 bit\\\\PRTG Server.exe\",\n                 \"?:\\\\Program Files (x86)\\\\Spiceworks\\\\bin\\\\spiceworks-finder.exe\",\n                 \"?:\\\\Program Files (x86)\\\\Zuercher Suite\\\\production\\\\leds\\\\leds.exe\",\n                 \"?:\\\\Program Files\\\\Tripwire\\\\Agent\\\\Plugins\\\\twexec\\\\twexec.exe\",\n                 \"D:\\\\Agents\\\\?\\\\_work\\\\_tasks\\\\*\\\\SonarScanner.MSBuild.exe\",\n                 \"?:\\\\Program Files\\\\Microsoft VS Code\\\\Code.exe\",\n                 \"?:\\\\programmiweb\\\\NetBeans-*\\\\netbeans\\\\bin\\\\netbeans64.exe\",\n                 \"?:\\\\Program Files (x86)\\\\Public Safety Suite Professional\\\\production\\\\leds\\\\leds.exe\",\n                 \"?:\\\\Program Files (x86)\\\\Tier2Tickets\\\\button_gui.exe\",\n                 \"?:\\\\Program Files\\\\NetBeans-*\\\\netbeans\\\\bin\\\\netbeans*.exe\",\n                 \"?:\\\\Program Files (x86)\\\\Public Safety Suite Professional\\\\production\\\\leds\\\\leds.exe\",\n                 \"?:\\\\Program Files (x86)\\\\Tier2Tickets\\\\button_gui.exe\",\n                 \"?:\\\\Program Files (x86)\\\\Helpdesk Button\\\\button_gui.exe\",\n                 \"?:\\\\VTSPortable\\\\VTS\\\\jre\\\\bin\\\\javaw.exe\",\n                 \"?:\\\\Program Files\\\\Bot Framework Composer\\\\Bot Framework Composer.exe\",\n                 \"?:\\\\Program Files\\\\KMSYS Worldwide\\\\eQuate\\\\*\\\\SessionMgr.exe\",\n                 \"?:\\\\Program Files (x86)\\\\Craneware\\\\Pricing Analyzer\\\\Craneware.Pricing.Shell.exe\",\n                 \"?:\\\\Program Files (x86)\\\\jumpcloud-agent-app\\\\jumpcloud-agent-app.exe\",\n                 \"?:\\\\Program Files\\\\PostgreSQL\\\\*\\\\bin\\\\pg_dumpall.exe\",\n                 \"?:\\\\Program Files (x86)\\\\Vim\\\\vim*\\\\vimrun.exe\") and\n  not (process.args :  \"?:\\\\Program Files\\\\Citrix\\\\Secure Access Client\\\\nsauto.exe\" and process.parent.name : \"userinit.exe\") and\n  not process.args :\n            (\"?:\\\\Program Files (x86)\\\\PCMatic\\\\PCPitstopScheduleService.exe\",\n             \"?:\\\\Program Files (x86)\\\\AllesTechnologyAgent\\\\*\",\n             \"https://auth.axis.com/oauth2/oauth-authorize*\") and\n  not process.command_line :\n               (\"\\\"cmd\\\" /c %NETBEANS_MAVEN_COMMAND_LINE%\",\n                \"?:\\\\Windows\\\\system32\\\\cmd.exe /q /d /s /c \\\"npm.cmd ^\\\"install^\\\" ^\\\"--no-bin-links^\\\" ^\\\"--production^\\\"\\\"\") and\n  not (process.name : \"cmd.exe\" and process.args : \"%TEMP%\\\\Spiceworks\\\\*\" and process.args : \"http*/dataloader/persist_netstat_data\") and \n  not (process.args == \"echo\" and process.args == \"GEQ\" and process.args == \"1073741824\")\n",
+    "related_integrations": [
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^0.1.0"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.command_line",
+        "type": "wildcard"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.executable",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "d9ffc3d6-9de9-4b29-9395-5757d0695ecf",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Execution",
+      "Data Source: System",
+      "Data Source: Sysmon",
+      "Data Source: SentinelOne",
+      "Data Source: Microsoft Defender for Endpoint"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1059",
+            "name": "Command and Scripting Interpreter",
+            "reference": "https://attack.mitre.org/techniques/T1059/",
+            "subtechnique": [
+              {
+                "id": "T1059.003",
+                "name": "Windows Command Shell",
+                "reference": "https://attack.mitre.org/techniques/T1059/003/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 1
+  },
+  "id": "d9ffc3d6-9de9-4b29-9395-5757d0695ecf_1",
+  "type": "security-rule"
+}

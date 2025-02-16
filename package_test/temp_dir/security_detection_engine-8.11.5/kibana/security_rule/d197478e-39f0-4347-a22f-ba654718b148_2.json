@@ -1,0 +1,84 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies the image load of a compression DLL. Adversaries will often compress and encrypt data in preparation for exfiltration.",
+        "from": "now-119m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Compression DLL Loaded by Unusual Process",
+        "query": "library where \n  dll.name : (\"System.IO.Compression.FileSystem.ni.dll\", \"System.IO.Compression.ni.dll\") and\n  not \n  (\n    (\n      process.executable : (\n        \"?:\\\\Program Files\\\\*\",\n        \"?:\\\\Program Files (x86)\\\\*\",\n        \"?:\\\\Windows\\\\Microsoft.NET\\\\Framework*\\\\mscorsvw.exe\",\n        \"?:\\\\Windows\\\\System32\\\\sdiagnhost.exe\",\n        \"?:\\\\Windows\\\\System32\\\\inetsrv\\\\w3wp.exe\",\n        \"?:\\\\ProgramData\\\\Microsoft\\\\Windows Defender Advanced Threat Protection\\\\DataCollection\\\\*\\\\OpenHandleCollector.exe\"\n      ) and process.code_signature.trusted == true\n    ) or\n    (\n      process.name : \"NuGet.exe\" and process.code_signature.trusted == true and user.id : (\"S-1-5-18\", \"S-1-5-20\")\n    )\n  )\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "dll.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.code_signature.trusted",
+                "type": "boolean"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "d197478e-39f0-4347-a22f-ba654718b148",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Collection",
+            "Data Source: Elastic Defend",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0009",
+                    "name": "Collection",
+                    "reference": "https://attack.mitre.org/tactics/TA0009/"
+                },
+                "technique": [
+                    {
+                        "id": "T1560",
+                        "name": "Archive Collected Data",
+                        "reference": "https://attack.mitre.org/techniques/T1560/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "d197478e-39f0-4347-a22f-ba654718b148_2",
+    "type": "security-rule"
+}

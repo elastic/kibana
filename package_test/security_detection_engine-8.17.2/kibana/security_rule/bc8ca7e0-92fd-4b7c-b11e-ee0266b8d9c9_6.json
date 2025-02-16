@@ -1,0 +1,97 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies potentially malicious processes communicating via a port paring typically not associated with SSH. For example, SSH over port 2200 or port 2222 as opposed to the traditional port 22. Adversaries may make changes to the standard port a protocol uses to bypass filtering or muddle analysis/parsing of network data.",
+    "false_positives": [
+      "SSH over ports apart from the traditional port 22 is highly uncommon. This rule alerts the usage of the such uncommon ports by the ssh service. Tuning is needed to have higher confidence. If this activity is expected and noisy in your environment, consider adding exceptions — preferably with a combination whitelisted ports for such legitimate ssh activities."
+    ],
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Potential Non-Standard Port SSH connection",
+    "query": "sequence by process.entity_id with maxspan=1m\n  [process where event.action == \"exec\" and process.name in (\"ssh\", \"sshd\") and not process.parent.name in (\n   \"rsync\", \"pyznap\", \"git\", \"ansible-playbook\", \"scp\", \"pgbackrest\", \"git-lfs\", \"expect\", \"Sourcetree\", \"ssh-copy-id\",\n   \"run\"\n   )\n  ]\n  [network where process.name:\"ssh\" and event.action in (\"connection_attempted\", \"connection_accepted\") and \n   destination.port != 22 and network.transport == \"tcp\" and not (\n     destination.ip == null or destination.ip == \"0.0.0.0\" or cidrmatch(\n       destination.ip, \"10.0.0.0/8\", \"127.0.0.0/8\", \"169.254.0.0/16\", \"172.16.0.0/12\", \"192.0.0.0/24\", \"192.0.0.0/29\",\n       \"192.0.0.8/32\", \"192.0.0.9/32\", \"192.0.0.10/32\", \"192.0.0.170/32\", \"192.0.0.171/32\", \"192.0.2.0/24\",\n       \"192.31.196.0/24\", \"192.52.193.0/24\", \"192.168.0.0/16\", \"192.88.99.0/24\", \"224.0.0.0/4\", \"100.64.0.0/10\",\n       \"192.175.48.0/24\",\"198.18.0.0/15\", \"198.51.100.0/24\", \"203.0.113.0/24\", \"240.0.0.0/4\", \"::1\", \"FE80::/10\",\n       \"FF00::/8\"\n     )\n   )\n  ]\n",
+    "references": [
+      "https://attack.mitre.org/techniques/T1571/"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "destination.ip",
+        "type": "ip"
+      },
+      {
+        "ecs": true,
+        "name": "destination.port",
+        "type": "long"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "network.transport",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.entity_id",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "bc8ca7e0-92fd-4b7c-b11e-ee0266b8d9c9",
+    "severity": "low",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Linux",
+      "Use Case: Threat Detection",
+      "Tactic: Command and Control",
+      "OS: macOS",
+      "Data Source: Elastic Defend"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0011",
+          "name": "Command and Control",
+          "reference": "https://attack.mitre.org/tactics/TA0011/"
+        },
+        "technique": [
+          {
+            "id": "T1571",
+            "name": "Non-Standard Port",
+            "reference": "https://attack.mitre.org/techniques/T1571/"
+          }
+        ]
+      }
+    ],
+    "type": "eql",
+    "version": 6
+  },
+  "id": "bc8ca7e0-92fd-4b7c-b11e-ee0266b8d9c9_6",
+  "type": "security-rule"
+}

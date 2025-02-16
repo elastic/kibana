@@ -1,0 +1,95 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies when a Route53 Resolver Query Log Configuration is deleted. When a Route53 Resolver query log configuration is deleted, Resolver stops logging DNS queries and responses for the specified configuration. Adversaries may delete query log configurations to evade detection or cover their tracks.",
+    "false_positives": [
+      "Legitimate deletion of Route53 Resolver Query Log Configuration by authorized personnel."
+    ],
+    "from": "now-60m",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail*"
+    ],
+    "interval": "10m",
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Route53 Resolver Query Log Configuration Deleted",
+    "note": "\n## Triage and Analysis\n\n### Investigating Route53 Resolver Query Log Configuration Deleted\n\nThis rule detects when a Route53 Resolver Query Log Configuration is deleted. Deleting these configurations stops the logging of DNS queries and responses, which can significantly impede network monitoring and compromise security visibility. Adversaries may delete these configurations to evade detection, remove evidence, or obscure their activities within a network.\n\nAdversaries target Route53 Resolver query log configurations because these logs can contain evidence of malicious domain queries or responses. By deleting these logs, an adversary can prevent the capture of information that could reveal unauthorized network activities, aiding in avoiding detection and thwarting incident response efforts.\n\n#### Possible Investigation Steps\n\n- **Review the Deletion Details**: Examine the CloudTrail logs to identify when and by whom the deletion was initiated.\n    - Check the `event.action` and `user_identity` elements to understand the scope and authorization of the deletion.\n- **Contextualize with User Actions**: Assess whether the deletion aligns with the user’s role and job responsibilities.\n    - Investigate if similar modifications have occurred recently that could suggest a pattern or broader campaign.\n- **Analyze Access Patterns and Permissions**: Verify whether the user had the appropriate permissions to delete log configurations.\n    - Investigate any recent permission changes that might indicate role abuse or credentials compromise.\n- **Correlate with Other Security Incidents**: Look for related security alerts or incidents that could be connected to the log deletion.\n    - This includes unusual network traffic, alerts from other AWS services, or findings from intrusion detection systems.\n- **Interview the Responsible Team**: If the deletion was initiated by an internal team member, confirm their intent and authorization to ensure it was a legitimate action.\n\n### False Positive Analysis\n\n- **Legitimate Administrative Actions**: Confirm that the deletion was part of scheduled IT operations or network management activities, possibly linked to maintenance or infrastructure updates. Validate this action against change management records or through interviews with relevant personnel.\n\n### Response and Remediation\n\n- **Restore Logs if Feasible**: If the deletion was unauthorized, consider restoring the configuration from backups to ensure continuous visibility into DNS queries.\n- **Review and Tighten Permissions**: Ensure that only authorized personnel have the capability to delete critical configurations.\n    - Adjust AWS IAM policies to reinforce security measures.\n- **Enhance Monitoring of Log Management**: Implement or enhance monitoring rules to detect and alert on unauthorized changes to logging configurations, focusing on critical deletions.\n- **Conduct Comprehensive Security Review**: If the deletion is verified as malicious, initiate a thorough security assessment to identify any further unauthorized changes or ongoing malicious activities.\n\n### Additional Information\n\nFor detailed instructions on managing Route53 Resolver and securing its configurations, refer to the [Amazon Route53 Resolver documentation](https://docs.aws.amazon.com/Route53/latest/APIReference/API_route53resolver_DeleteResolverQueryLogConfig.html).\n\n",
+    "query": "event.dataset:aws.cloudtrail and event.provider: route53resolver.amazonaws.com\n    and event.action: DeleteResolverQueryLogConfig and event.outcome: success\n",
+    "references": [
+      "https://docs.aws.amazon.com/Route53/latest/APIReference/API_route53resolver_DeleteResolverQueryLogConfig.html"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "453183fa-f903-11ee-8e88-f661ea17fbce",
+    "severity": "medium",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: Amazon Route53",
+      "Use Case: Log Auditing",
+      "Resources: Investigation Guide",
+      "Tactic: Defense Evasion"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1562",
+            "name": "Impair Defenses",
+            "reference": "https://attack.mitre.org/techniques/T1562/",
+            "subtechnique": [
+              {
+                "id": "T1562.008",
+                "name": "Disable or Modify Cloud Logs",
+                "reference": "https://attack.mitre.org/techniques/T1562/008/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 1
+  },
+  "id": "453183fa-f903-11ee-8e88-f661ea17fbce_1",
+  "type": "security-rule"
+}

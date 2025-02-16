@@ -1,0 +1,137 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the execution of a child process from a Microsoft Common Console file. Adversaries may embed a malicious command in an MSC file in order to trick victims into executing malicious commands.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-endpoint.events.process-*",
+      "logs-windows.sysmon_operational-*",
+      "endgame-*",
+      "logs-m365_defender.event-*",
+      "logs-sentinel_one_cloud_funnel.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Unusual Execution via Microsoft Common Console File",
+    "note": "## Triage and analysis\n\n### Investigating Execution via Microsoft Common Console File\n\n- Investigate the source of the MSC file.\n- Investigate the process execution chain (all spawned child processes and their descendants).\n- Investigate the process and it's descendants network and file events.\n- Identify the user account that performed the action and whether it should perform this kind of action.\n- Contact the account owner and confirm whether they are aware of this activity.\n\n### Response and remediation\n- Initiate the incident response process based on the outcome of the triage.\n- Isolate the involved host to prevent further post-compromise behavior.\n- If the triage identified malware, search the environment for additional compromised hosts.\n  - Implement temporary network rules, procedures, and segmentation to contain the malware.\n  - Stop suspicious processes.\n  - Immediately block the identified indicators of compromise (IoCs).\n  - Inspect the affected systems for additional malware backdoors like reverse shells, reverse proxies, or droppers that attackers could use to reinfect the system.\n- Remove and block malicious artifacts identified during triage.\n- Investigate credential exposure on systems compromised or used by the attacker to ensure all compromised accounts are identified. Reset passwords for these accounts and other potentially compromised credentials, such as email, business systems, and web services.\n- Run a full antimalware scan. This may reveal additional artifacts left in the system, persistence mechanisms, and malware components.\n- Determine the initial vector abused by the attacker and take action to prevent reinfection through the same vector.\n- Using the incident response data, update logging and audit policies to improve the mean time to detect (MTTD) and the mean time to respond (MTTR).\n",
+    "query": "process where host.os.type == \"windows\" and event.type == \"start\" and\n process.parent.executable : \"?:\\\\Windows\\\\System32\\\\mmc.exe\" and endswith~(process.parent.args, \".msc\") and\n not process.parent.args : (\"?:\\\\Windows\\\\System32\\\\*.msc\", \"?:\\\\Windows\\\\SysWOW64\\\\*.msc\", \"?:\\\\Program files\\\\*.msc\", \"?:\\\\Program Files (x86)\\\\*.msc\")\n",
+    "references": [
+      "https://www.genians.co.kr/blog/threat_intelligence/facebook"
+    ],
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "m365_defender",
+        "version": "^2.0.0"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^1.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.executable",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "e760c72b-bb1f-44f0-9f0d-37d51744ee75",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Execution",
+      "Tactic: Initial Access",
+      "Resources: Investigation Guide",
+      "Data Source: Elastic Endgame",
+      "Data Source: Elastic Defend",
+      "Data Source: Sysmon",
+      "Data Source: Microsoft Defender for Endpoint",
+      "Data Source: SentinelOne"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1204",
+            "name": "User Execution",
+            "reference": "https://attack.mitre.org/techniques/T1204/",
+            "subtechnique": [
+              {
+                "id": "T1204.002",
+                "name": "Malicious File",
+                "reference": "https://attack.mitre.org/techniques/T1204/002/"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0001",
+          "name": "Initial Access",
+          "reference": "https://attack.mitre.org/tactics/TA0001/"
+        },
+        "technique": [
+          {
+            "id": "T1566",
+            "name": "Phishing",
+            "reference": "https://attack.mitre.org/techniques/T1566/",
+            "subtechnique": [
+              {
+                "id": "T1566.001",
+                "name": "Spearphishing Attachment",
+                "reference": "https://attack.mitre.org/techniques/T1566/001/"
+              },
+              {
+                "id": "T1566.002",
+                "name": "Spearphishing Link",
+                "reference": "https://attack.mitre.org/techniques/T1566/002/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 101
+  },
+  "id": "e760c72b-bb1f-44f0-9f0d-37d51744ee75_101",
+  "type": "security-rule"
+}

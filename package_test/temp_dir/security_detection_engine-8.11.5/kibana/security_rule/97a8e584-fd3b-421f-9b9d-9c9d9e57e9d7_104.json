@@ -1,0 +1,80 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Detects when an attacker abuses the Multi-Factor authentication mechanism by repeatedly issuing login requests until the user eventually accepts the Okta push notification. An adversary may attempt to bypass the Okta MFA policies configured for an organization to obtain unauthorized access.",
+        "index": [
+            "filebeat-*",
+            "logs-okta*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Potential Abuse of Repeated MFA Push Notifications",
+        "note": "## Triage and analysis\n\n### Investigating Potential Abuse of Repeated MFA Push Notifications\n\nMulti-Factor Authentication (MFA) is an effective method to prevent unauthorized access. However, some adversaries may abuse the system by repeatedly sending MFA push notifications until the user unwittingly approves the access.\n\nThis rule detects when a user denies MFA Okta Verify push notifications twice, followed by a successful authentication event within a 10-minute window. This sequence could indicate an adversary's attempt to bypass the Okta MFA policy.\n\n#### Possible investigation steps:\n\n- Identify the user who received the MFA notifications by reviewing the `user.email` field.\n- Identify the time, source IP, and geographical location of the MFA requests and the subsequent successful login.\n- Review the `event.action` field to understand the nature of the events. It should include two `user.mfa.okta_verify.deny_push` actions and one `user.authentication.sso` action.\n- Ask the user if they remember receiving the MFA notifications and subsequently logging into their account.\n- Check if the MFA requests and the successful login occurred during the user's regular activity hours.\n- Look for any other suspicious activity on the account around the same time.\n- Identify whether the same pattern is repeated for other users in your organization. Multiple users receiving push notifications simultaneously might indicate a larger attack.\n\n### False positive analysis:\n\n- Determine if the MFA push notifications were legitimate. Sometimes, users accidentally trigger MFA requests or deny them unintentionally and later approve them.\n- Check if there are known issues with the MFA system causing false denials.\n\n### Response and remediation:\n\n- If unauthorized access is confirmed, initiate your incident response process.\n- Alert the user and your IT department immediately.\n- If possible, isolate the user's account until the issue is resolved.\n- Investigate the source of the unauthorized access.\n- If the account was accessed by an unauthorized party, determine the actions they took after logging in.\n- Consider enhancing your MFA policy to prevent such incidents in the future.\n- Encourage users to report any unexpected MFA notifications immediately.\n- Review and update your incident response plans and security policies based on the findings from the incident.",
+        "query": "sequence by user.email with maxspan=10m\n  [any where event.dataset == \"okta.system\" and event.module == \"okta\" and event.action == \"user.mfa.okta_verify.deny_push\"]\n  [any where event.dataset == \"okta.system\" and event.module == \"okta\" and event.action == \"user.mfa.okta_verify.deny_push\"]\n  [any where event.dataset == \"okta.system\" and event.module == \"okta\" and event.action == \"user.authentication.sso\"]\n",
+        "references": [
+            "https://www.mandiant.com/resources/russian-targeting-gov-business",
+            "https://www.elastic.co/security-labs/testing-okta-visibility-and-detection-dorothy"
+        ],
+        "related_integrations": [
+            {
+                "package": "okta",
+                "version": "^1.3.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.dataset",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.module",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.email",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 73,
+        "rule_id": "97a8e584-fd3b-421f-9b9d-9c9d9e57e9d7",
+        "setup": "The Okta Fleet integration, Filebeat module, or similarly structured data is required to be compatible with this rule.",
+        "severity": "high",
+        "tags": [
+            "Use Case: Identity and Access Audit",
+            "Data Source: Okta",
+            "Use Case: Identity and Access Audit",
+            "Tactic: Credential Access"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0006",
+                    "name": "Credential Access",
+                    "reference": "https://attack.mitre.org/tactics/TA0006/"
+                },
+                "technique": [
+                    {
+                        "id": "T1110",
+                        "name": "Brute Force",
+                        "reference": "https://attack.mitre.org/techniques/T1110/"
+                    }
+                ]
+            }
+        ],
+        "type": "eql",
+        "version": 104
+    },
+    "id": "97a8e584-fd3b-421f-9b9d-9c9d9e57e9d7_104",
+    "type": "security-rule"
+}

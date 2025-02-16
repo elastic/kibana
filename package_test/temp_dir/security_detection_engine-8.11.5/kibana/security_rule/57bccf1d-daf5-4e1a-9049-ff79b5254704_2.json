@@ -1,0 +1,86 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Identifies files written to the root of the Recycle Bin folder instead of subdirectories. Adversaries may place files in the root of the Recycle Bin in preparation for exfiltration or to evade defenses.",
+        "from": "now-119m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "interval": "60m",
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "File Staged in Root Folder of Recycle Bin",
+        "query": "file where host.os.type == \"windows\" and event.type == \"creation\" and\n  file.path : \"?:\\\\$RECYCLE.BIN\\\\*\" and\n  not file.path : \"?:\\\\$RECYCLE.BIN\\\\*\\\\*\" and\n  not file.name : \"desktop.ini\"\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "57bccf1d-daf5-4e1a-9049-ff79b5254704",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Collection",
+            "Data Source: Elastic Defend",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0009",
+                    "name": "Collection",
+                    "reference": "https://attack.mitre.org/tactics/TA0009/"
+                },
+                "technique": [
+                    {
+                        "id": "T1074",
+                        "name": "Data Staged",
+                        "reference": "https://attack.mitre.org/techniques/T1074/",
+                        "subtechnique": [
+                            {
+                                "id": "T1074.001",
+                                "name": "Local Data Staging",
+                                "reference": "https://attack.mitre.org/techniques/T1074/001/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 2
+    },
+    "id": "57bccf1d-daf5-4e1a-9049-ff79b5254704_2",
+    "type": "security-rule"
+}

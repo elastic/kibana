@@ -1,0 +1,68 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "A member was removed or their invitation to join was removed from a GitHub Organization.",
+    "from": "now-9m",
+    "index": [
+      "logs-github.audit-*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Member Removed From GitHub Organization",
+    "query": "configuration where event.dataset == \"github.audit\" and event.action == \"org.remove_member\"\n",
+    "related_integrations": [
+      {
+        "package": "github",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "095b6a58-8f88-4b59-827c-ab584ad4e759",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Use Case: Threat Detection",
+      "Use Case: UEBA",
+      "Tactic: Impact",
+      "Rule Type: BBR",
+      "Data Source: Github"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0040",
+          "name": "Impact",
+          "reference": "https://attack.mitre.org/tactics/TA0040/"
+        },
+        "technique": [
+          {
+            "id": "T1531",
+            "name": "Account Access Removal",
+            "reference": "https://attack.mitre.org/techniques/T1531/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 204
+  },
+  "id": "095b6a58-8f88-4b59-827c-ab584ad4e759_204",
+  "type": "security-rule"
+}

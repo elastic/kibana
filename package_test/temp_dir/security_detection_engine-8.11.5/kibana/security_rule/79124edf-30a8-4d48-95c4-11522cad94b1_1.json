@@ -1,0 +1,123 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "Detects files being compressed or archived into common formats. This is a common technique used to obfuscate files to evade detection or to staging data for exfiltration.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "max_signals": 1000,
+        "name": "File Compressed or Archived into Common Format",
+        "query": "file where event.type in (\"creation\", \"change\") and\n file.Ext.header_bytes : (\n                          /* compression formats */\n                          \"1F9D*\",             /* tar zip, tar.z (Lempel-Ziv-Welch algorithm) */\n                          \"1FA0*\",             /* tar zip, tar.z (LZH algorithm) */\n                          \"425A68*\",           /* Bzip2 */\n                          \"524E4301*\",         /* Rob Northen Compression */\n                          \"524E4302*\",         /* Rob Northen Compression */\n                          \"4C5A4950*\",         /* LZIP */\n                          \"504B0*\",            /* ZIP */\n                          \"526172211A07*\",     /* RAR compressed */\n                          \"44434D0150413330*\", /* Windows Update Binary Delta Compression file */\n                          \"50413330*\",         /* Windows Update Binary Delta Compression file */\n                          \"377ABCAF271C*\",     /* 7-Zip */\n                          \"1F8B*\",             /* GZIP */\n                          \"FD377A585A00*\",     /* XZ, tar.xz */\n                          \"7801*\",\t           /* zlib: No Compression (no preset dictionary) */\n                          \"785E*\",\t           /* zlib: Best speed (no preset dictionary) */\n                          \"789C*\",\t           /* zlib: Default Compression (no preset dictionary) */\n                          \"78DA*\", \t           /* zlib: Best Compression (no preset dictionary) */\n                          \"7820*\",\t           /* zlib: No Compression (with preset dictionary) */\n                          \"787D*\",\t           /* zlib: Best speed (with preset dictionary) */\n                          \"78BB*\",\t           /* zlib: Default Compression (with preset dictionary) */\n                          \"78F9*\",\t           /* zlib: Best Compression (with preset dictionary) */\n                          \"62767832*\",         /* LZFSE */\n                          \"28B52FFD*\",         /* Zstandard, zst */\n                          \"5253564B44415441*\", /* QuickZip rs compressed archive */\n                          \"2A2A4143452A2A*\",   /* ACE */\n\n                          /* archive formats */\n                          \"2D686C302D*\",       /* lzh */\n                          \"2D686C352D*\",       /* lzh */\n                          \"303730373037*\",     /* cpio */\n                          \"78617221*\",         /* xar */\n                          \"4F4152*\",           /* oar */\n                          \"49536328*\"          /* cab archive */\n )\n",
+        "references": [
+            "https://en.wikipedia.org/wiki/List_of_file_signatures"
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "file.Ext.header_bytes",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "79124edf-30a8-4d48-95c4-11522cad94b1",
+        "severity": "low",
+        "tags": [
+            "Data Source: Elastic Defend",
+            "Domain: Endpoint",
+            "OS: Linux",
+            "OS: macOS",
+            "OS: Windows",
+            "Tactic: Collection",
+            "Rule Type: BBR"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0009",
+                    "name": "Collection",
+                    "reference": "https://attack.mitre.org/tactics/TA0009/"
+                },
+                "technique": [
+                    {
+                        "id": "T1560",
+                        "name": "Archive Collected Data",
+                        "reference": "https://attack.mitre.org/techniques/T1560/",
+                        "subtechnique": [
+                            {
+                                "id": "T1560.001",
+                                "name": "Archive via Utility",
+                                "reference": "https://attack.mitre.org/techniques/T1560/001/"
+                            }
+                        ]
+                    },
+                    {
+                        "id": "T1074",
+                        "name": "Data Staged",
+                        "reference": "https://attack.mitre.org/techniques/T1074/",
+                        "subtechnique": [
+                            {
+                                "id": "T1074.001",
+                                "name": "Local Data Staging",
+                                "reference": "https://attack.mitre.org/techniques/T1074/001/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0011",
+                    "name": "Command and Control",
+                    "reference": "https://attack.mitre.org/tactics/TA0011/"
+                },
+                "technique": [
+                    {
+                        "id": "T1132",
+                        "name": "Data Encoding",
+                        "reference": "https://attack.mitre.org/techniques/T1132/",
+                        "subtechnique": [
+                            {
+                                "id": "T1132.001",
+                                "name": "Standard Encoding",
+                                "reference": "https://attack.mitre.org/techniques/T1132/001/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1027",
+                        "name": "Obfuscated Files or Information",
+                        "reference": "https://attack.mitre.org/techniques/T1027/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 1
+    },
+    "id": "79124edf-30a8-4d48-95c4-11522cad94b1_1",
+    "type": "security-rule"
+}

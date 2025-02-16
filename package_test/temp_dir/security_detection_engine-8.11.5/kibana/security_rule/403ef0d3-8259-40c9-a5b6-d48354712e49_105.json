@@ -1,0 +1,106 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Identifies processes modifying the services registry key directly, instead of through the expected Windows APIs. This could be an indication of an adversary attempting to stealthily persist through abnormal service creation or modification of an existing service.",
+        "from": "now-9m",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "eql",
+        "license": "Elastic License v2",
+        "name": "Unusual Persistence via Services Registry",
+        "query": "registry where host.os.type == \"windows\" and\n  registry.path : (\n      \"HKLM\\\\SYSTEM\\\\ControlSet*\\\\Services\\\\*\\\\ServiceDLL\",\n      \"HKLM\\\\SYSTEM\\\\ControlSet*\\\\Services\\\\*\\\\ImagePath\",\n      \"\\\\REGISTRY\\\\MACHINE\\\\SYSTEM\\\\ControlSet*\\\\Services\\\\*\\\\ServiceDLL\",\n      \"\\\\REGISTRY\\\\MACHINE\\\\SYSTEM\\\\ControlSet*\\\\Services\\\\*\\\\ImagePath\"\n  ) and not registry.data.strings : (\n      \"?:\\\\windows\\\\system32\\\\Drivers\\\\*.sys\",\n      \"\\\\SystemRoot\\\\System32\\\\drivers\\\\*.sys\",\n      \"\\\\??\\\\?:\\\\Windows\\\\system32\\\\Drivers\\\\*.SYS\",\n      \"system32\\\\DRIVERS\\\\USBSTOR\") and\n  not (process.name : \"procexp??.exe\" and registry.data.strings : \"?:\\\\*\\\\procexp*.sys\") and\n  not process.executable : (\n      \"?:\\\\Program Files\\\\*.exe\",\n      \"?:\\\\Program Files (x86)\\\\*.exe\",\n      \"?:\\\\Windows\\\\System32\\\\svchost.exe\",\n      \"?:\\\\Windows\\\\winsxs\\\\*\\\\TiWorker.exe\",\n      \"?:\\\\Windows\\\\System32\\\\drvinst.exe\",\n      \"?:\\\\Windows\\\\System32\\\\services.exe\",\n      \"?:\\\\Windows\\\\System32\\\\msiexec.exe\",\n      \"?:\\\\Windows\\\\System32\\\\regsvr32.exe\")\n",
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.executable",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "registry.data.strings",
+                "type": "wildcard"
+            },
+            {
+                "ecs": true,
+                "name": "registry.path",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "403ef0d3-8259-40c9-a5b6-d48354712e49",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Tactic: Defense Evasion",
+            "Data Source: Elastic Endgame",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1543",
+                        "name": "Create or Modify System Process",
+                        "reference": "https://attack.mitre.org/techniques/T1543/",
+                        "subtechnique": [
+                            {
+                                "id": "T1543.003",
+                                "name": "Windows Service",
+                                "reference": "https://attack.mitre.org/techniques/T1543/003/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0005",
+                    "name": "Defense Evasion",
+                    "reference": "https://attack.mitre.org/tactics/TA0005/"
+                },
+                "technique": [
+                    {
+                        "id": "T1112",
+                        "name": "Modify Registry",
+                        "reference": "https://attack.mitre.org/techniques/T1112/"
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "eql",
+        "version": 105
+    },
+    "id": "403ef0d3-8259-40c9-a5b6-d48354712e49_105",
+    "type": "security-rule"
+}

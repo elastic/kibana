@@ -1,0 +1,65 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "building_block_type": "default",
+        "description": "This rule leverages alert data from various Discovery building block rules to alert on signals with unusual unique host.id and user.id entries.",
+        "from": "now-9m",
+        "history_window_start": "now-14d",
+        "index": [
+            ".alerts-security.*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Unusual Discovery Activity by User",
+        "new_terms_fields": [
+            "host.id",
+            "user.id"
+        ],
+        "query": "host.os.type:windows and event.kind:signal and kibana.alert.rule.rule_id:(\n  \"d68e95ad-1c82-4074-a12a-125fe10ac8ba\" or \"7b8bfc26-81d2-435e-965c-d722ee397ef1\" or\n  \"0635c542-1b96-4335-9b47-126582d2c19a\" or \"6ea55c81-e2ba-42f2-a134-bccf857ba922\" or\n  \"e0881d20-54ac-457f-8733-fe0bc5d44c55\" or \"06568a02-af29-4f20-929c-f3af281e41aa\" or\n  \"c4e9ed3e-55a2-4309-a012-bc3c78dad10a\" or \"51176ed2-2d90-49f2-9f3d-17196428b169\" or\n  \"1d72d014-e2ab-4707-b056-9b96abe7b511\"\n)\n",
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.kind",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "kibana.alert.rule.rule_id",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 21,
+        "rule_id": "cf575427-0839-4c69-a9e6-99fde02606f3",
+        "severity": "low",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Discovery",
+            "Rule Type: Higher-Order Rule"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0007",
+                    "name": "Discovery",
+                    "reference": "https://attack.mitre.org/tactics/TA0007/"
+                },
+                "technique": []
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "new_terms",
+        "version": 1
+    },
+    "id": "cf575427-0839-4c69-a9e6-99fde02606f3_1",
+    "type": "security-rule"
+}

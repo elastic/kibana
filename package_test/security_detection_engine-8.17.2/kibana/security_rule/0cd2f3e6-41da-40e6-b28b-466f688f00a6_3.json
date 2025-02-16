@@ -1,0 +1,41 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies multiple violations of AWS Bedrock guardrails by the same user in the same account over a session. Multiple violations implies that a user may be intentionally attempting to cirvumvent security controls, access sensitive information, or possibly exploit a vulnerability in the system.",
+    "false_positives": [
+      "Legitimate misunderstanding by users or overly strict policies"
+    ],
+    "from": "now-60m",
+    "interval": "10m",
+    "language": "esql",
+    "license": "Elastic License v2",
+    "name": "AWS Bedrock Guardrails Detected Multiple Violations by a Single User Over a Session",
+    "query": "from logs-aws_bedrock.invocation-*\n| where gen_ai.compliance.violation_detected\n| keep user.id, gen_ai.request.model.id, cloud.account.id\n| stats violations = count(*) by user.id, gen_ai.request.model.id, cloud.account.id\n| where violations > 1\n| sort violations desc\n",
+    "references": [
+      "https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-components.html",
+      "https://atlas.mitre.org/techniques/AML.T0051",
+      "https://atlas.mitre.org/techniques/AML.T0054",
+      "https://www.elastic.co/security-labs/elastic-advances-llm-security"
+    ],
+    "risk_score": 47,
+    "rule_id": "0cd2f3e6-41da-40e6-b28b-466f688f00a6",
+    "setup": "## Setup\n\nThis rule requires that guardrails are configured in AWS Bedrock. For more information, see the AWS Bedrock documentation:\n\nhttps://docs.aws.amazon.com/bedrock/latest/userguide/guardrails-create.html\n",
+    "severity": "medium",
+    "tags": [
+      "Domain: LLM",
+      "Data Source: AWS Bedrock",
+      "Data Source: AWS S3",
+      "Resources: Investigation Guide",
+      "Use Case: Policy Violation",
+      "Mitre Atlas: T0051",
+      "Mitre Atlas: T0054"
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "esql",
+    "version": 3
+  },
+  "id": "0cd2f3e6-41da-40e6-b28b-466f688f00a6_3",
+  "type": "security-rule"
+}
