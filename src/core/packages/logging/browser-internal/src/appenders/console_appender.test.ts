@@ -11,45 +11,72 @@ import { LogRecord, LogLevel } from '@kbn/logging';
 import { unsafeConsole } from '@kbn/security-hardening';
 import { ConsoleAppender } from './console_appender';
 
-test('`append()` correctly formats records and pushes them to console.', () => {
-  jest.spyOn(unsafeConsole, 'log').mockImplementation(() => {
-    // noop
+const levels = [
+  LogLevel.Trace,
+  LogLevel.Debug,
+  LogLevel.Info,
+  LogLevel.Warn,
+  LogLevel.Error,
+  LogLevel.Fatal,
+  LogLevel.All,
+];
+
+const levelsToMethods = new Map<LogLevel, keyof typeof unsafeConsole>([
+  [LogLevel.Trace, 'trace'],
+  [LogLevel.Debug, 'debug'],
+  [LogLevel.Info, 'info'],
+  [LogLevel.Warn, 'warn'],
+  [LogLevel.Error, 'error'],
+  [LogLevel.Fatal, 'error'],
+  [LogLevel.All, 'log'],
+]);
+
+describe.each(levels)('`append()` correctly logs %p level.', (level) => {
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  const records: LogRecord[] = [
-    {
-      context: 'context-1',
-      level: LogLevel.All,
-      message: 'message-1',
-      timestamp: new Date(),
-      pid: 5355,
-    },
-    {
-      context: 'context-2',
-      level: LogLevel.Trace,
-      message: 'message-2',
-      timestamp: new Date(),
-      pid: 5355,
-    },
-    {
-      context: 'context-3',
-      error: new Error('Error'),
-      level: LogLevel.Fatal,
-      message: 'message-3',
-      timestamp: new Date(),
-      pid: 5355,
-    },
-  ];
+  test('`append()` correctly formats records and pushes them to console.', () => {
+    const method = levelsToMethods.get(level)!;
+    jest.spyOn(unsafeConsole, method).mockImplementation(() => {
+      // noop
+    });
 
-  const appender = new ConsoleAppender({
-    format(record) {
-      return `mock-${JSON.stringify(record)}`;
-    },
+    const records: LogRecord[] = [
+      {
+        context: 'context-1',
+        level,
+        message: 'message-1',
+        timestamp: new Date(),
+        pid: 5355,
+      },
+      {
+        context: 'context-2',
+        level,
+        message: 'message-2',
+        timestamp: new Date(),
+        pid: 5355,
+      },
+      {
+        context: 'context-3',
+        error: new Error('Error'),
+        level,
+        message: 'message-3',
+        timestamp: new Date(),
+        pid: 5355,
+      },
+    ];
+
+    const appender = new ConsoleAppender({
+      format(record) {
+        return `mock-${JSON.stringify(record)}`;
+      },
+    });
+
+    for (const record of records) {
+      appender.append(record);
+      expect(unsafeConsole[method]).toHaveBeenCalledWith(`mock-${JSON.stringify(record)}`);
+    }
+    expect(unsafeConsole[method]).toHaveBeenCalledTimes(records.length);
   });
-
-  for (const record of records) {
-    appender.append(record);
-    expect(unsafeConsole.log).toHaveBeenCalledWith(`mock-${JSON.stringify(record)}`);
-  }
-  expect(unsafeConsole.log).toHaveBeenCalledTimes(records.length);
 });
