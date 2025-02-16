@@ -19,6 +19,8 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
   EuiTitle,
+  EuiFlexItem,
+  EuiComboBox,
 } from '@elastic/eui';
 import { ISearchSource, Query } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -42,6 +44,7 @@ import { ExpressionRow } from './components/expression_row';
 import { MetricsExplorerFields, GroupBy } from './components/group_by';
 import { RuleConditionChart as PreviewChart } from '../rule_condition_chart/rule_condition_chart';
 import { getSearchConfiguration } from './helpers/get_search_configuration';
+import { dashboardServiceProvider, type DashboardItem } from '../../services/dashboard_service';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -66,10 +69,12 @@ export const defaultExpression: MetricExpression = {
 // eslint-disable-next-line import/no-default-export
 export default function Expressions(props: Props) {
   const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
+
   const {
     data,
     dataViews,
     dataViewEditor,
+    dashboard: dashboardService,
     unifiedSearch: {
       ui: { SearchBar },
     },
@@ -348,6 +353,50 @@ export default function Expressions(props: Props) {
     }
   }, [metadata, setRuleParams]);
 
+  const [dashboardList, setDashboardList] = useState<
+    Array<{
+      value: string;
+      label: string;
+    }>
+  >();
+
+  const [selectedDashboards, setSelectedDashboards] = useState<
+    Array<{ label: string; value: string }> | undefined
+  >(
+    ruleParams.dashboards?.map((dashboard) => ({
+      label: dashboard.title,
+      value: dashboard.id,
+    }))
+  );
+
+  const onChange = (selectedOptions: any[]) => {
+    setSelectedDashboards(selectedOptions);
+    setRuleParams(
+      'dashboards',
+      selectedOptions.map((selectedOption) => ({
+        id: selectedOption.value,
+        title: selectedOption.label,
+      }))
+    );
+  };
+
+  const getDashboardItem = (dashboard: DashboardItem) => ({
+    value: dashboard.id,
+    label: dashboard.attributes.title,
+  });
+
+  const loadDashboards = useCallback(async () => {
+    const dashboards = await dashboardServiceProvider(dashboardService).fetchDashboards();
+    const dashboardOptions = (dashboards ?? []).map((dashboard: DashboardItem) =>
+      getDashboardItem(dashboard)
+    );
+    setDashboardList(dashboardOptions);
+  }, [dashboardService]);
+
+  useEffect(() => {
+    loadDashboards();
+  }, [loadDashboards]);
+
   if (paramsError) {
     return (
       <>
@@ -610,6 +659,25 @@ export default function Expressions(props: Props) {
           }
         }}
       />
+      <EuiFlexItem>
+        <EuiSpacer size="m" />
+        <EuiTitle size="xs">
+          <h6>
+            <FormattedMessage
+              id="xpack.observability.customThreshold.rule.alertFlyout.linkDashboards"
+              defaultMessage="Link dashboard(s)"
+            />
+          </h6>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiComboBox
+          fullWidth
+          options={dashboardList}
+          selectedOptions={selectedDashboards}
+          onChange={onChange}
+        />
+        <EuiSpacer size="m" />
+      </EuiFlexItem>
       <EuiSpacer size="m" />
     </>
   );
