@@ -111,7 +111,6 @@ import {
   setSavedSearch,
   setDataViews,
   setInspector,
-  getTypes,
   setNotifications,
 } from './services';
 import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '../common/constants';
@@ -422,8 +421,9 @@ export class VisualizationsPlugin
         defaultMessage: 'Visualization',
       }),
       getIconForSavedObject: (savedObject) => {
-        const visState = JSON.parse(savedObject.attributes.visState ?? '{}');
-        return getTypes().get(visState.type)?.icon ?? '';
+        // const visState = JSON.parse(savedObject.attributes.visState ?? '{}');
+        // return getTypes().get(visState.type)?.icon ?? '';
+        return '';
       },
     });
 

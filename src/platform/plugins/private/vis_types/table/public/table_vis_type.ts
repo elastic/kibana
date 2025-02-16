@@ -15,7 +15,7 @@ import { TableVisParams, VIS_TYPE_TABLE } from '../common';
 import { TableOptions } from './components/table_vis_options_lazy';
 import { toExpressionAst } from './to_ast';
 
-export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
+export const tableVisType = {
   name: VIS_TYPE_TABLE,
   title: i18n.translate('visTypeTable.tableVisTitle', {
     defaultMessage: 'Data table',
@@ -113,4 +113,4 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
       canNavigateToLens: Boolean(vis?.params ? await convertToLens(vis, timeFilter) : null),
     };
   },
-};
+} as VisTypeDefinition<TableVisParams>;

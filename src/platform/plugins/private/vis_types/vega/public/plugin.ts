@@ -30,7 +30,6 @@ import {
 } from './services';
 
 import { createVegaFn } from './vega_fn';
-import { vegaVisType } from './vega_type';
 import type { IServiceSettings } from './vega_view/vega_map_view/service_settings/service_settings_types';
 
 import type { ConfigSchema } from '../server/config';
@@ -95,7 +94,10 @@ export class VegaPlugin implements Plugin<void, void> {
     expressions.registerFunction(() => createVegaFn(visualizationDependencies));
     expressions.registerRenderer(getVegaVisRenderer(visualizationDependencies));
 
-    visualizations.createBaseVisualization(vegaVisType);
+    visualizations.createBaseVisualization('vega', async () => {
+      const { vegaVisType } = await import('./vega_type');
+      return vegaVisType;
+    });
   }
 
   public start(core: CoreStart, deps: VegaPluginStartDependencies) {

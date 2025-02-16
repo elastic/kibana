@@ -13,8 +13,7 @@ import { getControlsTab, OptionsTabLazy } from './components/editor';
 import { InputControlVisDependencies } from './plugin';
 import { toExpressionAst } from './to_ast';
 import { InputControlVisParams } from './types';
-
-export const INPUT_CONTROL_VIS_TYPE = 'input_control_vis';
+import { INPUT_CONTROL_VIS_TYPE } from './constants';
 
 export function createInputControlVisTypeDefinition(
   deps: InputControlVisDependencies,

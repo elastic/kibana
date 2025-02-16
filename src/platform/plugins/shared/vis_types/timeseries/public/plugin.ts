@@ -22,10 +22,9 @@ import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { VisTypeTimeseriesPublicConfig } from '../server/config';
 
+import { VIS_TYPE } from '../common/constants';
 import { EditorController, TSVB_EDITOR_NAME } from './application/editor_controller';
-
 import { createMetricsFn } from './metrics_fn';
-import { metricsVisDefinition } from './metrics_type';
 import {
   setUISettings,
   setI18n,
@@ -89,10 +88,13 @@ export class MetricsPlugin implements Plugin<void, void> {
       })
     );
     setUISettings(core.uiSettings);
-    visualizations.createBaseVisualization({
-      ...metricsVisDefinition,
-      disableCreate: Boolean(readOnly),
-      disableEdit: Boolean(readOnly),
+    visualizations.createBaseVisualization(VIS_TYPE, async () => {
+      const { metricsVisType } = await import('./metrics_type');
+      return {
+        ...metricsVisType,
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      };
     });
   }
 

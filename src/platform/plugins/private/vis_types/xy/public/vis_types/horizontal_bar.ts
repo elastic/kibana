@@ -28,7 +28,7 @@ import { ChartType } from '../../common';
 import { optionTabs } from '../editor/common_config';
 import { getVisTypeFromParams } from './get_vis_type_from_params';
 
-export const horizontalBarVisTypeDefinition = {
+export const horizontalBarVisType = {
   name: 'horizontal_bar',
   title: i18n.translate('visTypeXy.horizontalBar.horizontalBarTitle', {
     defaultMessage: 'Horizontal bar',

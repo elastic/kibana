@@ -12,12 +12,12 @@ import { AggGroupNames } from '@kbn/data-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { Vis } from '@kbn/visualizations-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { TagCloudVisParams } from './types';
 import { getTagCloudOptions } from './components/get_tag_cloud_options';
 import { toExpressionAst } from './to_ast';
-import { TagCloudVisDependencies } from './plugin';
 
-export const getTagCloudVisTypeDefinition = ({ palettes }: TagCloudVisDependencies) => {
+export const getTagCloudVisType = (palettes: ChartsPluginSetup['palettes']) => {
   return {
     name: 'tagcloud',
     title: i18n.translate('visTypeTagCloud.vis.tagCloudTitle', { defaultMessage: 'Tag cloud' }),

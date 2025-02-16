@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GaugeTypeProps } from '../types';
-import { getGaugeVisTypeDefinition } from './gauge';
-import { getGoalVisTypeDefinition } from './goal';
-
-export const gaugeVisType = (props: GaugeTypeProps) => {
-  return getGaugeVisTypeDefinition(props);
-};
-
-export const goalVisType = (props: GaugeTypeProps) => {
-  return getGoalVisTypeDefinition(props);
-};
+export { areaVisType } from './area';
+export { lineVisType } from './line';
+export { histogramVisType } from './histogram';
+export { horizontalBarVisType } from './horizontal_bar';

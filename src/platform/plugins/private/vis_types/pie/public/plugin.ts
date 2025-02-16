@@ -20,7 +20,6 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { PiePublicConfig } from '../server/config';
-import { pieVisType } from './vis_type';
 import { setDataViewsStart } from './services';
 
 /** @internal */
@@ -63,13 +62,16 @@ export class VisTypePiePlugin {
     { visualizations, charts, usageCollection }: VisTypePieSetupDependencies
   ) {
     const { readOnly } = this.initializerContext.config.get<PiePublicConfig>();
-    visualizations.createBaseVisualization({
-      ...pieVisType({
-        showElasticChartsOptions: true,
-        palettes: charts.palettes,
-      }),
-      disableCreate: Boolean(readOnly),
-      disableEdit: Boolean(readOnly),
+    visualizations.createBaseVisualization('pie', async () => {
+      const { getPieVisType } = await import('./vis_type/pie');
+      return {
+        ...getPieVisType({
+          showElasticChartsOptions: true,
+          palettes: charts.palettes,
+        }),
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      };
     });
     return {};
   }

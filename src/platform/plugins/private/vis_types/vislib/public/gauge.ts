@@ -9,11 +9,8 @@
 
 import { ColorSchemaParams, Labels, Style } from '@kbn/charts-plugin/public';
 import { RangeValues } from '@kbn/vis-default-editor-plugin/public';
-import { gaugeVisType } from '@kbn/vis-type-gauge-plugin/public';
-import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
-
+import { getGaugeVisType } from '@kbn/vis-type-gauge-plugin/public';
 import { Alignment, GaugeType } from './types';
-import { toExpressionAst } from './to_ast';
 
 export interface Gauge extends ColorSchemaParams {
   backStyle: 'Full';
@@ -44,7 +41,10 @@ export interface GaugeVisParams {
   gauge: Gauge;
 }
 
-export const gaugeVisTypeDefinition = {
-  ...gaugeVisType({}),
-  toExpressionAst,
-} as VisTypeDefinition<GaugeVisParams>;
+export async function getLegacyGaugeVisType() {
+  const { toExpressionAst } = await import('./to_ast');
+  return {
+    ...(await getGaugeVisType()),
+    toExpressionAst,
+  };
+}

@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
-import { goalVisType } from '@kbn/vis-type-gauge-plugin/public';
+import { getGoalVisType } from '@kbn/vis-type-gauge-plugin/public';
 
-import { toExpressionAst } from './to_ast';
-import { GaugeVisParams } from './gauge';
-
-export const goalVisTypeDefinition = {
-  ...goalVisType({}),
-  toExpressionAst,
-} as VisTypeDefinition<GaugeVisParams>;
+export async function getLegacyGoalVisType() {
+  const { toExpressionAst } = await import('./to_ast');
+  return {
+    ...(await getGoalVisType()),
+    toExpressionAst,
+  };
+}

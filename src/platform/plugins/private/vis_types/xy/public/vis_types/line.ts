@@ -28,7 +28,7 @@ import { ChartType } from '../../common';
 import { optionTabs } from '../editor/common_config';
 import { getVisTypeFromParams } from './get_vis_type_from_params';
 
-export const lineVisTypeDefinition = {
+export const lineVisType = {
   name: 'line',
   title: i18n.translate('visTypeXy.line.lineTitle', { defaultMessage: 'Line' }),
   icon: 'visLine',

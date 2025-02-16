@@ -27,6 +27,7 @@ import {
   EuiTabs,
   EuiTab,
   EuiIconTip,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DocLinksStart } from '@kbn/core/public';
@@ -34,6 +35,7 @@ import type { BaseVisType, TypesStart } from '../../vis_types';
 import { VisGroups } from '../../vis_types/vis_groups_enum';
 import type { VisTypeAlias } from '../../vis_types/vis_type_alias_registry';
 import './group_selection.scss';
+import { useVisTypes } from '../../vis_types/use_vis_types';
 
 export interface GroupSelectionProps {
   onVisTypeSelected: (visType: BaseVisType | VisTypeAlias) => void;
@@ -82,13 +84,6 @@ const tabs: Array<{ id: 'recommended' | 'legacy'; label: ReactNode; dataTestSubj
   },
 ];
 
-const getVisTypesFromGroup = (
-  visTypesRegistry: TypesStart,
-  group: VisGroups
-): Array<BaseVisType | VisTypeAlias> => {
-  return visTypesRegistry.getByGroup(group).filter(({ disableCreate }) => !disableCreate);
-};
-
 function GroupSelection({
   tab = 'recommended',
   setTab,
@@ -96,34 +91,48 @@ function GroupSelection({
   ...props
 }: GroupSelectionProps) {
   const visualizeGuideLink = props.docLinks.links.visualize.guide;
-  const promotedVisGroups = useMemo(
+
+  const { isLoading, visTypes } = useVisTypes(visTypesRegistry);
+
+  const promotedVisTypes = useMemo(
     () =>
       orderBy(
         [
           ...visTypesRegistry.getAliases(),
-          ...visTypesRegistry.getByGroup(VisGroups.PROMOTED),
+          ...visTypes.filter((visType) => visType.group === VisGroups.PROMOTED),
         ].filter((visDefinition) => {
           return !visDefinition.disableCreate;
         }),
         ['promotion', 'title'],
         ['asc', 'asc']
       ),
-    [visTypesRegistry]
+    [visTypes, visTypesRegistry]
   );
 
-  const aggBasedTypes = getVisTypesFromGroup(visTypesRegistry, VisGroups.AGGBASED);
-  const legacyTypes = getVisTypesFromGroup(visTypesRegistry, VisGroups.LEGACY);
-
-  const shouldDisplayLegacyTab = legacyTypes.length + aggBasedTypes.length;
-
-  const [tsvbProps] = legacyTypes.map((visType) => ({
-    visType: {
-      ...visType,
-      icon: visType.name === 'metrics' ? 'visualizeApp' : (visType.icon as string),
-    },
-    onVisTypeSelected: props.onVisTypeSelected,
-    key: visType.name,
-  }));
+  const { PromotedLegacyVisCard, shouldDisplayLegacyTab } = useMemo(() => {
+    const getVisTypesFromGroup = (group: VisGroups): Array<BaseVisType | VisTypeAlias> => {
+      return visTypes.filter((visType) => visType.group === group && !visType.disableCreate);
+    };
+    const aggBasedTypes = getVisTypesFromGroup(VisGroups.AGGBASED);
+    const legacyTypes = getVisTypesFromGroup(VisGroups.LEGACY);
+    return {
+      PromotedLegacyVisCard:
+        legacyTypes.length >= 1 ? (
+          <VisTypeCard
+            visType={{
+              ...legacyTypes[0],
+              icon:
+                legacyTypes[0].name === 'metrics'
+                  ? 'visualizeApp'
+                  : (legacyTypes[0].icon as string),
+            }}
+            key={legacyTypes[0].name}
+            onVisTypeSelected={props.onVisTypeSelected}
+          />
+        ) : null,
+      shouldDisplayLegacyTab: Boolean(legacyTypes.length || aggBasedTypes.length),
+    };
+  }, [visTypes, props.onVisTypeSelected]);
 
   return (
     <>
@@ -136,66 +145,68 @@ function GroupSelection({
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody className="visNewVisDialogGroupSelection__body">
-        {shouldDisplayLegacyTab && (
-          <div className="visNewVisDialogGroupSelection__visGroups">
-            <EuiTabs>
-              {tabs.map((t) => (
-                <EuiTab
-                  data-test-subj={t.dataTestSubj}
-                  isSelected={tab === t.id}
-                  onClick={() => setTab(t.id)}
-                  key={t.id}
-                >
-                  {t.label}
-                </EuiTab>
-              ))}
-            </EuiTabs>
-          </div>
-        )}
+        <EuiSkeletonText isLoading={isLoading}>
+          <>
+            {shouldDisplayLegacyTab && (
+              <div className="visNewVisDialogGroupSelection__visGroups">
+                <EuiTabs>
+                  {tabs.map((t) => (
+                    <EuiTab
+                      data-test-subj={t.dataTestSubj}
+                      isSelected={tab === t.id}
+                      onClick={() => setTab(t.id)}
+                      key={t.id}
+                    >
+                      {t.label}
+                    </EuiTab>
+                  ))}
+                </EuiTabs>
+              </div>
+            )}
 
-        <div className="visNewVisDialogGroupSelection__visGroups">
-          <EuiSpacer size="s" />
-          {tab === 'recommended' ? (
-            <EuiFlexGrid columns={2} data-test-subj="visNewDialogGroups">
-              {promotedVisGroups.map((visType) => (
-                <VisGroup
-                  visType={visType}
-                  key={visType.name}
-                  onVisTypeSelected={props.onVisTypeSelected}
-                  shouldStretch={visType.name === 'lens'}
-                />
-              ))}
-            </EuiFlexGrid>
-          ) : (
-            <EuiFlexGrid columns={2} data-test-subj="visNewDialogGroups">
-              {tsvbProps ? <VisGroup {...tsvbProps} /> : null}
-              {
-                <VisGroup
-                  visType={{
-                    stage: 'production',
-                    name: 'aggbased',
-                    description: i18n.translate(
-                      'visualizations.newVisWizard.aggBasedGroupDescription',
-                      {
-                        defaultMessage: 'Craft charts using basic aggregations.',
-                      }
-                    ),
-                    icon: 'indexPatternApp',
-                    title: i18n.translate('visualizations.newVisWizard.aggBasedGroupTitle', {
-                      defaultMessage: 'Aggregation-based',
-                    }),
-                  }}
-                  onVisTypeSelected={() => {
-                    props.showMainDialog(false);
-                  }}
-                />
-              }
-            </EuiFlexGrid>
-          )}
-
-          <EuiSpacer size="l" />
-        </div>
-
+            <div className="visNewVisDialogGroupSelection__visGroups">
+              <EuiSpacer size="s" />
+              {tab === 'recommended' ? (
+                <EuiFlexGrid columns={2} data-test-subj="visNewDialogGroups">
+                  {promotedVisTypes.map((visType) => (
+                    <VisTypeCard
+                      visType={visType}
+                      key={visType.name}
+                      onVisTypeSelected={props.onVisTypeSelected}
+                      shouldStretch={visType.name === 'lens'}
+                    />
+                  ))}
+                </EuiFlexGrid>
+              ) : (
+                <EuiFlexGrid columns={2} data-test-subj="visNewDialogGroups">
+                  {PromotedLegacyVisCard}
+                  {
+                    <VisTypeCard
+                      visType={{
+                        stage: 'production',
+                        name: 'aggbased',
+                        description: i18n.translate(
+                          'visualizations.newVisWizard.aggBasedGroupDescription',
+                          {
+                            defaultMessage: 'Craft charts using basic aggregations.',
+                          }
+                        ),
+                        icon: 'indexPatternApp',
+                        title: i18n.translate('visualizations.newVisWizard.aggBasedGroupTitle', {
+                          defaultMessage: 'Aggregation-based',
+                        }),
+                      }}
+                      onVisTypeSelected={() => {
+                        props.showMainDialog(false);
+                      }}
+                    />
+                  }
+                </EuiFlexGrid>
+              )}
+              <EuiSpacer size="l" />
+            </div>
+          </>
+        </EuiSkeletonText>
         <ModalFooter visualizeGuideLink={visualizeGuideLink} />
       </EuiModalBody>
     </>
@@ -230,7 +241,7 @@ const ModalFooter = ({ visualizeGuideLink }: { visualizeGuideLink: string }) => 
   );
 };
 
-const VisGroup = ({ visType, onVisTypeSelected, shouldStretch = false }: VisCardProps) => {
+const VisTypeCard = ({ visType, onVisTypeSelected, shouldStretch = false }: VisCardProps) => {
   const onClick = useCallback(() => {
     onVisTypeSelected(visType);
   }, [onVisTypeSelected, visType]);

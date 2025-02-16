@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { createRegionMapFn } from './region_map_fn';
-export { regionMapRenderer } from './region_map_renderer';
+export { regionMapVisType } from './region_map/region_map_vis_type';
+export { tileMapVisType } from './tile_map/tile_map_vis_type';

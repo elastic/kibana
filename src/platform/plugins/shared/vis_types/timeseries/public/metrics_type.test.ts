@@ -12,7 +12,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { setDataViewsStart } from './services';
 import type { TimeseriesVisParams } from './types';
 import type { Vis } from '@kbn/visualizations-plugin/public';
-import { metricsVisDefinition } from './metrics_type';
+import { metricsVisType } from './metrics_type';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 describe('metricsVisDefinition', () => {
   describe('getUsedIndexPattern', () => {
@@ -40,8 +40,8 @@ describe('metricsVisDefinition', () => {
         },
       } as DataViewsPublicPluginStart);
       defaultParams = (
-        await metricsVisDefinition.setup!({
-          params: cloneDeep(metricsVisDefinition.visConfig.defaults),
+        await metricsVisType.setup!({
+          params: cloneDeep(metricsVisType.visConfig.defaults),
         } as unknown as Vis<TimeseriesVisParams>)
       ).params;
     });
@@ -49,7 +49,7 @@ describe('metricsVisDefinition', () => {
     it('should resolve correctly the base index pattern by id', async () => {
       expect(
         (
-          await metricsVisDefinition.getUsedIndexPattern!({
+          await metricsVisType.getUsedIndexPattern!({
             ...defaultParams,
             index_pattern: { id: '1' },
           })
@@ -60,7 +60,7 @@ describe('metricsVisDefinition', () => {
     it('should resolve correctly the base index pattern by name', async () => {
       expect(
         (
-          await metricsVisDefinition.getUsedIndexPattern!({
+          await metricsVisType.getUsedIndexPattern!({
             ...defaultParams,
             index_pattern: 'pattern2',
           })
@@ -69,7 +69,7 @@ describe('metricsVisDefinition', () => {
     });
 
     it('should resolve correctly the series overrides by name and id', async () => {
-      const resolvedPatterns = await metricsVisDefinition.getUsedIndexPattern!({
+      const resolvedPatterns = await metricsVisType.getUsedIndexPattern!({
         ...defaultParams,
         index_pattern: { id: '1' },
         series: [
@@ -91,7 +91,7 @@ describe('metricsVisDefinition', () => {
     });
 
     it('should correctly resolve annotation index patterns along with series', async () => {
-      const resolvedPatterns = await metricsVisDefinition.getUsedIndexPattern!({
+      const resolvedPatterns = await metricsVisType.getUsedIndexPattern!({
         ...defaultParams,
         index_pattern: { id: '1' },
         series: [
@@ -110,7 +110,7 @@ describe('metricsVisDefinition', () => {
     });
 
     it('should return default index pattern if none is specified', async () => {
-      const resolvedPatterns = await metricsVisDefinition.getUsedIndexPattern!({
+      const resolvedPatterns = await metricsVisType.getUsedIndexPattern!({
         ...defaultParams,
         index_pattern: undefined,
         series: [],

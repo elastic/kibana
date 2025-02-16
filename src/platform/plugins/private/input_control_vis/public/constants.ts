@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getHeatmapVisTypeDefinition } from './heatmap';
-import type { HeatmapTypeProps } from '../types';
-
-export const heatmapVisType = (props: HeatmapTypeProps) => {
-  return getHeatmapVisTypeDefinition(props);
-};
+export const INPUT_CONTROL_VIS_TYPE = 'input_control_vis';

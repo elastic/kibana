@@ -19,9 +19,7 @@ import { toExpressionAst } from '../to_ast';
 import { GaugeVisParams, GaugeType, GaugeTypeProps } from '../types';
 import { SplitTooltip } from './split_tooltip';
 
-export const getGoalVisTypeDefinition = (
-  props: GaugeTypeProps
-): VisTypeDefinition<GaugeVisParams> => ({
+export const getGoalVisType = (props: GaugeTypeProps): VisTypeDefinition<GaugeVisParams> => ({
   name: 'goal',
   title: i18n.translate('visTypeGauge.goal.goalTitle', { defaultMessage: 'Goal' }),
   icon: 'visGoal',

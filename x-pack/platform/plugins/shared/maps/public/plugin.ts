@@ -49,10 +49,8 @@ import {
   GEOHASH_GRID,
   getGeoHashBucketAgg,
   regionMapRenderer,
-  regionMapVisType,
   createTileMapFn,
   tileMapRenderer,
-  tileMapVisType,
 } from './legacy_visualizations';
 import { MapsAppLocatorDefinition } from './locators/map_locator/locator_definition';
 import { MapsAppTileMapLocatorDefinition } from './locators/tile_map_locator/locator_definition';
@@ -85,6 +83,8 @@ import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { setupMapEmbeddable } from './react_embeddable/setup_map_embeddable';
 import { MapRendererLazy } from './react_embeddable/map_renderer/map_renderer_lazy';
 import { registerUiActions } from './trigger_actions/register_ui_actions';
+import { REGION_MAP_VIS_TYPE } from './legacy_visualizations/region_map/types';
+import { TILE_MAP_VIS_TYPE } from './legacy_visualizations/tile_map/types';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -230,10 +230,16 @@ export class MapsPlugin
     plugins.data.search.aggs.types.registerLegacy(GEOHASH_GRID, getGeoHashBucketAgg);
     plugins.expressions.registerFunction(createRegionMapFn);
     plugins.expressions.registerRenderer(regionMapRenderer);
-    plugins.visualizations.createBaseVisualization(regionMapVisType);
+    plugins.visualizations.createBaseVisualization(REGION_MAP_VIS_TYPE, async () => {
+      const { regionMapVisType } = await import('./legacy_visualizations/vis_types_module');
+      return regionMapVisType;
+    });
     plugins.expressions.registerFunction(createTileMapFn);
     plugins.expressions.registerRenderer(tileMapRenderer);
-    plugins.visualizations.createBaseVisualization(tileMapVisType);
+    plugins.visualizations.createBaseVisualization(TILE_MAP_VIS_TYPE, async () => {
+      const { tileMapVisType } = await import('./legacy_visualizations/vis_types_module');
+      return tileMapVisType;
+    });
 
     setIsCloudEnabled(!!plugins.cloud?.isCloudEnabled);
 

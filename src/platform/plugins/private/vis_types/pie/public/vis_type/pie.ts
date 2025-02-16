@@ -23,7 +23,7 @@ import { PieTypeProps } from '../types';
 import { toExpressionAst } from '../to_ast';
 import { getPieOptions } from '../editor/components';
 
-export const getPieVisTypeDefinition = ({
+export const getPieVisType = ({
   showElasticChartsOptions = false,
   palettes,
 }: PieTypeProps): VisTypeDefinition<PartitionVisParams> => ({
