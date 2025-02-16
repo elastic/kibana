@@ -12,7 +12,7 @@
     "patterns": [
       "_ssl/certificates"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-ssl.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/security-api-ssl.html",
     "availability": {
       "stack": true,
       "serverless": false

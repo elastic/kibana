@@ -1,10 +1,15 @@
 {
-  "inference.stream_inference": {
+  "inference.unified_inference": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
       "human": "__flag__",
-      "pretty": "__flag__"
+      "pretty": "__flag__",
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "url_components": {
       "task_type": [
@@ -18,13 +23,13 @@
       "POST"
     ],
     "patterns": [
-      "_inference/{inference_id}/_stream",
-      "_inference/{task_type}/{inference_id}/_stream"
+      "_inference/{inference_id}/_unified",
+      "_inference/{task_type}/{inference_id}/_unified"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/stream-inference-api.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/unified-inference-api.html",
     "availability": {
       "stack": true,
-      "serverless": false
+      "serverless": true
     }
   }
 }

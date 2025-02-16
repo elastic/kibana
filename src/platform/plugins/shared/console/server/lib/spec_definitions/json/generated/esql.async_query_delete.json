@@ -1,5 +1,5 @@
 {
-  "security.authenticate": {
+  "esql.async_query_delete": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
@@ -7,15 +7,15 @@
       "pretty": "__flag__"
     },
     "methods": [
-      "GET"
+      "DELETE"
     ],
     "patterns": [
-      "_security/_authenticate"
+      "_query/async/{id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/security-api-authenticate.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/esql-async-query-delete-api.html",
     "availability": {
       "stack": true,
-      "serverless": true
+      "serverless": false
     }
   }
 }

@@ -1,5 +1,5 @@
 {
-  "inference.stream_inference": {
+  "inference.update": {
     "url_params": {
       "error_trace": "__flag__",
       "filter_path": [],
@@ -18,10 +18,10 @@
       "POST"
     ],
     "patterns": [
-      "_inference/{inference_id}/_stream",
-      "_inference/{task_type}/{inference_id}/_stream"
+      "_inference/{inference_id}/_update",
+      "_inference/{task_type}/{inference_id}/_update"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/stream-inference-api.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/update-inference-api.html",
     "availability": {
       "stack": true,
       "serverless": false
