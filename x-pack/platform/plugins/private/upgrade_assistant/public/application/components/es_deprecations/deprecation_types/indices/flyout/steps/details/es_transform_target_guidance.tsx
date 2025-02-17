@@ -42,18 +42,24 @@ export const ESTransformsTargetGuidance = ({ deprecation }: Props) => {
       <EuiText size="m">
         <p>
           <FormattedMessage
-            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.esTransform.linksText"
-            defaultMessage="{learnMoreLink} or {transformsLinkHtml} to manage associated transforms."
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.esTransform.description1"
+            defaultMessage="The reindex operation will copy all of the existing documents into a new index and remove the old one. During the reindex operation your data will be in a read-only state and transforms writing to this index will be paused."
+          />
+        </p>
+        <p>
+          <FormattedMessage
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.esTransform.description2"
+            defaultMessage="Depending on size and resources, reindexing may take an extended time. For indices with more than 10GB of data or to avoid transform downtime refer to the {migrationGuideLink} or {transformsLink} to manage transforms writing to this index."
             values={{
-              learnMoreLink: (
+              migrationGuideLink: (
                 <EuiLink target="_blank" href={deprecation.url}>
-                  <FormattedMessage
-                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.esTransform.learnMoreLink"
-                    defaultMessage="Learn more"
-                  />
+                  {i18n.translate(
+                    'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.esTransform.migrationGuideLink',
+                    { defaultMessage: 'migration guide' }
+                  )}
                 </EuiLink>
               ),
-              transformsLinkHtml: (
+              transformsLink: (
                 <EuiLink
                   target="_blank"
                   href={`${http.basePath.prepend('/app/management/data/transform')}`}
@@ -66,14 +72,6 @@ export const ESTransformsTargetGuidance = ({ deprecation }: Props) => {
               ),
             }}
           />
-        </p>
-        <p>
-          <EuiText size="m">
-            <FormattedMessage
-              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option1.description"
-              defaultMessage="The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
-            />
-          </EuiText>
         </p>
       </EuiText>
     </>
