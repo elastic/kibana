@@ -74,6 +74,7 @@ describe('StepDefinePackagePolicy', () => {
   const validationResults = {
     name: null,
     description: null,
+    additional_datastreams_permissions: null,
     namespace: null,
     inputs: {},
     vars: {
