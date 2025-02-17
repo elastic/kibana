@@ -65,6 +65,11 @@ export function estimateCapacity(
     capacity: { config: configuredCapacity },
   } = capacityStats.configuration.value;
 
+  if (!averageLoadPercentage) {
+    throw new Error(
+      `Task manager had an issue calculating capacity estimation. averageLoadPercentage: ${averageLoadPercentage}`
+    );
+  }
   /**
    * On average, how many polling cycles does it take to execute a task?
    * If this is higher than the polling cycle, then a whole cycle is wasted as
@@ -265,10 +270,15 @@ export function withCapacityEstimate(
   assumedKibanaInstances: number
 ): RawMonitoringStats['stats'] {
   if (isCapacityEstimationParams(monitoredStats)) {
-    return {
-      ...monitoredStats,
-      capacity_estimation: estimateCapacity(logger, monitoredStats, assumedKibanaInstances),
-    };
+    try {
+      return {
+        ...monitoredStats,
+        capacity_estimation: estimateCapacity(logger, monitoredStats, assumedKibanaInstances),
+      };
+    } catch (e) {
+      // Return monitoredStats with out capacity estimation
+      logger.error(e.message);
+    }
   }
   return monitoredStats;
 }

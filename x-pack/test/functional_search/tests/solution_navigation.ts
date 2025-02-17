@@ -308,6 +308,7 @@ export default function searchSolutionNavigation({
         'project_settings_project_nav',
         'ml:modelManagement',
         'stack_management',
+        'monitoring',
       ]);
     });
   });
