@@ -16,6 +16,8 @@ import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
 
+export type { ExportShare } from './services/share_orchestrator';
+
 export type BrowserUrlService = UrlService<
   BrowserShortUrlClientFactoryCreateParams,
   BrowserShortUrlClient

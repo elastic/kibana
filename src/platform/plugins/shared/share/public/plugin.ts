@@ -10,6 +10,7 @@
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
 import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
+import { ShareOptionsManager } from './services/share_options_manager';
 import { UrlService } from '../common/url_service';
 import { RedirectManager } from './url_service';
 import type { RedirectOptions } from '../common/url_service/locators/redirect';
@@ -41,6 +42,8 @@ export type SharePublicSetup = ShareMenuRegistrySetup & {
    * Sets the provider for the anonymous access service; this is consumed by the Security plugin to avoid a circular dependency.
    */
   setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => void;
+
+  newRegistrar: ShareOptionsManager['registerShareIntegration'];
 };
 
 /** @public */
@@ -73,6 +76,7 @@ export class SharePlugin
     >
 {
   private readonly shareMenuRegistry?: ShareMenuRegistry = new ShareMenuRegistry();
+  private readonly shareOptionsManager = new ShareOptionsManager();
   private readonly shareContextMenu = new ShareMenuManager();
   private redirectManager?: RedirectManager;
   private url?: BrowserUrlService;
@@ -122,6 +126,9 @@ export class SharePlugin
     registrations.setup({ analytics });
 
     return {
+      newRegistrar: this.shareOptionsManager.registerShareIntegration.bind(
+        this.shareOptionsManager
+      ),
       ...this.shareMenuRegistry!.setup(),
       url: this.url,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
@@ -136,11 +143,19 @@ export class SharePlugin
 
   public start(core: CoreStart): SharePublicStart {
     const disableEmbed = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
+
+    this.shareOptionsManager.start({
+      core,
+      urlService: this.url!,
+      anonymousAccessServiceProvider: () => this.anonymousAccessServiceProvider!(),
+    });
+
     const sharingContextMenuStart = this.shareContextMenu.start(
       core,
       this.url!,
       this.shareMenuRegistry!.start(),
       disableEmbed,
+      this.shareOptionsManager,
       this.anonymousAccessServiceProvider
     );
 

@@ -8,94 +8,85 @@
  */
 
 import type { ReactElement, ReactNode } from 'react';
-import { UrlParamExtension, ScreenshotExportOpts } from '../types';
+import type { EuiIconProps } from '@elastic/eui';
+import { UrlParamExtension, ScreenshotExportOpts, ShareContext } from '../types';
 
-export type ShareTypes = 'link' | 'export' | 'embed' | 'integration';
+export type ShareTypes = 'link' | 'embed' | 'integration';
 
-export type InternalShareActionIntent = Exclude<ShareActionIntent['shareType'], 'integration'>;
+export type InternalShareActionIntent = Exclude<ShareTypes, 'integration'>;
 
-/**
- * @description defines base config for all sharing actions, with capability for extension as needed
- */
-export interface ShareTypeConfig<C extends Record<string, unknown> = Record<string, unknown>> {
+interface ShareActionUserInputBase<E extends Record<string, unknown> = Record<string, unknown>> {
   /**
    * The title of the share action
    */
   title: string;
+  allowShortUrl?: boolean;
+  draftModeCallOut?: ReactNode;
+  helpText?: ReactElement;
   CTAButtonConfig?: {
     id: string;
     dataTestSubj: string;
     label: string;
   };
-  helpText?: ReactElement;
-  requiresSavedState?: boolean;
-  warnings?: Array<{ title: string; message: string }>;
-  // ctx will be the context of the app that is calling the share action, alongside core share deps
-  config: (ctx: Record<string, unknown>) => {
-    allowShortUrl?: boolean;
-    draftModeCallOut?: ReactNode;
-    // computeAnonymousCapabilities?: (anonymousUserCapabilities: Capabilities) => boolean;
-  } & C;
 }
 
-interface ShareMenuItemV2Base<
-  Config extends Record<string, unknown>,
-  T extends ShareTypes = ShareTypes
-> {
-  shareType: T;
-  shareTypeMeta: ShareTypeConfig<Config>;
-  /**
-   * specifies the app this share action is registered for, as of now within kibana valid share context could be
-   * lens, dashboard, canvas, this value will be used to retrieved all registered share actions for the given
-   */
-  sharingApp: string;
-}
+type ShareImplementation<
+  T extends ShareTypes,
+  U extends Record<string, unknown> = Record<string, unknown>,
+  C extends Record<string, unknown> = Record<string, unknown>
+> = T extends 'integration'
+  ? {
+      id: string;
+      groupId?: string;
+      shareType: T;
+      config: (ctx: ShareContext, userInput: ShareActionUserInputBase<U>) => C;
+    }
+  : {
+      shareType: T;
+      config: (ctx: ShareContext, userInput: ShareActionUserInputBase<U>) => C;
+    };
 
-/**
- * @description type definition for link share action
- */
-type LinkShare = ShareMenuItemV2Base<
-  {
-    /**
-     * @description opt-in method to provide a custom method to generate a share url based
-     */
-    delegatedShareUrlHandler?: () => string;
-  },
-  'link'
+export type LinkShare = ShareImplementation<'link', { delegatedShareUrlHandler?: () => string }>;
+
+export type EmbedShare = ShareImplementation<
+  'embed',
+  { allowEmbed: boolean; embedUrlParamExtensions?: UrlParamExtension[] }
 >;
 
+export type ShareIntegration<
+  IntegrationParameters extends Record<string, unknown> = Record<string, unknown>
+> = ShareImplementation<'integration', {}, IntegrationParameters>;
+
+export type ShareActionIntents = LinkShare | EmbedShare | ShareIntegration;
+
 /**
- * @description type definition for export share action
+ * @description bundled share integration for performing exports
  */
-type ExportShare = ShareMenuItemV2Base<
-  {
-    generateExport: (args: ScreenshotExportOpts) => Promise<unknown>;
-    generateExportUrl: (args: ScreenshotExportOpts) => string | undefined;
+export interface ExportShare
+  extends ShareIntegration<{
+    /**
+     * @deprecated only kept around for legacy reasons
+     */
+    name?: string;
+    /**
+     * @deprecated only kept around for legacy reasons
+     */
+    icon?: EuiIconProps['type'];
+    /**
+     * @deprecated only kept around for legacy reasons
+     */
+    sortOrder?: number;
+    label: string;
+    exportType: string;
+    generateAssetExport: (args: ScreenshotExportOpts) => Promise<unknown>;
+    generateValueExport: (args: ScreenshotExportOpts) => string | undefined;
+    warnings?: Array<{ title: string; message: string }>;
+    requiresSavedState?: boolean;
     supportedLayoutOptions: ['print'];
     renderLayoutOptionSwitch?: boolean;
-  },
-  'export'
->;
-
-/**
- * @description type definition for embed share action
- */
-type EmbedShare = ShareMenuItemV2Base<
-  {
-    allowEmbed: boolean;
-    embedUrlParamExtensions?: UrlParamExtension[];
-  },
-  'embed'
->;
-
-/**
- * @description type definition for integration share action, expected to be used to extend the share actions available,
- *  supports multiple registrations per share context
- */
-type ShareIntegration<C extends Record<string, unknown> = Record<string, unknown>> =
-  ShareMenuItemV2Base<C, 'integration'>;
-
-export type ShareActionIntent = LinkShare | ExportShare | EmbedShare | ShareIntegration;
+  }> {
+  groupId: 'export';
+}
 
 export interface SharingData {
   title: string;
@@ -106,14 +97,15 @@ export interface SharingData {
 }
 
 export abstract class ShareOrchestrator {
-  // when registering a share action only one share action can be registered per supported share context, attempting to register another will throw an error
-  abstract registerShareAction(args: ShareActionIntent): void;
+  abstract registerShareIntegration<I extends ShareIntegration>(shareObject: string, arg: I): void;
+  abstract registerShareIntegration<I extends ShareIntegration>(arg: I): void;
 
-  // when toggling the share menu we keep it simple, only passing in the minimum required data, instead of a sleuth of options
-  // any extra check that is required to be done will happen behind the scenes for each share context
-  abstract toggleShare(context: string, data: SharingData): void;
+  // abstract registerShareAction(app: string, args: ShareActionIntent[]): void;
+  // abstract registerShareAction(args: ShareActionIntent[]): void;
 
-  abstract fetchShareOptionForApp(
-    context: string
-  ): Array<Omit<ShareActionIntent, 'sharingApp'> | undefined>;
+  // // when toggling the share menu we keep it simple, only passing in the minimum required data, instead of a sleuth of options
+  // // any extra check that is required to be done will happen behind the scenes for each share context
+  // abstract toggleShare(context: string, data: SharingData): void;
+
+  // abstract fetchShareOptionForApp(sharingApp: string): Array<ShareActionIntent | undefined>;
 }
