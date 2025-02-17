@@ -61,7 +61,7 @@ export function useCreateSlo() {
             title: toMountPoint(
               <RedirectAppLinks coreStart={services} data-test-subj="observabilityMainContainer">
                 <FormattedMessage
-                  id="xpack.slo.slo.create.successNotification"
+                  id="xpack.slo.create.successNotification"
                   defaultMessage="Successfully created {name}. {editSLO} or {viewSLO}"
                   values={{
                     name: slo.name,
