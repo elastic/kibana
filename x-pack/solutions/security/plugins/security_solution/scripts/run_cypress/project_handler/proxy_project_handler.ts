@@ -55,11 +55,11 @@ export class ProxyHandler extends ProjectHandler {
       const kibanaOverrideImage = override;
       this.log.info(`Kibana Image Commit under test: ${process.env.KIBANA_MKI_IMAGE_COMMIT}!`);
       this.log.info(
-        `Overriding Kibana image in the MKI with docker.elastic.co/kibana-ci/kibana-serverless:pr-${kibanaOverrideImage}`
+        `Overriding Kibana image in the MKI with docker.elastic.co/kibana-ci/kibana-serverless:git-${kibanaOverrideImage}`
       );
       body.overrides = {
         kibana: {
-          docker_image: `docker.elastic.co/kibana-ci/kibana-serverless:pr-${kibanaOverrideImage}`,
+          docker_image: `docker.elastic.co/kibana-ci/kibana-serverless:git-${kibanaOverrideImage}`,
         },
       };
     }
