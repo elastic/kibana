@@ -44,6 +44,10 @@ import { suggest as suggestForStats } from '../autocomplete/commands/stats';
 import { suggest as suggestForWhere } from '../autocomplete/commands/where';
 import { suggest as suggestForJoin } from '../autocomplete/commands/join';
 import { suggest as suggestForFrom } from '../autocomplete/commands/from';
+import { suggest as suggestForRow } from '../autocomplete/commands/row';
+import { suggest as suggestForShow } from '../autocomplete/commands/show';
+import { suggest as suggestForGrok } from '../autocomplete/commands/grok';
+import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -191,12 +195,13 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Produces a row with one or more columns with values that you specify. This can be useful for testing.',
     }),
-    examples: ['row a=1', 'row a=1, b=2'],
+    examples: ['ROW a=1', 'ROW a=1, b=2'],
     signature: {
       multipleParams: true,
       // syntax check already validates part of this
       params: [{ name: 'assignment', type: 'any' }],
     },
+    suggest: suggestForRow,
     options: [],
     modes: [],
   },
@@ -220,13 +225,14 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.showDoc', {
       defaultMessage: 'Returns information about the deployment and its capabilities',
     }),
-    examples: ['show info'],
+    examples: ['SHOW INFO'],
     options: [],
     modes: [],
     signature: {
       multipleParams: false,
       params: [{ name: 'functions', type: 'function' }],
     },
+    suggest: suggestForShow,
   },
   {
     name: 'metrics',
@@ -450,7 +456,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
-    examples: ['… | dissect a "%{b} %{c}"'],
+    examples: ['… | DISSECT a "%{b} %{c}" APPEND_SEPARATOR = ":"'],
     options: [appendSeparatorOption],
     modes: [],
     signature: {
@@ -460,6 +466,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
     },
+    suggest: suggestForDissect,
   },
   {
     name: 'grok',
@@ -467,7 +474,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
-    examples: ['… | grok a "%{IP:b} %{NUMBER:c}"'],
+    examples: ['… | GROK a "%{IP:b} %{NUMBER:c}"'],
     options: [],
     modes: [],
     signature: {
@@ -477,6 +484,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
     },
+    suggest: suggestForGrok,
   },
   {
     name: 'mv_expand',
