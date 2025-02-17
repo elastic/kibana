@@ -21,7 +21,7 @@ import { FormRowSelect } from './form_row_select';
 import { LegacyAPMLink } from '../../../../../shared/links/apm/apm_link';
 import { FormRowSuggestionsSelect } from './form_row_suggestions_select';
 import { SERVICE_NAME } from '../../../../../../../common/es_fields/apm';
-import { isOpenTelemetryAgentName } from '../../../../../../../common/agent_name';
+import { isOpenTelemetryAgentName, isEDOTAgentName } from '../../../../../../../common/agent_name';
 import type { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
 
 interface Props {
@@ -82,12 +82,13 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
 
   const isAgentConfigurationSupported =
     !newConfig.agent_name ||
+    (newConfig.agent_name && isEDOTAgentName(newConfig.agent_name as AgentName)) ||
     (newConfig.agent_name && !isOpenTelemetryAgentName(newConfig.agent_name as AgentName));
 
   const INCORRECT_SERVICE_NAME_TRANSLATED = i18n.translate(
     'xpack.apm.settings.agentConfiguration.service.otel.error',
     {
-      defaultMessage: 'Selected service uses an OpenTelemetry agent, which is not supported',
+      defaultMessage: 'Selected service uses an unsupported OpenTelemetry agent',
     }
   );
 

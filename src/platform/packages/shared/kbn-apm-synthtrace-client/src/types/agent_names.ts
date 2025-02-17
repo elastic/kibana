@@ -20,17 +20,23 @@ type ElasticAgentName =
   | 'php'
   | 'android/java';
 
+type EDOTAgentName = 
+  | 'opentelemetry/java/elastic'
+  | 'opentelemetry/dotnet/elastic'
+  | 'opentelemetry/nodejs/elastic'
+  | 'opentelemetry/php/elastic'
+  | 'opentelemetry/python/elastic';
+
 type OpenTelemetryAgentName =
+  | EDOTAgentName
   | 'otlp'
   | 'opentelemetry/cpp'
   | 'opentelemetry/dotnet'
   | 'opentelemetry/dotnet/opentelemetry-dotnet-instrumentation'
-  | 'opentelemetry/dotnet/elastic'
   | 'opentelemetry/erlang'
   | 'opentelemetry/go'
   | 'opentelemetry/java'
   | 'opentelemetry/java/opentelemetry-java-instrumentation'
-  | 'opentelemetry/java/elastic'
   | 'opentelemetry/nodejs'
   | 'opentelemetry/php'
   | 'opentelemetry/python'
