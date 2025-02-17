@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { ShallowWrapper } from 'enzyme';
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { TimelinesPage } from './timelines_page';
-import { useSourcererDataView } from '../../sourcerer/containers';
+import { useDataView } from '../../data_view_picker/hooks/use_data_view';
 import { useUserPrivileges } from '../../common/components/user_privileges';
+import { TestProviders } from '../../common/mock';
 
 jest.mock('react-router-dom', () => {
   const originalModule = jest.requireActual('react-router-dom');
@@ -23,16 +24,22 @@ jest.mock('react-router-dom', () => {
   };
 });
 jest.mock('../../overview/components/events_by_dataset');
-jest.mock('../../sourcerer/containers');
 jest.mock('../../common/components/user_privileges');
+jest.mock('../../data_view_picker/hooks/use_data_view');
+
+jest.mock('../../common/components/security_route_page_wrapper', () => ({
+  SecurityRoutePageWrapper: (props: PropsWithChildren<{}>) => <>{props.children}</>,
+}));
+jest.mock('../components/open_timeline', () => ({
+  StatefulOpenTimeline: () => <div data-test-subj="stateful-open-timeline" />,
+}));
 
 describe('TimelinesPage', () => {
-  let wrapper: ShallowWrapper;
-
   it('should render landing page if no indicesExist', () => {
-    (useSourcererDataView as unknown as jest.Mock).mockReturnValue({
+    jest.mocked(useDataView).mockReturnValue({
       indicesExist: false,
-      sourcererDataView: {},
+      dataView: {},
+      status: 'ready',
     });
     (useUserPrivileges as jest.Mock).mockReturnValue({
       timelinePrivileges: {
@@ -40,17 +47,18 @@ describe('TimelinesPage', () => {
       },
     });
 
-    wrapper = shallow(<TimelinesPage />);
+    const wrapper = render(<TimelinesPage />, { wrapper: TestProviders });
 
-    expect(wrapper.exists('[data-test-subj="timelines-page-open-import-data"]')).toBeFalsy();
-    expect(wrapper.exists('[data-test-subj="timelines-page-new"]')).toBeFalsy();
-    expect(wrapper.exists('[data-test-subj="stateful-open-timeline"]')).toBeFalsy();
+    expect(wrapper.queryByTestId('timelines-page-open-import-data')).toBeFalsy();
+    expect(wrapper.queryByTestId('timelines-page-new')).toBeFalsy();
+    expect(wrapper.queryByTestId('stateful-open-timeline')).toBeFalsy();
   });
 
   it('should show the correct elements if user has crud', () => {
-    (useSourcererDataView as unknown as jest.Mock).mockReturnValue({
+    jest.mocked(useDataView).mockReturnValue({
       indicesExist: true,
-      sourcererDataView: {},
+      dataView: {},
+      status: 'ready',
     });
     (useUserPrivileges as jest.Mock).mockReturnValue({
       timelinePrivileges: {
@@ -58,11 +66,11 @@ describe('TimelinesPage', () => {
       },
     });
 
-    wrapper = shallow(<TimelinesPage />);
+    const wrapper = render(<TimelinesPage />, { wrapper: TestProviders });
 
-    expect(wrapper.exists('[data-test-subj="timelines-page-open-import-data"]')).toBeTruthy();
-    expect(wrapper.exists('[data-test-subj="timelines-page-new"]')).toBeTruthy();
-    expect(wrapper.exists('[data-test-subj="stateful-open-timeline"]')).toBeTruthy();
+    expect(wrapper.queryByTestId('timelines-page-open-import-data')).toBeTruthy();
+    expect(wrapper.queryByTestId('timelines-page-new')).toBeTruthy();
+    expect(wrapper.queryByTestId('stateful-open-timeline')).toBeTruthy();
   });
 
   it('should not show import button or modal if user does not have crud privileges but it should show the new timeline button', () => {
@@ -73,10 +81,10 @@ describe('TimelinesPage', () => {
       },
     });
 
-    wrapper = shallow(<TimelinesPage />);
+    const wrapper = render(<TimelinesPage />, { wrapper: TestProviders });
 
-    expect(wrapper.exists('[data-test-subj="timelines-page-open-import-data"]')).toBeFalsy();
-    expect(wrapper.exists('[data-test-subj="timelines-page-new"]')).toBeTruthy();
-    expect(wrapper.exists('[data-test-subj="stateful-open-timeline"]')).toBeTruthy();
+    expect(wrapper.queryByTestId('timelines-page-open-import-data')).toBeFalsy();
+    expect(wrapper.queryByTestId('timelines-page-new')).toBeTruthy();
+    expect(wrapper.queryByTestId('stateful-open-timeline')).toBeTruthy();
   });
 });
