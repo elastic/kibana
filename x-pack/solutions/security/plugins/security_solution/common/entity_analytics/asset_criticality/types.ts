@@ -11,10 +11,17 @@ export type CriticalityLevel = AssetCriticalityRecord['criticality_level'];
 
 export type CriticalityLevelWithUnassigned = CriticalityLevel | 'unassigned';
 
-export interface AssetCriticalityUpsert {
+interface BaseAssetCriticalityUpsert {
   idField: AssetCriticalityRecord['id_field'];
   idValue: AssetCriticalityRecord['id_value'];
+}
+
+export interface AssetCriticalityUpsert extends BaseAssetCriticalityUpsert {
   criticalityLevel: AssetCriticalityRecord['criticality_level'];
+}
+
+export interface AssetCriticalityUpsertForBulkUpload extends BaseAssetCriticalityUpsert {
+  criticalityLevel: AssetCriticalityRecord['criticality_level'] | 'unassigned';
 }
 
 export * from '../../api/entity_analytics/asset_criticality';
