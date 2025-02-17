@@ -81,7 +81,7 @@ export const getKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRouter)
           }
 
           return response.ok({
-            body: transformESSearchToKnowledgeBaseEntry(result.data)[0]
+            body: transformESSearchToKnowledgeBaseEntry(result.data)[0],
           });
         } catch (err) {
           const error = transformError(err);

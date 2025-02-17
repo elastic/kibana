@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { getKnowledgeBaseEntryGetRequest, requestMock } from '../../../__mocks__/request';
-import { ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND } from '@kbn/elastic-assistant-common';
+import { getKnowledgeBaseEntryGetRequest } from '../../../__mocks__/request';
 import { serverMock } from '../../../__mocks__/server';
 import { requestContextMock } from '../../../__mocks__/request_context';
-import { getEmptyFindResult, getFindKnowledgeBaseEntriesResultWithSingleHit } from '../../../__mocks__/response';
+import {
+  getEmptyFindResult,
+  getFindKnowledgeBaseEntriesResultWithSingleHit,
+} from '../../../__mocks__/response';
 import { getKnowledgeBaseEntryRoute } from './get_route';
 import type { AuthenticatedUser } from '@kbn/core-security-common';
 const mockUser = {
@@ -29,7 +31,7 @@ describe('Get Knowledge Base Entry route', () => {
     context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     getKnowledgeBaseEntryRoute(server.router);
   });
-  
+
   describe('status codes', () => {
     test('returns 200 if entry exists', async () => {
       clients.elasticAssistant.getAIAssistantKnowledgeBaseDataClient.findDocuments.mockResolvedValue(
