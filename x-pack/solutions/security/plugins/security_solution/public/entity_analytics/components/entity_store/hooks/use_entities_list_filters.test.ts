@@ -16,7 +16,7 @@ import { mockGlobalState } from '../../../../common/mock';
 
 const mockedExperimentalFeatures = mockGlobalState.app.enableExperimental;
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useEnableExperimental: () => ({ ...mockedExperimentalFeatures, serviceEntityStoreEnabled: true }),
+  useEnableExperimental: () => ({ ...mockedExperimentalFeatures }),
 }));
 jest.mock('../../../../common/hooks/use_global_filter_query');
 
