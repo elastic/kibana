@@ -55,7 +55,7 @@ export function toSearchResult({
 
 export function getSearchResultProvider(
   config: ConfigType,
-  connectorTypes: ConnectorServerSideDefinition[],
+  connectorTypes: ConnectorServerSideDefinition[]
 ): GlobalSearchResultProvider {
   return {
     find: ({ term, types, tags }, { aborted$, maxResults }, { core: { capabilities } }) => {
