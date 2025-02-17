@@ -60,6 +60,7 @@ import { AgentPolicyNotFoundError, FleetUnauthorizedError, FleetError } from '..
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
 import { packagePolicyToSimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 
 export async function populateAssignedAgentsCount(
   agentClient: AgentClient,
@@ -131,8 +132,16 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
   TypeOf<typeof GetAgentPoliciesRequestSchema.query>
 > = async (context, request, response) => {
   const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
-  const soClient = fleetContext.internalSoClient;
+
+  const authzFleetReadAgentPolicies =
+    request.authzResult?.[FLEET_API_PRIVILEGES.AGENT_POLICIES.READ] === true;
+  const authzFleetAgentRead = request.authzResult?.[FLEET_API_PRIVILEGES.AGENTS.READ] === true;
+
+  const soClient = authzFleetReadAgentPolicies
+    ? coreContext.savedObjects.client
+    : fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+
   const {
     full: withPackagePolicies = false,
     noAgentCount,
@@ -140,7 +149,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
     format,
     ...restOfQuery
   } = request.query;
-  if (!fleetContext.authz.fleet.readAgentPolicies && withPackagePolicies) {
+  if (!authzFleetReadAgentPolicies && withPackagePolicies) {
     throw new FleetUnauthorizedError(
       'full query parameter require agent policies read permissions'
     );
@@ -153,11 +162,11 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
   let { items } = agentPoliciesResponse;
   const { total, page, perPage } = agentPoliciesResponse;
 
-  if (fleetContext.authz.fleet.readAgents && (noAgentCount === false || withAgentCount)) {
+  if (authzFleetAgentRead && (noAgentCount === false || withAgentCount)) {
     await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, items);
   }
 
-  if (!fleetContext.authz.fleet.readAgentPolicies) {
+  if (!authzFleetReadAgentPolicies) {
     items = items.map(sanitizeItemForReadAgentOnly);
   } else if (withPackagePolicies && format === inputsFormat.Simplified) {
     items.map((item) => {
@@ -188,10 +197,17 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
   TypeOf<typeof BulkGetAgentPoliciesRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const fleetContext = await context.fleet;
-    const soClient = fleetContext.internalSoClient;
+    const [coreContext, fleetContext] = await Promise.all([context.core, context.fleet]);
+    const authzFleetReadAgentPolicies =
+      request.authzResult?.[FLEET_API_PRIVILEGES.AGENT_POLICIES.READ] === true;
+    const authzFleetAgentRead = request.authzResult?.[FLEET_API_PRIVILEGES.AGENTS.READ] === true;
+
+    const soClient = authzFleetReadAgentPolicies
+      ? coreContext.savedObjects.client
+      : fleetContext.internalSoClient;
+
     const { full: withPackagePolicies = false, ignoreMissing = false, ids } = request.body;
-    if (!fleetContext.authz.fleet.readAgentPolicies && withPackagePolicies) {
+    if (!authzFleetReadAgentPolicies && withPackagePolicies) {
       throw new FleetUnauthorizedError(
         'full query parameter require agent policies read permissions'
       );
@@ -200,7 +216,7 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
       withPackagePolicies,
       ignoreMissing,
     });
-    if (!fleetContext.authz.fleet.readAgentPolicies) {
+    if (!authzFleetReadAgentPolicies) {
       items = items.map(sanitizeItemForReadAgentOnly);
     } else if (withPackagePolicies && request.query.format === inputsFormat.Simplified) {
       items.map((item) => {
@@ -219,7 +235,7 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
     const body: BulkGetAgentPoliciesResponse = {
       items,
     };
-    if (fleetContext.authz.fleet.readAgents) {
+    if (authzFleetAgentRead) {
       await populateAssignedAgentsCount(fleetContext.agentClient.asCurrentUser, items);
     }
 
