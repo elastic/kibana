@@ -45,7 +45,8 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(1000);
     await page.getByTestId('serviceMap').click();
-    await expect(page.getByTestId('serviceMap')).toHaveScreenshot('service_map.png', {
+    const serviceMapLocator = await page.getByTestId('serviceMap');
+    await expect(serviceMapLocator).toHaveScreenshot('service_map.png', {
       animations: 'disabled',
     });
   });
@@ -61,7 +62,8 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(1000);
     await page.getByTestId('serviceMap').click();
-    await expect(page.getByTestId('serviceMap')).toHaveScreenshot('detailed_service_map.png', {
+    const serviceMapLocator = await page.getByTestId('serviceMap');
+    await expect(serviceMapLocator).toHaveScreenshot('detailed_service_map.png', {
       animations: 'disabled',
     });
   });
