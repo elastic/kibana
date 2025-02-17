@@ -87,19 +87,19 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
     'newExpandableFlyoutNavigationEnabled'
   );
 
-  useEffect(() => {
-    if (telemetryKey) {
-      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, telemetryKey);
-    }
-  }, [telemetryKey, renderingId]);
-
   const passedFindings = data?.count.passed || 0;
   const failedFindings = data?.count.failed || 0;
   const totalFindings = useMemo(
     () => passedFindings + failedFindings,
     [passedFindings, failedFindings]
   );
-  const hasMisconfigurationFindings = totalFindings > 0;
+  const shouldRender = totalFindings > 0; // this component only renders if there are findings
+
+  useEffect(() => {
+    if (shouldRender && telemetryKey) {
+      uiMetricService.trackUiMetric(METRIC_TYPE.COUNT, telemetryKey);
+    }
+  }, [shouldRender, telemetryKey, renderingId]);
 
   const misconfigurationsStats = useMemo(
     () => getFindingsStats(passedFindings, failedFindings),
@@ -161,7 +161,7 @@ export const MisconfigurationsInsight: React.FC<MisconfigurationsInsightProps> =
     ]
   );
 
-  if (!hasMisconfigurationFindings) return null;
+  if (!shouldRender) return null;
 
   return (
     <EuiFlexItem data-test-subj={dataTestSubj}>
