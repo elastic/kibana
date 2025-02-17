@@ -85,13 +85,23 @@ export const StatusColumn: React.FunctionComponent<{
         />
       </EuiButtonEmpty>
     );
+    const notStartedStatus = (
+      <EuiButtonEmpty size="s" iconType="minusInCircle" color="text">
+        <FormattedMessage
+          id="xpack.fleet.manageAutoUpgradeAgents.notStartedText"
+          defaultMessage="Not started"
+        />
+      </EuiButtonEmpty>
+    );
     let statusButton = inProgressStatus;
 
     if (agentVersionCounts.failedUpgradeAgents > 0) {
       statusButton = failedStatus;
     } else {
       const currPercentage = calcPercentage(agentVersionCounts.agents);
-      if (currPercentage >= percentage) {
+      if (currPercentage === 0) {
+        statusButton = notStartedStatus;
+      } else if (currPercentage >= percentage) {
         statusButton = completedStatus;
       } else {
         statusButton = inProgressStatus;
