@@ -43,7 +43,7 @@ describe('toMountPoint', () => {
   };
 
   it('exposes the euiTheme when `theme$` is provided', async () => {
-    const theme = { theme$: of<CoreTheme>({ darkMode: true }) };
+    const theme = { theme$: of<CoreTheme>({ darkMode: true, name: 'amsterdam' }) };
     const mount = toMountPoint(<InnerComponent />, { theme, i18n, analytics, userProfile });
 
     const targetEl = document.createElement('div');
@@ -55,7 +55,7 @@ describe('toMountPoint', () => {
   });
 
   it('propagates changes of the theme$ observable', async () => {
-    const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: true });
+    const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: true, name: 'amsterdam' });
 
     const mount = toMountPoint(<InnerComponent />, {
       theme: { theme$ },
@@ -72,7 +72,7 @@ describe('toMountPoint', () => {
     expect(euiTheme!.colorMode).toEqual('DARK');
 
     await act(async () => {
-      theme$.next({ darkMode: false });
+      theme$.next({ darkMode: false, name: 'amsterdam' });
     });
     await flushPromises();
 

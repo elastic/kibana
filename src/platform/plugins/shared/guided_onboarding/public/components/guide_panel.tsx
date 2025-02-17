@@ -57,7 +57,7 @@ export const GuidePanel = ({ api, application, notifications, theme$ }: GuidePan
   const [pluginState, setPluginState] = useState<PluginState | undefined>(undefined);
   const [guideConfig, setGuideConfig] = useState<GuideConfig | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { darkMode: isDarkTheme } = useObservable(theme$, { darkMode: false });
+  const { darkMode: isDarkTheme } = useObservable(theme$, { darkMode: false, name: 'amsterdam' });
 
   const styles = getGuidePanelStyles({ euiThemeContext, isDarkTheme });
 

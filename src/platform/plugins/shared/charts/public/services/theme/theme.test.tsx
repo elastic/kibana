@@ -18,7 +18,7 @@ import { ThemeService } from './theme';
 import { coreMock } from '@kbn/core/public/mocks';
 
 const createTheme$Mock = (mode: boolean) => {
-  return from([{ darkMode: mode }]);
+  return from([{ darkMode: mode, name: 'borealis' }]);
 };
 
 const { theme: setUpMockTheme } = coreMock.createSetup();
@@ -36,6 +36,7 @@ describe('ThemeService', () => {
 
       expect(await themeService.darkModeEnabled$.pipe(take(1)).toPromise()).toStrictEqual({
         darkMode: false,
+        name: 'borealis',
       });
     });
 
@@ -46,6 +47,7 @@ describe('ThemeService', () => {
 
       expect(await themeService.darkModeEnabled$.pipe(take(1)).toPromise()).toStrictEqual({
         darkMode: true,
+        name: 'borealis',
       });
     });
   });
@@ -80,19 +82,19 @@ describe('ThemeService', () => {
       const { useChartsBaseTheme } = themeService;
 
       const { result } = renderHook(() => useChartsBaseTheme());
-      expect(result.current).toBe(LIGHT_THEME);
+      expect(result.current).toStrictEqual(LIGHT_THEME);
 
       act(() => {
         setUpMockTheme.theme$ = createTheme$Mock(true);
         themeService.init(setUpMockTheme);
       });
-      expect(result.current).toBe(DARK_THEME);
+      expect(result.current).toStrictEqual(DARK_THEME);
       act(() => {
         setUpMockTheme.theme$ = createTheme$Mock(false);
         themeService.init(setUpMockTheme);
       });
       // act(() => darkMode$.next(false));
-      expect(result.current).toBe(LIGHT_THEME);
+      expect(result.current).toStrictEqual(LIGHT_THEME);
     });
 
     it('should not rerender when emitting the same value', () => {
