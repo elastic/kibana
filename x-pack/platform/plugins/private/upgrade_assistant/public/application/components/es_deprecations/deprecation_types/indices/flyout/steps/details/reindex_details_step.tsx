@@ -150,7 +150,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
             </Fragment>
           )}
           {!meta.isReadonly && isMLAnomalyIndex ? (
-            <MlAnomalyGuidance indexName={indexName} />
+            <MlAnomalyGuidance />
           ) : (
             <Fragment>
               <p>

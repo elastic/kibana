@@ -12,11 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiDescriptionList, EuiLink, EuiText } from '@elastic/eui';
 import { useAppContext } from '../../../../../../../app_context';
 
-interface Props {
-  indexName: string;
-}
-
-export const MlAnomalyGuidance: FunctionComponent<Props> = ({ indexName }) => {
+export const MlAnomalyGuidance: FunctionComponent = () => {
   const {
     services: {
       core: { docLinks },
