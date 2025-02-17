@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IDataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public';
-
-export interface StreamsAppServices {
-  dataStreamsClient: Promise<IDataStreamsStatsClient>;
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/observability/packages/alert-details'],
+};

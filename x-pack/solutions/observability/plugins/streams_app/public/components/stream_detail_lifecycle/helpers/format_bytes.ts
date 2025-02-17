@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/observability/packages/alert_details'],
-};
+import { formatNumber } from '@elastic/eui';
+
+export const formatBytes = (value: number) => formatNumber(value, '0.0 b');
