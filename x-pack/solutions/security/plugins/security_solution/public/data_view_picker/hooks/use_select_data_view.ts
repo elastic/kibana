@@ -14,7 +14,7 @@ export const useSelectDataView = () => {
   const dispatch = useDispatch();
 
   return useCallback(
-    (params: { id?: string | null; patterns?: string[]; scope: DataViewPickerScopeName }) => {
+    (params: { id?: string | null; patterns?: string[]; scope: DataViewPickerScopeName[] }) => {
       dispatch(selectDataViewAsync(params));
     },
     [dispatch]

@@ -62,7 +62,7 @@ export const useUpdateTimeline = () => {
         selectDataView({
           id: _timeline.dataViewId,
           patterns: _timeline.indexNames,
-          scope: DataViewPickerScopeName.timeline,
+          scope: [DataViewPickerScopeName.timeline],
         });
       }
       if (

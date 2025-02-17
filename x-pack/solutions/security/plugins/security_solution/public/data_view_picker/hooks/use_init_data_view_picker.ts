@@ -53,11 +53,11 @@ export const useInitDataViewPicker = () => {
 
     dispatch(shared.actions.init());
 
-    // Preload the default view
+    // Preload the default view for related scopes
     dispatch(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        scope: DataViewPickerScopeName.default,
+        scope: [DataViewPickerScopeName.default, DataViewPickerScopeName.timeline],
       })
     );
 

@@ -21,8 +21,6 @@ export const createDataViewSelectedListener = (dependencies: {
     ) => {
       const state = listenerApi.getState();
 
-      const currentScopeActions = scopes[action.payload.scope].actions;
-
       const findCachedDataView = (id: string | null | undefined) => {
         const savedDataView = state.dataViewPicker.shared.dataViews.find((dv) => dv.id === id);
 
@@ -45,6 +43,7 @@ export const createDataViewSelectedListener = (dependencies: {
         try {
           if (action.payload.id) {
             const dataViewById = await dependencies.dataViews.get(action.payload.id);
+            // eslint-disable-next-line require-atomic-updates
             dataViewSpec = dataViewById.toSpec();
           }
         } catch (error: unknown) {
@@ -64,19 +63,23 @@ export const createDataViewSelectedListener = (dependencies: {
             title,
           });
           listenerApi.dispatch(shared.actions.addDataView(adhocDataView));
+          // eslint-disable-next-line require-atomic-updates
           dataViewSpec = adhocDataView.toSpec();
         } catch (error: unknown) {
           adhocDataViewCreationError = error;
         }
       }
 
-      if (dataViewSpec) {
-        listenerApi.dispatch(currentScopeActions.setSelectedDataView(dataViewSpec));
-      } else if (dataViewByIdError || adhocDataViewCreationError) {
-        listenerApi.dispatch(
-          currentScopeActions.dataViewSelectionError('An error occured when setting data view')
-        );
-      }
+      action.payload.scope.forEach((scope) => {
+        const currentScopeActions = scopes[scope].actions;
+        if (dataViewSpec) {
+          listenerApi.dispatch(currentScopeActions.setSelectedDataView(dataViewSpec));
+        } else if (dataViewByIdError || adhocDataViewCreationError) {
+          listenerApi.dispatch(
+            currentScopeActions.dataViewSelectionError('An error occured when setting data view')
+          );
+        }
+      });
     },
   };
 };

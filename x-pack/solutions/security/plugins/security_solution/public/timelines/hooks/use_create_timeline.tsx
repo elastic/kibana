@@ -80,7 +80,7 @@ export const useCreateTimeline = ({
       setSelectedDataView({
         id: dataViewId,
         patterns: selectedPatterns,
-        scope: DataViewPickerScopeName.timeline,
+        scope: [DataViewPickerScopeName.timeline],
       });
 
       dispatch(

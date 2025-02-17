@@ -26,10 +26,10 @@ export const initialSharedState: SharedDataViewSelectionState = {
 export const selectDataViewAsync = createAction<{
   id?: string | null;
   patterns?: string[];
-  scope: DataViewPickerScopeName;
+  scope: DataViewPickerScopeName[];
 }>(`${SLICE_PREFIX}/selectDataView`);
 
-const createDataViewSelectionSlice = <T extends string>(scopeName: T) =>
+const createDataViewSelectionSlice = <T extends DataViewPickerScopeName>(scopeName: T) =>
   createSlice({
     name: `${SLICE_PREFIX}/${scopeName}`,
     initialState: initialScopeState,
@@ -44,7 +44,7 @@ const createDataViewSelectionSlice = <T extends string>(scopeName: T) =>
     },
     extraReducers(builder) {
       builder.addCase(selectDataViewAsync, (state, action) => {
-        if (action.payload.scope !== scopeName) {
+        if (!action.payload.scope.includes(scopeName)) {
           return state;
         }
 
