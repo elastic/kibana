@@ -33,7 +33,6 @@ import {
   type IEditSpaceStoreState,
 } from './reducers';
 import type { SpacesManager } from '../../../spaces_manager';
-import { DocLinksStart } from '@kbn/core/public';
 
 export interface EditSpaceProviderRootProps
   extends Pick<
@@ -50,7 +49,7 @@ export interface EditSpaceProviderRootProps
   getRolesAPIClient: () => Promise<RolesAPIClient>;
   getPrivilegesAPIClient: () => Promise<PrivilegesAPIClientPublicContract>;
   getSecurityLicense: () => Promise<SecurityLicense>;
-  docLinks: DocLinksStart;
+  enableSecurityLink: string;
 }
 
 interface EditSpaceClients {

@@ -10,7 +10,6 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 
 import {
-  docLinksServiceMock,
   httpServiceMock,
   i18nServiceMock,
   loggingSystemMock,
@@ -49,7 +48,6 @@ const userProfile = userProfileServiceMock.createStart();
 const theme = themeServiceMock.createStartContract();
 const i18n = i18nServiceMock.createStartContract();
 const logger = loggingSystemMock.createLogger();
-const docsLinks = docLinksServiceMock.createStartContract();
 
 const navigateSpy = jest.spyOn(history, 'push').mockImplementation(() => {});
 const updateSpaceSpy = jest
@@ -91,7 +89,7 @@ describe('EditSpaceSettings', () => {
           theme={theme}
           i18n={i18n}
           logger={logger}
-          docLinks={docsLinks}
+          enableSecurityLink=""
         >
           {children}
         </EditSpaceProviderRoot>

@@ -12,7 +12,6 @@ import crypto from 'crypto';
 import React from 'react';
 
 import {
-  docLinksServiceMock,
   httpServiceMock,
   i18nServiceMock,
   loggingSystemMock,
@@ -50,7 +49,6 @@ const theme = themeServiceMock.createStartContract();
 const i18n = i18nServiceMock.createStartContract();
 const logger = loggingSystemMock.createLogger();
 const spacesManager = spacesManagerMock.create();
-const docsLinks = docLinksServiceMock.createStartContract();
 
 const createRole = (roleName: string, kibana: Role['kibana'] = []): Role => {
   return {
@@ -115,7 +113,7 @@ const renderPrivilegeRolesForm = ({
               fetchRolesError: false,
             },
             invokeClient: spacesClientsInvocatorMock,
-            docLinks: docsLinks,
+            enableSecurityLink: '',
           }}
         >
           <PrivilegesRolesForm
