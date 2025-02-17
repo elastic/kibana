@@ -20,7 +20,7 @@ interface MutationArgs {
 
 export const usePutSynonymsSet = (
   onSuccess?: () => void,
-  onError?: (error: KibanaServerError) => void
+  onConflictError?: (error: KibanaServerError) => void
 ) => {
   const queryClient = useQueryClient();
   const {
@@ -53,8 +53,8 @@ export const usePutSynonymsSet = (
         );
       },
       onError: (error: { body: KibanaServerError }) => {
-        if (onError && error.body.statusCode === 409) {
-          onError(error.body);
+        if (onConflictError && error.body.statusCode === 409) {
+          onConflictError(error.body);
         } else {
           notifications?.toasts?.addError(new Error(error.body.message), {
             title: i18n.translate('xpack.searchSynonyms.putSynonymsSetError', {

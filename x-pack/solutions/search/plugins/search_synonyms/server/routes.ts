@@ -7,6 +7,7 @@
 
 import { IRouter, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import { APIRoutes } from '../common/api_routes';
 
 import { errorHandler } from './utils/error_handler';
@@ -322,7 +323,13 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       if (isExisting && !forceWrite) {
         return response.customError({
           statusCode: 409,
-          body: `Synonyms set ${synonymsSetId} already exists. Use forceWrite=true to overwrite it.`,
+          body: i18n.translate(
+            'xpack.search.synonyms.api.routes.synonymsSetAlreadyExistsErrorMessage',
+            {
+              defaultMessage: `Synonyms set {synonymsSetId} already exists. Use forceWrite=true to overwrite it.`,
+              values: { synonymsSetId },
+            }
+          ),
         });
       }
       const result = await putSynonymsSet(asCurrentUser, synonymsSetId);

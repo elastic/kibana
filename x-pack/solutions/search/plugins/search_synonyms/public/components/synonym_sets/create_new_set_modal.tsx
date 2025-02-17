@@ -38,14 +38,14 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
 
   const [name, setName] = useState('');
   const [rawName, setRawName] = useState('');
-  const [error, setError] = useState(false);
+  const [conflictError, setConflictError] = useState(false);
   const [forceWrite, setForceWrite] = useState(false);
   const { mutate: createSynonymsSet } = usePutSynonymsSet(
     () => {
       onClose();
     },
     () => {
-      setError(true);
+      setConflictError(true);
     }
   );
   return (
@@ -74,16 +74,16 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
               defaultMessage: 'Name',
             })}
             helpText={
-              !!rawName && !error
+              !!rawName && !conflictError
                 ? i18n.translate('xpack.searchSynonyms.createSynonymsSetModal.nameHelpText', {
                     defaultMessage: 'Your synonyms set will be named: {name}',
                     values: { name },
                   })
                 : undefined
             }
-            isInvalid={error}
+            isInvalid={conflictError}
             error={
-              error
+              conflictError
                 ? i18n.translate('xpack.searchSynonyms.createSynonymsSetModal.nameErrorText', {
                     defaultMessage: 'A synonym with id {name} already exists.',
                     values: { name },
@@ -97,12 +97,12 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
               onChange={(e) => {
                 setRawName(e.target.value);
                 setName(formatSynonymsSetName(e.target.value));
-                setError(false);
+                setConflictError(false);
                 setForceWrite(false);
               }}
             />
           </EuiFormRow>
-          {error && (
+          {conflictError && (
             <>
               <EuiSpacer size="s" />
               <EuiFormRow fullWidth>
@@ -149,10 +149,8 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
           data-test-subj="searchSynonymsCreateSynonymsSetModalCreateButton"
           form={formId}
           fill
-          disabled={!name || (error && !forceWrite)}
-          onClick={() => {
-            createSynonymsSet({ synonymsSetId: name, forceWrite });
-          }}
+          disabled={!name || (conflictError && !forceWrite)}
+          type="submit"
         >
           <FormattedMessage
             id="xpack.searchSynonyms.createSynonymsSetModal.createButton"
