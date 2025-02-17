@@ -33,7 +33,7 @@ export const SecurityDisabledCallout = ({ enableSecurityLink }: Props) => (
           <EuiLink href={enableSecurityLink} target="_blank" external={true}>
             <FormattedMessage
               id="xpack.spaces.management.spaceDetails.contentTabs.securityDisabledLearnMore"
-              defaultMessage="Learn more."
+              defaultMessage="Learn more"
             />
           </EuiLink>
         ),
