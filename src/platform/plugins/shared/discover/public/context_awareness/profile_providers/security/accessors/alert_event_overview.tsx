@@ -22,6 +22,7 @@ import {
 } from '@elastic/eui';
 import * as i18n from '../translations';
 import { getEcsAllowedValueDescription, getSecurityTimelineRedirectUrl } from '../utils';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 export const ExpandableSection: FC<PropsWithChildren<{ title: string }>> = ({
   title,
@@ -58,6 +59,14 @@ export const ExpandableSection: FC<PropsWithChildren<{ title: string }>> = ({
 };
 
 export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
+  const {
+    application: { getUrlForApp },
+  } = useDiscoverServices();
+
+  const timelinesURL = getUrlForApp('securitySolutionUI', {
+    path: 'timelines',
+  });
+
   const reason = useMemo(() => getFieldValue(hit, 'kibana.alert.reason') as string, [hit]);
   const description = useMemo(
     () => getFieldValue(hit, 'kibana.alert.rule.description') as string,
@@ -74,8 +83,9 @@ export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
         to: getFieldValue(hit, '@timestamp') as string,
         eventId: eventId as string,
         index: getFieldValue(hit, '_index') as string,
+        baseURL: timelinesURL,
       }),
-    [hit, eventId]
+    [hit, eventId, timelinesURL]
   );
 
   const eventCategory = useMemo(() => getFieldValue(hit, 'event.category') as string, [hit]);

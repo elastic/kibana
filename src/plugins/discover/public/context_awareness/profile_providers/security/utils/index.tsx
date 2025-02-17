@@ -23,6 +23,7 @@ export interface TimelineRedirectArgs {
   to?: string;
   eventId?: string;
   index: string;
+  baseURL: string;
 }
 
 export const getSecurityTimelineRedirectUrl = ({
@@ -30,9 +31,8 @@ export const getSecurityTimelineRedirectUrl = ({
   to,
   index,
   eventId,
+  baseURL,
 }: TimelineRedirectArgs) => {
-  const BASE_PATH = '/app/security/alerts';
-
   let timelineTimerangeSearchParam = {};
   if (from && to) {
     timelineTimerangeSearchParam = {
@@ -70,7 +70,7 @@ export const getSecurityTimelineRedirectUrl = ({
   const encodedTimelineTimerangeParam = encode(timelineTimerangeSearchParam);
   const encodedTimelineFlyoutParam = encode(timelineFlyoutSearchParam);
 
-  return `${BASE_PATH}?timeline=${encodedTimelineParam}&timeRange=${encodedTimelineTimerangeParam}&timelineFlyout=${encodedTimelineFlyoutParam}`;
+  return `${baseURL}?timeline=${encodedTimelineParam}&timeRange=${encodedTimelineTimerangeParam}&timelineFlyout=${encodedTimelineFlyoutParam}`;
 };
 
 /**
