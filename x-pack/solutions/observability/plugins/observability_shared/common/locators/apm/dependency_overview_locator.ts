@@ -5,18 +5,13 @@
  * 2.0.
  */
 import qs from 'query-string';
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-
-export interface DependencyOverviewParams extends SerializableRecord {
-  dependencyName: string;
-  environment?: string;
-  rangeFrom?: string;
-  rangeTo?: string;
-}
+import {
+  DEPENDENCY_OVERVIEW_LOCATOR_ID,
+  DependencyOverviewParams,
+} from '@kbn/deeplinks-observability/locators';
 
 export type DependencyOverviewLocator = LocatorPublic<DependencyOverviewParams>;
-export const DEPENDENCY_OVERVIEW_LOCATOR_ID = 'dependencyOverviewLocator';
 
 export class DependencyOverviewLocatorDefinition
   implements LocatorDefinition<DependencyOverviewParams>

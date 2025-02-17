@@ -13,3 +13,4 @@ export * from './dataset_quality_details';
 export * from './observability_logs_explorer';
 export * from './observability_onboarding';
 export * from './uptime';
+export * from './dependency_overview';
