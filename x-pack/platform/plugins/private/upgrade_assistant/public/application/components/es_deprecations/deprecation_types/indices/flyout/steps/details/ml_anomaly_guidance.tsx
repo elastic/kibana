@@ -63,7 +63,7 @@ export const MlAnomalyGuidance: FunctionComponent = () => {
               <EuiText size="m">
                 <FormattedMessage
                   id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.readOnlyMlAnomalyIndexText"
-                  defaultMessage="This skips reindexing and will mark the result index as read-only. It is useful for large indexes that contain the results of only one or a few anomaly detection jobs. If you delete these jobs later, you will not be able to create a new job with the same name. {learnMore} about write blocks."
+                  defaultMessage="This skips reindexing and will mark the result index as read-only. It is useful for large indices that contain the results of only one or a few anomaly detection jobs. If you delete these jobs later, you will not be able to create a new job with the same name. {learnMore} about write blocks."
                   values={{
                     learnMore: (
                       <EuiLink target="_blank" href={docLinks.links.upgradeAssistant.indexBlocks}>
