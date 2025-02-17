@@ -29,7 +29,6 @@ import {
 import { orderBy } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
-import { EmptyFunctionsMessage } from '../empty_functions_message';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { SearchFunctionsInput } from '../search_functions_input';
 import { FunctionRow } from '../topn_functions/function_row';
@@ -246,11 +245,7 @@ export function DifferentialTopNFunctionsGrid({
       <EuiFlexItem grow={false}>
         <SearchFunctionsInput onChange={onSearchFunctionNameChange} value={searchFunctionName} />
       </EuiFlexItem>
-      <EuiFlexItem
-        css={css`
-          position: relative;
-        `}
-      >
+      <EuiFlexItem>
         <EuiDataGrid
           data-test-subj="profilingDiffTopNFunctionsGrid"
           css={css`
@@ -353,7 +348,6 @@ export function DifferentialTopNFunctionsGrid({
             }}
           />
         )}
-        {sortedBaseRows.length && sortedComparisonRows.length ? null : <EmptyFunctionsMessage />}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
