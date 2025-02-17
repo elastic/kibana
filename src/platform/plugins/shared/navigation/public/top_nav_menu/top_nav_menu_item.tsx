@@ -48,9 +48,14 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
     }
   }
 
-  function handleClick(e: MouseEvent<HTMLButtonElement>) {
+  const isModifiedEvent = (event: MouseEvent) =>
+    !!(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
+
+  function handleClick(event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) {
     if (isDisabled()) return;
-    props.run(e.currentTarget);
+    if (props.href && isModifiedEvent(event)) return;
+
+    props.run(event.currentTarget);
     if (props.isMobileMenu) {
       props.closePopover();
     }
@@ -60,6 +65,7 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
     isDisabled: isDisabled(),
     onClick: handleClick,
     isLoading: props.isLoading,
+    href: props.href,
     iconType: props.iconType,
     iconSide: props.iconSide,
     'data-test-subj': props.testId,
