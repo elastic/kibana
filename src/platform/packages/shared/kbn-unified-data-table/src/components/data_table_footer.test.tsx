@@ -13,6 +13,7 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { servicesMock } from '../../__mocks__/services';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { DEFAULT_PAGINATION_MODE } from '../..';
 
 describe('UnifiedDataTableFooter', function () {
   it('should not render anything when not on the last page', async () => {
@@ -26,6 +27,8 @@ describe('UnifiedDataTableFooter', function () {
           rowCount={500}
           data={servicesMock.data}
           fieldFormats={servicesMock.fieldFormats}
+          paginationMode={DEFAULT_PAGINATION_MODE}
+          hasScrolledToBottom={false}
         />
       </KibanaContextProvider>
     );
@@ -42,6 +45,8 @@ describe('UnifiedDataTableFooter', function () {
         rowCount={500}
         data={servicesMock.data}
         fieldFormats={servicesMock.fieldFormats}
+        paginationMode={DEFAULT_PAGINATION_MODE}
+        hasScrolledToBottom={false}
       />
     );
     expect(component.isEmptyRender()).toBe(true);
@@ -57,6 +62,8 @@ describe('UnifiedDataTableFooter', function () {
         rowCount={500}
         data={servicesMock.data}
         fieldFormats={servicesMock.fieldFormats}
+        paginationMode={DEFAULT_PAGINATION_MODE}
+        hasScrolledToBottom={false}
       />
     );
     expect(findTestSubject(component, 'unifiedDataTableFooter').text()).toBe(
@@ -79,6 +86,8 @@ describe('UnifiedDataTableFooter', function () {
         onFetchMoreRecords={mockLoadMore}
         data={servicesMock.data}
         fieldFormats={servicesMock.fieldFormats}
+        paginationMode={DEFAULT_PAGINATION_MODE}
+        hasScrolledToBottom={false}
       />
     );
     expect(findTestSubject(component, 'unifiedDataTableFooter').text()).toBe(
@@ -107,6 +116,8 @@ describe('UnifiedDataTableFooter', function () {
         onFetchMoreRecords={mockLoadMore}
         data={servicesMock.data}
         fieldFormats={servicesMock.fieldFormats}
+        paginationMode={DEFAULT_PAGINATION_MODE}
+        hasScrolledToBottom={false}
       />
     );
     expect(findTestSubject(component, 'unifiedDataTableFooter').text()).toBe(
@@ -132,6 +143,8 @@ describe('UnifiedDataTableFooter', function () {
         rowCount={10000}
         data={servicesMock.data}
         fieldFormats={servicesMock.fieldFormats}
+        paginationMode={DEFAULT_PAGINATION_MODE}
+        hasScrolledToBottom={false}
       />
     );
     expect(findTestSubject(component, 'unifiedDataTableFooter').text()).toBe(
