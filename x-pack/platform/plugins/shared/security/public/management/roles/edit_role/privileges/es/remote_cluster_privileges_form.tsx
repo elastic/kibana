@@ -22,6 +22,7 @@ import React, { Fragment, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
+import type { RemoteClusterPrivilege } from '@kbn/security-plugin-types-common';
 import { euiThemeVars } from '@kbn/ui-theme';
 
 import { RemoteClusterComboBox } from './remote_clusters_combo_box';
@@ -54,7 +55,7 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
 }) => {
   const onCreateClusterOption = useCallback(
     (option: string) => {
-      const nextClusters = (remoteClusterPrivilege.clusters ?? []).concat([option]);
+      const nextClusters = ([...remoteClusterPrivilege.clusters] ?? []).concat([option]);
 
       onChange({
         ...remoteClusterPrivilege,
@@ -79,7 +80,7 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
     (newPrivileges: EuiComboBoxOptionOption[]) => {
       onChange({
         ...remoteClusterPrivilege,
-        privileges: newPrivileges.map(fromOption),
+        privileges: newPrivileges.map(fromOption) as RemoteClusterPrivilege[],
       });
     },
     [remoteClusterPrivilege, onChange]
@@ -116,7 +117,7 @@ export const RemoteClusterPrivilegesForm: React.FunctionComponent<Props> = ({
                 >
                   <RemoteClusterComboBox
                     data-test-subj={`remoteClusterClustersInput${formIndex}`}
-                    selectedOptions={(remoteClusterPrivilege.clusters ?? []).map(toOption)}
+                    selectedOptions={([...remoteClusterPrivilege.clusters] ?? []).map(toOption)}
                     onCreateOption={onCreateClusterOption}
                     onChange={onClustersChange}
                     isDisabled={isRoleReadOnly}

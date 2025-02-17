@@ -18,10 +18,6 @@ import { AnalyticsCollection } from '../../../../../../common/types/analytics';
 
 import { AnalyticsCollectionIntegrateView } from './analytics_collection_integrate_view';
 
-jest.mock('../../../../shared/enterprise_search_url', () => ({
-  getEnterpriseSearchUrl: () => 'http://localhost:3002',
-}));
-
 jest.mock('../../../../shared/cloud_details/cloud_details', () => ({
   useCloudDetails: () => ({
     elasticsearchUrl: 'your_deployment_url',

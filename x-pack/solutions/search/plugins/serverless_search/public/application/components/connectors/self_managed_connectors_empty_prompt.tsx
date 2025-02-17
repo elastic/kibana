@@ -12,22 +12,21 @@ import {
   EuiIcon,
   EuiLink,
   EuiButton,
-  EuiBadge,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ConnectorIcon } from '@kbn/search-shared-ui';
-import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
+import {
+  SearchEmptyPrompt,
+  DecorativeHorizontalStepper,
+  EuiIconPlugs,
+} from '@kbn/search-shared-ui';
 import { docLinks } from '../../../../common/doc_links';
-import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useCreateConnector } from '../../hooks/api/use_create_connector';
-import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useConnectors } from '../../hooks/api/use_connectors';
-import { ELASTIC_MANAGED_CONNECTOR_PATH, BASE_CONNECTORS_PATH } from '../../constants';
-import { BACK_LABEL } from '../../../../common/i18n_string';
 
 export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
   const connectorTypes = useConnectorTypes();
@@ -36,15 +35,10 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
   );
   const { createConnector, isLoading } = useCreateConnector();
   const { data } = useConnectors();
-  const assetBasePath = useAssetBasePath();
-  const connectorsIcon = assetBasePath + '/connectors.svg';
-  const {
-    application: { navigateToUrl },
-  } = useKibanaServices();
 
   return (
     <SearchEmptyPrompt
-      icon={connectorsIcon}
+      icon={EuiIconPlugs}
       title={i18n.translate('xpack.serverlessSearch.elasticManagedConnectorEmpty.title', {
         defaultMessage: 'Elastic managed connectors',
       })}
@@ -120,7 +114,7 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
                       justifyContent="center"
                     >
                       <EuiFlexItem grow={false}>
-                        <EuiIcon color="primary" size="l" type={connectorsIcon} />
+                        <EuiIcon color="primary" size="l" type={EuiIconPlugs} />
                       </EuiFlexItem>
                       <EuiFlexItem>
                         <EuiIcon size="m" type="sortRight" />
@@ -183,7 +177,7 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
                           <EuiIcon size="m" type="sortRight" />
                         </EuiFlexItem>
                         <EuiFlexItem>
-                          <EuiIcon color="primary" size="l" type={connectorsIcon} />
+                          <EuiIcon color="primary" size="l" type={EuiIconPlugs} />
                         </EuiFlexItem>
                         <EuiFlexItem>
                           <EuiIcon size="m" type="sortRight" />
@@ -228,26 +222,6 @@ export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
                 defaultMessage: 'Self-managed connector',
               })}
             </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup direction="column" gutterSize="s" alignItems="center">
-              <EuiFlexItem>
-                <EuiButton
-                  data-test-subj="serverlessSearchEmptyConnectorsPromptCreateElasticManagedConnectorButton"
-                  isLoading={isLoading}
-                  onClick={() =>
-                    navigateToUrl(`${BASE_CONNECTORS_PATH}/${ELASTIC_MANAGED_CONNECTOR_PATH}`)
-                  }
-                >
-                  {i18n.translate('xpack.serverlessSearch.connectorsEmpty.elasticManagedButton', {
-                    defaultMessage: 'Elastic managed connector',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="accent">{BACK_LABEL}</EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
       }

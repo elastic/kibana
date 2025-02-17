@@ -57,7 +57,7 @@ export function createTransactionMetricsAggregator(flushInterval: string) {
     {
       filter: (event) => event['processor.event'] === 'transaction',
       getAggregateKey: (event) => {
-        // see https://github.com/elastic/apm-server/blob/main/x-pack/apm-server/aggregation/txmetrics/aggregator.go
+        // see https://github.com/elastic/apm-server/blob/8.10/x-pack/apm-server/aggregation/txmetrics/aggregator.go
         let key = hashKeysOf(event, KEY_FIELDS);
         key = appendHash(key, event['parent.id'] ? '1' : '0');
         return key;

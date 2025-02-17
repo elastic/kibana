@@ -25,6 +25,7 @@ const sortingOverrides: Partial<{
 }> = {
   ['title']: 'name',
   ['size']: DataStreamStat.calculateFilteredSize,
+  ['quality']: (item) => Math.max(item.degradedDocs.percentage, item.failedDocs.percentage),
 };
 
 export const useDatasetQualityTable = () => {
@@ -35,7 +36,7 @@ export const useDatasetQualityTable = () => {
     },
   } = useKibanaContextForPlugin();
 
-  const { service } = useDatasetQualityContext();
+  const { service, isFailureStoreEnabled } = useDatasetQualityContext();
 
   const { page, rowsPerPage, sort } = useSelector(service, (state) => state.context.table);
 
@@ -65,14 +66,22 @@ export const useDatasetQualityTable = () => {
     service,
     (state) =>
       state.matches('stats.datasets.fetching') ||
+      state.matches('stats.docsStats.fetching') ||
       state.matches('integrations.fetching') ||
-      state.matches('stats.degradedDocs.fetching')
+      state.matches('stats.degradedDocs.fetching') ||
+      state.matches('stats.failedDocs.fetching')
   );
   const loadingDataStreamStats = useSelector(service, (state) =>
     state.matches('stats.datasets.fetching')
   );
+  const loadingDocStats = useSelector(service, (state) =>
+    state.matches('stats.docsStats.fetching')
+  );
   const loadingDegradedStats = useSelector(service, (state) =>
     state.matches('stats.degradedDocs.fetching')
+  );
+  const loadingFailedStats = useSelector(service, (state) =>
+    state.matches('stats.failedDocs.fetching')
   );
 
   const datasets = useSelector(service, (state) => state.context.datasets);
@@ -99,22 +108,28 @@ export const useDatasetQualityTable = () => {
         canUserMonitorDataset,
         canUserMonitorAnyDataStream,
         loadingDataStreamStats,
+        loadingDocStats,
         loadingDegradedStats,
+        loadingFailedStats,
         showFullDatasetNames,
         isActiveDataset: isActive,
         timeRange,
         urlService: url,
+        isFailureStoreEnabled,
       }),
     [
       fieldFormats,
       canUserMonitorDataset,
       canUserMonitorAnyDataStream,
       loadingDataStreamStats,
+      loadingDocStats,
       loadingDegradedStats,
+      loadingFailedStats,
       showFullDatasetNames,
       isActive,
       timeRange,
       url,
+      isFailureStoreEnabled,
     ]
   );
 

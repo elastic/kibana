@@ -92,7 +92,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/es-archiver",
     "@kbn/config-schema",
-    "@kbn/kubernetes-security-plugin",
     "@kbn/es-query",
     "@kbn/session-view-plugin",
     "@kbn/ml-is-populated-object",
@@ -107,7 +106,6 @@
     "@kbn/apm-synthtrace-client",
     "@kbn/utils",
     "@kbn/journeys",
-    "@kbn/stdio-dev-helpers",
     "@kbn/alerting-api-integration-helpers",
     "@kbn/cloud-security-posture-plugin",
     "@kbn/cloud-integration-saml-provider-plugin",
@@ -145,7 +143,6 @@
     "@kbn/reporting-export-types-pdf-common",
     "@kbn/reporting-export-types-png-common",
     "@kbn/reporting-common",
-    "@kbn/observability-logs-explorer-plugin",
     "@kbn/io-ts-utils",
     "@kbn/security-plugin-types-common",
     "@kbn/slo-schema",
@@ -187,11 +184,12 @@
     "@kbn/palettes",
     "@kbn/sse-utils-server",
     "@kbn/gen-ai-functional-testing",
-    "@kbn/integration-assistant-plugin",
+    "@kbn/automatic-import-plugin",
     "@kbn/core-elasticsearch-server",
     "@kbn/streams-schema",
     "@kbn/server-route-repository-utils",
     "@kbn/streams-plugin",
-    "@kbn/response-ops-rule-params"
+    "@kbn/response-ops-rule-params",
+    "@kbn/scout-info",
   ]
 }

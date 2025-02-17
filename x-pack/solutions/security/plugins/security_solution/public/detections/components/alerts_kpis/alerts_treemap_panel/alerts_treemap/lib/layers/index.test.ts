@@ -9,9 +9,13 @@ import { getRiskScorePalette, RISK_SCORE_STEPS } from '../chart_palette';
 import { maxRiskSubAggregations } from '../flatten/mocks/mock_buckets';
 import { getGroupFromPath, getLayersOneDimension, getLayersMultiDimensional } from '.';
 import type { Key, ArrayNode } from '@elastic/charts';
+import { useEuiTheme } from '@elastic/eui';
+import { renderHook } from '@testing-library/react';
 
 describe('layers', () => {
-  const colorPalette = getRiskScorePalette(RISK_SCORE_STEPS);
+  const { result } = renderHook(() => useEuiTheme());
+  const euiTheme = result.current.euiTheme;
+  const colorPalette = getRiskScorePalette(RISK_SCORE_STEPS, euiTheme);
 
   describe('getGroupFromPath', () => {
     it('returns the expected group from the path', () => {
@@ -69,14 +73,14 @@ describe('layers', () => {
       const dataName = 'mimikatz process started';
       expect(
         getLayersOneDimension({ colorPalette, maxRiskSubAggregations })[0].shape.fillColor(dataName)
-      ).toEqual('#e7664c');
+      ).toEqual('#E7664C');
     });
 
     it('return the default fill color when dataName is not found in the maxRiskSubAggregations', () => {
       const dataName = 'this does not exist';
       expect(
         getLayersOneDimension({ colorPalette, maxRiskSubAggregations })[0].shape.fillColor(dataName)
-      ).toEqual('#54b399');
+      ).toEqual('#54B399');
     });
   });
 
@@ -165,7 +169,7 @@ describe('layers', () => {
             { index: 0, value: 'Host-k8iyfzraq9' },
           ],
         })
-      ).toEqual('#e7664c');
+      ).toEqual('#E7664C');
     });
 
     it('returns the default fillColor for layer 1 when the group from path is not found', () => {
@@ -188,7 +192,7 @@ describe('layers', () => {
             { index: 0, value: 'nope' },
           ],
         })
-      ).toEqual('#54b399');
+      ).toEqual('#54B399');
     });
   });
 });

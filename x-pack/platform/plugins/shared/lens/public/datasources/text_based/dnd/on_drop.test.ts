@@ -23,6 +23,7 @@ describe('onDrop', () => {
         id: f.columnId,
         name: f.fieldName,
         meta: f?.meta,
+        ...(f.columnId === 'products.base_price' && { variable: 'field' }),
       } as DatatableColumn;
     })
   );
@@ -130,6 +131,50 @@ describe('onDrop', () => {
       })
     );
   });
+  it('should add the column when dropping a field controlled by a variable', () => {
+    const props = {
+      ...defaultProps,
+      source: {
+        field: 'field',
+        id: 'field',
+        humanData: {
+          label: '?field',
+        },
+      },
+      target: {
+        layerId: 'first',
+        groupId: 'x',
+        isNewColumn: true,
+        indexPatternId: '9de9a3c2-ae98-4180-b019-4d208e516b70',
+        humanData: {
+          groupLabel: 'Vertical axis',
+          layerNumber: 1,
+          position: 1,
+          label: 'Empty dimension',
+          nextLabel: '?field',
+          canDuplicate: false,
+        },
+        columnId: 'empty',
+        id: 'empty',
+      },
+      dropType: 'field_add' as DropType,
+    } as unknown as DatasourceDimensionDropHandlerProps<TextBasedPrivateState>;
+    const expectedColumns = [
+      column1,
+      column2,
+      column3,
+      { columnId: 'empty', fieldName: '?field', meta: { type: 'number' }, variable: 'field' },
+    ];
+    expect(onDrop(props)).toEqual(
+      expect.objectContaining({
+        layers: {
+          first: expect.objectContaining({
+            columns: expectedColumns,
+          }),
+        },
+      })
+    );
+  });
   it('should replace the column with the field', () => {
     const props = {
       ...defaultProps,
@@ -146,6 +191,33 @@ describe('onDrop', () => {
       column1,
       column2,
       { columnId: 'columnId3', fieldName: 'currency', meta: { type: 'string' } },
+    ];
+    expect(onDrop(props)).toEqual(
+      expect.objectContaining({
+        layers: {
+          first: expect.objectContaining({
+            columns: expectedColumns,
+          }),
+        },
+      })
+    );
+  });
+  it('should replace the column with the field if the field is controlled by a variable', () => {
+    const props = {
+      ...defaultProps,
+      source: {
+        field: 'field',
+        id: 'field',
+        humanData: {
+          label: '?field',
+        },
+      },
+      dropType: 'field_replace' as DropType,
+    };
+    const expectedColumns = [
+      column1,
+      column2,
+      { columnId: 'columnId3', fieldName: '?field', meta: { type: 'number' }, variable: 'field' },
     ];
     expect(onDrop(props)).toEqual(
       expect.objectContaining({

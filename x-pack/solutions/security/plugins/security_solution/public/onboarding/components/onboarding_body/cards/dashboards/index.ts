@@ -9,12 +9,12 @@ import React from 'react';
 import type { OnboardingCardConfig } from '../../../../types';
 import { OnboardingCardId } from '../../../../constants';
 import { DASHBOARDS_CARD_TITLE } from './translations';
-import dashboardsIcon from './images/dashboards_icon.png';
+import { getCardIcon } from '../common/card_icon';
 
 export const dashboardsCardConfig: OnboardingCardConfig = {
   id: OnboardingCardId.dashboards,
   title: DASHBOARDS_CARD_TITLE,
-  icon: dashboardsIcon,
+  icon: () => getCardIcon(OnboardingCardId.dashboards),
   Component: React.lazy(
     () =>
       import(
@@ -22,5 +22,5 @@ export const dashboardsCardConfig: OnboardingCardConfig = {
         './dashboards_card'
       )
   ),
-  capabilitiesRequired: ['dashboard.show'],
+  capabilitiesRequired: ['dashboard_v2.show'],
 };

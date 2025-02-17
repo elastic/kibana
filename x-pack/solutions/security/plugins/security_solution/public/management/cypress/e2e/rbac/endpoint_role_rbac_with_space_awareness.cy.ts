@@ -88,7 +88,7 @@ describe(
         .findByTestSubj(`space-avatar-${spaceId}`)
         .should('exist');
 
-      cy.get('#row_siem_expansion')
+      cy.get('#row_siemV2_expansion')
         .findByTestSubj('subFeatureEntry')
         .then(($element) => {
           const features: string[] = [];
@@ -107,6 +107,7 @@ describe(
           'Host Isolation ExceptionsNone',
           'BlocklistNone',
           'Event FiltersNone',
+          'Global Artifact ManagementNone',
           'Elastic Defend Policy ManagementNone',
           'Response Actions HistoryNone',
           'Host IsolationAll',
@@ -119,10 +120,14 @@ describe(
 
     it('should not display the privilege tooltip', () => {
       ENDPOINT_SUB_FEATURE_PRIVILEGE_IDS.forEach((subFeaturePrivilegeId) => {
-        cy.getByTestSubj(`securitySolution_siem_${subFeaturePrivilegeId}_nameTooltip`).should(
+        cy.getByTestSubj(`securitySolution_siemV2_${subFeaturePrivilegeId}_nameTooltip`).should(
           'not.exist'
         );
       });
+    });
+
+    it('should include new Global Artifact Management privilege', () => {
+      cy.getByTestSubj('securitySolution_siemV2_global_artifact_management').should('exist');
     });
   }
 );

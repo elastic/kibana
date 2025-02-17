@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ESQLAstItem,
-  ESQLCommand,
-  ESQLFunction,
-  ESQLLiteral,
-  ESQLSource,
+import {
+  isIdentifier,
+  type ESQLAstItem,
+  type ESQLCommand,
+  type ESQLFunction,
+  type ESQLLiteral,
+  type ESQLSource,
 } from '@kbn/esql-ast';
 import { uniqBy } from 'lodash';
 import {
@@ -30,7 +31,6 @@ import {
   isAssignment,
   isColumnItem,
   isFunctionItem,
-  isIdentifier,
   isLiteralItem,
   isTimeIntervalItem,
 } from '../shared/helpers';
@@ -48,6 +48,7 @@ import { EDITOR_MARKER } from '../shared/constants';
 import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { listCompleteItem } from './complete_items';
 import { removeMarkerArgFromArgsList } from '../shared/context';
+import { ESQLVariableType } from '../shared/types';
 
 function extractFunctionArgs(args: ESQLAstItem[]): ESQLFunction[] {
   return args.flatMap((arg) => (isAssignment(arg) ? arg.args[1] : arg)).filter(isFunctionItem);
@@ -101,7 +102,10 @@ export function getQueryForFields(queryString: string, commands: ESQLCommand[]) 
 export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'index' | 'policy') {
   const fromCommand = commands.find(({ name }) => name === 'from');
   const args = (fromCommand?.args ?? []) as ESQLSource[];
-  return args.filter((arg) => arg.sourceType === sourceType);
+  // the marker gets added in queries like "FROM "
+  return args.filter(
+    (arg) => arg.sourceType === sourceType && arg.name !== '' && arg.name !== EDITOR_MARKER
+  );
 }
 
 export function removeQuoteForSuggestedSources(suggestions: SuggestionRawDefinition[]) {
@@ -367,12 +371,14 @@ export async function getFieldsOrFunctionsSuggestions(
     functions,
     fields,
     variables,
+    values = false,
     literals = false,
   }: {
     functions: boolean;
     fields: boolean;
     variables?: Map<string, ESQLVariable[]>;
     literals?: boolean;
+    values?: boolean;
   },
   {
     ignoreFn = [],
@@ -387,6 +393,7 @@ export async function getFieldsOrFunctionsSuggestions(
       ? getFieldsByType(types, ignoreColumns, {
           advanceCursor: commandName === 'sort',
           openSuggestions: commandName === 'sort',
+          variableType: values ? ESQLVariableType.VALUES : ESQLVariableType.FIELDS,
         })
       : [])) as SuggestionRawDefinition[],
     functions
@@ -571,7 +578,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
           operatorReturnType === 'unknown' || operatorReturnType === 'unsupported'
             ? 'any'
             : operatorReturnType,
-        ignored: ['='],
+        ignored: ['=', ':'],
       })
     );
   } else {
@@ -617,6 +624,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
             {
               functions: true,
               fields: true,
+              values: Boolean(operator.subtype === 'binary-expression'),
             }
           ))
         );

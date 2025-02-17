@@ -1,0 +1,1145 @@
+{
+  "id": "@kbn/inference-langchain",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/inference-langchain",
+        "id": "def-common.InferenceChatModel",
+        "type": "Class",
+        "tags": [],
+        "label": "InferenceChatModel",
+        "description": [
+          "\nLangchain chatModel utilizing the inference API under the hood for communication with the LLM.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/inference-langchain",
+            "scope": "common",
+            "docId": "kibKbnInferenceLangchainPluginApi",
+            "section": "def-common.InferenceChatModel",
+            "text": "InferenceChatModel"
+          },
+          " extends ",
+          "BaseChatModel",
+          "<",
+          {
+            "pluginId": "@kbn/inference-langchain",
+            "scope": "common",
+            "docId": "kibKbnInferenceLangchainPluginApi",
+            "section": "def-common.InferenceChatModelCallOptions",
+            "text": "InferenceChatModelCallOptions"
+          },
+          ", ",
+          "AIMessageChunk",
+          ">"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel.temperature",
+            "type": "number",
+            "tags": [],
+            "label": "temperature",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel.functionCallingMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "functionCallingMode",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.FunctionCallingMode",
+                "text": "FunctionCallingMode"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel.model",
+            "type": "string",
+            "tags": [],
+            "label": "model",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel.signal",
+            "type": "Object",
+            "tags": [],
+            "label": "signal",
+            "description": [],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-langchain",
+                "id": "def-common.InferenceChatModel.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/inference-langchain",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceLangchainPluginApi",
+                    "section": "def-common.InferenceChatModelParams",
+                    "text": "InferenceChatModelParams"
+                  }
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel.lc_name",
+            "type": "Function",
+            "tags": [],
+            "label": "lc_name",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel.callKeys",
+            "type": "Array",
+            "tags": [],
+            "label": "callKeys",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel.getConnector",
+            "type": "Function",
+            "tags": [],
+            "label": "getConnector",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.InferenceConnector",
+                "text": "InferenceConnector"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel._llmType",
+            "type": "Function",
+            "tags": [],
+            "label": "_llmType",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel._modelType",
+            "type": "Function",
+            "tags": [],
+            "label": "_modelType",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel._identifyingParams",
+            "type": "Function",
+            "tags": [],
+            "label": "_identifyingParams",
+            "description": [],
+            "signature": [
+              "() => { connectorId: string; abortSignal?: AbortSignal | undefined; metadata?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteMetadata",
+                "text": "ChatCompleteMetadata"
+              },
+              " | undefined; temperature?: number | undefined; functionCalling?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.FunctionCallingMode",
+                "text": "FunctionCallingMode"
+              },
+              " | undefined; modelName?: string | undefined; toolChoice?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolChoice",
+                "text": "ToolChoice"
+              },
+              "<string> | undefined; tools?: Record<string, ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolDefinition",
+                "text": "ToolDefinition"
+              },
+              "> | undefined; model_name: string | undefined; }"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel.identifyingParams",
+            "type": "Function",
+            "tags": [],
+            "label": "identifyingParams",
+            "description": [],
+            "signature": [
+              "() => { connectorId: string; abortSignal?: AbortSignal | undefined; metadata?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteMetadata",
+                "text": "ChatCompleteMetadata"
+              },
+              " | undefined; temperature?: number | undefined; functionCalling?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.FunctionCallingMode",
+                "text": "FunctionCallingMode"
+              },
+              " | undefined; modelName?: string | undefined; toolChoice?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolChoice",
+                "text": "ToolChoice"
+              },
+              "<string> | undefined; tools?: Record<string, ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolDefinition",
+                "text": "ToolDefinition"
+              },
+              "> | undefined; model_name: string | undefined; }"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel.getLsParams",
+            "type": "Function",
+            "tags": [],
+            "label": "getLsParams",
+            "description": [],
+            "signature": [
+              "(options: this[\"ParsedCallOptions\"]) => ",
+              "LangSmithParams"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-langchain",
+                "id": "def-common.InferenceChatModel.getLsParams.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "this[\"ParsedCallOptions\"]"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel.bindTools",
+            "type": "Function",
+            "tags": [],
+            "label": "bindTools",
+            "description": [],
+            "signature": [
+              "(tools: ",
+              "BindToolsInput",
+              "[], kwargs?: Partial<",
+              {
+                "pluginId": "@kbn/inference-langchain",
+                "scope": "common",
+                "docId": "kibKbnInferenceLangchainPluginApi",
+                "section": "def-common.InferenceChatModelCallOptions",
+                "text": "InferenceChatModelCallOptions"
+              },
+              "> | undefined) => ",
+              "Runnable",
+              "<",
+              "BaseLanguageModelInput",
+              ", ",
+              "AIMessageChunk",
+              ", ",
+              {
+                "pluginId": "@kbn/inference-langchain",
+                "scope": "common",
+                "docId": "kibKbnInferenceLangchainPluginApi",
+                "section": "def-common.InferenceChatModelCallOptions",
+                "text": "InferenceChatModelCallOptions"
+              },
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-langchain",
+                "id": "def-common.InferenceChatModel.bindTools.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "tools",
+                "description": [],
+                "signature": [
+                  "BindToolsInput",
+                  "[]"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/inference-langchain",
+                "id": "def-common.InferenceChatModel.bindTools.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "kwargs",
+                "description": [],
+                "signature": [
+                  "Partial<",
+                  {
+                    "pluginId": "@kbn/inference-langchain",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceLangchainPluginApi",
+                    "section": "def-common.InferenceChatModelCallOptions",
+                    "text": "InferenceChatModelCallOptions"
+                  },
+                  "> | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel.invocationParams",
+            "type": "Function",
+            "tags": [],
+            "label": "invocationParams",
+            "description": [],
+            "signature": [
+              "(options: this[\"ParsedCallOptions\"]) => InvocationParams"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-langchain",
+                "id": "def-common.InferenceChatModel.invocationParams.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "this[\"ParsedCallOptions\"]"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel.completionWithRetry",
+            "type": "Function",
+            "tags": [],
+            "label": "completionWithRetry",
+            "description": [],
+            "signature": [
+              "{ (request: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteOptions",
+                "text": "ChatCompleteOptions"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolOptions",
+                "text": "ToolOptions"
+              },
+              "<string>, false>): Promise<Promise<",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteResponse",
+                "text": "ChatCompleteResponse"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolOptions",
+                "text": "ToolOptions"
+              },
+              "<string>>>>; (request: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteOptions",
+                "text": "ChatCompleteOptions"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolOptions",
+                "text": "ToolOptions"
+              },
+              "<string>, true>): Promise<",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteStreamResponse",
+                "text": "ChatCompleteStreamResponse"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolOptions",
+                "text": "ToolOptions"
+              },
+              "<string>>>; }"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-langchain",
+                "id": "def-common.InferenceChatModel.completionWithRetry.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "request",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.ChatCompleteOptions",
+                    "text": "ChatCompleteOptions"
+                  },
+                  "<",
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.ToolOptions",
+                    "text": "ToolOptions"
+                  },
+                  "<string>, boolean>"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel._generate",
+            "type": "Function",
+            "tags": [],
+            "label": "_generate",
+            "description": [],
+            "signature": [
+              "(baseMessages: ",
+              "BaseMessage",
+              "[], options: this[\"ParsedCallOptions\"], runManager?: ",
+              "CallbackManagerForLLMRun",
+              " | undefined) => Promise<",
+              "ChatResult",
+              ">"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-langchain",
+                "id": "def-common.InferenceChatModel._generate.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "baseMessages",
+                "description": [],
+                "signature": [
+                  "BaseMessage",
+                  "[]"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/inference-langchain",
+                "id": "def-common.InferenceChatModel._generate.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "this[\"ParsedCallOptions\"]"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/inference-langchain",
+                "id": "def-common.InferenceChatModel._generate.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "runManager",
+                "description": [],
+                "signature": [
+                  "CallbackManagerForLLMRun",
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel._streamResponseChunks",
+            "type": "Function",
+            "tags": [],
+            "label": "_streamResponseChunks",
+            "description": [],
+            "signature": [
+              "(baseMessages: ",
+              "BaseMessage",
+              "[], options: this[\"ParsedCallOptions\"], runManager?: ",
+              "CallbackManagerForLLMRun",
+              " | undefined) => AsyncGenerator<",
+              "ChatGenerationChunk",
+              ", any, unknown>"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-langchain",
+                "id": "def-common.InferenceChatModel._streamResponseChunks.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "baseMessages",
+                "description": [],
+                "signature": [
+                  "BaseMessage",
+                  "[]"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/inference-langchain",
+                "id": "def-common.InferenceChatModel._streamResponseChunks.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "this[\"ParsedCallOptions\"]"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/inference-langchain",
+                "id": "def-common.InferenceChatModel._streamResponseChunks.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "runManager",
+                "description": [],
+                "signature": [
+                  "CallbackManagerForLLMRun",
+                  " | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel.withStructuredOutput",
+            "type": "Function",
+            "tags": [],
+            "label": "withStructuredOutput",
+            "description": [],
+            "signature": [
+              "{ <RunOutput extends Record<string, any> = Record<string, any>>(outputSchema: Record<string, any> | Zod.ZodType<RunOutput, Zod.ZodTypeDef, RunOutput>, config?: ",
+              "StructuredOutputMethodOptions",
+              "<false> | undefined): ",
+              "Runnable",
+              "<",
+              "BaseLanguageModelInput",
+              ", RunOutput, ",
+              "RunnableConfig",
+              "<Record<string, any>>>; <RunOutput extends Record<string, any> = Record<string, any>>(outputSchema: Record<string, any> | Zod.ZodType<RunOutput, Zod.ZodTypeDef, RunOutput>, config?: ",
+              "StructuredOutputMethodOptions",
+              "<true> | undefined): ",
+              "Runnable",
+              "<",
+              "BaseLanguageModelInput",
+              ", { raw: ",
+              "BaseMessage",
+              "; parsed: RunOutput; }, ",
+              "RunnableConfig",
+              "<Record<string, any>>>; }"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-langchain",
+                "id": "def-common.InferenceChatModel.withStructuredOutput.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "outputSchema",
+                "description": [],
+                "signature": [
+                  "Record<string, any> | Zod.ZodType<RunOutput, Zod.ZodTypeDef, RunOutput>"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/inference-langchain",
+                "id": "def-common.InferenceChatModel.withStructuredOutput.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  "StructuredOutputMethodOptions",
+                  "<boolean> | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel._combineLLMOutput",
+            "type": "Function",
+            "tags": [],
+            "label": "_combineLLMOutput",
+            "description": [],
+            "signature": [
+              "() => {}"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/inference-langchain",
+        "id": "def-common.InferenceChatModelCallOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "InferenceChatModelCallOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/inference-langchain",
+            "scope": "common",
+            "docId": "kibKbnInferenceLangchainPluginApi",
+            "section": "def-common.InferenceChatModelCallOptions",
+            "text": "InferenceChatModelCallOptions"
+          },
+          " extends ",
+          "BaseChatModelCallOptions"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModelCallOptions.functionCallingMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "functionCallingMode",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.FunctionCallingMode",
+                "text": "FunctionCallingMode"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModelCallOptions.tools",
+            "type": "Array",
+            "tags": [],
+            "label": "tools",
+            "description": [],
+            "signature": [
+              "BindToolsInput",
+              "[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModelCallOptions.tool_choice",
+            "type": "string",
+            "tags": [],
+            "label": "tool_choice",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModelCallOptions.temperature",
+            "type": "number",
+            "tags": [],
+            "label": "temperature",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModelCallOptions.model",
+            "type": "string",
+            "tags": [],
+            "label": "model",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-langchain",
+        "id": "def-common.InferenceChatModelParams",
+        "type": "Interface",
+        "tags": [],
+        "label": "InferenceChatModelParams",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/inference-langchain",
+            "scope": "common",
+            "docId": "kibKbnInferenceLangchainPluginApi",
+            "section": "def-common.InferenceChatModelParams",
+            "text": "InferenceChatModelParams"
+          },
+          " extends ",
+          "BaseLanguageModelParams"
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModelParams.connector",
+            "type": "Object",
+            "tags": [],
+            "label": "connector",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.InferenceConnector",
+                "text": "InferenceConnector"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModelParams.chatComplete",
+            "type": "Function",
+            "tags": [],
+            "label": "chatComplete",
+            "description": [],
+            "signature": [
+              "<TToolOptions extends ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolOptions",
+                "text": "ToolOptions"
+              },
+              "<string> = ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolOptions",
+                "text": "ToolOptions"
+              },
+              "<string>, TStream extends boolean = false>(options: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteOptions",
+                "text": "ChatCompleteOptions"
+              },
+              "<TToolOptions, TStream>) => ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteCompositeResponse",
+                "text": "ChatCompleteCompositeResponse"
+              },
+              "<TToolOptions, TStream>"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/inference-langchain",
+                "id": "def-common.InferenceChatModelParams.chatComplete.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "{ connectorId: string; stream?: TStream | undefined; system?: string | undefined; messages: ",
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.Message",
+                    "text": "Message"
+                  },
+                  "[]; temperature?: number | undefined; modelName?: string | undefined; functionCalling?: ",
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.FunctionCallingMode",
+                    "text": "FunctionCallingMode"
+                  },
+                  " | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.ChatCompleteMetadata",
+                    "text": "ChatCompleteMetadata"
+                  },
+                  " | undefined; } & TToolOptions"
+                ],
+                "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModelParams.logger",
+            "type": "Object",
+            "tags": [],
+            "label": "logger",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/logging",
+                "scope": "common",
+                "docId": "kibKbnLoggingPluginApi",
+                "section": "def-common.Logger",
+                "text": "Logger"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModelParams.functionCallingMode",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "functionCallingMode",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.FunctionCallingMode",
+                "text": "FunctionCallingMode"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModelParams.temperature",
+            "type": "number",
+            "tags": [],
+            "label": "temperature",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModelParams.model",
+            "type": "string",
+            "tags": [],
+            "label": "model",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModelParams.signal",
+            "type": "Object",
+            "tags": [],
+            "label": "signal",
+            "description": [],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

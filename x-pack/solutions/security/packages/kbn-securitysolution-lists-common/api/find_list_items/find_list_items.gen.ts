@@ -15,45 +15,39 @@
  */
 
 import { z } from '@kbn/zod';
+import { isNonEmptyString } from '@kbn/zod-helpers';
 
-import { NonEmptyString } from '@kbn/openapi-common/schemas/primitives.gen';
 import { ListId } from '../model/list_common.gen';
 import { ListItem } from '../model/list_schemas.gen';
 
+/**
+ * Returns the items that come after the last item returned in the previous call (use the `cursor` value returned in the previous call). This parameter uses the `tie_breaker_id` field to ensure all items are sorted and returned correctly.
+ */
 export type FindListItemsCursor = z.infer<typeof FindListItemsCursor>;
-export const FindListItemsCursor = NonEmptyString;
+export const FindListItemsCursor = z.string().min(1).superRefine(isNonEmptyString);
 
 export type FindListItemsFilter = z.infer<typeof FindListItemsFilter>;
 export const FindListItemsFilter = z.string();
 
 export type FindListItemsRequestQuery = z.infer<typeof FindListItemsRequestQuery>;
 export const FindListItemsRequestQuery = z.object({
-  /**
-   * List's id
-   */
   list_id: ListId,
   /**
-   * The page number to return
+   * The page number to return.
    */
   page: z.coerce.number().int().optional(),
   /**
-   * The number of list items to return per page
+   * The number of list items to return per page.
    */
   per_page: z.coerce.number().int().optional(),
   /**
-   * Determines which field is used to sort the results
+   * Determines which field is used to sort the results.
    */
-  sort_field: NonEmptyString.optional(),
+  sort_field: z.string().min(1).superRefine(isNonEmptyString).optional(),
   /**
    * Determines the sort order, which can be `desc` or `asc`
    */
   sort_order: z.enum(['desc', 'asc']).optional(),
-  /** 
-      * Returns the list that come after the last list returned in the previous call
-(use the cursor value returned in the previous call). This parameter uses
-the `tie_breaker_id` field to ensure all lists are sorted and returned correctly.
- 
-      */
   cursor: FindListItemsCursor.optional(),
   /** 
       * Filters the returned results according to the value of the specified field,

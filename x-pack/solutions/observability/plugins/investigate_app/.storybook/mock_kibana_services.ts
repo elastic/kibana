@@ -7,7 +7,9 @@
 import { setKibanaServices } from '@kbn/esql/public/kibana_services';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 class LocalStorageMock {
@@ -32,8 +34,21 @@ class LocalStorageMock {
 const storage = new LocalStorageMock({}) as unknown as Storage;
 
 setKibanaServices(
+  {
+    getJoinIndicesAutocomplete: async () => ({ indices: [] }),
+    variablesService: {
+      esqlVariables: [],
+      areSuggestionsEnabled: false,
+      enableSuggestions: () => undefined,
+      disableSuggestions: () => undefined,
+      clearVariables: () => undefined,
+      addVariable: () => undefined,
+    },
+  },
   coreMock.createStart(),
   dataViewPluginMocks.createStartContract(),
+  dataPluginMock.createStartContract(),
   expressionsPluginMock.createStartContract(),
-  storage
+  storage,
+  uiActionsPluginMock.createStartContract()
 );

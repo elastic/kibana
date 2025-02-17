@@ -10,10 +10,12 @@
 import { Meta, Story } from '@storybook/react';
 import React from 'react';
 
+import { EuiFormFieldset } from '@elastic/eui';
 import { Template } from '../../mocks/src/storybook_template';
 import { ChunkLoadErrorComponent, KibanaErrorBoundaryStorybookMock } from '../../mocks';
 import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_services';
 import { KibanaErrorBoundary } from './error_boundary';
+import { KibanaSectionErrorBoundary } from './section_error_boundary';
 
 import mdx from '../../README.mdx';
 
@@ -41,6 +43,27 @@ export const ErrorInCallout: Story = () => {
         <KibanaErrorBoundary>
           <ChunkLoadErrorComponent />
         </KibanaErrorBoundary>
+      </KibanaErrorBoundaryDepsProvider>
+    </Template>
+  );
+};
+
+export const SectionErrorInCallout: Story = () => {
+  const services = storybookMock.getServices();
+
+  return (
+    <Template>
+      <KibanaErrorBoundaryDepsProvider {...services}>
+        <EuiFormFieldset legend={{ children: 'Section A' }}>
+          <KibanaSectionErrorBoundary sectionName="sectionA">
+            <ChunkLoadErrorComponent />
+          </KibanaSectionErrorBoundary>
+        </EuiFormFieldset>
+        <EuiFormFieldset legend={{ children: 'Section B' }}>
+          <KibanaSectionErrorBoundary sectionName="sectionB">
+            <ChunkLoadErrorComponent />
+          </KibanaSectionErrorBoundary>
+        </EuiFormFieldset>
       </KibanaErrorBoundaryDepsProvider>
     </Template>
   );

@@ -352,6 +352,12 @@ export const fleetUsagesSchema: RootSchema<any> = {
           description: 'Number of agent policies using global data tags',
         },
       },
+      count_with_non_default_space: {
+        type: 'long',
+        _meta: {
+          description: 'Number of agent policies using another space than the default one',
+        },
+      },
       avg_number_global_data_tags_per_policy: {
         type: 'long',
         _meta: {

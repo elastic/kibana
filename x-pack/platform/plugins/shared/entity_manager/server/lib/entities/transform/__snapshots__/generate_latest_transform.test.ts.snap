@@ -148,6 +148,7 @@ Object {
   },
   "settings": Object {
     "deduce_mappings": false,
+    "docs_per_second": undefined,
     "unattended": true,
   },
   "source": Object {
@@ -179,6 +180,7 @@ Object {
       "field": "@timestamp",
     },
   },
+  "timeout": undefined,
   "transform_id": "entities-v1-latest-admin-console-services",
 }
 `;

@@ -17,7 +17,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   apiHasExecutionContext,
   initializeTimeRange,
-  initializeTitles,
+  initializeTitleManager,
 } from '@kbn/presentation-publishing';
 import { distinctUntilChanged } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
@@ -58,12 +58,8 @@ export const getAnomalyChartsReactEmbeddableFactory = (
 
       const subscriptions = new Subscription();
 
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
-      const {
-        api: timeRangeApi,
-        comparators: timeRangeComparators,
-        serialize: serializeTimeRange,
-      } = initializeTimeRange(state);
+      const titleManager = initializeTitleManager(state);
+      const timeRangeManager = initializeTimeRange(state);
 
       const {
         anomalyChartsControlsApi,
@@ -71,7 +67,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
         serializeAnomalyChartsState,
         anomalyChartsComparators,
         onAnomalyChartsDestroy,
-      } = initializeAnomalyChartsControls(state, titlesApi, parentApi);
+      } = initializeAnomalyChartsControls(state, titleManager.api, parentApi);
 
       const api = buildApi(
         {
@@ -91,7 +87,7 @@ export const getAnomalyChartsReactEmbeddableFactory = (
                 parentApi,
                 uuid,
                 {
-                  ...serializeTitles(),
+                  ...titleManager.serialize(),
                   ...serializeAnomalyChartsState(),
                 }
               );
@@ -102,11 +98,11 @@ export const getAnomalyChartsReactEmbeddableFactory = (
               return Promise.reject();
             }
           },
-          ...titlesApi,
-          ...timeRangeApi,
+          ...titleManager.api,
+          ...timeRangeManager.api,
           ...anomalyChartsControlsApi,
           ...dataLoadingApi,
-          dataViews: buildDataViewPublishingApi(
+          dataViews$: buildDataViewPublishingApi(
             {
               anomalyDetectorService: mlServices.anomalyDetectorService,
               dataViewsService: pluginsStartServices.data.dataViews,
@@ -118,8 +114,8 @@ export const getAnomalyChartsReactEmbeddableFactory = (
             return {
               rawState: {
                 timeRange: undefined,
-                ...serializeTitles(),
-                ...serializeTimeRange(),
+                ...titleManager.serialize(),
+                ...timeRangeManager.serialize(),
                 ...serializeAnomalyChartsState(),
               },
               references: [],
@@ -127,8 +123,8 @@ export const getAnomalyChartsReactEmbeddableFactory = (
           },
         },
         {
-          ...timeRangeComparators,
-          ...titleComparators,
+          ...timeRangeManager.comparators,
+          ...titleManager.comparators,
           ...anomalyChartsComparators,
         }
       );

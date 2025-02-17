@@ -10,7 +10,7 @@ import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import { getPanelTitle, StateComparators } from '@kbn/presentation-publishing';
+import { getTitle, StateComparators } from '@kbn/presentation-publishing';
 import { createExtentFilter } from '../../common/elasticsearch_util';
 import { SavedMap } from '../routes/map_page';
 import { mapEmbeddablesSingleton } from './map_embeddables_singleton';
@@ -150,7 +150,7 @@ export function initializeCrossPanelActions({
   mapEmbeddablesSingleton.register(uuid, {
     getTitle: () => {
       const mapApi = getApi();
-      const title = mapApi ? getPanelTitle(mapApi) : undefined;
+      const title = mapApi ? getTitle(mapApi) : undefined;
       return title
         ? title
         : i18n.translate('xpack.maps.embeddable.untitleMap', {

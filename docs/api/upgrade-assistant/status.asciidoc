@@ -11,13 +11,19 @@ Check the status of your cluster.
 [[upgrade-assistant-api-status-request]]
 ==== Request
 
-`GET <kibana host>:<port>/api/upgrade_assistant/status`
+`GET <kibana host>:<port>/api/upgrade_assistant/status?targetVersion=9.0.0`
+
+`targetVersion`::
+(optional, string): Version to upgrade to.
 
 [[upgrade-assistant-api-status-response-codes]]
 ==== Response codes
 
 `200`::
   Indicates a successful call.
+  
+`403`::
+  Indicates a forbidden request when the upgrade path is not supported (e.g. upgrading more than 1 major or downgrading)
 
 [[upgrade-assistant-api-status-example]]
 ==== Example
@@ -28,11 +34,6 @@ The API returns the following:
 --------------------------------------------------
 {
   "readyForUpgrade": false,
-  "cluster": [
-    {
-      "message": "Cluster deprecated issue",
-      "details":"You have 2 system indices that must be migrated and 5 Elasticsearch deprecation issues and 0 Kibana deprecation issues that must be resolved before upgrading."
-    }
-  ]
+  "details":"The following issues must be resolved before upgrading: 1 Elasticsearch deprecation issue."
 }
 --------------------------------------------------

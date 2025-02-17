@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KUBERNETES_PATH, KUBERNETES_TITLE } from '@kbn/kubernetes-security-plugin/public';
 import type { CloudDefendPage, CloudDefendPageNavigationItem } from './types';
 
 const NAV_ITEMS_NAMES = {
@@ -23,10 +22,5 @@ export const cloudDefendPages: Record<CloudDefendPage, CloudDefendPageNavigation
     name: NAV_ITEMS_NAMES.POLICIES,
     path: `${CLOUD_DEFEND_BASE_PATH}/policies`,
     id: 'cloud_defend-policies',
-  },
-  dashboard: {
-    name: KUBERNETES_TITLE,
-    path: KUBERNETES_PATH,
-    id: 'kubernetes_security-dashboard',
   },
 };

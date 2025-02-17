@@ -166,6 +166,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
           rules: [{ rule_id: ruleId, version: rule.version }],
           enable,
         });
+      } catch {
+        // Error is handled by the mutation's onError callback, so no need to do anything here
       } finally {
         setLoadingRules((prev) => prev.filter((id) => id !== ruleId));
       }
@@ -182,6 +184,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
       setLoadingRules((prev) => [...prev, ...rulesToUpgrade.map((r) => r.rule_id)]);
       try {
         await installSpecificRulesRequest({ rules: rulesToUpgrade, enable });
+      } catch {
+        // Error is handled by the mutation's onError callback, so no need to do anything here
       } finally {
         setLoadingRules((prev) =>
           prev.filter((id) => !rulesToUpgrade.some((r) => r.rule_id === id))
@@ -197,6 +201,8 @@ export const AddPrebuiltRulesTableContextProvider = ({
     setLoadingRules((prev) => [...prev, ...rules.map((r) => r.rule_id)]);
     try {
       await installAllRulesRequest();
+    } catch {
+      // Error is handled by the mutation's onError callback, so no need to do anything here
     } finally {
       setLoadingRules([]);
       setSelectedRules([]);

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-
+import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,58 +19,28 @@ import {
   EuiPageTemplate,
   EuiText,
 } from '@elastic/eui';
-import { METRIC_TYPE } from '@kbn/analytics';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 
+import useMountedState from 'react-use/lib/useMountedState';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import { DASHBOARD_UI_METRIC_ID } from '../../../dashboard_constants';
-import {
-  coreServices,
-  dataService,
-  embeddableService,
-  usageCollectionService,
-  visualizationsService,
-} from '../../../services/kibana_services';
+import { coreServices } from '../../../services/kibana_services';
 import { getDashboardCapabilities } from '../../../utils/get_dashboard_capabilities';
-import { emptyScreenStrings } from '../../_dashboard_container_strings';
 import { addFromLibrary } from '../../embeddable/api';
+import { executeAddLensPanelAction } from '../../../dashboard_actions/execute_add_lens_panel_action';
 
 export function DashboardEmptyScreen() {
-  const lensAlias = useMemo(
-    () => visualizationsService.getAliases().find(({ name }) => name === 'lens'),
-    []
-  );
   const { showWriteControls } = useMemo(() => {
     return getDashboardCapabilities();
   }, []);
 
+  const isMounted = useMountedState();
   const dashboardApi = useDashboardApi();
+  const [isLoading, setIsLoading] = useState(false);
   const isDarkTheme = useObservable(coreServices.theme.theme$)?.darkMode;
-  const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode);
+  const viewMode = useStateFromPublishingSubject(dashboardApi.viewMode$);
   const isEditMode = useMemo(() => {
     return viewMode === 'edit';
   }, [viewMode]);
-
-  const goToLens = useCallback(() => {
-    if (!lensAlias || !lensAlias.alias) return;
-    const trackUiMetric = usageCollectionService?.reportUiCounter.bind(
-      usageCollectionService,
-      DASHBOARD_UI_METRIC_ID
-    );
-
-    if (trackUiMetric) {
-      trackUiMetric(METRIC_TYPE.CLICK, `${lensAlias.name}:create`);
-    }
-    const appContext = dashboardApi.getAppContext();
-    embeddableService.getStateTransfer().navigateToEditor(lensAlias.alias.app, {
-      path: lensAlias.alias.path,
-      state: {
-        originatingApp: appContext?.currentAppId,
-        originatingPath: appContext?.getCurrentPath?.() ?? '',
-        searchSessionId: dataService.search.session.getSessionId(),
-      },
-    });
-  }, [lensAlias, dashboardApi]);
 
   // TODO replace these SVGs with versions from EuiIllustration as soon as it becomes available.
   const imageUrl = coreServices.http.basePath.prepend(
@@ -87,19 +57,31 @@ export function DashboardEmptyScreen() {
 
   const title = (() => {
     const titleString = showEditPrompt
-      ? emptyScreenStrings.getEditModeTitle()
+      ? i18n.translate('dashboard.emptyScreen.editModeTitle', {
+          defaultMessage: 'This dashboard is empty. Let\u2019s fill it up!',
+        })
       : showWriteControls
-      ? emptyScreenStrings.getViewModeWithPermissionsTitle()
-      : emptyScreenStrings.getViewModeWithoutPermissionsTitle();
+      ? i18n.translate('dashboard.emptyScreen.viewModeTitle', {
+          defaultMessage: 'Add visualizations to your dashboard',
+        })
+      : i18n.translate('dashboard.emptyScreen.noPermissionsTitle', {
+          defaultMessage: 'This dashboard is empty.',
+        });
     return <h2>{titleString}</h2>;
   })();
 
   const body = (() => {
     const bodyString = showEditPrompt
-      ? emptyScreenStrings.getEditModeSubtitle()
+      ? i18n.translate('dashboard.emptyScreen.editModeSubtitle', {
+          defaultMessage: 'Create a visualization of your data, or add one from the library.',
+        })
       : showWriteControls
-      ? emptyScreenStrings.getViewModeWithPermissionsSubtitle()
-      : emptyScreenStrings.getViewModeWithoutPermissionsSubtitle();
+      ? i18n.translate('dashboard.emptyScreen.viewModeSubtitle', {
+          defaultMessage: 'Enter edit mode, and then start adding your visualizations.',
+        })
+      : i18n.translate('dashboard.emptyScreen.noPermissionsSubtitle', {
+          defaultMessage: 'You need additional privileges to edit this dashboard.',
+        });
     return (
       <EuiText size="s" color="subdued">
         <span>{bodyString}</span>
@@ -112,8 +94,20 @@ export function DashboardEmptyScreen() {
       return (
         <EuiFlexGroup justifyContent="center" gutterSize="l" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="lensApp" onClick={() => goToLens()}>
-              {emptyScreenStrings.getCreateVisualizationButtonTitle()}
+            <EuiButton
+              isLoading={isLoading}
+              iconType="lensApp"
+              onClick={async () => {
+                setIsLoading(true);
+                await executeAddLensPanelAction(dashboardApi);
+                if (isMounted()) {
+                  setIsLoading(false);
+                }
+              }}
+            >
+              {i18n.translate('dashboard.emptyScreen.createVisualization', {
+                defaultMessage: 'Create visualization',
+              })}
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -122,7 +116,9 @@ export function DashboardEmptyScreen() {
               iconType="folderOpen"
               onClick={() => addFromLibrary(dashboardApi)}
             >
-              {emptyScreenStrings.getAddFromLibraryButtonTitle()}
+              {i18n.translate('dashboard.emptyScreen.addFromLibrary', {
+                defaultMessage: 'Add from library',
+              })}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -131,7 +127,9 @@ export function DashboardEmptyScreen() {
     if (showWriteControls) {
       return (
         <EuiButton iconType="pencil" onClick={() => dashboardApi.setViewMode('edit')}>
-          {emptyScreenStrings.getEditLinkTitle()}
+          {i18n.translate('dashboard.emptyScreen.editDashboard', {
+            defaultMessage: 'Edit dashboard',
+          })}
         </EuiButton>
       );
     }

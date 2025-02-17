@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { mockGlobalState } from '../../../public/common/mock';
 import { parseAssetCriticalityCsvRow } from './parse_asset_criticality_csv_row';
 
+const experimentalFeatures = mockGlobalState.app.enableExperimental;
 describe('parseAssetCriticalityCsvRow', () => {
   it('should return valid false if the row has no columns', () => {
-    const result = parseAssetCriticalityCsvRow([]);
+    const result = parseAssetCriticalityCsvRow([], experimentalFeatures);
     expect(result.valid).toBe(false);
 
     // @ts-ignore result can now only be InvalidRecord
@@ -17,7 +19,7 @@ describe('parseAssetCriticalityCsvRow', () => {
   });
 
   it('should return valid false if the row has 2 columns', () => {
-    const result = parseAssetCriticalityCsvRow(['host', 'host-1']);
+    const result = parseAssetCriticalityCsvRow(['host', 'host-1'], experimentalFeatures);
     expect(result.valid).toBe(false);
 
     // @ts-ignore result can now only be InvalidRecord
@@ -25,7 +27,10 @@ describe('parseAssetCriticalityCsvRow', () => {
   });
 
   it('should return valid false if the row has 4 columns', () => {
-    const result = parseAssetCriticalityCsvRow(['host', 'host-1', 'low_impact', 'extra']);
+    const result = parseAssetCriticalityCsvRow(
+      ['host', 'host-1', 'low_impact', 'extra'],
+      experimentalFeatures
+    );
     expect(result.valid).toBe(false);
 
     // @ts-ignore result can now only be InvalidRecord
@@ -33,7 +38,7 @@ describe('parseAssetCriticalityCsvRow', () => {
   });
 
   it('should return valid false if the entity type is missing', () => {
-    const result = parseAssetCriticalityCsvRow(['', 'host-1', 'low_impact']);
+    const result = parseAssetCriticalityCsvRow(['', 'host-1', 'low_impact'], experimentalFeatures);
     expect(result.valid).toBe(false);
 
     // @ts-ignore result can now only be InvalidRecord
@@ -41,28 +46,34 @@ describe('parseAssetCriticalityCsvRow', () => {
   });
 
   it('should return valid false if the entity type is invalid', () => {
-    const result = parseAssetCriticalityCsvRow(['invalid', 'host-1', 'low_impact']);
+    const result = parseAssetCriticalityCsvRow(
+      ['invalid', 'host-1', 'low_impact'],
+      experimentalFeatures
+    );
     expect(result.valid).toBe(false);
 
     // @ts-ignore result can now only be InvalidRecord
     expect(result.error).toMatchInlineSnapshot(
-      `"Invalid entity type \\"invalid\\", expected to be one of: user, host, service, universal"`
+      `"Invalid entity type \\"invalid\\", expected to be one of: user, host, service"`
     );
   });
 
   it('should return valid false if the entity type is invalid and only log 1000 characters', () => {
     const invalidEntityType = 'x'.repeat(1001);
-    const result = parseAssetCriticalityCsvRow([invalidEntityType, 'host-1', 'low_impact']);
+    const result = parseAssetCriticalityCsvRow(
+      [invalidEntityType, 'host-1', 'low_impact'],
+      experimentalFeatures
+    );
     expect(result.valid).toBe(false);
 
     // @ts-ignore result can now only be InvalidRecord
     expect(result.error).toMatchInlineSnapshot(
-      `"Invalid entity type \\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx...\\", expected to be one of: user, host, service, universal"`
+      `"Invalid entity type \\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx...\\", expected to be one of: user, host, service"`
     );
   });
 
   it('should return valid false if the ID is missing', () => {
-    const result = parseAssetCriticalityCsvRow(['host', '', 'low_impact']);
+    const result = parseAssetCriticalityCsvRow(['host', '', 'low_impact'], experimentalFeatures);
     expect(result.valid).toBe(false);
 
     // @ts-ignore result can now only be InvalidRecord
@@ -70,7 +81,7 @@ describe('parseAssetCriticalityCsvRow', () => {
   });
 
   it('should return valid false if the criticality level is missing', () => {
-    const result = parseAssetCriticalityCsvRow(['host', 'host-1', '']);
+    const result = parseAssetCriticalityCsvRow(['host', 'host-1', ''], experimentalFeatures);
     expect(result.valid).toBe(false);
 
     // @ts-ignore result can now only be InvalidRecord
@@ -78,29 +89,38 @@ describe('parseAssetCriticalityCsvRow', () => {
   });
 
   it('should return valid false if the criticality level is invalid', () => {
-    const result = parseAssetCriticalityCsvRow(['host', 'host-1', 'invalid']);
+    const result = parseAssetCriticalityCsvRow(
+      ['host', 'host-1', 'unassigned_impact'],
+      experimentalFeatures
+    );
     expect(result.valid).toBe(false);
 
     // @ts-ignore result can now only be InvalidRecord
     expect(result.error).toMatchInlineSnapshot(
-      `"Invalid criticality level \\"invalid\\", expected one of extreme_impact, high_impact, medium_impact, low_impact"`
+      `"Invalid criticality level \\"unassigned_impact\\", expected one of extreme_impact, high_impact, medium_impact, low_impact, unassigned"`
     );
   });
 
   it('should return valid false if the criticality level is invalid and only log 1000 characters', () => {
     const invalidCriticalityLevel = 'x'.repeat(1001);
-    const result = parseAssetCriticalityCsvRow(['host', 'host-1', invalidCriticalityLevel]);
+    const result = parseAssetCriticalityCsvRow(
+      ['host', 'host-1', invalidCriticalityLevel],
+      experimentalFeatures
+    );
     expect(result.valid).toBe(false);
 
     // @ts-ignore result can now only be InvalidRecord
     expect(result.error).toMatchInlineSnapshot(
-      `"Invalid criticality level \\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx...\\", expected one of extreme_impact, high_impact, medium_impact, low_impact"`
+      `"Invalid criticality level \\"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx...\\", expected one of extreme_impact, high_impact, medium_impact, low_impact, unassigned"`
     );
   });
 
   it('should return valid false if the ID is too long', () => {
     const idValue = 'x'.repeat(1001);
-    const result = parseAssetCriticalityCsvRow(['host', idValue, 'low_impact']);
+    const result = parseAssetCriticalityCsvRow(
+      ['host', idValue, 'low_impact'],
+      experimentalFeatures
+    );
     expect(result.valid).toBe(false);
 
     // @ts-ignore result can now only be InvalidRecord
@@ -110,7 +130,9 @@ describe('parseAssetCriticalityCsvRow', () => {
   });
 
   it('should return the parsed row', () => {
-    expect(parseAssetCriticalityCsvRow(['host', 'host-1', 'low_impact'])).toEqual({
+    expect(
+      parseAssetCriticalityCsvRow(['host', 'host-1', 'low_impact'], experimentalFeatures)
+    ).toEqual({
       valid: true,
       record: {
         idField: 'host.name',
@@ -121,12 +143,26 @@ describe('parseAssetCriticalityCsvRow', () => {
   });
 
   it('should return the parsed row if criticality level is the wrong case', () => {
-    expect(parseAssetCriticalityCsvRow(['host', 'host-1', 'LOW_IMPACT'])).toEqual({
+    expect(
+      parseAssetCriticalityCsvRow(['host', 'host-1', 'LOW_IMPACT'], experimentalFeatures)
+    ).toEqual({
       valid: true,
       record: {
         idField: 'host.name',
         idValue: 'host-1',
         criticalityLevel: 'low_impact',
+      },
+    });
+  });
+  it('should return the parsed row if criticality level is UNASSIGNED', () => {
+    expect(
+      parseAssetCriticalityCsvRow(['host', 'host-1', 'UNASSIGNED'], experimentalFeatures)
+    ).toEqual({
+      valid: true,
+      record: {
+        idField: 'host.name',
+        idValue: 'host-1',
+        criticalityLevel: 'unassigned',
       },
     });
   });

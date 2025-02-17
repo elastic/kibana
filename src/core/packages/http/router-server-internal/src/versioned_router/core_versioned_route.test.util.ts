@@ -10,8 +10,6 @@
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { hapiMocks } from '@kbn/hapi-mocks';
 import { ApiVersion, ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { CoreKibanaRequest } from '../request';
-import { passThroughValidation } from './core_versioned_route';
 
 export function createRequest(
   {
@@ -19,18 +17,15 @@ export function createRequest(
     body,
     params,
     query,
-  }: { version: undefined | ApiVersion; body?: object; params?: object; query?: object } = {
+  }: { version?: undefined | ApiVersion; body?: object; params?: object; query?: object } = {
     version: '1',
   }
 ) {
-  return CoreKibanaRequest.from(
-    hapiMocks.createRequest({
-      payload: body,
-      params,
-      query,
-      headers: { [ELASTIC_HTTP_VERSION_HEADER]: version },
-      app: { requestId: 'fakeId' },
-    }),
-    passThroughValidation
-  );
+  return hapiMocks.createRequest({
+    payload: body,
+    params,
+    query,
+    headers: { [ELASTIC_HTTP_VERSION_HEADER]: version },
+    app: { requestId: 'fakeId' },
+  });
 }

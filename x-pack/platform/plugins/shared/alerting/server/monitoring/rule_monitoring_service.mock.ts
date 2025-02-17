@@ -25,6 +25,7 @@ function createPublicRuleMonitoringServiceMock() {
       setLastRunMetricsTotalAlertsDetected: jest.fn(),
       setLastRunMetricsTotalIndexingDurationMs: jest.fn(),
       setLastRunMetricsTotalSearchDurationMs: jest.fn(),
+      setLastRunMetricsGapRange: jest.fn(),
     };
   });
 }

@@ -43,7 +43,7 @@ describe('AssetCriticalityDataClient', () => {
           index: '.asset-criticality.asset-criticality-default',
           mappings: {
             _meta: {
-              version: 2,
+              version: 3,
             },
             dynamic: 'strict',
             properties: {
@@ -55,6 +55,13 @@ describe('AssetCriticalityDataClient', () => {
               },
               criticality_level: {
                 type: 'keyword',
+              },
+              event: {
+                properties: {
+                  ingested: {
+                    type: 'date',
+                  },
+                },
               },
               '@timestamp': {
                 type: 'date',
@@ -113,6 +120,9 @@ describe('AssetCriticalityDataClient', () => {
                 },
               },
             },
+          },
+          settings: {
+            default_pipeline: 'entity_analytics_create_eventIngest_from_timestamp-pipeline-default',
           },
         },
       });
@@ -347,6 +357,27 @@ describe('AssetCriticalityDataClient', () => {
           failed: 1,
           successful: 1,
           total: 2,
+        },
+      });
+    });
+
+    it('returns valid stats for unassigned', async () => {
+      const recordsStream = [
+        { idField: 'host.name', idValue: 'host1', criticalityLevel: 'unassigned' },
+      ];
+
+      const result = await subject.bulkUpsertFromStream({
+        recordsStream: Readable.from(recordsStream),
+        retries: 3,
+        flushBytes: 1_000,
+      });
+
+      expect(result).toEqual({
+        errors: [],
+        stats: {
+          failed: 0,
+          successful: 1,
+          total: 1,
         },
       });
     });

@@ -8,6 +8,7 @@
  */
 
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
+import { ESQLVariableType } from '../../shared/types';
 import { pipeCompleteItem } from '../complete_items';
 import { getDateLiterals } from '../factories';
 import { log10ParameterTypes, powParameterTypes } from './constants';
@@ -73,8 +74,8 @@ describe('WHERE <expression>', () => {
       const expectedComparisonWithDateSuggestions = [
         ...getDateLiterals(),
         ...getFieldNamesByType(['date']),
-        // all functions compatible with a keywordField type
-        ...getFunctionSignaturesByReturnType('where', ['date'], { scalar: true }),
+        ...getFieldNamesByType(['date_nanos']),
+        ...getFunctionSignaturesByReturnType('where', ['date', 'date_nanos'], { scalar: true }),
       ];
       await assertSuggestions(
         'from a | where dateField == /',
@@ -133,6 +134,24 @@ describe('WHERE <expression>', () => {
           ]
         );
       }
+    });
+
+    test('filters suggestions based on previous commands', async () => {
+      const { assertSuggestions } = await setup();
+
+      await assertSuggestions('from a | where / | limit 3', [
+        ...getFieldNamesByType('any')
+          .map((field) => `${field} `)
+          .map(attachTriggerCommand),
+        ...allEvalFns,
+      ]);
+
+      await assertSuggestions('from a | limit 3 | where / ', [
+        ...getFieldNamesByType('any')
+          .map((field) => `${field} `)
+          .map(attachTriggerCommand),
+        ...allEvalFns.filter((fn) => fn.label !== 'QSTR' && fn.label !== 'MATCH'),
+      ]);
     });
 
     test('suggests operators after a field name', async () => {
@@ -212,10 +231,18 @@ describe('WHERE <expression>', () => {
       ]);
       await assertSuggestions('from index | WHERE not /', [
         ...getFieldNamesByType('boolean').map((name) => attachTriggerCommand(`${name} `)),
-        ...getFunctionSignaturesByReturnType('where', 'boolean', { scalar: true }),
+        ...getFunctionSignaturesByReturnType('where', 'boolean', { scalar: true }, undefined, [
+          ':',
+        ]),
       ]);
       await assertSuggestions('FROM index | WHERE NOT ENDS_WITH(keywordField, "foo") /', [
-        ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['boolean']),
+        ...getFunctionSignaturesByReturnType(
+          'where',
+          'boolean',
+          { builtin: true },
+          ['boolean'],
+          [':']
+        ),
         pipeCompleteItem,
       ]);
       await assertSuggestions('from index | WHERE keywordField IS NOT/', [
@@ -290,9 +317,13 @@ describe('WHERE <expression>', () => {
       const { assertSuggestions } = await setup();
 
       await assertSuggestions('FROM index | WHERE doubleField + doubleField /', [
-        ...getFunctionSignaturesByReturnType('where', 'any', { builtin: true, skipAssign: true }, [
-          'double',
-        ]),
+        ...getFunctionSignaturesByReturnType(
+          'where',
+          'any',
+          { builtin: true, skipAssign: true },
+          ['double'],
+          [':']
+        ),
       ]);
     });
 
@@ -305,30 +336,109 @@ describe('WHERE <expression>', () => {
       );
     });
 
-    test('attaches ranges', async () => {
-      const { suggest } = await setup();
+    describe('attaches ranges', () => {
+      test('omits ranges if there is no prefix', async () => {
+        const { suggest } = await setup();
 
-      const suggestions = await suggest('FROM index | WHERE doubleField IS N/');
+        (await suggest('FROM index | WHERE /')).forEach((suggestion) => {
+          expect(suggestion.rangeToReplace).toBeUndefined();
+        });
+      });
 
-      expect(suggestions).toContainEqual(
-        expect.objectContaining({
-          text: 'IS NOT NULL',
-          rangeToReplace: {
-            start: 32,
-            end: 36,
+      test('uses indices of single prefix by default', async () => {
+        const { suggest } = await setup();
+
+        (await suggest('FROM index | WHERE some.prefix/')).forEach((suggestion) => {
+          expect(suggestion.rangeToReplace).toEqual({
+            start: 20,
+            end: 30,
+          });
+        });
+      });
+
+      test('"IS (NOT) NULL" with a matching prefix', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = await suggest('FROM index | WHERE doubleField IS N/');
+
+        expect(suggestions.find((s) => s.text === 'IS NOT NULL')?.rangeToReplace).toEqual({
+          start: 32,
+          end: 36,
+        });
+
+        expect(suggestions.find((s) => s.text === 'IS NULL')?.rangeToReplace).toEqual({
+          start: 32,
+          end: 36,
+        });
+      });
+
+      test('"IS (NOT) NULL" with a matching prefix with trailing space', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = await suggest('FROM index | WHERE doubleField IS /');
+
+        expect(suggestions.find((s) => s.text === 'IS NOT NULL')?.rangeToReplace).toEqual({
+          start: 32,
+          end: 35,
+        });
+
+        expect(suggestions.find((s) => s.text === 'IS NULL')?.rangeToReplace).toEqual({
+          start: 32,
+          end: 35,
+        });
+      });
+    });
+
+    describe('create control suggestion', () => {
+      test('suggests `Create control` option', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = await suggest('FROM a | WHERE agent.name == /', {
+          callbacks: {
+            canSuggestVariables: () => true,
+            getVariablesByType: () => [],
+            getColumnsFor: () => Promise.resolve([{ name: 'agent.name', type: 'keyword' }]),
           },
-        })
-      );
+        });
 
-      expect(suggestions).toContainEqual(
-        expect.objectContaining({
-          text: 'IS NULL',
-          rangeToReplace: {
-            start: 32,
-            end: 36,
+        expect(suggestions).toContainEqual({
+          label: 'Create control',
+          text: '',
+          kind: 'Issue',
+          detail: 'Click to create',
+          command: { id: 'esql.control.values.create', title: 'Click to create' },
+          sortText: '11',
+          rangeToReplace: { start: 31, end: 31 },
+        });
+      });
+
+      test('suggests `?value` option', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = await suggest('FROM a | WHERE agent.name == /', {
+          callbacks: {
+            canSuggestVariables: () => true,
+            getVariablesByType: () => [
+              {
+                key: 'value',
+                value: 'java',
+                type: ESQLVariableType.VALUES,
+              },
+            ],
+            getColumnsFor: () => Promise.resolve([{ name: 'agent.name', type: 'keyword' }]),
           },
-        })
-      );
+        });
+
+        expect(suggestions).toContainEqual({
+          label: '?value',
+          text: '?value',
+          kind: 'Constant',
+          detail: 'Named parameter',
+          command: undefined,
+          sortText: '11A',
+          rangeToReplace: { start: 31, end: 31 },
+        });
+      });
     });
   });
 });

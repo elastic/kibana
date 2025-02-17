@@ -10,6 +10,7 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
+import { EntityType } from '../../../../../common/search_strategy';
 import type { InitEntityEngineResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/init.gen';
 import {
   InitEntityEngineRequestBody,
@@ -55,7 +56,7 @@ export const initEntityEngineRoute = (
         try {
           const body: InitEntityEngineResponse = await secSol
             .getEntityStoreDataClient()
-            .init(request.params.entityType, request.body, {
+            .init(EntityType[request.params.entityType], request.body, {
               pipelineDebugMode,
             });
 

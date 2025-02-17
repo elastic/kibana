@@ -11,7 +11,16 @@ import { CreateIndexLanguageExamples } from './types';
 
 export const ConsoleCreateIndexExamples: CreateIndexLanguageExamples = {
   default: {
-    createIndex: ({ indexName }) => `PUT /${indexName ?? INDEX_PLACEHOLDER}`,
+    createIndex: ({ indexName }) => `PUT /${indexName ?? INDEX_PLACEHOLDER}
+{
+  "mappings": {
+    "properties":{
+      "text":{
+        "type":"text"
+      }
+    }
+  }
+}`,
   },
   dense_vector: {
     createIndex: ({ indexName }) => `PUT /${indexName ?? INDEX_PLACEHOLDER}
@@ -29,9 +38,21 @@ export const ConsoleCreateIndexExamples: CreateIndexLanguageExamples = {
   }
 }`,
   },
+  semantic: {
+    createIndex: ({ indexName }) => `PUT /${indexName ?? INDEX_PLACEHOLDER}
+{
+  "mappings": {
+    "properties":{
+      "text":{
+        "type":"semantic_text"
+      }
+    }
+  }
+}`,
+  },
 };
 
-export const ConsoleVectorsIngestDataExample: IngestDataCodeDefinition = {
+export const ConsoleIngestDataExample: IngestDataCodeDefinition = {
   ingestCommand: ({ indexName, sampleDocuments }) => {
     let result = 'POST /_bulk?pretty\n';
     sampleDocuments.forEach((document) => {

@@ -23,9 +23,11 @@ export const platinumOnlyPluginTokens = [insightMarkdownPlugin.insightPrefix];
 export const uiPlugins = ({
   insightsUpsellingMessage,
   interactionsUpsellingMessage,
+  canSeeTimeline,
 }: {
   insightsUpsellingMessage?: string;
   interactionsUpsellingMessage?: string;
+  canSeeTimeline: boolean;
 }) => {
   const currentPlugins = nonStatefulUiPlugins.map((plugin) => plugin.name);
   const insightPluginWithLicense = insightMarkdownPlugin.plugin({
@@ -33,6 +35,7 @@ export const uiPlugins = ({
   });
   const timelinePluginWithLicense = timelineMarkdownPlugin.plugin({
     interactionsUpsellingMessage,
+    canSeeTimeline,
   });
   const osqueryPluginWithLicense = osqueryMarkdownPlugin.plugin({
     interactionsUpsellingMessage,

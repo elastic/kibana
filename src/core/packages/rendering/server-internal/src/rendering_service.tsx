@@ -9,8 +9,7 @@
 
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { firstValueFrom, of } from 'rxjs';
-import { catchError, take, timeout } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of, map, catchError, take, timeout } from 'rxjs';
 import { i18n as i18nLib } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
@@ -21,10 +20,12 @@ import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import {
   type DarkModeValue,
+  type ThemeName,
   parseDarkModeValue,
   parseThemeNameValue,
   type UiSettingsParams,
   type UserProvidedValues,
+  DEFAULT_THEME_NAME,
 } from '@kbn/core-ui-settings-common';
 import { Template } from './views';
 import {
@@ -34,6 +35,7 @@ import {
   InternalRenderingServicePreboot,
   InternalRenderingServiceSetup,
   RenderingMetadata,
+  RenderingStartDeps,
 } from './types';
 import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
 import {
@@ -59,8 +61,14 @@ type RenderOptions =
 
 const themeVersion: ThemeVersion = 'v8';
 
+// TODO: Remove the temporary feature flag and supporting code when Borealis is live in Serverless
+// https://github.com/elastic/eui-private/issues/192
+export const DEFAULT_THEME_NAME_FEATURE_FLAG = 'coreRendering.defaultThemeName';
+
 /** @internal */
 export class RenderingService {
+  private readonly themeName$ = new BehaviorSubject<ThemeName>(DEFAULT_THEME_NAME);
+
   constructor(private readonly coreContext: CoreContext) {}
 
   public async preboot({
@@ -76,6 +84,7 @@ export class RenderingService {
           baseHref: http.staticAssets.getHrefBase(),
           packageInfo: this.coreContext.env.packageInfo,
           auth: http.auth,
+          themeName$: this.themeName$,
         }),
       });
     });
@@ -102,6 +111,7 @@ export class RenderingService {
         baseHref: http.staticAssets.getHrefBase(),
         packageInfo: this.coreContext.env.packageInfo,
         auth: http.auth,
+        themeName$: this.themeName$,
         userSettingsService: userSettings,
       }),
     });
@@ -118,6 +128,14 @@ export class RenderingService {
         i18n,
       }),
     };
+  }
+
+  public start({ featureFlags }: RenderingStartDeps) {
+    featureFlags
+      .getStringValue$<ThemeName>(DEFAULT_THEME_NAME_FEATURE_FLAG, DEFAULT_THEME_NAME)
+      // Parse the input feature flag value to ensure it's of type ThemeName
+      .pipe(map((value) => parseThemeNameValue(value)))
+      .subscribe(this.themeName$);
   }
 
   private async render(
@@ -212,8 +230,6 @@ export class RenderingService {
       darkMode = getSettingValue<DarkModeValue>('theme:darkMode', settings, parseDarkModeValue);
     }
 
-    const themeName = getSettingValue<string>('theme:name', settings, parseThemeNameValue);
-
     const themeStylesheetPaths = (mode: boolean) =>
       getThemeStylesheetPaths({
         darkMode: mode,
@@ -243,6 +259,7 @@ export class RenderingService {
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
+      hardenPrototypes: http.prototypeHardening,
       uiPublicUrl: `${staticAssetsHrefBase}/ui`,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       locale,
@@ -277,7 +294,7 @@ export class RenderingService {
         },
         theme: {
           darkMode,
-          name: themeName,
+          name: this.themeName$.getValue(),
           version: themeVersion,
           stylesheetPaths: {
             default: themeStylesheetPaths(false),

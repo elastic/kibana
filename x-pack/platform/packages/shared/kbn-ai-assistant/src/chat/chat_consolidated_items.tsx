@@ -128,9 +128,7 @@ export function ChatConsolidatedItems({
                 });
               }}
               onEditSubmit={(message) => onEditSubmit(item.message, message)}
-              onFeedbackClick={(feedback) => {
-                onFeedback(item.message, feedback);
-              }}
+              onFeedbackClick={(feedback) => onFeedback(feedback)}
               onRegenerateClick={() => {
                 onRegenerate(item.message);
               }}

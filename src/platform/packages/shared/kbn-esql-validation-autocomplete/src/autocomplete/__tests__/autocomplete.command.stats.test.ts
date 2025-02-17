@@ -9,6 +9,7 @@
 
 import { FieldType, FunctionReturnType } from '../../definitions/types';
 import { ESQL_COMMON_NUMERIC_TYPES, ESQL_NUMBER_TYPES } from '../../shared/esql_types';
+import { ESQLVariableType } from '../../shared/types';
 import { getDateHistogramCompletionItem } from '../commands/stats/util';
 import { allStarConstant } from '../complete_items';
 import { roundParameterTypes } from './constants';
@@ -56,7 +57,12 @@ describe('autocomplete.suggest', () => {
     describe('... <aggregates> ...', () => {
       test('lists possible aggregations on space after command', async () => {
         const { assertSuggestions } = await setup();
-        const expected = ['var0 = ', ...allAggFunctions, ...allEvaFunctions];
+        const expected = [
+          'var0 = ',
+          ...allAggFunctions,
+          ...allGroupingFunctions,
+          ...allEvaFunctions,
+        ];
 
         await assertSuggestions('from a | stats /', expected);
         await assertSuggestions('FROM a | STATS /', expected);
@@ -65,7 +71,11 @@ describe('autocomplete.suggest', () => {
       test('on assignment expression, shows all agg and eval functions', async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('from a | stats a=/', [...allAggFunctions, ...allEvaFunctions]);
+        await assertSuggestions('from a | stats a=/', [
+          ...allAggFunctions,
+          ...allGroupingFunctions,
+          ...allEvaFunctions,
+        ]);
       });
 
       test('on space after aggregate field', async () => {
@@ -80,6 +90,7 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from a | stats a=max(b), /', [
           'var0 = ',
           ...allAggFunctions,
+          ...allGroupingFunctions,
           ...allEvaFunctions,
         ]);
       });
@@ -98,7 +109,6 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from a | stats round(/', [
           ...getFunctionSignaturesByReturnType('stats', roundParameterTypes, {
             agg: true,
-            grouping: true,
           }),
           ...getFieldNamesByType(roundParameterTypes),
           ...getFunctionSignaturesByReturnType(
@@ -205,11 +215,13 @@ describe('autocomplete.suggest', () => {
           // TODO verify that this change is ok
           ...allAggFunctions,
           ...allEvaFunctions,
+          ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats var0=min(b),var1=c,/', [
           'var2 = ',
           ...allAggFunctions,
           ...allEvaFunctions,
+          ...allGroupingFunctions,
         ]);
       });
     });
@@ -251,6 +263,7 @@ describe('autocomplete.suggest', () => {
           'var0 = ',
           ...allAggFunctions,
           ...allEvaFunctions,
+          ...allGroupingFunctions,
         ]);
         await assertSuggestions('from a | stats avg(b) by c, /', [
           'var0 = ',
@@ -271,7 +284,8 @@ describe('autocomplete.suggest', () => {
           ...getFunctionSignaturesByReturnType('eval', ['integer', 'double', 'long'], {
             scalar: true,
           }),
-          ...allGroupingFunctions,
+          // categorize is not compatible here
+          ...allGroupingFunctions.filter((f) => !f.text.includes('CATEGORIZE')),
         ]);
         await assertSuggestions('from a | stats avg(b) by var0 = /', [
           getDateHistogramCompletionItem(),
@@ -355,6 +369,131 @@ describe('autocomplete.suggest', () => {
           const suggestions = await suggest('FROM a | STATS BY /');
 
           expect(suggestions).toContainEqual(expectedCompletionItem);
+        });
+      });
+
+      describe('create control suggestion', () => {
+        test('suggests `Create control` option for aggregations', async () => {
+          const { suggest } = await setup();
+
+          const suggestions = await suggest('FROM a | STATS /', {
+            callbacks: {
+              canSuggestVariables: () => true,
+              getVariablesByType: () => [],
+              getColumnsFor: () => Promise.resolve([{ name: 'clientip', type: 'ip' }]),
+            },
+          });
+
+          expect(suggestions).toContainEqual({
+            label: 'Create control',
+            text: '',
+            kind: 'Issue',
+            detail: 'Click to create',
+            command: { id: 'esql.control.functions.create', title: 'Click to create' },
+            sortText: '1',
+          });
+        });
+
+        test('suggests `?function` option', async () => {
+          const { suggest } = await setup();
+
+          const suggestions = await suggest('FROM a | STATS var0 = /', {
+            callbacks: {
+              canSuggestVariables: () => true,
+              getVariablesByType: () => [
+                {
+                  key: 'function',
+                  value: 'avg',
+                  type: ESQLVariableType.FUNCTIONS,
+                },
+              ],
+              getColumnsFor: () => Promise.resolve([{ name: 'clientip', type: 'ip' }]),
+            },
+          });
+
+          expect(suggestions).toContainEqual({
+            label: '?function',
+            text: '?function',
+            kind: 'Constant',
+            detail: 'Named parameter',
+            command: undefined,
+            sortText: '1A',
+          });
+        });
+
+        test('suggests `Create control` option for grouping', async () => {
+          const { suggest } = await setup();
+
+          const suggestions = await suggest('FROM a | STATS BY /', {
+            callbacks: {
+              canSuggestVariables: () => true,
+              getVariablesByType: () => [],
+              getColumnsFor: () => Promise.resolve([{ name: 'clientip', type: 'ip' }]),
+            },
+          });
+
+          expect(suggestions).toContainEqual({
+            label: 'Create control',
+            text: '',
+            kind: 'Issue',
+            detail: 'Click to create',
+            command: { id: 'esql.control.fields.create', title: 'Click to create' },
+            sortText: '11',
+          });
+        });
+
+        test('suggests `?field` option', async () => {
+          const { suggest } = await setup();
+
+          const suggestions = await suggest('FROM a | STATS BY /', {
+            callbacks: {
+              canSuggestVariables: () => true,
+              getVariablesByType: () => [
+                {
+                  key: 'field',
+                  value: 'clientip',
+                  type: ESQLVariableType.FIELDS,
+                },
+              ],
+              getColumnsFor: () => Promise.resolve([{ name: 'clientip', type: 'ip' }]),
+            },
+          });
+
+          expect(suggestions).toContainEqual({
+            label: '?field',
+            text: '?field',
+            kind: 'Constant',
+            detail: 'Named parameter',
+            command: undefined,
+            sortText: '11A',
+          });
+        });
+
+        test('suggests `?interval` option', async () => {
+          const { suggest } = await setup();
+
+          const suggestions = await suggest('FROM a | STATS BY BUCKET(@timestamp, /)', {
+            callbacks: {
+              canSuggestVariables: () => true,
+              getVariablesByType: () => [
+                {
+                  key: 'interval',
+                  value: '1 hour',
+                  type: ESQLVariableType.TIME_LITERAL,
+                },
+              ],
+              getColumnsFor: () => Promise.resolve([{ name: '@timestamp', type: 'date' }]),
+            },
+          });
+
+          expect(suggestions).toContainEqual({
+            label: '?interval',
+            text: '?interval',
+            kind: 'Constant',
+            detail: 'Named parameter',
+            command: undefined,
+            sortText: '1A',
+          });
         });
       });
     });

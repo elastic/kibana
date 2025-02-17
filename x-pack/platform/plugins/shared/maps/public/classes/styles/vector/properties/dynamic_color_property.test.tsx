@@ -26,6 +26,7 @@ import { mockField, MockLayer, MockStyle } from './test_helpers/test_util';
 import { ColorDynamicOptions } from '../../../../../common/descriptor_types';
 import { IVectorLayer } from '../../../layers/vector_layer';
 import { IField } from '../../../fields/field';
+import { OTHER_CATEGORY_DEFAULT_COLOR } from '../style_util';
 
 const makeProperty = (options: ColorDynamicOptions, style?: MockStyle, field?: IField) => {
   return new DynamicColorProperty(
@@ -417,21 +418,21 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           -1,
           'rgba(0,0,0,0)',
           0,
-          '#ecf1f7',
+          '#e4eefd',
           12.5,
-          '#d9e3ef',
+          '#d3e3fe',
           25,
-          '#c5d5e7',
+          '#c1d8fe',
           37.5,
-          '#b2c7df',
+          '#afceff',
           50,
-          '#9eb9d8',
+          '#9dc3ff',
           62.5,
-          '#8bacd0',
+          '#8bb8ff',
           75,
-          '#769fc8',
+          '#77adff',
           87.5,
-          '#6092c0',
+          '#61a2ff',
         ]);
       });
     });
@@ -575,7 +576,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
         fieldMetaOptions,
       };
       const colorProperty = makeProperty(dynamicStyleOptions);
-      expect(colorProperty._getMbColor()).toBe('#d3dae6');
+      expect(colorProperty._getMbColor()).toBe(OTHER_CATEGORY_DEFAULT_COLOR);
     });
 
     test('should return "other category" color when field name is not provided', async () => {
@@ -586,7 +587,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
       };
       // @ts-expect-error - test is verifing behavior when field is invalid.
       const colorProperty = makeProperty(dynamicStyleOptions);
-      expect(colorProperty._getMbColor()).toBe('#d3dae6');
+      expect(colorProperty._getMbColor()).toBe(OTHER_CATEGORY_DEFAULT_COLOR);
     });
 
     describe('pre-defined color palette', () => {
@@ -596,7 +597,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
-        expect(colorProperty._getMbColor()).toBe('#d3dae6');
+        expect(colorProperty._getMbColor()).toBe(OTHER_CATEGORY_DEFAULT_COLOR);
       });
 
       test('should return mapbox expression for color palette', async () => {
@@ -611,9 +612,9 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           'match',
           ['to-string', ['get', 'foobar']],
           'US',
-          '#54B399',
+          '#16C5C0',
           'CN',
-          '#6092C0',
+          '#A6EDEA',
           'grey',
         ]);
       });
@@ -627,7 +628,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
-        expect(colorProperty._getMbColor()).toBe('#d3dae6');
+        expect(colorProperty._getMbColor()).toBe(OTHER_CATEGORY_DEFAULT_COLOR);
       });
 
       test('should return "other category" color when customColorPalette is empty', async () => {
@@ -638,7 +639,7 @@ describe('get mapbox color expression (via internal _getMbColor)', () => {
           fieldMetaOptions,
         };
         const colorProperty = makeProperty(dynamicStyleOptions);
-        expect(colorProperty._getMbColor()).toBe('#d3dae6');
+        expect(colorProperty._getMbColor()).toBe(OTHER_CATEGORY_DEFAULT_COLOR);
       });
 
       test('should return mapbox expression for custom color palette', async () => {

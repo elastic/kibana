@@ -14,7 +14,7 @@ const POLLING_INTERVAL = 15 * 1000;
 export const useIndexMapping = (indexName: string) => {
   const { http } = useKibana().services;
   const queryKey = [QueryKeys.FetchMapping, indexName];
-  const result = useQuery<Mappings, { body: { message: string; error: string } }>({
+  return useQuery<Mappings, { body: { message: string; error: string } }>({
     queryKey,
     refetchInterval: POLLING_INTERVAL,
     refetchIntervalInBackground: true,
@@ -22,5 +22,4 @@ export const useIndexMapping = (indexName: string) => {
     queryFn: () =>
       http.fetch<Mappings>(`/api/index_management/mapping/${encodeURIComponent(indexName)}`),
   });
-  return { queryKey, ...result };
 };

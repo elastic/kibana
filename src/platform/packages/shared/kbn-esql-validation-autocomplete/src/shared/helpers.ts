@@ -29,7 +29,7 @@ import { aggregationFunctionDefinitions } from '../definitions/generated/aggrega
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
-import { groupingFunctionDefinitions } from '../definitions/grouping';
+import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { getTestFunctions } from './test_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnits } from '../definitions/literals';
@@ -82,10 +82,6 @@ export function isSourceItem(arg: ESQLAstItem): arg is ESQLSource {
 
 export function isColumnItem(arg: ESQLAstItem): arg is ESQLColumn {
   return isSingleItem(arg) && arg.type === 'column';
-}
-
-export function isIdentifier(arg: ESQLAstItem): arg is ESQLIdentifier {
-  return isSingleItem(arg) && arg.type === 'identifier';
 }
 
 export function isLiteralItem(arg: ESQLAstItem): arg is ESQLLiteral {
@@ -418,8 +414,8 @@ export function getAllArrayTypes(
   return types;
 }
 
-export function inKnownTimeInterval(item: ESQLTimeInterval): boolean {
-  return timeUnits.some((unit) => unit === item.unit.toLowerCase());
+export function inKnownTimeInterval(timeIntervalUnit: string): boolean {
+  return timeUnits.some((unit) => unit === timeIntervalUnit.toLowerCase());
 }
 
 /**
@@ -468,7 +464,7 @@ export function checkFunctionArgMatchesDefinition(
     }
   }
   if (arg.type === 'timeInterval') {
-    return argType === 'time_literal' && inKnownTimeInterval(arg);
+    return argType === 'time_literal' && inKnownTimeInterval(arg.unit);
   }
   if (arg.type === 'column') {
     const hit = getColumnForASTNode(arg, references);

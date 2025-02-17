@@ -38,6 +38,7 @@ import {
   ESQLTimeInterval,
   ESQLBooleanLiteral,
   ESQLNullLiteral,
+  BinaryExpressionOperator,
 } from '../types';
 import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
@@ -56,10 +57,10 @@ export namespace Builder {
     incomplete,
   });
 
-  export const command = (
-    template: PartialFields<AstNodeTemplate<ESQLCommand>, 'args'>,
+  export const command = <Name extends string>(
+    template: PartialFields<AstNodeTemplate<ESQLCommand<Name>>, 'args'>,
     fromParser?: Partial<AstNodeParserFields>
-  ): ESQLCommand => {
+  ): ESQLCommand<Name> => {
     return {
       ...template,
       ...Builder.parserFields(fromParser),
@@ -260,19 +261,25 @@ export namespace Builder {
         ) as ESQLUnaryExpression;
       };
 
-      export const binary = (
-        name: string,
+      export const binary = <Name extends BinaryExpressionOperator = BinaryExpressionOperator>(
+        name: Name,
         args: [left: ESQLAstItem, right: ESQLAstItem],
         template?: Omit<AstNodeTemplate<ESQLFunction>, 'subtype' | 'name' | 'operator' | 'args'>,
         fromParser?: Partial<AstNodeParserFields>
-      ): ESQLBinaryExpression => {
+      ): ESQLBinaryExpression<Name> => {
         const operator = Builder.identifier({ name });
         return Builder.expression.func.node(
           { ...template, name, operator, args, subtype: 'binary-expression' },
           fromParser
-        ) as ESQLBinaryExpression;
+        ) as ESQLBinaryExpression<Name>;
       };
     }
+
+    export const where = (
+      args: [left: ESQLAstItem, right: ESQLAstItem],
+      template?: Omit<AstNodeTemplate<ESQLFunction>, 'subtype' | 'name' | 'operator' | 'args'>,
+      fromParser?: Partial<AstNodeParserFields>
+    ) => Builder.expression.func.binary('where', args, template, fromParser);
 
     export namespace literal {
       /**

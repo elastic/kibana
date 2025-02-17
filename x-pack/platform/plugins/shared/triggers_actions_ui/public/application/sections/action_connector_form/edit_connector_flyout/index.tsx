@@ -259,7 +259,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                 <EuiButton
                   fill
                   iconType={isSaved ? 'check' : undefined}
-                  color="success"
+                  color="primary"
                   data-test-subj="edit-connector-flyout-save-btn"
                   isLoading={isSaving}
                   onClick={onClickSave}

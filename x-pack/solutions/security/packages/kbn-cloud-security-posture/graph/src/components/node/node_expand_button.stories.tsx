@@ -10,6 +10,7 @@
 import React from 'react';
 import { ThemeProvider } from '@emotion/react';
 import { Story } from '@storybook/react';
+import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { NodeShapeContainer } from './styles';
 import { NodeExpandButton, type NodeExpandButtonProps } from './node_expand_button';
 
@@ -24,6 +25,7 @@ export default {
       defaultValue: 'primary',
     },
   },
+  decorators: [GlobalStylesStorybookDecorator],
 };
 
 const Template: Story<NodeExpandButtonProps> = (args) => (

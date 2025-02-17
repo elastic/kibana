@@ -9,19 +9,19 @@
 
 import { getFieldValue, LogDocument, StackTraceFields } from '..';
 import {
-  ERROR_EXCEPTION_STACKTRACE,
-  ERROR_LOG_STACKTRACE,
+  ERROR_EXCEPTION_STACKTRACE_ABS_PATH,
+  ERROR_LOG_STACKTRACE_ABS_PATH,
   ERROR_STACK_TRACE,
 } from '../field_constants';
 
 export const getStacktraceFields = (doc: LogDocument): StackTraceFields => {
   const errorStackTrace = getFieldValue(doc, ERROR_STACK_TRACE);
-  const errorExceptionStackTrace = getFieldValue(doc, ERROR_EXCEPTION_STACKTRACE);
-  const errorLogStackTrace = getFieldValue(doc, ERROR_LOG_STACKTRACE);
+  const errorExceptionStackTrace = getFieldValue(doc, ERROR_EXCEPTION_STACKTRACE_ABS_PATH);
+  const errorLogStackTrace = getFieldValue(doc, ERROR_LOG_STACKTRACE_ABS_PATH);
 
   return {
     [ERROR_STACK_TRACE]: errorStackTrace,
-    [ERROR_EXCEPTION_STACKTRACE]: errorExceptionStackTrace,
-    [ERROR_LOG_STACKTRACE]: errorLogStackTrace,
+    [ERROR_EXCEPTION_STACKTRACE_ABS_PATH]: errorExceptionStackTrace,
+    [ERROR_LOG_STACKTRACE_ABS_PATH]: errorLogStackTrace,
   };
 };

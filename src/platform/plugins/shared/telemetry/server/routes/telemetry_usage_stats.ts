@@ -14,7 +14,7 @@ import type {
   StatsGetterConfig,
 } from '@kbn/telemetry-collection-manager-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { ApiOperation } from '@kbn/security-plugin-types-server';
+import { ApiOperation } from '@kbn/security-plugin-types-common';
 import { RequestHandler } from '@kbn/core-http-server';
 import { FetchSnapshotTelemetry } from '../../common/routes';
 import { UsageStatsBody, v2 } from '../../common/types';
@@ -46,7 +46,7 @@ export function registerTelemetryUsageStatsRoutes(
     const security = getSecurity();
     // We need to check useRbacForRequest to figure out if ES has security enabled before making the privileges check
     if (security && unencrypted && security.authz.mode.useRbacForRequest(req)) {
-      // Normally we would use `options: { tags: ['access:decryptedTelemetry'] }` in the route definition to check authorization for an
+      // Normally we would use `security: { authz: { requiredPrivileges: ['decryptedTelemetry'] } } }` in the route definition to check authorization for an
       // API action, however, we want to check this conditionally based on the `unencrypted` parameter. In this case we need to use the
       // security API directly to check privileges for this action. Note that the 'decryptedTelemetry' API privilege string is only
       // granted to users that have "Global All" or "Global Read" privileges in Kibana.

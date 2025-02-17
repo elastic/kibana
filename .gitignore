@@ -137,6 +137,7 @@ src/platform/packages/**/package-map.json
 /packages/kbn-synthetic-package-map/
 **/.synthetics/
 **/.journeys/
+**/.rca/
 x-pack/test/security_api_integration/plugins/audit_log/audit.log
 
 # ignore FTR temp directory

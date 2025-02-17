@@ -7,6 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -30,7 +31,7 @@ import {
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import dedent from 'dedent';
-import { AlertFieldsTable } from '@kbn/alerts-ui-shared';
+import { AlertFieldsTable } from '@kbn/alerts-ui-shared/src/alert_fields_table';
 import { css } from '@emotion/react';
 import { omit } from 'lodash';
 import { BetaBadge } from '../../components/experimental_badge';
@@ -95,6 +96,7 @@ export function AlertDetails() {
     uiSettings,
     serverless,
   } = useKibana().services;
+  const { onPageReady } = usePerformanceContext();
 
   const { search } = useLocation();
   const history = useHistory();
@@ -180,6 +182,12 @@ export function AlertDetails() {
   const onUntrackAlert = () => {
     setAlertStatus(ALERT_STATUS_UNTRACKED);
   };
+
+  useEffect(() => {
+    if (!isLoading && !!alertDetail && activeTabId === OVERVIEW_TAB_ID) {
+      onPageReady();
+    }
+  }, [onPageReady, alertDetail, isLoading, activeTabId]);
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;

@@ -15,5 +15,6 @@ export {
   useProfileAccessor,
   useRootProfile,
   useAdditionalCellActions,
+  useDefaultAdHocDataViews,
   BaseAppWrapper,
 } from './hooks';

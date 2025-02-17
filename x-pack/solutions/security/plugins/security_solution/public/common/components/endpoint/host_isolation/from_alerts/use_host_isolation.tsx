@@ -46,7 +46,7 @@ export const useHostIsolation = ({
       return isolationStatus.action ? true : false;
     } catch (error) {
       setLoading(false);
-      addError(error.message, { title: HOST_ISOLATION_FAILURE });
+      addError(error, { title: HOST_ISOLATION_FAILURE });
       return false;
     }
   }, [endpointId, comment, caseIds, agentType, addError]);

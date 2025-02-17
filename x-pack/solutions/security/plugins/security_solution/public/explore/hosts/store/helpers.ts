@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { RiskScoreEntity, RiskScoreFields } from '../../../../common/search_strategy';
 import type { RiskSeverity } from '../../../../common/search_strategy';
+import { EntityTypeToLevelField } from '../../../../common/search_strategy';
+import type { EntityType } from '../../../../common/entity_analytics/types';
 import { DEFAULT_TABLE_ACTIVE_PAGE } from '../../../common/store/constants';
 
 import type { HostsModel, Queries } from './model';
@@ -61,10 +62,7 @@ export const setHostsQueriesActivePageToZero = (state: HostsModel, type: HostsTy
   throw new Error(`HostsType ${type} is unknown`);
 };
 
-export const generateSeverityFilter = (
-  severitySelection: RiskSeverity[],
-  entity: RiskScoreEntity
-) =>
+export const generateSeverityFilter = (severitySelection: RiskSeverity[], entity: EntityType) =>
   severitySelection.length > 0
     ? [
         {
@@ -72,9 +70,7 @@ export const generateSeverityFilter = (
             bool: {
               should: severitySelection.map((query) => ({
                 match_phrase: {
-                  [entity === RiskScoreEntity.user
-                    ? RiskScoreFields.userRisk
-                    : RiskScoreFields.hostRisk]: {
+                  [EntityTypeToLevelField[entity]]: {
                     query,
                   },
                 },

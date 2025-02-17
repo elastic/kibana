@@ -12,18 +12,28 @@ import { invokeGraph, streamGraph } from './helpers';
 import { loggerMock } from '@kbn/logging-mocks';
 import { AgentExecutorParams, AssistantDataClients } from '../../executors/types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../../../../__mocks__/response';
 import {
   createOpenAIToolsAgent,
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
+import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { AssistantTool, AssistantToolParams } from '../../../..';
+import { promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
+import { promptDictionary } from '../../../prompt';
+import { promptGroupId } from '../../../prompt/local_prompt_object';
 jest.mock('./graph');
 jest.mock('./helpers');
 jest.mock('langchain/agents');
 jest.mock('@kbn/langchain/server/tracers/apm');
 jest.mock('@kbn/langchain/server/tracers/telemetry');
+jest.mock('@kbn/security-ai-prompts');
 const getDefaultAssistantGraphMock = getDefaultAssistantGraph as jest.Mock;
+const resolveProviderAndModelMock = resolveProviderAndModel as jest.Mock;
+const getPromptMock = getPrompt as jest.Mock;
 describe('callAssistantGraph', () => {
   const mockDataClients = {
     anonymizationFieldsDataClient: {
@@ -41,6 +51,13 @@ describe('callAssistantGraph', () => {
     },
   };
 
+  const savedObjectsClient = savedObjectsClientMock.create();
+  savedObjectsClient.find = jest.fn().mockResolvedValue({
+    page: 1,
+    per_page: 20,
+    total: 0,
+    saved_objects: [],
+  });
   const defaultParams = {
     actionsClient: actionsClientMock.create(),
     alertsIndexPattern: 'test-pattern',
@@ -60,18 +77,23 @@ describe('callAssistantGraph', () => {
     onNewReplacements: jest.fn(),
     replacements: [],
     request: mockRequest,
+    savedObjectsClient,
     size: 1,
     systemPrompt: 'test-prompt',
     telemetry: {},
     telemetryParams: {},
     traceOptions: {},
     responseLanguage: 'English',
+    contentReferencesStore: newContentReferencesStoreMock(),
   } as unknown as AgentExecutorParams<boolean>;
 
   beforeEach(() => {
     jest.clearAllMocks();
     (mockDataClients?.kbDataClient?.isInferenceEndpointExists as jest.Mock).mockResolvedValue(true);
     getDefaultAssistantGraphMock.mockReturnValue({});
+    resolveProviderAndModelMock.mockResolvedValue({
+      provider: 'bedrock',
+    });
     (invokeGraph as jest.Mock).mockResolvedValue({
       output: 'test-output',
       traceData: {},
@@ -81,6 +103,7 @@ describe('callAssistantGraph', () => {
     (mockDataClients?.anonymizationFieldsDataClient?.findDocuments as jest.Mock).mockResolvedValue(
       getFindAnonymizationFieldsResultWithSingleHit()
     );
+    getPromptMock.mockResolvedValue('prompt');
   });
 
   it('calls invokeGraph with correct parameters for non-streaming', async () => {
@@ -156,6 +179,58 @@ describe('callAssistantGraph', () => {
     });
   });
 
+  it('calls getPrompt for each tool and the default system prompt', async () => {
+    const getTool = jest.fn();
+    const mockTool: AssistantTool = {
+      id: 'id',
+      name: 'name',
+      description: 'description',
+      sourceRegister: 'sourceRegister',
+      isSupported: (params: AssistantToolParams) => true,
+      getTool,
+    };
+    const params = {
+      ...defaultParams,
+      assistantTools: [
+        { ...mockTool, name: 'test-tool' },
+        { ...mockTool, name: 'test-tool2' },
+      ],
+    };
+    await callAssistantGraph(params);
+
+    expect(getPromptMock).toHaveBeenCalledTimes(3);
+    expect(getPromptMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: 'test-model',
+        provider: 'openai',
+        promptId: 'test-tool',
+        promptGroupId: toolsGroupId,
+      })
+    );
+    expect(getPromptMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: 'test-model',
+        provider: 'openai',
+        promptId: 'test-tool2',
+        promptGroupId: toolsGroupId,
+      })
+    );
+    expect(getPromptMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        model: 'test-model',
+        provider: 'openai',
+        promptId: promptDictionary.systemPrompt,
+        promptGroupId: promptGroupId.aiAssistant,
+      })
+    );
+
+    expect(getTool).toHaveBeenCalledWith(
+      expect.objectContaining({
+        description: 'prompt',
+      })
+    );
+  });
+
   describe('agentRunnable', () => {
     it('creates OpenAIToolsAgent for openai llmType', async () => {
       const params = { ...defaultParams, llmType: 'openai' };
@@ -167,6 +242,12 @@ describe('callAssistantGraph', () => {
     });
 
     it('creates OpenAIToolsAgent for inference llmType', async () => {
+      defaultParams.actionsClient.get = jest.fn().mockResolvedValue({
+        config: {
+          provider: 'elastic',
+          providerConfig: { model_id: 'rainbow-sprinkles' },
+        },
+      });
       const params = { ...defaultParams, llmType: 'inference' };
       await callAssistantGraph(params);
 
@@ -206,6 +287,24 @@ describe('callAssistantGraph', () => {
       expect(createStructuredChatAgent).toHaveBeenCalled();
       expect(createOpenAIToolsAgent).not.toHaveBeenCalled();
       expect(createToolCallingAgent).not.toHaveBeenCalled();
+    });
+    it('does not calls resolveProviderAndModel when llmType === openai', async () => {
+      const params = { ...defaultParams, llmType: 'openai' };
+      await callAssistantGraph(params);
+
+      expect(resolveProviderAndModelMock).not.toHaveBeenCalled();
+    });
+    it('calls resolveProviderAndModel when llmType === inference', async () => {
+      const params = { ...defaultParams, llmType: 'inference' };
+      await callAssistantGraph(params);
+
+      expect(resolveProviderAndModelMock).toHaveBeenCalled();
+    });
+    it('calls resolveProviderAndModel when llmType === undefined', async () => {
+      const params = { ...defaultParams, llmType: undefined };
+      await callAssistantGraph(params);
+
+      expect(resolveProviderAndModelMock).toHaveBeenCalled();
     });
   });
 });

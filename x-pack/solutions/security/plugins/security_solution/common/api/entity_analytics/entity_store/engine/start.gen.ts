@@ -21,7 +21,7 @@ import { EntityType } from '../common.gen';
 export type StartEntityEngineRequestParams = z.infer<typeof StartEntityEngineRequestParams>;
 export const StartEntityEngineRequestParams = z.object({
   /**
-   * The entity type of the engine (either 'user' or 'host').
+   * The entity type of the engine
    */
   entityType: EntityType,
 });

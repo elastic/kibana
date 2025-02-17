@@ -48,7 +48,7 @@
       "observabilityAIAssistant",
       "aiops",
       "fieldsMetadata",
-      "logsDataAccess",
+      "logsDataAccess"
     ],
     "requiredBundles": [
       "kibanaUtils",

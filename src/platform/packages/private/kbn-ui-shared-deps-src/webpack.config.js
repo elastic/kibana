@@ -13,6 +13,7 @@ require('@kbn/babel-register').install();
 const Path = require('path');
 
 const webpack = require('webpack');
+const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');
 
@@ -24,11 +25,8 @@ const REPO_ROOT = require('child_process')
   .toString()
   .trim();
 
+/** @returns {import('webpack').Configuration} */
 module.exports = {
-  node: {
-    child_process: 'empty',
-    fs: 'empty',
-  },
   externals: {
     module: 'module',
   },
@@ -38,6 +36,7 @@ module.exports = {
   },
   context: __dirname,
   devtool: 'cheap-source-map',
+  target: 'web',
   output: {
     path: UiSharedDepsSrcDistDir,
     filename: '[name].js',
@@ -46,7 +45,6 @@ module.exports = {
     devtoolModuleFilenameTemplate: (info) =>
       `kbn-ui-shared-deps-src/${Path.relative(REPO_ROOT, info.absoluteResourcePath)}`,
     library: '__kbnSharedDeps__',
-    futureEmitAssets: true,
   },
 
   module: {
@@ -69,13 +67,6 @@ module.exports = {
       {
         test: /\.css$/,
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
-      },
-      {
-        test: /\.(ttf)(\?|$)/,
-        loader: 'url-loader',
-        options: {
-          limit: 8192,
-        },
       },
       {
         test: /\.(js|tsx?)$/,
@@ -104,13 +95,28 @@ module.exports = {
           },
         },
       },
+      // automatically chooses between exporting a data URI and emitting a separate file. Previously achievable by using url-loader with asset size limit.
+      {
+        test: /\.(ttf)(\?|$)/,
+        type: 'asset',
+        parser: {
+          dataUrlCondition: {
+            maxSize: 8192,
+          },
+        },
+      },
     ],
   },
 
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
+    mainFields: ['browser', 'module', 'main'],
+    conditionNames: ['browser', 'module', 'import', 'require', 'default'],
     alias: {
       '@elastic/eui$': '@elastic/eui/optimize/es',
+      '@elastic/eui/lib/components/provider/nested$':
+        '@elastic/eui/optimize/es/components/provider/nested',
+      '@elastic/eui/lib/services/theme/warning$': '@elastic/eui/optimize/es/services/theme/warning',
       moment: MOMENT_SRC,
       // NOTE: Used to include react profiling on bundles
       // https://gist.github.com/bvaughn/25e6233aeb1b4f0cdb8d8366e54a3977#webpack-4
@@ -122,8 +128,10 @@ module.exports = {
   },
 
   optimization: {
+    moduleIds: process.env.NODE_ENV === 'production' ? 'deterministic' : 'natural',
+    chunkIds: process.env.NODE_ENV === 'production' ? 'deterministic' : 'natural',
     minimize: false,
-    noEmitOnErrors: true,
+    emitOnErrors: false,
   },
 
   performance: {
@@ -134,6 +142,7 @@ module.exports = {
   },
 
   plugins: [
+    new NodeLibsBrowserPlugin(),
     new MiniCssExtractPlugin({
       filename: '[name].css',
     }),

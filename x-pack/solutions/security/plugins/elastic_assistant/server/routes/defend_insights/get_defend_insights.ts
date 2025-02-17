@@ -13,7 +13,7 @@ import {
   DEFEND_INSIGHTS,
   DefendInsightsGetResponse,
   DefendInsightsGetRequestQuery,
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+  API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
@@ -34,7 +34,7 @@ export const getDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestHa
     })
     .addVersion(
       {
-        version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {
             query: buildRouteValidationWithZod(DefendInsightsGetRequestQuery),

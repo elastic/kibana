@@ -7,18 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  Walker,
-  type ESQLAstItem,
-  type ESQLCommand,
-  type ESQLSingleAstItem,
-  type ESQLFunction,
-  ESQLAst,
-} from '@kbn/esql-ast';
+import { Walker, type ESQLSingleAstItem, type ESQLFunction } from '@kbn/esql-ast';
 import { logicalOperators } from '../../../definitions/builtin';
-import { isParameterType, type SupportedDataType } from '../../../definitions/types';
+import { CommandSuggestParams, isParameterType } from '../../../definitions/types';
 import { isFunctionItem } from '../../../shared/helpers';
-import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
+import type { SuggestionRawDefinition } from '../../types';
 import {
   getFunctionSuggestions,
   getOperatorSuggestion,
@@ -29,20 +22,18 @@ import { getOverlapRange, getSuggestionsToRightOfOperatorExpression } from '../.
 import { getPosition } from './util';
 import { pipeCompleteItem } from '../../complete_items';
 import {
+  EDITOR_MARKER,
   UNSUPPORTED_COMMANDS_BEFORE_MATCH,
   UNSUPPORTED_COMMANDS_BEFORE_QSTR,
 } from '../../../shared/constants';
 
-export async function suggest(
-  innerText: string,
-  command: ESQLCommand<'where'>,
-  getColumnsByType: GetColumnsByTypeFn,
-  _columnExists: (column: string) => boolean,
-  _getSuggestedVariableName: () => string,
-  getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
-  _getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
-  fullTextAst?: ESQLAst
-): Promise<SuggestionRawDefinition[]> {
+export async function suggest({
+  innerText,
+  command,
+  getColumnsByType,
+  getExpressionType,
+  previousCommands,
+}: CommandSuggestParams<'where'>): Promise<SuggestionRawDefinition[]> {
   const suggestions: SuggestionRawDefinition[] = [];
 
   /**
@@ -52,7 +43,8 @@ export async function suggest(
    */
   const expressionRoot = command.args[0] as ESQLSingleAstItem | undefined;
 
-  switch (getPosition(innerText, command)) {
+  const position = getPosition(innerText, command);
+  switch (position) {
     /**
      * After a column name
      */
@@ -161,7 +153,7 @@ export async function suggest(
 
     case 'empty_expression':
       // Don't suggest MATCH or QSTR after unsupported commands
-      const priorCommands = fullTextAst?.map((a) => a.name) ?? [];
+      const priorCommands = previousCommands?.map((a) => a.name) ?? [];
       const ignored = [];
       if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_MATCH.has(c))) {
         ignored.push('match');
@@ -169,12 +161,14 @@ export async function suggest(
       if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_QSTR.has(c))) {
         ignored.push('qstr');
       }
-
-      const columnSuggestions = await getColumnsByType('any', [], {
-        advanceCursor: true,
-        openSuggestions: true,
-      });
-
+      const last = previousCommands?.[previousCommands.length - 1];
+      let columnSuggestions: SuggestionRawDefinition[] = [];
+      if (!last?.text?.endsWith(`:${EDITOR_MARKER}`)) {
+        columnSuggestions = await getColumnsByType('any', [], {
+          advanceCursor: true,
+          openSuggestions: true,
+        });
+      }
       suggestions.push(
         ...columnSuggestions,
         ...getFunctionSuggestions({ command: 'where', ignored })
@@ -189,15 +183,38 @@ export async function suggest(
     suggestions.push(pipeCompleteItem);
   }
 
-  return suggestions.map<SuggestionRawDefinition>((s) => {
-    const overlap = getOverlapRange(innerText, s.text);
-    const offset = overlap.start === overlap.end ? 1 : 0;
-    return {
-      ...s,
-      rangeToReplace: {
-        start: overlap.start + offset,
-        end: overlap.end + offset,
-      },
-    };
-  });
+  /**
+   * Attach replacement ranges if there's a prefix.
+   *
+   * Can't rely on Monaco because
+   * - it counts "." as a word separator
+   * - it doesn't handle multi-word completions (like "is null")
+   *
+   * TODO - think about how to generalize this.
+   */
+  const hasNonWhitespacePrefix = !/\s/.test(innerText[innerText.length - 1]);
+  if (hasNonWhitespacePrefix) {
+    // get index of first char of final word
+    const lastWhitespaceIndex = innerText.search(/\S(?=\S*$)/);
+    suggestions.forEach((s) => {
+      if (['IS NULL', 'IS NOT NULL'].includes(s.text)) {
+        // this suggestion has spaces in it (e.g. "IS NOT NULL")
+        // so we need to see if there's an overlap
+        const overlap = getOverlapRange(innerText, s.text);
+        if (overlap.start < overlap.end) {
+          // there's an overlap so use that
+          s.rangeToReplace = overlap;
+          return;
+        }
+      }
+
+      // no overlap, so just replace from the last whitespace
+      s.rangeToReplace = {
+        start: lastWhitespaceIndex + 1,
+        end: innerText.length,
+      };
+    });
+  }
+
+  return suggestions;
 }

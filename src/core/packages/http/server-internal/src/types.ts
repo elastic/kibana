@@ -23,6 +23,7 @@ import type { PostValidationMetadata } from '@kbn/core-http-server';
 import type { HttpServerSetup } from './http_server';
 import type { ExternalUrlConfig } from './external_url';
 import type { InternalStaticAssets } from './static_assets';
+import type { RateLimiterConfig } from './rate_limiter';
 
 /** @internal */
 export interface InternalHttpServicePreboot
@@ -37,6 +38,7 @@ export interface InternalHttpServicePreboot
     | 'registerRouteHandlerContext'
     | 'server'
     | 'getServerInfo'
+    | 'prototypeHardening'
   > {
   registerRoutes<
     DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
@@ -53,10 +55,12 @@ export interface InternalHttpServiceSetup
   server: HttpServerSetup['server'];
   staticAssets: InternalStaticAssets;
   externalUrl: ExternalUrlConfig;
+  prototypeHardening: boolean;
   createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
     path: string,
     plugin?: PluginOpaqueId
   ) => IRouter<Context>;
+  rateLimiter: RateLimiterConfig;
   registerOnPostValidation(
     cb: (req: CoreKibanaRequest, metadata: PostValidationMetadata) => void
   ): void;

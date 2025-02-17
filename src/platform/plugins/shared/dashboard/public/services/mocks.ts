@@ -29,9 +29,9 @@ import { savedObjectTaggingOssPluginMock } from '@kbn/saved-objects-tagging-oss-
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks';
-import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mocks';
 
 import { setKibanaServices } from './kibana_services';
+import { setLogger } from './logger';
 import { DashboardAttributes } from '../../server/content_management';
 import { DashboardCapabilities } from '../../common';
 import { LoadDashboardReturn } from './dashboard_content_management_service/types';
@@ -40,7 +40,6 @@ import { SearchDashboardsResponse } from './dashboard_content_management_service
 const defaultDashboardCapabilities: DashboardCapabilities = {
   show: true,
   createNew: true,
-  saveQuery: true,
   createShortUrl: true,
   showWriteControls: true,
   storeSearchSession: true,
@@ -48,7 +47,7 @@ const defaultDashboardCapabilities: DashboardCapabilities = {
 
 export const setStubKibanaServices = () => {
   const core = coreMock.createStart();
-  (core.application.capabilities as any).dashboard = defaultDashboardCapabilities;
+  (core.application.capabilities as any).dashboard_v2 = defaultDashboardCapabilities;
 
   setKibanaServices(core, {
     contentManagement: contentManagementMock.createStartContract(),
@@ -72,8 +71,11 @@ export const setStubKibanaServices = () => {
     unifiedSearch: unifiedSearchPluginMock.createStartContract(),
     urlForwarding: urlForwardingPluginMock.createStartContract(),
     usageCollection: usageCollectionPluginMock.createSetupContract(),
-    visualizations: visualizationsPluginMock.createStartContract(),
   });
+};
+
+export const setStubLogger = () => {
+  setLogger(coreMock.createCoreContext().logger);
 };
 
 export const mockDashboardContentManagementService = {

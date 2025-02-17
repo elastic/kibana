@@ -12,13 +12,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  useEuiTheme,
   EuiButton,
   EuiBasicTable,
   EuiFieldSearch,
   EuiSpacer,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
 import { STATUS_DISPLAY, STATUS_SORT } from '../constants';
@@ -112,7 +111,6 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     onStatusChange,
     onSearchChange,
   }) => {
-    const { euiTheme } = useEuiTheme();
     const [search, setSearch] = useState<string>('');
 
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
@@ -148,16 +146,6 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     const isMutatingOrLoading = useMemo(() => {
       return isLoadingFinish || isLoadingArchive || isLoadingFinishAndArchive || isLoading;
     }, [isLoadingFinish, isLoadingArchive, isLoadingFinishAndArchive, isLoading]);
-
-    const tableCss = useMemo(() => {
-      return css`
-        .euiTableRow {
-          &.running {
-            background-color: ${euiTheme.colors.highlight};
-          }
-        }
-      `;
-    }, [euiTheme.colors.highlight]);
 
     const actions: Array<EuiBasicTableColumn<MaintenanceWindow>> = useMemo(
       () => [
@@ -232,7 +220,6 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
             <EuiFlexItem>
               <EuiBasicTable
                 data-test-subj="maintenance-windows-table"
-                css={tableCss}
                 itemId="id"
                 loading={isMutatingOrLoading}
                 tableCaption="Maintenance Windows List"

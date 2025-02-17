@@ -61,12 +61,6 @@ export const UPDATE_BUTTON_LABEL = i18n.translate(
     defaultMessage: 'Update',
   }
 );
-export const UPDATE_ERROR = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.updateError',
-  {
-    defaultMessage: 'Update error',
-  }
-);
 
 export const UPDATE_FLYOUT_PER_FIELD_TOOLTIP_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.perFieldTooltip',
@@ -174,3 +168,11 @@ export const RULE_NEW_VERSION_DETECTED_WARNING_DESCRIPTION = (ruleName: string) 
       values: { ruleName },
     }
   );
+
+export const CUSTOMIZATION_DISABLED_CALLOUT_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.upgradeRules.customizationDisabledCalloutDescription',
+  {
+    defaultMessage:
+      'Prebuilt rule customization is disabled. Only updates to Elastic version are available.',
+  }
+);

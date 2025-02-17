@@ -25,9 +25,11 @@ import type { InternalUserSettingsServiceSetup } from '@kbn/core-user-settings-s
 import type { I18nServiceSetup } from '@kbn/core-i18n-server';
 import type { InternalI18nServicePreboot } from '@kbn/core-i18n-server-internal';
 import type { InternalFeatureFlagsSetup } from '@kbn/core-feature-flags-server-internal';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 
 /** @internal */
 export interface RenderingMetadata {
+  hardenPrototypes: ICspConfig['strict'];
   strictCsp: ICspConfig['strict'];
   uiPublicUrl: string;
   bootstrapScriptUrl: string;
@@ -57,6 +59,11 @@ export interface RenderingSetupDeps {
   customBranding: InternalCustomBrandingSetup;
   userSettings: InternalUserSettingsServiceSetup;
   i18n: I18nServiceSetup;
+}
+
+/** @internal */
+export interface RenderingStartDeps {
+  featureFlags: FeatureFlagsStart;
 }
 
 /** @internal */

@@ -10,12 +10,20 @@ import React from 'react';
 import { css } from '@emotion/css';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
+export type ManagementTabs = Record<
+  string,
+  {
+    content: JSX.Element;
+    label: string;
+  }
+>;
+
 export function Wrapper({
   tabs,
   streamId,
   subtab,
 }: {
-  tabs: Record<string, { content: JSX.Element; label: string }>;
+  tabs: ManagementTabs;
   streamId: string;
   subtab: string;
 }) {
@@ -28,22 +36,24 @@ export function Wrapper({
         max-width: 100%;
       `}
     >
-      <EuiFlexItem grow={false}>
-        <EuiButtonGroup
-          legend="Management tabs"
-          idSelected={subtab}
-          onChange={(optionId) => {
-            router.push('/{key}/management/{subtab}', {
-              path: { key: streamId, subtab: optionId },
-              query: {},
-            });
-          }}
-          options={Object.keys(tabs).map((id) => ({
-            id,
-            label: tabs[id].label,
-          }))}
-        />
-      </EuiFlexItem>
+      {Object.keys(tabs).length > 1 && (
+        <EuiFlexItem grow={false}>
+          <EuiButtonGroup
+            legend="Management tabs"
+            idSelected={subtab}
+            onChange={(optionId) => {
+              router.push('/{key}/management/{subtab}', {
+                path: { key: streamId, subtab: optionId },
+                query: {},
+              });
+            }}
+            options={Object.keys(tabs).map((id) => ({
+              id,
+              label: tabs[id].label,
+            }))}
+          />
+        </EuiFlexItem>
+      )}
       <EuiFlexItem
         className={css`
           overflow: auto;

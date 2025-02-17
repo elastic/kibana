@@ -11,6 +11,7 @@ import { MisconfigurationsPreview } from './misconfiguration_preview';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
 import { TestProviders } from '../../../common/mock/test_providers';
+import { EntityIdentifierFields } from '../../../../common/entity_analytics/types';
 
 // Mock hooks
 jest.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
@@ -33,7 +34,7 @@ describe('MisconfigurationsPreview', () => {
       <TestProviders>
         <MisconfigurationsPreview
           value="host1"
-          field="host.name"
+          field={EntityIdentifierFields.hostName}
           isLinkEnabled={true}
           openDetailsPanel={mockOpenLeftPanel}
         />

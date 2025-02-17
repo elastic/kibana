@@ -35,8 +35,8 @@ import { AlertsByStatus } from '../../../../overview/components/detection_respon
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-import type { HostItem } from '../../../../../common/search_strategy';
-import { LastEventIndexKey, RiskScoreEntity } from '../../../../../common/search_strategy';
+import { LastEventIndexKey, type HostItem } from '../../../../../common/search_strategy';
+import { EntityType } from '../../../../../common/entity_analytics/types';
 import { SecurityPageName } from '../../../../app/types';
 import { FiltersGlobal } from '../../../../common/components/filters_global';
 import { HeaderPage } from '../../../../common/components/header_page';
@@ -81,6 +81,7 @@ import { AlertCountByRuleByStatus } from '../../../../common/components/alert_co
 import { useLicense } from '../../../../common/hooks/use_license';
 import { ResponderActionButton } from '../../../../common/components/endpoint/responder';
 import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
+import { SourcererScopeName } from '../../../../sourcerer/store/model';
 
 const ES_HOST_FIELD = 'host.name';
 const HostOverviewManage = manageQuery(HostOverview);
@@ -183,15 +184,16 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     [rawFilteredQuery]
   );
 
-  const entity = useMemo(() => ({ type: 'host' as const, name: detailName }), [detailName]);
+  const entity = useMemo(
+    () => ({ type: EntityType.host as const, name: detailName }),
+    [detailName]
+  );
   const privileges = useAssetCriticalityPrivileges(entity.name);
 
   const refetchRiskScore = useRefetchOverviewPageRiskScore(HOST_OVERVIEW_RISK_SCORE_QUERY_ID);
-  const { calculateEntityRiskScore } = useCalculateEntityRiskScore(
-    RiskScoreEntity.host,
-    detailName,
-    { onSuccess: refetchRiskScore }
-  );
+  const { calculateEntityRiskScore } = useCalculateEntityRiskScore(EntityType.host, detailName, {
+    onSuccess: refetchRiskScore,
+  });
 
   const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
   const criticality = useAssetCriticalityData({
@@ -264,6 +266,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     hostName={detailName}
                     indexNames={selectedPatterns}
                     jobNameById={jobNameById}
+                    scopeId={SourcererScopeName.default}
                   />
                 )}
               </AnomalyTableProvider>

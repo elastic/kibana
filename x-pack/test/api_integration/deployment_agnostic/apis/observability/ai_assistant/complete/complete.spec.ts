@@ -39,13 +39,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     {
       '@timestamp': new Date().toISOString(),
       message: {
-        role: MessageRole.System,
-        content: 'You are a helpful assistant',
-      },
-    },
-    {
-      '@timestamp': new Date().toISOString(),
-      message: {
         role: MessageRole.User,
         content: 'Good morning, bot!',
         // make sure it doesn't 400 on `data` being set
@@ -98,7 +91,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       ]);
 
       await titleSimulator.status(200);
-      await titleSimulator.next('My generated title');
+      await titleSimulator.next({
+        content: '',
+        tool_calls: [
+          {
+            id: 'id',
+            index: 0,
+            function: {
+              name: 'title_conversation',
+              arguments: JSON.stringify({ title: 'My generated title' }),
+            },
+          },
+        ],
+      });
       await titleSimulator.tokenCount({ completion: 5, prompt: 10, total: 15 });
       await titleSimulator.complete();
 

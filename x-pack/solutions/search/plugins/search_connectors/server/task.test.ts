@@ -24,36 +24,54 @@ describe('infraSyncTaskRunner', () => {
     id: '000001',
     name: 'Github Connector',
     service_type: 'github',
+    is_deleted: false,
   };
 
   const sharepointConnector: ConnectorMetadata = {
     id: '000002',
     name: 'Sharepoint Connector',
     service_type: 'sharepoint_online',
+    is_deleted: false,
   };
 
   const mysqlConnector: ConnectorMetadata = {
     id: '000003',
     name: 'MySQL Connector',
     service_type: 'mysql',
+    is_deleted: false,
+  };
+
+  const deleted = (connector: ConnectorMetadata): ConnectorMetadata => {
+    return {
+      id: connector.id,
+      name: connector.name,
+      service_type: connector.service_type,
+      is_deleted: true,
+    };
   };
 
   const githubPackagePolicy: PackagePolicyMetadata = {
     package_policy_id: 'agent-001',
     agent_policy_ids: ['agent-package-001'],
-    connector_metadata: githubConnector,
+    connector_settings: githubConnector,
+    package_policy_name: 'Agentless github_connector',
+    package_name: 'Elastic Connectors',
   };
 
   const sharepointPackagePolicy: PackagePolicyMetadata = {
     package_policy_id: 'agent-002',
     agent_policy_ids: ['agent-package-002'],
-    connector_metadata: sharepointConnector,
+    connector_settings: sharepointConnector,
+    package_policy_name: 'Agentless spo_connector',
+    package_name: 'Elastic Connectors',
   };
 
   const mysqlPackagePolicy: PackagePolicyMetadata = {
     package_policy_id: 'agent-003',
     agent_policy_ids: ['agent-package-003'],
-    connector_metadata: mysqlConnector,
+    connector_settings: mysqlConnector,
+    package_policy_name: 'Agentless mysql_connector',
+    package_name: 'Elastic Connectors',
   };
 
   let logger: MockedLogger;
@@ -197,8 +215,12 @@ describe('infraSyncTaskRunner', () => {
     expect(serviceMock.deployConnector).toBeCalledWith(sharepointConnector);
   });
 
-  test('Removes a package policy if no connectors match the policy', async () => {
-    serviceMock.getNativeConnectors.mockResolvedValue([mysqlConnector, githubConnector]);
+  test('Removes a package policy if connectors has been soft-deleted', async () => {
+    serviceMock.getNativeConnectors.mockResolvedValue([
+      deleted(sharepointConnector),
+      mysqlConnector,
+      githubConnector,
+    ]);
     serviceMock.getConnectorPackagePolicies.mockResolvedValue([sharepointPackagePolicy]);
     licensePluginStartMock.getLicense.mockResolvedValue(validLicenseMock);
 
@@ -211,8 +233,26 @@ describe('infraSyncTaskRunner', () => {
     expect(serviceMock.removeDeployment).toBeCalledWith(sharepointPackagePolicy.package_policy_id);
   });
 
+  test('Does not remove a package policy if no connectors match the policy', async () => {
+    serviceMock.getNativeConnectors.mockResolvedValue([mysqlConnector, githubConnector]);
+    serviceMock.getConnectorPackagePolicies.mockResolvedValue([sharepointPackagePolicy]);
+    licensePluginStartMock.getLicense.mockResolvedValue(validLicenseMock);
+
+    await infraSyncTaskRunner(
+      logger,
+      serviceMock,
+      licensePluginStartMock
+    )({ taskInstance: taskInstanceStub }).run();
+
+    expect(serviceMock.removeDeployment).not.toBeCalled();
+  });
+
   test('Removes deployments even if another connectors failed to be undeployed', async () => {
-    serviceMock.getNativeConnectors.mockResolvedValue([]);
+    serviceMock.getNativeConnectors.mockResolvedValue([
+      deleted(mysqlConnector),
+      deleted(sharepointConnector),
+      deleted(githubConnector),
+    ]);
     serviceMock.getConnectorPackagePolicies.mockResolvedValue([
       sharepointPackagePolicy,
       mysqlPackagePolicy,

@@ -8,15 +8,37 @@
  */
 
 export * as cli from './src/cli';
-export { expect, test, tags, createPlaywrightConfig, createLazyPageObject } from './src/playwright';
+export {
+  expect,
+  test,
+  spaceTest,
+  tags,
+  createPlaywrightConfig,
+  createLazyPageObject,
+  ingestTestDataHook,
+  ingestSynthtraceDataHook,
+} from './src/playwright';
 export type {
-  ScoutPage,
   ScoutPlaywrightOptions,
   ScoutTestOptions,
+  ScoutPage,
   PageObjects,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
-  EsArchiverFixture,
+  ScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures,
 } from './src/playwright';
 
-export type { Client, KbnClient, KibanaUrl, SamlSessionManager, ToolingLog } from './src/types';
+export type {
+  EsClient,
+  KbnClient,
+  KibanaUrl,
+  ScoutLogger,
+  ScoutServerConfig,
+  ScoutTestConfig,
+} from './src/types';
+
+// re-export from Playwright
+export type { Locator } from 'playwright/test';
+
+export { measurePerformance, measurePerformanceAsync } from './src/common';

@@ -14,7 +14,7 @@ import { ClearControlAction } from './clear_control_action';
 import type { ViewMode } from '@kbn/presentation-publishing';
 
 const dashboardApi = {
-  viewMode: new BehaviorSubject<ViewMode>('view'),
+  viewMode$: new BehaviorSubject<ViewMode>('view'),
 };
 const controlGroupApi = getMockedControlGroupApi(dashboardApi, {
   removePanel: jest.fn(),

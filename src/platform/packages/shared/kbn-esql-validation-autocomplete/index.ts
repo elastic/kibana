@@ -8,6 +8,7 @@
  */
 
 export type { SuggestionRawDefinition, ItemKind } from './src/autocomplete/types';
+export { ESQLVariableType, type ESQLControlVariable } from './src/shared/types';
 export type { CodeAction } from './src/code_actions/types';
 export type {
   FunctionDefinition,
@@ -66,6 +67,8 @@ export {
   isSingleItem,
 } from './src/shared/helpers';
 export { ENRICH_MODES } from './src/definitions/settings';
+export { timeUnits } from './src/definitions/literals';
+export { aggregationFunctionDefinitions } from './src/definitions/generated/aggregation_functions';
 export { getFunctionSignatures } from './src/definitions/helpers';
 
 export {

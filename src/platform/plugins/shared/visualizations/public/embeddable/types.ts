@@ -14,6 +14,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
 import {
   HasEditCapabilities,
+  HasLibraryTransforms,
   HasSupportedTriggers,
   PublishesDataLoading,
   PublishesDataViews,
@@ -70,26 +71,6 @@ export type VisualizeOutputState = VisualizeSavedVisInputState &
   Required<Omit<SerializedTitles, 'hidePanelTitles'>> &
   ExtraSavedObjectProperties;
 
-export const isVisualizeSavedObjectState = (
-  state: unknown
-): state is VisualizeSavedObjectInputState => {
-  return (
-    typeof state !== 'undefined' &&
-    (state as VisualizeSavedObjectInputState).savedObjectId !== undefined &&
-    !!(state as VisualizeSavedObjectInputState).savedObjectId &&
-    !('savedVis' in (state as VisualizeSavedObjectInputState)) &&
-    !('serializedVis' in (state as VisualizeSavedObjectInputState))
-  );
-};
-
-export const isVisualizeRuntimeState = (state: unknown): state is VisualizeRuntimeState => {
-  return (
-    !isVisualizeSavedObjectState(state) &&
-    !('savedVis' in (state as VisualizeRuntimeState)) &&
-    (state as VisualizeRuntimeState).serializedVis !== undefined
-  );
-};
-
 export type VisualizeApi = Partial<HasEditCapabilities> &
   PublishesDataViews &
   PublishesDataLoading &
@@ -98,13 +79,8 @@ export type VisualizeApi = Partial<HasEditCapabilities> &
   HasInspectorAdapters &
   HasSupportedTriggers &
   PublishesTimeRange &
+  HasLibraryTransforms &
   DefaultEmbeddableApi<VisualizeSerializedState, VisualizeRuntimeState> & {
     updateVis: (vis: DeepPartial<SerializedVis<VisParams>>) => void;
     openInspector: () => OverlayRef | undefined;
-    saveToLibrary: (title: string) => Promise<string>;
-    canLinkToLibrary: () => boolean;
-    canUnlinkFromLibrary: () => boolean;
-    checkForDuplicateTitle: (title: string) => boolean;
-    getByValueState: () => VisualizeSerializedState;
-    getByReferenceState: (id: string) => VisualizeSerializedState;
   };

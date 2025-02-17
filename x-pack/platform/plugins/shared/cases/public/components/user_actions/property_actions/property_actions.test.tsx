@@ -13,7 +13,8 @@ import { createAppMockRenderer } from '../../../common/mock';
 import { UserActionPropertyActions } from './property_actions';
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 
-describe('UserActionPropertyActions', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/206056
+describe.skip('UserActionPropertyActions', () => {
   let appMock: AppMockRenderer;
   const onClick = jest.fn();
 

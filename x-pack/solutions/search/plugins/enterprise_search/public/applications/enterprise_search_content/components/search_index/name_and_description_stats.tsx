@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { DESCRIPTION_LABEL, NAME_LABEL } from '../../../shared/constants';
-import { isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
+import { isConnectorIndex } from '../../utils/indices';
 
 import { ConnectorNameAndDescriptionFlyout } from './connector/connector_name_and_description/connector_name_and_description_flyout';
 import { ConnectorNameAndDescriptionLogic } from './connector/connector_name_and_description/connector_name_and_description_logic';
@@ -43,7 +43,7 @@ export const NameAndDescriptionStats: React.FC = () => {
   const hideStats = isLoading || isError;
   const { setIsEditing: setIsFlyoutVisible } = useActions(ConnectorNameAndDescriptionLogic);
 
-  if (!(isConnectorIndex(indexData) || isCrawlerIndex(indexData))) {
+  if (!isConnectorIndex(indexData)) {
     return <></>;
   }
 

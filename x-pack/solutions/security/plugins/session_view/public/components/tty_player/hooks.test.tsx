@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
 import { useIOLines, useXtermPlayer, XtermPlayerDeps } from './hooks';
 import type { ProcessEventsPage } from '../../../common';
@@ -63,38 +63,38 @@ describe('TTYPlayer/hooks', () => {
     });
 
     it('mounts and renders the first line of output', async () => {
-      const { result: xTermResult } = renderHook((props) => useXtermPlayer(props), {
+      const { result: xTermResult } = renderHook(useXtermPlayer, {
         initialProps,
       });
 
       const { terminal, currentLine, seekToLine } = xTermResult.current;
 
       // there is a minor delay in updates to xtermjs after writeln is called.
-      jest.advanceTimersByTime(100);
+      await act(async () => jest.advanceTimersByTime(100));
 
       // check that first line rendered in xtermjs
       expect(terminal.buffer.active.getLine(0)?.translateToString(true)).toBe('256');
       expect(currentLine).toBe(0);
 
-      act(() => {
+      await act(async () => {
         seekToLine(VIM_LINE_START); // line where vim output starts
       });
 
-      jest.advanceTimersByTime(100);
+      await act(async () => jest.advanceTimersByTime(100));
 
       expect(terminal.buffer.active.getLine(0)?.translateToString(true)).toBe('#!/bin/env bash');
     });
 
     it('allows the user to seek to any line of output', async () => {
-      const { result: xTermResult } = renderHook((props) => useXtermPlayer(props), {
+      const { result: xTermResult } = renderHook(useXtermPlayer, {
         initialProps,
       });
 
-      act(() => {
+      await act(async () => {
         xTermResult.current.seekToLine(VIM_LINE_START); // line where vim output starts
       });
 
-      jest.advanceTimersByTime(100);
+      await act(async () => jest.advanceTimersByTime(100));
 
       const { terminal, currentLine } = xTermResult.current;
 
@@ -103,64 +103,68 @@ describe('TTYPlayer/hooks', () => {
     });
 
     it('allows the user to play', async () => {
-      const { result, rerender } = renderHook((props) => useXtermPlayer(props), {
+      const { result, rerender } = renderHook(useXtermPlayer, {
         initialProps,
       });
 
       rerender({ ...initialProps, isPlaying: true });
 
-      act(() => {
-        jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * 10);
-      });
+      await act(async () => jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * 10));
 
       expect(result.current.currentLine).toBe(10);
     });
 
     it('allows the user to stop', async () => {
-      const { result, rerender } = renderHook((props) => useXtermPlayer(props), {
+      const { result, rerender } = renderHook(useXtermPlayer, {
         initialProps,
       });
 
       rerender({ ...initialProps, isPlaying: true });
-      act(() => {
-        jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * 10);
-      });
+
+      await act(async () => jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * 10));
+
+      expect(result.current.currentLine).toBe(10);
+
       rerender({ ...initialProps, isPlaying: false });
-      act(() => {
-        jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * 10);
-      });
+
+      await act(async () => jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * 10));
+
       expect(result.current.currentLine).toBe(10); // should not have advanced
     });
 
     it('should stop when it reaches the end of the array of lines', async () => {
-      const { result, rerender } = renderHook((props) => useXtermPlayer(props), {
+      const { result, rerender } = renderHook(useXtermPlayer, {
         initialProps,
       });
 
       rerender({ ...initialProps, isPlaying: true });
-      act(() => {
-        jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * initialProps.lines.length + 100);
-      });
+
+      await act(async () =>
+        jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * initialProps.lines.length + 100)
+      );
+
       expect(result.current.currentLine).toBe(initialProps.lines.length - 1);
     });
 
     it('should not print the first line twice after playback starts', async () => {
-      const { result, rerender } = renderHook((props) => useXtermPlayer(props), {
+      const { result, rerender } = renderHook(useXtermPlayer, {
         initialProps,
       });
 
       rerender({ ...initialProps, isPlaying: true });
-      act(() => {
+
+      await act(async () => {
         // advance render loop
         jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS);
       });
+
       rerender({ ...initialProps, isPlaying: false });
 
       expect(result.current.terminal.buffer.active.getLine(0)?.translateToString(true)).toBe('256');
     });
 
     it('ensure the first few render loops have printed the right lines', async () => {
-      const { result, rerender } = renderHook((props) => useXtermPlayer(props), {
+      const { result, rerender } = renderHook(useXtermPlayer, {
         initialProps,
       });
 
@@ -168,32 +172,36 @@ describe('TTYPlayer/hooks', () => {
 
       rerender({ ...initialProps, isPlaying: true });
 
-      act(() => {
+      await act(async () => {
         // advance render loop
         jest.advanceTimersByTime(DEFAULT_TTY_PLAYSPEED_MS * LOOPS);
       });
 
       rerender({ ...initialProps, isPlaying: false });
 
-      expect(result.current.terminal.buffer.active.getLine(0)?.translateToString(true)).toBe('256');
-      expect(result.current.terminal.buffer.active.getLine(1)?.translateToString(true)).toBe(',');
-      expect(result.current.terminal.buffer.active.getLine(2)?.translateToString(true)).toBe(
-        '                             Some Companies Puppet instance'
-      );
-      expect(result.current.terminal.buffer.active.getLine(3)?.translateToString(true)).toBe(
-        '             |  |    |       CentOS Stream release 8 on x86_64'
-      );
-      expect(result.current.terminal.buffer.active.getLine(4)?.translateToString(true)).toBe(
-        '  ***********************    Load average: 1.23, 1.01, 0.63'
-      );
-      expect(result.current.terminal.buffer.active.getLine(5)?.translateToString(true)).toBe(
-        '  ************************   '
-      );
-      expect(result.current.currentLine).toBe(LOOPS);
+      await waitFor(() => {
+        expect(result.current.terminal.buffer.active.getLine(0)?.translateToString(true)).toBe(
+          '256'
+        );
+        expect(result.current.terminal.buffer.active.getLine(1)?.translateToString(true)).toBe(',');
+        expect(result.current.terminal.buffer.active.getLine(2)?.translateToString(true)).toBe(
+          '                             Some Companies Puppet instance'
+        );
+        expect(result.current.terminal.buffer.active.getLine(3)?.translateToString(true)).toBe(
+          '             |  |    |       CentOS Stream release 8 on x86_64'
+        );
+        expect(result.current.terminal.buffer.active.getLine(4)?.translateToString(true)).toBe(
+          '  ***********************    Load average: 1.23, 1.01, 0.63'
+        );
+        expect(result.current.terminal.buffer.active.getLine(5)?.translateToString(true)).toBe(
+          '  ************************   '
+        );
+        expect(result.current.currentLine).toBe(LOOPS);
+      });
     });
 
     it('will allow a plain text search highlight on the last line printed', async () => {
-      const { result: xTermResult } = renderHook((props) => useXtermPlayer(props), {
+      const { result: xTermResult } = renderHook(useXtermPlayer, {
         initialProps,
       });
 

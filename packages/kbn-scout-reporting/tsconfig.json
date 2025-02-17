@@ -20,5 +20,6 @@
     "@kbn/scout-info",
     "@kbn/repo-info",
     "@kbn/code-owners",
+    "@kbn/repo-packages",
   ]
 }

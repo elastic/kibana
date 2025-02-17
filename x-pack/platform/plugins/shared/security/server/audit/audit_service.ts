@@ -74,6 +74,8 @@ export class AuditService {
 
     // Record feature usage at a regular interval if enabled and license allows
     const enabled = !!(config.enabled && config.appender);
+    const includeSavedObjectNames = config.include_saved_object_names;
+
     if (enabled) {
       license.features$.subscribe((features) => {
         clearInterval(this.usageIntervalId!);
@@ -141,6 +143,7 @@ export class AuditService {
         });
       },
       enabled,
+      includeSavedObjectNames,
     });
 
     http.registerOnPostAuth((request, response, t) => {
@@ -152,7 +155,7 @@ export class AuditService {
 
     return {
       asScoped,
-      withoutRequest: { log, enabled },
+      withoutRequest: { log, enabled, includeSavedObjectNames },
     };
   }
 

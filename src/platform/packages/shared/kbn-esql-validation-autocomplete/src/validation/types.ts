@@ -42,6 +42,13 @@ export interface ReferenceMaps {
   fields: Map<string, ESQLRealField>;
   policies: Map<string, ESQLPolicy>;
   query: string;
+  joinIndices: JoinIndexAutocompleteItem[];
+}
+
+export interface JoinIndexAutocompleteItem {
+  name: string;
+  mode: 'lookup' | string;
+  aliases: string[];
 }
 
 export interface ValidationErrors {
@@ -203,6 +210,10 @@ export interface ValidationErrors {
   onlyWhereCommandSupported: {
     message: string;
     type: { fn: string };
+  };
+  invalidJoinIndex: {
+    message: string;
+    type: { identifier: string };
   };
 }
 

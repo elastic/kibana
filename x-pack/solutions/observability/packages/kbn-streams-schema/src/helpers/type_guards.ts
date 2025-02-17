@@ -5,110 +5,41 @@
  * 2.0.
  */
 
-import { ZodSchema, custom } from '@kbn/zod';
-import {
-  AndCondition,
-  conditionSchema,
-  dissectProcessingDefinitionSchema,
-  DissectProcessingDefinition,
-  FilterCondition,
-  filterConditionSchema,
-  GrokProcessingDefinition,
-  grokProcessingDefinitionSchema,
-  IngestReadStreamDefinition,
-  ingestReadStreamDefinitonSchema,
-  IngestStreamDefinition,
-  ingestStreamDefinitonSchema,
-  OrCondition,
-  ReadStreamDefinition,
-  readStreamDefinitonSchema,
-  StreamDefinition,
-  streamDefinitionSchema,
-  WiredReadStreamDefinition,
-  wiredReadStreamDefinitonSchema,
-  WiredStreamDefinition,
-  wiredStreamDefinitonSchema,
-} from '../models';
-import {
-  IngestStreamConfigDefinition,
-  ingestStreamConfigDefinitonSchema,
-  StreamConfigDefinition,
-  streamConfigDefinitionSchema,
-  WiredStreamConfigDefinition,
-  wiredStreamConfigDefinitonSchema,
-} from '../models/stream_config';
+import { ZodSchema, z } from '@kbn/zod';
 
-export function isSchema<T>(zodSchema: ZodSchema, subject: T) {
-  try {
-    zodSchema.parse(subject);
-    return true;
-  } catch (e) {
-    return false;
-  }
+export function createIsNarrowSchema<TBaseSchema extends z.Schema, TNarrowSchema extends z.Schema>(
+  _base: TBaseSchema,
+  narrow: TNarrowSchema
+) {
+  return <TValue extends z.input<TBaseSchema>>(
+    value: TValue
+  ): value is Extract<TValue, z.input<TNarrowSchema>> => {
+    return isSchema(narrow, value);
+  };
 }
 
-export function isReadStream(subject: any): subject is ReadStreamDefinition {
-  return isSchema(readStreamDefinitonSchema, subject);
+export function createAsSchemaOrThrow<TBaseSchema extends z.Schema, TNarrowSchema extends z.Schema>(
+  _base: TBaseSchema,
+  narrow: TNarrowSchema
+) {
+  return <TValue extends z.input<TBaseSchema>>(
+    value: TValue
+  ): Extract<TValue, z.input<TNarrowSchema>> => {
+    narrow.parse(value);
+    return value;
+  };
 }
 
-export function isWiredReadStream(subject: any): subject is WiredReadStreamDefinition {
-  return isSchema(wiredReadStreamDefinitonSchema, subject);
+export function isSchema<TSchema extends z.Schema>(
+  schema: TSchema,
+  value: unknown
+): value is z.input<TSchema> {
+  return schema.safeParse(value).success;
 }
 
-export function isIngestReadStream(subject: any): subject is IngestReadStreamDefinition {
-  return isSchema(ingestReadStreamDefinitonSchema, subject);
-}
-
-export function isStream(subject: any): subject is StreamDefinition {
-  return isSchema(streamDefinitionSchema, subject);
-}
-
-export function isIngestStream(subject: StreamDefinition): subject is IngestStreamDefinition {
-  return isSchema(ingestStreamDefinitonSchema, subject);
-}
-
-export function isWiredStream(subject: StreamDefinition): subject is WiredStreamDefinition {
-  return isSchema(wiredStreamDefinitonSchema, subject);
-}
-
-const rootStreamSchema = custom<'RootStreamSchema'>((val) => {
-  return val?.name?.split('.').length === 1;
-});
-
-export function isRootStream(subject: any) {
-  return (
-    (isWiredStream(subject) || isWiredReadStream(subject)) && isSchema(rootStreamSchema, subject)
-  );
-}
-
-export function isWiredStreamConfig(subject: any): subject is WiredStreamConfigDefinition {
-  return isSchema(wiredStreamConfigDefinitonSchema, subject);
-}
-
-export function isIngestStreamConfig(subject: any): subject is IngestStreamConfigDefinition {
-  return isSchema(ingestStreamConfigDefinitonSchema, subject);
-}
-
-export function isStreamConfig(subject: any): subject is StreamConfigDefinition {
-  return isSchema(streamConfigDefinitionSchema, subject);
-}
-
-export function isGrokProcessor(subject: any): subject is GrokProcessingDefinition {
-  return isSchema(grokProcessingDefinitionSchema, subject);
-}
-
-export function isDissectProcessor(subject: any): subject is DissectProcessingDefinition {
-  return isSchema(dissectProcessingDefinitionSchema, subject);
-}
-
-export function isFilterCondition(subject: any): subject is FilterCondition {
-  return isSchema(filterConditionSchema, subject);
-}
-
-export function isAndCondition(subject: any): subject is AndCondition {
-  return isSchema(conditionSchema, subject) && subject.and != null;
-}
-
-export function isOrCondition(subject: any): subject is OrCondition {
-  return isSchema(conditionSchema, subject) && subject.or != null;
+export function assertsSchema<TSchema extends ZodSchema>(
+  schema: TSchema,
+  subject: any
+): asserts subject is z.input<TSchema> {
+  schema.parse(subject);
 }

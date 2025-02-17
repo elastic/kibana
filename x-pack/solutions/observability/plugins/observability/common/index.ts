@@ -64,6 +64,7 @@ export {
 /** @deprecated deprecated in 8.17. Please use casesFeatureIdV2 instead */
 export const casesFeatureId = 'observabilityCases';
 export const casesFeatureIdV2 = 'observabilityCasesV2';
+export const casesFeatureIdV3 = 'observabilityCasesV3';
 export const sloFeatureId = 'slo';
 // The ID of the observability app. Should more appropriately be called
 // 'observability' but it's used in telemetry by applicationUsage so we don't
@@ -77,6 +78,8 @@ export const observabilityFeatureId = 'observability';
 // by other plugins as well, so defined here to prevent cross-references.
 export { uptimeOverviewLocatorID } from '@kbn/deeplinks-observability';
 export const syntheticsMonitorDetailLocatorID = 'SYNTHETICS_MONITOR_DETAIL_LOCATOR';
+export const syntheticsMonitorLocationQueryLocatorID =
+  'SYNTHETICS_MONITOR_GROUP_BY_LOCATION_LOCATOR';
 export const syntheticsEditMonitorLocatorID = 'SYNTHETICS_EDIT_MONITOR_LOCATOR';
 export const syntheticsSettingsLocatorID = 'SYNTHETICS_SETTINGS';
 export const alertsLocatorID = 'ALERTS_LOCATOR';

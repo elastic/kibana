@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import type { EntityType } from '../types';
 
-export const identifierTypeSchema = t.keyof({ user: null, host: null, service: null });
-export type IdentifierTypeSchema = t.TypeOf<typeof identifierTypeSchema>;
-export type IdentifierType = IdentifierTypeSchema;
+export type IdentifierType = EntityType;

@@ -12,11 +12,10 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiPanel,
-  EuiToolTip,
   EuiSkeletonTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { isEmpty } from 'lodash';
 import { DataStreamApis } from '../use_data_stream_apis';
 import { Conversation } from '../../..';
@@ -24,9 +23,9 @@ import { AssistantTitle } from '../assistant_title';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
 import { FlyoutNavigation } from '../assistant_overlay/flyout_navigation';
 import { AssistantSettingsModal } from '../settings/assistant_settings_modal';
-import * as i18n from './translations';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { SettingsContextMenu } from '../settings/settings_context_menu/settings_context_menu';
+import * as i18n from './translations';
 
 interface OwnProps {
   selectedConversation: Conversation | undefined;
@@ -34,9 +33,7 @@ interface OwnProps {
   isDisabled: boolean;
   isLoading: boolean;
   isSettingsModalVisible: boolean;
-  onToggleShowAnonymizedValues: () => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  showAnonymizedValues: boolean;
   onChatCleared: () => void;
   onCloseFlyout?: () => void;
   chatHistoryVisible?: boolean;
@@ -53,6 +50,9 @@ interface OwnProps {
 }
 
 type Props = OwnProps;
+
+export const AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID = 'aiAssistantSettingsMenuContainer';
+
 /**
  * Renders the header of the Elastic AI Assistant.
  * Provide a user interface for selecting and managing conversations,
@@ -64,9 +64,7 @@ export const AssistantHeader: React.FC<Props> = ({
   isDisabled,
   isLoading,
   isSettingsModalVisible,
-  onToggleShowAnonymizedValues,
   setIsSettingsModalVisible,
-  showAnonymizedValues,
   onChatCleared,
   chatHistoryVisible,
   setChatHistoryVisible,
@@ -79,13 +77,7 @@ export const AssistantHeader: React.FC<Props> = ({
   isAssistantEnabled,
   refetchPrompts,
 }) => {
-  const showAnonymizedValuesChecked = useMemo(
-    () =>
-      selectedConversation?.replacements != null &&
-      Object.keys(selectedConversation?.replacements).length > 0 &&
-      showAnonymizedValues,
-    [selectedConversation?.replacements, showAnonymizedValues]
-  );
+  const { euiTheme } = useEuiTheme();
 
   const selectedConnectorId = useMemo(
     () => selectedConversation?.apiConfig?.connectorId,
@@ -134,6 +126,7 @@ export const AssistantHeader: React.FC<Props> = ({
           {onCloseFlyout && (
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
+                aria-label={i18n.CLOSE}
                 data-test-subj="euiFlyoutCloseButton"
                 iconType="cross"
                 color="text"
@@ -148,8 +141,8 @@ export const AssistantHeader: React.FC<Props> = ({
         hasShadow={false}
         paddingSize="m"
         css={css`
-          padding-top: ${euiThemeVars.euiSizeS};
-          padding-bottom: ${euiThemeVars.euiSizeS};
+          padding-top: ${euiTheme.size.s};
+          padding-bottom: ${euiTheme.size.s};
         `}
       >
         <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize="s">
@@ -180,29 +173,7 @@ export const AssistantHeader: React.FC<Props> = ({
                   onConnectorSelected={onConversationChange}
                 />
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={
-                    showAnonymizedValuesChecked ? i18n.SHOW_REAL_VALUES : i18n.SHOW_ANONYMIZED
-                  }
-                >
-                  <EuiButtonIcon
-                    css={css`
-                      border-radius: 50%;
-                    `}
-                    display="base"
-                    data-test-subj="showAnonymizedValues"
-                    isSelected={showAnonymizedValuesChecked}
-                    aria-label={
-                      showAnonymizedValuesChecked ? i18n.SHOW_ANONYMIZED : i18n.SHOW_REAL_VALUES
-                    }
-                    iconType={showAnonymizedValuesChecked ? 'eye' : 'eyeClosed'}
-                    onClick={onToggleShowAnonymizedValues}
-                    isDisabled={isEmpty(selectedConversation?.replacements)}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-              <EuiFlexItem>
+              <EuiFlexItem id={AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID}>
                 <SettingsContextMenu isDisabled={isDisabled} onChatCleared={onChatCleared} />
               </EuiFlexItem>
             </EuiFlexGroup>
