@@ -126,7 +126,7 @@ const getDocumentEntryFromLegacyKbEntry = (
     name: legacyEsKbDoc.text,
     namespace: legacyEsKbDoc.namespace,
     type: DocumentEntryType.value,
-    kbResource: legacyEsKbDoc.metadata?.kbResource as KnowledgeBaseResource ?? 'user',
+    kbResource: (legacyEsKbDoc.metadata?.kbResource as KnowledgeBaseResource) ?? 'user',
     source: legacyEsKbDoc.metadata?.source ?? 'unknown',
     required: legacyEsKbDoc.metadata?.required ?? false,
     text: legacyEsKbDoc.text,
