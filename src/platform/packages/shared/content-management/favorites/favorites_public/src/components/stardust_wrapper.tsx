@@ -90,12 +90,14 @@ const stardustContainerStyles = css`
 /* Disable the animation on the button icon to not overcrowd the stardust effect */
 const euiButtonIconStylesDisableAnimation = css`
   ${euiCanAnimate} {
-    button.euiButtonIcon:active,
-    button.euiButtonIcon:hover,
-    button.euiButtonIcon:focus {
-      animation: none;
-      transform: none;
-      background-color: transparent;
+    button.euiButtonIcon {
+      &:active,
+      &:hover,
+      &:focus {
+        animation: none;
+        transform: none;
+        background-color: transparent;
+      }
     }
   }
 `;
