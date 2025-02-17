@@ -95,8 +95,7 @@ describe('Search search provider', () => {
     {
       hasConnectors: true,
     } as any,
-    connectors,
-    false
+    connectors
   );
 
   beforeEach(() => {});
@@ -142,8 +141,7 @@ describe('Search search provider', () => {
         {
           hasConnectors: false,
         } as any,
-        connectors,
-        false
+        connectors
       );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
@@ -203,8 +201,7 @@ describe('Search search provider', () => {
         {
           hasConnectors: false,
         } as any,
-        connectors,
-        false
+        connectors
       );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
@@ -223,8 +220,7 @@ describe('Search search provider', () => {
         {
           hasConnectors: false,
         } as any,
-        connectors,
-        false
+        connectors
       );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
@@ -244,8 +240,7 @@ describe('Search search provider', () => {
         {
           hasConnectors: true,
         } as any,
-        connectors,
-        true
+        connectors
       );
       getTestScheduler().run(({ expectObservable }) => {
         expectObservable(
