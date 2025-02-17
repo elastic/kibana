@@ -47,33 +47,37 @@ const ExportContentUi = ({
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
   const [usePrintLayout, setPrintLayout] = useState(false);
 
+  console.log('export types:: %o \n', aggregateReportTypes);
+
   const radioOptions = useMemo(() => {
-    return aggregateReportTypes.reduce<EuiRadioGroupOption[]>((acc, { reportType, label }) => {
-      if (reportType) {
-        acc.push({
-          id: reportType,
-          label,
-          'data-test-subj': `${reportType}-radioOption`,
-        });
-      }
+    return aggregateReportTypes.reduce<EuiRadioGroupOption[]>((acc, { id, config }) => {
+      acc.push({
+        id: config.exportType,
+        label: config.label,
+        'data-test-subj': `${config.exportType}-radioOption`,
+      });
       return acc;
     }, []);
   }, [aggregateReportTypes]);
+
+  console.log('radioOptions:: %o \n', radioOptions);
 
   const [selectedRadio, setSelectedRadio] = useState<SupportedExportTypes>(
     radioOptions[0].id as SupportedExportTypes
   );
 
   const {
-    generateExportButton,
-    helpText,
-    warnings = [],
-    renderCopyURLButton,
-    generateExport,
-    generateExportUrl,
-    renderLayoutOptionSwitch,
+    config: {
+      generateExportButton,
+      helpText,
+      warnings = [],
+      renderCopyURLButton,
+      generateAssetExport: generateExport,
+      generateValueExport: generateExportUrl,
+      renderLayoutOptionSwitch,
+    },
   } = useMemo(() => {
-    return aggregateReportTypes?.find(({ reportType }) => reportType === selectedRadio)!;
+    return aggregateReportTypes?.find(({ config }) => config.exportType === selectedRadio)!;
   }, [selectedRadio, aggregateReportTypes]);
 
   const handlePrintLayoutChange = useCallback(
