@@ -43,13 +43,6 @@ export interface IndexAnnotationArgs {
   event?: Annotation['event'];
 }
 
-export interface GetParams {
-  index: string;
-  size: number;
-  body: object;
-  track_total_hits: boolean;
-}
-
 export interface GetResponse {
   success: true;
   annotations: Record<JobId, Annotations>;
@@ -279,28 +272,26 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       ];
     }
 
-    const params: GetParams = {
+    const params: estypes.SearchRequest = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
       size: maxAnnotations,
       track_total_hits: true,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              {
-                query_string: {
-                  query: `type:${ANNOTATION_TYPE.ANNOTATION}`,
-                  analyze_wildcard: false,
-                },
+      query: {
+        bool: {
+          filter: [
+            {
+              query_string: {
+                query: `type:${ANNOTATION_TYPE.ANNOTATION}`,
+                analyze_wildcard: false,
               },
-              {
-                bool: {
-                  must: boolCriteria,
-                },
+            },
+            {
+              bool: {
+                must: boolCriteria,
               },
-            ],
-            ...(shouldClauses ? { should: shouldClauses, minimum_should_match: 1 } : {}),
-          },
+            },
+          ],
+          ...(shouldClauses ? { should: shouldClauses, minimum_should_match: 1 } : {}),
         },
       },
     };
