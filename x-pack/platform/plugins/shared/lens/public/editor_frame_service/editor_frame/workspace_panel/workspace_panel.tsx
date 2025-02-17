@@ -81,6 +81,7 @@ import {
 import { setChangesApplied } from '../../../state_management/lens_slice';
 import { WorkspaceErrors } from './workspace_errors';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
+import { css } from '@emotion/react';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -496,7 +497,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
     return (
       <EuiText
-        className={classNames('lnsWorkspacePanel__emptyContent')}
+        className='lnsWorkspacePanel__emptyContent'
         textAlign="center"
         data-test-subj="workspace-drag-drop-prompt"
         size="s"
@@ -504,10 +505,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         <div>
           <DropIllustration
             aria-hidden={true}
-            className={classNames(
-              'lnsWorkspacePanel__promptIllustration',
-              'lnsWorkspacePanel__dropIllustration'
-            )}
+            className="lnsWorkspacePanel__promptIllustration lnsWorkspacePanel__dropIllustration"
           />
           <h2>
             <strong>
@@ -558,7 +556,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
     return (
       <EuiText
-        className={classNames('lnsWorkspacePanel__emptyContent')}
+        className="lnsWorkspacePanel__emptyContent"
         textAlign="center"
         data-test-subj="workspace-apply-changes-prompt"
         size="s"
@@ -644,6 +642,16 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       <Droppable
         className={classNames('lnsWorkspacePanel__dragDrop', {
           'lnsWorkspacePanel__dragDrop--fullscreen': isFullscreen,
+        })}
+        css={css({
+          ...(isFullscreen
+            ? {
+               border: 'none !important',
+              }
+            : {
+                
+              }),
+
         })}
         dataTestSubj="lnsWorkspace"
         dropTypes={suggestionForDraggedField ? ['field_add'] : undefined}
