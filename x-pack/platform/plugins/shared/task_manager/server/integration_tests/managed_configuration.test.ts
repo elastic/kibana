@@ -9,11 +9,32 @@ import sinon from 'sinon';
 import { Client } from '@elastic/elasticsearch';
 import { elasticsearchServiceMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers, Logger } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import { ADJUST_THROUGHPUT_INTERVAL } from '../lib/create_managed_configuration';
 import { TaskManagerPlugin, TaskManagerStartContract } from '../plugin';
 import { coreMock } from '@kbn/core/server/mocks';
 import { TaskManagerConfig } from '../config';
 import { BulkUpdateError } from '../lib/bulk_update_error';
+
+const mockTaskTypeRunFn = jest.fn();
+const mockCreateTaskRunner = jest.fn();
+const mockTaskType = {
+  title: '',
+  description: '',
+  stateSchemaByVersion: {
+    1: {
+      up: (state: Record<string, unknown>) => ({ ...state, baz: state.baz || '' }),
+      schema: schema.object({
+        foo: schema.string(),
+        bar: schema.string(),
+        baz: schema.string(),
+      }),
+    },
+  },
+  createTaskRunner: mockCreateTaskRunner.mockImplementation(() => ({
+    run: mockTaskTypeRunFn,
+  })),
+};
 
 describe('managed configuration', () => {
   let taskManagerStart: TaskManagerStartContract;
@@ -36,56 +57,58 @@ describe('managed configuration', () => {
     },
   };
 
+  const config = {
+    discovery: {
+      active_nodes_lookback: '30s',
+      interval: 10000,
+    },
+    kibanas_per_partition: 2,
+    capacity: 10,
+    max_attempts: 9,
+    poll_interval: 3000,
+    allow_reading_invalid_state: false,
+    version_conflict_threshold: 80,
+    monitored_aggregated_stats_refresh_rate: 60000,
+    monitored_stats_health_verbose_log: {
+      enabled: false,
+      level: 'debug' as const,
+      warn_delayed_task_start_in_seconds: 60,
+    },
+    monitored_stats_required_freshness: 4000,
+    monitored_stats_running_average_window: 50,
+    request_capacity: 1000,
+    monitored_task_execution_thresholds: {
+      default: {
+        error_threshold: 90,
+        warn_threshold: 80,
+      },
+      custom: {},
+    },
+    unsafe: {
+      exclude_task_types: [],
+      authenticate_background_task_utilization: true,
+    },
+    event_loop_delay: {
+      monitor: true,
+      warn_threshold: 5000,
+    },
+    worker_utilization_running_average_window: 5,
+    metrics_reset_interval: 3000,
+    claim_strategy: 'update_by_query',
+    request_timeouts: {
+      update_by_query: 1000,
+    },
+    auto_calculate_default_ech_capacity: false,
+  };
+
   afterEach(() => clock.restore());
 
-  describe('managed poll interval', () => {
+  describe('managed poll interval with default claim strategy', () => {
     beforeEach(async () => {
       jest.resetAllMocks();
       clock = sinon.useFakeTimers();
 
-      const context = coreMock.createPluginInitializerContext<TaskManagerConfig>({
-        discovery: {
-          active_nodes_lookback: '30s',
-          interval: 10000,
-        },
-        kibanas_per_partition: 2,
-        capacity: 10,
-        max_attempts: 9,
-        poll_interval: 3000,
-        allow_reading_invalid_state: false,
-        version_conflict_threshold: 80,
-        monitored_aggregated_stats_refresh_rate: 60000,
-        monitored_stats_health_verbose_log: {
-          enabled: false,
-          level: 'debug' as const,
-          warn_delayed_task_start_in_seconds: 60,
-        },
-        monitored_stats_required_freshness: 4000,
-        monitored_stats_running_average_window: 50,
-        request_capacity: 1000,
-        monitored_task_execution_thresholds: {
-          default: {
-            error_threshold: 90,
-            warn_threshold: 80,
-          },
-          custom: {},
-        },
-        unsafe: {
-          exclude_task_types: [],
-          authenticate_background_task_utilization: true,
-        },
-        event_loop_delay: {
-          monitor: true,
-          warn_threshold: 5000,
-        },
-        worker_utilization_running_average_window: 5,
-        metrics_reset_interval: 3000,
-        claim_strategy: 'update_by_query',
-        request_timeouts: {
-          update_by_query: 1000,
-        },
-        auto_calculate_default_ech_capacity: false,
-      });
+      const context = coreMock.createPluginInitializerContext<TaskManagerConfig>(config);
       logger = context.logger.get('taskManager');
 
       const taskManager = new TaskManagerPlugin(context);
@@ -127,10 +150,7 @@ describe('managed configuration', () => {
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
 
       expect(logger.warn).toHaveBeenCalledWith(
-        'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s).'
-      );
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Poll interval configuration changing from 3000 to 3600 after seeing 1 "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s).'
+        'Poll interval configuration changing from 3000 to 3600 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
       );
       expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 3600ms');
     });
@@ -154,10 +174,7 @@ describe('managed configuration', () => {
       clock.tick(100000);
 
       expect(logger.warn).toHaveBeenCalledWith(
-        'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s).'
-      );
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Poll interval configuration changing from 3000 to 61000 after seeing 1 "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s).'
+        'Poll interval configuration changing from 3000 to 61000 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
       );
       expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 61000ms');
     });
@@ -175,12 +192,110 @@ describe('managed configuration', () => {
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
 
       expect(logger.warn).toHaveBeenCalledWith(
-        'Poll interval configuration is temporarily increased after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s).'
-      );
-      expect(logger.debug).toHaveBeenCalledWith(
-        'Poll interval configuration changing from 3000 to 3600 after seeing 1 "too many request" and/or "execute [inline] script" and/or "cluster_block_exception" error(s).'
+        'Poll interval configuration changing from 3000 to 3600 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
       );
       expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 3600ms');
+    });
+  });
+
+  describe('managed poll interval with mget claim strategy', () => {
+    beforeEach(async () => {
+      jest.resetAllMocks();
+      clock = sinon.useFakeTimers();
+
+      const context = coreMock.createPluginInitializerContext<TaskManagerConfig>({
+        ...config,
+        poll_interval: 500,
+        claim_strategy: 'mget',
+      });
+      logger = context.logger.get('taskManager');
+
+      const taskManager = new TaskManagerPlugin(context);
+      (
+        await taskManager.setup(coreMock.createSetup(), { usageCollection: undefined })
+      ).registerTaskDefinitions({
+        fooType: mockTaskType,
+      });
+
+      const coreStart = coreMock.createStart();
+      coreStart.elasticsearch = esStart;
+      esStart.client.asInternalUser.child.mockReturnValue(
+        esStart.client.asInternalUser as unknown as Client
+      );
+      coreStart.savedObjects.createInternalRepository.mockReturnValue(savedObjectsClient);
+      taskManagerStart = taskManager.start(coreStart, {});
+
+      // force rxjs timers to fire when they are scheduled for setTimeout(0) as the
+      // sinon fake timers cause them to stall
+      clock.tick(0);
+    });
+
+    test('should increase poll interval when Elasticsearch returns 429 error', async () => {
+      savedObjectsClient.create.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b')
+      );
+
+      // Cause "too many requests" error to be thrown
+      await expect(
+        taskManagerStart.schedule({
+          taskType: 'fooType',
+          params: { foo: true },
+          state: { foo: 'test', bar: 'test', baz: 'test' },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Too Many Requests"`);
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Poll interval configuration changing from 500 to 600 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
+      );
+      expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 600ms');
+    });
+
+    test('should increase poll interval when Elasticsearch returns "cannot execute [inline] scripts" error', async () => {
+      const childEsClient = esStart.client.asInternalUser.child({}) as jest.Mocked<Client>;
+      childEsClient.search.mockImplementationOnce(async () => {
+        throw inlineScriptError;
+      });
+
+      await expect(taskManagerStart.fetch({})).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"cannot execute [inline] scripts\\" error"`
+      );
+
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Poll interval configuration changing from 500 to 600 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
+      );
+      expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 600ms');
+    });
+
+    test('should increase poll interval TM untilization is low', async () => {
+      savedObjectsClient.create.mockImplementationOnce(
+        async (type: string, attributes: unknown) => ({
+          id: 'testid',
+          type,
+          attributes,
+          references: [],
+          version: '123',
+        })
+      );
+
+      await taskManagerStart.schedule({
+        taskType: 'fooType',
+        params: { foo: true },
+        state: { foo: 'test', bar: 'test', baz: 'test' },
+      });
+
+      mockTaskTypeRunFn.mockImplementation(() => {
+        return { state: {} };
+      });
+
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Poll interval configuration changing from 500 to 3000 after a change in the average task load: 0.'
+      );
+      expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 3000ms');
     });
   });
 
@@ -189,49 +304,7 @@ describe('managed configuration', () => {
       jest.resetAllMocks();
       clock = sinon.useFakeTimers();
 
-      const context = coreMock.createPluginInitializerContext<TaskManagerConfig>({
-        discovery: {
-          active_nodes_lookback: '30s',
-          interval: 10000,
-        },
-        kibanas_per_partition: 2,
-        capacity: 10,
-        max_attempts: 9,
-        poll_interval: 3000,
-        allow_reading_invalid_state: false,
-        version_conflict_threshold: 80,
-        monitored_aggregated_stats_refresh_rate: 60000,
-        monitored_stats_health_verbose_log: {
-          enabled: false,
-          level: 'debug' as const,
-          warn_delayed_task_start_in_seconds: 60,
-        },
-        monitored_stats_required_freshness: 4000,
-        monitored_stats_running_average_window: 50,
-        request_capacity: 1000,
-        monitored_task_execution_thresholds: {
-          default: {
-            error_threshold: 90,
-            warn_threshold: 80,
-          },
-          custom: {},
-        },
-        unsafe: {
-          exclude_task_types: [],
-          authenticate_background_task_utilization: true,
-        },
-        event_loop_delay: {
-          monitor: true,
-          warn_threshold: 5000,
-        },
-        worker_utilization_running_average_window: 5,
-        metrics_reset_interval: 3000,
-        claim_strategy: 'update_by_query',
-        request_timeouts: {
-          update_by_query: 1000,
-        },
-        auto_calculate_default_ech_capacity: false,
-      });
+      const context = coreMock.createPluginInitializerContext<TaskManagerConfig>(config);
       logger = context.logger.get('taskManager');
 
       const taskManager = new TaskManagerPlugin(context);
@@ -312,47 +385,8 @@ describe('managed configuration', () => {
       clock = sinon.useFakeTimers();
 
       const context = coreMock.createPluginInitializerContext<TaskManagerConfig>({
-        discovery: {
-          active_nodes_lookback: '30s',
-          interval: 10000,
-        },
-        kibanas_per_partition: 2,
-        capacity: 10,
-        max_attempts: 9,
-        poll_interval: 3000,
-        allow_reading_invalid_state: false,
-        version_conflict_threshold: 80,
-        monitored_aggregated_stats_refresh_rate: 60000,
-        monitored_stats_health_verbose_log: {
-          enabled: false,
-          level: 'debug' as const,
-          warn_delayed_task_start_in_seconds: 60,
-        },
-        monitored_stats_required_freshness: 4000,
-        monitored_stats_running_average_window: 50,
-        request_capacity: 1000,
-        monitored_task_execution_thresholds: {
-          default: {
-            error_threshold: 90,
-            warn_threshold: 80,
-          },
-          custom: {},
-        },
-        unsafe: {
-          exclude_task_types: [],
-          authenticate_background_task_utilization: true,
-        },
-        event_loop_delay: {
-          monitor: true,
-          warn_threshold: 5000,
-        },
-        worker_utilization_running_average_window: 5,
-        metrics_reset_interval: 3000,
+        ...config,
         claim_strategy: 'mget',
-        request_timeouts: {
-          update_by_query: 1000,
-        },
-        auto_calculate_default_ech_capacity: false,
       });
       logger = context.logger.get('taskManager');
 

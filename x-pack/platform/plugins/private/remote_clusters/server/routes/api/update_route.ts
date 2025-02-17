@@ -12,7 +12,6 @@ import { RequestHandler } from '@kbn/core/server';
 
 import { API_BASE_PATH, SNIFF_MODE, PROXY_MODE } from '../../../common/constants';
 import { serializeCluster, deserializeCluster, Cluster, ClusterInfoEs } from '../../../common/lib';
-import { doesClusterExist } from '../../lib/does_cluster_exist';
 import { RouteDependencies } from '../../types';
 import { licensePreRoutingFactory } from '../../lib/license_pre_routing_factory';
 
@@ -52,7 +51,8 @@ export const register = (deps: RouteDependencies): void => {
       const { name } = request.params;
 
       // Check if cluster does exist.
-      const existingCluster = await doesClusterExist(clusterClient, name);
+      const previousClusterConfig = await clusterClient.asCurrentUser.cluster.remoteInfo();
+      const existingCluster = Boolean(previousClusterConfig && previousClusterConfig[name]);
       if (!existingCluster) {
         return response.notFound({
           body: {
@@ -65,9 +65,14 @@ export const register = (deps: RouteDependencies): void => {
           },
         });
       }
-
       // Update cluster as new settings
-      const updateClusterPayload = serializeCluster({ ...request.body, name } as Cluster);
+      const updateClusterPayload = serializeCluster(
+        {
+          ...request.body,
+          name,
+        } as Cluster,
+        previousClusterConfig[name].mode
+      );
 
       const updateClusterResponse = await clusterClient.asCurrentUser.cluster.putSettings({
         body: updateClusterPayload,

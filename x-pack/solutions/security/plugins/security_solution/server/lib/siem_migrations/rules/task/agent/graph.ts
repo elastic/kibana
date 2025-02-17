@@ -8,28 +8,27 @@
 import { END, START, StateGraph } from '@langchain/langgraph';
 import { getCreateSemanticQueryNode } from './nodes/create_semantic_query';
 import { getMatchPrebuiltRuleNode } from './nodes/match_prebuilt_rule';
-
 import { migrateRuleState } from './state';
 import { getTranslateRuleGraph } from './sub_graphs/translate_rule';
 import type { MigrateRuleGraphParams, MigrateRuleState } from './types';
-
 export function getRuleMigrationAgent({
   model,
-  inferenceClient,
+  esqlKnowledgeBase,
   ruleMigrationsRetriever,
-  connectorId,
   logger,
+  telemetryClient,
 }: MigrateRuleGraphParams) {
   const matchPrebuiltRuleNode = getMatchPrebuiltRuleNode({
     model,
     logger,
     ruleMigrationsRetriever,
+    telemetryClient,
   });
   const translationSubGraph = getTranslateRuleGraph({
     model,
-    inferenceClient,
+    esqlKnowledgeBase,
     ruleMigrationsRetriever,
-    connectorId,
+    telemetryClient,
     logger,
   });
   const createSemanticQueryNode = getCreateSemanticQueryNode({ model });

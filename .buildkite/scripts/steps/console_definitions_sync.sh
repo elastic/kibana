@@ -40,7 +40,7 @@ main () {
   git config --global user.name "$KIBANA_MACHINE_USERNAME"
   git config --global user.email '42973632+kibanamachine@users.noreply.github.com'
 
-  PR_TITLE="[Console] Update console definitions (${branch_name})"
+  PR_TITLE="[Console] Update console definitions (${BUILDKITE_BRANCH})"
   PR_BODY='This PR updates the console definitions to match the latest ones from the @elastic/elasticsearch-specification repo.'
 
   # Check if a PR already exists

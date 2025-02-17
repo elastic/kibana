@@ -3,7 +3,7 @@
 exports[`generateLinedRulesMenuItems should render the first linked rules with left icon and does not apply the css if the length is 1 1`] = `
 <div>
   <div
-    class="euiContextMenuItem css-0"
+    class="euiContextMenuItem emotion-euiContextMenuItem-m-center"
     data-test-subj="generateLinedRulesMenuItemsTestActionItem1a2b3c"
   >
     <span
@@ -42,7 +42,7 @@ exports[`generateLinedRulesMenuItems should render the first linked rules with l
 exports[`generateLinedRulesMenuItems should render the second linked rule and apply the css when the length is > 1 1`] = `
 <div>
   <div
-    class="euiContextMenuItem emotion-EuiContextMenuItem"
+    class="euiContextMenuItem emotion-euiContextMenuItem-m-center"
     data-test-subj="generateLinedRulesMenuItemsTestActionItem2a2b3c"
   >
     <span
