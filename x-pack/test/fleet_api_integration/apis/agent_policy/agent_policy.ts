@@ -2021,12 +2021,12 @@ export default function (providerContext: FtrProviderContext) {
           currentVersions: [
             {
               agents: 2,
-              failedAgents: 0,
+              failedUpgradeAgents: 0,
               version: '8.16.1',
             },
             {
               agents: 0,
-              failedAgents: 1,
+              failedUpgradeAgents: 1,
               version: '8.16.3',
             },
           ],
