@@ -83,7 +83,7 @@ export type SearchHit<
     ? {
         fields: Partial<Record<ValueTypeOfField<TFields>, unknown[]>>;
       }
-    : { fields?: Record<string, unknown[]> }) &
+    : { fields?: Record<string, unknown[] | undefined> }) &
   (TDocValueFields extends DocValueFields
     ? {
         fields: Partial<Record<ValueTypeOfField<TDocValueFields>, unknown[]>>;

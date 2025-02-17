@@ -33,7 +33,7 @@ interface FieldPatternResultBase {
   firstOccurrence: string;
   lastOccurrence: string;
   highlight: Record<string, string[]>;
-  metadata: Record<string, unknown[]>;
+  metadata: Record<string, unknown[] | undefined>;
 }
 
 interface FieldPatternResultChanges {
@@ -214,7 +214,7 @@ export async function runCategorizeTextAggregation({
         count: bucket.doc_count,
         pattern: bucket.key,
         regex: bucket.regex,
-        sample: bucket.sample.hits.hits[0].fields![fieldName][0] as string,
+        sample: bucket.sample.hits.hits[0].fields![fieldName]![0] as string,
         highlight: bucket.sample.hits.hits[0].highlight ?? {},
         metadata: bucket.sample.hits.hits[0].fields!,
         firstOccurrence: new Date(bucket.minTimestamp.value!).toISOString(),
