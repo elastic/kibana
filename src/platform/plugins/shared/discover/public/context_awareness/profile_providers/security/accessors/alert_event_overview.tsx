@@ -64,7 +64,7 @@ export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
   } = useDiscoverServices();
 
   const timelinesURL = getUrlForApp('securitySolutionUI', {
-    path: 'timelines',
+    path: 'alerts',
   });
 
   const reason = useMemo(() => getFieldValue(hit, 'kibana.alert.reason') as string, [hit]);
@@ -119,7 +119,7 @@ export const AlertEventOverview: DocViewerComponent = ({ hit }) => {
       <EuiFlexItem grow={false}>
         <EuiButton
           data-test-subj="exploreSecurity"
-          href={isAlert ? alertURL : eventURL}
+          href={isAlert && alertURL ? alertURL : eventURL}
           target="_blank"
           iconType="link"
           fill
