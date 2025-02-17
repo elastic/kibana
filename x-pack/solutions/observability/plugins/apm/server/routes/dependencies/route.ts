@@ -65,9 +65,8 @@ const topDependenciesStatisticsRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/dependencies/top_dependencies/statistics',
   params: t.type({
     query: t.intersection([
-      t.intersection([environmentRt, kueryRt, rangeRt]),
+      t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
       t.type({ numBuckets: toNumberRt }),
-      t.partial({ offsetRt }),
     ]),
     body: t.type({ dependencyNames: jsonRt.pipe(t.array(t.string)) }),
   }),
