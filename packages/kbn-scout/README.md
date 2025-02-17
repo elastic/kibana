@@ -186,7 +186,7 @@ If the servers are already running, you can execute tests independently using ei
 - Command Line: Use the following command to run tests:
 
 ```bash
-npx playwright test --config <plugin-path>/ui_tests/playwright.config.ts
+npx playwright test --config <plugin-path>/ui_tests/playwright.config.ts --project local
 ```
 
 ### Contributing

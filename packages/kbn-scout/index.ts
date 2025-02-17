@@ -12,6 +12,7 @@ export {
   expect,
   test,
   spaceTest,
+  globalSetupHook,
   tags,
   createPlaywrightConfig,
   createLazyPageObject,

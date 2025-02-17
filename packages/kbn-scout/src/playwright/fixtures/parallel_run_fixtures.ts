@@ -8,7 +8,13 @@
  */
 
 import { mergeTests } from 'playwright/test';
-import { apiFixtures, coreWorkerFixtures, scoutSpaceParallelFixture } from './worker';
+import {
+  apiFixtures,
+  coreWorkerFixtures,
+  esArchiverFixture,
+  scoutSpaceParallelFixture,
+  synthtraceFixture,
+} from './worker';
 import type {
   ApiParallelWorkerFixtures,
   EsClient,
@@ -52,3 +58,10 @@ export interface ScoutParallelWorkerFixtures extends ApiParallelWorkerFixtures {
   esClient: EsClient;
   scoutSpace: ScoutSpaceParallelFixture;
 }
+
+export const globalSetup = mergeTests(
+  coreWorkerFixtures,
+  esArchiverFixture,
+  synthtraceFixture,
+  apiFixtures
+);
