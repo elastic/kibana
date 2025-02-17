@@ -7,7 +7,7 @@
 
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import { BehaviorSubject } from 'rxjs';
-import { FunctionDefinition, MessageRole } from '../../common';
+import { FunctionDefinition } from '../../common';
 import type { ObservabilityAIAssistantChatService } from '../types';
 
 type MockedChatService = DeeplyMockedKeys<ObservabilityAIAssistantChatService>;
@@ -22,13 +22,7 @@ export const createMockChatService = (): MockedChatService => {
     hasFunction: jest.fn().mockReturnValue(false),
     hasRenderFunction: jest.fn().mockReturnValue(true),
     renderFunction: jest.fn(),
-    getSystemMessage: jest.fn().mockReturnValue({
-      '@timestamp': new Date().toISOString(),
-      message: {
-        role: MessageRole.System,
-        content: 'system',
-      },
-    }),
+    getSystemMessage: jest.fn().mockReturnValue('system'),
     getScopes: jest.fn(),
   };
   return mockChatService;
