@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIconTip,
+  EuiLoadingSpinner,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import React from 'react';
 import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { FieldHoverActionPopover } from './field_hover_popover_action';
@@ -18,6 +25,7 @@ export interface FieldWithActionsProps {
   formattedValue?: string;
   label: string;
   value?: unknown;
+  loading?: boolean;
   children?: (props: { content: React.ReactNode }) => React.ReactNode;
 }
 
@@ -27,12 +35,13 @@ export function FieldWithActions({
   formattedValue,
   label,
   value,
+  loading,
   children,
   ...props
 }: FieldWithActionsProps) {
   const hasFieldDescription = !!fieldMetadata?.flat_name;
 
-  return formattedValue && value ? (
+  return label ? (
     <div {...props}>
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
@@ -51,14 +60,17 @@ export function FieldWithActions({
         </EuiFlexItem>
 
         <EuiFlexItem grow={2}>
-          <FieldHoverActionPopover title={value} value={value} field={field}>
+          <FieldHoverActionPopover title={value as string} value={value} field={field}>
             <EuiFlexGroup
               responsive={false}
               alignItems="center"
               justifyContent="flexStart"
               gutterSize="xs"
             >
-              {children && children({ content: <FormattedValue value={formattedValue} /> })}
+              {loading && <EuiLoadingSpinner size="m" />}
+              {formattedValue &&
+                children &&
+                children({ content: <FormattedValue value={formattedValue} /> })}
             </EuiFlexGroup>
           </FieldHoverActionPopover>
         </EuiFlexItem>

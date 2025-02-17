@@ -7,27 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiHorizontalRule } from '@elastic/eui';
-import React from 'react';
 import { TRANSACTION_NAME_FIELD } from '@kbn/discover-utils';
+import { EuiHorizontalRule } from '@elastic/eui';
+import React, { useState, useEffect } from 'react';
 import { useTransactionContext } from '../hooks/use_transaction';
 import { FieldWithActions } from './field_with_actions/field_with_actions';
+import { FieldConfiguration } from '../resources/get_field_configuration';
 
 export interface TraceSummaryProps {
   fieldId: string;
-  fieldConfiguration: any;
+  fieldConfiguration: FieldConfiguration;
 }
 
 export function TraceSummary({ fieldConfiguration, fieldId }: TraceSummaryProps) {
-  const { transaction } = useTransactionContext();
+  const { transaction, loading } = useTransactionContext();
+  const [fieldValue, setFieldValue] = useState(fieldConfiguration.value);
+  const isTransactionNameField = fieldId === TRANSACTION_NAME_FIELD;
+  const displayLoading = isTransactionNameField && !fieldValue;
 
-  if (fieldId === TRANSACTION_NAME_FIELD && !fieldConfiguration.value) {
-    if (transaction) {
-      fieldConfiguration.value = transaction.name;
+  useEffect(() => {
+    if (isTransactionNameField && !fieldValue && transaction && !loading) {
+      setFieldValue(transaction.name);
     }
-  }
+  }, [transaction, fieldId, loading, fieldValue, isTransactionNameField]);
 
-  if (!fieldConfiguration.value) {
+  if ((!displayLoading && !fieldValue) || (displayLoading && !loading && !fieldValue)) {
     return null;
   }
 
@@ -37,11 +41,12 @@ export function TraceSummary({ fieldConfiguration, fieldId }: TraceSummaryProps)
         data-test-subj={`unifiedDocViewTracesOverviewAttribute-${fieldId}`}
         label={fieldConfiguration.title}
         field={fieldId}
-        value={fieldConfiguration.value}
-        formattedValue={fieldConfiguration.value}
+        value={fieldValue}
+        formattedValue={fieldValue as string}
         fieldMetadata={fieldConfiguration.fieldMetadata}
+        loading={displayLoading && loading}
       >
-        {() => <div>{fieldConfiguration.content(fieldConfiguration.value)}</div>}
+        {() => <div>{fieldConfiguration.content(fieldValue)}</div>}
       </FieldWithActions>
       <EuiHorizontalRule margin="xs" />
     </>
