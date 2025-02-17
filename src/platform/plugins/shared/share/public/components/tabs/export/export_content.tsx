@@ -47,8 +47,6 @@ const ExportContentUi = ({
   const [isCreatingExport, setIsCreatingExport] = useState<boolean>(false);
   const [usePrintLayout, setPrintLayout] = useState(false);
 
-  console.log('export types:: %o \n', aggregateReportTypes);
-
   const radioOptions = useMemo(() => {
     return aggregateReportTypes.reduce<EuiRadioGroupOption[]>((acc, { id, config }) => {
       acc.push({
@@ -59,8 +57,6 @@ const ExportContentUi = ({
       return acc;
     }, []);
   }, [aggregateReportTypes]);
-
-  console.log('radioOptions:: %o \n', radioOptions);
 
   const [selectedRadio, setSelectedRadio] = useState<SupportedExportTypes>(
     radioOptions[0].id as SupportedExportTypes

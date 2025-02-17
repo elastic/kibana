@@ -18,6 +18,7 @@ import type {
   BrowserUrlService,
   ShareContext,
 } from '../../types';
+import type { ShareTypes } from '../../services/share_orchestrator';
 
 export type { ShareMenuItemV2, ShareContextObjectTypeConfig } from '../../types';
 
@@ -44,7 +45,10 @@ export const ShareMenuProvider = ({
   return <ShareTabsContext.Provider value={shareContext}>{children}</ShareTabsContext.Provider>;
 };
 
-export const useShareTabsContext = () => {
+export const useShareTabsContext = <T extends ShareTypes>(
+  shareType?: T,
+  groupId?: T extends 'integration' ? string : never
+) => {
   const context = useContext(ShareTabsContext);
 
   if (!context) {
@@ -53,5 +57,19 @@ export const useShareTabsContext = () => {
     );
   }
 
-  return context;
+  const { shareMenuItems, ...rest } = context;
+
+  let shareTypeImplementations = shareMenuItems;
+
+  if (shareType) {
+    // only integration share types can have multiple implementations
+    shareTypeImplementations = (
+      shareType === 'integration' ? Array.prototype.filter : Array.prototype.find
+    ).call(shareMenuItems, (item) => item.shareType === shareType && item.groupId === groupId);
+  }
+
+  return {
+    ...rest,
+    shareMenuItems: shareTypeImplementations,
+  };
 };
