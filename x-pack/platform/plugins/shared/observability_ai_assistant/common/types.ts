@@ -63,6 +63,7 @@ export interface Conversation {
     last_updated: string;
     token_count?: TokenCount;
   };
+  systemMessage?: string;
   messages: Message[];
   labels: Record<string, string>;
   numeric_labels: Record<string, number>;

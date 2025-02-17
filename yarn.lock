@@ -6245,7 +6245,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logs-overview@link:x-pack/platform/packages/shared/logs_overview":
+"@kbn/logs-overview@link:x-pack/platform/packages/shared/logs-overview":
   version "0.0.0"
   uid ""
 
@@ -6549,11 +6549,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-common@link:x-pack/solutions/observability/packages/observability_ai/observability_ai_common":
+"@kbn/observability-ai-common@link:x-pack/solutions/observability/packages/observability-ai/observability-ai-common":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-server@link:x-pack/solutions/observability/packages/observability_ai/observability_ai_server":
+"@kbn/observability-ai-server@link:x-pack/solutions/observability/packages/observability-ai/observability-ai-server":
   version "0.0.0"
   uid ""
 
@@ -6593,15 +6593,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-browser@link:x-pack/solutions/observability/packages/utils_browser":
+"@kbn/observability-utils-browser@link:x-pack/solutions/observability/packages/utils-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-common@link:x-pack/solutions/observability/packages/utils_common":
+"@kbn/observability-utils-common@link:x-pack/solutions/observability/packages/utils-common":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-server@link:x-pack/solutions/observability/packages/utils_server":
+"@kbn/observability-utils-server@link:x-pack/solutions/observability/packages/utils-server":
   version "0.0.0"
   uid ""
 
@@ -6877,15 +6877,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-apis@link:packages/response-ops/alerts_apis":
+"@kbn/response-ops-alerts-apis@link:src/platform/packages/shared/response-ops/alerts-apis":
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-fields-browser@link:packages/response-ops/alerts_fields_browser":
+"@kbn/response-ops-alerts-fields-browser@link:src/platform/packages/shared/response-ops/alerts-fields-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-table@link:packages/response-ops/alerts_table":
+"@kbn/response-ops-alerts-table@link:src/platform/packages/shared/response-ops/alerts-table":
   version "0.0.0"
   uid ""
 
@@ -7113,7 +7113,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-shared-ui@link:x-pack/solutions/search/packages/shared_ui":
+"@kbn/search-shared-ui@link:x-pack/solutions/search/packages/shared-ui":
   version "0.0.0"
   uid ""
 
@@ -7181,7 +7181,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-distribution-bar@link:x-pack/solutions/security/packages/distribution_bar":
+"@kbn/security-solution-distribution-bar@link:x-pack/solutions/security/packages/distribution-bar":
   version "0.0.0"
   uid ""
 
@@ -17999,9 +17999,9 @@ element-resize-detector@^1.2.2:
     batch-processor "1.0.0"
 
 elliptic@^6.0.0, elliptic@^6.5.4:
-  version "6.5.7"
-  resolved "https://registry.yarnpkg.com/elliptic/-/elliptic-6.5.7.tgz#8ec4da2cb2939926a1b9a73619d768207e647c8b"
-  integrity sha512-ESVCtTwiA+XhY3wyh24QqRGBoP3rEdDUl3EDUUo9tft074fi19IrdpH7hLCMMP3CIj7jb3W96rn8lt/BqIlt5Q==
+  version "6.6.1"
+  resolved "https://registry.yarnpkg.com/elliptic/-/elliptic-6.6.1.tgz#3b8ffb02670bf69e382c7f65bf524c97c5405c06"
+  integrity sha512-RaddvvMatK2LJHqFJ+YA4WysVN5Ita9E35botqIYspQ4TkRAlCicdzKOjlyv/1Za5RyTNn7di//eEV0uTAfe3g==
   dependencies:
     bn.js "^4.11.9"
     brorand "^1.1.0"
