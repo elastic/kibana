@@ -12,6 +12,9 @@ export const REQUEST_NAMES = {
   SECURITY_CREATE_TAG: `${APP_UI_ID} fetch security create tag`,
   CTI_TAGS: `${APP_UI_ID} fetch cti tags`,
   ANOMALIES_TABLE: `${APP_UI_ID} fetch anomalies table data`,
+  PRIVILEGED_USER_DATA: `${APP_UI_ID} fetch privileged user data`,
+  PRIVILEGED_USER_FLYOUT_DATA: `${APP_UI_ID} fetch privileged user flyout data`,
+  SIMILAR_USERS: `${APP_UI_ID} fetch similar users`,
 } as const;
 
 export type RequestName = (typeof REQUEST_NAMES)[keyof typeof REQUEST_NAMES];

@@ -1,0 +1,282 @@
+openapi: 3.0.0
+info:
+  title: Privileged User Monitoring Common Schema
+  description: Common schema for asset criticality
+  version: '1'
+paths: {}
+components:
+  schemas:
+    PrivilegedUserIdentityFields:
+      type: object
+      required:
+        - name
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+    PrivmonDoc:
+      # either login doc or privilege doc
+      oneOf:
+        - $ref: '#/components/schemas/PrivmonLoginDoc'
+        - $ref: '#/components/schemas/PrivmonPrivilegeDoc'
+    PrivilegedUserObservation:
+      type: object
+      required:
+        - "@timestamp"
+        - observation_type
+        - summary
+        - raw_event
+        - timestamp
+        - ingested
+      properties:
+        observation_type:
+          type: string
+        summary:
+          type: string
+        raw_event:
+          type: object
+        timestamp:
+          type: string
+        ingested:
+          type: string
+        outdated:
+          type: boolean
+    PrivilegedUserDoc:
+      type: object
+      required:
+        - "@timestamp"
+        - created_at
+        - active
+        - user
+        - observations
+      properties:
+        "@timestamp":
+          type: string
+        created_at:
+          type: string
+        active:
+          type: boolean
+        observations:
+          type: array
+          items:
+            $ref: '#/components/schemas/PrivilegedUserObservation'
+        user:
+          type: object
+          required:
+            - name
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+    PrivilegedUserWithScore:
+      type: object
+      required:
+        - user
+        - score
+      properties:
+        user:
+          $ref: '#/components/schemas/PrivilegedUserDoc'
+        score:
+          type: number
+    PrivmonLoginDoc:
+      type: object
+      required:
+        - "@timestamp"
+        - user
+        - host
+        - source
+        - event
+      properties:
+        "@timestamp":
+          type: string
+        event:
+          type: object
+          required:
+            - ingested
+          properties:
+            action:
+              type: string
+            category:
+              type: array
+              items:
+                type: string
+            type:
+              type: array
+              items:
+                type: string
+            outcome:
+              type: string
+            kind:
+              type: string
+            id:
+              type: string
+            provider:
+              type: string
+            ingested:
+              type: string
+        user:
+          type: object
+          required:
+            - name
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            type:
+              type: string
+            domain:
+              type: string
+        host:
+          type: object
+          properties:
+            name:
+              type: string
+            hostname:
+              type: string
+            ip:
+              type: string
+            os:
+              type: object
+              properties:
+                type:
+                  type: string
+                name:
+                  type: string
+                version:
+                  type: string
+        source:
+          type: object
+          properties:
+            ip:
+              type: string
+            geo:
+              type: object
+              properties:
+                country_iso_code:
+                  type: string
+                city_name:
+                  type: string
+                location:
+                  type: object
+                  properties:
+                    lat:
+                      type: number
+                    lon:
+                      type: number
+        destination:
+          type: object
+          properties:
+            ip:
+              type: string
+            port:
+              type: number
+        related:
+          type: object
+          properties:
+            user:
+              type: array
+              items:
+                type: string
+            ip:
+              type: array
+              items:
+                type: string
+        log:
+          type: object
+          properties:
+            level:
+              type: string
+            source:
+              type: string
+        tags:
+          type: array
+          items:
+            type: string
+    PrivmonPrivilegeDoc:
+      type: object
+      required:
+        - "@timestamp"
+        - user
+        - target
+        - event
+      properties:
+        "@timestamp":
+          type: string
+        event:
+          type: object
+          required:
+            - ingested
+          properties:
+            action:
+              type: string
+            category:
+              type: array
+              items:
+                type: string
+            type:
+              type: array
+              items:
+                type: string
+            outcome:
+              type: string
+            kind:
+              type: string
+            id:
+              type: string
+            provider:
+              type: string
+            ingested:
+              type: string
+        user:
+          $ref: '#/components/schemas/PrivilegedUserIdentityFields'
+        target:
+          type: object
+          required:
+            - user
+          properties:
+            user:
+              type: object
+              required:
+                - name
+              properties:
+                id:
+                  type: string
+                name:
+                  type: string
+                type:
+                  type: string
+                created:
+                  type: string
+        group:
+          type: object
+          properties:
+            name:
+              type: string
+            id:
+              type: string
+        source:
+          type: object
+          properties:
+            ip:
+              type: string
+            geo:
+              type: object
+              properties:
+                country_iso_code:
+                  type: string
+                city_name:
+                  type: string
+                location:
+                  type: object
+                  properties:
+                    lat:
+                      type: number
+                    lon:
+                      type: number
+        tags:
+          type: array
+          items:
+            type: string
