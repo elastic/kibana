@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
@@ -32,23 +32,10 @@ jest.mock('../../../utils/kibana_react', () => {
 
 describe('TableActionsPopover', () => {
   let appMockRenderer: AppMockRenderer;
-  const originalClipboard = global.window.navigator.clipboard;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    Object.defineProperty(navigator, 'clipboard', {
-      value: {
-        writeText: jest.fn().mockImplementation(() => Promise.resolve()),
-      },
-      writable: true,
-    });
     appMockRenderer = createAppMockRenderer();
-  });
-
-  afterEach(() => {
-    Object.defineProperty(navigator, 'clipboard', {
-      value: originalClipboard,
-    });
   });
 
   test('it renders', () => {
@@ -79,7 +66,7 @@ describe('TableActionsPopover', () => {
         onCancelAndArchive={() => {}}
       />
     );
-    userEvent.click(result.getByTestId('table-actions-icon-button'));
+    fireEvent.click(result.getByTestId('table-actions-icon-button'));
     expect(result.getByTestId('table-actions-edit')).toBeInTheDocument();
     expect(result.getByTestId('table-actions-cancel')).toBeInTheDocument();
     expect(result.getByTestId('table-actions-cancel-and-archive')).toBeInTheDocument();
@@ -97,7 +84,7 @@ describe('TableActionsPopover', () => {
         onCancelAndArchive={() => {}}
       />
     );
-    userEvent.click(result.getByTestId('table-actions-icon-button'));
+    fireEvent.click(result.getByTestId('table-actions-icon-button'));
     expect(result.getByTestId('table-actions-edit')).toBeInTheDocument();
     expect(result.getByTestId('table-actions-archive')).toBeInTheDocument();
   });
@@ -114,7 +101,7 @@ describe('TableActionsPopover', () => {
         onCancelAndArchive={() => {}}
       />
     );
-    userEvent.click(result.getByTestId('table-actions-icon-button'));
+    fireEvent.click(result.getByTestId('table-actions-icon-button'));
     expect(result.getByTestId('table-actions-edit')).toBeInTheDocument();
     expect(result.getByTestId('table-actions-archive')).toBeInTheDocument();
   });
@@ -131,11 +118,17 @@ describe('TableActionsPopover', () => {
         onCancelAndArchive={() => {}}
       />
     );
-    userEvent.click(result.getByTestId('table-actions-icon-button'));
+    fireEvent.click(result.getByTestId('table-actions-icon-button'));
     expect(result.getByTestId('table-actions-unarchive')).toBeInTheDocument();
   });
 
   test('it shows the success toast when maintenance window id is copied', async () => {
+    Object.assign(navigator, {
+      clipboard: {
+        writeText: jest.fn().mockResolvedValue(''),
+      },
+    });
+
     const result = appMockRenderer.render(
       <TableActionsPopover
         id={'123'}
@@ -148,13 +141,16 @@ describe('TableActionsPopover', () => {
       />
     );
 
-    userEvent.click(result.getByTestId('table-actions-icon-button'));
-    expect(result.getByTestId('table-actions-copy-id')).toBeInTheDocument();
-    userEvent.click(result.getByTestId('table-actions-copy-id'));
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('123');
+    userEvent.click(await result.findByTestId('table-actions-icon-button'));
+    expect(await result.findByTestId('table-actions-copy-id')).toBeInTheDocument();
+    userEvent.click(await result.findByTestId('table-actions-copy-id'));
+    await waitFor(() => {
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('123');
+    });
 
     await waitFor(() => {
       expect(mockAddSuccess).toBeCalledWith('Copied maintenance window ID to clipboard');
     });
+    Object.assign(navigator, global.window.navigator.clipboard);
   });
 });
