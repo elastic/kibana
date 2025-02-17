@@ -30,7 +30,7 @@ export async function getAutoUpgradeAgentsStatus(
       aggregations: {
         versions: {
           terms: {
-            field: 'local_metadata.elastic.agent.version.keyword',
+            field: 'agent.version',
             size: 1000,
           },
         },
