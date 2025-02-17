@@ -36,6 +36,8 @@ export const bulkPatchRulesRoute = (
   logger: Logger,
   docLinks: DocLinksServiceSetup
 ) => {
+  const securityDocLinks = docLinks.links.securitySolution;
+
   router.versioned
     .patch({
       access: 'public',
@@ -61,8 +63,8 @@ export const bulkPatchRulesRoute = (
         },
         options: {
           deprecated: {
-            documentationUrl: docLinks.links.securitySolution.legacyBulkApiDeprecations,
-            severity: 'critical',
+            documentationUrl: securityDocLinks.legacyRuleManagementBulkApiDeprecations,
+            severity: 'warning',
             reason: {
               type: 'migrate',
               newApiMethod: 'POST',
