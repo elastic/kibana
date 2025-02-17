@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/platform/packages/shared/alerting_rule_utils'],
+  roots: ['<rootDir>/x-pack/solutions/observability/packages/alerting-test-data'],
 };
