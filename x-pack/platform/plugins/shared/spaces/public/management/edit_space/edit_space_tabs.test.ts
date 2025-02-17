@@ -58,6 +58,7 @@ describe('Edit Space Tabs: getTabs', () => {
         allowFeatureVisibility,
         allowSolutionVisibility,
         isSecurityEnabled,
+        enableSecurityLink: '',
       }).map(({ id, name }) => ({ name, id }))
     ).toEqual([
       { id: 'general', name: 'General settings' },
@@ -81,6 +82,7 @@ describe('Edit Space Tabs: getTabs', () => {
       allowFeatureVisibility,
       allowSolutionVisibility,
       isSecurityEnabled,
+      enableSecurityLink: '',
     }).find((tab) => tab.id === 'roles');
 
     if (!rolesTab?.append) {
@@ -106,6 +108,7 @@ describe('Edit Space Tabs: getTabs', () => {
       allowFeatureVisibility,
       allowSolutionVisibility,
       isSecurityEnabled,
+      enableSecurityLink: '',
     }).find((tab) => tab.id === 'roles');
 
     if (!rolesTab?.content) {
@@ -127,6 +130,7 @@ describe('Edit Space Tabs: getTabs', () => {
         allowFeatureVisibility,
         allowSolutionVisibility,
         isSecurityEnabled: true,
+        enableSecurityLink: '',
       }).map(({ id, name }) => ({ name, id }))
     ).toEqual([
       { id: 'general', name: 'General settings' },
@@ -145,6 +149,7 @@ describe('Edit Space Tabs: getTabs', () => {
         allowFeatureVisibility,
         allowSolutionVisibility,
         isSecurityEnabled: true,
+        enableSecurityLink: '',
       }).map(({ id, name }) => ({ name, id }))
     ).toEqual([
       { id: 'general', name: 'General settings' },
