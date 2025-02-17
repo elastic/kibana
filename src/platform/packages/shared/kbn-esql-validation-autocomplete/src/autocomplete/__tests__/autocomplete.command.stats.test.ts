@@ -373,7 +373,55 @@ describe('autocomplete.suggest', () => {
       });
 
       describe('create control suggestion', () => {
-        test('suggests `Create control` option', async () => {
+        test('suggests `Create control` option for aggregations', async () => {
+          const { suggest } = await setup();
+
+          const suggestions = await suggest('FROM a | STATS /', {
+            callbacks: {
+              canSuggestVariables: () => true,
+              getVariablesByType: () => [],
+              getColumnsFor: () => Promise.resolve([{ name: 'clientip', type: 'ip' }]),
+            },
+          });
+
+          expect(suggestions).toContainEqual({
+            label: 'Create control',
+            text: '',
+            kind: 'Issue',
+            detail: 'Click to create',
+            command: { id: 'esql.control.functions.create', title: 'Click to create' },
+            sortText: '1',
+          });
+        });
+
+        test('suggests `?function` option', async () => {
+          const { suggest } = await setup();
+
+          const suggestions = await suggest('FROM a | STATS var0 = /', {
+            callbacks: {
+              canSuggestVariables: () => true,
+              getVariablesByType: () => [
+                {
+                  key: 'function',
+                  value: 'avg',
+                  type: ESQLVariableType.FUNCTIONS,
+                },
+              ],
+              getColumnsFor: () => Promise.resolve([{ name: 'clientip', type: 'ip' }]),
+            },
+          });
+
+          expect(suggestions).toContainEqual({
+            label: '?function',
+            text: '?function',
+            kind: 'Constant',
+            detail: 'Named parameter',
+            command: undefined,
+            sortText: '1A',
+          });
+        });
+
+        test('suggests `Create control` option for grouping', async () => {
           const { suggest } = await setup();
 
           const suggestions = await suggest('FROM a | STATS BY /', {
@@ -390,7 +438,7 @@ describe('autocomplete.suggest', () => {
             kind: 'Issue',
             detail: 'Click to create',
             command: { id: 'esql.control.fields.create', title: 'Click to create' },
-            sortText: '11A',
+            sortText: '11',
           });
         });
 
