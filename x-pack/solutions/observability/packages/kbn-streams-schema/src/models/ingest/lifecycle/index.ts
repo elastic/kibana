@@ -99,7 +99,7 @@ export const isDisabledLifecycle = createIsNarrowSchema(
   disabledLifecycleSchema
 );
 
-type PhaseName = 'hot' | 'warm' | 'cold' | 'frozen' | 'delete';
+export type PhaseName = 'hot' | 'warm' | 'cold' | 'frozen' | 'delete';
 
 export interface IlmPolicyPhase {
   name: PhaseName;

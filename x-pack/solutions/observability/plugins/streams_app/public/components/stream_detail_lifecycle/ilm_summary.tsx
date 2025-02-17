@@ -13,6 +13,7 @@ import {
   IlmPolicyPhases,
   IngestStreamGetResponse,
   IngestStreamLifecycleILM,
+  PhaseName,
 } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import {
@@ -126,7 +127,7 @@ export function IlmSummary({
   }, [value]);
 
   return (
-    <>
+    <EuiFlexGroup direction="column" gutterSize="none">
       <EuiPanel hasShadow={false} hasBorder={false} paddingSize="s">
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem>
@@ -162,10 +163,10 @@ export function IlmSummary({
         )}
       </EuiPanel>
 
-      <EuiSpacer size="xxl" />
+      <EuiSpacer size="m" />
 
       <PhasesLegend phases={value} />
-    </>
+    </EuiFlexGroup>
   );
 }
 
@@ -222,7 +223,7 @@ function IlmPhase({
             hasBorder={false}
             hasShadow={false}
             grow={false}
-            style={{ marginBottom: '50px' }}
+            style={{ marginBottom: '40px' }}
           >
             <EuiText size="xs">
               <p>
@@ -239,7 +240,7 @@ function IlmPhase({
             paddingSize="xs"
             style={{
               marginRight: minAge ? '-20px' : '-5px',
-              width: '40px',
+              width: '50px',
               backgroundColor: ILM_PHASES.delete.color,
             }}
             grow={false}
@@ -256,41 +257,74 @@ function IlmPhase({
   );
 }
 
+function phasesDescriptions(phases: IlmPolicyPhases) {
+  const descriptions = orderIlmPhases(phases)
+    .filter(({ name }) => name !== 'delete')
+    .map(({ name, min_age: minAge }) => ({
+      name,
+      description: ILM_PHASES[name].description(minAge),
+      color: ILM_PHASES[name].color,
+    })) as Array<
+    {
+      name: PhaseName | 'indefinite';
+      description: string;
+    } & ({ color: string } | { icon: string })
+  >;
+
+  if (phases.delete) {
+    descriptions.push({
+      name: 'delete',
+      description: ILM_PHASES.delete.description(phases.delete!.min_age),
+      icon: 'trash',
+    });
+  } else {
+    descriptions.push({
+      name: 'indefinite',
+      description: i18n.translate('xpack.streams.streamDetailLifecycle.noRetentionDescription', {
+        defaultMessage: 'Data is stored indefinitely',
+      }),
+      icon: 'infinity',
+    });
+  }
+
+  return descriptions;
+}
+
 function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
   if (!phases) return null;
 
-  const descriptions = orderIlmPhases(phases).map(({ name, min_age: minAge }) => ({
-    name,
-    description: ILM_PHASES[name].description(minAge),
-  }));
-
+  const descriptions = phasesDescriptions(phases);
   return (
-    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-      {descriptions.map(({ name, description }) => (
+    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
+      {descriptions.map((phase, index) => (
         <>
           <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={2}>
-              <p>
+            <EuiFlexItem grow={false} style={{ width: '20px', alignItems: 'center' }}>
+              {'color' in phase ? (
                 <span
                   style={{
-                    height: '10px',
-                    width: '10px',
+                    height: '12px',
+                    width: '12px',
                     borderRadius: '50%',
-                    backgroundColor: ILM_PHASES[name].color,
+                    backgroundColor: phase.color,
                     display: 'inline-block',
-                    marginRight: '10px',
                   }}
                 />
-                <b>{capitalize(name)} phase</b>
-              </p>
+              ) : (
+                <EuiIcon type={phase.icon} />
+              )}
             </EuiFlexItem>
 
-            <EuiFlexItem grow={8}>
-              <EuiTextColor color="subdued">{description}</EuiTextColor>
+            <EuiFlexItem grow={2}>
+              <b>{capitalize(phase.name)}</b>
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={10}>
+              <EuiTextColor color="subdued">{phase.description}</EuiTextColor>
             </EuiFlexItem>
           </EuiFlexGroup>
 
-          <EuiSpacer size="s" />
+          {index === descriptions.length - 1 ? null : <EuiSpacer size="s" />}
         </>
       ))}
     </EuiPanel>

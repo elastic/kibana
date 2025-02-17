@@ -119,51 +119,45 @@ export function IngestionRate({
         </EuiFlexGroup>
       </EuiPanel>
 
-      <EuiSpacer size="s" />
+      <EuiSpacer />
 
-      {ingestionRateError ? (
-        <EuiFlexGroup
-          justifyContent="center"
-          alignItems="center"
-          style={{ width: '100%', height: '250px' }}
-        >
-          Failed to load ingestion rate
-        </EuiFlexGroup>
-      ) : isLoadingIngestionRate || isLoadingStats || !ingestionRate ? (
-        <EuiFlexGroup
-          justifyContent="center"
-          alignItems="center"
-          style={{ width: '100%', height: '250px' }}
-        >
+      <EuiFlexGroup
+        justifyContent="center"
+        alignItems="center"
+        style={{ width: '100%', minHeight: '250px' }}
+      >
+        {ingestionRateError ? (
+          'Failed to load ingestion rate'
+        ) : isLoadingIngestionRate || isLoadingStats || !ingestionRate ? (
           <EuiLoadingChart />
-        </EuiFlexGroup>
-      ) : (
-        <Chart size={{ height: 250 }}>
-          <Settings showLegend={false} />
-          <AreaSeries
-            id="ingestionRate"
-            name="Ingestion rate"
-            data={ingestionRate}
-            color="#61A2FF"
-            xScaleType="time"
-            xAccessor={'key'}
-            yAccessors={['value']}
-          />
+        ) : (
+          <Chart size={{ height: 250 }}>
+            <Settings showLegend={false} />
+            <AreaSeries
+              id="ingestionRate"
+              name="Ingestion rate"
+              data={ingestionRate}
+              color="#61A2FF"
+              xScaleType="time"
+              xAccessor={'key'}
+              yAccessors={['value']}
+            />
 
-          <Axis
-            id="bottom-axis"
-            position="bottom"
-            tickFormat={(value) => moment(value).format('YYYY-MM-DD')}
-            gridLine={{ visible: false }}
-          />
-          <Axis
-            id="left-axis"
-            position="left"
-            tickFormat={(value) => formatBytes(value)}
-            gridLine={{ visible: true }}
-          />
-        </Chart>
-      )}
+            <Axis
+              id="bottom-axis"
+              position="bottom"
+              tickFormat={(value) => moment(value).format('YYYY-MM-DD')}
+              gridLine={{ visible: false }}
+            />
+            <Axis
+              id="left-axis"
+              position="left"
+              tickFormat={(value) => formatBytes(value)}
+              gridLine={{ visible: true }}
+            />
+          </Chart>
+        )}
+      </EuiFlexGroup>
     </>
   );
 }

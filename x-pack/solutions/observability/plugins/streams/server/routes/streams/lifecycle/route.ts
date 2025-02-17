@@ -5,26 +5,20 @@
  * 2.0.
  */
 
-import { compact, pick } from 'lodash';
 import {
-  IlmPolicyPhases,
   IngestStreamDefinition,
   findInheritedLifecycle,
   isIlmLifecycle,
   isIngestStreamDefinition,
   isInheritLifecycle,
-  isWiredStreamDefinition,
+  isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import {
-  IlmExplainLifecycleLifecycleExplain,
-  IlmPolicy,
-  IlmPhase,
-  IndicesStatsIndicesStats,
-} from '@elastic/elasticsearch/lib/api/types';
+import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { createServerRoute } from '../../create_server_route';
 import { StreamsClient } from '../../../lib/streams/client';
 import { getDataStreamLifecycle } from '../../../lib/streams/stream_crud';
+import { ilmStats } from '../../../lib/streams/lifecycle/ilm_stats';
 
 const lifecycleStatsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/lifecycle/_stats',
@@ -47,97 +41,54 @@ const lifecycleStatsRoute = createServerRoute({
 
     const definition = await streamsClient.getStream(name);
     if (!isIngestStreamDefinition(definition)) {
-      throw new Error(`[${name}] is not an ingest stream`);
-    }
-
-    const lifecycle = await getEffectiveLifecycle({ definition, streamsClient });
-    if (!isIlmLifecycle(lifecycle)) {
-      throw new Error(`Only ilm lifecycle`);
-    }
-
-    if (server.isServerless) {
-      throw new Error(`lifecycle/_stats is not supported in serverless`);
+      throw new Error('Lifecycle stats are only available for ingest streams');
     }
 
     const dataStream = await streamsClient.getDataStream(name);
+    const lifecycle = await getEffectiveLifecycle({ definition, streamsClient, dataStream });
+    if (!isIlmLifecycle(lifecycle)) {
+      throw new Error('Lifecycle stats are only available for ILM');
+    }
+
+    if (server.isServerless) {
+      throw new Error('Lifecycle stats are not supported in serverless');
+    }
+
     const { policy } = await scopedClusterClient.asCurrentUser.ilm
-      .getLifecycle({
-        name: lifecycle.ilm.policy,
-      })
+      .getLifecycle({ name: lifecycle.ilm.policy })
       .then((policies) => policies[lifecycle.ilm.policy]);
 
-    const [ilmDetails, { indices: indicesStats = {} }] = await Promise.all([
-      scopedClusterClient.asCurrentUser.ilm
-        .explainLifecycle({
-          index: name,
-        })
-        .then(({ indices }) => Object.values(indices)),
+    const [{ indices: indicesIlmDetails }, { indices: indicesStats = {} }] = await Promise.all([
+      scopedClusterClient.asCurrentUser.ilm.explainLifecycle({ index: name }),
 
       scopedClusterClient.asCurrentUser.indices.stats({
         index: dataStream.indices.map(({ index_name: indexName }) => indexName),
       }),
     ]);
 
-    return ilmSummary(policy, ilmDetails, indicesStats);
+    return ilmStats({ policy, indicesIlmDetails, indicesStats });
   },
 });
-
-const ilmSummary = (
-  policy: IlmPolicy,
-  ilmDetails: IlmExplainLifecycleLifecycleExplain[],
-  indicesStats: Record<string, IndicesStatsIndicesStats>
-) => {
-  const phaseWithName = (name: keyof IlmPolicyPhases, phase?: IlmPhase) => {
-    if (!phase) return undefined;
-    return { ...pick(phase, ['min_age']), name };
-  };
-
-  const orderedPhases = compact([
-    phaseWithName('hot' as const, policy.phases.hot),
-    phaseWithName('warm' as const, policy.phases.warm),
-    phaseWithName('cold' as const, policy.phases.cold),
-    phaseWithName('frozen' as const, policy.phases.frozen),
-    phaseWithName('delete' as const, policy.phases.delete),
-  ]);
-
-  return orderedPhases.reduce((phases, phase) => {
-    if (phase.name === 'delete') {
-      phases[phase.name] = { name: phase.name, min_age: phase.min_age!.toString() };
-      return phases;
-    }
-
-    const sizeInBytes = ilmDetails
-      .filter((detail) => detail.managed && detail.phase === phase.name)
-      .map((detail) => indicesStats[detail.index!])
-      .reduce((size, stats) => size + (stats?.total?.store?.size_in_bytes ?? 0), 0);
-
-    phases[phase.name] = {
-      name: phase.name,
-      size_in_bytes: sizeInBytes,
-      min_age: phase.min_age?.toString(),
-    };
-    return phases;
-  }, {} as IlmPolicyPhases);
-};
 
 const getEffectiveLifecycle = async ({
   definition,
   streamsClient,
+  dataStream,
 }: {
   definition: IngestStreamDefinition;
   streamsClient: StreamsClient;
+  dataStream: IndicesDataStream;
 }) => {
-  if (!isInheritLifecycle(definition.ingest.lifecycle)) {
-    return definition.ingest.lifecycle;
+  if (isUnwiredStreamDefinition(definition)) {
+    return getDataStreamLifecycle(dataStream);
   }
 
-  if (isWiredStreamDefinition(definition)) {
+  if (isInheritLifecycle(definition.ingest.lifecycle)) {
     const ancestors = await streamsClient.getAncestors(definition.name);
     return findInheritedLifecycle(definition, ancestors);
   }
 
-  const dataStream = await streamsClient.getDataStream(definition.name);
-  return getDataStreamLifecycle(dataStream);
+  return definition.ingest.lifecycle;
 };
 
 export const lifecycleRoutes = {

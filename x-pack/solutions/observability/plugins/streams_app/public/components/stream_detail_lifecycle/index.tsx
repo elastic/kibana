@@ -206,28 +206,34 @@ export function StreamDetailLifecycle({
         </EuiFlexGroup>
       </EuiPanel>
 
-      <EuiSpacer size="s" />
+      <EuiSpacer size="m" />
 
-      <EuiFlexGroup>
-        <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-          <IngestionRate
-            definition={definition}
-            refreshStats={refreshStats}
-            isLoadingStats={isLoadingStats}
-            stats={stats}
-          />
-        </EuiPanel>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem grow={2}>
+            <EuiPanel grow={true} hasShadow={false} hasBorder paddingSize="s">
+              <IngestionRate
+                definition={definition}
+                refreshStats={refreshStats}
+                isLoadingStats={isLoadingStats}
+                stats={stats}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
 
-      {isIlmLifecycle(definition.effective_lifecycle) ? (
-          <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-            <IlmSummary
-              definition={definition}
-              lifecycle={definition.effective_lifecycle}
-              ilmLocator={ilmLocator}
-            />
-          </EuiPanel>
-      ) : null}
-      </EuiFlexGroup>
+          {isIlmLifecycle(definition.effective_lifecycle) ? (
+            <EuiFlexItem grow={3}>
+              <EuiPanel grow={true} hasShadow={false} hasBorder paddingSize="s">
+                <IlmSummary
+                  definition={definition}
+                  lifecycle={definition.effective_lifecycle}
+                  ilmLocator={ilmLocator}
+                />
+              </EuiPanel>
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </>
   );
 }

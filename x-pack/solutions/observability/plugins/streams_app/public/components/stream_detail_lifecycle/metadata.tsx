@@ -132,7 +132,7 @@ export function RetentionMetadata({
   );
 
   return (
-    <EuiPanel hasBorder={false} hasShadow={false}>
+    <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
       <MetadataRow
         metadata={i18n.translate('xpack.streams.streamDetailLifecycle.retentionPeriodLabel', {
           defaultMessage: 'Retention period',
@@ -156,7 +156,7 @@ export function RetentionMetadata({
         }
         button={contextualMenu}
       />
-      <EuiHorizontalRule margin="m" />
+      <EuiHorizontalRule margin="s" />
       <MetadataRow
         metadata={i18n.translate('xpack.streams.streamDetailLifecycle.retentionSourceLabel', {
           defaultMessage: 'Source',
@@ -168,7 +168,7 @@ export function RetentionMetadata({
           </EuiFlexGroup>
         }
       />
-      <EuiHorizontalRule margin="m" />
+      <EuiHorizontalRule margin="s" />
       <MetadataRow
         metadata={i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRate', {
           defaultMessage: 'Ingestion',
@@ -185,7 +185,7 @@ export function RetentionMetadata({
           )
         }
       />
-      <EuiHorizontalRule margin="m" />
+      <EuiHorizontalRule margin="s" />
       <MetadataRow
         metadata={i18n.translate('xpack.streams.streamDetailLifecycle.totalDocs', {
           defaultMessage: 'Total doc count',
