@@ -176,6 +176,6 @@ test.describe('Observability Onboarding - Elastic Agent', { tag: ['@ess', '@svlO
     await expect(customLogs.checkLogsStepMessage).toHaveText('Logs are being shipped!');
 
     await customLogs.exploreLogsButton.click();
-    await expect(page).toHaveURL(/\/app\/discover/);
+    await expect(page).toHaveURL(/\/app\/observability-logs-explorer/);
   });
 });
