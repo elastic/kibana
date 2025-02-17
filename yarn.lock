@@ -9800,7 +9800,7 @@
     "@statoscope/types" "5.28.1"
     "@types/md5" "^2.3.2"
 
-"@storybook/addon-a11y@8.3.5":
+"@storybook/addon-a11y@^8.3.5":
   version "8.3.5"
   resolved "https://registry.yarnpkg.com/@storybook/addon-a11y/-/addon-a11y-8.3.5.tgz#b40d519013961c87af8c1394253a2651d90793ae"
   integrity sha512-/19UO8IXbyfcYK5K8ejSYF+hC+EK79c0bBPHMNeYSFOHSqQM3KoMo+TLIcLsuhuRClmlM+4Zs+VSIYDwc+d3ig==
@@ -9808,7 +9808,7 @@
     "@storybook/addon-highlight" "8.3.5"
     axe-core "^4.2.0"
 
-"@storybook/addon-actions@8.5.5":
+"@storybook/addon-actions@8.5.5", "@storybook/addon-actions@^8.3.5":
   version "8.5.5"
   resolved "https://registry.yarnpkg.com/@storybook/addon-actions/-/addon-actions-8.5.5.tgz#9fa67f95f4852491fde217b36c7c2c9620073b52"
   integrity sha512-XJtE69QBXROM0xvAAFohkwuBLLnuEFBvAnmsY4+pfk001BCEZf7UXDY/XKD3Ew/Uou6o7oco7RmStycSlXU2Ng==
