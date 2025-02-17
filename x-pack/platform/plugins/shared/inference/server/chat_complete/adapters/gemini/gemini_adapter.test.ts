@@ -240,6 +240,57 @@ describe('geminiAdapter', () => {
       ]);
     });
 
+    it('encapsulates string tool messages', () => {
+      geminiAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [
+          {
+            role: MessageRole.User,
+            content: 'question',
+          },
+          {
+            role: MessageRole.Assistant,
+            content: null,
+            toolCalls: [
+              {
+                function: {
+                  name: 'my_function',
+                  arguments: {
+                    foo: 'bar',
+                  },
+                },
+                toolCallId: '0',
+              },
+            ],
+          },
+          {
+            name: 'my_function',
+            role: MessageRole.Tool,
+            toolCallId: '0',
+            response: JSON.stringify({ bar: 'foo' }),
+          },
+        ],
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+
+      const { messages } = getCallParams();
+      expect(messages[messages.length - 1]).toEqual({
+        role: 'user',
+        parts: [
+          {
+            functionResponse: {
+              name: '0',
+              response: {
+                response: JSON.stringify({ bar: 'foo' }),
+              },
+            },
+          },
+        ],
+      });
+    });
+
     it('correctly formats content parts', () => {
       geminiAdapter.chatComplete({
         executor: executorMock,

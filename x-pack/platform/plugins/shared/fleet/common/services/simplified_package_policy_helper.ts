@@ -51,6 +51,7 @@ export interface SimplifiedPackagePolicy {
   vars?: SimplifiedVars;
   inputs?: SimplifiedInputs;
   supports_agentless?: boolean | null;
+  additional_datastreams_permissions?: string[];
 }
 
 export interface FormattedPackagePolicy extends Omit<PackagePolicy, 'inputs' | 'vars'> {
@@ -161,6 +162,7 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     inputs = {},
     vars: packageLevelVars,
     supports_agentless: supportsAgentless,
+    additional_datastreams_permissions: additionalDatastreamsPermissions,
   } = data;
   const packagePolicy = {
     ...packageToPackagePolicy(
@@ -173,6 +175,10 @@ export function simplifiedPackagePolicytoNewPackagePolicy(
     supports_agentless: supportsAgentless,
     output_id: outputId,
   };
+
+  if (additionalDatastreamsPermissions) {
+    packagePolicy.additional_datastreams_permissions = additionalDatastreamsPermissions;
+  }
 
   if (packagePolicy.package && options?.experimental_data_stream_features) {
     packagePolicy.package.experimental_data_stream_features =
