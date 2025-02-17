@@ -13,7 +13,7 @@ import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/
 import { getOr, get, isNumber } from 'lodash/fp';
 import deepmerge from 'deepmerge';
 import { v4 as uuidv4 } from 'uuid';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import deepEqual from 'fast-deep-equal';
 
 import { escapeDataProviderId } from '../drag_and_drop/helpers';
