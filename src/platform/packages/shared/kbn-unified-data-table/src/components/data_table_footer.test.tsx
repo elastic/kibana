@@ -102,6 +102,50 @@ describe('UnifiedDataTableFooter', function () {
     expect(mockLoadMore).toHaveBeenCalledTimes(1);
   });
 
+  it('should render the load more button where pagination mode is set to load more and user has reached the bottom of the page', () => {
+    const mockLoadMore = jest.fn();
+
+    const component = mountWithIntl(
+      <UnifiedDataTableFooter
+        pageCount={5}
+        pageIndex={4}
+        sampleSize={500}
+        totalHits={1000}
+        rowCount={500}
+        isLoadingMore={false}
+        onFetchMoreRecords={mockLoadMore}
+        data={servicesMock.data}
+        fieldFormats={servicesMock.fieldFormats}
+        paginationMode={'loadMore'}
+        hasScrolledToBottom={true}
+      />
+    );
+
+    expect(findTestSubject(component, 'dscGridSampleSizeFetchMoreLink').exists()).toBe(true);
+  });
+
+  it('should not render the load more button where pagination mode is set to load more and but the user has not reached the bottom of the page', () => {
+    const mockLoadMore = jest.fn();
+
+    const component = mountWithIntl(
+      <UnifiedDataTableFooter
+        pageCount={5}
+        pageIndex={4}
+        sampleSize={500}
+        totalHits={1000}
+        rowCount={500}
+        isLoadingMore={false}
+        onFetchMoreRecords={mockLoadMore}
+        data={servicesMock.data}
+        fieldFormats={servicesMock.fieldFormats}
+        paginationMode={'loadMore'}
+        hasScrolledToBottom={false}
+      />
+    );
+
+    expect(findTestSubject(component, 'dscGridSampleSizeFetchMoreLink').exists()).toBe(false);
+  });
+
   it('should render a disabled button when loading more', async () => {
     const mockLoadMore = jest.fn();
 
