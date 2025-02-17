@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import useToggle from 'react-use/lib/useToggle';
 import { WiredStreamDefinition } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 import { FieldParent } from '../field_parent';
@@ -56,17 +55,16 @@ const FIELD_SUMMARIES = {
 
 interface FieldSummaryProps {
   field: SchemaField;
-  isEditingByDefault: boolean;
+  isEditing: boolean;
+  toggleEditMode: () => void;
   stream: WiredStreamDefinition;
   onChange: (field: Partial<SchemaField>) => void;
 }
 
 export const FieldSummary = (props: FieldSummaryProps) => {
-  const { field, isEditingByDefault, onChange, stream } = props;
+  const { field, isEditing, toggleEditMode, onChange, stream } = props;
 
   const router = useStreamsAppRouter();
-
-  const [isEditing, toggleEditMode] = useToggle(isEditingByDefault);
 
   return (
     <>
