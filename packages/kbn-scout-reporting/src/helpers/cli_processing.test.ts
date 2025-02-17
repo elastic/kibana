@@ -41,7 +41,7 @@ describe('cli_processing', () => {
       ];
 
       expect(stripRunCommand(argv)).toBe(
-        'npx playwright test --config path/to/config --grep=@svlSearch'
+        'npx playwright test --config path/to/config --project local --grep=@svlSearch'
       );
     });
 
