@@ -74,11 +74,10 @@ const getAspectRatioStyles = ({ x, y }: { x: number; y: number }) => {
 export function VisualizationToolbar(props: {
   activeVisualization: Visualization | null;
   framePublicAPI: FramePublicAPI;
-  isFixedPosition?: boolean;
 }) {
   const dispatchLens = useLensDispatch();
   const visualization = useLensSelector(selectVisualizationState);
-  const { activeVisualization, isFixedPosition } = props;
+  const { activeVisualization } = props;
   const setVisualizationState = useCallback(
     (newState: unknown) => {
       if (!activeVisualization) {
@@ -101,9 +100,6 @@ export function VisualizationToolbar(props: {
       {ToolbarComponent && (
         <EuiFlexItem
           grow={false}
-          className={classNames({
-            'lnsVisualizationToolbar--fixed': isFixedPosition,
-          })}
         >
           {ToolbarComponent({
             frame: props.framePublicAPI,
