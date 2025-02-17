@@ -67,6 +67,14 @@ export const ESTransformsTargetGuidance = ({ deprecation }: Props) => {
             }}
           />
         </p>
+        <p>
+          <EuiText size="m">
+            <FormattedMessage
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option1.description"
+              defaultMessage="The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
+            />
+          </EuiText>
+        </p>
       </EuiText>
     </>
   );
