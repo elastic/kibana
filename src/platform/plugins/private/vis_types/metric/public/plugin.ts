@@ -10,7 +10,6 @@
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { createMetricVisTypeDefinition } from './metric_vis_type';
 import type { MetricPublicConfig } from '../server/config';
 import { setDataViewsStart } from './services';
 
@@ -36,10 +35,13 @@ export class MetricVisPlugin
 
   public setup(core: CoreSetup, { visualizations }: MetricVisPluginSetupDependencies) {
     const { readOnly } = this.initializerContext.config.get<MetricPublicConfig>();
-    visualizations.createBaseVisualization({
-      ...createMetricVisTypeDefinition(),
-      disableCreate: Boolean(readOnly),
-      disableEdit: Boolean(readOnly),
+    visualizations.createBaseVisualization('metric', async () => {
+      const { metricVisType } = await import('./metric_vis_type');
+      return {
+        ...metricVisType,
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      };
     });
   }
 

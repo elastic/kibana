@@ -19,7 +19,7 @@ import {
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { apiHasVisualizeConfig, HasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 
-import { INPUT_CONTROL_VIS_TYPE } from './input_control_vis_type';
+import { INPUT_CONTROL_VIS_TYPE } from './constants';
 
 const ACTION_DEPRECATION_BADGE = 'ACTION_INPUT_CONTROL_DEPRECATION_BADGE';
 

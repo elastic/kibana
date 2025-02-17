@@ -22,7 +22,7 @@ import { parseTimelionExpressionAsync } from '../common/parser_async';
 
 const TimelionOptions = lazy(() => import('./timelion_options'));
 
-export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) {
+export function getTimelionVis(dependencies: TimelionVisDependencies) {
   // return the visType object, which kibana will use to display and configure new
   // Vis object of this type.
   return {

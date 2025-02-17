@@ -14,7 +14,6 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { GaugePublicConfig } from '../server/config';
 import { LEGACY_GAUGE_CHARTS_LIBRARY } from '../common';
 import { VisTypeGaugePluginSetup } from './types';
-import { gaugeVisType, goalVisType } from './vis_type';
 import { setDataViewsStart } from './services';
 
 /** @internal */
@@ -42,15 +41,21 @@ export class VisTypeGaugePlugin {
     if (!core.uiSettings.get(LEGACY_GAUGE_CHARTS_LIBRARY)) {
       const { readOnly } = this.initializerContext.config.get<GaugePublicConfig>();
       const visTypeProps = { showElasticChartsOptions: true };
-      visualizations.createBaseVisualization({
-        ...gaugeVisType(visTypeProps),
-        disableCreate: Boolean(readOnly),
-        disableEdit: Boolean(readOnly),
+      visualizations.createBaseVisualization('gauge', async () => {
+        const { getGaugeVisType } = await import('./vis_type/vis_types_module');
+        return {
+          ...getGaugeVisType(visTypeProps),
+          disableCreate: Boolean(readOnly),
+          disableEdit: Boolean(readOnly),
+        };
       });
-      visualizations.createBaseVisualization({
-        ...goalVisType(visTypeProps),
-        disableCreate: Boolean(readOnly),
-        disableEdit: Boolean(readOnly),
+      visualizations.createBaseVisualization('goal', async () => {
+        const { getGoalVisType } = await import('./vis_type/vis_types_module');
+        return {
+          ...getGoalVisType(visTypeProps),
+          disableCreate: Boolean(readOnly),
+          disableEdit: Boolean(readOnly),
+        };
       });
     }
 

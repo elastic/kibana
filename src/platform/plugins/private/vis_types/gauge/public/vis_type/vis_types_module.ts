@@ -7,9 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getPieVisTypeDefinition } from './pie';
-import type { PieTypeProps } from '../types';
-
-export const pieVisType = (props: PieTypeProps) => {
-  return getPieVisTypeDefinition(props);
-};
+export { getGaugeVisType } from './gauge';
+export { getGoalVisType } from './goal';

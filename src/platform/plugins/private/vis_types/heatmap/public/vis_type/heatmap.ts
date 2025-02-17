@@ -17,7 +17,7 @@ import { HeatmapTypeProps, HeatmapVisParams, AxisType, ScaleType } from '../type
 import { toExpressionAst } from '../to_ast';
 import { getHeatmapOptions } from '../editor/components';
 
-export const getHeatmapVisTypeDefinition = ({
+export const getHeatmapVisType = ({
   showElasticChartsOptions = false,
   palettes,
 }: HeatmapTypeProps): VisTypeDefinition<HeatmapVisParams> => ({

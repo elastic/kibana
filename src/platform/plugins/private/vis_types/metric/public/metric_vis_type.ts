@@ -15,7 +15,7 @@ import { MetricVisOptions } from './components';
 import { toExpressionAst } from './to_ast';
 import { VisParams } from './types';
 
-export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> => ({
+export const metricVisType = {
   name: 'metric',
   title: i18n.translate('visTypeMetric.metricTitle', { defaultMessage: 'Metric' }),
   icon: 'visMetric',
@@ -113,4 +113,4 @@ export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> =>
       canNavigateToLens: Boolean(vis?.params ? await convertToLens(vis, timeFilter) : null),
     };
   },
-});
+} as VisTypeDefinition<VisParams>;
