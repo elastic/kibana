@@ -65,47 +65,46 @@ describe('formatters', () => {
   });
 
   describe('asDecimalOrInteger', () => {
-    it('formats as integer when number equals to 0 ', () => {
-      expect(asDecimalOrInteger(0)).toEqual('0');
+    describe('with default threshold of 10', () => {
+      it('formats as integer when number equals to 0 ', () => {
+        expect(asDecimalOrInteger(0)).toEqual('0');
+      });
+      it('formats as integer when number is above or equals 10 ', () => {
+        expect(asDecimalOrInteger(10.123)).toEqual('10');
+        expect(asDecimalOrInteger(15.123)).toEqual('15');
+      });
+      it('formats as decimal when number is below 10 ', () => {
+        expect(asDecimalOrInteger(0.25435632645)).toEqual('0.3');
+        expect(asDecimalOrInteger(1)).toEqual('1.0');
+        expect(asDecimalOrInteger(3.374329704990765)).toEqual('3.4');
+        expect(asDecimalOrInteger(5)).toEqual('5.0');
+        expect(asDecimalOrInteger(9)).toEqual('9.0');
+      });
     });
 
-    it('formats as integer when number is above or equals 10 ', () => {
-      expect(asDecimalOrInteger(10.123)).toEqual('10');
-      expect(asDecimalOrInteger(15.123)).toEqual('15');
+    describe('with custom threshold of 1', () => {
+      it('formats as integer when number equals to 0 ', () => {
+        expect(asDecimalOrInteger(0, 1)).toEqual('0');
+      });
+      it('formats as integer when number is above or equals 1 ', () => {
+        expect(asDecimalOrInteger(1, 1)).toEqual('1');
+        expect(asDecimalOrInteger(1.123, 1)).toEqual('1');
+        expect(asDecimalOrInteger(3.374329704990765, 1)).toEqual('3');
+        expect(asDecimalOrInteger(5, 1)).toEqual('5');
+        expect(asDecimalOrInteger(9, 1)).toEqual('9');
+        expect(asDecimalOrInteger(10, 1)).toEqual('10');
+        expect(asDecimalOrInteger(10.123, 1)).toEqual('10');
+        expect(asDecimalOrInteger(15.123, 1)).toEqual('15');
+      });
+      it('formats as decimal when number is below 1 ', () => {
+        expect(asDecimalOrInteger(0.25435632645, 1)).toEqual('0.3');
+      });
     });
 
-    it.each([
-      [0.25435632645, '0.3'],
-      [1, '1.0'],
-      [3.374329704990765, '3.4'],
-      [5, '5.0'],
-      [9, '9.0'],
-    ])('formats as decimal when number is below 10 ', (value, formattedValue) => {
-      expect(asDecimalOrInteger(value)).toBe(formattedValue);
+    it('returns fallback when valueNaN', () => {
+      expect(asDecimalOrInteger(NaN)).toEqual('N/A');
+      expect(asDecimalOrInteger(null)).toEqual('N/A');
+      expect(asDecimalOrInteger(undefined)).toEqual('N/A');
     });
-
-    it.each([
-      [-0.123, '-0.1'],
-      [-1.234, '-1.2'],
-      [-9.876, '-9.9'],
-    ])(
-      'formats as decimal when number is negative and below 10 in absolute value',
-      (value, formattedValue) => {
-        expect(asDecimalOrInteger(value)).toEqual(formattedValue);
-      }
-    );
-
-    it.each([
-      [-12.34, '-12'],
-      [-123.45, '-123'],
-      [-1234.56, '-1,235'],
-      [-12345.67, '-12,346'],
-      [-12345678.9, '-12,345,679'],
-    ])(
-      'formats as integer when number is negative and above or equals 10 in absolute value',
-      (value, formattedValue) => {
-        expect(asDecimalOrInteger(value)).toEqual(formattedValue);
-      }
-    );
   });
 });

@@ -35,8 +35,12 @@ export function asInteger(value: Maybe<number> | null) {
   return numeral(value).format('0,0');
 }
 
-export function asDecimalOrInteger(value: number) {
-  if (value === 0 || Math.abs(value) >= 10) {
+export function asDecimalOrInteger(value: Maybe<number>, threshold = 10) {
+  if (!isFinite(value)) {
+    return NOT_AVAILABLE_LABEL;
+  }
+
+  if (value === null || value === undefined || value === 0 || value >= threshold) {
     return asInteger(value);
   }
   return asDecimal(value);
