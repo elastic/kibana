@@ -626,6 +626,20 @@ export const CANCEL_AND_ARCHIVE_MODAL_SUBTITLE = i18n.translate(
   }
 );
 
+export const DELETE_MODAL_TITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.deleteModal.title',
+  {
+    defaultMessage: 'Delete maintenance window',
+  }
+);
+
+export const DELETE_MODAL_SUBTITLE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.deleteModal.subtitle',
+  {
+    defaultMessage: 'Not sure what.',
+  }
+);
+
 export const ARCHIVE = i18n.translate('xpack.alerting.maintenanceWindows.archive', {
   defaultMessage: 'Archive',
 });
@@ -646,6 +660,13 @@ export const TABLE_ACTION_UNARCHIVE = i18n.translate(
   'xpack.alerting.maintenanceWindows.table.unarchive',
   {
     defaultMessage: 'Unarchive',
+  }
+);
+
+export const TABLE_ACTION_DELETE = i18n.translate(
+  'xpack.alerting.maintenanceWindows.table.delete',
+  {
+    defaultMessage: 'Delete',
   }
 );
 
@@ -670,6 +691,18 @@ export const ARCHIVE_CALLOUT_SUBTITLE = i18n.translate(
       'The changes you have made here will not be saved. Are you sure you want to discard these unsaved changes and archive this maintenance window?',
   }
 );
+
+export const DELETE = i18n.translate('xpack.alerting.maintenanceWindows.delete', {
+  defaultMessage: 'Delete',
+});
+
+export const DELETE_TITLE = i18n.translate('xpack.alerting.maintenanceWindows.delete.title', {
+  defaultMessage: 'Delete maintenance window',
+});
+
+export const DELETE_SUBTITLE = i18n.translate('xpack.alerting.maintenanceWindows.delete.subtitle', {
+  defaultMessage: 'Not sure what!.',
+});
 
 export const EXPERIMENTAL_LABEL = i18n.translate(
   'xpack.alerting.maintenanceWindows.badge.experimentalLabel',
