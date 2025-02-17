@@ -6249,7 +6249,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logs-overview@link:x-pack/platform/packages/shared/logs_overview":
+"@kbn/logs-overview@link:x-pack/platform/packages/shared/logs-overview":
   version "0.0.0"
   uid ""
 
