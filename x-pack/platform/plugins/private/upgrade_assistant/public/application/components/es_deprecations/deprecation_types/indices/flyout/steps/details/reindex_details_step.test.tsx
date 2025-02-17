@@ -12,6 +12,7 @@ import type { ReindexState } from '../../../use_reindex';
 import type { UpdateIndexState } from '../../../use_update_index';
 import { LoadingState } from '../../../../../../types';
 import { cloneDeep } from 'lodash';
+import { EnrichedDeprecationInfo } from '../../../../../../../../../common/types';
 
 jest.mock('../../../../../../../app_context', () => {
   const { docLinksServiceMock } = jest.requireActual('@kbn/core-doc-links-browser-mocks');
@@ -38,6 +39,13 @@ jest.mock('../../../../../../../app_context', () => {
 });
 
 describe('ReindexDetailsFlyoutStep', () => {
+  const deprecation: EnrichedDeprecationInfo = {
+    isCritical: true,
+    message: 'foo',
+    resolveDuringUpgrade: false,
+    type: 'index_settings',
+    url: 'https://te.st',
+  };
   const defaultReindexState: ReindexState = {
     loadingState: LoadingState.Success,
     meta: {
@@ -65,6 +73,7 @@ describe('ReindexDetailsFlyoutStep', () => {
         startReadonly={jest.fn()}
         reindexState={defaultReindexState}
         updateIndexState={defaultUpdateIndexState}
+        deprecation={deprecation}
       />
     );
 
@@ -214,7 +223,10 @@ describe('ReindexDetailsFlyoutStep', () => {
         startReadonly={jest.fn()}
         reindexState={defaultReindexState}
         updateIndexState={defaultUpdateIndexState}
-        correctiveAction={{ type: 'reindex', transformIds: ['abc', 'def'] }}
+        deprecation={{
+          ...deprecation,
+          correctiveAction: { type: 'reindex', transformIds: ['abc', 'def'] },
+        }}
       />
     );
     expect(wrapper).toMatchInlineSnapshot(`
@@ -299,6 +311,7 @@ describe('ReindexDetailsFlyoutStep', () => {
         startReadonly={jest.fn()}
         reindexState={props}
         updateIndexState={defaultUpdateIndexState}
+        deprecation={deprecation}
       />
     );
 
