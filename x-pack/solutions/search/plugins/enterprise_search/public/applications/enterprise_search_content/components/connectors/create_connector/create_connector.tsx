@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import { css } from '@emotion/react';
 
@@ -56,25 +56,16 @@ export const CreateConnector: React.FC = () => {
   const { overlays } = useKibana().services;
 
   const { http } = useValues(HttpLogic);
-  const { application, history, isAgentlessEnabled } = useValues(KibanaLogic);
+  const { application, history } = useValues(KibanaLogic);
 
   const { error } = useValues(AddConnectorApiLogic);
   const { euiTheme } = useEuiTheme();
-  const [selfManagePreference, setSelfManagePreference] = useState<SelfManagePreference>('native');
+  const [selfManagePreference, setSelfManagePreference] =
+    useState<SelfManagePreference>('selfManaged');
 
   const { selectedConnector, currentStep, isFormDirty } = useValues(NewConnectorLogic);
   const { setCurrentStep } = useActions(NewConnectorLogic);
   const stepStates = generateStepState(currentStep);
-  const isElasticManagedDiscontinued = true;
-  useEffect(() => {
-    if (
-      (selectedConnector && !selectedConnector.isNative && selfManagePreference === 'native') ||
-      !isAgentlessEnabled ||
-      isElasticManagedDiscontinued
-    ) {
-      setSelfManagePreference('selfManaged');
-    }
-  }, [selectedConnector]);
 
   const getSteps = (selfManaged: boolean): EuiContainedStepProps[] => {
     return [
@@ -145,7 +136,6 @@ export const CreateConnector: React.FC = () => {
           setSelfManagePreference(preference);
         }}
         error={errorToText(error)}
-        isElasticManagedDiscontinued={isElasticManagedDiscontinued}
       />
     ),
   };
@@ -211,7 +201,7 @@ export const CreateConnector: React.FC = () => {
               background-size: contain;
               background-repeat: no-repeat;
               background-position: bottom center;
-              min-height: 550px;
+              min-height: 466px;
               border: 1px solid ${euiTheme.colors.lightShade};
             `}
           >
