@@ -233,19 +233,22 @@ describe('ReindexDetailsFlyoutStep', () => {
       <Fragment>
         <EuiFlyoutBody>
           <EuiText>
-            <p>
-              <MemoizedFormattedMessage
-                defaultMessage="This index was created in ES 7.x and it is not compatible with the next major version. Choose one of the following options:"
-                id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.notCompatibleIndexText"
-              />
-            </p>
             <ESTransformsTargetGuidance
-              index="some_index"
-              transformIds={
-                Array [
-                  "abc",
-                  "def",
-                ]
+              deprecation={
+                Object {
+                  "correctiveAction": Object {
+                    "transformIds": Array [
+                      "abc",
+                      "def",
+                    ],
+                    "type": "reindex",
+                  },
+                  "isCritical": true,
+                  "message": "foo",
+                  "resolveDuringUpgrade": false,
+                  "type": "index_settings",
+                  "url": "https://te.st",
+                }
               }
             />
           </EuiText>
