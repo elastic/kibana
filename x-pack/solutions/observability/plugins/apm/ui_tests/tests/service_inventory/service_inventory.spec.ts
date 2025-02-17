@@ -58,7 +58,7 @@ test.describe('Service Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
     // cy.contains('opbeans-node').click({ force: true });
     await page.getByText('opbeans-node').click();
     // cy.url().should('include', '/apm/services/opbeans-node/overview');
-    await expect(page.url()).toContain('/apm/services/opbeans-node/overview');
+    expect(page.url()).toContain('/apm/services/opbeans-node/overview');
     await expect(page.getByTestId('apmMainTemplateHeaderServiceName')).toHaveText('opbeans-node');
   });
 
@@ -68,7 +68,7 @@ test.describe('Service Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
       .locator('[data-test-subj="comboBoxSearchInput"]')
       .click();
     await expect(
-      await page.getByTestId('comboBoxOptionsList environmentFilter-optionsList')
+      page.getByTestId('comboBoxOptionsList environmentFilter-optionsList')
     ).toBeVisible();
     await page
       .locator('[data-test-subj="comboBoxOptionsList environmentFilter-optionsList"]')
@@ -86,14 +86,14 @@ test.describe('Service Inventory', { tag: ['@ess', '@svlOblt'] }, () => {
   });
 
   test('shows the filtered services when using the service name fast filter', async ({ page }) => {
-    await expect(await page.getByTestId('tableSearchInput')).toBeVisible();
+    await expect(page.getByTestId('tableSearchInput')).toBeVisible();
     await expect(page.getByText('opbeans-node')).toBeVisible();
     await expect(page.getByText('opbeans-java')).toBeVisible();
     await expect(page.getByText('opbeans-rum')).toBeVisible();
     await page.getByTestId('tableSearchInput').fill('java');
-    await expect(page.getByText('opbeans-node')).not.toBeVisible();
+    await expect(page.getByText('opbeans-node')).toBeHidden();
     await expect(page.getByText('opbeans-java')).toBeVisible();
-    await expect(page.getByText('opbeans-rum')).not.toBeVisible();
+    await expect(page.getByText('opbeans-rum')).toBeHidden();
     await page.getByTestId('tableSearchInput').clear();
     await expect(page.getByText('opbeans-node')).toBeVisible();
     await expect(page.getByText('opbeans-java')).toBeVisible();
