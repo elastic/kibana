@@ -46,6 +46,7 @@ describe('flattenObject', () => {
     });
 
     expect(flattened).toEqual({
+      'alpha.beta': 99,
       'alpha.gamma.sigma': 1,
       'alpha.delta.sigma': 2,
       beta: 3,
