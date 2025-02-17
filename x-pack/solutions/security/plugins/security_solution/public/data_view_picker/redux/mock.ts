@@ -19,13 +19,29 @@ const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
 const mockDefaultDataViewSpec: DataViewSpec = {
   fields: mockFieldMap,
   id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-  title: '',
+  title: [
+    '.siem-signals-spacename',
+    'apm-*-transaction*',
+    'auditbeat-*',
+    'endgame-*',
+    'filebeat-*',
+    'logs-*',
+    'packetbeat-*',
+    'traces-apm*',
+    'winlogbeat-*',
+    '-*elastic-cloud-logs-*',
+  ].join(),
 };
 export const mockDataViewPickerState: RootState = {
   dataViewPicker: {
     ...dataViewPickerState,
     timeline: {
       ...dataViewPickerState.timeline,
+      dataView: mockDefaultDataViewSpec,
+      status: 'ready',
+    },
+    default: {
+      ...dataViewPickerState.default,
       dataView: mockDefaultDataViewSpec,
       status: 'ready',
     },
