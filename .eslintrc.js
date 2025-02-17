@@ -2111,25 +2111,25 @@ module.exports = {
         'no-console': 'off',
       },
     },
-    {
-      files: [
-        '**/*.stories.tsx',
-        '**/*.stories.ts',
-        '**/.storybook/**/*',
-        '**/storybook/**/*',
-        '**/kbn-storybook/**/*',
-        '**/__stories__/**/*',
-        '**/mocks/**/*',
-        '**/__mocks__/**/*',
-        '**/*.stories.test.tsx',
-        '**/*.stories.test.ts',
-        'x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/mock/use_fetch_graph_data.mock.ts',
-      ],
-      rules: {
-        // @storybook/addon-essentials contains many packages which are not defined in package.json
-        'import/no-extraneous-dependencies': 'off',
-      },
-    },
+    // {
+    //   files: [
+    //     '**/*.stories.tsx',
+    //     '**/*.stories.ts',
+    //     '**/.storybook/**/*',
+    //     '**/storybook/**/*',
+    //     '**/kbn-storybook/**/*',
+    //     '**/__stories__/**/*',
+    //     '**/mocks/**/*',
+    //     '**/__mocks__/**/*',
+    //     '**/*.stories.test.tsx',
+    //     '**/*.stories.test.ts',
+    //     'x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/mock/use_fetch_graph_data.mock.ts',
+    //   ],
+    //   rules: {
+    //     // @storybook/addon-essentials contains many packages which are not defined in package.json
+    //     'import/no-extraneous-dependencies': 'off',
+    //   },
+    // },
   ],
 };
 
