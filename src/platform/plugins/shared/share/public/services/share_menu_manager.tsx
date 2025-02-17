@@ -16,20 +16,36 @@ import { ShareMenuRegistryStart } from './share_menu_registry';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 import type { BrowserUrlService, ShareMenuItemV2 } from '../types';
 import { ShareMenu } from '../components/share_tabs';
+import { ShareOptionsManager } from './share_options_manager';
 
 export class ShareMenuManager {
   private isOpen = false;
-
+  private shareOptionsManager?: ShareOptionsManager;
   private container = document.createElement('div');
+
+  // constructor() {
+  //   this.shareOptionsManager = new ShareOptionsManager();
+  // }
+
+  // setup() {
+  //   return {
+  //     registerShareAction: this.shareOptionsManager.registerShareAction.bind(this.shareOptionsManager),
+  //   };
+  // }
 
   start(
     core: CoreStart,
     urlService: BrowserUrlService,
     shareRegistry: ShareMenuRegistryStart,
     disableEmbed: boolean,
+    shareOptionsManager: ShareOptionsManager,
     anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract
   ) {
+    this.shareOptionsManager = shareOptionsManager;
+
     return {
+      showShareDialog: this.showShareDialog.bind(this),
+
       /**
        * Collects share menu items from registered providers and mounts the share context menu under
        * the given `anchorElement`. If the context menu is already opened, a call to this method closes it.
@@ -40,9 +56,18 @@ export class ShareMenuManager {
           this.onClose();
           options.onClose?.();
         };
-        const menuItems = shareRegistry.getShareMenuItems({ ...options, onClose });
+        // const menuItems = shareRegistry.getShareMenuItems({ ...options, onClose });
 
-        console.log('menu items:: %o \n', menuItems);
+        // const menuItems = this.shareOptionsManager?.fetchShareOptionForApp(app);
+
+        // this.showShareDialog('lens');
+
+        const menuItems = this.shareOptionsManager!.resolveShareItemsForShareContext({
+          ...options,
+          onClose,
+        });
+
+        console.log('configured menu items received:: %o \n', menuItems);
 
         const anonymousAccess = anonymousAccessServiceProvider?.();
         this.toggleShareContextMenu({
@@ -64,6 +89,16 @@ export class ShareMenuManager {
     ReactDOM.unmountComponentAtNode(this.container);
     this.isOpen = false;
   };
+
+  private showShareDialog(app: string) {
+    const shareOptions = this.shareOptionsManager?.getShareConfigOptionsForApp(app);
+
+    if (!shareOptions) {
+      return;
+    }
+
+    console.log('share options available for app', shareOptions);
+  }
 
   private toggleShareContextMenu({
     anchorElement,

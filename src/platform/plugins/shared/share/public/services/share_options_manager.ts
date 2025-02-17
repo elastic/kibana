@@ -9,68 +9,73 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
-import type { BrowserUrlService } from '../types';
+import type { BrowserUrlService, ShareContext } from '../types';
 import {
   ShareOrchestrator,
-  type ShareActionIntent,
-  type SharingData,
+  type ShareActionIntents,
+  type SupportedShareIntegrations,
   type InternalShareActionIntent,
+  type LinkShare,
+  type EmbedShare,
+  type ShareIntegration,
 } from './share_orchestrator';
 
 interface ShareOptionsManagerStart {
   core: CoreStart;
   urlService: BrowserUrlService;
-  disableEmbed: boolean;
   anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
 }
 
 export class ShareOptionsManager implements ShareOrchestrator {
   private core?: CoreStart;
   private urlService?: BrowserUrlService;
-  private disableEmbed?: boolean;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
+
+  private readonly globalMarker: string = '*';
+
+  constructor() {
+    // this.registerLinkShareAction();
+    // this.registerEmbedShareAction();
+  }
 
   private readonly restrictedShareActionIntent: readonly InternalShareActionIntent[] = [
     'link',
     'embed',
-    'export',
   ];
 
   private readonly shareOptionsRegistry: Record<
-    ShareActionIntent['sharingApp'],
-    Map<InternalShareActionIntent | `integration-${string}`, Omit<ShareActionIntent, 'sharingApp'>>
-  > = {};
+    string,
+    Map<InternalShareActionIntent | `integration-${string}`, ShareActionIntents>
+  > = {
+    [this.globalMarker]: new Map(),
+  };
 
-  start({
-    core,
-    urlService,
-    disableEmbed,
-    anonymousAccessServiceProvider,
-  }: ShareOptionsManagerStart) {
+  start({ core, urlService, anonymousAccessServiceProvider }: ShareOptionsManagerStart) {
     this.core = core;
     this.urlService = urlService;
-    this.disableEmbed = disableEmbed;
     this.anonymousAccessServiceProvider = anonymousAccessServiceProvider;
   }
 
-  registerShareAction(shareActionIntent: ShareActionIntent): void {
-    const { sharingApp, shareType, ...actionIntentDefs } = shareActionIntent;
+  registerShareIntentAction(shareObject: string, shareActionIntent: ShareActionIntents): void {
+    const { shareType, ...actionIntentDefs } = shareActionIntent;
 
-    if (!this.shareOptionsRegistry[sharingApp]) {
-      this.shareOptionsRegistry[sharingApp] = new Map();
+    if (!this.shareOptionsRegistry[shareObject]) {
+      this.shareOptionsRegistry[shareObject] = new Map();
     }
 
-    const shareContextMap = this.shareOptionsRegistry[sharingApp];
+    const shareContextMap = this.shareOptionsRegistry[shareObject];
 
     // only one restricted share action can be registered per sharing app
     if (this.restrictedShareActionIntent.some((intent) => shareContextMap.has(intent))) {
       throw new Error(
-        `Share action with type [${shareType}] for app [${sharingApp}] has already been registered.`
+        `Share action with type [${shareType}] for app [${shareObject}] has already been registered.`
       );
     }
 
     shareContextMap.set(
-      shareType === 'integration' ? `integration-${String(crypto.randomUUID())}` : shareType,
+      shareType === 'integration'
+        ? `integration-${shareActionIntent.groupId || 'unknown'}-${shareActionIntent.id}`
+        : shareType,
       {
         shareType,
         ...actionIntentDefs,
@@ -78,25 +83,48 @@ export class ShareOptionsManager implements ShareOrchestrator {
     );
   }
 
-  fetchShareOptionForApp(
-    context: string
-  ): Array<Omit<ShareActionIntent, 'sharingApp'> | undefined> {
-    const shareContextMap = this.shareOptionsRegistry[context];
-
-    if (!shareContextMap) {
-      return [];
-    }
-
-    return Array.from(shareContextMap.values());
+  private registerLinkShareAction(): void {
+    this.registerShareIntentAction(this.globalMarker, {
+      shareType: 'link',
+    });
   }
 
-  toggleShare(shareApp: string, data: SharingData): void {
-    const shareOptions = this.fetchShareOptionForApp(shareApp);
+  private registerEmbedShareAction(): void {
+    this.registerShareIntentAction(this.globalMarker, {
+      shareType: 'embed',
+    });
+  }
 
-    // TODO: use client share context to provide values here
+  registerShareIntegration<I extends ShareIntegration>(
+    ...args: [string, Omit<I, 'shareType'>] | [Omit<I, 'shareType'>]
+  ): void {
+    const [shareObject, shareActionIntent] =
+      args.length === 1 ? [this.globalMarker, args[0]] : args;
+    this.registerShareIntentAction(shareObject, {
+      shareType: 'integration',
+      ...shareActionIntent,
+    });
+  }
 
-    if (!shareOptions.length) {
-      return;
+  getShareConfigOptionsForApp(
+    objectType: ShareContext['objectType']
+  ): Array<ShareActionIntents | undefined> {
+    const shareContextMap = this.shareOptionsRegistry[objectType];
+    const globalOptions = Array.from(this.shareOptionsRegistry[this.globalMarker].values());
+
+    if (!shareContextMap) {
+      return globalOptions;
     }
+
+    return globalOptions.concat(Array.from(shareContextMap.values()));
+  }
+
+  resolveShareItemsForShareContext({ objectType, ...shareContext }: ShareContext) {
+    return this.getShareConfigOptionsForApp(objectType).map((shareAction) => {
+      return {
+        ...shareAction,
+        config: shareAction?.config?.call(null, { objectType, ...shareContext }, {}),
+      };
+    });
   }
 }

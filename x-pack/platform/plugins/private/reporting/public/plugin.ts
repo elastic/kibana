@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, SharePluginStart, ExportShare } from '@kbn/share-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import { durationToNumber } from '@kbn/reporting-common';
@@ -26,6 +26,9 @@ import {
   getSharedComponents,
   reportingCsvShareModalProvider,
   reportingExportModalProvider,
+  reportingCsvExportShareProvider,
+  reportingPDFExportProvider,
+  reportingPNGExportProvider,
 } from '@kbn/reporting-public/share';
 import { ReportingCsvPanelAction } from '@kbn/reporting-csv-share-panel';
 import { InjectedIntl } from '@kbn/i18n-react';
@@ -220,9 +223,37 @@ export class ReportingPublicPlugin
           })
         );
 
+        shareSetup.newRegistrar<ExportShare>(
+          'search',
+          reportingCsvExportShareProvider({
+            apiClient,
+            license,
+            application,
+            startServices$,
+          })
+        );
+
         if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
-          shareSetup.register(
-            reportingExportModalProvider({
+          // shareSetup.register(
+          //   reportingExportModalProvider({
+          //     apiClient,
+          //     license,
+          //     application,
+          //     startServices$,
+          //   })
+          // );
+
+          shareSetup.newRegistrar<ExportShare>(
+            reportingPDFExportProvider({
+              apiClient,
+              license,
+              application,
+              startServices$,
+            })
+          );
+
+          shareSetup.newRegistrar<ExportShare>(
+            reportingPNGExportProvider({
               apiClient,
               license,
               application,
