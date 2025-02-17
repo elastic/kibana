@@ -18,6 +18,12 @@ export type SecuritySolutionRowCellRendererGetter = Awaited<
   ReturnType<SecuritySolutionCellRendererFeature['getRenderer']>
 >;
 
+/**
+ *
+ * This controls the list of fields that are allowed custom security solution rendering
+ * in Discover's contextual View
+ *
+ */
 const ALLOWED_DISCOVER_RENDERED_FIELDS = [
   'host.name',
   'user.name',
