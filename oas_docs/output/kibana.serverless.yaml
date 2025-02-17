@@ -44710,8 +44710,7 @@ components:
       type: object
       properties:
         kbResource:
-          description: Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
-          type: string
+          $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResource'
         source:
           description: Source document name or filepath
           type: string
@@ -45075,6 +45074,12 @@ components:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryUpdateFields'
       discriminator:
         propertyName: type
+    Security_AI_Assistant_API_KnowledgeBaseResource:
+      description: Knowledge Base resource name for grouping entries, e.g. 'esql', 'user', etc
+      enum:
+        - esql
+        - user
+      type: string
     Security_AI_Assistant_API_KnowledgeBaseResponse:
       description: AI assistant KnowledgeBase.
       type: object
