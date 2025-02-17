@@ -80,7 +80,7 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
     runManager?: CallbackManagerForLLMRun
   ): AsyncGenerator<ChatGenerationChunk> {
     const parameters = this.invocationParams(options);
-    const data = await this.connection.formatData(messages, parameters) as GeminiRequest;
+    const data = (await this.connection.formatData(messages, parameters)) as GeminiRequest;
     const stream = await this.caller.callWithOptions({ signal: options?.signal }, async () => {
       const systemPart: GeminiPartText | undefined = data?.systemInstruction
         ?.parts?.[0] as unknown as GeminiPartText;
