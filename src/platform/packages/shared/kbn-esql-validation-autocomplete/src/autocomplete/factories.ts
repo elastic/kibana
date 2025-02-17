@@ -72,9 +72,14 @@ export function getFunctionSuggestion(fn: FunctionDefinition): SuggestionRawDefi
     detail = `[${techPreviewLabel}] ${detail}`;
   }
   const fullSignatures = getFunctionSignatures(fn, { capitalize: true, withTypes: true });
+
+  let text = `${fn.name.toUpperCase()}($0)`;
+  if (fn.customSnippet) {
+    text = `${fn.name.toUpperCase()}(${fn.customSnippet})`;
+  }
   return {
     label: fn.name.toUpperCase(),
-    text: `${fn.name.toUpperCase()}($0)`,
+    text,
     asSnippet: true,
     kind: 'Function',
     detail,

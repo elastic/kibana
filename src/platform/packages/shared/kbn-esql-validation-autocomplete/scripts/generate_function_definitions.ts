@@ -330,7 +330,7 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
           description: undefined,
           ...(FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)
             ? // Default to false. If set to true, this parameter does not accept a function or literal, only fields.
-              idx === 0
+            param.name === 'field'
               ? { fieldsOnly: true }
               : { constantOnly: true }
             : {}),
@@ -692,6 +692,23 @@ const enrichGrouping = (
   });
 };
 
+/** Enriches scalar functions that only accept a query parameter */
+const enrichQueryStringFunction = (functionDefinition: FunctionDefinition): FunctionDefinition => {
+  if (functionDefinition.signatures.every((s) => s.params.length > 0 && s.params.every(p => p.name === 'query'))) {
+    return {
+      ...functionDefinition,
+      customSnippet: `"""$0"""`,
+    };
+  }
+  return functionDefinition;
+}
+
+const enrichFlow = [enrichQueryStringFunction] as const;
+
+const enrichScalarFunction = (scalarFunctionDefinitions: FunctionDefinition[]): FunctionDefinition[] => {
+  return scalarFunctionDefinitions.map(_.flow(...enrichFlow));
+}
+
 const enrichOperators = (
   operatorsFunctionDefinitions: FunctionDefinition[]
 ): FunctionDefinition[] => {
@@ -811,7 +828,7 @@ function printGeneratedFunctionsFile(
     functionDefinition: FunctionDefinition,
     functionNames: string[]
   ) => {
-    const { type, name, description, alias, signatures, operator } = functionDefinition;
+    const { type, name, description, alias, signatures, operator, customSnippet } = functionDefinition;
 
     let functionName = operator?.toLowerCase() ?? name.toLowerCase();
     if (functionName.includes('not')) {
@@ -833,7 +850,8 @@ function printGeneratedFunctionsFile(
     supportedCommands: ${JSON.stringify(functionDefinition.supportedCommands)},
     supportedOptions: ${JSON.stringify(functionDefinition.supportedOptions)},
     validate: ${functionDefinition.validate || 'undefined'},
-    examples: ${JSON.stringify(functionDefinition.examples || [])},
+    examples: ${JSON.stringify(functionDefinition.examples || [])},${
+      customSnippet ? `\ncustomSnippet: ${JSON.stringify(customSnippet)},` : ''}
 }`;
   };
 
@@ -936,7 +954,7 @@ ${functionsType === 'operators' ? `import { isNumericType } from '../../shared/e
 
   await writeFile(
     join(__dirname, '../src/definitions/generated/scalar_functions.ts'),
-    printGeneratedFunctionsFile(scalarFunctionDefinitions, 'scalar')
+    printGeneratedFunctionsFile(enrichScalarFunction(scalarFunctionDefinitions), 'scalar')
   );
   await writeFile(
     join(__dirname, '../src/definitions/generated/aggregation_functions.ts'),
