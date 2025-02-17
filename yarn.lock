@@ -10131,7 +10131,7 @@
   dependencies:
     ts-dedent "^2.0.0"
 
-"@storybook/core@^8.3.5":
+"@storybook/core@8.5.5", "@storybook/core@^8.3.5":
   version "8.5.5"
   resolved "https://registry.yarnpkg.com/@storybook/core/-/core-8.5.5.tgz#e0e18ac9475b4d5a269d2bd74c72c5d7e65009bf"
   integrity sha512-uQoMv6Zd941/vsjE8kP87pp1f5YHLyct+2J/FGUI5ukBOJLgS+K9khF82wfDL0JRULibV3b59g73tsttc3ZdcA==
@@ -28366,6 +28366,13 @@ stop-iteration-iterator@^1.0.0:
   integrity sha512-iCGQj+0l0HOdZ2AEeBADlsRC+vsnDsZsbdSiH1yNSjcfKM7fdpCMfqAL/dwF5BLiw/XhRft/Wax6zQbhq2BcjQ==
   dependencies:
     internal-slot "^1.0.4"
+
+storybook@^8.3.5:
+  version "8.5.5"
+  resolved "https://registry.yarnpkg.com/storybook/-/storybook-8.5.5.tgz#339a8b1c8afcf249af2876bfd911b9d1dab2e60c"
+  integrity sha512-F9+D5/sgo3WkxpB96ZmyW+mEmB5mM5+I6pbLrenFbeNvzgsgCAq0bqtJKqd9qWnGwa43iPxcl8c7/fE4qbeKvQ==
+  dependencies:
+    "@storybook/core" "8.5.5"
 
 stream-browserify@^2.0.1:
   version "2.0.2"
