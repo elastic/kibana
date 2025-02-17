@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-Cypress.on('uncaught:exception', (err, runnable) => {
-  return false;
-});
+import { createPlaywrightConfig } from '@kbn/scout';
 
-import './commands';
+// eslint-disable-next-line import/no-default-export
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
