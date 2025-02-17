@@ -28,7 +28,6 @@ import {
   catchError,
   debounceTime,
   merge,
-  EMPTY,
 } from 'rxjs';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { isEqual } from 'lodash';
@@ -411,14 +410,7 @@ export class TrainedModelsService {
             );
           }),
           switchMap((deployments) =>
-            merge(
-              ...deployments.map((deployment) =>
-                this.handleDeployment$(deployment).pipe(
-                  // Ensure errors in individual deployments don't break the stream
-                  catchError(() => EMPTY)
-                )
-              )
-            )
+            merge(...deployments.map((deployment) => this.handleDeployment$(deployment)))
           )
         )
         .subscribe()
@@ -449,29 +441,31 @@ export class TrainedModelsService {
                   }),
                 });
               },
-              error: (error) => {
-                this.displayErrorToast?.(
-                  error,
-                  i18n.translate('xpack.ml.trainedModels.modelsList.startFailed', {
-                    defaultMessage: 'Failed to start "{deploymentId}"',
-                    values: {
-                      deploymentId: deployment.deploymentParams.deployment_id,
-                    },
-                  })
-                );
-              },
-              finalize: () => {
-                this.removeScheduledDeployments({
-                  deploymentId: deployment.deploymentParams.deployment_id!,
-                });
-                // Manually update the BehaviorSubject to ensure proper cleanup
-                // if user navigates away, as localStorage hook won't be available to handle updates
-                const updatedDeployments = this._scheduledDeployments$
-                  .getValue()
-                  .filter((d) => d.modelId !== deployment.modelId);
-                this._scheduledDeployments$.next(updatedDeployments);
-                this.fetchModels();
-              },
+            }),
+            catchError((error) => {
+              this.displayErrorToast?.(
+                error,
+                i18n.translate('xpack.ml.trainedModels.modelsList.startFailed', {
+                  defaultMessage: 'Failed to start "{deploymentId}"',
+                  values: {
+                    deploymentId: deployment.deploymentParams.deployment_id,
+                  },
+                })
+              );
+              // Return null to allow stream to continue
+              return of(null);
+            }),
+            finalize(() => {
+              this.removeScheduledDeployments({
+                deploymentId: deployment.deploymentParams.deployment_id!,
+              });
+              // Manually update the BehaviorSubject to ensure proper cleanup
+              // if user navigates away, as localStorage hook won't be available to handle updates
+              const updatedDeployments = this._scheduledDeployments$
+                .getValue()
+                .filter((d) => d.modelId !== deployment.modelId);
+              this._scheduledDeployments$.next(updatedDeployments);
+              this.fetchModels();
             })
           )
         );
