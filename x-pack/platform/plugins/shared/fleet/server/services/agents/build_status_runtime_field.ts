@@ -70,7 +70,7 @@ const _buildInactiveCondition = (opts: {
     })
     .join(' || ');
 
-  return `lastCheckinMillis > 0 doc.containsKey(${field('policy_id')}) && ${field(
+  return `lastCheckinMillis > 0 && doc.containsKey(${field('policy_id')}) && ${field(
     'policy_id'
   )}.size() > 0 && ${policyClauses}`;
 };
