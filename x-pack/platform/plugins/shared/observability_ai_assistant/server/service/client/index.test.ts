@@ -301,6 +301,7 @@ describe('Observability AI Assistant client', () => {
           expect.objectContaining({
             connectorId: 'foo',
             stream: false,
+            system: EXPECTED_STORED_SYSTEM_MESSAGE,
             functionCalling: 'auto',
             toolChoice: expect.objectContaining({
               function: 'title_conversation',

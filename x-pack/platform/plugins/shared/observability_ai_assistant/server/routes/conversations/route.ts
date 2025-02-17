@@ -6,7 +6,7 @@
  */
 import { notImplemented } from '@hapi/boom';
 import * as t from 'io-ts';
-import { Conversation } from '../../../common/types';
+import { Conversation, MessageRole } from '../../../common/types';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { conversationCreateRt, conversationUpdateRt } from '../runtime_types';
 
@@ -18,7 +18,7 @@ const getConversationWithoutSystemMessages = (conversation: Conversation) => {
         ?.content ?? '';
   }
   conversation.messages = conversation.messages.filter(
-    (message) => message.message.role !== 'system'
+    (message) => message.message.role !== MessageRole.System
   );
   return conversation;
 };
