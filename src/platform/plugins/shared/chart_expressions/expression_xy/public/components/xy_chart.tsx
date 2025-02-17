@@ -340,11 +340,7 @@ export function XYChart({
 
   if (dataLayers.length === 0) {
     return (
-      <EmptyPlaceholder
-        icon={icon}
-        renderComplete={onRenderChange}
-        css={xyChartEmptyStyles}
-      />
+      <EmptyPlaceholder icon={icon} renderComplete={onRenderChange} css={xyChartEmptyStyles} />
     );
   }
 
