@@ -308,6 +308,16 @@ export function initRoutes(
           if (index.includes('kibana_security_session')) {
             return {
               statusCode: 503,
+              meta: {},
+              body: {
+                error: {
+                  type: 'no_shard_available_action_exception',
+                  reason: 'no shard available for [open]',
+                },
+              },
+            };
+            return {
+              statusCode: 503,
               message: 'no_shard_available_action_exception',
             } as unknown as DiagnosticResult;
           }

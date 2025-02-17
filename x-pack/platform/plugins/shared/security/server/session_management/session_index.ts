@@ -499,7 +499,8 @@ export class SessionIndex {
     } catch (err) {
       if (
         err instanceof errors.ResponseError &&
-        (err.statusCode === 503 || err.message.includes('no_shard_available_action_exception'))
+        err.statusCode === 503 &&
+        err.message.includes('no_shard_available_action_exception')
       ) {
         shardMissingCounter++;
         if (shardMissingCounter < 10) {
