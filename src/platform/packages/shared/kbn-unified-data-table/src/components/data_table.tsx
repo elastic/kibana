@@ -51,7 +51,7 @@ import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { useDataGridInTableSearch } from '@kbn/data-grid-in-table-search';
-import { useDebounceFn } from '@kbn/react-hooks';
+import { useThrottleFn } from '@kbn/react-hooks';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import {
   UnifiedDataTableSettings,
@@ -1146,41 +1146,45 @@ export const UnifiedDataTable = ({
     rowLineHeight: rowLineHeightOverride,
   });
 
-  const handleItemsRendered = useCallback(
-    ({
-      visibleRowStopIndex,
-      overscanRowStopIndex,
-    }: {
-      visibleRowStopIndex: number;
-      overscanRowStopIndex: number;
-    }) => {
-      if (visibleRowStopIndex === overscanRowStopIndex) {
-        setHasScrolledToBottom(true);
-      } else {
-        setHasScrolledToBottom(false);
-      }
+  const onScroll = useCallback(
+    (event: { scrollTop: number }) => {
+      setHasScrolledToBottom((prevHasScrolledToBottom) => {
+        // We need to manually query the react-window wrapper since EUI doesn't
+        // expose outerRef in virtualizationOptions, but we should request it
+        const outerRef = dataGridWrapper?.querySelector<HTMLElement>('.euiDataGrid__virtualized');
+
+        if (!outerRef) {
+          return prevHasScrolledToBottom;
+        }
+
+        // Account for footer height when it's visible to avoid flickering
+        const scrollBottomMargin = prevHasScrolledToBottom ? 140 : 100;
+        const isScrollable = outerRef.scrollHeight > outerRef.offsetHeight;
+        const isScrolledToBottom =
+          event.scrollTop + outerRef.offsetHeight >= outerRef.scrollHeight - scrollBottomMargin;
+
+        return isScrollable && isScrolledToBottom;
+      });
     },
-    []
+    [dataGridWrapper]
   );
 
-  const { run: debouncedHandleItemsRendered } = useDebounceFn(handleItemsRendered, { wait: 200 });
+  const { run: throttledOnScroll } = useThrottleFn(onScroll, { wait: 200 });
 
   const virtualizationOptions = useMemo(() => {
-    if (paginationMode === 'loadMore') {
-      return {
-        ...VIRTUALIZATION_OPTIONS,
-        onItemsRendered: debouncedHandleItemsRendered,
-      };
-    }
-
     // Don't use row overscan when showing Document column since
     // rendering so much DOM content in each cell impacts performance
     if (defaultColumns) {
-      return undefined;
+      return {
+        onScroll: throttledOnScroll,
+      };
     }
 
-    return VIRTUALIZATION_OPTIONS;
-  }, [debouncedHandleItemsRendered, defaultColumns, paginationMode]);
+    return {
+      ...VIRTUALIZATION_OPTIONS,
+      onScroll: throttledOnScroll,
+    };
+  }, [throttledOnScroll, defaultColumns]);
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 
