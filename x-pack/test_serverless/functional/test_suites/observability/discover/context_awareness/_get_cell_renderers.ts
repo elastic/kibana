@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  describe('extension getCellRenderers', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/211215
+  describe.skip('extension getCellRenderers', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsViewer();
       await esArchiver.loadIfNeeded(
@@ -41,7 +42,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('ES|QL mode', () => {
-      describe('Log Level Badge Cell', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/211174
+      describe.skip('Log Level Badge Cell', () => {
         it('should render log.level badge cell', async () => {
           const state = kbnRison.encode({
             dataSource: { type: 'esql' },
