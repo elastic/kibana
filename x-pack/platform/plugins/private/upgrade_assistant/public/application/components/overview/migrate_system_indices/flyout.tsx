@@ -7,6 +7,7 @@
 
 import React, { useState, ReactNode } from 'react';
 import { startCase } from 'lodash';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
@@ -206,7 +207,12 @@ export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutPr
       isExpander: true,
       name: (
         <EuiScreenReaderOnly>
-          <span>Expand row</span>
+          <span>
+            <FormattedMessage
+              id="xpack.upgradeAssistant.overview.systemIndices.expandRow"
+              defaultMessage="Expand row"
+            />
+          </span>
         </EuiScreenReaderOnly>
       ),
       render: (feature: SystemIndicesMigrationFeature) => {
@@ -224,7 +230,7 @@ export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutPr
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
+        <EuiTitle size="s" data-test-subj="flyoutTitle">
           <h2>{i18nTexts.flyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>

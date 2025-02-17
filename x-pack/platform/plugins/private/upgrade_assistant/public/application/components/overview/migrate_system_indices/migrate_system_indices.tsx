@@ -63,8 +63,14 @@ const getFailureCauses = (features: SystemIndicesMigrationFeature[]) => {
 
         return (
           <li key={feature}>
-            <strong>{feature}</strong>: <EuiCode>{Array.from(errors).join(', ')}</EuiCode> (
-            {indicesAffectedText})
+            <strong>{feature}</strong>: {' '}
+            {Array.from(errors).map((error, index) => (
+              <React.Fragment key={error}>
+                <EuiCode>{error}</EuiCode>
+                {index < errors.size - 1 && ', '}
+              </React.Fragment>
+            ))} {' '}
+            ({indicesAffectedText})
           </li>
         );
       })}
@@ -143,10 +149,10 @@ const i18nTexts = {
         />
         <EuiSpacer size="s" />
         {failureCauses}
-        <EuiSpacer size="s" />
         <FormattedMessage
           id="xpack.upgradeAssistant.overview.systemIndices.migrationFailedBody"
           defaultMessage="Check migration details for more information."
+          tagName="p"
         />
       </EuiText>
     );
