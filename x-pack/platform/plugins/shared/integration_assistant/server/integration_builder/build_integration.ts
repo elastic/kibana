@@ -41,30 +41,34 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
       `Invalid integration name: ${integration.name}, Should only contain letters, numbers and underscores`
     );
   }
+  const workingDir = joinPath(getDataPath(), `integration-assistant-${generateUniqueId()}`);
+  try {
+    const packageDirectoryName = `${integration.name}-${initialVersion}`;
+    const packageDir = createDirectories(workingDir, integration, packageDirectoryName);
 
-  const workingDir = joinPath(getDataPath(), `automatic-import-${generateUniqueId()}`);
-  const packageDirectoryName = `${integration.name}-${initialVersion}`;
-  const packageDir = createDirectories(workingDir, integration, packageDirectoryName);
+    const dataStreamsDir = joinPath(packageDir, 'data_stream');
+    const fieldsPerDatastream = integration.dataStreams.map((dataStream) => {
+      const dataStreamName = dataStream.name;
+      if (!isValidName(dataStreamName)) {
+        throw new BuildIntegrationError(
+          `Invalid datastream name: ${dataStreamName}, Should only contain letters, numbers and underscores`
+        );
+      }
+      const specificDataStreamDir = joinPath(dataStreamsDir, dataStreamName);
 
-  const dataStreamsDir = joinPath(packageDir, 'data_stream');
-  const fieldsPerDatastream = integration.dataStreams.map((dataStream) => {
-    const dataStreamName = dataStream.name;
-    if (!isValidDatastreamName(dataStreamName)) {
-      throw new Error(
-        `Invalid datastream name: ${dataStreamName}, Name must be at least 2 characters long and can only contain lowercase letters, numbers, and underscores`
+      const dataStreamFields = createDataStream(
+        integration.name,
+        specificDataStreamDir,
+        dataStream
       );
-    }
-    const specificDataStreamDir = joinPath(dataStreamsDir, dataStreamName);
-
-    const dataStreamFields = createDataStream(integration.name, specificDataStreamDir, dataStream);
-    createAgentInput(specificDataStreamDir, dataStream.inputTypes, dataStream.celInput);
-    createPipeline(specificDataStreamDir, dataStream.pipeline);
-    const fields = createFieldMapping(
-      integration.name,
-      dataStreamName,
-      specificDataStreamDir,
-      dataStream.docs
-    );
+      createAgentInput(specificDataStreamDir, dataStream.inputTypes);
+      createPipeline(specificDataStreamDir, dataStream.pipeline);
+      const fields = createFieldMapping(
+        integration.name,
+        dataStreamName,
+        specificDataStreamDir,
+        dataStream.docs
+      );
 
       return {
         datastream: dataStreamName,
