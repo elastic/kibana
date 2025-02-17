@@ -183,7 +183,6 @@ function mountWithServices(component: React.ReactElement): ReactWrapper {
     // preserving the root at the component level rather than
     // at the wrapper one
     wrappingComponent: wrappingComponent as ComponentType<{}>,
-    wrappingComponentProps: { services },
   });
 }
 
