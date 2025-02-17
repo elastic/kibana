@@ -15,6 +15,7 @@ import {
   notificationServiceMock,
   overlayServiceMock,
   themeServiceMock,
+  docLinksServiceMock,
 } from '@kbn/core/public/mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -41,6 +42,7 @@ const theme = themeServiceMock.createStartContract();
 const userProfile = userProfileServiceMock.createStart();
 const i18n = i18nServiceMock.createStartContract();
 const logger = loggingSystemMock.createLogger();
+const docsLinks = docLinksServiceMock.createStartContract();
 
 const TestComponent: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
@@ -67,6 +69,7 @@ const TestComponent: React.FC<React.PropsWithChildren> = ({ children }) => {
         userProfile={userProfile}
         i18n={i18n}
         logger={logger}
+        docLinks={docsLinks}
       >
         {children}
       </EditSpaceProviderRoot>

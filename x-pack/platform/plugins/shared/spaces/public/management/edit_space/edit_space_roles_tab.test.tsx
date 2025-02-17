@@ -9,6 +9,7 @@ import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
 
 import {
+  docLinksServiceMock,
   httpServiceMock,
   i18nServiceMock,
   loggingSystemMock,
@@ -39,6 +40,7 @@ const userProfile = userProfileServiceMock.createStart();
 const theme = themeServiceMock.createStartContract();
 const i18n = i18nServiceMock.createStartContract();
 const logger = loggingSystemMock.createLogger();
+const docsLinks = docLinksServiceMock.createStartContract();
 
 const space = {
   id: 'space-a',
@@ -83,6 +85,7 @@ describe('EditSpaceAssignedRolesTab', () => {
           theme={theme}
           i18n={i18n}
           logger={logger}
+          docLinks={docsLinks}
         >
           {children}
         </EditSpaceProviderRoot>

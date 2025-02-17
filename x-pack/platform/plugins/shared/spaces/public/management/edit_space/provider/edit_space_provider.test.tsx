@@ -10,6 +10,7 @@ import type { PropsWithChildren } from 'react';
 import React from 'react';
 
 import {
+  docLinksServiceMock,
   httpServiceMock,
   i18nServiceMock,
   loggingSystemMock,
@@ -38,6 +39,7 @@ const userProfile = userProfileServiceMock.createStart();
 const theme = themeServiceMock.createStartContract();
 const i18n = i18nServiceMock.createStartContract();
 const logger = loggingSystemMock.createLogger();
+const docsLinks = docLinksServiceMock.createStartContract();
 
 const spacesManager = spacesManagerMock.create();
 
@@ -70,6 +72,7 @@ const SUTProvider = ({
           getSecurityLicense: getSecurityLicenseMock,
           navigateToUrl: jest.fn(),
           capabilities,
+          docLinks: docsLinks,
         }}
       >
         {children}
