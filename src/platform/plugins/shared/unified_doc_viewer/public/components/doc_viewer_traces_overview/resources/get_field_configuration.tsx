@@ -63,7 +63,10 @@ export const getFieldConfiguration = (
         defaultMessage: 'Transaction name',
       }),
       content: (value) => (
-        <TransactionNameLink serviceName={attributes[SERVICE_NAME_FIELD]} transactionName={value} />
+        <TransactionNameLink
+          serviceName={attributes[SERVICE_NAME_FIELD]}
+          transactionName={value as string}
+        />
       ),
       value: attributes[TRANSACTION_NAME_FIELD],
     },
@@ -72,7 +75,7 @@ export const getFieldConfiguration = (
         defaultMessage: 'Service',
       }),
       content: (value) => (
-        <ServiceNameLink serviceName={value} agentName={attributes[AGENT_NAME_FIELD]} />
+        <ServiceNameLink serviceName={value as string} agentName={attributes[AGENT_NAME_FIELD]} />
       ),
       value: attributes[SERVICE_NAME_FIELD],
     },
@@ -80,7 +83,7 @@ export const getFieldConfiguration = (
       title: i18n.translate('unifiedDocViewer.tracesOverview.details.traceId.title', {
         defaultMessage: 'Trace ID',
       }),
-      content: (value) => <TraceIdLink traceId={value} />,
+      content: (value) => <TraceIdLink traceId={value as string} />,
       value: attributes[TRACE_ID_FIELD],
     },
     [SPAN_DESTINATION_SERVICE_RESOURCE_FIELD]: {
@@ -92,7 +95,7 @@ export const getFieldConfiguration = (
       ),
       content: (value) => (
         <DependencyNameLink
-          dependencyName={value}
+          dependencyName={value as string}
           environment={attributes[SERVICE_ENVIRONMENT_FIELD]}
         />
       ),
@@ -105,21 +108,21 @@ export const getFieldConfiguration = (
       title: i18n.translate('unifiedDocViewer.tracesOverview.details.timestamp.title', {
         defaultMessage: 'Start time',
       }),
-      content: (value) => <Timestamp timestamp={value} />,
+      content: (value) => <Timestamp timestamp={value as number} />,
       value: attributes[TIMESTAMP_FIELD],
     },
     [SPAN_DURATION_FIELD]: {
       title: i18n.translate('unifiedDocViewer.tracesOverview.details.spanDuration.title', {
         defaultMessage: 'Duration',
       }),
-      content: (value) => <EuiText size="xs">{asDuration(value)}</EuiText>,
+      content: (value) => <EuiText size="xs">{asDuration(value as number)}</EuiText>,
       value: attributes[SPAN_DURATION_FIELD] ?? 0,
     },
     [TRANSACTION_DURATION_FIELD]: {
       title: i18n.translate('unifiedDocViewer.tracesOverview.details.transactionDuration.title', {
         defaultMessage: 'Duration',
       }),
-      content: (value) => <EuiText size="xs">{asDuration(value)}</EuiText>,
+      content: (value) => <EuiText size="xs">{asDuration(value as number)}</EuiText>,
       value: attributes[TRANSACTION_DURATION_FIELD] ?? 0,
     },
     [SPAN_TYPE_FIELD]: {
@@ -143,7 +146,7 @@ export const getFieldConfiguration = (
           defaultMessage: 'Status code',
         }
       ),
-      content: (value) => <HttpStatusCode code={value} />,
+      content: (value) => <HttpStatusCode code={value as number} />,
       value: attributes[HTTP_RESPONSE_STATUS_CODE_FIELD],
     },
     [USER_AGENT_NAME_FIELD]: {
