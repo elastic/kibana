@@ -4,5 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export * from './EuiIconPlugs';
-export * from './EuiIconWeb';
+
+import { formatNumber } from '@elastic/eui';
+
+export const formatBytes = (value: number) => formatNumber(value, '0.0 b');
