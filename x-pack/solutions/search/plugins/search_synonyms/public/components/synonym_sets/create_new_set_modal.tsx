@@ -114,7 +114,7 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
                   <p>
                     <FormattedMessage
                       id="xpack.searchSynonyms.createSynonymsSetModal.error"
-                      defaultMessage="Creating a synonyms set with same name will overwrite the existing synonyms."
+                      defaultMessage="Creating a synonyms set with the same name will overwrite the existing set."
                     />
                   </p>
                 </EuiText>
