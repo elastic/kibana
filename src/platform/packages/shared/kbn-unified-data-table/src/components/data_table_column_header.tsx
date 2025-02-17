@@ -145,15 +145,7 @@ export const DataTableScoreColumnHeader = ({
   dataView,
   headerRowHeight,
   columnDisplayName,
-}: {
-  dataView: DataView;
-  columnName: string;
-  columnDisplayName: string;
-  showColumnTokens?: boolean;
-  isSorted?: boolean;
-  columnsMeta?: DataTableColumnsMeta;
-  headerRowHeight?: number;
-}) => {
+}: DataTableColumnHeaderProps & { isSorted?: boolean }) => {
   const tooltipContent = i18n.translate('unifiedDataTable.tableHeader.scoreFieldIconTooltip', {
     defaultMessage: 'In order to retrieve values for _score, you must sort by it.',
   });
