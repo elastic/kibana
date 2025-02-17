@@ -52,7 +52,7 @@ export class ProxyHandler extends ProjectHandler {
       !monitoringQualityGate;
     const override = commit && commit !== '' ? commit : process.env.KIBANA_MKI_IMAGE_COMMIT;
     if (override && !qualityGate) {
-      const kibanaOverrideImage = `${override?.substring(0, 12)}`;
+      const kibanaOverrideImage = override;
       this.log.info(`Kibana Image Commit under test: ${process.env.KIBANA_MKI_IMAGE_COMMIT}!`);
       this.log.info(
         `Overriding Kibana image in the MKI with docker.elastic.co/kibana-ci/kibana-serverless:pr-${kibanaOverrideImage}`
