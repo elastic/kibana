@@ -1265,7 +1265,7 @@
             "section": "def-common.ESQLCallbacks",
             "text": "ESQLCallbacks"
           },
-          " | undefined) => { getFieldsByType: (expectedType?: string | string[], ignored?: string[]) => Promise<",
+          " | undefined) => { getFieldsByType: (expectedType?: string | readonly string[], ignored?: string[]) => Promise<",
           {
             "pluginId": "@kbn/esql-validation-autocomplete",
             "scope": "common",
