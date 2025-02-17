@@ -2,18 +2,10 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
+    "types": ["jest", "node"]
   },
-  "include": [
-    "**/*.ts"
-  ],
-  "exclude": [
-    "**/__fixtures__/**/*",
-    "target/**/*",
-  ],
+  "include": ["**/*.ts"],
+  "exclude": ["**/__fixtures__/**/*", "target/**/*"],
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/dev-utils",
@@ -29,5 +21,6 @@
     "@kbn/jest-serializers",
     "@kbn/repo-packages",
     "@kbn/node-libs-browser-webpack-plugin",
+    "@kbn/core-ui-settings-common"
   ]
 }

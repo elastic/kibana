@@ -21,7 +21,6 @@ import {
   EuiIcon,
   EuiButtonIcon,
   EuiLink,
-  EuiThemeAmsterdam,
 } from '@elastic/eui';
 
 import { CoreStart } from '@kbn/core/public';
@@ -134,7 +133,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
   ];
 
   return (
-    <EuiProvider theme={EuiThemeAmsterdam}>
+    <EuiProvider>
       <EuiPageTemplate restrictWidth>
         <EuiPageTemplate.Header pageTitle="Files example" />
         <EuiPageTemplate.Section>

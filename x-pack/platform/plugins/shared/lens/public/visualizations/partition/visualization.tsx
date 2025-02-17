@@ -14,7 +14,7 @@ import {
   PaletteRegistry,
   getColorsFromMapping,
 } from '@kbn/coloring';
-import { ThemeServiceStart } from '@kbn/core/public';
+import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
 import { PartitionVisConfiguration } from '@kbn/visualizations-plugin/common/convert_to_lens';
@@ -494,8 +494,13 @@ export const getPieVisualization = ({
     };
   },
   DimensionEditorComponent(props) {
-    const isDarkMode = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
-    return <DimensionEditor {...props} paletteService={paletteService} isDarkMode={isDarkMode} />;
+    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, {
+      darkMode: false,
+      name: 'amsterdam',
+    });
+    return (
+      <DimensionEditor {...props} paletteService={paletteService} isDarkMode={theme.darkMode} />
+    );
   },
   DimensionEditorDataExtraComponent(props) {
     return <DimensionDataExtraEditor {...props} paletteService={paletteService} />;

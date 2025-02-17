@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { CoreStart, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
+import { CoreStart, CoreTheme, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { getAnnotationAccessor } from '@kbn/event-annotation-components';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
@@ -742,14 +742,17 @@ export const getXyVisualization = ({
       paletteService,
     };
 
-    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
+    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, {
+      darkMode: false,
+      name: 'amsterdam',
+    });
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (
       <ReferenceLinePanel {...allProps} />
     ) : isAnnotationsLayer(layer) ? (
       <AnnotationsPanel {...allProps} dataViewsService={dataViewsService} />
     ) : (
-      <DataDimensionEditor {...allProps} isDarkMode={isDarkMode} />
+      <DataDimensionEditor {...allProps} isDarkMode={theme.darkMode} />
     );
 
     return dimensionEditor;

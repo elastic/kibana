@@ -46,7 +46,7 @@ describe('AlertsQueryInspectorModal', () => {
   };
 
   const renderModalInspectQuery = () => {
-    const theme = { theme$: of({ darkMode: false }) };
+    const theme = { theme$: of({ darkMode: false, name: 'amsterdam' }) };
     const userProfile = userProfileServiceMock.createStart();
     return render(<AlertsQueryInspectorModal {...defaultProps} />, {
       wrapper: ({ children }) => (

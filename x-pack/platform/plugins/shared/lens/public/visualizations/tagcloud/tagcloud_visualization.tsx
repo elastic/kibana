@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ThemeServiceStart } from '@kbn/core/public';
+import { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { ExpressionTagcloudFunctionDefinition } from '@kbn/expression-tagcloud-plugin/common';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -294,11 +294,15 @@ export const getTagcloudVisualization = ({
   },
 
   DimensionEditorComponent(props) {
-    const isDarkMode: boolean = useObservable(kibanaTheme.theme$, { darkMode: false }).darkMode;
+    const theme = useObservable<CoreTheme>(kibanaTheme.theme$, {
+      darkMode: false,
+      name: 'amsterdam',
+    });
+
     if (props.groupId === TAG_GROUP_ID) {
       return (
         <TagsDimensionEditor
-          isDarkMode={isDarkMode}
+          isDarkMode={theme.darkMode}
           paletteService={paletteService}
           state={props.state}
           setState={props.setState}
