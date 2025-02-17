@@ -12,7 +12,7 @@ import React from 'react';
 import { UnifiedDocViewerTracesOverview } from '@kbn/unified-doc-viewer-plugin/public';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { DATASTREAM_TYPE_FIELD, getFieldValue } from '@kbn/discover-utils';
+import { DATASTREAM_TYPE_FIELD, PROCESSOR_EVENT_FIELD, getFieldValue } from '@kbn/discover-utils';
 import { DocViewerExtensionParams, DocViewerExtension } from '../../../../types';
 
 export const getDocViewer =
@@ -26,15 +26,16 @@ export const getDocViewer =
         ...prevValue,
       };
     }
-    const parentId = params.record.flattened['parent.id'];
+    const processorEvent = getFieldValue(params.record, PROCESSOR_EVENT_FIELD);
 
-    const documentType = parentId
-      ? i18n.translate('discover.docViews.tracesOverview.spanTitle', {
-          defaultMessage: 'Span',
-        })
-      : i18n.translate('discover.docViews.tracesOverview.transactionTitle', {
-          defaultMessage: 'Transaction',
-        });
+    const documentType =
+      processorEvent === 'span'
+        ? i18n.translate('discover.docViews.tracesOverview.spanTitle', {
+            defaultMessage: 'Span',
+          })
+        : i18n.translate('discover.docViews.tracesOverview.transactionTitle', {
+            defaultMessage: 'Transaction',
+          });
 
     return {
       ...prevValue,
