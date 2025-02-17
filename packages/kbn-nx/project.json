@@ -9,6 +9,11 @@
     ]
   },
   "targets": {
+    "generateAllTypecheckConfigs": {
+      "command": "node scripts/type_check.js --configs-only",
+      "cache": false,
+      "inputs": []
+    },
     "typecheck": {
       "inputs": [
         "src",

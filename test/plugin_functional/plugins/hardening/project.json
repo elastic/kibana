@@ -4,6 +4,9 @@
   "namedInputs": {
     "src": [
       "{projectRoot}/index.ts",
+      "{projectRoot}/common/**/*.ts",
+      "{projectRoot}/public/**/*.ts",
+      "{projectRoot}/public/**/*.tsx",
       "{projectRoot}/server/**/*.ts",
       "{workspaceRoot}/typings/**/*",
       "!{projectRoot}/target/**/*"
