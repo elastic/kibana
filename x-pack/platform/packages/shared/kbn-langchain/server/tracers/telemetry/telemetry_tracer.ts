@@ -6,8 +6,7 @@
  */
 
 import { BaseCallbackHandlerInput } from '@langchain/core/callbacks/base';
-import type { Run } from 'langsmith/schemas';
-import { BaseTracer } from '@langchain/core/tracers/base';
+import { BaseTracer, Run } from '@langchain/core/tracers/base';
 import { AnalyticsServiceSetup, Logger } from '@kbn/core/server';
 
 export interface TelemetryParams {
