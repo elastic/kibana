@@ -3,12 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": [
-    "common/**/*",
-    "public/**/*",
-    "server/**/*",
-    "typings/**/*",
-  ],
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
   "kbn_references": [
     "@kbn/kibana-react-plugin",
     "@kbn/monaco",
