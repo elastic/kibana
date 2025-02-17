@@ -24,7 +24,7 @@ interface HoverPopoverActionProps {
   field: string;
   value: unknown;
   formattedValue?: string;
-  title?: unknown;
+  title: string;
   anchorPosition?: PopoverAnchorPosition;
   display?: EuiPopoverProps['display'];
 }
@@ -68,11 +68,9 @@ export const FieldHoverActionPopover = ({
         panelStyle={{ minWidth: '24px' }}
         display={display}
       >
-        {(title as string) && (
-          <EuiPopoverTitle className="eui-textBreakWord" css={{ maxWidth: '200px' }}>
-            {title as string}
-          </EuiPopoverTitle>
-        )}
+        <EuiPopoverTitle className="eui-textBreakWord" css={{ maxWidth: '200px' }}>
+          {title}
+        </EuiPopoverTitle>
         <EuiFlexGroup wrap gutterSize="none" alignItems="center" justifyContent="spaceBetween">
           {uiFieldActions.map((action) => (
             <EuiToolTip content={action.label} key={action.id}>
