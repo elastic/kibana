@@ -19,11 +19,11 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DocLinksStart } from '@kbn/core/public';
-import { ReindexWarning, ReindexWarningTypes } from '../../../../../../../common/types';
+import { IndexWarning, IndexWarningType } from '../../../../../../../../../common/types';
 
-export const hasReindexWarning = (
-  warnings: ReindexWarning[],
-  warningType: ReindexWarningTypes
+export const hasIndexWarning = (
+  warnings: IndexWarning[],
+  warningType: IndexWarningType
 ): boolean => {
   return Boolean(warnings.find((warning) => warning.warningType === warningType));
 };
@@ -53,7 +53,7 @@ const WarningCheckbox: React.FunctionComponent<{
               <EuiIconTip
                 content={
                   <FormattedMessage
-                    id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.documentationLinkLabel"
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.documentationLinkLabel"
                     defaultMessage="Documentation"
                   />
                 }
@@ -79,7 +79,7 @@ export interface WarningCheckboxProps {
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   docLinks: DocLinksStart['links'];
   id: string;
-  meta?: ReindexWarning['meta'];
+  meta?: IndexWarning['meta'];
 }
 
 export const DeprecatedSettingWarningCheckbox: React.FunctionComponent<WarningCheckboxProps> = ({
@@ -96,14 +96,14 @@ export const DeprecatedSettingWarningCheckbox: React.FunctionComponent<WarningCh
       warningId={id}
       label={
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.deprecatedIndexSettingsWarningTitle"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.deprecatedIndexSettingsWarningTitle"
           defaultMessage="Remove deprecated index settings"
         />
       }
       description={
         <>
           <FormattedMessage
-            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.deprecatedIndexSettingsWarningDetail"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.deprecatedIndexSettingsWarningDetail"
             defaultMessage="The following deprecated index settings were detected:"
           />
 
@@ -135,7 +135,7 @@ export const ReplaceIndexWithAliasWarningCheckbox: React.FunctionComponent<
       warningId={id}
       label={
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.replaceIndexWithAliasWarningTitle"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.replaceIndexWithAliasWarningTitle"
           defaultMessage="Replace {indexName} index with {reindexName} index and create {indexName} index alias"
           values={{
             indexName: <EuiCode>{meta?.indexName}</EuiCode>,
@@ -145,11 +145,44 @@ export const ReplaceIndexWithAliasWarningCheckbox: React.FunctionComponent<
       }
       description={
         <FormattedMessage
-          id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.warningsStep.replaceIndexWithAliasWarningDetail"
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.replaceIndexWithAliasWarningDetail"
           defaultMessage="You can search {indexName} as before. To delete the data you'll have to delete {reindexName}"
           values={{
             indexName: <EuiCode>{meta?.indexName}</EuiCode>,
             reindexName: <EuiCode>{meta?.reindexName}</EuiCode>,
+          }}
+        />
+      }
+    />
+  );
+};
+
+export const MakeIndexReadonlyWarningCheckbox: React.FunctionComponent<WarningCheckboxProps> = ({
+  isChecked,
+  onChange,
+  id,
+  meta,
+}) => {
+  return (
+    <WarningCheckbox
+      isChecked={isChecked}
+      onChange={onChange}
+      warningId={id}
+      label={
+        <FormattedMessage
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.makeIndexReadonlyWarningTitle"
+          defaultMessage="Flag {indexName} index as read-only"
+          values={{
+            indexName: <EuiCode>{meta?.indexName}</EuiCode>,
+          }}
+        />
+      }
+      description={
+        <FormattedMessage
+          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.makeIndexReadonlyWarningDetail"
+          defaultMessage="You can continue to search and retrieve documents from {indexName}. You will not be able to insert new documents or modify existing ones."
+          values={{
+            indexName: <EuiCode>{meta?.indexName}</EuiCode>,
           }}
         />
       }

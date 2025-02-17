@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`WarningsFlyoutStep renders 1`] = `
+exports[`WarningFlyoutStep renders 1`] = `
 <Fragment>
   <EuiFlyoutBody />
   <EuiFlyoutFooter>
@@ -17,7 +17,7 @@ exports[`WarningsFlyoutStep renders 1`] = `
         >
           <MemoizedFormattedMessage
             defaultMessage="Back"
-            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.cancelButtonLabel"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.backButtonLabel"
           />
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -26,13 +26,14 @@ exports[`WarningsFlyoutStep renders 1`] = `
       >
         <EuiButton
           color="primary"
+          data-test-subj="startReindexingButton"
           disabled={false}
           fill={true}
           onClick={[MockFunction]}
         >
           <MemoizedFormattedMessage
             defaultMessage="Continue reindexing"
-            id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.continueButtonLabel"
+            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.warningsStep.reindex.continueButtonLabel"
           />
         </EuiButton>
       </EuiFlexItem>

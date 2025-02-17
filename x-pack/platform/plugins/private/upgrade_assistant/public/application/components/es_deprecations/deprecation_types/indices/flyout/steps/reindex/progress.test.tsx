@@ -8,9 +8,9 @@
 import { shallow } from 'enzyme';
 import React from 'react';
 
-import { ReindexStatus, ReindexStep } from '../../../../../../../common/types';
-import { LoadingState } from '../../../../types';
-import type { ReindexState } from '../use_reindex_state';
+import { ReindexStatus, ReindexStep } from '../../../../../../../../../common/types';
+import { LoadingState } from '../../../../../../types';
+import type { ReindexState } from '../../../use_reindex';
 import { ReindexProgress } from './progress';
 
 describe('ReindexProgress', () => {
@@ -28,6 +28,8 @@ describe('ReindexProgress', () => {
               indexName: 'foo',
               reindexName: 'reindexed-foo',
               aliases: [],
+              isFrozen: false,
+              isReadonly: false,
             },
           } as ReindexState
         }
@@ -44,7 +46,7 @@ describe('ReindexProgress', () => {
           <h3>
             <MemoizedFormattedMessage
               defaultMessage="Reindexing in progress… {percents}"
-              id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingInProgressTitle"
+              id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingInProgressTitle"
               values={
                 Object {
                   "percents": "0%",
@@ -60,7 +62,7 @@ describe('ReindexProgress', () => {
                 "status": "inProgress",
                 "title": <Memo(MemoizedFormattedMessage)
                   defaultMessage="Setting {indexName} index to read-only."
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.inProgress.readonlyStepTitle"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.inProgress.readonlyStepTitle"
                   values={
                     Object {
                       "indexName": <EuiCode>
@@ -74,7 +76,7 @@ describe('ReindexProgress', () => {
                 "status": "incomplete",
                 "title": <Memo(MemoizedFormattedMessage)
                   defaultMessage="Create {reindexName} index."
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.createIndexStepTitle"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.createIndexStepTitle"
                   values={
                     Object {
                       "reindexName": <EuiCode>
@@ -96,6 +98,8 @@ describe('ReindexProgress', () => {
                       "meta": Object {
                         "aliases": Array [],
                         "indexName": "foo",
+                        "isFrozen": false,
+                        "isReadonly": false,
                         "reindexName": "reindexed-foo",
                       },
                       "reindexTaskPercComplete": null,
@@ -108,7 +112,7 @@ describe('ReindexProgress', () => {
                 "status": "incomplete",
                 "title": <Memo(MemoizedFormattedMessage)
                   defaultMessage="Copy original index settings from {indexName} to {reindexName}."
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.indexSettingsRestoredStepTitle"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.indexSettingsRestoredStepTitle"
                   values={
                     Object {
                       "indexName": <EuiCode>
@@ -125,7 +129,7 @@ describe('ReindexProgress', () => {
                 "status": "incomplete",
                 "title": <Memo(MemoizedFormattedMessage)
                   defaultMessage="Create {indexName} alias for {reindexName} index."
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasCreatedStepTitle"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.aliasCreatedStepTitle"
                   values={
                     Object {
                       "indexName": <EuiCode>
@@ -142,7 +146,7 @@ describe('ReindexProgress', () => {
                 "status": "incomplete",
                 "title": <Memo(MemoizedFormattedMessage)
                   defaultMessage="Delete original {indexName} index."
-                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.originalIndexDeletedStepTitle"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.reindexStep.reindexingChecklist.originalIndexDeletedStepTitle"
                   values={
                     Object {
                       "indexName": <EuiCode>
@@ -173,6 +177,8 @@ describe('ReindexProgress', () => {
               indexName: 'foo',
               reindexName: 'reindexed-foo',
               aliases: [],
+              isFrozen: true,
+              isReadonly: false,
             },
           } as ReindexState
         }

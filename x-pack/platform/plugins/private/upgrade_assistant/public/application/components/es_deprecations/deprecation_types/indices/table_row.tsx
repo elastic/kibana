@@ -19,8 +19,8 @@ import {
 import { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { ReindexResolutionCell } from './resolution_table_cell';
-import { ReindexFlyout, ReindexFlyoutProps } from './flyout';
-import { ReindexStatusProvider, useReindexContext } from './context';
+import { IndexFlyout, IndexFlyoutProps } from './flyout';
+import { IndexStatusProvider, useIndexContext } from './context';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
@@ -29,31 +29,30 @@ interface TableRowProps {
   rowFieldNames: DeprecationTableColumns[];
 }
 
-const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
+const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
   rowFieldNames,
   deprecation,
 }) => {
   const [showFlyout, setShowFlyout] = useState(false);
-  const reindexState = useReindexContext();
+  const indexContext = useIndexContext();
 
   const { addContent: addContentToGlobalFlyout, removeContent: removeContentFromGlobalFlyout } =
     useGlobalFlyout();
 
   const closeFlyout = useCallback(async () => {
-    removeContentFromGlobalFlyout('reindexFlyout');
+    removeContentFromGlobalFlyout('indexFlyout');
     setShowFlyout(false);
     uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_REINDEX_CLOSE_FLYOUT_CLICK);
   }, [removeContentFromGlobalFlyout]);
 
   useEffect(() => {
     if (showFlyout) {
-      addContentToGlobalFlyout<ReindexFlyoutProps>({
-        id: 'reindexFlyout',
-        Component: ReindexFlyout,
+      addContentToGlobalFlyout<IndexFlyoutProps>({
+        id: 'indexFlyout',
+        Component: IndexFlyout,
         props: {
-          deprecation,
           closeFlyout,
-          ...reindexState,
+          ...indexContext,
         },
         flyoutProps: {
           onClose: closeFlyout,
@@ -63,7 +62,7 @@ const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
         },
       });
     }
-  }, [addContentToGlobalFlyout, deprecation, showFlyout, reindexState, closeFlyout]);
+  }, [addContentToGlobalFlyout, deprecation, showFlyout, indexContext, closeFlyout]);
 
   useEffect(() => {
     if (showFlyout) {
@@ -93,14 +92,14 @@ const ReindexTableRowCells: React.FunctionComponent<TableRowProps> = ({
   );
 };
 
-export const ReindexTableRow: React.FunctionComponent<TableRowProps> = (props) => {
+export const IndexTableRow: React.FunctionComponent<TableRowProps> = (props) => {
   const {
     services: { api },
   } = useAppContext();
 
   return (
-    <ReindexStatusProvider indexName={props.deprecation.index!} api={api}>
-      <ReindexTableRowCells {...props} />
-    </ReindexStatusProvider>
+    <IndexStatusProvider deprecation={props.deprecation} api={api}>
+      <IndexTableRowCells {...props} />
+    </IndexStatusProvider>
   );
 };

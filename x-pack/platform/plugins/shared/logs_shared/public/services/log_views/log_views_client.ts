@@ -25,6 +25,7 @@ import {
   PutLogViewError,
   ResolvedLogView,
   resolveLogView,
+  isNoSuchRemoteClusterError,
 } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import { ILogViewsClient } from './types';
@@ -69,7 +70,7 @@ export class LogViewsClient implements ILogViewsClient {
   }
 
   public async getResolvedLogViewStatus(resolvedLogView: ResolvedLogView): Promise<LogViewStatus> {
-    const indexStatus = await lastValueFrom(
+    return await lastValueFrom(
       this.search({
         params: {
           ignore_unavailable: true,
@@ -81,31 +82,43 @@ export class LogViewsClient implements ILogViewsClient {
         },
       })
     ).then(
-      ({ rawResponse }) => {
+      ({ rawResponse }): LogViewStatus => {
         if (rawResponse._shards.total <= 0) {
-          return 'missing' as const;
+          return {
+            index: 'missing',
+            reason: 'noShardsFound',
+          };
         }
 
         const totalHits = decodeTotalHits(rawResponse.hits.total);
         if (typeof totalHits === 'number' ? totalHits > 0 : totalHits.value > 0) {
-          return 'available' as const;
+          return {
+            index: 'available',
+          };
         }
 
-        return 'empty' as const;
+        return {
+          index: 'empty',
+        };
       },
-      (err) => {
+      (err): LogViewStatus => {
         if (err.status === 404) {
-          return 'missing' as const;
+          return {
+            index: 'missing',
+            reason: 'noIndicesFound',
+          };
+        } else if (err != null && isNoSuchRemoteClusterError(err)) {
+          return {
+            index: 'missing',
+            reason: 'remoteClusterNotFound',
+          };
         }
+
         throw new FetchLogViewStatusError(
           `Failed to check status of log indices of "${resolvedLogView.indices}": ${err}`
         );
       }
     );
-
-    return {
-      index: indexStatus,
-    };
   }
 
   public async putLogView(

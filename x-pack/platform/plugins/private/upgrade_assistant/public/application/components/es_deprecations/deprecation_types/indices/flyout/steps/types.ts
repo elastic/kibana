@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-export type { ReindexFlyoutProps } from './container';
-export { ReindexFlyout } from './container';
+export type FlyoutStep =
+  | 'details'
+  | 'confirmReadonly'
+  | 'confirmReindex'
+  | 'reindexing'
+  | 'makeReadonly'
+  | 'unfreeze'
+  | 'completed';
