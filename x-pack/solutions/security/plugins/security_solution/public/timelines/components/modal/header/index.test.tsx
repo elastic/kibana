@@ -9,59 +9,33 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import { TimelineModalHeader } from '.';
 import { render } from '@testing-library/react';
-import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useCreateTimeline } from '../../../hooks/use_create_timeline';
 import { useInspect } from '../../../../common/components/inspect/use_inspect';
 import { useKibana } from '../../../../common/lib/kibana';
 import { timelineActions } from '../../../store';
+import { TimelineId } from '../../../../../common/types';
 
-jest.mock('../../../../sourcerer/containers');
 jest.mock('../../../hooks/use_create_timeline');
 jest.mock('../../../../common/components/inspect/use_inspect');
 jest.mock('../../../../common/lib/kibana');
+jest.mock('react-redux', () => ({
+  ...jest.requireActual('react-redux'),
+  useDispatch: () => jest.fn(),
+}));
 
-const mockGetState = jest.fn();
-jest.mock('react-redux', () => {
-  const actual = jest.requireActual('react-redux');
-  return {
-    ...actual,
-    useDispatch: jest.fn(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    useSelector: (selector: any) =>
-      selector({
-        timeline: {
-          timelineById: {
-            'timeline-1': {
-              ...mockGetState(),
-            },
-          },
-        },
-      }),
-  };
-});
-
-const timelineId = 'timeline-1';
 const mockRef = {
   current: null,
 };
 const renderTimelineModalHeader = () =>
-  render(
-    <TestProviders>
-      <TimelineModalHeader timelineId={timelineId} openToggleRef={mockRef} />
-    </TestProviders>
-  );
+  render(<TimelineModalHeader timelineId={TimelineId.test} openToggleRef={mockRef} />, {
+    wrapper: TestProviders,
+  });
 
 describe('TimelineModalHeader', () => {
   (useCreateTimeline as jest.Mock).mockReturnValue(jest.fn());
   (useInspect as jest.Mock).mockReturnValue(jest.fn());
 
   it('should render all dom elements', () => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      browserFields: {},
-      indexPattern: { fields: [], title: '' },
-      sourcererDataView: {},
-    });
-
     const { getByTestId, getByText } = renderTimelineModalHeader();
 
     expect(getByTestId('timeline-favorite-empty-star')).toBeInTheDocument();
@@ -76,11 +50,6 @@ describe('TimelineModalHeader', () => {
   });
 
   it('should show attach to case if user has the correct permissions', () => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      browserFields: {},
-      indexPattern: { fields: [], title: '' },
-      sourcererDataView: {},
-    });
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         application: {
@@ -106,12 +75,6 @@ describe('TimelineModalHeader', () => {
   });
 
   it('should call showTimeline action when closing timeline', () => {
-    (useSourcererDataView as jest.Mock).mockReturnValue({
-      browserFields: {},
-      indexPattern: { fields: [], title: '' },
-      sourcererDataView: {},
-    });
-
     const spy = jest.spyOn(timelineActions, 'showTimeline');
 
     const { getByTestId } = renderTimelineModalHeader();
@@ -119,7 +82,7 @@ describe('TimelineModalHeader', () => {
     getByTestId('timeline-modal-header-close-button').click();
 
     expect(spy).toHaveBeenCalledWith({
-      id: timelineId,
+      id: TimelineId.test,
       show: false,
     });
   });
