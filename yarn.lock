@@ -3965,7 +3965,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-rule-utils@link:x-pack/platform/packages/shared/alerting_rule_utils":
+"@kbn/alerting-rule-utils@link:x-pack/platform/packages/shared/alerting-rule-utils":
   version "0.0.0"
   uid ""
 
@@ -6245,7 +6245,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logs-overview@link:x-pack/platform/packages/shared/logs_overview":
+"@kbn/logs-overview@link:x-pack/platform/packages/shared/logs-overview":
   version "0.0.0"
   uid ""
 
@@ -6549,19 +6549,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-common@link:x-pack/solutions/observability/packages/observability_ai/observability_ai_common":
+"@kbn/observability-ai-common@link:x-pack/solutions/observability/packages/observability-ai/observability-ai-common":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-server@link:x-pack/solutions/observability/packages/observability_ai/observability_ai_server":
+"@kbn/observability-ai-server@link:x-pack/solutions/observability/packages/observability-ai/observability-ai-server":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-alert-details@link:x-pack/solutions/observability/packages/alert_details":
+"@kbn/observability-alert-details@link:x-pack/solutions/observability/packages/alert-details":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-alerting-test-data@link:x-pack/solutions/observability/packages/alerting_test_data":
+"@kbn/observability-alerting-test-data@link:x-pack/solutions/observability/packages/alerting-test-data":
   version "0.0.0"
   uid ""
 
@@ -6569,7 +6569,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-get-padded-alert-time-range-util@link:x-pack/solutions/observability/packages/get_padded_alert_time_range_util":
+"@kbn/observability-get-padded-alert-time-range-util@link:x-pack/solutions/observability/packages/get-padded-alert-time-range-util":
   version "0.0.0"
   uid ""
 
@@ -6877,15 +6877,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-apis@link:packages/response-ops/alerts_apis":
+"@kbn/response-ops-alerts-apis@link:src/platform/packages/shared/response-ops/alerts-apis":
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-fields-browser@link:packages/response-ops/alerts_fields_browser":
+"@kbn/response-ops-alerts-fields-browser@link:src/platform/packages/shared/response-ops/alerts-fields-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-table@link:packages/response-ops/alerts_table":
+"@kbn/response-ops-alerts-table@link:src/platform/packages/shared/response-ops/alerts-table":
   version "0.0.0"
   uid ""
 
@@ -7109,7 +7109,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-shared-ui@link:x-pack/solutions/search/packages/shared_ui":
+"@kbn/search-shared-ui@link:x-pack/solutions/search/packages/shared-ui":
   version "0.0.0"
   uid ""
 
@@ -7177,7 +7177,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-distribution-bar@link:x-pack/solutions/security/packages/distribution_bar":
+"@kbn/security-solution-distribution-bar@link:x-pack/solutions/security/packages/distribution-bar":
   version "0.0.0"
   uid ""
 
@@ -23244,9 +23244,9 @@ jsonify@~0.0.0:
   integrity sha1-LHS27kHZPKUbe1qu6PUDYx0lKnM=
 
 jsonpath-plus@^10.0.0:
-  version "10.2.0"
-  resolved "https://registry.yarnpkg.com/jsonpath-plus/-/jsonpath-plus-10.2.0.tgz#84d680544d9868579cc7c8f59bbe153a5aad54c4"
-  integrity sha512-T9V+8iNYKFL2n2rF+w02LBOT2JjDnTjioaNFrxRy0Bv1y/hNsqR/EBK7Ojy2ythRHwmz2cRIls+9JitQGZC/sw==
+  version "10.3.0"
+  resolved "https://registry.yarnpkg.com/jsonpath-plus/-/jsonpath-plus-10.3.0.tgz#59e22e4fa2298c68dfcd70659bb47f0cad525238"
+  integrity sha512-8TNmfeTCk2Le33A3vRRwtuworG/L5RrgMvdjhKZxvyShO+mBu2fP50OWUjRLNtvw344DdDarFh9buFAZs5ujeA==
   dependencies:
     "@jsep-plugin/assignment" "^1.3.0"
     "@jsep-plugin/regex" "^1.0.4"
