@@ -341,7 +341,6 @@ export function XYChart({
   if (dataLayers.length === 0) {
     return (
       <EmptyPlaceholder
-        className="xyChart__empty"
         icon={icon}
         renderComplete={onRenderChange}
         css={xyChartEmptyStyles}
@@ -820,7 +819,6 @@ export function XYChart({
           <Settings
             noResults={
               <EmptyPlaceholder
-                className="xyChart__empty"
                 icon={icon}
                 renderComplete={onRenderChange}
                 css={xyChartEmptyStyles}
