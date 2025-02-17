@@ -18,6 +18,7 @@ import { floatFourDecimalPlacesRt } from '../runtime_types/float_four_decimal_pl
 import type { RawSettingDefinition, SettingDefinition } from './types';
 import { generalSettings } from './general_settings';
 import { javaSettings } from './java_settings';
+import { edotSDKSettings } from './edot_sdk_settings';
 import { mobileSettings } from './mobile_settings';
 import { getDurationRt } from '../runtime_types/duration_rt';
 import { getBytesRt } from '../runtime_types/bytes_rt';
@@ -139,6 +140,6 @@ export function validateSetting(setting: SettingDefinition, value: unknown) {
 }
 
 export const settingDefinitions: SettingDefinition[] = sortBy(
-  [...generalSettings, ...javaSettings, ...mobileSettings].map(getSettingDefaults),
+  [...generalSettings, ...javaSettings, ...mobileSettings, ...edotSDKSettings].map(getSettingDefaults),
   'key'
 );

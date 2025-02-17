@@ -34,6 +34,11 @@ export const generalSettings: RawSettingDefinition[] = [
       'php',
       'android/java',
       'iOS/swift',
+      'opentelemetry/java/elastic',
+      'opentelemetry/dotnet/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/php/elastic',
+      'opentelemetry/python/elastic',
     ],
   },
 
@@ -58,6 +63,11 @@ export const generalSettings: RawSettingDefinition[] = [
       'php',
       'android/java',
       'iOS/swift',
+      'opentelemetry/java/elastic',
+      'opentelemetry/dotnet/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/php/elastic',
+      'opentelemetry/python/elastic',
     ],
   },
 
@@ -80,7 +90,18 @@ export const generalSettings: RawSettingDefinition[] = [
       { text: 'transactions', value: 'transactions' },
       { text: 'all', value: 'all' },
     ],
-    excludeAgents: ['js-base', 'rum-js', 'php', 'android/java', 'iOS/swift'],
+    excludeAgents: [
+      'js-base',
+      'rum-js',
+      'php',
+      'android/java',
+      'iOS/swift',
+      'opentelemetry/java/elastic',
+      'opentelemetry/dotnet/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/php/elastic',
+      'opentelemetry/python/elastic',
+    ],
   },
 
   {
@@ -111,7 +132,19 @@ export const generalSettings: RawSettingDefinition[] = [
       defaultMessage:
         'If set to `true`, the agent will capture HTTP request and response headers (including cookies), as well as message headers/properties when using messaging frameworks (like Kafka).\n\nNOTE: Setting this to `false` reduces network bandwidth, disk space and object allocations.',
     }),
-    excludeAgents: ['js-base', 'rum-js', 'nodejs', 'php', 'android/java', 'iOS/swift'],
+    excludeAgents: [
+      'js-base',
+      'rum-js',
+      'nodejs',
+      'php',
+      'android/java',
+      'iOS/swift',
+      'opentelemetry/java/elastic',
+      'opentelemetry/dotnet/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/php/elastic',
+      'opentelemetry/python/elastic',
+    ],
   },
 
   {
@@ -284,7 +317,16 @@ export const generalSettings: RawSettingDefinition[] = [
       defaultMessage:
         'When recording, the agent instruments incoming HTTP requests, tracks errors, and collects and sends metrics. When set to non-recording, the agent works as a noop, not collecting data and not communicating with the APM Server except for polling for updated configuration. As this is a reversible switch, agent threads are not being killed when set to non-recording, but they will be mostly idle in this state, so the overhead should be negligible. You can use this setting to dynamically control whether Elastic APM is enabled or disabled.',
     }),
-    excludeAgents: ['nodejs', 'rum-js', 'js-base'],
+    excludeAgents: [
+      'nodejs',
+      'rum-js',
+      'js-base',
+      'opentelemetry/java/elastic',
+      'opentelemetry/dotnet/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/php/elastic',
+      'opentelemetry/python/elastic',
+    ],
   },
 
   {
@@ -379,7 +421,19 @@ export const generalSettings: RawSettingDefinition[] = [
       defaultMessage:
         '(Deprecated, use `span_stack_trace_min_duration` instead!) In its default settings, the APM agent will collect a stack trace with every recorded span.\nWhile this is very helpful to find the exact place in your code that causes the span, collecting this stack trace does have some overhead. \nWhen setting this option to a negative value, like `-1ms`, stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n\nTo disable stack trace collection for spans completely, set the value to `0ms`.',
     }),
-    excludeAgents: ['js-base', 'rum-js', 'nodejs', 'php', 'android/java', 'iOS/swift'],
+    excludeAgents: [
+      'js-base',
+      'rum-js',
+      'nodejs',
+      'php',
+      'android/java',
+      'iOS/swift',
+      'opentelemetry/java/elastic',
+      'opentelemetry/dotnet/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/php/elastic',
+      'opentelemetry/python/elastic',
+    ],
   },
 
   {
@@ -461,7 +515,17 @@ export const generalSettings: RawSettingDefinition[] = [
     description: i18n.translate('xpack.apm.agentConfig.transactionMaxSpans.description', {
       defaultMessage: 'Limits the amount of spans that are recorded per transaction.',
     }),
-    excludeAgents: ['js-base', 'rum-js', 'android/java', 'iOS/swift'],
+    excludeAgents: [
+      'js-base',
+      'rum-js',
+      'android/java',
+      'iOS/swift',
+      'opentelemetry/java/elastic',
+      'opentelemetry/dotnet/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/php/elastic',
+      'opentelemetry/python/elastic',
+    ],
   },
 
   // Transaction sample rate
@@ -476,7 +540,15 @@ export const generalSettings: RawSettingDefinition[] = [
       defaultMessage:
         'By default, the agent will sample every transaction (e.g. request to your service). To reduce overhead and storage requirements, you can set the sample rate to a value between 0.0 and 1.0. We still record overall time and the result for unsampled transactions, but not context information, labels, or spans.',
     }),
-    excludeAgents: ['android/java', 'iOS/swift'],
+    excludeAgents: [
+      'android/java',
+      'iOS/swift',
+      'opentelemetry/java/elastic',
+      'opentelemetry/dotnet/elastic',
+      'opentelemetry/nodejs/elastic',
+      'opentelemetry/php/elastic',
+      'opentelemetry/python/elastic',
+    ],
   },
 
   // Sanitize field names
