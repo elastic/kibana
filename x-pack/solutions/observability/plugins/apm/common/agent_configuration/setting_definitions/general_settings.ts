@@ -321,7 +321,6 @@ export const generalSettings: RawSettingDefinition[] = [
       'nodejs',
       'rum-js',
       'js-base',
-      'opentelemetry/java/elastic',
       'opentelemetry/dotnet/elastic',
       'opentelemetry/nodejs/elastic',
       'opentelemetry/php/elastic',
