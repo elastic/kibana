@@ -71,7 +71,9 @@ describe('AnnotationsPanel', () => {
     data: {},
   } as QueryInputServices;
 
-  const mountWithThemeProvider = (propsOverrides: Partial<typeof AnnotationEditorControls> = {}) => {
+  const mountWithThemeProvider = (
+    propsOverrides: Partial<typeof AnnotationEditorControls> = {}
+  ) => {
     return mount(
       <EuiThemeProvider>
         <AnnotationEditorControls
@@ -83,12 +85,12 @@ describe('AnnotationsPanel', () => {
           appName="myApp"
           {...propsOverrides}
         />
-      </EuiThemeProvider>)
-  }
+      </EuiThemeProvider>
+    );
+  };
 
   describe('Dimension Editor', () => {
     test('shows correct options for line annotations', () => {
-
       const component = mountWithThemeProvider();
 
       expect(
@@ -132,7 +134,7 @@ describe('AnnotationsPanel', () => {
         lineWidth: 3,
       };
 
-      const component = mountWithThemeProvider({annotation: rangeAnnotation});
+      const component = mountWithThemeProvider({ annotation: rangeAnnotation });
 
       expect(
         component.find('EuiDatePicker[data-test-subj="lns-xyAnnotation-fromTime"]').prop('selected')
@@ -160,66 +162,68 @@ describe('AnnotationsPanel', () => {
       const rangeEndTimestamp = new Date().toISOString();
 
       const { rerender } = render(
-      <EuiThemeProvider>
-        <AnnotationEditorControls
-        annotation={customLineStaticAnnotation}
-        onAnnotationChange={onAnnotationChange}
-        dataView={mockDataView}
-        getDefaultRangeEnd={() => rangeEndTimestamp}
-        queryInputServices={mockQueryInputServices}
-        appName="myApp"
-        />
-      </EuiThemeProvider>
+        <EuiThemeProvider>
+          <AnnotationEditorControls
+            annotation={customLineStaticAnnotation}
+            onAnnotationChange={onAnnotationChange}
+            dataView={mockDataView}
+            getDefaultRangeEnd={() => rangeEndTimestamp}
+            queryInputServices={mockQueryInputServices}
+            appName="myApp"
+          />
+        </EuiThemeProvider>
       );
 
       act(() => {
-      screen.getByTestId('lns-xyAnnotation-rangeSwitch').click();
+        screen.getByTestId('lns-xyAnnotation-rangeSwitch').click();
       });
 
       const expectedRangeAnnotation: RangeEventAnnotationConfig = {
-      color: '#FF00001A',
-      id: 'ann1',
-      isHidden: undefined,
-      label: 'Event range',
-      type: 'manual',
-      key: {
-        endTimestamp: rangeEndTimestamp,
-        timestamp: '2022-03-18T08:25:00.000Z',
-        type: 'range',
-      },
+        color: '#FF00001A',
+        id: 'ann1',
+        isHidden: undefined,
+        label: 'Event range',
+        type: 'manual',
+        key: {
+          endTimestamp: rangeEndTimestamp,
+          timestamp: '2022-03-18T08:25:00.000Z',
+          type: 'range',
+        },
       };
 
       expect(onAnnotationChange).toHaveBeenCalledWith(expectedRangeAnnotation);
 
       rerender(
-      <EuiThemeProvider>
-        <AnnotationEditorControls
-        annotation={expectedRangeAnnotation}
-        onAnnotationChange={onAnnotationChange}
-        dataView={mockDataView}
-        getDefaultRangeEnd={() => rangeEndTimestamp}
-        queryInputServices={mockQueryInputServices}
-        appName="myApp"
-        />
-      </EuiThemeProvider>
+        <EuiThemeProvider>
+          <AnnotationEditorControls
+            annotation={expectedRangeAnnotation}
+            onAnnotationChange={onAnnotationChange}
+            dataView={mockDataView}
+            getDefaultRangeEnd={() => rangeEndTimestamp}
+            queryInputServices={mockQueryInputServices}
+            appName="myApp"
+          />
+        </EuiThemeProvider>
       );
 
-      expect(screen.getByTestId('lns-xyAnnotation-rangeSwitch').getAttribute('aria-checked')).toBe('true');
+      expect(screen.getByTestId('lns-xyAnnotation-rangeSwitch').getAttribute('aria-checked')).toBe(
+        'true'
+      );
 
       act(() => {
-      screen.getByTestId('lns-xyAnnotation-rangeSwitch').click();
+        screen.getByTestId('lns-xyAnnotation-rangeSwitch').click();
       });
 
       expect(onAnnotationChange).toHaveBeenCalledWith({
-      color: '#FF0000',
-      id: 'ann1',
-      isHidden: undefined,
-      key: {
-        timestamp: '2022-03-18T08:25:00.000Z',
-        type: 'point_in_time',
-      },
-      label: 'Event',
-      type: 'manual',
+        color: '#FF0000',
+        id: 'ann1',
+        isHidden: undefined,
+        key: {
+          timestamp: '2022-03-18T08:25:00.000Z',
+          type: 'point_in_time',
+        },
+        label: 'Event',
+        type: 'manual',
       });
     });
 
