@@ -113,9 +113,11 @@ describe('AlertEventOverviewAccessor', () => {
 
         timeRange: {
           timeline: {
-            from: mockRow['@timestamp'],
-            to: mockRow['@timestamp'],
-            linkTo: false,
+            timerange: {
+              from: mockRow['@timestamp'],
+              to: mockRow['@timestamp'],
+              kind: 'absolute',
+            },
           },
         },
 
@@ -131,7 +133,7 @@ describe('AlertEventOverviewAccessor', () => {
       };
 
       expect(screen.getByTestId('exploreSecurity').getAttribute('href')).toBe(
-        `test-timeline-url?timeline=${encode(expectedURLJSON.timeline)}&timeRange=${encode(
+        `test-timeline-url?timeline=${encode(expectedURLJSON.timeline)}&timerange=${encode(
           expectedURLJSON.timeRange
         )}&timelineFlyout=${encode(expectedURLJSON.timelineFlyout)}`
       );
