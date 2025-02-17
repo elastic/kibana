@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
 import { render } from '@testing-library/react';
+import React from 'react';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { scopedHistoryMock } from '@kbn/core-application-browser-mocks';
 import { KibanaFeature } from '@kbn/features-plugin/common';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import type { GetTabsProps } from './edit_space_tabs';
 import { getTabs } from './edit_space_tabs';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-
 
 const space = {
   id: 'my-space',

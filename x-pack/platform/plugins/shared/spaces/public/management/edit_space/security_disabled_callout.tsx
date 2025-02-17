@@ -8,11 +8,11 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-type Props = {
+interface Props {
   enableSecurityLink: string;
-};
+}
 
 export const SecurityDisabledCallout = ({ enableSecurityLink }: Props) => (
   <EuiCallOut
