@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
 
@@ -20,15 +21,25 @@ export const FIELD_DEFINITION_TYPES = [
 
 export type FieldDefinitionType = (typeof FIELD_DEFINITION_TYPES)[number];
 
-export interface FieldDefinitionConfig {
+// We redefine "first class" parameters
+export type FieldDefinitionConfig = MappingProperty & {
   type: FieldDefinitionType;
   format?: string;
-}
+};
 
-export const fieldDefinitionConfigSchema: z.Schema<FieldDefinitionConfig> = z.object({
-  type: z.enum(FIELD_DEFINITION_TYPES),
-  format: z.optional(NonEmptyString),
-});
+// Parameters that we provide a generic (JSON blob) experience for
+export type FieldDefinitionConfigAdvancedParameters = Omit<
+  FieldDefinitionConfig,
+  'type' | 'format'
+>;
+
+export const fieldDefinitionConfigSchema: z.Schema<FieldDefinitionConfig> = z.intersection(
+  z.record(z.string(), z.unknown()),
+  z.object({
+    type: z.enum(FIELD_DEFINITION_TYPES),
+    format: z.optional(NonEmptyString),
+  })
+);
 
 export interface FieldDefinition {
   [x: string]: FieldDefinitionConfig;
@@ -39,9 +50,9 @@ export const fieldDefinitionSchema: z.Schema<FieldDefinition> = z.record(
   fieldDefinitionConfigSchema
 );
 
-export interface InheritedFieldDefinitionConfig extends FieldDefinitionConfig {
+export type InheritedFieldDefinitionConfig = FieldDefinitionConfig & {
   from: string;
-}
+};
 
 export interface InheritedFieldDefinition {
   [x: string]: InheritedFieldDefinitionConfig;
@@ -52,9 +63,9 @@ export const inheritedFieldDefinitionSchema: z.Schema<InheritedFieldDefinition> 
   z.intersection(fieldDefinitionConfigSchema, z.object({ from: NonEmptyString }))
 );
 
-export interface NamedFieldDefinitionConfig extends FieldDefinitionConfig {
+export type NamedFieldDefinitionConfig = FieldDefinitionConfig & {
   name: string;
-}
+};
 
 export const namedFieldDefinitionConfigSchema: z.Schema<NamedFieldDefinitionConfig> =
   z.intersection(
