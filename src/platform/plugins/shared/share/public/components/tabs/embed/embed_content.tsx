@@ -28,6 +28,7 @@ import { format as formatUrl, parse as parseUrl } from 'url';
 import { AnonymousAccessState } from '../../../../common';
 
 import type { IShareContext, ShareContextObjectTypeConfig } from '../../context';
+import type { EmbedShare } from '../../../services/share_orchestrator';
 
 type EmbedProps = Pick<
   IShareContext,
@@ -39,9 +40,9 @@ type EmbedProps = Pick<
   | 'isDirty'
   | 'allowShortUrl'
   | 'anonymousAccess'
-  | 'urlService'
 > & {
   objectConfig?: ShareContextObjectTypeConfig;
+  shortUrlService: ReturnType<EmbedShare['config']>['shortUrlService'];
 };
 
 interface UrlParams {
@@ -59,7 +60,7 @@ export const EmbedContent = ({
   objectConfig = {},
   isDirty,
   allowShortUrl,
-  urlService,
+  shortUrlService,
   anonymousAccess,
 }: EmbedProps) => {
   const urlParamsRef = useRef<UrlParams | undefined>(undefined);
@@ -172,15 +173,13 @@ export const EmbedContent = ({
   }, [shareableUrlForSavedObject, snapshotUrl, updateUrlParams]);
 
   const createShortUrl = useCallback(async () => {
-    const shortUrlService = urlService.shortUrls.get(null);
-
     if (shareableUrlLocatorParams) {
       const shortUrl = await shortUrlService.createWithLocator(shareableUrlLocatorParams);
       return shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
     } else {
       return (await shortUrlService.createFromLongUrl(snapshotUrl)).url;
     }
-  }, [shareableUrlLocatorParams, snapshotUrl, urlService.shortUrls]);
+  }, [shareableUrlLocatorParams, snapshotUrl, shortUrlService]);
 
   const addUrlAnonymousAccessParameters = useCallback(
     (tempUrl: string): string => {

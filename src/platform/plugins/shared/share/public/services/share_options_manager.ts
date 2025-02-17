@@ -7,41 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
-import type { BrowserUrlService, ShareContext } from '../types';
 import {
   ShareOrchestrator,
   type ShareActionIntents,
-  type SupportedShareIntegrations,
   type InternalShareActionIntent,
-  type LinkShare,
-  type EmbedShare,
   type ShareIntegration,
+  type ShareOptionsManagerStart,
 } from './share_orchestrator';
-
-interface ShareOptionsManagerStart {
-  core: CoreStart;
-  urlService: BrowserUrlService;
-  anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
-}
+import type { BrowserUrlService, ShareContext } from '../types';
+import type { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 
 export class ShareOptionsManager implements ShareOrchestrator {
-  private core?: CoreStart;
   private urlService?: BrowserUrlService;
   private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
 
   private readonly globalMarker: string = '*';
 
-  constructor() {
-    // this.registerLinkShareAction();
-    // this.registerEmbedShareAction();
-  }
-
   private readonly restrictedShareActionIntent: readonly InternalShareActionIntent[] = [
     'link',
     'embed',
   ];
+
+  constructor() {
+    // register default share actions
+    this.registerLinkShareAction();
+    this.registerEmbedShareAction();
+  }
 
   private readonly shareOptionsRegistry: Record<
     string,
@@ -50,48 +41,45 @@ export class ShareOptionsManager implements ShareOrchestrator {
     [this.globalMarker]: new Map(),
   };
 
-  start({ core, urlService, anonymousAccessServiceProvider }: ShareOptionsManagerStart) {
-    this.core = core;
-    this.urlService = urlService;
-    this.anonymousAccessServiceProvider = anonymousAccessServiceProvider;
-  }
-
-  registerShareIntentAction(shareObject: string, shareActionIntent: ShareActionIntents): void {
-    const { shareType, ...actionIntentDefs } = shareActionIntent;
-
+  private registerShareIntentAction(
+    shareObject: string,
+    shareActionIntent: ShareActionIntents
+  ): void {
     if (!this.shareOptionsRegistry[shareObject]) {
       this.shareOptionsRegistry[shareObject] = new Map();
     }
 
     const shareContextMap = this.shareOptionsRegistry[shareObject];
 
-    // only one restricted share action can be registered per sharing app
-    if (this.restrictedShareActionIntent.some((intent) => shareContextMap.has(intent))) {
+    const recordKey =
+      shareActionIntent.shareType === 'integration'
+        ? (`integration-${shareActionIntent.groupId || 'unknown'}-${shareActionIntent.id}` as const)
+        : shareActionIntent.shareType;
+
+    if (shareContextMap.has(recordKey)) {
       throw new Error(
-        `Share action with type [${shareType}] for app [${shareObject}] has already been registered.`
+        `Share action with type [${shareActionIntent.shareType}] for app [${shareObject}] has already been registered.`
       );
     }
 
-    shareContextMap.set(
-      shareType === 'integration'
-        ? `integration-${shareActionIntent.groupId || 'unknown'}-${shareActionIntent.id}`
-        : shareType,
-      {
-        shareType,
-        ...actionIntentDefs,
-      }
-    );
+    shareContextMap.set(recordKey, shareActionIntent);
   }
 
   private registerLinkShareAction(): void {
     this.registerShareIntentAction(this.globalMarker, {
       shareType: 'link',
+      config: ({ urlService }) => ({
+        shortUrlService: urlService?.shortUrls.get(null)!,
+      }),
     });
   }
 
   private registerEmbedShareAction(): void {
     this.registerShareIntentAction(this.globalMarker, {
       shareType: 'embed',
+      config: ({ urlService }) => ({
+        shortUrlService: urlService?.shortUrls.get(null)!,
+      }),
     });
   }
 
@@ -104,6 +92,11 @@ export class ShareOptionsManager implements ShareOrchestrator {
       shareType: 'integration',
       ...shareActionIntent,
     });
+  }
+
+  start({ urlService, anonymousAccessServiceProvider }: ShareOptionsManagerStart) {
+    this.urlService = urlService;
+    this.anonymousAccessServiceProvider = anonymousAccessServiceProvider;
   }
 
   getShareConfigOptionsForApp(
@@ -120,11 +113,24 @@ export class ShareOptionsManager implements ShareOrchestrator {
   }
 
   resolveShareItemsForShareContext({ objectType, ...shareContext }: ShareContext) {
-    return this.getShareConfigOptionsForApp(objectType).map((shareAction) => {
-      return {
+    if (!this.urlService || !this.anonymousAccessServiceProvider) {
+      throw new Error('ShareOptionsManager#start was not been invoked');
+    }
+
+    return this.getShareConfigOptionsForApp(objectType)
+      .map((shareAction) => ({
         ...shareAction,
-        config: shareAction?.config?.call(null, { objectType, ...shareContext }, {}),
-      };
-    });
+        config: shareAction?.config?.call(
+          null,
+          {
+            objectType,
+            urlService: this.urlService!,
+            anonymousAccessServiceProvider: this.anonymousAccessServiceProvider,
+            ...shareContext,
+          },
+          {}
+        ),
+      }))
+      .filter((shareAction) => shareAction.config);
   }
 }

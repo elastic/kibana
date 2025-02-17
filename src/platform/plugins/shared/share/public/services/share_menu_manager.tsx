@@ -10,37 +10,26 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { CoreStart, ThemeServiceStart, ToastsSetup, UserProfileService } from '@kbn/core/public';
+import { CoreStart, ThemeServiceStart, UserProfileService } from '@kbn/core/public';
 import { ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
-import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
-import type { BrowserUrlService, ShareMenuItemV2 } from '../types';
+import type { ShareMenuItemV2 } from '../types';
 import { ShareMenu } from '../components/share_tabs';
 import { ShareOptionsManager } from './share_options_manager';
+
+interface ShareMenuManagerStartDeps {
+  core: CoreStart;
+  shareRegistry: ShareMenuRegistryStart;
+  disableEmbed: boolean;
+  shareOptionsManager: ShareOptionsManager;
+}
 
 export class ShareMenuManager {
   private isOpen = false;
   private shareOptionsManager?: ShareOptionsManager;
   private container = document.createElement('div');
 
-  // constructor() {
-  //   this.shareOptionsManager = new ShareOptionsManager();
-  // }
-
-  // setup() {
-  //   return {
-  //     registerShareAction: this.shareOptionsManager.registerShareAction.bind(this.shareOptionsManager),
-  //   };
-  // }
-
-  start(
-    core: CoreStart,
-    urlService: BrowserUrlService,
-    shareRegistry: ShareMenuRegistryStart,
-    disableEmbed: boolean,
-    shareOptionsManager: ShareOptionsManager,
-    anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract
-  ) {
+  start({ core, shareOptionsManager, shareRegistry, disableEmbed }: ShareMenuManagerStartDeps) {
     this.shareOptionsManager = shareOptionsManager;
 
     return {
@@ -56,28 +45,17 @@ export class ShareMenuManager {
           this.onClose();
           options.onClose?.();
         };
-        // const menuItems = shareRegistry.getShareMenuItems({ ...options, onClose });
-
-        // const menuItems = this.shareOptionsManager?.fetchShareOptionForApp(app);
-
-        // this.showShareDialog('lens');
 
         const menuItems = this.shareOptionsManager!.resolveShareItemsForShareContext({
           ...options,
           onClose,
         });
 
-        console.log('configured menu items received:: %o \n', menuItems);
-
-        const anonymousAccess = anonymousAccessServiceProvider?.();
         this.toggleShareContextMenu({
           ...options,
           allowEmbed: disableEmbed ? false : options.allowEmbed,
           onClose,
           menuItems,
-          urlService,
-          anonymousAccess,
-          toasts: core.notifications.toasts,
           publicAPIEnabled: !disableEmbed,
           ...core,
         });
@@ -113,24 +91,18 @@ export class ShareMenuManager {
     shareableUrlLocatorParams,
     embedUrlParamExtensions,
     showPublicUrlSwitch,
-    urlService,
-    anonymousAccess,
     snapshotShareWarning,
     onClose,
     disabledShareUrl,
     isDirty,
-    toasts,
     delegatedShareUrlHandler,
     publicAPIEnabled,
     ...startServices
   }: ShowShareMenuOptions & {
     anchorElement: HTMLElement;
     menuItems: ShareMenuItemV2[];
-    urlService: BrowserUrlService;
-    anonymousAccess: AnonymousAccessServiceContract | undefined;
     onClose: () => void;
     isDirty: boolean;
-    toasts: ToastsSetup;
     userProfile: UserProfileService;
     theme: ThemeServiceStart;
     i18n: CoreStart['i18n'];
@@ -160,14 +132,11 @@ export class ShareMenuManager {
           shareableUrlLocatorParams,
           delegatedShareUrlHandler,
           embedUrlParamExtensions,
-          anonymousAccess,
           showPublicUrlSwitch,
-          urlService,
           snapshotShareWarning,
           disabledShareUrl,
           isDirty,
           shareMenuItems: menuItems,
-          toasts,
           onClose: () => {
             onClose();
             unmount();
