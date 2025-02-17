@@ -8,7 +8,12 @@
 import React from 'react';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { encode } from '@kbn/rison';
-import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
+import {
+  ALL_VALUE,
+  type CreateSLOInput,
+  type CreateSLOResponse,
+  type FindSLOResponse,
+} from '@kbn/slo-schema';
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
 import { EuiLink } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
@@ -49,6 +54,7 @@ export function useCreateSlo() {
         queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
 
         const sloEditUrl = http.basePath.prepend(paths.sloEdit(data.id));
+        const sloViewUrl = http.basePath.prepend(paths.sloDetails(data.id, ALL_VALUE));
 
         toasts.addSuccess(
           {
@@ -56,13 +62,20 @@ export function useCreateSlo() {
               <RedirectAppLinks coreStart={services} data-test-subj="observabilityMainContainer">
                 <FormattedMessage
                   id="xpack.slo.slo.create.successNotification"
-                  defaultMessage='Successfully created SLO: "{name}". {editSLO}'
+                  defaultMessage="Successfully created {name}. {editSLO} or {viewSLO}"
                   values={{
                     name: slo.name,
                     editSLO: (
                       <EuiLink data-test-subj="o11yUseCreateSloEditSloLink" href={sloEditUrl}>
                         {i18n.translate('xpack.slo.useCreateSlo.editSLOLinkLabel', {
                           defaultMessage: 'Edit SLO',
+                        })}
+                      </EuiLink>
+                    ),
+                    viewSLO: (
+                      <EuiLink data-test-subj="o11yUseCreateSloViewSloLink" href={sloViewUrl}>
+                        {i18n.translate('xpack.slo.useCreateSlo.viewSLOLinkLabel', {
+                          defaultMessage: 'View SLO',
                         })}
                       </EuiLink>
                     ),
