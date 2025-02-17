@@ -115,7 +115,6 @@ export const RulesTableHeader = ({
                   }
                 )}
                 id={'cis-section-multi-select-filter'}
-                data-test-subj={RULES_TABLE_HEADER_TEST_SUBJ.RULES_TABLE_HEADER_MULTI_SELECT_BUTTON}
                 onChange={(section) => {
                   setSelectedSection([...section?.selectedOptionKeys]);
                   onSectionChange(

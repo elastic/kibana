@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { FC, PropsWithChildren } from 'react';
 import { render, screen } from '@testing-library/react';
 import { RulesTableHeader } from './rules_table_header';
 import { CspBenchmarkRulesWithStates } from './rules_container';
