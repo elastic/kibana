@@ -7,9 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './rule_settings_flapping_form';
-export * from './rule_settings_flapping_inputs';
-export * from './rule_settings_flapping_message';
-export * from './rule_settings_flapping_title_tooltip';
-export * from './rule_settings_range_input';
-export { RulesSettingsAlertsDeletionSection } from './alert_deletion/rules_settings_alerts_deletion_section';
+export { fetchAlertsDeletionSettings } from './fetch_alerts_deletion_settings';
+export { updateAlertsDeletionSettings } from './update_alerts_deletion_settings';
