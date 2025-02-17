@@ -459,7 +459,6 @@ export function getUnitDuration(unit: number = 1) {
 export function getCompatibleLiterals(
   commandName: string,
   types: string[],
-  names?: string[],
   options?: {
     advanceCursorAndOpenSuggestions?: boolean;
     addComma?: boolean;
@@ -504,25 +503,6 @@ export function getCompatibleLiterals(
         options
       )
     ); // i.e. year, month, ...
-  }
-  if (types.includes('string')) {
-    if (names) {
-      const index = types.indexOf('string');
-      if (/pattern/.test(names[index])) {
-        suggestions.push(
-          ...buildConstantsDefinitions(
-            [commandName === 'grok' ? '"%{WORD:firstWord}"' : '"%{firstWord}"'],
-            i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.aPatternString', {
-              defaultMessage: 'A pattern string',
-            }),
-            undefined,
-            options
-          )
-        );
-      } else {
-        suggestions.push(...buildConstantsDefinitions(['string'], '', undefined, options));
-      }
-    }
   }
   return suggestions;
 }

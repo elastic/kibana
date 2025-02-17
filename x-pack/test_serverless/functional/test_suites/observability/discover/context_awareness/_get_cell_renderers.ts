@@ -26,7 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  describe('extension getCellRenderers', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/211215
+  describe.skip('extension getCellRenderers', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsViewer();
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
