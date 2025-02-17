@@ -37,14 +37,16 @@ import { DependencyNameLink } from '../sub_components/dependency_name_link';
 import { HttpStatusCode } from '../sub_components/http_status_code';
 import { asDuration } from '../utils';
 
+type FieldConfigValue = string | number | undefined;
+
 export const getFieldConfiguration = (
   attributes: TraceDocumentOverview
 ): Record<
   string,
   {
     title: string;
-    content: (value: any) => React.ReactNode;
-    value: any;
+    content: (value: FieldConfigValue) => React.ReactNode;
+    value: FieldConfigValue;
     fieldMetadata?: PartialFieldMetadataPlain;
   }
 > => {
