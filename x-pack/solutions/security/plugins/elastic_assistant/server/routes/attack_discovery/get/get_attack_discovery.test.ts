@@ -84,7 +84,7 @@ const mockCurrentAd = transformESSearchToAttackDiscovery(getAttackDiscoverySearc
 describe('getAttackDiscoveryRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    context.elasticAssistant.getCurrentUser.mockResolvedValueOnce(mockUser);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     context.elasticAssistant.getAttackDiscoveryDataClient.mockResolvedValue(mockDataClient);
 
     getAttackDiscoveryRoute(server.router);

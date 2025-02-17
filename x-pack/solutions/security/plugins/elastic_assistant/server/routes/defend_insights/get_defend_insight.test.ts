@@ -63,7 +63,7 @@ describe('getDefendInsightRoute', () => {
     mockDataClient = getDefaultDataClient();
     mockCurrentInsight = transformESSearchToDefendInsights(getDefendInsightsSearchEsMock())[0];
 
-    context.elasticAssistant.getCurrentUser.mockResolvedValueOnce(mockUser);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     context.elasticAssistant.getDefendInsightsDataClient.mockResolvedValue(mockDataClient);
     getDefendInsightRoute(server.router);
     (updateDefendInsightLastViewedAt as jest.Mock).mockResolvedValue(mockCurrentInsight);

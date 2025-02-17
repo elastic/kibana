@@ -72,7 +72,7 @@ const runningAd = {
 describe('postAttackDiscoveryRoute', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    context.elasticAssistant.getCurrentUser.mockResolvedValueOnce(mockUser);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     context.elasticAssistant.getAttackDiscoveryDataClient.mockResolvedValue(mockDataClient);
     context.elasticAssistant.actions = actionsMock.createStart();
     postAttackDiscoveryRoute(server.router);

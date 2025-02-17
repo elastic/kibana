@@ -51,7 +51,7 @@ describe('cancelAttackDiscoveryRoute', () => {
       ...mockCurrentAd,
       status: 'canceled',
     });
-    context.elasticAssistant.getCurrentUser.mockResolvedValueOnce(mockUser);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     context.elasticAssistant.getAttackDiscoveryDataClient.mockResolvedValue(mockDataClient);
 
     cancelAttackDiscoveryRoute(server.router);

@@ -46,7 +46,7 @@ describe('Post Evaluate Route', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    context.elasticAssistant.getCurrentUser.mockResolvedValueOnce(mockUser);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
 
     postEvaluateRoute(server.router, mockGetElser);
   });

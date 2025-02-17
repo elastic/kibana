@@ -106,7 +106,7 @@ describe('postDefendInsightsRoute', () => {
     });
     (isDefendInsightsEnabled as jest.Mock).mockResolvedValue(true);
 
-    context.elasticAssistant.getCurrentUser.mockResolvedValueOnce(mockUser);
+    context.elasticAssistant.getCurrentUser.mockResolvedValue(mockUser);
     context.elasticAssistant.getDefendInsightsDataClient.mockResolvedValue(mockDataClient);
     context.elasticAssistant.actions = actionsMock.createStart();
 
