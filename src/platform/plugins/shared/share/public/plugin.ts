@@ -45,7 +45,7 @@ export type SharePublicSetup = ShareMenuRegistrySetup & {
    */
   setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => void;
 
-  newRegistrar: ShareOptionsManager['registerShareIntegration'];
+  registerShareIntegration: ShareOptionsManager['registerShareIntegration'];
 };
 
 /** @public */
@@ -128,7 +128,7 @@ export class SharePlugin
     registrations.setup({ analytics });
 
     return {
-      newRegistrar: this.shareOptionsManager.registerShareIntegration.bind(
+      registerShareIntegration: this.shareOptionsManager.registerShareIntegration.bind(
         this.shareOptionsManager
       ),
       ...this.shareMenuRegistry!.setup(),
@@ -147,19 +147,16 @@ export class SharePlugin
     const disableEmbed = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
 
     this.shareOptionsManager.start({
-      core,
       urlService: this.url!,
       anonymousAccessServiceProvider: () => this.anonymousAccessServiceProvider!(),
     });
 
-    const sharingContextMenuStart = this.shareContextMenu.start(
+    const sharingContextMenuStart = this.shareContextMenu.start({
       core,
-      this.url!,
-      this.shareMenuRegistry!.start(),
+      shareRegistry: this.shareMenuRegistry!.start(),
       disableEmbed,
-      this.shareOptionsManager,
-      this.anonymousAccessServiceProvider
-    );
+      shareOptionsManager: this.shareOptionsManager,
+    });
 
     return {
       ...sharingContextMenuStart,

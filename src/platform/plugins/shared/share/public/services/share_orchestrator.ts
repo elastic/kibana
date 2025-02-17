@@ -9,7 +9,13 @@
 
 import type { ReactElement, ReactNode } from 'react';
 import type { EuiIconProps } from '@elastic/eui';
-import { UrlParamExtension, ScreenshotExportOpts, ShareContext } from '../types';
+import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
+import { UrlParamExtension, ScreenshotExportOpts, ShareContext, BrowserUrlService } from '../types';
+
+export interface ShareOptionsManagerStart {
+  urlService: BrowserUrlService;
+  anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
+}
 
 export type ShareTypes = 'link' | 'embed' | 'integration';
 
@@ -32,30 +38,50 @@ interface ShareActionUserInputBase<E extends Record<string, unknown> = Record<st
 
 type ShareImplementation<
   T extends ShareTypes,
-  U extends Record<string, unknown> = Record<string, unknown>,
-  C extends Record<string, unknown> = Record<string, unknown>
+  C extends Record<string, unknown> = Record<string, unknown>,
+  U extends Record<string, unknown> = Record<string, unknown>
 > = T extends 'integration'
   ? {
       id: string;
       groupId?: string;
       shareType: T;
-      config: (ctx: ShareContext, userInput: ShareActionUserInputBase<U>) => C;
+      config: (
+        ctx: ShareContext & ShareOptionsManagerStart,
+        userInput: ShareActionUserInputBase<U>
+      ) => C;
     }
   : {
       shareType: T;
-      config: (ctx: ShareContext, userInput: ShareActionUserInputBase<U>) => C;
+      config: (
+        ctx: ShareContext & ShareOptionsManagerStart,
+        userInput: ShareActionUserInputBase<U>
+      ) => C;
     };
 
-export type LinkShare = ShareImplementation<'link', { delegatedShareUrlHandler?: () => string }>;
+export type LinkShare = ShareImplementation<
+  'link',
+  {
+    shortUrlService: ReturnType<BrowserUrlService['shortUrls']['get']>;
+  },
+  {
+    delegatedShareUrlHandler?: () => string;
+  }
+>;
 
 export type EmbedShare = ShareImplementation<
   'embed',
-  { allowEmbed: boolean; embedUrlParamExtensions?: UrlParamExtension[] }
+  {
+    shortUrlService: ReturnType<BrowserUrlService['shortUrls']['get']>;
+  },
+  {
+    allowEmbed: boolean;
+    embedUrlParamExtensions?: UrlParamExtension[];
+  }
 >;
 
 export type ShareIntegration<
   IntegrationParameters extends Record<string, unknown> = Record<string, unknown>
-> = ShareImplementation<'integration', {}, IntegrationParameters>;
+> = ShareImplementation<'integration', IntegrationParameters, {}>;
 
 export type ShareActionIntents = LinkShare | EmbedShare | ShareIntegration;
 
@@ -97,6 +123,8 @@ export interface SharingData {
 }
 
 export abstract class ShareOrchestrator {
+  abstract start(args: ShareOptionsManagerStart): void;
+
   abstract registerShareIntegration<I extends ShareIntegration>(shareObject: string, arg: I): void;
   abstract registerShareIntegration<I extends ShareIntegration>(arg: I): void;
 
