@@ -38,14 +38,14 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
     await serviceMapPage.gotoWithDateSelected(start, end);
     expect(page.url()).toContain('/app/apm/service-map');
     await page.waitForSelector('[data-test-subj="serviceMap"]');
-    await expect(page.getByTestId('serviceMap').getByLabel('Loading')).not.toBeVisible();
+    await expect(page.getByTestId('serviceMap').getByLabel('Loading')).toBeHidden();
     await page.getByLabel('Zoom In').click();
     await page.getByTestId('centerServiceMap').click();
-    await expect(page.getByTestId('serviceMap').getByLabel('Loading')).not.toBeVisible();
+    await expect(page.getByTestId('serviceMap').getByLabel('Loading')).toBeHidden();
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(1000);
     await page.getByTestId('serviceMap').click();
-    await expect(await page.getByTestId('serviceMap')).toHaveScreenshot('service_map.png', {
+    await expect(page.getByTestId('serviceMap')).toHaveScreenshot('service_map.png', {
       animations: 'disabled',
     });
   });
@@ -54,19 +54,16 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
     await serviceMapPage.gotoDetailedServiceMapWithDateSelected(start, end);
     expect(page.url()).toContain('/services/opbeans-java/service-map');
     await page.waitForSelector('[data-test-subj="serviceMap"]');
-    await expect(page.getByTestId('serviceMap').getByLabel('Loading')).not.toBeVisible();
+    await expect(page.getByTestId('serviceMap').getByLabel('Loading')).toBeHidden();
     await page.getByLabel('Zoom out').click();
     await page.getByTestId('centerServiceMap').click();
-    await expect(page.getByTestId('serviceMap').getByLabel('Loading')).not.toBeVisible();
+    await expect(page.getByTestId('serviceMap').getByLabel('Loading')).toBeHidden();
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(1000);
     await page.getByTestId('serviceMap').click();
-    await expect(await page.getByTestId('serviceMap')).toHaveScreenshot(
-      'detailed_service_map.png',
-      {
-        animations: 'disabled',
-      }
-    );
+    await expect(page.getByTestId('serviceMap')).toHaveScreenshot('detailed_service_map.png', {
+      animations: 'disabled',
+    });
   });
 
   test('shows empty state when there is no data', async ({
@@ -74,7 +71,7 @@ test.describe('Service Map', { tag: ['@ess', '@svlOblt'] }, () => {
     pageObjects: { serviceMapPage },
   }) => {
     await serviceMapPage.typeInTheSearchBar();
-    await expect(page.getByTestId('serviceMap').getByLabel('Loading')).not.toBeVisible();
+    await expect(page.getByTestId('serviceMap').getByLabel('Loading')).toBeHidden();
     page.getByText('No services available');
     // search bar is still visible
     await expect(page.getByTestId('apmUnifiedSearchBar')).toBeVisible();
