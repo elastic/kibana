@@ -174,6 +174,7 @@ export const spacesManagementApp = Object.freeze({
               allowFeatureVisibility={config.allowFeatureVisibility}
               allowSolutionVisibility={config.allowSolutionVisibility}
               getPrivilegesAPIClient={getPrivilegesAPIClient}
+              docLinks={coreStart.docLinks}
             />
           );
         };

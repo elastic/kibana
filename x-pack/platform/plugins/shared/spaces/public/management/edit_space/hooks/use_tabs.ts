@@ -22,6 +22,7 @@ type UseTabsProps = Pick<GetTabsProps, 'capabilities' | 'rolesCount'> & {
   allowFeatureVisibility: boolean;
   allowSolutionVisibility: boolean;
   isSecurityEnabled: boolean;
+  enableSecurityLink: string;
 };
 
 export const useTabs = ({

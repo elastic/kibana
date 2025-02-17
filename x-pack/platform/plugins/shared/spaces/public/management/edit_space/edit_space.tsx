@@ -76,6 +76,7 @@ export const EditSpace: FC<PageProps> = ({
     notifications,
     isRoleManagementEnabled,
     license,
+    docLinks,
   } = useEditSpaceServices();
   const [space, setSpace] = useState<Space | null>(null);
   const [userActiveSpace, setUserActiveSpace] = useState<Space | null>(null);
@@ -94,6 +95,7 @@ export const EditSpace: FC<PageProps> = ({
     history,
     currentSelectedTabId: selectedTabId,
     isSecurityEnabled,
+    enableSecurityLink: docLinks.links.security.enableElasticSearchSecurityFeatures,
     ...props,
   });
 

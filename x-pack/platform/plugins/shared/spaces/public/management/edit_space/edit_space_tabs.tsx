@@ -37,6 +37,7 @@ export interface GetTabsProps {
   allowFeatureVisibility: boolean;
   allowSolutionVisibility: boolean;
   isSecurityEnabled: boolean;
+  enableSecurityLink: string;
 }
 
 const SuspenseEditSpaceSettingsTab = withSuspense(
@@ -71,6 +72,7 @@ export const getTabs = ({
   rolesCount,
   isRoleManagementEnabled,
   isSecurityEnabled,
+  enableSecurityLink,
   ...props
 }: GetTabsProps): EditSpaceTab[] => {
   const reloadWindow = () => {
@@ -115,7 +117,7 @@ export const getTabs = ({
           isReadOnly={!canUserModifyRoles}
         />
       ) : (
-        <SecurityDisabledCallout />
+        <SecurityDisabledCallout enableSecurityLink={enableSecurityLink} />
       ),
     });
   }
