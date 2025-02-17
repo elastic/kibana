@@ -57,7 +57,9 @@ export interface CreateAgentPolicyResponse {
 }
 
 export type UpdateAgentPolicyRequest = GetOneAgentPolicyRequest & {
-  body: NewAgentPolicy;
+  body: NewAgentPolicy & {
+    bumpRevision?: boolean;
+  };
 };
 
 export interface UpdateAgentPolicyResponse {

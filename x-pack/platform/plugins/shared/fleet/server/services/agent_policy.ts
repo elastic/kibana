@@ -773,7 +773,7 @@ class AgentPolicyService {
     }
 
     return this._update(soClient, esClient, id, agentPolicy, options?.user, {
-      bumpRevision: options.bumpRevision ?? true,
+      bumpRevision: options?.bumpRevision ?? true,
       removeProtection: false,
       skipValidation: options?.skipValidation ?? false,
     }).then((updatedAgentPolicy) => {
