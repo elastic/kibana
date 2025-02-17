@@ -29,7 +29,7 @@ export function getColorLabel(percent: number) {
 }
 
 export function scaleValue({ value, scaleFactor = 1 }: { value: number; scaleFactor?: number }) {
-  return value * scaleFactor;
+  return Math.trunc(value * scaleFactor);
 }
 
 export const getTotalCount = (topNFunctions?: TopNFunctions) => topNFunctions?.selfCPU ?? 0;

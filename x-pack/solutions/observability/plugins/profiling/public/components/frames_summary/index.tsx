@@ -40,10 +40,6 @@ const ESTIMATED_VALUE_LABEL = i18n.translate('xpack.profiling.diffTopNFunctions.
   defaultMessage: 'Estimated value',
 }) as string;
 
-function getScaleFactor(scaleFactor: number = 1) {
-  return scaleFactor;
-}
-
 export function FramesSummary({
   baseValue,
   comparisonValue,
@@ -52,11 +48,11 @@ export function FramesSummary({
   compressed = false,
 }: Props) {
   const baselineScaledTotalSamples = baseValue
-    ? baseValue.totalCount * getScaleFactor(baseValue.scaleFactor)
+    ? Math.trunc(baseValue.totalCount * (baseValue.scaleFactor || 1))
     : 0;
 
   const comparisonScaledTotalSamples = comparisonValue
-    ? comparisonValue.totalCount * getScaleFactor(comparisonValue.scaleFactor)
+    ? Math.trunc(comparisonValue.totalCount * (comparisonValue.scaleFactor || 1))
     : 0;
 
   const { co2EmissionDiff, costImpactDiff, totalSamplesDiff } = useMemo(() => {
