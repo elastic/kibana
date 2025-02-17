@@ -822,7 +822,7 @@ x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/respon
 x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
-x-pack/platform/packages/shared/logs_overview @elastic/obs-ux-logs-team
+x-pack/platform/packages/shared/logs-overview @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/ml/aiops_common @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_rate_analysis @elastic/ml-ui
@@ -925,8 +925,8 @@ x-pack/solutions/observability/packages/kbn-custom-integrations @elastic/obs-ux-
 x-pack/solutions/observability/packages/kbn-investigation-shared @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 x-pack/solutions/observability/packages/kbn-streams-schema @elastic/streams-program-team
-x-pack/solutions/observability/packages/observability_ai/observability_ai_common @elastic/obs-ai-assistant
-x-pack/solutions/observability/packages/observability_ai/observability_ai_server @elastic/obs-ai-assistant
+x-pack/solutions/observability/packages/observability-ai/observability-ai-common @elastic/obs-ai-assistant
+x-pack/solutions/observability/packages/observability-ai/observability-ai-server @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/synthetics_test_data @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/utils-browser @elastic/observability-ui
 x-pack/solutions/observability/packages/utils-common @elastic/observability-ui
@@ -963,7 +963,7 @@ x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-components @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-server @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-index-documents @elastic/search-kibana
-x-pack/solutions/search/packages/shared_ui @elastic/search-kibana
+x-pack/solutions/search/packages/shared-ui @elastic/search-kibana
 x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
 x-pack/solutions/search/plugins/search_assistant @elastic/search-kibana
 x-pack/solutions/search/plugins/search_connectors @elastic/search-kibana
