@@ -14456,10 +14456,10 @@ babel-runtime@6.x:
     core-js "^2.4.0"
     regenerator-runtime "^0.11.0"
 
-backport@^9.6.4:
-  version "9.6.4"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-9.6.4.tgz#ea45ab97f32ebca1564269f92a6fc56eda703cdc"
-  integrity sha512-cTaItWSGoO33vOD/br/Di2KFesgHyE6UWuc0GN0IiFk13UqEadeURq3UOQptARyQC3Nz56Us5QYNJ3E5L61zYg==
+backport@^9.6.6:
+  version "9.6.6"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-9.6.6.tgz#ab7d0a1720eb5cd3ccef51cd79f1872bb9ed409c"
+  integrity sha512-X/2vWZNZP5wvbfWaxtLsXSbnOxANgoCh84IZavTS2X2/6X/si3cpUL0ky1fh+70bK5O8PI+3Fopp5srmeqHB1g==
   dependencies:
     "@octokit/rest" "^19.0.7"
     axios "^1.6.2"
