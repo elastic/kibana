@@ -34,7 +34,7 @@ export const MlAnomalyGuidance: FunctionComponent = () => {
               learnMore: (
                 <EuiLink target="_blank" href={docLinks.links.ml.anomalyMigrationGuide}>
                   {i18n.translate(
-                    'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.notCompatibleMlAnomalyIndexText',
+                    'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.notCompatibleMlAnomalyIndexText.learnMore',
                     { defaultMessage: 'Learn more' }
                   )}
                 </EuiLink>
