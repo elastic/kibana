@@ -28,6 +28,7 @@ import { DiscoverCustomization, DiscoverCustomizationProvider } from '../../../.
 import { createCustomizationService } from '../../../../customizations/customization_service';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
+import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 
 const customisationService = createCustomizationService();
 
@@ -101,6 +102,13 @@ describe('Discover documents layout', () => {
     expect(component.find('.dscTable').exists()).toBeTruthy();
   });
 
+  test('render default value for paginationMode as standard', async () => {
+    const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
+    const discoverGridComponent = component.find(DiscoverGrid);
+    expect(discoverGridComponent.exists()).toBeTruthy();
+    expect(discoverGridComponent.prop('paginationMode')).toEqual('standard');
+  });
+
   test('render complete', async () => {
     const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
     expect(component.find('.dscDocuments__loading').exists()).toBeFalsy();
@@ -161,6 +169,17 @@ describe('Discover documents layout', () => {
         '_source',
         'rootProfile',
       ]);
+    });
+
+    xit('should pass pagination mode from profile', async () => {
+      const { dataSourceProfileProviderMock } = createContextAwarenessMocks();
+      jest.spyOn(dataSourceProfileProviderMock.profile, 'getPaginationConfig').mockReturnValue({
+        paginationMode: 'loadMore',
+      });
+      // Unsure how to pass this mock to the component
+      const component = await mountComponent(FetchStatus.COMPLETE, esHitsMock);
+      const discoverGridComponent = component.find(DiscoverGrid);
+      expect(discoverGridComponent.prop('paginationMode')).toEqual('loadMore');
     });
   });
 });

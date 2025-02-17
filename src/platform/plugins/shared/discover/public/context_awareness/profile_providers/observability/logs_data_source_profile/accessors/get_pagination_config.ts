@@ -9,7 +9,9 @@
 
 import type { DataSourceProfileProvider } from '../../../..';
 
-export const getPaginationConfig: DataSourceProfileProvider['profile']['getPaginationConfig'] =
-  () => ({
-    paginationMode: 'loadMore',
-  });
+export const getPaginationConfig: DataSourceProfileProvider['profile']['getPaginationConfig'] = (
+  prev
+) => ({
+  ...prev,
+  paginationMode: 'loadMore',
+});
