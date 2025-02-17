@@ -114,7 +114,7 @@ export const getMetricVisRenderer: (
       <KibanaRenderContextProvider {...core}>
         <VisualizationContainer
           data-test-subj="legacyMtrVis"
-          className="eui-scrollBar"
+          className="eui-scrollBar legacyMtrVis"
           showNoResult={!visData.rows?.length}
           renderComplete={renderComplete}
           handlers={handlers}
