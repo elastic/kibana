@@ -144,7 +144,7 @@ export const ContentEditorKibanaProvider: FC<
       return coreOpenFlyout(
         toMountPoint(
           <UserProfilesProvider {...userProfilesServices}>{node}</UserProfilesProvider>,
-          startServices
+          { ...startServices, legacyRoot: false }
         ),
         options
       );

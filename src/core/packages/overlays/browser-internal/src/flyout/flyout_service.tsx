@@ -13,6 +13,7 @@ import { css } from '@emotion/react';
 import { EuiFlyout, EuiFlyoutResizable } from '@elastic/eui';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 import { Subject } from 'rxjs';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
@@ -75,6 +76,7 @@ interface StartDeps {
 export class FlyoutService {
   private activeFlyout: FlyoutRef | null = null;
   private targetDomElement: Element | null = null;
+  private root: Root | null = null;
 
   public start({
     analytics,
@@ -136,9 +138,11 @@ export class FlyoutService {
           overflow: 'hidden',
         });
 
+        const legacyRoot = options.legacyRoot ?? true;
+
         // NOTE: The kbnOverlayMountWrapper className is used for allowing consumers to add additional styles
         // that support drag-and-drop (padding, pointer styles). It is not used for internal styling.
-        render(
+        const flyoutEl = (
           <KibanaRenderContextProvider
             analytics={analytics}
             i18n={i18n}
@@ -152,9 +156,15 @@ export class FlyoutService {
                 className="kbnOverlayMountWrapper"
               />
             )}
-          </KibanaRenderContextProvider>,
-          this.targetDomElement
+          </KibanaRenderContextProvider>
         );
+
+        if (legacyRoot) {
+          render(flyoutEl, this.targetDomElement!);
+        } else {
+          this.root = createRoot(this.targetDomElement!);
+          this.root.render(flyoutEl);
+        }
 
         return flyout;
       },
@@ -169,10 +179,14 @@ export class FlyoutService {
    * depend on unmounting for cleanup behaviour.
    */
   private cleanupDom(): void {
-    if (this.targetDomElement != null) {
+    if (this.root != null) {
+      this.root.unmount();
+      this.root = null;
+    } else if (this.targetDomElement != null) {
       unmountComponentAtNode(this.targetDomElement);
       this.targetDomElement.innerHTML = '';
     }
+
     this.activeFlyout = null;
   }
 }

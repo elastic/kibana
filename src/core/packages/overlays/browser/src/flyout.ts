@@ -40,4 +40,5 @@ export type OverlayFlyoutOpenOptions = Omit<
    */
   onClose?: (flyout: OverlayRef) => void;
   isResizable?: boolean;
+  legacyRoot?: boolean;
 };

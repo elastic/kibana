@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
 import { createRoot } from 'react-dom/client';
 import { pairwise, startWith } from 'rxjs';
 
