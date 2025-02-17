@@ -123,8 +123,6 @@
         "@langtrase/trace-attributes",
         "@opentelemetry/sdk-trace-base",
         "@smithy/eventstream-serde-node",
-        "@smithy/protocol-http",
-        "@smithy/signature-v4",
         "@smithy/types",
         "@types/aws4",
         "ajv",
@@ -3741,9 +3739,11 @@
         "@google/generative-ai",
         "@smithy/eventstream-codec",
         "@smithy/middleware-stack",
-        "@smithy/node-http-handler",
         "@smithy/util-utf8",
-        "@aws-sdk/client-bedrock-runtime"
+        "@aws-sdk/client-bedrock-agent-runtime",
+        "@aws-sdk/client-bedrock-runtime",
+        "@aws-sdk/client-kendra",
+        "@aws-sdk/credential-provider-node"
       ],
       "reviewers": [
         "team:security-generative-ai"
