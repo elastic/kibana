@@ -11,6 +11,8 @@ import type { PackageDataStreamTypes } from '../../../../common/types';
 
 import { dataStreamService } from '../../data_streams';
 
+const VALID_STREAM_TYPES = ['logs', 'metrics', 'traces', 'synthetics', 'profiling'];
+
 export async function getDataStreams(options: {
   esClient: ElasticsearchClient;
   type?: PackageDataStreamTypes;
@@ -27,6 +29,14 @@ export async function getDataStreams(options: {
 
   const filteredDataStreams = uncategorisedOnly
     ? allDataStreams.filter((stream) => {
+        const isValidStreamType = VALID_STREAM_TYPES.some((streamType) =>
+          stream.name.startsWith(streamType)
+        );
+
+        if (!isValidStreamType) {
+          return false;
+        }
+
         return !stream._meta || !stream._meta.managed_by || stream._meta.managed_by !== 'fleet';
       })
     : allDataStreams;
