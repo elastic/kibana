@@ -10,15 +10,20 @@ import type { RawSettingDefinition } from './types';
 
 export const edotSDKSettings: RawSettingDefinition[] = [
   {
-    key: 'my_test_config',
+    key: 'disable_instrumentations',
     type: 'text',
     defaultValue: '',
-    label: i18n.translate('xpack.apm.agentConfig.testConfig.label', {
-      defaultMessage: 'My Test config packages',
+    label: i18n.translate('xpack.apm.agentConfig.disableInstrumentations.label', {
+      defaultMessage: 'Disable instrumentations',
     }),
-    description: i18n.translate('xpack.apm.agentConfig.testConfig.description', {
+    description: i18n.translate('xpack.apm.agentConfig.disableInstrumentations.description', {
       defaultMessage:
-        'This is some test config',
+        'Comma-separated list of modules to disable instrumentation for.\n' +
+        'When instrumentation is disabled for a module, no spans will be collected for that module.\n' +
+        '\n' +
+        'The up-to-date list of modules for which instrumentation can be disabled is language specific ' +
+        'and can be found under the following links: ' +
+        '[opentelemetry/java/elastic](https://opentelemetry.io/docs/zero-code/java/agent/disable/#suppressing-specific-agent-instrumentation)',
     }),
     includeAgents: ['opentelemetry/java/elastic'],
   },
