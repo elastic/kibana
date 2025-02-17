@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
+import { waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';
 import { TableActionsPopover } from './table_actions_popover';
@@ -78,7 +79,7 @@ describe('TableActionsPopover', () => {
         onCancelAndArchive={() => {}}
       />
     );
-    fireEvent.click(result.getByTestId('table-actions-icon-button'));
+    userEvent.click(result.getByTestId('table-actions-icon-button'));
     expect(result.getByTestId('table-actions-edit')).toBeInTheDocument();
     expect(result.getByTestId('table-actions-cancel')).toBeInTheDocument();
     expect(result.getByTestId('table-actions-cancel-and-archive')).toBeInTheDocument();
@@ -96,7 +97,7 @@ describe('TableActionsPopover', () => {
         onCancelAndArchive={() => {}}
       />
     );
-    fireEvent.click(result.getByTestId('table-actions-icon-button'));
+    userEvent.click(result.getByTestId('table-actions-icon-button'));
     expect(result.getByTestId('table-actions-edit')).toBeInTheDocument();
     expect(result.getByTestId('table-actions-archive')).toBeInTheDocument();
   });
@@ -113,7 +114,7 @@ describe('TableActionsPopover', () => {
         onCancelAndArchive={() => {}}
       />
     );
-    fireEvent.click(result.getByTestId('table-actions-icon-button'));
+    userEvent.click(result.getByTestId('table-actions-icon-button'));
     expect(result.getByTestId('table-actions-edit')).toBeInTheDocument();
     expect(result.getByTestId('table-actions-archive')).toBeInTheDocument();
   });
@@ -130,7 +131,7 @@ describe('TableActionsPopover', () => {
         onCancelAndArchive={() => {}}
       />
     );
-    fireEvent.click(result.getByTestId('table-actions-icon-button'));
+    userEvent.click(result.getByTestId('table-actions-icon-button'));
     expect(result.getByTestId('table-actions-unarchive')).toBeInTheDocument();
   });
 
@@ -147,9 +148,9 @@ describe('TableActionsPopover', () => {
       />
     );
 
-    fireEvent.click(result.getByTestId('table-actions-icon-button'));
+    userEvent.click(result.getByTestId('table-actions-icon-button'));
     expect(result.getByTestId('table-actions-copy-id')).toBeInTheDocument();
-    fireEvent.click(result.getByTestId('table-actions-copy-id'));
+    userEvent.click(result.getByTestId('table-actions-copy-id'));
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith('123');
 
     await waitFor(() => {
