@@ -79,6 +79,18 @@ describe('Search search provider', () => {
     },
   };
 
+  const mongodbConnectorResult = {
+    icon: 'mongodb.svg',
+    id: 'mongodb',
+    score: 75,
+    title: 'MongoDB',
+    type: 'Elasticsearch',
+    url: {
+      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector`,
+      prependBasePath: true,
+    },
+  };
+
   const searchAIResult = {
     icon: 'logoEnterpriseSearch',
     id: 'ai_search',
@@ -131,7 +143,7 @@ describe('Search search provider', () => {
             mockSearchProviderContext
           )
         ).toBe('(a|)', {
-          a: expect.arrayContaining([{ ...customizedConnectorResult, score: 80 }]),
+          a: expect.arrayContaining([{ ...mongodbConnectorResult, score: 80 }]),
         });
       });
     });
