@@ -305,9 +305,7 @@ describe('ReindexDetailsFlyoutStep', () => {
       <Fragment>
         <EuiFlyoutBody>
           <EuiText>
-            <MlAnomalyGuidance
-              indexName=".ml-anomalies-1"
-            />
+            <MlAnomalyGuidance />
           </EuiText>
           <EuiSpacer />
         </EuiFlyoutBody>

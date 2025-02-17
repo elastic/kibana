@@ -149,100 +149,101 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
               </p>
             </Fragment>
           )}
-          {!meta.isReadonly && isMLAnomalyIndex ? (
-            <MlAnomalyGuidance />
-          ) : (
-            <Fragment>
-              <p>
-                <FormattedMessage
-                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.notCompatibleIndexText"
-                  defaultMessage="This index was created in ES 7.x and it is not compatible with the next major version. Choose one of the following options:"
+          {!meta.isReadonly &&
+            (isMLAnomalyIndex ? (
+              <MlAnomalyGuidance />
+            ) : (
+              <Fragment>
+                <p>
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.notCompatibleIndexText"
+                    defaultMessage="This index was created in ES 7.x and it is not compatible with the next major version. Choose one of the following options:"
+                  />
+                </p>
+                <EuiDescriptionList
+                  rowGutterSize="m"
+                  listItems={[
+                    {
+                      title: i18n.translate(
+                        'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option1.title',
+                        {
+                          defaultMessage: 'Option 1: Reindex data',
+                        }
+                      ),
+                      description: (
+                        <EuiText size="m">
+                          <FormattedMessage
+                            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option1.description"
+                            defaultMessage="The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
+                          />
+                        </EuiText>
+                      ),
+                    },
+                    {
+                      title: i18n.translate(
+                        'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option2.title',
+                        {
+                          defaultMessage: 'Option 2: Mark as read-only',
+                        }
+                      ),
+                      description: (
+                        <EuiText size="m">
+                          <FormattedMessage
+                            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option2.description"
+                            defaultMessage="Old indices can maintain compatibility with the next major version if they are turned into read-only mode. If you no longer need to update documents in this index (or add new ones), you might want to convert it to a read-only index. {docsLink}"
+                            values={{
+                              docsLink: (
+                                <EuiLink
+                                  target="_blank"
+                                  href={docLinks.links.upgradeAssistant.indexBlocks}
+                                >
+                                  {i18n.translate(
+                                    'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.learnMoreLinkLabel',
+                                    {
+                                      defaultMessage: 'Learn more',
+                                    }
+                                  )}
+                                </EuiLink>
+                              ),
+                            }}
+                          />
+                        </EuiText>
+                      ),
+                    },
+                    {
+                      title: i18n.translate(
+                        'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option3.title',
+                        {
+                          defaultMessage: 'Option 3: Delete index',
+                        }
+                      ),
+                      description: (
+                        <EuiText size="m">
+                          <FormattedMessage
+                            id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option3.description"
+                            defaultMessage="If you no longer need it, you can also delete the index from {indexManagementLinkHtml}."
+                            values={{
+                              indexManagementLinkHtml: (
+                                <EuiLink
+                                  href={`${http.basePath.prepend(
+                                    `/app/management/data/index_management/indices/index_details?indexName=${indexName}`
+                                  )}`}
+                                >
+                                  <FormattedMessage
+                                    id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.indexMgmtLink"
+                                    defaultMessage="Index Management"
+                                  />
+                                </EuiLink>
+                              ),
+                            }}
+                          />
+                        </EuiText>
+                      ),
+                    },
+                  ]}
                 />
-              </p>
-              <EuiDescriptionList
-                rowGutterSize="m"
-                listItems={[
-                  {
-                    title: i18n.translate(
-                      'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option1.title',
-                      {
-                        defaultMessage: 'Option 1: Reindex data',
-                      }
-                    ),
-                    description: (
-                      <EuiText size="m">
-                        <FormattedMessage
-                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option1.description"
-                          defaultMessage="The reindex operation allows transforming an index into a new, compatible one. It will copy all of the existing documents into a new index and remove the old one. Depending on size and resources, reindexing may take extended time and your data will be in a read-only state until the job has completed."
-                        />
-                      </EuiText>
-                    ),
-                  },
-                  {
-                    title: i18n.translate(
-                      'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option2.title',
-                      {
-                        defaultMessage: 'Option 2: Mark as read-only',
-                      }
-                    ),
-                    description: (
-                      <EuiText size="m">
-                        <FormattedMessage
-                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option2.description"
-                          defaultMessage="Old indices can maintain compatibility with the next major version if they are turned into read-only mode. If you no longer need to update documents in this index (or add new ones), you might want to convert it to a read-only index. {docsLink}"
-                          values={{
-                            docsLink: (
-                              <EuiLink
-                                target="_blank"
-                                href={docLinks.links.upgradeAssistant.indexBlocks}
-                              >
-                                {i18n.translate(
-                                  'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.learnMoreLinkLabel',
-                                  {
-                                    defaultMessage: 'Learn more',
-                                  }
-                                )}
-                              </EuiLink>
-                            ),
-                          }}
-                        />
-                      </EuiText>
-                    ),
-                  },
-                  {
-                    title: i18n.translate(
-                      'xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option3.title',
-                      {
-                        defaultMessage: 'Option 3: Delete index',
-                      }
-                    ),
-                    description: (
-                      <EuiText size="m">
-                        <FormattedMessage
-                          id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindex.option3.description"
-                          defaultMessage="If you no longer need it, you can also delete the index from {indexManagementLinkHtml}."
-                          values={{
-                            indexManagementLinkHtml: (
-                              <EuiLink
-                                href={`${http.basePath.prepend(
-                                  `/app/management/data/index_management/indices/index_details?indexName=${indexName}`
-                                )}`}
-                              >
-                                <FormattedMessage
-                                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.indexMgmtLink"
-                                  defaultMessage="Index Management"
-                                />
-                              </EuiLink>
-                            ),
-                          }}
-                        />
-                      </EuiText>
-                    ),
-                  },
-                ]}
-              />
-            </Fragment>
-          )}
+              </Fragment>
+            ))}
         </EuiText>
         <EuiSpacer />
       </EuiFlyoutBody>
