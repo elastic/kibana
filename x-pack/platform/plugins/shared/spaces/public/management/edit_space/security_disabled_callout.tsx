@@ -8,6 +8,7 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from 'react-intl';
 
 type Props = {
   enableSecurityLink: string;
@@ -24,10 +25,19 @@ export const SecurityDisabledCallout = ({ enableSecurityLink }: Props) => (
       }
     )}
   >
-    <EuiLink href={enableSecurityLink}>
-      {i18n.translate('xpack.spaces.management.spaceDetails.contentTabs.securityDisabledLinkText', {
-        defaultMessage: 'To manage space permissions, you must enable security features first.',
-      })}
-    </EuiLink>
+    <FormattedMessage
+      id="xpack.spaces.management.spaceDetails.contentTabs.securityDisabledDescription"
+      defaultMessage="To manage space permissions, you must enable security features first. {learnMoreLink}"
+      values={{
+        learnMoreLink: (
+          <EuiLink href={enableSecurityLink} target="_blank" external={true}>
+            <FormattedMessage
+              id="xpack.spaces.management.spaceDetails.contentTabs.securityDisabledLearnMore"
+              defaultMessage="Learn more."
+            />
+          </EuiLink>
+        ),
+      }}
+    />
   </EuiCallOut>
 );
