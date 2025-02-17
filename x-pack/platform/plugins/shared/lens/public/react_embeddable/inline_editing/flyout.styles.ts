@@ -25,25 +25,3 @@ export const InlineFlyoutStyles = ({ euiTheme }: UseEuiTheme) => `
     }
   }
 `;
-
-export const InlineFlyoutFlyoutBodyStyles = ({ euiTheme }: UseEuiTheme) => `
-// styles needed to display extra drop targets that are outside of the config panel main area
-overflow-y: auto;
-padding-left: 400px;
-margin-left: -400px;
-pointer-events: none;
-.euiFlyoutBody__overflow {
-transform: initial;
--webkit-mask-image: none;
-padding-left: inherit;
-margin-left: inherit;
-${!isScrollable && `overflow-y: hidden;`}
-> * {
-pointer-events: auto;
-}
-}
-.euiFlyoutBody__overflowContent {
-padding: 0;
-block-size: 100%;
-}
-`;
