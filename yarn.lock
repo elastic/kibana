@@ -6245,7 +6245,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logs-overview@link:x-pack/platform/packages/shared/logs_overview":
+"@kbn/logs-overview@link:x-pack/platform/packages/shared/logs-overview":
   version "0.0.0"
   uid ""
 
@@ -6549,11 +6549,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-common@link:x-pack/solutions/observability/packages/observability_ai/observability_ai_common":
+"@kbn/observability-ai-common@link:x-pack/solutions/observability/packages/observability-ai/observability-ai-common":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-server@link:x-pack/solutions/observability/packages/observability_ai/observability_ai_server":
+"@kbn/observability-ai-server@link:x-pack/solutions/observability/packages/observability-ai/observability-ai-server":
   version "0.0.0"
   uid ""
 
@@ -7097,7 +7097,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-shared-ui@link:x-pack/solutions/search/packages/shared_ui":
+"@kbn/search-shared-ui@link:x-pack/solutions/search/packages/shared-ui":
   version "0.0.0"
   uid ""
 
@@ -7165,7 +7165,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-distribution-bar@link:x-pack/solutions/security/packages/distribution_bar":
+"@kbn/security-solution-distribution-bar@link:x-pack/solutions/security/packages/distribution-bar":
   version "0.0.0"
   uid ""
 
