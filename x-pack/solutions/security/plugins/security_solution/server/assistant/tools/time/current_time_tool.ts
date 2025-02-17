@@ -32,10 +32,10 @@ const getTimeFormatter = (timezone: string | undefined) => {
     minute: '2-digit',
     second: '2-digit',
     hour12: false,
-    timeZoneName: 'short',
-  } as const;
+    timeZoneName: 'shortOffset',
+  } as Intl.DateTimeFormatOptions;
 
-  const formatter = new Intl.DateTimeFormat([], options);
+  const formatter = new Intl.DateTimeFormat('en-GB', options);
   return formatter;
 };
 

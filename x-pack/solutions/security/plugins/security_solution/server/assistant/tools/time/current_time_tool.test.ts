@@ -47,13 +47,13 @@ describe('CurrentTimeTool', () => {
     });
 
     it.each([
-      ['Browser', 'Local time: 14/02/2025, 09:33:12 UTC'],
-      [undefined, 'Local time: 14/02/2025, 09:33:12 UTC'],
-      ['Europe/Zurich', 'Local time: 14/02/2025, 10:33:12 CET (14/02/2025, 09:33:12 UTC)'],
-      ['Europe/Warsaw', 'Local time: 14/02/2025, 10:33:12 CET (14/02/2025, 09:33:12 UTC)'],
-      ['America/Denver', 'Local time: 14/02/2025, 02:33:12 GMT-7 (14/02/2025, 09:33:12 UTC)'],
-      ['MST', 'Local time: 14/02/2025, 02:33:12 GMT-7 (14/02/2025, 09:33:12 UTC)'],
-      ['America/Los_Angeles', 'Local time: 14/02/2025, 01:33:12 GMT-8 (14/02/2025, 09:33:12 UTC)'],
+      ['Browser', 'Local time: 14/02/2025, 09:33:12 GMT'],
+      [undefined, 'Local time: 14/02/2025, 09:33:12 GMT'],
+      ['Europe/Zurich', 'Local time: 14/02/2025, 10:33:12 GMT+1 (14/02/2025, 09:33:12 GMT)'],
+      ['Europe/Warsaw', 'Local time: 14/02/2025, 10:33:12 GMT+1 (14/02/2025, 09:33:12 GMT)'],
+      ['America/Denver', 'Local time: 14/02/2025, 02:33:12 GMT-7 (14/02/2025, 09:33:12 GMT)'],
+      ['MST', 'Local time: 14/02/2025, 02:33:12 GMT-7 (14/02/2025, 09:33:12 GMT)'],
+      ['America/Los_Angeles', 'Local time: 14/02/2025, 01:33:12 GMT-8 (14/02/2025, 09:33:12 GMT)'],
     ])(
       'gets correct time if dateFormat:tz is %s',
       async (timezone: string | undefined, expectedResult: string) => {
