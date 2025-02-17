@@ -1738,6 +1738,7 @@
     "properties": {}
   },
   "fleet-package-policies": {
+    "dynamic": false,
     "properties": {
       "bump_agent_policy_revision": {
         "type": "boolean"
@@ -2335,6 +2336,7 @@
     }
   },
   "ingest-package-policies": {
+    "dynamic": false,
     "properties": {
       "bump_agent_policy_revision": {
         "type": "boolean"

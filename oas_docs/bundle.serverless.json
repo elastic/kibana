@@ -8742,6 +8742,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -8753,7 +8754,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -8869,6 +8871,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -8880,7 +8883,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -8944,6 +8948,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -8955,7 +8960,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -9034,6 +9040,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -9045,7 +9052,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -9169,6 +9177,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -9180,7 +9189,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -9562,6 +9572,14 @@
                                 "items": {
                                   "additionalProperties": false,
                                   "properties": {
+                                    "additional_datastreams_permissions": {
+                                      "description": "Additional datastream permissions, that will be added to the agent policy.",
+                                      "items": {
+                                        "type": "string"
+                                      },
+                                      "nullable": true,
+                                      "type": "array"
+                                    },
                                     "agents": {
                                       "type": "number"
                                     },
@@ -10242,6 +10260,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -10253,7 +10272,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -10856,6 +10876,14 @@
                               "items": {
                                 "additionalProperties": false,
                                 "properties": {
+                                  "additional_datastreams_permissions": {
+                                    "description": "Additional datastream permissions, that will be added to the agent policy.",
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "nullable": true,
+                                    "type": "array"
+                                  },
                                   "agents": {
                                     "type": "number"
                                   },
@@ -11522,6 +11550,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -11533,7 +11562,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -11874,6 +11904,14 @@
                                 "items": {
                                   "additionalProperties": false,
                                   "properties": {
+                                    "additional_datastreams_permissions": {
+                                      "description": "Additional datastream permissions, that will be added to the agent policy.",
+                                      "items": {
+                                        "type": "string"
+                                      },
+                                      "nullable": true,
+                                      "type": "array"
+                                    },
                                     "agents": {
                                       "type": "number"
                                     },
@@ -12542,6 +12580,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -12553,7 +12592,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -12635,6 +12675,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -12646,7 +12687,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -12808,6 +12850,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -12819,7 +12862,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -13128,6 +13172,14 @@
                               "items": {
                                 "additionalProperties": false,
                                 "properties": {
+                                  "additional_datastreams_permissions": {
+                                    "description": "Additional datastream permissions, that will be added to the agent policy.",
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "nullable": true,
+                                    "type": "array"
+                                  },
                                   "agents": {
                                     "type": "number"
                                   },
@@ -13794,6 +13846,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -13805,7 +13858,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -14420,6 +14474,14 @@
                               "items": {
                                 "additionalProperties": false,
                                 "properties": {
+                                  "additional_datastreams_permissions": {
+                                    "description": "Additional datastream permissions, that will be added to the agent policy.",
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "nullable": true,
+                                    "type": "array"
+                                  },
                                   "agents": {
                                     "type": "number"
                                   },
@@ -15086,6 +15148,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -15097,7 +15160,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -15438,6 +15502,14 @@
                               "items": {
                                 "additionalProperties": false,
                                 "properties": {
+                                  "additional_datastreams_permissions": {
+                                    "description": "Additional datastream permissions, that will be added to the agent policy.",
+                                    "items": {
+                                      "type": "string"
+                                    },
+                                    "nullable": true,
+                                    "type": "array"
+                                  },
                                   "agents": {
                                     "type": "number"
                                   },
@@ -16104,6 +16176,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -16115,7 +16188,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -16184,6 +16258,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -16195,7 +16270,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -16209,6 +16285,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -16220,7 +16297,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -16755,6 +16833,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -16766,7 +16845,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -16901,6 +16981,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -16912,7 +16993,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -17042,6 +17124,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -17053,7 +17136,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -17162,6 +17246,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -17173,7 +17258,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -17709,6 +17795,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -17720,7 +17807,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -17798,6 +17886,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -17809,7 +17898,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18022,6 +18112,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18033,7 +18124,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18151,6 +18243,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18162,7 +18255,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18210,6 +18304,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18221,7 +18316,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18316,6 +18412,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18327,7 +18424,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18423,6 +18521,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18434,7 +18533,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18535,6 +18635,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18546,7 +18647,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18649,6 +18751,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18660,7 +18763,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18771,6 +18875,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18782,7 +18887,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18850,6 +18956,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18861,7 +18968,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -18914,6 +19022,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -18925,7 +19034,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -19004,6 +19114,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -19015,7 +19126,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -19090,6 +19202,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -19101,7 +19214,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -19167,6 +19281,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -19178,7 +19293,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -19245,6 +19361,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -19256,7 +19373,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -19704,6 +19822,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -19715,7 +19834,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -20186,6 +20306,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -20197,7 +20318,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -20390,6 +20512,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -20401,7 +20524,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -20476,6 +20600,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -20487,7 +20612,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -20573,6 +20699,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -20584,7 +20711,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -20718,6 +20846,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -20729,7 +20858,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -20826,6 +20956,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -20837,7 +20968,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -20898,6 +21030,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -20909,7 +21042,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -21043,6 +21177,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -21054,7 +21189,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -21221,6 +21357,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -21232,7 +21369,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -21353,6 +21491,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -21364,7 +21503,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -21431,6 +21571,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -21442,7 +21583,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -21530,6 +21672,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -21541,7 +21684,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -21669,6 +21813,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -21680,7 +21825,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -21768,6 +21914,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -21779,7 +21926,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -21965,6 +22113,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -21976,7 +22125,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -22079,6 +22229,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -22090,7 +22241,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -22641,6 +22793,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -22652,7 +22805,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -22816,6 +22970,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -22827,7 +22982,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -23082,6 +23238,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -23093,7 +23250,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -23311,6 +23469,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -23322,7 +23481,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -23370,6 +23530,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -23381,7 +23542,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -23444,6 +23606,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -23455,7 +23618,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -23604,6 +23768,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -23615,7 +23780,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -24283,6 +24449,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -24294,7 +24461,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -24493,6 +24661,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -24504,7 +24673,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -25156,6 +25326,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -25167,7 +25338,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -25287,6 +25459,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -25298,7 +25471,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -25357,6 +25531,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -25368,7 +25543,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -25514,6 +25690,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -25525,7 +25702,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -25571,6 +25749,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -25582,7 +25761,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -25767,6 +25947,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -25778,7 +25959,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -26090,6 +26272,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -26101,7 +26284,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -26165,6 +26349,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -26176,7 +26361,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -26353,6 +26539,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -26364,7 +26551,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -26679,6 +26867,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -26690,7 +26879,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -26770,6 +26960,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -26781,7 +26972,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -26795,6 +26987,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -26806,7 +26999,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -26876,6 +27070,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -26887,7 +27082,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -26948,6 +27144,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -26959,7 +27156,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -26973,6 +27171,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -26984,7 +27183,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -27040,6 +27240,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -27051,7 +27252,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -27116,6 +27318,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -27127,7 +27330,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -27141,6 +27345,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -27152,7 +27357,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -28261,6 +28467,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -28272,7 +28479,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -30433,6 +30641,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -30444,7 +30653,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -30508,6 +30718,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -30519,7 +30730,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -30533,6 +30745,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -30544,7 +30757,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -31645,6 +31859,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -31656,7 +31871,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -33801,6 +34017,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -33812,7 +34029,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -33877,6 +34095,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -33888,7 +34107,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -33990,6 +34210,14 @@
                       "items": {
                         "additionalProperties": false,
                         "properties": {
+                          "additional_datastreams_permissions": {
+                            "description": "Additional datastream permissions, that will be added to the agent policy.",
+                            "items": {
+                              "type": "string"
+                            },
+                            "nullable": true,
+                            "type": "array"
+                          },
                           "agents": {
                             "type": "number"
                           },
@@ -34587,6 +34815,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -34598,7 +34827,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -34645,6 +34875,14 @@
                   {
                     "additionalProperties": false,
                     "properties": {
+                      "additional_datastreams_permissions": {
+                        "description": "Additional datastream permissions, that will be added to the agent policy.",
+                        "items": {
+                          "type": "string"
+                        },
+                        "nullable": true,
+                        "type": "array"
+                      },
                       "description": {
                         "description": "Package policy description",
                         "type": "string"
@@ -34974,6 +35212,14 @@
                   {
                     "additionalProperties": false,
                     "properties": {
+                      "additional_datastreams_permissions": {
+                        "description": "Additional datastream permissions, that will be added to the agent policy.",
+                        "items": {
+                          "type": "string"
+                        },
+                        "nullable": true,
+                        "type": "array"
+                      },
                       "description": {
                         "type": "string"
                       },
@@ -35256,6 +35502,14 @@
                     "item": {
                       "additionalProperties": false,
                       "properties": {
+                        "additional_datastreams_permissions": {
+                          "description": "Additional datastream permissions, that will be added to the agent policy.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
                         "agents": {
                           "type": "number"
                         },
@@ -35839,6 +36093,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -35850,7 +36105,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -35864,6 +36120,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -35875,7 +36132,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -35952,6 +36210,14 @@
                       "items": {
                         "additionalProperties": false,
                         "properties": {
+                          "additional_datastreams_permissions": {
+                            "description": "Additional datastream permissions, that will be added to the agent policy.",
+                            "items": {
+                              "type": "string"
+                            },
+                            "nullable": true,
+                            "type": "array"
+                          },
                           "agents": {
                             "type": "number"
                           },
@@ -36537,6 +36803,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -36548,7 +36815,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -36747,6 +37015,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -36758,7 +37027,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -36860,6 +37130,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -36871,7 +37142,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -37096,6 +37368,14 @@
                             {
                               "additionalProperties": false,
                               "properties": {
+                                "additional_datastreams_permissions": {
+                                  "description": "Additional datastream permissions, that will be added to the agent policy.",
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "nullable": true,
+                                  "type": "array"
+                                },
                                 "agents": {
                                   "type": "number"
                                 },
@@ -37665,6 +37945,14 @@
                             {
                               "additionalProperties": false,
                               "properties": {
+                                "additional_datastreams_permissions": {
+                                  "description": "Additional datastream permissions, that will be added to the agent policy.",
+                                  "items": {
+                                    "type": "string"
+                                  },
+                                  "nullable": true,
+                                  "type": "array"
+                                },
                                 "description": {
                                   "description": "Package policy description",
                                   "type": "string"
@@ -38046,6 +38334,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -38057,7 +38346,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -38129,6 +38419,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -38140,7 +38431,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -38188,6 +38480,14 @@
                     "item": {
                       "additionalProperties": false,
                       "properties": {
+                        "additional_datastreams_permissions": {
+                          "description": "Additional datastream permissions, that will be added to the agent policy.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
                         "agents": {
                           "type": "number"
                         },
@@ -38771,6 +39071,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -38782,7 +39083,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -38856,6 +39158,14 @@
                   {
                     "additionalProperties": false,
                     "properties": {
+                      "additional_datastreams_permissions": {
+                        "description": "Additional datastream permissions, that will be added to the agent policy.",
+                        "items": {
+                          "type": "string"
+                        },
+                        "nullable": true,
+                        "type": "array"
+                      },
                       "description": {
                         "description": "Package policy description",
                         "type": "string"
@@ -39178,6 +39488,14 @@
                   {
                     "additionalProperties": false,
                     "properties": {
+                      "additional_datastreams_permissions": {
+                        "description": "Additional datastream permissions, that will be added to the agent policy.",
+                        "items": {
+                          "type": "string"
+                        },
+                        "nullable": true,
+                        "type": "array"
+                      },
                       "description": {
                         "type": "string"
                       },
@@ -39459,6 +39777,14 @@
                     "item": {
                       "additionalProperties": false,
                       "properties": {
+                        "additional_datastreams_permissions": {
+                          "description": "Additional datastream permissions, that will be added to the agent policy.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "nullable": true,
+                          "type": "array"
+                        },
                         "agents": {
                           "type": "number"
                         },
@@ -40042,6 +40368,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -40053,7 +40380,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -40067,6 +40395,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -40078,7 +40407,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -40188,6 +40518,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -40199,7 +40530,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -40361,6 +40693,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -40372,7 +40705,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -40436,6 +40770,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -40447,7 +40782,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -40549,6 +40885,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -40560,7 +40897,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -40725,6 +41063,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -40736,7 +41075,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -40813,6 +41153,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -40824,7 +41165,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -40930,6 +41272,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -40941,7 +41284,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -41121,6 +41465,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -41132,7 +41477,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -41227,6 +41573,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -41238,7 +41585,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -41383,6 +41731,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -41394,7 +41743,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
@@ -41479,6 +41829,7 @@
                   "additionalProperties": false,
                   "description": "Generic Error",
                   "properties": {
+                    "attributes": {},
                     "error": {
                       "type": "string"
                     },
@@ -41490,7 +41841,8 @@
                     }
                   },
                   "required": [
-                    "message"
+                    "message",
+                    "attributes"
                   ],
                   "type": "object"
                 }
