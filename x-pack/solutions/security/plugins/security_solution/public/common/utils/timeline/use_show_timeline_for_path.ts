@@ -28,10 +28,10 @@ export const useShowTimelineForGivenPath = () => {
     },
   } = useKibana();
   const userHasSecuritySolutionVisible = hasAccessToSecuritySolution(capabilities);
-  const dataViewId = dataView?.id ?? '';
+  const dataViewId = dataView?.id;
 
   const isTimelineAllowed = useMemo(
-    () => userHasSecuritySolutionVisible && (indicesExist || dataViewId === null),
+    () => userHasSecuritySolutionVisible && (indicesExist || typeof dataViewId === 'undefined'),
     [indicesExist, dataViewId, userHasSecuritySolutionVisible]
   );
 
