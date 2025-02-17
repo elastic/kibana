@@ -27,19 +27,19 @@ export async function getDataStreams(options: {
     dataset: datasetQuery ? `*${datasetQuery}*` : '*',
   });
 
-  const filteredDataStreams = uncategorisedOnly
+  let filteredDataStreams = uncategorisedOnly
     ? allDataStreams.filter((stream) => {
-        const isValidStreamType = VALID_STREAM_TYPES.some((streamType) =>
-          stream.name.startsWith(streamType)
-        );
-
-        if (!isValidStreamType) {
-          return false;
-        }
-
         return !stream._meta || !stream._meta.managed_by || stream._meta.managed_by !== 'fleet';
       })
     : allDataStreams;
+
+  filteredDataStreams = filteredDataStreams.filter((stream) => {
+    const isValidStreamType = VALID_STREAM_TYPES.some((streamType) =>
+      stream.name.startsWith(streamType)
+    );
+
+    return isValidStreamType;
+  });
 
   const mappedDataStreams = filteredDataStreams.map((dataStream) => {
     return { name: dataStream.name };
