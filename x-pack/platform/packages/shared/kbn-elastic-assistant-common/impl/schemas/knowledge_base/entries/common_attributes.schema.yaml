@@ -50,8 +50,7 @@ components:
         - "required"
       properties:
         kbResource:
-          type: string
-          description: Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
+          $ref: "#/components/schemas/KnowledgeBaseResource"
         source:
           type: string
           description: Source document name or filepath
@@ -164,6 +163,13 @@ components:
         - $ref: "#/components/schemas/BaseResponseProps"
         - $ref: "#/components/schemas/ResponseFields"
 
+    KnowledgeBaseResource:
+      description: Knowledge Base resource name for grouping entries, e.g. 'esql', 'user', etc
+      type: string
+      enum:
+        - esql
+        - user
+
     ###########
     # Document Knowledge Base Entry
     ###########
@@ -180,8 +186,7 @@ components:
           enum: [document]
           description: Entry type
         kbResource:
-          type: string
-          description: Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
+          $ref: "#/components/schemas/KnowledgeBaseResource"
         source:
           type: string
           description: Source document name or filepath

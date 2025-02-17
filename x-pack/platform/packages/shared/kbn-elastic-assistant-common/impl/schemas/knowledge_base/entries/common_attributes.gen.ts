@@ -49,14 +49,19 @@ export const KnowledgeBaseEntryErrorSchema = z
   .strict();
 
 /**
+ * Knowledge Base resource name for grouping entries, e.g. 'esql', 'user', etc
+ */
+export type KnowledgeBaseResource = z.infer<typeof KnowledgeBaseResource>;
+export const KnowledgeBaseResource = z.enum(['esql', 'user']);
+export type KnowledgeBaseResourceEnum = typeof KnowledgeBaseResource.enum;
+export const KnowledgeBaseResourceEnum = KnowledgeBaseResource.enum;
+
+/**
  * Metadata about a Knowledge Base Entry
  */
 export type Metadata = z.infer<typeof Metadata>;
 export const Metadata = z.object({
-  /**
-   * Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
-   */
-  kbResource: z.string(),
+  kbResource: KnowledgeBaseResource,
   /**
    * Source document name or filepath
    */
@@ -153,10 +158,7 @@ export const DocumentEntryRequiredFields = z.object({
    * Entry type
    */
   type: z.literal('document'),
-  /**
-   * Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
-   */
-  kbResource: z.string(),
+  kbResource: KnowledgeBaseResource,
   /**
    * Source document name or filepath
    */

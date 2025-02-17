@@ -1353,10 +1353,7 @@ components:
       type: object
       properties:
         kbResource:
-          description: >-
-            Knowledge Base resource name for grouping entries, e.g. 'esql',
-            'lens-docs', etc
-          type: string
+          $ref: '#/components/schemas/KnowledgeBaseResource'
         source:
           description: Source document name or filepath
           type: string
@@ -1736,6 +1733,14 @@ components:
         - $ref: '#/components/schemas/IndexEntryUpdateFields'
       discriminator:
         propertyName: type
+    KnowledgeBaseResource:
+      description: >-
+        Knowledge Base resource name for grouping entries, e.g. 'esql', 'user',
+        etc
+      enum:
+        - esql
+        - user
+      type: string
     KnowledgeBaseResponse:
       description: AI assistant KnowledgeBase.
       type: object
