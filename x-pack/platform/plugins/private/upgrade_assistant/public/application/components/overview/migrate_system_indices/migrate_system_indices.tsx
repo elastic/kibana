@@ -63,13 +63,13 @@ const getFailureCauses = (features: SystemIndicesMigrationFeature[]) => {
 
         return (
           <li key={feature}>
-            <strong>{feature}</strong>: {' '}
+            <strong>{feature}</strong>:{' '}
             {Array.from(errors).map((error, index) => (
               <React.Fragment key={error}>
                 <EuiCode>{error}</EuiCode>
                 {index < errors.size - 1 && ', '}
               </React.Fragment>
-            ))} {' '}
+            ))}{' '}
             ({indicesAffectedText})
           </li>
         );
