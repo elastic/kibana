@@ -21,18 +21,21 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
 import type { IShareContext, ShareContextObjectTypeConfig } from '../../context';
+import type { LinkShare } from '../../../services/share_orchestrator';
 
 type LinkProps = Pick<
   IShareContext,
   | 'objectType'
   | 'objectId'
   | 'isDirty'
-  | 'urlService'
   | 'shareableUrl'
   | 'delegatedShareUrlHandler'
   | 'shareableUrlLocatorParams'
   | 'allowShortUrl'
-> & { objectConfig?: ShareContextObjectTypeConfig };
+> & {
+  objectConfig?: ShareContextObjectTypeConfig;
+  shortUrlService: ReturnType<LinkShare['config']>['shortUrlService'];
+};
 
 interface UrlParams {
   [extensionName: string]: {
@@ -45,7 +48,7 @@ export const LinkContent = ({
   objectType,
   objectConfig = {},
   shareableUrl,
-  urlService,
+  shortUrlService,
   shareableUrlLocatorParams,
   allowShortUrl,
   delegatedShareUrlHandler,
@@ -80,15 +83,13 @@ export const LinkContent = ({
   }, [getUrlWithUpdatedParams, shareableUrl]);
 
   const createShortUrl = useCallback(async () => {
-    const shortUrlService = urlService.shortUrls.get(null);
-
     if (shareableUrlLocatorParams) {
       const shortUrl = await shortUrlService.createWithLocator(shareableUrlLocatorParams);
       return shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
     } else {
       return (await shortUrlService.createFromLongUrl(snapshotUrl)).url;
     }
-  }, [shareableUrlLocatorParams, urlService.shortUrls, snapshotUrl]);
+  }, [shareableUrlLocatorParams, shortUrlService, snapshotUrl]);
 
   const copyUrlHelper = useCallback(async () => {
     setIsLoading(true);

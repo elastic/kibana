@@ -24,9 +24,7 @@ import { ReportingAPIClient } from '@kbn/reporting-public';
 
 import {
   getSharedComponents,
-  reportingCsvShareModalProvider,
-  reportingExportModalProvider,
-  reportingCsvExportShareProvider,
+  reportingCsvExportProvider,
   reportingPDFExportProvider,
   reportingPNGExportProvider,
 } from '@kbn/reporting-public/share';
@@ -214,18 +212,10 @@ export class ReportingPublicPlugin
 
     startServices$.subscribe(([{ application }, { licensing }]) => {
       licensing.license$.subscribe((license) => {
-        shareSetup.register(
-          reportingCsvShareModalProvider({
-            apiClient,
-            license,
-            application,
-            startServices$,
-          })
-        );
-
-        shareSetup.newRegistrar<ExportShare>(
+        shareSetup.registerShareIntegration<ExportShare>(
           'search',
-          reportingCsvExportShareProvider({
+          // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
+          reportingCsvExportProvider({
             apiClient,
             license,
             application,
@@ -234,16 +224,8 @@ export class ReportingPublicPlugin
         );
 
         if (this.config.export_types.pdf.enabled || this.config.export_types.png.enabled) {
-          // shareSetup.register(
-          //   reportingExportModalProvider({
-          //     apiClient,
-          //     license,
-          //     application,
-          //     startServices$,
-          //   })
-          // );
-
-          shareSetup.newRegistrar<ExportShare>(
+          shareSetup.registerShareIntegration<ExportShare>(
+            // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
             reportingPDFExportProvider({
               apiClient,
               license,
@@ -252,7 +234,8 @@ export class ReportingPublicPlugin
             })
           );
 
-          shareSetup.newRegistrar<ExportShare>(
+          shareSetup.registerShareIntegration<ExportShare>(
+            // TODO: export the reporting pdf export provider for registration in the actual plugins that depend on it
             reportingPNGExportProvider({
               apiClient,
               license,

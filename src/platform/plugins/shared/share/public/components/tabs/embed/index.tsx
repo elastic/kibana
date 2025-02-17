@@ -25,9 +25,9 @@ const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ state, dispatch })
     isDirty,
     allowShortUrl,
     anonymousAccess,
-    urlService,
     shareableUrlLocatorParams,
-  } = useShareTabsContext()!;
+    shareMenuItems,
+  } = useShareTabsContext('embed');
 
   return (
     <EmbedContent
@@ -40,7 +40,7 @@ const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ state, dispatch })
         isDirty,
         anonymousAccess,
         allowShortUrl,
-        urlService,
+        shortUrlService: shareMenuItems.config.shortUrlService,
         shareableUrlLocatorParams,
       }}
     />
