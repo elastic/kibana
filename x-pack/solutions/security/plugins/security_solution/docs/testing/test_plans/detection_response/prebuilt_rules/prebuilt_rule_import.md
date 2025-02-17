@@ -21,6 +21,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
+  - [User stories](#user-stories)
   - [Terminology](#terminology)
 - [Scenarios](#scenarios)
   - [Core Functionality](#core-functionality)
@@ -48,6 +49,16 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Allow importing prebuilt rules at the API level](https://github.com/elastic/kibana/issues/180168)
 - [Benchmark performance of importing a large number of prebuilt rules](https://github.com/elastic/kibana/issues/195632)
 - [Tests for prebuilt rule import/export workflow](https://github.com/elastic/kibana/issues/202079)
+
+### User stories
+
+**Prebuilt rule import workflow:**
+
+- User can import a single prebuilt rule on the Rule Management page.
+- User can import multiple prebuilt rules on the Rule Management page.
+- User can import prebuilt non-customized rules.
+- User can import prebuilt customized rules.
+- User can import any combination of prebuilt non-customized, prebuilt customized, and custom rules.
 
 ### Terminology
 

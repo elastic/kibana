@@ -25,6 +25,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
+  - [User stories](#user-stories)
   - [Terminology](#terminology)
 - [Scenarios](#scenarios)
   - [Core Functionality](#core-functionality)
@@ -48,6 +49,17 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Support exporting prebuilt rules from the Rule Management page](https://github.com/elastic/kibana/issues/180173)
 - [Support exporting prebuilt rules from the Rule Details page](https://github.com/elastic/kibana/issues/180176)
 - [Tests for prebuilt rule import/export workflow](https://github.com/elastic/kibana/issues/202079)
+
+### User stories
+
+**Prebuilt rule export workflow:**
+
+- User can export a single prebuilt rule from the Rule Details page.
+- User can export multiple prebuilt rules one-by-one from the Rule Management page.
+- User can export multiple prebuilt rules in bulk from the Rule Management page via bulk actions.
+- User can export prebuilt non-customized rules.
+- User can export prebuilt customized rules.
+- User can export any combination of prebuilt non-customized, prebuilt customized, and custom rules.
 
 ### Terminology
 

@@ -19,6 +19,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
+  - [User stories](#user-stories)
   - [Terminology](#terminology)
   - [Assumptions](#assumptions)
   - [Functional requirements](#functional-requirements)
@@ -65,6 +66,19 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Users can Customize Prebuilt Detection Rules](https://github.com/elastic/security-team/issues/1974) (internal)
 - [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
 - [Tests for prebuilt rule upgrade workflow](https://github.com/elastic/kibana/issues/202078)
+
+### User stories
+
+**Prebuilt rule upgrade workflow:**
+
+- User can upgrade a single prebuilt rule to its latest version from the Rule Upgrade table with previewing incoming updates from Elastic and user customizations in the Rule Upgrade flyout.
+- Specifically, when upgrading a rule, in the Rule Upgrade flyout:
+  - User can preview updates from Elastic, for each rule field that has an update from Elastic.
+  - User can preview their customizations, for each rule field that was customized.
+  - User can compare their customizations with updates from Elastic and see if there are any conflicts between them, per each rule field.
+  - User can manually resolve conflicts between their customizations and updates from Elastic, per each rule field.
+  - User can edit the final field values before submitting the update.
+- User can upgrade a rule if its type has been changed by Elastic in the latest version, but can only accept the incoming changes; any user customizations will be lost.
 
 ### Terminology
 

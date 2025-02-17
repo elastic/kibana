@@ -24,6 +24,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
+  - [User stories](#user-stories)
   - [Terminology](#terminology)
   - [Assumptions](#assumptions)
 - [Scenarios](#scenarios)
@@ -57,6 +58,22 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Users can Customize Prebuilt Detection Rules](https://github.com/elastic/security-team/issues/1974) (internal)
 - [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
 - [Tests for prebuilt rule customization workflow](https://github.com/elastic/kibana/issues/202068)
+
+### User stories
+
+**Prebuilt rule customization workflow:**
+
+- User can edit a single prebuilt rule from the Rule Details page.
+- User can edit single prebuilt rules one-by-one from the Rule Management page.
+- User can edit multiple prebuilt rules in bulk via bulk actions on the Rule Management page. For example:
+  - User can bulk add index patterns to prebuilt rules.
+  - User can bulk update rule schedule in prebuilt rules.
+- User can customize most of the fields of prebuilt rules:
+  - User can edit and customize almost any field of a prebuilt rule, just like it's possible to do with custom rules, via editing it directly or via bulk editing via bulk actions.
+  - User can't edit the Author and License fields.
+- User can see if the rule is customized on the Rule Details page.
+- User can see which rules are customized on the Rule Management page in the Upgrade table.
+- User can un-customize a prebuilt rule by editing it and reverting its parameters back to their original values.
 
 ### Terminology
 

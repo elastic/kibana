@@ -20,6 +20,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
+  - [User stories](#user-stories)
   - [Terminology](#terminology)
   - [Assumptions](#assumptions)
   - [Non-functional requirements](#non-functional-requirements)
@@ -61,6 +62,15 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Users can Customize Prebuilt Detection Rules](https://github.com/elastic/security-team/issues/1974) (internal)
 - [Users can Customize Prebuilt Detection Rules: Milestone 2](https://github.com/elastic/kibana/issues/174167)
 - [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
+
+### User stories
+
+**Prebuilt rule installation workflow:**
+
+- User can install single prebuilt rules one-by-one from the Rule Installation page.
+- User can install multiple prebuilt rules in bulk from the Rule Installation page.
+- User can install all available prebuilt rules in bulk from the Rule Installation page.
+- User can preview properties of a prebuilt rule before installing it.
 
 ### Terminology
 
