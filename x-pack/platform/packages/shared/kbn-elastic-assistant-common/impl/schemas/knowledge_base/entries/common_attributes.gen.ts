@@ -56,7 +56,7 @@ export const Metadata = z.object({
   /**
    * Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
    */
-  kbResource: z.union([z.literal('user'), z.literal('esql')]),
+  kbResource: z.string(),
   /**
    * Source document name or filepath
    */
