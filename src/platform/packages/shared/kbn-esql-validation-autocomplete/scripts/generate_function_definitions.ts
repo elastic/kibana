@@ -330,7 +330,7 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
           description: undefined,
           ...(FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)
             ? // Default to false. If set to true, this parameter does not accept a function or literal, only fields.
-            param.name === 'field'
+              param.name === 'field'
               ? { fieldsOnly: true }
               : { constantOnly: true }
             : {}),
@@ -694,20 +694,26 @@ const enrichGrouping = (
 
 /** Enriches scalar functions that only accept a query parameter */
 const enrichQueryStringFunction = (functionDefinition: FunctionDefinition): FunctionDefinition => {
-  if (functionDefinition.signatures.every((s) => s.params.length > 0 && s.params.every(p => p.name === 'query'))) {
+  if (
+    functionDefinition.signatures.every(
+      (s) => s.params.length > 0 && s.params.every((p) => p.name === 'query')
+    )
+  ) {
     return {
       ...functionDefinition,
       customSnippet: `"""$0"""`,
     };
   }
   return functionDefinition;
-}
+};
 
 const enrichFlow = [enrichQueryStringFunction] as const;
 
-const enrichScalarFunction = (scalarFunctionDefinitions: FunctionDefinition[]): FunctionDefinition[] => {
+const enrichScalarFunction = (
+  scalarFunctionDefinitions: FunctionDefinition[]
+): FunctionDefinition[] => {
   return scalarFunctionDefinitions.map(_.flow(...enrichFlow));
-}
+};
 
 const enrichOperators = (
   operatorsFunctionDefinitions: FunctionDefinition[]
@@ -828,7 +834,8 @@ function printGeneratedFunctionsFile(
     functionDefinition: FunctionDefinition,
     functionNames: string[]
   ) => {
-    const { type, name, description, alias, signatures, operator, customSnippet } = functionDefinition;
+    const { type, name, description, alias, signatures, operator, customSnippet } =
+      functionDefinition;
 
     let functionName = operator?.toLowerCase() ?? name.toLowerCase();
     if (functionName.includes('not')) {
@@ -851,7 +858,8 @@ function printGeneratedFunctionsFile(
     supportedOptions: ${JSON.stringify(functionDefinition.supportedOptions)},
     validate: ${functionDefinition.validate || 'undefined'},
     examples: ${JSON.stringify(functionDefinition.examples || [])},${
-      customSnippet ? `\ncustomSnippet: ${JSON.stringify(customSnippet)},` : ''}
+      customSnippet ? `\ncustomSnippet: ${JSON.stringify(customSnippet)},` : ''
+    }
 }`;
   };
 
