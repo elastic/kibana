@@ -13,12 +13,27 @@ import { AlertEventOverview } from './alert_event_overview';
 import { DataTableRecord } from '@kbn/discover-utils';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { EcsFlat } from '@elastic/ecs';
+import { useDiscoverServices } from '../../../../hooks/use_discover_services';
+import { encode } from '@kbn/rison';
+
+jest.mock('../../../../hooks/use_discover_services');
+
+const TEST_TIMELINE_URL = 'test-timeline-url';
+
+const mockGetUrlForApp = jest.fn().mockReturnValue(TEST_TIMELINE_URL);
+
+const mockDiscoverServices = {
+  application: {
+    getUrlForApp: mockGetUrlForApp,
+  },
+};
 
 const mockRow = {
   'kibana.alert.reason': 'test-reason',
   'kibana.alert.rule.description': 'test-description',
   'event.kind': 'signal',
   _id: 'test-id',
+  '@timestamp': '2021-08-02T14:00:00.000Z',
   'kibana.alert.url': 'test-url',
 };
 
@@ -29,6 +44,9 @@ const mockHit = {
 const mockDataView = dataViewMock;
 
 describe('AlertEventOverviewAccessor', () => {
+  beforeEach(() => {
+    (useDiscoverServices as jest.Mock).mockReturnValue(mockDiscoverServices);
+  });
   describe('expandable sections', () => {
     test('should return the expandable sections correctly', () => {
       render(<AlertEventOverview hit={mockHit} dataView={mockDataView} />);
@@ -74,6 +92,49 @@ describe('AlertEventOverviewAccessor', () => {
       );
     });
 
-    test('should display timeline redirect url correctly', () => {});
+    test('should display timeline redirect url correctly', () => {
+      const localMockHit = {
+        flattened: {
+          ...mockRow,
+          'event.kind': 'event',
+          'event.category': 'process',
+        },
+      } as unknown as DataTableRecord;
+      render(<AlertEventOverview hit={localMockHit} dataView={mockDataView} />);
+      const expectedURLJSON = {
+        timeline: {
+          activeTab: 'query',
+          isOpen: true,
+          query: {
+            expression: '_id: test-id',
+            kind: 'kuery',
+          },
+        },
+
+        timeRange: {
+          timeline: {
+            from: mockRow['@timestamp'],
+            to: mockRow['@timestamp'],
+            linkTo: false,
+          },
+        },
+
+        timelineFlyout: {
+          right: {
+            id: 'document-details-right',
+            params: {
+              id: 'test-id',
+              scopeId: 'timeline-1',
+            },
+          },
+        },
+      };
+
+      expect(screen.getByTestId('exploreSecurity').getAttribute('href')).toBe(
+        `test-timeline-url?timeline=${encode(expectedURLJSON.timeline)}&timeRange=${encode(
+          expectedURLJSON.timeRange
+        )}&timelineFlyout=${encode(expectedURLJSON.timelineFlyout)}`
+      );
+    });
   });
 });

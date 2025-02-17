@@ -12,14 +12,15 @@ import { DocumentProfileProvider, DocumentType, SolutionType } from '../../../pr
 import { ProfileProviderServices } from '../../profile_provider_services';
 import { SecurityProfileProviderFactory } from '../types';
 import { SECURITY_PROFILE_ID } from '../constants';
-import { AlertEventOverview } from '../accessors/get_alert_event_overview';
+import { AlertEventOverview } from '../accessors/alert_event_overview';
 import * as i18n from '../translations';
 
 export const createSecurityDocumentProfileProvider: SecurityProfileProviderFactory<
   DocumentProfileProvider
-> = (services: ProfileProviderServices) => {
+> = (_services: ProfileProviderServices) => {
   return {
     profileId: SECURITY_PROFILE_ID.document,
+    experimental: true,
     profile: {
       getDocViewer: (prev) => (params) => {
         const prevDocViewer = prev(params);
@@ -40,7 +41,7 @@ export const createSecurityDocumentProfileProvider: SecurityProfileProviderFacto
         };
       },
     },
-    resolve: ({ record, rootContext }) => {
+    resolve: ({ rootContext }) => {
       if (rootContext.solutionType !== SolutionType.Security) {
         return { isMatch: false };
       }
