@@ -37,7 +37,7 @@ const logThresholdDefaultRecoveryMessage = i18n.translate(
   {
     defaultMessage: `Recovered: '{{context.reason}}'
     
-    {{rule.name}}' has recovered.
+    '{{rule.name}}' has recovered.
 
 [View alert details]('{{context.alertDetailsUrl}}')
 `,
