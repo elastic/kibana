@@ -459,7 +459,6 @@ export function getUnitDuration(unit: number = 1) {
 export function getCompatibleLiterals(
   commandName: string,
   types: string[],
-  names?: string[],
   options?: {
     advanceCursorAndOpenSuggestions?: boolean;
     addComma?: boolean;
@@ -504,25 +503,6 @@ export function getCompatibleLiterals(
         options
       )
     ); // i.e. year, month, ...
-  }
-  if (types.includes('string')) {
-    if (names) {
-      const index = types.indexOf('string');
-      if (/pattern/.test(names[index])) {
-        suggestions.push(
-          ...buildConstantsDefinitions(
-            [commandName === 'grok' ? '"%{WORD:firstWord}"' : '"%{firstWord}"'],
-            i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.aPatternString', {
-              defaultMessage: 'A pattern string',
-            }),
-            undefined,
-            options
-          )
-        );
-      } else {
-        suggestions.push(...buildConstantsDefinitions(['string'], '', undefined, options));
-      }
-    }
   }
   return suggestions;
 }
@@ -583,6 +563,23 @@ export function getDateLiterals(options?: {
   ];
 }
 
+export function getControlSuggestionIfSupported(
+  supportsControls: boolean,
+  type: ESQLVariableType,
+  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined
+) {
+  if (!supportsControls) {
+    return [];
+  }
+  const variableType = type;
+  const variables = getVariablesByType?.(variableType) ?? [];
+  const controlSuggestion = getControlSuggestion(
+    variableType,
+    variables?.map((v) => `?${v.key}`)
+  );
+  return controlSuggestion;
+}
+
 export function getControlSuggestion(
   type: ESQLVariableType,
   variables?: string[]
@@ -603,7 +600,7 @@ export function getControlSuggestion(
           defaultMessage: 'Click to create',
         }
       ),
-      sortText: '1A',
+      sortText: '1',
       command: {
         id: `esql.control.${type}.create`,
         title: i18n.translate(

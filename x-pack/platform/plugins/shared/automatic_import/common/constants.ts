@@ -37,6 +37,7 @@ export enum GenerationErrorCode {
   UNSUPPORTED_LOG_SAMPLES_FORMAT = 'unsupported-log-samples-format',
   UNPARSEABLE_CSV_DATA = 'unparseable-csv-data',
   CEF_ERROR = 'cef-not-supported',
+  BUILD_INTEGRATION_ERROR = 'build-integration-error',
 }
 
 // Size limits
