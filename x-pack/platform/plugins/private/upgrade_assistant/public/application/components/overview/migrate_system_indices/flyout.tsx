@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, ReactNode } from 'react';
 import { startCase } from 'lodash';
 import { i18n } from '@kbn/i18n';
-
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -22,6 +21,10 @@ import {
   EuiIcon,
   EuiSpacer,
   EuiInMemoryTable,
+  EuiButtonIcon,
+  EuiDescriptionList,
+  EuiScreenReaderOnly,
+  EuiBasicTableColumn,
 } from '@elastic/eui';
 
 import {
@@ -82,6 +85,27 @@ const i18nTexts = {
       defaultMessage: 'Status',
     }
   ),
+  errorTooltipLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.systemIndices.errorTooltipLabel',
+    {
+      defaultMessage: 'Migration failed for the following indices: ',
+    }
+  ),
+  unknownErrorLabel: i18n.translate(
+    'xpack.upgradeAssistant.overview.systemIndices.unknownErrorLabel',
+    {
+      defaultMessage: 'Unknown error',
+    }
+  ),
+};
+
+const getFailedIndices = (feature: SystemIndicesMigrationFeature) => {
+  return feature.indices
+    .filter((index) => index.failure_cause && index.failure_cause.error)
+    .map((index) => ({
+      index: index.index,
+      reason: index?.failure_cause?.error.type,
+    }));
 };
 
 const renderMigrationStatus = (status: MIGRATION_STATUS) => {
@@ -138,34 +162,73 @@ const renderMigrationStatus = (status: MIGRATION_STATUS) => {
     );
   }
 
-  return '';
+  return null;
 };
 
-const columns = [
-  {
-    field: 'feature_name',
-    name: i18nTexts.featureNameTableColumn,
-    sortable: true,
-    truncateText: true,
-    render: (name: string) => startCase(name),
-  },
-  {
-    field: 'migration_status',
-    name: i18nTexts.statusTableColumn,
-    sortable: true,
-    render: renderMigrationStatus,
-  },
-];
-
 export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutProps) => {
+  const [expandedRows, setExpandedRows] = useState<Record<string, ReactNode>>({});
+
+  const toggleRow = (feature: SystemIndicesMigrationFeature) => {
+    setExpandedRows((prev) => {
+      const newRows = { ...prev };
+      if (newRows[feature.feature_name]) {
+        delete newRows[feature.feature_name];
+      } else {
+        const failedIndices = getFailedIndices(feature);
+        const errorDetails = failedIndices.map(({ index, reason }) => ({
+          title: index,
+          description: reason || i18nTexts.unknownErrorLabel,
+        }));
+
+        newRows[feature.feature_name] = <EuiDescriptionList listItems={errorDetails} />;
+      }
+      return newRows;
+    });
+  };
+
+  const columns = [
+    {
+      field: 'feature_name',
+      name: i18nTexts.featureNameTableColumn,
+      sortable: true,
+      truncateText: true,
+      render: (name: string) => startCase(name),
+    },
+    {
+      field: 'migration_status',
+      name: i18nTexts.statusTableColumn,
+      sortable: true,
+      render: renderMigrationStatus,
+    },
+    {
+      align: 'right',
+      width: '40px',
+      isExpander: true,
+      name: (
+        <EuiScreenReaderOnly>
+          <span>Expand row</span>
+        </EuiScreenReaderOnly>
+      ),
+      render: (feature: SystemIndicesMigrationFeature) => {
+        return feature.migration_status === 'ERROR' ? (
+          <EuiButtonIcon
+            onClick={() => toggleRow(feature)}
+            aria-label={expandedRows[feature.feature_name] ? 'Collapse' : 'Expand'}
+            iconType={expandedRows[feature.feature_name] ? 'arrowDown' : 'arrowRight'}
+          />
+        ) : null;
+      },
+    },
+  ] as Array<EuiBasicTableColumn<SystemIndicesMigrationFeature>>;
+
   return (
     <>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s" data-test-subj="flyoutTitle">
+        <EuiTitle size="s">
           <h2>{i18nTexts.flyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody data-test-subj="flyoutDetails">
+      <EuiFlyoutBody>
         <EuiText>
           <p>{i18nTexts.flyoutDescription}</p>
         </EuiText>
@@ -175,6 +238,7 @@ export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutPr
           itemId="feature_name"
           items={data.features}
           columns={columns}
+          itemIdToExpandedRowMap={expandedRows}
           pagination={true}
           sorting={true}
         />
