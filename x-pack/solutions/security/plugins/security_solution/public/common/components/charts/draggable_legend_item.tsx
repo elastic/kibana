@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiHealth, EuiText } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import React, { useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { DEFAULT_NUMBER_FORMAT } from '../../../../common/constants';
 import { DefaultDraggable } from '../draggables';
@@ -24,7 +24,7 @@ import {
 import { getSourcererScopeId } from '../../../helpers';
 
 const CountFlexItem = styled(EuiFlexItem)`
-  ${({ theme }) => `margin-right: ${theme.eui.euiSizeS};`}
+  ${({ theme }) => `margin-right: ${theme.euiTheme.size.s};`}
 `;
 
 export interface LegendItem {
