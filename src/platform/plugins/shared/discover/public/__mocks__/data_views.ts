@@ -41,6 +41,7 @@ export function createDiscoverDataViewsMock() {
     clearInstanceCache: jest.fn(),
     getFieldsForIndexPattern: jest.fn((dataView) => dataView.fields),
     refreshFields: jest.fn(),
+    clearCache: jest.fn(),
   } as unknown as jest.Mocked<DataViewsContract>;
 }
 

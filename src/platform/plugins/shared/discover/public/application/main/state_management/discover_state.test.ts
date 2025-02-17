@@ -426,7 +426,6 @@ describe('Test discover state actions', () => {
   test('fetchData', async () => {
     const { state } = await getState('/');
     const dataState = state.dataState;
-    await state.actions.loadDataViewList();
     expect(dataState.data$.main$.value.fetchStatus).toBe(FetchStatus.LOADING);
     await state.actions.loadSavedSearch();
     const unsubscribe = state.actions.initializeAndSync();
@@ -442,7 +441,6 @@ describe('Test discover state actions', () => {
 
   test('loadSavedSearch with no id given an empty URL', async () => {
     const { state, getCurrentUrl } = await getState('');
-    await state.actions.loadDataViewList();
     const newSavedSearch = await state.actions.loadSavedSearch();
     expect(newSavedSearch?.id).toBeUndefined();
     const unsubscribe = state.actions.initializeAndSync();
