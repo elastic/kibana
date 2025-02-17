@@ -69,6 +69,7 @@ import {
   filterMaintenanceWindowsIds,
 } from '../task_runner/maintenance_windows';
 import { ErrorWithType } from '../lib/error_with_type';
+import { RuntimeFieldManager } from './RuntimeFieldsManager';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -123,6 +124,7 @@ export class AlertsClient<
   private _isUsingDataStreams: boolean;
   private ruleInfoMessage: string;
   private logTags: { tags: string[] };
+  private runtimeFieldsManager: RuntimeFieldManager;
 
   constructor(private readonly options: AlertsClientParams) {
     this.legacyAlertsClient = new LegacyAlertsClient<
@@ -151,6 +153,12 @@ export class AlertsClient<
     this.ruleInfoMessage = `for ${this.ruleType.id}:${this.options.rule.id} '${this.options.rule.name}'`;
     this.logTags = { tags: [this.ruleType.id, this.options.rule.id, 'alerts-client'] };
     this.isServerless = options.isServerless;
+
+    this.runtimeFieldsManager = new RuntimeFieldManager({
+      indexTemplateAndPattern: this.indexTemplateAndPattern,
+      logger: this.options.logger,
+      clientPromise: this.options.elasticsearchClientPromise,
+    });
   }
 
   public async initializeExecution(opts: InitializeExecutionOpts) {
@@ -273,6 +281,9 @@ export class AlertsClient<
     // Save the alert payload
     if (alert.payload) {
       this.reportedAlerts[alert.id] = alert.payload;
+
+      // create the runtimeFields in the component template
+      this.runtimeFieldsManager.addRuntimeFields(alert);
     }
 
     return {
@@ -603,6 +614,8 @@ export class AlertsClient<
         );
       }
     }
+
+    await this.runtimeFieldsManager.persistRuntimeFields();
 
     function getBulkMeta(
       uuid: string,
