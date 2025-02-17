@@ -39,17 +39,16 @@ import { asDuration } from '../utils';
 
 type FieldConfigValue = string | number | undefined;
 
+export interface FieldConfiguration {
+  title: string;
+  content: (value: FieldConfigValue) => React.ReactNode;
+  value: FieldConfigValue;
+  fieldMetadata?: PartialFieldMetadataPlain;
+}
+
 export const getFieldConfiguration = (
   attributes: TraceDocumentOverview
-): Record<
-  string,
-  {
-    title: string;
-    content: (value: FieldConfigValue) => React.ReactNode;
-    value: FieldConfigValue;
-    fieldMetadata?: PartialFieldMetadataPlain;
-  }
-> => {
+): Record<string, FieldConfiguration> => {
   return {
     [SPAN_NAME_FIELD]: {
       title: i18n.translate('unifiedDocViewer.tracesOverview.details.spanName.title', {
