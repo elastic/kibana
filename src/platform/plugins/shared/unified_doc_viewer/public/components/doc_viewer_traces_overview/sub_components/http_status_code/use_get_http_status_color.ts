@@ -17,7 +17,9 @@ export const useGetHttpStatusColor = (status: string | number) => {
     3: euiTheme.colors.vis.euiColorVisGrey0,
     4: euiTheme.colors.vis.euiColorVisWarning0,
     5: euiTheme.colors.vis.euiColorVisDanger0,
+    7: euiTheme.colors.vis.euiColorVisGrey0,
   };
-  const intStatus = typeof status === 'string' ? parseInt(status.replace(/\D/g, ''), 10) : status;
-  return httpStatusCodeColors[intStatus.toString().substring(0, 1)];
+
+  const firstStatusDigit = String(status).charAt(0);
+  return httpStatusCodeColors[firstStatusDigit];
 };
