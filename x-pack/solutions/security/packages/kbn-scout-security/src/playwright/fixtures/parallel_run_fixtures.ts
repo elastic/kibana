@@ -6,7 +6,6 @@
  */
 
 import { spaceTest as spaceBase } from '@kbn/scout';
-import { securityBrowserAuthFixture } from './test/browser_auth';
 import { extendPageObjects } from '../page_objects';
 import { SecurityParallelTestFixtures, SecurityParallelWorkerFixtures } from './types';
 
@@ -17,7 +16,6 @@ export const spaceTest = spaceBase.extend<
   SecurityParallelTestFixtures,
   SecurityParallelWorkerFixtures
 >({
-  ...securityBrowserAuthFixture,
   pageObjects: async (
     {
       pageObjects,

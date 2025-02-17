@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export { test } from './single_thread_fixtures';
-export { spaceTest } from './parallel_run_fixtures';
-export * from './types';
+import { createPlaywrightConfig } from '@kbn/scout';
+
+// eslint-disable-next-line import/no-default-export
+export default createPlaywrightConfig({
+  testDir: './tests/',
+});

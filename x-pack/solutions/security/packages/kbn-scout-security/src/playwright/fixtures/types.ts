@@ -11,9 +11,14 @@ import {
   ScoutTestFixtures,
   ScoutWorkerFixtures,
 } from '@kbn/scout';
+import { BrowserAuthFixture } from '@kbn/scout/src/playwright/fixtures/test/browser_auth';
 import { SecurityPageObjects } from '../page_objects';
 
+export interface SecurityBrowserAuthFixture extends BrowserAuthFixture {
+  loginAsPlatformEngineer: () => Promise<void>;
+}
 export interface SecurityTestFixtures extends ScoutTestFixtures {
+  browserAuth: SecurityBrowserAuthFixture;
   pageObjects: SecurityPageObjects;
 }
 

@@ -7,7 +7,7 @@
 
 import { ScoutPage, Locator } from '@kbn/scout';
 
-const PAGE_URL = '/app/security/entity_analytics';
+const PAGE_URL = 'security/entity_analytics';
 
 export class EntityAnalyticsPage {
   public enableRiskEngineBtn: Locator;

@@ -6,23 +6,29 @@
  */
 
 import { test as base } from '@kbn/scout';
-import { securityBrowserAuthFixture } from './test/browser_auth';
+import { BrowserAuthFixture } from '@kbn/scout/src/playwright/fixtures/test/browser_auth';
 import { extendPageObjects } from '../page_objects';
-import { SecurityTestFixtures, SecurityWorkerFixtures } from './types';
+import { SecurityBrowserAuthFixture, SecurityTestFixtures, SecurityWorkerFixtures } from './types';
 
-/**
- * Should be used for the test spec files executed seqentially.
- */
 export const test = base.extend<SecurityTestFixtures, SecurityWorkerFixtures>({
-  ...securityBrowserAuthFixture,
+  browserAuth: async (
+    { browserAuth }: { browserAuth: BrowserAuthFixture },
+    use: (auth: SecurityBrowserAuthFixture) => Promise<void>
+  ) => {
+    const extendedAuth: SecurityBrowserAuthFixture = {
+      ...browserAuth,
+      loginAsPlatformEngineer: async () => {
+        await browserAuth.loginAs('platform_engineer');
+      },
+    };
+
+    await use(extendedAuth);
+  },
   pageObjects: async (
     {
       pageObjects,
       page,
-    }: {
-      pageObjects: SecurityTestFixtures['pageObjects'];
-      page: SecurityTestFixtures['page'];
-    },
+    }: { pageObjects: SecurityTestFixtures['pageObjects']; page: SecurityTestFixtures['page'] },
     use: (pageObjects: SecurityTestFixtures['pageObjects']) => Promise<void>
   ) => {
     const extendedPageObjects = extendPageObjects(pageObjects, page);
