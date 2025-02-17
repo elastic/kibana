@@ -685,11 +685,11 @@ test.describe(
         ).toBeVisible();
       });
 
-      test('when user clicks on Explore Logs it navigates to observability Discover', async ({
+      test('when user clicks on Explore Logs it navigates to observability Logs Explorer', async ({
         page,
       }) => {
         await page.locator('[data-test-subj="obltOnboardingExploreLogs"]').click();
-        await expect(page).toHaveURL(/\/app\/discover/);
+        await expect(page).toHaveURL(/\/app\/observability-logs-explorer/);
       });
     });
   }
