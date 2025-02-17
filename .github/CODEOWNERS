@@ -759,9 +759,9 @@ src/platform/packages/private/kbn-reporting/server @elastic/appex-sharedux
 src/platform/packages/shared/kbn-resizable-layout @elastic/kibana-data-discovery
 examples/resizable_layout_examples @elastic/kibana-data-discovery
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
-packages/response-ops/alerts_apis @elastic/response-ops
-packages/response-ops/alerts_fields_browser @elastic/response-ops
-packages/response-ops/alerts_table @elastic/response-ops
+src/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
+src/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
+src/platform/packages/shared/response-ops/alerts-table @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_form @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_params @elastic/response-ops
 examples/response_stream @elastic/ml-ui
