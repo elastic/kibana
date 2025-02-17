@@ -113,8 +113,6 @@ import { AxisExtentModes, SeriesTypes, ValueLabelModes, XScaleTypes } from '../.
 import { DataLayers } from './data_layers';
 import { Tooltip as CustomTooltip } from './tooltip';
 import { XYCurrentTime } from './xy_current_time';
-
-import './xy_chart.scss';
 import { TooltipHeader } from './tooltip';
 import { LegendColorPickerWrapperContext, LegendColorPickerWrapper } from './legend_color_picker';
 import { createSplitPoint, getTooltipActions, getXSeriesPoint } from './tooltip/tooltip_actions';
