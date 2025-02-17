@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }) {
   const modifiedMarkdownText = 'Modified markdown text';
 
   const createMarkdownVis = async (title) => {
-    await dashboardAddPanel.clickMarkdownQuickButton();
+    await dashboardAddPanel.clickAddMarkdownPanel();
     await visEditor.setMarkdownTxt(originalMarkdownText);
     await visEditor.clickGo();
     if (title) {

@@ -307,7 +307,7 @@ export class ObservabilityAIAssistantClient {
                 disableFunctions,
                 tracer: completeTracer,
                 connectorId,
-                useSimulatedFunctionCalling: simulateFunctionCalling === true,
+                simulateFunctionCalling,
               })
             );
           }),
@@ -505,15 +505,19 @@ export class ObservabilityAIAssistantClient {
           }
         : ToolChoiceType.auto;
     }
+
     const options = {
       connectorId,
+      system: messages.find((message) => message.message.role === MessageRole.System)?.message
+        .content,
       messages: convertMessagesForInference(
         messages.filter((message) => message.message.role !== MessageRole.System)
       ),
       toolChoice,
       tools,
-      functionCalling: (simulateFunctionCalling ? 'simulated' : 'native') as FunctionCallingMode,
+      functionCalling: (simulateFunctionCalling ? 'simulated' : 'auto') as FunctionCallingMode,
     };
+
     if (stream) {
       return defer(() =>
         this.dependencies.inferenceClient.chatComplete({
