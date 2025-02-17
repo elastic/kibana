@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_integration',
+  preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/observability/packages/utils_server'],
+  roots: ['<rootDir>/x-pack/solutions/observability/packages/utils-server'],
 };

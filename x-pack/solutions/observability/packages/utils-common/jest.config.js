@@ -7,6 +7,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  roots: ['<rootDir>/x-pack/solutions/security/packages/distribution_bar'],
   rootDir: '../../../../..',
+  roots: ['<rootDir>/x-pack/solutions/observability/packages/utils-common'],
 };

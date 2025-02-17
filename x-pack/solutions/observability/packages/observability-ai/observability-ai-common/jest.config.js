@@ -7,6 +7,9 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/observability/packages/utils_common'],
+  rootDir: '../../../../../..',
+  roots: [
+    '<rootDir>/x-pack/solutions/observability/packages/observability-ai/observability-ai-common',
+    '<rootDir>/x-pack/solutions/observability/packages/observability-ai/observability-ai-server',
+  ],
 };
