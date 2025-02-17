@@ -53,10 +53,18 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Tickets
 
-- [Users can customize prebuilt detection rules](https://github.com/elastic/kibana/issues/174168) epic
-- [Implement single-line string diff algorithm](https://github.com/elastic/kibana/issues/180158)
+- [Users can Customize Prebuilt Detection Rules](https://github.com/elastic/security-team/issues/1974) (internal)
+- [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
 - [Implement number diff algorithm](https://github.com/elastic/kibana/issues/180160)
+- [Implement single-line string diff algorithm](https://github.com/elastic/kibana/issues/180158)
+- [Implement multi-line string diff algorithm](https://github.com/elastic/kibana/issues/180159)
 - [Implement array of scalar values diff algorithm](https://github.com/elastic/kibana/issues/180162)
+- [Implement data source fields diff algorithm](https://github.com/elastic/kibana/issues/187659)
+- [Implement query fields diff algorithms](https://github.com/elastic/kibana/issues/187658)
+- [Implement `concurrent_searches` and `items_per_search` fields diff algorithms](https://github.com/elastic/kibana/issues/188061)
+- [Implement rule type diff algorithm](https://github.com/elastic/kibana/issues/190482)
+- [Tests for prebuilt rule customization workflow](https://github.com/elastic/kibana/issues/202068)
+- [Tests for prebuilt rule upgrade workflow](https://github.com/elastic/kibana/issues/202078)
 
 ### Terminology
 

@@ -35,15 +35,11 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Tickets
 
-- [Rule Immutability/Customization epic](https://github.com/elastic/security-team/issues/1974)(internal)
-
-**Milestone 3 - Prebuilt Rules Customization:**
-- [Milestone 3 epic ticket](https://github.com/elastic/kibana/issues/174168)
-- [Tests for prebuilt rule upgrade workflow #202078](https://github.com/elastic/kibana/issues/202078)
-
-**Milestone 2:**
-- [Ensure full test coverage for existing workflows of installing and upgrading prebuilt rules](https://github.com/elastic/kibana/issues/148176)
-- [Write test plan and add test coverage for the new workflows of installing and upgrading prebuilt rules](https://github.com/elastic/kibana/issues/148192)
+- [Users can Customize Prebuilt Detection Rules](https://github.com/elastic/security-team/issues/1974) (internal)
+- [Users can Customize Prebuilt Detection Rules: Milestone 2](https://github.com/elastic/kibana/issues/174167)
+  - [Ensure full test coverage for existing workflows of installing and upgrading prebuilt rules](https://github.com/elastic/kibana/issues/148176)
+  - [Write test plan and add test coverage for the new workflows of installing and upgrading prebuilt rules](https://github.com/elastic/kibana/issues/148192)
+- [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
 
 ### Terminology
 

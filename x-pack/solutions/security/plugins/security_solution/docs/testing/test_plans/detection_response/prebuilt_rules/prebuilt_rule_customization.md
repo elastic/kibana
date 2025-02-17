@@ -54,8 +54,9 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Tickets
 
-- [Test plan issue](https://github.com/elastic/kibana/issues/202068)
-- [Prebuilt rule customization](https://github.com/elastic/kibana/issues/174168) epic
+- [Users can Customize Prebuilt Detection Rules](https://github.com/elastic/security-team/issues/1974) (internal)
+- [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
+- [Tests for prebuilt rule customization workflow](https://github.com/elastic/kibana/issues/202068)
 
 ### Terminology
 

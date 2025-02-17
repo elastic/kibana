@@ -42,9 +42,12 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Tickets
 
-- [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974)
-- [Rule Exporting Feature](https://github.com/elastic/kibana/issues/180167#issue-2227974379)
-- [Rule Export API PR](https://github.com/elastic/kibana/pull/194498)
+- [Users can Customize Prebuilt Detection Rules](https://github.com/elastic/security-team/issues/1974) (internal)
+- [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
+- [Allow exporting prebuilt rules at the API level](https://github.com/elastic/kibana/issues/180167)
+- [Support exporting prebuilt rules from the Rule Management page](https://github.com/elastic/kibana/issues/180173)
+- [Support exporting prebuilt rules from the Rule Details page](https://github.com/elastic/kibana/issues/180176)
+- [Tests for prebuilt rule import/export workflow](https://github.com/elastic/kibana/issues/202079)
 
 ### Terminology
 

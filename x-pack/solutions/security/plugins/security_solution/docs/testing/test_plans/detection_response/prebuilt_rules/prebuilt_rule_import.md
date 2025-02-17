@@ -43,9 +43,11 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Tickets
 
-- [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974)
-- [Rule Importing Feature](https://github.com/elastic/kibana/issues/180168)
-- [Rule Import API PR](https://github.com/elastic/kibana/pull/190198)
+- [Users can Customize Prebuilt Detection Rules](https://github.com/elastic/security-team/issues/1974) (internal)
+- [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
+- [Allow importing prebuilt rules at the API level](https://github.com/elastic/kibana/issues/180168)
+- [Benchmark performance of importing a large number of prebuilt rules](https://github.com/elastic/kibana/issues/195632)
+- [Tests for prebuilt rule import/export workflow](https://github.com/elastic/kibana/issues/202079)
 
 ### Terminology
 
