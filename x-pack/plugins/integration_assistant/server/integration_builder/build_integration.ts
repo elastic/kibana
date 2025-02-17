@@ -19,6 +19,7 @@ import { createFieldMapping } from './fields';
 import { createPipeline } from './pipeline';
 import { createReadme } from './readme_files';
 import { Field, flattenObjectsList } from '../util/samples';
+import { BuildIntegrationError } from '../lib/errors/build_integration_error';
 
 const initialVersion = '1.0.0';
 
@@ -36,12 +37,13 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
   configureNunjucks();
 
   if (!isValidName(integration.name)) {
-    throw new Error(
+    throw new BuildIntegrationError(
       `Invalid integration name: ${integration.name}, Should only contain letters, numbers and underscores`
     );
   }
 
   const workingDir = joinPath(getDataPath(), `integration-assistant-${generateUniqueId()}`);
+  try {
   const packageDirectoryName = `${integration.name}-${initialVersion}`;
   const packageDir = createDirectories(workingDir, integration, packageDirectoryName);
 
@@ -65,17 +67,22 @@ export async function buildPackage(integration: Integration): Promise<Buffer> {
       dataStream.docs
     );
 
-    return {
-      datastream: dataStreamName,
-      fields: mergeAndSortFields(fields, dataStreamFields),
-    };
-  });
+      return {
+        datastream: dataStreamName,
+        fields: mergeAndSortFields(fields, dataStreamFields),
+      };
+    });
 
   createReadme(packageDir, integration.name, fieldsPerDatastream);
   const zipBuffer = await createZipArchive(integration, workingDir, packageDirectoryName);
   removeDirSync(workingDir);
   return zipBuffer;
+} catch (error) {
+  throw new BuildIntegrationError('Building the Integration failed');
+} finally {
+  removeDirSync(workingDir);
 }
+
 export function isValidName(input: string): boolean {
   return input.length > 0 && NAME_REGEX_PATTERN.test(input);
 }
