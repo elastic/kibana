@@ -10,9 +10,8 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { getUnifiedDocViewerServices } from '../../../plugin';
 import { DEPENDENCY_OVERVIEW_LOCATOR_ID } from '@kbn/deeplinks-observability';
-
+import { getUnifiedDocViewerServices } from '../../../plugin';
 
 interface DependencyNameLinkProps {
   dependencyName: string;
