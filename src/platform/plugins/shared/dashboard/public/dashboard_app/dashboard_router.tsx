@@ -15,7 +15,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { parse, ParsedQuery } from 'query-string';
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 import { HashRouter, Redirect, RouteComponentProps } from 'react-router-dom';
 
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../plugin_constants';
@@ -185,11 +185,12 @@ export async function mountApp({
       iconType: 'glasses',
     });
   }
-  render(app, element);
+  const root = createRoot(element);
+  root.render(app);
   return () => {
     dataService.search.session.clear();
     unlistenParentHistory();
-    unmountComponentAtNode(element);
+    root.unmount();
     appUnMounted();
   };
 }

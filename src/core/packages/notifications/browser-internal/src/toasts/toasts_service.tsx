@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot, Root } from 'react-dom/client';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
@@ -37,7 +37,7 @@ interface StartDeps {
 
 export class ToastsService {
   private api?: ToastsApi;
-  private targetDomElement?: HTMLElement;
+  private root?: Root;
 
   public setup({ uiSettings }: SetupDeps) {
     this.api = new ToastsApi({ uiSettings });
@@ -46,26 +46,27 @@ export class ToastsService {
 
   public start({ eventReporter, overlays, targetDomElement, ...startDeps }: StartDeps) {
     this.api!.start({ overlays, ...startDeps });
-    this.targetDomElement = targetDomElement;
 
-    render(
+    const root = createRoot(targetDomElement);
+    this.root = root;
+
+    root.render(
       <KibanaRenderContextProvider {...startDeps}>
         <GlobalToastList
           dismissToast={(toastId: string) => this.api!.remove(toastId)}
           toasts$={this.api!.get$()}
           reportEvent={eventReporter}
         />
-      </KibanaRenderContextProvider>,
-      targetDomElement
+      </KibanaRenderContextProvider>
     );
 
     return this.api!;
   }
 
   public stop() {
-    if (this.targetDomElement) {
-      unmountComponentAtNode(this.targetDomElement);
-      this.targetDomElement.textContent = '';
+    if (this.root) {
+      this.root.unmount();
+      this.root = undefined;
     }
   }
 }
