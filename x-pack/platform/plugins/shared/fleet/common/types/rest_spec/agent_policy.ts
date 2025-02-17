@@ -40,7 +40,7 @@ export interface GetOneAgentPolicyResponse {
 export interface CurrentVersionCount {
   version: string;
   agents: number;
-  failedAgents: number;
+  failedUpgradeAgents: number;
 }
 
 export interface GetAutoUpgradeAgentsStatusResponse {

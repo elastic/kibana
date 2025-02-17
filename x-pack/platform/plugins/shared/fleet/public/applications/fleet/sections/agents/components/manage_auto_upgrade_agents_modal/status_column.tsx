@@ -45,7 +45,7 @@ export const StatusColumn: React.FunctionComponent<{
       autoUpgradeAgentsStatus?.currentVersions.find((value) => value.version === version) ?? {
         version,
         agents: 0,
-        failedAgents: 0,
+        failedUpgradeAgents: 0,
       }
     );
   }, [autoUpgradeAgentsStatus, version]);
@@ -87,7 +87,7 @@ export const StatusColumn: React.FunctionComponent<{
     );
     let statusButton = inProgressStatus;
 
-    if (agentVersionCounts.failedAgents > 0) {
+    if (agentVersionCounts.failedUpgradeAgents > 0) {
       statusButton = failedStatus;
     } else {
       const currPercentage = calcPercentage(agentVersionCounts.agents);
@@ -101,7 +101,7 @@ export const StatusColumn: React.FunctionComponent<{
     return (
       <EuiToolTip
         content={
-          agentVersionCounts.failedAgents === 0 ? (
+          agentVersionCounts.failedUpgradeAgents === 0 ? (
             <FormattedMessage
               id="xpack.fleet.manageAutoUpgradeAgents.currentStatusTooltip"
               defaultMessage="{agents} agents on target version"
@@ -112,9 +112,9 @@ export const StatusColumn: React.FunctionComponent<{
           ) : (
             <FormattedMessage
               id="xpack.fleet.manageAutoUpgradeAgents.failedStatusTooltip"
-              defaultMessage="{failedAgents} agents failed to upgrade"
+              defaultMessage="{failedUpgradeAgents} agents failed to upgrade"
               values={{
-                failedAgents: agentVersionCounts.failedAgents,
+                failedUpgradeAgents: agentVersionCounts.failedUpgradeAgents,
               }}
             />
           )

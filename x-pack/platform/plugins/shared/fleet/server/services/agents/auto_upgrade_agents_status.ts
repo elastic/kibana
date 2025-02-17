@@ -42,7 +42,7 @@ export async function getAutoUpgradeAgentsStatus(
           (currentVersionsMap[bucket.key] = {
             version: bucket.key,
             agents: bucket.doc_count,
-            failedAgents: 0,
+            failedUpgradeAgents: 0,
           })
       );
       total = result.total;
@@ -68,7 +68,7 @@ export async function getAutoUpgradeAgentsStatus(
           (currentVersionsMap[bucket.key] = {
             version: bucket.key,
             agents: currentVersionsMap[bucket.key]?.agents ?? 0,
-            failedAgents: bucket.doc_count,
+            failedUpgradeAgents: bucket.doc_count,
           })
       );
     });

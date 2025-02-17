@@ -300,7 +300,7 @@ export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
     schema.object({
       version: schema.string(),
       agents: schema.number(),
-      failedAgents: schema.number(),
+      failedUpgradeAgents: schema.number(),
     })
   ),
   totalAgents: schema.number(),
