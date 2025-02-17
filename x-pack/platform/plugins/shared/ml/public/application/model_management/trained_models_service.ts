@@ -28,6 +28,7 @@ import {
   catchError,
   debounceTime,
   merge,
+  EMPTY,
 } from 'rxjs';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { isEqual } from 'lodash';
@@ -410,7 +411,14 @@ export class TrainedModelsService {
             );
           }),
           switchMap((deployments) =>
-            merge(...deployments.map((deployment) => this.handleDeployment$(deployment)))
+            merge(
+              ...deployments.map((deployment) =>
+                this.handleDeployment$(deployment).pipe(
+                  // Ensure errors in individual deployments don't break the stream
+                  catchError(() => EMPTY)
+                )
+              )
+            )
           )
         )
         .subscribe()
