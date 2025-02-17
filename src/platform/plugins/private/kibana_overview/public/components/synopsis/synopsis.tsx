@@ -43,7 +43,7 @@ export function Synopsis({
   return (
     <EuiCard
       {...(betaBadgeProps && { betaBadgeProps })}
-      className={`homSynopsis__card ${!wrapInPanel ? 'homSynopsis__card--noPanel' : ''}`}
+      className="homSynopsis__card"
       layout="horizontal"
       icon={optionalImg}
       titleSize="xs"
