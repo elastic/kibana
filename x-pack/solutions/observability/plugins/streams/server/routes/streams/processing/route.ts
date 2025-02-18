@@ -6,11 +6,10 @@
  */
 
 import {
-  SampleDocument,
+  FlattenRecord,
   flattenRecord,
   namedFieldDefinitionConfigSchema,
   processorWithIdDefinitionSchema,
-  sampleDocument,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { checkAccess } from '../../../lib/streams/stream_crud';
@@ -56,13 +55,13 @@ export const simulateProcessorRoute = createServerRoute({
 export interface ProcessingSuggestionBody {
   field: string;
   connectorId: string;
-  samples: SampleDocument[];
+  samples: FlattenRecord[];
 }
 
 const processingSuggestionSchema = z.object({
   field: z.string(),
   connectorId: z.string(),
-  samples: z.array(sampleDocument),
+  samples: z.array(flattenRecord),
 });
 
 const suggestionsParamsSchema = z.object({
@@ -84,12 +83,15 @@ export const processingSuggestionRoute = createServerRoute({
   },
   params: suggestionsParamsSchema,
   handler: async ({ params, request, logger, getScopedClients }) => {
-    const { inferenceClient, scopedClusterClient } = await getScopedClients({ request });
+    const { inferenceClient, scopedClusterClient, streamsClient } = await getScopedClients({
+      request,
+    });
     return handleProcessingSuggestion(
       params.path.name,
       params.body,
       inferenceClient,
-      scopedClusterClient
+      scopedClusterClient,
+      streamsClient
     );
   },
 });

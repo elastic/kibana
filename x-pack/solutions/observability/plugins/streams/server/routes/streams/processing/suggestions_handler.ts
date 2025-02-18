@@ -8,21 +8,17 @@
 import { IScopedClusterClient } from '@kbn/core/server';
 import { get, groupBy, mapValues, orderBy, shuffle, uniq, uniqBy } from 'lodash';
 import { InferenceClient } from '@kbn/inference-plugin/server';
-import { SampleDocument } from '@kbn/streams-schema';
-import {
-  assertSimulationResult,
-  executeSimulation,
-  prepareSimulationBody,
-  prepareSimulationDiffs,
-  prepareSimulationResponse,
-} from './simulation_handler';
+import { FlattenRecord } from '@kbn/streams-schema';
+import { StreamsClient } from '../../../lib/streams/client';
+import { simulateProcessing } from './simulation_handler';
 import { ProcessingSuggestionBody } from './route';
 
 export const handleProcessingSuggestion = async (
   name: string,
   body: ProcessingSuggestionBody,
   inferenceClient: InferenceClient,
-  scopedClusterClient: IScopedClusterClient
+  scopedClusterClient: IScopedClusterClient,
+  streamsClient: StreamsClient
 ) => {
   const { field, samples } = body;
   // Turn sample messages into patterns to group by
@@ -50,30 +46,40 @@ export const handleProcessingSuggestion = async (
     };
   });
 
-  const patternsToProcess = orderBy(
-    Object.values(
-      mapValues(
-        // group by truncated pattern
-        groupBy(samplesWithPatterns, 'truncatedPattern'),
-        (samplesForTruncatedPattern, truncatedPattern) => {
-          // return truncated pattern, count, and unique example values, shuffled
-          return {
-            truncatedPattern,
-            count: samplesForTruncatedPattern.length,
-            exampleValues: shuffle(
-              uniq(samplesForTruncatedPattern.map(({ fieldValue }) => fieldValue))
-            ).slice(0, NUMBER_SAMPLES_PER_PATTERN),
-          };
-        }
-      )
-    ),
-    'count',
-    'desc'
-  ).slice(0, NUMBER_PATTERN_CATEGORIES);
+  // Group samples by their truncated patterns
+  const groupedByTruncatedPattern = groupBy(samplesWithPatterns, 'truncatedPattern');
+  // Process each group to create pattern summaries
+  const patternSummaries = mapValues(
+    groupedByTruncatedPattern,
+    (samplesForTruncatedPattern, truncatedPattern) => {
+      const uniqueValues = uniq(samplesForTruncatedPattern.map(({ fieldValue }) => fieldValue));
+      const shuffledExamples = shuffle(uniqueValues);
+
+      return {
+        truncatedPattern,
+        count: samplesForTruncatedPattern.length,
+        exampleValues: shuffledExamples.slice(0, NUMBER_SAMPLES_PER_PATTERN),
+      };
+    }
+  );
+  // Convert to array, sort by count, and take top patterns
+  const patternsToProcess = orderBy(Object.values(patternSummaries), 'count', 'desc').slice(
+    0,
+    NUMBER_PATTERN_CATEGORIES
+  );
 
   const results = await Promise.all(
     patternsToProcess.map((sample) =>
-      processPattern(sample, name, body, inferenceClient, scopedClusterClient, field, samples)
+      processPattern(
+        sample,
+        name,
+        body,
+        inferenceClient,
+        scopedClusterClient,
+        streamsClient,
+        field,
+        samples
+      )
     )
   );
 
@@ -84,11 +90,11 @@ export const handleProcessingSuggestion = async (
 
   return {
     patterns: deduplicatedSimulations.map((simulation) => simulation!.pattern),
-    simulations: deduplicatedSimulations as Array<ReturnType<typeof prepareSimulationResponse>>,
+    simulations: deduplicatedSimulations as SimulationWithPattern[],
   };
 };
 
-type SimulationWithPattern = ReturnType<typeof prepareSimulationResponse> & { pattern: string };
+type SimulationWithPattern = ReturnType<typeof simulateProcessing> & { pattern: string };
 
 async function processPattern(
   sample: { truncatedPattern: string; count: number; exampleValues: string[] },
@@ -96,8 +102,9 @@ async function processPattern(
   body: ProcessingSuggestionBody,
   inferenceClient: InferenceClient,
   scopedClusterClient: IScopedClusterClient,
+  streamsClient: StreamsClient,
   field: string,
-  samples: SampleDocument[]
+  samples: FlattenRecord[]
 ) {
   const chatResponse = await inferenceClient.output({
     id: 'get_pattern_suggestions',
@@ -118,11 +125,13 @@ async function processPattern(
       `,
     schema: {
       type: 'object',
+      required: ['rules'],
       properties: {
         rules: {
           type: 'array',
           items: {
             type: 'object',
+            required: ['parsing_rule'],
             properties: {
               source_name: {
                 type: 'string',
@@ -152,47 +161,44 @@ async function processPattern(
     await Promise.all(
       patterns.map(async (pattern) => {
         // Validate match on current sample
-        const simulationBody = prepareSimulationBody(name, {
-          processing: [
-            {
-              grok: {
-                field,
-                if: { always: {} },
-                patterns: [pattern],
-              },
+        const simulationResult = await simulateProcessing({
+          params: {
+            path: { name },
+            body: {
+              processing: [
+                {
+                  id: 'grok-processor',
+                  grok: {
+                    field,
+                    if: { always: {} },
+                    patterns: [pattern],
+                  },
+                },
+              ],
+              documents: samples,
             },
-          ],
-          documents: samples,
+          },
+          scopedClusterClient,
+          streamsClient,
         });
-        const simulationResult = await executeSimulation(scopedClusterClient, simulationBody);
-        const simulationDiffs = prepareSimulationDiffs(simulationResult, simulationBody.docs);
 
-        try {
-          assertSimulationResult(simulationResult, simulationDiffs);
-        } catch (e) {
+        if (simulationResult.is_non_additive_simulation) {
           return null;
         }
 
-        const simulationResponse = prepareSimulationResponse(
-          simulationResult,
-          simulationBody.docs,
-          simulationDiffs,
-          []
-        );
-
-        if (simulationResponse.success_rate === 0) {
+        if (simulationResult.success_rate === 0) {
           return null;
         }
 
         // TODO if success rate is zero, try to strip out the date part and try again
 
         return {
-          ...simulationResponse,
+          ...simulationResult,
           pattern,
         };
       })
     )
-  ).filter(Boolean) as SimulationWithPattern[];
+  ).filter(Boolean) as Array<SimulationWithPattern | null>;
 
   return {
     chatResponse,

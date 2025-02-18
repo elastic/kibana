@@ -23,7 +23,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useWatch, useFormContext } from 'react-hook-form';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
-import { IngestStreamGetResponse, SampleDocument } from '@kbn/streams-schema';
+import { IngestStreamGetResponse, FlattenRecord } from '@kbn/streams-schema';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
 import { useBoolean } from '@kbn/react-hooks';
@@ -49,10 +49,6 @@ const RefreshButton = ({
   const splitButtonPopoverId = useGeneratedHtmlId({
     prefix: 'splitButtonPopover',
   });
-
-  const onButtonClick = () => {
-    togglePopover(!isPopoverOpen);
-  };
 
   return (
     <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
@@ -81,7 +77,7 @@ const RefreshButton = ({
             button={
               <EuiButtonIcon
                 data-test-subj="streamsAppGrokAiPickConnectorButton"
-                onClick={onButtonClick}
+                onClick={togglePopover}
                 display="base"
                 size="s"
                 iconType="boxesVertical"
@@ -131,7 +127,7 @@ function InnerGrokAiSuggestions({
 }: {
   definition: IngestStreamGetResponse;
   refreshSimulation: UseProcessingSimulatorReturn['refreshSimulation'];
-  filteredSamples: SampleDocument[];
+  filteredSamples: FlattenRecord[];
 }) {
   const { dependencies } = useKibana();
   const {
@@ -197,20 +193,8 @@ function InnerGrokAiSuggestions({
     content = <EuiCallOut color="danger">{suggestionsError.message}</EuiCallOut>;
   }
 
-  if (suggestions && !suggestions.patterns.length) {
-    content = (
-      <>
-        <EuiText size="s">
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.noSuggestions',
-            { defaultMessage: 'No AI suggestions found' }
-          )}{' '}
-        </EuiText>
-      </>
-    );
-  }
-
   const currentPatterns = form.getValues().patterns;
+
   const filteredSuggestions = suggestions?.patterns
     .map((pattern, i) => ({
       pattern,
@@ -222,10 +206,22 @@ function InnerGrokAiSuggestions({
         !currentPatterns.some(({ value }) => value === suggestion.pattern)
     );
 
-  if (filteredSuggestions && !filteredSuggestions.length) {
+  if (suggestions && !suggestions.patterns.length) {
+    content = (
+      <>
+        <EuiCallOut color="primary">
+          {i18n.translate(
+            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.noSuggestions',
+            { defaultMessage: 'No suggested patterns found' }
+          )}{' '}
+        </EuiCallOut>
+      </>
+    );
+  } else if (filteredSuggestions && !filteredSuggestions.length) {
     // if all suggestions are in the blocklist or already in the patterns, just show the generation button, but no message
     content = null;
   }
+
 
   if (filteredSuggestions && filteredSuggestions.length) {
     content = (
