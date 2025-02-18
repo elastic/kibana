@@ -312,10 +312,6 @@ export class EntityStoreDataClient {
       throw new Error('Universal entity store is not enabled');
     }
 
-    if (entityType === EntityType.service && !experimentalFeatures.serviceEntityStoreEnabled) {
-      throw new Error('Service entity store is not enabled');
-    }
-
     if (!this.options.taskManager) {
       throw new Error('Task Manager is not available');
     }
