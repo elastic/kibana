@@ -224,7 +224,9 @@ export default function ({ getService }: FtrProviderContext) {
         2000
       );
       const { body } = await supertest.get(`/api/upgrade_assistant/status`).expect(200);
-      expect(body.readyForUpgrade).to.be(true);
+      // There are critical deprecations, but we expect none of them to be related to Kibana
+      expect(body.readyForUpgrade).to.be(false);
+      expect(body.details).not.to.contain('Kibana deprecation');
     });
   });
 }
