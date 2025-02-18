@@ -418,7 +418,7 @@
             "signature": [
               "Props & AP"
             ],
-            "path": "packages/response-ops/alerts_table/types.ts",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
