@@ -18,7 +18,7 @@ import { isEmpty } from 'lodash';
 import React, { useMemo } from 'react';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
-import { calculateBaseComparisonDiff, scaleValue } from '../topn_functions/utils';
+import { calculateBaseComparisonDiff, scaleAndRoundValue } from '../topn_functions/utils';
 import { SummaryItem } from './summary_item';
 
 interface FrameValue {
@@ -48,11 +48,14 @@ export function FramesSummary({
   compressed = false,
 }: Props) {
   const baselineScaledTotalSamples = baseValue
-    ? scaleValue({ value: baseValue.totalCount, scaleFactor: baseValue.scaleFactor })
+    ? scaleAndRoundValue({ value: baseValue.totalCount, scaleFactor: baseValue.scaleFactor })
     : 0;
 
   const comparisonScaledTotalSamples = comparisonValue
-    ? scaleValue({ value: comparisonValue.totalCount, scaleFactor: comparisonValue.scaleFactor })
+    ? scaleAndRoundValue({
+        value: comparisonValue.totalCount,
+        scaleFactor: comparisonValue.scaleFactor,
+      })
     : 0;
 
   const { co2EmissionDiff, costImpactDiff, totalSamplesDiff } = useMemo(() => {
