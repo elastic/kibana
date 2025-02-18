@@ -21,6 +21,7 @@
     "@kbn/apm-utils",
     "@kbn/es-query",
     "@kbn/observability-utils-common",
+    "@kbn/traced-es-client",
     "@kbn/alerting-plugin",
     "@kbn/rule-registry-plugin",
     "@kbn/rule-data-utils",
