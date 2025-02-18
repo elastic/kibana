@@ -89,10 +89,6 @@ export const useFetchCurrentUserConversations = ({
   setTotalItemCount,
 }: UseFetchCurrentUserConversationsParams): FetchCurrentUserConversations => {
   const queryFn = async ({ pageParam }: { pageParam?: UseFetchCurrentUserConversationsParams }) => {
-    console.log('sorting', {
-      sortField,
-      sortOrder,
-    });
     return http.fetch<FetchConversationsResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, {
       method: 'GET',
       version: API_VERSIONS.public.v1,

@@ -78,11 +78,6 @@ export const useCurrentConversation = ({
                 defaultSystemPromptId: promptId,
               }
             : undefined,
-          id: '',
-          messages: [],
-          replacements: {},
-          category: 'assistant',
-          title: '',
         });
       }
       if (currentConversation && currentConversation.apiConfig) {

@@ -94,7 +94,8 @@ export const useAssistantOverlay = (
 
   const { data: conversations, isLoading } = useFetchCurrentUserConversations({
     http,
-    isAssistantEnabled,
+    filter: `title:${conversationTitle}`,
+    isAssistantEnabled: conversationTitle != null ? isAssistantEnabled : false,
   });
   // memoize the props so that we can use them in the effect below:
   const _category: PromptContext['category'] = useMemo(() => category, [category]);
@@ -128,8 +129,8 @@ export const useAssistantOverlay = (
     // non-default conversations that may need to be initialized
     async (showOverlay: boolean, shouldCreateConversation: boolean = false) => {
       if (promptContextId != null) {
+        let conversation;
         if (shouldCreateConversation) {
-          let conversation;
           if (!isLoading) {
             conversation = conversationTitle
               ? Object.values(conversations).find((conv) => conv.title === conversationTitle)
@@ -138,7 +139,7 @@ export const useAssistantOverlay = (
 
           if (isAssistantEnabled && !conversation && defaultConnector && !isLoading) {
             try {
-              await createConversation({
+              conversation = await createConversation({
                 apiConfig: {
                   ...apiConfig,
                   actionTypeId: defaultConnector?.actionTypeId,
@@ -155,7 +156,7 @@ export const useAssistantOverlay = (
         assistantContextShowOverlay({
           showOverlay,
           promptContextId,
-          conversationTitle: conversationTitle ?? undefined,
+          conversationTitle: conversation?.id ?? conversationTitle ?? undefined,
         });
       }
     },

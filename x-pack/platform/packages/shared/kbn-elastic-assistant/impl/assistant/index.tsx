@@ -308,7 +308,10 @@ const AssistantComponent: React.FC<Props> = ({
 
   useEffect(() => {
     // Adding `conversationTitle !== selectedConversationTitle` to prevent auto-run still executing after changing selected conversation
-    if (currentConversation?.messages.length || conversationTitle !== currentConversation?.title) {
+    if (
+      currentConversation?.messages.length ||
+      (currentConversation && conversationTitle !== currentConversation?.title)
+    ) {
       return;
     }
 
@@ -332,7 +335,6 @@ const AssistantComponent: React.FC<Props> = ({
             anonymizationFields,
             promptContext,
           });
-
           setSelectedPromptContexts((prev) => ({
             ...prev,
             [promptContext.id]: newSelectedPromptContext,
