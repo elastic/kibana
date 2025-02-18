@@ -801,7 +801,7 @@ x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
 x-pack/platform/packages/shared/ai-infra/inference-common @elastic/appex-ai-infra
 x-pack/platform/packages/shared/ai-infra/product-doc-common @elastic/appex-ai-infra
-x-pack/platform/packages/shared/alerting_rule_utils @elastic/obs-ux-management-team
+x-pack/platform/packages/shared/alerting-rule-utils @elastic/obs-ux-management-team
 x-pack/platform/packages/shared/file-upload-common @elastic/ml-ui
 x-pack/platform/packages/shared/index-lifecycle-management/index_lifecycle_management_common_shared @elastic/kibana-management
 x-pack/platform/packages/shared/index-management/index_management_shared_types @elastic/kibana-management
@@ -818,7 +818,7 @@ x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common @elastic/respon
 x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/kbn-langchain @elastic/security-generative-ai
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/obs-ux-management-team
-x-pack/platform/packages/shared/logs_overview @elastic/obs-ux-logs-team
+x-pack/platform/packages/shared/logs-overview @elastic/obs-ux-logs-team
 x-pack/platform/packages/shared/ml/aiops_common @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_pattern_analysis @elastic/ml-ui
 x-pack/platform/packages/shared/ml/aiops_log_rate_analysis @elastic/ml-ui
@@ -913,20 +913,20 @@ x-pack/platform/plugins/shared/stack_connectors @elastic/response-ops
 x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/timelines @elastic/security-threat-hunting-investigations
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
-x-pack/solutions/observability/packages/alert_details @elastic/obs-ux-management-team
-x-pack/solutions/observability/packages/alerting_test_data @elastic/obs-ux-management-team
-x-pack/solutions/observability/packages/get_padded_alert_time_range_util @elastic/obs-ux-management-team
+x-pack/solutions/observability/packages/alert-details @elastic/obs-ux-management-team
+x-pack/solutions/observability/packages/alerting-test-data @elastic/obs-ux-management-team
+x-pack/solutions/observability/packages/get-padded-alert-time-range-util @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/kbn-alerts-grouping @elastic/response-ops
 x-pack/solutions/observability/packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 x-pack/solutions/observability/packages/kbn-investigation-shared @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 x-pack/solutions/observability/packages/kbn-streams-schema @elastic/streams-program-team
-x-pack/solutions/observability/packages/observability_ai/observability_ai_common @elastic/obs-ai-assistant
-x-pack/solutions/observability/packages/observability_ai/observability_ai_server @elastic/obs-ai-assistant
+x-pack/solutions/observability/packages/observability-ai/observability-ai-common @elastic/obs-ai-assistant
+x-pack/solutions/observability/packages/observability-ai/observability-ai-server @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/synthetics_test_data @elastic/obs-ux-management-team
-x-pack/solutions/observability/packages/utils_browser @elastic/observability-ui
-x-pack/solutions/observability/packages/utils_common @elastic/observability-ui
-x-pack/solutions/observability/packages/utils_server @elastic/observability-ui
+x-pack/solutions/observability/packages/utils-browser @elastic/observability-ui
+x-pack/solutions/observability/packages/utils-common @elastic/observability-ui
+x-pack/solutions/observability/packages/utils-server @elastic/observability-ui
 x-pack/solutions/observability/plugins/apm @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-ux-infra_services-team
 x-pack/solutions/observability/plugins/apm/ftr_e2e @elastic/obs-ux-infra_services-team
@@ -960,7 +960,7 @@ x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-components @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-api-keys-server @elastic/search-kibana
 x-pack/solutions/search/packages/kbn-search-index-documents @elastic/search-kibana
-x-pack/solutions/search/packages/shared_ui @elastic/search-kibana
+x-pack/solutions/search/packages/shared-ui @elastic/search-kibana
 x-pack/solutions/search/plugins/enterprise_search @elastic/search-kibana
 x-pack/solutions/search/plugins/search_assistant @elastic/search-kibana
 x-pack/solutions/search/plugins/search_connectors @elastic/search-kibana
@@ -975,7 +975,7 @@ x-pack/solutions/search/plugins/serverless_search @elastic/search-kibana
 x-pack/solutions/security/packages/connectors @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/data_table @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/data-stream-adapter @elastic/security-threat-hunting
-x-pack/solutions/security/packages/distribution_bar @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/packages/distribution-bar @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/packages/ecs_data_quality_dashboard @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/features @elastic/security-threat-hunting-explore
