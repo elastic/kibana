@@ -27194,6 +27194,24 @@ paths:
                             proxy_id:
                               nullable: true
                               type: string
+                            secrets:
+                              additionalProperties: true
+                              type: object
+                              properties:
+                                ssl:
+                                  additionalProperties: true
+                                  type: object
+                                  properties:
+                                    key:
+                                      anyOf:
+                                        - additionalProperties: true
+                                          type: object
+                                          properties:
+                                            id:
+                                              type: string
+                                          required:
+                                            - id
+                                        - type: string
                             shipper:
                               additionalProperties: true
                               nullable: true
@@ -27954,6 +27972,24 @@ paths:
                     proxy_id:
                       nullable: true
                       type: string
+                    secrets:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        ssl:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            key:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                  required:
+                                    - id
+                                - type: string
                     shipper:
                       additionalProperties: false
                       nullable: true
@@ -28675,6 +28711,24 @@ paths:
                           proxy_id:
                             nullable: true
                             type: string
+                          secrets:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           shipper:
                             additionalProperties: true
                             nullable: true
@@ -29496,6 +29550,24 @@ paths:
                           proxy_id:
                             nullable: true
                             type: string
+                          secrets:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           shipper:
                             additionalProperties: true
                             nullable: true
@@ -30249,6 +30321,24 @@ paths:
                     proxy_id:
                       nullable: true
                       type: string
+                    secrets:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        ssl:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            key:
+                              anyOf:
+                                - additionalProperties: false
+                                  type: object
+                                  properties:
+                                    id:
+                                      type: string
+                                  required:
+                                    - id
+                                - type: string
                     shipper:
                       additionalProperties: false
                       nullable: true
@@ -30951,6 +31041,24 @@ paths:
                           proxy_id:
                             nullable: true
                             type: string
+                          secrets:
+                            additionalProperties: true
+                            type: object
+                            properties:
+                              ssl:
+                                additionalProperties: true
+                                type: object
+                                properties:
+                                  key:
+                                    anyOf:
+                                      - additionalProperties: true
+                                        type: object
+                                        properties:
+                                          id:
+                                            type: string
+                                        required:
+                                          - id
+                                      - type: string
                           shipper:
                             additionalProperties: true
                             nullable: true
