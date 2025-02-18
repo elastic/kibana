@@ -33,7 +33,7 @@ export class TempSummaryCleanupTask {
     this.logger = logFactory.get(this.taskId);
     this.config = config;
 
-    this.logger.info('Registering task with [2m] timeout');
+    this.logger.debug('Registering task with [2m] timeout');
 
     taskManager.registerTaskDefinitions({
       [TYPE]: {
@@ -68,11 +68,11 @@ export class TempSummaryCleanupTask {
     }
 
     if (!this.config.tempSummaryCleanupTaskEnabled) {
-      this.logger.info('Unscheduling task');
+      this.logger.debug('Unscheduling task');
       return await plugins.taskManager.removeIfExists(this.taskId);
     }
 
-    this.logger.info('Scheduling task with [1h] interval');
+    this.logger.debug('Scheduling task with [1h] interval');
     this.wasStarted = true;
 
     try {
@@ -97,12 +97,12 @@ export class TempSummaryCleanupTask {
 
   public async runTask(taskInstance: ConcreteTaskInstance, core: CoreSetup) {
     if (!this.wasStarted) {
-      this.logger.info('runTask Aborted. Task not started yet');
+      this.logger.debug('runTask Aborted. Task not started yet');
       return;
     }
 
     if (taskInstance.id !== this.taskId) {
-      this.logger.info(
+      this.logger.debug(
         `Outdated task version: Got [${taskInstance.id}], current version is [${this.taskId}]`
       );
       return getDeleteTaskRunResult();

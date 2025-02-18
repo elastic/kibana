@@ -38,7 +38,7 @@ export class CleanUpTempSummary {
   public async execute(): Promise<void> {
     const openCircuitBreaker = await this.shouldOpenCircuitBreaker();
     if (openCircuitBreaker) {
-      this.logger.info('No temporary documents found, skipping.');
+      this.logger.debug('No temporary documents found, skipping.');
       return;
     }
 
@@ -64,7 +64,7 @@ export class CleanUpTempSummary {
   }
 
   private async findDuplicateTemporaryDocuments(searchAfterKey: AggBucketKey | undefined) {
-    this.logger.info('Searching for duplicate temporary documents');
+    this.logger.debug('Searching for duplicate temporary documents');
     const results = await this.esClient.search<unknown, AggResults>(
       {
         index: SUMMARY_DESTINATION_INDEX_PATTERN,
@@ -115,13 +115,13 @@ export class CleanUpTempSummary {
     const buckets = (results.aggregations?.duplicate_ids.buckets ?? []).map((bucket) => bucket.key);
     const nextSearchAfterKey = results.aggregations?.duplicate_ids.after_key;
 
-    this.logger.info(`Found ${buckets.length} duplicate temporary documents`);
+    this.logger.debug(`Found ${buckets.length} duplicate temporary documents`);
 
     return { buckets, nextSearchAfterKey };
   }
 
   private async deleteDuplicateTemporaryDocuments(buckets: AggBucketKey[]) {
-    this.logger.info(`Deleting ${buckets.length} duplicate temporary documents`);
+    this.logger.debug(`Deleting ${buckets.length} duplicate temporary documents`);
     await this.esClient.deleteByQuery(
       {
         index: SUMMARY_TEMP_INDEX_NAME,
