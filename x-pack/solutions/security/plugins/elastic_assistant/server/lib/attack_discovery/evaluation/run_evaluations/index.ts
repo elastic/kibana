@@ -75,7 +75,7 @@ export const runEvaluations = async ({
             runName: name,
             tags: ['evaluation', llmType ?? ''],
           }
-        ) as Promise<GraphState>;
+        );
       };
 
       const llm = await getEvaluatorLlm({
