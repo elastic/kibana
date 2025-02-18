@@ -12,6 +12,7 @@ import { set } from '@kbn/safer-lodash-set';
 
 import type {
   KafkaOutput,
+  NewElasticsearchOutput,
   NewLogstashOutput,
   NewRemoteElasticsearchOutput,
   Output,
@@ -343,6 +344,16 @@ function getOutputSecretPaths(
       outputSecretPaths.push({
         path: 'secrets.ssl.key',
         value: remoteESOutput.secrets.ssl.key,
+      });
+    }
+  }
+
+  if (outputType === 'elasticsearch') {
+    const esOutput = output as NewElasticsearchOutput;
+    if (esOutput?.secrets?.ssl?.key) {
+      outputSecretPaths.push({
+        path: 'secrets.ssl.key',
+        value: esOutput.secrets.ssl.key,
       });
     }
   }

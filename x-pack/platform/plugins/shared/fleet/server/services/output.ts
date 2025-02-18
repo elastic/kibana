@@ -123,11 +123,11 @@ export function outputIdToUuid(id: string) {
 }
 
 function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output {
-  const { output_id: outputId, ssl, proxy_id: proxyId, ...atributes } = so.attributes;
+  const { output_id: outputId, ssl, proxy_id: proxyId, ...attributes } = so.attributes;
 
   return {
     id: outputId ?? so.id,
-    ...atributes,
+    ...attributes,
     ...(ssl ? { ssl: JSON.parse(ssl as string) } : {}),
     ...(proxyId ? { proxy_id: proxyId } : {}),
   };
@@ -679,7 +679,7 @@ class OutputService {
       if (outputWithSecrets.secrets) data.secrets = outputWithSecrets.secrets;
     } else {
       if (!output.ssl?.key && output.secrets?.ssl?.key) {
-        data.ssl = output.secrets?.ssl as string;
+        data.ssl = JSON.stringify({ ...output.ssl, ...output.secrets.ssl });
       }
 
       if (output.type === outputType.Kafka && data.type === outputType.Kafka) {
@@ -705,11 +705,11 @@ class OutputService {
       id,
       savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
     });
-
     const newSo = await this.encryptedSoClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
       overwrite: options?.overwrite || options?.fromPreconfiguration,
       id,
     });
+
     logger.debug(`Created new output ${id}`);
     return outputSavedObjectToOutput(newSo);
   }
@@ -954,11 +954,6 @@ class OutputService {
         delete (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).kibana_api_key;
       }
 
-      if (data.type !== outputType.Logstash) {
-        // remove logstash specific field
-        updateData.ssl = null;
-      }
-
       if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
         updateData.ca_trusted_fingerprint = null;
         updateData.ca_sha256 = null;
@@ -1016,7 +1011,7 @@ class OutputService {
 
     if (data.ssl) {
       updateData.ssl = JSON.stringify(data.ssl);
-    } else if (data.ssl === null) {
+    } else {
       // Explicitly set to null to allow to delete the field
       updateData.ssl = null;
     }
@@ -1027,9 +1022,6 @@ class OutputService {
       }
       if (!data.username) {
         updateData.username = null;
-      }
-      if (!data.ssl) {
-        updateData.ssl = null;
       }
       if (!data.sasl) {
         updateData.sasl = null;
@@ -1109,7 +1101,7 @@ class OutputService {
       secretsToDelete = secretsRes.secretsToDelete;
     } else {
       if (!data.ssl?.key && data.secrets?.ssl?.key) {
-        updateData.ssl = data.secrets?.ssl as string;
+        updateData.ssl = JSON.stringify({ ...data.ssl, ...data.secrets.ssl });
       }
       if (data.type === outputType.Kafka && updateData.type === outputType.Kafka) {
         if (!data.password && data.secrets?.password) {

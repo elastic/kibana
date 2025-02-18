@@ -21,7 +21,6 @@ interface Props {
   inputs: OutputFormInputsType;
   useSecretsStorage: boolean;
   onToggleSecretStorage: (secretEnabled: boolean) => void;
-  hasEncryptedSavedObjectConfigured: boolean;
 }
 
 export const OutputFormElasticsearchSection: React.FunctionComponent<Props> = (props) => {

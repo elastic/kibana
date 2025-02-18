@@ -719,7 +719,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
         additionalYamlConfigValid &&
         nameInputValid &&
         caTrustedFingerprintValid &&
-        diskQueuePathValid
+        diskQueuePathValid &&
+        sslCertificateValid &&
+        ((sslKeyInput.value && sslKeyValid) || (sslKeySecretInput.value && sslKeySecretValid))
       );
     }
   }, [
@@ -1016,6 +1018,21 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
               ca_trusted_fingerprint: caTrustedFingerprintInput.value,
               proxy_id: proxyIdValue,
               ...shipperParams,
+              ssl: {
+                certificate: sslCertificateInput.value,
+                key: sslKeyInput.value || undefined,
+                certificate_authorities: sslCertificateAuthoritiesInput.value.filter(
+                  (val) => val !== ''
+                ),
+              },
+              ...(!sslKeyInput.value &&
+                sslKeySecretInput.value && {
+                  secrets: {
+                    ssl: {
+                      key: sslKeySecretInput.value,
+                    },
+                  },
+                }),
             } as NewElasticsearchOutput;
         }
       })();
@@ -1026,7 +1043,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
           setIsloading(false);
           return;
         }
-
         const res = await sendPutOutput(output.id, payload);
         if (res.error) {
           throw res.error;

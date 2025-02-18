@@ -106,6 +106,11 @@ const BaseSchema = {
     ])
   ),
   allow_edit: schema.maybe(schema.arrayOf(schema.string())),
+  secrets: schema.maybe(
+    schema.object({
+      ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
+    })
+  ),
 };
 
 const UpdateSchema = {
@@ -185,11 +190,6 @@ export const LogstashSchema = {
   ...BaseSchema,
   type: schema.literal(outputType.Logstash),
   hosts: schema.arrayOf(schema.string({ validate: validateLogstashHost }), { minSize: 1 }),
-  secrets: schema.maybe(
-    schema.object({
-      ssl: schema.maybe(schema.object({ key: schema.maybe(secretRefSchema) })),
-    })
-  ),
 };
 
 const LogstashUpdateSchema = {
