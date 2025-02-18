@@ -41,7 +41,11 @@ export function FieldWithActions({
 }: FieldWithActionsProps) {
   const hasFieldDescription = !!fieldMetadata?.flat_name;
 
-  return label ? (
+  if (!label) {
+    return null;
+  }
+
+  return (
     <div {...props}>
       <EuiFlexGroup>
         <EuiFlexItem grow={1}>
@@ -76,7 +80,7 @@ export function FieldWithActions({
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
-  ) : null;
+  );
 }
 
 const FormattedValue = ({ value }: { value: string }) => (
