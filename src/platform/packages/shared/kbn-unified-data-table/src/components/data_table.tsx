@@ -593,6 +593,8 @@ export const UnifiedDataTable = ({
     onSort,
   });
 
+  const { columns: sortedColumns } = sorting ?? {};
+
   const displayedRows = useMemo(() => {
     if (!sortedRows) {
       return [];
@@ -903,6 +905,7 @@ export const UnifiedDataTable = ({
         headerRowHeightLines,
         customGridColumnsConfiguration,
         onResize,
+        sortedColumns,
       }),
     [
       cellActionsHandling,
@@ -926,6 +929,7 @@ export const UnifiedDataTable = ({
       valueToStringConverter,
       visibleCellActions,
       visibleColumns,
+      sortedColumns,
     ]
   );
 
