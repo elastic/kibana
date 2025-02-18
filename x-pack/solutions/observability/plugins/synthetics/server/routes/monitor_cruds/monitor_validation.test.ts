@@ -664,7 +664,8 @@ describe('normalizeAPIConfig', () => {
       },
     });
     expect(normalizeAPIConfig({ type: 'browser', params: '{d}' } as any)).toEqual({
-      errorMessage: "Invalid params: Expected property name or '}' in JSON at position 1",
+      errorMessage:
+        "Invalid params: Expected property name or '}' in JSON at position 1 (line 1 column 2)",
       formattedConfig: {
         type: 'browser',
         params: '{d}',
@@ -702,7 +703,7 @@ describe('normalizeAPIConfig', () => {
     });
     expect(normalizeAPIConfig({ type: 'browser', playwright_options: '{d}' } as any)).toEqual({
       errorMessage:
-        "Invalid playwright_options: Expected property name or '}' in JSON at position 1",
+        "Invalid playwright_options: Expected property name or '}' in JSON at position 1 (line 1 column 2)",
       formattedConfig: {
         playwright_options: '{d}',
         type: 'browser',
