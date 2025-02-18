@@ -29,7 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const FROM_TIME = 'Oct 22, 2018 @ 00:00:00.000';
   const TO_TIME = 'Dec 3, 2018 @ 00:00:00.000';
 
-  describe('links panel navigation', () => {
+  describe.only('links panel navigation', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await security.testUser.setRoles([
@@ -214,9 +214,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(isDisabled).to.be('true');
       });
 
-      // TODO We should not be using an external website for our tests. This will be flaky
-      // if external network connectivity issues exist.
-      it.skip('should create an external link when openInNewTab is enabled', async () => {
+      it('should create an external link when openInNewTab is enabled', async () => {
         await testSubjects.clickWhenNotDisabled('externalLink--link999');
 
         // Should have opened another tab
@@ -227,7 +225,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(currentUrl).to.be('https://example.com/1');
       });
 
-      it.skip('should open in same tab when openInNewTab is disabled', async () => {
+      it('should open in same tab when openInNewTab is disabled', async () => {
         await testSubjects.clickWhenNotDisabled('externalLink--link888');
 
         // Should have opened in the same tab
