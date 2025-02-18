@@ -66,7 +66,8 @@ export const riskScorePreviewRoute = (
           filter,
           range: userRange,
           weights,
-          excludeAlertStatuses,
+          exclude_alert_statuses: excludedStatuses,
+          exclude_alert_tags: excludedTags,
         } = request.body;
 
         const entityAnalyticsConfig = await riskScoreService.getConfigurationWithDefaults(
@@ -85,6 +86,8 @@ export const riskScorePreviewRoute = (
           const afterKeys = userAfterKeys ?? {};
           const range = userRange ?? { start: 'now-15d', end: 'now' };
           const pageSize = userPageSize ?? DEFAULT_RISK_SCORE_PAGE_SIZE;
+          const excludeAlertStatuses = excludedStatuses || ['closed'];
+          const excludeAlertTags = excludedTags || [];
 
           const result = await riskScoreService.calculateScores({
             afterKeys,
@@ -98,6 +101,7 @@ export const riskScorePreviewRoute = (
             weights,
             alertSampleSizePerShard,
             excludeAlertStatuses,
+            excludeAlertTags,
           });
 
           securityContext.getAuditLogger()?.log({

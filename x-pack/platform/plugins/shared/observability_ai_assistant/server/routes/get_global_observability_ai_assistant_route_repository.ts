@@ -10,9 +10,11 @@ import { connectorRoutes } from './connectors/route';
 import { conversationRoutes } from './conversations/route';
 import { functionRoutes } from './functions/route';
 import { knowledgeBaseRoutes } from './knowledge_base/route';
+import { topLevelRoutes } from './top_level/route';
 
 export function getGlobalObservabilityAIAssistantServerRouteRepository() {
   return {
+    ...topLevelRoutes,
     ...chatRoutes,
     ...conversationRoutes,
     ...connectorRoutes,
