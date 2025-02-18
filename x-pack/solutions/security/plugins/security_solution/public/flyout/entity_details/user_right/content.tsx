@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -58,13 +57,6 @@ export const UserPanelContent = ({
 }: UserPanelContentProps) => {
   const observedFields = useObservedUserItems(observedUser);
   const isManagedUserEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyoutManagedUser');
-
-  console.log('Debugging riskScoreState:', {
-    isModuleEnabled: riskScoreState.isModuleEnabled,
-    data: riskScoreState.data,
-    dataType: typeof riskScoreState.data,
-    dataLength: Array.isArray(riskScoreState.data) ? riskScoreState.data.length : 'Not an array',
-  });
 
   return (
     <FlyoutBody>
