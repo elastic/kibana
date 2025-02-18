@@ -5,25 +5,38 @@
  * 2.0.
  */
 
+import { EuiLink } from '@elastic/eui';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { encode } from '@kbn/rison';
-import type { FindSLOResponse, UpdateSLOInput, UpdateSLOResponse } from '@kbn/slo-schema';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import {
+  ALL_VALUE,
+  type FindSLOResponse,
+  type UpdateSLOInput,
+  type UpdateSLOResponse,
+} from '@kbn/slo-schema';
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
+import React from 'react';
 import { paths } from '../../common/locators/paths';
-import { useKibana } from './use_kibana';
 import { sloKeys } from './query_key_factory';
+import { useKibana } from './use_kibana';
 import { usePluginContext } from './use_plugin_context';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useUpdateSlo() {
   const {
+    i18n: i18nStart,
+    theme,
     application: { navigateToUrl },
     http,
     notifications: { toasts },
   } = useKibana().services;
   const queryClient = useQueryClient();
+  const services = useKibana().services;
   const { sloClient } = usePluginContext();
 
   return useMutation<
@@ -39,14 +52,39 @@ export function useUpdateSlo() {
       });
     },
     {
-      onSuccess: (_data, { slo: { name } }) => {
+      onSuccess: (data, { slo: { name } }) => {
         queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
 
+        const sloViewUrl = http.basePath.prepend(paths.sloDetails(data.id, ALL_VALUE));
+
         toasts.addSuccess(
-          i18n.translate('xpack.slo.update.successNotification', {
-            defaultMessage: 'Successfully updated {name}',
-            values: { name },
-          })
+          {
+            title: toMountPoint(
+              <RedirectAppLinks coreStart={services} data-test-subj="observabilityMainContainer">
+                <FormattedMessage
+                  id="xpack.slo.update.successNotification"
+                  defaultMessage="Successfully updated {name}. {viewSLO}"
+                  values={{
+                    name,
+                    viewSLO: (
+                      <EuiLink data-test-subj="o11yUseUpdateSloViewSloLink" href={sloViewUrl}>
+                        {i18n.translate('xpack.slo.useUpdateSlo.viewSLOLinkLabel', {
+                          defaultMessage: 'View SLO',
+                        })}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </RedirectAppLinks>,
+              {
+                i18n: i18nStart,
+                theme,
+              }
+            ),
+          },
+          {
+            toastLifeTimeMs: 30000,
+          }
         );
       },
       onError: (error, { slo, sloId }, context) => {
