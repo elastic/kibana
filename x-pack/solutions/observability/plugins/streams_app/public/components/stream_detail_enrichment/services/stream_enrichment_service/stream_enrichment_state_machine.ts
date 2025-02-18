@@ -115,10 +115,18 @@ export const streamEnrichmentService = setup({
           guard: 'isRootStream',
         },
         {
+          target: 'resolvedChildStream',
+          actions: [{ type: 'setupProcessors' }],
+        },
+      ],
+    },
+
+    resolvedChildStream: {
+      always: [
+        {
           target: 'resolvedWiredStream',
           guard: 'isWiredStream',
           actions: [
-            { type: 'setupProcessors' },
             {
               type: 'setupFields',
               params: ({ context }) => ({
@@ -127,10 +135,7 @@ export const streamEnrichmentService = setup({
             },
           ],
         },
-        {
-          target: 'resolvedUnwiredStream',
-          actions: [{ type: 'setupProcessors' }],
-        },
+        { target: 'resolvedUnwiredStream' },
       ],
     },
 
