@@ -12,7 +12,6 @@ components:
         - user
         - host
         - service
-        - universal
 
     EngineDescriptor:
       type: object
