@@ -306,7 +306,6 @@ export class EntityStoreDataClient {
     requestBody: InitEntityEngineRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityEngineResponse> {
-    
     if (!this.options.taskManager) {
       throw new Error('Task Manager is not available');
     }
