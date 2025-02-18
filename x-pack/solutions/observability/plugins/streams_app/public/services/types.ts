@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface StreamsAppServices {}
+import { IDataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public';
+
+export interface StreamsAppServices {
+  dataStreamsClient: Promise<IDataStreamsStatsClient>;
+}
