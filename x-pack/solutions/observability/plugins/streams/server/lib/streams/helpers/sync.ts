@@ -14,6 +14,7 @@ import {
 import { isResponseError } from '@kbn/es-errors';
 import {
   IndicesDataStream,
+  IndicesIndexTemplate,
   IngestPipeline,
   IngestProcessorContainer,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -156,13 +157,58 @@ async function tryGettingPipeline({
     });
 }
 
+type UnwrapPromise<T extends Promise<any>> = T extends Promise<infer Value> ? Value : never;
+
 async function ensureStreamManagedPipelineReference(
   scopedClusterClient: IScopedClusterClient,
-  pipelineName: string,
+  pipelineName: string | undefined,
   definition: StreamDefinition,
-  executionPlan: ExecutionPlanStep[]
+  executionPlan: ExecutionPlanStep[],
+  unmanagedAssets: UnwrapPromise<ReturnType<typeof getUnmanagedElasticsearchAssets>>
 ) {
   const streamManagedPipelineName = getProcessingPipelineName(definition.name);
+  if (pipelineName === streamManagedPipelineName) {
+    // the data stream is already calling the stream managed pipeline directly
+    return;
+  }
+  if (!pipelineName) {
+    // no ingest pipeline, we need to update the template to call the stream managed pipeline as
+    // the default pipeline
+    const indexTemplateAsset = unmanagedAssets.find((asset) => asset.type === 'index_template');
+    if (!indexTemplateAsset) {
+      throw new Error(`Could not find index template for stream ${definition.name}`);
+    }
+    const indexTemplate = (
+      await scopedClusterClient.asCurrentUser.indices.getIndexTemplate({
+        name: indexTemplateAsset.id,
+      })
+    ).index_templates[0].index_template;
+    const updatedTemplate: IndicesIndexTemplate = {
+      ...indexTemplate,
+      template: {
+        ...indexTemplate.template,
+        settings: {
+          ...indexTemplate.template?.settings,
+          index: {
+            ...indexTemplate.template?.settings?.index,
+            default_pipeline: streamManagedPipelineName,
+          },
+        },
+      },
+    };
+    executionPlan.push({
+      method: 'PUT',
+      path: `/_index_template/${indexTemplateAsset.id}`,
+      body: updatedTemplate as unknown as Record<string, unknown>,
+    });
+
+    // rollover the data stream to apply the new default pipeline
+    executionPlan.push({
+      method: 'POST',
+      path: `/${definition.name}/_rollover`,
+    });
+    return;
+  }
   const { targetPipelineName, targetPipeline, referencesStreamManagedPipeline } =
     await findStreamManagedPipelineReference(scopedClusterClient, pipelineName, definition.name);
   if (!referencesStreamManagedPipeline) {
@@ -205,17 +251,12 @@ export async function syncUnwiredStreamDefinitionObjects({
   const executionPlan: ExecutionPlanStep[] = [];
   const streamManagedPipelineName = getProcessingPipelineName(definition.name);
   const pipelineName = unmanagedAssets.find((asset) => asset.type === 'ingest_pipeline')?.id;
-  if (!pipelineName) {
-    throw new Error('Unmanaged stream needs a default ingest pipeline');
-  }
-  if (pipelineName === streamManagedPipelineName) {
-    throw new Error('Unmanaged stream cannot have the @stream pipeline as the default pipeline');
-  }
   await ensureStreamManagedPipelineReference(
     scopedClusterClient,
     pipelineName,
     definition,
-    executionPlan
+    executionPlan,
+    unmanagedAssets
   );
 
   if (definition.ingest.processing.length) {
