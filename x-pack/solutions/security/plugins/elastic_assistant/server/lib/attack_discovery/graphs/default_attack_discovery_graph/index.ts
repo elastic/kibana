@@ -61,11 +61,7 @@ export const getDefaultAttackDiscoveryGraph = ({
   replacements,
   size,
   start,
-}: GetDefaultAttackDiscoveryGraphParams): CompiledStateGraph<
-  GraphState,
-  Partial<GraphState>,
-  'generate' | 'refine' | 'retrieve_anonymized_alerts' | '__start__'
-> => {
+}: GetDefaultAttackDiscoveryGraphParams) => {
   try {
     const graphState = getDefaultGraphState({ end, filter, prompts, start });
 
@@ -103,7 +99,7 @@ export const getDefaultAttackDiscoveryGraph = ({
       getRetrieveAnonymizedAlertsOrGenerateEdge(logger);
 
     // create the graph:
-    const graph = new StateGraph<GraphState>({ channels: graphState })
+    const graph = new StateGraph({ channels: graphState })
       .addNode(NodeType.RETRIEVE_ANONYMIZED_ALERTS_NODE, retrieveAnonymizedAlertsNode)
       .addNode(NodeType.GENERATE_NODE, generateNode)
       .addNode(NodeType.REFINE_NODE, refineNode)
