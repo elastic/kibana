@@ -57,7 +57,9 @@ export const UserPanelContent = ({
 
   return (
     <FlyoutBody>
-      {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
+      {Array.isArray(riskScoreState.data) &&
+        riskScoreState.isModuleEnabled &&
+        riskScoreState.data.length > 0 && (
         <>
           <FlyoutRiskSummary
             riskScoreData={riskScoreState}
