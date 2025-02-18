@@ -61,7 +61,17 @@ export const createSynthMethod = <N extends ESQLProperNode>(
         if (i < params.length) {
           const param = params[i];
           if (typeof param === 'string') src += param;
-          else src += serialize(param);
+          else if (Array.isArray(param)) {
+            let list: string = '';
+
+            for (const item of param) {
+              const serialized = typeof item === 'string' ? item : serialize(item);
+
+              list += (list ? ', ' : '') + serialized;
+            }
+
+            src += list;
+          } else src += serialize(param);
         }
       }
       return generator(src, opts);
