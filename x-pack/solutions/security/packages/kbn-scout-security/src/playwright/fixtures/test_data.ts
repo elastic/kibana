@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { test } from './single_thread_fixtures';
-export { spaceTest } from './parallel_run_fixtures';
-export * from './types';
-export * as testData from './test_data';
+export const ES_ARCHIVES = {
+  AUDITBEAT: 'x-pack/test/security_solution_cypress/es_archives/auditbeat_single',
+};

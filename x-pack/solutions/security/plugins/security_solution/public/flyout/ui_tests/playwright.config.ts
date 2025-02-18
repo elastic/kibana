@@ -10,4 +10,5 @@ import { createPlaywrightConfig } from '@kbn/scout';
 // eslint-disable-next-line import/no-default-export
 export default createPlaywrightConfig({
   testDir: './tests/',
+  globalSetup: require.resolve('@kbn/scout-security/src/playwright/global_setup'),
 });
