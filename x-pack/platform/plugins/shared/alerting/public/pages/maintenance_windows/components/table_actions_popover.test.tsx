@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 
