@@ -16,8 +16,6 @@ interface TimestampProps {
 }
 
 export function Timestamp({ timestamp }: TimestampProps) {
-  if (!timestamp) return null;
-
   const momentTime = moment(timestamp);
   const relativeTime = momentTime.fromNow();
   const absoluteTime = momentTime.format('MMM D, YYYY @ HH:mm:ss');
