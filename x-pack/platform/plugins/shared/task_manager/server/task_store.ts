@@ -80,6 +80,7 @@ export interface StoreOpts {
   requestTimeouts: RequestTimeoutsConfig;
   security: SecurityServiceStart;
   canEncryptSavedObjects?: boolean;
+  esoClient?: EncryptedSavedObjectsClient;
   spaces?: SpacesPluginStart;
 }
 
@@ -163,6 +164,7 @@ export class TaskStore {
    */
   constructor(opts: StoreOpts) {
     this.esClient = opts.esClient;
+    this.esoClient = opts.esoClient;
     this.index = opts.index;
     this.taskManagerId = opts.taskManagerId;
     this.definitions = opts.definitions;
@@ -182,6 +184,7 @@ export class TaskStore {
     });
     this.requestTimeouts = opts.requestTimeouts;
     this.security = opts.security;
+    this.spaces = opts.spaces;
     this.canEncryptSavedObjects = opts.canEncryptSavedObjects;
   }
 
@@ -615,7 +618,8 @@ export class TaskStore {
     });
 
     if (apiKeyIdsToRemove.length) {
-      this.security.authc.apiKeys.invalidateAsInternalUser({ ids: apiKeyIdsToRemove });
+
+      this.security.authc.apiKeys.invalidateAsInternalUser({ ids: [...new Set(apiKeyIdsToRemove)] });
     }
 
     try {
