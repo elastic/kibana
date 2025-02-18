@@ -6,6 +6,7 @@
  */
 
 import { action } from '@storybook/addon-actions';
+import type { Decorator } from '@storybook/react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
@@ -20,7 +21,7 @@ export default {
         {storyFn()}
       </ThemeProvider>
     ),
-  ],
+  ] as Decorator[],
 };
 
 export const AndOrButtons = {

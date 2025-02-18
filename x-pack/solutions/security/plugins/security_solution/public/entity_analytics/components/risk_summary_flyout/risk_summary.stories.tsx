@@ -37,7 +37,7 @@ export const Default: StoryFn = () => {
   );
 };
 
-export const LinkEnabledInPreviewMode: Story<void> = () => {
+export const LinkEnabledInPreviewMode: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>
@@ -57,7 +57,7 @@ export const LinkEnabledInPreviewMode: Story<void> = () => {
   );
 };
 
-export const LinkDisabled: Story<void> = () => {
+export const LinkDisabled: StoryFn = () => {
   return (
     <StorybookProviders>
       <TestProvider>

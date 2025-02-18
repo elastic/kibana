@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StoryFn } from '@storybook/react';
+import type { StoryFn, Decorator } from '@storybook/react';
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
@@ -37,7 +37,7 @@ export default {
         {storyFn()}
       </ThemeProvider>
     ),
-  ],
+  ] as Decorator[],
 };
 
 export const Default: StoryFn = () => {
