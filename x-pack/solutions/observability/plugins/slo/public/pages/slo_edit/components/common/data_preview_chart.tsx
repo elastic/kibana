@@ -38,7 +38,6 @@ import moment from 'moment';
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { GoodBadEventsChart } from '../../../../components/good_bad_events_chart/good_bad_events_chart';
 import { useDebouncedGetPreviewData } from '../../hooks/use_preview';
 import { useSectionFormValidation } from '../../hooks/use_section_form_validation';
 import { CreateSLOForm } from '../../types';
@@ -50,7 +49,6 @@ interface DataPreviewChartProps {
   thresholdColor?: string;
   thresholdMessage?: string;
   ignoreMoreThan100?: boolean;
-  useGoodBadEventsChart?: boolean;
   label?: string;
   range?: {
     from: Date;
@@ -68,7 +66,6 @@ export function DataPreviewChart({
   ignoreMoreThan100,
   // end specific timeslice metric indicator type
   label,
-  useGoodBadEventsChart,
   range,
 }: DataPreviewChartProps) {
   const { watch, getFieldState, formState, getValues } = useFormContext<CreateSLOForm>();
@@ -247,14 +244,8 @@ export function DataPreviewChart({
               </EuiFlexItem>
             </EuiFlexGroup>
           )}
-          {isSuccess && useGoodBadEventsChart && (
-            <GoodBadEventsChart
-              data={previewData || []}
-              bottomTitle={label || DEFAULT_LABEL}
-              isLoading={isPreviewLoading}
-            />
-          )}
-          {isSuccess && !useGoodBadEventsChart && (
+
+          {isSuccess && (
             <Chart size={{ height: 160, width: '100%' }}>
               <Tooltip
                 type="vertical"

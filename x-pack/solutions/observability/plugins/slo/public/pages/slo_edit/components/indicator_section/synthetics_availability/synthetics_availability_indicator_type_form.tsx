@@ -164,7 +164,7 @@ export function SyntheticsAvailabilityIndicatorTypeForm() {
         })}
         customFilters={allFilters as QuerySchema}
       />
-      <DataPreviewChart range={range} label={LABEL} useGoodBadEventsChart />
+      <DataPreviewChart range={range} label={LABEL} />
     </EuiFlexGroup>
   );
 }
