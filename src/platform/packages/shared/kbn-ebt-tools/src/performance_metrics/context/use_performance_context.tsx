@@ -21,13 +21,13 @@ export interface PerformanceApi {
    *
    * Usage:
    * ```ts
-   * markPerformanceRefreshStart();
+   * onPageRefreshStart();
    * ```
    *
    * The marker set by this function can later be used in performance measurements
    * along with an end marker end::pageReady to determine the total refresh duration.
    */
-  markPerformanceRefreshStart(): void;
+  onPageRefreshStart(): void;
 }
 
 export const PerformanceContext = createContext<PerformanceApi | undefined>(undefined);

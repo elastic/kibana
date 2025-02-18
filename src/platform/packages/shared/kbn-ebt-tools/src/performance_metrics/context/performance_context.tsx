@@ -13,7 +13,6 @@ import { useLocation } from 'react-router-dom';
 import { PerformanceApi, PerformanceContext } from './use_performance_context';
 import { PerformanceMetricEvent } from '../../performance_metric_events';
 import { measureInteraction } from './measure_interaction';
-import { perfomanceMarkers } from '../performance_markers';
 
 export type CustomMetrics = Omit<PerformanceMetricEvent, 'eventName' | 'meta' | 'duration'>;
 
@@ -49,8 +48,8 @@ export function PerformanceContextProvider({ children }: { children: React.React
           interaction.pageReady(eventData);
         }
       },
-      markPerformanceRefreshStart() {
-        performance.mark(perfomanceMarkers.startPageRefresh);
+      onPageRefreshStart() {
+        interaction.pageRefreshStart();
       },
     }),
     [isRendered, interaction]

@@ -142,7 +142,7 @@ export function UnifiedSearchBar({
 
   const { kuery, serviceName, environment, groupId, refreshPausedFromUrl, refreshIntervalFromUrl } =
     useSearchBarParams(value);
-  const { markPerformanceRefreshStart } = usePerformanceContext();
+  const { onPageRefreshStart } = usePerformanceContext();
   const timePickerTimeDefaults = core.uiSettings.get<TimePickerTimeDefaults>(
     UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
   );
@@ -206,7 +206,7 @@ export function UnifiedSearchBar({
   const onRefresh = () => {
     clearCache();
     incrementTimeRangeId();
-    markPerformanceRefreshStart();
+    onPageRefreshStart();
   };
 
   const onRefreshChange = ({ isPaused, refreshInterval }: Partial<OnRefreshChangeProps>) => {

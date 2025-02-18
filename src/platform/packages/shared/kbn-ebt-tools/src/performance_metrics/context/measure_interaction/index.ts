@@ -90,5 +90,8 @@ export function measureInteraction(pathname: string) {
         performance.clearMarks(perfomanceMarkers.endPageReady);
       }
     },
+    pageRefreshStart() {
+      performance.mark(perfomanceMarkers.startPageRefresh);
+    },
   };
 }

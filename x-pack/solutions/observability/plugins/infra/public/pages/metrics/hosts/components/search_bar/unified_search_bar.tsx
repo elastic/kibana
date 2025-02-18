@@ -25,7 +25,7 @@ export const UnifiedSearchBar = () => {
   const { metricsView } = useMetricsDataViewContext();
   const { searchCriteria, onLimitChange, onPanelFiltersChange, onSubmit } =
     useUnifiedSearchContext();
-  const { markPerformanceRefreshStart } = usePerformanceContext();
+  const { onPageRefreshStart } = usePerformanceContext();
 
   const { SearchBar } = unifiedSearch.ui;
 
@@ -34,10 +34,10 @@ export const UnifiedSearchBar = () => {
       // This makes sure `onSubmit` is only called when the submit button is clicked
       if (isUpdate === false) {
         onSubmit(payload);
-        markPerformanceRefreshStart();
+        onPageRefreshStart();
       }
     },
-    [onSubmit, markPerformanceRefreshStart]
+    [onSubmit, onPageRefreshStart]
   );
 
   return (

@@ -36,7 +36,7 @@ export const useMetricsExplorerState = ({ enabled }: { enabled: boolean } = { en
     timestamps,
     setTimestamps,
   } = useMetricsExplorerOptionsContainerContext();
-  const { markPerformanceRefreshStart } = usePerformanceContext();
+  const { onPageRefreshStart } = usePerformanceContext();
 
   const refreshTimestamps = useCallback(() => {
     const fromTimestamp = DateMath.parse(timeRange.from)!.valueOf();
@@ -47,8 +47,8 @@ export const useMetricsExplorerState = ({ enabled }: { enabled: boolean } = { en
       fromTimestamp,
       toTimestamp,
     });
-    markPerformanceRefreshStart();
-  }, [setTimestamps, timeRange, markPerformanceRefreshStart]);
+    onPageRefreshStart();
+  }, [setTimestamps, timeRange, onPageRefreshStart]);
 
   const { data, error, fetchNextPage, isLoading } = useMetricsExplorerData({
     options,
