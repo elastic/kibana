@@ -56,8 +56,8 @@ describe('TriggerButton', () => {
           isMissingCurrent
         />
       );
-      // EUI danger red: rgb(171, 35, 28)
-      expect(screen.getByTestId('test-id')).toHaveStyle({ color: 'rgb(171, 35, 28)' });
+      // EUI danger red: rgb(167, 22, 39)
+      expect(screen.getByTestId('test-id')).toHaveStyle({ color: 'rgb(167, 22, 39)' });
     });
   });
 
