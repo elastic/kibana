@@ -177,6 +177,9 @@ export function columnToOperation(
     interval: isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column)
       ? column.params.interval
       : undefined,
+    hasArraySupport:
+      isColumnOfType<LastValueIndexPatternColumn>('last_value', column) &&
+      column.params.showArrayValues,
   };
 }
 
@@ -450,7 +453,15 @@ export function getFormBasedDatasource({
       );
     },
 
-    toExpression: (state, layerId, indexPatterns, dateRange, nowInstant, searchSessionId) =>
+    toExpression: (
+      state,
+      layerId,
+      indexPatterns,
+      dateRange,
+      nowInstant,
+      searchSessionId,
+      forceDSL
+    ) =>
       toExpression(
         state,
         layerId,
@@ -458,7 +469,8 @@ export function getFormBasedDatasource({
         uiSettings,
         dateRange,
         nowInstant,
-        searchSessionId
+        searchSessionId,
+        forceDSL
       ),
 
     LayerSettingsComponent(props) {

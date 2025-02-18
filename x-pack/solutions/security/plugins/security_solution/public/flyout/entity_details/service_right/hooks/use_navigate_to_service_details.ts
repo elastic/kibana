@@ -19,7 +19,6 @@ interface UseNavigateToServiceDetailsParams {
   email?: string[];
   scopeId: string;
   contextID: string;
-  isDraggable?: boolean;
   isRiskScoreExist: boolean;
   isPreviewMode?: boolean;
 }
@@ -39,7 +38,6 @@ export const useNavigateToServiceDetails = ({
   serviceName,
   scopeId,
   contextID,
-  isDraggable,
   isRiskScoreExist,
   isPreviewMode,
 }: UseNavigateToServiceDetailsParams): UseNavigateToServiceDetailsResult => {
@@ -75,7 +73,6 @@ export const useNavigateToServiceDetails = ({
           contextID,
           serviceName,
           scopeId,
-          isDraggable,
         },
       };
 
@@ -89,7 +86,6 @@ export const useNavigateToServiceDetails = ({
     },
     [
       contextID,
-      isDraggable,
       isNewNavigationEnabled,
       isPreviewMode,
       isRiskScoreExist,

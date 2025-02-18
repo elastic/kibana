@@ -7,6 +7,7 @@
 
 import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
+import { EuiProvider } from '@elastic/eui';
 
 import React from 'react';
 import type { DropResult, ResponderProvided } from '@hello-pangea/dnd';
@@ -87,7 +88,9 @@ export const TestProvidersComponent = ({
                         <CellActionsProvider
                           getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
                         >
-                          <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                          <EuiProvider>
+                            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                          </EuiProvider>
                         </CellActionsProvider>
                       </ConsoleManager>
                     </ExpandableFlyoutTestProvider>
@@ -146,7 +149,9 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
                     <CellActionsProvider
                       getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
                     >
-                      <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                      <EuiProvider>
+                        <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                      </EuiProvider>
                     </CellActionsProvider>
                   </UserPrivilegesProvider>
                 </MockAssistantProvider>

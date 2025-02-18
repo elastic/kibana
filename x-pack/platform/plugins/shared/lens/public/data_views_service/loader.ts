@@ -72,6 +72,12 @@ export function convertDataViewIntoLensIndexPattern(
         ])
       ),
     fields: newFields,
+    getFormatterForField(sourceField: string): unknown {
+      const dvField = dataView.getFieldByName(sourceField);
+      if (dvField) {
+        return dataView.getFormatterForField(dvField);
+      }
+    },
     getFieldByName: getFieldByNameFactory(newFields),
     hasRestrictions: !!typeMeta?.aggs,
     spec: dataView.toSpec(false),

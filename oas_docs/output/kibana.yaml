@@ -16584,6 +16584,57 @@ paths:
       summary: Cleanup the Risk Engine
       tags:
         - Security Entity Analytics API
+  /api/risk_score/engine/saved_object/configure:
+    patch:
+      description: Configuring the Risk Engine Saved Object
+      operationId: ConfigureRiskEngineSavedObject
+      requestBody:
+        content:
+          application/json; Elastic-Api-Version=2023-10-31:
+            schema:
+              type: object
+              properties:
+                exclude_alert_statuses:
+                  items:
+                    type: string
+                  type: array
+                exclude_alert_tags:
+                  items:
+                    type: string
+                  type: array
+                range:
+                  type: object
+                  properties:
+                    end:
+                      type: string
+                    start:
+                      type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                type: object
+                properties:
+                  risk_engine_saved_object_configured:
+                    type: boolean
+          description: Successful response
+        '400':
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_TaskManagerUnavailableResponse'
+          description: Task manager is unavailable
+        default:
+          content:
+            application/json; Elastic-Api-Version=2023-10-31:
+              schema:
+                $ref: '#/components/schemas/Security_Entity_Analytics_API_ConfigureRiskEngineSavedObjectErrorResponse'
+          description: Unexpected error
+      summary: Configure the Risk Engine Saved Object
+      tags:
+        - Security Entity Analytics API
   /api/risk_score/engine/schedule_now:
     post:
       description: Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
@@ -28711,6 +28762,17 @@ components:
             query:
               description: An ESQL query
               type: string
+            timerange:
+              description: Time range to select in the time picker.
+              type: object
+              properties:
+                from:
+                  type: string
+                to:
+                  type: string
+              required:
+                - from
+                - to
             type:
               enum:
                 - EsqlQuery
@@ -35590,7 +35652,22 @@ components:
           required:
             - parameters
     Security_Endpoint_Management_API_GetProcessesRouteRequestBody:
-      $ref: '#/components/schemas/Security_Endpoint_Management_API_NoParametersRequestSchema'
+      type: object
+      properties:
+        agent_type:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
+        alert_ids:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+        case_ids:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+        comment:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
+        endpoint_ids:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointIds'
+        parameters:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_Parameters'
+      required:
+        - endpoint_ids
     Security_Endpoint_Management_API_HostPathScriptParameters:
       type: object
       properties:
@@ -35609,7 +35686,22 @@ components:
       required:
         - hostPath
     Security_Endpoint_Management_API_IsolateRouteRequestBody:
-      $ref: '#/components/schemas/Security_Endpoint_Management_API_NoParametersRequestSchema'
+      type: object
+      properties:
+        agent_type:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
+        alert_ids:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+        case_ids:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+        comment:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
+        endpoint_ids:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointIds'
+        parameters:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_Parameters'
+      required:
+        - endpoint_ids
     Security_Endpoint_Management_API_KillProcessRouteRequestBody:
       allOf:
         - type: object
@@ -35694,28 +35786,6 @@ components:
       format: nonempty
       minLength: 1
       type: string
-    Security_Endpoint_Management_API_NoParametersRequestSchema:
-      type: object
-      properties:
-        body:
-          type: object
-          properties:
-            agent_type:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
-            alert_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
-            case_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
-            comment:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
-            endpoint_ids:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointIds'
-            parameters:
-              $ref: '#/components/schemas/Security_Endpoint_Management_API_Parameters'
-          required:
-            - endpoint_ids
-      required:
-        - body
     Security_Endpoint_Management_API_Page:
       default: 1
       description: Page number
@@ -35874,7 +35944,22 @@ components:
       minLength: 1
       type: array
     Security_Endpoint_Management_API_UnisolateRouteRequestBody:
-      $ref: '#/components/schemas/Security_Endpoint_Management_API_NoParametersRequestSchema'
+      type: object
+      properties:
+        agent_type:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_AgentTypes'
+        alert_ids:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_AlertIds'
+        case_ids:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_CaseIds'
+        comment:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_Comment'
+        endpoint_ids:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_EndpointIds'
+        parameters:
+          $ref: '#/components/schemas/Security_Endpoint_Management_API_Parameters'
+      required:
+        - endpoint_ids
     Security_Endpoint_Management_API_UploadRouteRequestBody:
       allOf:
         - type: object
@@ -36069,6 +36154,27 @@ components:
           type: array
       required:
         - cleanup_successful
+        - errors
+    Security_Entity_Analytics_API_ConfigureRiskEngineSavedObjectErrorResponse:
+      type: object
+      properties:
+        errors:
+          items:
+            type: object
+            properties:
+              error:
+                type: string
+              seq:
+                type: integer
+            required:
+              - seq
+              - error
+          type: array
+        risk_engine_saved_object_configured:
+          example: false
+          type: boolean
+      required:
+        - risk_engine_saved_object_configured
         - errors
     Security_Entity_Analytics_API_CreateAssetCriticalityRecord:
       allOf:

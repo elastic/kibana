@@ -24,33 +24,13 @@ describe('validation', () => {
       });
 
       describe('... METADATA <indices>', () => {
-        for (const isWrapped of [true, false]) {
-          function setWrapping(option: string) {
-            return isWrapped ? `[${option}]` : option;
-          }
-
-          function addBracketsWarning() {
-            return isWrapped
-              ? ["Square brackets '[]' need to be removed from FROM METADATA declaration"]
-              : [];
-          }
-
-          describe(`wrapped = ${isWrapped}`, () => {
-            test('no errors on correct usage, waning on square brackets', async () => {
-              const { expectErrors } = await setup();
-              await expectErrors(
-                `from remote-ccs:indexes ${setWrapping('METADATA _id')}`,
-                ['Unknown index [remote-ccs:indexes]'],
-                addBracketsWarning()
-              );
-              await expectErrors(
-                `from *:indexes ${setWrapping('METADATA _id')}`,
-                ['Unknown index [*:indexes]'],
-                addBracketsWarning()
-              );
-            });
-          });
-        }
+        test('no errors on correct usage', async () => {
+          const { expectErrors } = await setup();
+          await expectErrors(`from remote-ccs:indexes METADATA _id`, [
+            'Unknown index [remote-ccs:indexes]',
+          ]);
+          await expectErrors(`from *:indexes METADATA _id`, ['Unknown index [*:indexes]']);
+        });
       });
     });
   });

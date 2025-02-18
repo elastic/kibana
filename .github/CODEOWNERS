@@ -27,6 +27,7 @@ x-pack/platform/packages/shared/kbn-alerting-comparators @elastic/response-ops
 x-pack/examples/alerting_example @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/platform/plugins/shared/alerting @elastic/response-ops
+x-pack/platform/packages/shared/alerting_rule_utils @elastic/obs-ux-management-team
 x-pack/platform/packages/private/kbn-alerting-state-types @elastic/response-ops
 src/platform/packages/shared/kbn-alerting-types @elastic/response-ops
 src/platform/packages/shared/kbn-alerts-as-data-utils @elastic/response-ops
@@ -599,6 +600,7 @@ src/platform/packages/shared/kbn-logging @elastic/kibana-core
 src/platform/packages/shared/kbn-logging-mocks @elastic/kibana-core
 x-pack/platform/plugins/shared/logs_data_access @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/logs_explorer @elastic/obs-ux-logs-team
+x-pack/platform/packages/shared/logs-overview @elastic/obs-ux-logs-team
 x-pack/platform/plugins/shared/logs_shared @elastic/obs-ux-logs-team
 x-pack/platform/plugins/private/logstash @elastic/logstash
 src/platform/packages/private/kbn-managed-content-badge @elastic/kibana-visualizations
@@ -667,6 +669,7 @@ src/platform/plugins/shared/navigation @elastic/appex-sharedux
 src/platform/plugins/shared/newsfeed @elastic/kibana-core
 test/common/plugins/newsfeed @elastic/kibana-core
 src/platform/plugins/private/no_data_page @elastic/appex-sharedux
+packages/kbn-node-libs-browser-webpack-plugin @elastic/kibana-operations
 x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
 src/platform/packages/shared/kbn-object-utils @elastic/kibana-core
 src/platform/packages/shared/kbn-object-versioning @elastic/appex-sharedux
@@ -674,23 +677,20 @@ src/platform/packages/shared/kbn-object-versioning-utils @elastic/appex-sharedux
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/obs-ai-assistant
 x-pack/solutions/observability/plugins/observability_ai_assistant_management @elastic/obs-ai-assistant
 x-pack/platform/plugins/shared/observability_ai_assistant @elastic/obs-ai-assistant
-x-pack/solutions/observability/packages/observability_ai/observability_ai_common @elastic/obs-ai-assistant
-x-pack/solutions/observability/packages/observability_ai/observability_ai_server @elastic/obs-ai-assistant
+x-pack/solutions/observability/packages/observability-ai/observability-ai-common @elastic/obs-ai-assistant
+x-pack/solutions/observability/packages/observability-ai/observability-ai-server @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/alert_details @elastic/obs-ux-management-team
-x-pack/platform/packages/shared/observability/alerting_rule_utils @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/alerting_test_data @elastic/obs-ux-management-team
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/solutions/observability/packages/get_padded_alert_time_range_util @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/observability_logs_explorer @elastic/obs-ux-logs-team
-x-pack/platform/packages/shared/observability/logs_overview @elastic/obs-ux-logs-team
-x-pack/solutions/observability/plugins/observability_onboarding/e2e @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability_onboarding @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/observability @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/observability_shared @elastic/observability-ui
 x-pack/solutions/observability/packages/synthetics_test_data @elastic/obs-ux-management-team
-x-pack/solutions/observability/packages/utils_browser @elastic/observability-ui
-x-pack/solutions/observability/packages/utils_common @elastic/observability-ui
-x-pack/solutions/observability/packages/utils_server @elastic/observability-ui
+x-pack/solutions/observability/packages/utils-browser @elastic/observability-ui
+x-pack/solutions/observability/packages/utils-common @elastic/observability-ui
+x-pack/solutions/observability/packages/utils-server @elastic/observability-ui
 x-pack/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
 test/common/plugins/otel_metrics @elastic/obs-ux-infra_services-team
 packages/kbn-openapi-bundler @elastic/security-detection-rule-management
@@ -758,6 +758,9 @@ src/platform/packages/private/kbn-reporting/server @elastic/appex-sharedux
 src/platform/packages/shared/kbn-resizable-layout @elastic/kibana-data-discovery
 examples/resizable_layout_examples @elastic/kibana-data-discovery
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
+src/platform/packages/shared/response-ops/alerts-apis @elastic/response-ops
+src/platform/packages/shared/response-ops/alerts-fields-browser @elastic/response-ops
+src/platform/packages/shared/response-ops/alerts-table @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_form @elastic/response-ops
 src/platform/packages/shared/response-ops/rule_params @elastic/response-ops
 examples/response_stream @elastic/ml-ui
@@ -790,6 +793,7 @@ src/platform/packages/shared/kbn-saved-search-component @elastic/obs-ux-logs-tea
 src/platform/plugins/shared/saved_search @elastic/kibana-data-discovery
 packages/kbn-scout @elastic/appex-qa
 packages/kbn-scout-info @elastic/appex-qa
+x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 packages/kbn-scout-reporting @elastic/appex-qa
 examples/screenshot_mode_example @elastic/appex-sharedux
 src/platform/plugins/shared/screenshot_mode @elastic/appex-sharedux
@@ -829,7 +833,7 @@ x-pack/platform/packages/shared/security/plugin_types_public @elastic/kibana-sec
 x-pack/platform/packages/shared/security/plugin_types_server @elastic/kibana-security
 x-pack/platform/packages/private/security/role_management_model @elastic/kibana-security
 x-pack/solutions/security/packages/connectors @elastic/security-threat-hunting-explore
-x-pack/solutions/security/packages/distribution_bar @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/packages/distribution-bar @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/packages/features @elastic/security-threat-hunting-explore
 x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
@@ -954,7 +958,7 @@ packages/kbn-stdio-dev-helpers @elastic/kibana-operations
 packages/kbn-storybook @elastic/kibana-operations
 x-pack/solutions/observability/plugins/streams_app @simianhacker @flash1293 @dgieselaar
 x-pack/solutions/observability/plugins/streams @simianhacker @flash1293 @dgieselaar
-x-pack/solutions/observability/packages/kbn-streams-schema @elastic/streams-program-team
+x-pack/platform/packages/shared/kbn-streams-schema @elastic/streams-program-team
 packages/kbn-styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
 x-pack/solutions/observability/plugins/synthetics/e2e @elastic/obs-ux-management-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-ux-management-team
@@ -981,7 +985,7 @@ x-pack/examples/testing_embedded_lens @elastic/kibana-visualizations
 x-pack/examples/third_party_lens_navigation_prompt @elastic/kibana-visualizations
 x-pack/examples/third_party_vis_lens_example @elastic/kibana-visualizations
 x-pack/solutions/security/plugins/threat_intelligence @elastic/security-threat-hunting-investigations
-x-pack/solutions/security/plugins/timelines @elastic/security-threat-hunting-investigations
+x-pack/platform/plugins/shared/timelines @elastic/security-threat-hunting-investigations
 src/platform/packages/private/kbn-timelion-grammar @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-timerange @elastic/obs-ux-logs-team
 src/platform/packages/private/kbn-tinymath @elastic/kibana-visualizations
@@ -1317,6 +1321,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 
 # Streams
 /x-pack/test/api_integration/deployment_agnostic/apis/observability/streams @elastic/streams-program-team
+/x-pack/test/api_integration/fixtures/kbn_archiver/streams @elastic/streams-program-team
 
 ### END Observability Plugins
 

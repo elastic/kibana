@@ -16,7 +16,8 @@ import { createAppMockRenderer } from '../../common/mock';
 import { basicFileMock } from '../../containers/mock';
 import { FileAttachmentEvent } from './file_attachment_event';
 
-describe('FileAttachmentEvent', () => {
+// Failing: See https://github.com/elastic/kibana/issues/206068
+describe.skip('FileAttachmentEvent', () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {

@@ -30,6 +30,7 @@ export const PLI_PRODUCT_FEATURES: PliProductFeatures = {
       ProductFeatureKey.externalRuleActions,
       ProductFeatureKey.integrationAssistant,
       ProductFeatureKey.prebuiltRuleCustomization,
+      ProductFeatureKey.siemMigrations,
     ],
   },
   endpoint: {

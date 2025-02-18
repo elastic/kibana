@@ -13,6 +13,7 @@ import {
   InfraSynthtraceEsClient,
   LogsSynthtraceEsClient,
   SyntheticsSynthtraceEsClient,
+  OtelSynthtraceEsClient,
   EntitiesSynthtraceEsClient,
 } from '../..';
 import { Logger } from '../lib/utils/create_logger';
@@ -25,6 +26,7 @@ interface EsClients {
   logsEsClient: LogsSynthtraceEsClient;
   infraEsClient: InfraSynthtraceEsClient;
   syntheticsEsClient: SyntheticsSynthtraceEsClient;
+  otelEsClient: OtelSynthtraceEsClient;
   entitiesEsClient: EntitiesSynthtraceEsClient;
 }
 
@@ -40,4 +42,5 @@ type Generate<TFields> = (options: {
 export type Scenario<TFields> = (options: RunOptions & { logger: Logger }) => Promise<{
   bootstrap?: (options: EsClients & KibanaClients) => Promise<void>;
   generate: Generate<TFields>;
+  teardown?: (options: EsClients & KibanaClients) => Promise<void>;
 }>;

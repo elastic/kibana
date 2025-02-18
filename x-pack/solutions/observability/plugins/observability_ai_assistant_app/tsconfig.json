@@ -82,8 +82,8 @@
     "@kbn/product-doc-common",
     "@kbn/charts-theme",
     "@kbn/ai-assistant-icon",
+    "@kbn/rule-data-utils",
+    "@kbn/utility-types",
   ],
-  "exclude": [
-    "target/**/*"
-  ]
+  "exclude": ["target/**/*"]
 }
