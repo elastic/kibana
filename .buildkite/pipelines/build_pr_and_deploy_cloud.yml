@@ -69,7 +69,6 @@ steps:
               limit: 3
 
       - wait: ~
-        continue_on_failure: true
 
       - command: |
           ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
@@ -83,12 +82,3 @@ steps:
           imageProject: elastic-images-prod
           machineType: n2-standard-2
         timeout_in_minutes: 5
-
-      - command: .buildkite/scripts/lifecycle/post_build.sh
-        label: Post-Build
-        timeout_in_minutes: 10
-        agents:
-          image: family/kibana-ubuntu-2004
-          imageProject: elastic-images-prod
-          provider: gcp
-          machineType: n2-standard-2
