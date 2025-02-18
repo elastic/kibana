@@ -135,9 +135,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       await cisIntegration.clickSaveButton();
-      await pageObjects.header.waitUntilLoadingHasFinished();
 
-      expect(await cisIntegrationAws.showPostInstallCloudFormationModal()).to.be(true);
+      // add timeout to give extra time for the modal to show up
+      await retry.tryForTime(agentCreationTimeout, async () => {
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        const resStatus = await cisIntegrationAws.showPostInstallCloudFormationModal();
+        expect(resStatus).to.be(true);
+      });
 
       await cisIntegration.navigateToIntegrationCspList();
       await pageObjects.header.waitUntilLoadingHasFinished();
