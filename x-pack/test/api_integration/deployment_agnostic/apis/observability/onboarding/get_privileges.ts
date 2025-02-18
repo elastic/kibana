@@ -12,21 +12,26 @@ import { type SupertestWithRoleScopeType } from '../../../services';
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
 
-  let viewerClient: SupertestWithRoleScopeType;
-  let adminClient: SupertestWithRoleScopeType;
+  let viewerClientWithAPIKey: SupertestWithRoleScopeType;
+  let adminClientWithAPIKey: SupertestWithRoleScopeType;
 
   describe('Api Key privileges check', () => {
     before(async () => {
-      viewerClient = await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
+      viewerClientWithAPIKey = await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
         withInternalHeaders: true,
       });
-      adminClient = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+      adminClientWithAPIKey = await roleScopedSupertest.getSupertestWithRoleScope('admin', {
         withInternalHeaders: true,
       });
     });
 
+    after(async () => {
+      viewerClientWithAPIKey.destroy();
+      adminClientWithAPIKey.destroy();
+    });
+
     it('returns false when user has reader privileges', async () => {
-      const response = await viewerClient.get(
+      const response = await viewerClientWithAPIKey.get(
         `/internal/observability_onboarding/logs/setup/privileges`
       );
 
@@ -34,7 +39,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('returns true when user has admin privileges', async () => {
-      const response = await adminClient.get(
+      const response = await adminClientWithAPIKey.get(
         `/internal/observability_onboarding/logs/setup/privileges`
       );
 
