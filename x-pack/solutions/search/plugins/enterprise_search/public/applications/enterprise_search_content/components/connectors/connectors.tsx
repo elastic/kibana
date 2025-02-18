@@ -11,13 +11,9 @@ import { useActions, useValues } from 'kea';
 
 import {
   EuiButton,
-  EuiButtonIcon,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
-  EuiPopover,
   EuiSearchBar,
   EuiSpacer,
   EuiText,
@@ -31,8 +27,6 @@ import { LEARN_MORE_LINK } from '../../../shared/constants';
 import { KibanaLogic } from '../../../shared/kibana';
 import { handlePageChange } from '../../../shared/table_pagination';
 import {
-  NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH,
-  NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH,
   NEW_INDEX_SELECT_CONNECTOR_PATH,
 } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
@@ -68,7 +62,6 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelf
     useActions(ConnectorsLogic);
   const { data, isLoading, searchParams, isEmpty, connectors } = useValues(ConnectorsLogic);
   const [searchQuery, setSearchValue] = useState('');
-  const [showMoreOptionsPopover, setShowMoreOptionsPopover] = useState<boolean>(false);
   const [showDefaultSettingsFlyout, setShowDefaultSettingsFlyout] = useState<boolean>(false);
   const { productFeatures } = useValues(KibanaLogic);
 
