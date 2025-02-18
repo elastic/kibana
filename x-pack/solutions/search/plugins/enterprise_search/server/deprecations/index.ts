@@ -195,7 +195,7 @@ export async function getCrawlerDeprecations(
 }
 
 /**
- * If the customer is using Native Connectors, and agentless is unavailable, they are told that they must convert their connectors to Connector Clients
+ * If the customer is using Native Connectors, they are told that they must convert their connectors to Connector Clients
  */
 export async function getNativeConnectorDeprecations(
   ctx: GetDeprecationsContext,
@@ -210,7 +210,7 @@ export async function getNativeConnectorDeprecations(
     const deprecations: DeprecationsDetails[] = [];
 
     if (nativeConnectors.length > 0) {
-      // There are some illegal service_types in their native connectors
+      // There are some native connectors
       deprecations.push({
         level: 'critical',
         deprecationType: 'feature',
