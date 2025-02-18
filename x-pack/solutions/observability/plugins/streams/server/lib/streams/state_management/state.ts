@@ -22,8 +22,8 @@ const applyChangeByType: ApplyChangeMap = {
 export type StateChange = WiredStreamChange | GroupStreamChange;
 
 export class State {
-  private wiredStreams: WiredStream[];
-  private groupStreams: GroupStream[];
+  wiredStreams: WiredStream[];
+  groupStreams: GroupStream[];
 
   constructor(wiredStreams: WiredStream[], groupStreams: GroupStream[]) {
     this.wiredStreams = wiredStreams;

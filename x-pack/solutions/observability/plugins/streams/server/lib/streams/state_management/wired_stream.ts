@@ -18,7 +18,11 @@ import { State } from './state';
 export interface UpsertWiredStreamChange {
   stream_type: 'wired';
   change: 'upsert';
-  request: WiredStreamUpsertRequest;
+  request: WiredStreamUpsertRequest & {
+    stream: {
+      name: string;
+    };
+  };
 }
 
 export interface DeleteWiredStreamChange {
@@ -32,6 +36,7 @@ export type WiredStreamChange = UpsertWiredStreamChange | DeleteWiredStreamChang
 // This class should live somewhere else later
 export class WiredStream {
   private definition: WiredStreamDefinition;
+  private changed: boolean = false;
 
   constructor(definition: WiredStreamDefinition) {
     this.definition = definition;
@@ -54,7 +59,22 @@ export class WiredStream {
   }
 
   private static applyUpsert(requestedChange: UpsertWiredStreamChange, newState: State) {
-    throw new Error('Method not implemented.');
+    const existingStream = newState.wiredStreams.find(
+      (wiredStream) => wiredStream.definition.name === requestedChange.request.stream.name
+    );
+
+    if (existingStream) {
+      existingStream.definition = requestedChange.request.stream;
+      existingStream.markAsChanged();
+    } else {
+      const wiredStream = new WiredStream(requestedChange.request.stream);
+      wiredStream.markAsChanged();
+      newState.wiredStreams.push(wiredStream);
+    }
+  }
+
+  private markAsChanged() {
+    this.changed = true;
   }
 
   private static applyDelete(requestedChange: DeleteWiredStreamChange, newState: State) {
