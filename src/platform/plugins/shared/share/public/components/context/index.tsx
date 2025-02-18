@@ -11,17 +11,12 @@ import { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import { I18nStart } from '@kbn/core/public';
 import React, { type PropsWithChildren, createContext, useContext } from 'react';
 
-import { AnonymousAccessServiceContract } from '../../../common';
-import type { ShareConfigs, BrowserUrlService, ShareContext, ShareTypes } from '../../types';
-
-export type { ShareMenuItemV2 } from '../../types';
+import type { ShareConfigs, ShareContext, ShareTypes } from '../../types';
 
 export interface IShareContext extends ShareContext {
   allowEmbed: boolean;
   allowShortUrl: boolean;
   shareMenuItems: ShareConfigs[];
-  anonymousAccess?: AnonymousAccessServiceContract;
-  urlService: BrowserUrlService;
   theme: ThemeServiceSetup;
   i18n: I18nStart;
   publicAPIEnabled?: boolean;

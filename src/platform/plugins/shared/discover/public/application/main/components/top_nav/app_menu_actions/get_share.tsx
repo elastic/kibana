@@ -110,6 +110,11 @@ export const getShareAppMenuItem = ({
             title: i18n.translate('discover.share.shareModal.title', {
               defaultMessage: 'Share this Discover session',
             }),
+            config: {
+              embed: {
+                showPublicUrlSwitch,
+              },
+            },
           },
           sharingData: {
             isTextBased: isEsqlMode,
@@ -123,7 +128,6 @@ export const getShareAppMenuItem = ({
               }),
           },
           isDirty: !savedSearch.id || stateContainer.appState.hasChanged(),
-          showPublicUrlSwitch,
           onClose: () => {
             anchorElement?.focus();
           },
