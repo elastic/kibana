@@ -97,6 +97,10 @@ import {
 import { CRITICALITY_VALUES } from '../asset_criticality/constants';
 import { createEngineDescription } from './installation/engine_description';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
+<<<<<<< HEAD
+=======
+
+>>>>>>> f5c9529e37e (Deprecate universal entity)
 import type { ApiKeyManager } from './auth/api_key';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
@@ -306,12 +310,6 @@ export class EntityStoreDataClient {
     requestBody: InitEntityEngineRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityEngineResponse> {
-    const { experimentalFeatures } = this.options;
-
-    if (entityType === EntityType.universal && !experimentalFeatures.assetInventoryStoreEnabled) {
-      throw new Error('Universal entity store is not enabled');
-    }
-
     if (!this.options.taskManager) {
       throw new Error('Task Manager is not available');
     }
