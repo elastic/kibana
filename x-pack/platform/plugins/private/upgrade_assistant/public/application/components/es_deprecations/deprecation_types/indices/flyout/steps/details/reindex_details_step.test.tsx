@@ -11,7 +11,6 @@ import { ReindexDetailsFlyoutStep } from './reindex_details_step';
 import type { ReindexState } from '../../../use_reindex';
 import type { UpdateIndexState } from '../../../use_update_index';
 import { LoadingState } from '../../../../../../types';
-import { cloneDeep } from 'lodash';
 import { EnrichedDeprecationInfo } from '../../../../../../../../../common/types';
 
 jest.mock('../../../../../../../app_context', () => {
@@ -39,14 +38,14 @@ jest.mock('../../../../../../../app_context', () => {
 });
 
 describe('ReindexDetailsFlyoutStep', () => {
-  const deprecation: EnrichedDeprecationInfo = {
+  const defaultDeprecation: () => EnrichedDeprecationInfo = () => ({
     isCritical: true,
     message: 'foo',
     resolveDuringUpgrade: false,
     type: 'index_settings',
     url: 'https://te.st',
-  };
-  const defaultReindexState: ReindexState = {
+  });
+  const defaultReindexState: () => ReindexState = () => ({
     loadingState: LoadingState.Success,
     meta: {
       indexName: 'some_index',
@@ -58,12 +57,12 @@ describe('ReindexDetailsFlyoutStep', () => {
     hasRequiredPrivileges: true,
     reindexTaskPercComplete: null,
     errorMessage: null,
-  };
+  });
 
-  const defaultUpdateIndexState: UpdateIndexState = {
+  const defaultUpdateIndexState: () => UpdateIndexState = () => ({
     status: 'incomplete',
     failedBefore: false,
-  };
+  });
 
   it('renders for non-readonly indices', () => {
     const wrapper = shallow(
@@ -71,9 +70,9 @@ describe('ReindexDetailsFlyoutStep', () => {
         closeFlyout={jest.fn()}
         startReindex={jest.fn()}
         startReadonly={jest.fn()}
-        reindexState={defaultReindexState}
-        updateIndexState={defaultUpdateIndexState}
-        deprecation={deprecation}
+        reindexState={defaultReindexState()}
+        updateIndexState={defaultUpdateIndexState()}
+        deprecation={defaultDeprecation()}
       />
     );
 
@@ -221,10 +220,10 @@ describe('ReindexDetailsFlyoutStep', () => {
         closeFlyout={jest.fn()}
         startReindex={jest.fn()}
         startReadonly={jest.fn()}
-        reindexState={defaultReindexState}
-        updateIndexState={defaultUpdateIndexState}
+        reindexState={defaultReindexState()}
+        updateIndexState={defaultUpdateIndexState()}
         deprecation={{
-          ...deprecation,
+          ...defaultDeprecation(),
           correctiveAction: { type: 'reindex', transformIds: ['abc', 'def'] },
         }}
       />
@@ -304,7 +303,7 @@ describe('ReindexDetailsFlyoutStep', () => {
   });
 
   it('renders for readonly indices (warning deprecation)', () => {
-    const props = cloneDeep(defaultReindexState);
+    const props = defaultReindexState();
     props.meta.isReadonly = true;
 
     const wrapper = shallow(
@@ -313,8 +312,8 @@ describe('ReindexDetailsFlyoutStep', () => {
         startReindex={jest.fn()}
         startReadonly={jest.fn()}
         reindexState={props}
-        updateIndexState={defaultUpdateIndexState}
-        deprecation={deprecation}
+        updateIndexState={defaultUpdateIndexState()}
+        deprecation={defaultDeprecation()}
       />
     );
 
@@ -387,15 +386,18 @@ describe('ReindexDetailsFlyoutStep', () => {
   });
 
   it('renders ML anomaly index guidance', () => {
-    const reindexState = cloneDeep(defaultReindexState);
+    const reindexState = defaultReindexState();
     reindexState.meta.indexName = '.ml-anomalies-1';
+    const deprecation = defaultDeprecation();
+    deprecation.index = '.ml-anomalies-1';
     const wrapper = shallow(
       <ReindexDetailsFlyoutStep
         closeFlyout={jest.fn()}
         startReindex={jest.fn()}
         startReadonly={jest.fn()}
         reindexState={reindexState}
-        updateIndexState={defaultUpdateIndexState}
+        updateIndexState={defaultUpdateIndexState()}
+        deprecation={deprecation}
       />
     );
 

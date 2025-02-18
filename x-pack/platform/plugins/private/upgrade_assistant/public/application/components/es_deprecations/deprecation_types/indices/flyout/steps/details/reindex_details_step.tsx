@@ -86,10 +86,10 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
 
   if (isESTransformTarget) {
     showEsTransformsGuidance = true;
-  } else if (isMLAnomalyIndex) {
-    showMlAnomalyGuidance = true;
   } else if (meta.isReadonly) {
     showReadOnlyGuidance = true;
+  } else if (isMLAnomalyIndex) {
+    showMlAnomalyGuidance = true;
   } else {
     showDefaultGuidance = true;
   }
