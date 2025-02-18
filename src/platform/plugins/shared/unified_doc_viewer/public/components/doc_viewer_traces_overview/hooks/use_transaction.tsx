@@ -36,13 +36,8 @@ async function getTransactionData({ transactionId, indexPattern, data }: GetTran
             bool: {
               must: [
                 {
-                  match: {
+                  term: {
                     'transaction.id': transactionId,
-                  },
-                },
-                {
-                  exists: {
-                    field: 'transaction.name',
                   },
                 },
                 {
@@ -70,12 +65,9 @@ const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) =>
         try {
           setLoading(true);
           const result = await getTransactionData({ transactionId, indexPattern, data });
+          const transactionName = result.rawResponse.hits.hits[0]?._source.transaction?.name;
 
-          const resultTransactionName = result.rawResponse.hits.hits.find(
-            (hit) => hit._source.transaction?.name
-          )?._source.transaction.name;
-
-          setTransaction(resultTransactionName ? { name: resultTransactionName } : null);
+          setTransaction(transactionName ? { name: transactionName } : null);
         } catch (err) {
           setTransaction({ name: '' });
         } finally {
