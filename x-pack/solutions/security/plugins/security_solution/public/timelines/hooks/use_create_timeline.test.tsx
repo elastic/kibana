@@ -94,7 +94,7 @@ describe('useCreateTimeline', () => {
     expect(createTimeline.mock.calls[0][0].show).toEqual(true);
     expect(createTimeline.mock.calls[0][0].updated).toEqual(undefined);
     expect(createTimeline.mock.calls[0][0].excludedRowRendererIds).toHaveLength(RowRendererCount);
-    expect(setSelectedDataView.mock.calls[0][0].scope).toEqual(SourcererScopeName.timeline);
+    expect(setSelectedDataView.mock.calls[0][0].scope).toEqual([SourcererScopeName.timeline]);
     expect(setSelectedDataView.mock.calls[0][0].id).toEqual(
       mockGlobalState.dataViewPicker.default.dataView?.id
     );
