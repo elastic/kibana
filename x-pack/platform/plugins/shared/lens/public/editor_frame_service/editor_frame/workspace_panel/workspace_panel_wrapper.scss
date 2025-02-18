@@ -7,11 +7,6 @@
   overflow: visible;
   height: 100%;
 
-  .lnsWorkspacePanelWrapper__content {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-  }
 
   .lnsWorkspacePanelWrapper__pageContentBody {
     flex-grow: 1;
@@ -87,10 +82,6 @@
   .lnsWorkspacePanel__actions {
     margin-top: $euiSizeL;
   }
-}
-
-.lnsWorkspacePanelWrapper__toolbar {
-  margin-bottom: $euiSizeXS;
 }
 
 .lnsWorkspacePanelWrapper__toolbar--fullscreen {
