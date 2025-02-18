@@ -7,7 +7,6 @@
 
 import rawExpect from 'expect';
 import expect from '@kbn/expect';
-import { IlmPhases } from '@elastic/elasticsearch/lib/api/types';
 import {
   IngestStreamEffectiveLifecycle,
   IngestStreamLifecycle,
