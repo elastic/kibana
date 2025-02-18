@@ -18,76 +18,107 @@ export default function ({ getService }: FtrProviderContext) {
   describe('settings', () => {
     after(async () => await deleteAllIndices());
 
-    it('should fetch an index settings', async () => {
-      const index = await createIndex();
+    const expectedIndexSettings = [
+      'max_inner_result_window',
+      'unassigned',
+      'max_terms_count',
+      'lifecycle',
+      'routing_partition_size',
+      'max_docvalue_fields_search',
+      'merge',
+      'max_refresh_listeners',
+      'max_regex_length',
+      'load_fixed_bitset_filters_eagerly',
+      'number_of_routing_shards',
+      'write',
+      'verified_before_close',
+      'mapping',
+      'source_only',
+      'soft_deletes',
+      'max_script_fields',
+      'query',
+      'format',
+      'frozen',
+      'sort',
+      'priority',
+      'codec',
+      'max_rescore_window',
+      'analyze',
+      'gc_deletes',
+      'max_ngram_diff',
+      'translog',
+      'auto_expand_replicas',
+      'requests',
+      'data_path',
+      'highlight',
+      'routing',
+      'search',
+      'fielddata',
+      'default_pipeline',
+      'max_slices_per_scroll',
+      'shard',
+      'xpack',
+      'percolator',
+      'allocation',
+      'refresh_interval',
+      'indexing',
+      'compound_format',
+      'blocks',
+      'max_result_window',
+      'store',
+      'queries',
+      'warmer',
+      'max_shingle_diff',
+      'query_string',
+    ];
 
-      const { status, body } = await getIndexSettings(index);
-      expect(status).to.eql(200);
+    describe('8.x specific tests', function () {
+      this.onlyEsVersion('8');
 
-      // Verify we fetch the corret index settings
-      expect(body.settings.index.provided_name).to.be(index);
+      it('should fetch an index settings', async function () {
+        const index = await createIndex();
 
-      const expectedSettings = [
-        'max_inner_result_window',
-        'unassigned',
-        'max_terms_count',
-        'lifecycle',
-        'routing_partition_size',
-        'max_docvalue_fields_search',
-        'merge',
-        'max_refresh_listeners',
-        'max_regex_length',
-        'load_fixed_bitset_filters_eagerly',
-        'number_of_routing_shards',
-        'write',
-        'verified_before_close',
-        'mapping',
-        'source_only',
-        'soft_deletes',
-        'max_script_fields',
-        'query',
-        'format',
-        'frozen',
-        'sort',
-        'priority',
-        'codec',
-        'max_rescore_window',
-        'analyze',
-        'gc_deletes',
-        'max_ngram_diff',
-        'translog',
-        'auto_expand_replicas',
-        'requests',
-        'data_path',
-        'highlight',
-        'routing',
-        'search',
-        'fielddata',
-        'default_pipeline',
-        'max_slices_per_scroll',
-        'shard',
-        'xpack',
-        'percolator',
-        'allocation',
-        'refresh_interval',
-        'indexing',
-        'compound_format',
-        'blocks',
-        'max_result_window',
-        'store',
-        'queries',
-        'warmer',
-        'max_shingle_diff',
-        'query_string',
-      ];
+        const { status, body } = await getIndexSettings(index);
+        expect(status).to.eql(200);
 
-      // Make sure none of the settings have been removed from ES API
-      expectedSettings.forEach((setting) => {
-        try {
-          expect(Object.hasOwn(body.defaults.index, setting)).to.be(true);
-        } catch {
-          throw new Error(`Expected setting "${setting}" not found.`);
-        }
+        // Verify we fetch the corret index settings
+        expect(body.settings.index.provided_name).to.be(index);
+
+        // Make sure none of the settings have been removed from ES API
+        expectedIndexSettings.forEach((setting) => {
+          try {
+            expect(Object.hasOwn(body.defaults.index, setting)).to.be(true);
+          } catch {
+            throw new Error(`Expected setting "${setting}" not found.`);
+          }
+        });
+      });
+    });
+
+    describe('Forward compatibility with 9.x', function () {
+      this.onlyEsVersion('>=9');
+
+      it('should fetch an index settings', async () => {
+        const indexSettingsNotIn9 = ['frozen'];
+
+        const index = await createIndex();
+
+        const { status, body } = await getIndexSettings(index);
+        expect(status).to.eql(200);
+
+        // Verify we fetch the corret index settings
+        expect(body.settings.index.provided_name).to.be(index);
+
+        // Make sure none of the settings have been removed from ES API
+        expectedIndexSettings
+          .filter((setting) => !indexSettingsNotIn9.includes(setting))
+          .forEach((setting) => {
+            try {
+              expect(Object.hasOwn(body.defaults.index, setting)).to.be(true);
+            } catch {
+              throw new Error(`Expected setting "${setting}" not found.`);
+            }
+          });
       });
     });
 
