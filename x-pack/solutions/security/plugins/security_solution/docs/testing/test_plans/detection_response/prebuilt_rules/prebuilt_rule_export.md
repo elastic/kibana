@@ -63,9 +63,9 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Terminology
 
-- **prebuilt rule**: A rule contained in our `Prebuilt Security Detection Rules` integration in Fleet.
-- **custom rule**: A rule defined by the user, which has no relation to the prebuilt rules
-- **rule source, or ruleSource**: A field on the rule that defines the rule's categorization
+- [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
+- **Rule source**, or **`ruleSource`**: a rule field that defines the rule's origin. Can be `internal` or `external`. Currently, custom rules have `internal` rule source and prebuilt rules have `external` rule source.
+- **`is_customized`**: a field within `ruleSource` that exists when rule source is set to `external`. It is a boolean value based on if the rule has been changed from its base version.
 
 ## Scenarios
 

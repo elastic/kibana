@@ -77,23 +77,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Terminology
 
-- **Base version**: Prebuilt rule asset we ship in the rule package corresponding to the currently installed prebuilt rules. It represents "original" version of the rule. During prebuilt rules installation prebuilt rule assets data is copied over and becomes an installed prebuilt rule.
-
-- **Customized prebuilt rule**: An installed prebuilt rule that has been changed by the user in the way rule fields semantically differ from the base version. Also referred to as "Modified" in the UI.
-
-- **Non-customized prebuilt rule**: An installed prebuilt rule that has rule fields values matching the base version.
-
-- **Custom rule**: A rule created by the user themselves
-
-- **rule source, or ruleSource**: A field on the rule that defines the rule's categorization. Can be `internal` or `external`.
-
-- **`is_customized`**: A field within `ruleSource` that exists when rule source is set to `external`. It is a boolean value based on if the rule has been changed from its base version
-
-- **customizable rule field**: A rule field that is able to be customized on a prebuilt rule. A comprehenseive list can be found in `./shared_assets/customizable_rule_fields.md`.
-
-- **non-customizable rule field**: A rule field that is unable to be customized on a prebuilt rule. A comprehenseive list can be found in `./shared_assets/non_customizable_rule_fields.md`.
-
-- **non-semantic change**: A change to a rule field that is functionally different. We normalize certain fields so for a time-related field such as `from`, `1m` vs `60s` are treated as the same value. We also trim leading and trailing whitespace for query fields.
+- [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
+- **Rule source**, or **`ruleSource`**: a rule field that defines the rule's origin. Can be `internal` or `external`. Currently, custom rules have `internal` rule source and prebuilt rules have `external` rule source.
+- **`is_customized`**: a field within `ruleSource` that exists when rule source is set to `external`. It is a boolean value based on if the rule has been changed from its base version.
+- **non-semantic change**: a change to a rule field that is functionally different. We normalize certain fields so for a time-related field such as `from`, `1m` vs `60s` are treated as the same value. We also trim leading and trailing whitespace for query fields.
 
 ### Assumptions
 

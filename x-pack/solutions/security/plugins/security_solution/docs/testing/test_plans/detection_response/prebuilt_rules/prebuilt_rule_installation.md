@@ -74,19 +74,9 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Terminology
 
-- **EPR**: [Elastic Package Registry](https://github.com/elastic/package-registry), service that hosts our **Package**.
-
-- **Package**: `security_detection_engine` Fleet package that we use to distribute prebuilt detection rules in the form of `security-rule` assets (saved objects).
-
-- **Real package**: actual latest stable package distributed and pulled from EPR via Fleet.
-
-- **Mock rules**: `security-rule` assets that are indexed into the `.kibana_security_solution` index directly in the test setup, either by using the ES client _in integration tests_ or by an API request _in Cypress tests_.
-
-- **Air-gapped environment**: an environment where Kibana doesn't have access to the internet. In general, EPR is not available in such environments, except the cases when the user runs a custom EPR inside the environment.
-
-- **CTA**: "call to action", usually a button, a link, or a callout message with a button, etc, that invites the user to do some action.
-  - CTA to install prebuilt rules - at this moment, it's a link button with a counter (implemented) and a callout with a link button (not yet implemented) on the Rule Management page.
-  - CTA to upgrade prebuilt rules - at this moment, it's a tab with a counter (implemented) and a callout with a link button (not yet implemented) on the Rule Management page.
+- [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
+- **CTA to install prebuilt rules**: a link button with a counter on the Rule Management page.
+- **CTA to upgrade prebuilt rules**: a tab with a counter on the Rule Management page.
 
 ### Assumptions
 

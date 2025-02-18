@@ -82,17 +82,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Terminology
 
-- **CTA**: "call to action", usually a button, a link, or a callout message with a button, etc, that invites the user to do some action.
-
-  - **CTA to upgrade the prebuilt rule**: the button to upgrade the prebuilt rule currently shown in the Rule Upgrade flyout.
-
-- **Non-customized field**: a prebuilt rule's field that has the original value from the originally installed prebuilt rule.
-
-- **Customized field**: a prebuilt rule's field that has a value that differs from the original field value of the originally installed prebuilt rule.
-
-- **Non-customized rule**: a prebuilt rule that doesn't have any customized fields.
-
-- **Customized rule**: a prebuilt rule that has one or more customized fields.
+- [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
+- **CTA to upgrade the prebuilt rule**: the button to upgrade the prebuilt rule currently shown in the Rule Upgrade flyout.
 
 ### Assumptions
 

@@ -68,14 +68,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Terminology
 
-- **Base version**: Also labeled as `base_version`. This is the version of a rule authored by Elastic as it is installed from the `security_detection_engine` package, with no customizations to any fields by the user.
-
-- **Current version**: Also labeled as `current_version`. This is the version of the rule that the user currently has installed. Consists of the `base_version` of the rules plus all customization applies to its fields by the user.
-
-- **Target version**: Also labeled as `target_version`. This is the version of the rule that contains the update from Elastic.
-
-- **Merged version**: Also labeled as `merged_version`. This is the version of the rule that we determine via the various algorithms. It could contain a mix of all the rule versions on a per-field basis to create a singluar version of the rule containing all relevant updates and user changes to display to the user.
-
+- [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
 - **Grouped fields**
   - `data_source`: an object that contains a `type` field with a value of `data_view_id` or `index_patterns` and another field that's either `data_view_id` of type string OR `index_patterns` of type string array
   - `kql_query`: an object that contains a `type` field with a value of `inline_query` or `saved_query` and other fields based on whichever type is defined. If it's `inline_query`, the object contains a `query` string field, a `language` field that's either `kuery` or `lucene`, and a `filters` field which is an array of kibana filters. If the type field is `saved_query`, the object only contains a `saved_query_id` string field.
