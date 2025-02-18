@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { encode } from '@kbn/rison';
@@ -13,13 +14,12 @@ import { SECURITY_ES_ARCHIVES_DIR, SECURITY_SOLUTION_DATA_VIEW } from '../../../
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'svlCommonPage']);
-  const testSubjects = getService('testSubjects');
-  const dataViews = getService('dataViews');
   const esArchiver = getService('esArchiver');
   const queryBar = getService('queryBar');
   const securitySolutionApi = getService('securitySolutionApi');
+  const find = getService('find');
 
-  describe('security root profile', () => {
+  describe('security document profile', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsViewer();
       await esArchiver.loadIfNeeded(path.join(SECURITY_ES_ARCHIVES_DIR, 'auditbeat_single'));
@@ -29,47 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.unload(path.join(SECURITY_ES_ARCHIVES_DIR, 'auditbeat_single'));
     });
     describe('doc viewer', () => {
-      describe('events', () => {
-        describe('DataView mode', () => {
-          it('should open event overview tab', async () => {
-            await PageObjects.common.navigateToActualUrl('discover', undefined, {
-              ensureCurrentUrl: false,
-            });
-            await dataViews.createFromSearchBar({
-              name: 'auditbeat-2022',
-              adHoc: true,
-              hasTimeField: true,
-            });
-            await queryBar.setQuery('host.name: "siem-kibana"');
-            await queryBar.clickQuerySubmitButton();
-            await PageObjects.discover.waitUntilSearchingHasFinished();
-            const expandDocViewerButton = await testSubjects.find('docTableExpandToggleColumn');
-            await expandDocViewerButton.click();
-
-            await testSubjects.existOrFail('eventOverview', { timeout: 2500 });
-          });
-        });
-
-        describe('ES|QL mode', () => {
-          it('should open event overview tab', async () => {
-            const state = encode({
-              datasource: { type: 'esql' },
-              query: { esql: 'from auditbeat-2022 | where host.name == "siem-kibana"' },
-            });
-
-            await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
-              ensureCurrentUrl: false,
-            });
-            await PageObjects.discover.waitUntilSearchingHasFinished();
-            const expanddocviewerbutton = await testSubjects.find('docTableExpandToggleColumn');
-            await expanddocviewerbutton.click();
-
-            await testSubjects.existOrFail('eventOverview', { timeout: 2500 });
-          });
-        });
-      });
-
-      describe('alerts', () => {
+      describe('alerts and events', () => {
         before(async () => {
           const testRunUuid = uuidv4();
           const ruleName = `Test Rule - ${testRunUuid}`;
@@ -92,23 +52,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         describe('DataView mode', () => {
-          it('should open alert overview tab', async () => {
+          it('should have row indicator for both event and alert', async () => {
             await PageObjects.common.navigateToActualUrl('discover', undefined, {
               ensureCurrentUrl: false,
             });
 
-            await queryBar.setQuery('event.kind: "signal"');
             await queryBar.clickQuerySubmitButton();
             await PageObjects.discover.waitUntilSearchingHasFinished();
-            const expandDocViewerButton = await testSubjects.find('docTableExpandToggleColumn');
-            await expandDocViewerButton.click();
 
-            await testSubjects.existOrFail('alertOverview', { timeout: 2500 });
+            expect(
+              await find.existsByCssSelector(
+                '[data-test-subj="unifiedDataTableRowColorIndicatorCell"][title="alert"]'
+              )
+            ).to.eql(true);
+            expect(
+              await find.existsByCssSelector(
+                '[data-test-subj="unifiedDataTableRowColorIndicatorCell"][title="event"]'
+              )
+            ).to.eql(true);
           });
 
           describe('ES|QL mode', () => {
-            it('should open alert overview tab', async () => {
-              const query = `FROM ${SECURITY_SOLUTION_DATA_VIEW} | WHERE event.kind == "signal"`;
+            it('should have row indicator for both event and alert', async () => {
+              const query = `FROM ${SECURITY_SOLUTION_DATA_VIEW}`;
 
               const state = encode({
                 datasource: { type: 'esql' },
@@ -120,10 +86,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               });
 
               await PageObjects.discover.waitUntilSearchingHasFinished();
-              const expandDocViewerButton = await testSubjects.find('docTableExpandToggleColumn');
-              await expandDocViewerButton.click();
 
-              await testSubjects.existOrFail('alertOverview', { timeout: 2500 });
+              expect(
+                await find.existsByCssSelector(
+                  '[data-test-subj="unifiedDataTableRowColorIndicatorCell"][title="alert"]'
+                )
+              ).to.eql(true);
+              expect(
+                await find.existsByCssSelector(
+                  '[data-test-subj="unifiedDataTableRowColorIndicatorCell"][title="event"]'
+                )
+              ).to.eql(true);
             });
           });
         });
