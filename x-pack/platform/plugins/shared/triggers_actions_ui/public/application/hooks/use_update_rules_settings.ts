@@ -37,9 +37,9 @@ export const useUpdateRuleSettings = (props: UseUpdateRuleSettingsProps) => {
       updates.push(updateQueryDelaySettings({ http, queryDelaySettings: settings.queryDelay }));
     }
 
-    if (settings.alertsDeletion) {
+    if (settings.alertDeletion) {
       updates.push(
-        updateAlertsDeletionSettings({ http, alertsDeletionSettings: settings.alertsDeletion })
+        updateAlertsDeletionSettings({ http, alertsDeletionSettings: settings.alertDeletion })
       );
     }
 

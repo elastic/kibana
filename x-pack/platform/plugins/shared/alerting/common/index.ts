@@ -58,9 +58,11 @@ export type {
   RulesSettingsModificationMetadata,
   RulesSettingsFlappingProperties,
   RulesSettingsQueryDelayProperties,
+  RulesSettingsAlertDeletionProperties,
   RuleSpecificFlappingProperties,
   RulesSettingsFlapping,
   RulesSettingsQueryDelay,
+  RulesSettingsAlertDeletion,
   RulesSettingsProperties,
   RulesSettings,
 } from './rules_settings';
@@ -80,6 +82,7 @@ export {
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID,
   RULES_SETTINGS_QUERY_DELAY_SAVED_OBJECT_ID,
+  RULES_SETTINGS_ALERT_DELETION_SAVED_OBJECT_ID,
   DEFAULT_LOOK_BACK_WINDOW,
   DEFAULT_STATUS_CHANGE_THRESHOLD,
   DEFAULT_QUERY_DELAY,
@@ -88,6 +91,7 @@ export {
   DISABLE_FLAPPING_SETTINGS,
   DEFAULT_QUERY_DELAY_SETTINGS,
   DEFAULT_SERVERLESS_QUERY_DELAY_SETTINGS,
+  DEFAULT_ALERT_DELETION_SETTINGS,
 } from './rules_settings';
 export type { RuleType, ActionGroup, ActionGroupIdsOf } from './rule_type';
 export { validateBackfillSchedule } from './lib';
