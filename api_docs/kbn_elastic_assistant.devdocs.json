@@ -1786,7 +1786,7 @@
             "section": "def-public.ClientMessage",
             "text": "ClientMessage"
           },
-          " extends Omit<{ timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, \"content\" | \"reader\">"
+          " extends Omit<{ timestamp: string; role: \"user\" | \"system\" | \"assistant\"; content: string; metadata?: { contentReferences?: Zod.objectOutputType<{}, Zod.ZodUnion<[Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"KnowledgeBaseEntry\">; knowledgeBaseEntryId: Zod.ZodString; knowledgeBaseEntryName: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; }, { id: string; type: \"KnowledgeBaseEntry\"; knowledgeBaseEntryId: string; knowledgeBaseEntryName: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"SecurityAlert\">; alertId: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"SecurityAlert\"; alertId: string; }, { id: string; type: \"SecurityAlert\"; alertId: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"SecurityAlertsPage\">; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"SecurityAlertsPage\"; }, { id: string; type: \"SecurityAlertsPage\"; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"ProductDocumentation\">; title: Zod.ZodString; url: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"ProductDocumentation\"; title: string; url: string; }, { id: string; type: \"ProductDocumentation\"; title: string; url: string; }>, Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodString; }, { type: Zod.ZodLiteral<\"EsqlQuery\">; query: Zod.ZodString; label: Zod.ZodString; timerange: Zod.ZodOptional<Zod.ZodObject<{ from: Zod.ZodString; to: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { from: string; to: string; }, { from: string; to: string; }>>; }>, \"strip\", Zod.ZodTypeAny, { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }, { id: string; type: \"EsqlQuery\"; label: string; query: string; timerange?: { from: string; to: string; } | undefined; }>]>, \"strip\"> | undefined; } | undefined; isError?: boolean | undefined; reader?: Zod.objectOutputType<{}, Zod.ZodUnknown, \"strip\"> | undefined; traceData?: { transactionId?: string | undefined; traceId?: string | undefined; } | undefined; }, \"content\" | \"reader\">"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
         "deprecated": false,
@@ -2523,7 +2523,7 @@
           },
           " | undefined; isFetchingResponse: boolean; refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean | undefined; }) => void; regenerateMessage: (conversationId: string) => void; showAnonymizedValues: boolean; currentUserAvatar?: ",
           "UserAvatar",
-          " | undefined; setIsStreaming: (isStreaming: boolean) => void; systemPromptContent?: string | undefined; }) => ",
+          " | undefined; setIsStreaming: (isStreaming: boolean) => void; systemPromptContent?: string | undefined; contentReferencesVisible?: boolean | undefined; contentReferencesEnabled?: boolean | undefined; }) => ",
           "EuiCommentProps",
           "[]"
         ],
@@ -2550,7 +2550,7 @@
               },
               " | undefined; isFetchingResponse: boolean; refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean | undefined; }) => void; regenerateMessage: (conversationId: string) => void; showAnonymizedValues: boolean; currentUserAvatar?: ",
               "UserAvatar",
-              " | undefined; setIsStreaming: (isStreaming: boolean) => void; systemPromptContent?: string | undefined; }"
+              " | undefined; setIsStreaming: (isStreaming: boolean) => void; systemPromptContent?: string | undefined; contentReferencesVisible?: boolean | undefined; contentReferencesEnabled?: boolean | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/kbn-elastic-assistant/impl/assistant_context/types.tsx",
             "deprecated": false,

@@ -9,7 +9,7 @@ import { createTestConfig } from '../../../../../config/serverless/config.base';
 
 export default createTestConfig({
   kbnTestServerArgs: [
-    `--xpack.securitySolution.enableExperimental=${JSON.stringify(['siemMigrationsEnabled'])}`,
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify([])}`, // override to empty array so the flag is not disabled
     `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
       { product_line: 'security', product_tier: 'complete' },
       { product_line: 'endpoint', product_tier: 'complete' },

@@ -311,16 +311,23 @@ export class ConsolePageObject extends FtrService {
     await this.testSubjects.click('consoleHistoryButton');
   }
 
+  async isConsoleTabOpen(tabId: string) {
+    await this.retry.waitFor('console container is displayed', async () => {
+      return await this.testSubjects.isDisplayed('consolePanel');
+    });
+    return await this.testSubjects.exists(tabId);
+  }
+
   public async isShellOpen() {
-    return await this.testSubjects.exists('consoleEditorContainer');
+    return await this.isConsoleTabOpen('consoleEditorContainer');
   }
 
   public async isConfigOpen() {
-    return await this.testSubjects.exists('consoleConfigPanel');
+    return await this.isConsoleTabOpen('consoleConfigPanel');
   }
 
   public async isHistoryOpen() {
-    return await this.testSubjects.exists('consoleHistoryPanel');
+    return await this.isConsoleTabOpen('consoleHistoryPanel');
   }
 
   public async openSettings() {

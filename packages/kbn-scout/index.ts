@@ -16,6 +16,7 @@ export {
   createPlaywrightConfig,
   createLazyPageObject,
   ingestTestDataHook,
+  ingestSynthtraceDataHook,
 } from './src/playwright';
 export type {
   ScoutPlaywrightOptions,
@@ -28,4 +29,16 @@ export type {
   ScoutParallelWorkerFixtures,
 } from './src/playwright';
 
-export type { Client, KbnClient, KibanaUrl, SamlSessionManager, ToolingLog } from './src/types';
+export type {
+  EsClient,
+  KbnClient,
+  KibanaUrl,
+  ScoutLogger,
+  ScoutServerConfig,
+  ScoutTestConfig,
+} from './src/types';
+
+// re-export from Playwright
+export type { Locator } from 'playwright/test';
+
+export { measurePerformance, measurePerformanceAsync } from './src/common';

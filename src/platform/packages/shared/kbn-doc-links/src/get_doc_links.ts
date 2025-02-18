@@ -299,6 +299,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       overview: `${KIBANA_DOCS}upgrade-assistant.html`,
       batchReindex: `${KIBANA_DOCS}batch-start-resume-reindex.html`,
       remoteReindex: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-from-remote`,
+      unfreezeApi: `${ELASTICSEARCH_DOCS}unfreeze-index-api.html`,
       reindexWithPipeline: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-with-an-ingest-pipeline`,
     },
     rollupJobs: `${KIBANA_DOCS}data-rollups.html`,
@@ -414,6 +415,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     server: {
       protocol: `${KIBANA_DOCS}settings.html#server-protocol`,
     },
+    logging: {
+      enableDeprecationHttpDebugLogs: `${KIBANA_DOCS}logging-settings.html#enable-http-debug-logs`,
+    },
     securitySolution: {
       artifactControl: `${SECURITY_SOLUTION_DOCS}artifact-control.html`,
       avcResults: `${ELASTIC_WEBSITE_URL}blog/elastic-security-av-comparatives-business-test`,
@@ -451,7 +455,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       aiAssistant: `${SECURITY_SOLUTION_DOCS}security-assistant.html`,
       signalsMigrationApi: `${SECURITY_SOLUTION_DOCS}signals-migration-api.html`,
       legacyEndpointManagementApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-199598`,
-      legacyBulkApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-207091`,
+      legacyRuleManagementBulkApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-207091`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,

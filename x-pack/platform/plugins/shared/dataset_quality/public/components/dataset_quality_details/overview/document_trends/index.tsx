@@ -61,7 +61,7 @@ const degradedDocsTooltip = (
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: number }) {
-  const { isServerless } = useDatasetQualityDetailsContext();
+  const { isFailureStoreEnabled } = useDatasetQualityDetailsContext();
   const { timeRange, updateTimeRange, docsTrendChart } = useDatasetQualityDetailsState();
   const {
     dataView,
@@ -82,7 +82,7 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
     [updateTimeRange, timeRange.refresh]
   );
 
-  const accordionTitle = isServerless ? (
+  const accordionTitle = !isFailureStoreEnabled ? (
     <EuiFlexItem
       css={css`
         flex-direction: row;
@@ -128,7 +128,7 @@ export default function DocumentTrends({ lastReloadTime }: { lastReloadTime: num
         <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem>
-            {!isServerless && (
+            {isFailureStoreEnabled && (
               <EuiButtonGroup
                 data-test-subj="datasetQualityDetailsChartTypeButtonGroup"
                 legend={i18n.translate('xpack.datasetQuality.details.chartTypeLegend', {

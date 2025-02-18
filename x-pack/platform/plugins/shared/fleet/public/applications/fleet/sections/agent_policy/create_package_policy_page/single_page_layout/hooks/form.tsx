@@ -174,11 +174,6 @@ export function useOnSubmit({
   // Used to initialize the package policy once
   const isInitializedRef = useRef(false);
 
-  // only used to save the initial value of the package policy
-  const [initialPackagePolicy, setInitialPackagePolicy] = useState<NewPackagePolicy>({
-    ...DEFAULT_PACKAGE_POLICY,
-  });
-
   const [agentPolicies, setAgentPolicies] = useState<AgentPolicy[]>([]);
   // New package policy state
   const [packagePolicy, setPackagePolicy] = useState<NewPackagePolicy>({
@@ -276,19 +271,11 @@ export function useOnSubmit({
         DEFAULT_PACKAGE_POLICY.description,
         integrationToEnable
       );
-      setInitialPackagePolicy(basePackagePolicy);
       updatePackagePolicy(basePackagePolicy);
       setIsInitialized(true);
     }
     init();
-  }, [
-    packageInfo,
-    agentPolicies,
-    updatePackagePolicy,
-    integrationToEnable,
-    isInitialized,
-    initialPackagePolicy,
-  ]);
+  }, [packageInfo, agentPolicies, updatePackagePolicy, integrationToEnable, isInitialized]);
 
   useEffect(() => {
     if (
@@ -304,16 +291,20 @@ export function useOnSubmit({
     }
   }, [packagePolicy, agentPolicies, updatePackagePolicy, canUseMultipleAgentPolicies]);
 
-  const { handleSetupTechnologyChange, selectedSetupTechnology, defaultSetupTechnology } =
-    useSetupTechnology({
-      newAgentPolicy,
-      setNewAgentPolicy,
-      updatePackagePolicy,
-      setSelectedPolicyTab,
-      packageInfo,
-      packagePolicy,
-      integrationToEnable,
-    });
+  const {
+    handleSetupTechnologyChange,
+    allowedSetupTechnologies,
+    selectedSetupTechnology,
+    defaultSetupTechnology,
+  } = useSetupTechnology({
+    newAgentPolicy,
+    setNewAgentPolicy,
+    updatePackagePolicy,
+    setSelectedPolicyTab,
+    packageInfo,
+    packagePolicy,
+    integrationToEnable,
+  });
   const setupTechnologyRef = useRef<SetupTechnology | undefined>(selectedSetupTechnology);
   // sync the inputs with the agentless selector change
   useEffect(() => {
@@ -328,9 +319,9 @@ export function useOnSubmit({
       if (isAgentlessSelected && AGENTLESS_DISABLED_INPUTS.includes(input.type)) {
         return { ...input, enabled: false };
       }
-      return initialPackagePolicy.inputs[i];
+      return packagePolicy.inputs[i];
     });
-  }, [initialPackagePolicy?.inputs, isAgentlessSelected, packagePolicy.inputs]);
+  }, [packagePolicy.inputs, isAgentlessSelected]);
 
   useEffect(() => {
     if (prevSetupTechnology !== selectedSetupTechnology) {
@@ -551,6 +542,7 @@ export function useOnSubmit({
     navigateAddAgent,
     navigateAddAgentHelp,
     handleSetupTechnologyChange,
+    allowedSetupTechnologies,
     selectedSetupTechnology,
     defaultSetupTechnology,
     isAgentlessSelected,

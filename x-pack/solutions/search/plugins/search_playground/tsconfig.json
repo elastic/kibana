@@ -49,6 +49,9 @@
     "@kbn/inference-endpoint-ui-common",
     "@kbn/inference-common",
     "@kbn/alerts-ui-shared",
+    "@kbn/ui-actions-plugin",
+    "@kbn/file-upload-common",
+    "@kbn/deeplinks-search",
   ],
   "exclude": [
     "target/**/*",

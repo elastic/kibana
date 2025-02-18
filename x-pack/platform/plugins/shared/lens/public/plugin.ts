@@ -114,9 +114,8 @@ import type {
   DatasourceMap,
   VisualizationMap,
 } from './types';
-import { getLensAliasConfig } from './vis_type_alias';
+import { lensVisTypeAlias } from './vis_type_alias';
 import { createOpenInDiscoverAction } from './trigger_actions/open_in_discover_action';
-import { CreateESQLPanelAction } from './trigger_actions/open_lens_config/create_action';
 import {
   inAppEmbeddableEditTrigger,
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
@@ -149,6 +148,7 @@ import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the
 import { convertToLensActionFactory } from './trigger_actions/convert_to_lens_action';
 import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';
 import { deserializeState } from './react_embeddable/helper';
+import { ACTION_CREATE_ESQL_CHART } from './trigger_actions/open_lens_config/constants';
 
 export type { SaveProps } from './app_plugin';
 
@@ -440,7 +440,7 @@ export class LensPlugin {
       );
     }
 
-    visualizations.registerAlias(getLensAliasConfig());
+    visualizations.registerAlias(lensVisTypeAlias);
 
     uiActionsEnhanced.registerDrilldown(
       new OpenInDiscoverDrilldown({
@@ -628,7 +628,7 @@ export class LensPlugin {
   }
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies): LensPublicStart {
-    this.hasDiscoverAccess = core.application.capabilities.discover.show as boolean;
+    this.hasDiscoverAccess = core.application.capabilities.discover_v2.show as boolean;
     this.dataViewsService = startDependencies.dataViews;
     // unregisters the Visualize action and registers the lens one
     if (startDependencies.uiActions.hasAction(ACTION_VISUALIZE_FIELD)) {
@@ -682,15 +682,30 @@ export class LensPlugin {
       editLensEmbeddableAction
     );
 
-    // Displays the add ESQL panel in the dashboard add Panel menu
-    const createESQLPanelAction = new CreateESQLPanelAction(startDependencies, core, async () => {
-      if (!this.editorFrameService) {
-        await this.initEditorFrameService();
-      }
+    startDependencies.uiActions.addTriggerActionAsync(
+      ADD_PANEL_TRIGGER,
+      ACTION_CREATE_ESQL_CHART,
+      async () => {
+        const { AddESQLPanelAction } = await import('./async_services');
+        return new AddESQLPanelAction(startDependencies, core, async () => {
+          if (!this.editorFrameService) {
+            await this.initEditorFrameService();
+          }
 
-      return this.editorFrameService!;
+          return this.editorFrameService!;
+        });
+      }
+    );
+    startDependencies.uiActions.registerActionAsync('addLensPanelAction', async () => {
+      const { getAddLensPanelAction } = await import('./async_services');
+      return getAddLensPanelAction(startDependencies);
     });
-    startDependencies.uiActions.addTriggerAction(ADD_PANEL_TRIGGER, createESQLPanelAction);
+    startDependencies.uiActions.attachAction(ADD_PANEL_TRIGGER, 'addLensPanelAction');
+    if (startDependencies.uiActions.hasTrigger('ADD_CANVAS_ELEMENT_TRIGGER')) {
+      // Because Canvas is not enabled in Serverless, this trigger might not be registered - only attach
+      // the create action if the Canvas-specific trigger does indeed exist.
+      startDependencies.uiActions.attachAction('ADD_CANVAS_ELEMENT_TRIGGER', 'addLensPanelAction');
+    }
 
     const discoverLocator = startDependencies.share?.url.locators.get('DISCOVER_APP_LOCATOR');
     if (discoverLocator) {
@@ -731,7 +746,7 @@ export class LensPlugin {
         });
       },
       canUseEditor: () => {
-        return Boolean(core.application.capabilities.visualize?.show);
+        return Boolean(core.application.capabilities.visualize_v2?.show);
       },
       getXyVisTypes: async () => {
         const { visualizationSubtypes } = await import('./visualizations/xy/types');

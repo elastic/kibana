@@ -15,13 +15,16 @@ import { useEuiTheme } from '@elastic/eui';
 import {
   INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
   INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID,
+  INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID,
 } from './test_ids';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
 jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../../../common/hooks/use_experimental_features');
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -65,10 +68,17 @@ const mockAlertData: ParsedAlertsData = {
   },
 };
 
+const openDetailsPanel = jest.fn();
+
 const renderAlertCountInsight = () => {
   return render(
     <TestProviders>
-      <AlertCountInsight name={name} fieldName={fieldName} data-test-subj={testId} />
+      <AlertCountInsight
+        name={name}
+        fieldName={fieldName}
+        data-test-subj={testId}
+        openDetailsPanel={openDetailsPanel}
+      />
     </TestProviders>
   );
 };
@@ -77,6 +87,7 @@ describe('AlertCountInsight', () => {
   beforeEach(() => {
     (useSignalIndex as jest.Mock).mockReturnValue({ signalIndexName: '' });
     (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: true } });
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
   });
 
   it('renders', () => {
@@ -94,6 +105,17 @@ describe('AlertCountInsight', () => {
       getByTestId(INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID)
     ).toBeInTheDocument();
     expect(queryByTestId(INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('open entity details panel when clicking on the count if new navigation is enabled', () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    (useAlertsByStatus as jest.Mock).mockReturnValue({
+      isLoading: false,
+      items: mockAlertData,
+    });
+    const { getByTestId } = renderAlertCountInsight();
+    getByTestId(INSIGHTS_ALERTS_COUNT_NAVIGATION_BUTTON_TEST_ID).click();
+    expect(openDetailsPanel).toHaveBeenCalled();
   });
 
   it('renders the count as text instead of button', () => {
@@ -151,10 +173,10 @@ describe('getFormattedAlertStats', () => {
   it('should return alert stats', () => {
     const alertStats = getFormattedAlertStats(mockAlertData, euiTheme);
     expect(alertStats).toEqual([
-      { key: 'High', count: 2, color: '#ff7e62' },
-      { key: 'Low', count: 2, color: '#54b399' },
-      { key: 'Medium', count: 2, color: '#f1d86f' },
-      { key: 'Critical', count: 2, color: '#bd271e' },
+      { key: 'High', count: 2, color: '#DA8B45' },
+      { key: 'Low', count: 2, color: '#54B399' },
+      { key: 'Medium', count: 2, color: '#D6BF57' },
+      { key: 'Critical', count: 2, color: '#E7664C' },
     ]);
   });
 

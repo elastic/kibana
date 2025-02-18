@@ -27,11 +27,17 @@ export const createArchiveIterator = (
   const paths: string[] = [];
 
   const traverseEntries = async (
-    onEntry: (entry: ArchiveEntry) => Promise<void>
+    onEntry: (entry: ArchiveEntry) => Promise<void>,
+    readBuffer?: (path: string) => boolean
   ): Promise<void> => {
-    await traverseArchiveEntries(archiveBuffer, contentType, async (entry) => {
-      await onEntry(entry);
-    });
+    await traverseArchiveEntries(
+      archiveBuffer,
+      contentType,
+      async (entry) => {
+        await onEntry(entry);
+      },
+      readBuffer
+    );
   };
 
   const getPaths = async (): Promise<string[]> => {
@@ -39,9 +45,12 @@ export const createArchiveIterator = (
       return paths;
     }
 
-    await traverseEntries(async (entry) => {
-      paths.push(entry.path);
-    });
+    await traverseEntries(
+      async (entry) => {
+        paths.push(entry.path);
+      },
+      () => false
+    );
 
     return paths;
   };

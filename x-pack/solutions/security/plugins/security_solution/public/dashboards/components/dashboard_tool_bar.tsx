@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { DashboardTopNav, LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
+import { DashboardTopNav } from '@kbn/dashboard-plugin/public';
 import type { ViewMode } from '@kbn/embeddable-plugin/public';
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
@@ -68,7 +68,7 @@ const DashboardToolBarComponent = ({
     }),
     []
   );
-  const { showWriteControls } = useCapabilities<DashboardCapabilities>(LEGACY_DASHBOARD_APP_ID);
+  const { showWriteControls } = useCapabilities<DashboardCapabilities>('dashboard_v2');
 
   return showWriteControls ? (
     <DashboardTopNav

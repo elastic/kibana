@@ -87,8 +87,8 @@ export const LICENSE_OVERRIDES = {
   'jsts@1.6.2': ['Eclipse Distribution License - v 1.0'], // cf. https://github.com/bjornharrtell/jsts
   '@mapbox/jsonlint-lines-primitives@2.0.2': ['MIT'], // license in readme https://github.com/tmcw/jsonlint
   '@elastic/ems-client@8.6.3': ['Elastic License 2.0'],
-  '@elastic/eui@99.0.0-borealis.1': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
-  '@elastic/eui-theme-borealis@0.0.8': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
+  '@elastic/eui@99.2.0-borealis.0': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
+  '@elastic/eui-theme-borealis@0.0.10': ['Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0'],
   'language-subtag-registry@0.3.21': ['CC-BY-4.0'], // retired ODC‑By license https://github.com/mattcg/language-subtag-registry
   'buffers@0.1.1': ['MIT'], // license in importing module https://www.npmjs.com/package/binary
   '@bufbuild/protobuf@1.2.1': ['Apache-2.0'], // license (Apache-2.0 AND BSD-3-Clause)

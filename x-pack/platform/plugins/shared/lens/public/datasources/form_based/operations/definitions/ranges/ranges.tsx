@@ -138,6 +138,9 @@ export const rangeOperation: OperationDefinition<
       sourceField: field.name,
     };
   },
+  toESQL: (column, columnId, _indexPattern, layer, uiSettings) => {
+    return undefined;
+  },
   toEsAggsFn: (column, columnId, indexPattern, layer, uiSettings) => {
     const { sourceField, params } = column;
     if (params.type === MODES.Range) {

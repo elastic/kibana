@@ -1,17 +1,1088 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`arrows ArrowBody renders correctly against snapshot 1`] = `
-.c0 {
-  background-color: #343741;
-  height: 3px;
-  width: 25px;
-}
-
 <ArrowBody
   height={3}
 >
+  <Insertion
+    cache={
+      Object {
+        "compat": true,
+        "insert": [Function],
+        "inserted": Object {
+          "10uvw04": true,
+          "vzhe8z-euiColorMode-LIGHT": true,
+        },
+        "key": "css",
+        "nonce": undefined,
+        "registered": Object {
+          "css-vzhe8z-euiColorMode-LIGHT": "
+        label: euiColorMode-LIGHT;
+        color: #1D2A3E;
+      ",
+        },
+        "sheet": StyleSheet {
+          "_alreadyInsertedOrderInsensitiveRule": true,
+          "_insertTag": [Function],
+          "before": null,
+          "container": <head>
+            <style
+              data-emotion="css"
+              data-s=""
+            >
+              
+              .css-1sgx2gt{inline-size:150px;}
+            </style>
+            <style
+              data-emotion="css"
+              data-s=""
+            >
+              
+              .css-1sgx2gt .euiKeyPadMenuItem__label{white-space:nowrap;overflow:hidden;}
+            </style>
+            <style
+              data-emotion="css"
+              data-s=""
+            >
+              
+              .css-1f5ny76{position:absolute;top:-8px;right:-8px;}
+            </style>
+            <style
+              data-emotion="css"
+              data-s=""
+            >
+              
+              .css-1lec23r{height:32px;}
+            </style>
+            <style
+              data-emotion="css"
+              data-s=""
+            >
+              
+              .css-1lec23r .euiSuperSelectControl{border:none;box-shadow:none;background:none;padding-left:0;}
+            </style>
+            <style
+              data-emotion="css"
+              data-s=""
+            >
+              
+              .css-1lec23r .euiFormControlLayoutIcons{right:14px;top:2px;}
+            </style>
+            <style
+              data-emotion="css"
+              data-s=""
+            >
+              
+              .css-8kffb{margin-right:8px;overflow:hidden;text-overflow:ellipsis;}
+            </style>
+            <style
+              data-emotion="css"
+              data-s=""
+            >
+              
+              .css-1kcx8qm{}
+            </style>
+            <style
+              data-emotion="css"
+              data-s=""
+            >
+              
+              .css-1kcx8qm .euiAccordion__childWrapper{-webkit-transition:none;transition:none;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              *,*:before,*:after{box-sizing:border-box;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,img,ins,kbd,q,s,samp,small,strike,strong,sub,sup,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td,article,aside,canvas,details,embed,figure,figcaption,footer,header,hgroup,menu,nav,output,ruby,section,summary,time,mark,audio,video{margin:0;padding:0;border:none;vertical-align:baseline;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              h1,h2,h3,h4,h5,h6,p{font-family:inherit;font-weight:inherit;font-size:inherit;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              article,aside,details,figcaption,figure,footer,header,hgroup,menu,nav,section{display:block;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              a[href],button,[role='button']{cursor:pointer;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              button{background:none;border:none;padding:0;margin:0;color:inherit;border-radius:0;font-size:inherit;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              input{margin:0;padding:0;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              input:disabled{opacity:1;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              ol,ul{list-style:none;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              blockquote,q{quotes:none;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              blockquote:before,blockquote:after,q:before,q:after{content:'';}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              table{border-collapse:collapse;border-spacing:0;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              hr{margin:0;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              fieldset{min-inline-size:auto;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              svg text{letter-spacing:normal!important;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              html{scrollbar-width:auto;scrollbar-color:rgba(90,109,140,0.5) #ECF1F9;font-family:'Inter',BlinkMacSystemFont,Helvetica,Arial,sans-serif;font-size:0.875rem;line-height:1.1428571428571428;font-weight:400;-webkit-text-size-adjust:100%;text-size-adjust:100%;font-kerning:normal;block-size:100%;background-color:#F6F9FC;color:#1D2A3E;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              html::-webkit-scrollbar{inline-size:16px;block-size:16px;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              html::-webkit-scrollbar-thumb{background-color:rgba(90,109,140,0.5);background-clip:content-box;border-radius:16px;border:4px solid #ECF1F9;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              html::-webkit-scrollbar-corner,html::-webkit-scrollbar-track{background-color:#ECF1F9;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              code,pre,kbd,samp{font-family:'Roboto Mono',Menlo,Courier,monospace;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              input,textarea,select{font-family:'Inter',BlinkMacSystemFont,Helvetica,Arial,sans-serif;font-size:1rem;line-height:1.1428571428571428;font-weight:400;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              select:disabled{opacity:1;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              button{font-family:'Inter',BlinkMacSystemFont,Helvetica,Arial,sans-serif;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              em{font-style:italic;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              strong{font-weight:600;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              *:focus{outline:2px solid #1750BA;outline-offset:-1px;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              *:focus:focus-visible{outline-style:auto;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              *:focus:not(:focus-visible){outline:none;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              ::selection{background:rgba(11,100,221,0.1);}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              a{color:#1750BA;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              a,a:hover,a:focus{-webkit-text-decoration:none;text-decoration:none;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .euiBody-hasPortalContent{position:relative;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .euiScreenReaderOnly{position:absolute;inset-block-start:auto;inset-inline-start:-10000px;inline-size:1px;block-size:1px;clip:rect(0 0 0 0);clip-path:inset(50%);overflow:hidden;margin:-1px;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-alignBaseline{vertical-align:baseline!important;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-alignBottom{vertical-align:bottom!important;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-alignMiddle{vertical-align:middle!important;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-alignTop{vertical-align:top!important;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-displayBlock{display:block!important;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-displayInline{display:inline!important;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-displayInlineBlock{display:inline-block!important;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-fullWidth{display:block!important;inline-size:100%!important;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-fullHeight{block-size:100%;flex:1 1 auto;overflow:hidden;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-textCenter{text-align:center!important;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-textLeft{text-align:start!important;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-textRight{text-align:end!important;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-textNoWrap{white-space:nowrap!important;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-textInheritColor{color:inherit!important;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-textBreakWord{overflow-wrap:break-word!important;word-break:break-word;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-textBreakAll{overflow-wrap:break-word!important;word-break:break-all!important;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-textBreakNormal{overflow-wrap:normal!important;word-wrap:normal!important;word-break:normal!important;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-textTruncate{max-inline-size:100%;overflow:hidden!important;text-overflow:ellipsis!important;white-space:nowrap!important;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-textNumber{font-feature-settings:'calt' 1,'kern' 1,'liga' 1,'tnum' 1;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-scrollBar{scrollbar-width:thin;scrollbar-color:rgba(90,109,140,0.5) transparent;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-scrollBar::-webkit-scrollbar{inline-size:16px;block-size:16px;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-scrollBar::-webkit-scrollbar-thumb{background-color:rgba(90,109,140,0.5);background-clip:content-box;border-radius:16px;border:calc(8px * 0.75) solid transparent;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-scrollBar::-webkit-scrollbar-corner,.eui-scrollBar::-webkit-scrollbar-track{background-color:transparent;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-yScroll{scrollbar-width:thin;scrollbar-color:rgba(90,109,140,0.5) transparent;block-size:100%;overflow-y:auto;overflow-block:auto;overflow-x:hidden;overflow-inline:hidden;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-yScroll::-webkit-scrollbar{inline-size:16px;block-size:16px;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-yScroll::-webkit-scrollbar-thumb{background-color:rgba(90,109,140,0.5);background-clip:content-box;border-radius:16px;border:calc(8px * 0.75) solid transparent;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-yScroll::-webkit-scrollbar-corner,.eui-yScroll::-webkit-scrollbar-track{background-color:transparent;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-yScroll:focus{outline:none;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-xScroll{scrollbar-width:thin;scrollbar-color:rgba(90,109,140,0.5) transparent;overflow-x:auto;overflow-inline:auto;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-xScroll::-webkit-scrollbar{inline-size:16px;block-size:16px;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-xScroll::-webkit-scrollbar-thumb{background-color:rgba(90,109,140,0.5);background-clip:content-box;border-radius:16px;border:calc(8px * 0.75) solid transparent;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-xScroll::-webkit-scrollbar-corner,.eui-xScroll::-webkit-scrollbar-track{background-color:transparent;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-xScroll:focus{outline:none;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-yScrollWithShadows{scrollbar-width:thin;scrollbar-color:rgba(90,109,140,0.5) transparent;block-size:100%;overflow-y:auto;overflow-block:auto;overflow-x:hidden;overflow-inline:hidden;-webkit-mask-image:linear-gradient(to bottom, 
+  rgba(255,0,0,0.1) 0%,
+  rgb(255,0,0) 8px
+  , 
+  rgb(255,0,0) calc(100% - 8px),
+  rgba(255,0,0,0.1) 100%
+  );mask-image:linear-gradient(to bottom, 
+  rgba(255,0,0,0.1) 0%,
+  rgb(255,0,0) 8px
+  , 
+  rgb(255,0,0) calc(100% - 8px),
+  rgba(255,0,0,0.1) 100%
+  );transform:translateZ(0);}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-yScrollWithShadows::-webkit-scrollbar{inline-size:16px;block-size:16px;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-yScrollWithShadows::-webkit-scrollbar-thumb{background-color:rgba(90,109,140,0.5);background-clip:content-box;border-radius:16px;border:calc(8px * 0.75) solid transparent;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-yScrollWithShadows::-webkit-scrollbar-corner,.eui-yScrollWithShadows::-webkit-scrollbar-track{background-color:transparent;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-yScrollWithShadows:focus{outline:none;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-xScrollWithShadows{scrollbar-width:thin;scrollbar-color:rgba(90,109,140,0.5) transparent;overflow-x:auto;overflow-inline:auto;-webkit-mask-image:linear-gradient(to right, 
+  rgba(255,0,0,0.1) 0%,
+  rgb(255,0,0) 8px
+  , 
+  rgb(255,0,0) calc(100% - 8px),
+  rgba(255,0,0,0.1) 100%
+  );mask-image:linear-gradient(to right, 
+  rgba(255,0,0,0.1) 0%,
+  rgb(255,0,0) 8px
+  , 
+  rgb(255,0,0) calc(100% - 8px),
+  rgba(255,0,0,0.1) 100%
+  );transform:translateZ(0);}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-xScrollWithShadows::-webkit-scrollbar{inline-size:16px;block-size:16px;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-xScrollWithShadows::-webkit-scrollbar-thumb{background-color:rgba(90,109,140,0.5);background-clip:content-box;border-radius:16px;border:calc(8px * 0.75) solid transparent;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-xScrollWithShadows::-webkit-scrollbar-corner,.eui-xScrollWithShadows::-webkit-scrollbar-track{background-color:transparent;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-xScrollWithShadows:focus{outline:none;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              [class*='eui-showFor']{display:none!important;}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-hideFor--xl{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 1200px){.eui-hideFor--xl{display:none!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--xl{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 1200px){.eui-showFor--xl{display:inline!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--xl--block{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 1200px){.eui-showFor--xl--block{display:block!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--xl--inlineBlock{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 1200px){.eui-showFor--xl--inlineBlock{display:inline-block!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--xl--flex{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 1200px){.eui-showFor--xl--flex{display:flex!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-hideFor--l{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 992px) and (max-width: 1199px){.eui-hideFor--l{display:none!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--l{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 992px) and (max-width: 1199px){.eui-showFor--l{display:inline!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--l--block{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 992px) and (max-width: 1199px){.eui-showFor--l--block{display:block!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--l--inlineBlock{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 992px) and (max-width: 1199px){.eui-showFor--l--inlineBlock{display:inline-block!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--l--flex{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 992px) and (max-width: 1199px){.eui-showFor--l--flex{display:flex!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-hideFor--m{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 768px) and (max-width: 991px){.eui-hideFor--m{display:none!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--m{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 768px) and (max-width: 991px){.eui-showFor--m{display:inline!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--m--block{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 768px) and (max-width: 991px){.eui-showFor--m--block{display:block!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--m--inlineBlock{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 768px) and (max-width: 991px){.eui-showFor--m--inlineBlock{display:inline-block!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--m--flex{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 768px) and (max-width: 991px){.eui-showFor--m--flex{display:flex!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-hideFor--s{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 575px) and (max-width: 767px){.eui-hideFor--s{display:none!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--s{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 575px) and (max-width: 767px){.eui-showFor--s{display:inline!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--s--block{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 575px) and (max-width: 767px){.eui-showFor--s--block{display:block!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--s--inlineBlock{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 575px) and (max-width: 767px){.eui-showFor--s--inlineBlock{display:inline-block!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--s--flex{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (min-width: 575px) and (max-width: 767px){.eui-showFor--s--flex{display:flex!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-hideFor--xs{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (max-width: 574px){.eui-hideFor--xs{display:none!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--xs{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (max-width: 574px){.eui-showFor--xs{display:inline!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--xs--block{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (max-width: 574px){.eui-showFor--xs--block{display:block!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--xs--inlineBlock{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (max-width: 574px){.eui-showFor--xs--inlineBlock{display:inline-block!important;}}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              .eui-showFor--xs--flex{}
+            </style>
+            <style
+              data-emotion="css-global"
+              data-s=""
+            >
+              
+              @media only screen and (max-width: 574px){.eui-showFor--xs--flex{display:flex!important;}}
+            </style>
+            <style
+              data-emotion="css"
+              data-s=""
+            >
+              
+              .css-vzhe8z-euiColorMode-LIGHT{color:#1D2A3E;}
+            </style>
+            <style
+              data-emotion="css"
+              data-s=""
+            >
+              
+              .css-10uvw04{background-color:#CAD3E2;height:3px;width:25px;}
+            </style>
+            <style
+              data-rfd-always="0"
+              type="text/css"
+            >
+               [data-rfd-drag-handle-context-id="0"] { 
+          -webkit-touch-callout: none;
+          -webkit-tap-highlight-color: rgba(0,0,0,0);
+          touch-action: manipulation;
+         } [data-rfd-droppable-context-id="0"] { overflow-anchor: none; } 
+            </style>
+            <style
+              data-rfd-dynamic="0"
+              type="text/css"
+            >
+               [data-rfd-drag-handle-context-id="0"] { 
+      cursor: -webkit-grab;
+      cursor: grab;
+     }  
+            </style>
+            <style
+              data-styled="active"
+              data-styled-version="5.3.11"
+            />
+          </head>,
+          "ctr": 2,
+          "insertionPoint": undefined,
+          "isSpeedy": false,
+          "key": "css",
+          "nonce": undefined,
+          "prepend": undefined,
+          "speedy": [Function],
+          "tags": Array [
+            <style
+              data-emotion="css"
+              data-s=""
+            >
+              
+              .css-vzhe8z-euiColorMode-LIGHT{color:#1D2A3E;}
+            </style>,
+            <style
+              data-emotion="css"
+              data-s=""
+            >
+              
+              .css-10uvw04{background-color:#CAD3E2;height:3px;width:25px;}
+            </style>,
+          ],
+        },
+      }
+    }
+    isStringTag={true}
+    serialized={
+      Object {
+        "map": undefined,
+        "name": "10uvw04",
+        "next": undefined,
+        "styles": "
+  background-color: #CAD3E2;
+  height: 3px;
+  width: 25px;
+",
+        "toString": [Function],
+      }
+    }
+  />
   <span
-    className="c0"
+    className="css-10uvw04"
     height={3}
   />
 </ArrowBody>

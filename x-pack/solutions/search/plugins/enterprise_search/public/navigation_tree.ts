@@ -83,6 +83,12 @@ export const getNavigationTreeDefinition = ({
               breadcrumbStatus: 'hidden',
               children: [
                 {
+                  getIsActive: ({ pathNameSerialized, prepend }) => {
+                    return (
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/overview')) ||
+                      pathNameSerialized.startsWith(prepend('/app/elasticsearch/start'))
+                    );
+                  },
                   link: 'enterpriseSearch',
                 },
                 {
@@ -300,12 +306,15 @@ export const getNavigationTreeDefinition = ({
                     },
                   ],
                   id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
-                  link: 'management',
                   renderAs: 'panelOpener',
                   spaceBefore: null,
                   title: i18n.translate('xpack.enterpriseSearch.searchNav.mngt', {
                     defaultMessage: 'Stack Management',
                   }),
+                },
+                {
+                  id: 'monitoring',
+                  link: 'monitoring',
                 },
               ],
               icon: 'gear',

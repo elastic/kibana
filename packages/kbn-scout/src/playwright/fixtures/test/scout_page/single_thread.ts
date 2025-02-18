@@ -9,9 +9,9 @@
 
 import { Page } from '@playwright/test';
 import { subj } from '@kbn/test-subj-selector';
-import { KibanaUrl, ToolingLog, coreWorkerFixtures } from '../../worker';
+import { PathOptions } from '../../../../common/services/kibana_url';
+import { KibanaUrl, ScoutLogger, coreWorkerFixtures } from '../../worker';
 import { ScoutPage } from '.';
-import { serviceLoadedMsg } from '../../../utils';
 
 /**
  * Instead of defining each method individually, we use a list of method names and loop through them, creating methods dynamically.
@@ -59,6 +59,8 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
     await page.locator(testSubjSelector).click();
     for (const char of text) {
       await page.keyboard.insertText(char);
+      // it is important to delay characters input to avoid flakiness, default is 25 ms
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(delay);
     }
   };
@@ -82,7 +84,8 @@ export function extendPlaywrightPage({
   // Extend page with '@kbn/test-subj-selector' support
   extendedPage.testSubj = extendPageWithTestSubject(page);
   // Method to navigate to specific Kibana apps
-  extendedPage.gotoApp = (appName: string) => page.goto(kbnUrl.app(appName));
+  extendedPage.gotoApp = (appName: string, pathOptions?: PathOptions) =>
+    page.goto(kbnUrl.app(appName, { pathOptions }));
   // Method to wait for global loading indicator to be hidden
   extendedPage.waitForLoadingIndicatorHidden = () =>
     extendedPage.testSubj.waitForSelector('globalLoadingIndicator-hidden', {
@@ -118,16 +121,16 @@ export function extendPlaywrightPage({
  * ```
  */
 export const scoutPageFixture = coreWorkerFixtures.extend<
-  { page: ScoutPage; log: ToolingLog },
+  { page: ScoutPage; log: ScoutLogger },
   { kbnUrl: KibanaUrl }
 >({
   page: async (
-    { page, kbnUrl, log }: { page: Page; kbnUrl: KibanaUrl; log: ToolingLog },
+    { page, kbnUrl, log }: { page: Page; kbnUrl: KibanaUrl; log: ScoutLogger },
     use: (extendedPage: ScoutPage) => Promise<void>
   ) => {
     const extendedPage = extendPlaywrightPage({ page, kbnUrl });
 
-    log.debug(serviceLoadedMsg(`scoutPage`));
+    log.serviceLoaded('scoutPage');
     await use(extendedPage);
   },
 });

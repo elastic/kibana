@@ -8,15 +8,20 @@
  */
 
 import type {
-  ESQLAst,
   ESQLAstItem,
   ESQLCommand,
   ESQLCommandOption,
   ESQLFunction,
   ESQLMessage,
+  ESQLSource,
 } from '@kbn/esql-ast';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
-import type { ESQLCallbacks } from '../shared/types';
+import type {
+  ESQLCallbacks,
+  ESQLControlVariable,
+  ESQLVariableType,
+  ESQLSourceResult,
+} from '../shared/types';
 
 /**
  * All supported field types in ES|QL. This is all the types
@@ -42,6 +47,7 @@ export const fieldTypes = [
   'counter_double',
   'unsupported',
   'date_nanos',
+  'function_named_parameters',
 ] as const;
 
 export type FieldType = (typeof fieldTypes)[number];
@@ -93,6 +99,13 @@ const arrayTypes = [
   'any[]',
   'date[]',
   'date_period[]',
+  'ip[]',
+  'cartesian_point[]',
+  'cartesian_shape[]',
+  'geo_point[]',
+  'geo_shape[]',
+  'version[]',
+  'date_nanos[]',
 ] as const;
 
 export type ArrayType = (typeof arrayTypes)[number];
@@ -118,8 +131,51 @@ export const isReturnType = (str: string | FunctionParameterType): str is Functi
   str !== 'unsupported' &&
   (dataTypes.includes(str as SupportedDataType) || str === 'unknown' || str === 'any');
 
+export interface Signature {
+  params: Array<{
+    name: string;
+    type: FunctionParameterType;
+    optional?: boolean;
+    supportsWildcard?: boolean;
+    /**
+     * If set, this parameter does not accept a field. It only accepts a constant,
+     * though a function can be used to create the value. (e.g. now() for dates or concat() for strings)
+     */
+    constantOnly?: boolean;
+    /**
+     * Default to false. If set to true, this parameter does not accept a function or literal, only fields.
+     */
+    fieldsOnly?: boolean;
+    /**
+     * if provided this means that the value must be one
+     * of the options in the array iff the value is a literal.
+     *
+     * String values are case insensitive.
+     *
+     * If the value is not a literal, this field is ignored because
+     * we can't check the return value of a function to see if it
+     * matches one of the options prior to runtime.
+     */
+    acceptedValues?: string[];
+    /**
+     * Must only be included _in addition to_ literalOptions.
+     *
+     * If provided this is the list of suggested values that
+     * will show up in the autocomplete. If omitted, the literalOptions
+     * will be used as suggestions.
+     *
+     * This is useful for functions that accept
+     * values that we don't want to show as suggestions.
+     */
+    literalSuggestions?: string[];
+    mapParams?: string;
+  }>;
+  minParams?: number;
+  returnType: FunctionReturnType;
+}
+
 export interface FunctionDefinition {
-  type: 'builtin' | 'agg' | 'eval';
+  type: 'builtin' | 'agg' | 'scalar' | 'operator' | 'grouping';
   preview?: boolean;
   ignoreAsSuggestion?: boolean;
   name: string;
@@ -127,50 +183,80 @@ export interface FunctionDefinition {
   description: string;
   supportedCommands: string[];
   supportedOptions?: string[];
-  signatures: Array<{
-    params: Array<{
-      name: string;
-      type: FunctionParameterType;
-      optional?: boolean;
-      supportsWildcard?: boolean;
-      /**
-       * If set, this parameter does not accept a field. It only accepts a constant,
-       * though a function can be used to create the value. (e.g. now() for dates or concat() for strings)
-       */
-      constantOnly?: boolean;
-      /**
-       * Default to false. If set to true, this parameter does not accept a function or literal, only fields.
-       */
-      fieldsOnly?: boolean;
-      /**
-       * if provided this means that the value must be one
-       * of the options in the array iff the value is a literal.
-       *
-       * String values are case insensitive.
-       *
-       * If the value is not a literal, this field is ignored because
-       * we can't check the return value of a function to see if it
-       * matches one of the options prior to runtime.
-       */
-      acceptedValues?: string[];
-      /**
-       * Must only be included _in addition to_ literalOptions.
-       *
-       * If provided this is the list of suggested values that
-       * will show up in the autocomplete. If omitted, the literalOptions
-       * will be used as suggestions.
-       *
-       * This is useful for functions that accept
-       * values that we don't want to show as suggestions.
-       */
-      literalSuggestions?: string[];
-    }>;
-    minParams?: number;
-    returnType: FunctionReturnType;
-  }>;
+  signatures: Signature[];
   examples?: string[];
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
+  operator?: string;
 }
+
+export interface CommandSuggestParams<CommandName extends string> {
+  /**
+   * The text of the query to the left of the cursor.
+   */
+  innerText: string;
+  /**
+   * The AST node of this command.
+   */
+  command: ESQLCommand<CommandName>;
+  /**
+   * Get a list of columns by type. This includes fields from any sources as well as
+   * variables defined in the query.
+   */
+  getColumnsByType: GetColumnsByTypeFn;
+  /**
+   * Check for the existence of a column by name.
+   * @param column
+   * @returns
+   */
+  columnExists: (column: string) => boolean;
+  /**
+   * Gets the name that should be used for the next variable.
+   * @returns
+   */
+  getSuggestedVariableName: () => string;
+  /**
+   * Examine the AST to determine the type of an expression.
+   * @param expression
+   * @returns
+   */
+  getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown';
+  /**
+   * Get a list of system preferences (currently the target value for the histogram bar)
+   * @returns
+   */
+  getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>;
+  /**
+   * The definition for the current command.
+   */
+  definition: CommandDefinition<CommandName>;
+  /**
+   * Fetch a list of all available sources
+   * @returns
+   */
+  getSources: () => Promise<ESQLSourceResult[]>;
+  /**
+   * Inspect the AST and returns the sources that are used in the query.
+   * @param type
+   * @returns
+   */
+  getSourcesFromQuery: (type: 'index' | 'policy') => ESQLSource[];
+  /**
+   * Generate a list of recommended queries
+   * @returns
+   */
+  getRecommendedQueriesSuggestions: (prefix?: string) => Promise<SuggestionRawDefinition[]>;
+  /**
+   * The AST for the query behind the cursor.
+   */
+  previousCommands?: ESQLCommand[];
+  callbacks?: ESQLCallbacks;
+  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined;
+  supportsControls?: boolean;
+}
+
+export type CommandSuggestFunction<CommandName extends string> = (
+  params: CommandSuggestParams<CommandName>
+) => Promise<SuggestionRawDefinition[]>;
 
 export interface CommandBaseDefinition<CommandName extends string> {
   name: CommandName;
@@ -183,21 +269,14 @@ export interface CommandBaseDefinition<CommandName extends string> {
   alias?: string;
   description: string;
   /**
+   * Displays a Technical preview label in the autocomplete
+   */
+  preview?: boolean;
+  /**
    * Whether to show or hide in autocomplete suggestion list
    */
   hidden?: boolean;
-  suggest?: (
-    innerText: string,
-    command: ESQLCommand<CommandName>,
-    getColumnsByType: GetColumnsByTypeFn,
-    columnExists: (column: string) => boolean,
-    getSuggestedVariableName: () => string,
-    getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
-    getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
-    fullTextAst?: ESQLAst,
-    definition?: CommandDefinition<CommandName>,
-    callbacks?: ESQLCallbacks
-  ) => Promise<SuggestionRawDefinition[]>;
+  suggest?: CommandSuggestFunction<CommandName>;
   /** @deprecated this property will disappear in the future */
   signature: {
     multipleParams: boolean;
@@ -244,7 +323,6 @@ export interface CommandDefinition<CommandName extends string>
   extends CommandBaseDefinition<CommandName> {
   examples: string[];
   validate?: (option: ESQLCommand) => ESQLMessage[];
-  hasRecommendedQueries?: boolean;
   /** @deprecated this property will disappear in the future */
   modes: CommandModeDefinition[];
   /** @deprecated this property will disappear in the future */

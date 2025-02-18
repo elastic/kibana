@@ -321,6 +321,7 @@
     "filter",
     "indexPattern",
     "status",
+    "timestampField",
     "type"
   ],
   "epm-packages": [

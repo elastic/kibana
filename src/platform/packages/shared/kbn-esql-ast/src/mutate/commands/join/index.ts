@@ -16,6 +16,7 @@ import type {
   ESQLAstQueryExpression,
   ESQLCommand,
   ESQLIdentifier,
+  ESQLSource,
 } from '../../../types';
 import * as generic from '../../generic';
 
@@ -43,10 +44,50 @@ export const byIndex = (ast: ESQLAstQueryExpression, index: number): ESQLCommand
   return [...list(ast)][index];
 };
 
+const getSource = (node: WalkerAstNode): ESQLSource =>
+  Walker.match(node, {
+    type: 'source',
+  }) as ESQLSource;
+
 const getIdentifier = (node: WalkerAstNode): ESQLIdentifier =>
   Walker.match(node, {
     type: 'identifier',
   }) as ESQLIdentifier;
+
+/**
+ * Summarizes a single JOIN command.
+ *
+ * @param command JOIN command to summarize.
+ * @returns Returns a summary of the JOIN command.
+ */
+export const summarizeCommand = (command: ESQLAstJoinCommand): JoinCommandSummary => {
+  const firstArg = command.args[0];
+  let index: ESQLSource | undefined;
+  let alias: ESQLIdentifier | undefined;
+  const conditions: ESQLAstExpression[] = [];
+
+  if (isAsExpression(firstArg)) {
+    index = getSource(firstArg.args[0]);
+    alias = getIdentifier(firstArg.args[1]);
+  } else {
+    index = getSource(firstArg);
+  }
+
+  const on = generic.commands.options.find(command, ({ name }) => name === 'on');
+
+  conditions.push(...((on?.args || []) as ESQLAstExpression[]));
+
+  const target: JoinCommandTarget = {
+    index: index!,
+    alias,
+  };
+  const summary: JoinCommandSummary = {
+    target,
+    conditions,
+  };
+
+  return summary;
+};
 
 /**
  * Summarizes all JOIN commands in the query.
@@ -59,30 +100,7 @@ export const summarize = (query: ESQLAstQueryExpression): JoinCommandSummary[] =
   const summaries: JoinCommandSummary[] = [];
 
   for (const command of list(query)) {
-    const firstArg = command.args[0];
-    let index: ESQLIdentifier | undefined;
-    let alias: ESQLIdentifier | undefined;
-    const conditions: ESQLAstExpression[] = [];
-
-    if (isAsExpression(firstArg)) {
-      index = getIdentifier(firstArg.args[0]);
-      alias = getIdentifier(firstArg.args[1]);
-    } else {
-      index = getIdentifier(firstArg);
-    }
-
-    const on = generic.commands.options.find(command, ({ name }) => name === 'on');
-
-    conditions.push(...((on?.args || []) as ESQLAstExpression[]));
-
-    const target: JoinCommandTarget = {
-      index: index!,
-      alias,
-    };
-    const summary: JoinCommandSummary = {
-      target,
-      conditions,
-    };
+    const summary = summarizeCommand(command);
 
     summaries.push(summary);
   }
@@ -96,6 +114,6 @@ export interface JoinCommandSummary {
 }
 
 export interface JoinCommandTarget {
-  index: ESQLIdentifier;
+  index: ESQLSource;
   alias?: ESQLIdentifier;
 }

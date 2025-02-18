@@ -45,7 +45,7 @@ export function SloEditPage() {
       ...(!!slo
         ? [
             {
-              href: basePath.prepend(paths.sloDetails(slo!.id)),
+              href: basePath.prepend(paths.sloDetails(slo.id, slo.instanceId)),
               text: slo!.name,
             },
           ]

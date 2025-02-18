@@ -39,6 +39,29 @@ jest.mock('../../hooks/use_fetch_synonyms_set', () => ({
   }),
 }));
 
+jest.mock('../../hooks/use_fetch_generated_rule_id', () => ({
+  useFetchGeneratedRuleId: () => ({
+    mutate: jest.fn(),
+  }),
+}));
+
+jest.mock('../../hooks/use_fetch_synonym_rule', () => ({
+  useFetchSynonymRule: () => ({
+    data: {
+      id: 'rule_id_3',
+      synonyms: 'explicit-from => explicit-to',
+    },
+    isLoading: false,
+    isError: false,
+  }),
+}));
+
+jest.mock('../../hooks/use_put_synonyms_rule', () => ({
+  usePutSynonymsRule: () => ({
+    mutate: jest.fn(),
+  }),
+}));
+
 describe('SynonymSetDetail table', () => {
   it('should render the list with synonym rules', () => {
     render(<SynonymsSetRuleTable synonymsSetId="synonymSetId" />);

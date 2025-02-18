@@ -166,44 +166,40 @@ const ProcessChart = ({ timeseries, color, label }: ProcessChartProps) => {
     : { max: 0, min: 0 };
 
   return (
-    <div
-      css={css`
-         {
-          width: 100%;
-          height: 140px;
-        }
-      `}
+    <Chart
+      size={{
+        height: '140px',
+        width: '100%',
+      }}
     >
-      <Chart>
-        <MetricExplorerSeriesChart
-          type={MetricsExplorerChartType.area}
-          metric={chartMetric}
-          id="0"
-          series={timeseries}
-          stack={false}
-        />
-        <Axis
-          id={'timestamp'}
-          position={Position.Bottom}
-          showOverlappingTicks={true}
-          tickFormat={dateFormatter}
-        />
-        <Axis
-          id={'values'}
-          position={Position.Left}
-          tickFormat={yAxisFormatter}
-          domain={domain}
-          ticks={6}
-          gridLine={{ visible: true }}
-        />
-        <Tooltip headerFormatter={({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS')} />
-        <Settings
-          baseTheme={chartTheme.baseTheme}
-          theme={chartTheme.theme}
-          locale={i18n.getLocale()}
-        />
-      </Chart>
-    </div>
+      <MetricExplorerSeriesChart
+        type={MetricsExplorerChartType.area}
+        metric={chartMetric}
+        id="0"
+        series={timeseries}
+        stack={false}
+      />
+      <Axis
+        id={'timestamp'}
+        position={Position.Bottom}
+        showOverlappingTicks={true}
+        tickFormat={dateFormatter}
+      />
+      <Axis
+        id={'values'}
+        position={Position.Left}
+        tickFormat={yAxisFormatter}
+        domain={domain}
+        ticks={6}
+        gridLine={{ visible: true }}
+      />
+      <Tooltip headerFormatter={({ value }) => moment(value).format('Y-MM-DD HH:mm:ss.SSS')} />
+      <Settings
+        baseTheme={chartTheme.baseTheme}
+        theme={chartTheme.theme}
+        locale={i18n.getLocale()}
+      />
+    </Chart>
   );
 };
 

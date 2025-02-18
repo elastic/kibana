@@ -12,7 +12,12 @@ import { writeFile } from 'fs/promises';
 import { join } from 'path';
 import _ from 'lodash';
 import type { RecursivePartial } from '@kbn/utility-types';
-import { FunctionDefinition } from '../src/definitions/types';
+import {
+  FunctionDefinition,
+  FunctionParameterType,
+  FunctionReturnType,
+  Signature,
+} from '../src/definitions/types';
 import { FULL_TEXT_SEARCH_FUNCTIONS } from '../src/shared/constants';
 const aliasTable: Record<string, string[]> = {
   to_version: ['to_ver'],
@@ -25,6 +30,52 @@ const aliasTable: Record<string, string[]> = {
 };
 const aliases = new Set(Object.values(aliasTable).flat());
 
+const bucketParameterTypes: Array<
+  [
+    FunctionParameterType,
+    FunctionParameterType,
+    FunctionParameterType | null,
+    FunctionParameterType | null,
+    FunctionReturnType
+  ]
+> = [
+  // field   // bucket   //from    // to   //result
+  ['date', 'date_period', null, null, 'date'],
+  ['date', 'integer', 'date', 'date', 'date'],
+  // Modified time_duration to time_literal
+  ['date', 'time_literal', null, null, 'date'],
+  ['double', 'double', null, null, 'double'],
+  ['double', 'integer', 'double', 'double', 'double'],
+  ['double', 'integer', 'double', 'integer', 'double'],
+  ['double', 'integer', 'double', 'long', 'double'],
+  ['double', 'integer', 'integer', 'double', 'double'],
+  ['double', 'integer', 'integer', 'integer', 'double'],
+  ['double', 'integer', 'integer', 'long', 'double'],
+  ['double', 'integer', 'long', 'double', 'double'],
+  ['double', 'integer', 'long', 'integer', 'double'],
+  ['double', 'integer', 'long', 'long', 'double'],
+  ['integer', 'double', null, null, 'double'],
+  ['integer', 'integer', 'double', 'double', 'double'],
+  ['integer', 'integer', 'double', 'integer', 'double'],
+  ['integer', 'integer', 'double', 'long', 'double'],
+  ['integer', 'integer', 'integer', 'double', 'double'],
+  ['integer', 'integer', 'integer', 'integer', 'double'],
+  ['integer', 'integer', 'integer', 'long', 'double'],
+  ['integer', 'integer', 'long', 'double', 'double'],
+  ['integer', 'integer', 'long', 'integer', 'double'],
+  ['integer', 'integer', 'long', 'long', 'double'],
+  ['long', 'double', null, null, 'double'],
+  ['long', 'integer', 'double', 'double', 'double'],
+  ['long', 'integer', 'double', 'integer', 'double'],
+  ['long', 'integer', 'double', 'long', 'double'],
+  ['long', 'integer', 'integer', 'double', 'double'],
+  ['long', 'integer', 'integer', 'integer', 'double'],
+  ['long', 'integer', 'integer', 'long', 'double'],
+  ['long', 'integer', 'long', 'double', 'double'],
+  ['long', 'integer', 'long', 'integer', 'double'],
+  ['long', 'integer', 'long', 'long', 'double'],
+];
+
 const scalarSupportedCommandsAndOptions = {
   supportedCommands: ['stats', 'inlinestats', 'metrics', 'eval', 'where', 'row', 'sort'],
   supportedOptions: ['by'],
@@ -36,11 +87,11 @@ const aggregationSupportedCommandsAndOptions = {
 
 // coalesce can be removed when a test is added for version type
 // (https://github.com/elastic/elasticsearch/pull/109032#issuecomment-2150033350)
-const excludedFunctions = new Set(['bucket', 'case']);
+const excludedFunctions = new Set(['case']);
 
 const extraFunctions: FunctionDefinition[] = [
   {
-    type: 'eval',
+    type: 'scalar',
     name: 'case',
     description:
       'Accepts pairs of conditions and values. The function returns the value that belongs to the first condition that evaluates to `true`. If the number of arguments is odd, the last argument is the default value which is returned when no condition matches.',
@@ -250,7 +301,7 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
     FunctionDefinition,
     'supportedCommands' | 'supportedOptions'
   > =
-    ESFunctionDefinition.type === 'eval'
+    ESFunctionDefinition.type === 'scalar'
       ? scalarSupportedCommandsAndOptions
       : aggregationSupportedCommandsAndOptions;
 
@@ -264,6 +315,7 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
   const ret = {
     type: ESFunctionDefinition.type,
     name: ESFunctionDefinition.name,
+    operator: ESFunctionDefinition.operator,
     ...supportedCommandsAndOptions,
     description: ESFunctionDefinition.description,
     alias: aliasTable[ESFunctionDefinition.name],
@@ -276,9 +328,11 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
           ...param,
           type: convertDateTime(param.type),
           description: undefined,
-          ...(idx === 0 && FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)
+          ...(FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)
             ? // Default to false. If set to true, this parameter does not accept a function or literal, only fields.
-              { fieldsOnly: true }
+              idx === 0
+              ? { fieldsOnly: true }
+              : { constantOnly: true }
             : {}),
         })),
         returnType: convertDateTime(signature.returnType),
@@ -299,9 +353,423 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
   return ret as FunctionDefinition;
 }
 
+const comparisonOperatorSignatures = (['ip', 'version'] as const).flatMap((type) => [
+  {
+    params: [
+      { name: 'left', type },
+      { name: 'right', type: 'text' as const, constantOnly: true },
+    ],
+    returnType: 'boolean' as const,
+  },
+  {
+    params: [
+      { name: 'left', type: 'text' as const, constantOnly: true },
+      { name: 'right', type },
+    ],
+    returnType: 'boolean' as const,
+  },
+]);
+const operatorsMeta: Record<
+  string,
+  {
+    name: string;
+    isMathOperator: boolean;
+    isComparisonOperator: boolean;
+    extraSignatures?: Signature[];
+  }
+> = {
+  add: {
+    name: '+',
+    isMathOperator: true,
+    isComparisonOperator: false,
+    extraSignatures: [
+      {
+        params: [
+          { name: 'left', type: 'time_literal' as const },
+          { name: 'right', type: 'date' as const },
+        ],
+        returnType: 'date' as const,
+      },
+      {
+        params: [
+          { name: 'left', type: 'date' as const },
+          { name: 'right', type: 'time_literal' as const },
+        ],
+        returnType: 'date' as const,
+      },
+    ],
+  },
+  sub: {
+    name: '-',
+    isMathOperator: true,
+    isComparisonOperator: false,
+    extraSignatures: [
+      {
+        params: [
+          { name: 'left', type: 'time_literal' as const },
+          { name: 'right', type: 'date' as const },
+        ],
+        returnType: 'date' as const,
+      },
+      {
+        params: [
+          { name: 'left', type: 'date' as const },
+          { name: 'right', type: 'time_literal' as const },
+        ],
+        returnType: 'date' as const,
+      },
+    ],
+  },
+  div: { name: '/', isMathOperator: true, isComparisonOperator: false },
+  equals: {
+    name: '==',
+    isMathOperator: false,
+    isComparisonOperator: true,
+    extraSignatures: [
+      ...comparisonOperatorSignatures,
+      {
+        params: [
+          { name: 'left', type: 'boolean' as const },
+          { name: 'right', type: 'boolean' as const },
+        ],
+        returnType: 'boolean' as const,
+      },
+      // constant strings okay because of implicit casting
+      {
+        params: [
+          { name: 'left', type: 'boolean' as const },
+          { name: 'right', type: 'keyword' as const, constantOnly: true },
+        ],
+        returnType: 'boolean' as const,
+      },
+      {
+        params: [
+          { name: 'left', type: 'keyword' as const, constantOnly: true },
+          { name: 'right', type: 'boolean' as const },
+        ],
+        returnType: 'boolean' as const,
+      },
+    ],
+  },
+  greater_than: {
+    name: '>',
+    isMathOperator: false,
+    isComparisonOperator: true,
+    extraSignatures: comparisonOperatorSignatures,
+  },
+  greater_than_or_equal: {
+    name: '>=',
+    isMathOperator: false,
+    isComparisonOperator: true,
+    extraSignatures: comparisonOperatorSignatures,
+  },
+  less_than: {
+    name: '<',
+    isMathOperator: false,
+    isComparisonOperator: true,
+    extraSignatures: comparisonOperatorSignatures,
+  },
+  less_than_or_equal: { name: '<=', isMathOperator: false, isComparisonOperator: true },
+  not_equals: {
+    name: '!=',
+    isMathOperator: false,
+    isComparisonOperator: true,
+    extraSignatures: [
+      ...comparisonOperatorSignatures,
+      {
+        params: [
+          { name: 'left', type: 'boolean' as const },
+          { name: 'right', type: 'boolean' as const },
+        ],
+        returnType: 'boolean' as const,
+      },
+      // constant strings okay because of implicit casting
+      {
+        params: [
+          { name: 'left', type: 'boolean' as const },
+          { name: 'right', type: 'keyword' as const, constantOnly: true },
+        ],
+        returnType: 'boolean' as const,
+      },
+      {
+        params: [
+          { name: 'left', type: 'keyword' as const, constantOnly: true },
+          { name: 'right', type: 'boolean' as const },
+        ],
+        returnType: 'boolean' as const,
+      },
+    ],
+  },
+  mod: { name: '%', isMathOperator: true, isComparisonOperator: false },
+  mul: { name: '*', isMathOperator: true, isComparisonOperator: false },
+  like: {
+    name: 'like',
+    isMathOperator: false,
+    isComparisonOperator: false,
+    extraSignatures: [
+      {
+        params: [
+          {
+            name: 'str',
+            type: 'text',
+            optional: false,
+          },
+          {
+            name: 'pattern',
+            type: 'keyword',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+        minParams: 2,
+      },
+      {
+        params: [
+          {
+            name: 'str',
+            type: 'keyword',
+            optional: false,
+          },
+          {
+            name: 'pattern',
+            type: 'text',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+        minParams: 2,
+      },
+    ],
+  },
+
+  rlike: {
+    name: 'rlike',
+    isMathOperator: false,
+    isComparisonOperator: false,
+    extraSignatures: [
+      {
+        params: [
+          {
+            name: 'str',
+            type: 'text',
+            optional: false,
+          },
+          {
+            name: 'pattern',
+            type: 'keyword',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+        minParams: 2,
+      },
+      {
+        params: [
+          {
+            name: 'str',
+            type: 'keyword',
+            optional: false,
+          },
+          {
+            name: 'pattern',
+            type: 'text',
+            optional: false,
+          },
+        ],
+        returnType: 'boolean',
+        minParams: 2,
+      },
+    ],
+  },
+};
+
+const validators: Record<string, string> = {
+  div: `(fnDef) => {
+    const [left, right] = fnDef.args;
+    const messages = [];
+    if (!Array.isArray(left) && !Array.isArray(right)) {
+      if (right.type === 'literal' && isNumericType(right.literalType)) {
+        if (right.value === 0) {
+          messages.push({
+            type: 'warning' as const,
+            code: 'divideByZero',
+            text: i18n.translate(
+              'kbn-esql-validation-autocomplete.esql.divide.warning.divideByZero',
+              {
+                defaultMessage: 'Cannot divide by zero: {left}/{right}',
+                values: {
+                  left: left.text,
+                  right: right.value,
+                },
+              }
+            ),
+            location: fnDef.location,
+          });
+        }
+      }
+    }
+    return messages;
+  }`,
+  mod: `(fnDef) => {
+    const [left, right] = fnDef.args;
+    const messages = [];
+    if (!Array.isArray(left) && !Array.isArray(right)) {
+      if (right.type === 'literal' && isNumericType(right.literalType)) {
+        if (right.value === 0) {
+          messages.push({
+            type: 'warning' as const,
+            code: 'moduleByZero',
+            text: i18n.translate(
+              'kbn-esql-validation-autocomplete.esql.divide.warning.zeroModule',
+              {
+                defaultMessage: 'Module by zero can return null value: {left}%{right}',
+                values: {
+                  left: left.text,
+                  right: right.value,
+                },
+              }
+            ),
+            location: fnDef.location,
+          });
+        }
+      }
+    }
+    return messages;
+  }`,
+};
+
+/**
+ * Elasticsearch doc exports name as 'lhs' or 'rhs' instead of 'left' or 'right'
+ * @param str
+ * @returns
+ */
+const replaceParamName = (str: string) => {
+  switch (str) {
+    case 'lhs':
+      return 'left';
+    case 'rhs':
+      return 'right';
+
+    // @todo: For in function where Kibana doesn't interpret field and inlist
+    case 'field':
+      return 'left';
+    case 'inlist':
+      return 'right';
+    default:
+      return str;
+  }
+};
+
+const enrichGrouping = (
+  groupingFunctionDefinitions: FunctionDefinition[]
+): FunctionDefinition[] => {
+  return groupingFunctionDefinitions.map((op) => {
+    if (op.name === 'bucket') {
+      const signatures = [
+        ...bucketParameterTypes.map((signature) => {
+          const [fieldType, bucketType, fromType, toType, resultType] = signature;
+          return {
+            params: [
+              { name: 'field', type: fieldType },
+              { name: 'buckets', type: bucketType, constantOnly: true },
+              ...(fromType ? [{ name: 'startDate', type: fromType, constantOnly: true }] : []),
+              ...(toType ? [{ name: 'endDate', type: toType, constantOnly: true }] : []),
+            ],
+            returnType: resultType,
+          };
+        }),
+      ];
+      return {
+        ...op,
+        signatures,
+        supportedOptions: ['by'],
+      };
+    }
+    return {
+      ...op,
+      supportedOptions: ['by'],
+    };
+  });
+};
+
+const enrichOperators = (
+  operatorsFunctionDefinitions: FunctionDefinition[]
+): FunctionDefinition[] => {
+  // @ts-expect-error Stringified version of the validator function
+  return operatorsFunctionDefinitions.map((op) => {
+    const isMathOperator =
+      Object.hasOwn(operatorsMeta, op.name) && operatorsMeta[op.name]?.isMathOperator;
+    const isComparisonOperator =
+      Object.hasOwn(operatorsMeta, op.name) && operatorsMeta[op.name]?.isComparisonOperator;
+
+    const isInOperator = op.name === 'in' || op.name === 'not_in';
+    const isLikeOperator = /like/i.test(op.name);
+    const isNotOperator =
+      op.name?.toLowerCase()?.startsWith('not_') && (isInOperator || isInOperator);
+
+    let signatures = op.signatures.map((s) => ({
+      ...s,
+      // Elasticsearch docs uses lhs and rhs instead of left and right that Kibana code uses
+      params: s.params.map((param) => ({ ...param, name: replaceParamName(param.name) })),
+    }));
+    let supportedCommands = op.supportedCommands;
+    let supportedOptions = op.supportedOptions;
+    if (isComparisonOperator) {
+      supportedCommands = _.uniq([...op.supportedCommands, 'eval', 'where', 'row', 'sort']);
+      supportedOptions = ['by'];
+    }
+    if (isMathOperator) {
+      supportedCommands = _.uniq([
+        ...op.supportedCommands,
+        'eval',
+        'where',
+        'row',
+        'stats',
+        'metrics',
+        'sort',
+      ]);
+      supportedOptions = ['by'];
+    }
+    if (isInOperator || isLikeOperator || isNotOperator) {
+      supportedCommands = ['eval', 'where', 'row', 'sort'];
+    }
+    if (isInOperator) {
+      // Override the signatures to be array types instead of singular
+      // i.e. right: 'keyword' -> right: 'keyword[]'
+      // so that in would open up ($0)
+      signatures = signatures.map((s) => ({
+        ...s,
+        params: s.params.map((p, idx) => ({
+          ...p,
+          type: `${p.type}${idx === 1 ? '[]' : ''}` as FunctionParameterType,
+        })),
+      }));
+    }
+    if (
+      Object.hasOwn(operatorsMeta, op.name) &&
+      Array.isArray(operatorsMeta[op.name]?.extraSignatures)
+    ) {
+      signatures.push(...(operatorsMeta[op.name].extraSignatures ?? []));
+    }
+
+    return {
+      ...op,
+      signatures,
+      // Elasticsearch docs does not include the full supported commands for math operators
+      // so we are overriding to add proper support
+      supportedCommands,
+      supportedOptions,
+      // @TODO: change to operator type
+      type: 'builtin' as const,
+      validate: validators[op.name],
+      ...(isNotOperator ? { ignoreAsSuggestion: true } : {}),
+    };
+  });
+};
+
 function printGeneratedFunctionsFile(
   functionDefinitions: FunctionDefinition[],
-  functionsType: 'aggregation' | 'scalar'
+  functionsType: 'aggregation' | 'scalar' | 'operators' | 'grouping'
 ) {
   /**
    * Deals with asciidoc internal cross-references in the function descriptions
@@ -343,12 +811,19 @@ function printGeneratedFunctionsFile(
     functionDefinition: FunctionDefinition,
     functionNames: string[]
   ) => {
-    const { type, name, description, alias, signatures } = functionDefinition;
+    const { type, name, description, alias, signatures, operator } = functionDefinition;
 
+    let functionName = operator?.toLowerCase() ?? name.toLowerCase();
+    if (functionName.includes('not')) {
+      functionName = name;
+    }
+    if (name.toLowerCase() === 'match') {
+      functionName = 'match';
+    }
     return `// Do not edit this manually... generated by scripts/generate_function_definitions.ts
     const ${getDefinitionName(name)}: FunctionDefinition = {
     type: '${type}',
-    name: '${name}',
+    name: '${functionName}',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.${name}', { defaultMessage: ${JSON.stringify(
       removeAsciiDocInternalCrossReferences(removeInlineAsciiDocLinks(description), functionNames)
     )} }),${functionDefinition.ignoreAsSuggestion ? 'ignoreAsSuggestion: true,\n' : ''}
@@ -389,6 +864,8 @@ ${
 import { isLiteralItem } from '../../shared/helpers';`
     : ''
 }
+${functionsType === 'operators' ? `import { isNumericType } from '../../shared/esql_types';` : ''}
+
 
 
 `;
@@ -428,17 +905,30 @@ import { isLiteralItem } from '../../shared/helpers';`
 
   const scalarFunctionDefinitions: FunctionDefinition[] = [];
   const aggFunctionDefinitions: FunctionDefinition[] = [];
+  const operatorDefinitions: FunctionDefinition[] = [];
+  const groupingFunctionDefinitions: FunctionDefinition[] = [];
+
   for (const ESDefinition of ESFunctionDefinitions) {
     if (aliases.has(ESDefinition.name) || excludedFunctions.has(ESDefinition.name)) {
       continue;
     }
 
     const functionDefinition = getFunctionDefinition(ESDefinition);
+    const isLikeOperator = functionDefinition.name.toLowerCase().includes('like');
 
-    if (functionDefinition.type === 'eval') {
+    if (functionDefinition.name.toLowerCase() === 'match') {
+      scalarFunctionDefinitions.push({ ...functionDefinition, type: 'scalar' });
+      continue;
+    }
+    if (functionDefinition.type === 'operator' || isLikeOperator) {
+      operatorDefinitions.push(functionDefinition);
+    }
+    if (functionDefinition.type === 'scalar' && !isLikeOperator) {
       scalarFunctionDefinitions.push(functionDefinition);
     } else if (functionDefinition.type === 'agg') {
       aggFunctionDefinitions.push(functionDefinition);
+    } else if (functionDefinition.type === 'grouping') {
+      groupingFunctionDefinitions.push(functionDefinition);
     }
   }
 
@@ -451,5 +941,13 @@ import { isLiteralItem } from '../../shared/helpers';`
   await writeFile(
     join(__dirname, '../src/definitions/generated/aggregation_functions.ts'),
     printGeneratedFunctionsFile(aggFunctionDefinitions, 'aggregation')
+  );
+  await writeFile(
+    join(__dirname, '../src/definitions/generated/operators.ts'),
+    printGeneratedFunctionsFile(enrichOperators(operatorDefinitions), 'operators')
+  );
+  await writeFile(
+    join(__dirname, '../src/definitions/generated/grouping_functions.ts'),
+    printGeneratedFunctionsFile(enrichGrouping(groupingFunctionDefinitions), 'grouping')
   );
 })();

@@ -85,8 +85,8 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             'licensing',
           ]);
 
-          const { prebuiltRulesCustomizationEnabled } = config.experimentalFeatures;
           const detectionRulesClient = ctx.securitySolution.getDetectionRulesClient();
+          const { isRulesCustomizationEnabled } = detectionRulesClient.getRuleCustomizationStatus();
           const actionsClient = ctx.actions.getActionsClient();
           const actionSOClient = ctx.core.savedObjects.getClient({
             includedHiddenTypes: ['action'],
@@ -158,6 +158,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
             config,
             context: ctx.securitySolution,
             prebuiltRuleAssetsClient: createPrebuiltRuleAssetsClient(savedObjectsClient),
+            ruleCustomizationStatus: detectionRulesClient.getRuleCustomizationStatus(),
           });
 
           const [parsedRules, parsedRuleErrors] = partition(isRuleToImport, parsedRuleStream);
@@ -165,7 +166,7 @@ export const importRulesRoute = (router: SecuritySolutionPluginRouter, config: C
 
           let importRuleResponse: ImportRuleResponse[] = [];
 
-          if (prebuiltRulesCustomizationEnabled) {
+          if (isRulesCustomizationEnabled) {
             importRuleResponse = await importRules({
               ruleChunks,
               overwriteRules: request.query.overwrite,

@@ -16,7 +16,7 @@ import {
   EuiContextMenuItemProps,
 } from '@elastic/eui';
 
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import styled from '@emotion/styled';
 import { LogEntryColumnContent } from './log_entry_column';
 
 export interface LogEntryContextMenuItem {
@@ -108,16 +108,16 @@ export const LogEntryContextMenu: React.FC<LogEntryContextMenuProps> = ({
   );
 };
 
-const LogEntryContextMenuContent = euiStyled(LogEntryColumnContent)`
+const LogEntryContextMenuContent = styled(LogEntryColumnContent)`
   overflow: hidden;
   user-select: none;
 `;
 
-const AbsoluteWrapper = euiStyled.div`
+const AbsoluteWrapper = styled.div`
   position: absolute;
 `;
 
-const ButtonWrapper = euiStyled.div`
+const ButtonWrapper = styled.div`
   transform: translate(-6px, -6px);
 `;
 

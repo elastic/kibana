@@ -8,9 +8,10 @@
  */
 
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsDeleteOptions } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
 import { deleteLegacyUrlAliases } from './internals/delete_legacy_url_aliases';
 import { getExpectedVersionProperties } from './utils';
@@ -46,12 +47,33 @@ export const performDelete = async <T>(
 
   const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
 
-  // we don't need to pass existing namespaces in because we're only concerned with authorizing
-  // the current space. This saves us from performing the preflight check if we're unauthorized
-  await securityExtension?.authorizeDelete({
-    namespace,
-    object: { type, id },
-  });
+  if (securityExtension) {
+    let name;
+
+    if (securityExtension.includeSavedObjectNames()) {
+      const nameAttribute = registry.getNameAttribute(type);
+
+      const savedObjectResponse = await client.get<SavedObjectsRawDocSource>(
+        {
+          index: commonHelper.getIndexForType(type),
+          id: serializer.generateRawId(namespace, type, id),
+          _source_includes: SavedObjectsUtils.getIncludedNameFields(type, nameAttribute),
+        },
+        { ignore: [404], meta: true }
+      );
+
+      const saveObject = { attributes: savedObjectResponse.body._source?.[type] };
+
+      name = SavedObjectsUtils.getName(nameAttribute, saveObject);
+    }
+
+    // we don't need to pass existing namespaces in because we're only concerned with authorizing
+    // the current space. This saves us from performing the preflight check if we're unauthorized
+    await securityExtension?.authorizeDelete({
+      namespace,
+      object: { type, id, name },
+    });
+  }
 
   const rawId = serializer.generateRawId(namespace, type, id);
   let preflightResult: PreflightCheckNamespacesResult | undefined;

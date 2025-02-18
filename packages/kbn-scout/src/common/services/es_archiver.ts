@@ -7,22 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client } from '@elastic/elasticsearch';
 import { EsArchiver } from '@kbn/es-archiver';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { KbnClient } from '@kbn/test';
-import type { ToolingLog } from '@kbn/tooling-log';
-import { serviceLoadedMsg } from '../../playwright/utils';
+import { ScoutLogger } from './logger';
+import { EsClient, KbnClient } from '../../types';
 
-export function createEsArchiver(esClient: Client, kbnClient: KbnClient, log: ToolingLog) {
-  const esArchiver = new EsArchiver({
-    log,
-    client: esClient,
-    kbnClient,
-    baseDir: REPO_ROOT,
-  });
+let esArchiverInstance: EsArchiver | undefined;
 
-  log.debug(serviceLoadedMsg('esArchiver'));
+export function getEsArchiver(esClient: EsClient, kbnClient: KbnClient, log: ScoutLogger) {
+  if (!esArchiverInstance) {
+    esArchiverInstance = new EsArchiver({
+      log,
+      client: esClient,
+      kbnClient,
+      baseDir: REPO_ROOT,
+    });
 
-  return esArchiver;
+    log.serviceLoaded('esArchiver');
+  }
+
+  return esArchiverInstance;
 }

@@ -2,26 +2,10 @@
   "id": "@kbn/securitysolution-data-table",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.addBuildingBlockStyle",
+        "id": "def-public.addBuildingBlockStyle",
         "type": "Function",
         "tags": [],
         "label": "addBuildingBlockStyle",
@@ -53,7 +37,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.addBuildingBlockStyle.$1",
+            "id": "def-public.addBuildingBlockStyle.$1",
             "type": "Object",
             "tags": [],
             "label": "ecs",
@@ -74,7 +58,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.addBuildingBlockStyle.$2",
+            "id": "def-public.addBuildingBlockStyle.$2",
             "type": "Object",
             "tags": [],
             "label": "theme",
@@ -95,7 +79,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.addBuildingBlockStyle.$3",
+            "id": "def-public.addBuildingBlockStyle.$3",
             "type": "Function",
             "tags": [],
             "label": "setCellProps",
@@ -116,7 +100,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.DataTableComponent",
+        "id": "def-public.DataTableComponent",
         "type": "Function",
         "tags": [],
         "label": "DataTableComponent",
@@ -133,7 +117,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableComponent.$1",
+            "id": "def-public.DataTableComponent.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -150,7 +134,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.dataTableReducer",
+        "id": "def-public.dataTableReducer",
         "type": "Function",
         "tags": [],
         "label": "dataTableReducer",
@@ -161,17 +145,17 @@
           "(state: ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableState",
+            "section": "def-public.TableState",
             "text": "TableState"
           },
           " | undefined, action: { type: any; }) => ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableState",
+            "section": "def-public.TableState",
             "text": "TableState"
           }
         ],
@@ -182,7 +166,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.dataTableReducer.$1",
+            "id": "def-public.dataTableReducer.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "state",
@@ -196,7 +180,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.dataTableReducer.$2",
+            "id": "def-public.dataTableReducer.$2",
             "type": "Object",
             "tags": [],
             "label": "action",
@@ -213,7 +197,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.getColumnHeaders",
+        "id": "def-public.getColumnHeaders",
         "type": "Function",
         "tags": [],
         "label": "getColumnHeaders",
@@ -241,7 +225,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.getColumnHeaders.$1",
+            "id": "def-public.getColumnHeaders.$1",
             "type": "Array",
             "tags": [],
             "label": "headers",
@@ -257,7 +241,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.getColumnHeaders.$2",
+            "id": "def-public.getColumnHeaders.$2",
             "type": "Object",
             "tags": [],
             "label": "browserFields",
@@ -278,7 +262,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.getColumnHeaders.$3",
+            "id": "def-public.getColumnHeaders.$3",
             "type": "CompoundType",
             "tags": [],
             "label": "isEventRenderedView",
@@ -297,7 +281,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.getEventIdToDataMapping",
+        "id": "def-public.getEventIdToDataMapping",
         "type": "Function",
         "tags": [],
         "label": "getEventIdToDataMapping",
@@ -329,7 +313,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.getEventIdToDataMapping.$1",
+            "id": "def-public.getEventIdToDataMapping.$1",
             "type": "Array",
             "tags": [],
             "label": "timelineData",
@@ -351,7 +335,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.getEventIdToDataMapping.$2",
+            "id": "def-public.getEventIdToDataMapping.$2",
             "type": "Array",
             "tags": [],
             "label": "eventIds",
@@ -366,7 +350,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.getEventIdToDataMapping.$3",
+            "id": "def-public.getEventIdToDataMapping.$3",
             "type": "Array",
             "tags": [],
             "label": "fieldsToKeep",
@@ -381,7 +365,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.getEventIdToDataMapping.$4",
+            "id": "def-public.getEventIdToDataMapping.$4",
             "type": "boolean",
             "tags": [],
             "label": "hasAlertsCrud",
@@ -400,7 +384,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.getPageRowIndex",
+        "id": "def-public.getPageRowIndex",
         "type": "Function",
         "tags": [],
         "label": "getPageRowIndex",
@@ -416,7 +400,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.getPageRowIndex.$1",
+            "id": "def-public.getPageRowIndex.$1",
             "type": "number",
             "tags": [],
             "label": "rowIndex",
@@ -431,7 +415,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.getPageRowIndex.$2",
+            "id": "def-public.getPageRowIndex.$2",
             "type": "number",
             "tags": [],
             "label": "itemsPerPage",
@@ -450,7 +434,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.getTableByIdSelector",
+        "id": "def-public.getTableByIdSelector",
         "type": "Function",
         "tags": [],
         "label": "getTableByIdSelector",
@@ -459,17 +443,17 @@
           "() => ((state: ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.DataTableState",
+            "section": "def-public.DataTableState",
             "text": "DataTableState"
           },
           ", tableId: string) => ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.DataTableModel",
+            "section": "def-public.DataTableModel",
             "text": "DataTableModel"
           },
           ") & ",
@@ -477,17 +461,17 @@
           "<(args_0: ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.DataTableModel",
+            "section": "def-public.DataTableModel",
             "text": "DataTableModel"
           },
           ") => ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.DataTableModel",
+            "section": "def-public.DataTableModel",
             "text": "DataTableModel"
           },
           ", { clearCache: () => void; }> & { clearCache: () => void; }"
@@ -501,7 +485,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.isEventBuildingBlockType",
+        "id": "def-public.isEventBuildingBlockType",
         "type": "Function",
         "tags": [],
         "label": "isEventBuildingBlockType",
@@ -523,7 +507,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.isEventBuildingBlockType.$1",
+            "id": "def-public.isEventBuildingBlockType.$1",
             "type": "Object",
             "tags": [],
             "label": "event",
@@ -550,7 +534,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.DataTableModel",
+        "id": "def-public.DataTableModel",
         "type": "Interface",
         "tags": [],
         "label": "DataTableModel",
@@ -558,9 +542,9 @@
         "signature": [
           {
             "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.DataTableModel",
+            "section": "def-public.DataTableModel",
             "text": "DataTableModel"
           },
           " extends ",
@@ -572,7 +556,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.columns",
+            "id": "def-public.DataTableModel.columns",
             "type": "Array",
             "tags": [],
             "label": "columns",
@@ -584,7 +568,7 @@
               "EuiDataGridColumn",
               ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
               "EuiDataGridColumn",
-              ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\" | \"isExpandable\" | \"isResizable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
+              ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"isExpandable\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\" | \"isResizable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
               "ColumnHeaderType",
               "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: ",
               {
@@ -618,7 +602,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.dataViewId",
+            "id": "def-public.DataTableModel.dataViewId",
             "type": "CompoundType",
             "tags": [],
             "label": "dataViewId",
@@ -634,7 +618,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.deletedEventIds",
+            "id": "def-public.DataTableModel.deletedEventIds",
             "type": "Array",
             "tags": [],
             "label": "deletedEventIds",
@@ -650,7 +634,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.filters",
+            "id": "def-public.DataTableModel.filters",
             "type": "Array",
             "tags": [],
             "label": "filters",
@@ -671,7 +655,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.graphEventId",
+            "id": "def-public.DataTableModel.graphEventId",
             "type": "string",
             "tags": [],
             "label": "graphEventId",
@@ -687,7 +671,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.id",
+            "id": "def-public.DataTableModel.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -700,7 +684,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.indexNames",
+            "id": "def-public.DataTableModel.indexNames",
             "type": "Array",
             "tags": [],
             "label": "indexNames",
@@ -714,7 +698,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.isLoading",
+            "id": "def-public.DataTableModel.isLoading",
             "type": "boolean",
             "tags": [],
             "label": "isLoading",
@@ -725,7 +709,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.isSelectAllChecked",
+            "id": "def-public.DataTableModel.isSelectAllChecked",
             "type": "boolean",
             "tags": [],
             "label": "isSelectAllChecked",
@@ -738,7 +722,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.itemsPerPage",
+            "id": "def-public.DataTableModel.itemsPerPage",
             "type": "number",
             "tags": [],
             "label": "itemsPerPage",
@@ -751,7 +735,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.itemsPerPageOptions",
+            "id": "def-public.DataTableModel.itemsPerPageOptions",
             "type": "Array",
             "tags": [],
             "label": "itemsPerPageOptions",
@@ -767,7 +751,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.loadingEventIds",
+            "id": "def-public.DataTableModel.loadingEventIds",
             "type": "Array",
             "tags": [],
             "label": "loadingEventIds",
@@ -783,7 +767,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.selectedEventIds",
+            "id": "def-public.DataTableModel.selectedEventIds",
             "type": "Object",
             "tags": [],
             "label": "selectedEventIds",
@@ -807,7 +791,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.initialized",
+            "id": "def-public.DataTableModel.initialized",
             "type": "CompoundType",
             "tags": [],
             "label": "initialized",
@@ -821,7 +805,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.sessionViewConfig",
+            "id": "def-public.DataTableModel.sessionViewConfig",
             "type": "CompoundType",
             "tags": [],
             "label": "sessionViewConfig",
@@ -836,7 +820,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.updated",
+            "id": "def-public.DataTableModel.updated",
             "type": "number",
             "tags": [],
             "label": "updated",
@@ -852,7 +836,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.totalCount",
+            "id": "def-public.DataTableModel.totalCount",
             "type": "number",
             "tags": [],
             "label": "totalCount",
@@ -865,7 +849,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.viewMode",
+            "id": "def-public.DataTableModel.viewMode",
             "type": "CompoundType",
             "tags": [],
             "label": "viewMode",
@@ -879,7 +863,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableModel.additionalFilters",
+            "id": "def-public.DataTableModel.additionalFilters",
             "type": "Object",
             "tags": [],
             "label": "additionalFilters",
@@ -896,7 +880,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.DataTableState",
+        "id": "def-public.DataTableState",
         "type": "Interface",
         "tags": [],
         "label": "DataTableState",
@@ -909,7 +893,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.DataTableState.dataTable",
+            "id": "def-public.DataTableState.dataTable",
             "type": "Object",
             "tags": [],
             "label": "dataTable",
@@ -917,9 +901,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-data-table",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-                "section": "def-common.TableState",
+                "section": "def-public.TableState",
                 "text": "TableState"
               }
             ],
@@ -932,7 +916,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.SortColumnTable",
+        "id": "def-public.SortColumnTable",
         "type": "Interface",
         "tags": [],
         "label": "SortColumnTable",
@@ -943,7 +927,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.SortColumnTable.columnId",
+            "id": "def-public.SortColumnTable.columnId",
             "type": "string",
             "tags": [],
             "label": "columnId",
@@ -954,7 +938,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.SortColumnTable.columnType",
+            "id": "def-public.SortColumnTable.columnType",
             "type": "string",
             "tags": [],
             "label": "columnType",
@@ -965,7 +949,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.SortColumnTable.esTypes",
+            "id": "def-public.SortColumnTable.esTypes",
             "type": "Array",
             "tags": [],
             "label": "esTypes",
@@ -979,7 +963,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.SortColumnTable.sortDirection",
+            "id": "def-public.SortColumnTable.sortDirection",
             "type": "CompoundType",
             "tags": [],
             "label": "sortDirection",
@@ -1003,7 +987,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.TableById",
+        "id": "def-public.TableById",
         "type": "Interface",
         "tags": [],
         "label": "TableById",
@@ -1016,7 +1000,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.TableById.Unnamed",
+            "id": "def-public.TableById.Unnamed",
             "type": "IndexSignature",
             "tags": [],
             "label": "[id: string]: DataTableModel",
@@ -1025,9 +1009,9 @@
               "[id: string]:  ",
               {
                 "pluginId": "@kbn/securitysolution-data-table",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-                "section": "def-common.DataTableModel",
+                "section": "def-public.DataTableModel",
                 "text": "DataTableModel"
               }
             ],
@@ -1040,7 +1024,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.TableState",
+        "id": "def-public.TableState",
         "type": "Interface",
         "tags": [],
         "label": "TableState",
@@ -1053,7 +1037,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.TableState.tableById",
+            "id": "def-public.TableState.tableById",
             "type": "Object",
             "tags": [],
             "label": "tableById",
@@ -1061,9 +1045,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/securitysolution-data-table",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-                "section": "def-common.TableById",
+                "section": "def-public.TableById",
                 "text": "TableById"
               }
             ],
@@ -1078,19 +1062,19 @@
     "enums": [
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.Direction",
+        "id": "def-public.Direction",
         "type": "Enum",
         "tags": [],
         "label": "Direction",
         "description": [],
-        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/timelines/common/search_strategy/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.TableEntityType",
+        "id": "def-public.TableEntityType",
         "type": "Enum",
         "tags": [],
         "label": "TableEntityType",
@@ -1102,7 +1086,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.TableId",
+        "id": "def-public.TableId",
         "type": "Enum",
         "tags": [],
         "label": "TableId",
@@ -1114,7 +1098,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.TimelineTabs",
+        "id": "def-public.TimelineTabs",
         "type": "Enum",
         "tags": [],
         "label": "TimelineTabs",
@@ -1128,7 +1112,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.defaultColumnHeaderType",
+        "id": "def-public.defaultColumnHeaderType",
         "type": "CompoundType",
         "tags": [],
         "label": "defaultColumnHeaderType",
@@ -1143,7 +1127,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.defaultHeaders",
+        "id": "def-public.defaultHeaders",
         "type": "Array",
         "tags": [],
         "label": "defaultHeaders",
@@ -1159,7 +1143,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.FILTER_OPEN",
+        "id": "def-public.FILTER_OPEN",
         "type": "string",
         "tags": [],
         "label": "FILTER_OPEN",
@@ -1174,7 +1158,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.SortDirectionTable",
+        "id": "def-public.SortDirectionTable",
         "type": "Type",
         "tags": [],
         "label": "SortDirectionTable",
@@ -1196,25 +1180,19 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.SubsetDataTableModel",
+        "id": "def-public.SubsetDataTableModel",
         "type": "Type",
         "tags": [],
         "label": "SubsetDataTableModel",
         "description": [],
         "signature": [
           "{ readonly sort: ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.SortColumnTable",
-            "text": "SortColumnTable"
-          },
+          "SortColumnTable",
           "[]; readonly title: string; readonly columns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\" | \"isExpandable\" | \"isResizable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
+          ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"isExpandable\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\" | \"isResizable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
           "ColumnHeaderType",
           "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: ",
           {
@@ -1241,13 +1219,7 @@
             "text": "IFieldSubType"
           },
           " | undefined; type?: string | undefined; })[]; readonly viewMode: ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.ViewSelection",
-            "text": "ViewSelection"
-          },
+          "ViewSelection",
           "; readonly filters?: ",
           {
             "pluginId": "@kbn/es-query",
@@ -1260,7 +1232,7 @@
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\" | \"isExpandable\" | \"isResizable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
+          ", \"id\" | \"actions\" | \"schema\" | \"display\" | \"isExpandable\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\" | \"isResizable\"> & { aggregatable?: boolean | undefined; searchable?: boolean | undefined; category?: string | undefined; columnHeaderType: ",
           "ColumnHeaderType",
           "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: ",
           {
@@ -1307,99 +1279,33 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.TableIdLiteral",
+        "id": "def-public.TableIdLiteral",
         "type": "Type",
         "tags": [],
         "label": "TableIdLiteral",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".usersPageEvents | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".hostsPageEvents | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".networkPageEvents | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".hostsPageSessions | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".alertsOnRuleDetailsPage | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".alertsOnAlertsPage | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".test | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".rulePreview | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".kubernetesPageSessions | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".alertsOnCasePage | ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableId",
-            "text": "TableId"
-          },
+          "TableId",
           ".alertsRiskInputs"
         ],
         "path": "x-pack/solutions/security/packages/data_table/common/types/data_table/index.ts",
@@ -1409,7 +1315,7 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.ViewSelection",
+        "id": "def-public.ViewSelection",
         "type": "Type",
         "tags": [],
         "label": "ViewSelection",
@@ -1426,7 +1332,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.tableDefaults",
+        "id": "def-public.tableDefaults",
         "type": "Object",
         "tags": [],
         "label": "tableDefaults",
@@ -1437,7 +1343,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.defaultColumns",
+            "id": "def-public.tableDefaults.defaultColumns",
             "type": "Array",
             "tags": [],
             "label": "defaultColumns",
@@ -1452,7 +1358,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.dataViewId",
+            "id": "def-public.tableDefaults.dataViewId",
             "type": "Uncategorized",
             "tags": [],
             "label": "dataViewId",
@@ -1466,7 +1372,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.deletedEventIds",
+            "id": "def-public.tableDefaults.deletedEventIds",
             "type": "Array",
             "tags": [],
             "label": "deletedEventIds",
@@ -1480,7 +1386,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.filters",
+            "id": "def-public.tableDefaults.filters",
             "type": "Array",
             "tags": [],
             "label": "filters",
@@ -1494,7 +1400,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.indexNames",
+            "id": "def-public.tableDefaults.indexNames",
             "type": "Array",
             "tags": [],
             "label": "indexNames",
@@ -1508,7 +1414,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.isSelectAllChecked",
+            "id": "def-public.tableDefaults.isSelectAllChecked",
             "type": "boolean",
             "tags": [],
             "label": "isSelectAllChecked",
@@ -1522,7 +1428,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.isLoading",
+            "id": "def-public.tableDefaults.isLoading",
             "type": "boolean",
             "tags": [],
             "label": "isLoading",
@@ -1536,7 +1442,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.itemsPerPage",
+            "id": "def-public.tableDefaults.itemsPerPage",
             "type": "number",
             "tags": [],
             "label": "itemsPerPage",
@@ -1547,7 +1453,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.itemsPerPageOptions",
+            "id": "def-public.tableDefaults.itemsPerPageOptions",
             "type": "Array",
             "tags": [],
             "label": "itemsPerPageOptions",
@@ -1561,7 +1467,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.loadingEventIds",
+            "id": "def-public.tableDefaults.loadingEventIds",
             "type": "Array",
             "tags": [],
             "label": "loadingEventIds",
@@ -1575,7 +1481,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.selectedEventIds",
+            "id": "def-public.tableDefaults.selectedEventIds",
             "type": "Object",
             "tags": [],
             "label": "selectedEventIds",
@@ -1587,7 +1493,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.showCheckboxes",
+            "id": "def-public.tableDefaults.showCheckboxes",
             "type": "boolean",
             "tags": [],
             "label": "showCheckboxes",
@@ -1601,7 +1507,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.sort",
+            "id": "def-public.tableDefaults.sort",
             "type": "Array",
             "tags": [],
             "label": "sort",
@@ -1615,7 +1521,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.selectAll",
+            "id": "def-public.tableDefaults.selectAll",
             "type": "boolean",
             "tags": [],
             "label": "selectAll",
@@ -1629,7 +1535,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.graphEventId",
+            "id": "def-public.tableDefaults.graphEventId",
             "type": "string",
             "tags": [],
             "label": "graphEventId",
@@ -1640,7 +1546,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.sessionViewConfig",
+            "id": "def-public.tableDefaults.sessionViewConfig",
             "type": "Uncategorized",
             "tags": [],
             "label": "sessionViewConfig",
@@ -1654,7 +1560,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.columns",
+            "id": "def-public.tableDefaults.columns",
             "type": "Array",
             "tags": [],
             "label": "columns",
@@ -1669,7 +1575,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.queryFields",
+            "id": "def-public.tableDefaults.queryFields",
             "type": "Array",
             "tags": [],
             "label": "queryFields",
@@ -1683,7 +1589,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.title",
+            "id": "def-public.tableDefaults.title",
             "type": "string",
             "tags": [],
             "label": "title",
@@ -1694,7 +1600,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.totalCount",
+            "id": "def-public.tableDefaults.totalCount",
             "type": "number",
             "tags": [],
             "label": "totalCount",
@@ -1705,7 +1611,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.viewMode",
+            "id": "def-public.tableDefaults.viewMode",
             "type": "string",
             "tags": [],
             "label": "viewMode",
@@ -1719,7 +1625,7 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-data-table",
-            "id": "def-common.tableDefaults.additionalFilters",
+            "id": "def-public.tableDefaults.additionalFilters",
             "type": "Object",
             "tags": [],
             "label": "additionalFilters",
@@ -1730,7 +1636,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/securitysolution-data-table",
-                "id": "def-common.tableDefaults.additionalFilters.showBuildingBlockAlerts",
+                "id": "def-public.tableDefaults.additionalFilters.showBuildingBlockAlerts",
                 "type": "boolean",
                 "tags": [],
                 "label": "showBuildingBlockAlerts",
@@ -1744,7 +1650,7 @@
               },
               {
                 "parentPluginId": "@kbn/securitysolution-data-table",
-                "id": "def-common.tableDefaults.additionalFilters.showOnlyThreatIndicatorAlerts",
+                "id": "def-public.tableDefaults.additionalFilters.showOnlyThreatIndicatorAlerts",
                 "type": "boolean",
                 "tags": [],
                 "label": "showOnlyThreatIndicatorAlerts",
@@ -1763,116 +1669,38 @@
       },
       {
         "parentPluginId": "@kbn/securitysolution-data-table",
-        "id": "def-common.tableEntity",
+        "id": "def-public.tableEntity",
         "type": "Object",
         "tags": [],
         "label": "tableEntity",
         "description": [],
         "signature": [
           "{ \"users-page-events\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"hosts-page-events\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"network-page-events\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"hosts-page-sessions-v2\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"alerts-rules-details-page\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"alerts-page\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"table-test\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; alternateTest: ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"rule-preview\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"kubernetes-page-sessions\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"alerts-case-page\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"alerts-risk-inputs\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; \"risk-inputs\": ",
-          {
-            "pluginId": "@kbn/securitysolution-data-table",
-            "scope": "common",
-            "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableEntityType",
-            "text": "TableEntityType"
-          },
+          "TableEntityType",
           "; }"
         ],
         "path": "x-pack/solutions/security/packages/data_table/common/types/data_table/index.ts",
@@ -1881,5 +1709,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

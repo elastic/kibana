@@ -17,6 +17,7 @@ import {
   MessageRole,
   isChatCompletionChunkEvent,
   isChatCompletionTokenCountEvent,
+  InferenceConnectorType,
 } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import { InferenceExecutor } from '../../utils/inference_executor';
@@ -61,6 +62,14 @@ describe('inferenceAdapter', () => {
   beforeEach(() => {
     executorMock.invoke.mockReset();
     isNativeFunctionCallingSupportedMock.mockReset().mockReturnValue(true);
+    executorMock.getConnector.mockReset().mockImplementation(() => {
+      return {
+        type: InferenceConnectorType.Inference,
+        name: 'inference connector',
+        connectorId: '.id',
+        config: {},
+      };
+    });
   });
 
   const defaultArgs = {

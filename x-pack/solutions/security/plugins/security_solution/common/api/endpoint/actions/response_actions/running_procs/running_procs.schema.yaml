@@ -28,4 +28,4 @@ components:
   schemas:
     GetProcessesRouteRequestBody:
       allOf:
-        - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/NoParametersRequestSchema'
+        - $ref: '../../../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'

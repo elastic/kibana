@@ -15,45 +15,16 @@ export default ({ getPageObjects }: FtrProviderContext) => {
   describe('Findings Page onboarding', function () {
     this.tags(['cloud_security_posture_findings_onboarding']);
     let findings: typeof PageObjects.findings;
-    let notInstalledVulnerabilities: typeof findings.notInstalledVulnerabilities;
     let notInstalledCSP: typeof findings.notInstalledCSP;
     let thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt: typeof findings.thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt;
-    let thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt: typeof findings.thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt;
 
     beforeEach(async () => {
       findings = PageObjects.findings;
-      notInstalledVulnerabilities = findings.notInstalledVulnerabilities;
       notInstalledCSP = findings.notInstalledCSP;
       thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt =
         findings.thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt;
-      thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt =
-        findings.thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt;
 
       await findings.waitForPluginInitialized();
-    });
-
-    it('Vulnerabilities - clicking on the `No integrations installed` prompt action button - `install CNVM`: navigates to the CNVM integration installation page', async () => {
-      await findings.navigateToLatestVulnerabilitiesPage();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const element = await notInstalledVulnerabilities.getElement();
-      expect(element).to.not.be(null);
-
-      await notInstalledVulnerabilities.navigateToAction('cnvm-not-installed-action');
-
-      await PageObjects.common.waitUntilUrlIncludes('add-integration/vuln_mgmt');
-    });
-
-    it('Vulnerabilities - clicking on the `Third party integrations` prompt action button - `Wiz Integration`: navigates to the Wiz integration installation page', async () => {
-      await findings.navigateToLatestVulnerabilitiesPage();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const element = await thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt.getElement();
-      expect(element).to.not.be(null);
-
-      await thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt.navigateToAction(
-        '3p-no-vulnerabilities-findings-prompt-wiz-integration-button'
-      );
-
-      await PageObjects.common.waitUntilUrlIncludes('fleet/integrations/wiz/add-integration');
     });
 
     it('Misconfigurations - clicking on the `No integrations installed` prompt action button - `install cloud posture integration`: navigates to the CSPM integration installation page', async () => {

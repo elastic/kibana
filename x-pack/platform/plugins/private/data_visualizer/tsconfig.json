@@ -83,7 +83,8 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/presentation-containers",
     "@kbn/react-kibana-mount",
-    "@kbn/core-ui-settings-browser"
+    "@kbn/core-ui-settings-browser",
+    "@kbn/file-upload-common"
   ],
   "exclude": [
     "target/**/*",

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
+
 import type { FeaturesPrivileges } from './features_privileges';
 
 export interface RoleIndexPrivilege {
@@ -54,4 +56,12 @@ export interface Role {
   };
   _transform_error?: string[];
   _unrecognized_applications?: string[];
+}
+
+export type QueryRolesRole = estypes.SecurityQueryRoleQueryRole;
+
+export interface QueryRolesResult {
+  roles: Role[];
+  count: number;
+  total: number;
 }

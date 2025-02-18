@@ -10,6 +10,7 @@ import { SecurityPageName } from '@kbn/security-solution-plugin/common';
 import {
   UPGRADE_INVESTIGATION_GUIDE,
   UPGRADE_INVESTIGATION_GUIDE_INTERACTIONS,
+  UPGRADE_PREBUILT_RULE_CUSTOMIZATION,
 } from '@kbn/security-solution-upselling/messages';
 import type {
   UpsellingMessageId,
@@ -160,6 +161,13 @@ export const upsellingMessages: UpsellingMessages = [
     pli: ProductFeatureKey.investigationGuideInteractions,
     message: UPGRADE_INVESTIGATION_GUIDE_INTERACTIONS(
       getProductTypeByPLI(ProductFeatureKey.investigationGuideInteractions) ?? ''
+    ),
+  },
+  {
+    id: 'prebuilt_rule_customization',
+    pli: ProductFeatureKey.prebuiltRuleCustomization,
+    message: UPGRADE_PREBUILT_RULE_CUSTOMIZATION(
+      getProductTypeByPLI(ProductFeatureKey.prebuiltRuleCustomization) ?? ''
     ),
   },
 ];
