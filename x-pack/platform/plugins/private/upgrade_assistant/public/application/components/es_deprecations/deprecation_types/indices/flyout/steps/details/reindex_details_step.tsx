@@ -36,7 +36,10 @@ import { FrozenCallOut } from '../frozen_callout';
 import type { UpdateIndexState } from '../../../use_update_index';
 import { FetchFailedCallOut } from '../fetch_failed_callout';
 import { ReindexingFailedCallOut } from '../reindexing_failed_callout';
+import { MlAnomalyGuidance } from './ml_anomaly_guidance';
 import { ESTransformsTargetGuidance } from './es_transform_target_guidance';
+
+const ML_ANOMALIES_PREFIX = '.ml-anomalies-';
 
 /**
  * Displays a flyout that shows the details / corrective action for a "reindex" deprecation for a given index.
@@ -72,8 +75,24 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   const hasReindexingFailed = reindexStatus === ReindexStatus.failed;
   const correctiveAction = deprecation.correctiveAction as ReindexAction | undefined;
   const isESTransformTarget = !!correctiveAction?.transformIds?.length;
+  const isMLAnomalyIndex = Boolean(indexName?.startsWith(ML_ANOMALIES_PREFIX));
 
   const { data: nodes } = api.useLoadNodeDiskSpace();
+
+  let showEsTransformsGuidance = false;
+  let showMlAnomalyReindexingGuidance = false;
+  let showReadOnlyGuidance = false;
+  let showDefaultGuidance = false;
+
+  if (isESTransformTarget) {
+    showEsTransformsGuidance = true;
+  } else if (meta.isReadonly) {
+    showReadOnlyGuidance = true;
+  } else if (isMLAnomalyIndex) {
+    showMlAnomalyReindexingGuidance = true;
+  } else {
+    showDefaultGuidance = true;
+  }
 
   return (
     <Fragment>
@@ -144,7 +163,9 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
         {meta.isFrozen && <FrozenCallOut />}
 
         <EuiText>
-          {meta.isReadonly && (
+          {showEsTransformsGuidance && <ESTransformsTargetGuidance deprecation={deprecation} />}
+          {showMlAnomalyReindexingGuidance && <MlAnomalyGuidance />}
+          {showReadOnlyGuidance && (
             <Fragment>
               <p>
                 <FormattedMessage
@@ -160,8 +181,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
               </p>
             </Fragment>
           )}
-          {isESTransformTarget && <ESTransformsTargetGuidance deprecation={deprecation} />}
-          {!meta.isReadonly && !isESTransformTarget && (
+          {showDefaultGuidance && (
             <Fragment>
               <p>
                 <FormattedMessage
