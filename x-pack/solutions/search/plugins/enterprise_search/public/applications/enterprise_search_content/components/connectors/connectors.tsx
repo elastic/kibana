@@ -26,9 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { LEARN_MORE_LINK } from '../../../shared/constants';
 import { KibanaLogic } from '../../../shared/kibana';
 import { handlePageChange } from '../../../shared/table_pagination';
-import {
-  NEW_INDEX_SELECT_CONNECTOR_PATH,
-} from '../../routes';
+import { NEW_INDEX_SELECT_CONNECTOR_PATH } from '../../routes';
 import { EnterpriseSearchContentPageTemplate } from '../layout';
 
 import { DefaultSettingsFlyout } from '../settings/default_settings_flyout';
