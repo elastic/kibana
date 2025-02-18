@@ -34,16 +34,17 @@ const streamsAppRoutes = {
     ),
     children: {
       '/{key}': {
-        element: <Outlet />,
+        element: (
+          <RedirectTo path="/{key}/{tab}" params={{ path: { tab: 'overview' } }}>
+            <Outlet />
+          </RedirectTo>
+        ),
         params: t.type({
           path: t.type({
             key: t.string,
           }),
         }),
         children: {
-          '/{key}': {
-            element: <RedirectTo path="/{key}/{tab}" params={{ path: { tab: 'overview' } }} />,
-          },
           '/{key}/management': {
             element: (
               <RedirectTo
