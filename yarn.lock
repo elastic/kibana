@@ -7673,7 +7673,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/streams-schema@link:x-pack/solutions/observability/packages/kbn-streams-schema":
+"@kbn/streams-schema@link:x-pack/platform/packages/shared/kbn-streams-schema":
   version "0.0.0"
   uid ""
 
