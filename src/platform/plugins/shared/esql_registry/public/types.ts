@@ -12,6 +12,6 @@ interface RecommendedQueries {
   query: string;
 }
 
-export interface ESQLEditorOverrides {
+export interface ESQLEditorExtensions {
   recommendedQueries?: RecommendedQueries[];
 }

@@ -124,8 +124,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     esqlRegistry,
   } = kibana.services;
 
-  console.log(esqlRegistry.getOverride('logs*'));
-
   const variablesService = kibana.services?.esql?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(query.esql ?? '');
@@ -484,8 +482,8 @@ export const ESQLEditor = memo(function ESQLEditor({
         return variablesService?.areSuggestionsEnabled ?? false;
       },
       getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
-      getRecommendedQueriesByIndexPattern: (indexPattern: string) => {
-        return esqlRegistry.getOverride(indexPattern);
+      getEditorExtensions: (indexPattern: string) => {
+        return esqlRegistry.getExtension(indexPattern);
       },
     };
     return callbacks;

@@ -7,32 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type ESQLEditorOverrides } from './types';
+import { type ESQLEditorExtensions } from './types';
 
 export class ESQLEditorRegistry {
-  private registry: Map<string, ESQLEditorOverrides>;
+  private registry: Map<string, ESQLEditorExtensions>;
 
   constructor() {
     this.registry = new Map();
   }
 
-  // Set overrides for a specific index pattern
-  setOverride(indexPattern: string, overrides: ESQLEditorOverrides) {
-    this.registry.set(indexPattern, overrides);
+  // Sets extensions for a specific index pattern
+  setExtension(indexPattern: string, extensions: ESQLEditorExtensions) {
+    if (!this.registry.has(indexPattern)) {
+      this.registry.set(indexPattern, extensions);
+    }
   }
 
-  // Get overrides for a specific index pattern
-  getOverride(indexPattern: string): ESQLEditorOverrides | undefined {
+  // Get extensions for a specific index pattern
+  getExtension(indexPattern: string): ESQLEditorExtensions | undefined {
     return this.registry.get(indexPattern);
   }
 
-  // Remove overrides for a specific index pattern
-  deleteOverride(indexPattern: string): boolean {
-    return this.registry.delete(indexPattern);
+  extensionExists(indexPattern: string): boolean {
+    return this.registry.has(indexPattern);
   }
 
-  // Get all overrides (for debugging or UI purposes)
-  getAllOverrides(): Record<string, ESQLEditorOverrides> {
+  // Get all extensions (for debugging or UI purposes)
+  getAllExtensions(): Record<string, ESQLEditorExtensions> {
     return Object.fromEntries(this.registry);
   }
 }

@@ -70,10 +70,11 @@ export async function suggest({
   }
   // FROM something /
   else if (indexes.length > 0 && /\s$/.test(innerText) && !isRestartingExpression(innerText)) {
+    const indexPattern = indexes[0].index ?? '';
     suggestions.push(buildOptionDefinition(metadataOption));
     suggestions.push(commaCompleteItem);
     suggestions.push(pipeCompleteItem);
-    suggestions.push(...(await getRecommendedQueriesSuggestions()));
+    suggestions.push(...(await getRecommendedQueriesSuggestions(indexPattern)));
   }
   // FROM something MET/
   else if (
@@ -88,8 +89,7 @@ export async function suggest({
   // FROM something, /
   else if (indexes.length) {
     const sources = await getSources();
-
-    const recommendedQuerySuggestions = await getRecommendedQueriesSuggestions();
+    const recommendedQuerySuggestions = await getRecommendedQueriesSuggestions('');
 
     const suggestionsToAdd = await handleFragment(
       innerText,

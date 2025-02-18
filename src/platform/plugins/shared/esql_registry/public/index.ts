@@ -14,3 +14,4 @@ export function plugin() {
 }
 
 export type { ESQLEditorRegistry } from './esql_editor_registry';
+export type { ESQLEditorExtensions } from './types';

@@ -7,16 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Plugin, CoreSetup } from '@kbn/core/public';
+import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import { ESQLEditorRegistry } from './esql_editor_registry';
 
 export class ESQLRegistryPlugin implements Plugin<{}, void> {
   private registry: ESQLEditorRegistry = new ESQLEditorRegistry();
+
   public setup(_: CoreSetup, {}: {}) {
     return {};
   }
 
-  public start(): ESQLEditorRegistry {
+  public start(core: CoreStart): ESQLEditorRegistry {
+    core.chrome.getActiveSolutionNavId$().subscribe((solutionNavId) => {
+      if (solutionNavId === 'oblt') {
+        // Register overrides temporary here
+        this.registry.setExtension('logs*', {
+          recommendedQueries: [
+            {
+              name: 'Logs count by log level',
+              query: '| STATS count(*) by log_level',
+            },
+            {
+              name: 'Redis logs',
+              query:
+                '| WHERE container.id.keyword IS NOT NULL | WHERE MATCH(kubernetes.pod.name, "redis")',
+            },
+            {
+              name: 'OOMKilled logs',
+              query: '| WHERE MATCH(message, "OOMKilled")',
+            },
+          ],
+        });
+      }
+    });
     return this.registry;
   }
 

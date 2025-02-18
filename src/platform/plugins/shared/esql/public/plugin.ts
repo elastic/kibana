@@ -76,26 +76,6 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
   ): EsqlPluginStart {
     const storage = new Storage(localStorage);
 
-    // Register overrides temporary here
-    // it should be set by each solution
-    esqlRegistry.setOverride('logs*', {
-      recommendedQueries: [
-        {
-          name: 'Logs count by log level',
-          query: 'FROM logs-* | STATS count(*) by log_level',
-        },
-        {
-          name: 'Redis logs',
-          query:
-            'FROM logs-* | WHERE container.id.keyword IS NOT NULL | WHERE MATCH(kubernetes.pod.name, "redis")',
-        },
-        {
-          name: 'OOMKilled logs',
-          query: 'FROM logs-* | WHERE MATCH(message, "OOMKilled")',
-        },
-      ],
-    });
-
     // Register triggers
     const appendESQLAction = new UpdateESQLQueryAction(data);
 

@@ -38,3 +38,20 @@ export const getRecommendedQueriesSuggestions = async (
 
   return suggestions;
 };
+
+export const mapRecommendedQueriesFromRegistry = (
+  recommendedQueriesExtensions: Array<{ name: string; query: string }>,
+  fromCommand: string = ''
+) => {
+  const suggestions: SuggestionRawDefinition[] = recommendedQueriesExtensions.map((extension) => {
+    return {
+      label: extension.name,
+      text: `${fromCommand}\n${extension.query}`,
+      detail: '',
+      kind: 'Issue',
+      sortText: 'D',
+    };
+  });
+
+  return suggestions;
+};

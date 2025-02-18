@@ -105,7 +105,10 @@ import {
 } from './helper';
 import { FunctionParameter, isParameterType } from '../definitions/types';
 import { comparisonFunctions } from '../definitions/builtin';
-import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
+import {
+  getRecommendedQueriesSuggestions,
+  mapRecommendedQueriesFromRegistry,
+} from './recommended_queries/suggestions';
 
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
@@ -174,6 +177,7 @@ export async function suggest(
   const getVariablesByType = resourceRetriever?.getVariablesByType;
   const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
+  const getEditorExtensions = resourceRetriever?.getEditorExtensions;
 
   if (astContext.type === 'newCommand') {
     // propose main commands here
@@ -183,18 +187,23 @@ export async function suggest(
       // Display the recommended queries if there are no commands (empty state)
       const recommendedQueriesSuggestions: SuggestionRawDefinition[] = [];
       if (getSources) {
-        let fromCommand = '';
+        let fromSource = '';
         const sources = await getSources();
         const visibleSources = sources.filter((source) => !source.hidden);
         if (visibleSources.find((source) => source.name.startsWith('logs'))) {
-          fromCommand = 'FROM logs*';
-        } else fromCommand = `FROM ${visibleSources[0].name}`;
+          fromSource = 'logs*';
+        } else fromSource = visibleSources[0]?.name ?? '';
+
+        const fromCommand = `FROM ${fromSource}`;
+        const recommendedQueriesExtensions =
+          getEditorExtensions?.(fromSource)?.recommendedQueries ?? [];
 
         const { getFieldsByType: getFieldsByTypeEmptyState } = getFieldsByTypeRetriever(
           fromCommand,
           resourceRetriever
         );
         recommendedQueriesSuggestions.push(
+          ...mapRecommendedQueriesFromRegistry(recommendedQueriesExtensions, fromCommand),
           ...(await getRecommendedQueriesSuggestions(getFieldsByTypeEmptyState, fromCommand))
         );
       }
@@ -402,6 +411,15 @@ async function getSuggestionsWithinCommandExpression(
 ) {
   const commandDef = getCommandDefinition(command.name);
 
+  const getRecommendedQueries = async (indexPattern: string, prefix: string = '') => {
+    const recommendedQueriesExtensions =
+      callbacks?.getEditorExtensions?.(indexPattern)?.recommendedQueries ?? [];
+    return [
+      ...mapRecommendedQueriesFromRegistry(recommendedQueriesExtensions, prefix),
+      ...(await getRecommendedQueriesSuggestions(getColumnsByType, prefix)),
+    ];
+  };
+
   // collect all fields + variables to suggest
   const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
   const anyVariables = collectVariables(commands, fieldsMap, innerText);
@@ -420,8 +438,8 @@ async function getSuggestionsWithinCommandExpression(
       getPreferences,
       definition: commandDef,
       getSources,
-      getRecommendedQueriesSuggestions: (prefix) =>
-        getRecommendedQueriesSuggestions(getColumnsByType, prefix),
+      getRecommendedQueriesSuggestions: (indexPattern, prefix) =>
+        getRecommendedQueries(indexPattern, prefix),
       getSourcesFromQuery: (type) => getSourcesFromCommands(commands, type),
       previousCommands: commands,
       callbacks,
