@@ -7,13 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
-import { NamedFieldDefinitionConfig, WiredStreamGetResponse } from '@kbn/streams-schema';
+import {
+  NamedFieldDefinitionConfig,
+  WiredStreamGetResponse,
+  getAdvancedParameters,
+} from '@kbn/streams-schema';
 import { isEqual, omit } from 'lodash';
 import { useMemo, useCallback } from 'react';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { SchemaField, isSchemaFieldTyped } from '../types';
 import { convertToFieldDefinitionConfig } from '../utils';
+import { getFormattedError } from '../../../util/errors';
 
 export const useSchemaFields = ({
   definition,
@@ -41,11 +46,11 @@ export const useSchemaFields = ({
     refresh: refreshUnmappedFields,
   } = useStreamsAppFetch(
     ({ signal }) => {
-      return streamsRepositoryClient.fetch('GET /api/streams/{id}/schema/unmapped_fields', {
+      return streamsRepositoryClient.fetch('GET /api/streams/{name}/schema/unmapped_fields', {
         signal,
         params: {
           path: {
-            id: definition.stream.name,
+            name: definition.stream.name,
           },
         },
       });
@@ -59,6 +64,7 @@ export const useSchemaFields = ({
         name,
         type: field.type,
         format: field.format,
+        additionalParameters: getAdvancedParameters(name, field),
         parent: field.from,
         status: 'inherited',
       })
@@ -69,6 +75,7 @@ export const useSchemaFields = ({
         name,
         type: field.type,
         format: field.format,
+        additionalParameters: getAdvancedParameters(name, field),
         parent: definition.stream.name,
         status: 'mapped',
       })
@@ -103,11 +110,11 @@ export const useSchemaFields = ({
           throw new Error('The field is not different, hence updating is not necessary.');
         }
 
-        await streamsRepositoryClient.fetch(`PUT /api/streams/{id}/_ingest`, {
+        await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest`, {
           signal: abortController.signal,
           params: {
             path: {
-              id: definition.stream.name,
+              name: definition.stream.name,
             },
             body: {
               ingest: {
@@ -132,12 +139,12 @@ export const useSchemaFields = ({
 
         refreshFields();
       } catch (error) {
-        toasts.addError(error, {
+        toasts.addError(new Error(error.body.message), {
           title: i18n.translate('xpack.streams.streamDetailSchemaEditorEditErrorToast', {
             defaultMessage: 'Something went wrong editing the {field} field',
             values: { field: field.name },
           }),
-          toastMessage: error.message,
+          toastMessage: getFormattedError(error).message,
           toastLifeTimeMs: 5000,
         });
       }
@@ -154,11 +161,11 @@ export const useSchemaFields = ({
           throw new Error('The field is not mapped, hence it cannot be unmapped.');
         }
 
-        await streamsRepositoryClient.fetch(`PUT /api/streams/{id}/_ingest`, {
+        await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest`, {
           signal: abortController.signal,
           params: {
             path: {
-              id: definition.stream.name,
+              name: definition.stream.name,
             },
             body: {
               ingest: {
@@ -185,7 +192,7 @@ export const useSchemaFields = ({
             defaultMessage: 'Something went wrong unmapping the {field} field',
             values: { field: fieldName },
           }),
-          toastMessage: error.message,
+          toastMessage: getFormattedError(error).message,
           toastLifeTimeMs: 5000,
         });
       }
