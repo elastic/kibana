@@ -204,13 +204,6 @@ const DimensionContainerStyles = {
       position: absolute;
       top: 0 !important;
     }
-
-    .lnsFrameLayout__sidebar-isFullscreen & {
-      border-left: ${
-        euiThemeContext.euiTheme.border.thin
-      }; // Force border regardless of theme in fullscreen
-      box-shadow: none;
-    }
   `;
   },
   header: ({ euiTheme }: UseEuiTheme) => css`

@@ -8,7 +8,7 @@
 import './workspace_panel_wrapper.scss';
 
 import React, { useCallback } from 'react';
-import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton, useEuiTheme } from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartSizeSpec } from '@kbn/chart-expressions-common';
@@ -123,6 +123,7 @@ export function WorkspacePanelWrapper({
   displayOptions,
 }: WorkspacePanelWrapperProps) {
   const dispatchLens = useLensDispatch();
+  const { euiTheme } = useEuiTheme();
 
   const changesApplied = useLensSelector(selectChangesApplied);
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
@@ -176,9 +177,12 @@ export function WorkspacePanelWrapper({
             alignItems="flexEnd"
             gutterSize="s"
             direction="row"
-            className={classNames('lnsWorkspacePanelWrapper__toolbar', {
+            className={classNames({
               'lnsWorkspacePanelWrapper__toolbar--fullscreen': isFullscreen,
             })}
+            css={css`
+              margin-bottom: ${euiTheme.size.xs};
+            `}
             responsive={false}
           >
             {!isFullscreen && (
@@ -237,7 +241,14 @@ export function WorkspacePanelWrapper({
         className={classNames('lnsWorkspacePanelWrapper stretch-for-sharing', {
           'lnsWorkspacePanelWrapper--fullscreen': isFullscreen,
         })}
-        css={{ height: '100%' }}
+        css={css`
+          height: 100%;
+          .lnsWorkspacePanelWrapper__content {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+          }
+          `}
         color="transparent"
       >
         <EuiFlexGroup

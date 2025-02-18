@@ -8,10 +8,11 @@
 import './frame_layout.scss';
 
 import React from 'react';
-import { EuiScreenReaderOnly, EuiFlexGroup, EuiFlexItem, EuiPage, EuiPageBody } from '@elastic/eui';
+import { EuiScreenReaderOnly, EuiFlexGroup, EuiFlexItem, EuiPage, EuiPageBody, useEuiTheme, euiBreakpoint } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { useLensSelector, selectIsFullscreenDatasource } from '../../state_management';
+import { css } from '@emotion/react';
 
 export interface FrameLayoutProps {
   dataPanel: React.ReactNode;
@@ -23,6 +24,7 @@ export interface FrameLayoutProps {
 
 export function FrameLayout(props: FrameLayoutProps) {
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
+  const euiTheme = useEuiTheme();
 
   return (
     <EuiFlexGroup direction="column" responsive={false} gutterSize="none" alignItems="stretch">
@@ -40,12 +42,27 @@ export function FrameLayout(props: FrameLayoutProps) {
           </aside>
         </EuiFlexItem>
       ) : null}
-      <EuiFlexItem grow={true} className="lnsFrameLayout__wrapper">
+      <EuiFlexItem grow={true} css={css`position: relative`}>
         <EuiPage
           paddingSize="none"
-          className={classNames('lnsFrameLayout', {
-            'lnsFrameLayout-isFullscreen': isFullscreen,
-          })}
+          css={css`
+            padding: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            overflow: hidden;
+            flex-direction: column;
+            ${euiBreakpoint(euiTheme, ['xs', 's', 'm'])} {
+              position: static;
+            }
+            ${isFullscreen && `.lnsFrameLayout__sidebar--left {
+              // Hide the datapanel in fullscreen mode. Using display: none does trigger
+              // a rerender when the container becomes visible again, maybe pushing offscreen is better
+              display: none;
+            }`} 
+          `}
         >
           <EuiPageBody
             restrictWidth={false}
@@ -84,6 +101,7 @@ export function FrameLayout(props: FrameLayoutProps) {
               </div>
             </section>
             <section
+              css={css`${isFullscreen && `flex: 1; max-width: none;`}`}
               className={classNames(
                 'lnsFrameLayout__sidebar lnsFrameLayout__sidebar--right',
                 'hide-for-sharing',
