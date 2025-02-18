@@ -226,7 +226,7 @@ const routes = {
                   </RouteBreadcrumb>
                 ),
                 params: t.type({
-                  query: t.partial({ pageIndex: toNumberRt }),
+                  query: t.partial({ pageIndex: toNumberRt, searchFunctionName: t.string }),
                 }),
               },
               '/functions/differential': {
@@ -257,6 +257,7 @@ const routes = {
                       baseline: toNumberRt,
                       comparison: toNumberRt,
                       pageIndex: toNumberRt,
+                      searchFunctionName: t.string,
                     }),
                   ]),
                 }),
