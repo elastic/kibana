@@ -15,7 +15,6 @@ interface Props {
   slo: SLOWithSummaryResponse;
   maxValue?: number | null;
   minValue?: number | null;
-  annotation?: React.ReactNode;
 }
 
 export function TimesliceAnnotation({ slo, maxValue, minValue }: Props) {

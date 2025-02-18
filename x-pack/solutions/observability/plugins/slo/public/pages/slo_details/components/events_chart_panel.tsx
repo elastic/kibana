@@ -67,11 +67,11 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
       </EuiTitle>
     );
 
-  const values = (data || []).map((row) => {
+  const values = (data ?? []).map((row) => {
     if (slo.indicator.type === 'sli.metric.timeslice') {
       return row.sliValue;
     } else {
-      return row?.events?.total || 0;
+      return row?.events?.total ?? 0;
     }
   });
   const maxValue = max(values);
@@ -130,7 +130,7 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
           {slo.indicator.type !== 'sli.metric.timeslice' ? (
             <GoodBadEventsChart
               isLoading={isLoading}
-              data={data || []}
+              data={data}
               annotation={annotation}
               slo={slo}
               onBrushed={onBrushed}
@@ -144,6 +144,7 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
               {!isLoading && (
                 <EventsAreaChart
                   slo={slo}
+                  data={data}
                   annotation={annotation}
                   minValue={minValue}
                   maxValue={maxValue}

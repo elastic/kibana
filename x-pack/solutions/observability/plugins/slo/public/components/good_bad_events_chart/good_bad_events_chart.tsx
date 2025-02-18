@@ -28,7 +28,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { openInDiscover } from '../../utils/slo/get_discover_link';
 
 export interface Props {
-  data: GetPreviewDataResponse;
+  data?: GetPreviewDataResponse;
   slo?: SLOWithSummaryResponse;
   annotation?: React.ReactNode;
   isLoading?: boolean;

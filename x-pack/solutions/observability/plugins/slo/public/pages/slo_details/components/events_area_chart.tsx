@@ -90,7 +90,6 @@ export function EventsAreaChart({
         })}
       />
       {annotation}
-
       <Axis
         id="bottom"
         position={Position.Bottom}
