@@ -15,6 +15,7 @@ import {
 } from '@kbn/unified-search-plugin/public';
 
 import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import { css } from '@emotion/react';
 import {
   changeIndexPattern,
   onDropToDimension,
@@ -39,7 +40,6 @@ import {
   registerLibraryAnnotationGroup,
 } from '../../../state_management';
 import { getRemoveOperation } from '../../../utils';
-import { css } from '@emotion/react';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
   const visualization = useLensSelector(selectVisualization);
@@ -256,15 +256,19 @@ export function LayerPanels(
   const hideAddLayerButton = query && isOfAggregateQueryType(query);
 
   return (
-    <EuiForm className="eui-yScroll" css={css`
-      padding: $euiSize $euiSize $euiSizeXL ($euiFormMaxWidth + $euiSize);
-      padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl} calc(400px + ${euiTheme.size.base});
-      margin-left: -400px;
-      ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
-        padding-left: ${euiTheme.size.base};
-        margin-left: 0;
-      }
-    `}>
+    <EuiForm
+      className="eui-yScroll"
+      css={css`
+        padding: $euiSize $euiSize $euiSizeXL ($euiFormMaxWidth + $euiSize);
+        padding: ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.xl}
+          calc(400px + ${euiTheme.size.base});
+        margin-left: -400px;
+        ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
+          padding-left: ${euiTheme.size.base};
+          margin-left: 0;
+        }
+      `}
+    >
       {layerIds.map((layerId, layerIndex) => {
         const { hidden, groups } = activeVisualization.getConfiguration({
           layerId,

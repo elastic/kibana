@@ -98,9 +98,7 @@ export function VisualizationToolbar(props: {
   return (
     <>
       {ToolbarComponent && (
-        <EuiFlexItem
-          grow={false}
-        >
+        <EuiFlexItem grow={false}>
           {ToolbarComponent({
             frame: props.framePublicAPI,
             state: visualization.state,
@@ -248,7 +246,7 @@ export function WorkspacePanelWrapper({
             height: 100%;
             position: absolute;
           }
-          `}
+        `}
         color="transparent"
       >
         <EuiFlexGroup
