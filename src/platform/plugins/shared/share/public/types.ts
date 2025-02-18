@@ -137,7 +137,6 @@ type LinkShareUIConfig = ShareActionUserInputBase<{
 }>;
 
 type EmbedShareUIConfig = ShareActionUserInputBase<{
-  allowEmbed: boolean;
   embedUrlParamExtensions?: UrlParamExtension[];
   computeAnonymousCapabilities?: (anonymousUserCapabilities: Capabilities) => boolean;
   /**
@@ -249,14 +248,6 @@ export interface ShareContextMenuPanelItem
   sortOrder?: number;
 }
 
-// we don't need this
-// export type SupportedExportTypes =
-//   | 'pngV2'
-//   | 'printablePdfV2'
-//   | 'csv_v2'
-//   | 'csv_searchsource'
-//   | 'lens_csv';
-
 /**
  * @public
  * Definition of a menu item rendered in the share menu. In the redesign, the
@@ -276,36 +267,6 @@ export interface ScreenshotExportOpts {
   optimizedForPrinting?: boolean;
   intl: InjectedIntl;
 }
-
-// export interface ShareMenuItemV2 extends ShareMenuItemBase {
-//   // extended props to support share modal
-//   label: 'PDF' | 'CSV' | 'PNG';
-//   // reportType?: SupportedExportTypes;
-//   requiresSavedState?: boolean;
-//   helpText?: ReactElement;
-//   copyURLButton?: { id: string; dataTestSubj: string; label: string };
-//   generateExportButton?: ReactElement;
-//   /**
-//    * Function to trigger an export
-//    */
-//   generateExport: (args: ScreenshotExportOpts) => Promise<unknown>;
-//   /**
-//    * Function to generate a URL to be used for automating export
-//    * Not applicable for exports that do not call a remote API (i.e Lens CSV export)
-//    */
-//   generateExportUrl?: (args: ScreenshotExportOpts) => string | undefined;
-//   theme?: ThemeServiceSetup;
-//   renderLayoutOptionSwitch?: boolean;
-//   layoutOption?: 'print';
-//   generateCopyUrl?: URL;
-//   renderCopyURLButton?: boolean;
-//   warnings?: Array<{ title: string; message: string }>;
-// }
-
-// export interface ShareMenuProviderV2 {
-//   readonly id: string;
-//   getShareMenuItems: (context: ShareContext) => ShareMenuItemV2[];
-// }
 
 export interface ShareMenuProviderLegacy {
   readonly id: string;
