@@ -84,7 +84,7 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
             error={
               conflictError
                 ? i18n.translate('xpack.searchSynonyms.createSynonymsSetModal.nameErrorText', {
-                    defaultMessage: 'A synonym with id {name} already exists.',
+                    defaultMessage: 'A synonym set with id {name} already exists.',
                     values: { name },
                   })
                 : undefined
