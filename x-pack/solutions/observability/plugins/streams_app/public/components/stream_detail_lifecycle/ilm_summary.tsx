@@ -283,7 +283,7 @@ function phasesDescriptions(phases: IlmPolicyPhases) {
     descriptions.push({
       name: 'indefinite',
       description: i18n.translate('xpack.streams.streamDetailLifecycle.noRetentionDescription', {
-        defaultMessage: 'Data is stored indefinitely',
+        defaultMessage: 'Data is stored indefinitely.',
       }),
       icon: 'infinity',
     });
