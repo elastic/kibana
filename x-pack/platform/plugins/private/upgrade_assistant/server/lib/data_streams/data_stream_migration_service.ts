@@ -182,20 +182,20 @@ export const dataStreamMigrationServiceFactory = ({
           );
         }
 
-        if (taskResponse.complete) {
-          // Check that no failures occurred
-          if (taskResponse.errors.length) {
-            // Include the entire task result in the error message. This should be guaranteed
-            // to be JSON-serializable since it just came back from Elasticsearch.
-            throw error.reindexTaskFailed(
-              `Reindexing failed with ${taskResponse.errors.length} errors:\n${JSON.stringify(
-                taskResponse,
-                null,
-                2
-              )}`
-            );
-          }
+        // Propagate errors from the reindex task even if reindexing is not yet complete.
+        if (taskResponse.errors.length) {
+          // Include the entire task result in the error message. This should be guaranteed
+          // to be JSON-serializable since it just came back from Elasticsearch.
+          throw error.reindexTaskFailed(
+            `Reindexing failed with ${taskResponse.errors.length} errors:\n${JSON.stringify(
+              taskResponse,
+              null,
+              2
+            )}`
+          );
+        }
 
+        if (taskResponse.complete) {
           // Update the status
           return {
             taskPercComplete: 1,
