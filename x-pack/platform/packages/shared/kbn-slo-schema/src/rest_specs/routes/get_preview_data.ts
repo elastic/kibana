@@ -6,7 +6,7 @@
  */
 import * as t from 'io-ts';
 import { indicatorSchema, objectiveSchema } from '../../schema';
-import { allOrAnyStringOrArray, dateType } from '../../schema/common';
+import { dateType, groupingsSchema } from '../../schema/common';
 
 const getPreviewDataParamsSchema = t.type({
   body: t.intersection([
@@ -19,10 +19,8 @@ const getPreviewDataParamsSchema = t.type({
     }),
     t.partial({
       objective: objectiveSchema,
-      instanceId: t.string,
-      groupBy: allOrAnyStringOrArray,
       remoteName: t.string,
-      groupings: t.record(t.string, t.unknown),
+      groupings: groupingsSchema,
     }),
   ]),
 });

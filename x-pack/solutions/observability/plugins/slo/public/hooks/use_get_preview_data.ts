@@ -20,10 +20,8 @@ export interface UseGetPreviewData {
 
 interface Props {
   isValid: boolean;
-  groupBy?: string | string[];
-  instanceId?: string;
   remoteName?: string;
-  groupings?: Record<string, unknown>;
+  groupings?: Record<string, string | number>;
   objective?: Objective;
   indicator: Indicator;
   range: {
@@ -37,9 +35,7 @@ export function useGetPreviewData({
   range,
   indicator,
   objective,
-  groupBy,
   groupings,
-  instanceId,
   remoteName,
 }: Props): UseGetPreviewData {
   const { sloClient } = usePluginContext();
@@ -55,11 +51,9 @@ export function useGetPreviewData({
               from: range.from.toISOString(),
               to: range.to.toISOString(),
             },
-            groupBy,
-            instanceId,
             groupings,
             remoteName,
-            ...(objective ? { objective } : null),
+            ...(!!objective && { objective }),
           },
         },
         signal,

@@ -5,35 +5,34 @@
  * 2.0.
  */
 
+import { estypes } from '@elastic/elasticsearch';
 import { calculateAuto } from '@kbn/calculate-auto';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import {
   ALL_VALUE,
   APMTransactionErrorRateIndicator,
-  SyntheticsAvailabilityIndicator,
   GetPreviewDataParams,
   GetPreviewDataResponse,
   HistogramIndicator,
   KQLCustomIndicator,
   MetricCustomIndicator,
+  SyntheticsAvailabilityIndicator,
   TimesliceMetricIndicator,
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { estypes } from '@elastic/elasticsearch';
-import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
-import { getElasticsearchQueryOrThrow } from './transform_generators';
-
-import { buildParamValues } from './transform_generators/synthetics_availability';
-import { typedSearch } from '../utils/queries';
+import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
 import { APMTransactionDurationIndicator } from '../domain/models';
 import { computeSLIForPreview } from '../domain/services';
+import { typedSearch } from '../utils/queries';
 import {
   GetCustomMetricIndicatorAggregation,
   GetHistogramIndicatorAggregation,
   GetTimesliceMetricIndicatorAggregation,
 } from './aggregations';
-import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
+import { getElasticsearchQueryOrThrow } from './transform_generators';
+import { buildParamValues } from './transform_generators/synthetics_availability';
 
 interface Options {
   range: {
@@ -41,9 +40,7 @@ interface Options {
     end: number;
   };
   interval: string;
-  instanceId?: string;
   remoteName?: string;
-  groupBy?: string | string[];
   groupings?: Record<string, unknown>;
 }
 export class GetPreviewData {
@@ -535,19 +532,8 @@ export class GetPreviewData {
 
   private getGroupingFilters(options: Options): estypes.QueryDslQueryContainer[] | undefined {
     const groupingsKeys = Object.keys(options.groupings ?? {});
-
-    // Probably used from the good vs bad events chart where we know the current groupings
-    // We should probably be ok with only using groupings which contains key and value...
-    // and remove the instanceId/GroupBy code path.
     if (groupingsKeys.length) {
       return groupingsKeys.map((key) => ({ term: { [key]: options.groupings![key] } }));
-    }
-
-    if (options.instanceId && options.instanceId !== ALL_VALUE && options.groupBy) {
-      const instanceIdPart = options.instanceId.split(',');
-      const groupByPart = [options.groupBy].flat();
-      if (instanceIdPart.length !== groupByPart.length) return undefined;
-      return groupByPart.map((groupBy, index) => ({ term: { [groupBy]: instanceIdPart[index] } }));
     }
   }
 
@@ -654,18 +640,15 @@ export class GetPreviewData {
       // they've breached the threshold.
       const rangeDuration = moment(params.range.to).diff(params.range.from, 'ms');
       const bucketSize =
-        params.indicator.type === 'sli.metric.timeslice' &&
-        rangeDuration <= 86_400_000 &&
-        params.objective?.timesliceWindow
+        rangeDuration <= 86_400_000 && params.objective?.timesliceWindow
           ? params.objective.timesliceWindow.asMinutes()
           : Math.max(
               calculateAuto.near(100, moment.duration(rangeDuration, 'ms'))?.asMinutes() ?? 0,
               1
             );
+
       const options: Options = {
-        instanceId: params.instanceId,
         range: { start: params.range.from.getTime(), end: params.range.to.getTime() },
-        groupBy: params.groupBy,
         remoteName: params.remoteName,
         groupings: params.groupings,
         interval: `${bucketSize}m`,
