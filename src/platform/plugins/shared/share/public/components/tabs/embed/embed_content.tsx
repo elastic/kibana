@@ -35,7 +35,6 @@ type EmbedProps = Pick<
   | 'shareableUrlLocatorParams'
   | 'shareableUrlForSavedObject'
   | 'shareableUrl'
-  | 'embedUrlParamExtensions'
   | 'objectType'
   | 'isDirty'
   | 'allowShortUrl'
@@ -52,7 +51,6 @@ interface UrlParams {
 }
 
 export const EmbedContent = ({
-  embedUrlParamExtensions: urlParamExtensions,
   shareableUrlForSavedObject,
   shareableUrl,
   shareableUrlLocatorParams,
@@ -74,7 +72,11 @@ export const EmbedContent = ({
   const [showPublicUrlSwitch, setShowPublicUrlSwitch] = useState(false);
   const copiedTextToolTipCleanupIdRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const { draftModeCallOut: DraftModeCallout, computeAnonymousCapabilities } = objectConfig;
+  const {
+    draftModeCallOut: DraftModeCallout,
+    computeAnonymousCapabilities,
+    embedUrlParamExtensions: urlParamExtensions,
+  } = objectConfig;
 
   useEffect(() => {
     if (computeAnonymousCapabilities && anonymousAccess) {

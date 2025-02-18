@@ -75,8 +75,9 @@ export class ShareRegistry implements ShareRegistryApi {
   private registerEmbedShareAction(): void {
     this.registerShareIntentAction(this.globalMarker, {
       shareType: 'embed',
-      config: ({ urlService }) => ({
-        shortUrlService: urlService?.shortUrls.get(null)!,
+      config: ({ urlService, anonymousAccessServiceProvider }) => ({
+        anonymousAccess: anonymousAccessServiceProvider!(),
+        shortUrlService: urlService.shortUrls.get(null),
       }),
     });
   }
@@ -86,6 +87,10 @@ export class ShareRegistry implements ShareRegistryApi {
    */
   register(value: ShareMenuProviderLegacy) {
     // implement backwards compatibility for the share plugin
+    this.registerShareIntentAction(this.globalMarker, {
+      shareType: 'integration',
+      config: value.getShareMenuItemsLegacy,
+    });
   }
 
   registerShareIntegration<I extends ShareIntegration>(
