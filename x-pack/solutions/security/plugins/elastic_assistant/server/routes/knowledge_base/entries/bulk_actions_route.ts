@@ -209,7 +209,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
             return checkResponse.response;
           }
 
-          console.error('a')
+          console.error('a');
 
           logger.debug(
             () =>
@@ -229,7 +229,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
             });
           }
 
-          console.error('b')
+          console.error('b');
 
           const abortController = new AbortController();
 
@@ -252,7 +252,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
             });
           }
 
-          console.error('c')
+          console.error('c');
 
           await validateDocumentsModification(
             kbDataClient,
@@ -260,7 +260,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
             body.delete?.ids ?? [],
             'delete'
           );
-          console.error('2')
+          console.error('2');
           await validateDocumentsModification(
             kbDataClient,
             authenticatedUser,
@@ -268,20 +268,23 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
             'update'
           );
 
-          console.error('d')
-          
+          console.error('d');
+
           const writer = await kbDataClient?.getWriter();
           const changedAt = new Date().toISOString();
-          
-                    console.error('docs', body.create?.map((entry) =>
-                      transformToCreateSchema({
-                        createdAt: changedAt,
-                        spaceId,
-                        user: authenticatedUser,
-                        entry,
-                        global: entry.users != null && entry.users.length === 0,
-                      })
-                    ),)
+
+          console.error(
+            'docs',
+            body.create?.map((entry) =>
+              transformToCreateSchema({
+                createdAt: changedAt,
+                spaceId,
+                user: authenticatedUser,
+                entry,
+                global: entry.users != null && entry.users.length === 0,
+              })
+            )
+          );
           const {
             errors,
             docs_created: docsCreated,
@@ -319,7 +322,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
                 })
               : undefined;
 
-              console.error('e', docsCreated)
+          console.error('e', docsCreated);
           return buildBulkResponse(
             response,
             {

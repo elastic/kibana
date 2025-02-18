@@ -62,7 +62,7 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     params: BulkParams<TUpdateParams, TCreateParams>
   ) => {
     try {
-      console.error('bulk')
+      console.error('bulk');
       if (
         !params.documentsToCreate?.length &&
         !params.documentsToUpdate?.length &&
@@ -81,9 +81,8 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
           requestTimeout: 120000,
         }
       );
-      
 
-      console.error('errors', errors, items, took)
+      console.error('errors', errors, items, took);
 
       return {
         errors: errors ? this.formatErrorsResponse(items) : [],
