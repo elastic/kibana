@@ -87,11 +87,12 @@ export function StreamDetailEnrichmentContent({
 
   const confirmTooltip = isNonAdditiveSimulation
     ? {
-        title: i18n.translate('xpack.streams.streamDetailView.nonAdditiveProcessorsTooltip.title', {
-          defaultMessage: 'Non additive simulation detected',
-        }),
+        title: i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.nonAdditiveProcessorsTooltip.title',
+          { defaultMessage: 'Non additive simulation detected' }
+        ),
         content: i18n.translate(
-          'xpack.streams.streamDetailView.nonAdditiveProcessorsTooltip.content',
+          'xpack.streams.streamDetailView.managementTab.enrichment.nonAdditiveProcessorsTooltip.content',
           {
             defaultMessage:
               'We currently prevent adding processors that change/remove existing data. Please update your processor configurations to continue.',

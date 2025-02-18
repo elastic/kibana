@@ -45,9 +45,6 @@ const streamsAppRoutes = {
           }),
         }),
         children: {
-          // '/{key}': {
-          //   element: <RedirectTo path="/{key}/{tab}" params={{ path: { tab: 'overview' } }} />,
-          // },
           '/{key}/management': {
             element: (
               <RedirectTo

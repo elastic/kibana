@@ -154,7 +154,7 @@ export const useProcessingSimulator = ({
   } = useStreamsAppFetch(
     ({ signal }): Promise<Simulation> => {
       if (!definition || isEmpty<FlattenRecord[]>(sampleDocs) || isEmpty(liveDraftProcessors)) {
-        // This is a hack to avoid loosing the previous value of the simulation once the conditions are not met. The state management refactor will fix this.
+        // This is a hack to avoid losing the previous value of the simulation once the conditions are not met. The state management refactor will fix this.
         return Promise.resolve(simulation!);
       }
 
@@ -166,7 +166,7 @@ export const useProcessingSimulator = ({
 
       // Each processor should meet the minimum schema requirements to run the simulation
       if (!hasValidProcessors) {
-        // This is a hack to avoid loosing the previous value of the simulation once the conditions are not met. The state management refactor will fix this.
+        // This is a hack to avoid losing the previous value of the simulation once the conditions are not met. The state management refactor will fix this.
         return Promise.resolve(simulation!);
       }
 

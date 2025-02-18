@@ -337,7 +337,7 @@ const conditionallyExecuteIngestSimulation = async (
  * 2. Compute the diff between the sample document and the simulation document to detect added fields and non-additive changes.
  * 3. Track the detected fields and errors for each processor.
  *
- * To keep this process the at O(n) complexity, we iterate over the documents and processors only once.
+ * To keep this process at the O(n) complexity, we iterate over the documents and processors only once.
  * This requires a closure on the processor metrics map to keep track of the processor state while iterating over the documents.
  */
 const computePipelineSimulationResult = (

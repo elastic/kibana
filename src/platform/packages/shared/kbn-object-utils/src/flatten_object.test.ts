@@ -10,7 +10,7 @@
 import { flattenObject } from './flatten_object';
 
 describe('flattenObject', () => {
-  it('should flat nested object properties', () => {
+  it('should flatten nested object properties', () => {
     const flattened = flattenObject({
       alpha: {
         gamma: {
