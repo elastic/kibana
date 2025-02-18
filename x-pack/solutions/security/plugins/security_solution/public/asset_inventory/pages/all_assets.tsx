@@ -142,12 +142,13 @@ export interface AllAssetsProps {
   'data-test-subj'?: string;
 }
 
+// TODO: Asset Inventory - adjust and remove type casting once we have real universal entity data
 const getEntity = (row: DataTableRecord): EntityEcs => {
   return {
     id: (row.flattened['asset.name'] as string) || '',
     name: (row.flattened['asset.name'] as string) || '',
     timestamp: row.flattened['@timestamp'] as Date,
-    type: (row.flattened['asset.type'] as string) || '',
+    type: 'universal',
   };
 };
 

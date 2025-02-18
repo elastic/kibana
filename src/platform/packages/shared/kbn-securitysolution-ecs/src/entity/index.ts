@@ -11,6 +11,6 @@
 export interface EntityEcs {
   id: string;
   name: string;
-  type: 'user' | 'host' | 'service';
+  type: 'universal' | 'user' | 'host' | 'service';
   timestamp: Date;
 }
