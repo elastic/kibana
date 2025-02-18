@@ -9,15 +9,15 @@ import type { ColumnarViewModel } from '@elastic/charts';
 import { memoize, sumBy } from 'lodash';
 import { lighten, parseToRgb } from 'polished';
 import seedrandom from 'seedrandom';
-import type { CriticalPathResponse } from '../../../../server/routes/traces/get_aggregated_critical_path';
 import type { CriticalPathTreeNode } from '../../../../common/critical_path/get_aggregated_critical_path_root_nodes';
 import { getAggregatedCriticalPathRootNodes } from '../../../../common/critical_path/get_aggregated_critical_path_root_nodes';
+import type { CriticalPathMetadata } from '../../../../common/critical_path/types';
 
 const lightenColor = lighten(0.2);
 
 export function criticalPathToFlamegraph(
   params: {
-    criticalPath: CriticalPathResponse;
+    criticalPath: CriticalPathMetadata;
     colors: string[];
   } & ({ serviceName: string; transactionName: string } | {})
 ): {
@@ -54,9 +54,9 @@ export function criticalPathToFlamegraph(
   let index = 0;
 
   const availableColors: Array<[number, number, number, number]> = colors.map((vizColor) => {
-    const rgb = parseToRgb(lightenColor(vizColor));
+    const rgb = parseToRgb(vizColor);
 
-    return [rgb.red / 255, rgb.green / 255, rgb.blue / 255, 1];
+    return [rgb.red / 255, rgb.green / 255, rgb.blue / 255, rgb.blue];
   });
 
   const pickColor = memoize((identifier: string) => {
@@ -67,7 +67,7 @@ export function criticalPathToFlamegraph(
   function addNodeToFlamegraph(node: CriticalPathTreeNode, x: number, y: number) {
     let nodeOperationId: string;
     let nodeLabel: string;
-    let operationMetadata: CriticalPathResponse['metadata'][string] | undefined;
+    let operationMetadata: CriticalPathMetadata['metadata'][string] | undefined;
     if (node.nodeId === 'root') {
       nodeOperationId = '';
       nodeLabel = 'root';

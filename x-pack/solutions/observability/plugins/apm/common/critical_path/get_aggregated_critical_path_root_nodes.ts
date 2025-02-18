@@ -6,7 +6,7 @@
  */
 
 import { sumBy } from 'lodash';
-import type { CriticalPathResponse } from '../../server/routes/traces/get_aggregated_critical_path';
+import type { CriticalPathMetadata } from './types';
 
 export interface CriticalPathTreeNode {
   nodeId: string;
@@ -16,7 +16,7 @@ export interface CriticalPathTreeNode {
 }
 
 export function getAggregatedCriticalPathRootNodes(params: {
-  criticalPath: CriticalPathResponse;
+  criticalPath: CriticalPathMetadata;
 }): {
   rootNodes: CriticalPathTreeNode[];
   maxDepth: number;

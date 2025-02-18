@@ -13,9 +13,10 @@ import { uniqueId } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useFetcher, isPending } from '../../../hooks/use_fetcher';
+import { isPending } from '../../../hooks/use_fetcher';
 import { CriticalPathFlamegraphTooltip } from './critical_path_flamegraph_tooltip';
 import { criticalPathToFlamegraph } from './critical_path_to_flamegraph';
+import { useCriticalPath } from './use_critical_path_flamegraph';
 
 const chartClassName = css`
   flex-grow: 1;
@@ -30,6 +31,7 @@ export function CriticalPathFlamegraph(
     onLoadTable?: () => void;
   } & ({ serviceName: string; transactionName: string } | {})
 ) {
+  const [hasTableLoaded, setHasTableLoaded] = useState(false);
   const { start, end, traceIds, traceIdsFetchStatus, onLoadTable } = props;
 
   const serviceName = 'serviceName' in props ? props.serviceName : null;
@@ -41,29 +43,15 @@ export function CriticalPathFlamegraph(
   // of the search.
   const timerange = useRef({ start, end });
   timerange.current = { start, end };
-  const [hasTableLoaded, setHasTableLoaded] = useState(false);
 
-  const { data: { criticalPath } = { criticalPath: null }, status: criticalPathFetchStatus } =
-    useFetcher(
-      (callApmApi) => {
-        if (!traceIds.length) {
-          return Promise.resolve({ criticalPath: null });
-        }
-
-        return callApmApi('POST /internal/apm/traces/aggregated_critical_path', {
-          params: {
-            body: {
-              start: timerange.current.start,
-              end: timerange.current.end,
-              traceIds,
-              serviceName,
-              transactionName,
-            },
-          },
-        });
-      },
-      [timerange, traceIds, serviceName, transactionName]
-    );
+  const { data: criticalPath, status: criticalPathFetchStatus } = useCriticalPath({
+    end: timerange.current.end,
+    start: timerange.current.start,
+    traceIds,
+    serviceName,
+    transactionName,
+    traceIdsFetchStatus,
+  });
 
   useEffect(() => {
     if (
@@ -92,7 +80,7 @@ export function CriticalPathFlamegraph(
       return undefined;
     }
 
-    const colors = euiPaletteColorBlind({});
+    const colors = euiPaletteColorBlind();
 
     const flamegraph = criticalPathToFlamegraph({
       criticalPath,
