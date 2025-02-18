@@ -5,20 +5,12 @@
  * 2.0.
  */
 
-import {
-  IngestStreamDefinition,
-  findInheritedLifecycle,
-  isIlmLifecycle,
-  isIngestStreamDefinition,
-  isInheritLifecycle,
-  isUnwiredStreamDefinition,
-} from '@kbn/streams-schema';
+import { isIlmLifecycle, isIngestStreamDefinition } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { createServerRoute } from '../../create_server_route';
-import { StreamsClient } from '../../../lib/streams/client';
-import { getDataStreamLifecycle } from '../../../lib/streams/stream_crud';
-import { ilmStats } from '../../../lib/streams/lifecycle/ilm_stats';
+import { ilmPhases } from '../../../lib/streams/lifecycle/ilm_phases';
+import { getEffectiveLifecycle } from '../../../lib/streams/lifecycle/get_effective_lifecycle';
+import { StatusError } from '../../../lib/streams/errors/status_error';
 
 const lifecycleStatsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/lifecycle/_stats',
@@ -35,23 +27,23 @@ const lifecycleStatsRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
   }),
-  handler: async ({ params, request, server, getScopedClients }) => {
+  handler: async ({ params, request, server: { isServerless }, getScopedClients }) => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const name = params.path.name;
 
     const definition = await streamsClient.getStream(name);
     if (!isIngestStreamDefinition(definition)) {
-      throw new Error('Lifecycle stats are only available for ingest streams');
+      throw new StatusError('Lifecycle stats are only available for ingest streams', 400);
     }
 
     const dataStream = await streamsClient.getDataStream(name);
     const lifecycle = await getEffectiveLifecycle({ definition, streamsClient, dataStream });
     if (!isIlmLifecycle(lifecycle)) {
-      throw new Error('Lifecycle stats are only available for ILM');
+      throw new StatusError('Lifecycle stats are only available for ILM policy', 400);
     }
 
-    if (server.isServerless) {
-      throw new Error('Lifecycle stats are not supported in serverless');
+    if (isServerless) {
+      throw new StatusError('Lifecycle stats are not supported in serverless', 400);
     }
 
     const { policy } = await scopedClusterClient.asCurrentUser.ilm
@@ -66,30 +58,9 @@ const lifecycleStatsRoute = createServerRoute({
       }),
     ]);
 
-    return ilmStats({ policy, indicesIlmDetails, indicesStats });
+    return { phases: ilmPhases({ policy, indicesIlmDetails, indicesStats }) };
   },
 });
-
-const getEffectiveLifecycle = async ({
-  definition,
-  streamsClient,
-  dataStream,
-}: {
-  definition: IngestStreamDefinition;
-  streamsClient: StreamsClient;
-  dataStream: IndicesDataStream;
-}) => {
-  if (isUnwiredStreamDefinition(definition)) {
-    return getDataStreamLifecycle(dataStream);
-  }
-
-  if (isInheritLifecycle(definition.ingest.lifecycle)) {
-    const ancestors = await streamsClient.getAncestors(definition.name);
-    return findInheritedLifecycle(definition, ancestors);
-  }
-
-  return definition.ingest.lifecycle;
-};
 
 export const lifecycleRoutes = {
   ...lifecycleStatsRoute,

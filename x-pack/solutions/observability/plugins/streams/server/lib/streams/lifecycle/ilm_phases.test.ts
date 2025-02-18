@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ilmStats } from './ilm_stats';
+import { ilmPhases } from './ilm_phases';
 
 describe('lifecycle helpers', () => {
   describe('ilmStats', () => {
     it('aggregates size of each phase', () => {
-      const stats = ilmStats({
+      const stats = ilmPhases({
         policy: {
           phases: {
             hot: {},
@@ -78,7 +78,7 @@ describe('lifecycle helpers', () => {
     });
 
     it('only aggregates managed indices', () => {
-      const stats = ilmStats({
+      const stats = ilmPhases({
         policy: {
           phases: {
             hot: {},

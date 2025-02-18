@@ -108,7 +108,7 @@ export function IlmSummary({
   const phasesWithGrow = useMemo(() => {
     if (!value) return undefined;
 
-    const orderedPhases = orderIlmPhases(value);
+    const orderedPhases = orderIlmPhases(value.phases);
     const totalDuration = parseDurationInSeconds(last(orderedPhases)!.min_age);
 
     return orderedPhases.map((phase, index, phases) => {
@@ -165,7 +165,7 @@ export function IlmSummary({
 
       <EuiSpacer size="m" />
 
-      <PhasesLegend phases={value} />
+      <PhasesLegend phases={value?.phases} />
     </EuiFlexGroup>
   );
 }

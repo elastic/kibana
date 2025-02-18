@@ -14,7 +14,7 @@ import {
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
 
-export function ilmStats({
+export function ilmPhases({
   policy,
   indicesIlmDetails,
   indicesStats,
