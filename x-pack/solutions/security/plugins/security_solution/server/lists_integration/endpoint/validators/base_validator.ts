@@ -11,6 +11,7 @@ import { isEqual } from 'lodash/fp';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { OperatingSystem } from '@kbn/securitysolution-utils';
 
+import { setArtifactOwnerSpaceId } from '../../../../common/endpoint/service/artifacts/utils';
 import type { FeatureKeys } from '../../../endpoint/services';
 import type { EndpointAuthz } from '../../../../common/endpoint/types/authz';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
@@ -195,5 +196,26 @@ export class BaseValidator {
     }
 
     return false;
+  }
+
+  /**
+   * Update the artifact item (if necessary) with a `ownerSpaceId` tag using the HTTP request's active space
+   * @param item
+   * @protected
+   */
+  protected async setOwnerSpaceId(
+    item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
+  ): Promise<void> {
+    if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+      if (!this.request) {
+        throw new EndpointArtifactExceptionValidationError(
+          'Unable to determine space id. Missing HTTP Request object',
+          500
+        );
+      }
+
+      const spaceId = (await this.endpointAppContext.getActiveSpace(this.request)).id;
+      setArtifactOwnerSpaceId(item, spaceId);
+    }
   }
 }
