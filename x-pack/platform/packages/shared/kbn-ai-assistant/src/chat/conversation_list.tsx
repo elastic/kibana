@@ -156,7 +156,6 @@ export function ConversationList({
                           size="s"
                           isActive={conversation.id === selectedConversationId}
                           isDisabled={isLoading}
-                          wrapText
                           showToolTip
                           href={conversation.href}
                           onClick={(event) => onClickConversation(event, conversation.id)}

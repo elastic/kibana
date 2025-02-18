@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useEffect, useState } from 'react';
 import {
   EuiButtonIcon,
@@ -23,6 +24,8 @@ import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { ChatActionsMenu } from './chat_actions_menu';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { FlyoutPositionMode } from './chat_flyout';
+import { ChatSharingMenu } from './chat_sharing_menu';
+import { ChatContextMenu } from './chat_context_menu';
 
 // needed to prevent InlineTextEdit component from expanding container
 const minWidthClassName = css`
@@ -87,7 +90,7 @@ export function ChatHeader({
       className={breakpoint === 'xs' ? chatHeaderMobileClassName : chatHeaderClassName}
       hasBorder={false}
       hasShadow={false}
-      paddingSize={breakpoint === 'xs' ? 's' : 'm'}
+      paddingSize="s"
     >
       <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
         <EuiFlexItem grow={false}>
@@ -98,113 +101,139 @@ export function ChatHeader({
           )}
         </EuiFlexItem>
 
-        <EuiFlexItem grow className={minWidthClassName}>
-          <EuiInlineEditTitle
-            heading="h2"
-            size={breakpoint === 'xs' ? 'xs' : 's'}
-            value={newTitle}
-            className={css`
-              color: ${!!title
-                ? theme.euiTheme.colors.textParagraph
-                : theme.euiTheme.colors.textSubdued};
-            `}
-            inputAriaLabel={i18n.translate('xpack.aiAssistant.chatHeader.editConversationInput', {
-              defaultMessage: 'Edit conversation',
-            })}
-            isReadOnly={
-              !conversationId ||
-              !connectors.selectedConnector ||
-              licenseInvalid ||
-              !Boolean(onSaveTitle)
-            }
-            onChange={(e) => {
-              setNewTitle(e.currentTarget.nodeValue || '');
-            }}
-            onSave={(e) => {
-              if (onSaveTitle) {
-                onSaveTitle(e);
-              }
-            }}
-            onCancel={() => {
-              setNewTitle(title);
-            }}
-          />
-        </EuiFlexItem>
+        <EuiFlexGroup
+          gutterSize="xs"
+          justifyContent="spaceBetween"
+          alignItems="center"
+          className={minWidthClassName}
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center" className={minWidthClassName}>
+            <EuiFlexItem grow={false} className={minWidthClassName}>
+              <EuiInlineEditTitle
+                heading="h2"
+                size={breakpoint === 'xs' ? 'xs' : 's'}
+                value={newTitle}
+                className={css`
+                  color: ${!!title
+                    ? theme.euiTheme.colors.textParagraph
+                    : theme.euiTheme.colors.textSubdued};
+                `}
+                inputAriaLabel={i18n.translate(
+                  'xpack.aiAssistant.chatHeader.editConversationInput',
+                  {
+                    defaultMessage: 'Edit conversation',
+                  }
+                )}
+                isReadOnly={
+                  !conversationId ||
+                  !connectors.selectedConnector ||
+                  licenseInvalid ||
+                  !Boolean(onSaveTitle)
+                }
+                onChange={(e) => {
+                  setNewTitle(e.currentTarget.nodeValue || '');
+                }}
+                onSave={onSaveTitle}
+                onCancel={() => {
+                  setNewTitle(title);
+                }}
+                editModeProps={{
+                  formRowProps: {
+                    fullWidth: true,
+                  },
+                }}
+              />
+            </EuiFlexItem>
 
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" responsive={false}>
-            {flyoutPositionMode && onToggleFlyoutPositionMode ? (
-              <>
-                <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    anchorPosition="downLeft"
-                    button={
-                      <EuiToolTip
-                        content={
-                          flyoutPositionMode === 'overlay'
-                            ? i18n.translate(
-                                'xpack.aiAssistant.chatHeader.euiToolTip.flyoutModeLabel.dock',
-                                { defaultMessage: 'Dock conversation' }
-                              )
-                            : i18n.translate(
-                                'xpack.aiAssistant.chatHeader.euiToolTip.flyoutModeLabel.undock',
-                                { defaultMessage: 'Undock conversation' }
-                              )
-                        }
-                        display="block"
-                      >
-                        <EuiButtonIcon
-                          aria-label={i18n.translate(
-                            'xpack.aiAssistant.chatHeader.euiButtonIcon.toggleFlyoutModeLabel',
-                            { defaultMessage: 'Toggle flyout mode' }
-                          )}
-                          data-test-subj="observabilityAiAssistantChatHeaderButton"
-                          iconType={flyoutPositionMode === 'overlay' ? 'menuRight' : 'menuLeft'}
-                          onClick={handleToggleFlyoutPositionMode}
-                        />
-                      </EuiToolTip>
-                    }
-                  />
-                </EuiFlexItem>
-                {navigateToConversation ? (
+            <EuiFlexItem grow={false}>
+              <ChatSharingMenu />
+            </EuiFlexItem>
+
+            {conversationId ? (
+              <EuiFlexItem grow={false}>
+                <ChatContextMenu
+                  onCopyConversationClick={onCopyConversation}
+                  disabled={licenseInvalid}
+                />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
+
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs" responsive={false}>
+              {flyoutPositionMode && onToggleFlyoutPositionMode ? (
+                <>
                   <EuiFlexItem grow={false}>
                     <EuiPopover
                       anchorPosition="downLeft"
                       button={
                         <EuiToolTip
-                          content={i18n.translate(
-                            'xpack.aiAssistant.chatHeader.euiToolTip.navigateToConversationsLabel',
-                            { defaultMessage: 'Navigate to conversations' }
-                          )}
+                          content={
+                            flyoutPositionMode === 'overlay'
+                              ? i18n.translate(
+                                  'xpack.aiAssistant.chatHeader.euiToolTip.flyoutModeLabel.dock',
+                                  { defaultMessage: 'Dock conversation' }
+                                )
+                              : i18n.translate(
+                                  'xpack.aiAssistant.chatHeader.euiToolTip.flyoutModeLabel.undock',
+                                  { defaultMessage: 'Undock conversation' }
+                                )
+                          }
                           display="block"
                         >
                           <EuiButtonIcon
                             aria-label={i18n.translate(
-                              'xpack.aiAssistant.chatHeader.euiButtonIcon.navigateToConversationsLabel',
-                              { defaultMessage: 'Navigate to conversations' }
+                              'xpack.aiAssistant.chatHeader.euiButtonIcon.toggleFlyoutModeLabel',
+                              { defaultMessage: 'Toggle flyout mode' }
                             )}
                             data-test-subj="observabilityAiAssistantChatHeaderButton"
-                            iconType="discuss"
-                            onClick={() => navigateToConversation(conversationId)}
+                            iconType={flyoutPositionMode === 'overlay' ? 'menuRight' : 'menuLeft'}
+                            onClick={handleToggleFlyoutPositionMode}
                           />
                         </EuiToolTip>
                       }
                     />
                   </EuiFlexItem>
-                ) : null}
-              </>
-            ) : null}
+                  {navigateToConversation ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiPopover
+                        anchorPosition="downLeft"
+                        button={
+                          <EuiToolTip
+                            content={i18n.translate(
+                              'xpack.aiAssistant.chatHeader.euiToolTip.navigateToConversationsLabel',
+                              { defaultMessage: 'Navigate to conversations' }
+                            )}
+                            display="block"
+                          >
+                            <EuiButtonIcon
+                              aria-label={i18n.translate(
+                                'xpack.aiAssistant.chatHeader.euiButtonIcon.navigateToConversationsLabel',
+                                { defaultMessage: 'Navigate to conversations' }
+                              )}
+                              data-test-subj="observabilityAiAssistantChatHeaderButton"
+                              iconType="discuss"
+                              onClick={() => navigateToConversation(conversationId)}
+                            />
+                          </EuiToolTip>
+                        }
+                      />
+                    </EuiFlexItem>
+                  ) : null}
+                </>
+              ) : null}
 
-            <EuiFlexItem grow={false}>
-              <ChatActionsMenu
-                connectors={connectors}
-                conversationId={conversationId}
-                disabled={licenseInvalid}
-                onCopyConversationClick={onCopyConversation}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <ChatActionsMenu
+                  connectors={connectors}
+                  conversationId={conversationId}
+                  disabled={licenseInvalid}
+                  onCopyConversationClick={onCopyConversation}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiPanel>
   );

@@ -131,16 +131,6 @@ export function ChatActionsMenu({
                 ),
                 panel: 1,
               },
-              {
-                name: i18n.translate('xpack.aiAssistant.chatHeader.actions.copyConversation', {
-                  defaultMessage: 'Copy conversation',
-                }),
-                disabled: !conversationId,
-                onClick: () => {
-                  toggleActionsMenu();
-                  onCopyConversationClick();
-                },
-              },
             ],
           },
           {

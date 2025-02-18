@@ -140,7 +140,7 @@ export function ChatBody({
   const chatService = useAIAssistantChatService();
 
   const {
-    services: { uiSettings },
+    services: { uiSettings, notifications },
   } = useKibana();
 
   const simulateFunctionCalling = uiSettings!.get<boolean>(
@@ -252,15 +252,58 @@ export function ChatBody({
   });
 
   const handleCopyConversation = () => {
-    const deserializedMessages = (conversation.value?.messages ?? messages).map(deserializeMessage);
+    try {
+      const deserializedMessages = (conversation.value?.messages ?? messages).map(
+        deserializeMessage
+      );
 
-    const content = JSON.stringify({
-      title: conversation.value?.conversation.title || initialTitle,
-      systemMessage: conversation.value?.systemMessage,
-      messages: deserializedMessages,
-    });
+      const content = JSON.stringify({
+        title: conversation.value?.conversation.title || initialTitle,
+        systemMessage: conversation.value?.systemMessage,
+        messages: deserializedMessages,
+      });
 
-    navigator.clipboard?.writeText(content || '');
+      navigator.clipboard?.writeText(content || '');
+
+      notifications!.toasts.addSuccess({
+        title: i18n.translate('xpack.aiAssistant.copyConversationSuccessToast', {
+          defaultMessage: 'Conversation copied to clipboard',
+        }),
+      });
+    } catch (error) {
+      notifications!.toasts.addError(error, {
+        title: i18n.translate('xpack.aiAssistant.copyConversationErrorToast', {
+          defaultMessage: 'Could not copy conversation',
+        }),
+      });
+    }
+  };
+
+  const handleCopyUrl = () => {
+    try {
+      const deserializedMessages = (conversation.value?.messages ?? messages).map(
+        deserializeMessage
+      );
+
+      const content = JSON.stringify({
+        title: initialTitle,
+        messages: deserializedMessages,
+      });
+
+      navigator.clipboard?.writeText(content || '');
+
+      notifications!.toasts.addSuccess({
+        title: i18n.translate('xpack.aiAssistant.copyUrlSuccessToast', {
+          defaultMessage: 'URL copied to clipboard',
+        }),
+      });
+    } catch (error) {
+      notifications!.toasts.addError(error, {
+        title: i18n.translate('xpack.aiAssistant.copyUrlErrorToast', {
+          defaultMessage: 'Could not copy URL',
+        }),
+      });
+    }
   };
 
   const handleActionClick = ({
