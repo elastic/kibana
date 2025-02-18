@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './src/create_observability_es_client';
+export * from './src/create_traced_es_client';

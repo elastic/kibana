@@ -80,7 +80,7 @@ export type EsqlQueryResponse = UnparsedEsqlResponse | ParsedEsqlResponse;
  * An Elasticsearch Client with a fully typed `search` method and built-in
  * APM instrumentation.
  */
-export interface ObservabilityElasticsearchClient {
+export interface TracedElasticsearchClient {
   search<TDocument = unknown, TSearchRequest extends SearchRequest = SearchRequest>(
     operationName: string,
     parameters: TSearchRequest
@@ -110,7 +110,7 @@ export interface ObservabilityElasticsearchClient {
   client: ElasticsearchClient;
 }
 
-export function createObservabilityEsClient({
+export function createTracedEsClient({
   client,
   logger,
   plugin,
@@ -120,7 +120,7 @@ export function createObservabilityEsClient({
   logger: Logger;
   plugin?: string;
   labels?: Record<string, string>;
-}): ObservabilityElasticsearchClient {
+}): TracedElasticsearchClient {
   // wraps the ES calls in a named APM span for better analysis
   // (otherwise it would just eg be a _search span)
   const callWithLogger = <T>(
