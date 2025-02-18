@@ -146,7 +146,7 @@ export function IngestionRate({
             <Axis
               id="bottom-axis"
               position="bottom"
-              tickFormat={(value) => moment(value).format('YYYY-MM-DD')}
+              tickFormat={(value) => moment(value).format('YYYY-MM-DD HH:mm:ss')}
               gridLine={{ visible: false }}
             />
             <Axis
