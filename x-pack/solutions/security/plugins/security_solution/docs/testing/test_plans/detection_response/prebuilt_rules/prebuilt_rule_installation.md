@@ -80,10 +80,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Assumptions
 
-- Below scenarios only apply to prebuilt detection rules.
-- Users should be able to install prebuilt rules on the `Basic` license and higher.
-- EPR is available for fetching the package unless explicitly indicated otherwise.
-- Only the latest **stable** package is checked for installation/upgrade and pre-release packages are ignored.
+- [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 
 ### Non-functional requirements
 
@@ -96,6 +93,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Functional requirements
 
+- Users should be able to install prebuilt rules on the `Basic` license and higher.
 - User should be able to install prebuilt rules with and without previewing what exactly they would install (rule properties).
 - If user chooses to preview a prebuilt rule to be installed/upgraded, we currently show this preview in a flyout.
 - In the prebuilt rule preview a tab that doesn't have any sections should not be displayed and a section that doesn't have any properties also should not be displayed.

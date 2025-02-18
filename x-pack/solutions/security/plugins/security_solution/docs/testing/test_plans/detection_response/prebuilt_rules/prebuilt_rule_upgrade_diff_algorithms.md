@@ -77,6 +77,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Assumptions
 
+- [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 - All scenarios will contain at least 1 prebuilt rule installed in Kibana.
 - A new version will be available for rule(s).
 

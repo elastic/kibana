@@ -87,7 +87,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Assumptions
 
-- Below scenarios only apply to prebuilt detection rules.
+- [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 - A prebuilt rule is shown in the Rule Upgrade table when there's a newer version of this rule in the currently installed package with prebuilt rules.
 
 ### Functional requirements

@@ -101,13 +101,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Assumptions
 
-- Below scenarios only apply to prebuilt detection rules.
-- EPR is available for fetching the package with prebuilt rules unless explicitly indicated otherwise.
-- Only the latest **stable** package is checked for installation/upgrade and pre-release packages are ignored.
-- Users have the required [privileges for managing detection rules](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html).
-- Users are:
-  - on the `Basic` license and higher in self-hosted and ECH environments;
-  - on the `Essentials` tier and higher in Serverless environments.
+- [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 
 ### Non-functional requirements
 

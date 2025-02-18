@@ -23,6 +23,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Tickets](#tickets)
   - [User stories](#user-stories)
   - [Terminology](#terminology)
+  - [Assumptions](#assumptions)
 - [Scenarios](#scenarios)
   - [Core Functionality](#core-functionality)
     - [Scenario: Importing an unmodified prebuilt rule with a matching rule\_id and version](#scenario-importing-an-unmodified-prebuilt-rule-with-a-matching-rule_id-and-version)
@@ -65,6 +66,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
 - **Rule source**, or **`ruleSource`**: a rule field that defines the rule's origin. Can be `internal` or `external`. Currently, custom rules have `internal` rule source and prebuilt rules have `external` rule source.
 - **`is_customized`**: a field within `ruleSource` that exists when rule source is set to `external`. It is a boolean value based on if the rule has been changed from its base version.
+
+### Assumptions
+
+- [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 
 ## Scenarios
 

@@ -47,10 +47,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Assumptions
 
-- Below scenarios only apply to prebuilt detection rules.
-- Users should be able to install and upgrade prebuilt rules on the `Basic` license and higher.
-- EPR is available for fetching the package unless explicitly indicated otherwise.
-- Only the latest **stable** package is checked for installation/upgrade and pre-release packages are ignored.
+- [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 
 ### Non-functional requirements
 
@@ -63,6 +60,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Functional requirements
 
+- Package should be installable and updatable:
+  - on any license in self-hosted and ECH environments;
+  - on any tier in Serverless Security environments;
+  - regardless of user privileges, as long as the user has access to Security Solution.
 - User should be able to install prebuilt rules with and without previewing what exactly they would install (rule properties).
 - User should be able to upgrade prebuilt rules with and without previewing what updates they would apply (rule properties of target rule versions).
 

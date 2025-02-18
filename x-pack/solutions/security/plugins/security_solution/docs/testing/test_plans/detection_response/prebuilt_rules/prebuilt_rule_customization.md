@@ -84,6 +84,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Assumptions
 
+- [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 - Rule package used will have all previous rule versions present (no missing base versions)
 
 ## Scenarios
