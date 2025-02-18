@@ -7345,7 +7345,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-storybook-config@link:packages/serverless/storybook/config":
+"@kbn/serverless-storybook-config@link:src/platform/packages/shared/serverless/storybook/config":
   version "0.0.0"
   uid ""
 

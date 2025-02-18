@@ -1495,7 +1495,7 @@
     "@kbn/scout-oblt": "link:x-pack/solutions/observability/packages/kbn-scout-oblt",
     "@kbn/scout-reporting": "link:packages/kbn-scout-reporting",
     "@kbn/security-api-integration-helpers": "link:x-pack/test/security_api_integration/packages/helpers",
-    "@kbn/serverless-storybook-config": "link:packages/serverless/storybook/config",
+    "@kbn/serverless-storybook-config": "link:src/platform/packages/shared/serverless/storybook/config",
     "@kbn/set-map": "link:packages/kbn-set-map",
     "@kbn/shared-ux-card-no-data-mocks": "link:src/platform/packages/shared/shared-ux/card/no_data/mocks",
     "@kbn/shared-ux-file-image-mocks": "link:src/platform/packages/shared/shared-ux/file/image/mocks",
