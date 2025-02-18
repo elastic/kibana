@@ -12,7 +12,7 @@ import { useTheme } from '../../../../hooks/use_theme';
 
 export const GRID_ITEM_HEADER_HEIGHT = 40;
 
-interface GridItemProps {
+export interface GridItemProps {
   id: string;
   title: string;
   children: React.ReactNode;
