@@ -37,9 +37,9 @@ import {
   StorageClientCleanResponse,
   ApplicationDocument,
   InternalIStorageClient,
-} from '..';
+} from '../..';
 import { getSchemaVersion } from '../get_schema_version';
-import { StorageMappingProperty } from '../types';
+import { StorageMappingProperty } from '../../types';
 
 function getAliasName(name: string) {
   return name;

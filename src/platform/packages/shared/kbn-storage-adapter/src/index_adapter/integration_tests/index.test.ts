@@ -18,7 +18,7 @@ import {
   StorageClientIndexResponse,
   StorageIndexAdapter,
   type StorageSettings,
-} from '../..';
+} from '../../..';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import * as getSchemaVersionModule from '../../get_schema_version';

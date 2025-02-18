@@ -11,7 +11,7 @@ import {
   DocumentAnalysis,
   TruncatedDocumentAnalysis,
 } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
-import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { ObservabilityElasticsearchClient } from '@kbn/traced-es-client';
 import { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
 import {
   analyzeFetchedRelatedEntities,

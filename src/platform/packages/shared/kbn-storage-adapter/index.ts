@@ -154,6 +154,6 @@ export type StorageDocumentOf<TStorageSettings extends StorageSettings> = Storag
   properties: TStorageSettings['schema']['properties'];
 }> & { _id: string };
 
-export { StorageIndexAdapter } from './index_adapter';
+export { StorageIndexAdapter } from './src/index_adapter';
 
 export { types } from './types';

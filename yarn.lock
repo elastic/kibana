@@ -7801,6 +7801,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/traced-es-client@link:src/platform/packages/shared/kbn-traced-es-client":
+  version "0.0.0"
+  uid ""
+
 "@kbn/transform-plugin@link:x-pack/platform/plugins/private/transform":
   version "0.0.0"
   uid ""

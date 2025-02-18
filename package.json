@@ -954,6 +954,7 @@
     "@kbn/timelion-grammar": "link:src/platform/packages/private/kbn-timelion-grammar",
     "@kbn/timerange": "link:src/platform/packages/shared/kbn-timerange",
     "@kbn/tinymath": "link:src/platform/packages/private/kbn-tinymath",
+    "@kbn/traced-es-client": "link:src/platform/packages/shared/kbn-traced-es-client",
     "@kbn/transform-plugin": "link:x-pack/platform/plugins/private/transform",
     "@kbn/translations-plugin": "link:x-pack/platform/plugins/private/translations",
     "@kbn/transpose-utils": "link:src/platform/packages/private/kbn-transpose-utils",
