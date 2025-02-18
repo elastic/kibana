@@ -38,10 +38,38 @@ export default ({ getService }: FtrProviderContext) => {
     } as Job;
   }
 
-  function getDatafeedConfig(jobId: string) {
+  function getJobConfigWithByField(jobId: string) {
+    return {
+      job_id: jobId,
+      description:
+        'count by geoip.city_name partition=day_of_week on ecommerce dataset with 1h bucket span',
+      analysis_config: {
+        bucket_span: '1h',
+        influencers: ['geoip.city_name', 'day_of_week'],
+        detectors: [
+          {
+            function: 'count',
+            by_field_name: 'geoip.city_name',
+            partition_field_name: 'day_of_week',
+          },
+        ],
+      },
+      data_description: {
+        time_field: 'order_date',
+        time_format: 'epoch_ms',
+      },
+      analysis_limits: {
+        model_memory_limit: '11mb',
+        categorization_examples_limit: 4,
+      },
+      model_plot_config: { enabled: false },
+    } as Job;
+  }
+
+  function getDatafeedConfig(jobId: string, indices: string[]) {
     return {
       datafeed_id: `datafeed-${jobId}`,
-      indices: ['ft_farequote'],
+      indices,
       job_id: jobId,
       query: { bool: { must: [{ match_all: {} }] } },
     } as Datafeed;
@@ -50,12 +78,17 @@ export default ({ getService }: FtrProviderContext) => {
   async function createMockJobs() {
     await ml.api.createAndRunAnomalyDetectionLookbackJob(
       getJobConfig('fq_multi_1_ae'),
-      getDatafeedConfig('fq_multi_1_ae')
+      getDatafeedConfig('fq_multi_1_ae', ['ft_farequote'])
     );
 
     await ml.api.createAndRunAnomalyDetectionLookbackJob(
       getJobConfig('fq_multi_2_ae', false),
-      getDatafeedConfig('fq_multi_2_ae')
+      getDatafeedConfig('fq_multi_2_ae', ['ft_farequote'])
+    );
+
+    await ml.api.createAndRunAnomalyDetectionLookbackJob(
+      getJobConfigWithByField('ecommerce_advanced_1'),
+      getDatafeedConfig('ecommerce_advanced_1', ['ft_ecommerce'])
     );
   }
 
@@ -72,6 +105,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('PartitionFieldsValues', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await createMockJobs();
     });
@@ -227,6 +261,64 @@ export default ({ getService }: FtrProviderContext) => {
 
         const body = await runRequest(requestBody);
         expect(body.partition_field.values.length).to.eql(19);
+      });
+    });
+
+    describe('cross filtering', () => {
+      it('should return filtered values for by_field when partition_field is set', async () => {
+        const requestBody = {
+          jobId: 'ecommerce_advanced_1',
+          criteriaFields: [{ fieldName: 'detector_index', fieldValue: 0 }],
+          earliestMs: 1687968000000, // June 28, 2023 16:00:00 GMT
+          latestMs: 1688140800000, // June 30, 2023 16:00:00 GMT
+          searchTerm: {},
+          fieldsConfig: {
+            by_field: {
+              anomalousOnly: true,
+              applyTimeRange: true,
+              sort: { order: 'desc', by: 'anomaly_score' },
+            },
+            partition_field: {
+              anomalousOnly: true,
+              applyTimeRange: true,
+              sort: { order: 'desc', by: 'anomaly_score' },
+              value: 'Saturday',
+            },
+          },
+        };
+        const body = await runRequest(requestBody);
+
+        expect(body.by_field.values.length).to.eql(1);
+        expect(body.by_field.values[0].value).to.eql('Abu Dhabi');
+      });
+
+      it('should return filtered values for partition_field when by_field is set', async () => {
+        const requestBody = {
+          jobId: 'ecommerce_advanced_1',
+          criteriaFields: [{ fieldName: 'detector_index', fieldValue: 0 }],
+          earliestMs: 1687968000000, // June 28, 2023 16:00:00 GMT
+          latestMs: 1688140800000, // June 30, 2023 16:00:00 GMT
+          searchTerm: {},
+          fieldsConfig: {
+            by_field: {
+              anomalousOnly: true,
+              applyTimeRange: true,
+              sort: { order: 'desc', by: 'anomaly_score' },
+              value: 'Abu Dhabi',
+            },
+            partition_field: {
+              anomalousOnly: true,
+              applyTimeRange: true,
+              sort: { order: 'desc', by: 'anomaly_score' },
+            },
+          },
+        };
+
+        const body = await runRequest(requestBody);
+
+        expect(body.partition_field.values.length).to.eql(2);
+        expect(body.partition_field.values[0].value).to.eql('Saturday');
+        expect(body.partition_field.values[1].value).to.eql('Monday');
       });
     });
   });

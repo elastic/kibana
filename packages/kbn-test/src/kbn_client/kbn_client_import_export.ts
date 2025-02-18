@@ -55,7 +55,7 @@ export class KbnClientImportExport {
     return absolutePath;
   }
 
-  async load(path: string, options?: { space?: string }) {
+  async load(path: string, options?: { space?: string; createNewCopies?: boolean }) {
     const src = this.resolveAndValidatePath(path);
     this.log.debug('resolved import for', path, 'to', src);
 
@@ -65,19 +65,20 @@ export class KbnClientImportExport {
     const formData = new FormData();
     formData.append('file', objects.map((obj) => JSON.stringify(obj)).join('\n'), 'import.ndjson');
 
+    const query = options?.createNewCopies ? { createNewCopies: true } : { overwrite: true };
+
     // TODO: should we clear out the existing saved objects?
     const resp = await this.req<ImportApiResponse>(options?.space, {
       method: 'POST',
       path: '/api/saved_objects/_import',
-      query: {
-        overwrite: true,
-      },
+      query,
       body: formData,
       headers: formData.getHeaders(),
     });
 
     if (resp.data.success) {
       this.log.success('import success');
+      return resp.data;
     } else {
       throw createFailError(
         `failed to import all saved objects: ${inspect(resp.data, {

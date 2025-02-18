@@ -18,9 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/193309
-  describe.skip('misc console behavior', function testMiscConsoleBehavior() {
-    this.tags('includeFirefox');
+  describe('misc console behavior', function testMiscConsoleBehavior() {
     before(async () => {
       await browser.setWindowSize(1200, 800);
       await PageObjects.common.navigateToApp('console');

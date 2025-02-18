@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedPanelState } from '@kbn/presentation-containers';
+import { SerializedPanelState } from '@kbn/presentation-publishing';
 import { BookSerializedState } from '../../react_embeddables/saved_book/types';
 
 const SAVED_STATE_SESSION_STORAGE_KEY =

@@ -16,6 +16,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { createTestEsCluster, kibanaServerTestUser } from '@kbn/test';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getFips } from 'crypto';
 
 describe('migrator-only node', () => {
   const log = new ToolingLog({ writeTo: process.stdout, level: 'debug' });
@@ -30,6 +31,7 @@ describe('migrator-only node', () => {
     let logsSub: undefined | Rx.Subscription;
     try {
       await es.start();
+      const isFipsEnabled = getFips();
 
       proc = ChildProcess.spawn(
         process.execPath,
@@ -42,7 +44,7 @@ describe('migrator-only node', () => {
           '--no-optimizer',
           '--no-base-path',
           '--no-watch',
-          '--oss',
+          isFipsEnabled ? '--xpack.security.fipsMode.enabled=true' : '--oss',
         ],
         { stdio: ['pipe', 'pipe', 'pipe'] }
       );

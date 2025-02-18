@@ -67,10 +67,11 @@ const workaroundForResizeObserver = () =>
     }
   });
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/184558
+describe.skip(
   'Detection ES|QL rules, creation',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     const rule = getEsqlRule();

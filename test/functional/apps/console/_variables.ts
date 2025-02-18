@@ -13,12 +13,10 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const retry = getService('retry');
   const log = getService('log');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
-  // Failing: See https://github.com/elastic/kibana/issues/157776
-  describe.skip('Console variables', function testConsoleVariables() {
-    this.tags('includeFirefox');
-
+  describe('Console variables', function testConsoleVariables() {
     before(async () => {
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
@@ -46,6 +44,24 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       const variables = await PageObjects.console.getVariables();
       log.debug(variables);
       expect(variables).to.eql([]);
+    });
+
+    it('should allow copying a variable to clipboard', async () => {
+      await PageObjects.console.openConfig();
+
+      // Add a new test variable
+      await PageObjects.console.addNewVariable({ name: 'test_variable', value: 'test' });
+      // Copy the variable to clipboard
+      await PageObjects.console.copyVariableToClipboard('test_variable');
+
+      await retry.try(async () => {
+        const actualRequest = await browser.execute(() => navigator.clipboard.readText());
+
+        expect(actualRequest.trim()).to.contain('${test_variable}');
+      });
+
+      // Clean up
+      await PageObjects.console.removeVariables();
     });
 
     describe('with variables in url', () => {

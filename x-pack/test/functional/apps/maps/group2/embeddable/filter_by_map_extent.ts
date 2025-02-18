@@ -38,7 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should filter dashboard by map extent when "filter by map extent" is enabled', async () => {
-      await dashboardPanelActions.clickContextMenuItemByTitle(
+      await dashboardPanelActions.clickPanelActionByTitle(
         FILTER_BY_MAP_EXTENT_DATA_TEST_SUBJ,
         'document example'
       );
@@ -59,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should remove map extent filter dashboard when "filter by map extent" is disabled', async () => {
-      await dashboardPanelActions.clickContextMenuItemByTitle(
+      await dashboardPanelActions.clickPanelActionByTitle(
         FILTER_BY_MAP_EXTENT_DATA_TEST_SUBJ,
         'document example'
       );

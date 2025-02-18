@@ -31,6 +31,7 @@ management systems:
 * {sn-itsm}
 * {sn-sir}
 * {swimlane}
+* {hive}
 * {webhook-cm}
 
 NOTE: To create connectors and send cases to external systems, you must have the
@@ -45,7 +46,7 @@ Alternatively, you can create them in *{stack-manage-app} > Cases > Settings*:
 
 . Enter your required settings. Refer to <<resilient-action-type>>,
 <<jira-action-type>>, <<servicenow-action-type>>, <<servicenow-sir-action-type>>,
-<<swimlane-action-type>>, or <<cases-webhook-action-type>> for connector
+<<swimlane-action-type>>, <<thehive-action-type>>, or <<cases-webhook-action-type>> for connector
 configuration details.
 
 You can subsequently choose the connector when you create cases and use it in case templates.

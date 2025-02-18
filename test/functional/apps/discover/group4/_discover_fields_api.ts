@@ -16,17 +16,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
-  const { common, discover, timePicker, settings, unifiedFieldList } = getPageObjects([
+  const { common, discover, timePicker, unifiedFieldList } = getPageObjects([
     'common',
     'discover',
     'timePicker',
-    'settings',
     'unifiedFieldList',
   ]);
   const security = getService('security');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
-    'discover:searchFieldsFromSource': false,
   };
   describe('discover uses fields API test', function describeIndexTests() {
     before(async function () {
@@ -46,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should correctly display documents', async function () {
       log.debug('check if Document title exists in the grid');
-      expect(await discover.getDocHeader()).to.have.string('Document');
+      expect(await discover.getDocHeader()).to.have.string('Summary');
       const rowData = await discover.getDocTableIndex(1);
       log.debug('check the newest doc timestamp in UTC (check diff timezone in last test)');
       expect(rowData.startsWith('Sep 22, 2015 @ 23:50:13.253')).to.be.ok();
@@ -59,13 +57,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('adding a column removes a default column', async function () {
       await unifiedFieldList.clickFieldListItemAdd('_score');
       expect(await discover.getDocHeader()).to.have.string('_score');
-      expect(await discover.getDocHeader()).not.to.have.string('Document');
+      expect(await discover.getDocHeader()).not.to.have.string('Summary');
     });
 
     it('removing a column adds a default column', async function () {
       await unifiedFieldList.clickFieldListItemRemove('_score');
       expect(await discover.getDocHeader()).not.to.have.string('_score');
-      expect(await discover.getDocHeader()).to.have.string('Document');
+      expect(await discover.getDocHeader()).to.have.string('Summary');
     });
 
     it('displays _source viewer in doc viewer', async function () {
@@ -73,28 +71,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.isShowingDocViewer();
       await discover.clickDocViewerTab('doc_view_source');
       await discover.expectSourceViewerToExist();
-    });
-
-    it('switches to _source column when fields API is no longer used', async function () {
-      await settings.navigateTo();
-      await settings.clickKibanaSettings();
-      await settings.toggleAdvancedSettingCheckbox('discover:searchFieldsFromSource');
-
-      await common.navigateToApp('discover');
-      await timePicker.setDefaultAbsoluteRange();
-
-      expect(await discover.getDocHeader()).to.have.string('Document');
-    });
-
-    it('switches to Document column when fields API is used', async function () {
-      await settings.navigateTo();
-      await settings.clickKibanaSettings();
-      await settings.toggleAdvancedSettingCheckbox('discover:searchFieldsFromSource');
-
-      await common.navigateToApp('discover');
-      await timePicker.setDefaultAbsoluteRange();
-
-      expect(await discover.getDocHeader()).to.have.string('Document');
     });
   });
 }

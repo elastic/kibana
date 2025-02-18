@@ -46,17 +46,17 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
     describe('handle snooze rule request appropriately', function () {
       this.tags('skipFIPS');
       it('should handle snooze rule request appropriately', async () => {
-        const { body: createdAction } = await supertest
+        const { body: createdConnector } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'MY action',
+            name: 'MY Connector',
             connector_type_id: 'test.noop',
             config: {},
             secrets: {},
           })
           .expect(200);
-        objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+        objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
 
         const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
@@ -66,7 +66,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
               enabled: false,
               actions: [
                 {
-                  id: createdAction.id,
+                  id: createdConnector.id,
                   group: 'default',
                   params: {},
                 },
@@ -104,17 +104,17 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
     describe('handle snooze rule request appropriately when duration is -1', function () {
       this.tags('skipFIPS');
       it('should handle snooze rule request appropriately when duration is -1', async () => {
-        const { body: createdAction } = await supertest
+        const { body: createdConnector } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'MY action',
+            name: 'MY Connector',
             connector_type_id: 'test.noop',
             config: {},
             secrets: {},
           })
           .expect(200);
-        objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+        objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
 
         const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
@@ -124,7 +124,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
               enabled: false,
               actions: [
                 {
-                  id: createdAction.id,
+                  id: createdConnector.id,
                   group: 'default',
                   params: {},
                 },
@@ -160,17 +160,17 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
     });
 
     it('should not trigger actions when snoozed', async () => {
-      const { body: createdAction, status: connStatus } = await supertest
+      const { body: createdConnector, status: connStatus } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'MY action',
+          name: 'MY Connector',
           connector_type_id: 'test.noop',
           config: {},
           secrets: {},
         });
       expect(connStatus).to.be(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
 
       log.info('creating rule');
       const { body: createdRule, status: ruleStatus } = await supertest
@@ -188,7 +188,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
             },
             actions: [
               {
-                id: createdAction.id,
+                id: createdConnector.id,
                 group: 'default',
                 params: {},
               },
@@ -328,17 +328,17 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
     describe('clear the snooze after it expires', function () {
       this.tags('skipFIPS');
       it('should clear the snooze after it expires', async () => {
-        const { body: createdAction } = await supertest
+        const { body: createdConnector } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
           .set('kbn-xsrf', 'foo')
           .send({
-            name: 'MY action',
+            name: 'MY Connector',
             connector_type_id: 'test.noop',
             config: {},
             secrets: {},
           })
           .expect(200);
-        objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+        objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
 
         const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
@@ -355,7 +355,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
               },
               actions: [
                 {
-                  id: createdAction.id,
+                  id: createdConnector.id,
                   group: 'default',
                   params: {},
                 },
@@ -405,6 +405,160 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
           type: RULE_SAVED_OBJECT_TYPE,
           id: createdRule.id,
         });
+      });
+    });
+
+    describe('validation', function () {
+      this.tags('skipFIPS');
+      it('should return 400 if the id is not in a valid format', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            id: 'invalid key',
+          },
+        });
+
+        expect(response.statusCode).to.eql(400);
+        expect(response.body.message).to.eql(
+          `[request body.snooze_schedule.id]: Key must be lower case, a-z, 0-9, '_', and '-' are allowed`
+        );
+      });
+
+      it('accepts a uuid as a key', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+        await alertUtils
+          .getSnoozeRequest(createdRule.id)
+          .send({
+            snooze_schedule: {
+              ...SNOOZE_SCHEDULE,
+              id: 'e58e2340-dba6-454c-8308-b2ca66a7cf7',
+            },
+          })
+          .expect(204);
+      });
+
+      it('should return 400 if the timezone is not valid', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            rRule: { ...SNOOZE_SCHEDULE.rRule, tzid: 'invalid' },
+          },
+        });
+
+        expect(response.statusCode).to.eql(400);
+        expect(response.body.message).to.eql(
+          '[request body.snooze_schedule.rRule.tzid]: string is not a valid timezone: invalid'
+        );
+      });
+
+      it('should return 400 if the byweekday is not valid', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            rRule: { ...SNOOZE_SCHEDULE.rRule, byweekday: ['invalid'] },
+          },
+        });
+
+        expect(response.statusCode).to.eql(400);
+      });
+
+      it('should return 400 if the bymonthday is not valid', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            rRule: { ...SNOOZE_SCHEDULE.rRule, bymonthday: [35] },
+          },
+        });
+
+        expect(response.statusCode).to.eql(400);
+        expect(response.body.message).to.eql(
+          '[request body.snooze_schedule.rRule.bymonthday.0]: Value must be equal to or lower than [31].'
+        );
+      });
+
+      it('should return 400 if the bymonth is not valid', async () => {
+        const { body: createdRule } = await supertest
+          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              enabled: false,
+            })
+          )
+          .expect(200);
+
+        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+
+        const response = await alertUtils.getSnoozeRequest(createdRule.id).send({
+          snooze_schedule: {
+            ...SNOOZE_SCHEDULE,
+            rRule: { ...SNOOZE_SCHEDULE.rRule, bymonth: [14] },
+          },
+        });
+
+        expect(response.statusCode).to.eql(400);
+        expect(response.body.message).to.eql(
+          '[request body.snooze_schedule.rRule.bymonth.0]: Value must be equal to or lower than [12].'
+        );
       });
     });
   });

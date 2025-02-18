@@ -16,6 +16,9 @@ import {
   getSimpleRuleOutputWithoutRuleId,
   removeServerGeneratedPropertiesIncludingRuleId,
   updateUsername,
+  createHistoricalPrebuiltRuleAssetSavedObjects,
+  installPrebuiltRules,
+  createRuleAssetSavedObject,
 } from '../../../utils';
 import {
   createAlertsIndex,
@@ -31,7 +34,8 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless patch_rules_bulk', () => {
+  // TODO: https://github.com/elastic/kibana/issues/193184 Delete this file and clean up the code
+  describe.skip('@ess @serverless @skipInServerlessMKI patch_rules_bulk', () => {
     describe('patch rules bulk', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
@@ -344,6 +348,42 @@ export default ({ getService }: FtrProviderContext) => {
               status_code: 404,
             },
             id: '5096dec6-b6b9-4d8d-8f93-6c2602079d9d',
+          },
+        ]);
+      });
+
+      // Unskip: https://github.com/elastic/kibana/issues/195921
+      it('@skipInServerlessMKI throws an error if rule has external rule source and non-customizable fields are changed', async () => {
+        // Install base prebuilt detection rule
+        await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
+          createRuleAssetSavedObject({ rule_id: 'rule-1', author: ['elastic'] }),
+          createRuleAssetSavedObject({ rule_id: 'rule-2', license: 'basic' }),
+        ]);
+        await installPrebuiltRules(es, supertest);
+
+        const { body } = await securitySolutionApi
+          .bulkPatchRules({
+            body: [
+              { rule_id: 'rule-1', author: ['new user'] },
+              { rule_id: 'rule-2', license: 'new license' },
+            ],
+          })
+          .expect(200);
+
+        expect([body[0], body[1]]).toEqual([
+          {
+            error: {
+              message: 'Cannot update "author" field for prebuilt rules',
+              status_code: 400,
+            },
+            rule_id: 'rule-1',
+          },
+          {
+            error: {
+              message: 'Cannot update "license" field for prebuilt rules',
+              status_code: 400,
+            },
+            rule_id: 'rule-2',
           },
         ]);
       });

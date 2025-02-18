@@ -1,4 +1,6 @@
-summary: Create a tracking containment rule.
+summary: Tracking containment rule
+description: >
+  Create a tracking containment rule that checks when an entity is contained or no longer contained within a boundary.
 value:
   consumer: alerts
   name: my tracking rule

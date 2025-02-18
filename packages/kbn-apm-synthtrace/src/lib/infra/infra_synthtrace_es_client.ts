@@ -17,6 +17,10 @@ import { Logger } from '../utils/create_logger';
 
 export type InfraSynthtraceEsClientOptions = Omit<SynthtraceEsClientOptions, 'pipeline'>;
 
+interface Pipeline {
+  includeSerialization?: boolean;
+}
+
 export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
   constructor(options: { client: Client; logger: Logger } & InfraSynthtraceEsClientOptions) {
     super({
@@ -30,13 +34,26 @@ export class InfraSynthtraceEsClient extends SynthtraceEsClient<InfraDocument> {
       'metrics-aws*',
     ];
   }
+
+  getDefaultPipeline(
+    {
+      includeSerialization,
+    }: {
+      includeSerialization?: boolean;
+    } = { includeSerialization: true }
+  ) {
+    return infraPipeline({ includeSerialization });
+  }
 }
 
-function infraPipeline() {
+function infraPipeline({ includeSerialization }: Pipeline = { includeSerialization: true }) {
   return (base: Readable) => {
+    const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
+
     return pipeline(
+      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       base,
-      getSerializeTransform(),
+      ...serializationTransform,
       getRoutingTransform(),
       getDedotTransform(),
       (err: unknown) => {

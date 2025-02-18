@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
 import { resolve } from 'path';
+
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaAPITestsConfig = await readConfigFile(
@@ -17,6 +19,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const auditLogPath = resolve(__dirname, './plugins/audit_log/anonymous.log');
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [require.resolve('./tests/chips')],
     servers: xPackAPITestsConfig.get('servers'),
     security: { disableTestUser: true },

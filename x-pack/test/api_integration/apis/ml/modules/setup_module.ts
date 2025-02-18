@@ -669,7 +669,8 @@ export default ({ getService }: FtrProviderContext) => {
       expected: {
         responseCode: 403,
         error: 'Forbidden',
-        message: 'Forbidden',
+        message:
+          'API [POST /internal/ml/modules/setup/sample_data_weblogs] is unauthorized for user, this action is granted by the Kibana privileges [ml:canCreateJob]',
       },
     },
   ];

@@ -29,9 +29,9 @@
           "\nThe content for the Sample Data Tab in the `home` plugin."
         ],
         "signature": [
-          "() => JSX.Element"
+          "() => React.JSX.Element"
         ],
-        "path": "packages/home/sample_data_tab/src/sample_data_tab.tsx",
+        "path": "src/platform/packages/shared/home/sample_data_tab/src/sample_data_tab.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -48,11 +48,11 @@
           "\nKibana-specific Provider that maps dependencies to services."
         ],
         "signature": [
-          "({ children, ...dependencies }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...dependencies }: React.PropsWithChildren<",
           "SampleDataTabKibanaDependencies",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
-        "path": "packages/home/sample_data_tab/src/services.tsx",
+        "path": "src/platform/packages/shared/home/sample_data_tab/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -64,11 +64,11 @@
             "label": "{ children, ...dependencies }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "SampleDataTabKibanaDependencies",
-              ">>"
+              ">"
             ],
-            "path": "packages/home/sample_data_tab/src/services.tsx",
+            "path": "src/platform/packages/shared/home/sample_data_tab/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -87,11 +87,11 @@
           "\nA Context Provider that provides services to the component and its dependencies."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           "SampleDataTabServices",
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
-        "path": "packages/home/sample_data_tab/src/services.tsx",
+        "path": "src/platform/packages/shared/home/sample_data_tab/src/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -103,11 +103,11 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               "SampleDataTabServices",
-              ">>"
+              ">"
             ],
-            "path": "packages/home/sample_data_tab/src/services.tsx",
+            "path": "src/platform/packages/shared/home/sample_data_tab/src/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -132,7 +132,7 @@
         "signature": [
           "\"goToDemoEnvButton\""
         ],
-        "path": "packages/home/sample_data_tab/src/constants.ts",
+        "path": "src/platform/packages/shared/home/sample_data_tab/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -149,7 +149,7 @@
         "signature": [
           "\"showSampleDataAccordion\""
         ],
-        "path": "packages/home/sample_data_tab/src/constants.ts",
+        "path": "src/platform/packages/shared/home/sample_data_tab/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -166,7 +166,7 @@
         "signature": [
           "\"showSampleDataButton\""
         ],
-        "path": "packages/home/sample_data_tab/src/constants.ts",
+        "path": "src/platform/packages/shared/home/sample_data_tab/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

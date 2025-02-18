@@ -1,5 +1,0 @@
-{
-  "type": "shared-server",
-  "id": "@kbn/content-management-content-insights-server",
-  "owner": "@elastic/appex-sharedux"
-}

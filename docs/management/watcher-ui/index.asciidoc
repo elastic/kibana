@@ -8,8 +8,8 @@ Watches are helpful for analyzing mission-critical and business-critical
 streaming data. For example, you might watch application logs for performance
 outages or audit access logs for security threats.
 
-To get started, open the main menu,
-then click *Stack Management > Watcher*.
+Go to the *Watcher* page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 With this UI, you can:
 
 * <<watcher-create-threshold-alert, Create a simple threshold watch>>
@@ -39,9 +39,8 @@ and either of these Watcher roles:
 * `watcher_admin`. You can perform all Watcher actions, including create and edit watches.
 * `watcher_user`. You can view watches, but not create or edit them.
 
-To manage roles, open the main menu, then click *Stack Management > Roles*, or use the
-<<role-management-api, Kibana Role Management API>>. Watches are shared between
-all users with the same role.
+To manage roles, go to the *Roles* management page, or use the {api-kibana}/group/endpoint-roles[role APIs].
+Watches are shared between all users with the same role.
 
 NOTE: If you are creating a threshold watch, you must also have the `view_index_metadata` index privilege. See
 {ref}/index-mgmt.html[Index management] for detailed information.

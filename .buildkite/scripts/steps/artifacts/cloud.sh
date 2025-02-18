@@ -42,7 +42,6 @@ jq '
   .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_TEST_IMAGE'" |
   .resources.kibana[0].plan.kibana.version = "'$FULL_VERSION'" |
   .resources.elasticsearch[0].plan.elasticsearch.version = "'$FULL_VERSION'" |
-  .resources.enterprise_search[0].plan.enterprise_search.version = "'$FULL_VERSION'" |
   .resources.integrations_server[0].plan.integrations_server.version = "'$FULL_VERSION'"
   ' .buildkite/scripts/steps/cloud/deploy.json > "$DEPLOYMENT_SPEC"
 

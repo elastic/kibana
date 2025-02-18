@@ -1,0 +1,29 @@
+{
+  "type": "plugin",
+  "id": "@kbn/entityManager-app-plugin",
+  "owner": "@elastic/obs-entities",
+  "group": "observability",
+  "visibility": "private",
+  "description": "Entity manager plugin for entity assets (inventory, topology, etc)",
+  "plugin": {
+    "id": "entityManagerApp",
+    "configPath": ["xpack", "entityManagerApp"],
+    "browser": true,
+    "server": false,
+    "requiredPlugins": [
+      "entityManager",
+      "observabilityShared",
+      "presentationUtil",
+      "usageCollection",
+      "licensing"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "serverless"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils"
+    ]
+  }
+}

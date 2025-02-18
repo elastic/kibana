@@ -147,6 +147,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(contextIndexTemplate.name).to.eql(indexTemplateName);
         expect(contextIndexTemplate.index_template.index_patterns).to.eql([
           '.internal.alerts-test.patternfiring.alerts-default-*',
+          '.reindexed-v8-internal.alerts-test.patternfiring.alerts-default-*',
         ]);
         expect(contextIndexTemplate.index_template.composed_of).to.eql([
           '.alerts-test.patternfiring.alerts-mappings',

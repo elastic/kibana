@@ -21,7 +21,7 @@ import {
   registerFindRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
-import { setupConfig } from '../routes_test_utils';
+import { deprecationMock, setupConfig } from '../routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -72,7 +72,13 @@ describe('GET /api/saved_objects/_find with allowApiAccess true', () => {
     const config = setupConfig(true);
     const access = 'public';
 
-    registerFindRoute(router, { config, coreUsageData, logger, access });
+    registerFindRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });

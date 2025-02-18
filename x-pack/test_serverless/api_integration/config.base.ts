@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { FtrConfigProviderContext } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 
 import { services } from './services';
 import type { CreateTestConfigOptions } from '../shared/types';
@@ -16,6 +17,7 @@ export function createTestConfig(options: CreateTestConfigOptions) {
     return {
       ...svlSharedConfig.getAll(),
 
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       services: {
         ...services,
         ...options.services,
@@ -24,6 +26,10 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [
           ...svlSharedConfig.get('esTestCluster.serverArgs'),
+          // custom native roles are enabled only for search and security projects
+          ...(options.serverlessProject !== 'oblt'
+            ? ['xpack.security.authc.native_roles.enabled=true']
+            : []),
           ...(options.esServerArgs ?? []),
         ],
       },

@@ -41,8 +41,6 @@ import {
   PROMPT_CONTEXT_SELECTOR,
   QUICK_PROMPT_BADGE,
   ADD_NEW_CONNECTOR,
-  SHOW_ANONYMIZED_BUTTON,
-  ASSISTANT_SETTINGS_BUTTON,
   SEND_TO_TIMELINE_BUTTON,
 } from '../screens/ai_assistant';
 import { TOASTER } from '../screens/alerts_detection_rules';
@@ -86,7 +84,7 @@ export const resetConversation = () => {
 export const selectConversation = (conversationName: string) => {
   cy.get(FLYOUT_NAV_TOGGLE).click();
   cy.get(CONVERSATION_SELECT(conversationName)).click();
-  cy.get(CONVERSATION_TITLE + ' h2').should('have.text', conversationName);
+  assertConversationTitle(conversationName);
   cy.get(FLYOUT_NAV_TOGGLE).click();
 };
 
@@ -95,7 +93,7 @@ export const updateConversationTitle = (newTitle: string) => {
   cy.get(CONVERSATION_TITLE + ' input').clear();
   cy.get(CONVERSATION_TITLE + ' input').type(newTitle);
   cy.get(CONVERSATION_TITLE + ' input').type('{enter}');
-  cy.get(CONVERSATION_TITLE + ' h2').should('have.text', newTitle);
+  assertConversationTitle(newTitle);
 };
 
 export const typeAndSendMessage = (message: string) => {
@@ -171,8 +169,11 @@ export const assertNewConversation = (isWelcome: boolean, title: string) => {
   } else {
     cy.get(EMPTY_CONVO).should('be.visible');
   }
-  cy.get(CONVERSATION_TITLE + ' h2').should('have.text', title);
+  assertConversationTitle(title);
 };
+
+export const assertConversationTitle = (title: string) =>
+  cy.get(CONVERSATION_TITLE + ' h2').should('have.text', title);
 
 export const assertSystemPromptSent = (message: string) => {
   cy.get(CONVERSATION_MESSAGE).eq(0).should('contain', message);
@@ -217,9 +218,7 @@ const assertConversationTitleReadOnly = () => {
 export const assertConversationReadOnly = () => {
   assertConversationTitleReadOnly();
   cy.get(ADD_NEW_CONNECTOR).should('be.disabled');
-  cy.get(SHOW_ANONYMIZED_BUTTON).should('be.disabled');
   cy.get(CHAT_CONTEXT_MENU).should('be.disabled');
   cy.get(FLYOUT_NAV_TOGGLE).should('be.disabled');
   cy.get(NEW_CHAT).should('be.disabled');
-  cy.get(ASSISTANT_SETTINGS_BUTTON).should('be.disabled');
 };

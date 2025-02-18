@@ -5,16 +5,10 @@
  * 2.0.
  */
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { resolve } from 'path';
-
 import { services } from './services';
 import { pageObjects } from './page_objects';
-
-// Docker image to use for Fleet API integration tests.
-// This hash comes from the latest successful build of the Production Distribution of the Package Registry, for
-// example: https://internal-ci.elastic.co/blue/organizations/jenkins/package_storage%2Findexing-job/detail/main/1884/pipeline/147.
-// It should be updated any time there is a new package published.
-export const dockerImage = 'docker.elastic.co/package-registry/distribution:lite';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
@@ -29,6 +23,8 @@ export default async function ({ readConfigFile }) {
   return {
     services,
     pageObjects,
+
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
 
     servers: kibanaFunctionalConfig.get('servers'),
 
@@ -55,6 +51,7 @@ export default async function ({ readConfigFile }) {
         '--server.restrictInternalApis=false',
         // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
         `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
+        `--xpack.fleet.internal.registry.kibanaVersionCheckEnabled=false`,
       ],
     },
     uiSettings: {
@@ -195,6 +192,15 @@ export default async function ({ readConfigFile }) {
       },
       obsAIAssistantManagement: {
         pathname: '/app/management/kibana/observabilityAiAssistantManagement',
+      },
+      enterpriseSearch: {
+        pathname: '/app/elasticsearch/overview',
+      },
+      elasticsearchStart: {
+        pathname: '/app/elasticsearch/start',
+      },
+      elasticsearchIndices: {
+        pathname: '/app/elasticsearch/indices',
       },
     },
 
@@ -398,7 +404,14 @@ export default async function ({ readConfigFile }) {
             indices: [
               {
                 names: ['*'],
-                privileges: ['create', 'read', 'view_index_metadata', 'monitor', 'create_index'],
+                privileges: [
+                  'create',
+                  'read',
+                  'view_index_metadata',
+                  'monitor',
+                  'create_index',
+                  'manage',
+                ],
               },
             ],
           },
@@ -573,6 +586,20 @@ export default async function ({ readConfigFile }) {
           ],
         },
 
+        read_ilm: {
+          elasticsearch: {
+            cluster: ['read_ilm'],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['default'],
+            },
+          ],
+        },
+
         index_management_user: {
           elasticsearch: {
             cluster: ['monitor', 'manage_index_templates', 'manage_enrich'],
@@ -600,6 +627,13 @@ export default async function ({ readConfigFile }) {
               'manage_slm',
               'cluster:admin/snapshot',
               'cluster:admin/repository',
+              'manage_index_templates',
+            ],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
             ],
           },
           kibana: [
@@ -615,6 +649,20 @@ export default async function ({ readConfigFile }) {
         ingest_pipelines_user: {
           elasticsearch: {
             cluster: ['manage_pipeline', 'cluster:monitor/nodes/info'],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
+        manage_processors_user: {
+          elasticsearch: {
+            cluster: ['manage'],
           },
           kibana: [
             {

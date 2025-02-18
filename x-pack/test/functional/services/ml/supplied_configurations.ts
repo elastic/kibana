@@ -27,7 +27,7 @@ export function MachineLearningSuppliedConfigurationsProvider({ getService }: Ft
       );
     },
     async assertAllConfigurationsAreLoaded() {
-      const expectedLength = 18;
+      const expectedLength = 19;
       await retry.tryForTime(10 * 1000, async () => {
         const cards = await testSubjects.findAll('mlSuppliedConfigurationsCard');
         expect(cards.length).to.eql(

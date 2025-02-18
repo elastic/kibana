@@ -196,16 +196,6 @@ export class DevServer {
               this.phase$.next('listening');
               this.ready$.next(true);
             }
-
-            // TODO: remove this once Pier is done migrating log rotation to KP
-            if (msg === 'RELOAD_LOGGING_CONFIG_FROM_SERVER_WORKER') {
-              // When receive that event from server worker
-              // forward a reloadLoggingConfig message to parent
-              // and child proc. This is only used by LogRotator service
-              // when the cluster mode is enabled
-              process.emit('message' as any, { reloadLoggingConfig: true } as any);
-              proc.send({ reloadLoggingConfig: true });
-            }
           }),
           takeUntil(exit$)
         );

@@ -267,7 +267,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             message:
               'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
             retry: false,
-            errorSource: TaskErrorSource.FRAMEWORK,
+            errorSource: TaskErrorSource.USER,
           });
         });
 
@@ -456,7 +456,13 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'ok',
               connector_id: bedrockActionId,
-              data: { message: bedrockClaude2SuccessResponse.completion },
+              data: {
+                message: bedrockClaude2SuccessResponse.completion,
+                usage: {
+                  input_tokens: 41,
+                  output_tokens: 64,
+                },
+              },
             });
 
             const events: IValidatedEvent[] = await retry.try(async () => {
@@ -620,7 +626,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: bedrockActionId,
-            errorSource: TaskErrorSource.FRAMEWORK,
+            errorSource: TaskErrorSource.USER,
             message:
               'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
             retry: false,

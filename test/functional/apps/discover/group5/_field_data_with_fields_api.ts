@@ -33,7 +33,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        'discover:searchFieldsFromSource': false,
       });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await common.navigateToApp('discover');
@@ -68,10 +67,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('doc view should show @timestamp and Document columns', async function () {
+      it('doc view should show @timestamp and Summary columns', async function () {
         const Docheader = await discover.getDocHeader();
         expect(Docheader).to.contain('@timestamp');
-        expect(Docheader).to.contain('Document');
+        expect(Docheader).to.contain('Summary');
       });
 
       it('a bad syntax query should show an error message', async function () {
@@ -107,6 +106,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const marks = await discover.getMarks();
         expect(marks.length).to.be.above(0);
         expect(marks).to.contain('election');
+      });
+
+      // we used to add _source as a column by default when `discover:searchFieldsFromSource` existed
+      it('should show @timestamp and Summary columns for legacy links with _source as a column', async function () {
+        const currentUrl = await browser.getCurrentUrl();
+        const [, hash] = currentUrl.split('#/');
+        const nextHash = hash
+          .replace('columns:!(relatedContent)', 'columns:!(_source)')
+          .replace('election', 'club');
+
+        expect(nextHash).to.contain('columns:!(_source)');
+
+        await common.navigateToUrl('discover', nextHash, { useActualUrl: true });
+
+        await header.waitUntilLoadingHasFinished();
+        await discover.waitUntilSearchingHasFinished();
+
+        const gridHeader = await discover.getDocHeader();
+        expect(gridHeader).to.contain('@timestamp');
+        expect(gridHeader).to.contain('Summary');
+
+        const marks = await discover.getMarks();
+        expect(marks.length).to.be.above(0);
+        expect(marks).to.contain('club');
+
+        expect(await browser.getCurrentUrl()).to.contain('columns:!()');
       });
     });
   });

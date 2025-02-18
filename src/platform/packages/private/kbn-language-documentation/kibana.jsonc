@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/language-documentation",
+  "owner": [
+    "@elastic/kibana-esql"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}

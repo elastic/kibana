@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
-import { commonFunctionalUIServices } from '@kbn/ftr-common-functional-ui-services';
-
-export const services = {
-  ...commonFunctionalServices,
-  ...commonFunctionalUIServices,
-} as const;
+export * from '@kbn/test-suites-src/common/services';

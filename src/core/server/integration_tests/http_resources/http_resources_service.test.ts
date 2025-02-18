@@ -28,6 +28,7 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
         csp: { disableUnsafeEval },
         plugins: { initialize: false },
         elasticsearch: { skipStartupConnectionCheck: true },
+        server: { restrictInternalApis: false },
       });
       await root.preboot();
     });
@@ -197,6 +198,21 @@ function applyTestsWithDisableUnsafeEvalSetTo(disableUnsafeEval: boolean) {
 
         expect(response.text).toBe('window.alert(42);');
       });
+    });
+
+    it('responses do not contain the elastic-api-version header', async () => {
+      const { http, httpResources } = await root.setup();
+
+      const router = http.createRouter('');
+      const resources = httpResources.createRegistrar(router);
+      const htmlBody = `<p>HtMlr00lz</p>`;
+      resources.register({ path: '/render-html', validate: false }, (context, req, res) =>
+        res.renderHtml({ body: htmlBody })
+      );
+
+      await root.start();
+      const { header } = await request.get(root, '/render-html').expect(200);
+      expect(header).not.toMatchObject({ 'elastic-api-version': expect.any(String) });
     });
   });
 }

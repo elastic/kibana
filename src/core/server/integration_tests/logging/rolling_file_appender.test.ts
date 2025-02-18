@@ -13,7 +13,7 @@ import moment from 'moment-timezone';
 import { getNextRollingTime } from '@kbn/core-logging-server-internal';
 import { createRoot as createkbnTestServerRoot } from '@kbn/core-test-helpers-kbn-server';
 
-const flushDelay = 250;
+const flushDelay = 2000;
 const delay = (waitInMs: number) => new Promise((resolve) => setTimeout(resolve, waitInMs));
 const flush = async () => delay(flushDelay);
 
@@ -31,6 +31,7 @@ function createRoot(appenderConfig: any) {
         },
       ],
     },
+    server: { restrictInternalApis: false },
   });
 }
 

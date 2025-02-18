@@ -104,7 +104,7 @@ sub load_github_key {
     my ($file) = glob("~/.github_auth");
     unless ( -e $file ) {
         warn "File ~/.github_auth doesn't exist - using anonymous API. "
-            . "Generate a Personal Access Token at https://github.com/settings/applications\n";
+            . "Generate a Personal Access Token https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens \n";
         return '';
     }
     open my $fh, $file or die "Couldn't open $file: $!";

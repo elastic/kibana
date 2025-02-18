@@ -1,0 +1,628 @@
+{
+  "type": "data_stream",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "template": {
+      "_meta": {
+        "managed": true,
+        "managed_by": "fleet",
+        "package": {
+          "name": "gcp"
+        }
+      },
+      "data_stream": {
+        "allow_custom_routing": false,
+        "hidden": false
+      },
+      "ignore_missing_component_templates": [
+        "logs-gcp.audit@custom"
+      ],
+      "index_patterns": [
+        "logs-gcp.audit-*"
+      ],
+      "name": "logs-gcp.audit",
+      "priority": 200,
+      "template": {
+        "mappings": {
+          "_meta": {
+            "managed": true,
+            "managed_by": "fleet",
+            "package": {
+              "name": "gcp"
+            }
+          },
+          "date_detection": false,
+          "dynamic_templates": [
+            {
+              "ecs_message_match_only_text": {
+                "mapping": {
+                  "type": "match_only_text"
+                },
+                "path_match": [
+                  "message",
+                  "*.message"
+                ],
+                "unmatch_mapping_type": "object"
+              }
+            },
+            {
+              "ecs_non_indexed_keyword": {
+                "mapping": {
+                  "doc_values": false,
+                  "index": false,
+                  "type": "keyword"
+                },
+                "path_match": [
+                  "*event.original"
+                ]
+              }
+            },
+            {
+              "ecs_non_indexed_long": {
+                "mapping": {
+                  "doc_values": false,
+                  "index": false,
+                  "type": "long"
+                },
+                "path_match": [
+                  "*.x509.public_key_exponent"
+                ]
+              }
+            },
+            {
+              "ecs_ip": {
+                "mapping": {
+                  "type": "ip"
+                },
+                "match_mapping_type": "string",
+                "path_match": [
+                  "ip",
+                  "*.ip",
+                  "*_ip"
+                ]
+              }
+            },
+            {
+              "ecs_wildcard": {
+                "mapping": {
+                  "type": "wildcard"
+                },
+                "path_match": [
+                  "*.io.text",
+                  "*.message_id",
+                  "*registry.data.strings",
+                  "*url.path"
+                ],
+                "unmatch_mapping_type": "object"
+              }
+            },
+            {
+              "ecs_path_match_wildcard_and_match_only_text": {
+                "mapping": {
+                  "fields": {
+                    "text": {
+                      "type": "match_only_text"
+                    }
+                  },
+                  "type": "wildcard"
+                },
+                "path_match": [
+                  "*.body.content",
+                  "*url.full",
+                  "*url.original"
+                ],
+                "unmatch_mapping_type": "object"
+              }
+            },
+            {
+              "ecs_match_wildcard_and_match_only_text": {
+                "mapping": {
+                  "fields": {
+                    "text": {
+                      "type": "match_only_text"
+                    }
+                  },
+                  "type": "wildcard"
+                },
+                "match": [
+                  "*command_line",
+                  "*stack_trace"
+                ],
+                "unmatch_mapping_type": "object"
+              }
+            },
+            {
+              "ecs_path_match_keyword_and_match_only_text": {
+                "mapping": {
+                  "fields": {
+                    "text": {
+                      "type": "match_only_text"
+                    }
+                  },
+                  "type": "keyword"
+                },
+                "path_match": [
+                  "*.title",
+                  "*.executable",
+                  "*.name",
+                  "*.working_directory",
+                  "*.full_name",
+                  "*file.path",
+                  "*file.target_path",
+                  "*os.full",
+                  "*email.subject",
+                  "*vulnerability.description",
+                  "*user_agent.original"
+                ],
+                "unmatch_mapping_type": "object"
+              }
+            },
+            {
+              "ecs_date": {
+                "mapping": {
+                  "type": "date"
+                },
+                "path_match": [
+                  "*.timestamp",
+                  "*_timestamp",
+                  "*.not_after",
+                  "*.not_before",
+                  "*.accessed",
+                  "created",
+                  "*.created",
+                  "*.installed",
+                  "*.creation_date",
+                  "*.ctime",
+                  "*.mtime",
+                  "ingested",
+                  "*.ingested",
+                  "*.start",
+                  "*.end",
+                  "*.indicator.first_seen",
+                  "*.indicator.last_seen",
+                  "*.indicator.modified_at",
+                  "*threat.enrichments.matched.occurred"
+                ],
+                "unmatch_mapping_type": "object"
+              }
+            },
+            {
+              "ecs_path_match_float": {
+                "mapping": {
+                  "type": "float"
+                },
+                "path_match": [
+                  "*.score.*",
+                  "*_score*"
+                ],
+                "path_unmatch": "*.version",
+                "unmatch_mapping_type": "object"
+              }
+            },
+            {
+              "ecs_usage_double_scaled_float": {
+                "mapping": {
+                  "scaling_factor": 1000,
+                  "type": "scaled_float"
+                },
+                "match_mapping_type": [
+                  "double",
+                  "long",
+                  "string"
+                ],
+                "path_match": "*.usage"
+              }
+            },
+            {
+              "ecs_geo_point": {
+                "mapping": {
+                  "type": "geo_point"
+                },
+                "path_match": [
+                  "*.geo.location"
+                ]
+              }
+            },
+            {
+              "ecs_flattened": {
+                "mapping": {
+                  "type": "flattened"
+                },
+                "match_mapping_type": "object",
+                "path_match": [
+                  "*structured_data",
+                  "*exports",
+                  "*imports"
+                ]
+              }
+            },
+            {
+              "all_strings_to_keywords": {
+                "mapping": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "match_mapping_type": "string"
+              }
+            }
+          ],
+          "properties": {
+            "@timestamp": {
+              "ignore_malformed": false,
+              "type": "date"
+            },
+            "cloud": {
+              "properties": {
+                "image": {
+                  "properties": {
+                    "id": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "data_stream": {
+              "properties": {
+                "dataset": {
+                  "type": "constant_keyword"
+                },
+                "namespace": {
+                  "type": "constant_keyword"
+                },
+                "type": {
+                  "type": "constant_keyword"
+                }
+              }
+            },
+            "data_stream.dataset": {
+              "type": "constant_keyword"
+            },
+            "data_stream.namespace": {
+              "type": "constant_keyword"
+            },
+            "data_stream.type": {
+              "type": "constant_keyword",
+              "value": "logs"
+            },
+            "event": {
+              "properties": {
+                "agent_id_status": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "dataset": {
+                  "type": "constant_keyword",
+                  "value": "gcp.audit"
+                },
+                "ingested": {
+                  "format": "strict_date_time_no_millis||strict_date_optional_time||epoch_millis",
+                  "ignore_malformed": false,
+                  "type": "date"
+                },
+                "module": {
+                  "type": "constant_keyword",
+                  "value": "gcp"
+                }
+              }
+            },
+            "gcp": {
+              "properties": {
+                "audit": {
+                  "properties": {
+                    "authentication_info": {
+                      "properties": {
+                        "authority_selector": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "principal_email": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "principal_subject": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "service_account_delegation_info": {
+                          "type": "flattened"
+                        },
+                        "service_account_key_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "third_party_principal": {
+                          "type": "flattened"
+                        }
+                      }
+                    },
+                    "authorization_info": {
+                      "properties": {
+                        "granted": {
+                          "type": "boolean"
+                        },
+                        "permission": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "resource": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "resource_attributes": {
+                          "properties": {
+                            "name": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "service": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "type": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      },
+                      "type": "nested"
+                    },
+                    "flattened": {
+                      "type": "flattened"
+                    },
+                    "labels": {
+                      "type": "flattened"
+                    },
+                    "logentry_operation": {
+                      "properties": {
+                        "first": {
+                          "type": "boolean"
+                        },
+                        "id": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "last": {
+                          "type": "boolean"
+                        },
+                        "producer": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "metadata": {
+                      "type": "flattened"
+                    },
+                    "method_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "num_response_items": {
+                      "type": "long"
+                    },
+                    "policy_violation_info": {
+                      "properties": {
+                        "payload": {
+                          "type": "flattened"
+                        },
+                        "resource_tags": {
+                          "type": "flattened"
+                        },
+                        "resource_type": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "violations": {
+                          "properties": {
+                            "checkedValue": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "constraint": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "errorMessage": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            },
+                            "policyType": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          },
+                          "type": "nested"
+                        }
+                      }
+                    },
+                    "request": {
+                      "type": "flattened"
+                    },
+                    "request_metadata": {
+                      "properties": {
+                        "caller_ip": {
+                          "type": "ip"
+                        },
+                        "caller_supplied_user_agent": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "raw": {
+                          "properties": {
+                            "caller_ip": {
+                              "ignore_above": 1024,
+                              "type": "keyword"
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "resource_location": {
+                      "properties": {
+                        "current_locations": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "resource_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "response": {
+                      "type": "flattened"
+                    },
+                    "service_name": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "status": {
+                      "properties": {
+                        "code": {
+                          "type": "long"
+                        },
+                        "details": {
+                          "type": "flattened"
+                        },
+                        "message": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "type": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "destination": {
+                  "properties": {
+                    "instance": {
+                      "properties": {
+                        "project_id": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "region": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "zone": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "vpc": {
+                      "properties": {
+                        "project_id": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "subnetwork_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "vpc_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                },
+                "source": {
+                  "properties": {
+                    "instance": {
+                      "properties": {
+                        "project_id": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "region": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "zone": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "vpc": {
+                      "properties": {
+                        "project_id": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "subnetwork_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        },
+                        "vpc_name": {
+                          "ignore_above": 1024,
+                          "type": "keyword"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "host": {
+              "properties": {
+                "containerized": {
+                  "type": "boolean"
+                },
+                "os": {
+                  "properties": {
+                    "build": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    },
+                    "codename": {
+                      "ignore_above": 1024,
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
+            "input": {
+              "properties": {
+                "type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "log": {
+              "properties": {
+                "offset": {
+                  "type": "long"
+                }
+              }
+            }
+          }
+        },
+        "settings": {
+          "index": {
+            "codec": "best_compression",
+            "final_pipeline": ".fleet_final_pipeline-1",
+            "mapping": {
+              "ignore_malformed": "true",
+              "total_fields": {
+                "ignore_dynamic_beyond_limit": "true",
+                "limit": "1000"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

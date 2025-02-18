@@ -1,4 +1,4 @@
-name: Add Fleet issue to Platform Ingest project
+name: Add Fleet issue to Platform Ingest - UI & Integrations project
 
 on:
   issues:
@@ -6,9 +6,9 @@ on:
       - labeled
       
 env:
-  INGEST_PROJECT_ID: 'PVT_kwDOAGc3Zs4AEzn4'
+  INGEST_PROJECT_ID: 'PVT_kwDOAGc3Zs4AogrP'
   FLEET_LABEL: 'Team:Fleet'
-  AREA_FIELD_ID: 'PVTSSF_lADOAGc3Zs4AEzn4zgEgZSo'
+  AREA_FIELD_ID: 'PVTSSF_lADOAGc3Zs4AogrPzggEiBs'
   FLEET_UI_OPTION_ID: '411a7b86'
 
 jobs:

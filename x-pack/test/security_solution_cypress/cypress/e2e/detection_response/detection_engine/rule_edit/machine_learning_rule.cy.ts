@@ -7,13 +7,13 @@
 
 import { getMachineLearningRule } from '../../../../objects/rule';
 import {
-  ALERT_SUPPRESSION_DURATION_INPUT,
+  ALERT_SUPPRESSION_DURATION_UNIT_INPUT,
+  ALERT_SUPPRESSION_DURATION_VALUE_INPUT,
   ALERT_SUPPRESSION_FIELDS,
   ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS,
 } from '../../../../screens/create_new_rule';
 import {
   DEFINITION_DETAILS,
-  DETAILS_TITLE,
   SUPPRESS_BY_DETAILS,
   SUPPRESS_FOR_DETAILS,
   SUPPRESS_MISSING_FIELD,
@@ -42,7 +42,7 @@ import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 describe(
   'Machine Learning Detection Rules - Editing',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
   },
   () => {
     let mlRule: ReturnType<typeof getMachineLearningRule>;
@@ -88,9 +88,6 @@ describe(
             'have.text',
             'Suppress and group alerts for events with missing fields'
           );
-
-          // suppression functionality should be under Tech Preview
-          cy.contains(DETAILS_TITLE, SUPPRESS_FOR_DETAILS).contains('Technical Preview');
         });
       });
     });
@@ -113,12 +110,10 @@ describe(
 
       it('allows editing of a rule to change its suppression configuration', () => {
         // check saved suppression settings
-        cy.get(ALERT_SUPPRESSION_DURATION_INPUT)
-          .eq(0)
+        cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT)
           .should('be.enabled')
           .should('have.value', 360);
-        cy.get(ALERT_SUPPRESSION_DURATION_INPUT)
-          .eq(1)
+        cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT)
           .should('be.enabled')
           .should('have.value', 's');
 
@@ -139,12 +134,10 @@ describe(
 
       it('allows editing of a rule to remove suppression configuration', () => {
         // check saved suppression settings
-        cy.get(ALERT_SUPPRESSION_DURATION_INPUT)
-          .eq(0)
+        cy.get(ALERT_SUPPRESSION_DURATION_VALUE_INPUT)
           .should('be.enabled')
           .should('have.value', 360);
-        cy.get(ALERT_SUPPRESSION_DURATION_INPUT)
-          .eq(1)
+        cy.get(ALERT_SUPPRESSION_DURATION_UNIT_INPUT)
           .should('be.enabled')
           .should('have.value', 's');
 

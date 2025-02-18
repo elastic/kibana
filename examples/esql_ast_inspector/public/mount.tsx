@@ -23,7 +23,7 @@ export const mount =
 
     const reactElement = (
       <i18nCore.Context>
-        <App core={core} plugins={plugins} />
+        <App />
       </i18nCore.Context>
     );
 

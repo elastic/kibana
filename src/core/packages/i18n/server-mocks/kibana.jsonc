@@ -1,0 +1,10 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/core-i18n-server-mocks",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

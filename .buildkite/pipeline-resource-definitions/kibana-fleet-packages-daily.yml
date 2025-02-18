@@ -26,7 +26,6 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/fleet/packages_daily.yml
-      skip_intermediate_builds: false
       provider_settings:
         trigger_mode: none
         publish_commit_status: false
@@ -47,3 +46,5 @@ spec:
           message: Single user daily test
           env: {}
           branch: main
+      tags:
+        - kibana

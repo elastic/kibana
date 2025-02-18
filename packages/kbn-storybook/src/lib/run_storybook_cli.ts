@@ -43,7 +43,7 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
       const staticDir = [
         UiSharedDepsNpm.distDir,
         UiSharedDepsSrc.distDir,
-        'src/plugins/kibana_react/public/assets:plugins/kibanaReact/assets',
+        'src/platform/plugins/shared/kibana_react/public/assets:plugins/kibanaReact/assets',
       ];
       const config: Record<string, any> = {
         configDir,

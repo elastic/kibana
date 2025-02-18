@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getEsqlRule, getSimpleCustomQueryRule } from '../../../../objects/rule';
+import { getEsqlRule, getNewThreatIndicatorRule } from '../../../../objects/rule';
 
 import {
   PREVIEW_LOGGED_REQUEST_DESCRIPTION,
@@ -32,14 +32,7 @@ const expectedValidEsqlQuery = 'from auditbeat* METADATA _id';
 describe(
   'Detection rules, preview',
   {
-    // Currently FF are not supported on MKI environments, so this test should be skipped from MKI environments.
-    // Once `manualRuleRunEnabled` FF is removed, we can remove `@skipInServerlessMKI` as well
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
-    env: {
-      kbnServerArgs: [
-        `--xpack.securitySolution.enableExperimental=${JSON.stringify(['loggingRequestsEnabled'])}`,
-      ],
-    },
+    tags: ['@ess', '@serverless'],
   },
   () => {
     beforeEach(() => {
@@ -71,12 +64,12 @@ describe(
 
     describe('does not support preview logged requests', () => {
       beforeEach(() => {
-        createRule(getSimpleCustomQueryRule()).then((createdRule) => {
+        createRule(getNewThreatIndicatorRule()).then((createdRule) => {
           visitEditRulePage(createdRule.body.id);
         });
       });
 
-      it('does not show preview logged requests checkbox', () => {
+      it('does not show preview logged requests checkbox fro Indicator Match rule', () => {
         cy.get(RULES_CREATION_PREVIEW_REFRESH_BUTTON).should('be.visible');
         cy.get(PREVIEW_LOGGED_REQUESTS_CHECKBOX).should('not.exist');
       });

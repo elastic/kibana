@@ -18,29 +18,12 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
 } from '@elastic/eui';
-import { EmbeddableRoot, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { SampleMlJob, SampleApp1ClickContext } from '../../triggers';
-import { ButtonEmbeddable } from '../../embeddables/button_embeddable';
+import { ReactEmbeddableRenderer, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { useUiActions } from '../../context';
-
-export const job: SampleMlJob = {
-  job_id: '123',
-  job_type: 'anomaly_detector',
-  description: 'This is some ML job.',
-};
-
-export const context: SampleApp1ClickContext = { job };
+import { BUTTON_EMBEDDABLE } from '../../embeddables/register_button_embeddable';
 
 export const DrilldownsWithEmbeddableExample: React.FC = () => {
   const { plugins, managerWithEmbeddable } = useUiActions();
-  const embeddable = React.useMemo(
-    () =>
-      new ButtonEmbeddable(
-        { id: 'DrilldownsWithEmbeddableExample' },
-        { uiActions: plugins.uiActionsEnhanced }
-      ),
-    [plugins.uiActionsEnhanced]
-  );
   const [showManager, setShowManager] = React.useState(false);
   const [openPopup, setOpenPopup] = React.useState(false);
   const viewRef = React.useRef<'/create' | '/manage'>('/create');
@@ -112,7 +95,13 @@ export const DrilldownsWithEmbeddableExample: React.FC = () => {
         <EuiFlexItem grow={false}>{openManagerButton}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <div style={{ maxWidth: 200 }}>
-            <EmbeddableRoot embeddable={embeddable} />
+            <ReactEmbeddableRenderer<{}, {}>
+              type={BUTTON_EMBEDDABLE}
+              getParentApi={() => ({
+                getSerializedStateForChild: () => undefined,
+              })}
+              hidePanelChrome={true}
+            />
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -124,7 +113,6 @@ export const DrilldownsWithEmbeddableExample: React.FC = () => {
             initialRoute={viewRef.current}
             dynamicActionManager={managerWithEmbeddable}
             triggers={[VALUE_CLICK_TRIGGER]}
-            placeContext={{ embeddable }}
             onClose={() => setShowManager(false)}
           />
         </EuiFlyout>

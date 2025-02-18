@@ -20,6 +20,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./benchmark/v2'));
     loadTestFile(require.resolve('./rules/v1'));
     loadTestFile(require.resolve('./rules/v2'));
+    loadTestFile(require.resolve('./graph'));
 
     // Place your tests files under this directory and add the following here:
     // loadTestFile(require.resolve('./your test name'));

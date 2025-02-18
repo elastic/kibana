@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBadge, EuiStat } from '@elastic/eui';
+import { EuiBadge, EuiStat, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -17,7 +17,6 @@ import {
   initializeTimeRange,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { euiThemeVars } from '@kbn/ui-theme';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, switchMap, tap } from 'rxjs';
 import { SEARCH_EMBEDDABLE_ID } from './constants';
@@ -50,9 +49,9 @@ export const getSearchEmbeddableFactory = (services: Services) => {
       const api = buildApi(
         {
           ...timeRange.api,
-          blockingError: blockingError$,
-          dataViews: dataViews$,
-          dataLoading: dataLoading$,
+          blockingError$,
+          dataViews$,
+          dataLoading$,
           serializeState: () => {
             return {
               rawState: {
@@ -124,6 +123,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
         api,
         Component: () => {
           const [count, error] = useBatchedPublishingSubjects(count$, blockingError$);
+          const { euiTheme } = useEuiTheme();
 
           useEffect(() => {
             return () => {
@@ -138,7 +138,7 @@ export const getSearchEmbeddableFactory = (services: Services) => {
             <div
               css={css`
                 width: 100%;
-                padding: ${euiThemeVars.euiSizeM};
+                padding: ${euiTheme.size.m};
               `}
             >
               <EuiStat

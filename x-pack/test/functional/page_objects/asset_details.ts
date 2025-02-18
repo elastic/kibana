@@ -25,6 +25,11 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.existOrFail(`infraAssetDetailsHostChartsSection${metric}`);
     },
 
+    // Add metrics callout
+    async addMetricsCalloutExists() {
+      return testSubjects.existOrFail('infraAddMetricsCallout');
+    },
+
     // Overview
     async clickOverviewTab() {
       return testSubjects.click('infraAssetDetailsOverviewTab');
@@ -32,6 +37,10 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
 
     async getOverviewTab() {
       return testSubjects.find('infraAssetDetailsOverviewTab');
+    },
+
+    async assetDetailsKPITileMissing(type: string) {
+      return testSubjects.missingOrFail(`infraAssetDetailsKPI${type}`);
     },
 
     async getAssetDetailsKPITileValue(type: string) {
@@ -113,6 +122,7 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
 
     async getOverviewTabHostMetricCharts(metric: string) {
       const container = await testSubjects.find('infraAssetDetailsOverviewTabContent');
+      await testSubjects.existOrFail(`infraAssetDetailsHostChartsSection${metric}`);
       const section = await container.findByTestSubject(
         `infraAssetDetailsHostChartsSection${metric}`
       );
@@ -121,6 +131,7 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
 
     async getOverviewTabDockerMetricCharts(metric: string) {
       const container = await testSubjects.find('infraAssetDetailsOverviewTabContent');
+      await testSubjects.existOrFail(`infraAssetDetailsDockerChartsSection${metric}`);
       const section = await container.findByTestSubject(
         `infraAssetDetailsDockerChartsSection${metric}`
       );
@@ -223,12 +234,19 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('infraAssetDetailsMetricsTab');
     },
 
+    async isMetricChartsLoaded() {
+      return !(await testSubjects.exists(
+        '[data-test-subj*="infraAssetDetailsMetricChart"] .echChartStatus[data-ech-render-complete=true]'
+      ));
+    },
+
     async metricsChartsContentExists() {
       return testSubjects.click('infraAssetDetailsMetricChartsContent');
     },
 
     async getMetricsTabHostCharts(metric: string) {
       const container = await testSubjects.find('infraAssetDetailsMetricsTabContent');
+      await testSubjects.existOrFail(`infraAssetDetailsHostChartsSection${metric}`);
       const section = await container.findByTestSubject(
         `infraAssetDetailsHostChartsSection${metric}`
       );
@@ -331,6 +349,10 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
 
     async dashboardsTabExists() {
       return testSubjects.exists('infraAssetDetailsDashboardsTab');
+    },
+
+    async dashboardsTabExistsOrFail() {
+      return testSubjects.existOrFail('infraAssetDetailsDashboardsTab');
     },
 
     async addDashboardExists() {

@@ -13,6 +13,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('search', () => {
     loadTestFile(require.resolve('./search'));
     loadTestFile(require.resolve('./sql_search'));
-    loadTestFile(require.resolve('./bsearch'));
   });
 }

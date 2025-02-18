@@ -11,7 +11,7 @@
         "label": "KibanaSettingsApplication",
         "description": [],
         "signature": [
-          "({ docLinks, i18n, notifications, settings, theme, history, sectionRegistry, application, chrome, }: ",
+          "({ docLinks, i18n, notifications, settings, userProfile, theme, history, sectionRegistry, application, chrome, }: ",
           {
             "pluginId": "@kbn/management-settings-application",
             "scope": "public",
@@ -19,9 +19,9 @@
             "section": "def-public.SettingsApplicationKibanaDependencies",
             "text": "SettingsApplicationKibanaDependencies"
           },
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-management/settings/application/index.tsx",
+        "path": "src/platform/packages/private/kbn-management/settings/application/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,7 +30,7 @@
             "id": "def-public.KibanaSettingsApplication.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  docLinks,\n  i18n,\n  notifications,\n  settings,\n  theme,\n  history,\n  sectionRegistry,\n  application,\n  chrome,\n}",
+            "label": "{\n  docLinks,\n  i18n,\n  notifications,\n  settings,\n  userProfile,\n  theme,\n  history,\n  sectionRegistry,\n  application,\n  chrome,\n}",
             "description": [],
             "signature": [
               {
@@ -41,7 +41,7 @@
                 "text": "SettingsApplicationKibanaDependencies"
               }
             ],
-            "path": "packages/kbn-management/settings/application/index.tsx",
+            "path": "src/platform/packages/private/kbn-management/settings/application/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -60,9 +60,9 @@
           "\nComponent for displaying the {@link SettingsApplication} component."
         ],
         "signature": [
-          "() => JSX.Element"
+          "() => React.JSX.Element"
         ],
-        "path": "packages/kbn-management/settings/application/application.tsx",
+        "path": "src/platform/packages/private/kbn-management/settings/application/application.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -79,7 +79,7 @@
           "\nKibana-specific Provider that maps dependencies to services."
         ],
         "signature": [
-          "({ children, ...dependencies }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...dependencies }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/management-settings-application",
             "scope": "public",
@@ -87,9 +87,9 @@
             "section": "def-public.SettingsApplicationKibanaDependencies",
             "text": "SettingsApplicationKibanaDependencies"
           },
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-management/settings/application/services.tsx",
+        "path": "src/platform/packages/private/kbn-management/settings/application/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -101,7 +101,7 @@
             "label": "{ children, ...dependencies }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/management-settings-application",
                 "scope": "public",
@@ -109,9 +109,9 @@
                 "section": "def-public.SettingsApplicationKibanaDependencies",
                 "text": "SettingsApplicationKibanaDependencies"
               },
-              ">>"
+              ">"
             ],
-            "path": "packages/kbn-management/settings/application/services.tsx",
+            "path": "src/platform/packages/private/kbn-management/settings/application/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -130,7 +130,7 @@
           "\nA Context Provider that provides services to the component and its dependencies."
         ],
         "signature": [
-          "({ children, ...services }: React.PropsWithChildren<React.PropsWithChildren<",
+          "({ children, ...services }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/management-settings-application",
             "scope": "public",
@@ -138,9 +138,9 @@
             "section": "def-public.SettingsApplicationServices",
             "text": "SettingsApplicationServices"
           },
-          ">>) => JSX.Element"
+          ">) => React.JSX.Element"
         ],
-        "path": "packages/kbn-management/settings/application/services.tsx",
+        "path": "src/platform/packages/private/kbn-management/settings/application/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -152,7 +152,7 @@
             "label": "{\n  children,\n  ...services\n}",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<React.PropsWithChildren<",
+              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/management-settings-application",
                 "scope": "public",
@@ -160,9 +160,9 @@
                 "section": "def-public.SettingsApplicationServices",
                 "text": "SettingsApplicationServices"
               },
-              ">>"
+              ">"
             ],
-            "path": "packages/kbn-management/settings/application/services.tsx",
+            "path": "src/platform/packages/private/kbn-management/settings/application/services.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -201,7 +201,7 @@
             "text": "FieldInputKibanaDependencies"
           }
         ],
-        "path": "packages/kbn-management/settings/application/services.tsx",
+        "path": "src/platform/packages/private/kbn-management/settings/application/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -234,7 +234,7 @@
           " & ",
           "Services"
         ],
-        "path": "packages/kbn-management/settings/application/services.tsx",
+        "path": "src/platform/packages/private/kbn-management/settings/application/services.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

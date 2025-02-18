@@ -8,12 +8,14 @@
  */
 
 import { FtrConfigProviderContext, findTestPluginPaths } from '@kbn/test';
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import path from 'path';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../functional/config.base.js'));
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     rootTags: ['runOutsideOfCiGroups'],
     testFiles: [
       require.resolve('./test_suites/usage_collection'),
@@ -59,8 +61,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // We want to test when the banner is shown
         '--telemetry.banner=true',
         // explicitly enable the cloud integration plugins to validate the rendered config keys
-        '--xpack.cloud_integrations.chat.enabled=true',
-        '--xpack.cloud_integrations.chat.chatURL=a_string',
         '--xpack.cloud_integrations.experiments.enabled=true',
         '--xpack.cloud_integrations.experiments.launch_darkly.sdk_key=a_string',
         '--xpack.cloud_integrations.experiments.launch_darkly.client_id=a_string',

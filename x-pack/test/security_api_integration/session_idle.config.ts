@@ -6,7 +6,10 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext } from '@kbn/test';
+
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import type { FtrConfigProviderContext } from '@kbn/test';
+
 import { services } from './services';
 
 // the default export of config files must be a config provider
@@ -20,6 +23,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const testEndpointsPlugin = resolve(__dirname, '../security_functional/plugins/test_endpoints');
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
     testFiles: [resolve(__dirname, './tests/session_idle')],
     services,
     servers: xPackAPITestsConfig.get('servers'),

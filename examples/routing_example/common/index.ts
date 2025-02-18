@@ -15,3 +15,13 @@ export const POST_MESSAGE_ROUTE_PATH = '/api/post_message';
 
 // Internal APIs should use the `internal` prefix, instead of the `api` prefix.
 export const INTERNAL_GET_MESSAGE_BY_ID_ROUTE = '/internal/get_message';
+
+export const DEPRECATED_ROUTES = {
+  DEPRECATED_ROUTE: '/api/routing_example/d/deprecated_route',
+  REMOVED_ROUTE: '/api/routing_example/d/removed_route',
+  MIGRATED_ROUTE: '/api/routing_example/d/migrated_route',
+  VERSIONED_ROUTE: '/api/routing_example/d/versioned_route',
+  INTERNAL_DEPRECATED_ROUTE: '/api/routing_example/d/internal_deprecated_route',
+  INTERNAL_ONLY_ROUTE: '/internal/routing_example/d/internal_only_route',
+  VERSIONED_INTERNAL_ROUTE: '/internal/routing_example/d/internal_versioned_route',
+};

@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless read_rules', () => {
+  describe('@ess @serverless @serverlessQA read_rules', () => {
     describe('reading rules', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);

@@ -14,7 +14,7 @@
         "tags": [],
         "label": "overlayServiceMock",
         "description": [],
-        "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
+        "path": "src/core/packages/overlays/browser-mocks/src/overlay_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -38,7 +38,7 @@
               "OverlayService",
               ">>"
             ],
-            "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
+            "path": "src/core/packages/overlays/browser-mocks/src/overlay_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -61,16 +61,10 @@
                 "text": "DeeplyMockedKeys"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-overlays-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-public.OverlayStart",
-                "text": "OverlayStart"
-              },
+              "OverlayStart",
               ">"
             ],
-            "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
+            "path": "src/core/packages/overlays/browser-mocks/src/overlay_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],

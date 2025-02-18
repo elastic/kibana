@@ -9,37 +9,35 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default ({ getPageObjects }: FtrProviderContext) => {
+export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['common', 'findings', 'header']);
+  const retry = getService('retry');
 
   describe('Findings Page onboarding', function () {
     this.tags(['cloud_security_posture_findings_onboarding']);
     let findings: typeof PageObjects.findings;
-    let notInstalledVulnerabilities: typeof findings.notInstalledVulnerabilities;
     let notInstalledCSP: typeof findings.notInstalledCSP;
+    let thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt: typeof findings.thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt;
+
+    // wrapper function to waitUntilLoadingHasFinished
+    const navigateToMisconfigurationsWithRetry = async () => {
+      await retry.try(async () => {
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      });
+    };
 
     beforeEach(async () => {
       findings = PageObjects.findings;
-      notInstalledVulnerabilities = findings.notInstalledVulnerabilities;
       notInstalledCSP = findings.notInstalledCSP;
+      thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt =
+        findings.thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt;
 
       await findings.waitForPluginInitialized();
     });
 
-    it('clicking on the `No integrations installed` prompt action button - `install CNVM`: navigates to the CNVM integration installation page', async () => {
-      await findings.navigateToLatestVulnerabilitiesPage();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      const element = await notInstalledVulnerabilities.getElement();
-      expect(element).to.not.be(null);
-
-      await notInstalledVulnerabilities.navigateToAction('cnvm-not-installed-action');
-
-      await PageObjects.common.waitUntilUrlIncludes('add-integration/vuln_mgmt');
-    });
-
-    it('clicking on the `No integrations installed` prompt action button - `install cloud posture intergation`: navigates to the CSPM integration installation page', async () => {
+    it('Misconfigurations - clicking on the `No integrations installed` prompt action button - `install cloud posture integration`: navigates to the CSPM integration installation page', async () => {
       await findings.navigateToMisconfigurations();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await navigateToMisconfigurationsWithRetry();
       const element = await notInstalledCSP.getElement();
       expect(element).to.not.be(null);
 
@@ -48,14 +46,28 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       await PageObjects.common.waitUntilUrlIncludes('add-integration/cspm');
     });
 
-    it('clicking on the `No integrations installed` prompt action button - `install kubernetes posture intergation`: navigates to the KSPM integration installation page', async () => {
+    it('Misconfigurations - clicking on the `No integrations installed` prompt action button - `install kubernetes posture integration`: navigates to the KSPM integration installation page', async () => {
       await findings.navigateToMisconfigurations();
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await navigateToMisconfigurationsWithRetry();
       const element = await notInstalledCSP.getElement();
       expect(element).to.not.be(null);
 
       await notInstalledCSP.navigateToAction('kspm-not-installed-action');
+
       await PageObjects.common.waitUntilUrlIncludes('add-integration/kspm');
+    });
+
+    it('Misconfigurations - clicking on the `Third party integrations` prompt action button - `Wiz Integration`: navigates to the Wiz integration installation page', async () => {
+      await findings.navigateToMisconfigurations();
+      await navigateToMisconfigurationsWithRetry();
+      const element = await thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt.getElement();
+      expect(element).to.not.be(null);
+
+      await thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt.navigateToAction(
+        '3p-no-misconfigurations-findings-prompt-wiz-integration-button'
+      );
+
+      await PageObjects.common.waitUntilUrlIncludes('fleet/integrations/wiz/add-integration');
     });
   });
 };

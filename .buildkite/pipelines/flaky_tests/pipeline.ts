@@ -122,7 +122,7 @@ const pipeline = {
 
 steps.push({
   command: '.buildkite/scripts/steps/build_kibana.sh',
-  label: 'Build Kibana Distribution and Plugins',
+  label: 'Build Kibana Distribution',
   agents: expandAgentQueue('c2-8'),
   key: 'build',
   if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''",
@@ -193,6 +193,31 @@ for (const testSuite of testSuites) {
         },
       });
       break;
+    case 'elastic_synthetics':
+      const synthGroup = groups.find((g) => g.key === testSuite.key);
+      if (!synthGroup) {
+        throw new Error(
+          `Group configuration was not found in groups.json for the following synthetics suite: {${suiteName}}.`
+        );
+      }
+      steps.push({
+        command: `.buildkite/scripts/steps/functional/${suiteName}.sh`,
+        label: synthGroup.name,
+        agents: expandAgentQueue('n2-4-spot'),
+        key: `synthetics-suite-${suiteIndex++}`,
+        depends_on: 'build',
+        timeout_in_minutes: 30,
+        parallelism: testSuite.count,
+        concurrency,
+        concurrency_group: process.env.UUID,
+        concurrency_method: 'eager',
+        cancel_on_build_failing: true,
+        retry: {
+          automatic: [{ exit_status: '-1', limit: 3 }],
+        },
+      });
+      break;
+
     default:
       throw new Error(`unknown test suite: ${testSuite.key}`);
   }

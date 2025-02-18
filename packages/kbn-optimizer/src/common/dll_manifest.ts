@@ -20,7 +20,7 @@ export interface ParsedDllManifest {
 }
 
 const hash = (s: string) => {
-  return Crypto.createHash('sha1').update(s).digest('base64').replace(/=+$/, '');
+  return Crypto.createHash('sha1').update(s).digest('base64').replace(/=+$/, ''); // eslint-disable-line @kbn/eslint/no_unsafe_hash
 };
 
 export function parseDllManifest(manifest: DllManifest): ParsedDllManifest {

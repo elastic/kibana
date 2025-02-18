@@ -41,7 +41,6 @@ yarn kbn watch
 [discrete]
 === List of Already Migrated Packages to Bazel
 
-- @kbn/ace
 - @kbn/analytics
 - @kbn/apm-config-loader
 - @kbn/apm-utils
@@ -83,7 +82,6 @@ yarn kbn watch
 - @kbn/securitysolution-utils
 - @kbn/server-http-tools
 - @kbn/server-route-repository
-- @kbn/spec-to-console
 - @kbn/std
 - @kbn/storybook
 - @kbn/telemetry-utils

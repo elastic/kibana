@@ -138,6 +138,12 @@ export default function createScheduledTaskIdTests({ getService }: FtrProviderCo
         // When we enable the rule, the unrecognized task should be removed and a new
         // task created in its place
 
+        await supertestWithoutAuth
+          .post('/api/alerting_tasks/run_mark_tasks_as_unrecognized')
+          .set('kbn-xsrf', 'foo')
+          .send({})
+          .expect(200);
+
         // scheduled task should exist and be unrecognized
         await retry.try(async () => {
           const taskRecordLoaded = await getScheduledTask(RULE_ID);

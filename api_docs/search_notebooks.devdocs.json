@@ -14,7 +14,7 @@
       "tags": [],
       "label": "SearchNotebooksPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/search_notebooks/public/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_notebooks/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -28,7 +28,7 @@
       "tags": [],
       "label": "SearchNotebooksPluginStart",
       "description": [],
-      "path": "x-pack/plugins/search_notebooks/public/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_notebooks/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -44,7 +44,7 @@
             "NotebookListValue",
             ") => void"
           ],
-          "path": "x-pack/plugins/search_notebooks/public/types.ts",
+          "path": "x-pack/solutions/search/plugins/search_notebooks/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -58,7 +58,7 @@
               "signature": [
                 "NotebookListValue"
               ],
-              "path": "x-pack/plugins/search_notebooks/public/types.ts",
+              "path": "x-pack/solutions/search/plugins/search_notebooks/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -76,7 +76,7 @@
           "signature": [
             "(notebookId: string) => void"
           ],
-          "path": "x-pack/plugins/search_notebooks/public/types.ts",
+          "path": "x-pack/solutions/search/plugins/search_notebooks/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -90,7 +90,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/search_notebooks/public/types.ts",
+              "path": "x-pack/solutions/search/plugins/search_notebooks/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -117,7 +117,7 @@
       "tags": [],
       "label": "SearchNotebooksPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/search_notebooks/server/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_notebooks/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -131,7 +131,7 @@
       "tags": [],
       "label": "SearchNotebooksPluginStart",
       "description": [],
-      "path": "x-pack/plugins/search_notebooks/server/types.ts",
+      "path": "x-pack/solutions/search/plugins/search_notebooks/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -155,7 +155,7 @@
         "signature": [
           "\"searchNotebooks\""
         ],
-        "path": "x-pack/plugins/search_notebooks/common/index.ts",
+        "path": "x-pack/solutions/search/plugins/search_notebooks/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -170,7 +170,7 @@
         "signature": [
           "\"searchNotebooks\""
         ],
-        "path": "x-pack/plugins/search_notebooks/common/index.ts",
+        "path": "x-pack/solutions/search/plugins/search_notebooks/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

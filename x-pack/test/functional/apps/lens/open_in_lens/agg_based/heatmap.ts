@@ -9,26 +9,22 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
-  const { visualize, lens, visChart, timePicker, visEditor } = getPageObjects([
+  const { visualize, lens, visChart, visEditor } = getPageObjects([
     'visualize',
     'lens',
     'visChart',
-    'timePicker',
     'visEditor',
   ]);
 
   describe('Heatmap', function describeIndexTests() {
-    const isNewChartsLibraryEnabled = true;
-
     before(async () => {
-      await visualize.initTests(isNewChartsLibraryEnabled);
+      await visualize.initTests();
     });
 
     beforeEach(async () => {
       await visualize.navigateToNewAggBasedVisualization();
       await visualize.clickHeatmapChart();
       await visualize.clickNewSearch();
-      await timePicker.setDefaultAbsoluteRange();
     });
 
     it('should show the "Edit Visualization in Lens" menu item if no X-axis was specified', async () => {

@@ -1,0 +1,39 @@
+openapi: 3.0.0
+info:
+  title: Elastic Security - Timeline - Notes API
+  version: '2023-10-31'
+paths:
+  /api/note:
+    delete:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: DeleteNote
+      summary: Delete a note
+      description: Delete a note from a Timeline using the note ID.
+      tags:
+        - access:securitySolution
+      requestBody:
+        description: The ID of the note to delete.
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  required: [noteId]
+                  nullable: true
+                  properties:
+                    noteId:
+                      type: string
+                - type: object
+                  required: [noteIds]
+                  nullable: true
+                  properties:
+                    noteIds:
+                      type: array
+                      nullable: true
+                      items:
+                        type: string
+      responses:
+        '200':
+          description: Indicates the note was successfully deleted.

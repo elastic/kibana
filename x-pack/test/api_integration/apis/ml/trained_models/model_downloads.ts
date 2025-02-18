@@ -45,7 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
         .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(200, status, body);
 
-      expect(body.length).to.eql(5);
+      expect(body.length).to.eql(6);
 
       expect(body).to.eql([
         {
@@ -100,6 +100,8 @@ export default ({ getService }: FtrProviderContext) => {
             },
           },
           description: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations)',
+          disclaimer:
+            'This E5 model, as defined, hosted, integrated and used in conjunction with our other Elastic Software is covered by our standard warranty.',
           license: 'MIT',
           licenseUrl: 'https://huggingface.co/elastic/multilingual-e5-small',
           type: ['pytorch', 'text_embedding'],
@@ -119,11 +121,29 @@ export default ({ getService }: FtrProviderContext) => {
           },
           description:
             'E5 (EmbEddings from bidirEctional Encoder rEpresentations), optimized for linux-x86_64',
+          disclaimer:
+            'This E5 model, as defined, hosted, integrated and used in conjunction with our other Elastic Software is covered by our standard warranty.',
           license: 'MIT',
           licenseUrl: 'https://huggingface.co/elastic/multilingual-e5-small_linux-x86_64',
           type: ['pytorch', 'text_embedding'],
           model_id: '.multilingual-e5-small_linux-x86_64',
           ...(isIntelBased ? { recommended: true, supported: true } : { supported: false }),
+        },
+        {
+          model_id: '.rerank-v1',
+          techPreview: true,
+          recommended: true,
+          supported: true,
+          hidden: true,
+          modelName: 'rerank',
+          version: 1,
+          config: {
+            input: {
+              field_names: ['input', 'query'],
+            },
+          },
+          description: 'Elastic Rerank v1',
+          type: ['pytorch', 'text_similarity'],
         },
       ]);
     });

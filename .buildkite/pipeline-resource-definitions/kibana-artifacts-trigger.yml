@@ -26,7 +26,6 @@ spec:
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/artifacts_trigger.yml
-      skip_intermediate_builds: false
       provider_settings:
         build_branches: false
         build_pull_requests: false
@@ -44,3 +43,5 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
         kibana-tech-leads:
           access_level: MANAGE_BUILD_AND_READ
+      tags:
+        - kibana

@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import { stringify } from 'query-string';
-import url from 'url';
 import { resolve } from 'path';
+import { stringify } from 'query-string';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
+import type { Cookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
+import url from 'url';
+
 import expect from '@kbn/expect';
-import { parse as parseCookie, Cookie } from 'tough-cookie';
-import { adminTestUser } from '@kbn/test';
 import {
   getLogoutRequest,
   getSAMLRequestId,
   getSAMLResponse,
 } from '@kbn/security-api-integration-helpers/saml/saml_tools';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { adminTestUser } from '@kbn/test';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { FileWrapper } from '../audit/file_wrapper';
 
 export default function ({ getService }: FtrProviderContext) {

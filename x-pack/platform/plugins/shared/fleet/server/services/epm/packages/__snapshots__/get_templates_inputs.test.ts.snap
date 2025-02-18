@@ -1,0 +1,81 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Fleet - getTemplateInputs should work for input package 1`] = `
+"inputs:
+  # Custom log file: Collect your custom log files.
+  - id: logs-logfile
+    type: logfile
+    streams:
+      # Custom log file: Custom log file
+      - id: logfile-log.logs
+        ignore_older: 72h
+        # data_stream:
+        #  dataset: <DATA_STREAM.DATASET>
+        #    # Dataset name: Set the name for your dataset. Changing the dataset will send the data to a different index. You can't use \`-\` in the name of a dataset and only valid characters for [Elasticsearch index names](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-index_.html).
+        # paths:
+        #  - <PATHS> # Log file path: Path to log files to be collected
+        # exclude_files:
+        #  - <EXCLUDE_FILES> # Exclude files: Patterns to be ignored
+        # tags:
+        #  - <TAGS> # Tags: Tags to include in the published event
+"
+`;
+
+exports[`Fleet - getTemplateInputs should work for integration package 1`] = `
+"inputs:
+  # Collect Redis application logs: Collecting application logs from Redis instances
+  - id: redis-logfile
+    type: logfile
+  # Collect Redis slow logs: Collecting slow logs from Redis instances
+  - id: redis-redis
+    type: redis
+  # Collect Redis metrics: Collecting info, key and keyspace metrics from Redis instances
+  - id: redis-redis/metrics
+    type: redis/metrics
+    streams:
+      # Redis key metrics: Collect Redis key metrics
+      - id: redis/metrics-redis.key
+        data_stream:
+          dataset: redis.key
+          type: metrics
+        metricsets:
+          - key
+        hosts:
+          - 127.0.0.1:6379
+        idle_timeout: 20s
+        key.patterns:
+          - limit: 20
+            pattern: '*'
+        maxconn: 10
+        network: tcp
+        period: 10s
+        tags:
+          - test
+          # - <TAGS> # Tags
+        # username: <USERNAME> # Username
+        # password: <PASSWORD> # Password
+        # tags_streams:
+        #  - <TAGS_STREAMS> # Tags in streams
+"
+`;
+
+exports[`Fleet - getTemplateInputs should work for package with dynamic ids 1`] = `
+"inputs:
+  # Collect Docker container logs: Collecting docker container logs
+  - id: docker-filestream
+    type: filestream
+    streams:
+      # Collect Docker container logs: Collect Docker container logs
+      - id: docker-container-logs-\${docker.container.name}-\${docker.container.id}
+        data_stream:
+          dataset: docker.container_logs
+          type: logs
+        paths:
+          - /var/lib/docker/containers/\${docker.container.id}/*-json.log
+        parsers:
+          - container:
+              stream: all
+              format: docker
+        # condition: <CONDITION> # Condition: Condition to filter when to apply this datastream. Refer to [Docker provider](https://www.elastic.co/guide/en/fleet/current/docker-provider.html) to find the available keys and to [Conditions](https://www.elastic.co/guide/en/fleet/current/dynamic-input-configuration.html#conditions) on how to use the available keys in conditions.
+"
+`;

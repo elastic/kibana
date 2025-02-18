@@ -14,11 +14,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
-  const { common, discover, header, timePicker } = getPageObjects([
+  const { common, discover, header, timePicker, unifiedFieldList } = getPageObjects([
     'common',
     'discover',
     'header',
     'timePicker',
+    'unifiedFieldList',
   ]);
 
   describe('discover unified histogram breakdown', function describeIndexTests() {
@@ -34,6 +35,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/discover');
+    });
+
+    it('should apply breakdown when selected from field stats', async () => {
+      await unifiedFieldList.clickFieldListAddBreakdownField('geo.dest');
+      await header.waitUntilLoadingHasFinished();
+      const list = await discover.getHistogramLegendList();
+      expect(list).to.eql(['CN', 'IN', 'US', 'Other']);
     });
 
     it('should choose breakdown field', async () => {

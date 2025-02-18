@@ -54,9 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   }
 
   const checkDiscoverNavigationResult = async () => {
-    await dashboardPanelActions.clickContextMenuItem(
-      'embeddablePanelAction-ACTION_OPEN_IN_DISCOVER'
-    );
+    await dashboardPanelActions.clickPanelAction('embeddablePanelAction-ACTION_OPEN_IN_DISCOVER');
 
     const [, discoverHandle] = await browser.getAllWindowHandles();
     await browser.switchToWindow(discoverHandle);

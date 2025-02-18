@@ -6,9 +6,12 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext } from '@kbn/test';
-import { services } from '../functional/services';
+
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import type { FtrConfigProviderContext } from '@kbn/test';
+
 import { pageObjects } from '../functional/page_objects';
+import { services } from '../functional/services';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
@@ -25,6 +28,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     .filter((arg: string) => !arg.startsWith('--security.showInsecureClusterWarning'));
 
   return {
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
     testFiles: [resolve(__dirname, './tests/insecure_cluster_warning')],
 
     services,

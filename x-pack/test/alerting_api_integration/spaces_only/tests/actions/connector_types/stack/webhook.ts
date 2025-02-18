@@ -35,7 +35,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     return parsedUrl.port;
   }
 
-  describe('webhook action', () => {
+  describe('webhook connector', () => {
     describe('with http endpoint', () => {
       let webhookSimulatorURL: string = '';
       let webhookServer: http.Server;
@@ -47,9 +47,9 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       });
 
       it('webhook can be executed without username and password', async () => {
-        const webhookActionId = await createWebhookAction(supertest, webhookSimulatorURL);
+        const webhookConnectorId = await createWebhookConnector(supertest, webhookSimulatorURL);
         const { body: result } = await supertest
-          .post(`/api/actions/action/${webhookActionId}/_execute`)
+          .post(`/api/actions/connector/${webhookConnectorId}/_execute`)
           .set('kbn-xsrf', 'test')
           .send({
             params: {
@@ -78,11 +78,11 @@ export default function webhookTest({ getService }: FtrProviderContext) {
       });
 
       it('should support the POST method against webhook target', async () => {
-        const webhookActionId = await createWebhookAction(supertest, webhookSimulatorURL, {
+        const webhookConnectorId = await createWebhookConnector(supertest, webhookSimulatorURL, {
           method: 'post',
         });
         const { body: result } = await supertest
-          .post(`/api/actions/action/${webhookActionId}/_execute`)
+          .post(`/api/actions/connector/${webhookConnectorId}/_execute`)
           .set('kbn-xsrf', 'test')
           .send({
             params: {
@@ -100,24 +100,6 @@ export default function webhookTest({ getService }: FtrProviderContext) {
     });
 
     describe('ssl customization', () => {
-      it('should handle the xpack.actions.rejectUnauthorized: false', async () => {
-        const connectorId = 'custom.ssl.noCustom';
-        const port = await getPortOfConnector(connectorId);
-        const server = await createTlsWebhookServer(port);
-        const { status, body } = await supertest
-          .post(`/api/actions/connector/${connectorId}/_execute`)
-          .set('kbn-xsrf', 'test')
-          .send({
-            params: {
-              body: 'foo',
-            },
-          });
-        expect(status).to.eql(200);
-        server.close();
-
-        expect(body.status).to.eql('ok');
-      });
-
       it('should handle the customized rejectUnauthorized: false', async () => {
         const connectorId = 'custom.ssl.rejectUnauthorizedFalse';
         const port = await getPortOfConnector(connectorId);
@@ -176,7 +158,7 @@ export default function webhookTest({ getService }: FtrProviderContext) {
   });
 }
 
-export async function createWebhookAction(
+export async function createWebhookConnector(
   supertest: SuperTestAgent,
   webhookSimulatorURL: string,
   config: Record<string, string | Record<string, string>> = {}
@@ -190,16 +172,16 @@ export async function createWebhookAction(
     url,
   };
 
-  const { body: createdAction } = await supertest
-    .post('/api/actions/action')
+  const { body: createdConnector } = await supertest
+    .post('/api/actions/connector')
     .set('kbn-xsrf', 'test')
     .send({
-      name: 'A generic Webhook action',
-      actionTypeId: '.webhook',
+      name: 'A generic Webhook connector',
+      connector_type_id: '.webhook',
       secrets: {},
       config: composedConfig,
     })
     .expect(200);
 
-  return createdAction.id;
+  return createdConnector.id;
 }

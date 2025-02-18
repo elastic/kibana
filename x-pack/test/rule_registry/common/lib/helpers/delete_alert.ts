@@ -22,7 +22,7 @@ export const deleteAlert = async (
   const { body: targetIndices } = await getAlertsTargetIndices(getService, user, spaceId);
   if (id) {
     const { body, status } = await supertest
-      .delete(`${getSpaceUrlPrefix(spaceId)}/api/alerts/alert/${id}`)
+      .delete(`${getSpaceUrlPrefix(spaceId)}/api/alerting/rule/${id}`)
       .auth(user.username, user.password)
       .set('kbn-xsrf', 'foo');
 

@@ -1,0 +1,10 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/shared-ux-prompt-no-data-views-mocks",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

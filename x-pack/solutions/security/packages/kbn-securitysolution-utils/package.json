@@ -1,0 +1,8 @@
+{
+  "name": "@kbn/securitysolution-utils",
+  "version": "1.0.0",
+  "description": "security solution utilities to use across plugins such lists, security_solution, cases, etc...",
+  "license": "Elastic License 2.0",
+  "private": true,
+  "sideEffects": false
+}

@@ -4,11 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FtrConfigProviderContext, Config, defineDockerServersConfig } from '@kbn/test';
+import {
+  fleetPackageRegistryDockerImage,
+  FtrConfigProviderContext,
+  Config,
+  defineDockerServersConfig,
+} from '@kbn/test';
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { ServerlessProjectType } from '@kbn/es';
 import path from 'path';
-import { dockerImage } from '../../../fleet_api_integration/config.base';
 import { DeploymentAgnosticCommonServices, services } from '../services';
 
 interface CreateTestConfigOptions<T extends DeploymentAgnosticCommonServices> {
@@ -30,11 +35,7 @@ const esServerArgsFromController = {
     // for ML, data frame analytics are not part of this project type
     'xpack.ml.dfa.enabled=false',
   ],
-  security: [
-    'xpack.security.authc.api_key.cache.max_keys=70000',
-    'data_streams.lifecycle.retention.factory_default=365d',
-    'data_streams.lifecycle.retention.factory_max=365d',
-  ],
+  security: ['xpack.security.authc.api_key.cache.max_keys=70000'],
 };
 
 // include settings from kibana controller
@@ -85,6 +86,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
     return {
       ...svlSharedConfig.getAll(),
 
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       services: {
         // services can be customized, but must extend DeploymentAgnosticCommonServices
         ...(options.services || services),
@@ -92,7 +94,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
       dockerServers: defineDockerServersConfig({
         registry: {
           enabled: !!dockerRegistryPort,
-          image: dockerImage,
+          image: fleetPackageRegistryDockerImage,
           portInContainer: 8080,
           port: dockerRegistryPort,
           args: dockerArgs,
@@ -104,6 +106,10 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
         ...svlSharedConfig.get('esTestCluster'),
         serverArgs: [
           ...svlSharedConfig.get('esTestCluster.serverArgs'),
+          // custom native roles are enabled only for search and security projects
+          ...(options.serverlessProject !== 'oblt'
+            ? ['xpack.security.authc.native_roles.enabled=true']
+            : []),
           ...esServerArgsFromController[options.serverlessProject],
         ],
       },
@@ -113,11 +119,19 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,
+          // defined in MKI control plane. Necessary for Synthetics app testing
+          '--xpack.uptime.service.password=test',
+          '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+          '--xpack.uptime.service.devUrl=mockDevUrl',
+          '--xpack.uptime.service.manifestUrl=mockDevUrl',
         ],
       },
       testFiles: options.testFiles,
       junit: options.junit,
-      suiteTags: options.suiteTags,
+      suiteTags: {
+        include: options.suiteTags?.include,
+        exclude: [...(options.suiteTags?.exclude || []), 'skipServerless'],
+      },
     };
   };
 }

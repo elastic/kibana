@@ -29,7 +29,7 @@
           },
           "[]"
         ],
-        "path": "packages/core/config/core-config-server-internal/src/deprecation/core_deprecations.ts",
+        "path": "src/core/packages/config/server-internal/src/deprecation/core_deprecations.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -51,16 +51,10 @@
           "(configService: ",
           "IConfigService",
           ", params: ",
-          {
-            "pluginId": "@kbn/core-config-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreConfigServerInternalPluginApi",
-            "section": "def-server.EnsureValidConfigurationParameters",
-            "text": "EnsureValidConfigurationParameters"
-          },
+          "EnsureValidConfigurationParameters",
           ") => Promise<void>"
         ],
-        "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
+        "path": "src/core/packages/config/server-internal/src/ensure_valid_configuration.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -76,7 +70,7 @@
             "signature": [
               "IConfigService"
             ],
-            "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
+            "path": "src/core/packages/config/server-internal/src/ensure_valid_configuration.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -91,15 +85,9 @@
               "{@link EnsureValidConfigurationParameters | Options} to enable/disable extra edge-cases."
             ],
             "signature": [
-              {
-                "pluginId": "@kbn/core-config-server-internal",
-                "scope": "server",
-                "docId": "kibKbnCoreConfigServerInternalPluginApi",
-                "section": "def-server.EnsureValidConfigurationParameters",
-                "text": "EnsureValidConfigurationParameters"
-              }
+              "EnsureValidConfigurationParameters"
             ],
-            "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
+            "path": "src/core/packages/config/server-internal/src/ensure_valid_configuration.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -122,17 +110,11 @@
           "\nParameters for the helper {@link ensureValidConfiguration}\n"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-config-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreConfigServerInternalPluginApi",
-            "section": "def-server.EnsureValidConfigurationParameters",
-            "text": "EnsureValidConfigurationParameters"
-          },
+          "EnsureValidConfigurationParameters",
           " extends ",
           "ConfigValidateParameters"
         ],
-        "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
+        "path": "src/core/packages/config/server-internal/src/ensure_valid_configuration.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -148,7 +130,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/core/config/core-config-server-internal/src/ensure_valid_configuration.ts",
+            "path": "src/core/packages/config/server-internal/src/ensure_valid_configuration.ts",
             "deprecated": false,
             "trackAdoption": false
           }

@@ -11,6 +11,6 @@ export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Cases - group 1', function () {
     loadTestFile(require.resolve('./create_case_form'));
     loadTestFile(require.resolve('./view_case'));
-    loadTestFile(require.resolve('./deletion'));
+    loadTestFile(require.resolve('./sub_privileges'));
   });
 };
