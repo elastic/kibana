@@ -20,7 +20,6 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSpacer,
-  EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -106,25 +105,11 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
             <>
               <EuiSpacer size="s" />
               <EuiFormRow fullWidth>
-                <EuiText
-                  color="danger"
-                  data-test-subj="searchSynonymsCreateSynonymsSetModalError"
-                  size="s"
-                >
-                  <p>
-                    <FormattedMessage
-                      id="xpack.searchSynonyms.createSynonymsSetModal.error"
-                      defaultMessage="Creating a synonyms set with the same name will overwrite the existing set."
-                    />
-                  </p>
-                </EuiText>
-              </EuiFormRow>
-              <EuiFormRow fullWidth>
                 <EuiCheckbox
                   id={overwriteId}
                   data-test-subj="searchSynonymsCreateSynonymsSetModalForceWrite"
                   label={i18n.translate('xpack.searchSynonyms.createSynonymsSetModal.forceWrite', {
-                    defaultMessage: 'I understand the risks. Overwrite the existing synonym set.',
+                    defaultMessage: 'Overwrite the existing synonym set.',
                   })}
                   checked={forceWrite}
                   onChange={() => setForceWrite(!forceWrite)}
