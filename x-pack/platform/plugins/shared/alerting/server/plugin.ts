@@ -72,7 +72,7 @@ import {
 } from './rules_settings';
 import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
 import { ILicenseState, LicenseState } from './lib/license_state';
-import { AlertingRequestHandlerContext, ALERTING_FEATURE_ID, RuleAlertData } from './types';
+import { AlertingRequestHandlerContext, ALERTING_FEATURE_ID, RuleAlertData, RULES_SETTINGS_SAVED_OBJECT_TYPE } from './types';
 import { defineRoutes } from './routes';
 import {
   AlertInstanceContext,
@@ -113,9 +113,10 @@ import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import { ConnectorAdapter, ConnectorAdapterParams } from './connector_adapters/types';
 import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
-import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
+import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias, spaceIdToNamespace } from './lib';
 import { BackfillClient } from './backfill_client/backfill_client';
 import { MaintenanceWindowsService } from './task_runner/maintenance_windows';
+import { AlertDeletionClient } from './alert_deletion';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -233,6 +234,7 @@ export class AlertingPlugin {
   private pluginStop$: Subject<void>;
   private dataStreamAdapter?: DataStreamAdapter;
   private backfillClient?: BackfillClient;
+  private alertDeletionClient?: AlertDeletionClient;
   private readonly isServerless: boolean;
   private nodeRoles: PluginInitializerContext['node']['roles'];
   private readonly connectorAdapterRegistry = new ConnectorAdapterRegistry();
@@ -299,6 +301,18 @@ export class AlertingPlugin {
       taskManagerSetup: plugins.taskManager,
       taskManagerStartPromise,
       taskRunnerFactory: this.taskRunnerFactory,
+    });
+
+    this.alertDeletionClient = new AlertDeletionClient({
+      elasticsearchClientPromise: core
+            .getStartServices()
+            .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+      internalSavedObjectsRepositoryPromise: core.getStartServices().then(([{ savedObjects }]) =>
+        savedObjects.createInternalRepository([RULES_SETTINGS_SAVED_OBJECT_TYPE])),
+      logger: this.logger,
+      spacesStartPromise: core.getStartServices().then(([_, alertingStart]) => alertingStart.spaces),
+      taskManagerSetup: plugins.taskManager,
+      taskManagerStartPromise,
     });
 
     this.eventLogger = plugins.eventLog.getLogger({
@@ -409,6 +423,7 @@ export class AlertingPlugin {
       config$: plugins.unifiedSearch.autocomplete.getInitializerContextConfig().create(),
       isServerless: this.isServerless,
       docLinks: core.docLinks,
+      alertDeletionClient: this.alertDeletionClient,
     });
 
     return {
@@ -507,12 +522,6 @@ export class AlertingPlugin {
       includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, AD_HOC_RUN_SAVED_OBJECT_TYPE],
     });
 
-    const spaceIdToNamespace = (spaceId?: string) => {
-      return plugins.spaces && spaceId
-        ? plugins.spaces.spacesService.spaceIdToNamespace(spaceId)
-        : undefined;
-    };
-
     alertingAuthorizationClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,
       securityPluginStart: plugins.security,
@@ -536,7 +545,7 @@ export class AlertingPlugin {
         AD_HOC_RUN_SAVED_OBJECT_TYPE,
       ]),
       encryptedSavedObjectsClient,
-      spaceIdToNamespace,
+      spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
       getSpaceId(request: KibanaRequest) {
         return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
       },
@@ -621,7 +630,7 @@ export class AlertingPlugin {
       }),
       savedObjects: core.savedObjects,
       share: plugins.share,
-      spaceIdToNamespace,
+      spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
       uiSettings: core.uiSettings,
       usageCounter: this.usageCounter,
       getEventLogClient: (request: KibanaRequest) => plugins.eventLog.getClient(request),
