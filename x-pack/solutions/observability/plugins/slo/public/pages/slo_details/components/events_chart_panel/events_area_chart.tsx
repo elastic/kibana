@@ -14,9 +14,9 @@ import { useAnnotations } from '@kbn/observability-plugin/public';
 import { GetPreviewDataResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import moment from 'moment';
-import { getBrushTimeBounds } from '../../../utils/slo/duration';
-import { TimeBounds } from '../types';
-import { useKibana } from '../../../hooks/use_kibana';
+import { getBrushTimeBounds } from '../../../../utils/slo/duration';
+import { TimeBounds } from '../../types';
+import { useKibana } from '../../../../hooks/use_kibana';
 
 export function EventsAreaChart({
   slo,

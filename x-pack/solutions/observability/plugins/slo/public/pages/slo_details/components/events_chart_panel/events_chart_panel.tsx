@@ -22,12 +22,12 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TimesliceAnnotation } from './timeslice_annotation';
 import { EventsAreaChart } from './events_area_chart';
-import { TimeBounds } from '../types';
-import { SloTabId } from './slo_details';
-import { useGetPreviewData } from '../../../hooks/use_get_preview_data';
-import { useKibana } from '../../../hooks/use_kibana';
-import { GoodBadEventsChart } from '../../../components/good_bad_events_chart/good_bad_events_chart';
-import { getDiscoverLink } from '../../../utils/slo/get_discover_link';
+import { TimeBounds } from '../../types';
+import { SloTabId } from '../slo_details';
+import { useGetPreviewData } from '../../../../hooks/use_get_preview_data';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { GoodBadEventsChart } from './good_bad_events_chart';
+import { getDiscoverLink } from '../../../../utils/slo/get_discover_link';
 
 export interface Props {
   slo: SLOWithSummaryResponse;

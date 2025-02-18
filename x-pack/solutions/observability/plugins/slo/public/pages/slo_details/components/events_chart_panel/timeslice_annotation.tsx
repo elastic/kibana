@@ -9,7 +9,7 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { AnnotationDomainType, LineAnnotation, RectAnnotation } from '@elastic/charts';
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { COMPARATOR_MAPPING } from '../../slo_edit/constants';
+import { COMPARATOR_MAPPING } from '../../../slo_edit/constants';
 
 interface Props {
   slo: SLOWithSummaryResponse;
