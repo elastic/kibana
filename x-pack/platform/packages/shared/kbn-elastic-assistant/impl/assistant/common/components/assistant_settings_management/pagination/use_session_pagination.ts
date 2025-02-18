@@ -13,7 +13,7 @@ import { DEFAULT_PAGE_SIZE } from '../../../../settings/const';
 
 export const getDefaultTableOptions = <T>(sortField: keyof T) => ({
   page: { size: DEFAULT_PAGE_SIZE, index: 0 },
-  sort: { field: sortField, direction: 'asc' as const },
+  sort: { field: sortField, direction: 'desc' as const },
 });
 
 interface InMemoryPagination {
@@ -68,17 +68,18 @@ export const useSessionPagination = <T extends {}, B extends boolean>({
     [inMemory, sessionStorageTableOptions, totalItemCount]
   );
 
-  const sorting = useMemo(
-    () =>
-      ({
-        sort: sessionStorageTableOptions.sort ?? defaultTableOptions.sort,
-      } as B extends true ? EuiInMemoryTableProps<T>['sorting'] : EuiTableSortingType<T>),
-    [defaultTableOptions.sort, sessionStorageTableOptions.sort]
-  );
+  const sorting = useMemo(() => {
+    console.log('sessionStorage sort', sessionStorageTableOptions.sort);
+    console.log('defaultTableOptions sort', defaultTableOptions.sort);
+    return {
+      sort: sessionStorageTableOptions.sort ?? defaultTableOptions.sort,
+    } as B extends true ? EuiInMemoryTableProps<T>['sorting'] : EuiTableSortingType<T>;
+  }, [defaultTableOptions.sort, sessionStorageTableOptions.sort]);
 
   const onTableChange: UseSessionPaginationReturn<T, B>['onTableChange'] = useCallback(
     (args: CriteriaWithPagination<T>) => {
       const { page, sort } = args;
+      console.log('setSessionStorageTableOptions sort', sort);
       setSessionStorageTableOptions({
         page,
         ...(sort ? { sort } : {}),

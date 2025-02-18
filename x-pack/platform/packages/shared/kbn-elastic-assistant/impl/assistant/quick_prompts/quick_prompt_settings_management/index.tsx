@@ -153,7 +153,7 @@ const QuickPromptSettingsManagementComponent = () => {
   });
 
   const { onTableChange, pagination, sorting } = useSessionPagination<PromptResponse, true>({
-    defaultTableOptions: getDefaultTableOptions<PromptResponse>('createdAt'),
+    defaultTableOptions: getDefaultTableOptions<PromptResponse>('updatedAt'),
     nameSpace,
     storageKey: QUICK_PROMPT_TABLE_SESSION_STORAGE_KEY,
   });

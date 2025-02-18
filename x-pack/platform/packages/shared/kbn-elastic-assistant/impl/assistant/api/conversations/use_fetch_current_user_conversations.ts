@@ -34,6 +34,8 @@ export interface UseFetchCurrentUserConversationsParams {
   page?: number;
   perPage?: number;
   signal?: AbortSignal | undefined;
+  sortField?: string;
+  sortOrder?: string;
   refetchOnWindowFocus?: boolean;
   isAssistantEnabled: boolean;
   setTotalItemCount?: (total: number) => void;
@@ -80,11 +82,17 @@ export const useFetchCurrentUserConversations = ({
   page = query.page,
   perPage = query.perPage,
   signal,
+  sortField = 'updated_at',
+  sortOrder = 'desc',
   refetchOnWindowFocus = true,
   isAssistantEnabled,
   setTotalItemCount,
 }: UseFetchCurrentUserConversationsParams): FetchCurrentUserConversations => {
   const queryFn = async ({ pageParam }: { pageParam?: UseFetchCurrentUserConversationsParams }) => {
+    console.log('sorting', {
+      sortField,
+      sortOrder,
+    });
     return http.fetch<FetchConversationsResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, {
       method: 'GET',
       version: API_VERSIONS.public.v1,
@@ -93,6 +101,8 @@ export const useFetchCurrentUserConversations = ({
         filter,
         page: pageParam?.page ?? page,
         per_page: pageParam?.perPage ?? perPage,
+        sort_field: sortField,
+        sort_order: sortOrder,
       },
       signal,
     });
@@ -111,7 +121,15 @@ export const useFetchCurrentUserConversations = ({
 
   const { data, fetchNextPage, hasNextPage, isFetched, isFetching, isLoading, refetch } =
     useInfiniteQuery(
-      [ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND, page, perPage, API_VERSIONS.public.v1, filter],
+      [
+        ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
+        page,
+        perPage,
+        API_VERSIONS.public.v1,
+        filter,
+        sortField,
+        sortOrder,
+      ],
       queryFn,
       {
         enabled: isAssistantEnabled,

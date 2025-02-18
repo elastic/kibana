@@ -17,6 +17,8 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { css } from '@emotion/react';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common';
+import { useConversationsUpdater } from '../../settings/use_settings_updater/use_conversations_updater';
 import { Conversation } from '../../../assistant_context/types';
 import { ConversationTableItem, useConversationsTable } from './use_conversations_table';
 import { ConversationStreamingSwitch } from '../conversation_settings/conversation_streaming_switch';
@@ -35,14 +37,14 @@ import {
   getDefaultTableOptions,
   useSessionPagination,
 } from '../../common/components/assistant_settings_management/pagination/use_session_pagination';
-import { useSettingsUpdater } from '../../settings/use_settings_updater/use_settings_updater';
 import { AssistantSettingsBottomBar } from '../../settings/assistant_settings_bottom_bar';
 interface Props {
   connectors: AIConnector[] | undefined;
   defaultConnector?: AIConnector;
   isDisabled?: boolean;
 }
-
+const camelToSnake = (camelStr: string): string =>
+  camelStr.replace(/(?<!^)([A-Z])/g, '_$1').toLowerCase();
 const ConversationSettingsManagementComponent: React.FC<Props> = ({
   connectors,
   defaultConnector,
@@ -56,15 +58,21 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     toasts,
   } = useAssistantContext();
 
-  const { data: allPrompts, isFetched: promptsLoaded, refetch: refetchPrompts } = useFetchPrompts();
+  const { data: allPrompts, refetch: refetchPrompts } = useFetchPrompts();
   const [totalItemCount, setTotalItemCount] = useState(5);
   const { onTableChange, pagination, sorting } = useSessionPagination<Conversation, false>({
     nameSpace,
     storageKey: CONVERSATION_TABLE_SESSION_STORAGE_KEY,
-    defaultTableOptions: getDefaultTableOptions<Conversation>('createdAt'),
+    defaultTableOptions: getDefaultTableOptions<Conversation>('updatedAt'),
     inMemory: false,
     totalItemCount,
   });
+
+  const allSystemPrompts = useMemo(
+    () => allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system),
+    [allPrompts.data]
+  );
+
   const {
     data: conversations,
     isFetched: conversationsLoaded,
@@ -76,6 +84,11 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     page: pagination.pageIndex + 1,
     perPage: pagination.pageSize,
     setTotalItemCount,
+    ...(sorting?.sort?.field
+      ? // @ts-ignore field can be Title field column gets entire conversation and is labeled Title
+        { sortField: sorting.sort.field === 'Title' ? 'title' : camelToSnake(sorting.sort.field) }
+      : {}),
+    ...(sorting?.sort?.direction ? { sortOrder: sorting.sort.direction } : {}),
   });
 
   const refetchAll = useCallback(() => {
@@ -84,21 +97,20 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   }, [refetchPrompts, refetchConversations]);
 
   const {
-    systemPromptSettings: allSystemPrompts,
     assistantStreamingEnabled,
     conversationsSettingsBulkActions,
-    resetSettings,
-    saveSettings,
+    resetConversationsSettings,
+    saveConversationsSettings,
     setConversationSettings,
     setConversationsSettingsBulkActions,
     setUpdatedAssistantStreamingEnabled,
-  } = useSettingsUpdater(conversations, allPrompts, conversationsLoaded, promptsLoaded);
+  } = useConversationsUpdater(conversations, conversationsLoaded);
 
   const [hasPendingChanges, setHasPendingChanges] = useState(false);
 
   const handleSave = useCallback(
     async (param?: { callback?: () => void }) => {
-      const isSuccess = await saveSettings();
+      const isSuccess = await saveConversationsSettings();
       if (isSuccess) {
         toasts?.addSuccess({
           iconType: 'check',
@@ -107,10 +119,10 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
         setHasPendingChanges(false);
         param?.callback?.();
       } else {
-        resetSettings();
+        resetConversationsSettings();
       }
     },
-    [resetSettings, saveSettings, toasts]
+    [resetConversationsSettings, saveConversationsSettings, toasts]
   );
 
   const setAssistantStreamingEnabled = useCallback(
@@ -127,9 +139,9 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   }, [handleSave, refetchAll]);
 
   const onCancelClick = useCallback(() => {
-    resetSettings();
+    resetConversationsSettings();
     setHasPendingChanges(false);
-  }, [resetSettings]);
+  }, [resetConversationsSettings]);
 
   // Local state for saving previously selected items so tab switching is friendlier
   // Conversation Selection State
