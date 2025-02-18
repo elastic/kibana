@@ -37,7 +37,7 @@
           },
           "[]) => Record<string, string>"
         ],
-        "path": "x-pack/platform/packages/shared/alerting_rule_utils/src/get_ecs_groups.ts",
+        "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/get_ecs_groups.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -58,7 +58,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/platform/packages/shared/alerting_rule_utils/src/get_ecs_groups.ts",
+            "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/get_ecs_groups.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -76,7 +76,7 @@
         "tags": [],
         "label": "Group",
         "description": [],
-        "path": "x-pack/platform/packages/shared/alerting_rule_utils/src/get_ecs_groups.ts",
+        "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/get_ecs_groups.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -87,7 +87,7 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "path": "x-pack/platform/packages/shared/alerting_rule_utils/src/get_ecs_groups.ts",
+            "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/get_ecs_groups.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -98,7 +98,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "path": "x-pack/platform/packages/shared/alerting_rule_utils/src/get_ecs_groups.ts",
+            "path": "x-pack/platform/packages/shared/alerting-rule-utils/src/get_ecs_groups.ts",
             "deprecated": false,
             "trackAdoption": false
           }
