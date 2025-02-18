@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test/jest_integration',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shated/kbn-storage-adapter'],
+  roots: ['<rootDir>/src/platform/packages/shared/kbn-storage-adapter'],
 };
