@@ -12,7 +12,6 @@ import { getFieldDefinitions } from '@kbn/management-settings-field-definition';
 import { FieldDefinition } from '@kbn/management-settings-types';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { Clause } from '@elastic/eui/src/components/search_bar/query/ast';
-import { SolutionView } from '@kbn/spaces-plugin/common';
 import { useServices } from '../services';
 import { CATEGORY_FIELD } from '../query_input';
 import { useSettings } from './use_settings';
@@ -21,24 +20,16 @@ import { useSettings } from './use_settings';
  * React hook which retrieves settings and returns an observed collection of
  * {@link FieldDefinition} objects derived from those settings.
  * @param scope The {@link UiSettingsScope} of the settings to be retrieved.
- * @param solution The {@link SolutionView} of the current active space.
  * @param query The {@link Query} to execute for filtering the fields.
  * @returns An array of {@link FieldDefinition} objects.
  */
-export const useFields = (
-  scope: UiSettingsScope,
-  solution?: SolutionView,
-  query?: Query
-): FieldDefinition[] => {
+export const useFields = (scope: UiSettingsScope, query?: Query): FieldDefinition[] => {
   const { isCustomSetting, isOverriddenSetting } = useServices();
   const settings = useSettings(scope);
-  let fields = getFieldDefinitions(settings, {
+  const fields = getFieldDefinitions(settings, {
     isCustom: (key) => isCustomSetting(key, scope),
     isOverridden: (key) => isOverriddenSetting(key, scope),
   });
-  if (solution && solution !== 'classic') {
-    fields = fields.filter((field) => field.solution === undefined || field.solution === solution);
-  }
   if (query) {
     const clauses: Clause[] = query.ast.clauses.map((clause) =>
       // If the clause value contains `:` and is not a category filter, add it as a term clause

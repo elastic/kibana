@@ -9,21 +9,16 @@
 
 import { Query } from '@elastic/eui';
 import { FieldDefinition } from '@kbn/management-settings-types';
-import { SolutionView } from '@kbn/spaces-plugin/common';
 import { useFields } from './use_fields';
 
 /**
  * React hook which retrieves the fields for each scope (`namespace` and `global`)
  * and returns two collections of {@link FieldDefinition} objects.
- * @param solution The {@link SolutionView} of the current active space.
  * @param query The {@link Query} to execute for filtering the fields.
  * @returns Two arrays of {@link FieldDefinition} objects.
  */
-export const useScopeFields = (
-  solution?: SolutionView,
-  query?: Query
-): [FieldDefinition[], FieldDefinition[]] => {
-  const spaceFields = useFields('namespace', solution, query);
-  const globalFields = useFields('global', solution, query);
+export const useScopeFields = (query?: Query): [FieldDefinition[], FieldDefinition[]] => {
+  const spaceFields = useFields('namespace', query);
+  const globalFields = useFields('global', query);
   return [spaceFields, globalFields];
 };

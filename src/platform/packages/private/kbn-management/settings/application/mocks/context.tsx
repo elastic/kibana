@@ -67,6 +67,7 @@ export const createSettingsApplicationServicesMock = (
     Promise.resolve({
       solution: spaceSolution,
     }),
+  subscribeToActiveSpace: () => new Subscription(),
 });
 
 export const TestWrapper = ({

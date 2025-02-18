@@ -26,7 +26,6 @@ import { i18nTexts } from './i18n_texts';
 import { Tab } from './tab';
 import { readOnlyBadge } from './read_only_badge';
 import { useScopeFields } from './hooks/use_scope_fields';
-import { useSolutionView } from './hooks/use_solution_view';
 import { QueryInput, QueryInputProps } from './query_input';
 import { useServices } from './services';
 
@@ -70,10 +69,8 @@ export const SettingsApplication = () => {
     addUrlToHistory(search);
   };
 
-  const currentSolution = useSolutionView();
-
-  const [spaceAllFields, globalAllFields] = useScopeFields(currentSolution);
-  const [spaceFilteredFields, globalFilteredFields] = useScopeFields(currentSolution, query);
+  const [spaceAllFields, globalAllFields] = useScopeFields();
+  const [spaceFilteredFields, globalFilteredFields] = useScopeFields(query);
 
   const {
     spaceSettings: { save: canSaveSpaceSettings },
