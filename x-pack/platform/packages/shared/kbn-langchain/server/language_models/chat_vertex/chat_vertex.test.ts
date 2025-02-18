@@ -140,6 +140,7 @@ const callOptions = {
 const handleLLMNewToken = jest.fn();
 const callRunManager = {
   handleLLMNewToken,
+  handleCustomEvent: jest.fn().mockResolvedValue({}),
 } as unknown as CallbackManagerForLLMRun;
 const onFailedAttempt = jest.fn();
 const defaultArgs = {
@@ -149,6 +150,7 @@ const defaultArgs = {
   streaming: false,
   maxRetries: 0,
   onFailedAttempt,
+  apiKey: "mock"
 };
 
 const testMessage = 'Yes, your name is Andrew. How can I assist you further, Andrew?';
@@ -188,7 +190,6 @@ describe('ActionsClientChatVertexAI', () => {
   describe('_generate streaming: false', () => {
     it('returns the expected content when _generate is invoked', async () => {
       const actionsClientChatVertexAI = new ActionsClientChatVertexAI(defaultArgs);
-
       const result = await actionsClientChatVertexAI._generate(
         callMessages,
         callOptions,
