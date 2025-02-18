@@ -19,8 +19,8 @@ import {
   UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import { css } from '@emotion/react';
+
 import { useGridLayoutContext } from '../use_grid_layout_context';
 
 export const GridRowTitle = React.memo(

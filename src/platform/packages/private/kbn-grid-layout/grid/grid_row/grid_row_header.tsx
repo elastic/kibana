@@ -9,7 +9,14 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { distinctUntilChanged, map } from 'rxjs';
 
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  UseEuiTheme,
+  euiCanAnimate,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -17,7 +24,6 @@ import { useGridLayoutContext } from '../use_grid_layout_context';
 import { deleteRow } from '../utils/row_management';
 import { DeleteGridRowModal } from './delete_grid_row_modal';
 import { GridRowTitle } from './grid_row_title';
-import { useGridRowHeaderStyles } from './use_grid_row_header_styles';
 
 export interface GridRowHeaderProps {
   rowIndex: number;
@@ -29,7 +35,6 @@ export const GridRowHeader = React.memo(
   ({ rowIndex, toggleIsCollapsed, collapseButtonRef }: GridRowHeaderProps) => {
     const { gridLayoutStateManager } = useGridLayoutContext();
 
-    const headerStyles = useGridRowHeaderStyles();
     const [editTitleOpen, setEditTitleOpen] = useState<boolean>(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
     const [readOnly, setReadOnly] = useState<boolean>(
@@ -89,7 +94,7 @@ export const GridRowHeader = React.memo(
         <EuiFlexGroup
           gutterSize="xs"
           alignItems="center"
-          css={headerStyles}
+          css={styles.headerStyles}
           className="kbnGridRowHeader"
           data-test-subj={`kbnGridRowHeader-${rowIndex}`}
         >
@@ -159,11 +164,7 @@ export const GridRowHeader = React.memo(
           }
         </EuiFlexGroup>
         {deleteModalVisible && (
-          <DeleteGridRowModal
-            rowIndex={rowIndex}
-            gridLayoutStateManager={gridLayoutStateManager}
-            setDeleteModalVisible={setDeleteModalVisible}
-          />
+          <DeleteGridRowModal rowIndex={rowIndex} setDeleteModalVisible={setDeleteModalVisible} />
         )}
       </>
     );
@@ -180,6 +181,32 @@ const styles = {
   floatToRight: css({
     marginLeft: 'auto',
   }),
+  headerStyles: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      height: `calc(${euiTheme.size.xl} + (2 * ${euiTheme.size.s}))`,
+      padding: `${euiTheme.size.s} 0px`,
+      borderBottom: '1px solid transparent', // prevents layout shift
+      '.kbnGridRowContainer--collapsed &': {
+        borderBottom: euiTheme.border.thin,
+      },
+      '.kbnGridLayout--deleteRowIcon': {
+        marginLeft: euiTheme.size.xs,
+      },
+      // these styles hide the delete + move actions by default and only show them on hover
+      [`.kbnGridLayout--deleteRowIcon,
+        .kbnGridLayout--moveRowIcon`]: {
+        opacity: '0',
+        [`${euiCanAnimate}`]: {
+          transition: `opacity ${euiTheme.animation.extraFast} ease-in`,
+        },
+      },
+      [`&:hover .kbnGridLayout--deleteRowIcon, 
+        &:hover .kbnGridLayout--moveRowIcon,
+        &:has(:focus-visible) .kbnGridLayout--deleteRowIcon,
+        &:has(:focus-visible) .kbnGridLayout--moveRowIcon`]: {
+        opacity: 1,
+      },
+    }),
 };
 
 GridRowHeader.displayName = 'GridRowHeader';

@@ -17,20 +17,20 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
 } from '@elastic/eui';
-
 import { i18n } from '@kbn/i18n';
-import { GridLayoutStateManager } from '../types';
+
 import { deleteRow, movePanelsToRow } from '../utils/row_management';
+import { useGridLayoutContext } from '../use_grid_layout_context';
 
 export const DeleteGridRowModal = ({
   rowIndex,
-  gridLayoutStateManager,
   setDeleteModalVisible,
 }: {
   rowIndex: number;
-  gridLayoutStateManager: GridLayoutStateManager;
   setDeleteModalVisible: (visible: boolean) => void;
 }) => {
+  const { gridLayoutStateManager } = useGridLayoutContext();
+
   return (
     <EuiModal
       onClose={() => {
