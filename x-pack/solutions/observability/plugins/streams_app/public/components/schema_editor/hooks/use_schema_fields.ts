@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import {
   NamedFieldDefinitionConfig,
   WiredStreamGetResponse,
@@ -14,6 +13,7 @@ import {
 } from '@kbn/streams-schema';
 import { isEqual, omit } from 'lodash';
 import { useMemo, useCallback } from 'react';
+import { useAbortController } from '@kbn/react-hooks';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { SchemaField, isSchemaFieldTyped } from '../types';
