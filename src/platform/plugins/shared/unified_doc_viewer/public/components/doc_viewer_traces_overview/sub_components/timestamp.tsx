@@ -21,7 +21,7 @@ export function Timestamp({ timestamp }: TimestampProps) {
   const absoluteTime = momentTime.format('MMM D, YYYY @ HH:mm:ss');
 
   return (
-    <EuiText size="xs">
+    <EuiText size="xs" data-test-subj="docViewerTracesOverviewTimestamp">
       {absoluteTime} ({relativeTime})
     </EuiText>
   );
