@@ -74,7 +74,7 @@ export function GeoFieldWorkspacePanel(props: Props) {
   );
 }
 
-export const DroppableStyles = ({ euiTheme }: UseEuiTheme) => {
+const DroppableStyles = ({ euiTheme }: UseEuiTheme) => {
   return `
     padding: ${euiTheme.size.xxl} ${euiTheme.size.xxxl};
     border: ${euiTheme.border.thin};

@@ -7,11 +7,6 @@
   }
 }
 
-.lnsLayerPanel__settingsStaticHeaderIcon {
-  margin-right: $euiSizeS;
-  vertical-align: inherit;
-}
-
 .lnsLayerPanel__row {
   padding: $euiSize;
 
@@ -38,29 +33,6 @@
   }
 }
 
-.lnsLayerPanel__group {
-  margin: (-$euiSizeXS) (-$euiSize);
-  padding: $euiSizeXS $euiSize;
-}
-
-.lnsLayerPanel__styleEditor {
-  padding: $euiSize;
-}
-
-// Start dimension style overrides
-
-.lnsLayerPanel__dimensionContainer {
-  position: relative;
-  &+& {
-    margin-top: $euiSizeS;
-  }
-}
-
-.domDroppable--replacing {
-  .dimensionTrigger__textLabel {
-    text-decoration: line-through;
-  }
-}
 
 // Removes EUI focus ring
 @mixin removeEuiFocusRing {
