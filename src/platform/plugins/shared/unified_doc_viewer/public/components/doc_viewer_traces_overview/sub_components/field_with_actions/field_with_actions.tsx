@@ -7,14 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  EuiLoadingSpinner,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiLoadingSpinner, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { PartialFieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
 import { FieldHoverActionPopover } from './field_hover_popover_action';
@@ -25,8 +18,8 @@ export interface FieldWithActionsProps {
   formattedValue: string;
   label: string;
   value: string;
+  children: React.ReactNode;
   loading?: boolean;
-  children?: (props: { content: React.ReactNode }) => React.ReactNode;
 }
 
 export function FieldWithActions({
@@ -72,7 +65,7 @@ export function FieldWithActions({
               gutterSize="xs"
             >
               {loading && <EuiLoadingSpinner size="m" />}
-              {children && children({ content: <FormattedValue value={formattedValue} /> })}
+              {children}
             </EuiFlexGroup>
           </FieldHoverActionPopover>
         </EuiFlexItem>
@@ -80,12 +73,3 @@ export function FieldWithActions({
     </div>
   );
 }
-
-const FormattedValue = ({ value }: { value: string }) => (
-  <EuiText
-    className="eui-textTruncate"
-    size="s"
-    // Value returned from formatFieldValue is always sanitized
-    dangerouslySetInnerHTML={{ __html: value }}
-  />
-);

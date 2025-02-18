@@ -46,7 +46,7 @@ export function TraceSummary({ fieldConfiguration, fieldId }: TraceSummaryProps)
         fieldMetadata={fieldConfiguration.fieldMetadata}
         loading={displayLoading && loading}
       >
-        {() => <div>{fieldConfiguration.content(fieldValue)}</div>}
+        <div>{fieldConfiguration.content(fieldValue)}</div>
       </FieldWithActions>
       <EuiHorizontalRule margin="xs" />
     </>
