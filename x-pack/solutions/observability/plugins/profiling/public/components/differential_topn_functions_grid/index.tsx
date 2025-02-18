@@ -10,19 +10,27 @@ import type {
   EuiDataGridColumn,
   EuiDataGridSorting,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiDataGrid, EuiScreenReaderOnly, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiDataGrid,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiScreenReaderOnly,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { StackFrameMetadata, TopNFunctions } from '@kbn/profiling-utils';
 import {
-  getCalleeFunction,
   TopNComparisonFunctionSortField,
   TopNFunctionSortField,
+  getCalleeFunction,
 } from '@kbn/profiling-utils';
 import { orderBy } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
+import { SearchFunctionsInput } from '../search_functions_input';
 import { FunctionRow } from '../topn_functions/function_row';
 import type { IFunctionRow } from '../topn_functions/utils';
 import { convertRowToFrame, getFunctionsRows, getTotalCount } from '../topn_functions/utils';
@@ -84,6 +92,8 @@ interface Props {
   comparisonSortField: TopNComparisonFunctionSortField;
   totalSeconds: number;
   comparisonTotalSeconds: number;
+  searchFunctionName: string;
+  onSearchFunctionNameChange: (functionName: string) => void;
 }
 
 export function DifferentialTopNFunctionsGrid({
@@ -101,6 +111,8 @@ export function DifferentialTopNFunctionsGrid({
   sortDirection,
   sortField,
   totalSeconds,
+  searchFunctionName,
+  onSearchFunctionNameChange,
 }: Props) {
   const theme = useEuiTheme();
   const calculateImpactEstimates = useCalculateImpactEstimate();
@@ -145,6 +157,7 @@ export function DifferentialTopNFunctionsGrid({
         calculateImpactEstimates,
         topNFunctions: base,
         totalSeconds,
+        functionNameSearchQuery: searchFunctionName,
       }),
       comparisonRows: getFunctionsRows({
         baselineScaleFactor,
@@ -153,6 +166,7 @@ export function DifferentialTopNFunctionsGrid({
         comparisonTopNFunctions: base,
         topNFunctions: comparison,
         totalSeconds: comparisonTotalSeconds,
+        functionNameSearchQuery: searchFunctionName,
       }),
     };
   }, [
@@ -162,6 +176,7 @@ export function DifferentialTopNFunctionsGrid({
     comparison,
     comparisonScaleFactor,
     comparisonTotalSeconds,
+    searchFunctionName,
     totalSeconds,
   ]);
 
@@ -226,109 +241,114 @@ export function DifferentialTopNFunctionsGrid({
   const rowCount = Math.max(sortedBaseRows.length, sortedComparisonRows.length);
 
   return (
-    <>
-      <EuiDataGrid
-        data-test-subj="profilingDiffTopNFunctionsGrid"
-        css={css`
-          .thickBorderLeft {
-            border-left: ${theme.euiTheme.border.thick} !important;
-          }
-        `}
-        aria-label={i18n.translate(
-          'xpack.profiling.onWeelkDiffTopN.euiDataGrid.topNFunctionsLabel',
-          {
-            defaultMessage: 'TopN functions',
-          }
-        )}
-        columns={columns}
-        leadingControlColumns={[
-          {
-            id: 'actions',
-            width: 40,
-            headerCellRender() {
-              return (
-                <EuiScreenReaderOnly>
-                  <span>
-                    {i18n.translate('xpack.profiling.topNFunctionsGrid.span.controlsLabel', {
-                      defaultMessage: 'Controls',
-                    })}
-                  </span>
-                </EuiScreenReaderOnly>
-              );
-            },
-            rowCellRender: function RowCellRender({ rowIndex }) {
-              function handleOnClick() {
-                const row = sortedBaseRows[rowIndex];
-                const currentFrameId = getFrameIdentification(row.frame);
-                const compareRow = sortedComparisonRows.find(
-                  (item) => getFrameIdentification(item.frame) === currentFrameId
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiFlexItem grow={false}>
+        <SearchFunctionsInput onChange={onSearchFunctionNameChange} value={searchFunctionName} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiDataGrid
+          data-test-subj="profilingDiffTopNFunctionsGrid"
+          css={css`
+            .thickBorderLeft {
+              border-left: ${theme.euiTheme.border.thick};
+            }
+          `}
+          aria-label={i18n.translate(
+            'xpack.profiling.onWeelkDiffTopN.euiDataGrid.topNFunctionsLabel',
+            {
+              defaultMessage: 'TopN functions',
+            }
+          )}
+          columns={columns}
+          leadingControlColumns={[
+            {
+              id: 'actions',
+              width: 40,
+              headerCellRender() {
+                return (
+                  <EuiScreenReaderOnly>
+                    <span>
+                      {i18n.translate('xpack.profiling.topNFunctionsGrid.span.controlsLabel', {
+                        defaultMessage: 'Controls',
+                      })}
+                    </span>
+                  </EuiScreenReaderOnly>
                 );
-                setRowsInformation({
-                  baseRow: row,
-                  comparisonRow: compareRow,
-                });
-              }
-              return (
-                <EuiButtonIcon
-                  data-test-subj="profilingTopNFunctionsGridButton"
-                  aria-label={i18n.translate(
-                    'xpack.profiling.topNFunctionsGrid.euiButtonIcon.showActionsLabel',
-                    { defaultMessage: 'Show actions' }
-                  )}
-                  iconType="expand"
-                  color="text"
-                  onClick={handleOnClick}
-                />
-              );
+              },
+              rowCellRender: function RowCellRender({ rowIndex }) {
+                function handleOnClick() {
+                  const row = sortedBaseRows[rowIndex];
+                  const currentFrameId = getFrameIdentification(row.frame);
+                  const compareRow = sortedComparisonRows.find(
+                    (item) => getFrameIdentification(item.frame) === currentFrameId
+                  );
+                  setRowsInformation({
+                    baseRow: row,
+                    comparisonRow: compareRow,
+                  });
+                }
+                return (
+                  <EuiButtonIcon
+                    data-test-subj="profilingTopNFunctionsGridButton"
+                    aria-label={i18n.translate(
+                      'xpack.profiling.topNFunctionsGrid.euiButtonIcon.showActionsLabel',
+                      { defaultMessage: 'Show actions' }
+                    )}
+                    iconType="expand"
+                    color="text"
+                    onClick={handleOnClick}
+                  />
+                );
+              },
             },
-          },
-        ]}
-        columnVisibility={{ visibleColumns, setVisibleColumns }}
-        rowCount={rowCount}
-        renderCellValue={CellValue}
-        sorting={{
-          columns: [
-            { id: sortField, direction: sortDirection },
-            { id: comparisonSortField, direction: comparisonSortDirection },
-          ],
-          onSort,
-        }}
-        pagination={{
-          pageIndex,
-          pageSize: 100,
-          // Left it empty on purpose as it is a required property on the pagination
-          onChangeItemsPerPage: () => {},
-          onChangePage,
-          pageSizeOptions: [],
-        }}
-        rowHeightsOptions={{ defaultHeight: 'auto' }}
-        toolbarVisibility={{
-          showColumnSelector: false,
-          showKeyboardShortcuts: false,
-          showDisplaySelector: false,
-          showSortSelector: false,
-        }}
-      />
-      {rowsInformation && (
-        <FrameInformationTooltip
-          compressed
-          comparisonRank={rowsInformation.comparisonRow?.rank}
-          comparisonFrame={
-            rowsInformation.comparisonRow
-              ? convertRowToFrame(rowsInformation.comparisonRow)
-              : undefined
-          }
-          comparisonTotalSamples={comparisonTotalCount}
-          comparisonTotalSeconds={comparisonTotalSeconds}
-          rank={rowsInformation.baseRow.rank}
-          frame={convertRowToFrame(rowsInformation.baseRow)}
-          totalSamples={totalCount}
-          totalSeconds={totalSeconds}
-          onClose={() => {
-            setRowsInformation(undefined);
+          ]}
+          columnVisibility={{ visibleColumns, setVisibleColumns }}
+          rowCount={rowCount}
+          renderCellValue={CellValue}
+          sorting={{
+            columns: [
+              { id: sortField, direction: sortDirection },
+              { id: comparisonSortField, direction: comparisonSortDirection },
+            ],
+            onSort,
+          }}
+          pagination={{
+            pageIndex,
+            pageSize: 100,
+            // Left it empty on purpose as it is a required property on the pagination
+            onChangeItemsPerPage: () => {},
+            onChangePage,
+            pageSizeOptions: [],
+          }}
+          rowHeightsOptions={{ defaultHeight: 'auto' }}
+          toolbarVisibility={{
+            showColumnSelector: false,
+            showKeyboardShortcuts: false,
+            showDisplaySelector: false,
+            showSortSelector: false,
           }}
         />
-      )}
-    </>
+        {rowsInformation && (
+          <FrameInformationTooltip
+            compressed
+            comparisonRank={rowsInformation.comparisonRow?.rank}
+            comparisonFrame={
+              rowsInformation.comparisonRow
+                ? convertRowToFrame(rowsInformation.comparisonRow)
+                : undefined
+            }
+            comparisonTotalSamples={comparisonTotalCount}
+            comparisonTotalSeconds={comparisonTotalSeconds}
+            rank={rowsInformation.baseRow.rank}
+            frame={convertRowToFrame(rowsInformation.baseRow)}
+            totalSamples={totalCount}
+            totalSeconds={totalSeconds}
+            onClose={() => {
+              setRowsInformation(undefined);
+            }}
+          />
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
