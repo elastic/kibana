@@ -22,9 +22,9 @@ import { FieldHoverActionPopover } from './field_hover_popover_action';
 export interface FieldWithActionsProps {
   field: string;
   fieldMetadata?: PartialFieldMetadataPlain;
-  formattedValue?: string;
+  formattedValue: string;
   label: string;
-  value?: unknown;
+  value: string;
   loading?: boolean;
   children?: (props: { content: React.ReactNode }) => React.ReactNode;
 }
@@ -64,7 +64,7 @@ export function FieldWithActions({
         </EuiFlexItem>
 
         <EuiFlexItem grow={2}>
-          <FieldHoverActionPopover title={value as string} value={value} field={field}>
+          <FieldHoverActionPopover title={value} value={value} field={field}>
             <EuiFlexGroup
               responsive={false}
               alignItems="center"
@@ -72,9 +72,7 @@ export function FieldWithActions({
               gutterSize="xs"
             >
               {loading && <EuiLoadingSpinner size="m" />}
-              {formattedValue &&
-                children &&
-                children({ content: <FormattedValue value={formattedValue} /> })}
+              {children && children({ content: <FormattedValue value={formattedValue} /> })}
             </EuiFlexGroup>
           </FieldHoverActionPopover>
         </EuiFlexItem>

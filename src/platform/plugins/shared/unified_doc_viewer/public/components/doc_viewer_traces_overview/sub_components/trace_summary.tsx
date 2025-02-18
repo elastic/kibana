@@ -41,7 +41,7 @@ export function TraceSummary({ fieldConfiguration, fieldId }: TraceSummaryProps)
         data-test-subj={`unifiedDocViewTracesOverviewAttribute-${fieldId}`}
         label={fieldConfiguration.title}
         field={fieldId}
-        value={fieldValue}
+        value={fieldValue as string}
         formattedValue={fieldValue as string}
         fieldMetadata={fieldConfiguration.fieldMetadata}
         loading={displayLoading && loading}
