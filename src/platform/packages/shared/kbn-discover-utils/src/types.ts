@@ -122,6 +122,7 @@ export interface TraceDocumentOverview
   'trace.id': string;
   'parent.id'?: string;
   'http.response.status_code'?: number;
+  'processor.event'?: 'span' | 'transaction';
 }
 
 export interface ServiceFields {

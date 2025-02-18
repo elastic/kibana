@@ -33,6 +33,7 @@ export function getTraceDocumentOverview(doc: DataTableRecord): TraceDocumentOve
     fieldConstants.SPAN_DESTINATION_SERVICE_RESOURCE_FIELD,
     fieldConstants.USER_AGENT_NAME_FIELD,
     fieldConstants.USER_AGENT_VERSION_FIELD,
+    fieldConstants.PROCESSOR_EVENT_FIELD,
   ];
 
   return fields.reduce((acc, field) => {
