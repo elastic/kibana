@@ -58,7 +58,12 @@ image::management/connectors/images/thehive-params-alert-test.png[{hive} alert p
 Event action:: The action that will be performed in {hive}: create a case or an alert.
 Title:: The title of the incident.
 Description:: The details about the incident.
-Severity:: The severity of the incident: `LOW`, `MEDIUM`, `HIGH` or `CRITICAL`.
+Severity:: The severity of the incident: LOW, MEDIUM, HIGH or CRITICAL.
++
+--
+NOTE: While creating an alert, use the Keep severity from rule toggle to create an alert with the rule's severity. If the rule does not have a defined severity, the alert will have the default MEDIUM severity.
+--
+
 TLP:: The traffic light protocol designation for the incident: `CLEAR`, `GREEN`, `AMBER`, `AMBER+STRICT` or `RED`.
 Tags:: The keywords or tags for the incident.
 Additional comments:: Additional information about the incident.

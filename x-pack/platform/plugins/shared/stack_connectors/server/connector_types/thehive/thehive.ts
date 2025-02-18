@@ -158,7 +158,7 @@ export class TheHiveConnector extends CaseConnector<
     try {
       const { body, ...restOfAlert } = alert;
       const bodyJson = JSON.parse(body ?? '{}');
-      const mergedAlertBody = { ...restOfAlert, ...bodyJson };
+      const mergedAlertBody = { ...bodyJson, ...restOfAlert };
 
       return mergedAlertBody;
     } catch (err) {

@@ -36383,12 +36383,6 @@ Object {
       ],
       "type": "alternatives",
     },
-    "template": Object {
-      "flags": Object {
-        "error": [Function],
-      },
-      "type": "number",
-    },
     "title": Object {
       "flags": Object {
         "error": [Function],
