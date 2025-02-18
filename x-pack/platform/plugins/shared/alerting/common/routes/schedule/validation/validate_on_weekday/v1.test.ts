@@ -6,24 +6,30 @@
  */
 import { validateOnWeekDay } from './v1';
 
-describe('validateRecurrenceByWeekday', () => {
+describe('validateOnWeekDay', () => {
   it('validates empty array', () => {
     expect(validateOnWeekDay([])).toEqual('OnWeekDay cannot be empty');
   });
 
-  it('validates properly formed byweekday strings', () => {
+  it('validates properly formed onWeekDay strings', () => {
     const weekdays = ['+1MO', '+2TU', '+3WE', '+4TH', '-4FR', '-3SA', '-2SU', '-1MO'];
 
     expect(validateOnWeekDay(weekdays)).toBeUndefined();
   });
 
-  it('validates improperly formed byweekday strings', () => {
+  it('validates improperly formed onWeekDay strings', () => {
     expect(validateOnWeekDay(['+1MO', 'FOO', '+3WE', 'BAR', '-4FR'])).toEqual(
       'Invalid onWeekDay values in recurring schedule: FOO,BAR'
     );
   });
 
-  it('validates byweekday strings without recurrence', () => {
+  it('validates invalid week numbers in onWeekDay strings', () => {
+    expect(validateOnWeekDay(['+5MO', '+3WE', '-7FR'])).toEqual(
+      'Invalid onWeekDay values in recurring schedule: +5MO,-7FR'
+    );
+  });
+
+  it('validates onWeekDay strings without recurrence', () => {
     expect(validateOnWeekDay(['MO', 'TU', 'WE', 'TH', 'FR', 'SA', 'SU'])).toBeUndefined();
   });
 });

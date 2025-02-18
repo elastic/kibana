@@ -21,7 +21,7 @@ export const validateDuration = (duration: string) => {
   const date = dateMath.parse(`now-${duration}`);
 
   if (!date || !date.isValid()) {
-    return 'Invalid duration.';
+    return 'Invalid schedule duration.';
   }
   return;
 };
