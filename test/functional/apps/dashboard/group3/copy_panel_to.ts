@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(modalIsOpened).to.be(true);
   };
 
-  describe.only('dashboard panel copy to', function viewEditModeTests() {
+  describe('dashboard panel copy to', function viewEditModeTests() {
     before(async function () {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
