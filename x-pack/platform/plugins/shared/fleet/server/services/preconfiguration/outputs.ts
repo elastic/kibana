@@ -21,9 +21,7 @@ import type {
   NewOutput,
   OutputSecret,
   KafkaOutput,
-  NewLogstashOutput,
   NewRemoteElasticsearchOutput,
-  NewElasticsearchOutput,
 } from '../../../common/types';
 import { normalizeHostsForAgents } from '../../../common/services';
 import type { FleetConfigType } from '../../config';
@@ -186,17 +184,7 @@ async function hashSecrets(output: PreconfiguredOutput) {
       };
     }
   }
-  if (output.type === 'logstash') {
-    const logstashOutput = output as NewLogstashOutput;
-    if (typeof logstashOutput.secrets?.ssl?.key === 'string') {
-      const key = await hashSecret(logstashOutput.secrets?.ssl?.key);
-      return {
-        ssl: {
-          key,
-        },
-      };
-    }
-  }
+
   if (output.type === 'remote_elasticsearch') {
     const remoteESOutput = output as NewRemoteElasticsearchOutput;
     let secrets;
@@ -223,17 +211,14 @@ async function hashSecrets(output: PreconfiguredOutput) {
     }
     return secrets;
   }
-
-  if (output.type === 'elasticsearch') {
-    const esOutput = output as NewElasticsearchOutput;
-    if (typeof esOutput.secrets?.ssl?.key === 'string') {
-      const key = await hashSecret(esOutput.secrets?.ssl?.key);
-      return {
-        ssl: {
-          key,
-        },
-      };
-    }
+  // es and logstash types have only `ssl.key`
+  if (typeof output.secrets?.ssl?.key === 'string') {
+    const key = await hashSecret(output.secrets?.ssl?.key);
+    return {
+      ssl: {
+        key,
+      },
+    };
   }
 
   return undefined;
@@ -384,8 +369,7 @@ async function isPreconfiguredOutputDifferentFromCurrent(
         existingOutput.secrets?.kibana_api_key
       )) ||
       isDifferent(existingOutput.kibana_url, preconfiguredOutput.kibana_url) ||
-      isDifferent(existingOutput.sync_integrations, preconfiguredOutput.sync_integrations) ||
-      isDifferent(existingOutput.secrets?.ssl?.key, preconfiguredOutput.secrets?.ssl?.key);
+      isDifferent(existingOutput.sync_integrations, preconfiguredOutput.sync_integrations);
 
     return serviceTokenIsDifferent;
   };

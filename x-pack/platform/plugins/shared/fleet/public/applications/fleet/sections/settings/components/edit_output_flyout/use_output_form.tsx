@@ -379,7 +379,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     validateSSLCertificate,
     isSSLEditable
   );
-  const sslKeyInput = useInput(output?.ssl?.key ?? '', validateSSLKey, isSSLEditable);
+  const sslKeyInput = useInput((output?.ssl?.key as string) ?? '', validateSSLKey, isSSLEditable);
 
   const sslKeySecretInput = useSecretInput(
     (output as NewLogstashOutput)?.secrets?.ssl?.key,
@@ -447,7 +447,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     isSSLEditable
   );
   const kafkaSslKeyInput = useInput(
-    kafkaOutput?.ssl?.key,
+    kafkaOutput?.ssl?.key as string,
     kafkaAuthMethodInput.value === kafkaAuthType.Ssl ? validateSSLKey : undefined,
     isSSLEditable
   );

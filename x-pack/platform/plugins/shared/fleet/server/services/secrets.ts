@@ -386,12 +386,7 @@ export async function deleteOutputSecrets(opts: {
 export function getOutputSecretReferences(output: Output): PolicySecretReference[] {
   const outputSecretPaths: PolicySecretReference[] = [];
 
-  if (
-    (output.type === 'kafka' ||
-      output.type === 'logstash' ||
-      output.type === 'remote_elasticsearch') &&
-    typeof output.secrets?.ssl?.key === 'object'
-  ) {
+  if (typeof output.secrets?.ssl?.key === 'object') {
     outputSecretPaths.push({
       id: output.secrets.ssl.key.id,
     });

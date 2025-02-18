@@ -543,14 +543,16 @@ class OutputService {
 
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
 
-    if (output.type === outputType.Logstash || output.type === outputType.Kafka) {
+    if (output.type === outputType.Logstash) {
       await validateLogstashOutputNotUsedInAPMPolicy(undefined, data.is_default);
-      if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
-        throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
-          `${output.type} output needs encrypted saved object api key to be set`
-        );
-      }
     }
+
+    if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+      throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
+        `${output.type} output needs encrypted saved object api key to be set`
+      );
+    }
+
     const { policiesWithFleetServer, policiesWithSynthetics } =
       await findPoliciesWithFleetServerOrSynthetics();
     const agentlessPolicies = await findAgentlessPolicies();
@@ -693,7 +695,6 @@ class OutputService {
         if (!output.service_token && output.secrets?.service_token) {
           data.service_token = output.secrets?.service_token as string;
         }
-
         if (!output.kibana_api_key && output.secrets?.kibana_api_key) {
           data.kibana_api_key = output.secrets?.kibana_api_key as string;
         }
@@ -709,7 +710,6 @@ class OutputService {
       overwrite: options?.overwrite || options?.fromPreconfiguration,
       id,
     });
-
     logger.debug(`Created new output ${id}`);
     return outputSavedObjectToOutput(newSo);
   }
@@ -1011,7 +1011,7 @@ class OutputService {
 
     if (data.ssl) {
       updateData.ssl = JSON.stringify(data.ssl);
-    } else {
+    } else if (data.ssl === null) {
       // Explicitly set to null to allow to delete the field
       updateData.ssl = null;
     }
@@ -1025,6 +1025,9 @@ class OutputService {
       }
       if (!data.sasl) {
         updateData.sasl = null;
+      }
+      if (!data.ssl) {
+        updateData.ssl = null;
       }
     }
 
