@@ -61,7 +61,6 @@ module.exports = (_, argv) => {
         '@elastic/charts',
         '@elastic/eui',
         '@elastic/eui/optimize/es/components/provider/nested',
-        '@elastic/eui/optimize/es/services/theme/warning',
         '@elastic/eui/dist/eui_theme_light.json',
         '@elastic/eui/dist/eui_theme_dark.json',
         '@elastic/numeral',

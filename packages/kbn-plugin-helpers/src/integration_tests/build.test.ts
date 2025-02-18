@@ -72,10 +72,9 @@ it('builds a generated plugin into a viable archive', async () => {
      info run bazel and build required artifacts for the optimizer
      succ bazel run successfully and artifacts were created
      info running @kbn/optimizer
-     │ERROR No current read transaction available/Users/tiagocosta/.backport/repositories/elastic/kibana/node_modules/@babel/core/lib/parser/index.js:74
+     │ succ browser bundle created at plugins/foo_test_plugin/build/kibana/fooTestPlugin/target/public
      │ info stopping @kbn/optimizer
      info compressing js and css bundles found at plugins/foo_test_plugin/build/kibana/fooTestPlugin/target/public to brotli
-    ERROR Error: ENOENT: no such file or directory, scandir '/Users/tiagocosta/.backport/repositories/elastic/kibana/plugins/foo_test_plugin/build/kibana/fooTestPlugin/target/public'
      info copying assets from \`public/assets\` to build
      info copying server source into the build and converting with babel
      info running yarn to install dependencies
@@ -99,6 +98,10 @@ it('builds a generated plugin into a viable archive', async () => {
       "kibana/fooTestPlugin/server/plugin.js",
       "kibana/fooTestPlugin/server/routes/index.js",
       "kibana/fooTestPlugin/server/types.js",
+      "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.637.js",
+      "kibana/fooTestPlugin/target/public/fooTestPlugin.chunk.637.js.br",
+      "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js",
+      "kibana/fooTestPlugin/target/public/fooTestPlugin.plugin.js.br",
       "kibana/fooTestPlugin/translations/ja-JP.json",
       "kibana/fooTestPlugin/tsconfig.json",
     ]
