@@ -53,7 +53,10 @@ export interface AssistantTelemetry {
     isEnabledKnowledgeBase: boolean;
   }) => void;
   reportAssistantQuickPrompt: (params: { promptTitle: string }) => void;
-  reportAssistantSettingToggled: (params: { assistantStreamingEnabled?: boolean }) => void;
+  reportAssistantSettingToggled: (params: {
+    assistantStreamingEnabled?: boolean;
+    alertsCountUpdated?: boolean;
+  }) => void;
 }
 
 export interface AssistantAvailability {
