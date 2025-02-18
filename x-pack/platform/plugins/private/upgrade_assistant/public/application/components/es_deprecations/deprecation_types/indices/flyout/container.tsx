@@ -154,6 +154,7 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
             startReadonly={() => {
               setFlyoutStep('confirmReadonly');
             }}
+            deprecation={deprecation}
             updateIndexState={updateIndexState}
             reindexState={reindexState}
           />
@@ -214,6 +215,7 @@ export const IndexFlyout: React.FunctionComponent<IndexFlyoutProps> = ({
   }, [
     flyoutStep,
     correctiveAction?.type,
+    deprecation,
     closeFlyout,
     updateIndexState,
     reindexState,

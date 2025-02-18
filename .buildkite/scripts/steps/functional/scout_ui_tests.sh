@@ -31,4 +31,12 @@ for run_mode in "--stateful"; do
   run_tests "Maps" "x-pack/platform/plugins/shared/maps/ui_tests/playwright.config.ts" "$run_mode"
 done
 
+# Observability Onboarding
+for run_mode in "--stateful"; do
+  run_tests "Observability Onboarding: Parallel Workers" "x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/parallel.playwright.config.ts" "$run_mode"
+  # Disabled while we don't have any tests under the config
+  # run_tests "Observability Onboarding" "x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/playwright.config.ts" "$run_mode"
+done
+
+
 exit $EXIT_CODE
