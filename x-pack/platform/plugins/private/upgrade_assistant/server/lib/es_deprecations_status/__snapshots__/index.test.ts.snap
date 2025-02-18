@@ -93,6 +93,20 @@ Object {
     },
     Object {
       "correctiveAction": Object {
+        "blockerForReindexing": undefined,
+        "type": "reindex",
+      },
+      "details": "This index has version: 7.17.28-8.0.0",
+      "frozen": true,
+      "index": "frozen_index",
+      "isCritical": true,
+      "message": "Old index with a compatibility version < 8.0",
+      "resolveDuringUpgrade": false,
+      "type": "index_settings",
+      "url": "https://www.elastic.co/guide/en/elasticsearch/reference/current/migrating-8.0.html#breaking-changes-8.0",
+    },
+    Object {
+      "correctiveAction": Object {
         "blockerForReindexing": "index-closed",
         "type": "reindex",
       },
@@ -203,7 +217,7 @@ Object {
       "url": "https://github.com/elastic/elasticsearch/pull/117172",
     },
   ],
-  "totalCriticalDeprecations": 7,
+  "totalCriticalDeprecations": 8,
   "totalCriticalHealthIssues": 0,
 }
 `;
