@@ -234,7 +234,7 @@ export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutPr
           <h2>{i18nTexts.flyoutTitle}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody data-test-subj="flyoutDetails">
         <EuiText>
           <p>{i18nTexts.flyoutDescription}</p>
         </EuiText>

@@ -5,18 +5,22 @@ Array [
   Array [
     "Security",
     "Migration failed",
+    "",
   ],
   Array [
     "Machine Learning",
     "Migration in progress",
+    "",
   ],
   Array [
     "Kibana",
     "Migration required",
+    "",
   ],
   Array [
     "Logstash",
     "Migration complete",
+    "",
   ],
 ]
 `;
