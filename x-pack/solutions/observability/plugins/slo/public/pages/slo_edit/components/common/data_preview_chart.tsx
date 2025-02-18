@@ -60,11 +60,13 @@ interface DataPreviewChartProps {
 
 export function DataPreviewChart({
   formatPattern,
+  // Specific to timeslice metric indicator type
   threshold,
   thresholdDirection,
   thresholdColor,
   thresholdMessage,
   ignoreMoreThan100,
+  // end specific timeslice metric indicator type
   label,
   useGoodBadEventsChart,
   range,
@@ -250,7 +252,6 @@ export function DataPreviewChart({
               data={previewData || []}
               bottomTitle={label || DEFAULT_LABEL}
               isLoading={isPreviewLoading}
-              annotation={annotation}
             />
           )}
           {isSuccess && !useGoodBadEventsChart && (
