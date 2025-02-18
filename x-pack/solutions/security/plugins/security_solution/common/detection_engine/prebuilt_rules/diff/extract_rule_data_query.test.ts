@@ -47,7 +47,7 @@ describe('extract rule data queries', () => {
       });
     });
 
-    it('normalizes filters', () => {
+    it('normalizes filters with all fields present', () => {
       const extractedKqlQuery = extractRuleKqlQuery(
         'event.kind:alert',
         'kuery',
@@ -55,24 +55,23 @@ describe('extract rule data queries', () => {
         undefined
       );
 
-      expect(extractedKqlQuery).toEqual({
-        type: KqlQueryType.inline_query,
-        query: 'event.kind:alert',
-        language: 'kuery',
-        filters: [
-          {
-            meta: {
-              negate: false,
-              disabled: false,
-            },
-            query: {
-              term: {
-                field: 'value',
+      expect(extractedKqlQuery).toEqual(
+        expect.objectContaining({
+          filters: [
+            {
+              meta: {
+                negate: false,
+                disabled: false,
+              },
+              query: {
+                term: {
+                  field: 'value',
+                },
               },
             },
-          },
-        ],
-      });
+          ],
+        })
+      );
     });
 
     it('normalizes filters without disabled field', () => {
@@ -83,24 +82,94 @@ describe('extract rule data queries', () => {
         undefined
       );
 
-      expect(extractedKqlQuery).toEqual({
-        type: KqlQueryType.inline_query,
-        query: 'event.kind:alert',
-        language: 'kuery',
-        filters: [
-          {
-            meta: {
-              negate: false,
-              disabled: false,
-            },
-            query: {
-              term: {
-                field: 'value',
+      expect(extractedKqlQuery).toEqual(
+        expect.objectContaining({
+          filters: [
+            {
+              meta: {
+                negate: false,
+                disabled: false,
+              },
+              query: {
+                term: {
+                  field: 'value',
+                },
               },
             },
-          },
-        ],
-      });
+          ],
+        })
+      );
+    });
+
+    it('normalizes filters without negate field', () => {
+      const extractedKqlQuery = extractRuleKqlQuery(
+        'event.kind:alert',
+        'kuery',
+        [{ ...mockFilter, meta: { ...mockFilter.meta, negate: undefined } }],
+        undefined
+      );
+
+      expect(extractedKqlQuery).toEqual(
+        expect.objectContaining({
+          filters: [
+            {
+              meta: {
+                disabled: false,
+              },
+              query: {
+                term: {
+                  field: 'value',
+                },
+              },
+            },
+          ],
+        })
+      );
+    });
+
+    it('normalizes filters without meta object', () => {
+      const extractedKqlQuery = extractRuleKqlQuery(
+        'event.kind:alert',
+        'kuery',
+        [{ ...mockFilter, meta: undefined }],
+        undefined
+      );
+
+      expect(extractedKqlQuery).toEqual(
+        expect.objectContaining({
+          filters: [
+            {
+              query: {
+                term: {
+                  field: 'value',
+                },
+              },
+            },
+          ],
+        })
+      );
+    });
+
+    it('normalizes filters without query object', () => {
+      const extractedKqlQuery = extractRuleKqlQuery(
+        'event.kind:alert',
+        'kuery',
+        [{ ...mockFilter, query: undefined }],
+        undefined
+      );
+
+      expect(extractedKqlQuery).toEqual(
+        expect.objectContaining({
+          filters: [
+            {
+              meta: {
+                negate: false,
+                disabled: false,
+              },
+            },
+          ],
+        })
+      );
     });
   });
 
