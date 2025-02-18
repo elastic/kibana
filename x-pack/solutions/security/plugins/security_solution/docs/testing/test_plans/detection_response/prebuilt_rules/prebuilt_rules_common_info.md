@@ -11,8 +11,8 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Features](#features)
 - [Common terminology](#common-terminology)
 - [Common assumptions](#common-assumptions)
-- [Common functional requirements](#common-functional-requirements)
 - [Common non-functional requirements](#common-non-functional-requirements)
+- [Common functional requirements](#common-functional-requirements)
 
 ## Tickets
 
@@ -114,10 +114,15 @@ Unless explicitly indicated otherwise:
   - on the `Essentials` tier in a Serverless Security environment.
 - User has the required [privileges for managing detection rules](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html).
 
-## Common functional requirements
-
-TBD
-
 ## Common non-functional requirements
+
+- Package installation, rule installation and rule upgrade workflows should work:
+  - regardless of the package type: with historical rule versions or without;
+  - regardless of the package registry availability: i.e., they should also work in air-gapped environments.
+- Rule installation and upgrade workflows should work with packages containing up to 15000 historical rule versions. This is the max number of versions of all rules in the package. This limit is enforced by Fleet.
+- Kibana should not crash with Out Of Memory exception during package installation.
+- For test purposes, it should be possible to use detection rules package versions lower than the latest.
+
+## Common functional requirements
 
 TBD

@@ -22,6 +22,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [User stories](#user-stories)
   - [Terminology](#terminology)
   - [Assumptions](#assumptions)
+  - [Non-functional requirements](#non-functional-requirements)
   - [Functional requirements](#functional-requirements)
 - [Scenarios](#scenarios)
   - [Rule upgrade field preview](#rule-upgrade-field-preview)
@@ -89,6 +90,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 - A prebuilt rule is shown in the Rule Upgrade table when there's a newer version of this rule in the currently installed package with prebuilt rules.
+
+### Non-functional requirements
+
+- [Common non-functional requirements](./prebuilt_rules_common_info.md#common-non-functional-requirements).
 
 ### Functional requirements
 

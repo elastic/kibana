@@ -19,6 +19,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Tickets](#tickets)
   - [Terminology](#terminology)
   - [Assumptions](#assumptions)
+  - [Non-functional requirements](#non-functional-requirements)
 - [Scenarios](#scenarios)
   - [Rule field doesn't have an update and has no custom value - `AAA`](#rule-field-doesnt-have-an-update-and-has-no-custom-value---aaa)
     - [**Scenario: `AAA` - Rule field is any type**](#scenario-aaa---rule-field-is-any-type)
@@ -80,6 +81,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 - [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 - All scenarios will contain at least 1 prebuilt rule installed in Kibana.
 - A new version will be available for rule(s).
+
+### Non-functional requirements
+
+- [Common non-functional requirements](./prebuilt_rules_common_info.md#common-non-functional-requirements).
 
 ## Scenarios
 

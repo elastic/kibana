@@ -24,6 +24,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [User stories](#user-stories)
   - [Terminology](#terminology)
   - [Assumptions](#assumptions)
+  - [Non-functional requirements](#non-functional-requirements)
 - [Scenarios](#scenarios)
   - [Core Functionality](#core-functionality)
     - [Scenario: Importing an unmodified prebuilt rule with a matching rule\_id and version](#scenario-importing-an-unmodified-prebuilt-rule-with-a-matching-rule_id-and-version)
@@ -70,6 +71,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 ### Assumptions
 
 - [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
+
+### Non-functional requirements
+
+- [Common non-functional requirements](./prebuilt_rules_common_info.md#common-non-functional-requirements).
 
 ## Scenarios
 

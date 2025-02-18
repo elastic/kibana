@@ -27,6 +27,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [User stories](#user-stories)
   - [Terminology](#terminology)
   - [Assumptions](#assumptions)
+  - [Non-functional requirements](#non-functional-requirements)
 - [Scenarios](#scenarios)
   - [Editing prebuilt rules](#editing-prebuilt-rules)
     - [**Scenario: User can edit a non-customized prebuilt rule from the rule edit page**](#scenario-user-can-edit-a-non-customized-prebuilt-rule-from-the-rule-edit-page)
@@ -86,6 +87,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 - Rule package used will have all previous rule versions present (no missing base versions)
+
+### Non-functional requirements
+
+- [Common non-functional requirements](./prebuilt_rules_common_info.md#common-non-functional-requirements).
 
 ## Scenarios
 
