@@ -41,7 +41,7 @@ export async function registerAndScheduleKbSemanticTextMigrationTask({
   // register task
   registerKbSemanticTextMigrationTask({ taskManager, logger, coreStart, config });
 
-  // wait for index assets to be created
+  // wait for index assets to be updated
   await indexAssetsUpdatedPromise;
 
   // schedule task
