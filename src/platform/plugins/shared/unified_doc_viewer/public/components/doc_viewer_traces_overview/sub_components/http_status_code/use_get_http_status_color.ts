@@ -21,5 +21,5 @@ export const useGetHttpStatusColor = (status: string | number) => {
   };
 
   const firstStatusDigit = String(status).charAt(0);
-  return httpStatusCodeColors[firstStatusDigit];
+  return httpStatusCodeColors[firstStatusDigit] || 'default';
 };

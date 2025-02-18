@@ -19,7 +19,7 @@ interface HttpStatusCodeProps {
 
 export function HttpStatusCode({ code }: HttpStatusCodeProps) {
   return (
-    <EuiBadge color={useGetHttpStatusColor(code) || 'default'}>
+    <EuiBadge color={useGetHttpStatusColor(code)}>
       <EuiText size="xs">
         {code} {httpStatusCodes[code.toString()]}
       </EuiText>
