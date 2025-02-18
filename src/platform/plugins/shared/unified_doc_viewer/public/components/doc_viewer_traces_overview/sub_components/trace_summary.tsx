@@ -26,10 +26,10 @@ export function TraceSummary({ fieldConfiguration, fieldId }: TraceSummaryProps)
   const displayLoading = isTransactionNameField && !fieldValue;
 
   useEffect(() => {
-    if (isTransactionNameField && !fieldValue && transaction && !loading) {
+    if (isTransactionNameField && !fieldValue && transaction?.name && !loading) {
       setFieldValue(transaction.name);
     }
-  }, [transaction, fieldId, loading, fieldValue, isTransactionNameField]);
+  }, [transaction?.name, loading, fieldValue, isTransactionNameField]);
 
   if ((!displayLoading && !fieldValue) || (displayLoading && !loading && !fieldValue)) {
     return null;
