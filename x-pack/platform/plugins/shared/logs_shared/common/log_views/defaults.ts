@@ -17,8 +17,7 @@ export const defaultLogViewAttributes: LogViewAttributes = {
   name: 'Log View',
   description: 'A default log view',
   logIndices: {
-    type: 'index_name',
-    indexName: 'logs-*,filebeat-*',
+    type: 'kibana_advanced_setting',
   },
   logColumns: [
     {

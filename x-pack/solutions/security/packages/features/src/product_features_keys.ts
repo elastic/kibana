@@ -132,6 +132,12 @@ export enum ProductFeatureNotesFeatureKey {
    */
   notes = 'notes',
 }
+export enum ProductFeatureSiemMigrationsKey {
+  /**
+   * Enables the SIEM Migrations main feature
+   */
+  siemMigrations = 'siem_migrations',
+}
 
 // Merges the two enums.
 export const ProductFeatureKey = {
@@ -139,6 +145,7 @@ export const ProductFeatureKey = {
   ...ProductFeatureCasesKey,
   ...ProductFeatureAssistantKey,
   ...ProductFeatureAttackDiscoveryKey,
+  ...ProductFeatureSiemMigrationsKey,
   ...ProductFeatureTimelineFeatureKey,
   ...ProductFeatureNotesFeatureKey,
 };
@@ -148,6 +155,7 @@ export type ProductFeatureKeyType =
   | ProductFeatureCasesKey
   | ProductFeatureAssistantKey
   | ProductFeatureAttackDiscoveryKey
+  | ProductFeatureSiemMigrationsKey
   | ProductFeatureTimelineFeatureKey
   | ProductFeatureNotesFeatureKey;
 
@@ -161,6 +169,7 @@ export enum SecuritySubFeatureId {
   hostIsolationExceptionsBasic = 'hostIsolationExceptionsBasicSubFeature',
   blocklist = 'blocklistSubFeature',
   eventFilters = 'eventFiltersSubFeature',
+  globalArtifactManagement = 'globalArtifactManagementSubFeature',
   policyManagement = 'policyManagementSubFeature',
   responseActionsHistory = 'responseActionsHistorySubFeature',
   workflowInsights = 'workflowInsightsSubFeature',

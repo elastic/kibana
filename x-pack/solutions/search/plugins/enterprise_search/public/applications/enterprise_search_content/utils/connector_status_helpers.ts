@@ -26,18 +26,6 @@ export const getConnectorLastSeenError = (connector: Connector): string => {
   );
 };
 
-// Determines if the connector has been seen recently.
-// Note: The default heartbeat interval for the connector service is every 5 minutes.
-// This is configured using the `service.heartbeat` key in:
-// https://github.com/elastic/connectors/blob/main/connectors/config.py
-export const hasConnectorBeenSeenRecently = (
-  connector: Connector,
-  timeWindowMinutes: number = 10
-): boolean =>
-  connector.last_seen
-    ? moment(connector.last_seen).isSameOrAfter(moment().subtract(timeWindowMinutes, 'minutes'))
-    : false;
-
 const incompleteText = i18n.translate(
   'xpack.enterpriseSearch.content.searchIndices.ingestionStatus.incomplete.label',
   { defaultMessage: 'Incomplete' }

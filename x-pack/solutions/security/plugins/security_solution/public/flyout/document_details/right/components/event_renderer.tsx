@@ -7,25 +7,18 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiFlexItem, EuiTitle } from '@elastic/eui';
-import styled from '@emotion/styled';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiFlexItem, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { getRowRenderer } from '../../../../timelines/components/timeline/body/renderers/get_row_renderer';
 import { defaultRowRenderers } from '../../../../timelines/components/timeline/body/renderers';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { EVENT_RENDERER_TEST_ID } from './test_ids';
 
-const ReasonPreviewContainerWrapper = styled.div`
-  overflow-x: auto;
-  padding-block: ${euiThemeVars.euiSizeS};
-`;
-
-const ReasonPreviewContainer = styled.div``;
-
 /**
  * Event renderer of an event document
  */
 export const EventRenderer: FC = () => {
+  const { euiTheme } = useEuiTheme();
   const { dataAsNestedObject, scopeId } = useDocumentDetailsContext();
 
   const renderer = useMemo(
@@ -38,7 +31,6 @@ export const EventRenderer: FC = () => {
         ? renderer.renderRow({
             contextId: 'event-details',
             data: dataAsNestedObject,
-            isDraggable: false,
             scopeId,
           })
         : null,
@@ -53,11 +45,14 @@ export const EventRenderer: FC = () => {
       <EuiTitle size="xxs">
         <h5>{'Event renderer'}</h5>
       </EuiTitle>
-      <ReasonPreviewContainerWrapper>
-        <ReasonPreviewContainer className={'eui-displayInlineBlock'}>
-          {rowRenderer}
-        </ReasonPreviewContainer>
-      </ReasonPreviewContainerWrapper>
+      <div
+        css={css`
+          overflow-x: auto;
+          padding-block: ${euiTheme.size.s};
+        `}
+      >
+        <div className={'eui-displayInlineBlock'}>{rowRenderer}</div>
+      </div>
     </EuiFlexItem>
   );
 };

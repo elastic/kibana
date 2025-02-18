@@ -5,7 +5,9 @@ exports[`HeaderPage it renders 1`] = `
   <EuiPageHeader
     alignItems="center"
   >
-    <HeaderSection>
+    <EuiPageHeaderSection
+      css="unknown styles"
+    >
       <Memo(TitleComponent)
         badgeOptions={
           Object {
@@ -23,7 +25,7 @@ exports[`HeaderPage it renders 1`] = `
         data-test-subj="header-page-subtitle"
         items="Test subtitle"
       />
-    </HeaderSection>
+    </EuiPageHeaderSection>
     <EuiPageHeaderSection
       data-test-subj="header-page-supplements"
     >
