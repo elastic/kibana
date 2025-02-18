@@ -10,6 +10,8 @@
 import { catchError, filter, lastValueFrom, map, of } from 'rxjs';
 import type {
   Alert,
+  EsQuerySnapshot,
+  LegacyField,
   RuleRegistrySearchRequest,
   RuleRegistrySearchResponse,
 } from '@kbn/alerting-types';
@@ -20,8 +22,7 @@ import type {
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
   SortCombinations,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { EsQuerySnapshot, LegacyField } from '../../types';
+} from '@elastic/elasticsearch/lib/api/types';
 
 export interface SearchAlertsParams {
   // Dependencies

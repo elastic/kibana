@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { useCallback } from 'react';
-import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
+import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from './use_kibana';
 
-export const useDashboardsApi = (id?: string) => {
+export const useDashboardsApi = (name?: string) => {
   const { signal } = useAbortController();
   const {
     dependencies: {
@@ -21,15 +21,15 @@ export const useDashboardsApi = (id?: string) => {
 
   const addDashboards = useCallback(
     async (dashboards: SanitizedDashboardAsset[]) => {
-      if (!id) {
+      if (!name) {
         return;
       }
 
-      await streamsRepositoryClient.fetch('POST /api/streams/{id}/dashboards/_bulk', {
+      await streamsRepositoryClient.fetch('POST /api/streams/{name}/dashboards/_bulk', {
         signal,
         params: {
           path: {
-            id,
+            name,
           },
           body: {
             operations: dashboards.map((dashboard) => {
@@ -39,19 +39,19 @@ export const useDashboardsApi = (id?: string) => {
         },
       });
     },
-    [id, signal, streamsRepositoryClient]
+    [name, signal, streamsRepositoryClient]
   );
 
   const removeDashboards = useCallback(
     async (dashboards: SanitizedDashboardAsset[]) => {
-      if (!id) {
+      if (!name) {
         return;
       }
-      await streamsRepositoryClient.fetch('POST /api/streams/{id}/dashboards/_bulk', {
+      await streamsRepositoryClient.fetch('POST /api/streams/{name}/dashboards/_bulk', {
         signal,
         params: {
           path: {
-            id,
+            name,
           },
           body: {
             operations: dashboards.map((dashboard) => {
@@ -61,7 +61,7 @@ export const useDashboardsApi = (id?: string) => {
         },
       });
     },
-    [id, signal, streamsRepositoryClient]
+    [name, signal, streamsRepositoryClient]
   );
 
   return {

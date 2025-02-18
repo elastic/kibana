@@ -62,7 +62,6 @@
     "xpack.inferenceEndpointUICommon": "platform/packages/shared/kbn-inference-endpoint-ui-common",
     "xpack.infra": "solutions/observability/plugins/infra",
     "xpack.logsDataAccess": "platform/plugins/shared/logs_data_access",
-    "xpack.logsExplorer": "solutions/observability/plugins/logs_explorer",
     "xpack.logsShared": "platform/plugins/shared/logs_shared",
     "xpack.fleet": "platform/plugins/shared/fleet",
     "xpack.ingestPipelines": "platform/plugins/shared/ingest_pipelines",
@@ -111,7 +110,7 @@
     "xpack.observability_onboarding": "solutions/observability/plugins/observability_onboarding",
     "xpack.observabilityShared": "solutions/observability/plugins/observability_shared",
     "xpack.observabilityLogsOverview": [
-      "platform/packages/shared/logs_overview/src/components"
+      "platform/packages/shared/logs-overview/src/components"
     ],
     "xpack.osquery": [
       "platform/plugins/shared/osquery"
@@ -130,7 +129,7 @@
     ],
     "xpack.runtimeFields": "platform/plugins/private/runtime_fields",
     "xpack.screenshotting": "platform/plugins/shared/screenshotting",
-    "xpack.searchSharedUI": "solutions/search/packages/shared_ui",
+    "xpack.searchSharedUI": "solutions/search/packages/shared-ui",
     "xpack.searchHomepage": "solutions/search/plugins/search_homepage",
     "xpack.searchIndices": "solutions/search/plugins/search_indices",
     "xpack.searchNavigation": "solutions/search/plugins/search_solution/search_navigation",

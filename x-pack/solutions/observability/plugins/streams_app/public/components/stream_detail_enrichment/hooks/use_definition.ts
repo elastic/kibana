@@ -7,8 +7,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
-import { useBoolean } from '@kbn/react-hooks';
+import { useAbortController, useBoolean } from '@kbn/react-hooks';
 import {
   IngestStreamGetResponse,
   isWiredStreamGetResponse,
@@ -133,11 +132,11 @@ export const useDefinition = (
   const saveChanges = async () => {
     startsSaving();
     try {
-      await streamsRepositoryClient.fetch(`PUT /api/streams/{id}/_ingest`, {
+      await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest`, {
         signal: abortController.signal,
         params: {
           path: {
-            id: definition.stream.name,
+            name: definition.stream.name,
           },
           body: {
             ingest: {
