@@ -13,35 +13,54 @@ import { ToolingLog } from '@kbn/tooling-log';
 
 export const DEFAULT_TEST_PATH_PATTERNS = ['src/platform/plugins', 'x-pack/**/plugins'];
 
+interface PluginScoutConfig {
+  group: string;
+  pluginPath: string;
+  configs: string[];
+}
+
 export const getScoutPlaywrightConfigs = (searchPaths: string[], log: ToolingLog) => {
   const patterns = searchPaths.map((basePath) =>
     path.join(basePath, '**/ui_tests/{playwright.config.ts,parallel.playwright.config.ts}')
   );
 
-  log.info('Searching for playwright config files in the following paths:');
+  log.info('Searching for Playwright config files in the following paths:');
   patterns.forEach((pattern) => log.info(`- ${pattern}`));
   log.info(''); // Add a newline for better readability
 
   const files = patterns.flatMap((pattern) => fastGlob.sync(pattern, { onlyFiles: true }));
 
-  // Group config files by plugin
-  const plugins = files.reduce((acc: Map<string, string[]>, filePath: string) => {
-    const match = filePath.match(
-      /(?:src\/platform\/plugins|x-pack\/.*?\/plugins)\/(?:.*?\/)?([^\/]+)\/ui_tests\//
-    );
-    const pluginName = match ? match[1] : null;
+  const typeMappings: Record<string, string> = {
+    'x-pack/solutions/security': 'security',
+    'x-pack/solutions/search': 'search',
+    'x-pack/solutions/observability': 'observability',
+    'platform/plugins': 'platform',
+  };
 
-    if (pluginName) {
+  // Group config files by plugin
+  const plugins = files.reduce((acc: Map<string, PluginScoutConfig>, filePath: string) => {
+    const match = filePath.match(
+      /(x-pack\/(?:solutions\/[^\/]+|platform)\/plugins\/(?:[^\/]+\/)*([^\/]+))\/ui_tests\//
+    );
+    const pluginPath = match ? match[1] : null;
+    const pluginName = match ? match[2] : null;
+
+    if (pluginPath && pluginName) {
+      // Find the matching type or default to "unknown"
+      const group =
+        Object.entries(typeMappings).find(([key]) => filePath.includes(key))?.[1] || 'unknown';
+
       if (!acc.has(pluginName)) {
-        acc.set(pluginName, []);
+        acc.set(pluginName, { group, pluginPath, configs: [] });
       }
-      acc.get(pluginName)!.push(filePath);
+
+      acc.get(pluginName)!.configs.push(filePath);
     } else {
       log.warning(`Unable to extract plugin name from path: ${filePath}`);
     }
 
     return acc;
-  }, new Map<string, string[]>());
+  }, new Map<string, PluginScoutConfig>());
 
   return plugins;
 };
