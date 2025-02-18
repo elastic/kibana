@@ -11,5 +11,5 @@ import type { Decorator } from '@storybook/react';
 import { StorybookContext } from './context';
 
 export const decorator: Decorator = (story, storybook) => {
-  return <StorybookContext storyContext={storybook}>{story()}</StorybookContext>;
+  return <StorybookContext storyContext={[story, storybook]}>{story()}</StorybookContext>;
 };

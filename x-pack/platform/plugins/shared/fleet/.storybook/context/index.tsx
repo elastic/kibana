@@ -58,7 +58,7 @@ export const StorybookContext: React.FC<{
   const browserHistory = createBrowserHistory();
   const history = new CoreScopedHistory(browserHistory, basepath);
 
-  const isCloudEnabled = storyContext?.args.isCloudEnabled;
+  const isCloudEnabled = Boolean(storyContext?.[1].args.isCloudEnabled);
   // @ts-ignore {} no assignable to parameter
   ExperimentalFeaturesService.init({});
   const startServices: FleetStartServices = useMemo(
