@@ -76,5 +76,44 @@ describe('lifecycle helpers', () => {
         delete: { name: 'delete', min_age: '10d' },
       });
     });
+
+    it('only aggregates managed indices', () => {
+      const stats = ilmStats({
+        policy: {
+          phases: {
+            hot: {},
+            warm: { min_age: '2d' },
+          },
+        },
+        indicesIlmDetails: {
+          index_name_001: {
+            index: 'index_name_001',
+            managed: true,
+            phase: 'hot',
+            policy: 'mypolicy',
+          },
+          index_name_002: {
+            index: 'index_name_002',
+            managed: true,
+            phase: 'hot',
+            policy: 'mypolicy',
+          },
+          index_name_003: {
+            index: 'index_name_003',
+            managed: false,
+          },
+        },
+        indicesStats: {
+          index_name_001: { total: { store: { size_in_bytes: 10, reserved_in_bytes: 0 } } },
+          index_name_002: { total: { store: { size_in_bytes: 10, reserved_in_bytes: 0 } } },
+          index_name_003: { total: { store: { size_in_bytes: 20, reserved_in_bytes: 0 } } },
+        },
+      });
+
+      expect(stats).toEqual({
+        hot: { name: 'hot', size_in_bytes: 20, min_age: undefined },
+        warm: { name: 'warm', size_in_bytes: 0, min_age: '2d' },
+      });
+    });
   });
 });
