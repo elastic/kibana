@@ -174,6 +174,13 @@ export const agentPolicyRouteService = {
     return AGENT_POLICY_API_ROUTES.INFO_PATTERN.replace('{agentPolicyId}', agentPolicyId);
   },
 
+  getAutoUpgradeAgentsStatusPath: (agentPolicyId: string) => {
+    return AGENT_POLICY_API_ROUTES.AUTO_UPGRADE_AGENTS_STATUS_PATTERN.replace(
+      '{agentPolicyId}',
+      agentPolicyId
+    );
+  },
+
   getCreatePath: () => {
     return AGENT_POLICY_API_ROUTES.CREATE_PATTERN;
   },
