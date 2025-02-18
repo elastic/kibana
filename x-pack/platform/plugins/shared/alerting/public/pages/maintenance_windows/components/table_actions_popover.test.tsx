@@ -141,16 +141,13 @@ describe('TableActionsPopover', () => {
       />
     );
 
-    userEvent.click(await result.findByTestId('table-actions-icon-button'));
+    await userEvent.click(await result.findByTestId('table-actions-icon-button'));
     expect(await result.findByTestId('table-actions-copy-id')).toBeInTheDocument();
-    userEvent.click(await result.findByTestId('table-actions-copy-id'));
-    await waitFor(() => {
-      expect(navigator.clipboard.writeText).toHaveBeenCalledWith('123');
-    });
 
-    await waitFor(() => {
-      expect(mockAddSuccess).toBeCalledWith('Copied maintenance window ID to clipboard');
-    });
+    await userEvent.click(await result.findByTestId('table-actions-copy-id'));
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('123');
+    expect(mockAddSuccess).toBeCalledWith('Copied maintenance window ID to clipboard');
+
     Object.assign(navigator, global.window.navigator.clipboard);
   });
 });
