@@ -95,7 +95,7 @@ export const GridRowHeader = React.memo(
           alignItems="center"
           css={headerStyles}
           className="kbnGridRowHeader"
-          data-test-subj={`kbnGridRowHeader--${rowIndex}`}
+          data-test-subj={`kbnGridRowHeader-${rowIndex}`}
         >
           <GridRowTitle
             rowIndex={rowIndex}
@@ -114,7 +114,11 @@ export const GridRowHeader = React.memo(
             !editTitleOpen && (
               <>
                 <EuiFlexItem grow={false} css={styles.hiddenOnCollapsed}>
-                  <EuiText color="subdued" size="s" data-test-subj="kbnGridRowHeader--panelCount">
+                  <EuiText
+                    color="subdued"
+                    size="s"
+                    data-test-subj={`kbnGridRowHeader-${rowIndex}--panelCount`}
+                  >
                     {i18n.translate('kbnGridLayout.rowHeader.panelCount', {
                       defaultMessage:
                         '({panelCount} {panelCount, plural, one {panel} other {panels}})',

@@ -153,14 +153,14 @@ export const GridRow = React.memo(
         )}
         {!isCollapsed && (
           <div
-            id={`kbnGridRow--${rowIndex}`}
+            id={`kbnGridRow-${rowIndex}`}
             className={'kbnGridRow'}
             ref={(element: HTMLDivElement | null) =>
               (gridLayoutStateManager.rowRefs.current[rowIndex] = element)
             }
             css={[styles.fullHeight, styles.grid]}
             role="region"
-            aria-labelledby={`kbnGridRowTile--${rowIndex}`}
+            aria-labelledby={`kbnGridRowTile-${rowIndex}`}
           >
             {/* render the panels **in order** for accessibility, using the memoized panel components */}
             {panelIdsInOrder.map((panelId) => (

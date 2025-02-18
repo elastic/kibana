@@ -39,13 +39,13 @@ describe('GridRow', () => {
   it('does not show the panels in a row that is collapsed', async () => {
     renderGridRow({ rowIndex: 1 });
 
-    expect(screen.getByTestId('kbnGridRowTitle--1').ariaExpanded).toBe('true');
+    expect(screen.getByTestId('kbnGridRowTitle-1').ariaExpanded).toBe('true');
     expect(screen.getAllByText(/panel content/)).toHaveLength(1);
 
     const collapseButton = screen.getByRole('button', { name: /toggle collapse/i });
     await userEvent.click(collapseButton);
 
-    expect(screen.getByTestId('kbnGridRowTitle--1').ariaExpanded).toBe('false');
+    expect(screen.getByTestId('kbnGridRowTitle-1').ariaExpanded).toBe('false');
     expect(screen.queryAllByText(/panel content/)).toHaveLength(0);
   });
 });

@@ -95,9 +95,9 @@ export const GridRowTitle = React.memo(
             onClick={toggleIsCollapsed}
             css={accordianButtonStyles}
             size="m"
-            id={`kbnGridRowTitle--${rowIndex}`}
-            aria-controls={`kbnGridRow--${rowIndex}`}
-            data-test-subj={`kbnGridRowTitle--${rowIndex}`}
+            id={`kbnGridRowTitle-${rowIndex}`}
+            aria-controls={`kbnGridRow-${rowIndex}`}
+            data-test-subj={`kbnGridRowTitle-${rowIndex}`}
             textProps={false}
             flush="both"
           >
@@ -124,7 +124,7 @@ export const GridRowTitle = React.memo(
               inputAriaLabel={i18n.translate('kbnGridLayout.row.editTitleAriaLabel', {
                 defaultMessage: 'Edit section title',
               })}
-              data-test-subj="kbnGridRowTitle--editor"
+              data-test-subj={`kbnGridRowTitle-${rowIndex}--editor`}
             />
           </EuiFlexItem>
         ) : (
@@ -138,7 +138,7 @@ export const GridRowTitle = React.memo(
                   aria-label={i18n.translate('kbnGridLayout.row.editRowTitle', {
                     defaultMessage: 'Edit section title',
                   })}
-                  data-test-subj="kbnGridRowTitle--edit"
+                  data-test-subj={`kbnGridRowTitle-${rowIndex}--edit`}
                 />
               </EuiFlexItem>
             )}
