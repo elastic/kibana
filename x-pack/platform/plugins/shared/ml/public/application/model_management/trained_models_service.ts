@@ -62,6 +62,11 @@ interface TrainedModelsServiceInit {
   canManageSpacesAndSavedObjects: boolean;
 }
 
+interface DeleteModelOptions {
+  with_pipelines?: boolean;
+  force?: boolean;
+}
+
 export class TrainedModelsService {
   private readonly _reloadSubject$ = new Subject();
 
@@ -211,6 +216,34 @@ export class TrainedModelsService {
           );
         },
       });
+  }
+
+  public deleteModel(modelIds: string[], options: DeleteModelOptions) {
+    return of(modelIds).pipe(
+      tap(() => modelIds.forEach((modelId) => this.removeScheduledDeployments({ modelId }))),
+      switchMap(() =>
+        forkJoin(
+          modelIds.map((modelId) =>
+            from(this.trainedModelsApiService.deleteTrainedModel(modelId, options))
+          )
+        )
+      ),
+      tap({
+        next: () => this.fetchModels(),
+        error: (error) => {
+          this.displayErrorToast?.(
+            error,
+            i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
+              defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
+              values: {
+                modelsCount: modelIds.length,
+              },
+            })
+          );
+          this.fetchModels();
+        },
+      })
+    );
   }
 
   public stopModelDeployment(

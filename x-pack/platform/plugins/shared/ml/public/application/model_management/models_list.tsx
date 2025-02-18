@@ -51,6 +51,7 @@ import type {
 import {
   isBaseNLPModelItem,
   isBuiltInModel,
+  isModelDeployed,
   isModelDownloadItem,
   isNLPModelItem,
 } from '../../../common/types/trained_models';
@@ -513,13 +514,22 @@ export const ModelsList: FC<Props> = ({
               defaultMessage: 'Built-in model',
             });
           }
+          if (isModelDeployed(item)) {
+            return i18n.translate('xpack.ml.trainedModels.modelsList.deployedModelMessage', {
+              defaultMessage: 'Model is deployed',
+            });
+          }
           return '';
         },
         selectable: (item) =>
-          !isModelDownloadItem(item) && !isPopulatedObject(item.pipelines) && !isBuiltInModel(item),
+          !isModelDownloadItem(item) &&
+          !isPopulatedObject(item.pipelines) &&
+          !isBuiltInModel(item) &&
+          !isModelDeployed(item),
         onSelectionChange: (selectedItems) => {
           setSelectedModels(selectedItems);
         },
+        selected: selectedModels,
       }
     : undefined;
 
@@ -677,10 +687,6 @@ export const ModelsList: FC<Props> = ({
         {modelsToDelete.length > 0 && (
           <DeleteModelsModal
             onClose={(refreshList) => {
-              modelsToDelete.forEach((model) => {
-                trainedModelsService.removeScheduledDeployments({ modelId: model.model_id });
-              });
-
               setItemIdToExpandedRowMap((prev) => {
                 const newMap = { ...prev };
                 modelsToDelete.forEach((model) => {
@@ -695,6 +701,7 @@ export const ModelsList: FC<Props> = ({
                 fetchModels();
               }
             }}
+            setSelectedModels={setSelectedModels}
             models={modelsToDelete}
           />
         )}

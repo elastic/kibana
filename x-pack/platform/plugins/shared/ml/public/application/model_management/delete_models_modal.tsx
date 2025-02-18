@@ -7,7 +7,6 @@
 
 import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
@@ -25,21 +24,29 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { TrainedModelItem, TrainedModelUIItem } from '../../../common/types/trained_models';
 import { isExistingModel } from '../../../common/types/trained_models';
 import { type WithRequired } from '../../../common/types/common';
-import { useTrainedModelsApiService } from '../services/ml_api_service/trained_models';
-import { useToastNotificationService } from '../services/toast_notification_service';
 import { DeleteSpaceAwareItemCheckModal } from '../components/delete_space_aware_item_check_modal';
+import { useMlKibana } from '../contexts/kibana';
 
 interface DeleteModelsModalProps {
   models: TrainedModelUIItem[];
   onClose: (refreshList?: boolean) => void;
+  setSelectedModels: (models: TrainedModelUIItem[]) => void;
 }
 
-export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose }) => {
-  const trainedModelsApiService = useTrainedModelsApiService();
-  const { displayErrorToast } = useToastNotificationService();
+export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({
+  models,
+  onClose,
+  setSelectedModels,
+}) => {
+  const {
+    services: {
+      mlServices: { trainedModelsService },
+    },
+  } = useMlKibana();
 
   const [canDeleteModel, setCanDeleteModel] = useState(false);
   const [deletePipelines, setDeletePipelines] = useState<boolean>(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const modelIds = models.map((m) => m.model_id);
 
@@ -61,29 +68,24 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
   }, 0);
 
   const deleteModels = useCallback(async () => {
-    try {
-      await Promise.all(
-        modelIds.map((modelId) =>
-          trainedModelsApiService.deleteTrainedModel(modelId, {
-            with_pipelines: deletePipelines,
-            force: pipelinesCount > 0,
-          })
-        )
-      );
-    } catch (error) {
-      displayErrorToast(
-        error,
-        i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
-          defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
-          values: {
-            modelsCount: modelIds.length,
-          },
-        })
-      );
-    }
-    onClose(true);
+    setIsDeleting(true);
+    trainedModelsService
+      .deleteModel(modelIds, {
+        with_pipelines: deletePipelines,
+        force: pipelinesCount > 0,
+      })
+      .subscribe({
+        next: () => {
+          setSelectedModels([]);
+          onClose(false);
+        },
+        error: () => {
+          setIsDeleting(false);
+        },
+      });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [modelIds, trainedModelsApiService, deletePipelines, pipelinesCount]);
+  }, [modelIds, trainedModelsService, deletePipelines, pipelinesCount]);
 
   return canDeleteModel ? (
     <EuiModal
@@ -202,6 +204,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
           fill
           color="danger"
           data-test-subj="mlModelsDeleteModalConfirmButton"
+          isLoading={isDeleting}
         >
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.deleteModal.deleteButtonLabel"
