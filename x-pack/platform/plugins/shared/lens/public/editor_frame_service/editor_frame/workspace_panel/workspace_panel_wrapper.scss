@@ -61,11 +61,7 @@
     }
   }
 
-  &.domDroppable--hover {
-    .lnsDropIllustration__hand {
-      animation: lnsWorkspacePanel__illustrationPulseContinuous 1.5s ease-in-out 0s infinite normal forwards;
-    }
-  }
+ 
 }
 
 .lnsWorkspacePanel__emptyContent {
@@ -106,68 +102,4 @@
   margin-left: auto;
   max-width: 176px;
   max-height: 176px;
-}
-
-.lnsWorkspacePanel__dropIllustration {
-  // Drop shadow values is a dupe of @euiBottomShadowMedium but used as a filter
-  // Hard-coded px values OK (@cchaos)
-  // sass-lint:disable-block indentation
-  filter:
-    drop-shadow(0 6px 12px transparentize($euiShadowColor, .8)) drop-shadow(0 4px 4px transparentize($euiShadowColor, .8)) drop-shadow(0 2px 2px transparentize($euiShadowColor, .8));
-}
-
-.lnsDropIllustration__adjustFill {
-  fill: $euiColorFullShade;
-}
-
-.lnsDropIllustration__hand {
-  animation: lnsWorkspacePanel__illustrationPulseArrow 5s ease-in-out 0s infinite normal forwards;
-}
-
-@keyframes lnsWorkspacePanel__illustrationPulseArrow {
-  0% {
-    transform: translateY(0%);
-  }
-
-  65% {
-    transform: translateY(0%);
-  }
-
-  72% {
-    transform: translateY(10%);
-  }
-
-  79% {
-    transform: translateY(7%);
-  }
-
-  86% {
-    transform: translateY(10%);
-  }
-
-  95% {
-    transform: translateY(0);
-  }
-}
-
-@keyframes lnsWorkspacePanel__illustrationPulseContinuous {
-  0% {
-    transform: translateY(10%);
-  }
-
-  25% {
-    transform: translateY(15%);
-  }
-
-  50% {
-    transform: translateY(10%);
-  }
-
-  75% {
-    transform: translateY(15%);
-  }
-
-  100% { 
-    transform: translateY(10%);
-  }
 }

@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toExpression } from '@kbn/interpreter';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiButtonEmpty, EuiLink, EuiTextColor } from '@elastic/eui';
+import { EuiText, EuiButtonEmpty, EuiLink, EuiTextColor, transparentize, useEuiTheme } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
@@ -195,6 +195,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const visualizationRenderStartTime = useRef<number>(NaN);
   const dataReceivedTime = useRef<number>(NaN);
   const esTookTime = useRef<number>(0);
+
+  const {euiTheme}  = useEuiTheme();
 
   const onRender$ = useCallback(() => {
     if (renderDeps.current) {
@@ -505,7 +507,14 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         <div>
           <DropIllustration
             aria-hidden={true}
-            className="lnsWorkspacePanel__promptIllustration lnsWorkspacePanel__dropIllustration"
+            className="lnsWorkspacePanel__promptIllustration"
+            css={css`
+              filter: 
+                drop-shadow(0 6px 12px ${transparentize(euiTheme.colors.shadow, .2)}) 
+                drop-shadow(0 4px 4px ${transparentize(euiTheme.colors.shadow, .2)}) 
+                drop-shadow(0 2px 2px ${transparentize(euiTheme.colors.shadow, .2)});
+              `}
+              
           />
           <h2>
             <strong>
@@ -564,9 +573,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         <div>
           <img
             aria-hidden={true}
+            className="lnsWorkspacePanel__promptIllustration"
             src={IS_DARK_THEME ? applyChangesIllustrationDark : applyChangesIllustrationLight}
             alt={applyChangesString}
-            className="lnsWorkspacePanel__promptIllustration"
           />
           <h2>
             <strong>

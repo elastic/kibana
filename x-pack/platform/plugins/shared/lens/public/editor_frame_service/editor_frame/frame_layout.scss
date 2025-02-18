@@ -36,10 +36,10 @@ $lnsPanelMinWidth: $euiSize * 18;
   }
 }
 
- .lnsFrameLayout__pageBody.lnsFrameLayout__pageBody-isFullscreen {
-    flex: 1;
-    padding: 0;
-  }
+.lnsFrameLayout__pageBody.lnsFrameLayout__pageBody-isFullscreen {
+  flex: 1;
+  padding: 0;
+}
 
 .lnsFrameLayout__sidebar {
   margin: 0;

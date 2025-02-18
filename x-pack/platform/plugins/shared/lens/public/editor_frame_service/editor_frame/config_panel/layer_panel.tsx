@@ -523,8 +523,11 @@ export function LayerPanel(props: LayerPanelProps) {
                   <>
                     {group.accessors.length ? (
                       <ReorderProvider
-                        className={'lnsLayerPanel__group'}
                         dataTestSubj="lnsDragDrop"
+                        css={css`
+                          margin: -${euiTheme.size.xs} -${euiTheme.size.base};
+                          padding: ${euiTheme.size.xs} ${euiTheme.size.base};
+                        `}
                       >
                         {group.accessors.map((accessorConfig, accessorIndex) => {
                           const { columnId } = accessorConfig;
@@ -790,7 +793,11 @@ export function LayerPanel(props: LayerPanelProps) {
               activeVisualization.DimensionEditorComponent &&
               openColumnGroup?.enableDimensionEditor && (
                 <>
-                  <div className="lnsLayerPanel__styleEditor">
+                  <div
+                    css={css`
+                      padding: ${euiTheme.size.base};
+                    `}
+                  >
                     <activeVisualization.DimensionEditorComponent
                       {...{
                         ...layerVisualizationConfigProps,
