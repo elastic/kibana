@@ -6,6 +6,7 @@
  */
 
 import { actions } from '@storybook/addon-actions';
+import type { Decorator } from '@storybook/react';
 import React from 'react';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
 import { InitialConfigurationStep } from './initial_configuration_step';
@@ -16,7 +17,7 @@ export default {
   decorators: [
     (renderStory) => <div style={{ maxWidth: 800 }}>{renderStory()}</div>,
     decorateWithGlobalStorybookThemeProviders,
-  ],
+  ] as Decorator[],
 };
 
 export const ReconfigurationWithPartitionedWarnings = {

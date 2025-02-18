@@ -33,6 +33,22 @@ export default {
   },
 } as Meta;
 
+const BASE_ARGS = {
+  expression: {
+    aggType: Aggregators.CUSTOM,
+    timeSize: 1,
+    timeUnit: 'm' as TimeUnitChar,
+    threshold: [1],
+    comparator: COMPARATORS.GREATER_THAN,
+  },
+  fields: [
+    { name: 'system.cpu.user.pct', normalizedType: 'number' },
+    { name: 'system.cpu.system.pct', normalizedType: 'number' },
+    { name: 'system.cpu.cores', normalizedType: 'number' },
+  ],
+  aggregationTypes: aggregationType,
+};
+
 const CustomEquationEditorTemplate: StoryFn<CustomEquationEditorProps> = (args) => {
   const [expression, setExpression] = useState<MetricExpression>(args.expression);
   const [errors, setErrors] = useState<IErrorObject>(args.errors);
@@ -94,20 +110,4 @@ export const CustomEquationEditorWithEquationErrors = {
 
 export const CustomEquationEditorWithFieldError = {
   render: CustomEquationEditorTemplate,
-};
-
-const BASE_ARGS = {
-  expression: {
-    aggType: Aggregators.CUSTOM,
-    timeSize: 1,
-    timeUnit: 'm' as TimeUnitChar,
-    threshold: [1],
-    comparator: COMPARATORS.GREATER_THAN,
-  },
-  fields: [
-    { name: 'system.cpu.user.pct', normalizedType: 'number' },
-    { name: 'system.cpu.system.pct', normalizedType: 'number' },
-    { name: 'system.cpu.cores', normalizedType: 'number' },
-  ],
-  aggregationTypes: aggregationType,
 };
