@@ -164,20 +164,27 @@ export async function suggest(
   }
 
   // build the correct query to fetch the list of fields
+
   const queryForFields = getQueryForFields(
     buildQueryUntilPreviousCommand(ast, correctedQuery),
     ast
   );
 
+  const getEditorExtensions = resourceRetriever?.getEditorExtensions;
+  // get source from the queryString
+  const sourcesFromQuery = getSourcesFromCommands(ast, 'index');
+  const index = sourcesFromQuery.length ? sourcesFromQuery[0].index : undefined;
+  const recommendedFields = getEditorExtensions?.(index ?? '')?.recommendedFields ?? [];
+
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields.replace(EDITOR_MARKER, ''),
-    resourceRetriever
+    resourceRetriever,
+    recommendedFields
   );
   const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
   const getVariablesByType = resourceRetriever?.getVariablesByType;
   const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
-  const getEditorExtensions = resourceRetriever?.getEditorExtensions;
 
   if (astContext.type === 'newCommand') {
     // propose main commands here
@@ -286,10 +293,12 @@ export async function suggest(
 
 export function getFieldsByTypeRetriever(
   queryString: string,
-  resourceRetriever?: ESQLCallbacks
+  resourceRetriever?: ESQLCallbacks,
+  recommendedFields?: string[]
 ): { getFieldsByType: GetColumnsByTypeFn; getFieldsMap: GetFieldsMapFn } {
   const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
   const getVariablesByType = resourceRetriever?.getVariablesByType;
+
   const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
   return {
     getFieldsByType: async (
@@ -302,7 +311,12 @@ export function getFieldsByTypeRetriever(
         supportsControls,
       };
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getVariablesByType);
+      return buildFieldsDefinitionsWithMetadata(
+        fields,
+        updatedOptions,
+        getVariablesByType,
+        recommendedFields
+      );
     },
     getFieldsMap: helpers.getFieldsMap,
   };

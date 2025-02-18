@@ -37,6 +37,7 @@ export class ESQLRegistryPlugin implements Plugin<{}, void> {
               query: '| WHERE MATCH(message, "OOMKilled")',
             },
           ],
+          recommendedFields: ['log_level', 'message'],
         });
       }
     });

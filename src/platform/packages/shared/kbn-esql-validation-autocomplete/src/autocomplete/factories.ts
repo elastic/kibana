@@ -193,6 +193,17 @@ export const getSuggestionsAfterNot = (): SuggestionRawDefinition[] => {
     .map(getOperatorSuggestion);
 };
 
+const getFieldsSortText = (isEcs: boolean, isRecommended: boolean) => {
+  if (isRecommended) {
+    return '1C';
+  }
+  if (isEcs) {
+    return '1D';
+  }
+
+  return 'D';
+};
+
 export const buildFieldsDefinitionsWithMetadata = (
   fields: ESQLRealField[],
   options?: {
@@ -202,10 +213,13 @@ export const buildFieldsDefinitionsWithMetadata = (
     variableType?: ESQLVariableType;
     supportsControls?: boolean;
   },
-  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined
+  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined,
+  recommendedFields?: string[]
 ): SuggestionRawDefinition[] => {
   const fieldsSuggestions = fields.map((field) => {
     const titleCaseType = field.type.charAt(0).toUpperCase() + field.type.slice(1);
+    const fieldIsRecommended = recommendedFields?.includes(field.name);
+    const sortText = getFieldsSortText(Boolean(field.isEcs), Boolean(fieldIsRecommended));
     return {
       label: field.name,
       text:
@@ -215,7 +229,7 @@ export const buildFieldsDefinitionsWithMetadata = (
       kind: 'Variable',
       detail: titleCaseType,
       // If detected to be an ECS field, push it up to the top of the list
-      sortText: field.isEcs ? '1D' : 'D',
+      sortText,
       command: options?.openSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
     };
   }) as SuggestionRawDefinition[];

@@ -14,4 +14,5 @@ interface RecommendedQueries {
 
 export interface ESQLEditorExtensions {
   recommendedQueries?: RecommendedQueries[];
+  recommendedFields?: string[];
 }
