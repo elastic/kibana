@@ -17,7 +17,6 @@ import { REPO_ROOT } from './lib/constants';
 import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
 import 'webpack-dev-server'; // Extends webpack configuration with `devServer` property
 
-// eslint-disable-next-line import/no-default-export
 export default ({ config: storybookConfig }: { config: Configuration }) => {
   const config: Configuration = {
     devServer: {
