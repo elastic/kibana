@@ -8,7 +8,7 @@
 import { isDeepEqual } from 'react-use/lib/util';
 
 import { Logger, SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
-import { CloudDataAttributes, CloudSecurityAnswer, SolutionType } from '../routes/types';
+import { CloudDataAttributes, CloudSecurityAnswer, SolutionType } from '../../common/types';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { CLOUD_DATA_SAVED_OBJECT_ID } from '../routes/constants';
 

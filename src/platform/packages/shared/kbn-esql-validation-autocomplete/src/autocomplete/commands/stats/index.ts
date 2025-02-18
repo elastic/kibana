@@ -7,43 +7,50 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLAstItem, ESQLCommand } from '@kbn/esql-ast';
-import { SupportedDataType } from '../../../definitions/types';
-import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
+import { CommandSuggestParams } from '../../../definitions/types';
+import type { SuggestionRawDefinition } from '../../types';
 import {
   TRIGGER_SUGGESTION_COMMAND,
   getNewVariableSuggestion,
   getFunctionSuggestions,
+  getControlSuggestionIfSupported,
 } from '../../factories';
+import { ESQLVariableType } from '../../../shared/types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 import { pushItUpInTheList } from '../../helper';
 import { byCompleteItem, getDateHistogramCompletionItem, getPosition } from './util';
 
-export async function suggest(
-  innerText: string,
-  command: ESQLCommand<'stats'>,
-  getColumnsByType: GetColumnsByTypeFn,
-  _columnExists: (column: string) => boolean,
-  getSuggestedVariableName: () => string,
-  _getExpressionType: (expression: ESQLAstItem | undefined) => SupportedDataType | 'unknown',
-  getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>
-): Promise<SuggestionRawDefinition[]> {
+export async function suggest({
+  innerText,
+  command,
+  getColumnsByType,
+  getSuggestedVariableName,
+  getPreferences,
+  getVariablesByType,
+  supportsControls,
+}: CommandSuggestParams<'stats'>): Promise<SuggestionRawDefinition[]> {
   const pos = getPosition(innerText, command);
 
   const columnSuggestions = pushItUpInTheList(
     await getColumnsByType('any', [], { advanceCursor: true, openSuggestions: true }),
     true
   );
+  const controlSuggestions = getControlSuggestionIfSupported(
+    Boolean(supportsControls),
+    ESQLVariableType.FUNCTIONS,
+    getVariablesByType
+  );
 
   switch (pos) {
     case 'expression_without_assignment':
       return [
+        ...controlSuggestions,
         ...getFunctionSuggestions({ command: 'stats' }),
         getNewVariableSuggestion(getSuggestedVariableName()),
       ];
 
     case 'expression_after_assignment':
-      return [...getFunctionSuggestions({ command: 'stats' })];
+      return [...controlSuggestions, ...getFunctionSuggestions({ command: 'stats' })];
 
     case 'expression_complete':
       return [

@@ -7,14 +7,15 @@
 
 import { EuiFlexGroup, EuiButton, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { WiredStreamGetResponse, IngestUpsertRequest } from '@kbn/streams-schema';
 import React from 'react';
+import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { emptyEqualsToAlways } from '../../util/condition';
 import { useRoutingState } from './hooks/routing_state';
+import { getFormattedError } from '../../util/errors';
 
 export function ControlBar({
   definition,
@@ -56,11 +57,11 @@ export function ControlBar({
       return;
     }
 
-    return streamsRepositoryClient.fetch('POST /api/streams/{id}/_fork', {
+    return streamsRepositoryClient.fetch('POST /api/streams/{name}/_fork', {
       signal,
       params: {
         path: {
-          id: definition.stream.name,
+          name: definition.stream.name,
         },
         body: {
           if: emptyEqualsToAlways(routingAppState.childUnderEdit.child.if),
@@ -92,11 +93,11 @@ export function ControlBar({
       },
     } as IngestUpsertRequest;
 
-    return streamsRepositoryClient.fetch('PUT /api/streams/{id}/_ingest', {
+    return streamsRepositoryClient.fetch('PUT /api/streams/{name}/_ingest', {
       signal,
       params: {
         path: {
-          id: stream.name,
+          name: stream.name,
         },
         body: request,
       },
@@ -158,7 +159,7 @@ export function ControlBar({
         title: i18n.translate('xpack.streams.failedToSave', {
           defaultMessage: 'Failed to save',
         }),
-        toastMessage: 'body' in error ? error.body.message : error.message,
+        toastMessage: getFormattedError(error).message,
       });
       routingAppState.setLastDisplayedToast(toast);
     }
