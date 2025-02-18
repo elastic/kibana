@@ -117,7 +117,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       SEARCH_INDICES,
       SEARCH_INDICES_START,
     ];
-    const isCloud = !!cloud?.cloudId;
 
     if (customIntegrations) {
       registerEnterpriseSearchIntegrations(
@@ -315,7 +314,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
 
     if (globalSearch) {
       globalSearch.registerResultProvider(
-        getSearchResultProvider(config, searchConnectors?.getConnectorTypes() || [], isCloud)
+        getSearchResultProvider(config, searchConnectors?.getConnectorTypes() || [])
       );
       globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.staticAssets));
       globalSearch.registerResultProvider(getConnectorsSearchResultProvider(http.staticAssets));
