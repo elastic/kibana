@@ -7,7 +7,8 @@
 
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { FieldDefinition, IngestUpsertRequest } from '@kbn/streams-schema';
-import { fromPromise } from 'xstate5';
+import { ErrorActorEvent, fromPromise } from 'xstate5';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
@@ -56,7 +57,8 @@ export const createUpsertStreamSuccessNofitier =
 
 export const createUpsertStreamFailureNofitier =
   ({ toasts }: { toasts: IToasts }) =>
-  ({ event }) => {
+  (params: { event: unknown }) => {
+    const event = params.event as ErrorActorEvent<esErrors.ResponseError, string>;
     toasts.addError(new Error(event.error.body.message), {
       title: i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichment.saveChangesError',

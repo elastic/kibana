@@ -6,3 +6,4 @@
  */
 
 export * from './stream_enrichment_state_machine';
+export * from './use_streams_enrichment';

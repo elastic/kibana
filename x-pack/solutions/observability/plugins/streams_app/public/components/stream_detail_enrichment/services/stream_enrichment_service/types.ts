@@ -8,7 +8,7 @@
 import { IToasts } from '@kbn/core/public';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { FieldDefinition, IngestStreamGetResponse, ProcessorDefinition } from '@kbn/streams-schema';
-import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../../types';
+import { ProcessorDefinitionWithUIAttributes } from '../../types';
 
 export interface StreamEnrichmentServiceDependencies {
   streamsRepositoryClient: StreamsRepositoryClient;
@@ -32,8 +32,7 @@ export type StreamEnrichmentEvent =
   | { type: 'stream.update' }
   | { type: 'simulation.viewDataPreview' }
   | { type: 'simulation.viewDetectedFields' }
-  | { type: 'processors.add'; processor: ProcessorDefinition; fields?: DetectedField[] }
-  | { type: 'processors.add'; processor: ProcessorDefinition; fields?: DetectedField[] }
+  | { type: 'processors.add'; processor: ProcessorDefinition }
   | { type: 'processors.delete'; id: string }
   | { type: 'processors.reorder'; processors: ProcessorDefinitionWithUIAttributes[] }
   | {
@@ -43,5 +42,12 @@ export type StreamEnrichmentEvent =
       status: ProcessorDefinitionWithUIAttributes['status'];
     };
 
-export type StreamEnrichmentEventPayload<TEventType extends StreamEnrichmentEvent['type']> =
-  Extract<StreamEnrichmentEvent, { type: TEventType }>;
+export type StreamEnrichmentEventByType<TEventType extends StreamEnrichmentEvent['type']> = Extract<
+  StreamEnrichmentEvent,
+  { type: TEventType }
+>;
+
+export type StreamEnrichmentEventParams<TEventType extends StreamEnrichmentEvent['type']> = Omit<
+  StreamEnrichmentEventByType<TEventType>,
+  'type'
+>;
