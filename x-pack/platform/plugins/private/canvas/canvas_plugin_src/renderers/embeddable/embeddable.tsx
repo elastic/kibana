@@ -22,11 +22,7 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
-import {
-  CanvasContainerApi,
-  RendererFactory,
-  RendererHandlers,
-} from '../../../types';
+import { CanvasContainerApi, RendererFactory, RendererHandlers } from '../../../types';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { StartDeps } from '../../plugin';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';

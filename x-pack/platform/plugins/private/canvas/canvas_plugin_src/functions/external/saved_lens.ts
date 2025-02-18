@@ -25,13 +25,13 @@ interface Arguments {
   palette?: PaletteOutput;
 }
 
-export type SavedLensInput = {
+export interface SavedLensInput {
   title?: string;
   savedObjectId: string;
   timeRange?: TimeRange;
   filters: DataFilter[];
   palette?: PaletteOutput;
-};
+}
 
 const defaultTimeRange = {
   from: 'now-15m',
