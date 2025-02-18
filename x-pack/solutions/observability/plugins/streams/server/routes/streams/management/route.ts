@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { conditionSchema } from '@kbn/streams-schema';
+import {
+  RecursiveRecord,
+  conditionSchema,
+  conditionToQueryDsl,
+  getFields,
+} from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { ResyncStreamsResponse } from '../../../lib/streams/client';
-import { getFields } from '../../../lib/streams/helpers/condition_fields';
-import { conditionToQueryDsl } from '../../../lib/streams/helpers/condition_to_query_dsl';
 import { checkAccess } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
 import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';
 
 export const forkStreamsRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{id}/_fork',
+  endpoint: 'POST /api/streams/{name}/_fork',
   options: {
     access: 'internal',
   },
@@ -28,7 +31,7 @@ export const forkStreamsRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      id: z.string(),
+      name: z.string(),
     }),
     body: z.object({ stream: z.object({ name: z.string() }), if: conditionSchema }),
   }),
@@ -38,7 +41,7 @@ export const forkStreamsRoute = createServerRoute({
     });
 
     return await streamsClient.forkStream({
-      parent: params.path.id,
+      parent: params.path.name,
       if: params.body.if,
       name: params.body.stream.name,
     });
@@ -85,7 +88,7 @@ export const getStreamsStatusRoute = createServerRoute({
 });
 
 export const sampleStreamRoute = createServerRoute({
-  endpoint: 'POST /api/streams/{id}/_sample',
+  endpoint: 'POST /api/streams/{name}/_sample',
   options: {
     access: 'internal',
   },
@@ -97,7 +100,7 @@ export const sampleStreamRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ id: z.string() }),
+    path: z.object({ name: z.string() }),
     body: z.object({
       if: z.optional(conditionSchema),
       start: z.optional(z.number()),
@@ -105,13 +108,13 @@ export const sampleStreamRoute = createServerRoute({
       size: z.optional(z.number()),
     }),
   }),
-  handler: async ({ params, request, getScopedClients }): Promise<{ documents: unknown[] }> => {
+  handler: async ({ params, request, getScopedClients }) => {
     const { scopedClusterClient } = await getScopedClients({ request });
 
-    const { read } = await checkAccess({ id: params.path.id, scopedClusterClient });
+    const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
 
     if (!read) {
-      throw new DefinitionNotFoundError(`Stream definition for ${params.path.id} not found`);
+      throw new DefinitionNotFoundError(`Stream definition for ${params.path.name} not found`);
     }
 
     const { if: condition, start, end, size } = params.body;
@@ -157,12 +160,12 @@ export const sampleStreamRoute = createServerRoute({
       size,
     };
     const results = await scopedClusterClient.asCurrentUser.search({
-      index: params.path.id,
+      index: params.path.name,
       allow_no_indices: true,
       ...searchBody,
     });
 
-    return { documents: results.hits.hits.map((hit) => hit._source) };
+    return { documents: results.hits.hits.map((hit) => hit._source) as RecursiveRecord[] };
   },
 });
 

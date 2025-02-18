@@ -70,6 +70,10 @@ export const FOOTER_CATEGORIES: Array<LinkCategory<SolutionPageName>> = [
       defaultMessage: 'Management',
     }),
     iconType: 'gear',
-    linkIds: [ExternalPageName.management, ExternalPageName.integrationsSecurity],
+    linkIds: [
+      ExternalPageName.management,
+      ExternalPageName.managementMonitoring,
+      ExternalPageName.integrationsSecurity,
+    ],
   },
 ];

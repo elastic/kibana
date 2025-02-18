@@ -25,6 +25,7 @@ describe('getIsExperimentalFeatureEnabled', () => {
         isMustacheAutocompleteOn: false,
         showMustacheAutocompleteSwitch: false,
         isUsingRuleCreateFlyout: false,
+        alertDeletionSettingsEnabled: false,
       },
     });
 

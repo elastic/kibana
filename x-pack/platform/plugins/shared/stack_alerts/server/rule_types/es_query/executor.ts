@@ -8,7 +8,7 @@
 import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
-import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
+import { getEcsGroups } from '@kbn/alerting-rule-utils';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -18,8 +18,9 @@ import {
 } from '@kbn/rule-data-utils';
 
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
+import { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 
-import { ComparatorFns } from '../../../common';
+import { ComparatorFns } from '@kbn/response-ops-rule-params/common';
 import {
   addMessages,
   EsQueryRuleActionContext,
@@ -33,7 +34,6 @@ import {
 } from './types';
 import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import { fetchEsQuery } from './lib/fetch_es_query';
-import { EsQueryRuleParams } from './rule_type_params';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
 import { isEsqlQueryRule, isSearchSourceRule } from './util';
 import { fetchEsqlQuery } from './lib/fetch_esql_query';

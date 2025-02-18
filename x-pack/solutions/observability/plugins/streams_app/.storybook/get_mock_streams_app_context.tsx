@@ -15,6 +15,7 @@ import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
+import { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/services/data_streams_stats/data_streams_stats_client';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 
 export function getMockStreamsAppContext(): StreamsAppKibanaContext {
@@ -38,7 +39,8 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
       },
     },
     services: {
-      query: jest.fn(),
+      dataStreamsClient: Promise.resolve({} as unknown as DataStreamsStatsClient),
     },
+    isServerless: false,
   };
 }
