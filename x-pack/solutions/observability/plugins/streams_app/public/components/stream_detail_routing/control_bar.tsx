@@ -15,6 +15,7 @@ import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { emptyEqualsToAlways } from '../../util/condition';
 import { useRoutingState } from './hooks/routing_state';
+import { getFormattedError } from '../../util/errors';
 
 export function ControlBar({
   definition,
@@ -158,7 +159,7 @@ export function ControlBar({
         title: i18n.translate('xpack.streams.failedToSave', {
           defaultMessage: 'Failed to save',
         }),
-        toastMessage: 'body' in error ? error.body.message : error.message,
+        toastMessage: getFormattedError(error).message,
       });
       routingAppState.setLastDisplayedToast(toast);
     }
