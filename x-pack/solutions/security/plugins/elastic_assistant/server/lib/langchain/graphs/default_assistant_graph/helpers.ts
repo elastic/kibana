@@ -13,12 +13,12 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ExecuteConnectorRequestBody, TraceData } from '@kbn/elastic-assistant-common';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { AIMessageChunk } from '@langchain/core/messages';
+import { AgentFinish } from 'langchain/agents';
 import { withAssistantSpan } from '../../tracers/apm/with_assistant_span';
 import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
 import { GraphInputs } from './types';
 import type { OnLlmResponse, TraceOptions } from '../../executors/types';
-import { AgentFinish } from 'langchain/agents';
 
 interface StreamGraphParams {
   apmTracer: APMTracer;
