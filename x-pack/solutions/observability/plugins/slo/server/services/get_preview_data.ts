@@ -23,7 +23,7 @@ import {
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
 import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
-import { APMTransactionDurationIndicator } from '../domain/models';
+import { APMTransactionDurationIndicator, Groupings } from '../domain/models';
 import { computeSLIForPreview } from '../domain/services';
 import { typedSearch } from '../utils/queries';
 import {
@@ -41,7 +41,7 @@ interface Options {
   };
   interval: string;
   remoteName?: string;
-  groupings?: Record<string, unknown>;
+  groupings?: Groupings;
 }
 export class GetPreviewData {
   constructor(
@@ -634,8 +634,8 @@ export class GetPreviewData {
 
   public async execute(params: GetPreviewDataParams): Promise<GetPreviewDataResponse> {
     try {
-      // If the time range is 24h or less, then we want to use a 1m bucket for the
-      // Timeslice metric so that the chart is as close to the evaluation as possible.
+      // If the time range is 24h or less, then we want to use the timeslice duration for the buckets
+      // so that the chart is as close to the evaluation as possible.
       // Otherwise due to how the statistics work, the values might not look like
       // they've breached the threshold.
       const rangeDuration = moment(params.range.to).diff(params.range.from, 'ms');
