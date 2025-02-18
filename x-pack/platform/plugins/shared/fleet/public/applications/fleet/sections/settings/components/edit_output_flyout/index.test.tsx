@@ -126,9 +126,9 @@ describe('EditOutputFlyout', () => {
       utils.queryByLabelText('Elasticsearch CA trusted fingerprint (optional)')
     ).not.toBeNull();
 
-    // Does not show logstash SSL inputs
+    // Shows SSL inputs
     logstashInputsLabels.forEach((label) => {
-      expect(utils.queryByLabelText(label)).toBeNull();
+      expect(utils.queryByLabelText(label)).not.toBeNull();
     });
 
     // Does not show kafka inputs nor sections

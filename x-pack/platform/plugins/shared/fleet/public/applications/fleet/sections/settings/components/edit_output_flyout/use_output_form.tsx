@@ -376,14 +376,18 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
   );
   const sslCertificateInput = useInput(
     output?.ssl?.certificate ?? '',
-    validateSSLCertificate,
+    output?.type === 'logstash' ? validateSSLCertificate : undefined,
     isSSLEditable
   );
-  const sslKeyInput = useInput((output?.ssl?.key as string) ?? '', validateSSLKey, isSSLEditable);
+  const sslKeyInput = useInput(
+    (output?.ssl?.key as string) ?? '',
+    output?.type === 'logstash' ? validateSSLKey : undefined,
+    isSSLEditable
+  );
 
   const sslKeySecretInput = useSecretInput(
     (output as NewLogstashOutput)?.secrets?.ssl?.key,
-    validateSSLKeySecret,
+    output?.type === 'logstash' ? validateSSLKeySecret : undefined,
     isSSLEditable
   );
 
@@ -708,9 +712,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
           (syncIntegrationsInput.value &&
             ((kibanaAPIKeyInput.value && kibanaAPIKeyValid) ||
               (kibanaAPIKeySecretInput.value && kibanaAPIKeySecretValid)) &&
-            kibanaURLInputValid)) &&
-        sslCertificateValid &&
-        ((sslKeyInput.value && sslKeyValid) || (sslKeySecretInput.value && sslKeySecretValid))
+            kibanaURLInputValid))
+        // (sslCertificateValid ||
+        //   (sslKeyInput.value && sslKeyValid) ||
+        //   (sslKeySecretInput.value && sslKeySecretValid))
       );
     } else {
       // validate ES
@@ -719,9 +724,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
         additionalYamlConfigValid &&
         nameInputValid &&
         caTrustedFingerprintValid &&
-        diskQueuePathValid &&
-        sslCertificateValid &&
-        ((sslKeyInput.value && sslKeyValid) || (sslKeySecretInput.value && sslKeySecretValid))
+        diskQueuePathValid
+        // sslCertificateValid &&
+        // ((sslKeyInput.value && sslKeyValid) || (sslKeySecretInput.value && sslKeySecretValid))
       );
     }
   }, [

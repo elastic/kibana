@@ -23,7 +23,7 @@ import { ExperimentalFeaturesService } from '../../../../services';
 
 import type { OutputFormInputsType } from './use_output_form';
 import { SecretFormRow } from './output_form_secret_form_row';
-import { SSLFormSection } from './Ssl_form_section';
+import { SSLFormSection } from './ssl_form_section';
 
 interface Props {
   inputs: OutputFormInputsType;

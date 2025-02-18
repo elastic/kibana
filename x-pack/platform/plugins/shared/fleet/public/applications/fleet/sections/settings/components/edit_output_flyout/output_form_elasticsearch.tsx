@@ -15,7 +15,7 @@ import { MultiRowInput } from '../multi_row_input';
 import { useStartServices } from '../../../../hooks';
 
 import type { OutputFormInputsType } from './use_output_form';
-import { SSLFormSection } from './Ssl_form_section';
+import { SSLFormSection } from './ssl_form_section';
 
 interface Props {
   inputs: OutputFormInputsType;

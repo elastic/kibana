@@ -18,7 +18,7 @@ import { MultiRowInput } from '../multi_row_input';
 import type { OutputFormInputsType } from './use_output_form';
 
 import { EncryptionKeyRequiredCallout } from './encryption_key_required_callout';
-import { SSLFormSection } from './Ssl_form_section';
+import { SSLFormSection } from './ssl_form_section';
 
 interface Props {
   inputs: OutputFormInputsType;
