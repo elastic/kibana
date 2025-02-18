@@ -27,7 +27,7 @@ const lifecycleStatsRoute = createServerRoute({
   params: z.object({
     path: z.object({ name: z.string() }),
   }),
-  handler: async ({ params, request, server: { isServerless }, getScopedClients }) => {
+  handler: async ({ params, request, getScopedClients }) => {
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const name = params.path.name;
 
@@ -40,10 +40,6 @@ const lifecycleStatsRoute = createServerRoute({
     const lifecycle = await getEffectiveLifecycle({ definition, streamsClient, dataStream });
     if (!isIlmLifecycle(lifecycle)) {
       throw new StatusError('Lifecycle stats are only available for ILM policy', 400);
-    }
-
-    if (isServerless) {
-      throw new StatusError('Lifecycle stats are not supported in serverless', 400);
     }
 
     const { policy } = await scopedClusterClient.asCurrentUser.ilm
