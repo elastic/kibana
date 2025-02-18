@@ -190,7 +190,7 @@ describe('Overview - Migrate system indices', () => {
       // Error is displayed
       expect(exists('migrationFailedCallout')).toBe(true);
       expect(find('migrationFailedCallout').text()).toContain(
-        'Errors occurred while migrating system indices:kibana:  mapper_parsing_exception'
+        'Errors occurred while migrating system indices:kibana: mapper_parsing_exception'
       );
 
       // CTA is enabled

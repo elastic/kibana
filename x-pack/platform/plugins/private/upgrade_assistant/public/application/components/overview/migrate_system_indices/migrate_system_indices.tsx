@@ -144,13 +144,13 @@ const i18nTexts = {
     return (
       <EuiText size="s">
         <FormattedMessage
-          id="xpack.upgradeAssistant.overview.systemIndices.migrationFailedBody"
+          id="xpack.upgradeAssistant.overview.systemIndices.migrationFailedBodyFirstParagraph"
           defaultMessage="Errors occurred while migrating system indices:"
         />
         <EuiSpacer size="s" />
         {failureCauses}
         <FormattedMessage
-          id="xpack.upgradeAssistant.overview.systemIndices.migrationFailedBody"
+          id="xpack.upgradeAssistant.overview.systemIndices.migrationFailedBodySecondParagraph"
           defaultMessage="Check migration details for more information."
           tagName="p"
         />
