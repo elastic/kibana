@@ -9,6 +9,7 @@
 
 import { Page } from '@playwright/test';
 import { subj } from '@kbn/test-subj-selector';
+import { PathOptions } from '../../../../common/services/kibana_url';
 import { KibanaUrl, ScoutLogger, coreWorkerFixtures } from '../../worker';
 import { ScoutPage } from '.';
 
@@ -58,6 +59,8 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
     await page.locator(testSubjSelector).click();
     for (const char of text) {
       await page.keyboard.insertText(char);
+      // it is important to delay characters input to avoid flakiness, default is 25 ms
+      // eslint-disable-next-line playwright/no-wait-for-timeout
       await page.waitForTimeout(delay);
     }
   };
@@ -81,7 +84,8 @@ export function extendPlaywrightPage({
   // Extend page with '@kbn/test-subj-selector' support
   extendedPage.testSubj = extendPageWithTestSubject(page);
   // Method to navigate to specific Kibana apps
-  extendedPage.gotoApp = (appName: string) => page.goto(kbnUrl.app(appName));
+  extendedPage.gotoApp = (appName: string, pathOptions?: PathOptions) =>
+    page.goto(kbnUrl.app(appName, { pathOptions }));
   // Method to wait for global loading indicator to be hidden
   extendedPage.waitForLoadingIndicatorHidden = () =>
     extendedPage.testSubj.waitForSelector('globalLoadingIndicator-hidden', {

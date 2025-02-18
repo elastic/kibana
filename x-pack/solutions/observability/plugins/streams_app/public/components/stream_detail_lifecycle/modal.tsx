@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   IlmLocatorParams,
   Phases,
@@ -16,8 +16,16 @@ import {
   IngestStreamGetResponse,
   IngestStreamLifecycle,
   StreamGetResponse,
+  UnwiredStreamGetResponse,
+  WiredStreamGetResponse,
+  getAncestors,
   isIlmLifecycle,
+  isUnwiredStreamGetResponse,
+  isWiredStreamDefinition,
   isWiredStreamGetResponse,
+  findInheritedLifecycle,
+  findInheritingStreams,
+  isDslLifecycle,
 } from '@kbn/streams-schema';
 import {
   EuiButton,
@@ -25,11 +33,12 @@ import {
   EuiCallOut,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiFieldNumber,
+  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHighlight,
   EuiLink,
+  EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
@@ -46,6 +55,9 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import useToggle from 'react-use/lib/useToggle';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useWiredStreams } from '../../hooks/use_wired_streams';
+import { getFormattedError } from '../../util/errors';
 
 export type LifecycleEditAction = 'none' | 'dsl' | 'ilm' | 'inherit';
 
@@ -77,6 +89,16 @@ export function EditLifecycleModal({
   return <InheritModal {...options} />;
 }
 
+const isInvalidRetention = (value: string) => {
+  const num = Number(value);
+  return isNaN(num) || num < 1 || num % 1 > 0;
+};
+
+const parseRetentionDuration = (value: string = '') => {
+  const result = /(\d+)([d|m|s|h])/.exec(value);
+  return { value: result?.[1], unit: result?.[2] };
+};
+
 function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }: ModalOptions) {
   const timeUnits = [
     { name: 'Days', value: 'd' },
@@ -85,10 +107,24 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
     { name: 'Seconds', value: 's' },
   ];
 
-  const [selectedUnit, setSelectedUnit] = useState(timeUnits[0]);
-  const [retentionValue, setRetentionValue] = useState(1);
-  const [noRetention, toggleNoRetention] = useToggle(false);
+  const existingRetention = isDslLifecycle(definition.stream.ingest.lifecycle)
+    ? parseRetentionDuration(definition.stream.ingest.lifecycle.dsl.data_retention)
+    : undefined;
+  const [selectedUnit, setSelectedUnit] = useState(
+    (existingRetention && timeUnits.find((unit) => unit.value === existingRetention.unit)) ||
+      timeUnits[0]
+  );
+  const [retentionValue, setRetentionValue] = useState(
+    (existingRetention && existingRetention.value) || '1'
+  );
+  const [noRetention, toggleNoRetention] = useToggle(
+    Boolean(existingRetention && !existingRetention.value)
+  );
   const [showUnitMenu, { on: openUnitMenu, off: closeUnitMenu }] = useBoolean(false);
+  const invalidRetention = useMemo(
+    () => isInvalidRetention(retentionValue) && !noRetention,
+    [retentionValue, noRetention]
+  );
 
   return (
     <EuiModal onClose={closeModal}>
@@ -105,20 +141,13 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
           defaultMessage: 'Specify a custom data retention period for this stream.',
         })}
         <EuiSpacer />
-        <EuiFieldNumber
-          data-test-subj="streamsAppDslModalFieldNumber"
+        <EuiFieldText
+          data-test-subj="streamsAppDslModalDaysField"
           value={retentionValue}
-          onChange={(e) => {
-            const valueAsNumber = e.target.valueAsNumber;
-            if (isNaN(valueAsNumber) || valueAsNumber < 1) {
-              setRetentionValue(1);
-            } else {
-              setRetentionValue(valueAsNumber);
-            }
-          }}
-          min={1}
+          onChange={(e) => setRetentionValue(e.target.value)}
           disabled={noRetention}
           fullWidth
+          isInvalid={invalidRetention}
           append={
             <EuiPopover
               isOpen={showUnitMenu}
@@ -155,6 +184,16 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
             </EuiPopover>
           }
         />
+        {invalidRetention ? (
+          <>
+            <EuiSpacer size="xs" />
+            <EuiText color="danger" size="xs">
+              {i18n.translate('xpack.streams.streamDetailLifecycle.invalidRetentionValue', {
+                defaultMessage: 'A positive integer is required',
+              })}
+            </EuiText>
+          </>
+        ) : null}
         <EuiSpacer />
         <EuiSwitch
           label={i18n.translate('xpack.streams.streamDetailLifecycle.keepDataIndefinitely', {
@@ -170,10 +209,13 @@ function DslModal({ closeModal, definition, updateInProgress, updateLifecycle }:
         definition={definition}
         confirmationLabel="Save"
         closeModal={closeModal}
+        confirmationIsDisabled={invalidRetention}
         onConfirm={() => {
           updateLifecycle({
             dsl: {
-              data_retention: noRetention ? undefined : `${retentionValue}${selectedUnit.value}`,
+              data_retention: noRetention
+                ? undefined
+                : `${Number(retentionValue)}${selectedUnit.value}`,
             },
           });
         }}
@@ -256,7 +298,7 @@ function IlmModal({
         setPolicies(policyOptions);
       })
       .catch((error) => {
-        setErrorMessage('body' in error ? error.body.message : error.message);
+        setErrorMessage(getFormattedError(error).message);
       })
       .finally(() => setIsLoading(false));
 
@@ -341,7 +383,31 @@ function IlmModal({
   );
 }
 
-function InheritModal({ definition, closeModal, updateInProgress, updateLifecycle }: ModalOptions) {
+function InheritModal({ definition, ...options }: ModalOptions) {
+  if (isWiredStreamGetResponse(definition)) {
+    return <InheritModalWired definition={definition} {...options} />;
+  } else if (isUnwiredStreamGetResponse(definition)) {
+    return <InheritModalUnwired definition={definition} {...options} />;
+  }
+}
+
+function InheritModalWired({
+  definition,
+  closeModal,
+  updateInProgress,
+  updateLifecycle,
+}: ModalOptions & { definition: WiredStreamGetResponse }) {
+  const { wiredStreams, isLoading: wiredStreamsLoading } = useWiredStreams();
+
+  const parents = useMemo(() => {
+    if (wiredStreamsLoading || !wiredStreams) {
+      return undefined;
+    }
+
+    const ancestors = getAncestors(definition.stream.name);
+    return wiredStreams.filter((stream) => ancestors.includes(stream.name));
+  }, [definition, wiredStreams, wiredStreamsLoading]);
+
   return (
     <EuiModal onClose={closeModal}>
       <EuiModalHeader>
@@ -353,16 +419,67 @@ function InheritModal({ definition, closeModal, updateInProgress, updateLifecycl
       </EuiModalHeader>
 
       <EuiModalBody>
-        {isWiredStreamGetResponse(definition)
-          ? i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleWiredDesc', {
-              defaultMessage:
-                'All custom retention settings for this stream will be removed, resetting it to inherit data retention from its nearest parent.',
-            })
-          : i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleUnwiredDesc', {
-              defaultMessage:
-                'All custom retention settings for this stream will be removed, resetting it to use the configuration of the data stream.',
-            })}
-        <EuiSpacer />
+        {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleWiredDesc', {
+          defaultMessage:
+            'All custom retention settings for this stream will be removed, resetting it to inherit data retention from',
+        })}{' '}
+        {wiredStreamsLoading || !parents ? (
+          <EuiLoadingSpinner size="s" />
+        ) : (
+          <>
+            <LinkToStream
+              name={
+                findInheritedLifecycle(
+                  {
+                    ...definition.stream,
+                    ingest: { ...definition.stream.ingest, lifecycle: { inherit: {} } },
+                  },
+                  parents
+                ).from
+              }
+            />
+            .
+          </>
+        )}
+      </EuiModalBody>
+
+      <ModalFooter
+        definition={definition}
+        confirmationLabel={i18n.translate(
+          'xpack.streams.streamDetailLifecycle.defaultLifecycleAction',
+          {
+            defaultMessage: 'Set to default',
+          }
+        )}
+        closeModal={closeModal}
+        onConfirm={() => updateLifecycle({ inherit: {} })}
+        updateInProgress={updateInProgress}
+      />
+    </EuiModal>
+  );
+}
+
+function InheritModalUnwired({
+  definition,
+  closeModal,
+  updateInProgress,
+  updateLifecycle,
+}: ModalOptions & { definition: UnwiredStreamGetResponse }) {
+  return (
+    <EuiModal onClose={closeModal}>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleTitle', {
+            defaultMessage: 'Set data retention to default',
+          })}
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+
+      <EuiModalBody>
+        {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleUnwiredDesc', {
+          defaultMessage:
+            'All custom retention settings for this stream will be removed, resetting it to use the configuration of the data stream.',
+        })}
       </EuiModalBody>
 
       <ModalFooter
@@ -391,6 +508,17 @@ function ModalFooter({
   onConfirm: () => void;
   closeModal: () => void;
 }) {
+  const { wiredStreams, isLoading: wiredStreamsLoading } = useWiredStreams();
+  const inheritingStreams = useMemo(() => {
+    if (!isWiredStreamGetResponse(definition) || wiredStreamsLoading || !wiredStreams) {
+      return [];
+    }
+    return findInheritingStreams(
+      definition.stream,
+      wiredStreams.filter(isWiredStreamDefinition)
+    ).filter((name) => name !== definition.stream.name);
+  }, [definition, wiredStreams, wiredStreamsLoading]);
+
   return (
     <EuiModalFooter>
       <EuiFlexGroup direction="column">
@@ -412,6 +540,27 @@ function ModalFooter({
                     defaultMessage:
                       'Data retention changes will apply to dependant streams unless they already have custom retention settings in place.',
                   }
+                )}
+
+                <EuiSpacer />
+
+                {wiredStreamsLoading ? (
+                  <EuiLoadingSpinner size="s" />
+                ) : inheritingStreams.length > 0 ? (
+                  <>
+                    {i18n.translate('xpack.streams.streamDetailLifecycle.inheritingChildStreams', {
+                      defaultMessage: 'The following child streams will be updated:',
+                    })}{' '}
+                    {inheritingStreams.map((name) => (
+                      <>
+                        {' '}
+                        <LinkToStream name={name} />{' '}
+                      </>
+                    ))}
+                    .
+                  </>
+                ) : (
+                  'No child streams will be updated.'
                 )}
               </p>
             </EuiCallOut>
@@ -448,5 +597,24 @@ function ModalFooter({
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiModalFooter>
+  );
+}
+
+function LinkToStream({ name }: { name: string }) {
+  const router = useStreamsAppRouter();
+
+  return (
+    <EuiLink
+      data-test-subj="streamsAppLinkToStreamLink"
+      target="_blank"
+      href={router.link('/{key}/{tab}', {
+        path: {
+          key: name,
+          tab: 'overview',
+        },
+      })}
+    >
+      [{name}]
+    </EuiLink>
   );
 }
