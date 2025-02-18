@@ -151,8 +151,7 @@ test('renders actions as incomplete if there are 0 defined actions', async () =>
   expect(await screen.getByText('Step 2 is incomplete')).toBeInTheDocument();
   const step2 = screen.getByTestId('ruleFormStep-rule-actions-reportOnBlur');
   await fireEvent.blur(step2!);
-  // Use regex with negative lookahead because the testing library doesn't like doing not.toBeInTheDocument() with text matchers
-  expect(await screen.getByText(/Step 2(?! has errors)/)).toBeInTheDocument();
+  expect(await screen.queryByText('Step 2 has errors')).not.toBeInTheDocument();
 });
 
 test('renders actions as complete if there are more than 0 defined actions', async () => {
@@ -171,8 +170,8 @@ test('renders actions as complete if there are more than 0 defined actions', asy
   };
 
   render(<TestComponent />);
-  // Regex means "Step 2" NOT followed by " is incomplete" or " has errors"
-  expect(await screen.getByText(/Step 2(?!( is incomplete)|( has errors))/)).toBeInTheDocument();
+  expect(await screen.queryByText('Step 2 has errors')).not.toBeInTheDocument();
+  expect(await screen.queryByText('Step 2 is incomplete')).not.toBeInTheDocument();
 });
 
 describe('useRuleFormHorizontalSteps', () => {
