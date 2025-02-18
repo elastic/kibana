@@ -12,24 +12,16 @@ import { I18nStart } from '@kbn/core/public';
 import React, { type PropsWithChildren, createContext, useContext } from 'react';
 
 import { AnonymousAccessServiceContract } from '../../../common';
-import type {
-  ShareMenuItemV2,
-  UrlParamExtension,
-  BrowserUrlService,
-  ShareContext,
-} from '../../types';
-import type { ShareTypes } from '../../services/share_orchestrator';
+import type { ShareConfigs, BrowserUrlService, ShareContext, ShareTypes } from '../../types';
 
-export type { ShareMenuItemV2, ShareContextObjectTypeConfig } from '../../types';
+export type { ShareMenuItemV2 } from '../../types';
 
 export interface IShareContext extends ShareContext {
   allowEmbed: boolean;
   allowShortUrl: boolean;
-  shareMenuItems: ShareMenuItemV2[];
-  embedUrlParamExtensions?: UrlParamExtension[];
+  shareMenuItems: ShareConfigs[];
   anonymousAccess?: AnonymousAccessServiceContract;
   urlService: BrowserUrlService;
-  snapshotShareWarning?: string;
   theme: ThemeServiceSetup;
   i18n: I18nStart;
   publicAPIEnabled?: boolean;
@@ -57,7 +49,7 @@ export const useShareTabsContext = <T extends ShareTypes>(
     );
   }
 
-  const { shareMenuItems, ...rest } = context;
+  const { shareMenuItems, objectTypeMeta, ...rest } = context;
 
   let shareTypeImplementations = shareMenuItems;
 
@@ -65,11 +57,15 @@ export const useShareTabsContext = <T extends ShareTypes>(
     // only integration share types can have multiple implementations
     shareTypeImplementations = (
       shareType === 'integration' ? Array.prototype.filter : Array.prototype.find
-    ).call(shareMenuItems, (item) => item.shareType === shareType && item.groupId === groupId);
+    ).call(shareMenuItems, (item) => item.shareType === shareType && item?.groupId === groupId);
   }
 
   return {
     ...rest,
+    objectTypeMeta: {
+      ...objectTypeMeta,
+      config: shareType ? objectTypeMeta.config[shareType] : objectTypeMeta.config,
+    },
     shareMenuItems: shareTypeImplementations,
   };
 };
