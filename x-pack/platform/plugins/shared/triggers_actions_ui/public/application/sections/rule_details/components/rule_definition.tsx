@@ -23,31 +23,24 @@ import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query'
 import { RuleDefinitionProps } from '../../../../types';
 import { RuleType } from '../../../..';
 import { useKibana } from '../../../../common/lib/kibana';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import {
   hasAllPrivilege,
   hasExecuteActionsCapability,
   hasShowActionsCapability,
 } from '../../../lib/capabilities';
 import { RuleActions } from './rule_actions';
-import { RuleEdit } from '../../rule_form';
 
 export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   rule,
   actionTypeRegistry,
   ruleTypeRegistry,
-  onEditRule,
   hideEditButton = false,
   filteredRuleTypes = [],
-  useNewRuleForm = false,
 }) => {
   const {
     application: { capabilities, navigateToApp },
   } = useKibana().services;
 
-  const isUsingRuleCreateFlyout = getIsExperimentalFeatureEnabled('isUsingRuleCreateFlyout');
-
-  const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [ruleType, setRuleType] = useState<RuleType>();
 
   const hasConditions = !!(rule?.params.criteria as any[])?.length;
@@ -110,17 +103,13 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   }, [rule, ruleTypeRegistry]);
 
   const onEditRuleClick = () => {
-    if (!isUsingRuleCreateFlyout && useNewRuleForm) {
-      navigateToApp('management', {
-        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
-        state: {
-          returnApp: 'management',
-          returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
-        },
-      });
-    } else {
-      setEditFlyoutVisible(true);
-    }
+    navigateToApp('management', {
+      path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
+      state: {
+        returnApp: 'management',
+        returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
+      },
+    });
   };
 
   const ruleDefinitionList = [
@@ -239,18 +228,6 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
         <EuiSpacer size="m" />
         <EuiDescriptionList compressed={true} type="column" listItems={ruleDefinitionList} />
       </EuiPanel>
-      {editFlyoutVisible && (
-        <RuleEdit
-          onSave={() => {
-            setEditFlyoutVisible(false);
-            return onEditRule();
-          }}
-          initialRule={rule}
-          onClose={() => setEditFlyoutVisible(false)}
-          ruleTypeRegistry={ruleTypeRegistry}
-          actionTypeRegistry={actionTypeRegistry}
-        />
-      )}
     </EuiFlexItem>
   );
 };
