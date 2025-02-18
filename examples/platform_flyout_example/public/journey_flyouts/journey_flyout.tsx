@@ -8,7 +8,6 @@
  */
 
 import {
-  EuiBadge,
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiFlexGroup,
@@ -21,26 +20,37 @@ import { css } from '@emotion/react';
 import React, {
   forwardRef,
   useCallback,
+  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
   useState,
 } from 'react';
+import { v4 } from 'uuid';
 import {
+  getJourneyFlyoutChildStyles,
   getJourneyFlyoutParentStyles,
   getZIndex,
   triggerAnimationOnRef,
 } from './journey_flyout.styles';
-import { JourneyFlyoutApi, JourneyFlyoutEntry } from './types';
+import { JourneyFlyoutApi, JourneyFlyoutEntry, JourneyFlyoutProps } from './types';
+
+interface JourneyFlyoutEntryState extends JourneyFlyoutEntry {
+  ActiveChild?: React.FC<JourneyFlyoutProps>;
+}
 
 export const JourneyFlyout = forwardRef<JourneyFlyoutApi>(({}, ref) => {
   const { euiTheme } = useEuiTheme();
-  const journeyFlyoutParentStyles = useMemo(
-    () => getJourneyFlyoutParentStyles(euiTheme),
+  const { journeyFlyoutParentStyles, journeyFlyoutChildStyles } = useMemo(
+    () => ({
+      journeyFlyoutParentStyles: getJourneyFlyoutParentStyles(euiTheme),
+      journeyFlyoutChildStyles: getJourneyFlyoutChildStyles(euiTheme),
+    }),
     [euiTheme]
   );
 
-  const flyoutEntries = useRef<JourneyFlyoutEntry[]>([]);
+  const flyoutsMap = useRef<{ [key: string]: JourneyFlyoutEntryState }>({});
+  const flyoutEntries = useRef<JourneyFlyoutEntryState[]>([]);
 
   const [historyCount, setHistoryCount] = useState(0);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
@@ -53,12 +63,21 @@ export const JourneyFlyout = forwardRef<JourneyFlyoutApi>(({}, ref) => {
   const [bIndex, setBIndex] = useState<number | undefined>(undefined);
 
   const [isAActive, setIsAActive] = useState(true);
+  const activeIndex = useMemo(() => (isAActive ? aIndex : bIndex), [aIndex, bIndex, isAActive]);
+
+  const [hasChildFlyout, setHasChildFlyout] = useState(false);
+  const [childId, setChildId] = useState<string>();
+
+  useEffect(() => {
+    setHasChildFlyout(Boolean(flyoutEntries.current[activeIndex ?? -1]?.ActiveChild));
+  }, [activeIndex]);
 
   const resetFlyoutState = useCallback(() => {
     setIsFlyoutOpen(false);
     setAIndex(undefined);
     setBIndex(undefined);
     flyoutEntries.current = [];
+    flyoutsMap.current = {};
     setIsAActive(true);
     setHistoryCount(0);
   }, []);
@@ -73,11 +92,15 @@ export const JourneyFlyout = forwardRef<JourneyFlyoutApi>(({}, ref) => {
     },
   }));
 
-  const openNextFlyout: JourneyFlyoutApi['openFlyout'] = useCallback(
+  const openNextFlyout: JourneyFlyoutProps['openNextFlyout'] = useCallback(
     (flyoutEntry) => {
       if (isAnimating) return;
       flyoutEntries.current.push(flyoutEntry);
       setHistoryCount((prev) => prev + 1);
+
+      // close child flyout
+      const activeFlyout = flyoutEntries?.current[activeIndex ?? -1];
+      if (activeFlyout?.ActiveChild) activeFlyout.ActiveChild = undefined;
 
       // use the currently inactive flyout as the next active flyout.
       const setIndexForNextActiveFlyout = isAActive ? setBIndex : setAIndex;
@@ -93,7 +116,7 @@ export const JourneyFlyout = forwardRef<JourneyFlyoutApi>(({}, ref) => {
         (isAActive ? setAIndex : setBIndex)(undefined);
       });
     },
-    [isAActive, isAnimating]
+    [activeIndex, isAActive, isAnimating]
   );
 
   const openLastFlyout = useCallback(() => {
@@ -114,29 +137,79 @@ export const JourneyFlyout = forwardRef<JourneyFlyoutApi>(({}, ref) => {
     });
   }, [isAActive, isAnimating]);
 
-  const { ComponentA, ComponentB } = useMemo(() => {
+  const openChildFlyout: JourneyFlyoutProps['openChildFlyout'] = useCallback(
+    ({ Component }) => {
+      const activeFlyout = flyoutEntries?.current[activeIndex ?? -1];
+      if (!activeFlyout) return;
+      activeFlyout.ActiveChild = Component;
+      setHasChildFlyout(true);
+      setChildId(v4());
+    },
+    [activeIndex]
+  );
+
+  const { ComponentA, ComponentB, CurrentChildComponent } = useMemo(() => {
     return {
       ComponentA: flyoutEntries?.current[aIndex ?? -1]?.Component,
       ComponentB: flyoutEntries?.current[bIndex ?? -1]?.Component,
+      CurrentChildComponent:
+        hasChildFlyout && childId ? flyoutEntries?.current[activeIndex ?? -1]?.ActiveChild : null,
     };
-  }, [aIndex, bIndex]);
+  }, [aIndex, bIndex, activeIndex, hasChildFlyout, childId]);
 
   if (!isFlyoutOpen) return null;
+  console.log('rendering with child ID,', childId);
   return (
     <>
       <JourneyFlyoutFade />
+      <div
+        key={childId}
+        css={css`
+          right: ${hasChildFlyout ? '800px' : '0'};
+          ${journeyFlyoutChildStyles}
+        `}
+      >
+        <div className="journey-flyout-toolbar">
+          <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                iconType="cross"
+                onClick={() => {
+                  setHasChildFlyout(false);
+                  flyoutEntries.current[activeIndex ?? -1].ActiveChild = undefined;
+                }}
+                aria-label="Close journey flyout"
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </div>
+        <div
+          css={css`
+            padding: ${euiTheme.size.s};
+          `}
+        >
+          {CurrentChildComponent && (
+            <CurrentChildComponent
+              openNextFlyout={openNextFlyout}
+              openChildFlyout={openChildFlyout}
+            />
+          )}
+        </div>
+      </div>
       <div css={journeyFlyoutParentStyles}>
         <div className="journey-flyout-toolbar">
           <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                disabled={historyCount <= 1}
-                iconType="clockCounter"
-                iconSide="left"
-                onClick={openLastFlyout}
-              >
-                Back &nbsp; <EuiBadge>{historyCount}</EuiBadge>
-              </EuiButtonEmpty>
+              {historyCount > 1 && (
+                <EuiButtonEmpty
+                  size="xs"
+                  iconType="clockCounter"
+                  iconSide="left"
+                  onClick={openLastFlyout}
+                >
+                  Back
+                </EuiButtonEmpty>
+              )}
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
@@ -150,11 +223,15 @@ export const JourneyFlyout = forwardRef<JourneyFlyoutApi>(({}, ref) => {
         </div>
         <div className="journey-flyout-content-container">
           <div ref={aRef} className="journey-flyout-content" css={getZIndex(isAActive)}>
-            {ComponentA && <ComponentA openFlyout={openNextFlyout} />}
+            {ComponentA && (
+              <ComponentA openNextFlyout={openNextFlyout} openChildFlyout={openChildFlyout} />
+            )}
           </div>
           <div className="journey-flyout-shadow" />
           <div ref={bRef} className="journey-flyout-content" css={getZIndex(!isAActive)}>
-            {ComponentB && <ComponentB openFlyout={openNextFlyout} />}
+            {ComponentB && (
+              <ComponentB openNextFlyout={openNextFlyout} openChildFlyout={openChildFlyout} />
+            )}
           </div>
         </div>
       </div>

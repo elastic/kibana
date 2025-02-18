@@ -46,7 +46,7 @@ export const getJourneyFlyoutParentStyles = (euiTheme: EuiThemeComputed) => css`
 
   .journey-flyout-toolbar {
     padding: ${euiTheme.size.s};
-    border-left: ${euiTheme.border.thick};
+    border-left: ${euiTheme.border.thin};
     border-bottom: ${euiTheme.border.thin};
     background-color: ${euiTheme.colors.backgroundBasePlain};
   }
@@ -63,7 +63,7 @@ export const getJourneyFlyoutParentStyles = (euiTheme: EuiThemeComputed) => css`
     height: 100%;
     position: absolute;
     padding: ${euiTheme.size.s};
-    border-left: ${euiTheme.border.thick};
+    border-left: ${euiTheme.border.thin};
     background-color: ${euiTheme.colors.backgroundBasePlain};
   }
 
@@ -85,5 +85,25 @@ export const getJourneyFlyoutParentStyles = (euiTheme: EuiThemeComputed) => css`
 
   .slide-out {
     animation: ${euiFlyoutSlideInRight} ${euiTheme.animation.normal} ease-in reverse;
+  }
+`;
+
+export const getJourneyFlyoutChildStyles = (euiTheme: EuiThemeComputed) => css`
+  position: fixed;
+  display: flex;
+  flex-direction: column;
+  top: ${fixedHeaderOffset};
+  transition: right ${euiTheme.animation.fast} ease-out;
+  width: 800px;
+  background-color: ${euiTheme.colors.backgroundBaseSubdued};
+  z-index: ${euiTheme.levels.flyout};
+  height: calc(100vh - ${fixedHeaderOffset});
+  border-left: ${euiTheme.border.thin};
+
+  .journey-flyout-toolbar {
+    padding: ${euiTheme.size.s};
+    border-left: ${euiTheme.border.thin};
+    border-bottom: ${euiTheme.border.thin};
+    background-color: ${euiTheme.colors.backgroundBaseSubdued};
   }
 `;

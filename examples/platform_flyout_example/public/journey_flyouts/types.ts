@@ -8,7 +8,12 @@
  */
 
 export interface JourneyFlyoutEntry {
-  Component: React.FC<JourneyFlyoutApi>;
+  Component: React.FC<JourneyFlyoutProps>;
+}
+
+export interface JourneyFlyoutProps {
+  openNextFlyout: (props: JourneyFlyoutEntry) => void;
+  openChildFlyout: (props: JourneyFlyoutEntry) => void;
 }
 
 export interface JourneyFlyoutApi {
