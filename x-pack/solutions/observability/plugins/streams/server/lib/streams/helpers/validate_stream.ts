@@ -76,8 +76,8 @@ export function validateStreamTypeChanges(
   }
 
   const fromIngestToGroup =
-    isGroupStreamDefinition(currentStreamDefinition) &&
-    isIngestStreamDefinition(nextStreamDefinition);
+    isGroupStreamDefinition(nextStreamDefinition) &&
+    isIngestStreamDefinition(currentStreamDefinition);
 
   if (fromIngestToGroup) {
     throw new MalformedStreamError('Cannot change ingest stream to group stream');
