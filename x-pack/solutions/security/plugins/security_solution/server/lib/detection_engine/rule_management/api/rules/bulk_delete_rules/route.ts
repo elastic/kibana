@@ -128,6 +128,9 @@ export const bulkDeleteRulesRoute = (
       },
     },
   };
+
+  const securityDocLinks = docLinks.links.securitySolution;
+
   router.versioned.delete(routeConfig).addVersion(
     {
       version: '2023-10-31',
@@ -138,7 +141,7 @@ export const bulkDeleteRulesRoute = (
       },
       options: {
         deprecated: {
-          documentationUrl: docLinks.links.securitySolution.legacyBulkApiDeprecations,
+          documentationUrl: securityDocLinks.legacyRuleManagementBulkApiDeprecations,
           severity: 'warning',
           reason: {
             type: 'migrate',
@@ -150,6 +153,7 @@ export const bulkDeleteRulesRoute = (
     },
     handler
   );
+
   router.versioned.post(routeConfig).addVersion(
     {
       version: '2023-10-31',
@@ -160,7 +164,7 @@ export const bulkDeleteRulesRoute = (
       },
       options: {
         deprecated: {
-          documentationUrl: docLinks.links.securitySolution.legacyBulkApiDeprecations,
+          documentationUrl: securityDocLinks.legacyRuleManagementBulkApiDeprecations,
           severity: 'warning',
           reason: {
             type: 'migrate',
