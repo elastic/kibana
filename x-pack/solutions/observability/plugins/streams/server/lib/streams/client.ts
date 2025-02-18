@@ -67,6 +67,7 @@ import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
 import { SecurityError } from './errors/security_error';
 import { NameTakenError } from './errors/name_taken_error';
 import { MalformedStreamError } from './errors/malformed_stream_error';
+import { State, StateChange } from './state_management/state';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -118,11 +119,51 @@ export class StreamsClient {
     return rootLogsStreamExists;
   }
 
+  private async attemptChanges(
+    requestedChanges: StateChange[],
+    storageClient: StreamsStorageClient,
+    dryRun: boolean = false
+  ) {
+    const startingState = await State.currentState(storageClient);
+    // Optional: Validate the starting state for drift outside of Streams
+
+    const desiredState = startingState.applyChanges(requestedChanges);
+
+    const validationResult = desiredState.validate();
+    if (!validationResult.isValid) {
+      return; // Report errors
+    }
+
+    if (dryRun) {
+      return desiredState.changes();
+    } else {
+      try {
+        desiredState.commitChanges();
+      } catch (error) {
+        // Rollback to currentState
+      }
+    }
+  }
+
   /**
    * Enabling streams means creating the logs root stream.
    * If it is already enabled, it is a noop.
    */
   async enableStreams(): Promise<EnableStreamsResponse> {
+    await this.attemptChanges(
+      [
+        {
+          stream_type: 'wired',
+          change: 'upsert',
+          request: {
+            dashboards: [],
+            stream: rootStreamDefinition,
+          },
+        },
+      ],
+      this.dependencies.storageClient
+    );
+
     const isEnabled = await this.isStreamsEnabled();
 
     if (isEnabled) {
