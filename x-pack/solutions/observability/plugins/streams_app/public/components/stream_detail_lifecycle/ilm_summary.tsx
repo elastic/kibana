@@ -93,7 +93,7 @@ export function IlmSummary({
     },
   } = useKibana();
 
-  const { value, loading } = useStreamsAppFetch(
+  const { value, loading, error } = useStreamsAppFetch(
     ({ signal }) => {
       if (!definition) return;
 
@@ -150,7 +150,9 @@ export function IlmSummary({
       </EuiPanel>
 
       <EuiPanel grow={true} hasShadow={false} hasBorder={false} paddingSize="s">
-        {loading || !phasesWithGrow ? (
+        {error ? (
+          '-'
+        ) : loading || !phasesWithGrow ? (
           <EuiLoadingSpinner />
         ) : (
           <EuiFlexGroup direction="row" gutterSize="none" responsive={false}>
