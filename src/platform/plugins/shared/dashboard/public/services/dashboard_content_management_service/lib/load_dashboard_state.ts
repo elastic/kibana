@@ -8,7 +8,7 @@
  */
 
 import { has } from 'lodash';
-
+import { i18n } from '@kbn/i18n';
 import { injectSearchSourceReferences } from '@kbn/data-plugin/public';
 import { Filter, Query } from '@kbn/es-query';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
@@ -31,6 +31,7 @@ import type {
   LoadDashboardReturn,
 } from '../types';
 import { convertNumberToDashboardVersion } from './dashboard_versioning';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 
 export function migrateLegacyQuery(query: Query | { [key: string]: any } | string): Query {
   // Lucene was the only option before, so language-less queries are all lucene
@@ -84,7 +85,16 @@ export const loadDashboardState = async ({
         id,
       })
       .catch((e) => {
-        throw new SavedObjectNotFound(DASHBOARD_CONTENT_ID, id);
+        if (isHttpFetchError(e) && e.response?.status === 404) {
+          throw new SavedObjectNotFound(DASHBOARD_CONTENT_ID, id);
+        }
+        const message = isHttpFetchError(e) && e.body
+          ? (e.body as { message?: string }).message ?? e.message
+          : e.message;
+        throw new Error(i18n.translate('dashboard.loadSavedObject.error', {
+          defaultMessage: 'Unable to load dashboard. {message}',
+          values: { message }
+        }));
       });
 
     ({ item: rawDashboardContent, meta: resolveMeta } = result);
