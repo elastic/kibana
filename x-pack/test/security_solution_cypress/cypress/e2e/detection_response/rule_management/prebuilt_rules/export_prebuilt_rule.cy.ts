@@ -6,7 +6,7 @@
  */
 
 import { bulkExportRules } from '../../../../tasks/rules_bulk_actions';
-import { exportRuleFromDetailsPage } from '../../../../tasks/rule_details';
+import { exportRuleFromDetailsPage, visitRuleDetailsPage } from '../../../../tasks/rule_details';
 import {
   expectedExportedRule,
   expectedExportedRules,
@@ -19,7 +19,7 @@ import {
   filterByElasticRules,
   selectAllRules,
 } from '../../../../tasks/alerts_detection_rules';
-import { RULE_NAME, TOASTER_BODY } from '../../../../screens/alerts_detection_rules';
+import { TOASTER_BODY } from '../../../../screens/alerts_detection_rules';
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { createAndInstallMockedPrebuiltRules } from '../../../../tasks/api_calls/prebuilt_rules';
@@ -28,6 +28,8 @@ import { createRule, findRuleByRuleId, patchRule } from '../../../../tasks/api_c
 import { login } from '../../../../tasks/login';
 
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
+
+const PREBUILT_RULE_ID = 'rule_1';
 
 describe(
   'Detection rules, Prebuilt Rules Export workflow - With Rule Customization',
@@ -47,7 +49,7 @@ describe(
     describe('Rule export workflow with single rules', () => {
       const PREBUILT_RULE = createRuleAssetSavedObject({
         name: 'Non-customized prebuilt rule',
-        rule_id: 'rule_1',
+        rule_id: PREBUILT_RULE_ID,
         version: 1,
         index: getIndexPatterns(),
       });
@@ -58,46 +60,14 @@ describe(
         cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
         /* Create a new rule and install it */
         createAndInstallMockedPrebuiltRules([PREBUILT_RULE]);
+        createRule(
+          getNewRule({ name: 'Custom rule to export', rule_id: 'custom_rule_id', enabled: false })
+        ).as('customRuleResponse');
         visitRulesManagementTable();
-        createRule(getNewRule({ name: 'Custom rule to export', enabled: false })).as(
-          'customRuleResponse'
-        );
-      });
-
-      it('can export a non-customized prebuilt rule from the rule management table using the bulk actions menu', function () {
-        findRuleByRuleId('rule_1').as('prebuiltRuleResponse');
-        filterByElasticRules();
-        selectAllRules();
-        bulkExportRules();
-        cy.wait('@bulk_action').then(({ response }) => {
-          cy.wrap(response?.body).should('eql', expectedExportedRule(this.prebuiltRuleResponse));
-          cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
-        });
-      });
-
-      it('can export a customized prebuilt rule from the rule management table using the bulk actions menu', function () {
-        patchRule('rule_1', { name: 'Customized prebuilt rule' }).as('prebuiltRuleResponse'); // We want to make this a customized prebuilt rule
-        filterByElasticRules();
-        selectAllRules();
-        bulkExportRules();
-        cy.wait('@bulk_action').then(({ response }) => {
-          cy.wrap(response?.body).should('eql', expectedExportedRule(this.prebuiltRuleResponse));
-          cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
-        });
-      });
-
-      it('can export a custom rule from the rule management table using the bulk actions menu', function () {
-        filterByCustomRules();
-        selectAllRules();
-        bulkExportRules();
-        cy.wait('@bulk_action').then(({ response }) => {
-          cy.wrap(response?.body).should('eql', expectedExportedRule(this.customRuleResponse));
-          cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
-        });
       });
 
       it('can export non-customized prebuilt rules from the rule management table individually', function () {
-        findRuleByRuleId('rule_1').as('prebuiltRuleResponse');
+        findRuleByRuleId(PREBUILT_RULE_ID).as('prebuiltRuleResponse');
         exportRule('Non-customized prebuilt rule');
         cy.wait('@bulk_action').then(({ response }) => {
           cy.wrap(response?.body).should('eql', expectedExportedRule(this.prebuiltRuleResponse));
@@ -106,7 +76,9 @@ describe(
       });
 
       it('can export customized prebuilt rules from the rule management table individually', function () {
-        patchRule('rule_1', { name: 'Customized prebuilt rule' }).as('prebuiltRuleResponse'); // We want to make this a customized prebuilt rule
+        patchRule(PREBUILT_RULE_ID, { name: 'Customized prebuilt rule' }).as(
+          'prebuiltRuleResponse'
+        ); // We want to make this a customized prebuilt rule
         exportRule('Customized prebuilt rule');
         cy.wait('@bulk_action').then(({ response }) => {
           cy.wrap(response?.body).should('eql', expectedExportedRule(this.prebuiltRuleResponse));
@@ -123,8 +95,9 @@ describe(
       });
 
       it('can export a non-customized prebuilt rule from the rule details page', function () {
-        findRuleByRuleId('rule_1').as('prebuiltRuleResponse');
-        cy.get(RULE_NAME).contains('Non-customized prebuilt rule').click();
+        findRuleByRuleId(PREBUILT_RULE_ID).as('prebuiltRuleResponse');
+        visitRuleDetailsPage(PREBUILT_RULE_ID);
+        visitRuleDetailsPage(PREBUILT_RULE_ID);
         exportRuleFromDetailsPage();
         cy.wait('@bulk_action').then(({ response }) => {
           cy.wrap(response?.body).should('eql', expectedExportedRule(this.prebuiltRuleResponse));
@@ -133,8 +106,10 @@ describe(
       });
 
       it('can export a customized prebuilt rule from the rule details page', function () {
-        patchRule('rule_1', { name: 'Customized prebuilt rule' }).as('prebuiltRuleResponse'); // We want to make this a customized prebuilt rule
-        cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
+        patchRule(PREBUILT_RULE_ID, { name: 'Customized prebuilt rule' }).as(
+          'prebuiltRuleResponse'
+        ); // We want to make this a customized prebuilt rule
+        visitRuleDetailsPage(PREBUILT_RULE_ID);
         exportRuleFromDetailsPage();
         cy.wait('@bulk_action').then(({ response }) => {
           cy.wrap(response?.body).should('eql', expectedExportedRule(this.prebuiltRuleResponse));
@@ -142,8 +117,8 @@ describe(
         });
       });
 
-      it('can export a custom prebuilt rule from the rule details page', function () {
-        cy.get(RULE_NAME).contains('Custom rule to export').click();
+      it('can export a custom rule from the rule details page', function () {
+        visitRuleDetailsPage('custom_rule_id');
         exportRuleFromDetailsPage();
         cy.wait('@bulk_action').then(({ response }) => {
           cy.wrap(response?.body).should('eql', expectedExportedRule(this.customRuleResponse));
@@ -155,7 +130,7 @@ describe(
     describe('Rule export workflow with multiple rules', () => {
       const PREBUILT_RULE_1 = createRuleAssetSavedObject({
         name: 'Non-customized prebuilt rule',
-        rule_id: 'rule_1',
+        rule_id: PREBUILT_RULE_ID,
         version: 1,
         index: getIndexPatterns(),
       });
@@ -174,7 +149,7 @@ describe(
         /* Create a new rule and install it */
         createAndInstallMockedPrebuiltRules([PREBUILT_RULE_1, PREBUILT_RULE_2]);
 
-        findRuleByRuleId('rule_1').as('nonCustomizedPrebuiltRuleResponse');
+        findRuleByRuleId(PREBUILT_RULE_ID).as('nonCustomizedPrebuiltRuleResponse');
         // We want to make this a customized prebuilt rule
         patchRule('rule_2', { name: 'Customized prebuilt rule' }).as(
           'customizedPrebuiltRuleResponse'
@@ -183,6 +158,43 @@ describe(
           'customRuleResponse'
         );
         visitRulesManagementTable();
+      });
+
+      it('can export a non-customized prebuilt rule from the rule management table using the bulk actions menu', function () {
+        findRuleByRuleId(PREBUILT_RULE_ID).as('prebuiltRuleResponse');
+        filterByElasticRules();
+        selectAllRules();
+        bulkExportRules();
+        cy.wait('@bulk_action').then(({ response }) => {
+          cy.wrap(response?.body).should(
+            'eql',
+            expectedExportedRule(this.nonCustomizedPrebuiltRuleResponse)
+          );
+          cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
+        });
+      });
+
+      it('can export a customized prebuilt rule from the rule management table using the bulk actions menu', function () {
+        patchRule(PREBUILT_RULE_ID, { name: 'Customized prebuilt rule' }).as(
+          'prebuiltRuleResponse'
+        ); // We want to make this a customized prebuilt rule
+        filterByElasticRules();
+        selectAllRules();
+        bulkExportRules();
+        cy.wait('@bulk_action').then(({ response }) => {
+          cy.wrap(response?.body).should('eql', expectedExportedRule(this.prebuiltRuleResponse));
+          cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
+        });
+      });
+
+      it('can export a custom rule from the rule management table using the bulk actions menu', function () {
+        filterByCustomRules();
+        selectAllRules();
+        bulkExportRules();
+        cy.wait('@bulk_action').then(({ response }) => {
+          cy.wrap(response?.body).should('eql', expectedExportedRule(this.customRuleResponse));
+          cy.get(TOASTER_BODY).should('have.text', 'Successfully exported 1 of 1 rule.');
+        });
       });
 
       it('can export all rule types from the rule management table using the bulk actions menu', function () {
