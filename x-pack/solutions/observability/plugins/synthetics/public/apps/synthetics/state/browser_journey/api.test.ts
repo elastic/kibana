@@ -8,7 +8,7 @@
 import { getJourneyScreenshot, fetchScreenshotBlockSet } from './api';
 import { apiService } from '../../../../utils/api_service';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
-import { ScreenshotBlockDoc } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ScreenshotBlockDoc } from '../../../../../common/runtime_types';
 
 jest.mock('../../../../utils/api_service');
 
