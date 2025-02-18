@@ -19,7 +19,7 @@ import {
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
-import { flattenObject } from '@kbn/object-utils';
+import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
@@ -141,7 +141,7 @@ export const useProcessingSimulator = ({
         },
       });
 
-      return samplesBody.documents.map((doc) => flattenObject(doc)) as FlattenRecord[];
+      return samplesBody.documents.map((doc) => flattenObjectNestedLast(doc)) as FlattenRecord[];
     },
     [definition, streamsRepositoryClient, start, end, samplingCondition],
     { disableToastOnError: true }

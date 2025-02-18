@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { flattenObject } from './flatten_object';
+import { flattenObject, flattenObjectNestedLast } from './flatten_object';
 
 describe('flattenObject', () => {
   it('should flatten nested object properties', () => {
@@ -29,9 +29,11 @@ describe('flattenObject', () => {
       beta: 3,
     });
   });
+});
 
+describe('flattenObjectNestedLast', () => {
   it('should give nested object properties precedence over already flattened entries', () => {
-    const flattened = flattenObject({
+    const flattened = flattenObjectNestedLast({
       'alpha.beta': 99,
       alpha: {
         gamma: {

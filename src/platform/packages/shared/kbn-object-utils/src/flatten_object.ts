@@ -24,26 +24,40 @@ export function flattenObject<TObj extends Record<PropertyKey, any>>(
   parentKey: string = ''
 ) {
   const result: Record<PropertyKey, GetValuesTypes<TObj>> = {};
-  const nestedValues: Record<PropertyKey, GetValuesTypes<TObj>> = {};
 
   for (const key in obj) {
     if (Object.hasOwn(obj, key)) {
       const value = obj[key];
       const newKey = parentKey ? `${parentKey}.${key}` : key;
       if (isPlainObject(value)) {
-        Object.assign(nestedValues, { [newKey]: value });
+        Object.assign(result, flattenObject(value, newKey));
       } else {
         result[newKey] = value;
       }
     }
   }
+  return result;
+}
 
-  for (const key in nestedValues) {
-    if (Object.hasOwn(nestedValues, key)) {
-      const value = nestedValues[key];
-      Object.assign(result, flattenObject(value, key));
+/**
+ * Returns a flattened version of the input object, giving higher priority to nested fields and flattening them after the other properties.
+ * @param obj - The input object.
+ * @returns An object containing all the flattened properties.
+ */
+export function flattenObjectNestedLast<TObj extends Record<PropertyKey, any>>(obj: TObj) {
+  const flattened: Record<PropertyKey, GetValuesTypes<TObj>> = {};
+  const nested: Record<PropertyKey, GetValuesTypes<TObj>> = {};
+
+  for (const key in obj) {
+    if (Object.hasOwn(obj, key)) {
+      const value = obj[key];
+      if (isPlainObject(value)) {
+        nested[key] = value;
+      } else {
+        flattened[key] = value;
+      }
     }
   }
 
-  return result;
+  return { ...flattened, ...flattenObject(nested) };
 }

@@ -19,7 +19,7 @@ import {
   IngestSimulateSimulateDocumentResult,
 } from '@elastic/elasticsearch/lib/api/types';
 import { IScopedClusterClient } from '@kbn/core/server';
-import { flattenObject, calculateObjectDiff } from '@kbn/object-utils';
+import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
 import {
   FlattenRecord,
   ProcessorDefinitionWithId,
@@ -434,10 +434,14 @@ const getLastDoc = (docResult: SuccessfulIngestSimulateDocumentResult) => {
   const lastDocSource = docResult.processor_results.at(-1)?.doc?._source ?? {};
 
   if (status === 'parsed') {
-    return { value: flattenObject(lastDocSource), errors: [] as SimulationError[], status };
+    return {
+      value: flattenObjectNestedLast(lastDocSource),
+      errors: [] as SimulationError[],
+      status,
+    };
   } else {
     const { _errors, ...value } = lastDocSource;
-    return { value: flattenObject(value), errors: _errors as SimulationError[], status };
+    return { value: flattenObjectNestedLast(value), errors: _errors as SimulationError[], status };
   }
 };
 
@@ -474,12 +478,12 @@ const computeSimulationDocDiff = (
     const nextDoc = comparisonDocs[0];
 
     const { added, updated } = calculateObjectDiff(
-      flattenObject(currentDoc.value),
-      flattenObject(nextDoc.value)
+      flattenObjectNestedLast(currentDoc.value),
+      flattenObjectNestedLast(nextDoc.value)
     );
 
-    const addedFields = Object.keys(flattenObject(added));
-    const updatedFields = Object.keys(flattenObject(updated));
+    const addedFields = Object.keys(flattenObjectNestedLast(added));
+    const updatedFields = Object.keys(flattenObjectNestedLast(updated));
 
     // Sort list to have deterministic list of results
     const processorDetectedFields = [...addedFields, ...updatedFields].sort().map((name) => ({
