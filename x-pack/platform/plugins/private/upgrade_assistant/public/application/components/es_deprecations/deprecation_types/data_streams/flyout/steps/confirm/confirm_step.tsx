@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutFooter,
+  EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -63,7 +64,6 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
     },
   } = useAppContext();
   const { links } = docLinks;
-
   const [checkedIds, setCheckedIds] = useState<CheckedIds>(
     warnings.reduce((initialCheckedIds, warning, index) => {
       initialCheckedIds[idForWarning(index)] = false;
@@ -96,28 +96,54 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
       : i18n.translate(
           'xpack.upgradeAssistant.dataStream.migration.flyout.checklistStep.startActionButtonLabel',
           {
-            defaultMessage: 'Mark all read only',
+            defaultMessage: 'Mark all read-only',
           }
         );
 
   const actionClarification =
-    resolutionType === 'reindex'
-      ? i18n.translate(
-          'xpack.upgradeAssistant.dataStream.flyout.warningsStep.reindex.acceptChangesTitle',
-          {
-            defaultMessage:
-              '{count, plural, =1 {# backing index} other {# backing indices}}, including current write index, will be re-indexed. Current write index will be rolled over first.',
-            values: { count: meta.indicesRequiringUpgradeCount },
-          }
-        )
-      : i18n.translate(
-          'xpack.upgradeAssistant.dataStream.flyout.warningsStep.readonly.acceptChangesTitle',
-          {
-            defaultMessage:
-              '{count, plural, =1 {# backing index} other {# backing indices}}, including current write index, will be marked as read only.',
-            values: { count: meta.indicesRequiringUpgradeCount },
-          }
-        );
+    resolutionType === 'reindex' ? (
+      <>
+        <p>
+          <FormattedMessage
+            id="xpack.upgradeAssistant.dataStream.flyout.warningsStep.reindex.acceptChangesTitle"
+            defaultMessage="{count, plural, =1 {# backing index} other {# backing indices}}, including current write index, will be re-indexed. Current write index will be rolled over first."
+            values={{
+              count: meta.indicesRequiringUpgradeCount,
+            }}
+          />
+        </p>
+        <EuiSpacer size="s" />
+        <p>
+          <FormattedMessage
+            id="xpack.upgradeAssistant.dataStream.flyout.warningsStep.reindex.acceptChangesTitle"
+            defaultMessage="You can increase the speed of reindexing by changing throttling configuration on ES. Where changing throttling configuration allows you to utilize more resources to speed up the reindexing process. {learnMoreHtml}"
+            values={{
+              learnMoreHtml: (
+                <EuiLink
+                  href={`${links.elasticsearch.docsBase}data-stream-reindex-api.html#reindex-data-stream-api-settings`}
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    id="xpack.upgradeAssistant.dataStream.migration.flyout.warningsStep.learnMoreLink"
+                    defaultMessage="Learn more"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
+        </p>
+      </>
+    ) : (
+      <p>
+        <FormattedMessage
+          id="xpack.upgradeAssistant.dataStream.flyout.warningsStep.readonly.acceptChangesTitle"
+          defaultMessage="{count, plural, =1 {# backing index} other {# backing indices}}, including current write index, will be marked as read-only."
+          values={{
+            count: meta.indicesRequiringUpgradeCount,
+          }}
+        />
+      </p>
+    );
 
   return (
     <>
@@ -127,7 +153,7 @@ export const ConfirmMigrationFlyoutStep: React.FunctionComponent<{
             {resolutionType === 'reindex' && <ReindexWarningCallout />}
             {resolutionType === 'readonly' && <ReadonlyWarningCallout />}
             <EuiSpacer />
-            <p>{actionClarification}</p>
+            {actionClarification}
             <EuiSpacer size="m" />
             {warnings.map((warning, index) => {
               const WarningCheckbox = warningToComponentMap[warning.warningType];
