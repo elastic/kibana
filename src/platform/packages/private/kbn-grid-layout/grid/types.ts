@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { ObservedSize } from 'useßresize-observer/polyfilled';
+import type { ObservedSize } from 'use-resize-observer/polyfilled';
 
 export interface GridCoordinate {
   column: number;

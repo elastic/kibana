@@ -13,7 +13,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui'
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-import { GridLayoutStateManager } from '../types';
+import { useGridLayoutContext } from '../use_grid_layout_context';
 import { deleteRow } from '../utils/row_management';
 import { DeleteGridRowModal } from './delete_grid_row_modal';
 import { GridRowTitle } from './grid_row_title';
@@ -21,18 +21,14 @@ import { useGridRowHeaderStyles } from './use_grid_row_header_styles';
 
 export interface GridRowHeaderProps {
   rowIndex: number;
-  gridLayoutStateManager: GridLayoutStateManager;
   toggleIsCollapsed: () => void;
   collapseButtonRef: React.MutableRefObject<HTMLButtonElement | null>;
 }
 
 export const GridRowHeader = React.memo(
-  ({
-    rowIndex,
-    gridLayoutStateManager,
-    toggleIsCollapsed,
-    collapseButtonRef,
-  }: GridRowHeaderProps) => {
+  ({ rowIndex, toggleIsCollapsed, collapseButtonRef }: GridRowHeaderProps) => {
+    const { gridLayoutStateManager } = useGridLayoutContext();
+
     const headerStyles = useGridRowHeaderStyles();
     const [editTitleOpen, setEditTitleOpen] = useState<boolean>(false);
     const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
@@ -103,7 +99,6 @@ export const GridRowHeader = React.memo(
             toggleIsCollapsed={toggleIsCollapsed}
             editTitleOpen={editTitleOpen}
             setEditTitleOpen={setEditTitleOpen}
-            gridLayoutStateManager={gridLayoutStateManager}
             collapseButtonRef={collapseButtonRef}
           />
           {

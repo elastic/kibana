@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
-import { GridLayoutStateManager } from '../types';
+import { useGridLayoutContext } from '../use_grid_layout_context';
 
 export const GridRowTitle = React.memo(
   ({
@@ -30,7 +30,6 @@ export const GridRowTitle = React.memo(
     editTitleOpen,
     setEditTitleOpen,
     toggleIsCollapsed,
-    gridLayoutStateManager,
     collapseButtonRef,
   }: {
     readOnly: boolean;
@@ -38,9 +37,10 @@ export const GridRowTitle = React.memo(
     editTitleOpen: boolean;
     setEditTitleOpen: (value: boolean) => void;
     toggleIsCollapsed: () => void;
-    gridLayoutStateManager: GridLayoutStateManager;
     collapseButtonRef: React.MutableRefObject<HTMLButtonElement | null>;
   }) => {
+    const { gridLayoutStateManager } = useGridLayoutContext();
+
     const inputRef = useRef<HTMLInputElement | null>(null);
     const currentRow = gridLayoutStateManager.gridLayout$.getValue()[rowIndex];
     const [rowTitle, setRowTitle] = useState<string>(currentRow.title);

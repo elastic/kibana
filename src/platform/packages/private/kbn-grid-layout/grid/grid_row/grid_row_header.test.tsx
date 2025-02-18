@@ -13,10 +13,11 @@ import { EuiThemeProvider } from '@elastic/eui';
 import { RenderResult, act, render, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { gridLayoutStateManagerMock } from '../test_utils/mocks';
+import { gridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
 import { getSampleLayout } from '../test_utils/sample_layout';
 import { GridLayoutStateManager } from '../types';
 import { GridRowHeader, GridRowHeaderProps } from './grid_row_header';
+import { GridLayoutContext, GridLayoutContextType } from '../use_grid_layout_context';
 
 const toggleIsCollapsed = jest
   .fn()
@@ -27,16 +28,28 @@ const toggleIsCollapsed = jest
   });
 
 describe('GridRowHeader', () => {
-  const renderGridRowHeader = (propsOverrides: Partial<GridRowHeaderProps> = {}) => {
+  const renderGridRowHeader = (
+    propsOverrides: Partial<GridRowHeaderProps> = {},
+    contextOverrides: Partial<GridLayoutContextType> = {}
+  ) => {
     return render(
       <EuiThemeProvider>
-        <GridRowHeader
-          rowIndex={0}
-          toggleIsCollapsed={() => toggleIsCollapsed(0, gridLayoutStateManagerMock)}
-          gridLayoutStateManager={gridLayoutStateManagerMock}
-          collapseButtonRef={React.createRef()}
-          {...propsOverrides}
-        />
+        <GridLayoutContext.Provider
+          value={
+            {
+              renderPanelContents: mockRenderPanelContents,
+              gridLayoutStateManager: gridLayoutStateManagerMock,
+              ...contextOverrides,
+            } as GridLayoutContextType
+          }
+        >
+          <GridRowHeader
+            rowIndex={0}
+            toggleIsCollapsed={() => toggleIsCollapsed(0, gridLayoutStateManagerMock)}
+            collapseButtonRef={React.createRef()}
+            {...propsOverrides}
+          />
+        </GridLayoutContext.Provider>
       </EuiThemeProvider>
     );
   };

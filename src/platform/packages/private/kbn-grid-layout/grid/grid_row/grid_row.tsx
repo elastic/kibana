@@ -32,7 +32,6 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
   const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
     getKeysInOrder(currentRow.panels)
   );
-  const [rowTitle, setRowTitle] = useState<string>(currentRow.title);
   const [isCollapsed, setIsCollapsed] = useState<boolean>(currentRow.isCollapsed);
 
   useEffect(
@@ -138,7 +137,6 @@ export const GridRow = React.memo(({ rowIndex }: GridRowProps) => {
       {rowIndex !== 0 && (
         <GridRowHeader
           rowIndex={rowIndex}
-          gridLayoutStateManager={gridLayoutStateManager}
           toggleIsCollapsed={toggleIsCollapsed}
           collapseButtonRef={collapseButtonRef}
         />
