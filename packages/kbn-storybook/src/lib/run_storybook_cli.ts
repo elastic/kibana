@@ -56,8 +56,8 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
       try {
         // Some transitive deps of addon-docs are ESM and not loading properly
         // See: https://github.com/storybookjs/storybook/issues/29467
-        // require('fix-esm').require('rehype-external-links');
-        // require('fix-esm').require('rehype-slug');
+        require('fix-esm').require('rehype-external-links');
+        require('fix-esm').require('rehype-slug');
         require('fix-esm').require('react-docgen');
         await build(config);
       } finally {
