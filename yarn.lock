@@ -5625,6 +5625,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-registry@link:src/platform/plugins/shared/esql_registry":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql-utils@link:src/platform/packages/shared/kbn-esql-utils":
   version "0.0.0"
   uid ""

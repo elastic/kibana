@@ -18,6 +18,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { ESQLEditorRegistry } from '@kbn/esql-registry/public';
 
 export interface ESQLEditorProps {
   /** The aggregate type query */
@@ -121,4 +122,5 @@ export interface ESQLEditorDeps {
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
   esql?: EsqlPluginStartBase;
+  esqlRegistry: ESQLEditorRegistry;
 }

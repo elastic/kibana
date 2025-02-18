@@ -121,7 +121,10 @@ export const ESQLEditor = memo(function ESQLEditor({
     uiSettings,
     uiActions,
     data,
+    esqlRegistry,
   } = kibana.services;
+
+  console.log(esqlRegistry.getOverride('logs*'));
 
   const variablesService = kibana.services?.esql?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
@@ -481,6 +484,9 @@ export const ESQLEditor = memo(function ESQLEditor({
         return variablesService?.areSuggestionsEnabled ?? false;
       },
       getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
+      getRecommendedQueriesByIndexPattern: (indexPattern: string) => {
+        return esqlRegistry.getOverride(indexPattern);
+      },
     };
     return callbacks;
   }, [
@@ -500,6 +506,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     histogramBarTarget,
     variablesService?.esqlVariables,
     variablesService?.areSuggestionsEnabled,
+    esqlRegistry,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {

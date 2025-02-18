@@ -17,6 +17,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ESQLEditorRegistry } from '@kbn/esql-registry/public';
 import type { EsqlPluginStart } from './plugin';
 
 export let core: CoreStart;
@@ -28,6 +29,7 @@ interface ServiceDeps {
   expressions: ExpressionsStart;
   storage: Storage;
   uiActions: UiActionsStart;
+  esqlRegistry: ESQLEditorRegistry;
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
@@ -55,6 +57,7 @@ export const setKibanaServices = (
   expressions: ExpressionsStart,
   storage: Storage,
   uiActions: UiActionsStart,
+  esqlRegistry: ESQLEditorRegistry,
   indexManagement?: IndexManagementPluginSetup,
   fieldsMetadata?: FieldsMetadataPublicStart,
   usageCollection?: UsageCollectionStart
@@ -71,5 +74,6 @@ export const setKibanaServices = (
     fieldsMetadata,
     usageCollection,
     esql,
+    esqlRegistry,
   });
 };

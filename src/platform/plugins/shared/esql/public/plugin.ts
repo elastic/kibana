@@ -15,6 +15,7 @@ import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-ty
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { ESQLEditorRegistry } from '@kbn/esql-registry/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   updateESQLQueryTrigger,
@@ -41,6 +42,7 @@ interface EsqlPluginStartDependencies {
   data: DataPublicPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
+  esqlRegistry: ESQLEditorRegistry;
 }
 
 export interface EsqlPluginStart {
@@ -69,9 +71,30 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       uiActions,
       fieldsMetadata,
       usageCollection,
+      esqlRegistry,
     }: EsqlPluginStartDependencies
   ): EsqlPluginStart {
     const storage = new Storage(localStorage);
+
+    // Register overrides temporary here
+    // it should be set by each solution
+    esqlRegistry.setOverride('logs*', {
+      recommendedQueries: [
+        {
+          name: 'Logs count by log level',
+          query: 'FROM logs-* | STATS count(*) by log_level',
+        },
+        {
+          name: 'Redis logs',
+          query:
+            'FROM logs-* | WHERE container.id.keyword IS NOT NULL | WHERE MATCH(kubernetes.pod.name, "redis")',
+        },
+        {
+          name: 'OOMKilled logs',
+          query: 'FROM logs-* | WHERE MATCH(message, "OOMKilled")',
+        },
+      ],
+    });
 
     // Register triggers
     const appendESQLAction = new UpdateESQLQueryAction(data);
@@ -107,6 +130,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       expressions,
       storage,
       uiActions,
+      esqlRegistry,
       this.indexManagement,
       fieldsMetadata,
       usageCollection
