@@ -6,42 +6,27 @@
  */
 
 import {
-  NamedFieldDefinitionConfig,
-  ProcessorDefinition,
   SampleDocument,
+  flattenRecord,
   namedFieldDefinitionConfigSchema,
-  processorDefinitionSchema,
+  processorWithIdDefinitionSchema,
   sampleDocument,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { checkAccess } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
 import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';
+import { ProcessingSimulationParams, simulateProcessing } from './simulation_handler';
 import { handleProcessingSuggestion } from './suggestions_handler';
-import {
-  assertSimulationResult,
-  executeSimulation,
-  prepareSimulationBody,
-  prepareSimulationDiffs,
-  prepareSimulationResponse,
-} from './simulation_handler';
-
-export interface ProcessingSimulateBody {
-  processing: ProcessorDefinition[];
-  documents: SampleDocument[];
-  detected_fields?: NamedFieldDefinitionConfig[];
-}
-
-const processingSimulateBodySchema: z.Schema<ProcessingSimulateBody> = z.object({
-  processing: z.array(processorDefinitionSchema),
-  documents: z.array(sampleDocument),
-  detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
-});
 
 const paramsSchema = z.object({
   path: z.object({ name: z.string() }),
-  body: processingSimulateBodySchema,
-});
+  body: z.object({
+    processing: z.array(processorWithIdDefinitionSchema),
+    documents: z.array(flattenRecord),
+    detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
+  }),
+}) satisfies z.Schema<ProcessingSimulationParams>;
 
 export const simulateProcessorRoute = createServerRoute({
   endpoint: 'POST /api/streams/{name}/processing/_simulate',
@@ -57,27 +42,14 @@ export const simulateProcessorRoute = createServerRoute({
   },
   params: paramsSchema,
   handler: async ({ params, request, getScopedClients }) => {
-    const { scopedClusterClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
 
     const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
     if (!read) {
       throw new DefinitionNotFoundError(`Stream definition for ${params.path.name} not found.`);
     }
 
-    const simulationBody = prepareSimulationBody(params.path.name, params.body);
-
-    const simulationResult = await executeSimulation(scopedClusterClient, simulationBody);
-
-    const simulationDiffs = prepareSimulationDiffs(simulationResult, simulationBody.docs);
-
-    assertSimulationResult(simulationResult, simulationDiffs);
-
-    return prepareSimulationResponse(
-      simulationResult,
-      simulationBody.docs,
-      simulationDiffs,
-      params.body.detected_fields
-    );
+    return simulateProcessing({ params, scopedClusterClient, streamsClient });
   },
 });
 

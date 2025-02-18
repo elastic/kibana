@@ -18,6 +18,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
+<<<<<<< HEAD
+=======
+import { flattenObjectNestedLast } from '@kbn/object-utils';
+>>>>>>> tonyghiani/127-enrichment-simulation-improvements
 import { isEmpty } from 'lodash';
 import { SampleDocument } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
@@ -55,6 +59,32 @@ export const ProcessorOutcomePreview = ({
 
   const { timeRange, setTimeRange } = useDateRange({ data });
 
+<<<<<<< HEAD
+=======
+  const [selectedDocsFilter, setSelectedDocsFilter] =
+    useState<DocsFilterOption>('outcome_filter_all');
+
+  const simulationDocuments = useMemo(() => {
+    if (!simulation?.documents) {
+      return samples.map((doc) => flattenObjectNestedLast(doc)) as RecursiveRecord[];
+    }
+
+    const filterDocuments = (filter: DocsFilterOption) => {
+      switch (filter) {
+        case 'outcome_filter_matched':
+          return simulation.documents.filter((doc) => doc.status === 'parsed');
+        case 'outcome_filter_unmatched':
+          return simulation.documents.filter((doc) => doc.status !== 'parsed');
+        case 'outcome_filter_all':
+        default:
+          return simulation.documents;
+      }
+    };
+
+    return filterDocuments(selectedDocsFilter).map((doc) => doc.value);
+  }, [samples, simulation?.documents, selectedDocsFilter]);
+
+>>>>>>> tonyghiani/127-enrichment-simulation-improvements
   const tableColumns = useMemo(() => {
     switch (selectedDocsFilter) {
       case 'outcome_filter_unmatched':

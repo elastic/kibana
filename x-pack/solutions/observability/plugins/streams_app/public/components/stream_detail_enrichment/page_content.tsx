@@ -87,6 +87,25 @@ export function StreamDetailEnrichmentContent({
     return <RootStreamEmptyPrompt />;
   }
 
+  const isNonAdditiveSimulation = simulation && simulation.is_non_additive_simulation;
+  const isSubmitDisabled = Boolean(!hasChanges || isNonAdditiveSimulation);
+
+  const confirmTooltip = isNonAdditiveSimulation
+    ? {
+        title: i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.nonAdditiveProcessorsTooltip.title',
+          { defaultMessage: 'Non additive simulation detected' }
+        ),
+        content: i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.nonAdditiveProcessorsTooltip.content',
+          {
+            defaultMessage:
+              'We currently prevent adding processors that change/remove existing data. Please update your processor configurations to continue.',
+          }
+        ),
+      }
+    : undefined;
+
   return (
     <StreamsEnrichmentContextProvider
       definition={definition}
@@ -97,14 +116,14 @@ export function StreamDetailEnrichmentContent({
           paddingSize="none"
           css={css`
             display: flex;
-            overflow: auto;
+            overflow: hidden auto;
           `}
         >
           <EuiResizableContainer>
             {(EuiResizablePanel, EuiResizableButton) => (
               <>
                 <EuiResizablePanel
-                  initialSize={25}
+                  initialSize={30}
                   minSize="400px"
                   tabIndex={0}
                   paddingSize="none"
@@ -118,13 +137,12 @@ export function StreamDetailEnrichmentContent({
                     onWatchProcessor={watchProcessor}
                     onAddProcessor={addProcessor}
                     onReorderProcessor={reorderProcessors}
+                    simulation={simulation}
                   />
                 </EuiResizablePanel>
-
                 <EuiResizableButton indicator="border" accountForScrollbars="both" />
-
                 <EuiResizablePanel
-                  initialSize={75}
+                  initialSize={70}
                   minSize="300px"
                   tabIndex={0}
                   paddingSize="s"
@@ -147,10 +165,11 @@ export function StreamDetailEnrichmentContent({
         </EuiSplitPanel.Inner>
         <EuiSplitPanel.Inner grow={false} color="subdued">
           <ManagementBottomBar
+            confirmTooltip={confirmTooltip}
             onCancel={resetChanges}
             onConfirm={saveChanges}
             isLoading={isSavingChanges}
-            disabled={!hasChanges}
+            disabled={isSubmitDisabled}
           />
         </EuiSplitPanel.Inner>
       </EuiSplitPanel.Outer>
@@ -166,6 +185,7 @@ interface ProcessorsEditorProps {
   onReorderProcessor: UseDefinitionReturn['reorderProcessors'];
   onUpdateProcessor: UseDefinitionReturn['updateProcessor'];
   onWatchProcessor: UseProcessingSimulatorReturn['watchProcessor'];
+  simulation: UseProcessingSimulatorReturn['simulation'];
 }
 
 const ProcessorsEditor = React.memo(
@@ -177,6 +197,7 @@ const ProcessorsEditor = React.memo(
     onReorderProcessor,
     onUpdateProcessor,
     onWatchProcessor,
+    simulation,
   }: ProcessorsEditorProps) => {
     const { euiTheme } = useEuiTheme();
 
@@ -240,6 +261,7 @@ const ProcessorsEditor = React.memo(
                   onDeleteProcessor={onDeleteProcessor}
                   onUpdateProcessor={onUpdateProcessor}
                   onWatchProcessor={onWatchProcessor}
+                  processorMetrics={simulation?.processors_metrics[processor.id]}
                 />
               ))}
             </SortableList>
@@ -249,6 +271,7 @@ const ProcessorsEditor = React.memo(
             definition={definition}
             onAddProcessor={onAddProcessor}
             onWatchProcessor={onWatchProcessor}
+            processorMetrics={simulation?.processors_metrics.draft}
           />
         </EuiPanel>
       </>
