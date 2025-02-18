@@ -9,7 +9,9 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('@ess SecuritySolution SIEM Migrations', () => {
     loadTestFile(require.resolve('./create'));
+    loadTestFile(require.resolve('./get_prebuilt_rules'));
     loadTestFile(require.resolve('./get'));
+    loadTestFile(require.resolve('./install'));
     loadTestFile(require.resolve('./stats'));
     loadTestFile(require.resolve('./update'));
   });

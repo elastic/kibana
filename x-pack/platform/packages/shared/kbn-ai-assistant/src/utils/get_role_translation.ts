@@ -15,12 +15,6 @@ export function getRoleTranslation(role: MessageRole) {
     });
   }
 
-  if (role === MessageRole.System) {
-    return i18n.translate('xpack.aiAssistant.chatTimeline.messages.system.label', {
-      defaultMessage: 'System',
-    });
-  }
-
   return i18n.translate('xpack.aiAssistant.chatTimeline.messages.elasticAssistant.label', {
     defaultMessage: 'Elastic Assistant',
   });

@@ -6242,7 +6242,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logs-overview@link:x-pack/platform/packages/shared/logs_overview":
+"@kbn/logs-overview@link:x-pack/platform/packages/shared/logs-overview":
   version "0.0.0"
   uid ""
 
@@ -6550,11 +6550,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-common@link:x-pack/solutions/observability/packages/observability_ai/observability_ai_common":
+"@kbn/observability-ai-common@link:x-pack/solutions/observability/packages/observability-ai/observability-ai-common":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-server@link:x-pack/solutions/observability/packages/observability_ai/observability_ai_server":
+"@kbn/observability-ai-server@link:x-pack/solutions/observability/packages/observability-ai/observability-ai-server":
   version "0.0.0"
   uid ""
 
@@ -6578,10 +6578,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-onboarding-e2e@link:x-pack/solutions/observability/plugins/observability_onboarding/e2e":
-  version "0.0.0"
-  uid ""
-
 "@kbn/observability-onboarding-plugin@link:x-pack/solutions/observability/plugins/observability_onboarding":
   version "0.0.0"
   uid ""
@@ -6598,15 +6594,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-browser@link:x-pack/solutions/observability/packages/utils_browser":
+"@kbn/observability-utils-browser@link:x-pack/solutions/observability/packages/utils-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-common@link:x-pack/solutions/observability/packages/utils_common":
+"@kbn/observability-utils-common@link:x-pack/solutions/observability/packages/utils-common":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-server@link:x-pack/solutions/observability/packages/utils_server":
+"@kbn/observability-utils-server@link:x-pack/solutions/observability/packages/utils-server":
   version "0.0.0"
   uid ""
 
@@ -6878,15 +6874,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-apis@link:packages/response-ops/alerts_apis":
+"@kbn/response-ops-alerts-apis@link:src/platform/packages/shared/response-ops/alerts-apis":
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-fields-browser@link:packages/response-ops/alerts_fields_browser":
+"@kbn/response-ops-alerts-fields-browser@link:src/platform/packages/shared/response-ops/alerts-fields-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-table@link:packages/response-ops/alerts_table":
+"@kbn/response-ops-alerts-table@link:src/platform/packages/shared/response-ops/alerts-table":
   version "0.0.0"
   uid ""
 
@@ -7011,6 +7007,10 @@
   uid ""
 
 "@kbn/scout-info@link:packages/kbn-scout-info":
+  version "0.0.0"
+  uid ""
+
+"@kbn/scout-oblt@link:x-pack/solutions/observability/packages/kbn-scout-oblt":
   version "0.0.0"
   uid ""
 
@@ -7174,7 +7174,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-distribution-bar@link:x-pack/solutions/security/packages/distribution_bar":
+"@kbn/security-solution-distribution-bar@link:x-pack/solutions/security/packages/distribution-bar":
   version "0.0.0"
   uid ""
 
@@ -14463,10 +14463,10 @@ babel-runtime@6.x:
     core-js "^2.4.0"
     regenerator-runtime "^0.11.0"
 
-backport@^9.6.4:
-  version "9.6.4"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-9.6.4.tgz#ea45ab97f32ebca1564269f92a6fc56eda703cdc"
-  integrity sha512-cTaItWSGoO33vOD/br/Di2KFesgHyE6UWuc0GN0IiFk13UqEadeURq3UOQptARyQC3Nz56Us5QYNJ3E5L61zYg==
+backport@^9.6.6:
+  version "9.6.6"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-9.6.6.tgz#ab7d0a1720eb5cd3ccef51cd79f1872bb9ed409c"
+  integrity sha512-X/2vWZNZP5wvbfWaxtLsXSbnOxANgoCh84IZavTS2X2/6X/si3cpUL0ky1fh+70bK5O8PI+3Fopp5srmeqHB1g==
   dependencies:
     "@octokit/rest" "^19.0.7"
     axios "^1.6.2"
