@@ -16,6 +16,7 @@ import { getEntitiesKibanaClient } from './get_entites_kibana_client';
 import { getEntitiesEsClient } from './get_entities_es_client';
 import { getInfraEsClient } from './get_infra_es_client';
 import { getLogsEsClient } from './get_logs_es_client';
+import { getOtelSynthtraceEsClient } from './get_otel_es_client';
 import { getScenario } from './get_scenario';
 import { getSyntheticsEsClient } from './get_synthetics_es_client';
 import { loggerProxy } from './logger_proxy';
@@ -71,6 +72,12 @@ async function start() {
     logger,
   });
 
+  const otelEsClient = getOtelSynthtraceEsClient({
+    concurrency: runOptions.concurrency,
+    target: esUrl,
+    logger,
+  });
+
   const file = runOptions.file;
 
   const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
@@ -85,6 +92,7 @@ async function start() {
       logsEsClient,
       infraEsClient,
       syntheticsEsClient,
+      otelEsClient,
       entitiesEsClient,
       entitiesKibanaClient,
     });
@@ -101,6 +109,7 @@ async function start() {
         infraEsClient,
         entitiesEsClient,
         syntheticsEsClient,
+        otelEsClient,
       },
     })
   );
@@ -140,6 +149,7 @@ async function start() {
       logsEsClient,
       infraEsClient,
       syntheticsEsClient,
+      otelEsClient,
       entitiesEsClient,
       entitiesKibanaClient,
     });
