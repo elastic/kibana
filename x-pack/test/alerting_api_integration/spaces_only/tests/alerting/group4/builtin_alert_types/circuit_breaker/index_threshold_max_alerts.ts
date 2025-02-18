@@ -29,7 +29,6 @@ export default function maxAlertsRuleTests({ getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       await esTestIndexTool.destroy();
-
       await esTestIndexTool.setup();
     });
 
