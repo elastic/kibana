@@ -107,13 +107,24 @@ export interface IlmPolicyPhase {
   min_age?: string;
 }
 
+export interface IlmPolicyHotPhase extends IlmPolicyPhase {
+  name: 'hot';
+  rollover: {
+    max_size?: number | string;
+    max_primary_shard_size?: number | string;
+    max_age?: string;
+    max_docs?: number;
+    max_primary_shard_docs?: number;
+  };
+}
+
 export interface IlmPolicyDeletePhase {
-  name: PhaseName;
+  name: 'delete';
   min_age: string;
 }
 
 export interface IlmPolicyPhases {
-  hot?: IlmPolicyPhase;
+  hot?: IlmPolicyHotPhase;
   warm?: IlmPolicyPhase;
   cold?: IlmPolicyPhase;
   frozen?: IlmPolicyPhase;

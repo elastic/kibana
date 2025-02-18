@@ -25,7 +25,7 @@ export function ilmPhases({
 }) {
   const phaseWithName = (name: keyof IlmPolicyPhases, phase?: IlmPhase) => {
     if (!phase) return undefined;
-    return { ...pick(phase, ['min_age']), name };
+    return { ...pick(phase, ['min_age'], ['actions']), name };
   };
 
   const ilmDetails = Object.values(indicesIlmDetails);
@@ -48,11 +48,29 @@ export function ilmPhases({
       .map((detail) => indicesStats[detail.index!])
       .reduce((size, stats) => size + (stats?.total?.store?.size_in_bytes ?? 0), 0);
 
-    phases[phase.name] = {
+    const policyPhase = {
       name: phase.name,
       size_in_bytes: sizeInBytes,
       min_age: phase.min_age?.toString(),
     };
+    if (phase.name === 'hot') {
+      const rollover = phase.actions?.rollover;
+      const maxAge = !rollover?.max_age || rollover?.max_age === -1 ? undefined : rollover.max_age;
+      phases[phase.name] = {
+        ...policyPhase,
+        name: 'hot',
+        rollover: {
+          max_age: maxAge,
+          max_size: phase.actions?.rollover?.max_size,
+          max_primary_shard_size: phase.actions?.rollover?.max_primary_shard_size,
+          max_docs: phase.actions?.rollover?.max_docs,
+          max_primary_shard_docs: phase.actions?.rollover?.max_primary_shard_docs,
+        },
+      };
+    } else {
+      phases[phase.name] = policyPhase;
+    }
+
     return phases;
   }, {} as IlmPolicyPhases);
 }

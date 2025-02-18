@@ -9,6 +9,7 @@ import { capitalize, last } from 'lodash';
 import React, { useMemo } from 'react';
 import {
   IlmPolicyDeletePhase,
+  IlmPolicyHotPhase,
   IlmPolicyPhase,
   IlmPolicyPhases,
   IngestStreamGetResponse,
@@ -33,46 +34,65 @@ import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
 import { orderIlmPhases, parseDurationInSeconds } from './helpers';
 import { IlmLink } from './ilm_link';
+import { rolloverCondition } from './helpers/rollover_condition';
 
 const ILM_PHASES = {
   hot: {
     color: '#F6726A',
-    description: () =>
-      i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseDescription', {
-        defaultMessage: 'Recent, frequently-searched data. Best indexing and search performance.',
-      }),
+    description: (phase: IlmPolicyPhase | IlmPolicyDeletePhase) => {
+      const hotPhase = phase as IlmPolicyHotPhase;
+      const condition = rolloverCondition(hotPhase.rollover);
+      return [
+        i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseDescription', {
+          defaultMessage: 'Recent, frequently-searched data. Best indexing and search performance.',
+        }),
+        condition
+          ? i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseRolloverDescription', {
+              defaultMessage: '*Time since rollover. Current rollover condition: {condition}.',
+              values: { condition },
+            })
+          : i18n.translate('xpack.streams.streamDetailLifecycle.hotPhaseNoRolloverDescription', {
+              defaultMessage:
+                '*Time since rollover. Data will not move to the next phase because rollover is not enabled.',
+            }),
+      ];
+    },
   },
   warm: {
     color: '#FCD883',
-    description: () =>
+    description: () => [
       i18n.translate('xpack.streams.streamDetailLifecycle.warmPhaseDescription', {
         defaultMessage:
           'Frequently searched data, rarely updated. Optimized for search, not indexing.',
       }),
+    ],
   },
   cold: {
     color: '#A6EDEA',
-    description: () =>
+    description: () => [
       i18n.translate('xpack.streams.streamDetailLifecycle.coldPhaseDescription', {
         defaultMessage:
           'Data searched infrequently, not updated. Optimized for cost savings over search performance.',
       }),
+    ],
   },
   frozen: {
     color: '#61A2FF',
-    description: () =>
+    description: () => [
       i18n.translate('xpack.streams.streamDetailLifecycle.frozenPhaseDescription', {
         defaultMessage:
           'Most cost-effective way to store your data and still be able to search it.',
       }),
+    ],
   },
   delete: {
     color: '#DDD',
-    description: (duration?: string) =>
+    description: (phase: IlmPolicyPhase | IlmPolicyDeletePhase) => [
       i18n.translate('xpack.streams.streamDetailLifecycle.deletePhaseDescription', {
         defaultMessage: 'Data deleted after {duration}.',
-        values: { duration },
+        values: { duration: phase.min_age! },
       }),
+    ],
   },
 };
 
@@ -250,7 +270,7 @@ function IlmPhase({
             hasShadow={false}
           >
             <EuiText textAlign="center" size="xs">
-              {minAge || '∞'}
+              {minAge ? minAge + (phase.name === 'hot' ? '*' : '') : '∞'}
             </EuiText>
           </EuiPanel>
         ) : undefined}
@@ -262,29 +282,31 @@ function IlmPhase({
 function phasesDescriptions(phases: IlmPolicyPhases) {
   const descriptions = orderIlmPhases(phases)
     .filter(({ name }) => name !== 'delete')
-    .map(({ name, min_age: minAge }) => ({
-      name,
-      description: ILM_PHASES[name].description(minAge),
-      color: ILM_PHASES[name].color,
+    .map((phase) => ({
+      name: phase.name,
+      description: ILM_PHASES[phase.name].description(phase),
+      color: ILM_PHASES[phase.name].color,
     })) as Array<
     {
       name: PhaseName | 'indefinite';
-      description: string;
+      description: string[];
     } & ({ color: string } | { icon: string })
   >;
 
   if (phases.delete) {
     descriptions.push({
       name: 'delete',
-      description: ILM_PHASES.delete.description(phases.delete!.min_age),
+      description: ILM_PHASES.delete.description(phases.delete),
       icon: 'trash',
     });
   } else {
     descriptions.push({
       name: 'indefinite',
-      description: i18n.translate('xpack.streams.streamDetailLifecycle.noRetentionDescription', {
-        defaultMessage: 'Data is stored indefinitely.',
-      }),
+      description: [
+        i18n.translate('xpack.streams.streamDetailLifecycle.noRetentionDescription', {
+          defaultMessage: 'Data is stored indefinitely.',
+        }),
+      ],
       icon: 'infinity',
     });
   }
@@ -322,7 +344,9 @@ function PhasesLegend({ phases }: { phases?: IlmPolicyPhases }) {
             </EuiFlexItem>
 
             <EuiFlexItem grow={10}>
-              <EuiTextColor color="subdued">{phase.description}</EuiTextColor>
+              {phase.description.map((desc) => (
+                <EuiTextColor color="subdued">{desc}</EuiTextColor>
+              ))}
             </EuiFlexItem>
           </EuiFlexGroup>
 
