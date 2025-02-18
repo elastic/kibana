@@ -69,10 +69,6 @@ export function TransactionOverview() {
   const hasLogsOnlySignal =
     serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
 
-  if (hasLogsOnlySignal) {
-    return <ServiceTabEmptyState id="transactionOverview" />;
-  }
-
   const handleOnLoadTable = useCallback(() => {
     onPageReady({
       meta: {
@@ -80,7 +76,11 @@ export function TransactionOverview() {
         rangeTo: end,
       },
     });
-  }, []);
+  }, [start, end, onPageReady]);
+
+  if (hasLogsOnlySignal) {
+    return <ServiceTabEmptyState id="transactionOverview" />;
+  }
 
   return (
     <>

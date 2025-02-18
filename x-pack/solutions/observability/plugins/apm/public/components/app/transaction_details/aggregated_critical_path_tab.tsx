@@ -43,7 +43,7 @@ function TransactionDetailAggregatedCriticalPath({ traceSamplesFetchResult }: Ta
         value1: traceIds.length,
       },
     });
-  }, []);
+  }, [start, end, traceIds, onPageReady]);
 
   return (
     <CriticalPathFlamegraph

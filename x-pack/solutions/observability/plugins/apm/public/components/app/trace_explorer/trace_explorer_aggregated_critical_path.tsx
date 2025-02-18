@@ -38,7 +38,7 @@ export function TraceExplorerAggregatedCriticalPath() {
         value1: traceIds.length,
       },
     });
-  }, []);
+  }, [start, end, traceIds, onPageReady]);
   return (
     <CriticalPathFlamegraph
       start={start}
