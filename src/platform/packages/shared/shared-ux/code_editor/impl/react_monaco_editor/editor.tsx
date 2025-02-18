@@ -122,6 +122,9 @@ export interface MonacoEditorProps {
   onChange?: ChangeHandler;
 }
 
+// initialize supported languages
+initializeSupportedLanguages();
+
 export function MonacoEditor({
   width = '100%',
   height = '100%',
@@ -178,11 +181,6 @@ export function MonacoEditor({
   const handleEditorWillUnmount = () => {
     editorWillUnmount?.(editor.current!, monaco);
   };
-
-  useEffect(() => {
-    // initialize supported languages
-    initializeSupportedLanguages();
-  });
 
   useEffect(() => {
     // register default theme code editor theme
