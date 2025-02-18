@@ -7,27 +7,9 @@
   }
 }
 
-.lnsLayerPanel__layerHeader {
-  padding: $euiSize;
-  border-bottom: $euiBorderThin;
-}
-
-// fixes truncation for too long chart switcher labels
-.lnsLayerPanel__layerSettingsWrapper {
-  min-width: 0;
-}
-
-.lnsLayerPanel__settingsStaticHeader {
-  padding-left: $euiSizeXS;
-}
-
 .lnsLayerPanel__settingsStaticHeaderIcon {
   margin-right: $euiSizeS;
   vertical-align: inherit;
-}
-
-.lnsLayerPanel__settingsStaticHeaderTitle {
-  display: inline;
 }
 
 .lnsLayerPanel__row {

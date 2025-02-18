@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiIconTip,
   UseEuiTheme,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -50,6 +51,7 @@ export function LayerPanel(props: LayerPanelProps) {
   }>({});
 
   const [isPanelSettingsOpen, setPanelSettingsOpen] = useState(false);
+  const { euiTheme } = useEuiTheme();
 
   const {
     framePublicAPI,
@@ -365,9 +367,20 @@ export function LayerPanel(props: LayerPanelProps) {
         data-test-subj={`lns-layerPanel-${layerIndex}`}
       >
         <EuiPanel paddingSize="none" hasShadow={false} hasBorder>
-          <header className="lnsLayerPanel__layerHeader">
+          <header
+            className="lnsLayerPanel__layerHeader"
+            css={css`
+              padding: ${euiTheme.size.base};
+              border-bottom: ${euiTheme.border.thin};
+            `}
+          >
             <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-              <EuiFlexItem grow className="lnsLayerPanel__layerSettingsWrapper">
+              <EuiFlexItem
+                grow
+                css={css`
+                  min-width: 0; // fixes truncation for too long chart switcher labels
+                `}
+              >
                 <LayerHeader
                   layerConfigProps={{
                     ...layerVisualizationConfigProps,

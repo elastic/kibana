@@ -27,6 +27,7 @@ import { DropIllustration } from '@kbn/chart-icons';
 import { useDragDropContext, DragDropIdentifier, Droppable } from '@kbn/dom-drag-drop';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ChartSizeSpec, isChartSizeEvent } from '@kbn/chart-expressions-common';
+import { css } from '@emotion/react';
 import { getSuccessfulRequestTimings } from '../../../report_performance_metric_util';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
@@ -81,7 +82,6 @@ import {
 import { setChangesApplied } from '../../../state_management/lens_slice';
 import { WorkspaceErrors } from './workspace_errors';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
-import { css } from '@emotion/react';
 
 export interface WorkspacePanelProps {
   visualizationMap: VisualizationMap;
@@ -497,7 +497,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
     return (
       <EuiText
-        className='lnsWorkspacePanel__emptyContent'
+        className="lnsWorkspacePanel__emptyContent"
         textAlign="center"
         data-test-subj="workspace-drag-drop-prompt"
         size="s"
@@ -646,12 +646,9 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         css={css({
           ...(isFullscreen
             ? {
-               border: 'none !important',
+                border: 'none !important',
               }
-            : {
-                
-              }),
-
+            : {}),
         })}
         dataTestSubj="lnsWorkspace"
         dropTypes={suggestionForDraggedField ? ['field_add'] : undefined}

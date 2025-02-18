@@ -8,11 +8,19 @@
 import './frame_layout.scss';
 
 import React from 'react';
-import { EuiScreenReaderOnly, EuiFlexGroup, EuiFlexItem, EuiPage, EuiPageBody, useEuiTheme, euiBreakpoint } from '@elastic/eui';
+import {
+  EuiScreenReaderOnly,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPage,
+  EuiPageBody,
+  useEuiTheme,
+  euiBreakpoint,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { useLensSelector, selectIsFullscreenDatasource } from '../../state_management';
 import { css } from '@emotion/react';
+import { useLensSelector, selectIsFullscreenDatasource } from '../../state_management';
 
 export interface FrameLayoutProps {
   dataPanel: React.ReactNode;
@@ -42,7 +50,12 @@ export function FrameLayout(props: FrameLayoutProps) {
           </aside>
         </EuiFlexItem>
       ) : null}
-      <EuiFlexItem grow={true} css={css`position: relative`}>
+      <EuiFlexItem
+        grow={true}
+        css={css`
+          position: relative;
+        `}
+      >
         <EuiPage
           paddingSize="none"
           css={css`
@@ -57,11 +70,12 @@ export function FrameLayout(props: FrameLayoutProps) {
             ${euiBreakpoint(euiTheme, ['xs', 's', 'm'])} {
               position: static;
             }
-            ${isFullscreen && `.lnsFrameLayout__sidebar--left {
+            ${isFullscreen &&
+            `.lnsFrameLayout__sidebar--left {
               // Hide the datapanel in fullscreen mode. Using display: none does trigger
               // a rerender when the container becomes visible again, maybe pushing offscreen is better
               display: none;
-            }`} 
+            }`}
           `}
         >
           <EuiPageBody
@@ -101,7 +115,9 @@ export function FrameLayout(props: FrameLayoutProps) {
               </div>
             </section>
             <section
-              css={css`${isFullscreen && `flex: 1; max-width: none;`}`}
+              css={css`
+                ${isFullscreen && `flex: 1; max-width: none;`}
+              `}
               className={classNames(
                 'lnsFrameLayout__sidebar lnsFrameLayout__sidebar--right',
                 'hide-for-sharing',
