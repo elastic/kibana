@@ -26,8 +26,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     after(async () => {
-      viewerClientWithAPIKey.destroy();
-      adminClientWithAPIKey.destroy();
+      await viewerClientWithAPIKey.destroy();
+      await adminClientWithAPIKey.destroy();
     });
 
     it('returns false when user has reader privileges', async () => {
