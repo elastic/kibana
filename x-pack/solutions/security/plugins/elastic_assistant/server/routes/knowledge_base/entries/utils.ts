@@ -57,7 +57,6 @@ export const validateDocumentsModification = async (
   });
   const availableIds = availableEntries.map((doc) => doc.id);
   const nonAvailableIds = documentIds.filter((id) => !availableIds.includes(id));
-  console.error('aaa', nonAvailableIds);
   if (nonAvailableIds.length > 0) {
     throw new Error(`Could not find documents to ${operation}: ${nonAvailableIds}.`);
   }

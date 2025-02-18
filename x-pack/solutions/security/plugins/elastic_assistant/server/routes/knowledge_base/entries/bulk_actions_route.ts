@@ -209,8 +209,6 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
             return checkResponse.response;
           }
 
-          console.error('a');
-
           logger.debug(
             () =>
               `Performing bulk action on Knowledge Base Entries:\n${JSON.stringify(request.body)}`
@@ -228,8 +226,6 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
               statusCode: 400,
             });
           }
-
-          console.error('b');
 
           const abortController = new AbortController();
 
@@ -252,39 +248,21 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
             });
           }
 
-          console.error('c');
-
           await validateDocumentsModification(
             kbDataClient,
             authenticatedUser,
             body.delete?.ids ?? [],
             'delete'
           );
-          console.error('2');
           await validateDocumentsModification(
             kbDataClient,
             authenticatedUser,
             body.update?.map((entry) => entry.id) ?? [],
             'update'
           );
-
-          console.error('d');
-
+          
           const writer = await kbDataClient?.getWriter();
           const changedAt = new Date().toISOString();
-
-          console.error(
-            'docs',
-            body.create?.map((entry) =>
-              transformToCreateSchema({
-                createdAt: changedAt,
-                spaceId,
-                user: authenticatedUser,
-                entry,
-                global: entry.users != null && entry.users.length === 0,
-              })
-            )
-          );
           const {
             errors,
             docs_created: docsCreated,
@@ -322,7 +300,6 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
                 })
               : undefined;
 
-          console.error('e', docsCreated);
           return buildBulkResponse(
             response,
             {
