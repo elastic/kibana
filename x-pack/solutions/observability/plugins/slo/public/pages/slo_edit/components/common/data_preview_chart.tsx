@@ -49,7 +49,7 @@ interface DataPreviewChartProps {
   thresholdColor?: string;
   thresholdMessage?: string;
   ignoreMoreThan100?: boolean;
-  label?: string;
+  rangeLabel?: string;
   range?: {
     from: Date;
     to: Date;
@@ -65,7 +65,7 @@ export function DataPreviewChart({
   thresholdMessage,
   ignoreMoreThan100,
   // end specific timeslice metric indicator type
-  label,
+  rangeLabel,
   range,
 }: DataPreviewChartProps) {
   const { watch, getFieldState, formState, getValues } = useFormContext<CreateSLOForm>();
@@ -313,7 +313,7 @@ export function DataPreviewChart({
 
               <Axis
                 id="time"
-                title={label || DEFAULT_LABEL}
+                title={rangeLabel ?? DEFAULT_LABEL}
                 tickFormat={(d) => moment(d).format(dateFormat)}
                 position={Position.Bottom}
                 timeAxisLayerCount={2}
