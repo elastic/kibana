@@ -167,7 +167,6 @@ export const LOGS_EXPLORER_FEEDBACK_LINK = 'https://ela.st/explorer-feedback';
 export type {
   ServiceOverviewParams,
   ServiceOverviewLocator,
-  TransactionDetailsByNameParams,
   TransactionDetailsByNameLocator,
   AssetDetailsFlyoutLocator,
   AssetDetailsFlyoutLocatorParams,

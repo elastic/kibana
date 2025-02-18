@@ -25,3 +25,12 @@ export interface DependencyOverviewParams extends SerializableRecord {
   rangeFrom?: string;
   rangeTo?: string;
 }
+
+export const TRANSACTION_DETAILS_BY_NAME_LOCATOR = 'TransactionDetailsByNameLocator';
+
+export interface TransactionDetailsByNameParams extends SerializableRecord {
+  serviceName: string;
+  transactionName: string;
+  rangeFrom?: string;
+  rangeTo?: string;
+}
