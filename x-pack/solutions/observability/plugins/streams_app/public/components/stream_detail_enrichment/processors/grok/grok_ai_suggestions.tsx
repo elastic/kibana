@@ -222,7 +222,6 @@ function InnerGrokAiSuggestions({
     content = null;
   }
 
-
   if (filteredSuggestions && filteredSuggestions.length) {
     content = (
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -260,6 +259,7 @@ function InnerGrokAiSuggestions({
                       const currentState = form.getValues();
                       const hasNoPatterns =
                         !currentState.patterns || !currentState.patterns.some(({ value }) => value);
+                      form.clearErrors('patterns');
                       if (hasNoPatterns) {
                         form.setValue('patterns', [{ value: suggestion.pattern }]);
                       } else {
