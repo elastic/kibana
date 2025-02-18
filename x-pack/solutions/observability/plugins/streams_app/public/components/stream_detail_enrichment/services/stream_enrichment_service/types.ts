@@ -8,6 +8,8 @@
 import { IToasts } from '@kbn/core/public';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { FieldDefinition, IngestStreamGetResponse, ProcessorDefinition } from '@kbn/streams-schema';
+import { ErrorActorEvent } from 'xstate5';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../../types';
 
 export interface StreamEnrichmentServiceDependencies {
@@ -28,6 +30,10 @@ export interface StreamEnrichmentContext {
 }
 
 export type StreamEnrichmentEvent =
+  | { type: 'stream.update' }
+  | { type: 'simulation.viewDataPreview' }
+  | { type: 'simulation.viewDetectedFields' }
+  | { type: 'processors.add'; processor: ProcessorDefinition; fields?: DetectedField[] }
   | { type: 'processors.add'; processor: ProcessorDefinition; fields?: DetectedField[] }
   | { type: 'processors.delete'; id: string }
   | { type: 'processors.reorder'; processors: ProcessorDefinitionWithUIAttributes[] }
@@ -36,7 +42,8 @@ export type StreamEnrichmentEvent =
       id: string;
       processorUpdate: ProcessorDefinition;
       status: ProcessorDefinitionWithUIAttributes['status'];
-    };
+    }
+  | ErrorActorEvent<esErrors.ResponseError, 'stream.update'>;
 
 export type StreamEnrichmentEventPayload<TEventType extends StreamEnrichmentEvent['type']> =
   Extract<StreamEnrichmentEvent, { type: TEventType }>;

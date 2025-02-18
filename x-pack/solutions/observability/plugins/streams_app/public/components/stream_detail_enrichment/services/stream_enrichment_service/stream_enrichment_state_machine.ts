@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { MachineImplementationsFrom, assign, fromPromise, setup } from 'xstate5';
+import { ErrorActorEvent, MachineImplementationsFrom, assign, setup } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import {
   ProcessorDefinition,
@@ -14,8 +13,9 @@ import {
   isRootStreamDefinition,
   isWiredStreamGetResponse,
 } from '@kbn/streams-schema';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
+import { errors as esErrors } from '@elastic/elasticsearch';
 // import { CategorizeLogsServiceDependencies, LogCategorizationParams } from './types';
+import { i18n } from '@kbn/i18n';
 import {
   StreamEnrichmentContext,
   StreamEnrichmentEvent,
@@ -24,6 +24,11 @@ import {
   StreamEnrichmentServiceDependencies,
 } from './types';
 import { processorConverter } from '../../utils';
+import {
+  createUpsertStreamActor,
+  createUpsertStreamFailureNofitier,
+  createUpsertStreamSuccessNofitier,
+} from './upsert_stream';
 
 export const streamEnrichmentService = setup({
   types: {
@@ -32,9 +37,12 @@ export const streamEnrichmentService = setup({
     events: {} as StreamEnrichmentEvent,
   },
   actors: {
-    fetchSamples: getPlaceholderFor(createSampleFetcherActor),
+    // fetchSamples: getPlaceholderFor(createSampleFetcherActor),
+    upsertStream: getPlaceholderFor(createUpsertStreamActor),
   },
   actions: {
+    notifyUpsertStreamSuccess: () => {},
+    notifyUpsertStreamFailure: () => {},
     setupProcessors: assign(({ context }) => {
       const processors = createProcessorsList(context.definition.stream.ingest.processing);
       return {
@@ -91,9 +99,11 @@ export const streamEnrichmentService = setup({
   guards: {
     isRootStream: ({ context }) => isRootStreamDefinition(context.definition.stream),
     isWiredStream: ({ context }) => isWiredStreamGetResponse(context.definition),
+    hasMultipleProcessors: ({ context }) => context.processors.length > 1,
+    hasStagedChanges: ({ context }) => context.hasStagedChanges,
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoMUMCMSAbDAL2qgGIBtABgF1FQABwD2sWhmEoBIAB6IAjADYAnBQAcigOzy1mgKwAaEAE8FAJkXqza+Wb0Bfe0dSZchYuQoQwBMFjooUO6kZAAqxoJgXHzSImJ0ktJyCAAsanrq3CmKuoYmiGbc3BQp3Ip2js7o2PhEIV4+fgFBdeThkVzy-EggceKJPclpGWpZOfpGpghm2SVlFU7g1W6tlN6+-mzBbRFRnGbdQqL9UoOIw5nZuZOINhQOlSAowt7wPS4122SxxwmnoMkALSKG4IYGPD4rDyUajiRgsNg-eISf6yc5mUG2EbWLEQ5a1aENDbNL7tMBIk5JAqKFIUZR6ADMWMxdisNgWVVcBPqxFgwgYADdIAB1DDECBfCl-KkITRlCg0+Z5KYWSwMtQ4jlLLlfCi8-lCiAAVRQAHcxZBJT0+tKzrL5YrysqFPJafSmVrIdzPPrBZAAErCYQEK1HZEDAGIOWWR12THKTRzJ2ORxAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoMUMCMSAbDAL2qgGIBtABgF1FQABwD2sWhmEoBIAB6IAjADYAnBQAcigOzzNAJl0AWebvndlBgDQgAnojW6KAVgC+zq6ky5CxchQhgCMCw6FChvUjIAFWtBMC4+aRExOklpOQRdLXVHeUcDPSMTM0sbRABmAwNXd3RsfCIIvwCgkLCG8mjYrnl+JBAk8VS+9MzNbNz8w2NTcytbBDUKpz1HMu4czUdNNXlq8FqvdspiWGEGADdIAGEcDAYIcN8IDFhBBhJrNgAFNGEsOFOaFg7EEv3+sEBsAoJAgEB4vSEokGUmGiEculU3Fyih0ZU03EU60cczsajUFE0ZTUmmUW00ijKWl0ew8dUexzgZ0uEBudweRz8LzeH2+YIBwiBILFEIlUP8DGa8MSSJSKNA6XRmOxuPxhMcxNKCHpjgoZTKulW6x0Wx2LIO9R8HNOF2ut3u7MFr3en1CPz+4sloP9MqBFGIEv8aCVfQGqrSiAMhIoimpBjU+UKMxK80URgoykymXRjmpamUds8DsaJy5rr5HueXpFvulkKlwchFAAroIICRAtHEckJGrZGiMRQsY4cZTdUSSQgcuT0a43CAUMJ-PA+qzDo7lcOhurEABaRQLs8VtkC6jiRgsNgH5HxhAGXQLnZOK97xr+QLBNh2U6MAnzjVFF00BcKnJRRYLg+DYM0b8q18GsXR5N1+X3GMVRHF8ynMZNU3TTRM2KKD00nZk113FCnVrDD6wFRthR9KA-XBSFQLw8DVnJbhuCpZQzGUaYzAXUwdAoeQDEcAlTDKHJp2ompKw9NDuV5d1mKFb1AIwMgu3eMCh2fcDKgcFNSJIsjZkNUwtmTWT5MEpTFBU-Y1IFDS620x1PVY-TDOMkcKHODAwAAdwAEX7EgfjAcKou4o8x1fZRVFLMsRLEuz5nkGSTUKlzFOxDzaPUzl0K0rDf105swgMoz+1CpKYuaYJIAAMQi+5t1Mky0oMYSiOsjNcuzBRdEEpy5JxVyyuQyrnW5AAlYRhAIdkUtHdJKlUAw8TTcaijy8ojFXZwgA */
   id: 'enrichStream',
   context: ({ input }) => ({
     definition: input.definition,
@@ -116,95 +126,85 @@ export const streamEnrichmentService = setup({
         },
         {
           target: 'resolvedChildStream',
-          actions: [{ type: 'setupProcessors' }],
         },
       ],
     },
-
     resolvedChildStream: {
-      always: [
-        {
-          target: 'resolvedWiredStream',
-          guard: 'isWiredStream',
-          actions: [
-            {
-              type: 'setupFields',
-              params: ({ context }) => ({
-                definition: context.definition as WiredStreamGetResponse,
-              }),
+      type: 'parallel',
+      entry: [{ type: 'setupProcessors' }],
+      states: {
+        displayingProcessors: {
+          on: {
+            'processors.add': {
+              actions: [
+                { type: 'addProcessor', params: ({ event }) => event },
+                { type: 'deriveStagedChangesFlag' },
+              ],
             },
-          ],
+            'processors.delete': {
+              actions: [
+                { type: 'deleteProcessor', params: ({ event }) => event },
+                { type: 'deriveStagedChangesFlag' },
+              ],
+            },
+            'processors.reorder': {
+              guard: 'hasMultipleProcessors',
+              actions: [
+                { type: 'reorderProcessors', params: ({ event }) => event },
+                { type: 'deriveStagedChangesFlag' },
+              ],
+            },
+            'processors.update': {
+              actions: [
+                { type: 'updateProcessor', params: ({ event }) => event },
+                { type: 'deriveStagedChangesFlag' },
+              ],
+            },
+          },
         },
-        { target: 'resolvedUnwiredStream' },
-      ],
-    },
-
-    resolvedWiredStream: {
+        displayingSimulation: {
+          initial: 'viewDataPreview',
+          states: {
+            viewDataPreview: {
+              on: {
+                'simulation.viewDetectedFields': 'viewDetectedFields',
+              },
+            },
+            viewDetectedFields: {
+              on: {
+                'simulation.viewDataPreview': 'viewDataPreview',
+              },
+            },
+          },
+        },
+      },
       on: {
-        'processors.add': {
-          actions: [
-            { type: 'addProcessor', params: ({ event }) => event },
-            { type: 'updateFields', params: ({ event }) => ({ fields: event.fields }) },
-            { type: 'deriveStagedChangesFlag' },
-          ],
-        },
-        'processors.delete': {
-          actions: [
-            { type: 'deleteProcessor', params: ({ event }) => event },
-            { type: 'deriveStagedChangesFlag' },
-          ],
-        },
-        'processors.reorder': {
-          actions: [
-            { type: 'reorderProcessors', params: ({ event }) => event },
-            { type: 'deriveStagedChangesFlag' },
-          ],
-        },
-        'processors.update': {
-          actions: [
-            { type: 'updateProcessor', params: ({ event }) => event },
-            { type: 'deriveStagedChangesFlag' },
-          ],
+        'stream.update': {
+          guard: 'hasStagedChanges',
+          target: 'updatingStream',
         },
       },
     },
-
-    resolvedUnwiredStream: {
-      on: {
-        'processors.add': {
-          actions: [
-            { type: 'addProcessor', params: ({ event }) => event },
-            { type: 'deriveStagedChangesFlag' },
-          ],
+    updatingStream: {
+      invoke: {
+        src: 'upsertStream',
+        input: ({ context }) => ({
+          definition: context.definition,
+          processors: context.processors,
+          fields: isWiredStreamGetResponse(context.definition) ? context.fields : undefined,
+        }),
+        onDone: {
+          target: '',
         },
-        'processors.delete': {
-          actions: [
-            { type: 'deleteProcessor', params: ({ event }) => event },
-            { type: 'deriveStagedChangesFlag' },
-          ],
-        },
-        'processors.reorder': {
-          actions: [
-            { type: 'reorderProcessors', params: ({ event }) => event },
-            { type: 'deriveStagedChangesFlag' },
-          ],
-        },
-        'processors.update': {
-          actions: [
-            { type: 'updateProcessor', params: ({ event }) => event },
-            { type: 'deriveStagedChangesFlag' },
-          ],
+        onError: {
+          actions: [{ type: 'notifyUpsertStreamFailure' }],
         },
       },
     },
-
     resolvedRootStream: {
       type: 'final',
     },
   },
-  output: ({ context }) => ({
-    processors: context.processors,
-  }),
 });
 
 export const createCategorizeLogsServiceImplementations = ({
@@ -214,25 +214,29 @@ export const createCategorizeLogsServiceImplementations = ({
   typeof streamEnrichmentService
 > => ({
   actors: {
-    fetchSamples: createSampleFetcherActor({ streamsRepositoryClient }),
+    // fetchSamples: createSampleFetcherActor({ streamsRepositoryClient }),
+    upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
     // categorizeDocuments: categorizeDocuments({ search }),
     // countDocuments: countDocuments({ search }),
   },
+  actions: {
+    notifyUpsertStreamSuccess: createUpsertStreamSuccessNofitier({ toasts }),
+    notifyUpsertStreamFailure: ({
+      event,
+    }: {
+      event: ErrorActorEvent<esErrors.ResponseError, 'upsertStream'>;
+    }) => {
+      toasts.addError(new Error(event.error.body.message), {
+        title: i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.saveChangesError',
+          { defaultMessage: "An issue occurred saving processors' changes." }
+        ),
+        toastMessage: event.error.body.message,
+      });
+    },
+  },
 });
-
-function createSampleFetcherActor({
-  streamsRepositoryClient,
-}: Pick<StreamEnrichmentServiceDependencies, 'streamsRepositoryClient'>) {
-  return fromPromise(() => {});
-}
 
 const createProcessorsList = (processors: ProcessorDefinition[]) => {
   return processors.map((processor) => processorConverter.toUIDefinition(processor));
-};
-
-const hasOrderChanged = (
-  processors: ProcessorDefinitionWithUIAttributes[],
-  initialProcessors: ProcessorDefinitionWithUIAttributes[]
-) => {
-  return processors.some((processor, index) => processor.id !== initialProcessors[index].id);
 };
