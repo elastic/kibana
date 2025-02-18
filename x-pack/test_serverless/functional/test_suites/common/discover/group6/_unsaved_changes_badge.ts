@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'unifiedFieldList',
   ]);
+  const dataViews = getService('dataViews');
   const security = getService('security');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
@@ -49,6 +50,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
+      await dataViews.createFromSearchBar({
+        name: 'lo', // Must be anything but log/logs
+        adHoc: true,
+        hasTimeField: true,
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
     });
