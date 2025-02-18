@@ -168,3 +168,5 @@ x-pack/test/security_solution_playwright/.env
 
 .nx/cache
 .nx/workspace-data
+
+**/project.json
