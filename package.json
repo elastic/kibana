@@ -77,6 +77,9 @@
     "yarn": "^1.22.19"
   },
   "resolutions": {
+    "**/@babel/code-frame": "7.24.7",
+    "**/@babel/helper-validator-identifier": "7.24.7",
+    "**/@babel/parser": "7.24.7",
     "**/@bazel/typescript/protobufjs": "6.11.4",
     "**/@hello-pangea/dnd": "16.6.0",
     "**/@langchain/core": "^0.3.16",
