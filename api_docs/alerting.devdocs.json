@@ -10640,56 +10640,68 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alerts_table/hooks/apis/bulk_get_maintenance_windows.ts"
+            "plugin": "@kbn/response-ops-alerts-table",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/types.ts"
+          },
+          {
+            "plugin": "@kbn/response-ops-alerts-table",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/types.ts"
+          },
+          {
+            "plugin": "@kbn/response-ops-alerts-table",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/components/maintenance_windows_tooltip_content.tsx"
+          },
+          {
+            "plugin": "@kbn/response-ops-alerts-table",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/components/maintenance_windows_tooltip_content.tsx"
+          },
+          {
+            "plugin": "@kbn/response-ops-alerts-table",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/components/maintenance_windows_cell.tsx"
+          },
+          {
+            "plugin": "@kbn/response-ops-alerts-table",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/components/maintenance_windows_cell.tsx"
+          },
+          {
+            "plugin": "@kbn/response-ops-alerts-table",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/components/maintenance_windows_cell.tsx"
+          },
+          {
+            "plugin": "@kbn/response-ops-alerts-table",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/components/maintenance_windows_cell.tsx"
+          },
+          {
+            "plugin": "@kbn/response-ops-alerts-table",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/apis/bulk_get_maintenance_windows.ts"
+          },
+          {
+            "plugin": "@kbn/response-ops-alerts-table",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/apis/bulk_get_maintenance_windows.ts"
+          },
+          {
+            "plugin": "@kbn/response-ops-alerts-table",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/apis/bulk_get_maintenance_windows.ts"
+          },
+          {
+            "plugin": "@kbn/response-ops-alerts-table",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/apis/bulk_get_maintenance_windows.ts"
+          },
+          {
+            "plugin": "@kbn/response-ops-alerts-table",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/apis/bulk_get_maintenance_windows.ts"
+          },
+          {
+            "plugin": "@kbn/response-ops-alerts-table",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/hooks/use_bulk_get_maintenance_windows.tsx"
+          },
+          {
+            "plugin": "@kbn/response-ops-alerts-table",
+            "path": "src/platform/packages/shared/response-ops/alerts-table/hooks/use_bulk_get_maintenance_windows.tsx"
           },
           {
             "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alerts_table/hooks/apis/bulk_get_maintenance_windows.ts"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alerts_table/hooks/apis/bulk_get_maintenance_windows.ts"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alerts_table/hooks/apis/bulk_get_maintenance_windows.ts"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alerts_table/hooks/apis/bulk_get_maintenance_windows.ts"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alerts_table/hooks/use_bulk_get_maintenance_windows.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alerts_table/hooks/use_bulk_get_maintenance_windows.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alerts_table/maintenance_windows/tooltip_content.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alerts_table/maintenance_windows/tooltip_content.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alerts_table/maintenance_windows/cell.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alerts_table/maintenance_windows/cell.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alerts_table/maintenance_windows/cell.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alerts_table/maintenance_windows/cell.tsx"
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_details/components/rule_alert_list.tsx"
           },
           {
             "plugin": "triggersActionsUi",
@@ -10702,26 +10714,6 @@
           {
             "plugin": "triggersActionsUi",
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_details/components/rule_alert_list.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_details/components/rule_alert_list.tsx"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alerts_table/maintenance_windows/index.mock.ts"
-          },
-          {
-            "plugin": "triggersActionsUi",
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/alerts_table/maintenance_windows/index.mock.ts"
           }
         ],
         "initialIsOpen": false
