@@ -65,7 +65,7 @@ interface SummaryAggResults {
   };
 }
 
-const BATCH_SIZE = 100;
+const BATCH_SIZE = 10;
 const DEFAULT_MAX_STALE_TIME = new Duration(1, DurationUnit.Day);
 const DEFAULT_MAX_DELAY = new Duration(5, DurationUnit.Minute);
 
