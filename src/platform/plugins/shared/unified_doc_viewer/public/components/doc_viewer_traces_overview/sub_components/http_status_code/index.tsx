@@ -19,8 +19,11 @@ interface HttpStatusCodeProps {
 
 export function HttpStatusCode({ code }: HttpStatusCodeProps) {
   return (
-    <EuiBadge color={useGetHttpStatusColor(code)}>
-      <EuiText size="xs">
+    <EuiBadge
+      color={useGetHttpStatusColor(code)}
+      data-test-subj="docViewerTracesOverviewHttpStatusCodeBadge"
+    >
+      <EuiText size="xs" data-test-subj="docViewerTracesOverviewHttpStatusCodeText">
         {code} {httpStatusCodes[code.toString()]}
       </EuiText>
     </EuiBadge>
