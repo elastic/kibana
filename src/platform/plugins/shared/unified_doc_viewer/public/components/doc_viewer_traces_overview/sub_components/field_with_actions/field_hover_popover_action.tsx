@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiPopover,
@@ -42,20 +42,32 @@ export const FieldHoverActionPopover = ({
   const leaveTimer = useRef<NodeJS.Timeout | null>(null);
   const uiFieldActions = useUIFieldActions({ field, value, formattedValue });
 
+  const clearTimeoutIfExists = () => {
+    if (leaveTimer.current) {
+      clearTimeout(leaveTimer.current);
+    }
+  };
+
   // The timeout hack is required because we are using a Popover which ideally should be used with a mouseclick,
   // but we are using it as a Tooltip. Which means we now need to manually handle the open and close
   // state using the mouse hover events. This cause the popover to close even before the user could
   // navigate actions inside it. Hence, to prevent this, we need this hack
   const onMouseEnter = () => {
-    if (leaveTimer.current) {
-      clearTimeout(leaveTimer.current);
-    }
+    clearTimeoutIfExists();
     setIsPopoverOpen(true);
   };
 
   const onMouseLeave = () => {
-    leaveTimer.current = setTimeout(() => setIsPopoverOpen(false), 100);
+    leaveTimer.current = setTimeout(() => {
+      return setIsPopoverOpen(false);
+    }, 100);
   };
+
+  useEffect(function onUnmount() {
+    return () => {
+      clearTimeoutIfExists();
+    };
+  }, []);
 
   return (
     <span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
