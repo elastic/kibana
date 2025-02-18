@@ -11,7 +11,7 @@
         "label": "GridLayout",
         "description": [],
         "signature": [
-          "({ layout, gridSettings, renderPanelContents, onLayoutChange, expandedPanelId, accessMode, className, }: ",
+          "({ layout, gridSettings, renderPanelContents, onLayoutChange, expandedPanelId, accessMode, className, useCustomDragHandle, }: ",
           "GridLayoutProps",
           ") => React.JSX.Element"
         ],
@@ -22,9 +22,9 @@
           {
             "parentPluginId": "@kbn/grid-layout",
             "id": "def-public.GridLayout.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
-            "label": "{\n  layout,\n  gridSettings,\n  renderPanelContents,\n  onLayoutChange,\n  expandedPanelId,\n  accessMode = 'EDIT',\n  className,\n}",
+            "label": "{\n  layout,\n  gridSettings,\n  renderPanelContents,\n  onLayoutChange,\n  expandedPanelId,\n  accessMode = 'EDIT',\n  className,\n  useCustomDragHandle = false,\n}",
             "description": [],
             "signature": [
               "GridLayoutProps"
@@ -266,7 +266,9 @@
         "type": "Type",
         "tags": [],
         "label": "GridAccessMode",
-        "description": [],
+        "description": [
+          "\nControls whether the resize + drag handles are visible and functioning"
+        ],
         "signature": [
           "\"VIEW\" | \"EDIT\""
         ],
