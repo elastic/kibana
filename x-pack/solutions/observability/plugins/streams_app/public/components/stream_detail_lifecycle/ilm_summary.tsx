@@ -153,13 +153,15 @@ export function IlmSummary({
           <EuiFlexItem>
             <EuiText>
               <h5>
-                {i18n.translate('xpack.streams.streamDetailLifecycle.policySummar', {
+                {i18n.translate('xpack.streams.streamDetailLifecycle.policySummary', {
                   defaultMessage: 'Policy summary',
                 })}
               </h5>
             </EuiText>
             <EuiTextColor color="subdued">
-              Phases and details of the lifecycle applied to this stream
+              {i18n.translate('xpack.streams.streamDetailLifecycle.policySummaryInfo', {
+                defaultMessage: 'Phases and details of the lifecycle applied to this stream',
+              })}
             </EuiTextColor>
           </EuiFlexItem>
 
