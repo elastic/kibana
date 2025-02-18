@@ -75,9 +75,9 @@ import { extractTokenCount } from './operators/extract_token_count';
 import { getGeneratedTitle } from './operators/get_generated_title';
 import { instrumentAndCountTokens } from './operators/instrument_and_count_tokens';
 import {
-  runSemanticTextKnowledgeBaseMigration,
-  scheduleSemanticTextMigration,
-} from '../task_manager_definitions/register_migrate_knowledge_base_entries_task';
+  reIndexKnowledgeBaseAndPopulateSemanticTextField,
+  scheduleKbSemanticTextMigrationTask,
+} from '../task_manager_definitions/register_kb_semantic_text_migration_task';
 import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 import { getElserModelId } from '../knowledge_base_service/get_elser_model_id';
@@ -508,6 +508,8 @@ export class ObservabilityAIAssistantClient {
 
     const options = {
       connectorId,
+      system: messages.find((message) => message.message.role === MessageRole.System)?.message
+        .content,
       messages: convertMessagesForInference(
         messages.filter((message) => message.message.role !== MessageRole.System)
       ),
@@ -686,12 +688,11 @@ export class ObservabilityAIAssistantClient {
 
     core
       .getStartServices()
-      .then(([_, pluginsStart]) => {
-        logger.debug('Schedule semantic text migration task');
-        return scheduleSemanticTextMigration(pluginsStart);
-      })
+      .then(([_, pluginsStart]) =>
+        scheduleKbSemanticTextMigrationTask({ taskManager: pluginsStart.taskManager, logger })
+      )
       .catch((error) => {
-        logger.error(`Failed to run semantic text migration task: ${error}`);
+        logger.error(`Failed to schedule semantic text migration task: ${error}`);
       });
 
     return res;
@@ -702,8 +703,8 @@ export class ObservabilityAIAssistantClient {
     return this.dependencies.knowledgeBaseService.reset(esClient);
   };
 
-  migrateKnowledgeBaseToSemanticText = () => {
-    return runSemanticTextKnowledgeBaseMigration({
+  reIndexKnowledgeBaseAndPopulateSemanticTextField = () => {
+    return reIndexKnowledgeBaseAndPopulateSemanticTextField({
       esClient: this.dependencies.esClient,
       logger: this.dependencies.logger,
       config: this.dependencies.config,

@@ -38,10 +38,13 @@ interface DataStreamActionMetadata {
 export type EsMetadata = Actions | MlActionMetadata | DataStreamActionMetadata;
 
 // TODO(jloleysens): Replace these regexes once this issue is addressed https://github.com/elastic/elasticsearch/issues/118062
-const ES_INDEX_MESSAGES_REQIURING_REINDEX = [
+const ES_INDEX_MESSAGES_REQUIRING_REINDEX = [
   /Index created before/,
   /index with a compatibility version \</,
 ];
+
+export const isFrozenDeprecation = (message: string, indexName?: string): boolean =>
+  Boolean(indexName) && message.includes(`Index [${indexName}] is a frozen index`);
 
 export const getCorrectiveAction = (
   deprecationType: EnrichedDeprecationInfo['type'],
@@ -55,9 +58,10 @@ export const getCorrectiveAction = (
   const clusterSettingDeprecation = metadata?.actions?.find(
     (action) => action.action_type === 'remove_settings' && typeof indexName === 'undefined'
   );
-  const requiresReindexAction = ES_INDEX_MESSAGES_REQIURING_REINDEX.some((regexp) =>
+  const requiresReindexAction = ES_INDEX_MESSAGES_REQUIRING_REINDEX.some((regexp) =>
     regexp.test(message)
   );
+  const requiresUnfreezeAction = isFrozenDeprecation(message, indexName);
   const requiresIndexSettingsAction = Boolean(indexSettingDeprecation);
   const requiresClusterSettingsAction = Boolean(clusterSettingDeprecation);
   const requiresMlAction = /[Mm]odel snapshot/.test(message);
@@ -99,6 +103,12 @@ export const getCorrectiveAction = (
   if (requiresReindexAction) {
     return {
       type: 'reindex',
+    };
+  }
+
+  if (requiresUnfreezeAction) {
+    return {
+      type: 'unfreeze',
     };
   }
 
