@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('Asset Inventory - Entity Store', function () {
-    loadTestFile(require.resolve('./keyword_builder_ingest_pipeline'));
+  describe('security APIs - Session Index Shard Missing', function () {
+    loadTestFile(require.resolve('./shard_missing'));
   });
 }
