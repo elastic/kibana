@@ -98,7 +98,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     describe('after migrating', () => {
       before(async () => {
         const { status } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/semantic_text_migration',
+          endpoint: 'POST /internal/observability_ai_assistant/kb/migrations/kb_semantic_text',
         });
         expect(status).to.be(200);
       });
@@ -137,7 +137,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('returns entries correctly via API', async () => {
         const { status } = await observabilityAIAssistantAPIClient.editor({
-          endpoint: 'POST /internal/observability_ai_assistant/kb/semantic_text_migration',
+          endpoint: 'POST /internal/observability_ai_assistant/kb/migrations/kb_semantic_text',
         });
 
         expect(status).to.be(200);
