@@ -11,6 +11,16 @@ export const DEPRECATED_ML_ROUTE_TO_NEW_ROUTE = {
   jobs: 'anomaly_detection',
   data_frame_analytics: 'analytics',
   trained_models: 'trained_models',
+  notifications: 'overview',
+  memory_usage: 'overview',
+  supplied_configurations: 'supplied_configurations',
+  settings: 'ad_settings',
+  'settings/calendars_list': 'ad_settings/calendars_list',
+  'settings/calendars_list/new_calendar': 'ad_settings/calendars_list/new_calendar',
+  'settings/calendars_dst_list': 'ad_settings/calendars_dst_list',
+  'settings/calendars_dst_list/new_calendar': 'ad_settings/calendars_dst_list/new_calendar',
+  filter_lists: 'ad_settings/filter_lists',
+  'filter_lists/new_filter_list': 'ad_settings/filter_lists/new_filter_list',
 };
 
 export const ML_PAGES = {
