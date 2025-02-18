@@ -14,7 +14,7 @@ import {
   SiemMigrationStatus,
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
-import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { ElasticRule, RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
 import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
@@ -147,7 +147,7 @@ export class RuleMigrationsTaskClient {
               endRuleTranslation({ migrationResult });
               await this.data.rules.saveCompleted({
                 ...ruleMigration,
-                elastic_rule: migrationResult.elastic_rule,
+                elastic_rule: migrationResult.elastic_rule as ElasticRule,
                 translation_result: migrationResult.translation_result,
                 comments: migrationResult.comments,
               });

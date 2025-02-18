@@ -64,71 +64,71 @@ export const getDefaultAssistantGraph = ({
     // Default graph state
     const graphAnnotation = Annotation.Root({
       input: Annotation<string>({
-        value: (x: string, y?: string) => y ?? x,
+        reducer: (x: string, y?: string) => y ?? x,
         default: () => '',
       }),
       lastNode: Annotation<string>({
-        value: (x: string, y?: string) => y ?? x,
+        reducer: (x: string, y?: string) => y ?? x,
         default: () => 'start',
       }),
       steps: Annotation<AgentStep[]>({
-        value: (x: AgentStep[], y: AgentStep[]) => x.concat(y),
+        reducer: (x: AgentStep[], y: AgentStep[]) => x.concat(y),
         default: () => [],
       }),
       hasRespondStep: Annotation<boolean>({
-        value: (x: boolean, y?: boolean) => y ?? x,
+        reducer: (x: boolean, y?: boolean) => y ?? x,
         default: () => false,
       }),
       agentOutcome: Annotation<AgentAction | AgentFinish | undefined>({
-        value: (
+        reducer: (
           x: AgentAction | AgentFinish | undefined,
           y?: AgentAction | AgentFinish | undefined
         ) => y ?? x,
         default: () => undefined,
       }),
       messages: Annotation<BaseMessage[]>({
-        value: (x: BaseMessage[], y: BaseMessage[]) => y ?? x,
+        reducer: (x: BaseMessage[], y: BaseMessage[]) => y ?? x,
         default: () => [],
       }),
       chatTitle: Annotation<string>({
-        value: (x: string, y?: string) => y ?? x,
+        reducer: (x: string, y?: string) => y ?? x,
         default: () => '',
       }),
       llmType: Annotation<string>({
-        value: (x: string, y?: string) => y ?? x,
+        reducer: (x: string, y?: string) => y ?? x,
         default: () => 'unknown',
       }),
       isStream: Annotation<boolean>({
-        value: (x: boolean, y?: boolean) => y ?? x,
+        reducer: (x: boolean, y?: boolean) => y ?? x,
         default: () => false,
       }),
       isOssModel: Annotation<boolean>({
-        value: (x: boolean, y?: boolean) => y ?? x,
+        reducer: (x: boolean, y?: boolean) => y ?? x,
         default: () => false,
       }),
       connectorId: Annotation<string>({
-        value: (x: string, y?: string) => y ?? x,
+        reducer: (x: string, y?: string) => y ?? x,
         default: () => '',
       }),
       conversation: Annotation<ConversationResponse | undefined>({
-        value: (x: ConversationResponse | undefined, y?: ConversationResponse | undefined) =>
+        reducer: (x: ConversationResponse | undefined, y?: ConversationResponse | undefined) =>
           y ?? x,
         default: () => undefined,
       }),
       conversationId: Annotation<string>({
-        value: (x: string, y?: string) => y ?? x,
+        reducer: (x: string, y?: string) => y ?? x,
         default: () => '',
       }),
       responseLanguage: Annotation<string>({
-        value: (x: string, y?: string) => y ?? x,
+        reducer: (x: string, y?: string) => y ?? x,
         default: () => 'English',
       }),
       contentReferencesEnabled: Annotation<boolean>({
-        value: (x: boolean, y?: boolean) => y ?? x,
+        reducer: (x: boolean, y?: boolean) => y ?? x,
         default: () => contentReferencesEnabled,
       }),
       provider: Annotation<string>({
-        value: (x: string, y?: string) => y ?? x,
+        reducer: (x: string, y?: string) => y ?? x,
         default: () => '',
       }),
     });
