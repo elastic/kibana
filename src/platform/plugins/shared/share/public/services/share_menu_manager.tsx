@@ -31,8 +31,6 @@ export class ShareMenuManager {
     this.shareRegistry = shareRegistry;
 
     return {
-      showShareDialog: this.showShareDialog.bind(this),
-
       /**
        * Collects share menu items from registered providers and mounts the share context menu under
        * the given `anchorElement`. If the context menu is already opened, a call to this method closes it.
@@ -51,7 +49,7 @@ export class ShareMenuManager {
 
         this.toggleShareContextMenu({
           ...options,
-          allowEmbed: false, // disableEmbed ? false : options.allowEmbed,
+          allowEmbed: disableEmbed ? false : options.allowEmbed,
           onClose,
           menuItems,
           publicAPIEnabled: !disableEmbed,
