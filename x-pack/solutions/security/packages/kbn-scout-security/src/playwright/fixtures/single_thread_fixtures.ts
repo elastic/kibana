@@ -9,19 +9,14 @@ import { test as base } from '@kbn/scout';
 import { BrowserAuthFixture } from '@kbn/scout/src/playwright/fixtures/test/browser_auth';
 import { extendPageObjects } from '../page_objects';
 import { SecurityBrowserAuthFixture, SecurityTestFixtures, SecurityWorkerFixtures } from './types';
+import { extendBrowserAuth } from './authentication';
 
 export const test = base.extend<SecurityTestFixtures, SecurityWorkerFixtures>({
   browserAuth: async (
     { browserAuth }: { browserAuth: BrowserAuthFixture },
     use: (auth: SecurityBrowserAuthFixture) => Promise<void>
   ) => {
-    const extendedAuth: SecurityBrowserAuthFixture = {
-      ...browserAuth,
-      loginAsPlatformEngineer: async () => {
-        await browserAuth.loginAs('platform_engineer');
-      },
-    };
-
+    const extendedAuth = await extendBrowserAuth(browserAuth);
     await use(extendedAuth);
   },
   pageObjects: async (
