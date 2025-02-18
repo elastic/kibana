@@ -40,7 +40,7 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
     closeDataViewEditor.current = dataViewEditor.openEditor({
       onSave: async (newDataView) => {
         dispatch(shared.actions.addDataView(newDataView));
-        dispatch(selectDataViewAsync({ id: newDataView.id, scope: props.scope }));
+        dispatch(selectDataViewAsync({ id: newDataView.id, scope: [props.scope] }));
         // TODO: reload data views
       },
       allowAdHocDataView: true,
@@ -78,7 +78,7 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
 
   const handleChangeDataView = useCallback(
     (id: string) => {
-      dispatch(selectDataViewAsync({ id, scope: props.scope }));
+      dispatch(selectDataViewAsync({ id, scope: [props.scope] }));
     },
     [dispatch, props.scope]
   );

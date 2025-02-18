@@ -127,7 +127,7 @@ export const useInvestigateInTimeline = () => {
         // (This is required so the timeline event count matches the prevalence count)
         if (!keepDataView) {
           setSelectedDataView({
-            scope: SourcererScopeName.timeline,
+            scope: [SourcererScopeName.timeline],
             id: defaultDataView.id,
             patterns: [signalIndexName || ''],
           });
