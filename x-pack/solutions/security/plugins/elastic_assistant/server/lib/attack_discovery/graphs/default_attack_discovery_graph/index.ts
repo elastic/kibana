@@ -9,7 +9,6 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { Replacements } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
-import type { CompiledStateGraph } from '@langchain/langgraph';
 import { END, START, StateGraph } from '@langchain/langgraph';
 
 import { CombinedPrompts } from './nodes/helpers/prompts';
@@ -22,7 +21,6 @@ import { getDefaultGraphState } from './state';
 import { getGenerateNode } from './nodes/generate';
 import { getRefineNode } from './nodes/refine';
 import { getRetrieveAnonymizedAlertsNode } from './nodes/retriever';
-import type { GraphState } from './types';
 
 export interface GetDefaultAttackDiscoveryGraphParams {
   alertsIndexPattern?: string;
