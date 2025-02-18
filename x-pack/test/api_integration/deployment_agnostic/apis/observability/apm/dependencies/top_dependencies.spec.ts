@@ -129,7 +129,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const expectedValue = transaction.duration * 1000;
           expect(latency.value).to.be(expectedValue);
           expect(
-            topDependenciesStats.currentTimeseries[[dataConfig.span.destination]].latency.every(
+            topDependenciesStats.currentTimeseries[dataConfig.span.destination].latency.every(
               ({ y }) => y === expectedValue
             )
           ).to.be(true);
@@ -144,7 +144,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const totalRate = rate + errorRate;
           expect(roundNumber(throughput.value)).to.be(roundNumber(totalRate));
           expect(
-            topDependenciesStats.currentTimeseries[[dataConfig.span.destination]].throughput.every(
+            topDependenciesStats.currentTimeseries[dataConfig.span.destination].throughput.every(
               ({ y }) => roundNumber(y) === roundNumber(totalRate)
             )
           ).to.be(true);
@@ -168,7 +168,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           const expectedValue = dataConfigErroRate / (rate + dataConfigErroRate);
           expect(errorRate.value).to.be(expectedValue);
           expect(
-            topDependenciesStats.currentTimeseries[[dataConfig.span.destination]].errorRate.every(
+            topDependenciesStats.currentTimeseries[dataConfig.span.destination].errorRate.every(
               ({ y }) => y === expectedValue
             )
           ).to.be(true);
