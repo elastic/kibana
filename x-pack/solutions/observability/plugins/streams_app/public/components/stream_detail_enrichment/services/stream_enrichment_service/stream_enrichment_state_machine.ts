@@ -4,18 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ErrorActorEvent, MachineImplementationsFrom, assign, setup } from 'xstate5';
+import { MachineImplementationsFrom, assign, setup } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import {
+  IngestStreamGetResponse,
   ProcessorDefinition,
   WiredStreamGetResponse,
   getProcessorType,
   isRootStreamDefinition,
   isWiredStreamGetResponse,
 } from '@kbn/streams-schema';
-import { errors as esErrors } from '@elastic/elasticsearch';
-// import { CategorizeLogsServiceDependencies, LogCategorizationParams } from './types';
-import { i18n } from '@kbn/i18n';
 import {
   StreamEnrichmentContext,
   StreamEnrichmentEvent,
@@ -37,14 +35,16 @@ export const streamEnrichmentService = setup({
     events: {} as StreamEnrichmentEvent,
   },
   actors: {
-    // fetchSamples: getPlaceholderFor(createSampleFetcherActor),
     upsertStream: getPlaceholderFor(createUpsertStreamActor),
   },
   actions: {
     notifyUpsertStreamSuccess: () => {},
     notifyUpsertStreamFailure: () => {},
-    setupProcessors: assign(({ context }) => {
-      const processors = createProcessorsList(context.definition.stream.ingest.processing);
+    storeDefinition: assign((_, params: { definition: IngestStreamGetResponse }) => ({
+      definition: params.definition,
+    })),
+    setupProcessors: assign((_, params: { definition: IngestStreamGetResponse }) => {
+      const processors = createProcessorsList(params.definition.stream.ingest.processing);
       return {
         initialProcessors: processors,
         processors,
@@ -97,28 +97,31 @@ export const streamEnrichmentService = setup({
     }),
   },
   guards: {
-    isRootStream: ({ context }) => isRootStreamDefinition(context.definition.stream),
-    isWiredStream: ({ context }) => isWiredStreamGetResponse(context.definition),
     hasMultipleProcessors: ({ context }) => context.processors.length > 1,
     hasStagedChanges: ({ context }) => context.hasStagedChanges,
+    isRootStream: ({ context }) => isRootStreamDefinition(context.definition.stream),
+    isWiredStream: ({ context }) => isWiredStreamGetResponse(context.definition),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoMUMCMSAbDAL2qgGIBtABgF1FQABwD2sWhmEoBIAB6IAjADYAnBQAcigOzzNAJl0AWebvndlBgDQgAnojW6KAVgC+zq6ky5CxchQhgCMCw6FChvUjIAFWtBMC4+aRExOklpOQRdLXVHeUcDPSMTM0sbRABmAwNXd3RsfCIIvwCgkLCG8mjYrnl+JBAk8VS+9MzNbNz8w2NTcytbBDUKpz1HMu4czUdNNXlq8FqvdspiWGEGADdIAGEcDAYIcN8IDFhBBhJrNgAFNGEsOFOaFg7EEv3+sEBsAoJAgEB4vSEokGUmGiEculU3Fyih0ZU03EU60cczsajUFE0ZTUmmUW00ijKWl0ew8dUexzgZ0uEBudweRz8LzeH2+YIBwiBILFEIlUP8DGa8MSSJSKNA6XRmOxuPxhMcxNKCHpjgoZTKulW6x0Wx2LIO9R8HNOF2ut3u7MFr3en1CPz+4sloP9MqBFGIEv8aCVfQGqrSiAMhIoimpBjU+UKMxK80URgoykymXRjmpamUds8DsaJy5rr5HueXpFvulkKlwchFAAroIICRAtHEckJGrZGiMRQsY4cZTdUSSQgcuT0a43CAUMJ-PA+qzDo7lcOhurEABaRQLs8VtkC6jiRgsNgH5HxhAGXQLnZOK97xr+QLBNh2U6MAnzjVFF00BcKnJRRYLg+DYM0b8q18GsXR5N1+X3GMVRHF8ynMZNU3TTRM2KKD00nZk113FCnVrDD6wFRthR9KA-XBSFQLw8DVnJbhuCpZQzGUaYzAXUwdAoeQDEcAlTDKHJp2ompKw9NDuV5d1mKFb1AIwMgu3eMCh2fcDKgcFNSJIsjZkNUwtmTWT5MEpTFBU-Y1IFDS620x1PVY-TDOMkcKHODAwAAdwAEX7EgfjAcKou4o8x1fZRVFLMsRLEuz5nkGSTUKlzFOxDzaPUzl0K0rDf105swgMoz+1CpKYuaYJIAAMQi+5t1Mky0oMYSiOsjNcuzBRdEEpy5JxVyyuQyrnW5AAlYRhAIdkUtHdJKlUAw8TTcaijy8ojFXZwgA */
+  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoBXFDWgjEgGwwC9IBiWI0y4rMBgBukANoAGALqJQABwD2sDA3koZIAB6IAHABYAzBQBsR-QHZx20wEZdVgJwAaEAE9E16xXP7rR3Wb0AVh8jbWsAX3DnVExcQmJyCjplRhZWOigOCWkkEAUlFTVcrQRAgCZnNwRrMrDjMtszMtCjcX1gyOj0bHweROSGZjYMrOscuUUU1XUS7X0jCmsze1MmvV1fM0rEc3EKMyMy5bL9U-17a21O8G64vr44eSYRCABhHAwmCHjeLnuKfiCF7ZdT5KZFUAlaziIz2Lx2cQwpomOwVVw7REUYIeGHiMy6cSBIxma4xHo-RLEWBPF7vT7fe5-BKUKiyCAkAhgEG5MGFGY6eaLZarWq6DbE7YIMKBLHaQLWey6QLaRVGJak269ZkAx7PSB0r4UygQDCwWRMEguDIABTQ8gEsGpaFgHFkdodTtgFBIEAg3ImBQw02KOzKZWM1n0zTK4kjrXORklRkCewawV0Ye0WbMHSiN1iWt4OupereH0N-xNZotVpQUFt9rgntd7qb8mdFAgYCYYE5-rykz5IYQUfDaqjh1j8zaK0l5QW2nE9ljSqV+l0oQ1BaNxZp+vLDO1VfNlptrcd7ZdbsbF47xHbXbQ-d5QYhmkQZUCugotXlBLx-gBJckoEoYBLNFYi6XJcpxbuS-xUnuZb0jux41meN7NteHqXtQbIclyUigoOr78iOYYRhOMZxjOiboggRxwvYKzBPKypWOIZS6HBdzaohpYGoeRZoaedZ4BgZBUBahQUEIGBgAA7gAIhyJC2mAcmKVwElSRyr6yfJym9mAWCchAABi8lfLAz4kcGkIflYxgEocapmOYGZ0VU9iBGYixpvoSL6GEwU8YWlK6rSB6oaaJ61lA4mSdJ+maUZnKmZAlndhALpKElemqAZikqQQanEKltmBvZ74joSFCceuNRsVGKqSsuCyHNYX7rmsKwknmZK8UWrLsgwYmMhAqhgEkKBCPIADW02DeFLL4WNCX3AgdBzVgBUoNklXgmRHj2NoQorHYjUhdoko5jKvhWE0ZgBH45hhTuI16eNzIcGAaB2mgFAngQABm7aUMtH1rRkRpbbN9p7QdRE8nZb5QksZ26PYDQGFmhKRjd9EmJ4Zhda9n7rhBkR5ig8hdvAuSQ-cxFVWjiAALQZpK7MHP5oTmCqKbMQq73-DQAypGwkAs0dw5YxQHHNMxSJygckoNArCLaCcioXGGm4DZqO4S0M6R1jLQ4OQgy5wpYrRLI07TBJKkb2IYByEgc0JdX+ot8ZF+4oczKOs2RXnuEqFBY8m8qnCYZSKn7Rb8VFQdHrF6F1g2OHOhbpHDrYcIhAS8q2Fxqu3QE9SF+cPhzOuScRSWqcVun1aiQlOnJdVL7VSUX6SmEcI1LYYSRkcKbcYb24IQHyGt8JGcd4lukyalJVlRphl5337icW1NT7OIdj4sSgXR43DzN4HC+JCJ8Ur93KBFWlJlmVl1k72zpTuYsRJhv4WElgAgHxlDGE+G53LHxWJfPCo0YbBwDLLK2HgvzGD8JxKwDRfC+EHnidBVhoTxzFD4WBKdIAACV5DyAIEaL+ZETiGGVMqewBwE7ylYeHaoRwzqdXlAEfE7kIjUyAA */
   id: 'enrichStream',
   context: ({ input }) => ({
     definition: input.definition,
     initialProcessors: [],
     processors: [],
-    fields: {},
     hasStagedChanges: false,
   }),
-  initial: 'initializing',
+  initial: 'uninitialized',
   states: {
-    initializing: {
-      // Keep this empty for now as a middle state to perform upcoming initializations (url params, etc)
-      always: 'detectingStreamType',
+    uninitialized: {
+      on: {
+        'stream.received': {
+          target: 'initializing',
+          actions: [{ type: 'storeDefinition', params: ({ event }) => event }],
+        },
+      },
     },
-    detectingStreamType: {
+    initializing: {
       always: [
         {
           target: 'resolvedRootStream',
@@ -131,7 +134,17 @@ export const streamEnrichmentService = setup({
     },
     resolvedChildStream: {
       type: 'parallel',
-      entry: [{ type: 'setupProcessors' }],
+      entry: [
+        {
+          type: 'setupFields',
+          params: ({ context }) => ({ definition: context.definition as WiredStreamGetResponse }),
+          guard: 'isWiredStream',
+        },
+        {
+          type: 'setupProcessors',
+          params: ({ context }) => ({ definition: context.definition }),
+        },
+      ],
       states: {
         displayingProcessors: {
           on: {
@@ -179,6 +192,10 @@ export const streamEnrichmentService = setup({
         },
       },
       on: {
+        'stream.received': {
+          target: 'initializing',
+          actions: [{ type: 'storeDefinition', params: ({ event }) => event }],
+        },
         'stream.update': {
           guard: 'hasStagedChanges',
           target: 'updatingStream',
@@ -194,9 +211,11 @@ export const streamEnrichmentService = setup({
           fields: isWiredStreamGetResponse(context.definition) ? context.fields : undefined,
         }),
         onDone: {
-          target: '',
+          target: 'resolvedChildStream',
+          actions: [{ type: 'notifyUpsertStreamSuccess' }],
         },
         onError: {
+          target: 'resolvedChildStream',
           actions: [{ type: 'notifyUpsertStreamFailure' }],
         },
       },
@@ -214,26 +233,11 @@ export const createCategorizeLogsServiceImplementations = ({
   typeof streamEnrichmentService
 > => ({
   actors: {
-    // fetchSamples: createSampleFetcherActor({ streamsRepositoryClient }),
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
-    // categorizeDocuments: categorizeDocuments({ search }),
-    // countDocuments: countDocuments({ search }),
   },
   actions: {
     notifyUpsertStreamSuccess: createUpsertStreamSuccessNofitier({ toasts }),
-    notifyUpsertStreamFailure: ({
-      event,
-    }: {
-      event: ErrorActorEvent<esErrors.ResponseError, 'upsertStream'>;
-    }) => {
-      toasts.addError(new Error(event.error.body.message), {
-        title: i18n.translate(
-          'xpack.streams.streamDetailView.managementTab.enrichment.saveChangesError',
-          { defaultMessage: "An issue occurred saving processors' changes." }
-        ),
-        toastMessage: event.error.body.message,
-      });
-    },
+    notifyUpsertStreamFailure: createUpsertStreamFailureNofitier({ toasts }),
   },
 });
 
