@@ -2,7 +2,7 @@
 
 ## Common information
 
-See [common information](./prebuilt_rules_common_info.md) about prebuilt rules, which inclides:
+See [common information](./prebuilt_rules_common_info.md) about prebuilt rules, which includes:
 
 - Overview of our features built around prebuilt rules.
 - Common terminology used in the test plans below.

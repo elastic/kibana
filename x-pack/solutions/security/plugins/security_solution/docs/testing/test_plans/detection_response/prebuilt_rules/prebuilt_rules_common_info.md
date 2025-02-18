@@ -98,6 +98,11 @@ Terminology related to prebuilt rule customization:
 - **Customizable rule field**: a rule field that is able to be customized on a prebuilt rule. A comprehenseive list can be found in `./shared_assets/customizable_rule_fields.md`.
 - **Non-customizable rule field**: a rule field that is unable to be customized on a prebuilt rule. A comprehenseive list can be found in `./shared_assets/non_customizable_rule_fields.md`.
 
+Terminology related to the "rule source" object:
+
+- **Rule source**, also known as `ruleSource` and `rule_source`: a rule field that defines the rule's origin. Can be `internal` or `external`. Currently, custom rules have `internal` rule source and prebuilt rules have `external` rule source.
+- **`is_customized`**: a field within `ruleSource` that exists when rule source is set to `external`. It is a boolean value based on if the rule has been changed from its base version.
+
 Terminology related to UI and UX:
 
 - **CTA**: "call to action", usually a button, a link, or a callout message with a button, etc, that invites the user to do some action.
