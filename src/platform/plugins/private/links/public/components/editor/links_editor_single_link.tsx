@@ -56,11 +56,7 @@ export const LinksEditorSingleLink = ({
           />
         </EuiFlexItem>
 
-        <EuiFlexItem
-          className={classNames('linksPanelEditorLinkText', {
-            'linksPanelEditorLinkText--noLabel': !link.label,
-          })}
-        >
+        <EuiFlexItem className={'linksPanelEditorLinkText'}>
           <EuiText size="s" color={'default'} className="eui-textTruncate">
             {link.label || link.title}
           </EuiText>
@@ -147,9 +143,6 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     '.linksPanelEditorLinkText': {
       flex: 1,
       minWidth: 0,
-      '&--noLabel': {
-        fontStyle: 'italic',
-      },
     },
     '&.linkError': {
       border: `1px solid ${transparentize(euiTheme.colors.textWarning, 0.3)}`,

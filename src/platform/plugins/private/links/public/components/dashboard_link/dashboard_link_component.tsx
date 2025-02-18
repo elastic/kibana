@@ -30,15 +30,13 @@ import { trackUiMetric } from '../../services/kibana_services';
 import { LinksParentApi, ResolvedLink } from '../../types';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 
-export const DashboardLinkComponent = ({
-  link,
-  layout,
-  parentApi,
-}: {
+export interface DashboardLinkProps {
   link: ResolvedLink;
   layout: LinksLayoutType;
   parentApi: LinksParentApi;
-}) => {
+}
+
+export const DashboardLinkComponent = ({ link, layout, parentApi }: DashboardLinkProps) => {
   const [
     parentDashboardId,
     parentDashboardTitle,
