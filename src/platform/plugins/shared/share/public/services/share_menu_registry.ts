@@ -7,50 +7,131 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
+  BrowserUrlService,
   ShareContext,
-  ShareMenuProvider,
-  ShareMenuProviderV2,
+  ShareConfigs,
+  ShareRegistryApi,
+  ShareActionIntents,
+  InternalShareActionIntent,
+  ShareIntegration,
+  ShareRegistryApiStart,
   ShareMenuProviderLegacy,
 } from '../types';
+import type { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 
-export class ShareMenuRegistry {
-  private readonly shareMenuProviders = new Map<string, ShareMenuProvider>();
+export class ShareRegistry implements ShareRegistryApi {
+  private urlService?: BrowserUrlService;
+  private anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
 
-  register(shareMenuProvider: ShareMenuProvider) {
-    if (this.shareMenuProviders.has(shareMenuProvider.id)) {
+  private readonly globalMarker: string = '*';
+
+  constructor() {
+    // register default share actions
+    this.registerLinkShareAction();
+    this.registerEmbedShareAction();
+  }
+
+  private readonly shareOptionsRegistry: Record<
+    string,
+    Map<InternalShareActionIntent | `integration-${string}`, ShareActionIntents>
+  > = {
+    [this.globalMarker]: new Map(),
+  };
+
+  private registerShareIntentAction(
+    shareObject: string,
+    shareActionIntent: ShareActionIntents
+  ): void {
+    if (!this.shareOptionsRegistry[shareObject]) {
+      this.shareOptionsRegistry[shareObject] = new Map();
+    }
+
+    const shareContextMap = this.shareOptionsRegistry[shareObject];
+
+    const recordKey =
+      shareActionIntent.shareType === 'integration'
+        ? (`integration-${shareActionIntent.groupId || 'unknown'}-${shareActionIntent.id}` as const)
+        : shareActionIntent.shareType;
+
+    if (shareContextMap.has(recordKey)) {
       throw new Error(
-        `Share menu provider with id [${shareMenuProvider.id}] has already been registered. Use a unique id.`
+        `Share action with type [${shareActionIntent.shareType}] for app [${shareObject}] has already been registered.`
       );
     }
-    this.shareMenuProviders.set(shareMenuProvider.id, shareMenuProvider);
+
+    shareContextMap.set(recordKey, shareActionIntent);
   }
 
-  public setup() {
-    return {
-      /**
-       * Register an additional source of items for share context menu items. All registered providers
-       * will be called if a consumer displays the context menu. Returned `ShareMenuItem`s will be shown
-       * in the context menu together with the default built-in share options.
-       * Each share provider needs a globally unique id.
-       * @param shareMenuProvider
-       */
-      register: this.register.bind(this),
-    };
+  private registerLinkShareAction(): void {
+    this.registerShareIntentAction(this.globalMarker, {
+      shareType: 'link',
+      config: ({ urlService }) => ({
+        shortUrlService: urlService?.shortUrls.get(null)!,
+      }),
+    });
   }
 
-  public start() {
-    return {
-      getShareMenuItems: (context: ShareContext) =>
-        Array.from(this.shareMenuProviders.values()).flatMap((shareActionProvider) =>
-          (
-            (shareActionProvider as ShareMenuProviderV2).getShareMenuItems ??
-            (shareActionProvider as ShareMenuProviderLegacy).getShareMenuItemsLegacy
-          ).call(shareActionProvider, context)
-        ),
-    };
+  private registerEmbedShareAction(): void {
+    this.registerShareIntentAction(this.globalMarker, {
+      shareType: 'embed',
+      config: ({ urlService }) => ({
+        shortUrlService: urlService?.shortUrls.get(null)!,
+      }),
+    });
+  }
+
+  /**
+   * @deprecated use {@link registerShareIntegration} instead
+   */
+  register(value: ShareMenuProviderLegacy) {
+    // implement backwards compatibility for the share plugin
+  }
+
+  registerShareIntegration<I extends ShareIntegration>(
+    ...args: [string, Omit<I, 'shareType'>] | [Omit<I, 'shareType'>]
+  ): void {
+    const [shareObject, shareActionIntent] =
+      args.length === 1 ? [this.globalMarker, args[0]] : args;
+    this.registerShareIntentAction(shareObject, {
+      shareType: 'integration',
+      ...shareActionIntent,
+    });
+  }
+
+  start({ urlService, anonymousAccessServiceProvider }: ShareRegistryApiStart) {
+    this.urlService = urlService;
+    this.anonymousAccessServiceProvider = anonymousAccessServiceProvider;
+  }
+
+  getShareConfigOptionsForObject(
+    objectType: ShareContext['objectType']
+  ): Array<ShareActionIntents | undefined> {
+    const shareContextMap = this.shareOptionsRegistry[objectType];
+    const globalOptions = Array.from(this.shareOptionsRegistry[this.globalMarker].values());
+
+    if (!shareContextMap) {
+      return globalOptions;
+    }
+
+    return globalOptions.concat(Array.from(shareContextMap.values()));
+  }
+
+  resolveShareItemsForShareContext({ objectType, ...shareContext }: ShareContext): ShareConfigs[] {
+    if (!this.urlService || !this.anonymousAccessServiceProvider) {
+      throw new Error('ShareOptionsManager#start was not been invoked');
+    }
+
+    return this.getShareConfigOptionsForObject(objectType)
+      .map((shareAction) => ({
+        ...shareAction,
+        config: shareAction?.config?.call(null, {
+          urlService: this.urlService!,
+          anonymousAccessServiceProvider: this.anonymousAccessServiceProvider,
+          objectType,
+          ...shareContext,
+        }),
+      }))
+      .filter((shareAction) => shareAction.config);
   }
 }
-
-export type ShareMenuRegistrySetup = ReturnType<ShareMenuRegistry['setup']>;
-export type ShareMenuRegistryStart = ReturnType<ShareMenuRegistry['start']>;

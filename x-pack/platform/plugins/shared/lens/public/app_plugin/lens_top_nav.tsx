@@ -655,13 +655,7 @@ export const LensTopNavMenu = ({
 
             share.toggleShareContextMenu({
               anchorElement,
-              allowEmbed: false,
               allowShortUrl: false,
-              delegatedShareUrlHandler: () => {
-                return isCurrentStateDirty || !currentDoc?.savedObjectId
-                  ? shareableUrl!
-                  : savedObjectURL.href;
-              },
               objectId: currentDoc?.savedObjectId,
               objectType: 'lens',
               objectTypeMeta: {
@@ -686,6 +680,15 @@ export const LensTopNavMenu = ({
                         />
                       </EuiCallOut>
                     ),
+                    delegatedShareUrlHandler: () => {
+                      return isCurrentStateDirty || !currentDoc?.savedObjectId
+                        ? shareableUrl!
+                        : savedObjectURL.href;
+                    },
+                  },
+                  embed: {
+                    allowEmbed: true,
+                    showPublicUrlSwitch: () => false,
                   },
                 },
               },
@@ -695,7 +698,6 @@ export const LensTopNavMenu = ({
               // disable the menu if both shortURL permission and the visualization has not been saved
               // TODO: improve here the disabling state with more specific checks
               disabledShareUrl: Boolean(!shareUrlEnabled && !currentDoc?.savedObjectId),
-              showPublicUrlSwitch: () => false,
               onClose: () => {
                 anchorElement?.focus();
               },

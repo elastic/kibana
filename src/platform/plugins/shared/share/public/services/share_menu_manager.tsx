@@ -12,25 +12,23 @@ import ReactDOM from 'react-dom';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CoreStart, ThemeServiceStart, UserProfileService } from '@kbn/core/public';
 import { ShowShareMenuOptions } from '../types';
-import { ShareMenuRegistryStart } from './share_menu_registry';
-import type { ShareMenuItemV2 } from '../types';
+import { ShareRegistry } from './share_menu_registry';
+import type { ShareConfigs } from '../types';
 import { ShareMenu } from '../components/share_tabs';
-import { ShareOptionsManager } from './share_options_manager';
 
 interface ShareMenuManagerStartDeps {
   core: CoreStart;
-  shareRegistry: ShareMenuRegistryStart;
+  shareRegistry: ShareRegistry;
   disableEmbed: boolean;
-  shareOptionsManager: ShareOptionsManager;
 }
 
 export class ShareMenuManager {
   private isOpen = false;
-  private shareOptionsManager?: ShareOptionsManager;
+  private shareRegistry?: ShareRegistry;
   private container = document.createElement('div');
 
-  start({ core, shareOptionsManager, shareRegistry, disableEmbed }: ShareMenuManagerStartDeps) {
-    this.shareOptionsManager = shareOptionsManager;
+  start({ core, shareRegistry, disableEmbed }: ShareMenuManagerStartDeps) {
+    this.shareRegistry = shareRegistry;
 
     return {
       showShareDialog: this.showShareDialog.bind(this),
@@ -46,14 +44,14 @@ export class ShareMenuManager {
           options.onClose?.();
         };
 
-        const menuItems = this.shareOptionsManager!.resolveShareItemsForShareContext({
+        const menuItems = this.shareRegistry!.resolveShareItemsForShareContext({
           ...options,
           onClose,
         });
 
         this.toggleShareContextMenu({
           ...options,
-          allowEmbed: disableEmbed ? false : options.allowEmbed,
+          allowEmbed: false, // disableEmbed ? false : options.allowEmbed,
           onClose,
           menuItems,
           publicAPIEnabled: !disableEmbed,
@@ -68,16 +66,6 @@ export class ShareMenuManager {
     this.isOpen = false;
   };
 
-  private showShareDialog(app: string) {
-    const shareOptions = this.shareOptionsManager?.getShareConfigOptionsForApp(app);
-
-    if (!shareOptions) {
-      return;
-    }
-
-    console.log('share options available for app', shareOptions);
-  }
-
   private toggleShareContextMenu({
     anchorElement,
     allowEmbed,
@@ -89,18 +77,14 @@ export class ShareMenuManager {
     menuItems,
     shareableUrl,
     shareableUrlLocatorParams,
-    embedUrlParamExtensions,
-    showPublicUrlSwitch,
-    snapshotShareWarning,
     onClose,
     disabledShareUrl,
     isDirty,
-    delegatedShareUrlHandler,
     publicAPIEnabled,
     ...startServices
   }: ShowShareMenuOptions & {
     anchorElement: HTMLElement;
-    menuItems: ShareMenuItemV2[];
+    menuItems: ShareConfigs[];
     onClose: () => void;
     isDirty: boolean;
     userProfile: UserProfileService;
@@ -130,10 +114,6 @@ export class ShareMenuManager {
           sharingData,
           shareableUrl,
           shareableUrlLocatorParams,
-          delegatedShareUrlHandler,
-          embedUrlParamExtensions,
-          showPublicUrlSwitch,
-          snapshotShareWarning,
           disabledShareUrl,
           isDirty,
           shareMenuItems: menuItems,

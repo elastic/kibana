@@ -9,7 +9,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
-  ShareMenuRegistry,
+  ShareRegistry,
   ShareMenuRegistrySetup,
   ShareMenuRegistryStart,
 } from './share_menu_registry';
@@ -29,7 +29,7 @@ const createStartMock = (): jest.Mocked<ShareMenuRegistryStart> => {
   return start;
 };
 
-const createMock = (): jest.Mocked<PublicMethodsOf<ShareMenuRegistry>> => {
+const createMock = (): jest.Mocked<PublicMethodsOf<ShareRegistry>> => {
   const service = {
     setup: jest.fn(),
     start: jest.fn(),

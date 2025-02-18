@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ShareMenuRegistry } from './share_menu_registry';
+import { ShareRegistry } from './share_menu_registry';
 import { ShareMenuItemV2, ShareContext } from '../types';
 
 describe('ShareActionsRegistry', () => {
   describe('setup', () => {
     test('throws when registering duplicate id', () => {
-      const setup = new ShareMenuRegistry().setup();
+      const setup = new ShareRegistry().setup();
       setup.register({
         id: 'csvReports',
         getShareMenuItems: () => [],
@@ -32,7 +32,7 @@ describe('ShareActionsRegistry', () => {
   describe('start', () => {
     describe('getActions', () => {
       test('returns a flat list of actions returned by all providers', () => {
-        const service = new ShareMenuRegistry();
+        const service = new ShareRegistry();
         const registerFunction = service.setup().register;
         const shareAction1 = {} as ShareMenuItemV2;
         const shareAction2 = {} as ShareMenuItemV2;

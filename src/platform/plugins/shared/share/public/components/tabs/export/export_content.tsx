@@ -26,7 +26,7 @@ import {
   EuiIconTip,
   type EuiRadioGroupOption,
 } from '@elastic/eui';
-import { SupportedExportTypes, ShareMenuItemV2 } from '../../../types';
+import { ShareMenuItemV2 } from '../../../types';
 import { type IShareContext } from '../../context';
 
 type ExportProps = Pick<IShareContext, 'isDirty' | 'objectId' | 'objectType' | 'onClose'> & {
@@ -58,9 +58,7 @@ const ExportContentUi = ({
     }, []);
   }, [aggregateReportTypes]);
 
-  const [selectedRadio, setSelectedRadio] = useState<SupportedExportTypes>(
-    radioOptions[0].id as SupportedExportTypes
-  );
+  const [selectedRadio, setSelectedRadio] = useState(radioOptions[0].id);
 
   const {
     config: {

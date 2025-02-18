@@ -9,8 +9,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { ShareMenuManager, ShareMenuManagerStart } from './services';
-import { ShareMenuRegistry, ShareMenuRegistrySetup } from './services';
-import { ShareOptionsManager } from './services/share_options_manager';
+import { ShareRegistry /* , ShareMenuRegistrySetup */ } from './services';
 import { UrlService } from '../common/url_service';
 import { RedirectManager } from './url_service';
 import type { RedirectOptions } from '../common/url_service/locators/redirect';
@@ -26,7 +25,7 @@ import { registrations } from './lib/registrations';
 import type { BrowserUrlService } from './types';
 
 /** @public */
-export type SharePublicSetup = ShareMenuRegistrySetup & {
+export interface SharePublicSetup {
   /**
    * Utilities to work with URL locators and short URLs.
    */
@@ -43,8 +42,12 @@ export type SharePublicSetup = ShareMenuRegistrySetup & {
    */
   setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => void;
 
-  registerShareIntegration: ShareOptionsManager['registerShareIntegration'];
-};
+  registerShareIntegration: ShareRegistry['registerShareIntegration'];
+  /**
+   * @deprecated Use `registerShareIntegration` instead.
+   */
+  register: ShareRegistry['register'];
+}
 
 /** @public */
 export type SharePublicStart = ShareMenuManagerStart & {
@@ -75,8 +78,7 @@ export class SharePlugin
       SharePublicStartDependencies
     >
 {
-  private readonly shareMenuRegistry?: ShareMenuRegistry = new ShareMenuRegistry();
-  private readonly shareOptionsManager = new ShareOptionsManager();
+  private readonly shareRegistry = new ShareRegistry();
   private readonly shareContextMenu = new ShareMenuManager();
   private redirectManager?: RedirectManager;
   private url?: BrowserUrlService;
@@ -126,10 +128,10 @@ export class SharePlugin
     registrations.setup({ analytics });
 
     return {
-      registerShareIntegration: this.shareOptionsManager.registerShareIntegration.bind(
-        this.shareOptionsManager
+      registerShareIntegration: this.shareRegistry.registerShareIntegration.bind(
+        this.shareRegistry
       ),
-      ...this.shareMenuRegistry!.setup(),
+      register: this.shareRegistry.register.bind(this.shareRegistry),
       url: this.url,
       navigate: (options: RedirectOptions) => this.redirectManager!.navigate(options),
       setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => {
@@ -144,16 +146,15 @@ export class SharePlugin
   public start(core: CoreStart): SharePublicStart {
     const disableEmbed = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
 
-    this.shareOptionsManager.start({
+    this.shareRegistry.start({
       urlService: this.url!,
       anonymousAccessServiceProvider: () => this.anonymousAccessServiceProvider!(),
     });
 
     const sharingContextMenuStart = this.shareContextMenu.start({
       core,
-      shareRegistry: this.shareMenuRegistry!.start(),
+      shareRegistry: this.shareRegistry,
       disableEmbed,
-      shareOptionsManager: this.shareOptionsManager,
     });
 
     return {
