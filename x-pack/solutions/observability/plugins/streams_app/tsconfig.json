@@ -28,7 +28,6 @@
     "@kbn/react-kibana-context-render",
     "@kbn/code-editor",
     "@kbn/observability-utils-browser",
-    "@kbn/observability-utils-server",
     "@kbn/ui-theme",
     "@kbn/calculate-auto",
     "@kbn/kibana-react-plugin",
@@ -58,6 +57,7 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/datemath",
     "@kbn/dataset-quality-plugin",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/traced-es-client"
   ]
 }
