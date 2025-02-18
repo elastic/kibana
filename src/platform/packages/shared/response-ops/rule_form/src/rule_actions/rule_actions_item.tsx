@@ -596,7 +596,7 @@ export const RuleActionsItem = (props: RuleActionsItemProps) => {
   const connectorTitle = useMemo(() => {
     const title = connector ? ACTION_TITLE(connector) : actionTypeModel.actionTypeTitle;
     return (
-      <EuiFlexItem grow={false} style={{ overflowWrap: 'anywhere' }}>
+      <EuiFlexItem grow={false} className=".eui-textBreakWord">
         <EuiText size="s">{title}</EuiText>
       </EuiFlexItem>
     );
