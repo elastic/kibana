@@ -70,7 +70,10 @@ export class GetPreviewData {
     options: Options
   ): Promise<GetPreviewDataResponse> {
     const filter: estypes.QueryDslQueryContainer[] = [];
-    this.getGroupingsFilter(options, filter);
+    const groupingFilters = this.getGroupingFilters(options);
+    if (groupingFilters) {
+      filter.push(...groupingFilters);
+    }
     if (indicator.params.service !== ALL_VALUE)
       filter.push({
         match: { 'service.name': indicator.params.service },
@@ -171,7 +174,10 @@ export class GetPreviewData {
     options: Options
   ): Promise<GetPreviewDataResponse> {
     const filter: estypes.QueryDslQueryContainer[] = [];
-    this.getGroupingsFilter(options, filter);
+    const groupingFilters = this.getGroupingFilters(options);
+    if (groupingFilters) {
+      filter.push(...groupingFilters);
+    }
     if (indicator.params.service !== ALL_VALUE)
       filter.push({
         match: { 'service.name': indicator.params.service },
@@ -271,7 +277,10 @@ export class GetPreviewData {
       filterQuery,
     ];
 
-    this.getGroupingsFilter(options, filter);
+    const groupingFilters = this.getGroupingFilters(options);
+    if (groupingFilters) {
+      filter.push(...groupingFilters);
+    }
 
     const index = options.remoteName
       ? `${options.remoteName}:${indicator.params.index}`
@@ -339,7 +348,11 @@ export class GetPreviewData {
       { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
       filterQuery,
     ];
-    this.getGroupingsFilter(options, filter);
+
+    const groupingFilters = this.getGroupingFilters(options);
+    if (groupingFilters) {
+      filter.push(...groupingFilters);
+    }
 
     const index = options.remoteName
       ? `${options.remoteName}:${indicator.params.index}`
@@ -410,7 +423,10 @@ export class GetPreviewData {
       filterQuery,
     ];
 
-    this.getGroupingsFilter(options, filter);
+    const groupingFilters = this.getGroupingFilters(options);
+    if (groupingFilters) {
+      filter.push(...groupingFilters);
+    }
 
     const index = options.remoteName
       ? `${options.remoteName}:${indicator.params.index}`
@@ -464,7 +480,10 @@ export class GetPreviewData {
       filterQuery,
     ];
 
-    this.getGroupingsFilter(options, filter);
+    const groupingFilters = this.getGroupingFilters(options);
+    if (groupingFilters) {
+      filter.push(...groupingFilters);
+    }
 
     const index = options.remoteName
       ? `${options.remoteName}:${indicator.params.index}`
@@ -514,23 +533,21 @@ export class GetPreviewData {
     }));
   }
 
-  private getGroupingsFilter(options: Options, filter: estypes.QueryDslQueryContainer[]) {
-    const groupingsKeys = Object.keys(options.groupings || []);
+  private getGroupingFilters(options: Options): estypes.QueryDslQueryContainer[] | undefined {
+    const groupingsKeys = Object.keys(options.groupings ?? {});
 
+    // Probably used from the good vs bad events chart where we know the current groupings
+    // We should probably be ok with only using groupings which contains key and value...
+    // and remove the instanceId/GroupBy code path.
     if (groupingsKeys.length) {
-      groupingsKeys.forEach((key) => {
-        filter.push({
-          term: { [key]: options.groupings?.[key] },
-        });
-      });
-    } else if (options.instanceId && options.instanceId !== ALL_VALUE && options.groupBy) {
+      return groupingsKeys.map((key) => ({ term: { [key]: options.groupings![key] } }));
+    }
+
+    if (options.instanceId && options.instanceId !== ALL_VALUE && options.groupBy) {
       const instanceIdPart = options.instanceId.split(',');
-      const groupByPart = Array.isArray(options.groupBy) ? options.groupBy : [options.groupBy];
-      groupByPart.forEach((groupBy, index) => {
-        filter.push({
-          term: { [groupBy]: instanceIdPart[index] },
-        });
-      });
+      const groupByPart = [options.groupBy].flat();
+      if (instanceIdPart.length !== groupByPart.length) return undefined;
+      return groupByPart.map((groupBy, index) => ({ term: { [groupBy]: instanceIdPart[index] } }));
     }
   }
 
