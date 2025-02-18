@@ -277,7 +277,7 @@ export async function syncUnwiredStreamDefinitionObjects({
     }
   }
 
-  if (requiresTemplateForking(definition)) {
+  if (requiresForkedTemplate(definition)) {
     await ensureForkedIndexTemplate({
       unmanagedAssets,
       definition,
@@ -285,7 +285,7 @@ export async function syncUnwiredStreamDefinitionObjects({
       logger,
       isServerless,
     });
-  } else {
+
     await upsertComponent({
       logger,
       esClient: scopedClusterClient.asCurrentUser,
@@ -331,11 +331,6 @@ async function ensureForkedIndexTemplate({
       esClient: scopedClusterClient.asCurrentUser,
       component: generateUnwiredBaseLayer(definition, indexTemplate),
     }),
-    upsertComponent({
-      logger,
-      esClient: scopedClusterClient.asCurrentUser,
-      component: generateUnwiredLayer(definition, isServerless),
-    }),
 
     upsertTemplate({
       logger,
@@ -345,7 +340,7 @@ async function ensureForkedIndexTemplate({
   ]);
 }
 
-function requiresTemplateForking(definition: UnwiredStreamDefinition) {
+function requiresForkedTemplate(definition: UnwiredStreamDefinition) {
   const hasLifecycleChange = !isInheritLifecycle(definition.ingest.lifecycle);
   return hasLifecycleChange;
 }
