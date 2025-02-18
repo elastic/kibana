@@ -4776,6 +4776,21 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.EVENT_OUTCOME_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "EVENT_OUTCOME_FIELD",
+        "description": [],
+        "signature": [
+          "\"event.outcome\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.FIELDS_LIMIT_SETTING",
         "type": "string",
         "tags": [],
@@ -4883,6 +4898,21 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.INDEX_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "INDEX_FIELD",
+        "description": [],
+        "signature": [
+          "\"_index\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.LOG_FILE_PATH_FIELD",
         "type": "string",
         "tags": [],
@@ -4982,6 +5012,21 @@
           "\"discover:modifyColumnsOnSwitch\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.ORCHESTRATOR_CLUSTER_ID_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "ORCHESTRATOR_CLUSTER_ID_FIELD",
+        "description": [],
+        "signature": [
+          "\"orchestrator.cluster.id\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5281,6 +5326,36 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SPAN_DURATION_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_DURATION_FIELD",
+        "description": [],
+        "signature": [
+          "\"span.duration.us\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.SPAN_NAME_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "SPAN_NAME_FIELD",
+        "description": [],
+        "signature": [
+          "\"span.name\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.TIMESTAMP_FIELD",
         "type": "string",
         "tags": [],
@@ -5303,6 +5378,36 @@
         "description": [],
         "signature": [
           "\"trace.id\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.TRANSACTION_DURATION_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_DURATION_FIELD",
+        "description": [],
+        "signature": [
+          "\"transaction.duration.us\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.TRANSACTION_NAME_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "TRANSACTION_NAME_FIELD",
+        "description": [],
+        "signature": [
+          "\"transaction.name\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
@@ -5384,6 +5489,21 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DURATION_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "DURATION_FIELDS",
+        "description": [],
+        "signature": [
+          "readonly string[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.RESOURCE_FIELD_CONFIGURATION",
         "type": "Object",
         "tags": [],
@@ -5451,6 +5571,21 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.RESOURCE_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "RESOURCE_FIELDS",
+        "description": [],
+        "signature": [
+          "readonly [\"service.name\", \"container.name\", \"host.name\", \"orchestrator.namespace\", \"cloud.instance.id\", \"orchestrator.resource.id\", \"orchestrator.cluster.name\", \"orchestrator.cluster.id\", \"container.id\", \"agent.name\"]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.SMART_FALLBACK_FIELDS",
         "type": "Object",
         "tags": [],
@@ -5489,6 +5624,21 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.TRACE_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "TRACE_FIELDS",
+        "description": [],
+        "signature": [
+          "readonly [\"service.name\", \"event.outcome\", \"transaction.name\", \"transaction.duration.us\", \"span.name\", \"span.duration.us\", \"agent.name\"]"
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/logs/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]
