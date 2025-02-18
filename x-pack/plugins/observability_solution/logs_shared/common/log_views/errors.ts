@@ -38,3 +38,6 @@ export class PutLogViewError extends Error {
     this.name = 'PutLogViewError';
   }
 }
+
+export const isNoSuchRemoteClusterError = (err: Error) =>
+  err?.message?.includes('no_such_remote_cluster_exception');
