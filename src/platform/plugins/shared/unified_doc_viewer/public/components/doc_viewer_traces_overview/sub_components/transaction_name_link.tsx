@@ -10,14 +10,13 @@
 import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
+import { TRANSACTION_DETAILS_BY_NAME_LOCATOR } from '@kbn/deeplinks-observability';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 
 interface TransactionNameLinkProps {
   serviceName: string;
   transactionName: string;
 }
-
-const TRANSACTION_DETAILS_BY_NAME_LOCATOR = 'TransactionDetailsByNameLocator';
 
 export function TransactionNameLink({ transactionName, serviceName }: TransactionNameLinkProps) {
   const {
