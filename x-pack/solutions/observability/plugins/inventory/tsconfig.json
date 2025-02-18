@@ -51,7 +51,6 @@
     "@kbn/rule-data-utils",
     "@kbn/spaces-plugin",
     "@kbn/cloud-plugin",
-    "@kbn/observability-utils-browser",
     "@kbn/storybook",
     "@kbn/dashboard-plugin",
     "@kbn/deeplinks-analytics",
