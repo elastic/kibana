@@ -16661,6 +16661,8 @@ paths:
                               type: string
                             memory:
                               type: string
+                bumpRevision:
+                  type: boolean
                 data_output_id:
                   nullable: true
                   type: string

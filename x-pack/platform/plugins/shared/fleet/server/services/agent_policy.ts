@@ -695,6 +695,7 @@ class AgentPolicyService {
       spaceId?: string;
       authorizationHeader?: HTTPAuthorizationHeader | null;
       skipValidation?: boolean;
+      bumpRevision?: boolean;
     }
   ): Promise<AgentPolicy> {
     const logger = appContextService.getLogger();
@@ -766,7 +767,7 @@ class AgentPolicyService {
     }
 
     return this._update(soClient, esClient, id, agentPolicy, options?.user, {
-      bumpRevision: true,
+      bumpRevision: options?.bumpRevision ?? true,
       removeProtection: false,
       skipValidation: options?.skipValidation ?? false,
     }).then((updatedAgentPolicy) => {
