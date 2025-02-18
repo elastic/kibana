@@ -2650,6 +2650,18 @@ describe('queryEventsBySavedObjectsSearchAfter', () => {
     });
   });
 
+  test('should use seq_no_primary_term in query', async () => {
+    await clusterClientAdapter.queryEventsBySavedObjectsSearchAfter(defaultQuery);
+
+    expect(clusterClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          seq_no_primary_term: true,
+        }),
+      })
+    );
+  });
+
   test('should create new PIT when not provided', async () => {
     await clusterClientAdapter.queryEventsBySavedObjectsSearchAfter(defaultQuery);
 

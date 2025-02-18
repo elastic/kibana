@@ -742,6 +742,7 @@ export class ClusterClientAdapter<
       } = await esClient.search<IValidatedEventInternalDocInfo>({
         body,
         track_total_hits: true,
+        seq_no_primary_term: true,
       });
 
       // Get the sort values from the last hit to use as search_after for next page
