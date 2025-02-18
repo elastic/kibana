@@ -7,16 +7,15 @@
 
 import { EuiBadge } from '@elastic/eui';
 import React from 'react';
-import { Conversation } from '../../../../../..';
 
 export const BadgesColumn: React.FC<{
-  items: Conversation[] | null | undefined;
+  items: string[] | null | undefined;
   prefix: string;
   color?: string;
 }> = React.memo(({ items, prefix, color = 'hollow' }) =>
   items && items.length > 0 ? (
     <div>
-      {items.map(({ title }, idx) => (
+      {items.map((title, idx) => (
         <EuiBadge key={`${prefix}-${idx}`} color={color}>
           {title}
         </EuiBadge>

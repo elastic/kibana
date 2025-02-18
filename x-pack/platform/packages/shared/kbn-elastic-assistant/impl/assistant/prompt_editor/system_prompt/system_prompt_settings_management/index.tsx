@@ -127,13 +127,8 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
   }, [resetConversationsSettings, resetSystemPromptSettings]);
 
   const onCreate = useCallback(() => {
-    onSystemPromptSelect({
-      id: '',
-      content: '',
-      name: '',
-      promptType: 'system',
-      conversations: [],
-    });
+    // TODO test this change
+    onSystemPromptSelect('');
     openFlyout();
   }, [onSystemPromptSelect, openFlyout]);
 

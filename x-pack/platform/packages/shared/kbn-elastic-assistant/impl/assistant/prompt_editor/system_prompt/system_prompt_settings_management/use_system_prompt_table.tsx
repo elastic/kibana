@@ -53,7 +53,7 @@ export const useSystemPromptTable = () => {
         align: 'left',
         name: i18n.SYSTEM_PROMPTS_TABLE_COLUMN_DEFAULT_CONVERSATIONS,
         render: ({ conversations, id }: SystemPromptSettings) => (
-          <BadgesColumn items={conversations} prefix={id} />
+          <BadgesColumn items={conversations.map(({ title }) => title)} prefix={id} />
         ),
       },
       {

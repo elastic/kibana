@@ -35,15 +35,15 @@ interface UseSessionPaginationReturn<T extends {}, B extends boolean> {
   sorting: B extends true ? EuiInMemoryTableProps<T>['sorting'] : EuiTableSortingType<T>;
 }
 
-export const useSessionPagination = <T extends {}, B extends boolean>({
+export const useSessionPagination = <T extends {}, B extends boolean = true>({
   defaultTableOptions,
   nameSpace = DEFAULT_ASSISTANT_NAMESPACE,
-  inMemory = true as B,
+  inMemory,
   storageKey,
   totalItemCount = 0,
 }: {
   defaultTableOptions: CriteriaWithPagination<T>;
-  inMemory?: boolean;
+  inMemory?: B;
   nameSpace?: string;
   storageKey: string;
   totalItemCount?: number;
@@ -64,22 +64,19 @@ export const useSessionPagination = <T extends {}, B extends boolean>({
             pageSize: sessionStorageTableOptions.page.size ?? DEFAULT_PAGE_SIZE,
             pageSizeOptions: [5, 10, DEFAULT_PAGE_SIZE, 50],
             pageIndex: sessionStorageTableOptions.page.index,
-          }) as B extends true ? InMemoryPagination : ServerSidePagination,
+          }) as UseSessionPaginationReturn<T, B>['pagination'],
     [inMemory, sessionStorageTableOptions, totalItemCount]
   );
 
   const sorting = useMemo(() => {
-    console.log('sessionStorage sort', sessionStorageTableOptions.sort);
-    console.log('defaultTableOptions sort', defaultTableOptions.sort);
     return {
       sort: sessionStorageTableOptions.sort ?? defaultTableOptions.sort,
-    } as B extends true ? EuiInMemoryTableProps<T>['sorting'] : EuiTableSortingType<T>;
+    } as UseSessionPaginationReturn<T, B>['sorting'];
   }, [defaultTableOptions.sort, sessionStorageTableOptions.sort]);
 
   const onTableChange: UseSessionPaginationReturn<T, B>['onTableChange'] = useCallback(
     (args: CriteriaWithPagination<T>) => {
       const { page, sort } = args;
-      console.log('setSessionStorageTableOptions sort', sort);
       setSessionStorageTableOptions({
         page,
         ...(sort ? { sort } : {}),
