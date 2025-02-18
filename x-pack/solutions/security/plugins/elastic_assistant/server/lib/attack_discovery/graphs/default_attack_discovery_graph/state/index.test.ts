@@ -27,7 +27,7 @@ const prompts = {
 describe('getDefaultGraphState', () => {
   it('returns the expected default attackDiscoveries', () => {
     const graphAnnotation = getDefaultGraphAnnotation({ prompts });
-    
+
     expect(graphAnnotation.spec.attackDiscoveries.value).toBeNull();
   });
 
@@ -93,13 +93,17 @@ describe('getDefaultGraphState', () => {
 
   it('returns the expected default maxHallucinationFailures state', () => {
     const graphAnnotation = getDefaultGraphAnnotation({ prompts });
-    expect(graphAnnotation.spec.maxHallucinationFailures.value).toBe(DEFAULT_MAX_HALLUCINATION_FAILURES);
+    expect(graphAnnotation.spec.maxHallucinationFailures.value).toBe(
+      DEFAULT_MAX_HALLUCINATION_FAILURES
+    );
   });
 
   it('returns the expected default maxRepeatedGenerations state', () => {
     const graphAnnotation = getDefaultGraphAnnotation({ prompts });
 
-    expect(graphAnnotation.spec.maxRepeatedGenerations.value).toBe(DEFAULT_MAX_REPEATED_GENERATIONS);
+    expect(graphAnnotation.spec.maxRepeatedGenerations.value).toBe(
+      DEFAULT_MAX_REPEATED_GENERATIONS
+    );
   });
 
   it('returns the expected default refinements state', () => {
