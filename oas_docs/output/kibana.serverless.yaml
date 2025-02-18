@@ -42652,6 +42652,7 @@ components:
           index:
             - kibana_sample_data_logs
           esQuery: '"""{"query":{"match_all" : {}}}"""'
+          excludeHitsFromPreviousRun: true
           aggType: count
           groupBy: all
           searchType: esQuery
