@@ -618,8 +618,9 @@ export class TaskStore {
     });
 
     if (apiKeyIdsToRemove.length) {
-
-      this.security.authc.apiKeys.invalidateAsInternalUser({ ids: [...new Set(apiKeyIdsToRemove)] });
+      this.security.authc.apiKeys.invalidateAsInternalUser({
+        ids: [...new Set(apiKeyIdsToRemove)],
+      });
     }
 
     try {

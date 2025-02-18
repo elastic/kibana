@@ -265,14 +265,16 @@ describe('TaskStore', () => {
       (getUserScope as jest.Mock).mockResolvedValueOnce(mockUserScope);
       coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
 
-      scopedSavedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
-        id: 'testid',
-        type,
-        attributes,
-        references: [],
-        version: '123',
-        userScope: mockUserScope,
-      }));
+      scopedSavedObjectsClient.create.mockImplementation(
+        async (type: string, attributes: unknown) => ({
+          id: 'testid',
+          type,
+          attributes,
+          references: [],
+          version: '123',
+          userScope: mockUserScope,
+        })
+      );
 
       const result = await store.schedule(task as TaskInstance, { request });
 
@@ -301,12 +303,7 @@ describe('TaskStore', () => {
         }
       );
 
-      expect(getUserScope).toHaveBeenCalledWith(
-        request, 
-        true, 
-        coreStart.security, 
-        spacesStart
-      );
+      expect(getUserScope).toHaveBeenCalledWith(request, true, coreStart.security, spacesStart);
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
 
@@ -324,7 +321,7 @@ describe('TaskStore', () => {
         partition: 225,
         userScope: mockUserScope,
         id: 'testid',
-        version: '123'
+        version: '123',
       });
     });
 
@@ -344,10 +341,12 @@ describe('TaskStore', () => {
       };
 
       (getUserScope as jest.Mock).mockRejectedValueOnce(new Error('Something went wrong!'));
-      
+
       const request = httpServerMock.createKibanaRequest();
 
-      await expect(store.schedule(task as TaskInstance, { request })).rejects.toThrow('Something went wrong!');
+      await expect(store.schedule(task as TaskInstance, { request })).rejects.toThrow(
+        'Something went wrong!'
+      );
 
       expect(getUserScope).toHaveBeenCalled();
     });
@@ -1536,7 +1535,7 @@ describe('TaskStore', () => {
       },
       references: [],
       version: '123',
-    }
+    };
 
     beforeEach(() => {
       store = new TaskStore({
@@ -1558,14 +1557,12 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
       });
 
-      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest
-        .fn()
-        .mockResolvedValue({
-          close: jest.fn(),
-          find: function* asyncGenerator() {
-            yield { saved_objects: [mockTask]}
-          },
-        });
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [mockTask] };
+        },
+      });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
     });
@@ -1584,7 +1581,9 @@ describe('TaskStore', () => {
       const result = await store.remove(id);
       expect(result).toBeUndefined();
       expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', id, { refresh: false });
-      expect(coreStart.security.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({"ids": ["apiKeyId"]});
+      expect(coreStart.security.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
+        ids: ['apiKeyId'],
+      });
     });
 
     test('pushes error from saved objects client to errors$', async () => {
@@ -1627,7 +1626,7 @@ describe('TaskStore', () => {
       },
       references: [],
       version: '123',
-    }
+    };
 
     const mockTask2 = {
       id: 'task2',
@@ -1653,7 +1652,7 @@ describe('TaskStore', () => {
       },
       references: [],
       version: '123',
-    }
+    };
 
     const tasksIdsToDelete = [randomId(), randomId()];
 
@@ -1677,21 +1676,19 @@ describe('TaskStore', () => {
         canEncryptSavedObjects: true,
       });
 
-      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest
-        .fn()
-        .mockResolvedValue({
-          close: jest.fn(),
-          find: function* asyncGenerator() {
-            yield { saved_objects: [mockTask1, mockTask2]}
-          },
-        });
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [mockTask1, mockTask2] };
+        },
+      });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
     });
 
     test('removes the tasks with the specified ids', async () => {
       savedObjectsClient.bulkGet.mockResolvedValueOnce({
-        saved_objects: [mockTask1, mockTask2]
+        saved_objects: [mockTask1, mockTask2],
       });
       const result = await store.bulkRemove(tasksIdsToDelete);
       expect(result).toBeUndefined();
@@ -1703,21 +1700,21 @@ describe('TaskStore', () => {
         { refresh: false }
       );
     });
-    
+
     test('bulk invalidates API key of tasks with API keys', async () => {
       savedObjectsClient.bulkGet.mockResolvedValueOnce({
-        saved_objects: [mockTask1, mockTask2]
+        saved_objects: [mockTask1, mockTask2],
       });
       const result = await store.bulkRemove(['task1', 'task2']);
       expect(result).toBeUndefined();
       expect(coreStart.security.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
-        ids: ['apiKeyId1', 'apiKeyId2']
+        ids: ['apiKeyId1', 'apiKeyId2'],
       });
     });
 
     test('pushes error from saved objects client to errors$', async () => {
       savedObjectsClient.bulkGet.mockResolvedValueOnce({
-        saved_objects: [mockTask1, mockTask2]
+        saved_objects: [mockTask1, mockTask2],
       });
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       savedObjectsClient.bulkDelete.mockRejectedValue(new Error('Failure'));
@@ -2179,12 +2176,7 @@ describe('TaskStore', () => {
 
       const result = await store.bulkSchedule([task1, task2], { request });
 
-      expect(getUserScope).toHaveBeenCalledWith(
-        request, 
-        true, 
-        coreStart.security, 
-        spacesStart
-      );
+      expect(getUserScope).toHaveBeenCalledWith(request, true, coreStart.security, spacesStart);
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
 
@@ -2192,12 +2184,12 @@ describe('TaskStore', () => {
         {
           id: 'task1',
           attempts: 0,
-          params: {"hello":"world"},
+          params: { hello: 'world' },
           retryAt: null,
           runAt: mockedDate,
           scheduledAt: mockedDate,
           startedAt: null,
-          state: {"foo":"bar"},
+          state: { foo: 'bar' },
           stateVersion: 1,
           status: 'idle',
           taskType: 'report',
@@ -2209,12 +2201,12 @@ describe('TaskStore', () => {
         {
           id: 'task2',
           attempts: 0,
-          params: {"hello":"world"},
+          params: { hello: 'world' },
           retryAt: null,
           runAt: mockedDate,
           scheduledAt: mockedDate,
           startedAt: null,
-          state: {"foo":"bar"},
+          state: { foo: 'bar' },
           stateVersion: 1,
           status: 'idle',
           taskType: 'report',
@@ -2222,7 +2214,7 @@ describe('TaskStore', () => {
           partition: 225,
           userScope: mockUserScope,
           version: '123',
-        }
+        },
       ]);
     });
 
@@ -2236,10 +2228,12 @@ describe('TaskStore', () => {
       };
 
       (getUserScope as jest.Mock).mockRejectedValueOnce(new Error('Something went wrong!'));
-      
+
       const request = httpServerMock.createKibanaRequest();
 
-      await expect(store.bulkSchedule([task as TaskInstance], { request })).rejects.toThrow('Something went wrong!');
+      await expect(store.bulkSchedule([task as TaskInstance], { request })).rejects.toThrow(
+        'Something went wrong!'
+      );
 
       expect(getUserScope).toHaveBeenCalled();
     });
