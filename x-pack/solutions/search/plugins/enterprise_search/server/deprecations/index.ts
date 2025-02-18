@@ -223,13 +223,14 @@ export async function getNativeConnectorDeprecations(
             'xpack.enterpriseSearch.deprecations.fauxNativeConnector.message',
             {
               values: {
-                connectorIds:
-                  nativeConnectors.map((connector) => `- \`${connector.id}\``).join('\n') + '\n',
+                connectorIds: nativeConnectors
+                  .map((connector) => `- \`${connector.id}\``)
+                  .join('\n'),
               },
               defaultMessage:
                 'Elastic-managed connectors are no longer supported.\n\n' +
                 'The following connectors need to be converted to self-managed connectors to continue using them:\n' +
-                '{connectorIds}' +
+                '{connectorIds}\n\n' +
                 'This conversion is a lossless process and can be performed using "quick resolve".\n\n' +
                 'Alternatively, deleting these connectors will also unblock your upgrade.',
             }
@@ -241,14 +242,14 @@ export async function getNativeConnectorDeprecations(
             i18n.translate(
               'xpack.enterpriseSearch.deprecations.fauxNativeConnector.listConnectors',
               {
-                defaultMessage: 'Enumerate all connector records',
+                defaultMessage: 'Go through the Elastic-managed connectors in the Connectors UI.',
               }
             ),
             i18n.translate(
               'xpack.enterpriseSearch.deprecations.fauxNativeConnector.convertPretenders',
               {
                 defaultMessage:
-                  'Select "Convert to Client" for any connectors where `is_native: true`.',
+                  'Click on "Convert to self-managed" in the Connector Configuration tab for any connector with the "Elastic-managed connector" badge.',
               }
             ),
           ],
