@@ -113,6 +113,9 @@ export async function generateAgent(
       last_checkin: new Date().toISOString(),
       policy_id: policyId,
       policy_revision: 1,
+      agent: {
+        version,
+      },
       local_metadata: {
         elastic: {
           agent: {
