@@ -182,21 +182,6 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
     });
   }
 
-  /** Updates one rule migration status to `pending` */
-  async saveWaiting(id: string): Promise<void> {
-    const index = await this.getIndexName();
-    const profileId = await this.getProfileUid();
-    const doc = {
-      status: SiemMigrationStatus.PENDING, // TODO:? new WAITING status so the UI can differentiate
-      updated_by: profileId,
-      updated_at: new Date().toISOString(),
-    };
-    await this.esClient.update({ index, id, doc, refresh: 'wait_for' }).catch((error) => {
-      this.logger.error(`Error updating rule migration status to pending: ${error.message}`);
-      throw error;
-    });
-  }
-
   /** Updates one rule migration with the provided data and sets the status to `failed` */
   async saveError({ id, ...ruleMigration }: StoredRuleMigration): Promise<void> {
     const index = await this.getIndexName();

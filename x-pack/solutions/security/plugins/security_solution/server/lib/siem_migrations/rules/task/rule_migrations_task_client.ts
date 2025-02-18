@@ -22,7 +22,7 @@ import type {
 } from './types';
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
 
-type MigrationsRunning = Map<string, { user: string; abortController: AbortController }>;
+type MigrationsRunning = Map<string, RuleMigrationTaskRunner>;
 
 export class RuleMigrationsTaskClient {
   constructor(
@@ -59,6 +59,7 @@ export class RuleMigrationsTaskClient {
     const abortController = new AbortController();
     const migrationTaskRunner = new RuleMigrationTaskRunner(
       migrationId,
+      this.currentUser,
       abortController,
       this.data,
       migrationLogger,
@@ -71,7 +72,7 @@ export class RuleMigrationsTaskClient {
       // Just to prevent a race condition in the setup
       throw new Error('Task already running for this migration');
     }
-    this.migrationsRunning.set(migrationId, { user: this.currentUser.username, abortController });
+    this.migrationsRunning.set(migrationId, migrationTaskRunner);
 
     migrationLogger.info('Starting migration');
 
@@ -95,6 +96,7 @@ export class RuleMigrationsTaskClient {
     filter: RuleMigrationFilters
   ): Promise<{ updated: boolean }> {
     if (this.migrationsRunning.has(migrationId)) {
+      // not update migrations that are currently running
       return { updated: false };
     }
     filter.installed = false; // only retry rules that are not installed
