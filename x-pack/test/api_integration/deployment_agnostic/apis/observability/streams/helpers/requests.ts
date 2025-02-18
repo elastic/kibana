@@ -91,3 +91,20 @@ export async function getStream(
     .expect(expectStatusCode)
     .then((response) => response.body);
 }
+
+export async function getIlmStats(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .fetch('GET /api/streams/{name}/lifecycle/_stats', {
+      params: {
+        path: {
+          name,
+        },
+      },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
