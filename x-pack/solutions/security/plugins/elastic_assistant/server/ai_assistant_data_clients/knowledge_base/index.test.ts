@@ -413,7 +413,7 @@ describe('AIAssistantKnowledgeBaseDataClient', () => {
 
       expect(results).toHaveLength(1);
       expect(results[0].pageContent).toBe('test');
-      expect(results[0].metadata.kbResource).toBe('test');
+      expect(results[0].metadata.kbResource).toBe('user');
     });
 
     it('should swallow errors during search', async () => {
