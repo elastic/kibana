@@ -26,11 +26,10 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       path: APIRoutes.SYNONYM_SETS,
       options: {
         access: 'internal',
-        tags: ['synonyms:read'],
       },
       security: {
         authz: {
-          requiredPrivileges: ['synonyms:read'],
+          requiredPrivileges: ['manage_synonyms'],
         },
       },
       validate: {
@@ -78,11 +77,10 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       path: APIRoutes.SYNONYM_SET_ID,
       options: {
         access: 'internal',
-        tags: ['synonyms:write', 'synonyms:read'],
       },
       security: {
         authz: {
-          requiredPrivileges: ['synonyms:write', 'synonyms:read'],
+          requiredPrivileges: ['manage_synonyms'],
         },
       },
       validate: {
@@ -119,11 +117,10 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       path: APIRoutes.SYNONYM_SET_ID,
       options: {
         access: 'internal',
-        tags: ['synonyms:read'],
       },
       security: {
         authz: {
-          requiredPrivileges: ['synonyms:read'],
+          requiredPrivileges: ['manage_synonyms'],
         },
       },
       validate: {
@@ -177,11 +174,10 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       path: APIRoutes.SYNONYM_SET_ID_RULE_ID,
       options: {
         access: 'internal',
-        tags: ['synonyms:read'],
       },
       security: {
         authz: {
-          requiredPrivileges: ['synonyms:read'],
+          requiredPrivileges: ['manage_synonyms'],
         },
       },
       validate: {
@@ -228,11 +224,10 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       path: APIRoutes.SYNONYM_SET_ID_RULE_ID,
       options: {
         access: 'internal',
-        tags: ['synonyms:write', 'synonyms:read'],
       },
       security: {
         authz: {
-          requiredPrivileges: ['synonyms:write', 'synonyms:read'],
+          requiredPrivileges: ['manage_synonyms'],
         },
       },
       validate: {
@@ -279,11 +274,10 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       path: APIRoutes.SYNONYM_SET_ID,
       options: {
         access: 'internal',
-        tags: ['synonyms:write', 'synonyms:read'],
       },
       security: {
         authz: {
-          requiredPrivileges: ['synonyms:write', 'synonyms:read'],
+          requiredPrivileges: ['manage_synonyms'],
         },
       },
       validate: {
@@ -328,11 +322,10 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       path: APIRoutes.GENERATE_SYNONYM_RULE_ID,
       options: {
         access: 'internal',
-        tags: ['synonyms:write', 'synonyms:read'],
       },
       security: {
         authz: {
-          requiredPrivileges: ['synonyms:write', 'synonyms:read'],
+          requiredPrivileges: ['manage_synonyms'],
         },
       },
       validate: {
@@ -377,11 +370,10 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       path: APIRoutes.SYNONYM_SET_ID_RULE_ID,
       options: {
         access: 'internal',
-        tags: ['synonyms:write', 'synonyms:read'],
       },
       security: {
         authz: {
-          requiredPrivileges: ['synonyms:write', 'synonyms:read'],
+          requiredPrivileges: ['manage_synonyms'],
         },
       },
       validate: {
