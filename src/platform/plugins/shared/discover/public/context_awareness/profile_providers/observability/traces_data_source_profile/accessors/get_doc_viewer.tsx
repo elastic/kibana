@@ -21,9 +21,7 @@ export const getDocViewer =
     const isTrace = getFieldValue(params.record, DATASTREAM_TYPE_FIELD) === 'traces';
 
     if (!isTrace) {
-      return {
-        ...prevValue,
-      };
+      return prevValue;
     }
     const processorEvent = getFieldValue(params.record, PROCESSOR_EVENT_FIELD);
 
