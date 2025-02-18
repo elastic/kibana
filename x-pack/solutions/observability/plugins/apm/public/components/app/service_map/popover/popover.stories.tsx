@@ -8,6 +8,7 @@
 import type { StoryObj, Meta } from '@storybook/react';
 import cytoscape from 'cytoscape';
 import React from 'react';
+import type { PopoverProps } from '.';
 import { Popover } from '.';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
@@ -15,7 +16,7 @@ import { mockApmApiCallResponse } from '../../../../services/rest/call_apm_api_s
 import { CytoscapeContext } from '../cytoscape';
 import exampleGroupedConnectionsData from '../__stories__/example_grouped_connections.json';
 
-interface Args {
+interface Args extends PopoverProps {
   nodeData: cytoscape.NodeDataDefinition;
 }
 

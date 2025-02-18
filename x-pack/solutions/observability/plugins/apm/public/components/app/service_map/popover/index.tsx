@@ -67,7 +67,7 @@ export interface ContentsProps {
   onFocusClick: (event: MouseEvent<HTMLAnchorElement>) => void;
 }
 
-interface PopoverProps {
+export interface PopoverProps {
   focusedServiceName?: string;
   environment: Environment;
   kuery: string;

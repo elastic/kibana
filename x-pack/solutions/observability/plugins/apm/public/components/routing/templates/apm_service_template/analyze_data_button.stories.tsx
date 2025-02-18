@@ -27,7 +27,7 @@ export default {
   component: AnalyzeDataButton,
   decorators: [
     (StoryComponent, { args }) => {
-      const { agentName, canShowDashboard, environment, serviceName } = args;
+      const { agentName, canShowDashboard, environment, serviceName } = args as unknown as Args;
 
       return (
         <MemoryRouter
@@ -66,7 +66,7 @@ export default {
         </MemoryRouter>
       );
     },
-  ] as Decorator,
+  ] as Decorator[],
 };
 
 export const Example: StoryObj<Args> = {

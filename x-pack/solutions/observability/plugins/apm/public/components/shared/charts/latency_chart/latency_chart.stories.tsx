@@ -10,6 +10,7 @@ import type { StoryObj, Meta } from '@storybook/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { LatencyChart } from '.';
+import type { Props } from '.';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import type { ApmPluginContextValue } from '../../../../context/apm_plugin/apm_plugin_context';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
@@ -23,7 +24,7 @@ import { mockApmApiCallResponse } from '../../../../services/rest/call_apm_api_s
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 
-interface Args {
+interface Args extends Props {
   latencyChartResponse: APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/latency'>;
 }
 
