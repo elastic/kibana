@@ -89,6 +89,8 @@ export const buildESQLTheme = ({
           'nulls_order',
           'join_lookup',
           'join',
+          'dev_change_point',
+          'dev_insist',
         ],
         euiThemeVars.euiColorAccentText,
         true // isBold
@@ -157,6 +159,10 @@ export const buildESQLTheme = ({
           'metrics_multiline_comment',
           'closing_metrics_line_comment',
           'closing_metrics_multiline_comment',
+          'change_point_line_comment',
+          'change_point_multiline_comment',
+          'insist_line_comment',
+          'insist_multiline_comment',
         ],
         euiThemeVars.euiTextSubduedColor
       ),
