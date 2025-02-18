@@ -8,6 +8,7 @@
 import type { OnTimeChangeProps } from '@elastic/eui';
 import { EuiSuperDatePicker, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { FilterManager } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter, Query } from '@kbn/es-query';
 import { debounce } from 'lodash/fp';
@@ -17,7 +18,6 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { getCommonTimeRanges } from '../helpers/get_common_time_ranges';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
-import * as i18n from '../translations';
 import { useDataView } from '../use_data_view';
 
 export const MAX_ALERTS = 500;
@@ -27,10 +27,10 @@ export const NO_INDEX_PATTERNS: DataView[] = [];
 
 interface Props {
   end: string;
+  filterManager: FilterManager;
   filters: Filter[];
   query: Query;
   setEnd: React.Dispatch<React.SetStateAction<string>>;
-  setFilters: React.Dispatch<React.SetStateAction<Filter[]>>;
   setQuery: React.Dispatch<React.SetStateAction<Query>>;
   setStart: React.Dispatch<React.SetStateAction<string>>;
   start: string;
@@ -38,10 +38,10 @@ interface Props {
 
 const AlertSelectionQueryComponent: React.FC<Props> = ({
   end,
+  filterManager,
   filters,
   query,
   setEnd,
-  setFilters,
   setQuery,
   setStart,
   start,
@@ -129,9 +129,9 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
    */
   const onFiltersUpdated = useCallback(
     (newFilters: Filter[]) => {
-      setFilters(newFilters);
+      filterManager.setFilters(newFilters);
     },
-    [setFilters]
+    [filterManager]
   );
 
   /**
@@ -172,7 +172,6 @@ const AlertSelectionQueryComponent: React.FC<Props> = ({
             debouncedOnQueryChange(debouncedQuery?.query);
           }}
           onQuerySubmit={onQuerySubmit}
-          placeholder={i18n.FILTER_YOUR_DATA}
           query={query}
         />
       </div>
