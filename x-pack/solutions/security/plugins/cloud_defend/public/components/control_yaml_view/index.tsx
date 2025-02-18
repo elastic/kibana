@@ -6,7 +6,7 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiSpacer, EuiText, EuiFlexGroup, EuiFlexItem, EuiForm } from '@elastic/eui';
-import { CodeEditor, YamlLang } from '@kbn/code-editor';
+import { CodeEditor, YAML_LANG_ID } from '@kbn/code-editor';
 import { monaco } from '@kbn/monaco';
 import { uniq } from 'lodash';
 import { INPUT_CONTROL } from '../../../common/constants';
@@ -158,7 +158,7 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
         <div css={styles.yamlEditor}>
           <CodeEditor
             width="100%"
-            languageId={YamlLang}
+            languageId={YAML_LANG_ID}
             options={{
               wordWrap: 'off',
               model: currentModel,
