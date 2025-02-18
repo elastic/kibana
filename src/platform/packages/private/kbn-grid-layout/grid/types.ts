@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { ObservedSize } from 'use-resize-observer/polyfilled';
+import type { ObservedSize } from 'useßresize-observer/polyfilled';
 
 export interface GridCoordinate {
   column: number;
@@ -107,4 +107,24 @@ export interface PanelInteractionEvent {
   };
 }
 
+/**
+ * This type is used to conditionally change the type of `renderPanelContents` depending
+ * on the value of `useCustomDragHandle`
+ */
+export type UseCustomDragHandle =
+  | {
+      useCustomDragHandle: true;
+      renderPanelContents: (
+        panelId: string,
+        setDragHandles: (refs: Array<HTMLElement | null>) => void
+      ) => React.ReactNode;
+    }
+  | {
+      useCustomDragHandle?: false;
+      renderPanelContents: (panelId: string) => React.ReactNode;
+    };
+
+/**
+ * Controls whether the resize + drag handles are visible and functioning
+ */
 export type GridAccessMode = 'VIEW' | 'EDIT';

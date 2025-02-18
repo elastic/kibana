@@ -307,6 +307,7 @@ export const GridExample = ({
             expandedPanelId={expandedPanelId}
             layout={currentLayout}
             gridSettings={gridSettings}
+            useCustomDragHandle={true}
             renderPanelContents={renderPanelContents}
             onLayoutChange={onLayoutChange}
             css={customLayoutCss}

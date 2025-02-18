@@ -26,28 +26,31 @@ import { EuiThemeProvider } from '@elastic/eui';
 const onLayoutChange = jest.fn();
 
 const renderGridLayout = (propsOverrides: Partial<GridLayoutProps> = {}) => {
-  const defaultProps: GridLayoutProps = {
+  const props = {
     accessMode: 'EDIT',
     layout: getSampleLayout(),
     gridSettings,
     renderPanelContents: mockRenderPanelContents,
     onLayoutChange,
-  };
+    ...propsOverrides,
+  } as GridLayoutProps;
 
   const { rerender, ...rtlRest } = render(
     <EuiThemeProvider>
-      <GridLayout {...defaultProps} {...propsOverrides} />
+      <GridLayout {...props} />
     </EuiThemeProvider>
   );
 
   return {
     ...rtlRest,
-    rerender: (overrides: Partial<GridLayoutProps>) =>
-      rerender(
+    rerender: (overrides: Partial<GridLayoutProps>) => {
+      const newProps = { ...props, ...overrides } as GridLayoutProps;
+      return rerender(
         <EuiThemeProvider>
-          <GridLayout {...defaultProps} {...overrides} />
+          <GridLayout {...newProps} />
         </EuiThemeProvider>
-      ),
+      );
+    },
   };
 };
 
