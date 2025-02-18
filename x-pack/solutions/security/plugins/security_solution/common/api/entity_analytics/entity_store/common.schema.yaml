@@ -31,7 +31,7 @@ components:
           type: string
         fieldHistoryLength:
           type: integer
-        lookbackPeriod:
+        lookbackPeriod: 
           type: string
           default: 24h
           pattern: '[smdh]$'
@@ -42,15 +42,15 @@ components:
           default: 180s
           pattern: '[smdh]$'
         frequency:
-          type: string
+          type: string 
           default: 1m
           pattern: '[smdh]$'
         delay:
           type: string
-          default: 1m
-          pattern: '[smdh]$'
+          default: 1m 
+          pattern: '[smdh]$'               
         docsPerSecond:
-          type: integer
+          type: integer       
         error:
           type: object
 
@@ -62,21 +62,21 @@ components:
         - stopped
         - updating
         - error
-
+    
     EngineComponentStatus:
       type: object
       required:
-        - id
-        - installed
-        - resource
+          - id
+          - installed
+          - resource
       properties:
-        id:
+        id: 
           type: string
-        installed:
+        installed: 
           type: boolean
         resource:
           $ref: '#/components/schemas/EngineComponentResource'
-        health:
+        health: 
           type: string
           enum:
             - green
@@ -92,8 +92,8 @@ components:
                 type: string
               message:
                 type: string
-        metadata:
-          type: unknown
+              metadata:
+                type: unknown
 
     EngineComponentResource:
       type: string
