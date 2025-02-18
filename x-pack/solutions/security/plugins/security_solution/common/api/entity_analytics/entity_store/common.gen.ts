@@ -87,10 +87,10 @@ export const EngineComponentStatus = z.object({
       z.object({
         title: z.string().optional(),
         message: z.string().optional(),
+        metadata: z.object({}).optional(),
       })
     )
     .optional(),
-  metadata: z.unknown().optional(),
 });
 
 export type StoreStatus = z.infer<typeof StoreStatus>;

@@ -93,7 +93,7 @@ components:
               message:
                 type: string
               metadata:
-                type: unknown
+                type: object
 
     EngineComponentResource:
       type: string
