@@ -85,6 +85,6 @@ const ThemeSwitcherTooltip = React.memo(
       })
     );
 
-    return <TooltipLinkList links={links} />;
+    return <TooltipLinkList links={links.flat()} />;
   }
 );
