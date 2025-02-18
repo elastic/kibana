@@ -53,7 +53,6 @@ const getFlyoutParamsByEntity = ({
   contextId,
 }: InventoryFlyoutProps): FlyoutParams => {
   const entitiesFlyoutParams: Record<EntityEcs['type'], FlyoutParams> = {
-    universal: { id: UniversalEntityPanelKey, params: { entity } },
     user: { id: UserPanelKey, params: { userName: entity.name, scopeId, contextId } },
     host: { id: HostPanelKey, params: { hostName: entity.name, scopeId, contextId } },
     service: { id: ServicePanelKey, params: { serviceName: entity.name, scopeId, contextId } },
@@ -71,7 +70,7 @@ export const useDynamicEntityFlyout = ({ onFlyoutClose }: { onFlyoutClose: () =>
     const entityFlyoutParams = getFlyoutParamsByEntity({ entity, scopeId, contextId });
 
     // User, Host, and Service entity flyouts rely on entity name to fetch required data
-    if (entity.type !== 'universal' && !entity.name) {
+    if (!entity.name) {
       notifications.toasts.addDanger({
         title: i18n.translate(
           'xpack.securitySolution.assetInventory.openFlyout.missingEntityNameTitle',

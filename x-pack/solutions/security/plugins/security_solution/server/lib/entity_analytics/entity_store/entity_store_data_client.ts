@@ -306,12 +306,7 @@ export class EntityStoreDataClient {
     requestBody: InitEntityEngineRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityEngineResponse> {
-    const { experimentalFeatures } = this.options;
-
-    if (entityType === EntityType.service && !experimentalFeatures.serviceEntityStoreEnabled) {
-      throw new Error('Service entity store is not enabled');
-    }
-
+    
     if (!this.options.taskManager) {
       throw new Error('Task Manager is not available');
     }

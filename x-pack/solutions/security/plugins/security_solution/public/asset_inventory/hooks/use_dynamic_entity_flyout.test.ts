@@ -11,7 +11,6 @@ import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useKibana } from '../../common/lib/kibana';
 import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_expandable_flyout_close';
 import {
-  UniversalEntityPanelKey,
   UserPanelKey,
   HostPanelKey,
   ServicePanelKey,
@@ -33,7 +32,7 @@ jest.mock('../../flyout/shared/hooks/use_on_expandable_flyout_close', () => ({
 const entity = {
   id: '123',
   name: 'test-entity',
-  type: 'universal',
+  type: 'user',
   timestamp: new Date(),
 };
 
@@ -57,27 +56,6 @@ describe('useDynamicEntityFlyout', () => {
       services: { notifications: { toasts: toastsMock } },
     });
     (useOnExpandableFlyoutClose as jest.Mock).mockImplementation(({ callback }) => callback);
-  });
-
-  it('should open the flyout with correct params for a universal entity', () => {
-    const { result } = renderHook(() =>
-      useDynamicEntityFlyout({ onFlyoutClose: onFlyoutCloseMock })
-    );
-
-    act(() => {
-      result.current.openDynamicFlyout({
-        entity: { ...entity, type: 'universal', name: 'testUniversal' },
-        scopeId: 'scope1',
-        contextId: 'context1',
-      });
-    });
-
-    expect(openFlyoutMock).toHaveBeenCalledWith({
-      right: {
-        id: UniversalEntityPanelKey,
-        params: { entity: { ...entity, type: 'universal', name: 'testUniversal' } },
-      },
-    });
   });
 
   it('should open the flyout with correct params for a user entity', () => {

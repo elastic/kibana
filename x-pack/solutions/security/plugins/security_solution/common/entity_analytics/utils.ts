@@ -13,11 +13,6 @@ export const getDisabledEntityTypes = (
   experimentalFeatures: ExperimentalFeatures
 ): EntityType[] => {
   const disabledEntityTypes: EntityType[] = [];
-  const isServiceEntityStoreEnabled = experimentalFeatures.serviceEntityStoreEnabled;
-
-  if (!isServiceEntityStoreEnabled) {
-    disabledEntityTypes.push(EntityType.service);
-  }
 
   return disabledEntityTypes;
 };
