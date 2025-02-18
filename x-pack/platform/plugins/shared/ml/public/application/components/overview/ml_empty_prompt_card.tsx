@@ -5,18 +5,9 @@
  * 2.0.
  */
 
-import type { FC } from 'react';
 import React from 'react';
 import type { EuiEmptyPromptProps } from '@elastic/eui';
-import { EuiEmptyPrompt, EuiTitle, EuiImage } from '@elastic/eui';
-import { useEuiTheme } from '@elastic/eui';
-export const CardTitle: FC<React.PropsWithChildren> = ({ children }) => {
-  return (
-    <EuiTitle size="s">
-      <h3>{children}</h3>
-    </EuiTitle>
-  );
-};
+import { EuiEmptyPrompt, EuiImage, useEuiTheme } from '@elastic/eui';
 
 export const MLEmptyPromptCard = ({
   title,
@@ -36,8 +27,9 @@ export const MLEmptyPromptCard = ({
       hasBorder={true}
       hasShadow={false}
       icon={<EuiImage size="fullWidth" src={iconSrc} alt={iconAlt} />}
-      title={<CardTitle>{title}</CardTitle>}
-      body={<p>{body}</p>}
+      title={<h3>{title}</h3>}
+      titleSize="s"
+      body={body}
       actions={actions}
       data-test-subj={dataTestSubj}
     />

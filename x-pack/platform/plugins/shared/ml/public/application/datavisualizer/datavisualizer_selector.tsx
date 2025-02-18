@@ -20,6 +20,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiBetaBadge,
+  EuiTitle,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,7 +33,6 @@ import { MlPageHeader } from '../components/page_header';
 import { ML_PAGES } from '../../locator';
 import esqlImage from './images/esql-overview-ml.svg';
 import { DataVisualizerGrid } from '../overview/data_visualizer_grid';
-import { CardTitle } from '../components/overview/ml_empty_prompt_card';
 
 function startTrialDescription() {
   return (
@@ -70,12 +70,14 @@ export const ESQLTryItNowCard: FC = () => {
               <EuiFlexItem>
                 <EuiFlexGroup gutterSize="xs">
                   <EuiFlexItem grow={false}>
-                    <CardTitle>
-                      <FormattedMessage
-                        id="xpack.ml.datavisualizer.selector.selectESQLTitle"
-                        defaultMessage="ES|QL"
-                      />
-                    </CardTitle>
+                    <EuiTitle size="s">
+                      <h3>
+                        <FormattedMessage
+                          id="xpack.ml.datavisualizer.selector.selectESQLTitle"
+                          defaultMessage="ES|QL"
+                        />
+                      </h3>
+                    </EuiTitle>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiBetaBadge

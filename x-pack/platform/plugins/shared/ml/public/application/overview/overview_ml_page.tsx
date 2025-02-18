@@ -32,7 +32,6 @@ import { AnomalyDetectionOverviewCard } from './components/anomaly_detection_ove
 import { DataFrameAnalyticsOverviewCard } from './components/data_frame_analytics_overview';
 import { useEnabledFeatures } from '../contexts/ml';
 import { DataVisualizerGrid } from './data_visualizer_grid';
-import { CardTitle } from '../components/overview/ml_empty_prompt_card';
 import { ESQLTryItNowCard } from '../datavisualizer/datavisualizer_selector';
 
 export const overviewPanelDefaultState = Object.freeze({
@@ -76,7 +75,9 @@ export const MLOverviewCard = ({
             onClick={() => navigateToPath(path)}
           />
         }
-        title={<CardTitle>{title}</CardTitle>}
+        title={title}
+        titleSize="s"
+        titleElement="h3"
       >
         <EuiFlexItem grow={true}>
           <EuiSpacer size="m" />
@@ -171,13 +172,13 @@ export const OverviewPage: FC = () => {
                     />
                   }
                   title={
-                    <CardTitle>
-                      <FormattedMessage
-                        id="xpack.ml.overview.logRateAnalysis.title"
-                        defaultMessage="Log Rate Analysis"
-                      />
-                    </CardTitle>
+                    <FormattedMessage
+                      id="xpack.ml.overview.logRateAnalysis.title"
+                      defaultMessage="Log Rate Analysis"
+                    />
                   }
+                  titleElement="h3"
+                  titleSize="s"
                   description={
                     <>
                       <FormattedMessage
@@ -220,13 +221,13 @@ export const OverviewPage: FC = () => {
                     />
                   }
                   title={
-                    <CardTitle>
-                      <FormattedMessage
-                        id="xpack.ml.overview.logPatternAnalysisTitle"
-                        defaultMessage="Log Pattern Analysis"
-                      />
-                    </CardTitle>
+                    <FormattedMessage
+                      id="xpack.ml.overview.logPatternAnalysisTitle"
+                      defaultMessage="Log Pattern Analysis"
+                    />
                   }
+                  titleElement="h3"
+                  titleSize="s"
                   description={
                     <>
                       <FormattedMessage
@@ -268,13 +269,13 @@ export const OverviewPage: FC = () => {
                     />
                   }
                   title={
-                    <CardTitle>
-                      <FormattedMessage
-                        id="xpack.ml.overview.changePointDetection.title"
-                        defaultMessage="Change Point Detection"
-                      />
-                    </CardTitle>
+                    <FormattedMessage
+                      id="xpack.ml.overview.changePointDetection.title"
+                      defaultMessage="Change Point Detection"
+                    />
                   }
+                  titleElement="h3"
+                  titleSize="s"
                   description={
                     <>
                       <FormattedMessage
