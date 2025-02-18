@@ -29,7 +29,6 @@ import {
   isGroupStreamDefinition,
   isIngestStreamDefinition,
   isDslLifecycle,
-  isIlmLifecycle,
   isInheritLifecycle,
   isRootStreamDefinition,
   isUnwiredStreamDefinition,
@@ -60,14 +59,12 @@ import {
   checkAccessBulk,
   deleteStreamObjects,
   deleteUnmanagedStreamObjects,
-  getDataStreamLifecycle,
 } from './stream_crud';
 import { updateDataStreamsLifecycle } from './data_streams/manage_data_streams';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
 import { SecurityError } from './errors/security_error';
 import { NameTakenError } from './errors/name_taken_error';
-import { MalformedStreamError } from './errors/malformed_stream_error';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -353,17 +350,6 @@ export class StreamsClient {
       });
 
       parentDefinition = validateWiredStreamResult.parentDefinition;
-    } else if (isUnwiredStreamDefinition(definition)) {
-      // condition to be removed once ILM is implemented for unwired streams
-      if (isDslLifecycle(definition.ingest.lifecycle)) {
-        const dataStream = await this.getDataStream(definition.name);
-        const effectiveLifecycle = getDataStreamLifecycle(dataStream);
-        if (isIlmLifecycle(effectiveLifecycle)) {
-          throw new MalformedStreamError(
-            'Cannot use DSL for unwired stream as it is currently using ILM'
-          );
-        }
-      }
     }
 
     const result = !!existingDefinition ? ('updated' as const) : ('created' as const);

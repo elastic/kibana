@@ -35,7 +35,7 @@ import {
 import { generateReroutePipeline } from '../ingest_pipelines/generate_reroute_pipeline';
 import { upsertTemplate } from '../index_templates/manage_index_templates';
 import {
-  generateIndexTemplate,
+  generateWiredIndexTemplate,
   generateUnwiredIndexTemplate,
 } from '../index_templates/generate_index_template';
 import {
@@ -85,7 +85,7 @@ export async function syncWiredStreamDefinitionObjects({
   await upsertTemplate({
     esClient: scopedClusterClient.asCurrentUser,
     logger,
-    template: generateIndexTemplate(definition.name, isServerless),
+    template: generateWiredIndexTemplate(definition.name, isServerless),
   });
 
   await upsertDataStream({
