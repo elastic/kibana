@@ -23,7 +23,7 @@ export function TraceSummary({ fieldConfiguration, fieldId }: TraceSummaryProps)
   const { transaction, loading } = useTransactionContext();
   const [fieldValue, setFieldValue] = useState(fieldConfiguration.value);
   const isTransactionNameField = fieldId === TRANSACTION_NAME_FIELD;
-  const displayLoading = isTransactionNameField && !fieldValue;
+  const isTransactionNameFieldWithoutValue = isTransactionNameField && !fieldValue;
 
   useEffect(() => {
     if (isTransactionNameField && !fieldValue && transaction?.name && !loading) {
@@ -31,7 +31,10 @@ export function TraceSummary({ fieldConfiguration, fieldId }: TraceSummaryProps)
     }
   }, [transaction?.name, loading, fieldValue, isTransactionNameField]);
 
-  if ((!displayLoading && !fieldValue) || (displayLoading && !loading && !fieldValue)) {
+  if (
+    (!isTransactionNameFieldWithoutValue && !fieldValue) ||
+    (isTransactionNameFieldWithoutValue && !loading)
+  ) {
     return null;
   }
 
@@ -44,7 +47,7 @@ export function TraceSummary({ fieldConfiguration, fieldId }: TraceSummaryProps)
         value={fieldValue as string}
         formattedValue={fieldValue as string}
         fieldMetadata={fieldConfiguration.fieldMetadata}
-        loading={displayLoading && loading}
+        loading={isTransactionNameFieldWithoutValue && loading}
       >
         <div>{fieldConfiguration.content(fieldValue)}</div>
       </FieldWithActions>
