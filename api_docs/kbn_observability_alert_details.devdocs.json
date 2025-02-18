@@ -29,7 +29,7 @@
         "signature": [
           "({ alertStart, alertEnd, color, id }: Props) => React.JSX.Element"
         ],
-        "path": "x-pack/solutions/observability/packages/alert_details/src/components/alert_active_time_range_annotation.tsx",
+        "path": "x-pack/solutions/observability/packages/alert-details/src/components/alert_active_time_range_annotation.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
             "signature": [
               "Props"
             ],
-            "path": "x-pack/solutions/observability/packages/alert_details/src/components/alert_active_time_range_annotation.tsx",
+            "path": "x-pack/solutions/observability/packages/alert-details/src/components/alert_active_time_range_annotation.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -62,7 +62,7 @@
         "signature": [
           "({ alertStart, color, dateFormat, id }: Props) => React.JSX.Element"
         ],
-        "path": "x-pack/solutions/observability/packages/alert_details/src/components/alert_annotation.tsx",
+        "path": "x-pack/solutions/observability/packages/alert-details/src/components/alert_annotation.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -76,7 +76,7 @@
             "signature": [
               "Props"
             ],
-            "path": "x-pack/solutions/observability/packages/alert_details/src/components/alert_annotation.tsx",
+            "path": "x-pack/solutions/observability/packages/alert-details/src/components/alert_annotation.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -95,7 +95,7 @@
         "signature": [
           "({ threshold, color, id }: Props) => React.JSX.Element"
         ],
-        "path": "x-pack/solutions/observability/packages/alert_details/src/components/alert_threshold_annotation.tsx",
+        "path": "x-pack/solutions/observability/packages/alert-details/src/components/alert_threshold_annotation.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -109,7 +109,7 @@
             "signature": [
               "Props"
             ],
-            "path": "x-pack/solutions/observability/packages/alert_details/src/components/alert_threshold_annotation.tsx",
+            "path": "x-pack/solutions/observability/packages/alert-details/src/components/alert_threshold_annotation.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -128,7 +128,7 @@
         "signature": [
           "({ color, id, threshold }: Props) => React.JSX.Element"
         ],
-        "path": "x-pack/solutions/observability/packages/alert_details/src/components/alert_threshold_time_range_rect.tsx",
+        "path": "x-pack/solutions/observability/packages/alert-details/src/components/alert_threshold_time_range_rect.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -142,7 +142,7 @@
             "signature": [
               "Props"
             ],
-            "path": "x-pack/solutions/observability/packages/alert_details/src/components/alert_threshold_time_range_rect.tsx",
+            "path": "x-pack/solutions/observability/packages/alert-details/src/components/alert_threshold_time_range_rect.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -164,7 +164,7 @@
           ") => ",
           "UseAlertsHistory"
         ],
-        "path": "x-pack/solutions/observability/packages/alert_details/src/hooks/use_alerts_history.ts",
+        "path": "x-pack/solutions/observability/packages/alert-details/src/hooks/use_alerts_history.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -178,7 +178,7 @@
             "signature": [
               "Props"
             ],
-            "path": "x-pack/solutions/observability/packages/alert_details/src/hooks/use_alerts_history.ts",
+            "path": "x-pack/solutions/observability/packages/alert-details/src/hooks/use_alerts_history.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

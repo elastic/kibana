@@ -10641,63 +10641,63 @@
         "references": [
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/types.ts"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/types.ts"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/types.ts"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/types.ts"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/components/maintenance_windows_tooltip_content.tsx"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/components/maintenance_windows_tooltip_content.tsx"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/components/maintenance_windows_tooltip_content.tsx"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/components/maintenance_windows_tooltip_content.tsx"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/components/maintenance_windows_cell.tsx"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/components/maintenance_windows_cell.tsx"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/components/maintenance_windows_cell.tsx"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/components/maintenance_windows_cell.tsx"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/components/maintenance_windows_cell.tsx"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/components/maintenance_windows_cell.tsx"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/components/maintenance_windows_cell.tsx"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/components/maintenance_windows_cell.tsx"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/apis/bulk_get_maintenance_windows.ts"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/apis/bulk_get_maintenance_windows.ts"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/apis/bulk_get_maintenance_windows.ts"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/apis/bulk_get_maintenance_windows.ts"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/apis/bulk_get_maintenance_windows.ts"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/apis/bulk_get_maintenance_windows.ts"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/apis/bulk_get_maintenance_windows.ts"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/apis/bulk_get_maintenance_windows.ts"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/apis/bulk_get_maintenance_windows.ts"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/apis/bulk_get_maintenance_windows.ts"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/hooks/use_bulk_get_maintenance_windows.tsx"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/hooks/use_bulk_get_maintenance_windows.tsx"
           },
           {
             "plugin": "@kbn/response-ops-alerts-table",
-            "path": "packages/response-ops/alerts_table/hooks/use_bulk_get_maintenance_windows.tsx"
+            "path": "src/platform/packages/shared/response-ops/alerts-table/hooks/use_bulk_get_maintenance_windows.tsx"
           },
           {
             "plugin": "triggersActionsUi",
