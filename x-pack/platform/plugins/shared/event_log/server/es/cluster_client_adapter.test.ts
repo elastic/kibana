@@ -2655,9 +2655,7 @@ describe('queryEventsBySavedObjectsSearchAfter', () => {
 
     expect(clusterClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        body: expect.objectContaining({
-          seq_no_primary_term: true,
-        }),
+        seq_no_primary_term: true,
       })
     );
   });
