@@ -18,6 +18,7 @@ import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
 import { GraphInputs } from './types';
 import type { OnLlmResponse, TraceOptions } from '../../executors/types';
+import { AgentFinish } from 'langchain/agents';
 
 interface StreamGraphParams {
   apmTracer: APMTracer;
@@ -234,7 +235,7 @@ export const invokeGraph = async ({
       };
       span.addLabels({ evaluationId: traceOptions?.evaluationId });
     }
-    const r = await assistantGraph.invoke(inputs, {
+    const result = await assistantGraph.invoke(inputs, {
       callbacks: [
         apmTracer,
         ...(traceOptions?.tracers ?? []),
@@ -243,8 +244,8 @@ export const invokeGraph = async ({
       runName: DEFAULT_ASSISTANT_GRAPH_ID,
       tags: traceOptions?.tags ?? [],
     });
-    const output = r.agentOutcome.returnValues.output;
-    const conversationId = r.conversation?.id;
+    const output = (result.agentOutcome as AgentFinish).returnValues.output;
+    const conversationId = result.conversation?.id;
     if (onLlmResponse) {
       await onLlmResponse(output, traceData);
     }
