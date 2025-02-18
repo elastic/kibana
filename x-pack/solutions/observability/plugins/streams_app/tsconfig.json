@@ -59,6 +59,7 @@
     "@kbn/actions-plugin",
     "@kbn/datemath",
     "@kbn/dataset-quality-plugin",
-    "@kbn/search-types"
+    "@kbn/search-types",
+    "@kbn/object-utils"
   ]
 }
