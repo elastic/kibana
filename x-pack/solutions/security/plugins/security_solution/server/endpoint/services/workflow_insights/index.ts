@@ -150,6 +150,7 @@ class SecurityWorkflowInsightsService {
     const remediationExists = await checkIfRemediationExists({
       insight,
       exceptionListsClient: this.endpointContext.getExceptionListsClient(),
+      endpointMetadataClient: this.endpointContext.getEndpointMetadataService(),
     });
 
     if (remediationExists) {

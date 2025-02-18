@@ -9,13 +9,15 @@ import React from 'react';
 import type { OnboardingCardConfig } from '../../../../../types';
 import { OnboardingCardId } from '../../../../../constants';
 import { START_MIGRATION_CARD_TITLE } from './translations';
-import cardIcon from './images/card_header_icon.png';
+import type { StartMigrationCardMetadata } from './types';
 import { checkStartMigrationCardComplete } from './start_migration_check_complete';
+import { getCardIcon } from '../../common/card_icon';
 
-export const startMigrationCardConfig: OnboardingCardConfig = {
+export const startMigrationCardConfig: OnboardingCardConfig<StartMigrationCardMetadata> = {
   id: OnboardingCardId.siemMigrationsStart,
   title: START_MIGRATION_CARD_TITLE,
-  icon: cardIcon,
+  icon: () => getCardIcon(OnboardingCardId.siemMigrationsStart),
+  licenseTypeRequired: 'enterprise',
   Component: React.lazy(
     () =>
       import(
@@ -24,5 +26,4 @@ export const startMigrationCardConfig: OnboardingCardConfig = {
       )
   ),
   checkComplete: checkStartMigrationCardComplete,
-  licenseTypeRequired: 'enterprise',
 };

@@ -7,11 +7,12 @@
 
 import classNames from 'classnames';
 import React, { useEffect } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
+import { Global } from '@emotion/react';
 import type { CommonProps } from '@elastic/eui';
 
 import { useGlobalFullScreen } from '../../containers/use_full_screen';
-import { AppGlobalStyle } from '../page';
+import { appGlobalStyles } from '../page';
 
 const Wrapper = styled.div`
   &.securitySolutionWrapper--fullHeight {
@@ -55,7 +56,7 @@ const SecuritySolutionPageWrapperComponent: React.FC<
   return (
     <Wrapper className={classes} style={style} {...otherProps}>
       {children}
-      <AppGlobalStyle />
+      <Global styles={appGlobalStyles} />
     </Wrapper>
   );
 };

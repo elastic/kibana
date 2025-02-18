@@ -12,13 +12,13 @@ export const ADD_TO_TIMELINE_ICON = 'timeline';
 export const ADD_TO_TIMELINE = i18n.translate(
   'xpack.securitySolution.actions.cellValue.addToTimeline.displayName',
   {
-    defaultMessage: 'Add to timeline',
+    defaultMessage: 'Add to Timeline',
   }
 );
 export const INVESTIGATE_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.actions.cellValue.addToNewTimeline.displayName',
   {
-    defaultMessage: 'Investigate in timeline',
+    defaultMessage: 'Investigate in Timeline',
   }
 );
 
@@ -42,15 +42,15 @@ export const ALERTS_COUNT = (entity: string, description: string) =>
 export const ADD_TO_TIMELINE_SUCCESS_TITLE = (value: string) =>
   i18n.translate('xpack.securitySolution.actions.addToTimeline.addedFieldMessage', {
     values: { fieldOrValue: value },
-    defaultMessage: `Added {fieldOrValue} to timeline`,
+    defaultMessage: `Added {fieldOrValue} to Timeline`,
   });
 
 export const ADD_TO_TIMELINE_FAILED_TITLE = i18n.translate(
   'xpack.securitySolution.actions.cellValue.addToTimeline.warningTitle',
-  { defaultMessage: 'Unable to add to timeline' }
+  { defaultMessage: 'Unable to add to Timeline' }
 );
 
 export const ADD_TO_TIMELINE_FAILED_TEXT = i18n.translate(
   'xpack.securitySolution.actions.cellValue.addToTimeline.warningMessage',
-  { defaultMessage: 'Filter received is empty or cannot be added to timeline' }
+  { defaultMessage: 'Filter received is empty or cannot be added to Timeline' }
 );

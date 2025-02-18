@@ -7,6 +7,7 @@
 
 import { mount } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
+import type { ComponentProps } from 'react';
 import React from 'react';
 import { TableId } from '@kbn/securitysolution-data-table';
 import type { ColumnHeaderOptions } from '../../../../common/types';
@@ -15,9 +16,8 @@ import { DragDropContextWrapper } from '../../../common/components/drag_and_drop
 import { defaultHeaders, mockTimelineData, TestProviders } from '../../../common/mock';
 import { defaultRowRenderers } from '../../../timelines/components/timeline/body/renderers';
 import type { TimelineNonEcsData } from '../../../../common/search_strategy/timeline';
-import type { CellValueElementProps } from '../../../timelines/components/timeline/cell_rendering';
 import { DefaultCellRenderer } from '../../../timelines/components/timeline/cell_rendering/default_cell_renderer';
-import { getRenderCellValueHook } from './render_cell_value';
+import { CellValue } from './render_cell_value';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 jest.mock('../../../common/lib/kibana');
@@ -41,18 +41,17 @@ describe('RenderCellValue', () => {
 
   let data: TimelineNonEcsData[];
   let header: ColumnHeaderOptions;
-  let props: CellValueElementProps;
+  let props: ComponentProps<typeof CellValue>;
 
   beforeEach(() => {
     data = cloneDeep(mockTimelineData[0].data);
     header = cloneDeep(defaultHeaders[0]);
     props = {
       columnId,
-      data,
+      legacyAlert: data,
       eventId,
       header,
       isDetails: false,
-      isDraggable: false,
       isExpandable: false,
       isExpanded: false,
       linkValues,
@@ -63,38 +62,39 @@ describe('RenderCellValue', () => {
       rowRenderers: defaultRowRenderers,
       asPlainText: false,
       ecsData: undefined,
-      truncate: undefined,
+      truncate: false,
       context: undefined,
       browserFields: {},
-    };
+    } as unknown as ComponentProps<typeof CellValue>;
   });
 
   test('it forwards the `CellValueElementProps` to the `DefaultCellRenderer`', () => {
-    const RenderCellValue = getRenderCellValueHook({
-      scopeId: SourcererScopeName.default,
-      tableId: TableId.test,
-    });
     const wrapper = mount(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
-          <RenderCellValue {...props} />
+          <CellValue
+            {...props}
+            sourcererScope={SourcererScopeName.default}
+            tableType={TableId.test}
+          />
         </DragDropContextWrapper>
       </TestProviders>
     );
 
-    expect(wrapper.find(DefaultCellRenderer).props()).toEqual(props);
+    const { legacyAlert, ...defaultCellRendererProps } = props;
+
+    expect(wrapper.find(DefaultCellRenderer).props()).toEqual({
+      ...defaultCellRendererProps,
+      data: legacyAlert,
+      scopeId: SourcererScopeName.default,
+    });
   });
 
   test('it renders a GuidedOnboardingTourStep', () => {
-    const RenderCellValue = getRenderCellValueHook({
-      scopeId: SourcererScopeName.default,
-      tableId: TableId.test,
-    });
-
     const wrapper = mount(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
-          <RenderCellValue {...props} />
+          <CellValue {...props} scopeId={SourcererScopeName.default} tableType={TableId.test} />
         </DragDropContextWrapper>
       </TestProviders>
     );
