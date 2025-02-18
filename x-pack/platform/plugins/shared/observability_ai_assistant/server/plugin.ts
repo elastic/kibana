@@ -15,6 +15,7 @@ import {
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+import { ApiPrivileges } from '@kbn/security-authorization-core-common';
 import { OBSERVABILITY_AI_ASSISTANT_FEATURE_ID } from '../common/feature';
 import type { ObservabilityAIAssistantConfig } from './config';
 import { registerServerRoutes } from './routes/register_routes';
@@ -30,7 +31,8 @@ import { registerFunctions } from './functions';
 import { recallRankingEvent } from './analytics/recall_ranking';
 import { initLangtrace } from './service/client/instrumentation/init_langtrace';
 import { aiAssistantCapabilities } from '../common/capabilities';
-import { registerMigrateKnowledgeBaseEntriesTask } from './service/task_manager_definitions/register_migrate_knowledge_base_entries_task';
+import { registerAndScheduleKbSemanticTextMigrationTask } from './service/task_manager_definitions/register_kb_semantic_text_migration_task';
+import { updateExistingIndexAssets } from './service/create_or_update_index_assets';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -44,8 +46,10 @@ export class ObservabilityAIAssistantPlugin
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
   service: ObservabilityAIAssistantService | undefined;
+  private isDev: boolean;
 
   constructor(context: PluginInitializerContext<ObservabilityAIAssistantConfig>) {
+    this.isDev = context.env.mode.dev;
     this.logger = context.logger.get();
     this.config = context.config.get<ObservabilityAIAssistantConfig>();
     initLangtrace();
@@ -72,7 +76,11 @@ export class ObservabilityAIAssistantPlugin
       privileges: {
         all: {
           app: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'kibana'],
-          api: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID, 'ai_assistant', 'manage_llm_product_doc'],
+          api: [
+            OBSERVABILITY_AI_ASSISTANT_FEATURE_ID,
+            'ai_assistant',
+            ApiPrivileges.manage('llm_product_doc'),
+          ],
           catalogue: [OBSERVABILITY_AI_ASSISTANT_FEATURE_ID],
           savedObject: {
             all: [],
@@ -121,14 +129,24 @@ export class ObservabilityAIAssistantPlugin
       config: this.config,
     }));
 
-    registerMigrateKnowledgeBaseEntriesTask({
+    // Update existing index assets (mappings, templates, etc). This will not create assets if they do not exist.
+    const indexAssetsUpdatedPromise = updateExistingIndexAssets({
+      logger: this.logger.get('index_assets'),
+      core,
+    }).catch((e) => this.logger.error(`Index assets could not be updated: ${e.message}`));
+
+    // register task to migrate knowledge base entries to include semantic_text field
+    registerAndScheduleKbSemanticTextMigrationTask({
       core,
       taskManager: plugins.taskManager,
-      logger: this.logger,
+      logger: this.logger.get('kb_semantic_text_migration_task'),
       config: this.config,
-    }).catch((e) => {
-      this.logger.error(`Knowledge base migration was not successfully: ${e.message}`);
-    });
+      indexAssetsUpdatedPromise,
+    }).catch((e) =>
+      this.logger.error(
+        `Knowledge base semantic_text migration task could not be registered: ${e.message}`
+      )
+    );
 
     service.register(registerFunctions);
 
@@ -139,6 +157,7 @@ export class ObservabilityAIAssistantPlugin
         plugins: withCore,
         service: this.service,
       },
+      isDev: this.isDev,
     });
 
     core.analytics.registerEventType(recallRankingEvent);

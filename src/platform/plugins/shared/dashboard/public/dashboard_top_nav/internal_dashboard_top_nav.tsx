@@ -26,6 +26,7 @@ import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
+import { MountPointPortal } from '@kbn/react-kibana-mount';
 
 import { UI_SETTINGS } from '../../common';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -33,6 +34,7 @@ import {
   dashboardManagedBadge,
   getDashboardBreadcrumb,
   getDashboardTitle,
+  topNavStrings,
   unsavedChangesBadgeStrings,
 } from '../dashboard_app/_dashboard_app_strings';
 import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount_context';
@@ -53,6 +55,7 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import './_dashboard_top_nav.scss';
 import { getFullEditPath } from '../utils/urls';
+import { DashboardFavoriteButton } from './dashboard_favorite_button';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -152,6 +155,9 @@ export function InternalDashboardTopNav({
             <>
               {dashboardTitle}
               <EuiIcon
+                tabIndex={0}
+                role="button"
+                aria-label={topNavStrings.settings.description}
                 size="s"
                 type="pencil"
                 className="dshTitleBreadcrumbs__updateIcon"
@@ -323,6 +329,18 @@ export function InternalDashboardTopNav({
     return allBadges;
   }, [hasUnsavedChanges, viewMode, isPopoverOpen, dashboardApi, maybeRedirect]);
 
+  const setFavoriteButtonMountPoint = useCallback(
+    (mountPoint: MountPoint<HTMLElement> | undefined) => {
+      if (mountPoint) {
+        return coreServices.chrome.setBreadcrumbsAppendExtension({
+          content: mountPoint,
+          order: 0,
+        });
+      }
+    },
+    []
+  );
+
   return (
     <div className="dashboardTopNav">
       <h1
@@ -366,6 +384,9 @@ export function InternalDashboardTopNav({
       ) : null}
       {viewMode === 'edit' ? <DashboardEditingToolbar isDisabled={!!focusedPanelId} /> : null}
       {showBorderBottom && <EuiHorizontalRule margin="none" />}
+      <MountPointPortal setMountPoint={setFavoriteButtonMountPoint}>
+        <DashboardFavoriteButton dashboardId={lastSavedId} />
+      </MountPointPortal>
     </div>
   );
 }

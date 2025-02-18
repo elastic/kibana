@@ -10,12 +10,12 @@ import { useCallback } from 'react';
 import type { RuleMigrationTranslationStats } from '../../../../common/siem_migrations/model/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_INSTALL_PATH } from '../../../../common/siem_migrations/constants';
 import type { InstallMigrationRulesResponse } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import * as i18n from './translations';
 import { useInvalidateGetMigrationRules } from './use_get_migration_rules';
 import { useInvalidateGetMigrationTranslationStats } from './use_get_migration_translation_stats';
 import { installMigrationRules } from '../api';
-import { useTranslatedRuleTelemetry } from '../hooks/use_translated_rule_telemetry';
 
 export const INSTALL_MIGRATION_RULES_MUTATION_KEY = ['POST', SIEM_RULE_MIGRATION_INSTALL_PATH];
 
@@ -29,20 +29,14 @@ export const useInstallMigrationRules = (
   translationStats?: RuleMigrationTranslationStats
 ) => {
   const { addError, addSuccess } = useAppToasts();
+  const { telemetry } = useKibana().services.siemMigrations.rules;
 
-  const { reportTranslatedRuleBulkInstall } = useTranslatedRuleTelemetry();
   const reportTelemetry = useCallback(
-    (data: InstallMigrationRulesParams, error?: Error) => {
-      const { ids, enabled } = data;
-      reportTranslatedRuleBulkInstall({
-        migrationId,
-        enabled: !!enabled,
-        count: ids?.length ?? translationStats?.rules.success.installable ?? 0,
-        result: error ? 'failed' : 'success',
-        errorMessage: error?.message,
-      });
+    ({ ids, enabled = false }: InstallMigrationRulesParams, error?: Error) => {
+      const count = ids?.length ?? translationStats?.rules.success.installable ?? 0;
+      telemetry.reportTranslatedRuleBulkInstall({ migrationId, enabled, count, error });
     },
-    [migrationId, reportTranslatedRuleBulkInstall, translationStats?.rules.success.installable]
+    [migrationId, telemetry, translationStats?.rules.success.installable]
   );
 
   const invalidateGetRuleMigrations = useInvalidateGetMigrationRules();

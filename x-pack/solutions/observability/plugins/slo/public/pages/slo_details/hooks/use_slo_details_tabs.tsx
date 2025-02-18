@@ -7,7 +7,7 @@
 
 import { EuiNotificationBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { paths } from '../../../../common/locators/paths';
 import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
@@ -31,7 +31,7 @@ export const useSloDetailsTabs = ({
   setSelectedTabId?: (val: SloTabId) => void;
 }) => {
   const { data: activeAlerts } = useFetchActiveAlerts({
-    sloIdsAndInstanceIds: slo ? [[slo.id, slo.instanceId ?? ALL_VALUE]] : [],
+    sloIdsAndInstanceIds: slo ? [[slo.id, slo.instanceId]] : [],
     shouldRefetch: isAutoRefreshing,
   });
 

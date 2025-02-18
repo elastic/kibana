@@ -9,14 +9,11 @@
 
 const Path = require('path');
 const Crypto = require('crypto');
-const startOfDay = /** @type {import('date-fns/startOfDay').default} */ (
-  /** @type {unknown} */ (require('date-fns/startOfDay'))
-);
 
 const chalk = require('chalk');
 const LmdbStore = require('lmdb');
 
-const GLOBAL_ATIME = startOfDay(new Date()).valueOf();
+const GLOBAL_ATIME = new Date().setHours(0, 0, 0, 0);
 const MINUTE = 1000 * 60;
 const HOUR = MINUTE * 60;
 const DAY = HOUR * 24;

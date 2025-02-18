@@ -7,7 +7,8 @@
 import type { EuiFlexGroupProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { chartHeight } from '..';
 import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 import {
@@ -44,6 +45,24 @@ export function ApmOverview() {
   } = useApmParams('/services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const [haveTablesLoaded, setHaveTablesLoaded] = useState({
+    transactions: false,
+    dependencies: false,
+    errors: false,
+  });
+  const { onPageReady } = usePerformanceContext();
+
+  useEffect(() => {
+    const { transactions, dependencies, errors } = haveTablesLoaded;
+    if (transactions && dependencies && errors) {
+      onPageReady({
+        meta: {
+          rangeFrom,
+          rangeTo,
+        },
+      });
+    }
+  }, [haveTablesLoaded, onPageReady, rangeFrom, rangeTo]);
 
   const isRumAgent = isRumAgentName(agentName);
   const isOpenTelemetryAgent = isOpenTelemetryAgentName(agentName as AgentName);
@@ -61,6 +80,10 @@ export function ApmOverview() {
     'apm.sloCalloutDismissed',
     false
   );
+
+  const onLoadTable = (key: string) => {
+    setHaveTablesLoaded((currentValues) => ({ ...currentValues, [key]: true }));
+  };
 
   return (
     <>
@@ -98,6 +121,7 @@ export function ApmOverview() {
                 kuery={kuery}
                 environment={environment}
                 fixedHeight={true}
+                onLoadTable={() => onLoadTable('transactions')}
                 start={start}
                 end={end}
                 showPerPageOptions={false}
@@ -121,7 +145,10 @@ export function ApmOverview() {
           )}
           <EuiFlexItem grow={7}>
             <EuiPanel hasBorder={true}>
-              <ServiceOverviewErrorsTable serviceName={serviceName} />
+              <ServiceOverviewErrorsTable
+                serviceName={serviceName}
+                onLoadTable={() => onLoadTable('errors')}
+              />
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -151,6 +178,7 @@ export function ApmOverview() {
             <EuiFlexItem grow={7}>
               <EuiPanel hasBorder={true}>
                 <ServiceOverviewDependenciesTable
+                  onLoadTable={() => onLoadTable('dependencies')}
                   fixedHeight={true}
                   showPerPageOptions={false}
                   link={

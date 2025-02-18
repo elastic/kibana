@@ -221,5 +221,72 @@ describe('external_vis_context', () => {
         injectESQLQueryIntoLensLayers(attributes, { esql: 'from foo | stats count(*)' })
       ).toStrictEqual(expectedAttributes);
     });
+
+    it('should inject the interval to the Lens attributes for ES|QL config (textbased)', async () => {
+      const attributes = {
+        visualizationType: 'lnsXY',
+        state: {
+          visualization: { preferredSeriesType: 'line' },
+          datasourceStates: {
+            textBased: {
+              layers: {
+                layer1: {
+                  query: { esql: 'from foo' },
+                  columns: [
+                    {
+                      columnId: 'col1',
+                      fieldName: 'field1',
+                    },
+                    {
+                      columnId: 'timestamp',
+                      fieldName: 'timestamp',
+                      label: 'timestamp every 1h',
+                      customLabel: true,
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      } as unknown as UnifiedHistogramVisContext['attributes'];
+
+      const expectedAttributes = {
+        ...attributes,
+        state: {
+          ...attributes.state,
+          datasourceStates: {
+            ...attributes.state.datasourceStates,
+            textBased: {
+              ...attributes.state.datasourceStates.textBased,
+              layers: {
+                layer1: {
+                  query: { esql: 'from foo' },
+                  columns: [
+                    {
+                      columnId: 'col1',
+                      fieldName: 'field1',
+                    },
+                    {
+                      columnId: 'timestamp',
+                      fieldName: 'timestamp',
+                      label: 'timestamp every 10 minutes',
+                      customLabel: true,
+                    },
+                  ],
+                },
+              },
+            },
+          },
+        },
+      } as unknown as UnifiedHistogramVisContext['attributes'];
+      expect(
+        injectESQLQueryIntoLensLayers(
+          attributes,
+          { esql: 'from foo' },
+          'timestamp every 10 minutes'
+        )
+      ).toStrictEqual(expectedAttributes);
+    });
   });
 });
