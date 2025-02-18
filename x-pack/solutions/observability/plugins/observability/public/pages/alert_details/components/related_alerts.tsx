@@ -27,6 +27,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { BoolQuery, Filter, type Query } from '@kbn/es-query';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
+import { GroupingToolbarControls } from '../../../components/alerts_table/grouping/grouping_toolbar_controls';
 import { ObservabilityFields } from '../../../../common/utils/alerting/types';
 
 import {
@@ -150,6 +151,12 @@ export function InternalRelatedAlerts({ alert }: Props) {
                   consumers={observabilityAlertFeatureIds}
                   query={mergeBoolQueries(esQuery, groupQuery)}
                   initialPageSize={ALERTS_PER_PAGE}
+                  renderAdditionalToolbarControls={() => (
+                    <GroupingToolbarControls
+                      groupingId={RELATED_ALERTS_TABLE_CONFIG_ID}
+                      ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
+                    />
+                  )}
                   showInspectButton
                 />
               );
