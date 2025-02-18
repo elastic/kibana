@@ -96,14 +96,16 @@ const MetricsExplorerContent = () => {
     currentTimerange: timeRange,
   };
 
-  if (!isLoading) {
-    onPageReady({
-      meta: {
-        rangeFrom: timeRange.from,
-        rangeTo: timeRange.to,
-      },
-    });
-  }
+  useEffect(() => {
+    if (!isLoading && data) {
+      onPageReady({
+        meta: {
+          rangeFrom: timeRange.from,
+          rangeTo: timeRange.to,
+        },
+      });
+    }
+  }, [isLoading, data]);
 
   return (
     <InfraPageTemplate
