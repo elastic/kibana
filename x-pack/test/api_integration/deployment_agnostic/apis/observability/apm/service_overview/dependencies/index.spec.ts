@@ -16,7 +16,6 @@ import { generateData, dataConfig } from './generate_data';
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');
   const synthtrace = getService('synthtrace');
-  const es = getService('es');
   const start = new Date('2021-01-01T00:00:00.000Z').getTime();
   const end = new Date('2021-01-01T00:15:00.000Z').getTime() - 1;
   const bucketSize = Math.round((end - start) / (60 * 1000));
@@ -94,7 +93,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         const expectedValue = transaction.duration * 1000;
         expect(latency.value).to.be(expectedValue);
-        expect(latency.timeseries.every(({ y }) => y === expectedValue)).to.be(true);
+        expect(latency.timeseries?.every(({ y }) => y === expectedValue)).to.be(true);
       });
 
       it('returns the correct throughput', () => {
@@ -106,7 +105,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const expectedThroughput = rate + errorRate;
         expect(roundNumber(throughput.value)).to.be(roundNumber(expectedThroughput));
         expect(
-          throughput.timeseries.every(
+          throughput.timeseries?.every(
             ({ y }) => roundNumber(y) === roundNumber(expectedThroughput / bucketSize)
           )
         ).to.be(true);
@@ -121,7 +120,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const expectedValuePerBucket = (rate + errorRate) * transaction.duration * 1000;
         expect(totalTime.value).to.be(expectedValuePerBucket * bucketSize);
         expect(
-          totalTime.timeseries.every(
+          totalTime.timeseries?.every(
             ({ y }) => roundNumber(y) === roundNumber(expectedValuePerBucket)
           )
         ).to.be(true);
@@ -134,7 +133,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const { rate, transaction, errorRate: dataConfigErroRate } = dataConfig;
         const expectedValue = dataConfigErroRate / (rate + dataConfigErroRate);
         expect(errorRate.value).to.be(expectedValue);
-        expect(errorRate.timeseries.every(({ y }) => y === expectedValue)).to.be(true);
+        expect(errorRate.timeseries?.every(({ y }) => y === expectedValue)).to.be(true);
       });
     });
   });
