@@ -24,7 +24,7 @@ import { CANCEL, DELETE, SETTINGS_UPDATED_TOAST_TITLE } from '../../settings/tra
 import { useQuickPromptEditor } from '../quick_prompt_settings/use_quick_prompt_editor';
 import { useQuickPromptTable } from './use_quick_prompt_table';
 import {
-  DEFAULT_TABLE_OPTIONS,
+  getDefaultTableOptions,
   useSessionPagination,
 } from '../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { QUICK_PROMPT_TABLE_SESSION_STORAGE_KEY } from '../../../assistant_context/constants';
@@ -152,8 +152,8 @@ const QuickPromptSettingsManagementComponent = () => {
     isEditEnabled: () => true,
   });
 
-  const { onTableChange, pagination, sorting } = useSessionPagination({
-    defaultTableOptions: DEFAULT_TABLE_OPTIONS,
+  const { onTableChange, pagination, sorting } = useSessionPagination<PromptResponse, true>({
+    defaultTableOptions: getDefaultTableOptions<PromptResponse>('createdAt'),
     nameSpace,
     storageKey: QUICK_PROMPT_TABLE_SESSION_STORAGE_KEY,
   });

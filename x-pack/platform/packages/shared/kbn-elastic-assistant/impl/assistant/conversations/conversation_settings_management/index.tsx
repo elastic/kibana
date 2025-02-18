@@ -31,8 +31,10 @@ import { Flyout } from '../../common/components/assistant_settings_management/fl
 import { CANCEL, DELETE, SETTINGS_UPDATED_TOAST_TITLE } from '../../settings/translations';
 import { ConversationSettingsEditor } from '../conversation_settings/conversation_settings_editor';
 import { CONVERSATION_TABLE_SESSION_STORAGE_KEY } from '../../../assistant_context/constants';
-import { useSessionPagination } from '../../common/components/assistant_settings_management/pagination/use_session_pagination';
-import { DEFAULT_PAGE_SIZE } from '../../settings/const';
+import {
+  getDefaultTableOptions,
+  useSessionPagination,
+} from '../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { useSettingsUpdater } from '../../settings/use_settings_updater/use_settings_updater';
 import { AssistantSettingsBottomBar } from '../../settings/assistant_settings_bottom_bar';
 interface Props {
@@ -40,11 +42,6 @@ interface Props {
   defaultConnector?: AIConnector;
   isDisabled?: boolean;
 }
-
-export const DEFAULT_TABLE_OPTIONS = {
-  page: { size: DEFAULT_PAGE_SIZE, index: 0 },
-  sort: { field: 'createdAt', direction: 'desc' as const },
-};
 
 const ConversationSettingsManagementComponent: React.FC<Props> = ({
   connectors,
@@ -61,10 +58,10 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
 
   const { data: allPrompts, isFetched: promptsLoaded, refetch: refetchPrompts } = useFetchPrompts();
   const [totalItemCount, setTotalItemCount] = useState(5);
-  const { onTableChange, pagination, sorting } = useSessionPagination<false>({
+  const { onTableChange, pagination, sorting } = useSessionPagination<Conversation, false>({
     nameSpace,
     storageKey: CONVERSATION_TABLE_SESSION_STORAGE_KEY,
-    defaultTableOptions: DEFAULT_TABLE_OPTIONS,
+    defaultTableOptions: getDefaultTableOptions<Conversation>('createdAt'),
     inMemory: false,
     totalItemCount,
   });

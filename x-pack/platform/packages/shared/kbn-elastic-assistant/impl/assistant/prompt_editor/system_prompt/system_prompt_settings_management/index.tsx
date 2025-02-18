@@ -30,7 +30,7 @@ import { useFetchPrompts } from '../../../api';
 import { Flyout } from '../../../common/components/assistant_settings_management/flyout';
 import { useFlyoutModalVisibility } from '../../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
 import {
-  DEFAULT_TABLE_OPTIONS,
+  getDefaultTableOptions,
   useSessionPagination,
 } from '../../../common/components/assistant_settings_management/pagination/use_session_pagination';
 import { CANCEL, DELETE, SETTINGS_UPDATED_TOAST_TITLE } from '../../../settings/translations';
@@ -118,7 +118,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
       });
       param?.callback?.();
     },
-    [saveConversationsSettings, saveSystemPromptSettings, toasts]
+    [refetchSystemPromptConversations, saveConversationsSettings, saveSystemPromptSettings, toasts]
   );
 
   const onCancelClick = useCallback(() => {
@@ -187,8 +187,8 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
 
   const { getColumns } = useSystemPromptTable();
 
-  const { onTableChange, pagination, sorting } = useSessionPagination<true>({
-    defaultTableOptions: DEFAULT_TABLE_OPTIONS,
+  const { onTableChange, pagination, sorting } = useSessionPagination<SystemPromptSettings, true>({
+    defaultTableOptions: getDefaultTableOptions<SystemPromptSettings>('createdAt'),
     nameSpace,
     storageKey: SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY,
   });
