@@ -7,7 +7,7 @@
 
 import { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import type { Document } from '@langchain/core/documents';
-import type { StateGraphArgs } from '@langchain/langgraph';
+import { Annotation } from '@langchain/langgraph';
 
 import { AttackDiscoveryPrompts } from '../nodes/helpers/prompts';
 import {
@@ -15,7 +15,6 @@ import {
   DEFAULT_MAX_HALLUCINATION_FAILURES,
   DEFAULT_MAX_REPEATED_GENERATIONS,
 } from '../constants';
-import type { GraphState } from '../types';
 
 export interface Options {
   end?: string;
@@ -24,90 +23,91 @@ export interface Options {
   start?: string;
 }
 
-export const getDefaultGraphState = ({
+
+export const getDefaultGraphAnnotation = ({
   end,
   filter,
   prompts,
   start,
-}: Options): StateGraphArgs<GraphState>['channels'] => ({
-  attackDiscoveries: {
+}: Options) => Annotation.Root({
+  attackDiscoveries: Annotation<AttackDiscovery[] | null>({
     value: (x: AttackDiscovery[] | null, y?: AttackDiscovery[] | null) => y ?? x,
     default: () => null,
-  },
-  attackDiscoveryPrompt: {
+  }),
+  attackDiscoveryPrompt: Annotation<string, string |undefined>({
     value: (x: string, y?: string) => y ?? x,
     default: () => prompts.default,
-  },
-  anonymizedAlerts: {
+  }),
+  anonymizedAlerts: Annotation<Document[]>({
     value: (x: Document[], y?: Document[]) => y ?? x,
     default: () => [],
-  },
-  combinedGenerations: {
+  }),
+  combinedGenerations: Annotation<string, string | undefined>({
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
-  },
-  combinedRefinements: {
+  }),
+  combinedRefinements: Annotation<string, string | undefined>({
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
-  },
-  continuePrompt: {
+  }),
+  continuePrompt: Annotation<string, string | undefined>({
     value: (x: string, y?: string) => y ?? x,
-    default: () => prompts.continue,
-  },
-  end: {
+    default: () => '',
+  }),
+  end: Annotation<string | null | undefined>({
     value: (x?: string | null, y?: string | null) => y ?? x,
     default: () => end,
-  },
-  errors: {
+  }),
+  errors: Annotation<string[], string[] | undefined>({
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
-  },
-  filter: {
+  }),
+  filter: Annotation<Record<string, unknown> | null | undefined>({
     value: (x?: Record<string, unknown> | null, y?: Record<string, unknown> | null) => y ?? x,
     default: () => filter,
-  },
-  generationAttempts: {
+  }),
+  generationAttempts:  Annotation<number, number | undefined>({
     value: (x: number, y?: number) => y ?? x,
     default: () => 0,
-  },
-  generations: {
+  }),
+  generations:  Annotation<string[], string[] | undefined>({
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
-  },
-  hallucinationFailures: {
+  }),
+  hallucinationFailures:  Annotation<number, number | undefined>({
     value: (x: number, y?: number) => y ?? x,
     default: () => 0,
-  },
-  refinePrompt: {
+  }),
+  refinePrompt:  Annotation<string, string | undefined>({
     value: (x: string, y?: string) => y ?? x,
     default: () => prompts.refine,
-  },
-  maxGenerationAttempts: {
+  }),
+  maxGenerationAttempts:  Annotation<number, number | undefined>({
     value: (x: number, y?: number) => y ?? x,
     default: () => DEFAULT_MAX_GENERATION_ATTEMPTS,
-  },
-  maxHallucinationFailures: {
+  }),
+  maxHallucinationFailures:  Annotation<number, number | undefined>({
     value: (x: number, y?: number) => y ?? x,
     default: () => DEFAULT_MAX_HALLUCINATION_FAILURES,
-  },
-  maxRepeatedGenerations: {
+  }),
+  maxRepeatedGenerations:  Annotation<number, number | undefined>({
     value: (x: number, y?: number) => y ?? x,
     default: () => DEFAULT_MAX_REPEATED_GENERATIONS,
-  },
-  refinements: {
+  }),
+  refinements:  Annotation<string[], string[] | undefined>({
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
-  },
-  replacements: {
+  }),
+  replacements:  Annotation<Replacements, Replacements | undefined>({
     value: (x: Replacements, y?: Replacements) => y ?? x,
     default: () => ({}),
-  },
-  start: {
+  }),
+  start:  Annotation<string | null | undefined, string | null | undefined>({
     value: (x?: string | null, y?: string | null) => y ?? x,
     default: () => start,
-  },
-  unrefinedResults: {
+  }),
+  unrefinedResults:  Annotation<AttackDiscovery[] | null, AttackDiscovery[] | null | undefined>({
     value: (x: AttackDiscovery[] | null, y?: AttackDiscovery[] | null) => y ?? x,
     default: () => null,
-  },
+  }),
 });

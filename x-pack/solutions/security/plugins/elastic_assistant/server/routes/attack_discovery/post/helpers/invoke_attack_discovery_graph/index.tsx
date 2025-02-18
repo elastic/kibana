@@ -118,14 +118,14 @@ export const invokeAttackDiscoveryGraph = async ({
 
   logger?.debug(() => 'invokeAttackDiscoveryGraph: invoking the Attack discovery graph');
 
-  const result = await graph.invoke(
+  const result: GraphState = await graph.invoke(
     {},
     {
       callbacks: [...(traceOptions?.tracers ?? [])],
       runName: ATTACK_DISCOVERY_GRAPH_RUN_NAME,
       tags,
     }
-  ) as GraphState;
+  );
 
   const {
     attackDiscoveries,
