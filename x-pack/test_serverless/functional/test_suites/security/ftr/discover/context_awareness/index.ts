@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
@@ -12,7 +13,8 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects(['timePicker', 'svlCommonPage']);
   const from = '2017-06-10T14:00:00.000Z';
-  const to = '2024-06-10T16:30:00.000Z';
+  // next day to include alerts generated in the tests
+  const to = moment().add(1, 'day').toISOString();
 
   describe('discover/security/context_awareness', function () {
     this.tags(['esGate']);
@@ -39,7 +41,8 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
-    // loadTestFile(require.resolve('./cell_renderer'));
+    loadTestFile(require.resolve('./cell_renderer'));
     loadTestFile(require.resolve('./doc_viewer'));
+    loadTestFile(require.resolve('./row_indicator'));
   });
 }
