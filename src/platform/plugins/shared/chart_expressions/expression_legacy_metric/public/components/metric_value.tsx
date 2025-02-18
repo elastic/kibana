@@ -46,6 +46,7 @@ export const MetricVisValue = (props: MetricVisValueProps) => {
     >
       <div
         data-test-subj="metric_value"
+        className="legacyMtrVis__value"
         css={styles.legacyMtrVisValue}
         style={{
           ...(style.spec as CSSProperties),
