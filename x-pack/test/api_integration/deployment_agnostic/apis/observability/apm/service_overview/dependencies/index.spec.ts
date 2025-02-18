@@ -130,7 +130,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         const {
           currentStats: { errorRate },
         } = dependencies.serviceDependencies[0];
-        const { rate, transaction, errorRate: dataConfigErroRate } = dataConfig;
+        const { rate, errorRate: dataConfigErroRate } = dataConfig;
         const expectedValue = dataConfigErroRate / (rate + dataConfigErroRate);
         expect(errorRate.value).to.be(expectedValue);
         expect(errorRate.timeseries?.every(({ y }) => y === expectedValue)).to.be(true);
