@@ -289,13 +289,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           {
             '@timestamp': new Date().toISOString(),
             message: {
-              role: MessageRole.System,
-              content: 'You are a helpful assistant',
-            },
-          },
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
               role: MessageRole.User,
               content: 'Today we will be testing user instructions!',
             },
@@ -353,10 +346,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('adds the instruction to the system prompt', async () => {
         const conversation = await getConversationForUser('editor');
-        const systemMessage = conversation.messages.find(
-          (message) => message.message.role === MessageRole.System
-        )!;
-        expect(systemMessage.message.content).to.contain(userInstructionText);
+        expect(conversation.systemMessage).to.contain(userInstructionText);
       });
 
       it('does not add the instruction to the context', async () => {
@@ -375,12 +365,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       it('does not add the instruction conversation for other users', async () => {
         const conversation = await getConversationForUser('admin');
-        const systemMessage = conversation.messages.find(
-          (message) => message.message.role === MessageRole.System
-        )!;
 
-        expect(systemMessage.message.content).to.not.contain(userInstructionText);
-        expect(conversation.messages.length).to.be(5);
+        expect(conversation.systemMessage).to.not.contain(userInstructionText);
+        expect(conversation.messages.length).to.be(4);
       });
     });
 

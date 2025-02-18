@@ -10,8 +10,10 @@ import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
-  const { getPageObjects } = providerContext;
+  const { getPageObjects, getService } = providerContext;
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
+  const retry = getService('retry');
+  const saveIntegrationPolicyTimeout = 1000 * 30; // 30 seconds
 
   describe('Test adding Cloud Security Posture Integrations KSPM K8S', function () {
     this.tags(['cloud_security_posture_cis_integration_kspm_k8s']);
@@ -24,14 +26,17 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('KSPM K8S', () => {
       it('KSPM K8S Workflow', async () => {
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        await cisIntegration.clickFirstElementOnIntegrationTable();
-        expect(
-          (await cisIntegration.isOptionChecked('cisK8sTestId', 'cloudbeat/cis_k8s')) === 'true'
-        ).to.be(true);
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+          await cisIntegration.navigateToIntegrationCspList();
+          await cisIntegration.clickFirstElementOnIntegrationTable();
+          expect(
+            (await cisIntegration.isOptionChecked('cisK8sTestId', 'cloudbeat/cis_k8s')) === 'true'
+          ).to.be(true);
+        });
       });
     });
   });
