@@ -80,7 +80,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   const { data: nodes } = api.useLoadNodeDiskSpace();
 
   let showEsTransformsGuidance = false;
-  let showMlAnomalyGuidance = false;
+  let showMlAnomalyReindexingGuidance = false;
   let showReadOnlyGuidance = false;
   let showDefaultGuidance = false;
 
@@ -89,7 +89,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   } else if (meta.isReadonly) {
     showReadOnlyGuidance = true;
   } else if (isMLAnomalyIndex) {
-    showMlAnomalyGuidance = true;
+    showMlAnomalyReindexingGuidance = true;
   } else {
     showDefaultGuidance = true;
   }
@@ -164,7 +164,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
 
         <EuiText>
           {showEsTransformsGuidance && <ESTransformsTargetGuidance deprecation={deprecation} />}
-          {showMlAnomalyGuidance && <MlAnomalyGuidance />}
+          {showMlAnomalyReindexingGuidance && <MlAnomalyGuidance />}
           {showReadOnlyGuidance && (
             <Fragment>
               <p>
