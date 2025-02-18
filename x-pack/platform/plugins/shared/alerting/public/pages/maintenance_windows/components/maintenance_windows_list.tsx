@@ -20,7 +20,7 @@ import {
 
 import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
-import { STATUS_DISPLAY, STATUS_SORT } from '../constants';
+import { DATE_FORMAT_UI_SETTING, STATUS_DISPLAY, STATUS_SORT } from '../constants';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
 import {
   MaintenanceWindowStatus,
@@ -32,6 +32,7 @@ import { TableActionsPopover, TableActionsPopoverProps } from './table_actions_p
 import { useFinishMaintenanceWindow } from '../../../hooks/use_finish_maintenance_window';
 import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
 import { useFinishAndArchiveMaintenanceWindow } from '../../../hooks/use_finish_and_archive_maintenance_window';
+import { useUiSetting } from '../../../utils/kibana_react';
 
 interface MaintenanceWindowsListProps {
   isLoading: boolean;
@@ -47,7 +48,11 @@ interface MaintenanceWindowsListProps {
   onSearchChange: (value: string) => void;
 }
 
-const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindow>> = [
+const getColumns = ({
+  dateFormat,
+}: {
+  dateFormat: string;
+}): Array<EuiBasicTableColumn<MaintenanceWindow>> => [
   {
     field: 'title',
     name: i18n.NAME,
@@ -71,9 +76,7 @@ const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindow>> = [
     render: (startDate: string, item: MaintenanceWindow) => {
       return (
         <EuiFlexGroup responsive={false} alignItems="center">
-          <EuiFlexItem grow={false}>
-            {formatDate(startDate, MAINTENANCE_WINDOW_DATE_FORMAT)}
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{formatDate(startDate, dateFormat)}</EuiFlexItem>
           {item.events.length > 1 ? (
             <EuiFlexItem grow={false}>
               <UpcomingEventsPopover maintenanceWindowFindResponse={item} />
@@ -88,7 +91,7 @@ const COLUMNS: Array<EuiBasicTableColumn<MaintenanceWindow>> = [
     field: 'eventEndTime',
     name: i18n.TABLE_END_TIME,
     dataType: 'date',
-    render: (endDate: string) => formatDate(endDate, MAINTENANCE_WINDOW_DATE_FORMAT),
+    render: (endDate: string) => formatDate(endDate, dateFormat),
   },
 ];
 
@@ -112,6 +115,10 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     onSearchChange,
   }) => {
     const [search, setSearch] = useState<string>('');
+    const systemDateFormat = useUiSetting<string>(
+      DATE_FORMAT_UI_SETTING,
+      MAINTENANCE_WINDOW_DATE_FORMAT
+    );
 
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
     const onEdit = useCallback<TableActionsPopoverProps['onEdit']>(
@@ -169,10 +176,10 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       [isMutatingOrLoading, onArchive, onCancel, onCancelAndArchive, onEdit]
     );
 
-    const columns = useMemo(
-      () => (readOnly ? COLUMNS : COLUMNS.concat(actions)),
-      [actions, readOnly]
-    );
+    const columns = useMemo(() => {
+      const result = getColumns({ dateFormat: systemDateFormat });
+      return readOnly ? result : result.concat(actions);
+    }, [actions, readOnly, systemDateFormat]);
 
     const onInputChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {
