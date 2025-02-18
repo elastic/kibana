@@ -57,6 +57,7 @@ const PageWrapper: FC = () => {
           alignItems={'flexStart'}
           gutterSize={'m'}
           direction="column"
+          data-test-subj="mlPageSuppliedConfigurations"
         >
           <EuiFlexItem grow={false}>
             <FormattedMessage

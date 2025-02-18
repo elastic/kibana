@@ -286,21 +286,21 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.assertTotalFeatureImportanceEvaluatePanelExists();
         });
 
-        xit('should display the feature importance decision path', async () => {
+        it('should display the feature importance decision path', async () => {
           await ml.dataFrameAnalyticsResults.assertResultsTableExists();
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
           await ml.dataFrameAnalyticsResults.openFeatureImportancePopover();
           await ml.dataFrameAnalyticsResults.assertFeatureImportancePopoverContent();
         });
 
-        xit('should display the feature importance decision path after changing page', async () => {
+        it('should display the feature importance decision path after changing page', async () => {
           await ml.dataFrameAnalyticsResults.selectResultsTablePage(3);
           await ml.dataFrameAnalyticsResults.assertResultsTableNotEmpty();
           await ml.dataFrameAnalyticsResults.openFeatureImportancePopover();
           await ml.dataFrameAnalyticsResults.assertFeatureImportancePopoverContent();
         });
 
-        xit('should display the histogram charts', async () => {
+        it('should display the histogram charts', async () => {
           await ml.testExecution.logTestStep(
             'displays the histogram charts when option is enabled'
           );
@@ -316,7 +316,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
 
-        xit('should sort and hide/show columns correctly', async () => {
+        it('should sort and hide/show columns correctly', async () => {
           await ml.testExecution.logTestStep('sorts table');
           await ml.dataFrameAnalyticsResults.toggleColumnSortPopoverState(true);
           await ml.dataFrameAnalyticsResults.setColumnToSortBy(
@@ -329,7 +329,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsResults.hideAllResultsTableColumns();
         });
 
-        xit('should link to custom visualization UI from scatterplot charts', async () => {
+        it('should link to custom visualization UI from scatterplot charts', async () => {
           await ml.dataFrameAnalyticsResults.assertOpensExploreInCustomVisualization();
         });
       });

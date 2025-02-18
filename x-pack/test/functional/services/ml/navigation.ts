@@ -47,7 +47,6 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToStackManagementMlSection(sectionId: string, pageSubject: string) {
-      await PageObjects.common.navigateToApp('home');
       await PageObjects.common.navigateToApp('management');
       const sections = await managementMenu.getSections();
       expect(sections).to.have.length(3);
@@ -228,11 +227,17 @@ export function MachineLearningNavigationProvider({
     },
 
     async navigateToDataESQLDataVisualizer() {
-      await this.navigateToArea('~mlMainTab & ~esqlDataVisualizer', 'dataVisualizerIndexPage');
+      await testSubjects.click('mlDataVisualizerSelectESQLButton');
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail('dataVisualizerIndexPage');
+      });
     },
 
     async navigateToDataDrift() {
-      await this.navigateToArea('~mlMainTab & ~dataDrift', 'mlPageDataDrift');
+      await testSubjects.click('mlDataVisualizerSelectDataDriftButton');
+      await retry.tryForTime(60 * 1000, async () => {
+        await testSubjects.existOrFail('mlPageDataDrift');
+      });
     },
 
     async navigateToSuppliedConfigurations() {
