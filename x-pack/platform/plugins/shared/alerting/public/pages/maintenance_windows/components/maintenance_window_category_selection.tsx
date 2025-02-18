@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiTextColor,
-  EuiCheckboxGroup,
   EuiRadioGroup,
   EuiLoadingSpinner,
 } from '@elastic/eui';
@@ -59,30 +58,12 @@ export const MaintenanceWindowCategorySelection = (
     onChange,
   } = props;
 
-  const selectedMap = useMemo(() => {
-    return selectedCategories.reduce<Record<string, boolean>>((result, category) => {
-      result[category] = true;
-      return result;
-    }, {});
-  }, [selectedCategories]);
-
   const options = useMemo(() => {
     return CHECKBOX_OPTIONS.map((option) => ({
       ...option,
       disabled: !availableCategories.includes(option.id),
     })).sort((a, b) => a.id.localeCompare(b.id));
   }, [availableCategories]);
-
-  const onCheckboxChange = useCallback(
-    (id: string) => {
-      if (selectedCategories.includes(id)) {
-        onChange(selectedCategories.filter((category) => category !== id));
-      } else {
-        onChange([...selectedCategories, id]);
-      }
-    },
-    [selectedCategories, onChange]
-  );
 
   const onRadioChange = useCallback(
     (id: string) => {
@@ -92,32 +73,15 @@ export const MaintenanceWindowCategorySelection = (
   );
 
   const categorySelection = useMemo(() => {
-    if (isScopedQueryEnabled) {
-      return (
-        <EuiRadioGroup
-          data-test-subj="maintenanceWindowCategorySelectionRadioGroup"
-          options={options}
-          idSelected={selectedCategories[0]}
-          onChange={onRadioChange}
-        />
-      );
-    }
     return (
-      <EuiCheckboxGroup
-        data-test-subj="maintenanceWindowCategorySelectionCheckboxGroup"
+      <EuiRadioGroup
+        data-test-subj="maintenanceWindowCategorySelectionRadioGroup"
         options={options}
-        idToSelectedMap={selectedMap}
-        onChange={onCheckboxChange}
+        idSelected={selectedCategories[0]}
+        onChange={onRadioChange}
       />
     );
-  }, [
-    isScopedQueryEnabled,
-    options,
-    selectedCategories,
-    selectedMap,
-    onCheckboxChange,
-    onRadioChange,
-  ]);
+  }, [options, selectedCategories, onRadioChange]);
 
   if (isLoading) {
     return (
@@ -133,26 +97,28 @@ export const MaintenanceWindowCategorySelection = (
   }
 
   return (
-    <EuiFlexGroup data-test-subj="maintenanceWindowCategorySelection">
-      <EuiFlexItem>
-        <EuiText size="s">
-          <h4>{i18n.CREATE_FORM_CATEGORY_SELECTION_TITLE}</h4>
-          <p>
-            <EuiTextColor color="subdued">
-              {i18n.CREATE_FORM_CATEGORY_SELECTION_DESCRIPTION}
-            </EuiTextColor>
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFormRow
-          label={i18n.CREATE_FORM_CATEGORIES_SELECTION_CHECKBOX_GROUP_TITLE}
-          isInvalid={!!errors.length}
-          error={errors[0]}
-        >
-          {categorySelection}
-        </EuiFormRow>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    isScopedQueryEnabled && (
+      <EuiFlexGroup data-test-subj="maintenanceWindowCategorySelection">
+        <EuiFlexItem>
+          <EuiText size="s">
+            <h4>{i18n.CREATE_FORM_CATEGORY_SELECTION_TITLE}</h4>
+            <p>
+              <EuiTextColor color="subdued">
+                {i18n.CREATE_FORM_CATEGORY_SELECTION_DESCRIPTION}
+              </EuiTextColor>
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            label={i18n.CREATE_FORM_CATEGORIES_SELECTION_CHECKBOX_GROUP_TITLE}
+            isInvalid={!!errors.length}
+            error={errors[0]}
+          >
+            {categorySelection}
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    )
   );
 };

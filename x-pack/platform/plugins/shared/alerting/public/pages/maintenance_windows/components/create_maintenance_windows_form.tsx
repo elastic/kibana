@@ -316,8 +316,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     }
     setFieldValue('categoryIds', [...new Set(validRuleTypes.map((ruleType) => ruleType.category))]);
     hasSetInitialCategories.current = true;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditMode, validRuleTypes, mounted]);
+  }, [isEditMode, mounted, setFieldValue, validRuleTypes]);
 
   // For edit mode, if a maintenance window => category_ids is not an array, this means
   // the maintenance window was created before the introduction of category filters.
@@ -337,8 +336,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     }
     setFieldValue('categoryIds', VALID_CATEGORIES);
     hasSetInitialCategories.current = true;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditMode, categoryIds, mounted]);
+  }, [isEditMode, categoryIds, mounted, setFieldValue]);
 
   useEffect(() => {
     if (!isScopedQueryEnabled && Array.isArray(categoryIds)) {
@@ -460,8 +458,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             )}
           </UseField>
         </EuiFlexItem>
+        <EuiHorizontalRule margin="xl" />
         <EuiFlexItem>
-          <EuiHorizontalRule margin="xl" />
           <UseField path="categoryIds">
             {(field) => (
               <MaintenanceWindowCategorySelection
@@ -491,7 +489,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             )}
           </UseField>
         </EuiFlexItem>
-        <EuiHorizontalRule margin="xl" />
+        {isScopedQueryEnabled && <EuiHorizontalRule margin="xl" />}
       </EuiFlexGroup>
       {isEditMode && (
         <>
