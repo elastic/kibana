@@ -50,7 +50,7 @@ export const mockSourceLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#6092C0' },
+        options: { color: '#A6EDEA' },
       },
       lineColor: {
         type: 'STATIC',
@@ -108,7 +108,7 @@ export const mockDestinationLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#D36086' },
+        options: { color: '#61A2FF' },
       },
       lineColor: {
         type: 'STATIC',
@@ -164,7 +164,7 @@ export const mockClientLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#6092C0' },
+        options: { color: '#A6EDEA' },
       },
       lineColor: {
         type: 'STATIC',
@@ -227,7 +227,7 @@ export const mockServerLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#D36086' },
+        options: { color: '#61A2FF' },
       },
       lineColor: {
         type: 'STATIC',
@@ -286,7 +286,7 @@ export const mockLineLayer = {
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#6092C0' },
+        options: { color: '#A6EDEA' },
       },
       lineWidth: {
         type: 'DYNAMIC',
@@ -351,7 +351,7 @@ export const mockClientServerLineLayer = {
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#6092C0' },
+        options: { color: '#A6EDEA' },
       },
       lineWidth: {
         type: 'DYNAMIC',

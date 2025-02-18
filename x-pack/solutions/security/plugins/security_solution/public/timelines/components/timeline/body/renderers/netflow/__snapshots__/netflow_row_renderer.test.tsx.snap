@@ -120,16 +120,11 @@ tr:hover .c5:focus::before {
   vertical-align: top;
 }
 
-.c10 svg {
-  position: relative;
-  top: -1px;
-}
-
-.c12 {
+.c11 {
   margin-right: 5px;
 }
 
-.c11 {
+.c10 {
   margin-right: 5px;
 }
 
@@ -1127,7 +1122,7 @@ tr:hover .c5:focus::before {
                                                                 class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                                               >
                                                                 <div
-                                                                  class="c10"
+                                                                  class="css-ggf2mo"
                                                                 >
                                                                   <a
                                                                     class="euiLink emotion-euiLink-primary"
@@ -1517,7 +1512,7 @@ tr:hover .c5:focus::before {
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <span
-                              class="css-1io4upz"
+                              class="css-10gmjt4"
                               height="2.8"
                             />
                           </div>
@@ -1590,7 +1585,7 @@ tr:hover .c5:focus::before {
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <span
-                              class="css-1io4upz"
+                              class="css-10gmjt4"
                               height="2.8"
                             />
                           </div>
@@ -1658,7 +1653,7 @@ tr:hover .c5:focus::before {
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <span
-                              class="css-1io4upz"
+                              class="css-10gmjt4"
                               height="2.8"
                             />
                           </div>
@@ -1692,7 +1687,7 @@ tr:hover .c5:focus::before {
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <span
-                              class="css-1almmfe"
+                              class="css-1aksxv4"
                               height="2.2"
                             />
                           </div>
@@ -1777,7 +1772,7 @@ tr:hover .c5:focus::before {
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <span
-                              class="css-1almmfe"
+                              class="css-1aksxv4"
                               height="2.2"
                             />
                           </div>
@@ -1845,7 +1840,7 @@ tr:hover .c5:focus::before {
                             class="euiFlexItem emotion-euiFlexItem-growZero"
                           >
                             <span
-                              class="css-1almmfe"
+                              class="css-1aksxv4"
                               height="2.2"
                             />
                           </div>
@@ -2026,7 +2021,7 @@ tr:hover .c5:focus::before {
                                                                 class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
                                                               >
                                                                 <div
-                                                                  class="c10"
+                                                                  class="css-ggf2mo"
                                                                 >
                                                                   <a
                                                                     class="euiLink emotion-euiLink-primary"
@@ -2473,7 +2468,7 @@ tr:hover .c5:focus::before {
                                 class="euiBadge__text emotion-euiBadge__text"
                               >
                                 <span
-                                  class="c11"
+                                  class="c10"
                                 >
                                   ja3
                                 </span>
@@ -2568,7 +2563,7 @@ tr:hover .c5:focus::before {
                                 class="euiBadge__text emotion-euiBadge__text"
                               >
                                 <span
-                                  class="c12"
+                                  class="c11"
                                 >
                                   client cert
                                 </span>
@@ -2663,7 +2658,7 @@ tr:hover .c5:focus::before {
                                 class="euiBadge__text emotion-euiBadge__text"
                               >
                                 <span
-                                  class="c12"
+                                  class="c11"
                                 >
                                   server cert
                                 </span>
