@@ -150,7 +150,7 @@ const defaultArgs = {
   streaming: false,
   maxRetries: 0,
   onFailedAttempt,
-  apiKey: "mock"
+  apiKey: 'mock',
 };
 
 const testMessage = 'Yes, your name is Andrew. How can I assist you further, Andrew?';
