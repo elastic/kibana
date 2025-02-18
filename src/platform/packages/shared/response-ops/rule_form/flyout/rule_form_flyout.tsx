@@ -26,9 +26,15 @@ const RuleFormFlyoutWithContext = <MetaData extends RuleTypeMetaData>(
 ) => {
   const { onClickClose, hideCloseButton } = useRuleFlyoutUIContext();
   const onClose = useCallback(() => {
+    // If onClickClose has been initialized, call it instead of onCancel. onClickClose should be used to
+    // determine if the close confirmation modal should be shown. props.onCancel is passed down the component hierarchy
+    // and will be called 1) by onClickClose, if the confirmation modal doesn't need to be shown, or 2) by the confirm
+    // button on the confirmation modal
     if (onClickClose) {
       onClickClose();
     } else {
+      // ONLY call props.onCancel directly from this level of the component hierarcht if onClickClose has not yet been initialized.
+      // This will only occur if the user tries to close the flyout while the Suspense fallback is still visible
       props.onCancel?.();
     }
   }, [onClickClose, props]);
