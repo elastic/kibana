@@ -41,7 +41,9 @@ export const getSearchEsListMock = (): SearchEsListSchema => ({
   version: VERSION,
 });
 
-export const getSearchListMock = (): estypes.SearchResponse<SearchEsListSchema> => ({
+export const getSearchListMock = (
+  source?: SearchEsListSchema
+): estypes.SearchResponse<SearchEsListSchema> => ({
   _scroll_id: '123',
   _shards: getShardMock(),
   hits: {
@@ -50,7 +52,7 @@ export const getSearchListMock = (): estypes.SearchResponse<SearchEsListSchema> 
         _id: LIST_ID,
         _index: LIST_INDEX,
         _score: 0,
-        _source: getSearchEsListMock(),
+        _source: source || getSearchEsListMock(),
       },
     ],
     max_score: 0,

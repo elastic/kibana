@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useState, useEffect } from 'react';
+import React, { memo, useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -21,13 +21,15 @@ import {
   EuiCallOut,
   EuiSpacer,
   EuiSelect,
+  type EuiComboBoxOptionOption,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import styled from 'styled-components';
 
 import type { PackageInfo, NewPackagePolicy, RegistryVarsEntry } from '../../../../../types';
 import { Loading } from '../../../../../components';
-import { useStartServices } from '../../../../../hooks';
+import { useGetEpmDatastreams, useStartServices } from '../../../../../hooks';
 
 import { isAdvancedVar } from '../../services';
 import type { PackagePolicyValidationResults } from '../../services';
@@ -89,6 +91,26 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
       canUseOutputPerIntegration,
       allowedOutputs,
     } = useOutputs(packagePolicy, packageInfo.name);
+
+    const { data: epmDatastreamsRes } = useGetEpmDatastreams();
+
+    const datastreamsOptions = useMemo<Array<EuiComboBoxOptionOption<string>>>(
+      () =>
+        epmDatastreamsRes?.items?.map((item) => ({
+          label: item.name,
+          value: item.name,
+        })) ?? [],
+      [epmDatastreamsRes]
+    );
+
+    const selectedDatastreamOptions = useMemo<EuiComboBoxOptionOption[]>(
+      () =>
+        packagePolicy?.additional_datastreams_permissions?.map((item) => ({
+          label: item,
+          value: item,
+        })) ?? [],
+      [packagePolicy?.additional_datastreams_permissions]
+    );
 
     // Reset output if switching to agentless and the current
     // selected output is not allowed
@@ -402,6 +424,55 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                       }
                     >
                       <div />
+                    </EuiFormRow>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFormRow
+                      isInvalid={validationResults?.additional_datastreams_permissions !== null}
+                      error={validationResults?.additional_datastreams_permissions ?? []}
+                      label={
+                        <FormattedMessage
+                          id="xpack.fleet.createPackagePolicy.stepConfigure.additionalPermissionsLabel"
+                          defaultMessage="Add a reroute processor permission {tooltip}"
+                          values={{
+                            tooltip: (
+                              <EuiIconTip
+                                content={
+                                  <FormattedMessage
+                                    id="xpack.fleet.createPackagePolicy.stepConfigure.additionalPermissionsToolTip"
+                                    defaultMessage="Use the reroute processor to redirect data flows to another target index or data stream."
+                                  />
+                                }
+                                position="right"
+                              />
+                            ),
+                          }}
+                        />
+                      }
+                    >
+                      <EuiComboBox
+                        selectedOptions={selectedDatastreamOptions}
+                        options={datastreamsOptions}
+                        onChange={(val) => {
+                          updatePackagePolicy({
+                            additional_datastreams_permissions: val.map((v) => v.label),
+                          });
+                        }}
+                        onCreateOption={(option) => {
+                          const additionalPermissions =
+                            packagePolicy.additional_datastreams_permissions ?? [];
+
+                          updatePackagePolicy({
+                            additional_datastreams_permissions: [...additionalPermissions, option],
+                          });
+                        }}
+                        placeholder={i18n.translate(
+                          'xpack.fleet.createPackagePolicy.stepConfigure.additionalPermissionsPlaceholder',
+                          {
+                            defaultMessage: 'Add a permission',
+                          }
+                        )}
+                      />
                     </EuiFormRow>
                   </EuiFlexItem>
                   {/* Advanced vars */}

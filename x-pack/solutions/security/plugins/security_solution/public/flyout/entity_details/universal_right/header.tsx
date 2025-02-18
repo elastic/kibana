@@ -29,6 +29,7 @@ export const UniversalEntityFlyoutHeader = ({ entity }: UniversalEntityFlyoutHea
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
+          {/* @ts-ignore Fix it once genetric entity is introduce*/}
           <FlyoutTitle title={entity?.id} iconType={EntityIconByType[entity?.type]} />
         </EuiFlexItem>
       </EuiFlexGroup>
