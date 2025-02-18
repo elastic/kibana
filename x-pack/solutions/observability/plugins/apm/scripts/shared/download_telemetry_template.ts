@@ -11,7 +11,7 @@ export async function downloadTelemetryTemplate({ githubToken }: { githubToken: 
   const octokit = new Octokit({
     auth: githubToken,
   });
-  const file = await octokit.repos.getContents({
+  const file = await octokit.repos.getContent({
     owner: 'elastic',
     repo: 'telemetry',
     path: 'config/templates/xpack-phone-home.json',
