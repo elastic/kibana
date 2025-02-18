@@ -22,13 +22,16 @@ export const createDataViewSelectedListener = (dependencies: {
       const state = listenerApi.getState();
 
       const findCachedDataView = (id: string | null | undefined) => {
-        const savedDataView = state.dataViewPicker.shared.dataViews.find((dv) => dv.id === id);
+        const dataView =
+          state.dataViewPicker.shared.adhocDataViews.find((dv) => dv.id === id) ?? null;
 
-        if (savedDataView) {
-          return savedDataView;
+        // NOTE: validate if fields are available, otherwise dont return the view
+        // This is required to compute browserFields later.
+        if (!Object.keys(dataView?.fields || {})) {
+          return null;
         }
 
-        return state.dataViewPicker.shared.adhocDataViews.find((dv) => dv.id === id) ?? null;
+        return dataView;
       };
 
       let dataViewByIdError: unknown;
