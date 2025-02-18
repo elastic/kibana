@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, IScopedClusterClient } from '@kbn/core/server';
+import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 
 import type { GetEntityStoreStatusResponse } from '../../../common/api/entity_analytics/entity_store/status.gen';
 import type { ExperimentalFeatures } from '../../../common';
@@ -18,9 +18,15 @@ interface AssetInventoryClientOpts {
   experimentalFeatures: ExperimentalFeatures;
 }
 
+type EntityStoreEngineStatus = GetEntityStoreStatusResponse['engines'][number];
+
+interface UniversalEntityEngineStatus extends Omit<EntityStoreEngineStatus, 'type'> {
+  type: 'universal';
+}
+
 interface TransformMetadata {
-  documents_processed?: number;
-  trigger_count?: number;
+  documents_processed: number;
+  trigger_count: number;
 }
 
 const ASSET_INVENTORY_STATUS: Record<string, string> = {
@@ -34,12 +40,7 @@ const ASSET_INVENTORY_STATUS: Record<string, string> = {
 // AssetInventoryDataClient is responsible for managing the asset inventory,
 // including initializing and cleaning up resources such as Elasticsearch ingest pipelines.
 export class AssetInventoryDataClient {
-  private esClient: ElasticsearchClient;
-
-  constructor(private readonly options: AssetInventoryClientOpts) {
-    const { clusterClient } = this.options;
-    this.esClient = clusterClient.asCurrentUser;
-  }
+  constructor(private readonly options: AssetInventoryClientOpts) {}
 
   // Enables the asset inventory by deferring the initialization to avoid blocking the main thread.
   public async enable() {
@@ -94,65 +95,82 @@ export class AssetInventoryDataClient {
     secSolutionContext: SecuritySolutionApiRequestHandlerContext,
     entityStorePrivileges: Awaited<ReturnType<typeof getEntityStorePrivileges>>
   ) {
-    const hasEntityStorePrivileges = entityStorePrivileges.has_all_required;
-
-    let status = ASSET_INVENTORY_STATUS.DISABLED;
-
-    console.log(JSON.stringify(entityStorePrivileges, null, 2));
-
-    if (!hasEntityStorePrivileges) {
-      status = ASSET_INVENTORY_STATUS.INSUFFICIENT_PRIVILEGES;
-      return { status, privileges: entityStorePrivileges.privileges };
+    // Check if the user has the required privileges to access the entity store.
+    if (!entityStorePrivileges.has_all_required) {
+      return {
+        status: ASSET_INVENTORY_STATUS.INSUFFICIENT_PRIVILEGES,
+        privileges: entityStorePrivileges.privileges,
+      };
     }
 
+    // Retrieve entity store status
     const entityStoreStatus = await secSolutionContext.getEntityStoreDataClient().status({
       include_components: true,
     });
 
     const entityEngineStatus = entityStoreStatus.status;
 
-    console.log(JSON.stringify(entityStoreStatus, null, 2));
-
+    // Determine the asset inventory status based on the entity engine status
     if (entityEngineStatus === 'not_installed') {
-      status = ASSET_INVENTORY_STATUS.DISABLED;
-    } else {
-      if (entityEngineStatus === 'installing') {
-        status = ASSET_INVENTORY_STATUS.INITIALIZING;
-      } else {
-        const universalEntityEngineStatus = entityStoreStatus.engines.find(
-          (engine) => engine.type === 'universal'
-        );
-        // If the universal engine is not installed, the asset inventory is disabled.
-        if (!universalEntityEngineStatus) {
-          status = ASSET_INVENTORY_STATUS.DISABLED;
-        } else {
-          status = ASSET_INVENTORY_STATUS.INITIALIZING;
-          let hasDocumentsProcessedInTransforms = false;
-          let hasTransformTriggered = false;
-          for (const engine of entityStoreStatus.engines) {
-            if (engine.components) {
-              for (const component of engine.components) {
-                if (component.resource === 'transform') {
-                  if (component?.metadata?.trigger_count > 1) {
-                    hasTransformTriggered = true;
-                  }
-                  if (component?.metadata?.documents_processed > 0) {
-                    hasDocumentsProcessedInTransforms = true;
-                    break;
-                  }
-                }
-              }
-            }
-          }
-
-          if (hasDocumentsProcessedInTransforms) {
-            status = ASSET_INVENTORY_STATUS.READY;
-          } else if (hasTransformTriggered === true) {
-            status = ASSET_INVENTORY_STATUS.EMPTY;
-          }
-        }
-      }
+      return { status: ASSET_INVENTORY_STATUS.DISABLED };
     }
-    return { status };
+    if (entityEngineStatus === 'installing') {
+      return { status: ASSET_INVENTORY_STATUS.INITIALIZING };
+    }
+
+    // Check for universal entity engine
+    const universalEntityEngine = entityStoreStatus.engines.find(this.isUniversalEntityEngine);
+    // If the universal engine is not installed, the asset inventory is disabled.
+    if (!universalEntityEngine) {
+      return { status: ASSET_INVENTORY_STATUS.DISABLED };
+    }
+
+    // Determine final status based on transform metadata
+    if (this.hasDocumentsProcessed(universalEntityEngine)) {
+      return { status: ASSET_INVENTORY_STATUS.READY };
+    }
+    if (this.hasTransformTriggered(universalEntityEngine)) {
+      return { status: ASSET_INVENTORY_STATUS.EMPTY };
+    }
+
+    // If the engine is still initializing, return the initializing status
+    return { status: ASSET_INVENTORY_STATUS.INITIALIZING };
+  }
+
+  // Type guard to check if an entity engine is a Universal entity engine
+  private isUniversalEntityEngine(
+    engine: EntityStoreEngineStatus
+  ): engine is UniversalEntityEngineStatus {
+    return engine.type === 'universal';
+  }
+
+  // Type guard function to validate entity store component metadata
+  private isTransformMetadata(metadata: unknown): metadata is TransformMetadata {
+    return (
+      typeof metadata === 'object' &&
+      metadata !== null &&
+      'documents_processed' in metadata &&
+      'trigger_count' in metadata &&
+      typeof (metadata as TransformMetadata).documents_processed === 'number' &&
+      typeof (metadata as TransformMetadata).trigger_count === 'number'
+    );
+  }
+
+  private hasDocumentsProcessed(engine: UniversalEntityEngineStatus): boolean {
+    return !!engine.components?.some((component) => {
+      if (component.resource === 'transform' && this.isTransformMetadata(component.metadata)) {
+        return component.metadata.documents_processed > 0;
+      }
+      return false;
+    });
+  }
+
+  private hasTransformTriggered(engine: UniversalEntityEngineStatus): boolean {
+    return !!engine.components?.some((component) => {
+      if (component.resource === 'transform' && this.isTransformMetadata(component.metadata)) {
+        return component.metadata.trigger_count > 0;
+      }
+      return false;
+    });
   }
 }
