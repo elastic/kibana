@@ -242,7 +242,7 @@ export async function getNativeConnectorDeprecations(
             i18n.translate(
               'xpack.enterpriseSearch.deprecations.fauxNativeConnector.listConnectors',
               {
-                defaultMessage: 'Go through the Elastic-managed connectors in the Connectors UI.',
+                defaultMessage: 'Identify all Elastic-managed connectors in the Connectors UI.',
               }
             ),
             i18n.translate(
