@@ -26894,6 +26894,37 @@
                                 "nullable": true,
                                 "type": "string"
                               },
+                              "secrets": {
+                                "additionalProperties": true,
+                                "properties": {
+                                  "ssl": {
+                                    "additionalProperties": true,
+                                    "properties": {
+                                      "key": {
+                                        "anyOf": [
+                                          {
+                                            "additionalProperties": true,
+                                            "properties": {
+                                              "id": {
+                                                "type": "string"
+                                              }
+                                            },
+                                            "required": [
+                                              "id"
+                                            ],
+                                            "type": "object"
+                                          },
+                                          {
+                                            "type": "string"
+                                          }
+                                        ]
+                                      }
+                                    },
+                                    "type": "object"
+                                  }
+                                },
+                                "type": "object"
+                              },
                               "shipper": {
                                 "additionalProperties": true,
                                 "nullable": true,
@@ -28041,6 +28072,37 @@
                         "nullable": true,
                         "type": "string"
                       },
+                      "secrets": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "ssl": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "key": {
+                                "anyOf": [
+                                  {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      },
                       "shipper": {
                         "additionalProperties": false,
                         "nullable": true,
@@ -29123,6 +29185,37 @@
                             "proxy_id": {
                               "nullable": true,
                               "type": "string"
+                            },
+                            "secrets": {
+                              "additionalProperties": true,
+                              "properties": {
+                                "ssl": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "key": {
+                                      "anyOf": [
+                                        {
+                                          "additionalProperties": true,
+                                          "properties": {
+                                            "id": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "id"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
                             },
                             "shipper": {
                               "additionalProperties": true,
@@ -30363,6 +30456,37 @@
                               "nullable": true,
                               "type": "string"
                             },
+                            "secrets": {
+                              "additionalProperties": true,
+                              "properties": {
+                                "ssl": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "key": {
+                                      "anyOf": [
+                                        {
+                                          "additionalProperties": true,
+                                          "properties": {
+                                            "id": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "id"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
+                            },
                             "shipper": {
                               "additionalProperties": true,
                               "nullable": true,
@@ -31502,6 +31626,37 @@
                         "nullable": true,
                         "type": "string"
                       },
+                      "secrets": {
+                        "additionalProperties": false,
+                        "properties": {
+                          "ssl": {
+                            "additionalProperties": false,
+                            "properties": {
+                              "key": {
+                                "anyOf": [
+                                  {
+                                    "additionalProperties": false,
+                                    "properties": {
+                                      "id": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "id"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
+                              }
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      },
                       "shipper": {
                         "additionalProperties": false,
                         "nullable": true,
@@ -32562,6 +32717,37 @@
                             "proxy_id": {
                               "nullable": true,
                               "type": "string"
+                            },
+                            "secrets": {
+                              "additionalProperties": true,
+                              "properties": {
+                                "ssl": {
+                                  "additionalProperties": true,
+                                  "properties": {
+                                    "key": {
+                                      "anyOf": [
+                                        {
+                                          "additionalProperties": true,
+                                          "properties": {
+                                            "id": {
+                                              "type": "string"
+                                            }
+                                          },
+                                          "required": [
+                                            "id"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "type": "object"
+                                }
+                              },
+                              "type": "object"
                             },
                             "shipper": {
                               "additionalProperties": true,
