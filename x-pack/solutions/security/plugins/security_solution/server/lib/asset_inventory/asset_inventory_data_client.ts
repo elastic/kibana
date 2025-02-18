@@ -20,8 +20,8 @@ interface AssetInventoryClientOpts {
 
 type EntityStoreEngineStatus = GetEntityStoreStatusResponse['engines'][number];
 
-interface UniversalEntityEngineStatus extends Omit<EntityStoreEngineStatus, 'type'> {
-  type: 'universal';
+interface HostEntityEngineStatus extends Omit<EntityStoreEngineStatus, 'type'> {
+  type: 'host';
 }
 
 interface TransformMetadata {
@@ -118,18 +118,18 @@ export class AssetInventoryDataClient {
       return { status: ASSET_INVENTORY_STATUS.INITIALIZING };
     }
 
-    // Check for universal entity engine
-    const universalEntityEngine = entityStoreStatus.engines.find(this.isUniversalEntityEngine);
-    // If the universal engine is not installed, the asset inventory is disabled.
-    if (!universalEntityEngine) {
+    // Check for host entity engine
+    const hostEntityEngine = entityStoreStatus.engines.find(this.isHostEntityEngine);
+    // If the host engine is not installed, the asset inventory is disabled.
+    if (!hostEntityEngine) {
       return { status: ASSET_INVENTORY_STATUS.DISABLED };
     }
 
     // Determine final status based on transform metadata
-    if (this.hasDocumentsProcessed(universalEntityEngine)) {
+    if (this.hasDocumentsProcessed(hostEntityEngine)) {
       return { status: ASSET_INVENTORY_STATUS.READY };
     }
-    if (this.hasTransformTriggered(universalEntityEngine)) {
+    if (this.hasTransformTriggered(hostEntityEngine)) {
       return { status: ASSET_INVENTORY_STATUS.EMPTY };
     }
 
@@ -137,11 +137,10 @@ export class AssetInventoryDataClient {
     return { status: ASSET_INVENTORY_STATUS.INITIALIZING };
   }
 
-  // Type guard to check if an entity engine is a Universal entity engine
-  private isUniversalEntityEngine(
-    engine: EntityStoreEngineStatus
-  ): engine is UniversalEntityEngineStatus {
-    return engine.type === 'universal';
+  // Type guard to check if an entity engine is a host entity engine
+  // Todo: Change to the new 'generic' entity engine once it's ready
+  private isHostEntityEngine(engine: EntityStoreEngineStatus): engine is HostEntityEngineStatus {
+    return engine.type === 'host';
   }
 
   // Type guard function to validate entity store component metadata
@@ -156,7 +155,7 @@ export class AssetInventoryDataClient {
     );
   }
 
-  private hasDocumentsProcessed(engine: UniversalEntityEngineStatus): boolean {
+  private hasDocumentsProcessed(engine: HostEntityEngineStatus): boolean {
     return !!engine.components?.some((component) => {
       if (component.resource === 'transform' && this.isTransformMetadata(component.metadata)) {
         return component.metadata.documents_processed > 0;
@@ -165,7 +164,7 @@ export class AssetInventoryDataClient {
     });
   }
 
-  private hasTransformTriggered(engine: UniversalEntityEngineStatus): boolean {
+  private hasTransformTriggered(engine: HostEntityEngineStatus): boolean {
     return !!engine.components?.some((component) => {
       if (component.resource === 'transform' && this.isTransformMetadata(component.metadata)) {
         return component.metadata.trigger_count > 0;
