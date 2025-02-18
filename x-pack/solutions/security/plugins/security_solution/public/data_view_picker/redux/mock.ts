@@ -45,5 +45,10 @@ export const mockDataViewPickerState: RootState = {
       dataView: mockDefaultDataViewSpec,
       status: 'ready',
     },
+    analyzer: {
+      ...dataViewPickerState.analyzer,
+      dataView: mockDefaultDataViewSpec,
+      status: 'ready',
+    },
   },
 };
