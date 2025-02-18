@@ -713,9 +713,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
             ((kibanaAPIKeyInput.value && kibanaAPIKeyValid) ||
               (kibanaAPIKeySecretInput.value && kibanaAPIKeySecretValid)) &&
             kibanaURLInputValid))
-        // (sslCertificateValid ||
-        //   (sslKeyInput.value && sslKeyValid) ||
-        //   (sslKeySecretInput.value && sslKeySecretValid))
       );
     } else {
       // validate ES
@@ -725,8 +722,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
         nameInputValid &&
         caTrustedFingerprintValid &&
         diskQueuePathValid
-        // sslCertificateValid &&
-        // ((sslKeyInput.value && sslKeyValid) || (sslKeySecretInput.value && sslKeySecretValid))
       );
     }
   }, [
