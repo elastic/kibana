@@ -143,7 +143,6 @@ export const DashboardLinkDestinationPicker = ({
           onDestinationPicked(undefined);
         }
       }}
-      css={styles}
       data-test-subj="links--linkEditor--dashboardLink--comboBox"
       inputPopoverProps={{ panelProps: { css: styles } }}
     />

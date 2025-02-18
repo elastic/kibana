@@ -164,7 +164,7 @@ const LinksEditor = ({
 
   return (
     <>
-      <div css={flyoutStyles} ref={editLinkFlyoutRef} />
+      <div css={styles.flyoutStyles} ref={editLinkFlyoutRef} />
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
@@ -201,7 +201,7 @@ const LinksEditor = ({
                 <>
                   <EuiDragDropContext onDragEnd={onDragEnd}>
                     <EuiDroppable
-                      css={droppableStyles}
+                      css={styles.droppableStyles}
                       droppableId="linksDroppableLinksArea"
                       data-test-subj="links--panelEditor--linksAreaDroppable"
                     >
@@ -319,56 +319,58 @@ const LinksEditor = ({
 // eslint-disable-next-line import/no-default-export
 export default LinksEditor;
 
-const euiFlyoutOpenAnimation = keyframes`
-  0% {
-    opacity: 0;
-    transform: translateX(100%);
-  }
+const styles = {
+  droppableStyles: ({ euiTheme }: UseEuiTheme) => css({ margin: `0 -${euiTheme.size.xs}` }),
+  flyoutStyles: ({ euiTheme }: UseEuiTheme) => {
+    const euiFlyoutOpenAnimation = keyframes`
+    0% {
+      opacity: 0;
+      transform: translateX(100%);
+    }
+  
+    100% {
+      opacity: 1;
+      transform: translateX(0%);
+    }
+  `;
 
-  100% {
-    opacity: 1;
-    transform: translateX(0%);
-  }
-`;
+    const euiFlyoutCloseAnimation = keyframes`
+    0% {
+      opacity: 1;
+      transform: translateX(0%);
+    }
+  
+    100% {
+      opacity: 0;
+      transform: translateX(100%);
+    }`;
 
-const euiFlyoutCloseAnimation = keyframes`
-  0% {
-    opacity: 1;
-    transform: translateX(0%);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translateX(100%);
-  }`;
-
-const flyoutStyles = ({ euiTheme }: UseEuiTheme) =>
-  css({
-    // EUI TODO: We need to set transform to 'none' to avoid drag/drop issues in the flyout caused by the
-    // `transform: translateZ(0)` workaround for the mask image bug in Chromium.
-    // https://github.com/elastic/eui/pull/7855.
-    '.euiFlyoutBody__overflow': {
-      transform: 'none',
-    },
-    '.linkEditor': {
-      maxInlineSize: `calc(${euiTheme.size.xs} * 125)`,
-      height: 'calc(100vh - var(--euiFixedHeadersOffset, 0))',
-      position: 'fixed',
-      display: 'flex',
-      inlineSize: '50vw',
-      zIndex: euiTheme.levels.flyout,
-      alignItems: 'stretch',
-      flexDirection: 'column',
-      borderLeft: euiTheme.border.thin,
-      background: euiTheme.colors.backgroundBasePlain,
-      minWidth: `calc((${euiTheme.size.xl} * 13) + ${euiTheme.size.s})`, // 424px
-      '&.in': {
-        animation: `${euiFlyoutOpenAnimation} ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
+    return css({
+      // EUI TODO: We need to set transform to 'none' to avoid drag/drop issues in the flyout caused by the
+      // `transform: translateZ(0)` workaround for the mask image bug in Chromium.
+      // https://github.com/elastic/eui/pull/7855.
+      '.euiFlyoutBody__overflow': {
+        transform: 'none',
       },
-      '&.out': {
-        animation: `${euiFlyoutCloseAnimation} ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
+      '.linkEditor': {
+        maxInlineSize: `calc(${euiTheme.size.xs} * 125)`,
+        height: 'calc(100vh - var(--euiFixedHeadersOffset, 0))',
+        position: 'fixed',
+        display: 'flex',
+        inlineSize: '50vw',
+        zIndex: euiTheme.levels.flyout,
+        alignItems: 'stretch',
+        flexDirection: 'column',
+        borderLeft: euiTheme.border.thin,
+        background: euiTheme.colors.backgroundBasePlain,
+        minWidth: `calc((${euiTheme.size.xl} * 13) + ${euiTheme.size.s})`, // 424px
+        '&.in': {
+          animation: `${euiFlyoutOpenAnimation} ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
+        },
+        '&.out': {
+          animation: `${euiFlyoutCloseAnimation} ${euiTheme.animation.normal} ${euiTheme.animation.resistance}`,
+        },
       },
-    },
-  });
-
-const droppableStyles = ({ euiTheme }: UseEuiTheme) => css({ margin: `0 -${euiTheme.size.xs}` });
+    });
+  },
+};
