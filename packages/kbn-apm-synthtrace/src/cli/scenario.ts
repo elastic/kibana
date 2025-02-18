@@ -13,6 +13,7 @@ import {
   InfraSynthtraceEsClient,
   LogsSynthtraceEsClient,
   SyntheticsSynthtraceEsClient,
+  OtelSynthtraceEsClient,
   EntitiesSynthtraceEsClient,
 } from '../..';
 import { Logger } from '../lib/utils/create_logger';
@@ -25,6 +26,7 @@ interface EsClients {
   logsEsClient: LogsSynthtraceEsClient;
   infraEsClient: InfraSynthtraceEsClient;
   syntheticsEsClient: SyntheticsSynthtraceEsClient;
+  otelEsClient: OtelSynthtraceEsClient;
   entitiesEsClient: EntitiesSynthtraceEsClient;
 }
 
