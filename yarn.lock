@@ -9979,7 +9979,7 @@
     dequal "^2.0.2"
     ts-dedent "^2.0.0"
 
-"@storybook/addon-docs@8.5.5":
+"@storybook/addon-docs@8.5.5", "@storybook/addon-docs@^8.3.5":
   version "8.5.5"
   resolved "https://registry.yarnpkg.com/@storybook/addon-docs/-/addon-docs-8.5.5.tgz#8909b0d791c206a559616b40df798a5bc78441b2"
   integrity sha512-pQVu6IAwcD7sV7i6alnugT1kHv2EMAhqeS5/Vq2JJoA/QaiHxF83f2L3eCVxP2nKbHYUttdBpIQ+acIsw3jx7Q==
