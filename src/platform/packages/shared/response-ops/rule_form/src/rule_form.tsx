@@ -40,7 +40,7 @@ export interface RuleFormProps<MetaData extends RuleTypeMetaData = RuleTypeMetaD
   shouldUseRuleProducer?: boolean;
   canShowConsumerSelection?: boolean;
   showMustacheAutocompleteSwitch?: boolean;
-  initialValues?: Partial<RuleFormData>;
+  initialValues?: Partial<Omit<RuleFormData, 'ruleTypeId'>>;
   initialMetadata?: MetaData;
   isServerless?: boolean;
 }
