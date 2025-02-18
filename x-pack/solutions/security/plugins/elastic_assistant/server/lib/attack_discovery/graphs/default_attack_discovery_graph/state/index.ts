@@ -34,7 +34,7 @@ export const getDefaultGraphAnnotation = ({
     value: (x: AttackDiscovery[] | null, y?: AttackDiscovery[] | null) => y ?? x,
     default: () => null,
   }),
-  attackDiscoveryPrompt: Annotation<string, string |undefined>({
+  attackDiscoveryPrompt: Annotation<string>({
     value: (x: string, y?: string) => y ?? x,
     default: () => prompts.default,
   }),
@@ -42,15 +42,15 @@ export const getDefaultGraphAnnotation = ({
     value: (x: Document[], y?: Document[]) => y ?? x,
     default: () => [],
   }),
-  combinedGenerations: Annotation<string, string | undefined>({
+  combinedGenerations: Annotation<string>({
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
   }),
-  combinedRefinements: Annotation<string, string | undefined>({
+  combinedRefinements: Annotation<string>({
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
   }),
-  continuePrompt: Annotation<string, string | undefined>({
+  continuePrompt: Annotation<string, string>({
     value: (x: string, y?: string) => y ?? x,
     default: () => '',
   }),
@@ -58,7 +58,7 @@ export const getDefaultGraphAnnotation = ({
     value: (x?: string | null, y?: string | null) => y ?? x,
     default: () => end,
   }),
-  errors: Annotation<string[], string[] | undefined>({
+  errors: Annotation<string[], string[]>({
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
   }),
@@ -66,39 +66,39 @@ export const getDefaultGraphAnnotation = ({
     value: (x?: Record<string, unknown> | null, y?: Record<string, unknown> | null) => y ?? x,
     default: () => filter,
   }),
-  generationAttempts:  Annotation<number, number | undefined>({
+  generationAttempts: Annotation<number>({
     value: (x: number, y?: number) => y ?? x,
     default: () => 0,
   }),
-  generations:  Annotation<string[], string[] | undefined>({
+  generations: Annotation<string[]>({
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
   }),
-  hallucinationFailures:  Annotation<number, number | undefined>({
+  hallucinationFailures: Annotation<number>({
     value: (x: number, y?: number) => y ?? x,
     default: () => 0,
   }),
-  refinePrompt:  Annotation<string, string | undefined>({
+  refinePrompt: Annotation<string>({
     value: (x: string, y?: string) => y ?? x,
     default: () => prompts.refine,
   }),
-  maxGenerationAttempts:  Annotation<number, number | undefined>({
+  maxGenerationAttempts: Annotation<number>({
     value: (x: number, y?: number) => y ?? x,
     default: () => DEFAULT_MAX_GENERATION_ATTEMPTS,
   }),
-  maxHallucinationFailures:  Annotation<number, number | undefined>({
+  maxHallucinationFailures: Annotation<number>({
     value: (x: number, y?: number) => y ?? x,
     default: () => DEFAULT_MAX_HALLUCINATION_FAILURES,
   }),
-  maxRepeatedGenerations:  Annotation<number, number | undefined>({
+  maxRepeatedGenerations: Annotation<number>({
     value: (x: number, y?: number) => y ?? x,
     default: () => DEFAULT_MAX_REPEATED_GENERATIONS,
   }),
-  refinements:  Annotation<string[], string[] | undefined>({
+  refinements: Annotation<string[]>({
     value: (x: string[], y?: string[]) => y ?? x,
     default: () => [],
   }),
-  replacements:  Annotation<Replacements, Replacements | undefined>({
+  replacements: Annotation<Replacements>({
     value: (x: Replacements, y?: Replacements) => y ?? x,
     default: () => ({}),
   }),
@@ -106,7 +106,7 @@ export const getDefaultGraphAnnotation = ({
     value: (x?: string | null, y?: string | null) => y ?? x,
     default: () => start,
   }),
-  unrefinedResults:  Annotation<AttackDiscovery[] | null, AttackDiscovery[] | null | undefined>({
+  unrefinedResults: Annotation<AttackDiscovery[] | null>({
     value: (x: AttackDiscovery[] | null, y?: AttackDiscovery[] | null) => y ?? x,
     default: () => null,
   }),
