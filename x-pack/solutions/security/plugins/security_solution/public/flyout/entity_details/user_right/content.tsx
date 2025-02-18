@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -58,22 +59,31 @@ export const UserPanelContent = ({
   const observedFields = useObservedUserItems(observedUser);
   const isManagedUserEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyoutManagedUser');
 
+  console.log('Debugging riskScoreState:', {
+    isModuleEnabled: riskScoreState.isModuleEnabled,
+    data: riskScoreState.data,
+    dataType: typeof riskScoreState.data,
+    dataLength: Array.isArray(riskScoreState.data) ? riskScoreState.data.length : 'Not an array',
+  });
+
   return (
     <FlyoutBody>
-      {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
-        <>
-          <FlyoutRiskSummary
-            riskScoreData={riskScoreState}
-            recalculatingScore={recalculatingScore}
-            queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
-            openDetailsPanel={openDetailsPanel}
-            isPreviewMode={isPreviewMode}
-            isLinkEnabled={isLinkEnabled}
-            entityType={EntityType.user}
-          />
-          <EuiHorizontalRule />
-        </>
-      )}
+      {Array.isArray(riskScoreState.data) &&
+        riskScoreState.isModuleEnabled &&
+        riskScoreState.data.length > 0 && (
+          <>
+            <FlyoutRiskSummary
+              riskScoreData={riskScoreState}
+              recalculatingScore={recalculatingScore}
+              queryId={USER_PANEL_RISK_SCORE_QUERY_ID}
+              openDetailsPanel={openDetailsPanel}
+              isPreviewMode={isPreviewMode}
+              isLinkEnabled={isLinkEnabled}
+              entityType={EntityType.user}
+            />
+            <EuiHorizontalRule />
+          </>
+        )}
       <AssetCriticalityAccordion
         entity={{ name: userName, type: EntityType.user }}
         onChange={onAssetCriticalityChange}
