@@ -231,10 +231,7 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('rejects a versionless prebuilt rule', async () => {
-        const rule = createRuleAssetSavedObject({
-          rule_id: prebuiltRuleIds[0],
-          version: undefined,
-        })['security-rule'];
+        const rule = getCustomQueryRuleParams({ rule_id: prebuiltRuleIds[0], version: undefined }); // Uses the `getCustomQueryRuleParams` util intead of the `createRuleAssetSavedObject` util because we are forcing an invalid rule body according to the Zod schema
         const { body } = await importRules([rule]);
 
         expect(body.errors).toHaveLength(1);
@@ -283,13 +280,11 @@ export default ({ getService }: FtrProviderContext): void => {
         const rules = [
           getCustomQueryRuleParams({ rule_id: 'custom-rule', version: 23 }),
           getCustomQueryRuleParams({ rule_id: 'custom-rule-2', version: undefined }),
-          // Prebuilt rule with a matching rule_id but no matching version
-          createRuleAssetSavedObject({ rule_id: 'rule-1', version: 1234 })['security-rule'],
           // Unmodified prebuilt rule with matching rule_id and version
           createRuleAssetSavedObject({ rule_id: 'rule-2', version: 2 })['security-rule'],
           // Customized prebuilt rule with a matching rule_id and version
           createRuleAssetSavedObject({
-            rule_id: 'rule-2',
+            rule_id: 'rule-1',
             version: 2,
             name: 'Customized prebuilt rule',
           })['security-rule'],
@@ -322,7 +317,7 @@ export default ({ getService }: FtrProviderContext): void => {
             }),
             expect.objectContaining({
               rule_id: 'rule-1',
-              version: 1234,
+              version: 2,
               rule_source: { type: 'external', is_customized: true },
               immutable: true,
             }),
