@@ -11,22 +11,181 @@ import type { ComponentType, ReactElement, ReactNode } from 'react';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { Capabilities, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
+import type { Capabilities, ToastsSetup } from '@kbn/core/public';
+import type { EuiIconProps } from '@elastic/eui';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
+import { AnonymousAccessServiceContract } from '../common/anonymous_access';
 
-export type { ExportShare } from './services/share_orchestrator';
+export interface ShareRegistryApiStart {
+  urlService: BrowserUrlService;
+  anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract;
+}
+
+export type ShareTypes = 'link' | 'embed' | 'integration';
+
+export type InternalShareActionIntent = Exclude<ShareTypes, 'integration'>;
+
+type ShareActionUserInputBase<E extends Record<string, unknown> = Record<string, unknown>> = {
+  /**
+   * The title of the share action
+   */
+  draftModeCallOut?: ReactNode;
+  helpText?: ReactElement;
+  CTAButtonConfig?: {
+    id: string;
+    dataTestSubj: string;
+    label: string;
+  };
+  snapshotShareWarning?: string;
+} & E;
+
+type ShareImplementationFactory<
+  T extends ShareTypes,
+  C extends Record<string, unknown> = Record<string, unknown>
+> = T extends 'integration'
+  ? {
+      id: string;
+      groupId?: string;
+      shareType: T;
+      config: (ctx: ShareContext & ShareRegistryApiStart) => C;
+    }
+  : {
+      shareType: T;
+      config: (ctx: ShareContext & ShareRegistryApiStart) => C;
+    };
+
+// New type definition to extract the config return type
+type ShareImplementation<T> = Omit<T, 'config'> & {
+  config: T extends ShareImplementationFactory<any, infer R> ? R : never;
+};
+
+/**
+ * @description implementation definition for creating a share action for sharing object links
+ */
+export type LinkShare = ShareImplementationFactory<
+  'link',
+  {
+    shortUrlService: ReturnType<BrowserUrlService['shortUrls']['get']>;
+  }
+>;
+
+/**
+ * @description implementation definition for creating a share action for sharing embed links
+ */
+export type EmbedShare = ShareImplementationFactory<
+  'embed',
+  {
+    shortUrlService: ReturnType<BrowserUrlService['shortUrls']['get']>;
+  }
+>;
+
+/**
+ * @description skeleton definition for implementing a share action integration
+ */
+export type ShareIntegration<
+  IntegrationParameters extends Record<string, unknown> = Record<string, unknown>
+> = ShareImplementationFactory<'integration', IntegrationParameters>;
+
+/**
+ * @description Share integration implementation definition for performing exports within kibana
+ */
+export interface ExportShare
+  extends ShareIntegration<{
+    /**
+     * @deprecated only kept around for legacy reasons
+     */
+    name?: string;
+    /**
+     * @deprecated only kept around for legacy reasons
+     */
+    icon?: EuiIconProps['type'];
+    /**
+     * @deprecated only kept around for legacy reasons
+     */
+    sortOrder?: number;
+    label: string;
+    exportType: string;
+    generateAssetExport: (args: ScreenshotExportOpts) => Promise<unknown>;
+    generateValueExport: (args: ScreenshotExportOpts) => string | undefined;
+    warnings?: Array<{ title: string; message: string }>;
+    requiresSavedState?: boolean;
+    supportedLayoutOptions: ['print'];
+    renderLayoutOptionSwitch?: boolean;
+  }> {
+  groupId: 'export';
+}
+
+export type ShareActionIntents = LinkShare | EmbedShare | ShareIntegration;
+
+// Example usage
+type LinkShareConfig = ShareImplementation<LinkShare>;
+type EmbedShareConfig = ShareImplementation<EmbedShare>;
+type ExportShareConfig = ShareImplementation<ExportShare>;
+type ShareIntegrationConfig = ShareImplementation<ShareIntegration>;
+
+export type ShareConfigs = LinkShareConfig | EmbedShareConfig | ExportShareConfig;
+
+type LinkShareUIConfig = ShareActionUserInputBase<{
+  /**
+   *
+   * @description allows a consumer to provide a custom method which when invoked
+   * handles providing a share url in the context of said consumer
+   */
+  delegatedShareUrlHandler?: () => string;
+}>;
+
+type EmbedShareUIConfig = ShareActionUserInputBase<{
+  allowEmbed: boolean;
+  embedUrlParamExtensions?: UrlParamExtension[];
+  computeAnonymousCapabilities?: (anonymousUserCapabilities: Capabilities) => boolean;
+  /**
+   * @deprecated use computeAnonymousCapabilities defined on objectTypeMeta config
+   */
+  showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
+}>;
+
+type ExportShareUIConfig = ShareActionUserInputBase<{}>;
+
+export interface ShareUIConfig {
+  link: LinkShareUIConfig;
+  embed: EmbedShareUIConfig;
+  export: ExportShareUIConfig;
+}
+
+export interface SharingData {
+  title: string;
+  locatorParams: {
+    id: string;
+    params: Record<string, unknown>;
+  };
+}
+
+export abstract class ShareRegistryApi {
+  abstract start(args: ShareRegistryApiStart): void;
+
+  abstract registerShareIntegration<I extends ShareIntegration>(shareObject: string, arg: I): void;
+  abstract registerShareIntegration<I extends ShareIntegration>(arg: I): void;
+
+  abstract getShareConfigOptionsForObject(
+    objectType: string
+  ): Array<ShareActionIntents | undefined>;
+
+  abstract resolveShareItemsForShareContext(args: ShareContext): ShareConfigs[];
+
+  // abstract registerShareAction(app: string, args: ShareActionIntent[]): void;
+  // abstract registerShareAction(args: ShareActionIntent[]): void;
+
+  // // when toggling the share menu we keep it simple, only passing in the minimum required data, instead of a sleuth of options
+  // // any extra check that is required to be done will happen behind the scenes for each share context
+  // abstract toggleShare(context: string, data: SharingData): void;
+}
 
 export type BrowserUrlService = UrlService<
   BrowserShortUrlClientFactoryCreateParams,
   BrowserShortUrlClient
 >;
-
-export interface ShareContextObjectTypeConfig {
-  draftModeCallOut?: ReactNode;
-  computeAnonymousCapabilities?: (anonymousUserCapabilities: Capabilities) => boolean;
-}
 
 /**
  * @public
@@ -38,14 +197,20 @@ export interface ShareContextObjectTypeConfig {
  * to render the menu as a popover.
  * */
 export interface ShareContext {
+  /**
+   * The type of the object to share. for example lens, dashboard, etc.
+   */
   objectType: string;
   /**
    * Allows for passing contextual information that each consumer can provide to customize the share menu
    */
   objectTypeMeta: {
     title: string;
-    config?: Partial<Record<'link' | 'export' | 'embed', ShareContextObjectTypeConfig>>;
+    config: Partial<ShareUIConfig>;
   };
+  /**
+   * Id of the object that's been attempted to be shared
+   */
   objectId?: string;
   /**
    * Current url for sharing. This can be set in cases where `window.location.href`
@@ -65,19 +230,9 @@ export interface ShareContext {
     locator: LocatorPublic<any>;
     params: any;
   };
-  /**
-   *
-   * @description allows a consumer to provide a custom method which when invoked
-   * handles providing a share url in the context of said consumer
-   */
-  delegatedShareUrlHandler?: () => string;
   sharingData: { [key: string]: unknown };
   isDirty: boolean;
   onClose: () => void;
-  /**
-   * @deprecated use computeAnonymousCapabilities defined on objectTypeMeta config
-   */
-  showPublicUrlSwitch?: (anonymousUserCapabilities: Capabilities) => boolean;
   disabledShareUrl?: boolean;
   toasts: ToastsSetup;
 }
@@ -94,12 +249,13 @@ export interface ShareContextMenuPanelItem
   sortOrder?: number;
 }
 
-export type SupportedExportTypes =
-  | 'pngV2'
-  | 'printablePdfV2'
-  | 'csv_v2'
-  | 'csv_searchsource'
-  | 'lens_csv';
+// we don't need this
+// export type SupportedExportTypes =
+//   | 'pngV2'
+//   | 'printablePdfV2'
+//   | 'csv_v2'
+//   | 'csv_searchsource'
+//   | 'lens_csv';
 
 /**
  * @public
@@ -121,35 +277,36 @@ export interface ScreenshotExportOpts {
   intl: InjectedIntl;
 }
 
-export interface ShareMenuItemV2 extends ShareMenuItemBase {
-  // extended props to support share modal
-  label: 'PDF' | 'CSV' | 'PNG';
-  reportType?: SupportedExportTypes;
-  requiresSavedState?: boolean;
-  helpText?: ReactElement;
-  copyURLButton?: { id: string; dataTestSubj: string; label: string };
-  generateExportButton?: ReactElement;
-  /**
-   * Function to trigger an export
-   */
-  generateExport: (args: ScreenshotExportOpts) => Promise<unknown>;
-  /**
-   * Function to generate a URL to be used for automating export
-   * Not applicable for exports that do not call a remote API (i.e Lens CSV export)
-   */
-  generateExportUrl?: (args: ScreenshotExportOpts) => string | undefined;
-  theme?: ThemeServiceSetup;
-  renderLayoutOptionSwitch?: boolean;
-  layoutOption?: 'print';
-  generateCopyUrl?: URL;
-  renderCopyURLButton?: boolean;
-  warnings?: Array<{ title: string; message: string }>;
-}
+// export interface ShareMenuItemV2 extends ShareMenuItemBase {
+//   // extended props to support share modal
+//   label: 'PDF' | 'CSV' | 'PNG';
+//   // reportType?: SupportedExportTypes;
+//   requiresSavedState?: boolean;
+//   helpText?: ReactElement;
+//   copyURLButton?: { id: string; dataTestSubj: string; label: string };
+//   generateExportButton?: ReactElement;
+//   /**
+//    * Function to trigger an export
+//    */
+//   generateExport: (args: ScreenshotExportOpts) => Promise<unknown>;
+//   /**
+//    * Function to generate a URL to be used for automating export
+//    * Not applicable for exports that do not call a remote API (i.e Lens CSV export)
+//    */
+//   generateExportUrl?: (args: ScreenshotExportOpts) => string | undefined;
+//   theme?: ThemeServiceSetup;
+//   renderLayoutOptionSwitch?: boolean;
+//   layoutOption?: 'print';
+//   generateCopyUrl?: URL;
+//   renderCopyURLButton?: boolean;
+//   warnings?: Array<{ title: string; message: string }>;
+// }
 
-export interface ShareMenuProviderV2 {
-  readonly id: string;
-  getShareMenuItems: (context: ShareContext) => ShareMenuItemV2[];
-}
+// export interface ShareMenuProviderV2 {
+//   readonly id: string;
+//   getShareMenuItems: (context: ShareContext) => ShareMenuItemV2[];
+// }
+
 export interface ShareMenuProviderLegacy {
   readonly id: string;
   getShareMenuItemsLegacy: (context: ShareContext) => ShareMenuItemLegacy[];
@@ -162,7 +319,7 @@ export interface ShareMenuProviderLegacy {
  * menu. Returned `ShareMenuItem`s will be shown in the context menu together with the
  * default built-in share options. Each share provider needs a globally unique id.
  * */
-export type ShareMenuProvider = ShareMenuProviderV2 | ShareMenuProviderLegacy;
+// export type ShareMenuProvider =  ShareMenuProviderLegacy;
 
 interface UrlParamExtensionProps {
   setParamValue: (values: {}) => void;
@@ -176,10 +333,7 @@ export interface UrlParamExtension {
 /** @public */
 export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   anchorElement: HTMLElement;
-  allowEmbed: boolean;
   allowShortUrl: boolean;
-  embedUrlParamExtensions?: UrlParamExtension[];
-  snapshotShareWarning?: string;
   onClose?: () => void;
   publicAPIEnabled?: boolean;
 }

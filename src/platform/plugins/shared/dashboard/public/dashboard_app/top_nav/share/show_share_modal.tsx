@@ -229,6 +229,12 @@ export function ShowShareModal({
           ),
         },
         embed: {
+          embedUrlParamExtensions: [
+            {
+              paramName: 'embed',
+              component: EmbedUrlParamExtension,
+            },
+          ],
           draftModeCallOut: (
             <EuiCallOut
               color="warning"
@@ -261,12 +267,6 @@ export function ShowShareModal({
         params: locatorParams,
       },
     },
-    embedUrlParamExtensions: [
-      {
-        paramName: 'embed',
-        component: EmbedUrlParamExtension,
-      },
-    ],
     snapshotShareWarning: Boolean(unsavedDashboardState?.panels)
       ? shareModalStrings.getSnapshotShareWarning()
       : undefined,

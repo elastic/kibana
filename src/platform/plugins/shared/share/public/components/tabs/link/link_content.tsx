@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useState, useRef, useEffect } from 'react';
 import type { IShareContext, ShareContextObjectTypeConfig } from '../../context';
-import type { LinkShare } from '../../../services/share_orchestrator';
+import type { LinkShare } from '../../../types';
 
 type LinkProps = Pick<
   IShareContext,
@@ -29,7 +29,6 @@ type LinkProps = Pick<
   | 'objectId'
   | 'isDirty'
   | 'shareableUrl'
-  | 'delegatedShareUrlHandler'
   | 'shareableUrlLocatorParams'
   | 'allowShortUrl'
 > & {
@@ -46,12 +45,11 @@ interface UrlParams {
 export const LinkContent = ({
   isDirty,
   objectType,
-  objectConfig = {},
+  objectConfig,
   shareableUrl,
   shortUrlService,
   shareableUrlLocatorParams,
   allowShortUrl,
-  delegatedShareUrlHandler,
 }: LinkProps) => {
   const [snapshotUrl, setSnapshotUrl] = useState<string>('');
   const [isTextCopied, setTextCopied] = useState(false);
@@ -59,6 +57,8 @@ export const LinkContent = ({
   const urlParamsRef = useRef<UrlParams | undefined>(undefined);
   const urlToCopy = useRef<string | undefined>(undefined);
   const copiedTextToolTipCleanupIdRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const { delegatedShareUrlHandler } = objectConfig;
 
   const getUrlWithUpdatedParams = useCallback((tempUrl: string): string => {
     const urlWithUpdatedParams = urlParamsRef.current
