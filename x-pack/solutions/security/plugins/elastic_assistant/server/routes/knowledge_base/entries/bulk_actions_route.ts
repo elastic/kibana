@@ -260,7 +260,7 @@ export const bulkActionKnowledgeBaseEntriesRoute = (router: ElasticAssistantPlug
             body.update?.map((entry) => entry.id) ?? [],
             'update'
           );
-          
+
           const writer = await kbDataClient?.getWriter();
           const changedAt = new Date().toISOString();
           const {
