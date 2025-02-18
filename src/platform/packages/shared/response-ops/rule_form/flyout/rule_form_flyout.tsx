@@ -21,7 +21,7 @@ const RuleForm: React.LazyExoticComponent<React.FC<RuleFormProps<any>>> = lazy((
   import('../src/rule_form').then((module) => ({ default: module.RuleForm }))
 );
 
-const RuleFormFlyoutWithContext = <MetaData extends RuleTypeMetaData>(
+const RuleFormFlyoutRenderer = <MetaData extends RuleTypeMetaData>(
   props: RuleFormProps<MetaData>
 ) => {
   const { onClickClose, hideCloseButton } = useRuleFlyoutUIContext();
@@ -66,7 +66,7 @@ export const RuleFormFlyout = <MetaData extends RuleTypeMetaData>(
 ) => {
   return (
     <RuleFlyoutUIContextProvider>
-      <RuleFormFlyoutWithContext {...props} />
+      <RuleFormFlyoutRenderer {...props} />
     </RuleFlyoutUIContextProvider>
   );
 };
