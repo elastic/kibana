@@ -20,6 +20,7 @@ import type { NavigateToApp } from '../../breadcrumbs';
 import { getMlManagementBreadcrumb, getStackManagementBreadcrumb } from '../../breadcrumbs';
 import { useCreateADLinks } from '../../../components/custom_hooks/use_create_ad_links';
 import { DataSourceContextProvider } from '../../../contexts/ml';
+import { useNavigateToManagementMlLink } from '../../../contexts/kibana/use_create_url';
 
 const Page = dynamic(async () => ({
   default: (await import('../../../jobs/new_job/recognize')).Page,
@@ -83,6 +84,7 @@ const CheckViewOrCreateWrapper: FC<PageProps> = ({ location }) => {
   const { createLinkWithUserDefaults } = useCreateADLinks();
 
   const navigateToPath = useNavigateToPath();
+  const navigateToMlManagementLink = useNavigateToManagementMlLink('anomaly_detection');
 
   /**
    * Checks whether the jobs in a data recognizer module have been created.
@@ -104,7 +106,10 @@ const CheckViewOrCreateWrapper: FC<PageProps> = ({ location }) => {
             await navigateToPath(url);
             reject();
           } else {
-            await navigateToPath(`/jobs/new_job/recognize?id=${moduleId}&index=${dataViewId}`);
+            await navigateToMlManagementLink(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER, {
+              id: moduleId,
+              index: dataViewId,
+            });
             reject();
           }
         })
