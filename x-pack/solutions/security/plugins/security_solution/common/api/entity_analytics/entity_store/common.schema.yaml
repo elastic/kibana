@@ -74,6 +74,8 @@ components:
           type: string
         installed: 
           type: boolean
+        metadata:
+          type: object
         resource:
           $ref: '#/components/schemas/EngineComponentResource'
         health: 
@@ -92,8 +94,6 @@ components:
                 type: string
               message:
                 type: string
-              metadata:
-                type: object
 
     EngineComponentResource:
       type: string

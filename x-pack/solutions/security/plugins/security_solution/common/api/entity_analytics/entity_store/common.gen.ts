@@ -80,6 +80,7 @@ export type EngineComponentStatus = z.infer<typeof EngineComponentStatus>;
 export const EngineComponentStatus = z.object({
   id: z.string(),
   installed: z.boolean(),
+  metadata: z.object({}).optional(),
   resource: EngineComponentResource,
   health: z.enum(['green', 'yellow', 'red', 'unknown']).optional(),
   errors: z
@@ -87,7 +88,6 @@ export const EngineComponentStatus = z.object({
       z.object({
         title: z.string().optional(),
         message: z.string().optional(),
-        metadata: z.object({}).optional(),
       })
     )
     .optional(),
