@@ -16,7 +16,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
 
-  const { dashboard, timePicker, timeToVisualize } = getPageObjects(['dashboard', 'timePicker', 'timeToVisualize']);
+  const { dashboard, timePicker, timeToVisualize } = getPageObjects([
+    'dashboard',
+    'timePicker',
+    'timeToVisualize',
+  ]);
 
   const fewPanelsTitle = 'few panels';
   const markdownTitle = 'Copy To Markdown';
