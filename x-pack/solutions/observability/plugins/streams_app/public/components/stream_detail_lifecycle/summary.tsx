@@ -21,7 +21,7 @@ export function RetentionSummary({ definition }: { definition: IngestStreamGetRe
   const summary = useMemo(() => summaryText(definition), [definition]);
 
   return (
-    <EuiPanel hasShadow={false} hasBorder color="subdued" paddingSize="s">
+    <EuiPanel hasShadow={false} hasBorder color="subdued" paddingSize="m">
       <EuiText>
         <h5>
           {i18n.translate('xpack.streams.streamDetailLifecycle.retentionSummaryLabel', {
