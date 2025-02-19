@@ -25,10 +25,10 @@ export type CustomStatusCheckCallback = () => Promise<boolean>;
 export interface CustomComponentProps {
   http: HomeKibanaServices['http'];
   basePath: string;
-  isDarkTheme?: boolean;
-  kibanaVersion?: string;
-  variantId?: string;
-  isCloudEnabled?: boolean;
+  isDarkTheme: boolean;
+  kibanaVersion: string;
+  variantId: string;
+  isCloudEnabled: boolean;
 }
 type CustomComponent = () => Promise<React.ComponentType<CustomComponentProps>>;
 
