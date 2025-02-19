@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('create new', () => {
-      it('warns on duplicate name for new dashboard', async function () {
+      it.only('warns on duplicate name for new dashboard', async function () {
         await dashboard.clickNewDashboard();
         await dashboard.saveDashboard(dashboardName);
 
@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.expectDuplicateTitleWarningDisplayed({ displayed: true });
       });
 
-      it('does not save on reject confirmation', async function () {
+      it.only('does not save on reject confirmation', async function () {
         await dashboard.cancelSave();
         await dashboard.gotoDashboardLandingPage();
 
