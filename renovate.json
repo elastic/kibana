@@ -4015,7 +4015,7 @@
         "main"
       ],
       "labels": [
-        "Team:Obs UX Logs",
+        "Team:obs-ux-logs",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4036,7 +4036,7 @@
         "main"
       ],
       "labels": [
-        "Team:Obs UX Logs",
+        "Team:obs-ux-logs",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4056,7 +4056,7 @@
         "main"
       ],
       "labels": [
-        "Team:Obs UX Logs",
+        "Team:obs-ux-logs",
         "release_note:skip",
         "backport:all-open"
       ],
