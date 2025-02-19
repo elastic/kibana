@@ -2784,7 +2784,7 @@
             "references": [
               {
                 "plugin": "@kbn/monaco",
-                "path": "src/platform/packages/shared/kbn-monaco/src/esql/lib/hover/hover.ts"
+                "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/lib/hover/hover.ts"
               }
             ]
           },

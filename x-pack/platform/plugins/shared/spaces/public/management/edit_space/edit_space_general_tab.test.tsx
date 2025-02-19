@@ -89,6 +89,7 @@ describe('EditSpaceSettings', () => {
           theme={theme}
           i18n={i18n}
           logger={logger}
+          enableSecurityLink=""
         >
           {children}
         </EditSpaceProviderRoot>

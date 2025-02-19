@@ -13989,6 +13989,9 @@
                     },
                     "type": "object"
                   },
+                  "bumpRevision": {
+                    "type": "boolean"
+                  },
                   "data_output_id": {
                     "nullable": true,
                     "type": "string"
