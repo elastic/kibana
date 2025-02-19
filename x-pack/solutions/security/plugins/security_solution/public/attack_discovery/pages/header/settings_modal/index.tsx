@@ -27,7 +27,6 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { AlertsSettings } from './alerts_settings';
-import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { Footer } from '../../settings_flyout/footer';
 import { getIsTourEnabled } from './is_tour_enabled';
 import * as i18n from './translations';
@@ -45,7 +44,6 @@ const SettingsModalComponent: React.FC<Props> = ({
   localStorageAttackDiscoveryMaxAlerts,
   setLocalStorageAttackDiscoveryMaxAlerts,
 }) => {
-  const spaceId = useSpaceId() ?? 'default';
   const modalTitleId = useGeneratedHtmlId();
 
   const [maxAlerts, setMaxAlerts] = useState(
@@ -68,7 +66,7 @@ const SettingsModalComponent: React.FC<Props> = ({
   }, [closeModal, maxAlerts, setLocalStorageAttackDiscoveryMaxAlerts]);
 
   const [showSettingsTour, setShowSettingsTour] = useLocalStorage<boolean>(
-    `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${spaceId}.${SHOW_SETTINGS_TOUR_LOCAL_STORAGE_KEY}.v8.16`,
+    `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${SHOW_SETTINGS_TOUR_LOCAL_STORAGE_KEY}.v8.16`,
     true
   );
   const onTourFinished = useCallback(() => setShowSettingsTour(() => false), [setShowSettingsTour]);
