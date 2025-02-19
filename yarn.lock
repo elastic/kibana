@@ -6572,6 +6572,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/observability-schema@link:x-pack/solutions/observability/packages/kbn-observability-schema":
+  version "0.0.0"
+  uid ""
+
 "@kbn/observability-shared-plugin@link:x-pack/solutions/observability/plugins/observability_shared":
   version "0.0.0"
   uid ""
