@@ -10,6 +10,7 @@ import { FtrProviderContext } from './ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Solution navigation smoke tests', function () {
+    loadTestFile(require.resolve('./tests/nav_panel'));
     loadTestFile(require.resolve('./tests/observability_sidenav'));
     loadTestFile(require.resolve('./tests/search_sidenav'));
     loadTestFile(require.resolve('./tests/security_sidenav'));
