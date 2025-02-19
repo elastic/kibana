@@ -58,15 +58,10 @@ export function FieldWithActions({
 
         <EuiFlexItem grow={2}>
           <FieldHoverActionPopover title={value} value={value} field={field}>
-            <EuiFlexGroup
-              responsive={false}
-              alignItems="center"
-              justifyContent="flexStart"
-              gutterSize="xs"
-            >
+            <div className="eui-textBreakWord">
               {loading && <EuiLoadingSpinner size="m" />}
               {children}
-            </EuiFlexGroup>
+            </div>
           </FieldHoverActionPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
