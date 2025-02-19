@@ -128,7 +128,6 @@ export const useConversation = (): UseConversation => {
    */
   const setApiConfig = useCallback(
     async ({ conversation, apiConfig }: SetApiConfigProps) => {
-      console.log('setApiConfig', conversation, apiConfig);
       if (conversation.id === '') {
         // only developer should ever see this error
         throw new Error('Conversation ID is required to set API config');

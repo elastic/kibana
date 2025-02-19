@@ -57,10 +57,6 @@ export const AssistantOverlay = React.memo(() => {
 
         setIsModalVisible(so);
         setPromptContextId(pid);
-        console.log('showOverlay', {
-          selectedConversation,
-          nextConversation,
-        });
         setSelectedConversation(nextConversation);
       },
     [assistantTelemetry, getLastConversation]

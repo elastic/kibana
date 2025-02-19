@@ -62,6 +62,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
     http,
     assistantAvailability: { isAssistantEnabled },
     getLastConversation,
+    setLastConversation,
   } = useAssistantContext();
   const {
     allSystemPrompts,
@@ -81,6 +82,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
       isFetchedCurrentUserConversations &&
       isFetchedPrompts &&
       Object.keys(conversations).length > 0,
+    setLastConversation,
   });
 
   const onConversationChange = useCallback(

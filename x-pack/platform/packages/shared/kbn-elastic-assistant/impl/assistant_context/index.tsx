@@ -298,12 +298,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
 
   const getLastConversation = useCallback(
     (selectedConversation?: SelectedConversation): LastConversation => {
-      console.log('getLastConversation', {
-        selectedConversation,
-        localStorageLastConversation,
-        localStorageLastConversationId,
-      });
-
       let nextConversation: LastConversation = { id: '' };
       // Type guard to check if selectedConversation has a 'title'
       if (selectedConversation && 'title' in selectedConversation) {
@@ -311,16 +305,12 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
           id: '',
           title: selectedConversation.title,
         };
-        setLocalStorageLastConversation(nextConversation);
-        console.log('getLastConversation 1', nextConversation);
         return nextConversation;
       }
 
       // If selectedConversation exists and has an 'id', return it with no 'title'
       if (selectedConversation && 'id' in selectedConversation) {
         nextConversation = { id: selectedConversation.id };
-        setLocalStorageLastConversation(nextConversation);
-        console.log('getLastConversation 2', nextConversation);
         return nextConversation;
       }
 
@@ -330,33 +320,25 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
           id: '',
           title: localStorageLastConversation.title,
         };
-        setLocalStorageLastConversation(nextConversation);
-        console.log('getLastConversation 3', nextConversation);
         return nextConversation;
       }
 
       // If localStorageLastConversation, return it
       if (localStorageLastConversation && 'id' in localStorageLastConversation) {
         nextConversation = localStorageLastConversation;
-        setLocalStorageLastConversation(nextConversation);
-        console.log('getLastConversation 4', nextConversation);
         return nextConversation;
       }
 
       // If localStorageLastConversationId exists, use it as 'id'
       if (localStorageLastConversationId) {
         nextConversation = { id: localStorageLastConversationId };
-        setLocalStorageLastConversation(nextConversation);
-        console.log('getLastConversation 5', nextConversation);
         return nextConversation;
       }
 
       // Default to an empty 'id'
-      setLocalStorageLastConversation(nextConversation);
-      console.log('getLastConversation 1', nextConversation);
       return nextConversation;
     },
-    [localStorageLastConversation, localStorageLastConversationId, setLocalStorageLastConversation]
+    [localStorageLastConversation, localStorageLastConversationId]
   );
 
   // Fetch assistant capabilities

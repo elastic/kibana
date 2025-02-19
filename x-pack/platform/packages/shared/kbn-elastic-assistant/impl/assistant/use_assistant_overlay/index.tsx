@@ -8,6 +8,7 @@
 import { Replacements } from '@kbn/elastic-assistant-common';
 import { useCallback, useEffect, useMemo } from 'react';
 
+import { Conversation } from '../../assistant_context/types';
 import { useAssistantContext } from '../../assistant_context';
 import { getUniquePromptContextId } from '../../assistant_context/helpers';
 import type { PromptContext } from '../prompt_context/types';
@@ -79,10 +80,11 @@ export const useAssistantOverlay = (
 ): UseAssistantOverlay => {
   const { http } = useAssistantContext();
 
-  const { data: conversations, isLoading } = useFetchCurrentUserConversations({
+  const { refetch } = useFetchCurrentUserConversations({
     http,
     filter: `title:${conversationTitle}`,
-    isAssistantEnabled: conversationTitle != null ? isAssistantEnabled : false,
+    // prevent from running automatically
+    isAssistantEnabled: false,
   });
   // memoize the props so that we can use them in the effect below:
   const _category: PromptContext['category'] = useMemo(() => category, [category]);
@@ -114,16 +116,16 @@ export const useAssistantOverlay = (
   const showAssistantOverlay = useCallback(
     // shouldCreateConversation should only be passed for
     // non-default conversations that may need to be initialized
-    async (showOverlay: boolean, shouldCreateConversation: boolean = false) => {
+    async (showOverlay: boolean) => {
       if (promptContextId != null) {
-        let conversation;
-        if (shouldCreateConversation) {
-          if (!isLoading) {
-            conversation = conversationTitle
-              ? Object.values(conversations).find((conv) => conv.title === conversationTitle)
-              : undefined;
-          }
-        }
+        const refetched = await refetch();
+        const conversation =
+          refetched && conversationTitle
+            ? Object.values(refetched?.data?.pages[0].data ?? []).find(
+                (conv: Conversation) => conv.title === conversationTitle
+              )
+            : undefined;
+
         assistantContextShowOverlay({
           showOverlay,
           promptContextId,
@@ -136,7 +138,7 @@ export const useAssistantOverlay = (
         });
       }
     },
-    [assistantContextShowOverlay, conversationTitle, conversations, isLoading, promptContextId]
+    [assistantContextShowOverlay, conversationTitle, promptContextId, refetch]
   );
 
   useEffect(() => {
