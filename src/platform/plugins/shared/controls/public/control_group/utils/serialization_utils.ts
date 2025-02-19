@@ -15,10 +15,10 @@ import { parseReferenceName } from '../../controls/data_controls/reference_name_
 export const deserializeControlGroup = (
   state: SerializedPanelState<ControlGroupSerializedState>
 ): ControlGroupRuntimeState => {
-  const controls: ControlPanelsState = {};
+  const initialChildControlState: ControlPanelsState = {};
   (state.rawState.controls ?? []).forEach(controlSeriailizedState => {
     const { controlConfig, id, ...rest } = controlSeriailizedState;
-    controls[id ?? uuidv4()] = {
+    initialChildControlState[id ?? uuidv4()] = {
       ...rest,
       ...(controlConfig ?? {})
     }
@@ -30,13 +30,13 @@ export const deserializeControlGroup = (
   references.forEach((reference) => {
     const referenceName = reference.name;
     const { controlId } = parseReferenceName(referenceName);
-    if (controls[controlId]) {
-      (controls[controlId] as { dataViewId?: string }).dataViewId = reference.id;
+    if (initialChildControlState[controlId]) {
+      (initialChildControlState[controlId] as { dataViewId?: string }).dataViewId = reference.id;
     }
   });
 
   return {
     ...state.rawState,
-    initialChildControlState: controls,
+    initialChildControlState,
   };
 };
