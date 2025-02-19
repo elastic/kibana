@@ -9,12 +9,14 @@ import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import type { AuthenticatedUser } from '@kbn/core/server';
 import type { SiemRuleMigrationsClientDependencies, StoredRuleMigration } from '../types';
-import { mockRuleMigrationsDataClient } from '../data/__mocks__/mocks';
+import { createRuleMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
+const mockRetrieverInitialize = jest.fn().mockResolvedValue(undefined);
 jest.mock('./retrievers', () => ({
+  ...jest.requireActual('./retrievers'),
   RuleMigrationsRetriever: jest.fn().mockImplementation(() => ({
-    initialize: jest.fn().mockResolvedValue(undefined),
+    initialize: () => mockRetrieverInitialize(),
   })),
 }));
 
@@ -25,9 +27,10 @@ jest.mock('./util/actions_client_chat', () => ({
   })),
 }));
 
+const mockInvoke = jest.fn().mockResolvedValue({});
 jest.mock('./agent', () => ({
   ...jest.requireActual('./agent'),
-  getRuleMigrationAgent: jest.fn(() => ({ invoke: jest.fn().mockResolvedValue({}) })),
+  getRuleMigrationAgent: () => ({ invoke: mockInvoke }),
 }));
 
 jest.mock('./rule_migrations_telemetry_client', () => ({
@@ -55,12 +58,27 @@ const mockDependencies: jest.Mocked<SiemRuleMigrationsClientDependencies> = {
 } as unknown as SiemRuleMigrationsClientDependencies;
 
 const mockUser = {} as unknown as AuthenticatedUser;
+const ruleId = 'test-rule-id';
+
+jest.useFakeTimers();
+jest.spyOn(global, 'setTimeout');
+const mockTimeout = setTimeout as unknown as jest.Mock;
+mockTimeout.mockImplementation((cb) => {
+  // never actually wait, we'll check the calls manually
+  cb();
+});
 
 describe('RuleMigrationTaskRunner', () => {
   let taskRunner: RuleMigrationTaskRunner;
   let abortController: AbortController;
+  let mockRuleMigrationsDataClient: ReturnType<typeof createRuleMigrationsDataClientMock>;
 
   beforeEach(() => {
+    mockRetrieverInitialize.mockResolvedValue(undefined); // Reset the mock
+    mockInvoke.mockResolvedValue({}); // Reset the mock
+    mockRuleMigrationsDataClient = createRuleMigrationsDataClientMock();
+    jest.clearAllMocks();
+
     abortController = new AbortController();
     taskRunner = new RuleMigrationTaskRunner(
       'test-migration-id',
@@ -72,81 +90,155 @@ describe('RuleMigrationTaskRunner', () => {
     );
   });
 
-  it('setup initializes necessary components', async () => {
-    const mockSetup = jest.spyOn(taskRunner, 'setup').mockResolvedValue();
-    await taskRunner.setup('test-connector-id');
-    expect(mockSetup).toHaveBeenCalledWith('test-connector-id');
-  });
-
-  it('run handles migration successfully', async () => {
-    mockRuleMigrationsDataClient.rules.get.mockResolvedValue({
-      total: 1,
-      data: [{ id: 'rule-1', status: SiemMigrationStatus.PENDING }] as StoredRuleMigration[],
-    });
-    mockRuleMigrationsDataClient.rules.saveProcessing.mockResolvedValue(undefined);
-    mockRuleMigrationsDataClient.rules.saveCompleted.mockResolvedValue(undefined);
-
-    const mockRun = jest.spyOn(taskRunner, 'run').mockResolvedValue();
-    await taskRunner.setup('test-connector-id');
-    await taskRunner.run({});
-    expect(mockRun).toHaveBeenCalled();
-  });
-
-  describe('abort', () => {
-    it('run handles abort signal correctly during initialization', async () => {
+  describe('run', () => {
+    let runPromise: Promise<void>;
+    beforeEach(async () => {
       await taskRunner.setup('test-connector-id');
-      const promise = taskRunner.run({});
-      abortController.abort(); // Trigger the abort signal
-
-      await expect(promise).resolves.toBeUndefined(); // Ensure the function handles abort gracefully
-
-      expect(mockLogger.info).toHaveBeenCalledWith(
-        'Abort signal received, stopping initialization'
-      );
     });
 
-    it('run handles abort signal correctly during run', async () => {
+    it('run handles migration successfully', async () => {
+      mockRuleMigrationsDataClient.rules.get.mockResolvedValue({ total: 0, data: [] });
+      mockRuleMigrationsDataClient.rules.get.mockResolvedValueOnce({
+        total: 1,
+        data: [{ id: ruleId, status: SiemMigrationStatus.PENDING }] as StoredRuleMigration[],
+      });
+
       await taskRunner.setup('test-connector-id');
-      const promise = taskRunner.run({});
-      await Promise.resolve(); // Wait for the initialization to complete
-      abortController.abort(); // Trigger the abort signal
+      await expect(taskRunner.run({})).resolves.toBeUndefined();
 
-      await expect(promise).resolves.toBeUndefined(); // Ensure the function handles abort gracefully
-
-      expect(mockLogger.info).toHaveBeenCalledWith('Abort signal received, stopping migration');
+      expect(mockRuleMigrationsDataClient.rules.saveProcessing).toHaveBeenCalled();
+      expect(mockTimeout).toHaveBeenCalledTimes(1); // execution sleep
+      expect(mockInvoke).toHaveBeenCalledTimes(1);
+      expect(mockRuleMigrationsDataClient.rules.saveCompleted).toHaveBeenCalled();
+      expect(mockRuleMigrationsDataClient.rules.get).toHaveBeenCalledTimes(2); // One with data, one without
+      expect(mockLogger.info).toHaveBeenCalledWith('Migration completed successfully');
     });
-  });
 
-  it('run logs an error on regular failure', async () => {
-    const error = new Error('Test error');
-    mockRuleMigrationsDataClient.rules.get.mockRejectedValue(error);
-    await taskRunner.setup('test-connector-id');
-    await expect(taskRunner.run({})).resolves.toBeUndefined();
-    expect(mockLogger.error).toHaveBeenCalledWith(`Error processing migration: ${error}`);
-  });
+    describe('when error occurs', () => {
+      const errorMessage = 'Test error';
 
-  describe.skip('backoff retries', () => {
-    it('retries on failure with exponential backoff', async () => {
-      jest.useFakeTimers();
-      const error = new Error('Transient error');
-      const mockAgent = jest.requireMock('./agent').getRuleMigrationAgent();
+      describe('during initialization', () => {
+        it('should handle abort error correctly', async () => {
+          runPromise = taskRunner.run({});
+          abortController.abort(); // Trigger the abort signal
 
-      mockAgent.invoke
-        .mockRejectedValueOnce(error)
-        .mockRejectedValueOnce(error)
-        .mockResolvedValue({});
+          await expect(runPromise).resolves.toBeUndefined(); // Ensure the function handles abort gracefully
 
-      await taskRunner.setup('test-connector-id');
-      const runPromise = taskRunner.run({});
+          expect(mockLogger.info).toHaveBeenCalledWith(
+            'Abort signal received, stopping initialization'
+          );
+        });
 
-      jest.advanceTimersByTime(1000); // First retry delay
-      jest.advanceTimersByTime(2000); // Second retry delay
+        it('should handle other errors correctly', async () => {
+          mockRetrieverInitialize.mockRejectedValueOnce(new Error(errorMessage));
 
-      await runPromise;
+          runPromise = taskRunner.run({});
+          await expect(runPromise).resolves.toBeUndefined(); // Ensure the function handles abort gracefully
 
-      expect(mockLogger.warn).toHaveBeenCalledWith('Retrying agent.invoke after transient failure');
-      expect(mockAgent.invoke).toHaveBeenCalledTimes(3);
-      jest.useRealTimers();
+          expect(mockLogger.error).toHaveBeenCalledWith(
+            `Error initializing migration: Error: ${errorMessage}`
+          );
+        });
+      });
+
+      describe('during migration', () => {
+        beforeEach(() => {
+          mockRuleMigrationsDataClient.rules.get.mockRestore();
+          mockRuleMigrationsDataClient.rules.get.mockResolvedValue({ total: 0, data: [] });
+          mockRuleMigrationsDataClient.rules.get.mockResolvedValueOnce({
+            total: 1,
+            data: [{ id: ruleId, status: SiemMigrationStatus.PENDING }] as StoredRuleMigration[],
+          });
+        });
+
+        it('should handle abort error correctly', async () => {
+          runPromise = taskRunner.run({});
+          await Promise.resolve(); // Wait for the initialization to complete
+          abortController.abort(); // Trigger the abort signal
+
+          await expect(runPromise).resolves.toBeUndefined(); // Ensure the function handles abort gracefully
+          expect(mockLogger.info).toHaveBeenCalledWith('Abort signal received, stopping migration');
+        });
+
+        it('should handle other errors correctly', async () => {
+          mockInvoke.mockRejectedValue(new Error(errorMessage));
+
+          runPromise = taskRunner.run({});
+          await expect(runPromise).resolves.toBeUndefined();
+
+          expect(mockLogger.error).toHaveBeenCalledWith(
+            `Error translating rule \"${ruleId}\" with error: ${errorMessage}`
+          );
+          expect(mockRuleMigrationsDataClient.rules.saveError).toHaveBeenCalled();
+        });
+
+        describe('during rate limit errors', () => {
+          const rule2Id = 'test-rule-id-2';
+
+          beforeEach(async () => {
+            mockRuleMigrationsDataClient.rules.get.mockRestore();
+            mockRuleMigrationsDataClient.rules.get.mockResolvedValue({ total: 0, data: [] });
+            mockRuleMigrationsDataClient.rules.get.mockResolvedValueOnce({
+              total: 1,
+              data: [
+                { id: ruleId, status: SiemMigrationStatus.PENDING },
+                { id: rule2Id, status: SiemMigrationStatus.PENDING },
+              ] as StoredRuleMigration[],
+            });
+          });
+
+          it('should retry with exponential backoff', async () => {
+            const error = new Error('429. You did way too many requests dude');
+
+            mockInvoke
+              .mockResolvedValue({}) // Successful calls from here on
+              .mockRejectedValueOnce(error) // Third failed call for rule 1
+              .mockRejectedValueOnce(error) // Second failed call for rule 1
+              .mockRejectedValueOnce(error) // First failed call for rule 2
+              .mockRejectedValueOnce(error); // First failed call for rule 1
+
+            await expect(taskRunner.run({})).resolves.toBeUndefined(); // success
+
+            /**
+             * Invokes:
+             * rule 1 -> failure -> start backoff retries
+             * rule 2 -> failure -> await for rule 1 backoff
+             * then:
+             * rule 1 retry 1 -> failure
+             * rule 1 retry 2 -> failure
+             * rule 1 retry 3 -> success
+             * then:
+             * rule 2 -> success
+             */
+            expect(mockInvoke).toHaveBeenCalledTimes(6);
+            expect(mockTimeout).toHaveBeenCalledTimes(6); // 3 backoff sleeps + 3 execution sleeps
+            expect(mockTimeout).toHaveBeenNthCalledWith(
+              1,
+              expect.any(Function),
+              expect.any(Number)
+            );
+            expect(mockTimeout).toHaveBeenNthCalledWith(
+              2,
+              expect.any(Function),
+              expect.any(Number)
+            );
+            expect(mockTimeout).toHaveBeenNthCalledWith(3, expect.any(Function), 1000);
+            expect(mockTimeout).toHaveBeenNthCalledWith(4, expect.any(Function), 2000);
+            expect(mockTimeout).toHaveBeenNthCalledWith(5, expect.any(Function), 4000);
+            expect(mockTimeout).toHaveBeenNthCalledWith(
+              6,
+              expect.any(Function),
+              expect.any(Number)
+            );
+
+            expect(mockLogger.debug).toHaveBeenCalledWith(
+              `Awaiting backoff task for rule "${rule2Id}"`
+            );
+            expect(mockInvoke).toHaveBeenCalledTimes(6); // 3 retries + 3 executions
+            expect(mockRuleMigrationsDataClient.rules.saveCompleted).toHaveBeenCalledTimes(2); // 2 rules
+          });
+        });
+      });
     });
   });
 });
