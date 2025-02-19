@@ -44,36 +44,52 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
     remoteName: slo.remote?.remoteName,
   });
 
-  const title =
-    slo.indicator.type !== 'sli.metric.timeslice' ? (
-      <EuiTitle size="xs">
-        <h2>
-          {i18n.translate('xpack.slo.sloDetails.eventsChartPanel.title', {
-            defaultMessage: 'Good vs bad events',
-          })}
-        </h2>
-      </EuiTitle>
-    ) : (
-      <EuiTitle size="xs">
-        <h2>
-          {i18n.translate('xpack.slo.sloDetails.eventsChartPanel.timesliceTitle', {
-            defaultMessage: 'Timeslice metric',
-          })}
-        </h2>
-      </EuiTitle>
-    );
-
   const canLinkToDiscover = ![
     'sli.apm.transactionErrorRate',
     'sli.apm.transactionDuration',
   ].includes(slo.indicator.type);
+
+  function getChartTitle() {
+    switch (slo.indicator.type) {
+      case 'sli.metric.timeslice':
+        return i18n.translate('xpack.slo.sloDetails.eventsChartPanel.timesliceTitle', {
+          defaultMessage: 'Timeslice metric',
+        });
+      default:
+        return i18n.translate('xpack.slo.sloDetails.eventsChartPanel.title', {
+          defaultMessage: 'Good vs bad events',
+        });
+    }
+  }
+
+  function getChart() {
+    switch (slo.indicator.type) {
+      case 'sli.metric.timeslice':
+        return (
+          <MetricTimesliceEventsChart
+            isLoading={isLoading}
+            slo={slo}
+            data={data}
+            onBrushed={onBrushed}
+          />
+        );
+      default:
+        return (
+          <GoodBadEventsChart isLoading={isLoading} data={data} slo={slo} onBrushed={onBrushed} />
+        );
+    }
+  }
 
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="eventsChartPanel">
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexGroup>
           <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem grow={1}>{title}</EuiFlexItem>
+            <EuiFlexItem grow={1}>
+              <EuiTitle size="xs">
+                <h2>{getChartTitle()}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
             {selectedTabId !== 'history' && (
               <EuiFlexItem>
                 <EuiText color="subdued" size="s">
@@ -110,18 +126,7 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
           )}
         </EuiFlexGroup>
 
-        <EuiFlexItem>
-          {slo.indicator.type !== 'sli.metric.timeslice' ? (
-            <GoodBadEventsChart isLoading={isLoading} data={data} slo={slo} onBrushed={onBrushed} />
-          ) : (
-            <MetricTimesliceEventsChart
-              isLoading={isLoading}
-              slo={slo}
-              data={data}
-              onBrushed={onBrushed}
-            />
-          )}
-        </EuiFlexItem>
+        <EuiFlexItem>{getChart()}</EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );

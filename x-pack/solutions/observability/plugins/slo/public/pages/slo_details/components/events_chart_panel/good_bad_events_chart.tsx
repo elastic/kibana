@@ -42,21 +42,11 @@ export function GoodBadEventsChart({ data, slo, onBrushed, isLoading }: Props) {
   const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
     isDateHistogram: true,
   });
-
   const { ObservabilityAnnotations, annotations, wrapOnBrushEnd, onAnnotationClick } =
-    useAnnotations({
-      slo,
-    });
+    useAnnotations({ slo });
 
   const dateFormat = uiSettings.get('dateFormat');
-
   const yAxisNumberFormat = '0,0';
-
-  const domain = {
-    fit: true,
-    min: NaN,
-    max: NaN,
-  };
 
   const intervalInMilliseconds =
     data && data.length > 2
@@ -72,16 +62,14 @@ export function GoodBadEventsChart({ data, slo, onBrushed, isLoading }: Props) {
   });
 
   const barClickHandler = (params: XYChartElementEvent[]) => {
-    if (slo?.indicator?.type === 'sli.kql.custom') {
-      const [datum, eventDetail] = params[0];
-      const isBad = eventDetail.specId === badEventId;
-      const timeRange = {
-        from: moment(datum.x).toISOString(),
-        to: moment(datum.x).add(intervalInMilliseconds, 'ms').toISOString(),
-        mode: 'absolute' as const,
-      };
-      openInDiscover({ slo, showBad: isBad, showGood: !isBad, timeRange, discover, uiSettings });
-    }
+    const [datum, eventDetail] = params[0];
+    const isBad = eventDetail.specId === badEventId;
+    const timeRange = {
+      from: moment(datum.x).toISOString(),
+      to: moment(datum.x).add(intervalInMilliseconds, 'ms').toISOString(),
+      mode: 'absolute' as const,
+    };
+    openInDiscover({ slo, showBad: isBad, showGood: !isBad, timeRange, discover, uiSettings });
   };
 
   if (isLoading) {
@@ -131,7 +119,11 @@ export function GoodBadEventsChart({ data, slo, onBrushed, isLoading }: Props) {
         id="left"
         position={Position.Left}
         tickFormat={(d) => numeral(d).format(yAxisNumberFormat)}
-        domain={domain}
+        domain={{
+          fit: true,
+          min: NaN,
+          max: NaN,
+        }}
       />
 
       <BarSeries
@@ -146,12 +138,10 @@ export function GoodBadEventsChart({ data, slo, onBrushed, isLoading }: Props) {
         xAccessor="key"
         yAccessors={['value']}
         stackAccessors={[0]}
-        data={
-          data?.map((datum) => ({
-            key: new Date(datum.date).getTime(),
-            value: datum.events?.good,
-          })) ?? []
-        }
+        data={(data ?? []).map((datum) => ({
+          key: new Date(datum.date).getTime(),
+          value: datum.events?.good,
+        }))}
       />
 
       <BarSeries
@@ -166,12 +156,10 @@ export function GoodBadEventsChart({ data, slo, onBrushed, isLoading }: Props) {
         xAccessor="key"
         yAccessors={['value']}
         stackAccessors={[0]}
-        data={
-          data?.map((datum) => ({
-            key: new Date(datum.date).getTime(),
-            value: datum.events?.bad,
-          })) ?? []
-        }
+        data={(data ?? []).map((datum) => ({
+          key: new Date(datum.date).getTime(),
+          value: datum.events?.bad,
+        }))}
       />
     </Chart>
   );

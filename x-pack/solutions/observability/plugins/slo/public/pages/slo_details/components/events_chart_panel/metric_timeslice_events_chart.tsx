@@ -29,9 +29,9 @@ interface Props {
 
 export function MetricTimesliceEventsChart({ slo, isLoading, data, onBrushed }: Props) {
   const { charts, uiSettings } = useKibana().services;
+  const chartRef = useRef(null);
   const baseTheme = charts.theme.useChartsBaseTheme();
   const dateFormat = uiSettings.get('dateFormat');
-  const chartRef = useRef(null);
   const yAxisNumberFormat = slo.indicator.type === 'sli.metric.timeslice' ? '0,0[.00]' : '0,0';
 
   const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
