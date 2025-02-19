@@ -11,14 +11,14 @@ import { TestProviders } from '../../../common/mock';
 import type { UserPanelProps } from '.';
 import { UserPanel } from '.';
 import type {
-  FlyoutPanelProps,
-  ExpandableFlyoutState,
   ExpandableFlyoutApi,
+  ExpandableFlyoutState,
+  FlyoutPanelHistory,
 } from '@kbn/expandable-flyout';
 import {
   useExpandableFlyoutApi,
-  useExpandableFlyoutState,
   useExpandableFlyoutHistory,
+  useExpandableFlyoutState,
 } from '@kbn/expandable-flyout';
 import { mockManagedUserData, mockObservedUser } from './mocks';
 import { mockRiskScoreState } from '../../shared/mocks';
@@ -57,7 +57,9 @@ const flyoutContextValue = {
   closeLeftPanel: jest.fn(),
 } as unknown as ExpandableFlyoutApi;
 
-const flyoutHistory = [{ id: 'id1', params: {} }] as unknown as FlyoutPanelProps[];
+const flyoutHistory: FlyoutPanelHistory[] = [
+  { lastOpen: Date.now(), panel: { id: 'id1', params: {} } },
+];
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
   useExpandableFlyoutHistory: jest.fn(),
