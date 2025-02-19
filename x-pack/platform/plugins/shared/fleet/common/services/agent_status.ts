@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ActiveAgentStatuses } from '../constants';
 import type { Agent, AgentStatus, FleetServerAgent } from '../types';
 
 export function getPreviousAgentStatusForOfflineAgents(
@@ -64,16 +65,7 @@ export function buildKueryForInactiveAgents() {
 }
 
 export function buildKueryForActiveAgents() {
-  const activeStatus = [
-    'online',
-    'offline',
-    'enrolling',
-    'updating',
-    'degraded',
-    'error',
-    'orphaned',
-  ]; // excluded: unenrolling, unenrolled, inactive, uninstalled
-  return `(${activeStatus.map((s) => `status:${s}`).join(' or ')})`;
+  return `(${ActiveAgentStatuses.map((s) => `status:${s}`).join(' or ')})`;
 }
 
 export const AGENT_UPDATING_TIMEOUT_HOURS = 2;
