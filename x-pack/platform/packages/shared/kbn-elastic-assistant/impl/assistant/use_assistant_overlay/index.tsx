@@ -15,7 +15,7 @@ import type { PromptContext } from '../prompt_context/types';
 import { useFetchCurrentUserConversations } from '../api';
 
 interface UseAssistantOverlay {
-  showAssistantOverlay: (show: boolean, silent?: boolean) => void;
+  showAssistantOverlay: (show: boolean) => void;
   promptContextId: string;
 }
 
@@ -117,7 +117,7 @@ export const useAssistantOverlay = (
     // shouldCreateConversation should only be passed for
     // non-default conversations that may need to be initialized
     async (showOverlay: boolean) => {
-      if (promptContextId != null) {
+      if (promptContextId != null && isAssistantEnabled) {
         const refetched = await refetch();
         const conversation =
           refetched && conversationTitle
@@ -138,7 +138,7 @@ export const useAssistantOverlay = (
         });
       }
     },
-    [assistantContextShowOverlay, conversationTitle, promptContextId, refetch]
+    [assistantContextShowOverlay, conversationTitle, isAssistantEnabled, promptContextId, refetch]
   );
 
   useEffect(() => {

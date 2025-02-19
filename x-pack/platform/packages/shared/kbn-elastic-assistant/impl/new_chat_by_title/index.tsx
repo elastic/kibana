@@ -8,39 +8,27 @@
 import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { SelectedConversation, useAssistantContext } from '../assistant_context';
-
 import * as i18n from './translations';
 
 export interface Props {
   children?: React.ReactNode;
-  /** Optionally automatically add this context to a conversation when the assistant is shown */
-  selectedConversation?: SelectedConversation;
+  showAssistantOverlay: (show: boolean) => void;
   /** Defaults to `discuss`. If null, the button will not have an icon */
   iconType?: string | null;
-  /** Optionally specify a well known ID, or default to a UUID */
-  promptContextId?: string;
   /** Defaults to false. If true, shows icon button without text */
   iconOnly?: boolean;
 }
 
 const NewChatByTitleComponent: React.FC<Props> = ({
   children = i18n.NEW_CHAT,
-  selectedConversation,
+  showAssistantOverlay,
   iconType,
-  promptContextId,
   iconOnly = false,
 }) => {
-  const { showAssistantOverlay } = useAssistantContext();
-
   // proxy show / hide calls to assistant context, using our internal prompt context id:
   const showOverlay = useCallback(() => {
-    showAssistantOverlay({
-      selectedConversation,
-      promptContextId,
-      showOverlay: true,
-    });
-  }, [selectedConversation, promptContextId, showAssistantOverlay]);
+    showAssistantOverlay(true);
+  }, [showAssistantOverlay]);
 
   const icon = useMemo(() => {
     if (iconType === null) {
