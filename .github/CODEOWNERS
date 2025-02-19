@@ -528,7 +528,9 @@ src/platform/packages/shared/kbn-sse-utils @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-sse-utils-client @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-sse-utils-server @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-std @elastic/kibana-core
+src/platform/packages/shared/kbn-storage-adapter @elastic/observability-ui
 src/platform/packages/shared/kbn-timerange @elastic/obs-ux-logs-team
+src/platform/packages/shared/kbn-traced-es-client @elastic/observability-ui
 src/platform/packages/shared/kbn-triggers-actions-ui-types @elastic/response-ops
 src/platform/packages/shared/kbn-try-in-console @elastic/search-kibana
 src/platform/packages/shared/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
