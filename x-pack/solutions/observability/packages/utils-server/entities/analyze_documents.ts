@@ -8,7 +8,7 @@
 import { mapValues } from 'lodash';
 import { mergeSampleDocumentsWithFieldCaps } from '@kbn/observability-utils-common/llm/log_analysis/merge_sample_documents_with_field_caps';
 import { DocumentAnalysis } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
-import type { ObservabilityElasticsearchClient } from '../es/client/create_observability_es_client';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery } from '../es/queries/kql_query';
 import { rangeQuery } from '../es/queries/range_query';
 
@@ -19,7 +19,7 @@ export async function analyzeDocuments({
   end,
   index,
 }: {
-  esClient: ObservabilityElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   kuery: string;
   start: number;
   end: number;
