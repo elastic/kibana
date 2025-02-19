@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ProcessorType, IngestStreamGetResponse } from '@kbn/streams-schema';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useForm, SubmitHandler, FormProvider, useWatch } from 'react-hook-form';
 import { css } from '@emotion/react';
@@ -39,10 +39,12 @@ import {
 } from '../utils';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 import { UseDefinitionReturn } from '../hooks/use_definition';
-import { UseProcessingSimulatorReturn } from '../hooks/use_processing_simulator';
+import { ProcessorMetrics, UseProcessingSimulatorReturn } from '../hooks/use_processing_simulator';
+import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
 
 export interface ProcessorPanelProps {
   definition: IngestStreamGetResponse;
+  processorMetrics?: ProcessorMetrics;
   onWatchProcessor: UseProcessingSimulatorReturn['watchProcessor'];
 }
 
@@ -57,7 +59,11 @@ export interface EditProcessorPanelProps extends ProcessorPanelProps {
   onUpdateProcessor: UseDefinitionReturn['updateProcessor'];
 }
 
-export function AddProcessorPanel({ onAddProcessor, onWatchProcessor }: AddProcessorPanelProps) {
+export function AddProcessorPanel({
+  onAddProcessor,
+  onWatchProcessor,
+  processorMetrics,
+}: AddProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
 
   const [hasChanges, setHasChanges] = useState(false);
@@ -151,6 +157,7 @@ export function AddProcessorPanel({ onAddProcessor, onWatchProcessor }: AddProce
               <EuiButton
                 data-test-subj="streamsAppAddProcessorPanelAddProcessorButton"
                 size="s"
+                fill
                 onClick={methods.handleSubmit(handleSubmit)}
                 disabled={!methods.formState.isValid && methods.formState.isSubmitted}
               >
@@ -165,12 +172,16 @@ export function AddProcessorPanel({ onAddProcessor, onWatchProcessor }: AddProce
       >
         <EuiSpacer size="s" />
         <FormProvider {...methods}>
+          <ProcessorMetricsHeader metrics={processorMetrics} />
           <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
             <ProcessorTypeSelector />
             <EuiSpacer size="m" />
             {type === 'grok' && <GrokProcessorForm />}
             {type === 'dissect' && <DissectProcessorForm />}
           </EuiForm>
+          {processorMetrics && !isEmpty(processorMetrics.errors) && (
+            <ProcessorErrors metrics={processorMetrics} />
+          )}
         </FormProvider>
       </EuiAccordion>
     </EuiPanel>
@@ -195,6 +206,7 @@ export function EditProcessorPanel({
   onUpdateProcessor,
   onWatchProcessor,
   processor,
+  processorMetrics,
 }: EditProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
 
@@ -307,6 +319,7 @@ export function EditProcessorPanel({
               <EuiButton
                 data-test-subj="streamsAppEditProcessorPanelUpdateProcessorButton"
                 size="s"
+                fill
                 onClick={methods.handleSubmit(handleSubmit)}
                 disabled={!methods.formState.isValid}
               >
@@ -317,7 +330,8 @@ export function EditProcessorPanel({
               </EuiButton>
             </EuiFlexGroup>
           ) : (
-            <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
+              {processorMetrics && <ProcessorMetricBadges {...processorMetrics} />}
               {isUnsaved && (
                 <EuiBadge>
                   {i18n.translate(
@@ -343,6 +357,7 @@ export function EditProcessorPanel({
       >
         <EuiSpacer size="s" />
         <FormProvider {...methods}>
+          <ProcessorMetricsHeader metrics={processorMetrics} />
           <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
             <ProcessorTypeSelector disabled />
             <EuiSpacer size="m" />
@@ -357,11 +372,25 @@ export function EditProcessorPanel({
               {deleteProcessorLabel}
             </EuiButton>
           </EuiForm>
+          {processorMetrics && !isEmpty(processorMetrics.errors) && (
+            <ProcessorErrors metrics={processorMetrics} />
+          )}
         </FormProvider>
       </EuiAccordion>
     </EuiPanel>
   );
 }
+
+const ProcessorMetricsHeader = ({ metrics }: { metrics?: ProcessorMetrics }) => {
+  if (!metrics) return null;
+
+  return (
+    <>
+      <ProcessorMetricBadges {...metrics} />
+      <EuiSpacer size="m" />
+    </>
+  );
+};
 
 const deleteProcessorLabel = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.deleteProcessorLabel',
