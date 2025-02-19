@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import * as i18n from './translations';
 
 export interface Props {
+  /** Optionally render new chat as a link */
+  asLink?: boolean;
   children?: React.ReactNode;
   showAssistantOverlay: (show: boolean) => void;
   /** Defaults to `discuss`. If null, the button will not have an icon */
@@ -20,6 +22,7 @@ export interface Props {
 }
 
 const NewChatByTitleComponent: React.FC<Props> = ({
+  asLink = false,
   children = i18n.NEW_CHAT,
   showAssistantOverlay,
   iconType,
@@ -40,7 +43,11 @@ const NewChatByTitleComponent: React.FC<Props> = ({
 
   return useMemo(
     () =>
-      iconOnly ? (
+      asLink ? (
+        <EuiLink data-test-subj="newChatLink" onClick={showOverlay}>
+          {children}
+        </EuiLink>
+      ) : iconOnly ? (
         <EuiToolTip content={i18n.NEW_CHAT}>
           <EuiButtonIcon
             data-test-subj="newChatByTitle"

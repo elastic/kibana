@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import { Actions } from '../../../../../../../actions';
 
 interface Props {
+  chatTitle?: string;
   markdownComment: string;
   showAddToNewCaseAction?: boolean;
   showCopyToClipboardAction?: boolean;
@@ -36,6 +37,7 @@ const useStyles = () => {
 };
 
 const StickyActionsComponent: FC<Props> = ({
+  chatTitle,
   indexName,
   markdownComment,
   showCopyToClipboardAction,
@@ -47,6 +49,7 @@ const StickyActionsComponent: FC<Props> = ({
   return (
     <div css={styles.stickyContainer}>
       <Actions
+        chatTitle={chatTitle}
         indexName={indexName}
         markdownComment={markdownComment}
         showChatAction={showChatAction}

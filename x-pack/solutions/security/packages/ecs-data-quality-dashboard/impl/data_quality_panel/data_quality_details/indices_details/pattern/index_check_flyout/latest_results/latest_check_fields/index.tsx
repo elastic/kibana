@@ -48,6 +48,7 @@ const styles = {
 };
 
 export interface Props {
+  checkedAt: number;
   indexName: string;
   patternRollup: PatternRollup | undefined;
   ilmPhase: IlmPhase | undefined;
@@ -55,6 +56,7 @@ export interface Props {
 }
 
 const LatestCheckFieldsComponent: React.FC<Props> = ({
+  checkedAt,
   indexName,
   patternRollup,
   ilmPhase,
@@ -95,6 +97,7 @@ const LatestCheckFieldsComponent: React.FC<Props> = ({
         badgeCount: incompatibleFieldsCount,
         content: (
           <IncompatibleTab
+            checkedAt={checkedAt}
             docsCount={docsCount}
             ilmPhase={ilmPhase}
             indexName={indexName}
@@ -165,6 +168,7 @@ const LatestCheckFieldsComponent: React.FC<Props> = ({
     [
       allFields,
       allFieldsCount,
+      checkedAt,
       customFields,
       customFieldsCount,
       docsCount,

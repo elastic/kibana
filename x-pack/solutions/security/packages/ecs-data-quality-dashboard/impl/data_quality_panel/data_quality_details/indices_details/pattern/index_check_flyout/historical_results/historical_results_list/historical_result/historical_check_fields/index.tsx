@@ -36,6 +36,7 @@ const HistoricalCheckFieldsComponent: React.FC<Props> = ({ indexName, historical
     ecsFieldCount,
     customFieldCount,
     totalFieldCount,
+    checkedAt,
   } = historicalResult;
 
   const tabs = useMemo(
@@ -47,6 +48,7 @@ const HistoricalCheckFieldsComponent: React.FC<Props> = ({ indexName, historical
         badgeCount: incompatibleFieldCount,
         content: (
           <IncompatibleTab
+            checkedAt={checkedAt}
             docsCount={docsCount}
             ilmPhase={ilmPhase}
             indexName={indexName}

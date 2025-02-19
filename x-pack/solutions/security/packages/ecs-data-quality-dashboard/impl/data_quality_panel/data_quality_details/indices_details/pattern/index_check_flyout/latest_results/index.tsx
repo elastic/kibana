@@ -28,6 +28,7 @@ import {
 } from '../translations';
 
 export interface Props {
+  checkedAt: number;
   ilmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> | null;
   indexName: string;
   patternRollup: PatternRollup | undefined;
@@ -35,6 +36,7 @@ export interface Props {
 }
 
 const LatestResultsComponent: React.FC<Props> = ({
+  checkedAt,
   indexName,
   patternRollup,
   stats,
@@ -80,6 +82,7 @@ const LatestResultsComponent: React.FC<Props> = ({
       <IndexStatsPanel docsCount={docsCount} sizeInBytes={sizeInBytes ?? 0} ilmPhase={ilmPhase} />
       <EuiSpacer />
       <LatestCheckFields
+        checkedAt={checkedAt}
         docsCount={docsCount}
         ilmPhase={ilmPhase}
         indexName={indexName}

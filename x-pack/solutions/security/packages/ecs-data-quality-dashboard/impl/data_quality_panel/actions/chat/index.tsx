@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useCallback } from 'react';
-import { NewChat } from '@kbn/elastic-assistant';
+import { NewChatByTitle, useAssistantOverlay } from '@kbn/elastic-assistant';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 
@@ -32,32 +32,32 @@ const useStyles = () => {
 };
 
 interface Props {
+  chatTitle?: string;
   markdownComment: string;
   indexName: string;
 }
 
-const ChatActionComponent: FC<Props> = ({ indexName, markdownComment }) => {
+const ChatActionComponent: FC<Props> = ({ indexName, markdownComment, chatTitle }) => {
   const styles = useStyles();
   const { isAssistantEnabled } = useDataQualityContext();
   const getPromptContext = useCallback(async () => markdownComment, [markdownComment]);
-
+  const { showAssistantOverlay } = useAssistantOverlay(
+    'data-quality-dashboard',
+    chatTitle ?? DATA_QUALITY_DASHBOARD_CONVERSATION_ID,
+    DATA_QUALITY_PROMPT_CONTEXT_PILL(indexName),
+    getPromptContext,
+    null,
+    DATA_QUALITY_SUGGESTED_USER_PROMPT,
+    DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP,
+    isAssistantEnabled
+  );
   return (
-    <NewChat
-      asLink={true}
-      category="data-quality-dashboard"
-      conversationId={DATA_QUALITY_DASHBOARD_CONVERSATION_ID}
-      description={DATA_QUALITY_PROMPT_CONTEXT_PILL(indexName)}
-      getPromptContext={getPromptContext}
-      suggestedUserPrompt={DATA_QUALITY_SUGGESTED_USER_PROMPT}
-      tooltip={DATA_QUALITY_PROMPT_CONTEXT_PILL_TOOLTIP}
-      isAssistantEnabled={isAssistantEnabled}
-      iconType={null}
-    >
+    <NewChatByTitle asLink showAssistantOverlay={showAssistantOverlay} iconType={null}>
       <span css={styles.linkText}>
         <AssistantIcon />
         {ASK_ASSISTANT}
       </span>
-    </NewChat>
+    </NewChatByTitle>
   );
 };
 

@@ -220,6 +220,7 @@ export const IndexCheckFlyoutComponent: React.FC<Props> = ({
           {selectedTabId === LATEST_CHECK_TAB_ID ? (
             <>
               <LatestResults
+                checkedAt={indexResult?.checkedAt ?? 0}
                 indexName={indexName}
                 stats={stats}
                 ilmExplain={ilmExplain}

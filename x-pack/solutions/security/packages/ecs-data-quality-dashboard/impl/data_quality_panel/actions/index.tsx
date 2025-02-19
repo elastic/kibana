@@ -13,6 +13,7 @@ import { CopyToClipboardAction } from './copy_to_clipboard';
 import { AddToNewCaseAction } from './add_to_new_case';
 
 export interface Props {
+  chatTitle?: string;
   markdownComment: string;
   indexName?: string;
   showAddToNewCaseAction?: boolean;
@@ -21,6 +22,7 @@ export interface Props {
 }
 
 const ActionsComponent: React.FC<Props> = ({
+  chatTitle,
   showAddToNewCaseAction,
   showCopyToClipboardAction,
   showChatAction,
@@ -48,7 +50,11 @@ const ActionsComponent: React.FC<Props> = ({
 
       {showChatAction && indexName && (
         <EuiFlexItem grow={false}>
-          <ChatAction indexName={indexName} markdownComment={markdownComment} />
+          <ChatAction
+            chatTitle={chatTitle}
+            indexName={indexName}
+            markdownComment={markdownComment}
+          />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
