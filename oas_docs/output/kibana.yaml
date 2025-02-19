@@ -40911,7 +40911,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryUpdateProps'
+              $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps'
         required: true
       responses:
         '200':
@@ -51332,6 +51332,8 @@ components:
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_User'
               type: array
+          required:
+            - id
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
     Security_AI_Assistant_API_EsqlContentReference:
       allOf:
@@ -51490,6 +51492,8 @@ components:
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_User'
               type: array
+          required:
+            - id
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
     Security_AI_Assistant_API_InputSchema:
       description: Array of objects defining the input schema, allowing the LLM to extract structured data to be used in retrieval
@@ -51652,6 +51656,12 @@ components:
       anyOf:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryUpdateFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryUpdateFields'
+      discriminator:
+        propertyName: type
+    Security_AI_Assistant_API_KnowledgeBaseEntryUpdateRouteProps:
+      anyOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
       discriminator:
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseResource:
