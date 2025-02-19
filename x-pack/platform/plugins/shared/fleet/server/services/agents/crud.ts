@@ -393,46 +393,6 @@ export async function getAllAgentsByKuery(
  * @param soClient
  * @param options
  */
-export async function getTotalAgentsByKuery(
-  esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract,
-  options: ListWithKuery & { spaceId?: string }
-): Promise<number> {
-  const { kuery = '', spaceId } = options;
-
-  const filters = await _getSpaceAwarenessFilter(spaceId);
-  if (kuery && kuery !== '') {
-    filters.push(kuery);
-  }
-  const kueryNode = _joinFilters(filters);
-  const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
-  const runtimeFields = await buildAgentStatusRuntimeField(soClient);
-
-  try {
-    const res = await esClient.search<FleetServerAgent>({
-      index: AGENTS_INDEX,
-      size: 0,
-      rest_total_hits_as_int: true,
-      track_total_hits: true,
-      runtime_mappings: runtimeFields,
-      fields: Object.keys(runtimeFields),
-      ...query,
-    });
-    return res.hits.total as number;
-  } catch (err) {
-    appContextService
-      .getLogger()
-      .error(`Error getting total agents by kuery: ${JSON.stringify(err)}`);
-    throw err;
-  }
-}
-
-/**
- * Fetch all agents by kuery in batches.
- * @param esClient
- * @param soClient
- * @param options
- */
 export async function fetchAllAgentsByKuery(
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,

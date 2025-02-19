@@ -16,7 +16,7 @@ import { createAppContextStartContractMock } from '../mocks';
 import { agentPolicyService, appContextService } from '../services';
 import {
   fetchAllAgentsByKuery,
-  getTotalAgentsByKuery,
+  getAgentsByKuery,
   sendUpgradeAgentsActions,
 } from '../services/agents';
 import { isAgentUpgradeable } from '../../common/services';
@@ -43,12 +43,10 @@ const MOCK_TASK_INSTANCE = {
 };
 
 const mockAgentPolicyService = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
-const mockedGetTotalAgentsByKuery = getTotalAgentsByKuery as jest.MockedFunction<
-  typeof getTotalAgentsByKuery
->;
 const mockedFetchAllAgentsByKuery = fetchAllAgentsByKuery as jest.MockedFunction<
   typeof fetchAllAgentsByKuery
 >;
+const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
 const mockedSendUpgradeAgentsActions = sendUpgradeAgentsActions as jest.MockedFunction<
   typeof sendUpgradeAgentsActions
 >;
@@ -153,21 +151,16 @@ describe('AutomaticAgentUpgradeTask', () => {
       const agentPolicies = [
         {
           id: 'agent-policy-1',
-          required_versions: [
-            {
-              version: '8.18.0',
-              percentage: 30,
-            },
-          ],
+          required_versions: [{ version: '8.18.0', percentage: 30 }],
         },
       ] as AgentPolicy[];
       mockAgentPolicyService.fetchAllAgentPolicies =
         getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
 
       const agents = generateAgents(10, 'agent-policy-1', '8.15.0');
-      mockedGetTotalAgentsByKuery.mockResolvedValueOnce(agents.length); // active agents
-      mockedGetTotalAgentsByKuery.mockResolvedValueOnce(0); // agents on or updating to target version
-      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents)); // active agents
+      mockedGetAgentsByKuery.mockResolvedValueOnce({ total: agents.length } as any); // active agents
+      mockedGetAgentsByKuery.mockResolvedValueOnce({ total: 0 } as any); // agents on or updating to target version
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
 
       await runTask();
 
@@ -177,6 +170,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         {
           agents: agents.slice(0, 3),
           version: '8.18.0',
+          upgradeDurationSeconds: 600,
           isAutomatic: true,
         }
       );
@@ -186,12 +180,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       const agentPolicies = [
         {
           id: 'agent-policy-1',
-          required_versions: [
-            {
-              version: '8.18.0',
-              percentage: 30,
-            },
-          ],
+          required_versions: [{ version: '8.18.0', percentage: 30 }],
         },
       ] as AgentPolicy[];
       mockAgentPolicyService.fetchAllAgentPolicies =
@@ -206,9 +195,9 @@ describe('AutomaticAgentUpgradeTask', () => {
           agent: { version: '8.18.0' },
         },
       ] as Agent[];
-      mockedGetTotalAgentsByKuery.mockResolvedValueOnce(agents.length); // active agents
-      mockedGetTotalAgentsByKuery.mockResolvedValueOnce(1); // agents on or updating to target version
-      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents)); // active agents
+      mockedGetAgentsByKuery.mockResolvedValueOnce({ total: agents.length } as any); // active agents
+      mockedGetAgentsByKuery.mockResolvedValueOnce({ total: 1 } as any); // agents on or updating to target version
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
 
       await runTask();
 
@@ -218,6 +207,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         {
           agents: agents.slice(0, 2),
           version: '8.18.0',
+          upgradeDurationSeconds: 600,
           isAutomatic: true,
         }
       );
@@ -227,12 +217,7 @@ describe('AutomaticAgentUpgradeTask', () => {
       const agentPolicies = [
         {
           id: 'agent-policy-1',
-          required_versions: [
-            {
-              version: '8.18.0',
-              percentage: 30,
-            },
-          ],
+          required_versions: [{ version: '8.18.0', percentage: 30 }],
         },
       ] as AgentPolicy[];
       mockAgentPolicyService.fetchAllAgentPolicies =
@@ -248,9 +233,9 @@ describe('AutomaticAgentUpgradeTask', () => {
           upgrade_details: { target_version: '8.18.0' },
         },
       ] as Agent[];
-      mockedGetTotalAgentsByKuery.mockResolvedValueOnce(agents.length); // active agents
-      mockedGetTotalAgentsByKuery.mockResolvedValueOnce(1); // agents on or updating to target version
-      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents)); // active agents
+      mockedGetAgentsByKuery.mockResolvedValueOnce({ total: agents.length } as any); // active agents
+      mockedGetAgentsByKuery.mockResolvedValueOnce({ total: 1 } as any); // agents on or updating to target version
+      mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
 
       await runTask();
 
@@ -260,6 +245,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         {
           agents: agents.slice(0, 2),
           version: '8.18.0',
+          upgradeDurationSeconds: 600,
           isAutomatic: true,
         }
       );
@@ -269,20 +255,15 @@ describe('AutomaticAgentUpgradeTask', () => {
       const agentPolicies = [
         {
           id: 'agent-policy-1',
-          required_versions: [
-            {
-              version: '8.18.0',
-              percentage: 30,
-            },
-          ],
+          required_versions: [{ version: '8.18.0', percentage: 30 }],
         },
       ] as AgentPolicy[];
       mockAgentPolicyService.fetchAllAgentPolicies =
         getMockAgentPolicyFetchAllAgentPolicies(agentPolicies);
 
       const agents = generateAgents(10, 'agent-policy-1', '8.15.0', 'updating');
-      mockedGetTotalAgentsByKuery.mockResolvedValueOnce(agents.length); // active agents
-      mockedGetTotalAgentsByKuery.mockResolvedValueOnce(agents.length); // agents on or updating to target version
+      mockedGetAgentsByKuery.mockResolvedValueOnce({ total: agents.length } as any); // active agents
+      mockedGetAgentsByKuery.mockResolvedValueOnce({ total: agents.length } as any); // agents on or updating to target version
       mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents)); // active agents
 
       await runTask();
@@ -293,7 +274,7 @@ describe('AutomaticAgentUpgradeTask', () => {
     it('Should not run if task is outdated', async () => {
       const result = await runTask({ ...MOCK_TASK_INSTANCE, id: 'old-id' });
 
-      expect(mockAgentPolicyService.list).not.toHaveBeenCalled();
+      expect(mockAgentPolicyService.fetchAllAgentPolicies).not.toHaveBeenCalled();
       expect(result).toEqual(getDeleteTaskRunResult());
     });
 
@@ -304,11 +285,7 @@ describe('AutomaticAgentUpgradeTask', () => {
 
       await runTask();
 
-      mockAgentPolicyService.list.mockResolvedValue({
-        items: [],
-      } as any);
-
-      expect(mockAgentPolicyService.list).not.toHaveBeenCalled();
+      expect(mockAgentPolicyService.fetchAllAgentPolicies).not.toHaveBeenCalled();
     });
   });
 });

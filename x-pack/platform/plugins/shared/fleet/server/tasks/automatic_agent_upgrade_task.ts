@@ -22,12 +22,17 @@ import type { LoggerFactory } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import semverGt from 'semver/functions/gt';
 
-import type { Agent, FleetServerAgentMetadata } from '../../common/types';
+import type {
+  Agent,
+  AgentPolicy,
+  AgentTargetVersion,
+  FleetServerAgentMetadata,
+} from '../../common/types';
 
 import { agentPolicyService, appContextService } from '../services';
 import {
   fetchAllAgentsByKuery,
-  getTotalAgentsByKuery,
+  getAgentsByKuery,
   sendUpgradeAgentsActions,
 } from '../services/agents';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
@@ -35,12 +40,13 @@ import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../common/service
 
 export const TYPE = 'fleet:automatic-agent-upgrade-task';
 export const VERSION = '1.0.0';
+export const AGENT_POLICIES_BATCHSIZE = 500;
+export const AGENTS_BATCHSIZE = 10000;
 const TITLE = 'Fleet Automatic agent upgrades';
 const SCOPE = ['fleet'];
-const INTERVAL = '1h'; // TODO: check
-const TIMEOUT = '10m'; // // TODO: check
-const AGENTS_BATCHSIZE = 10000; // // TODO: check
-const AGENT_POLICIES_BATCHSIZE = 500; // // TODO: check
+const INTERVAL = '30s';
+const TIMEOUT = '10m';
+const MIN_UPGRADE_DURATION_SECONDS = 600;
 type AgentWithDefinedVersion = Agent & { agent: FleetServerAgentMetadata };
 
 interface AutomaticAgentUpgradeTaskSetupContract {
@@ -117,10 +123,6 @@ export class AutomaticAgentUpgradeTask {
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract
   ) {
-    this.logger.debug(
-      `[AutomaticAgentUpgradeTask] Fetching all agent policies with required_versions`
-    );
-
     // Fetch custom agent policies with set required_versions in batches.
     const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
       kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.is_managed:false AND ${AGENT_POLICY_SAVED_OBJECT_TYPE}.required_versions:*`,
@@ -135,124 +137,129 @@ export class AutomaticAgentUpgradeTask {
         this.endRun('Found no agent policies to process');
         return;
       }
-
-      // Process each agent policy individually in order to calculate agent percentages.
       for (const agentPolicy of agentPolicyPageResults) {
-        this.logger.debug(
-          `[AutomaticAgentUpgradeTask] Processing agent policy ${
-            agentPolicy.id
-          } with required_versions ${JSON.stringify(agentPolicy.required_versions)}`
-        );
-
-        // Fetch all active agents assigned to the policy in batches.
-        // The total number of active agents is used to calculate the target percentage of agents for upgrade.
-        const activeAgentsKuery = `policy_id:${
-          agentPolicy.id
-        } AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`;
-        const totalActiveAgents = await getTotalAgentsByKuery(esClient, soClient, {
-          kuery: activeAgentsKuery,
-        });
-        if (totalActiveAgents === 0) {
-          this.logger.debug(
-            `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id} has no active agents`
-          );
-          continue;
-        }
-        const activeAgentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
-          kuery: activeAgentsKuery,
-          perPage: AGENTS_BATCHSIZE,
-        });
-
-        // Common agents pool for all required versions (to avoid same agents being selected).
-        const agentsBatch = await this.getNextAgentsBatch(activeAgentsFetcher);
-        let agentsDone = agentsBatch.done;
-        const agentsPool = {
-          toProcess: agentsBatch.agents,
-          alreadyProcessed: [] as AgentWithDefinedVersion[],
-        };
-
-        // Process each required version.
-        for (const requiredVersion of agentPolicy.required_versions ?? []) {
-          this.logger.debug(
-            `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: checking candidate agents for upgrade (target version: ${requiredVersion.version}, percentage: ${requiredVersion.percentage})`
-          );
-
-          // Get total number of agents already or on or updating to target version.
-          // This information is needed to know if the target percentage has already been reached.
-          const totalOnOrUpdatingToTargetVersionKuery = `policy_id:${agentPolicy.id} AND agent.version:${requiredVersion.version} OR (status:updating AND upgrade_details.target_version:${requiredVersion.version})`;
-          const totalOnOrUpdatingToTargetVersionAgents = await getTotalAgentsByKuery(
-            esClient,
-            soClient,
-            {
-              kuery: totalOnOrUpdatingToTargetVersionKuery,
-            }
-          );
-
-          // Calculate how many agents should be upgraded. Continue to next required version if target is already met.
-          let numberOfAgentsForUpgrade = Math.round(
-            (totalActiveAgents * requiredVersion.percentage) / 100
-          );
-          numberOfAgentsForUpgrade -= totalOnOrUpdatingToTargetVersionAgents;
-          if (numberOfAgentsForUpgrade <= 0) {
-            this.logger.debug(
-              `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: target percentage ${requiredVersion.percentage} already reached for version: ${requiredVersion.version})`
-            );
-            continue;
-          }
-
-          do {
-            // Select agents for upgrade.
-            const [agentsForUpgrade, remainingAgents] = agentsPool.toProcess.reduce(
-              (acc, agent) => {
-                const isAgentAlreadyOnOrUpdatingToTargetVersion =
-                  agent.agent.version === requiredVersion.version ||
-                  (agent.status === 'updating' &&
-                    agent.upgrade_details?.target_version === requiredVersion.version &&
-                    !AgentStatusKueryHelper.isStuckInUpdating(agent));
-                const keepAgentForUpgrade =
-                  acc[0].length < numberOfAgentsForUpgrade &&
-                  !isAgentAlreadyOnOrUpdatingToTargetVersion &&
-                  isAgentUpgradeable(agent) &&
-                  semverGt(requiredVersion.version, agent.agent.version);
-                acc[keepAgentForUpgrade ? 0 : 1].push(agent);
-                return acc;
-              },
-              [[], []] as [AgentWithDefinedVersion[], AgentWithDefinedVersion[]]
-            );
-            // Save remaining agents for the next agents batch or the next required version.
-            agentsPool.toProcess = [];
-            agentsPool.alreadyProcessed.push(...remainingAgents);
-            // Send bulk upgrade action for selected agents.
-            if (agentsForUpgrade.length > 0) {
-              this.logger.info(
-                `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: sending bulk upgrade to ${requiredVersion.version} for ${agentsForUpgrade.length} agents`
-              );
-              await sendUpgradeAgentsActions(soClient, esClient, {
-                agents: agentsForUpgrade,
-                version: requiredVersion.version,
-                isAutomatic: true,
-              });
-            }
-            // Check if target percentage was met. If not, fetch more agents if possible.
-            numberOfAgentsForUpgrade -= agentsForUpgrade.length;
-            if (!agentsDone && numberOfAgentsForUpgrade > 0) {
-              const nextBatch = await this.getNextAgentsBatch(activeAgentsFetcher);
-              agentsDone = nextBatch.done;
-              agentsPool.toProcess = nextBatch.agents;
-            }
-          } while (!agentsDone && numberOfAgentsForUpgrade > 0);
-
-          // Reset agentsPool for next required version.
-          agentsPool.toProcess = agentsPool.alreadyProcessed;
-          agentsPool.alreadyProcessed = [];
-
-          if (agentsDone && numberOfAgentsForUpgrade > 0) {
-            this.logger.debug(
-              `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: no candidate agents for upgrade (target version: ${requiredVersion.version}, percentage: ${requiredVersion.percentage})`
-            );
-          }
-        }
+        await this.checkAgentPolicyForAutomaticUpgrades(esClient, soClient, agentPolicy);
       }
+    }
+  }
+
+  private async checkAgentPolicyForAutomaticUpgrades(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    agentPolicy: AgentPolicy
+  ) {
+    this.logger.debug(
+      `[AutomaticAgentUpgradeTask] Processing agent policy ${
+        agentPolicy.id
+      } with required_versions ${JSON.stringify(agentPolicy.required_versions)}`
+    );
+
+    // Get total number of active agents.
+    // This is used to calculate how many agents should be selected for upgrade based on the target percentage.
+    const totalActiveAgents = await this.getAgentCount(
+      esClient,
+      soClient,
+      this.getActiveAgentsKuery(agentPolicy)
+    );
+    if (totalActiveAgents === 0) {
+      this.logger.debug(
+        `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id} has no active agents`
+      );
+      return;
+    }
+
+    for (const requiredVersion of agentPolicy.required_versions ?? []) {
+      await this.processRequiredVersion(
+        esClient,
+        soClient,
+        agentPolicy,
+        requiredVersion,
+        totalActiveAgents
+      );
+    }
+  }
+
+  private async getAgentCount(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    kuery: string
+  ) {
+    const res = await getAgentsByKuery(esClient, soClient, {
+      showInactive: false,
+      perPage: 0,
+      kuery,
+    });
+    return res.total;
+  }
+
+  private getActiveAgentsKuery(agentPolicy: AgentPolicy) {
+    return `policy_id:${agentPolicy.id} AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`;
+  }
+
+  private async processRequiredVersion(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    agentPolicy: AgentPolicy,
+    requiredVersion: AgentTargetVersion,
+    totalActiveAgents: number
+  ) {
+    this.logger.debug(
+      `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: checking candidate agents for upgrade (target version: ${requiredVersion.version}, percentage: ${requiredVersion.percentage})`
+    );
+
+    // Calculate how many agents should meet the version requirement.
+    let numberOfAgentsForUpgrade = Math.round(
+      (totalActiveAgents * requiredVersion.percentage) / 100
+    );
+    // Subtract total number of agents already or on or updating to target version.
+    const totalOnOrUpdatingToTargetVersionAgents = await this.getAgentCount(
+      esClient,
+      soClient,
+      `policy_id:${agentPolicy.id} AND agent.version:${requiredVersion.version} OR (status:updating AND upgrade_details.target_version:${requiredVersion.version})`
+    );
+    numberOfAgentsForUpgrade -= totalOnOrUpdatingToTargetVersionAgents;
+    // Return if target is already met.
+    if (numberOfAgentsForUpgrade <= 0) {
+      this.logger.debug(
+        `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: target percentage ${requiredVersion.percentage} already reached for version: ${requiredVersion.version})`
+      );
+      return;
+    }
+
+    // Fetch all active agents assigned to the policy in batches.
+    // NB: ideally, we would query active agents on or below the target version. Unfortunately, this is not possible because agent.version
+    //     is stored as text, so semver comparison cannot be done in the ES query (cf. https://github.com/elastic/kibana/issues/168604).
+    //     As an imperfect alternative, sort agents by version. Since versions sort alphabetically, this will not always result in ascending semver sorting.
+    const activeAgentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
+      kuery: this.getActiveAgentsKuery(agentPolicy),
+      perPage: AGENTS_BATCHSIZE,
+      sortField: 'agent.version',
+      sortOrder: 'asc',
+    });
+
+    let { done, agents } = await this.getNextAgentsBatch(activeAgentsFetcher);
+    let shouldProcessAgents = true;
+
+    while (shouldProcessAgents) {
+      numberOfAgentsForUpgrade = await this.findAndUpgradeCandidateAgents(
+        esClient,
+        soClient,
+        agentPolicy,
+        numberOfAgentsForUpgrade,
+        requiredVersion.version,
+        agents
+      );
+      if (!done && numberOfAgentsForUpgrade > 0) {
+        ({ done, agents } = await this.getNextAgentsBatch(activeAgentsFetcher));
+      } else {
+        shouldProcessAgents = false;
+      }
+    }
+
+    if (numberOfAgentsForUpgrade > 0) {
+      this.logger.debug(
+        `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: not enough candidate agents for upgrade (target version: ${requiredVersion.version}, percentage: ${requiredVersion.percentage})`
+      );
     }
   }
 
@@ -264,6 +271,53 @@ export class AutomaticAgentUpgradeTask {
       done: agentsBatch.done,
       agents: agents.filter((agent): agent is AgentWithDefinedVersion => agent.agent !== undefined),
     };
+  }
+
+  private async findAndUpgradeCandidateAgents(
+    esClient: ElasticsearchClient,
+    soClient: SavedObjectsClientContract,
+    agentPolicy: AgentPolicy,
+    numberOfAgentsForUpgrade: number,
+    version: string,
+    agents: AgentWithDefinedVersion[]
+  ) {
+    const agentsForUpgrade: AgentWithDefinedVersion[] = [];
+
+    for (const agent of agents) {
+      if (agentsForUpgrade.length >= numberOfAgentsForUpgrade) {
+        break;
+      }
+      const keepAgentForUpgrade =
+        agent.agent.version !== version &&
+        (agent.status !== 'updating' || AgentStatusKueryHelper.isStuckInUpdating(agent)) &&
+        isAgentUpgradeable(agent) &&
+        semverGt(version, agent.agent.version);
+      if (keepAgentForUpgrade) {
+        agentsForUpgrade.push(agent);
+      }
+    }
+
+    // Send bulk upgrade action for selected agents.
+    if (agentsForUpgrade.length > 0) {
+      this.logger.info(
+        `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: sending bulk upgrade to ${version} for ${agentsForUpgrade.length} agents`
+      );
+      await sendUpgradeAgentsActions(soClient, esClient, {
+        agents: agentsForUpgrade,
+        version,
+        upgradeDurationSeconds: this.getUpgradeDurationSeconds(agentsForUpgrade.length),
+        isAutomatic: true,
+      });
+    }
+
+    return numberOfAgentsForUpgrade - agentsForUpgrade.length;
+  }
+
+  private getUpgradeDurationSeconds(nAgents: number) {
+    const calculatedUpgradeDurationSeconds = Math.round(nAgents * 0.03);
+    return calculatedUpgradeDurationSeconds > MIN_UPGRADE_DURATION_SECONDS
+      ? calculatedUpgradeDurationSeconds
+      : MIN_UPGRADE_DURATION_SECONDS;
   }
 
   public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
