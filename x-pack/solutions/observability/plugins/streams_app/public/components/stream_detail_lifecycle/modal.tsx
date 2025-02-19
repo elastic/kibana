@@ -57,6 +57,7 @@ import { useBoolean } from '@kbn/react-hooks';
 import useToggle from 'react-use/lib/useToggle';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useWiredStreams } from '../../hooks/use_wired_streams';
+import { getFormattedError } from '../../util/errors';
 
 export type LifecycleEditAction = 'none' | 'dsl' | 'ilm' | 'inherit';
 
@@ -297,7 +298,7 @@ function IlmModal({
         setPolicies(policyOptions);
       })
       .catch((error) => {
-        setErrorMessage('body' in error ? error.body.message : error.message);
+        setErrorMessage(getFormattedError(error).message);
       })
       .finally(() => setIsLoading(false));
 
