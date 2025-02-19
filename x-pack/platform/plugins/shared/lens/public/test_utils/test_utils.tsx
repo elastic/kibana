@@ -6,11 +6,14 @@
  */
 
 import { EuiThemeProvider } from '@elastic/eui';
+import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RenderOptions, render } from '@testing-library/react';
 import { ComponentType, MountRendererProps, mount } from 'enzyme';
 import React from 'react';
 import { PropsWithChildren, ReactElement } from 'react';
+import { LensAppServices } from '../app_plugin/types';
 
 export const renderWithProviders = (
   ui: ReactElement,
@@ -23,11 +26,13 @@ export const renderWithProviders = (
 
   const Wrapper: React.FC<PropsWithChildren<{}>> = ({ children }) => {
     return (
-      <I18nProvider>
-        <EuiThemeProvider>
-          {wrapper ? <CustomWrapper>{children}</CustomWrapper> : children}
-        </EuiThemeProvider>
-      </I18nProvider>
+      <KibanaContextProvider services={coreMock.createStart() as unknown as LensAppServices}>
+        <I18nProvider>
+          <EuiThemeProvider>
+            {wrapper ? <CustomWrapper>{children}</CustomWrapper> : children}
+          </EuiThemeProvider>
+        </I18nProvider>
+      </KibanaContextProvider>
     );
   };
 
@@ -42,15 +47,17 @@ export const mountWithProviders = (component: React.ReactElement, options?: Moun
   const WrappingComponent = wrappingComponent as React.ComponentType<React.PropsWithChildren<{}>>;
 
   const wrapper: React.FC<PropsWithChildren<{}>> = ({ children }) => (
-    <I18nProvider>
-      <EuiThemeProvider>
-        {WrappingComponent ? (
-          <WrappingComponent {...wrappingComponentProps}>{children}</WrappingComponent>
-        ) : (
-          children
-        )}
-      </EuiThemeProvider>
-    </I18nProvider>
+    <KibanaContextProvider services={coreMock.createStart() as unknown as LensAppServices}>
+      <I18nProvider>
+        <EuiThemeProvider>
+          {WrappingComponent ? (
+            <WrappingComponent {...wrappingComponentProps}>{children}</WrappingComponent>
+          ) : (
+            children
+          )}
+        </EuiThemeProvider>
+      </I18nProvider>
+    </KibanaContextProvider>
   );
 
   const instance = mount(component, {
