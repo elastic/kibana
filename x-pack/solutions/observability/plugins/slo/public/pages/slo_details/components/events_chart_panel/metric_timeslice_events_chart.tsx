@@ -18,7 +18,7 @@ import React, { useRef } from 'react';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getBrushTimeBounds } from '../../../../utils/slo/duration';
 import { TimeBounds } from '../../types';
-import { TimesliceAnnotation } from './timeslice_annotation';
+import { MetricTimesliceAnnotation } from './metric_timeslice_annotation';
 
 interface Props {
   data?: GetPreviewDataResponse;
@@ -32,41 +32,27 @@ export function MetricTimesliceEventsChart({ slo, isLoading, data, onBrushed }: 
   const chartRef = useRef(null);
   const baseTheme = charts.theme.useChartsBaseTheme();
   const dateFormat = uiSettings.get('dateFormat');
-  const yAxisNumberFormat = slo.indicator.type === 'sli.metric.timeslice' ? '0,0[.00]' : '0,0';
-
   const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
     isDateHistogram: true,
   });
-
-  const values = (data ?? []).map((row) => {
-    if (slo.indicator.type === 'sli.metric.timeslice') {
-      return row.sliValue;
-    } else {
-      return row?.events?.total ?? 0;
-    }
+  const { ObservabilityAnnotations, annotations, wrapOnBrushEnd } = useAnnotations({
+    slo,
   });
+
+  if (slo.indicator.type !== 'sli.metric.timeslice') {
+    return null;
+  }
+
+  const values = (data ?? []).map((row) => row.sliValue);
   const maxValue = max(values);
   const minValue = min(values);
-
-  const annotation = <TimesliceAnnotation slo={slo} minValue={minValue} maxValue={maxValue} />;
-
-  const threshold =
-    slo.indicator.type === 'sli.metric.timeslice'
-      ? slo.indicator.params.metric.threshold
-      : undefined;
+  const threshold = slo.indicator.params.metric.threshold;
 
   const domain = {
     fit: true,
-    min:
-      threshold != null && minValue != null && threshold < minValue ? threshold : minValue || NaN,
-    max:
-      threshold != null && maxValue != null && threshold > maxValue ? threshold : maxValue || NaN,
+    min: min([threshold, minValue]) ?? NaN,
+    max: max([threshold, maxValue]) ?? NaN,
   };
-
-  const { ObservabilityAnnotations, annotations, wrapOnBrushEnd } = useAnnotations({
-    domain,
-    slo,
-  });
 
   if (isLoading) {
     return <EuiLoadingChart size="m" mono data-test-subj="metricTimesliceLoadingChart" />;
@@ -100,7 +86,7 @@ export function MetricTimesliceEventsChart({ slo, isLoading, data, onBrushed }: 
           onBrushed?.(getBrushTimeBounds(brushArea));
         })}
       />
-      {annotation}
+      <MetricTimesliceAnnotation slo={slo} minValue={minValue} maxValue={maxValue} />
       <Axis
         id="bottom"
         position={Position.Bottom}
@@ -110,7 +96,7 @@ export function MetricTimesliceEventsChart({ slo, isLoading, data, onBrushed }: 
       <Axis
         id="left"
         position={Position.Left}
-        tickFormat={(d) => numeral(d).format(yAxisNumberFormat)}
+        tickFormat={(d) => numeral(d).format('0,0[.00]')}
         domain={domain}
       />
       <AreaSeries

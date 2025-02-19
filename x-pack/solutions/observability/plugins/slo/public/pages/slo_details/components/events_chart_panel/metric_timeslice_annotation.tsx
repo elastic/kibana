@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { AnnotationDomainType, LineAnnotation, RectAnnotation } from '@elastic/charts';
-import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import React from 'react';
 import { COMPARATOR_MAPPING } from '../../../slo_edit/constants';
 
 interface Props {
@@ -17,15 +17,15 @@ interface Props {
   minValue?: number | null;
 }
 
-export function TimesliceAnnotation({ slo, maxValue, minValue }: Props) {
+export function MetricTimesliceAnnotation({ slo, maxValue, minValue }: Props) {
   const { euiTheme } = useEuiTheme();
 
-  const threshold =
-    slo.indicator.type === 'sli.metric.timeslice'
-      ? slo.indicator.params.metric.threshold
-      : undefined;
+  if (slo.indicator.type !== 'sli.metric.timeslice') {
+    return null;
+  }
 
-  return slo.indicator.type === 'sli.metric.timeslice' && threshold ? (
+  const threshold = slo.indicator.params.metric.threshold;
+  return (
     <>
       <LineAnnotation
         id="thresholdAnnotation"
@@ -45,10 +45,7 @@ export function TimesliceAnnotation({ slo, maxValue, minValue }: Props) {
         dataValues={[
           {
             coordinates: ['GT', 'GTE'].includes(slo.indicator.params.metric.comparator)
-              ? {
-                  y0: threshold,
-                  y1: maxValue,
-                }
+              ? { y0: threshold, y1: maxValue }
               : { y0: minValue, y1: threshold },
             details: `${COMPARATOR_MAPPING[slo.indicator.params.metric.comparator]} ${threshold}`,
           },
@@ -57,5 +54,5 @@ export function TimesliceAnnotation({ slo, maxValue, minValue }: Props) {
         style={{ fill: euiTheme.colors.warning, opacity: 0.1 }}
       />
     </>
-  ) : null;
+  );
 }
