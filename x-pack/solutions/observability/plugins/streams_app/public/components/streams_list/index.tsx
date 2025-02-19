@@ -260,7 +260,7 @@ function StreamNode({
             color="text"
             href={router.link('/{key}', { path: { key: node.name } })}
           >
-            {shortNames ? node.name.split('.').pop() : node.name}
+            {shortNames && node.type === 'wired' ? node.name.split('.').pop() : node.name}
           </EuiLink>
         </EuiToolTip>
         {node.type === 'root' && (
