@@ -46,7 +46,6 @@ export function GoodBadEventsChart({ data, slo, onBrushed, isLoading }: Props) {
     useAnnotations({ slo });
 
   const dateFormat = uiSettings.get('dateFormat');
-  const yAxisNumberFormat = '0,0';
 
   const intervalInMilliseconds =
     data && data.length > 2
@@ -118,7 +117,7 @@ export function GoodBadEventsChart({ data, slo, onBrushed, isLoading }: Props) {
       <Axis
         id="left"
         position={Position.Left}
-        tickFormat={(d) => numeral(d).format(yAxisNumberFormat)}
+        tickFormat={(d) => numeral(d).format('0')}
         domain={{
           fit: true,
           min: NaN,
