@@ -1,6 +1,11 @@
 {
   "$schema": "http://json-schema.org/schema",
   "executors": {
+    "typecheck": {
+      "implementation": "./src/executors/typecheck/executor",
+      "schema": "./src/executors/typecheck/schema.json",
+      "description": "typecheck executor (no tricks)"
+    },
     "typecheck-js": {
       "implementation": "./src/executors/typecheck_js/executor",
       "schema": "./src/executors/typecheck_js/schema.json",
@@ -20,6 +25,11 @@
       "implementation": "./src/executors/jest/executor",
       "schema": "./src/executors/jest/schema.json",
       "description": "Jest Unit test executor"
+    },
+    "noop": {
+      "implementation": "./src/executors/noop/executor",
+      "schema": "./src/executors/noop/schema.json",
+      "description": "Noop executor"
     }
   }
 }

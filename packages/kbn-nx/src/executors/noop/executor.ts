@@ -8,11 +8,13 @@
  */
 
 import type { ExecutorContext } from '@nx/devkit';
+import * as fs from 'fs';
 
 // eslint-disable-next-line import/no-default-export
 export default async function noopExecutor(
   options: {},
   context: ExecutorContext
 ): Promise<{ success: boolean }> {
+  fs.writeFileSync('context.json', JSON.stringify(context, null, 2));
   return { success: true };
 }

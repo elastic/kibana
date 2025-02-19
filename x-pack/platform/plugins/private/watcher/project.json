@@ -1,0 +1,36 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nrwl/nx/refs/heads/master/packages/nx/schemas/project-schema.json",
+  "name": "@kbn/watcher-plugin",
+  "namedInputs": {
+    "src": [
+      "{projectRoot}/__jest__/**/*",
+      "{projectRoot}/server/**/*",
+      "{projectRoot}/public/**/*",
+      "{projectRoot}/common/**/*",
+      "{projectRoot}/__fixtures__/*",
+      "{workspaceRoot}/typings/**/*",
+      "!{projectRoot}/target/**/*"
+    ]
+  },
+  "targets": {
+    "typecheck": {
+      "inputs": [
+        "src",
+        "^src",
+        "global:tsConfigs",
+        "^global:tsConfigs"
+      ],
+      "outputs": [
+        "{projectRoot}/target"
+      ]
+    },
+    "jest": {
+      "options": {
+        "jestConfig": "{projectRoot}/jest.config.js"
+      }
+    },
+    "lint": {}
+  },
+  "projectType": "application",
+  "sourceRoot": "x-pack/platform/plugins/private/watcher"
+}

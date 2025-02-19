@@ -44,7 +44,7 @@
       "cache": true
     },
     "typecheck": {
-      "command": "NODE_OPTIONS='--max-old-space-size=8192' tsc --build {projectRoot}/tsconfig.type_check.json --pretty",
+      "executor": "@kbn/nx:typecheck",
       "dependsOn": ["^@kbn/nx", "^typecheck", "@kbn/nx:generateAllTypecheckConfigs"],
       "inputs": ["src", "^src", "global:tsConfigs", "^global:tsConfigs"],
       "outputs": ["{projectRoot}/target"],
@@ -78,5 +78,5 @@
     }
   },
   "_nxCloudId": "675840972b7c9c798b3d1e9f",
-  "nxCloudId": "67b31dc6fd2afb07f5eb739f"
+  "nxCloudId": "67b5bf9d5f0dc34dcaf2b1b4"
 }
