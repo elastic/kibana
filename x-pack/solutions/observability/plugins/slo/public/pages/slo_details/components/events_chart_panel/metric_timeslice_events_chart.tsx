@@ -6,7 +6,7 @@
  */
 
 import { AreaSeries, Axis, Chart, Position, ScaleType, Settings } from '@elastic/charts';
-import { EuiIcon } from '@elastic/eui';
+import { EuiIcon, EuiLoadingChart } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -20,15 +20,14 @@ import { getBrushTimeBounds } from '../../../../utils/slo/duration';
 import { TimeBounds } from '../../types';
 import { TimesliceAnnotation } from './timeslice_annotation';
 
-export function EventsAreaChart({
-  slo,
-  data,
-  onBrushed,
-}: {
+interface Props {
   data?: GetPreviewDataResponse;
+  isLoading: boolean;
   slo: SLOWithSummaryResponse;
   onBrushed?: (timeBounds: TimeBounds) => void;
-}) {
+}
+
+export function MetricTimesliceEventsChart({ slo, isLoading, data, onBrushed }: Props) {
   const { charts, uiSettings } = useKibana().services;
   const baseTheme = charts.theme.useChartsBaseTheme();
   const dateFormat = uiSettings.get('dateFormat');
@@ -68,6 +67,10 @@ export function EventsAreaChart({
     domain,
     slo,
   });
+
+  if (isLoading) {
+    return <EuiLoadingChart size="m" mono data-test-subj="metricTimesliceLoadingChart" />;
+  }
 
   return (
     <Chart size={{ height: 150, width: '100%' }} ref={chartRef}>

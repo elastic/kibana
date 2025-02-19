@@ -10,7 +10,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
-  EuiLoadingChart,
   EuiPanel,
   EuiText,
   EuiTitle,
@@ -24,8 +23,8 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { TimeBounds } from '../../types';
 import { getDiscoverLink } from '../../utils/get_discover_link';
 import { SloTabId } from '../slo_details';
-import { EventsAreaChart } from './events_area_chart';
 import { GoodBadEventsChart } from './good_bad_events_chart';
+import { MetricTimesliceEventsChart } from './metric_timeslice_events_chart';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -36,7 +35,6 @@ export interface Props {
 
 export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props) {
   const { discover, uiSettings } = useKibana().services;
-
   const { isLoading, data } = useGetPreviewData({
     range,
     isValid: true,
@@ -116,13 +114,12 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
           {slo.indicator.type !== 'sli.metric.timeslice' ? (
             <GoodBadEventsChart isLoading={isLoading} data={data} slo={slo} onBrushed={onBrushed} />
           ) : (
-            <>
-              {isLoading && (
-                <EuiLoadingChart size="m" mono data-test-subj="sliEventsChartLoading" />
-              )}
-
-              {!isLoading && <EventsAreaChart slo={slo} data={data} onBrushed={onBrushed} />}
-            </>
+            <MetricTimesliceEventsChart
+              isLoading={isLoading}
+              slo={slo}
+              data={data}
+              onBrushed={onBrushed}
+            />
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

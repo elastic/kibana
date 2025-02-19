@@ -29,12 +29,12 @@ import { openInDiscover } from '../../utils/get_discover_link';
 
 export interface Props {
   data?: GetPreviewDataResponse;
-  slo?: SLOWithSummaryResponse;
-  isLoading?: boolean;
+  slo: SLOWithSummaryResponse;
+  isLoading: boolean;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function GoodBadEventsChart({ data, slo, onBrushed, isLoading = false }: Props) {
+export function GoodBadEventsChart({ data, slo, onBrushed, isLoading }: Props) {
   const { charts, uiSettings, discover } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
@@ -85,7 +85,7 @@ export function GoodBadEventsChart({ data, slo, onBrushed, isLoading = false }: 
   };
 
   if (isLoading) {
-    return <EuiLoadingChart size="m" mono data-test-subj="sliEventsChartLoading" />;
+    return <EuiLoadingChart size="m" mono data-test-subj="goodBadEventsLoadingChart" />;
   }
 
   return (
