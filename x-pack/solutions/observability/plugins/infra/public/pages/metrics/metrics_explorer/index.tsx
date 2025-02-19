@@ -105,7 +105,7 @@ const MetricsExplorerContent = () => {
         },
       });
     }
-  }, [isLoading, data]);
+  }, [isLoading, data, timeRange.from, timeRange.to, onPageReady]);
 
   return (
     <InfraPageTemplate
