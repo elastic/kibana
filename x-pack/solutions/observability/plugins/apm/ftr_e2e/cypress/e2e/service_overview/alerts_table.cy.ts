@@ -36,7 +36,7 @@ describe('Errors table', () => {
   });
 
   it('Alerts table with the search bar is populated', () => {
-    const expectedControls = ['Status', 'Rule', 'Group', 'Tags'];
+    const expectedControls = ['Statusactive 1', 'Rule', 'Group', 'Tags'];
 
     cy.visitKibana(serviceOverviewHref);
     cy.contains('opbeans-java');
