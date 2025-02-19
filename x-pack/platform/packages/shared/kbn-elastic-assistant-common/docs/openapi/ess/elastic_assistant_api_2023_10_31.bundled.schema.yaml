@@ -746,7 +746,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/KnowledgeBaseEntryUpdateProps'
+              $ref: '#/components/schemas/KnowledgeBaseEntryUpdateRouteProps'
         required: true
       responses:
         '200':
@@ -1393,6 +1393,8 @@ components:
               items:
                 $ref: '#/components/schemas/User'
               type: array
+          required:
+            - id
         - $ref: '#/components/schemas/DocumentEntryCreateFields'
     EsqlContentReference:
       allOf:
@@ -1563,6 +1565,8 @@ components:
               items:
                 $ref: '#/components/schemas/User'
               type: array
+          required:
+            - id
         - $ref: '#/components/schemas/IndexEntryCreateFields'
     InputSchema:
       description: >-
@@ -1727,6 +1731,12 @@ components:
       anyOf:
         - $ref: '#/components/schemas/DocumentEntryUpdateFields'
         - $ref: '#/components/schemas/IndexEntryUpdateFields'
+      discriminator:
+        propertyName: type
+    KnowledgeBaseEntryUpdateRouteProps:
+      anyOf:
+        - $ref: '#/components/schemas/DocumentEntryCreateFields'
+        - $ref: '#/components/schemas/IndexEntryCreateFields'
       discriminator:
         propertyName: type
     KnowledgeBaseResource:

@@ -255,6 +255,12 @@ export const KnowledgeBaseEntryUpdateProps = z.discriminatedUnion('type', [
   IndexEntryUpdateFields,
 ]);
 
+export type KnowledgeBaseEntryUpdateRouteProps = z.infer<typeof KnowledgeBaseEntryUpdateRouteProps>;
+export const KnowledgeBaseEntryUpdateRouteProps = z.discriminatedUnion('type', [
+  DocumentEntryCreateFields,
+  IndexEntryCreateFields,
+]);
+
 export type KnowledgeBaseEntryResponse = z.infer<typeof KnowledgeBaseEntryResponse>;
 export const KnowledgeBaseEntryResponse = z.discriminatedUnion('type', [DocumentEntry, IndexEntry]);
 

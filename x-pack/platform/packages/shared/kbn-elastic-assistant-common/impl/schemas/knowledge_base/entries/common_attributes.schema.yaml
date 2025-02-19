@@ -313,6 +313,14 @@ components:
         - $ref: "#/components/schemas/DocumentEntryUpdateFields"
         - $ref: "#/components/schemas/IndexEntryUpdateFields"
 
+    # Don't allow passing id to the update route body
+    KnowledgeBaseEntryUpdateRouteProps:
+      discriminator:
+        propertyName: type
+      anyOf:
+        - $ref: "#/components/schemas/DocumentEntryCreateFields"
+        - $ref: "#/components/schemas/IndexEntryCreateFields"
+
     KnowledgeBaseEntryResponse:
       discriminator:
         propertyName: type

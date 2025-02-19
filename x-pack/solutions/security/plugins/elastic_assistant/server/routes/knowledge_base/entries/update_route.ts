@@ -15,7 +15,7 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
   KnowledgeBaseEntryResponse,
-  KnowledgeBaseEntryUpdateProps,
+  KnowledgeBaseEntryUpdateRouteProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
 import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
@@ -39,7 +39,7 @@ export const updateKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
         validate: {
           request: {
             params: buildRouteValidationWithZod(UpdateKnowledgeBaseEntryRequestParams),
-            body: buildRouteValidationWithZod(KnowledgeBaseEntryUpdateProps),
+            body: buildRouteValidationWithZod(KnowledgeBaseEntryUpdateRouteProps),
           },
         },
       },

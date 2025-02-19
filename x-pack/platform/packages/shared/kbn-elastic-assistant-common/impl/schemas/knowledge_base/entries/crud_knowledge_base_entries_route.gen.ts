@@ -19,7 +19,7 @@ import { z } from '@kbn/zod';
 import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
-  KnowledgeBaseEntryUpdateProps,
+  KnowledgeBaseEntryUpdateRouteProps,
   DeleteResponseFields,
 } from './common_attributes.gen';
 import { NonEmptyString } from '../../common_attributes.gen';
@@ -83,11 +83,7 @@ export type UpdateKnowledgeBaseEntryRequestParamsInput = z.input<
 export type UpdateKnowledgeBaseEntryRequestBody = z.infer<
   typeof UpdateKnowledgeBaseEntryRequestBody
 >;
-export const UpdateKnowledgeBaseEntryRequestBody = KnowledgeBaseEntryUpdateProps.merge(
-  z.object({
-    id: NonEmptyString.optional(),
-  })
-);
+export const UpdateKnowledgeBaseEntryRequestBody = KnowledgeBaseEntryUpdateRouteProps;
 export type UpdateKnowledgeBaseEntryRequestBodyInput = z.input<
   typeof UpdateKnowledgeBaseEntryRequestBody
 >;
