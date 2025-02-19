@@ -65,6 +65,9 @@ export const useSendMessage = (): UseSendMessage => {
           signal: abortController.current.signal,
           size: knowledgeBase.latestAlerts,
           traceOptions,
+          screenContext: {
+            timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          }
         });
       } finally {
         clearTimeout(timeoutId);

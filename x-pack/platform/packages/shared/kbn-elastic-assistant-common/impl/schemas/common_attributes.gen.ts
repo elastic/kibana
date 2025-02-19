@@ -48,3 +48,11 @@ export type SortOrder = z.infer<typeof SortOrder>;
 export const SortOrder = z.enum(['asc', 'desc']);
 export type SortOrderEnum = typeof SortOrder.enum;
 export const SortOrderEnum = SortOrder.enum;
+
+export type ScreenContext = z.infer<typeof ScreenContext>;
+export const ScreenContext = z.object({
+  /**
+   * The local timezone of the user
+   */
+  timeZone: z.string().optional(),
+});

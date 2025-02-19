@@ -39,6 +39,11 @@ const getTimeFormatter = (timezone: string | undefined) => {
   return formatter;
 };
 
+const getShortOffsetTimezone = (formatter: Intl.DateTimeFormat) => {
+  const offset = formatter.formatToParts(new Date()).find((part) => part.type === 'timeZoneName')?.value;
+  return offset;
+}
+
 export const CURRENT_TIME_TOOL: AssistantTool = {
   id: TOOL_DETAILS.id,
   name: TOOL_DETAILS.name,
@@ -60,14 +65,23 @@ export const CURRENT_TIME_TOOL: AssistantTool = {
         const settingsDateFormatTimezone = await core.uiSettings.client.get<string | undefined>(
           'dateFormat:tz'
         );
-        const timezone =
-          settingsDateFormatTimezone === 'Browser' ? 'UTC' : settingsDateFormatTimezone ?? 'UTC';
-        const currentDate = new Date();
-        const localTime = getTimeFormatter(timezone).format(currentDate);
-        const utcConversionRequired = timezone !== 'UTC';
+        const localTimezone: string =
+          (settingsDateFormatTimezone === 'Browser' ? params.screenContext?.timeZone : settingsDateFormatTimezone) ?? 'UTC';
+
+        const now = new Date();
+        
+        const localFormatter = getTimeFormatter(localTimezone)
+        const utcFormatter = getTimeFormatter("UTC")
+
+        // If the local timezone is different from UTC, we should show the UTC time as well
+        const utcConversionRequired = getShortOffsetTimezone(localFormatter) !== getShortOffsetTimezone(utcFormatter);
+
         const utcConversion = utcConversionRequired
-          ? getTimeFormatter('UTC').format(currentDate)
+          ? utcFormatter.format(now)
           : undefined;
+
+        const localTime = localFormatter.format(now);
+
         return `Local time: ${localTime} ${utcConversion ? `(${utcConversion})` : ''}`.trim();
       },
       {

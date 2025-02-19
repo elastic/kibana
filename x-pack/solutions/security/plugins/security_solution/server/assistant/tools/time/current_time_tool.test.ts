@@ -8,6 +8,7 @@
 import type { AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
 import type { CurrentTimeToolParams } from './current_time_tool';
 import { CURRENT_TIME_TOOL } from './current_time_tool';
+import { ScreenContext } from '@kbn/elastic-assistant-common';
 
 describe('CurrentTimeTool', () => {
   const defaultArgs = {
@@ -43,28 +44,39 @@ describe('CurrentTimeTool', () => {
       jest.clearAllMocks();
       jest
         .useFakeTimers()
-        .setSystemTime(new Date('Fri Feb 14 2025 09:33:12 GMT+0000 (Greenwich Mean Time)'));
+        .setSystemTime(new Date('Fri Feb 14 2025 07:33:12 GMT+0000 (Greenwich Mean Time)'));
     });
 
     it.each([
-      ['Browser', 'Local time: 14/02/2025, 09:33:12 GMT'],
-      [undefined, 'Local time: 14/02/2025, 09:33:12 GMT'],
-      ['Europe/Zurich', 'Local time: 14/02/2025, 10:33:12 GMT+1 (14/02/2025, 09:33:12 GMT)'],
-      ['Europe/Warsaw', 'Local time: 14/02/2025, 10:33:12 GMT+1 (14/02/2025, 09:33:12 GMT)'],
-      ['America/Denver', 'Local time: 14/02/2025, 02:33:12 GMT-7 (14/02/2025, 09:33:12 GMT)'],
-      ['MST', 'Local time: 14/02/2025, 02:33:12 GMT-7 (14/02/2025, 09:33:12 GMT)'],
-      ['America/Los_Angeles', 'Local time: 14/02/2025, 01:33:12 GMT-8 (14/02/2025, 09:33:12 GMT)'],
+      // kibana settings timezone
+      ['Browser', undefined,'Local time: 14/02/2025, 07:33:12 GMT'],
+      [undefined, undefined,'Local time: 14/02/2025, 07:33:12 GMT'],
+      ['Europe/Zurich', undefined,'Local time: 14/02/2025, 08:33:12 GMT+1 (14/02/2025, 07:33:12 GMT)'],
+      ['Europe/Warsaw', undefined,'Local time: 14/02/2025, 08:33:12 GMT+1 (14/02/2025, 07:33:12 GMT)'],
+      ['America/Denver', undefined,'Local time: 14/02/2025, 00:33:12 GMT-7 (14/02/2025, 07:33:12 GMT)'],
+      ['MST', undefined,'Local time: 14/02/2025, 00:33:12 GMT-7 (14/02/2025, 07:33:12 GMT)'],
+      ['America/Los_Angeles', undefined,'Local time: 13/02/2025, 23:33:12 GMT-8 (14/02/2025, 07:33:12 GMT)'],
+
+      // screen context timezone
+      ['Browser', "Europe/London",'Local time: 14/02/2025, 07:33:12 GMT'],
+      ['Browser', "Europe/Zurich",'Local time: 14/02/2025, 08:33:12 GMT+1 (14/02/2025, 07:33:12 GMT)'],
+      ['Browser', "Europe/Warsaw",'Local time: 14/02/2025, 08:33:12 GMT+1 (14/02/2025, 07:33:12 GMT)'],
+      ['Browser', "America/Denver",'Local time: 14/02/2025, 00:33:12 GMT-7 (14/02/2025, 07:33:12 GMT)'],
+      ['Browser', "MST",'Local time: 14/02/2025, 00:33:12 GMT-7 (14/02/2025, 07:33:12 GMT)'],
+      ['Browser', 'America/Los_Angeles','Local time: 13/02/2025, 23:33:12 GMT-8 (14/02/2025, 07:33:12 GMT)'],
     ])(
-      'gets correct time if dateFormat:tz is %s',
-      async (timezone: string | undefined, expectedResult: string) => {
+      'when timezone from kibana settings is "%s" and screenContext.timezone is "%s", then result is "%s"',
+      async (kibanaSettingTimezone: string | undefined, screenContextTimezone: string | undefined, expectedResult: string) => {
         defaultArgs.core.uiSettings.client.get = jest
           .fn()
           .mockImplementation(async (key: string) => {
             expect(key).toEqual('dateFormat:tz');
-            return timezone;
+            return kibanaSettingTimezone;
           });
 
-        const result = await CURRENT_TIME_TOOL.getTool(defaultArgs)?.invoke({});
+        const screenContext: Partial<ScreenContext> = {timeZone: screenContextTimezone};
+
+        const result = await CURRENT_TIME_TOOL.getTool({...defaultArgs, screenContext})?.invoke({});
         expect(result).toEqual(expectedResult);
       }
     );

@@ -34,6 +34,7 @@ import {
   ExecuteConnectorRequestBody,
   Replacements,
   ContentReferencesStore,
+  ScreenContext,
 } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import {
@@ -256,6 +257,7 @@ export interface AssistantToolParams {
     unknown,
     ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody | DefendInsightsPostRequestBody
   >;
+  screenContext?: ScreenContext;
   size?: number;
   telemetry?: AnalyticsServiceSetup;
 }

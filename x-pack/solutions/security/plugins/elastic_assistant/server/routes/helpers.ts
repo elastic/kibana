@@ -25,6 +25,7 @@ import {
   ContentReferencesStore,
   ContentReferences,
   MessageMetadata,
+  ScreenContext,
 } from '@kbn/elastic-assistant-common';
 import { ILicense } from '@kbn/licensing-plugin/server';
 import { i18n } from '@kbn/i18n';
@@ -253,6 +254,7 @@ export interface LangChainExecuteParams {
   response: KibanaResponseFactory;
   responseLanguage?: string;
   savedObjectsClient: SavedObjectsClientContract;
+  screenContext?: ScreenContext;
   systemPrompt?: string;
 }
 export const langChainExecute = async ({
@@ -278,6 +280,7 @@ export const langChainExecute = async ({
   responseLanguage,
   isStream = true,
   savedObjectsClient,
+  screenContext,
   systemPrompt,
 }: LangChainExecuteParams) => {
   // Fetch any tools registered by the request's originating plugin
@@ -339,6 +342,7 @@ export const langChainExecute = async ({
     replacements,
     responseLanguage,
     savedObjectsClient,
+    screenContext,
     size: request.body.size,
     systemPrompt,
     telemetry,

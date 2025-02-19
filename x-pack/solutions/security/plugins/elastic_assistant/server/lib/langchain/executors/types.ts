@@ -16,6 +16,7 @@ import {
   ExecuteConnectorRequestBody,
   Message,
   Replacements,
+  ScreenContext,
 } from '@kbn/elastic-assistant-common';
 import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
@@ -67,6 +68,7 @@ export interface AgentExecutorParams<T extends boolean> {
   request: KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;
   response?: KibanaResponseFactory;
   savedObjectsClient: SavedObjectsClientContract;
+  screenContext?: ScreenContext;
   size?: number;
   systemPrompt?: string;
   telemetry: AnalyticsServiceSetup;
