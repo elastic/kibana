@@ -255,6 +255,7 @@ export const postEvaluateRoute = (
                   signal: abortSignal,
                   streaming: false,
                   maxRetries: 0,
+                  convertSystemMessageToHumanContent: false,
                 });
               const llm = createLlmInstance();
               const anonymizationFieldsRes =

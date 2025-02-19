@@ -36,6 +36,7 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   model?: string;
   maxTokens?: number;
   telemetryMetadata?: TelemetryMetadata;
+  convertSystemMessageToHumanContent?: boolean;
 }
 
 export class ActionsClientChatVertexAI extends ChatVertexAI {

@@ -151,6 +151,7 @@ const defaultArgs = {
   maxRetries: 0,
   onFailedAttempt,
   apiKey: 'mock',
+  convertSystemMessageToHumanContent: false,
 };
 
 const testMessage = 'Yes, your name is Andrew. How can I assist you further, Andrew?';
@@ -221,7 +222,7 @@ describe('ActionsClientChatVertexAI', () => {
       expect(onFailedAttempt).toHaveBeenCalled();
     });
 
-    it('rejects with the expected error the message has invalid content', async () => {
+    it('resolves to expected result when message has invalid content', async () => {
       actionsClient.execute.mockImplementation(
         jest.fn().mockResolvedValue({
           data: {
@@ -236,7 +237,7 @@ describe('ActionsClientChatVertexAI', () => {
 
       await expect(
         actionsClientChatVertexAI._generate(callMessages, callOptions, callRunManager)
-      ).rejects.toThrowError("Cannot read properties of undefined (reading 'text')");
+      ).resolves.toEqual({"generations": [], "llmOutput": {}});
     });
   });
 

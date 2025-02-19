@@ -66,6 +66,7 @@ export class ActionsClientChat {
       model: connector.config?.defaultModel,
       ...params,
       streaming: false, // disabling streaming by default
+      convertSystemMessageToHumanContent: false,
     });
     return model;
   }
