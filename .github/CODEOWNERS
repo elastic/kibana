@@ -870,15 +870,15 @@ src/platform/packages/shared/kbn-server-route-repository @elastic/obs-knowledge-
 src/platform/packages/shared/kbn-server-route-repository-client @elastic/obs-knowledge-team
 src/platform/packages/shared/kbn-server-route-repository-utils @elastic/obs-knowledge-team
 x-pack/platform/plugins/shared/serverless @elastic/appex-sharedux
-src/platform/packages/private/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
+src/platform/packages/shared/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
 x-pack/solutions/observability/plugins/serverless_observability @elastic/obs-ux-management-team
 src/platform/packages/shared/serverless/settings/observability_project @elastic/appex-sharedux @elastic/kibana-management @elastic/obs-ux-management-team
 src/platform/packages/private/serverless/project_switcher @elastic/appex-sharedux
 x-pack/solutions/search/plugins/serverless_search @elastic/search-kibana
 src/platform/packages/shared/serverless/settings/search_project @elastic/search-kibana @elastic/kibana-management
 src/platform/packages/shared/serverless/settings/security_project @elastic/security-solution @elastic/kibana-management
-packages/serverless/storybook/config @elastic/appex-sharedux
-src/platform/packages/private/serverless/types @elastic/appex-sharedux
+src/platform/packages/shared/serverless/storybook/config @elastic/appex-sharedux
+src/platform/packages/shared/serverless/types @elastic/appex-sharedux
 test/plugin_functional/plugins/session_notifications @elastic/kibana-core
 x-pack/solutions/security/plugins/session_view @elastic/kibana-cloud-security-posture
 packages/kbn-set-map @elastic/kibana-operations
