@@ -17,7 +17,7 @@
     "patterns": [
       "_security/privilege/{application}/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-delete-privilege.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/security-api-delete-privilege.html",
     "availability": {
       "stack": true,
       "serverless": false
