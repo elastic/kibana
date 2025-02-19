@@ -24465,9 +24465,9 @@ paths:
                             key:
                               type: string
                       required:
-                        - id
                         - name
                         - host_urls
+                        - id
                     type: array
                   page:
                     type: number
@@ -24686,9 +24686,9 @@ paths:
                           key:
                             type: string
                     required:
-                      - id
                       - name
                       - host_urls
+                      - id
                 required:
                   - item
         '400':
@@ -24861,9 +24861,9 @@ paths:
                           key:
                             type: string
                     required:
-                      - id
                       - name
                       - host_urls
+                      - id
                 required:
                   - item
         '400':
@@ -24916,8 +24916,6 @@ paths:
                     type: string
                   minItems: 1
                   type: array
-                id:
-                  type: string
                 is_default:
                   type: boolean
                 is_internal:
@@ -24983,7 +24981,6 @@ paths:
                     key:
                       type: string
               required:
-                - id
                 - proxy_id
       responses:
         '200':
@@ -25073,9 +25070,9 @@ paths:
                           key:
                             type: string
                     required:
-                      - id
                       - name
                       - host_urls
+                      - id
                 required:
                   - item
         '400':
