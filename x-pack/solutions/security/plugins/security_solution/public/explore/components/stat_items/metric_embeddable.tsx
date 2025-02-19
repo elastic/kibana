@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import React from 'react';
-import { css } from '@emotion/react';
-import { FlexItem, MetricItem, StatValue } from './utils';
+import { FlexItem, StatValue } from './utils';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import type { FieldConfigs } from './types';
 
@@ -28,53 +27,44 @@ const MetricEmbeddableComponent = ({
 }: MetricEmbeddableProps) => {
   return (
     <EuiFlexGroup gutterSize="none" className="metricEmbeddable">
-      {fields.map((field) => {
-        const metricItemStyles =
-          !field.icon &&
-          css`
-            &.euiFlexItem {
-              min-width: 250px;
-            }
-          `;
-        return (
-          <FlexItem key={`stat-items-field-${field.key}`}>
-            <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-              {field.icon && (
-                <FlexItem grow={false}>
-                  <EuiIcon
-                    type={field.icon}
-                    color={field.color}
-                    size="l"
-                    data-test-subj="stat-icon"
-                  />
-                </FlexItem>
-              )}
+      {fields.map((field) => (
+        <FlexItem key={`stat-items-field-${field.key}`}>
+          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+            {field.icon && (
+              <FlexItem grow={false}>
+                <EuiIcon
+                  type={field.icon}
+                  color={field.color}
+                  size="l"
+                  data-test-subj="stat-icon"
+                />
+              </FlexItem>
+            )}
 
-              <MetricItem css={metricItemStyles}>
-                {field.lensAttributes && (
-                  <div data-test-subj="stat-title">
-                    <VisualizationEmbeddable
-                      data-test-subj="embeddable-metric"
-                      height={CHART_HEIGHT}
-                      id={`${id}-${field.key}-metric-embeddable`}
-                      lensAttributes={field.lensAttributes}
-                      timerange={timerange}
-                      inspectTitle={inspectTitle}
-                    />
-                  </div>
-                )}
-              </MetricItem>
-              {field.description != null && (
-                <FlexItem>
-                  <StatValue>
-                    <p data-test-subj="stat-title">{field.description}</p>
-                  </StatValue>
-                </FlexItem>
+            <EuiFlexItem>
+              {field.lensAttributes && (
+                <div data-test-subj="stat-title">
+                  <VisualizationEmbeddable
+                    data-test-subj="embeddable-metric"
+                    height={CHART_HEIGHT}
+                    id={`${id}-${field.key}-metric-embeddable`}
+                    lensAttributes={field.lensAttributes}
+                    timerange={timerange}
+                    inspectTitle={inspectTitle}
+                  />
+                </div>
               )}
-            </EuiFlexGroup>
-          </FlexItem>
-        );
-      })}
+            </EuiFlexItem>
+            {field.description != null && (
+              <FlexItem>
+                <StatValue>
+                  <p data-test-subj="stat-title">{field.description}</p>
+                </StatValue>
+              </FlexItem>
+            )}
+          </EuiFlexGroup>
+        </FlexItem>
+      ))}
     </EuiFlexGroup>
   );
 };
