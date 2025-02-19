@@ -14,9 +14,7 @@ import { SPLUNK_ELASTIC_ALERT_SEVERITY_MAP } from '../../../../../../../constant
 import type { SplunkSeverity } from '../../../../../../../../../../common/siem_migrations/types';
 import type { OriginalRule } from '../../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 
-export const mapSplunkSeverityToElasticSeverity = (
-  splunkSeverity?: keyof SplunkSeverity
-): Severity => {
+export const mapSplunkSeverityToElasticSeverity = (splunkSeverity?: SplunkSeverity): Severity => {
   if (!splunkSeverity) {
     return DEFAULT_TRANSLATION_SEVERITY;
   }
@@ -25,7 +23,7 @@ export const mapSplunkSeverityToElasticSeverity = (
 
 export const getElasticSeverityFromOriginalRule = (originalRule: OriginalRule) => {
   return originalRule.query_language === 'spl' || originalRule.vendor === 'splunk'
-    ? mapSplunkSeverityToElasticSeverity(originalRule.severity as keyof SplunkSeverity)
+    ? mapSplunkSeverityToElasticSeverity(originalRule.severity as SplunkSeverity)
     : DEFAULT_TRANSLATION_SEVERITY;
 };
 

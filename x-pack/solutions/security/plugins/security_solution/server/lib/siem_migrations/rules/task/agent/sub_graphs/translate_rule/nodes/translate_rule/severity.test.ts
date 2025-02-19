@@ -50,7 +50,7 @@ describe('tests', () => {
   describe('mapSplunkSeverityToElasticSeverity', () => {
     describe('when there is a match', () => {
       const tests: Array<{
-        input: keyof SplunkSeverity;
+        input: SplunkSeverity;
         expected: string;
       }> = [
         {
@@ -84,9 +84,7 @@ describe('tests', () => {
     describe('when there is no match', () => {
       it('should return default severity when there is no match', () => {
         expect(
-          mapSplunkSeverityToElasticSeverity(
-            'an_invalid_severity' as unknown as keyof SplunkSeverity
-          )
+          mapSplunkSeverityToElasticSeverity('an_invalid_severity' as unknown as SplunkSeverity)
         ).toEqual('low');
       });
 

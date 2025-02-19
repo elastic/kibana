@@ -8,7 +8,7 @@
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { SplunkSeverity } from '../../../common/siem_migrations/types';
 
-export const SPLUNK_ELASTIC_ALERT_SEVERITY_MAP: Record<keyof SplunkSeverity, Severity> = {
+export const SPLUNK_ELASTIC_ALERT_SEVERITY_MAP: Record<SplunkSeverity, Severity> = {
   '1': 'low',
   '2': 'low',
   '3': 'medium',
