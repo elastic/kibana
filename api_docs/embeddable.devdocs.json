@@ -2069,58 +2069,6 @@
       },
       {
         "parentPluginId": "embeddable",
-        "id": "def-public.ADD_PANEL_LEGACY_GROUP",
-        "type": "Object",
-        "tags": [],
-        "label": "ADD_PANEL_LEGACY_GROUP",
-        "description": [],
-        "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.ADD_PANEL_LEGACY_GROUP.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.ADD_PANEL_LEGACY_GROUP.getDisplayName",
-            "type": "Function",
-            "tags": [],
-            "label": "getDisplayName",
-            "description": [],
-            "signature": [
-              "() => string"
-            ],
-            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.ADD_PANEL_LEGACY_GROUP.order",
-            "type": "number",
-            "tags": [],
-            "label": "order",
-            "description": [],
-            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
         "id": "def-public.ADD_PANEL_OTHER_GROUP",
         "type": "Object",
         "tags": [],
@@ -2176,6 +2124,74 @@
           {
             "parentPluginId": "embeddable",
             "id": "def-public.ADD_PANEL_OTHER_GROUP.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [],
+            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.ADD_PANEL_VISUALIZATION_GROUP",
+        "type": "Object",
+        "tags": [],
+        "label": "ADD_PANEL_VISUALIZATION_GROUP",
+        "description": [],
+        "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ADD_PANEL_VISUALIZATION_GROUP.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ADD_PANEL_VISUALIZATION_GROUP.getDisplayName",
+            "type": "Function",
+            "tags": [],
+            "label": "getDisplayName",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ADD_PANEL_VISUALIZATION_GROUP.getIconType",
+            "type": "Function",
+            "tags": [],
+            "label": "getIconType",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "src/platform/plugins/shared/embeddable/public/ui_actions/add_panel_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ADD_PANEL_VISUALIZATION_GROUP.order",
             "type": "number",
             "tags": [],
             "label": "order",

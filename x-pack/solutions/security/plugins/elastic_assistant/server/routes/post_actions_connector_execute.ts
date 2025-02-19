@@ -12,9 +12,11 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { schema } from '@kbn/config-schema';
 import {
   API_VERSIONS,
+  newContentReferencesStore,
   ExecuteConnectorRequestBody,
   Message,
   Replacements,
+  pruneContentReferences,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { INVOKE_ASSISTANT_ERROR_EVENT } from '../lib/telemetry/event_based_telemetry';
@@ -23,6 +25,7 @@ import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import {
   appendAssistantMessageToConversation,
+  DEFAULT_PLUGIN_NAME,
   getIsKnowledgeBaseInstalled,
   getSystemPromptFromUserConversation,
   langChainExecute,
@@ -99,6 +102,7 @@ export const postActionsConnectorExecuteRoute = (
           // get the actions plugin start contract from the request context:
           const actions = ctx.elasticAssistant.actions;
           const inference = ctx.elasticAssistant.inference;
+          const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
           const productDocsAvailable =
             (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
           const actionsClient = await actions.getActionsClientWithRequest(request);
@@ -106,9 +110,18 @@ export const postActionsConnectorExecuteRoute = (
           const connector = connectors.length > 0 ? connectors[0] : undefined;
           const isOssModel = isOpenSourceModel(connector);
 
+          const contentReferencesEnabled =
+            assistantContext.getRegisteredFeatures(DEFAULT_PLUGIN_NAME).contentReferencesEnabled;
+
           const conversationsDataClient =
-            await assistantContext.getAIAssistantConversationsDataClient();
+            await assistantContext.getAIAssistantConversationsDataClient({
+              contentReferencesEnabled,
+            });
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
+
+          const contentReferencesStore = contentReferencesEnabled
+            ? newContentReferencesStore()
+            : undefined;
 
           onLlmResponse = async (
             content: string,
@@ -116,6 +129,9 @@ export const postActionsConnectorExecuteRoute = (
             isError = false
           ): Promise<void> => {
             if (conversationsDataClient && conversationId) {
+              const contentReferences =
+                contentReferencesStore && pruneContentReferences(content, contentReferencesStore);
+
               await appendAssistantMessageToConversation({
                 conversationId,
                 conversationsDataClient,
@@ -123,6 +139,7 @@ export const postActionsConnectorExecuteRoute = (
                 replacements: latestReplacements,
                 isError,
                 traceData,
+                contentReferences,
               });
             }
           };
@@ -140,6 +157,7 @@ export const postActionsConnectorExecuteRoute = (
             actionsClient,
             actionTypeId,
             connectorId,
+            contentReferencesStore,
             isOssModel,
             conversationId,
             context: ctx,
@@ -153,6 +171,7 @@ export const postActionsConnectorExecuteRoute = (
             request,
             response,
             telemetry,
+            savedObjectsClient,
             systemPrompt,
             ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
           });

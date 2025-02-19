@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart, Logger, PluginInitializerContext } from '@kbn/core/server';
+import {
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  Logger,
+  PluginInitializerContext,
+  ElasticsearchClient,
+} from '@kbn/core/server';
 import { firstValueFrom, Subject } from 'rxjs';
 import { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
 import { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
@@ -19,7 +26,7 @@ import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
-import { IEventLogClientService } from '@kbn/event-log-plugin/server';
+import { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
 import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
@@ -35,6 +42,7 @@ export interface FixtureSetupDeps {
   alerting: AlertingServerSetup;
   taskManager: TaskManagerSetupContract;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  eventLog: IEventLogService;
 }
 
 export interface FixtureStartDeps {
@@ -46,6 +54,7 @@ export interface FixtureStartDeps {
   taskManager: TaskManagerStartContract;
   eventLog: IEventLogClientService;
   notifications: NotificationsPluginStart;
+  elasticsearch: ElasticsearchClient;
 }
 
 const testRuleTypes = [
@@ -92,7 +101,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
 
   public setup(
     core: CoreSetup<FixtureStartDeps>,
-    { features, actions, alerting, ruleRegistry }: FixtureSetupDeps
+    { features, actions, alerting, ruleRegistry, eventLog }: FixtureSetupDeps
   ) {
     features.registerKibanaFeature({
       id: 'alertsFixture',
@@ -134,7 +143,13 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     defineActionTypes(core, { actions });
     defineRuleTypes(core, { alerting, ruleRegistry }, this.logger);
     defineConnectorAdapters(core, { alerting });
-    defineRoutes(core, this.taskManagerStart, this.notificationsStart, { logger: this.logger });
+    const eventLogger = eventLog.getLogger({
+      event: { provider: 'alerting' },
+    });
+    defineRoutes(core, this.taskManagerStart, this.notificationsStart, {
+      logger: this.logger,
+      eventLogger,
+    });
   }
 
   public start(core: CoreStart, { taskManager, notifications }: FixtureStartDeps) {

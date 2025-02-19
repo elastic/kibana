@@ -25,10 +25,12 @@ export function AppRoot({
   pluginsStart,
   services,
   appMountParameters,
+  isServerless,
 }: {
   coreStart: CoreStart;
   pluginsStart: StreamsAppStartDependencies;
   services: StreamsAppServices;
+  isServerless: boolean;
 } & { appMountParameters: AppMountParameters }) {
   const { history } = appMountParameters;
 
@@ -39,6 +41,7 @@ export function AppRoot({
       start: pluginsStart,
     },
     services,
+    isServerless,
   };
 
   return (

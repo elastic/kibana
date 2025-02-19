@@ -38,6 +38,7 @@ export interface InternalHttpServicePreboot
     | 'registerRouteHandlerContext'
     | 'server'
     | 'getServerInfo'
+    | 'prototypeHardening'
   > {
   registerRoutes<
     DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
@@ -54,6 +55,7 @@ export interface InternalHttpServiceSetup
   server: HttpServerSetup['server'];
   staticAssets: InternalStaticAssets;
   externalUrl: ExternalUrlConfig;
+  prototypeHardening: boolean;
   createRouter: <Context extends RequestHandlerContextBase = RequestHandlerContextBase>(
     path: string,
     plugin?: PluginOpaqueId

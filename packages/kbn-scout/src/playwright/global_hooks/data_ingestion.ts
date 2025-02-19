@@ -9,35 +9,34 @@
 
 import { FullConfig } from 'playwright/test';
 import {
-  createEsArchiver,
-  createEsClient,
-  createKbnClient,
-  createLogger,
+  getLogger,
+  getEsArchiver,
   createScoutConfig,
+  measurePerformanceAsync,
+  getEsClient,
+  getKbnClient,
 } from '../../common';
 import { ScoutTestOptions } from '../types';
-import { measurePerformance } from '../utils';
 
 export async function ingestTestDataHook(config: FullConfig, archives: string[]) {
-  const log = createLogger();
+  const log = getLogger();
 
   if (archives.length === 0) {
-    log.info('[scout setup] no test data to ingest');
+    log.debug('[setup] no test data to ingest');
     return;
   }
 
-  return measurePerformance(log, '[scout setup]: ingestTestDataHook', async () => {
+  return measurePerformanceAsync(log, '[setup]: ingestTestDataHook', async () => {
     // TODO: This should be configurable local vs cloud
     const configName = 'local';
     const projectUse = config.projects[0].use as ScoutTestOptions;
     const serversConfigDir = projectUse.serversConfigDir;
     const scoutConfig = createScoutConfig(serversConfigDir, configName, log);
+    const esClient = getEsClient(scoutConfig, log);
+    const kbnClient = getKbnClient(scoutConfig, log);
+    const esArchiver = getEsArchiver(esClient, kbnClient, log);
 
-    const esClient = createEsClient(scoutConfig, log);
-    const kbnCLient = createKbnClient(scoutConfig, log);
-    const esArchiver = createEsArchiver(esClient, kbnCLient, log);
-
-    log.info('[scout setup] loading test data (only if indexes do not exist)...');
+    log.debug('[setup] loading test data (only if indexes do not exist)...');
     for (const archive of archives) {
       await esArchiver.loadIfNeeded(archive);
     }

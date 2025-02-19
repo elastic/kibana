@@ -626,7 +626,7 @@
               },
               "[] | undefined; hiddenFilterPanelOptions?: ",
               "FilterPanelOption",
-              "[] | undefined; prependFilterBar?: React.ReactNode; isRefreshPaused?: boolean | undefined; dateRangeFrom?: string | undefined; dateRangeTo?: string | undefined; savedQuery?: ",
+              "[] | undefined; prependFilterBar?: React.ReactNode; isRefreshPaused?: boolean | undefined; dateRangeFrom?: string | undefined; dateRangeTo?: string | undefined; showSavedQueryControls?: boolean | undefined; savedQuery?: ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -964,6 +964,29 @@
             "label": "adHocDataViews",
             "description": [
               "\nThe adHocDataviews."
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/plugins/shared/unified_search/public/dataview_picker/data_view_picker.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.DataViewPickerProps.managedDataViews",
+            "type": "Array",
+            "tags": [],
+            "label": "managedDataViews",
+            "description": [
+              "\nData views managed by the application"
             ],
             "signature": [
               {
@@ -2299,9 +2322,7 @@
         "signature": [
           "Omit<",
           "SearchBarOwnProps",
-          "<QT>, \"showSaveQuery\"> & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; saveQueryMenuVisibility?: ",
-          "SavedQueryMenuVisibility",
-          " | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; onFiltersUpdated?: ((filters: ",
+          "<QT>, \"showSaveQuery\"> & { appName: string; useDefaultBehaviors?: boolean | undefined; savedQueryId?: string | undefined; allowSavingQueries?: boolean | undefined; onSavedQueryIdChange?: ((savedQueryId?: string | undefined) => void) | undefined; onFiltersUpdated?: ((filters: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",

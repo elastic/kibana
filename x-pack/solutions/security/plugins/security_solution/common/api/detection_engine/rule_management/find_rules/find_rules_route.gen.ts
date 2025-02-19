@@ -63,6 +63,14 @@ export const FindRulesRequestQuery = z.object({
    * Rules per page
    */
   per_page: z.coerce.number().int().min(0).optional().default(20),
+  /**
+   * Gaps range start
+   */
+  gaps_range_start: z.string().optional(),
+  /**
+   * Gaps range end
+   */
+  gaps_range_end: z.string().optional(),
 });
 export type FindRulesRequestQueryInput = z.input<typeof FindRulesRequestQuery>;
 

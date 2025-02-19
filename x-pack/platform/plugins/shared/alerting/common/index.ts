@@ -173,6 +173,7 @@ export {
   preconfiguredConnectorActionRefPrefix,
   systemConnectorActionRefPrefix,
 } from './action_ref_prefix';
+export { gapStatus } from './constants';
 
 export type {
   MaintenanceWindowModificationMetadata,
@@ -225,6 +226,21 @@ export const INTERNAL_ALERTING_BACKFILL_FIND_API_PATH =
   `${INTERNAL_ALERTING_BACKFILL_API_PATH}/_find` as const;
 export const INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH =
   `${INTERNAL_ALERTING_BACKFILL_API_PATH}/_schedule` as const;
+
+export const INTERNAL_ALERTING_GAPS_API_PATH =
+  `${INTERNAL_BASE_ALERTING_API_PATH}/rules/gaps` as const;
+
+export const INTERNAL_ALERTING_GAPS_FIND_API_PATH =
+  `${INTERNAL_ALERTING_GAPS_API_PATH}/_find` as const;
+
+export const INTERNAL_ALERTING_GAPS_GET_RULES_API_PATH =
+  `${INTERNAL_ALERTING_GAPS_API_PATH}/_get_rules` as const;
+
+export const INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH =
+  `${INTERNAL_ALERTING_GAPS_API_PATH}/_get_gaps_summary_by_rule_ids` as const;
+
+export const INTERNAL_ALERTING_GAPS_FILL_BY_ID_API_PATH =
+  `${INTERNAL_ALERTING_GAPS_API_PATH}/_fill_by_id` as const;
 
 export const ALERTING_FEATURE_ID = 'alerts';
 export const MONITORING_HISTORY_LIMIT = 200;

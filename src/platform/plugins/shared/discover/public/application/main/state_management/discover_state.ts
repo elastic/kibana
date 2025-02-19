@@ -272,17 +272,18 @@ export function getDiscoverStateContainer({
   const globalStateContainer = getDiscoverGlobalStateContainer(stateStorage);
 
   /**
+   * Internal State Container, state that's not persisted and not part of the URL
+   */
+  const internalStateContainer = getInternalStateContainer();
+
+  /**
    * Saved Search State Container, the persisted saved object of Discover
    */
   const savedSearchContainer = getSavedSearchContainer({
     services,
     globalStateContainer,
+    internalStateContainer,
   });
-
-  /**
-   * Internal State Container, state that's not persisted and not part of the URL
-   */
-  const internalStateContainer = getInternalStateContainer();
 
   /**
    * App State Container, synced with the _a part URL
@@ -497,7 +498,7 @@ export function getDiscoverStateContainer({
       }),
       {
         isDisabled: () =>
-          services.capabilities.discover.storeSearchSession
+          services.capabilities.discover_v2.storeSearchSession
             ? { disabled: false }
             : {
                 disabled: true,

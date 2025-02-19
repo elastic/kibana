@@ -12,7 +12,7 @@ export default createServerlessTestConfig({
   // @ts-expect-error roleScopedSupertest service accepts a user not just a user role and is different from the one in the common services
   services,
   serverlessProject: 'security',
-  testFiles: [require.resolve('./apis/copy_to_space')],
+  testFiles: [require.resolve('./apis/copy_to_space/index_trial')],
   junit: {
     reportName:
       'X-Pack Spaces API Deployment Agnostic Integration Tests -- copy_to_space - serverless',

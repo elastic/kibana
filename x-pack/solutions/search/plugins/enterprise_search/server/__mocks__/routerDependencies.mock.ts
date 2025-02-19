@@ -14,33 +14,16 @@ import { GlobalConfigService } from '../services/global_config_service';
 
 export const mockLogger = loggingSystemMock.createLogger().get();
 
-export const mockRequestHandler = {
-  createRequest: jest.fn(() => () => {}),
-  hasValidData(data: any) {
-    return (this.createRequest as jest.Mock).mock.calls[0][0].hasValidData(data);
-  },
-};
-
 export const mockMl = mlPluginServerMock.createSetupContract();
 
 export const mockConfig: ConfigType = {
   enabled: true,
-  host: 'http://localhost:3002',
-  accessCheckTimeout: 5000,
-  accessCheckTimeoutWarning: 300,
-  ssl: {
-    verificationMode: 'none',
-  },
   hasConnectors: true,
   hasDefaultIngestPipeline: true,
   hasDocumentLevelSecurityEnabled: true,
   hasIncrementalSyncEnabled: true,
   hasNativeConnectors: true,
   hasWebCrawler: true,
-  isCloud: false,
-  ui: {
-    enabled: true,
-  },
 };
 
 /**
@@ -50,7 +33,6 @@ export const mockConfig: ConfigType = {
 export const mockDependencies = {
   // Mock router should be handled on a per-test basis
   config: mockConfig,
-  enterpriseSearchRequestHandler: mockRequestHandler as any,
   getSavedObjectsService: jest.fn(),
   getStartServices: jest.fn(),
   globalConfigService: new GlobalConfigService(),

@@ -184,7 +184,7 @@ describe('getExpressionType', () => {
     beforeAll(() => {
       setTestFunctions([
         {
-          type: 'eval',
+          type: 'scalar',
           name: 'test',
           description: 'Test function',
           supportedCommands: ['eval'],
@@ -201,14 +201,14 @@ describe('getExpressionType', () => {
           ],
         },
         {
-          type: 'eval',
+          type: 'scalar',
           name: 'returns_keyword',
           description: 'Test function',
           supportedCommands: ['eval'],
           signatures: [{ params: [], returnType: 'keyword' }],
         },
         {
-          type: 'eval',
+          type: 'scalar',
           name: 'accepts_dates',
           description: 'Test function',
           supportedCommands: ['eval'],
@@ -297,7 +297,7 @@ describe('getExpressionType', () => {
     it('accounts for the "any" parameter type', () => {
       setTestFunctions([
         {
-          type: 'eval',
+          type: 'scalar',
           name: 'test',
           description: 'Test function',
           supportedCommands: ['eval'],

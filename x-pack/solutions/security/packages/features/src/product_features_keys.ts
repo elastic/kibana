@@ -85,12 +85,17 @@ export enum ProductFeatureSecurityKey {
   cloudSecurityPosture = 'cloud_security_posture',
 
   /**
-   * enables the integration assistant
+   * enables the automatic import
    */
-  integrationAssistant = 'integration_assistant',
+  automaticImport = 'automatic_import',
 
   /** Enables Endpoint Workflow Insights */
   securityWorkflowInsights = 'security_workflow_insights',
+
+  /**
+   * Enables customization of prebuilt Elastic rules
+   */
+  prebuiltRuleCustomization = 'prebuilt_rule_customization',
 }
 
 export enum ProductFeatureCasesKey {
@@ -127,6 +132,12 @@ export enum ProductFeatureNotesFeatureKey {
    */
   notes = 'notes',
 }
+export enum ProductFeatureSiemMigrationsKey {
+  /**
+   * Enables the SIEM Migrations main feature
+   */
+  siemMigrations = 'siem_migrations',
+}
 
 // Merges the two enums.
 export const ProductFeatureKey = {
@@ -134,6 +145,7 @@ export const ProductFeatureKey = {
   ...ProductFeatureCasesKey,
   ...ProductFeatureAssistantKey,
   ...ProductFeatureAttackDiscoveryKey,
+  ...ProductFeatureSiemMigrationsKey,
   ...ProductFeatureTimelineFeatureKey,
   ...ProductFeatureNotesFeatureKey,
 };
@@ -143,6 +155,7 @@ export type ProductFeatureKeyType =
   | ProductFeatureCasesKey
   | ProductFeatureAssistantKey
   | ProductFeatureAttackDiscoveryKey
+  | ProductFeatureSiemMigrationsKey
   | ProductFeatureTimelineFeatureKey
   | ProductFeatureNotesFeatureKey;
 
@@ -156,6 +169,7 @@ export enum SecuritySubFeatureId {
   hostIsolationExceptionsBasic = 'hostIsolationExceptionsBasicSubFeature',
   blocklist = 'blocklistSubFeature',
   eventFilters = 'eventFiltersSubFeature',
+  globalArtifactManagement = 'globalArtifactManagementSubFeature',
   policyManagement = 'policyManagementSubFeature',
   responseActionsHistory = 'responseActionsHistorySubFeature',
   workflowInsights = 'workflowInsightsSubFeature',
@@ -172,6 +186,7 @@ export enum CasesSubFeatureId {
   casesSettings = 'casesSettingsSubFeature',
   createComment = 'createCommentSubFeature',
   reopenCase = 'reopenCaseSubFeature',
+  assignUsers = 'assignUsersSubFeature',
 }
 
 /** Sub-features IDs for Security Assistant */

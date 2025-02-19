@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 
 import { DataViewField } from '@kbn/data-views-plugin/common';
 
@@ -19,6 +19,7 @@ import type {
   OptionsListSortingType,
   OptionsListSuggestions,
 } from '../../../../common/options_list';
+import { MIN_OPTIONS_LIST_REQUEST_SIZE } from '../options_list_control/constants';
 
 export const getOptionsListMocks = () => {
   const selectedOptions$ = new BehaviorSubject<OptionsListSelection[] | undefined>(undefined);
@@ -30,7 +31,7 @@ export const getOptionsListMocks = () => {
       field$: new BehaviorSubject<DataViewField | undefined>({ type: 'string' } as DataViewField),
       availableOptions$: new BehaviorSubject<OptionsListSuggestions | undefined>(undefined),
       invalidSelections$: new BehaviorSubject<Set<OptionsListSelection>>(new Set([])),
-      totalCardinality$: new BehaviorSubject<number | undefined>(undefined),
+      totalCardinality$: new BehaviorSubject<number>(0),
       dataLoading$: new BehaviorSubject<boolean>(false),
       parentApi: {
         allowExpensiveQueries$: new BehaviorSubject<boolean>(true),
@@ -38,6 +39,7 @@ export const getOptionsListMocks = () => {
       fieldFormatter: new BehaviorSubject((value: string | number) => String(value)),
       makeSelection: jest.fn(),
       setExclude: (next: boolean | undefined) => exclude$.next(next),
+      loadMoreSubject: new Subject<void>(),
     },
     stateManager: {
       searchString: new BehaviorSubject<string>(''),
@@ -48,6 +50,7 @@ export const getOptionsListMocks = () => {
       sort: new BehaviorSubject<OptionsListSortingType | undefined>(undefined),
       selectedOptions: selectedOptions$ as PublishingSubject<OptionsListSelection[] | undefined>,
       searchTechnique: new BehaviorSubject<OptionsListSearchTechnique | undefined>(undefined),
+      requestSize: new BehaviorSubject<number>(MIN_OPTIONS_LIST_REQUEST_SIZE),
     },
     displaySettings: {} as OptionsListDisplaySettings,
     // setSelectedOptions and setExistsSelected are not exposed via API because

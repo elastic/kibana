@@ -102,7 +102,10 @@ export function getQueryForFields(queryString: string, commands: ESQLCommand[]) 
 export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'index' | 'policy') {
   const fromCommand = commands.find(({ name }) => name === 'from');
   const args = (fromCommand?.args ?? []) as ESQLSource[];
-  return args.filter((arg) => arg.sourceType === sourceType);
+  // the marker gets added in queries like "FROM "
+  return args.filter(
+    (arg) => arg.sourceType === sourceType && arg.name !== '' && arg.name !== EDITOR_MARKER
+  );
 }
 
 export function removeQuoteForSuggestedSources(suggestions: SuggestionRawDefinition[]) {
@@ -575,7 +578,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
           operatorReturnType === 'unknown' || operatorReturnType === 'unsupported'
             ? 'any'
             : operatorReturnType,
-        ignored: ['='],
+        ignored: ['=', ':'],
       })
     );
   } else {

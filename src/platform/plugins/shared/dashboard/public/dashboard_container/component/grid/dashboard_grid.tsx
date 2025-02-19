@@ -10,10 +10,12 @@
 import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef } from 'react';
 
+import { css } from '@emotion/react';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
+import { useEuiTheme } from '@elastic/eui';
 import { DashboardPanelState } from '../../../../common';
 import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../../common/content_management/constants';
 import { arePanelLayoutsEqual } from '../../../dashboard_api/are_panel_layouts_equal';
@@ -30,6 +32,7 @@ export const DashboardGrid = ({
   const dashboardApi = useDashboardApi();
   const layoutStyles = useLayoutStyles();
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
+  const { euiTheme } = useEuiTheme();
 
   const [expandedPanelId, panels, useMargins, viewMode] = useBatchedPublishingSubjects(
     dashboardApi.expandedPanelId$,
@@ -56,6 +59,11 @@ export const DashboardGrid = ({
         width: gridData.w,
         height: gridData.h,
       };
+      // update `data-grid-row` attribute for all panels because it is used for some styling
+      const panelRef = panelRefs.current[panelId];
+      if (typeof panelRef !== 'function' && panelRef?.current) {
+        panelRef.current.setAttribute('data-grid-row', `${gridData.y}`);
+      }
     });
 
     return [singleRow];
@@ -89,25 +97,24 @@ export const DashboardGrid = ({
   );
 
   const renderPanelContents = useCallback(
-    (id: string, setDragHandles?: (refs: Array<HTMLElement | null>) => void) => {
+    (id: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
       const currentPanels = dashboardApi.panels$.getValue();
       if (!currentPanels[id]) return;
 
       if (!panelRefs.current[id]) {
         panelRefs.current[id] = React.createRef();
       }
-
       const type = currentPanels[id].type;
       return (
         <DashboardGridItem
           ref={panelRefs.current[id]}
-          data-grid={currentPanels[id].gridData}
           key={id}
           id={id}
           type={type}
           setDragHandles={setDragHandles}
           appFixedViewport={appFixedViewport}
           dashboardContainerRef={dashboardContainerRef}
+          data-grid-row={currentPanels[id].gridData.y} // initialize data-grid-row
         />
       );
     },
@@ -125,6 +132,7 @@ export const DashboardGrid = ({
           rowHeight: DASHBOARD_GRID_HEIGHT,
           columnCount: DASHBOARD_GRID_COLUMN_COUNT,
         }}
+        useCustomDragHandle={true}
         renderPanelContents={renderPanelContents}
         onLayoutChange={onLayoutChange}
         expandedPanelId={expandedPanelId}
@@ -141,12 +149,32 @@ export const DashboardGrid = ({
     viewMode,
   ]);
 
-  const classes = classNames({
-    'dshLayout-withoutMargins': !useMargins,
-    'dshLayout--viewing': viewMode === 'view',
-    'dshLayout--editing': viewMode !== 'view',
-    'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
-  });
+  const { dashboardClasses, dashboardStyles } = useMemo(() => {
+    return {
+      dashboardClasses: classNames({
+        'dshLayout-withoutMargins': !useMargins,
+        'dshLayout--viewing': viewMode === 'view',
+        'dshLayout--editing': viewMode !== 'view',
+        'dshLayout-isMaximizedPanel': expandedPanelId !== undefined,
+      }),
+      dashboardStyles: css`
+        // for dashboards with no controls, increase the z-index of the hover actions in the
+        // top row so that they overlap the sticky nav in Dashboard
+        .dshDashboardViewportWrapper:not(:has(.dshDashboardViewport-controls))
+          &
+          .dshDashboardGrid__item[data-grid-row='0']
+          .embPanel__hoverActions {
+          z-index: ${euiTheme.levels.toast};
+        }
 
-  return <div className={classes}>{memoizedgridLayout}</div>;
+        // when in fullscreen mode, combine all floating actions on first row and nudge them down
+      `,
+    };
+  }, [useMargins, viewMode, expandedPanelId, euiTheme.levels.toast]);
+
+  return (
+    <div className={dashboardClasses} css={dashboardStyles}>
+      {memoizedgridLayout}
+    </div>
+  );
 };

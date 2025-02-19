@@ -5,12 +5,31 @@
  * 2.0.
  */
 
+import type { Filter } from '@kbn/es-query';
 import { KqlQueryType } from '../../../api/detection_engine';
 import {
   extractRuleEqlQuery,
   extractRuleEsqlQuery,
   extractRuleKqlQuery,
 } from './extract_rule_data_query';
+
+const mockFilter: Filter = {
+  meta: {
+    alias: null,
+    negate: false,
+    disabled: false,
+    type: 'phrase',
+    key: 'test',
+    params: {
+      query: 'value',
+    },
+  },
+  query: {
+    term: {
+      field: 'value',
+    },
+  },
+};
 
 describe('extract rule data queries', () => {
   describe('extractRuleKqlQuery', () => {
@@ -22,6 +41,39 @@ describe('extract rule data queries', () => {
         query: 'event.kind:alert',
         language: 'kuery',
         filters: [],
+      });
+    });
+
+    it('normalizes filters', () => {
+      const extractedKqlQuery = extractRuleKqlQuery(
+        'event.kind:alert',
+        'kuery',
+        [mockFilter],
+        undefined
+      );
+
+      expect(extractedKqlQuery).toEqual({
+        type: KqlQueryType.inline_query,
+        query: 'event.kind:alert',
+        language: 'kuery',
+        filters: [
+          {
+            meta: {
+              negate: false,
+              disabled: false,
+              type: 'phrase',
+              key: 'test',
+              params: {
+                query: 'value',
+              },
+            },
+            query: {
+              term: {
+                field: 'value',
+              },
+            },
+          },
+        ],
       });
     });
   });

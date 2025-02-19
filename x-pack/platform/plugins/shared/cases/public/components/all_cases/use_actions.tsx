@@ -38,6 +38,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
   const tooglePopover = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const refreshCases = useRefreshCases();
+  const { permissions } = useCasesContext();
 
   const shouldDisable = useShouldDisableStatus();
 
@@ -83,6 +84,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
 
   const canDelete = deleteAction.canDelete;
   const canUpdate = statusAction.canUpdateStatus;
+  const canAssign = permissions.assign;
 
   const panels = useMemo((): EuiContextMenuPanelDescriptor[] => {
     const mainPanelItems: EuiContextMenuPanelItemDescriptor[] = [];
@@ -136,6 +138,9 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
 
     if (canUpdate) {
       mainPanelItems.push(tagsAction.getAction([theCase]));
+    }
+
+    if (canAssign) {
       mainPanelItems.push(assigneesAction.getAction([theCase]));
     }
 
@@ -164,6 +169,7 @@ const ActionColumnComponent: React.FC<{ theCase: CaseUI; disableActions: boolean
   }, [
     assigneesAction,
     canDelete,
+    canAssign,
     canUpdate,
     copyIDAction,
     deleteAction,
@@ -242,7 +248,8 @@ interface UseBulkActionsProps {
 
 export const useActions = ({ disableActions }: UseBulkActionsProps): UseBulkActionsReturnValue => {
   const { permissions } = useCasesContext();
-  const shouldShowActions = permissions.update || permissions.delete || permissions.reopenCase;
+  const shouldShowActions =
+    permissions.update || permissions.delete || permissions.reopenCase || permissions.assign;
 
   return {
     actions: shouldShowActions

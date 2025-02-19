@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { syntheticsInspectStatusRuleRoute } from './rules/inspect_status_rule';
+import { syntheticsGetLatestTestRunRoute } from './pings/get_latest_test_run';
 import { deleteSyntheticsParamsBulkRoute } from './settings/params/delete_params_bulk';
 import { deleteSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/delete_monitor_bulk';
 import {
@@ -100,6 +102,7 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   createPostDynamicSettingsRoute,
   syntheticsGetPingHeatmapRoute,
   createOverviewTrendsRoute,
+  syntheticsInspectStatusRuleRoute,
 ];
 
 export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
@@ -117,4 +120,5 @@ export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] =
   deleteSyntheticsMonitorRoute,
   deleteSyntheticsMonitorBulkRoute,
   deleteSyntheticsParamsBulkRoute,
+  syntheticsGetLatestTestRunRoute,
 ];

@@ -8,8 +8,8 @@
 import { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/observability-utils-server/es/storage';
 import { StreamsPluginStartDependencies } from '../../../types';
-import { AssetClient } from './asset_client';
-import { assetStorageSettings } from './storage_settings';
+import { AssetClient, StoredAssetLink } from './asset_client';
+import { AssetStorageSettings, assetStorageSettings } from './storage_settings';
 
 export class AssetService {
   constructor(
@@ -20,7 +20,7 @@ export class AssetService {
   async getClientWithRequest({ request }: { request: KibanaRequest }): Promise<AssetClient> {
     const [coreStart, pluginsStart] = await this.coreSetup.getStartServices();
 
-    const adapter = new StorageIndexAdapter(
+    const adapter = new StorageIndexAdapter<AssetStorageSettings, StoredAssetLink>(
       coreStart.elasticsearch.client.asInternalUser,
       this.logger.get('assets'),
       assetStorageSettings

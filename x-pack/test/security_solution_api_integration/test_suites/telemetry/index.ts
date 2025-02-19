@@ -9,5 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Security Solution -  Telemetry', function () {
     loadTestFile(require.resolve('./tasks/indices_metadata'));
+    loadTestFile(require.resolve('./tasks/endpoint'));
   });
 };

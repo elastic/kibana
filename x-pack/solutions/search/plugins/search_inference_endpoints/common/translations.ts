@@ -124,3 +124,30 @@ export const BREADCRUMB_INFERENCE_ENDPOINTS = i18n.translate(
     defaultMessage: 'Inference Endpoints',
   }
 );
+
+export const ENDPOINT_COPY_SUCCESS = (inferenceId: string) =>
+  i18n.translate('xpack.searchInferenceEndpoints.actions.copyIDSuccess', {
+    defaultMessage: 'Inference endpoint ID {inferenceId} copied',
+    values: { inferenceId },
+  });
+
+export const ENDPOINT_COPY_ID_ACTION_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.actions.copyID',
+  {
+    defaultMessage: 'Copy endpoint ID',
+  }
+);
+
+export const ENDPOINT_DELETE_ACTION_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.actions.deleteEndpoint',
+  {
+    defaultMessage: 'Delete endpoint',
+  }
+);
+
+export const ENDPOINT_VIEW_ACTION_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.actions.viewEndpooint',
+  {
+    defaultMessage: 'View endpoint',
+  }
+);

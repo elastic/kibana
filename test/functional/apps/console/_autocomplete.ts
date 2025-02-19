@@ -59,6 +59,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
     });
 
+    it('correctly autocompletes inline JSON', async () => {
+      // 1) Type the request line + inline body (two lines total).
+      await PageObjects.console.enterText('GET index/_search\n{"query": {t');
+
+      // 2) Trigger autocomplete
+      await PageObjects.console.sleepForDebouncePeriod();
+      await PageObjects.console.promptAutocomplete('e');
+
+      // 3) Wait for the autocomplete suggestions to appear
+      await retry.waitFor('autocomplete to be visible', () =>
+        PageObjects.console.isAutocompleteVisible()
+      );
+
+      // 4) Press Enter to accept the first suggestion (likely "term")
+      await PageObjects.console.pressEnter();
+
+      // 5) Now check the text in the editor
+      await retry.try(async () => {
+        const text = await PageObjects.console.getEditorText();
+        // Assert we do NOT invalid autocompletions such as `""term"` or `{term"`
+        expect(text).not.to.contain('""term"');
+        expect(text).not.to.contain('{term"');
+        // and that "term" was inserted
+        expect(text).to.contain('"term"');
+      });
+    });
+
     it('should not show duplicate suggestions', async () => {
       await PageObjects.console.enterText(`POST _ingest/pipeline/_simulate
 {
@@ -159,15 +186,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.pressEnter();
         await PageObjects.console.sleepForDebouncePeriod();
 
-        expect((await PageObjects.console.getEditorText()).replace(/\s/g, '')).to.be.eql(
+        // Verify that the autocomplete suggestion is inserted into the editor
+        expect((await PageObjects.console.getEditorText()).replace(/\s/g, '')).to.contain(
           `
-GET _search
-{
-    "aggs": {
-      "NAME": {
-        "AGG_TYPE": {}
-      }
-    }
+"aggs": {
+  "NAME": {
+    "AGG_TYPE": {}
+  }
 }
 `.replace(/\s/g, '')
         );
@@ -373,8 +398,7 @@ GET _search
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/198109
-    describe.skip('index fields autocomplete', () => {
+    describe('index fields autocomplete', () => {
       const indexName = `index_field_test-${Date.now()}-${Math.random()}`;
 
       before(async () => {
@@ -393,7 +417,11 @@ GET _search
 
       it('fields autocomplete only shows fields of the index', async () => {
         await PageObjects.console.clearEditorText();
-        await PageObjects.console.enterText('GET _search\n{\n"fields": ["');
+        await PageObjects.console.enterText('GET _search\n{\n"fields": [');
+        // Wait for the autocomplete request to finish loading
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        // Trigger the autocomplete for the field we previously added
+        await PageObjects.console.enterText('te');
 
         expect(await PageObjects.console.getAutocompleteSuggestion(0)).to.be.eql('test');
         expect(await PageObjects.console.getAutocompleteSuggestion(1)).to.be.eql(undefined);

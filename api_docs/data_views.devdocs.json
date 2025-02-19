@@ -6448,6 +6448,65 @@
         "children": [
           {
             "parentPluginId": "dataViews",
+            "id": "def-public.IIndexPatternFieldList.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "\nCreates a DataViewField instance. Does not add it to the data view."
+            ],
+            "signature": [
+              "(field: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              ") => ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/fields/field_list.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-public.IIndexPatternFieldList.create.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "field",
+                "description": [
+                  "field spec to create field instance"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
+                  }
+                ],
+                "path": "src/platform/plugins/shared/data_views/common/fields/field_list.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "a new data view field instance"
+            ]
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-public.IIndexPatternFieldList.add",
             "type": "Function",
             "tags": [],
@@ -13938,8 +13997,12 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/containers/create_sourcerer_data_view.ts"
               },
               {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/public/asset_inventory/components/filters/filters.tsx"
+              },
+              {
                 "plugin": "timelines",
-                "path": "x-pack/solutions/security/plugins/timelines/server/search_strategy/index_fields/index.ts"
+                "path": "x-pack/platform/plugins/shared/timelines/server/search_strategy/index_fields/index.ts"
               },
               {
                 "plugin": "exploratoryView",
@@ -24527,6 +24590,65 @@
         "children": [
           {
             "parentPluginId": "dataViews",
+            "id": "def-common.IIndexPatternFieldList.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "\nCreates a DataViewField instance. Does not add it to the data view."
+            ],
+            "signature": [
+              "(field: ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
+              },
+              ") => ",
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "src/platform/plugins/shared/data_views/common/fields/field_list.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.IIndexPatternFieldList.create.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "field",
+                "description": [
+                  "field spec to create field instance"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "common",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
+                  }
+                ],
+                "path": "src/platform/plugins/shared/data_views/common/fields/field_list.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "a new data view field instance"
+            ]
+          },
+          {
+            "parentPluginId": "dataViews",
             "id": "def-common.IIndexPatternFieldList.add",
             "type": "Function",
             "tags": [],
@@ -25724,8 +25846,8 @@
                 "path": "src/core/packages/saved-objects/server-internal/src/routes/legacy_import_export/lib/import_dashboards.ts"
               },
               {
-                "plugin": "@kbn/core-saved-objects-browser-mocks",
-                "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/saved-objects/browser-mocks/src/simple_saved_object.mock.ts"
               },
               {
                 "plugin": "graph",

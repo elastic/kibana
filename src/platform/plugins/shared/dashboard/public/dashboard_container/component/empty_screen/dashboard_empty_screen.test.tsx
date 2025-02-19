@@ -13,12 +13,10 @@ import React from 'react';
 
 import { DashboardContext } from '../../../dashboard_api/use_dashboard_api';
 import { DashboardApi } from '../../../dashboard_api/types';
-import { coreServices, visualizationsService } from '../../../services/kibana_services';
+import { coreServices } from '../../../services/kibana_services';
 import { DashboardEmptyScreen } from './dashboard_empty_screen';
 import { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-
-visualizationsService.getAliases = jest.fn().mockReturnValue([{ name: 'lens' }]);
 
 describe('DashboardEmptyScreen', () => {
   function mountComponent(viewMode: ViewMode) {
@@ -57,7 +55,7 @@ describe('DashboardEmptyScreen', () => {
   });
 
   test('renders correctly with readonly mode', () => {
-    (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
+    (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
 
     const component = mountComponent('view');
     expect(component.render()).toMatchSnapshot();
@@ -72,7 +70,7 @@ describe('DashboardEmptyScreen', () => {
 
   // even when in edit mode, readonly users should not have access to the editing buttons in the empty prompt.
   test('renders correctly with readonly and edit mode', () => {
-    (coreServices.application.capabilities as any).dashboard.showWriteControls = false;
+    (coreServices.application.capabilities as any).dashboard_v2.showWriteControls = false;
 
     const component = mountComponent('edit');
     expect(component.render()).toMatchSnapshot();

@@ -126,7 +126,8 @@
         {
           "names": [
             "metrics-endpoint.metadata_current_*",
-            ".fleet-agents*", ".fleet-actions*",
+            ".fleet-agents*",
+            ".fleet-actions*",
             "risk-score.risk-score-*",
             ".entities.v1.latest.security_*"
           ],
@@ -162,10 +163,11 @@
           "actions": ["read"],
           "builtInAlerts": ["all"],
           "osquery": ["all"],
-          "discover": ["all"],
-          "dashboard": ["all"],
-          "maps": ["all"],
-          "visualize": ["all"]
+          "discover_v2": ["all"],
+          "dashboard_v2": ["all"],
+          "maps_v2": ["all"],
+          "visualize_v2": ["all"],
+          "savedQueryManagement": ["all"]
         },
         "spaces": ["*"],
         "base": []

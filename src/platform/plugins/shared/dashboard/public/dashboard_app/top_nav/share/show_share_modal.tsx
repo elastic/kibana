@@ -41,9 +41,9 @@ export interface ShowShareModalProps {
 }
 
 export const showPublicUrlSwitch = (anonymousUserCapabilities: Capabilities) => {
-  if (!anonymousUserCapabilities.dashboard) return false;
+  if (!anonymousUserCapabilities.dashboard_v2) return false;
 
-  const dashboard = anonymousUserCapabilities.dashboard;
+  const dashboard = anonymousUserCapabilities.dashboard_v2;
 
   return !!dashboard.show;
 };
@@ -245,6 +245,7 @@ export function ShowShareModal({
                 : shareModalStrings.getDraftShareWarning('embed')}
             </EuiCallOut>
           ),
+          computeAnonymousCapabilities: showPublicUrlSwitch,
         },
       },
     },
@@ -266,7 +267,6 @@ export function ShowShareModal({
         component: EmbedUrlParamExtension,
       },
     ],
-    showPublicUrlSwitch,
     snapshotShareWarning: Boolean(unsavedDashboardState?.panels)
       ? shareModalStrings.getSnapshotShareWarning()
       : undefined,

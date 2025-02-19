@@ -12,7 +12,6 @@ components:
         - user
         - host
         - service
-        - universal
 
     EngineDescriptor:
       type: object
@@ -36,6 +35,22 @@ components:
           type: string
           default: 24h
           pattern: '[smdh]$'
+        timestampField:
+          type: string
+        timeout:
+          type: string
+          default: 180s
+          pattern: '[smdh]$'
+        frequency:
+          type: string 
+          default: 1m
+          pattern: '[smdh]$'
+        delay:
+          type: string
+          default: 1m 
+          pattern: '[smdh]$'               
+        docsPerSecond:
+          type: integer       
         error:
           type: object
 
@@ -59,6 +74,8 @@ components:
           type: string
         installed: 
           type: boolean
+        metadata:
+          type: object
         resource:
           $ref: '#/components/schemas/EngineComponentResource'
         health: 

@@ -47,6 +47,8 @@ export interface EntityEngineInstallationDescriptor {
   settings: {
     syncDelay: string;
     frequency: string;
+    timeout: string;
+    docsPerSecond?: number;
     lookbackPeriod: string;
     timestampField: string;
   };
@@ -56,7 +58,7 @@ export interface EntityEngineInstallationDescriptor {
    * This can be an array of processors which get appended to the default pipeline,
    * or a function that takes the default processors and returns an array of processors.
    **/
-  pipeline:
+  pipeline?:
     | IngestProcessorContainer[]
     | ((defaultProcessors: IngestProcessorContainer[]) => IngestProcessorContainer[]);
 

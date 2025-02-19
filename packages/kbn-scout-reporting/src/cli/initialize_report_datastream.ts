@@ -8,8 +8,13 @@
  */
 
 import { Command } from '@kbn/dev-cli-runner';
+import {
+  SCOUT_REPORTER_ES_API_KEY,
+  SCOUT_REPORTER_ES_URL,
+  SCOUT_REPORTER_ES_VERIFY_CERTS,
+} from '@kbn/scout-info';
 import { ScoutReportDataStream } from '../reporting/report/events';
-import { getValidatedESClient } from './common';
+import { getValidatedESClient } from '../helpers/elasticsearch';
 
 export const initializeReportDatastream: Command<void> = {
   name: 'initialize-report-datastream',
@@ -18,13 +23,14 @@ export const initializeReportDatastream: Command<void> = {
     string: ['esURL', 'esAPIKey'],
     boolean: ['verifyTLSCerts'],
     default: {
-      esURL: process.env.ES_URL,
-      esAPIKey: process.env.ES_API_KEY,
+      esURL: SCOUT_REPORTER_ES_URL,
+      esAPIKey: SCOUT_REPORTER_ES_API_KEY,
+      verifyTLSCerts: SCOUT_REPORTER_ES_VERIFY_CERTS,
     },
     help: `
-    --esURL           (required)  Elasticsearch URL [env: ES_URL]
-    --esAPIKey        (required)  Elasticsearch API Key [env: ES_API_KEY]
-    --verifyTLSCerts  (optional)  Verify TLS certificates
+    --esURL           (required)  Elasticsearch URL [env: SCOUT_REPORTER_ES_URL]
+    --esAPIKey        (required)  Elasticsearch API Key [env: SCOUT_REPORTER_ES_API_KEY]
+    --verifyTLSCerts  (optional)  Verify TLS certificates [env: SCOUT_REPORTER_ES_VERIFY_CERTS]
     `,
   },
   run: async ({ flagsReader, log }) => {
@@ -41,7 +47,7 @@ export const initializeReportDatastream: Command<void> = {
           rejectUnauthorized: flagsReader.boolean('verifyTLSCerts'),
         },
       },
-      log
+      { log, cli: true }
     );
 
     // Initialize the report datastream

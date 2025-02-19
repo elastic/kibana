@@ -17,6 +17,7 @@ import { ESQLEditor } from './esql_editor';
 import type { ESQLEditorProps } from './types';
 import { ReactWrapper } from 'enzyme';
 import { coreMock } from '@kbn/core/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 describe('ESQLEditor', () => {
   const uiConfig: Record<string, any> = {};
@@ -30,6 +31,7 @@ describe('ESQLEditor', () => {
       client: uiSettings,
     },
     core: coreMock.createStart(),
+    data: dataPluginMock.createStartContract(),
   };
 
   function renderESQLEditorComponent(testProps: ESQLEditorProps) {

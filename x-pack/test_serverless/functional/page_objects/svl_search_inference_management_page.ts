@@ -40,12 +40,16 @@ export function SvlSearchInferenceManagementPageProvider({ getService }: FtrProv
       },
 
       async expectPreconfiguredEndpointsCannotBeDeleted() {
-        const preconfigureEndpoints = await testSubjects.findAll(
+        const actionButton = await testSubjects.find('euiCollapsedItemActionsButton');
+        await actionButton.click();
+
+        await testSubjects.existOrFail('inferenceUIDeleteAction-preconfigured');
+        const preconfigureEndpoint = await testSubjects.find(
           'inferenceUIDeleteAction-preconfigured'
         );
-        for (const endpoint of preconfigureEndpoints) {
-          expect(await endpoint.isEnabled()).to.be(false);
-        }
+
+        const isEnabled = await preconfigureEndpoint.isEnabled();
+        expect(isEnabled).to.be(false);
       },
 
       async expectEndpointWithoutUsageTobeDelete() {
@@ -85,10 +89,11 @@ export function SvlSearchInferenceManagementPageProvider({ getService }: FtrProv
       },
 
       async expectToCopyEndpoint() {
-        const table = await testSubjects.find('inferenceEndpointTable');
-        const rows = await table.findAllByClassName('euiTableRow');
+        const actionButton = await testSubjects.find('euiCollapsedItemActionsButton');
+        await actionButton.click();
 
-        const elserCopyEndpointId = await rows[0].findByTestSubject(
+        await testSubjects.existOrFail('inference-endpoints-action-copy-id-label');
+        const elserCopyEndpointId = await testSubjects.find(
           'inference-endpoints-action-copy-id-label'
         );
 
@@ -100,7 +105,7 @@ export function SvlSearchInferenceManagementPageProvider({ getService }: FtrProv
     AddInferenceFlyout: {
       async expectInferenceEndpointToBeVisible() {
         await testSubjects.click('add-inference-endpoint-header-button');
-        await testSubjects.existOrFail('create-inference-flyout');
+        await testSubjects.existOrFail('inference-flyout');
 
         await testSubjects.click('provider-select');
         await testSubjects.setValue('provider-super-select-search-box', 'Cohere');
@@ -113,8 +118,26 @@ export function SvlSearchInferenceManagementPageProvider({ getService }: FtrProv
           'cohere-completion'
         );
 
-        await testSubjects.click('add-inference-endpoint-submit-button');
-        expect(await testSubjects.isEnabled('add-inference-endpoint-submit-button')).to.be(false);
+        expect(await testSubjects.isEnabled('inference-endpoint-submit-button')).to.be(true);
+      },
+    },
+
+    EditInferenceFlyout: {
+      async expectEditInferenceEndpointFlyoutToBeVisible() {
+        const actionButton = await testSubjects.find('euiCollapsedItemActionsButton');
+        await actionButton.click();
+
+        await testSubjects.existOrFail('inference-endpoints-action-view-endpoint-label');
+        const elserViewEndpoint = await testSubjects.find(
+          'inference-endpoints-action-view-endpoint-label'
+        );
+
+        await elserViewEndpoint.click();
+        await testSubjects.existOrFail('inference-flyout');
+        (await testSubjects.getVisibleText('provider-select')).includes('Elasticsearch');
+        (await testSubjects.getVisibleText('model_id-input')).includes('.elser_model_2');
+
+        expect(await testSubjects.isEnabled('inference-endpoint-submit-button')).to.be(false);
       },
     },
   };

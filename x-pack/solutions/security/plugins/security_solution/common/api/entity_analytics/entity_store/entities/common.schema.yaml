@@ -9,7 +9,6 @@ components:
     UserEntity:
       type: object
       required:
-        - "@timestamp"
         - user
         - entity
       properties:
@@ -66,10 +65,15 @@ components:
               $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
           required:
             - criticality
+        event:
+          type: object
+          properties:
+            ingested:
+              type: string
+              format: date-time
     HostEntity:
       type: object
       required:
-        - "@timestamp"
         - host
         - entity
       properties:
@@ -130,10 +134,15 @@ components:
               $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
           required:
             - criticality
+        event:
+          type: object
+          properties:
+            ingested:
+              type: string
+              format: date-time
     ServiceEntity:
       type: object
       required:
-        - "@timestamp"
         - service
         - entity
       properties:
@@ -166,6 +175,12 @@ components:
               $ref: '../../asset_criticality/common.schema.yaml#/components/schemas/AssetCriticalityLevel'
           required:
             - criticality
+        event:
+          type: object
+          properties:
+            ingested:
+              type: string
+              format: date-time
     Entity:
       oneOf:
         - $ref: '#/components/schemas/UserEntity'

@@ -407,6 +407,9 @@ export class SettingsPageObject extends FtrService {
       `table.euiTable tbody tr.euiTableRow:nth-child(${tableFields.indexOf(name) + 1})
         td:nth-last-child(2) button`
     );
+    await this.retry.waitFor('flyout to open', async () => {
+      return await this.testSubjects.exists('flyoutTitle');
+    });
   }
 
   async increasePopularity() {

@@ -6,28 +6,19 @@
  */
 import { EuiDataGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { CSSProperties, useEffect, useMemo, useState } from 'react';
+import { RecursiveRecord } from '@kbn/streams-schema';
+import { isEmpty } from 'lodash';
+import React, { useMemo } from 'react';
 
 export function PreviewTable({
   documents,
   displayColumns,
-  height,
 }: {
-  documents: unknown[];
+  documents: RecursiveRecord[];
   displayColumns?: string[];
-  height?: CSSProperties['height'];
 }) {
-  const [computedHeight, setComputedHeight] = useState('100px');
-  useEffect(() => {
-    // set height to 100% after a short delay otherwise it doesn't calculate correctly
-    // TODO: figure out a better way to do this
-    setTimeout(() => {
-      setComputedHeight(`100%`);
-    }, 50);
-  }, []);
-
   const columns = useMemo(() => {
-    if (displayColumns) return displayColumns;
+    if (displayColumns && !isEmpty(displayColumns)) return displayColumns;
 
     const cols = new Set<string>();
     documents.forEach((doc) => {
@@ -42,9 +33,10 @@ export function PreviewTable({
   }, [displayColumns, documents]);
 
   const gridColumns = useMemo(() => {
-    return Array.from(columns).map((column) => ({
+    return columns.map((column) => ({
       id: column,
       displayAsText: column,
+      initialWidth: columns.length > 10 ? 250 : undefined,
     }));
   }, [columns]);
 
@@ -61,13 +53,12 @@ export function PreviewTable({
       }}
       toolbarVisibility={false}
       rowCount={documents.length}
-      height={height ?? computedHeight}
       renderCellValue={({ rowIndex, columnId }) => {
         const doc = documents[rowIndex];
         if (!doc || typeof doc !== 'object') {
           return '';
         }
-        const value = (doc as Record<string, unknown>)[columnId];
+        const value = (doc as RecursiveRecord)[columnId];
         if (value === undefined || value === null) {
           return '';
         }

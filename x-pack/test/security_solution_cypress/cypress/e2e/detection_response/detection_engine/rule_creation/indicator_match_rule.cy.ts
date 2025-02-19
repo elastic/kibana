@@ -14,17 +14,17 @@ import {
 } from '../../../../objects/rule';
 
 import {
-  ALERT_RULE_NAME,
   ALERT_RISK_SCORE,
+  ALERT_RULE_NAME,
   ALERT_SEVERITY,
   ALERTS_COUNT,
 } from '../../../../screens/alerts';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
-  RULES_MANAGEMENT_TABLE,
   RULE_NAME,
   RULE_SWITCH,
+  RULES_MANAGEMENT_TABLE,
   SEVERITY,
 } from '../../../../screens/alerts_detection_rules';
 import {
@@ -58,13 +58,13 @@ import {
 import { INDICATOR_MATCH_ROW_RENDER, PROVIDER_BADGE } from '../../../../screens/timeline';
 import { investigateFirstAlertInTimeline } from '../../../../tasks/alerts';
 import {
+  checkDuplicatedRule,
+  disableAutoRefresh,
   duplicateFirstRule,
   duplicateRuleFromMenu,
-  checkDuplicatedRule,
   expectNumberOfRules,
-  selectAllRules,
   goToRuleDetailsOf,
-  disableAutoRefresh,
+  selectAllRules,
 } from '../../../../tasks/alerts_detection_rules';
 import { duplicateSelectedRulesWithExceptions } from '../../../../tasks/rules_bulk_actions';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -85,15 +85,15 @@ import {
   getIndicatorAndButton,
   getIndicatorAtLeastOneInvalidationText,
   getIndicatorDeleteButton,
-  getRuleIndexInput,
   getIndicatorIndexComboField,
   getIndicatorIndicatorIndex,
   getIndicatorInvalidationText,
   getIndicatorMappingComboField,
   getIndicatorOrButton,
+  getRuleIndexInput,
+  getThreatMatchQueryInvalidationText,
   selectIndicatorMatchType,
   waitForAlertsToPopulate,
-  getThreatMatchQueryInvalidationText,
 } from '../../../../tasks/create_new_rule';
 import {
   SCHEDULE_INTERVAL_AMOUNT_INPUT,
@@ -105,10 +105,10 @@ import { goBackToRuleDetails } from '../../../../tasks/edit_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import {
-  goBackToRulesTable,
   getDetails,
-  waitForTheRuleToBeExecuted,
+  goBackToRulesTable,
   visitRuleDetailsPage,
+  waitForTheRuleToBeExecuted,
 } from '../../../../tasks/rule_details';
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';

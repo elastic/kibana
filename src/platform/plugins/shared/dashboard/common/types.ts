@@ -9,23 +9,15 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import type { DashboardContainerInput, DashboardPanelMap } from './dashboard_container/types';
-import type { DashboardAttributes, DashboardPanel } from '../server/content_management';
+import type { DashboardPanelMap } from './dashboard_container/types';
+import type { DashboardAttributes } from '../server/content_management';
 
 export interface DashboardCapabilities {
   showWriteControls: boolean;
-  saveQuery: boolean;
   createNew: boolean;
   show: boolean;
   [key: string]: boolean;
 }
-
-/**
- * For BWC reasons, dashboard state is stored with panels as an array instead of a map
- */
-export type SharedDashboardState = Partial<
-  Omit<DashboardContainerInput, 'panels'> & { panels: DashboardPanel[] }
->;
 
 /**
  * A partially parsed version of the Dashboard Attributes used for inject and extract logic for both the Dashboard Container and the Dashboard Saved Object.

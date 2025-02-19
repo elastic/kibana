@@ -181,10 +181,10 @@ export function initializeEditApi(
       return false;
     }
     return (
-      Boolean(capabilities.visualize.save) ||
+      Boolean(capabilities.visualize_v2.save) ||
       (!getState().savedObjectId &&
-        Boolean(capabilities.dashboard?.showWriteControls) &&
-        Boolean(capabilities.visualize.show))
+        Boolean(capabilities.dashboard_v2?.showWriteControls) &&
+        Boolean(capabilities.visualize_v2.show))
     );
   };
 

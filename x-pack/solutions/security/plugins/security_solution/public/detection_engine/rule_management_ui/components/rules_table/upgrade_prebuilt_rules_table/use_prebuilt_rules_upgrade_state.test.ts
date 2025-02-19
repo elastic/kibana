@@ -16,10 +16,7 @@ import {
 } from '../../../../../../common/api/detection_engine';
 import { act, renderHook } from '@testing-library/react';
 import { usePrebuiltRulesUpgradeState } from './use_prebuilt_rules_upgrade_state';
-
-jest.mock('../../../../rule_management/hooks/use_is_prebuilt_rules_customization_enabled', () => ({
-  useIsPrebuiltRulesCustomizationEnabled: jest.fn(() => true),
-}));
+import { TestProviders } from '../../../../../common/mock';
 
 jest.mock('../../../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: jest.fn().mockReturnValue({
@@ -37,6 +34,7 @@ describe('usePrebuiltRulesUpgradeState', () => {
       },
     } = renderHook(usePrebuiltRulesUpgradeState, {
       initialProps: ruleUpgradeInfosMock,
+      wrapper: TestProviders,
     });
 
     expect(rulesUpgradeState).toEqual({
@@ -50,6 +48,7 @@ describe('usePrebuiltRulesUpgradeState', () => {
 
       const { result } = renderHook(usePrebuiltRulesUpgradeState, {
         initialProps: ruleUpgradeInfosMock,
+        wrapper: TestProviders,
       });
 
       expect(result.current.rulesUpgradeState).toEqual({
@@ -85,6 +84,7 @@ describe('usePrebuiltRulesUpgradeState', () => {
 
       const { result } = renderHook(usePrebuiltRulesUpgradeState, {
         initialProps: ruleUpgradeInfosMock,
+        wrapper: TestProviders,
       });
 
       expect(result.current.rulesUpgradeState).toEqual({
@@ -122,6 +122,7 @@ describe('usePrebuiltRulesUpgradeState', () => {
 
       const { result } = renderHook(usePrebuiltRulesUpgradeState, {
         initialProps: ruleUpgradeInfosMock,
+        wrapper: TestProviders,
       });
 
       expect(result.current.rulesUpgradeState).toEqual({
@@ -159,6 +160,7 @@ describe('usePrebuiltRulesUpgradeState', () => {
 
       const { result } = renderHook(usePrebuiltRulesUpgradeState, {
         initialProps: ruleUpgradeInfosMock,
+        wrapper: TestProviders,
       });
 
       expect(result.current.rulesUpgradeState).toEqual({
@@ -197,6 +199,7 @@ describe('usePrebuiltRulesUpgradeState', () => {
 
       const { result } = renderHook(usePrebuiltRulesUpgradeState, {
         initialProps: ruleUpgradeInfosMock,
+        wrapper: TestProviders,
       });
 
       act(() => {
@@ -254,6 +257,7 @@ describe('usePrebuiltRulesUpgradeState', () => {
       it('invalidates resolved conflicts', () => {
         const { result, rerender } = renderHook(usePrebuiltRulesUpgradeState, {
           initialProps: createMock({ revision: 1 }),
+          wrapper: TestProviders,
         });
 
         act(() => {
@@ -291,6 +295,7 @@ describe('usePrebuiltRulesUpgradeState', () => {
 
         const { result, rerender } = renderHook(usePrebuiltRulesUpgradeState, {
           initialProps: createMock({ revision: 1 }),
+          wrapper: TestProviders,
         });
 
         act(() => {
@@ -345,6 +350,7 @@ describe('usePrebuiltRulesUpgradeState', () => {
 
         const { result, rerender } = renderHook(usePrebuiltRulesUpgradeState, {
           initialProps: createMock({ version: 1 }),
+          wrapper: TestProviders,
         });
 
         act(() => {
@@ -382,6 +388,7 @@ describe('usePrebuiltRulesUpgradeState', () => {
 
         const { result, rerender } = renderHook(usePrebuiltRulesUpgradeState, {
           initialProps: createMock({ version: 1 }),
+          wrapper: TestProviders,
         });
 
         act(() => {

@@ -14,6 +14,9 @@ import type { Logger } from '@kbn/logging';
 import { BaseMessage } from '@langchain/core/messages';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { ConversationResponse, Replacements } from '@kbn/elastic-assistant-common';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { ActionsClient } from '@kbn/actions-plugin/server';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { AgentState, NodeParamsBase } from './types';
 import { AssistantDataClients } from '../../executors/types';
 
@@ -30,26 +33,32 @@ import { NodeType } from './constants';
 export const DEFAULT_ASSISTANT_GRAPH_ID = 'Default Security Assistant Graph';
 
 export interface GetDefaultAssistantGraphParams {
+  actionsClient: PublicMethodsOf<ActionsClient>;
   agentRunnable: AgentRunnableSequence;
   dataClients?: AssistantDataClients;
   createLlmInstance: () => BaseChatModel;
   logger: Logger;
+  savedObjectsClient: SavedObjectsClientContract;
   signal?: AbortSignal;
   tools: StructuredTool[];
   replacements: Replacements;
+  contentReferencesEnabled: boolean;
 }
 
 export type DefaultAssistantGraph = ReturnType<typeof getDefaultAssistantGraph>;
 
 export const getDefaultAssistantGraph = ({
+  actionsClient,
   agentRunnable,
   dataClients,
   createLlmInstance,
   logger,
+  savedObjectsClient,
   // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
   signal,
   tools,
   replacements,
+  contentReferencesEnabled = false,
 }: GetDefaultAssistantGraphParams) => {
   try {
     // Default graph state
@@ -97,6 +106,10 @@ export const getDefaultAssistantGraph = ({
         value: (x: boolean, y?: boolean) => y ?? x,
         default: () => false,
       },
+      connectorId: {
+        value: (x: string, y?: string) => y ?? x,
+        default: () => '',
+      },
       conversation: {
         value: (x: ConversationResponse | undefined, y?: ConversationResponse | undefined) =>
           y ?? x,
@@ -110,11 +123,21 @@ export const getDefaultAssistantGraph = ({
         value: (x: string, y?: string) => y ?? x,
         default: () => 'English',
       },
+      contentReferencesEnabled: {
+        value: (x: boolean, y?: boolean) => y ?? x,
+        default: () => contentReferencesEnabled,
+      },
+      provider: {
+        value: (x: string, y?: string) => y ?? x,
+        default: () => '',
+      },
     };
 
     // Default node parameters
     const nodeParams: NodeParamsBase = {
+      actionsClient,
       logger,
+      savedObjectsClient,
     };
 
     // Put together a new graph using default state from above

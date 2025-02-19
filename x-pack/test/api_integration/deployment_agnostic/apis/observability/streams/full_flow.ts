@@ -94,10 +94,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
           it('returns a 404 for logs', async () => {
             await apiClient
-              .fetch('GET /api/streams/{id}', {
+              .fetch('GET /api/streams/{name}', {
                 params: {
                   path: {
-                    id: 'logs',
+                    name: 'logs',
                   },
                 },
               })
@@ -139,6 +139,31 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message: 'test',
           'log.level': 'info',
           'log.logger': 'nginx',
+          'stream.name': 'logs',
+        });
+      });
+
+      it('Index a doc with a stream field', async () => {
+        const doc = {
+          '@timestamp': '2024-01-01T00:00:00.000Z',
+          message: JSON.stringify({
+            'log.level': 'info',
+            'log.logger': 'nginx',
+            message: 'test',
+            stream: 'somethingelse', // a field named stream should work as well
+          }),
+        };
+        const response = await indexDocument(esClient, 'logs', doc);
+        expect(response.result).to.eql('created');
+        const result = await fetchDocument(esClient, 'logs', response._id);
+        expect(result._index).to.match(/^\.ds\-logs-.*/);
+        expect(result._source).to.eql({
+          '@timestamp': '2024-01-01T00:00:00.000Z',
+          message: 'test',
+          'log.level': 'info',
+          'log.logger': 'nginx',
+          'stream.name': 'logs',
+          stream: 'somethingelse',
         });
       });
 
@@ -176,6 +201,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message: 'test',
           'log.level': 'info',
           'log.logger': 'nginx',
+          'stream.name': 'logs.nginx',
         });
       });
 
@@ -209,6 +235,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message: 'test',
           'log.level': 'info',
           'log.logger': 'nginx',
+          'stream.name': 'logs.nginx.access',
         });
       });
 
@@ -242,6 +269,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           message: 'test',
           'log.level': 'error',
           'log.logger': 'nginx',
+          'stream.name': 'logs.nginx',
         });
       });
 

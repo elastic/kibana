@@ -8,7 +8,7 @@
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { screen, render, waitFor, fireEvent } from '@testing-library/react';
 
 import { TestProviders, mockDataViewSpec } from '../../mock';
 
@@ -116,9 +116,8 @@ describe('TopN', () => {
     toggleTopN,
   };
   describe('common functionality', () => {
-    let wrapper: ReactWrapper;
     beforeEach(() => {
-      wrapper = mount(
+      render(
         <TestProviders>
           <TopN {...testProps} />
         </TestProviders>
@@ -126,8 +125,7 @@ describe('TopN', () => {
     });
 
     test('it invokes the toggleTopN function when the close button is clicked', () => {
-      wrapper.find('[data-test-subj="close"]').first().simulate('click');
-      wrapper.update();
+      fireEvent.click(screen.getByTestId('close'));
 
       expect(toggleTopN).toHaveBeenCalled();
     });

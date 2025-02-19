@@ -25,7 +25,7 @@ export const getStartEndParams = (query: string, time?: TimeRange) => {
   if (time && (startNamedParams || endNamedParams)) {
     const timeParams = {
       start: startNamedParams ? dateMath.parse(time.from)?.toISOString() : undefined,
-      end: endNamedParams ? dateMath.parse(time.to)?.toISOString() : undefined,
+      end: endNamedParams ? dateMath.parse(time.to, { roundUp: true })?.toISOString() : undefined,
     };
     const namedParams = [];
     if (timeParams?.start) {
@@ -47,7 +47,7 @@ export const getNamedParams = (
   const namedParams: ESQLSearchParams['params'] = getStartEndParams(query, timeRange);
   if (variables?.length) {
     variables?.forEach(({ key, value, type }) => {
-      if (type === ESQLVariableType.FIELDS) {
+      if (type === ESQLVariableType.FIELDS || type === ESQLVariableType.FUNCTIONS) {
         namedParams.push({ [key]: { identifier: value } });
       } else {
         namedParams.push({ [key]: value });

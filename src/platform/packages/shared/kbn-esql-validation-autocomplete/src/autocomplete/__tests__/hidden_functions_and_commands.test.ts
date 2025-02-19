@@ -28,7 +28,7 @@ describe('hidden functions', () => {
   it('does not suggest hidden scalar functions', async () => {
     setTestFunctions([
       {
-        type: 'eval',
+        type: 'scalar',
         name: 'HIDDEN_FUNCTION',
         description: 'This is a hidden function',
         signatures: [{ params: [], returnType: 'text' }],
@@ -36,7 +36,7 @@ describe('hidden functions', () => {
         ignoreAsSuggestion: true,
       },
       {
-        type: 'eval',
+        type: 'scalar',
         name: 'VISIBLE_FUNCTION',
         description: 'This is a visible function',
         signatures: [{ params: [], returnType: 'text' }],

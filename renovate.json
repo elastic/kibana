@@ -17,7 +17,9 @@
   ],
   "baseBranches": [
     "main",
+    "9.0",
     "8.x",
+    "8.18",
     "8.17",
     "8.16",
     "7.17"
@@ -39,6 +41,15 @@
         ".*"
       ],
       "enabled": false
+    },
+    {
+      "groupName": "webpack",
+      "matchDepNames": ["webpack", "@types/webpack", "webpack-cli", "webpack-dev-server", "webpack-merge"],
+      "reviewers": ["team:kibana-operations"],
+      "matchBaseBranches": ["main"],
+      "labels": ["Team:Operations", "backport:all-open", "release_note:skip", "ci:build-webpack-bundle-analyzer"],
+      "minimumReleaseAge": "60 days",
+      "enabled": true
     },
     {
       "groupName": "devcontainer",
@@ -1420,6 +1431,7 @@
         "eslint-plugin-mocha",
         "eslint-plugin-no-unsanitized",
         "eslint-plugin-node",
+        "eslint-plugin-playwright",
         "eslint-plugin-react",
         "eslint-plugin-react-hooks",
         "eslint-plugin-react-perf",
@@ -2837,7 +2849,6 @@
         "cypress"
       ],
       "reviewers": [
-        "team:apm",
         "team:security-solution"
       ],
       "matchBaseBranches": [
@@ -3463,26 +3474,6 @@
       "groupName": "redux-saga-testing",
       "matchDepNames": [
         "redux-saga-testing"
-      ],
-      "reviewers": [
-        "team:obs-ux-management-team"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "backport:all-open",
-        "ci:all-cypress-suites",
-        "Team:obs-ux-management"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "date-fns",
-      "matchDepNames": [
-        "date-fns"
       ],
       "reviewers": [
         "team:obs-ux-management-team"
@@ -4342,6 +4333,25 @@
         "Team:Kibana Management",
         "Feature:Console"
       ],
+      "enabled": true
+    },
+    {
+      "groupName": "node-libs-browser",
+      "matchDepNames": [
+        "node-libs-browser"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Operations",
+        "backport:prev-minor",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "7 days",
       "enabled": true
     }
   ],

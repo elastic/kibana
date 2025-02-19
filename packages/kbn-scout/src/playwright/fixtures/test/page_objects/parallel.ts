@@ -8,7 +8,6 @@
  */
 
 import { PageObjects, createCorePageObjects } from '../../../page_objects';
-import { serviceLoadedMsg } from '../../../utils';
 import { ScoutSpaceParallelFixture } from '../../worker';
 import { scoutPageParallelFixture } from '../scout_page';
 
@@ -28,7 +27,7 @@ export const pageObjectsParallelFixture = scoutPageParallelFixture.extend<
 >({
   pageObjects: async ({ page, log, scoutSpace }, use) => {
     const corePageObjects = createCorePageObjects(page);
-    log.debug(serviceLoadedMsg(`pageObjects:${scoutSpace.id}`));
+    log.serviceLoaded(`pageObjects:${scoutSpace.id}`);
     await use(corePageObjects);
   },
 });

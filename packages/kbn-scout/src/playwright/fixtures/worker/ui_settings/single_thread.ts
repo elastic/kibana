@@ -8,7 +8,7 @@
  */
 
 import { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
-import { isValidUTCDate, formatTime, serviceLoadedMsg } from '../../../utils';
+import { isValidUTCDate, formatTime } from '../../../utils';
 import { coreWorkerFixtures } from '../core_fixtures';
 import { UiSettingsFixture } from '.';
 
@@ -35,7 +35,7 @@ export const uiSettingsFixture = coreWorkerFixtures.extend<{}, { uiSettings: UiS
         },
       };
 
-      log.debug(serviceLoadedMsg(`uiSettings`));
+      log.serviceLoaded('uiSettings');
       await use(kbnClientUiSettings);
     },
     { scope: 'worker' },

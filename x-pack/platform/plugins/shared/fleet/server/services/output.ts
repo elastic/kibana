@@ -180,7 +180,7 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
   ];
   const agentPoliciesFromPackagePolicies = await agentPolicyService.getByIds(
     internalSoClientWithoutSpaceExtension,
-    agentPolicyIdsFromPackagePolicies
+    agentPolicyIdsFromPackagePolicies.map((id) => ({ id, spaceId: '*' }))
   );
 
   const agentPoliciesIndexedById = indexBy(
@@ -249,7 +249,7 @@ async function findPoliciesWithFleetServerOrSynthetics(outputId?: string, isDefa
     if (agentPolicyIds.length) {
       agentPolicies = await agentPolicyService.getByIds(
         internalSoClientWithoutSpaceExtension,
-        agentPolicyIds
+        agentPolicyIds.map((id) => ({ id, spaceId: '*' }))
       );
       for (const packagePolicy of packagePolicies) {
         for (const policyId of packagePolicy.policy_ids) {
@@ -696,6 +696,9 @@ class OutputService {
         if (!output.service_token && output.secrets?.service_token) {
           data.service_token = output.secrets?.service_token as string;
         }
+        if (!output.kibana_api_key && output.secrets?.kibana_api_key) {
+          data.kibana_api_key = output.secrets?.kibana_api_key as string;
+        }
       }
     }
 
@@ -950,6 +953,7 @@ class OutputService {
         updateData.ca_trusted_fingerprint = null;
         updateData.ca_sha256 = null;
         delete (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).service_token;
+        delete (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).kibana_api_key;
       }
 
       if (data.type !== outputType.Logstash) {
@@ -1072,6 +1076,9 @@ class OutputService {
       if (!data.service_token) {
         updateData.service_token = null;
       }
+      if (!data.kibana_api_key) {
+        updateData.kibana_api_key = null;
+      }
     }
 
     if (!data.preset && data.type === outputType.Elasticsearch) {
@@ -1120,6 +1127,9 @@ class OutputService {
       ) {
         if (!data.service_token && data.secrets?.service_token) {
           updateData.service_token = data.secrets?.service_token as string;
+        }
+        if (!data.kibana_api_key && data.secrets?.kibana_api_key) {
+          updateData.kibana_api_key = data.secrets?.kibana_api_key as string;
         }
       }
     }

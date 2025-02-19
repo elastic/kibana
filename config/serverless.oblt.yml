@@ -1,15 +1,16 @@
 # Observability Project config
 
 ## Disable plugins
-enterpriseSearch.enabled: false
+xpack.search.enabled: false
 xpack.cloudSecurityPosture.enabled: false
 xpack.infra.enabled: true
 xpack.uptime.enabled: true
 xpack.securitySolution.enabled: false
-xpack.search.notebooks.enabled: false
+xpack.searchNotebooks.enabled: false
 xpack.searchPlayground.enabled: false
 xpack.searchInferenceEndpoints.enabled: false
 xpack.searchIndices.enabled: false
+xpack.searchSynonyms.enabled: false
 
 
 ## Fine-tune the observability solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
@@ -32,10 +33,20 @@ xpack.features.overrides:
         - feature: "observability"
           privileges: [ "read" ]
   ### Dashboards feature should be moved from Analytics category to the Observability one.
-  dashboard.category: "observability"
+  dashboard_v2.category: "observability"
   ### Discover feature should be moved from Analytics category to the Observability one and its privileges are
   ### fine-tuned to grant access to Observability app.
   discover:
+    privileges:
+      # Discover `All` feature privilege should implicitly grant `All` access to Observability app.
+      all.composedOf:
+        - feature: "observability"
+          privileges: [ "all" ]
+      # Discover `Read` feature privilege should implicitly grant `Read` access to Observability app.
+      read.composedOf:
+        - feature: "observability"
+          privileges: [ "read" ]
+  discover_v2:
     category: "observability"
     privileges:
       # Discover `All` feature privilege should implicitly grant `All` access to Observability app.
@@ -127,9 +138,6 @@ uiSettings.overrides.defaultRoute: /app/observability/landing
 # Customize empty page state for analytics apps
 no_data_page.analyticsNoDataPageFlavor: 'serverless_observability'
 
-## Set the dev project switch current type
-xpack.serverless.plugin.developer.projectSwitcher.currentType: 'observability'
-
 ## Disable adding the component template `.fleet_agent_id_verification-1` to every index template for each datastream for each integration
 xpack.fleet.agentIdVerificationEnabled: false
 
@@ -181,6 +189,9 @@ xpack.fleet.internal.registry.excludePackages: [
 
     # Profiling integrations
     'profiler_agent',
+
+    # Search connectors
+    'elastic_connectors',
   ]
 
 ## Required for force installation of integration packages

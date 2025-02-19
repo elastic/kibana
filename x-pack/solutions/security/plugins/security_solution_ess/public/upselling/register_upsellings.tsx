@@ -13,6 +13,7 @@ import {
   UPGRADE_ALERT_ASSIGNMENTS,
   UPGRADE_INVESTIGATION_GUIDE,
   UPGRADE_NOTES_MANAGEMENT_USER_FILTER,
+  UPGRADE_PREBUILT_RULE_CUSTOMIZATION,
 } from '@kbn/security-solution-upselling/messages';
 import type {
   MessageUpsellings,
@@ -137,5 +138,10 @@ export const upsellingMessages: UpsellingMessages = [
     id: 'note_management_user_filter',
     minimumLicenseRequired: 'platinum',
     message: UPGRADE_NOTES_MANAGEMENT_USER_FILTER('Platinum'),
+  },
+  {
+    id: 'prebuilt_rule_customization',
+    minimumLicenseRequired: 'enterprise',
+    message: UPGRADE_PREBUILT_RULE_CUSTOMIZATION('Enterprise'),
   },
 ];

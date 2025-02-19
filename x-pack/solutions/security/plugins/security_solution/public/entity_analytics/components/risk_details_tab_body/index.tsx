@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { useUpsellingComponent } from '../../../common/hooks/use_upselling';
 import { EnableRiskScore } from '../enable_risk_score';
@@ -28,7 +28,7 @@ import { RiskEnginePrivilegesCallOut } from '../risk_engine_privileges_callout';
 import { RiskScoresNoDataDetected } from '../risk_score_no_data_detected';
 
 const StyledEuiFlexGroup = styled(EuiFlexGroup)`
-  margin-top: ${({ theme }) => theme.eui.euiSizeL};
+  margin-top: ${({ theme: { euiTheme } }) => euiTheme.size.l};
 `;
 
 type ComponentsQueryProps = HostsComponentsQueryProps | UsersComponentsQueryProps;

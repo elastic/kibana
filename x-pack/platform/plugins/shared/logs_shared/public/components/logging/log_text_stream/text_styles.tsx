@@ -6,35 +6,39 @@
  */
 
 import React, { useMemo, useState, useCallback } from 'react';
-
-import { euiStyled, css } from '@kbn/kibana-react-plugin/common';
+import { css } from '@emotion/react';
+import styled from '@emotion/styled';
+import { EuiThemeComputed, useEuiFontSize } from '@elastic/eui';
+import { withAttrs } from '../../../utils/theme_utils/with_attrs';
 import { TextScale } from '../../../../common/log_text_scale';
 
 export type WrapMode = 'none' | 'pre-wrapped' | 'long';
 
-export const monospaceTextStyle = (scale: TextScale) => css`
-  font-family: ${(props) => props.theme.eui.euiCodeFontFamily};
-  font-size: ${(props) => {
-    switch (scale) {
-      case 'large':
-        return props.theme.eui.euiFontSizeM;
-      case 'medium':
-        return props.theme.eui.euiFontSizeS;
-      case 'small':
-        return props.theme.eui.euiFontSizeXS;
-      default:
-        return props.theme.eui.euiFontSize;
-    }
-  }};
-  line-height: ${(props) => props.theme.eui.euiLineHeight};
+const getFontSize = (textscale: TextScale) => {
+  switch (textscale) {
+    case 'large':
+      return 'm';
+    case 'medium':
+      return 's';
+    case 'small':
+      return 'xs';
+    default:
+      return 's';
+  }
+};
+
+export const useMonospaceTextStyle = (scale: TextScale, euiTheme: EuiThemeComputed) => css`
+  font-family: ${euiTheme.font.familyCode};
+  font-size: ${useEuiFontSize(getFontSize(scale))};
+  line-height: ${euiTheme.font.lineHeightMultiplier};
 `;
 
-export const hoveredContentStyle = css`
-  background-color: ${(props) => props.theme.eui.euiFocusBackgroundColor};
+export const hoveredContentStyle = (euiTheme: EuiThemeComputed) => css`
+  background-color: ${euiTheme.focus.backgroundColor};
 `;
 
-export const highlightedContentStyle = css`
-  background-color: ${(props) => props.theme.eui.euiColorHighlight};
+export const highlightedContentStyle = (euiTheme: EuiThemeComputed) => css`
+  background-color: ${euiTheme.colors.highlight};
 `;
 
 export const longWrappedContentStyle = css`
@@ -96,15 +100,18 @@ interface MonospaceCharacterDimensionsProbe {
   scale: TextScale;
 }
 
-const MonospaceCharacterDimensionsProbe = euiStyled.div.attrs(() => ({
-  'aria-hidden': true,
-}))<MonospaceCharacterDimensionsProbe>`
-  visibility: hidden;
-  position: absolute;
-  height: auto;
-  width: auto;
-  padding: 0;
-  margin: 0;
+const MonospaceCharacterDimensionsProbe = withAttrs(
+  styled.div<MonospaceCharacterDimensionsProbe>`
+    visibility: hidden;
+    position: absolute;
+    height: auto;
+    width: auto;
+    padding: 0;
+    margin: 0;
 
-  ${(props) => monospaceTextStyle(props.scale)};
-`;
+    ${(props) => useMonospaceTextStyle(props.scale, props.theme.euiTheme)};
+  `,
+  () => ({
+    'aria-hidden': true,
+  })
+);

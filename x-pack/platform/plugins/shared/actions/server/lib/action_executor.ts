@@ -418,7 +418,7 @@ export class ActionExecutor {
         const actionType = actionTypeRegistry.get(actionTypeId);
         const configurationUtilities = actionTypeRegistry.getUtils();
 
-        let validatedParams;
+        let validatedParams: Record<string, unknown>;
         let validatedConfig;
         let validatedSecrets;
         try {
@@ -605,11 +605,14 @@ export class ActionExecutor {
                   prompt_tokens: tokenTracking.prompt_tokens ?? 0,
                   completion_tokens: tokenTracking.completion_tokens ?? 0,
                 });
+
                 analyticsService.reportEvent(GEN_AI_TOKEN_COUNT_EVENT.eventType, {
                   actionTypeId,
                   total_tokens: tokenTracking.total_tokens ?? 0,
                   prompt_tokens: tokenTracking.prompt_tokens ?? 0,
                   completion_tokens: tokenTracking.completion_tokens ?? 0,
+                  aggregateBy: tokenTracking?.telemetry_metadata?.aggregateBy,
+                  pluginId: tokenTracking?.telemetry_metadata?.pluginId,
                   ...(actionTypeId === '.gen-ai' && config?.apiProvider != null
                     ? { provider: config?.apiProvider }
                     : {}),

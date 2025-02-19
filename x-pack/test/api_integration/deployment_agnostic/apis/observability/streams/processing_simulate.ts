@@ -18,17 +18,17 @@ import {
 
 async function simulateProcessingForStream(
   client: StreamsSupertestRepositoryClient,
-  id: string,
+  name: string,
   body: ClientRequestParamsOf<
     StreamsRouteRepository,
-    'POST /api/streams/{id}/processing/_simulate'
+    'POST /api/streams/{name}/processing/_simulate'
   >['params']['body'],
   statusCode = 200
 ) {
   return client
-    .fetch('POST /api/streams/{id}/processing/_simulate', {
+    .fetch('POST /api/streams/{name}/processing/_simulate', {
       params: {
-        path: { id },
+        path: { name },
         body,
       },
     })

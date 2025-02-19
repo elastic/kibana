@@ -293,11 +293,13 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       xpackSecurity: `${KIBANA_DOCS}xpack-security.html`,
       restApis: `${KIBANA_DOCS}api.html`,
       dashboardImportExport: `${KIBANA_DOCS}dashboard-api.html`,
+      upgradeNotes: `${KIBANA_DOCS}breaking-changes-summary.html`,
     },
     upgradeAssistant: {
       overview: `${KIBANA_DOCS}upgrade-assistant.html`,
       batchReindex: `${KIBANA_DOCS}batch-start-resume-reindex.html`,
       remoteReindex: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-from-remote`,
+      unfreezeApi: `${ELASTICSEARCH_DOCS}unfreeze-index-api.html`,
       reindexWithPipeline: `${ELASTICSEARCH_DOCS}docs-reindex.html#reindex-with-an-ingest-pipeline`,
     },
     rollupJobs: `${KIBANA_DOCS}data-rollups.html`,
@@ -396,6 +398,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       typesRemoval: `${ELASTICSEARCH_DOCS}removal-of-types.html`,
       setupUpgrade: `${ELASTICSEARCH_DOCS}setup-upgrade.html`,
       apiCompatibilityHeader: `${ELASTICSEARCH_DOCS}api-conventions.html#api-compatibility`,
+      migrationGuide: `${ELASTICSEARCH_DOCS}breaking-changes.html`,
     },
     siem: {
       guide: `${SECURITY_SOLUTION_DOCS}index.html`,
@@ -411,6 +414,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     server: {
       protocol: `${KIBANA_DOCS}settings.html#server-protocol`,
+    },
+    logging: {
+      enableDeprecationHttpDebugLogs: `${KIBANA_DOCS}logging-settings.html#enable-http-debug-logs`,
     },
     securitySolution: {
       artifactControl: `${SECURITY_SOLUTION_DOCS}artifact-control.html`,
@@ -449,7 +455,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       aiAssistant: `${SECURITY_SOLUTION_DOCS}security-assistant.html`,
       signalsMigrationApi: `${SECURITY_SOLUTION_DOCS}signals-migration-api.html`,
       legacyEndpointManagementApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-199598`,
-      legacyBulkApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-207091`,
+      legacyRuleManagementBulkApiDeprecations: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-207091`,
     },
     query: {
       eql: `${ELASTICSEARCH_DOCS}eql.html`,
@@ -671,6 +677,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mappingRolesFieldRules: `${ELASTICSEARCH_DOCS}role-mapping-resources.html#mapping-roles-rule-field`,
       runAsPrivilege: `${ELASTICSEARCH_DOCS}security-privileges.html#_run_as_privilege`,
       deprecatedV1Endpoints: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-199656`,
+      enableElasticSearchSecurityFeatures: `${ELASTICSEARCH_DOCS}security-minimal-setup.html#_enable_elasticsearch_security_features`,
     },
     spaces: {
       kibanaLegacyUrlAliases: `${KIBANA_DOCS}legacy-url-aliases.html`,

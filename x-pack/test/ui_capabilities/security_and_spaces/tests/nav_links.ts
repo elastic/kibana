@@ -62,11 +62,12 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
                 'enterpriseSearchApplications',
                 'enterpriseSearchAnalytics',
                 'searchPlayground',
-                'searchInferenceEndpoints',
                 'searchSynonyms',
+                'searchInferenceEndpoints',
                 'guidedOnboardingFeature',
                 'securitySolutionAssistant',
                 'securitySolutionAttackDiscovery',
+                'securitySolutionSiemMigrations',
                 'dataQuality'
               )
             );

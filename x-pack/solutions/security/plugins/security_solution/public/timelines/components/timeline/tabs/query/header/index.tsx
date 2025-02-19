@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import { InPortal } from 'react-reverse-portal';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
-import styled from '@emotion/styled';
-import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 import { useTimelineEventsCountPortal } from '../../../../../../common/hooks/use_timeline_events_count';
 import {
   type TimelineStatus,
@@ -25,7 +24,7 @@ import { timelineDefaults } from '../../../../../store/defaults';
 import * as i18n from './translations';
 import { StatefulSearchOrFilter } from '../../../search_or_filter';
 import { DataProviders } from '../../../data_providers';
-import { StyledEuiFlyoutHeader, EventsCountBadge, TabHeaderContainer } from '../../shared/layout';
+import { EventsCountBadge, StyledEuiFlyoutHeader, TabHeaderContainer } from '../../shared/layout';
 
 interface Props {
   activeTab: TimelineTabs;
@@ -38,24 +37,27 @@ interface Props {
   totalCount: number;
 }
 
-const DataProvidersContainer = styled.div<{ $shouldShowQueryBuilder: boolean }>`
-  position: relative;
-  width: 100%;
-  transition: 0.5s ease-in-out;
-  overflow: hidden;
+const useStyles = (shouldShowQueryBuilder: boolean) => {
+  const { euiTheme } = useEuiTheme();
 
-  ${(props) =>
-    props.$shouldShowQueryBuilder
-      ? `display: block; max-height: 300px; visibility: visible; margin-block-start: 0px;`
-      : `display: block; max-height: 0px; visibility: hidden; margin-block-start:-${euiThemeVars.euiSizeS};`}
-
-  .${IS_DRAGGING_CLASS_NAME} & {
+  return css`
+    position: relative;
+    width: 100%;
+    transition: 0.5s ease-in-out;
+    overflow: hidden;
     display: block;
-    max-height: 300px;
-    visibility: visible;
-    margin-block-start: 0px;
-  }
-`;
+    max-height: ${shouldShowQueryBuilder ? '300px' : '0'};
+    visibility: ${shouldShowQueryBuilder ? 'visible' : 'hidden'};
+    margin-block-start: ${shouldShowQueryBuilder ? '0' : -euiTheme.size.s};
+
+    . ${IS_DRAGGING_CLASS_NAME} & {
+      display: block;
+      max-height: 300px;
+      visibility: visible;
+      margin-block-start: 0;
+    }
+  `;
+};
 
 const QueryTabHeaderComponent: React.FC<Props> = ({
   activeTab,
@@ -78,13 +80,14 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
   const timelineType = useDeepEqualSelector(
     (state) => (getTimeline(state, timelineId) ?? timelineDefaults).timelineType
   );
-
   const isDataProviderVisible = useDeepEqualSelector(
     (state) => getIsDataProviderVisible(state, timelineId) ?? timelineDefaults.isDataProviderVisible
   );
-
-  const shouldShowQueryBuilder =
-    isDataProviderVisible || timelineType === TimelineTypeEnum.template;
+  const shouldShowQueryBuilder = useMemo(
+    () => isDataProviderVisible || timelineType === TimelineTypeEnum.template,
+    [isDataProviderVisible, timelineType]
+  );
+  const dataProviderStyles = useStyles(shouldShowQueryBuilder);
 
   return (
     <StyledEuiFlyoutHeader data-test-subj={`${activeTab}-tab-flyout-header`} hasBorder={false}>
@@ -123,12 +126,9 @@ const QueryTabHeaderComponent: React.FC<Props> = ({
                 </EuiFlexItem>
               )}
               {show ? (
-                <DataProvidersContainer
-                  className="data-providers-container"
-                  $shouldShowQueryBuilder={shouldShowQueryBuilder}
-                >
+                <div css={dataProviderStyles} className="data-providers-container">
                   <DataProviders timelineId={timelineId} />
-                </DataProvidersContainer>
+                </div>
               ) : null}
             </EuiFlexGroup>
           </TabHeaderContainer>

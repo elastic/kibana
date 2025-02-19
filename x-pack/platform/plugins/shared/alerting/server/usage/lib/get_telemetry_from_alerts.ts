@@ -14,6 +14,7 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { NUM_ALERTING_RULE_TYPES } from '../alerting_usage_collector';
 import { parseSimpleRuleTypeBucket } from './parse_simple_rule_type_bucket';
 import { AlertingUsage } from '../types';
+import { parseAndLogError } from './parse_and_log_error';
 
 interface Opts {
   esClient: ElasticsearchClient;
@@ -69,20 +70,10 @@ export async function getTotalAlertsCountAggregations({
     return {
       hasErrors: false,
       count_alerts_total: totalAlertsCount ?? 0,
-      count_alerts_by_rule_type: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
+      count_alerts_by_rule_type: parseSimpleRuleTypeBucket(aggregations?.by_rule_type_id?.buckets),
     };
   } catch (err) {
-    const errorMessage = err && err.message ? err.message : err.toString();
-
-    logger.warn(
-      `Error executing alerting telemetry task: getTotalAlertsCountAggregations - ${JSON.stringify(
-        err
-      )}`,
-      {
-        tags: ['alerting', 'telemetry-failed'],
-        error: { stack_trace: err.stack },
-      }
-    );
+    const errorMessage = parseAndLogError(err, `getTotalAlertsCountAggregations`, logger);
 
     return {
       hasErrors: true,

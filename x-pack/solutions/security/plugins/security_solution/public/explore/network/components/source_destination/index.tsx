@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { Network } from './network';
 import { SourceDestinationWithArrows } from './source_destination_with_arrows';
@@ -36,7 +36,6 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
     destinationPackets,
     destinationPort,
     eventId,
-    isDraggable,
     networkBytes,
     networkCommunityId,
     networkDirection,
@@ -62,7 +61,6 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
           contextId={contextId}
           direction={networkDirection}
           eventId={eventId}
-          isDraggable={isDraggable}
           protocol={networkProtocol}
           transport={transport}
         />
@@ -81,7 +79,6 @@ export const SourceDestination = React.memo<SourceDestinationProps>(
           destinationPackets={destinationPackets}
           destinationPort={destinationPort}
           eventId={eventId}
-          isDraggable={isDraggable}
           sourceBytes={sourceBytes}
           sourceGeoContinentName={sourceGeoContinentName}
           sourceGeoCountryName={sourceGeoCountryName}

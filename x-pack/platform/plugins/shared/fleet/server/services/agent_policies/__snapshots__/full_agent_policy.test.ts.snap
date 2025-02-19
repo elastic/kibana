@@ -309,8 +309,11 @@ Object {
       "hosts": Array [
         "http://127.0.0.1:9201",
       ],
+      "kibana_api_key": undefined,
+      "kibana_url": undefined,
       "preset": "balanced",
       "service_token": undefined,
+      "sync_integrations": undefined,
       "type": "remote_elasticsearch",
     },
   },

@@ -11,6 +11,7 @@ const _allowedExperimentalValues = {
   showExperimentalShipperOptions: false,
   useSpaceAwareness: false,
   enableAutomaticAgentUpgrades: false,
+  enableSyncIntegrationsOnRemote: false,
 };
 
 /**

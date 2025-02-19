@@ -88,7 +88,6 @@ export const moveAction = (
       ? getResizePreviewRect({
           interactionEvent,
           pointerPixel,
-          runtimeSettings,
         })
       : getDragPreviewRect({
           interactionEvent,

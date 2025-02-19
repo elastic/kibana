@@ -69,8 +69,10 @@ export class EntityManagerServerPlugin
   public config: EntityManagerConfig;
   public logger: Logger;
   public server?: EntityManagerServerSetup;
+  private isDev: boolean;
 
   constructor(context: PluginInitializerContext<EntityManagerConfig>) {
+    this.isDev = context.env.mode.dev;
     this.config = context.config.get();
     this.logger = context.logger.get();
   }
@@ -143,6 +145,7 @@ export class EntityManagerServerPlugin
       },
       core,
       logger: this.logger,
+      runDevModeChecks: this.isDev,
     });
 
     return {};
@@ -166,7 +169,6 @@ export class EntityManagerServerPlugin
   ): EntityManagerServerPluginStart {
     if (this.server) {
       this.server.core = core;
-      this.server.isServerless = core.elasticsearch.getCapabilities().serverless;
       this.server.security = plugins.security;
       this.server.encryptedSavedObjects = plugins.encryptedSavedObjects;
     }

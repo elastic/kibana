@@ -132,8 +132,6 @@ export const OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID =
 export const OBSERVABILITY_APM_ENABLE_TABLE_SEARCH_BAR = 'observability:apmEnableTableSearchBar';
 export const OBSERVABILITY_APM_ENABLE_SERVICE_INVENTORY_TABLE_SEARCH_BAR =
   'observability:apmEnableServiceInventoryTableSearchBar';
-export const OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID =
-  'observability:logsExplorer:allowedDataViews';
 export const OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID = 'observability:newLogsOverview';
 export const OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE = 'observability:entityCentricExperience';
 export const OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID = 'observability:logSources';
@@ -178,6 +176,8 @@ export const SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING =
   'securitySolution:enableAssetCriticality' as const;
 export const SECURITY_SOLUTION_ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING =
   'securitySolution:enableVisualizationsInFlyout' as const;
+export const SECURITY_SOLUTION_ENABLE_GRAPH_VISUALIZATION_SETTING =
+  'securitySolution:enableGraphVisualization' as const;
 
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';

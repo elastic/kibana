@@ -11,7 +11,7 @@ import { userProfiles, userProfilesMap } from '../../../containers/user_profiles
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import type { AppMockRenderer } from '../../../common/mock';
-import { createAppMockRenderer, noUpdateCasesPermissions } from '../../../common/mock';
+import { createAppMockRenderer, noAssignCasesPermissions } from '../../../common/mock';
 import type { AssignUsersProps } from './assign_users';
 import { AssignUsers } from './assign_users';
 import { waitForEuiPopoverClose, waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
@@ -49,15 +49,15 @@ describe('AssignUsers', () => {
     expect(screen.getByText('No users are assigned')).toBeInTheDocument();
   });
 
-  it('does not show the suggest users edit button when the user does not have update permissions', () => {
-    appMockRender = createAppMockRenderer({ permissions: noUpdateCasesPermissions() });
+  it('does not show the suggest users edit button when the user does not have assign permissions', () => {
+    appMockRender = createAppMockRenderer({ permissions: noAssignCasesPermissions() });
     appMockRender.render(<AssignUsers {...defaultProps} />);
 
     expect(screen.queryByText('case-view-assignees-edit')).not.toBeInTheDocument();
   });
 
-  it('does not show the assign users link when the user does not have update permissions', () => {
-    appMockRender = createAppMockRenderer({ permissions: noUpdateCasesPermissions() });
+  it('does not show the assign users link when the user does not have assign permissions', () => {
+    appMockRender = createAppMockRenderer({ permissions: noAssignCasesPermissions() });
     appMockRender.render(<AssignUsers {...defaultProps} />);
 
     expect(screen.queryByTestId('assign yourself')).not.toBeInTheDocument();

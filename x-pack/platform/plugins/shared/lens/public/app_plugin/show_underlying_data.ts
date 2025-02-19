@@ -98,10 +98,10 @@ export function getLayerMetaInfo(
   timeRange: TimeRange | undefined,
   capabilities: RecursiveReadonly<{
     navLinks: Capabilities['navLinks'];
-    discover?: Capabilities['discover'];
+    discover_v2?: Capabilities['discover_v2'];
   }>
 ): { meta: LayerMetaInfo | undefined; isVisible: boolean; error: string | undefined } {
-  const isVisible = Boolean(capabilities.navLinks?.discover && capabilities.discover?.show);
+  const isVisible = Boolean(capabilities.navLinks?.discover && capabilities.discover_v2?.show);
   // If Multiple tables, return
   // If there are time shifts, return
   // If dataViews have not loaded yet, return

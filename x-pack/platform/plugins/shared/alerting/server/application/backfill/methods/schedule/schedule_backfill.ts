@@ -165,5 +165,8 @@ export async function scheduleBackfill(
     ruleTypeRegistry: context.ruleTypeRegistry,
     spaceId: context.spaceId,
     unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
+    eventLogClient: await context.getEventLogClient(),
+    internalSavedObjectsRepository: context.internalSavedObjectsRepository,
+    eventLogger: context.eventLogger,
   });
 }

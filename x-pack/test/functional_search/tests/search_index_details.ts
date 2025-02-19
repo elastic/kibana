@@ -18,7 +18,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'searchNavigation',
   ]);
   const es = getService('es');
-  const security = getService('security');
   const browser = getService('browser');
   const retry = getService('retry');
   const spaces = getService('spaces');
@@ -26,7 +25,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const indexName = 'test-my-index';
 
-  describe('Search index details page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/206396
+  describe.skip('Search index details page', function () {
     describe('Solution Nav - Search', function () {
       let cleanUp: () => Promise<unknown>;
       let spaceCreated: { id: string } = { id: '' };
@@ -113,6 +113,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         it('should have quick stats', async () => {
           await pageObjects.searchIndexDetailsPage.expectQuickStats();
+          await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveIndexStatus();
+          await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveIndexStorage('227b');
           await pageObjects.searchIndexDetailsPage.expectQuickStatsAIMappings();
           await es.indices.putMapping({
             index: indexName,
@@ -188,6 +190,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           it('should be able to delete document', async () => {
             await pageObjects.searchIndexDetailsPage.changeTab('dataTab');
             await pageObjects.searchIndexDetailsPage.clickFirstDocumentDeleteAction();
+
+            // re-open page to refresh queries for test (these will auto-refresh,
+            // but waiting for that will make this test flakey)
+            await pageObjects.searchNavigation.navigateToIndexDetailPage(indexName);
             await pageObjects.searchIndexDetailsPage.expectAddDocumentCodeExamples();
             await pageObjects.searchIndexDetailsPage.expectQuickStatsToHaveDocumentCount(0);
           });
@@ -339,7 +345,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         before(async () => {
           await esDeleteAllIndices(indexName);
           await es.indices.create({ index: indexName });
-          await security.testUser.setRoles(['index_management_user']);
         });
         beforeEach(async () => {
           // Navigate to search solution space

@@ -51,7 +51,6 @@ export const FindingsSearchBar = ({
         showFilterBar={true}
         showQueryInput={true}
         showDatePicker={false}
-        saveQueryMenuVisibility="hidden"
         isLoading={loading}
         indexPatterns={[dataView]}
         onQuerySubmit={setQuery}

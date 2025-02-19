@@ -30,6 +30,7 @@ export class DataStreamAdapter extends IndexAdapter {
         esClient,
         logger,
         totalFieldsLimit: this.totalFieldsLimit,
+        writeIndexOnly: this.writeIndexOnly,
       }),
       `${this.name} data stream`
     );

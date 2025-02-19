@@ -10,8 +10,8 @@
 import { ESQLCommand } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
 import { JoinCommandPosition, JoinPosition, JoinStaticPosition } from './types';
-import type { JoinIndexAutocompleteItem } from '../../../validation/types';
 import { SuggestionRawDefinition } from '../../types';
+import type { JoinIndexAutocompleteItem } from '../../../validation/types';
 
 const REGEX =
   /^(?<type>\w+((?<after_type>\s+((?<mnemonic>(JOIN|JOI|JO|J)((?<after_mnemonic>\s+((?<index>\S+((?<after_index>\s+(?<as>(AS|A))?(?<after_as>\s+(((?<alias>\S+)?(?<after_alias>\s+)?)?))?((?<on>(ON|O)((?<after_on>\s+(?<cond>[^\s])?)?))?))?))?))?))?))?))?/i;
@@ -104,4 +104,52 @@ export const joinIndicesToSuggestions = (
   }
 
   return [...mainSuggestions, ...aliasSuggestions];
+};
+
+export const suggestionIntersection = (
+  suggestions1: SuggestionRawDefinition[],
+  suggestions2: SuggestionRawDefinition[]
+): SuggestionRawDefinition[] => {
+  const labels1 = new Set<string>();
+  const intersection: SuggestionRawDefinition[] = [];
+
+  for (const suggestion1 of suggestions1) {
+    labels1.add(suggestion1.label);
+  }
+
+  for (const suggestion2 of suggestions2) {
+    if (labels1.has(suggestion2.label)) {
+      intersection.push({ ...suggestion2 });
+    }
+  }
+
+  return intersection;
+};
+
+export const suggestionUnion = (
+  suggestions1: SuggestionRawDefinition[],
+  suggestions2: SuggestionRawDefinition[]
+): SuggestionRawDefinition[] => {
+  const labels = new Set<string>();
+  const union: SuggestionRawDefinition[] = [];
+
+  for (const suggestion of suggestions1) {
+    const label = suggestion.label;
+
+    if (!labels.has(label)) {
+      union.push(suggestion);
+      labels.add(label);
+    }
+  }
+
+  for (const suggestion of suggestions2) {
+    const label = suggestion.label;
+
+    if (!labels.has(label)) {
+      union.push(suggestion);
+      labels.add(label);
+    }
+  }
+
+  return union;
 };

@@ -35,12 +35,8 @@ export interface Meta {
   page: MetaPage;
 }
 
-export interface ClientConfigType {
-  host?: string;
-  ui: {
-    enabled: boolean;
-  };
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ClientConfigType {}
 
 export type { ConnectorStats } from './connector_stats';
 export type { ElasticsearchIndexWithPrivileges } from './indices';

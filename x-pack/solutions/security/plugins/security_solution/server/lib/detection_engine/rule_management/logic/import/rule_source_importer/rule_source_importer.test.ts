@@ -10,7 +10,7 @@ import type {
   ValidatedRuleToImport,
 } from '../../../../../../../common/api/detection_engine';
 import { createPrebuiltRuleAssetsClient as createPrebuiltRuleAssetsClientMock } from '../../../../prebuilt_rules/logic/rule_assets/__mocks__/prebuilt_rule_assets_client';
-import { configMock, createMockConfig, requestContextMock } from '../../../../routes/__mocks__';
+import { createMockConfig, requestContextMock } from '../../../../routes/__mocks__';
 import { getPrebuiltRuleMock } from '../../../../prebuilt_rules/mocks';
 import { createRuleSourceImporter } from './rule_source_importer';
 import * as calculateRuleSourceModule from '../calculate_rule_source_for_import';
@@ -25,7 +25,6 @@ describe('ruleSourceImporter', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     config = createMockConfig();
-    config = configMock.withExperimentalFeature(config, 'prebuiltRulesCustomizationEnabled');
     context = requestContextMock.create().securitySolution;
     ruleAssetsClientMock = createPrebuiltRuleAssetsClientMock();
     ruleAssetsClientMock.fetchLatestAssets.mockResolvedValue([{}]);
@@ -37,6 +36,7 @@ describe('ruleSourceImporter', () => {
       context,
       config,
       prebuiltRuleAssetsClient: ruleAssetsClientMock,
+      ruleCustomizationStatus: { isRulesCustomizationEnabled: true },
     });
   });
 
@@ -134,12 +134,13 @@ describe('ruleSourceImporter', () => {
       await subject.calculateRuleSource(rule);
 
       expect(calculatorSpy).toHaveBeenCalledTimes(1);
-      expect(calculatorSpy).toHaveBeenCalledWith({
-        rule,
-        prebuiltRuleAssetsByRuleId: { 'rule-1': expect.objectContaining({ rule_id: 'rule-1' }) },
-        isKnownPrebuiltRule: true,
-        isRuleCustomizationEnabled: true,
-      });
+      expect(calculatorSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          rule,
+          prebuiltRuleAssetsByRuleId: { 'rule-1': expect.objectContaining({ rule_id: 'rule-1' }) },
+          isKnownPrebuiltRule: true,
+        })
+      );
     });
 
     it('throws an error if the rule is not known to the calculator', async () => {
@@ -163,12 +164,15 @@ describe('ruleSourceImporter', () => {
         await subject.calculateRuleSource(rule);
 
         expect(calculatorSpy).toHaveBeenCalledTimes(1);
-        expect(calculatorSpy).toHaveBeenCalledWith({
-          rule,
-          prebuiltRuleAssetsByRuleId: { 'rule-1': expect.objectContaining({ rule_id: 'rule-1' }) },
-          isKnownPrebuiltRule: true,
-          isRuleCustomizationEnabled: true,
-        });
+        expect(calculatorSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            rule,
+            prebuiltRuleAssetsByRuleId: {
+              'rule-1': expect.objectContaining({ rule_id: 'rule-1' }),
+            },
+            isKnownPrebuiltRule: true,
+          })
+        );
       });
     });
   });

@@ -18,7 +18,6 @@ import {
   FailedDocsDetails,
   FailedDocsErrorsResponse,
   NonAggregatableDatasets,
-  QualityIssue,
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
 import { indexNameToDataStreamParts } from '../../../common/utils';
@@ -30,7 +29,6 @@ import {
   DatasetQualityDetailsControllerContext,
   DatasetQualityDetailsControllerEvent,
   DatasetQualityDetailsControllerTypeState,
-  QualityIssueType,
 } from './types';
 
 import { IntegrationType } from '../../../common/data_stream_details';
@@ -43,6 +41,11 @@ import {
   rolloverDataStreamFailedNotifier,
   updateFieldLimitFailedNotifier,
 } from './notifications';
+import {
+  filterIssues,
+  mapDegradedFieldsIssues,
+  mapFailedDocsIssues,
+} from '../../utils/quality_issues';
 
 export const createPureDatasetQualityDetailsControllerStateMachine = (
   initialContext: DatasetQualityDetailsControllerContext
@@ -566,18 +569,8 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 qualityIssues: {
                   ...context.qualityIssues,
                   data: [
-                    ...(context.qualityIssues.data ?? []).filter(
-                      (field) => field.type !== 'failed'
-                    ),
-                    ...(event.data.timeSeries.length > 0
-                      ? [
-                          {
-                            ...event.data,
-                            name: 'failedDocs',
-                            type: 'failed' as QualityIssueType,
-                          },
-                        ]
-                      : []),
+                    ...filterIssues(context.qualityIssues.data, 'failed'),
+                    ...mapFailedDocsIssues(event.data),
                   ],
                 },
               }
@@ -601,13 +594,8 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                 qualityIssues: {
                   ...context.qualityIssues,
                   data: [
-                    ...(context.qualityIssues.data ?? []).filter(
-                      (field) => field.type !== 'degraded'
-                    ),
-                    ...(event.data.degradedFields.map((field) => ({
-                      ...field,
-                      type: 'degraded',
-                    })) as QualityIssue[]),
+                    ...filterIssues(context.qualityIssues.data, 'degraded'),
+                    ...mapDegradedFieldsIssues(event.data?.degradedFields),
                   ],
                 },
               }
@@ -779,6 +767,7 @@ export interface DatasetQualityDetailsControllerStateMachineDependencies {
   toasts: IToasts;
   dataStreamStatsClient: IDataStreamsStatsClient;
   dataStreamDetailsClient: IDataStreamDetailsClient;
+  isFailureStoreEnabled: boolean;
 }
 
 export const createDatasetQualityDetailsControllerStateMachine = ({
@@ -787,6 +776,7 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
   toasts,
   dataStreamStatsClient,
   dataStreamDetailsClient,
+  isFailureStoreEnabled,
 }: DatasetQualityDetailsControllerStateMachineDependencies) =>
   createPureDatasetQualityDetailsControllerStateMachine(initialContext).withConfig({
     actions: {
@@ -851,6 +841,14 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return false;
       },
       loadFailedDocsDetails: (context) => {
+        if (!isFailureStoreEnabled) {
+          const unsupportedError = {
+            message: 'Failure store is disabled',
+            statusCode: 501,
+          };
+          return Promise.reject(unsupportedError);
+        }
+
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
         return dataStreamDetailsClient.getFailedDocsDetails({
@@ -905,6 +903,14 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return Promise.resolve();
       },
       loadfailedDocsErrors: (context) => {
+        if (!isFailureStoreEnabled) {
+          const unsupportedError = {
+            message: 'Failure store is disabled',
+            statusCode: 501,
+          };
+          return Promise.reject(unsupportedError);
+        }
+
         if ('expandedQualityIssue' in context && context.expandedQualityIssue) {
           const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 

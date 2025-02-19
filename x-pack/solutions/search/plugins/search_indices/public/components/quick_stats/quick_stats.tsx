@@ -8,168 +8,93 @@
 import React, { useMemo, useState } from 'react';
 import type { Index } from '@kbn/index-management-shared-types';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiI18nNumber,
-  EuiPanel,
-  EuiText,
-  useEuiTheme,
-  EuiButton,
-} from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { Mappings } from '../../types';
-import { countVectorBasedTypesFromMappings } from './mappings_convertor';
-import { QuickStat } from './quick_stat';
-import { useKibana } from '../../hooks/use_kibana';
 import { IndexDocuments } from '../../hooks/api/use_document_search';
+
+import { AISearchQuickStat } from './ai_search_stat';
+import { AliasesStat } from './aliases_quick_stat';
+import { StatefulDocumentCountStat } from './stateful_document_count_stat';
+import { StatefulIndexStorageStat } from './stateful_storage_stat';
+import { IndexStatusStat } from './index_status_stat';
+import { QuickStatsContainer } from './quick_stats_container';
+import { countVectorBasedTypesFromMappings } from './mappings_convertor';
+import { StatelessDocumentCountStat } from './stateless_document_cout_stat';
+import { StatelessQuickStats } from './stateless_quick_stats';
+import { QuickStatsPanelStyle } from './styles';
 
 export interface QuickStatsProps {
   index: Index;
   mappings: Mappings;
   indexDocuments: IndexDocuments;
   tooltipContent?: string;
+  isStateless: boolean;
 }
 
-export const SetupAISearchButton: React.FC = () => {
-  const {
-    services: { docLinks },
-  } = useKibana();
-  return (
-    <EuiPanel hasBorder={false} hasShadow={false} color="transparent">
-      <EuiFlexGroup gutterSize="s" direction="column" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiText>
-            <h6>
-              {i18n.translate('xpack.searchIndices.quickStats.setup_ai_search_description', {
-                defaultMessage: 'Build AI-powered search experiences with Elastic',
-              })}
-            </h6>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            href={docLinks.links.enterpriseSearch.semanticSearch}
-            target="_blank"
-            data-test-subj="setupAISearchButton"
-          >
-            {i18n.translate('xpack.searchIndices.quickStats.setup_ai_search_button', {
-              defaultMessage: 'Set up now',
-            })}
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-};
-
-export const QuickStats: React.FC<QuickStatsProps> = ({ index, mappings, indexDocuments }) => {
+export const QuickStats: React.FC<QuickStatsProps> = ({
+  index,
+  mappings,
+  indexDocuments,
+  isStateless,
+}) => {
   const [open, setOpen] = useState<boolean>(false);
   const { euiTheme } = useEuiTheme();
-  const mappingStats = useMemo(() => countVectorBasedTypesFromMappings(mappings), [mappings]);
-  const vectorFieldCount =
-    mappingStats.sparse_vector + mappingStats.dense_vector + mappingStats.semantic_text;
-  const docCount = indexDocuments?.results._meta.page.total ?? 0;
+  const { mappingStats, vectorFieldCount } = useMemo(() => {
+    const stats = countVectorBasedTypesFromMappings(mappings);
+    const vectorFields = stats.sparse_vector + stats.dense_vector + stats.semantic_text;
+    return { mappingStats: stats, vectorFieldCount: vectorFields };
+  }, [mappings]);
+
+  const stats = isStateless
+    ? [
+        <StatelessDocumentCountStat
+          index={index}
+          documentCount={indexDocuments?.results._meta.page.total ?? 0}
+          open={open}
+          setOpen={setOpen}
+        />,
+        ...(Array.isArray(index.aliases) && index.aliases.length > 0
+          ? [<AliasesStat aliases={index.aliases} open={open} setOpen={setOpen} />]
+          : []),
+        <AISearchQuickStat
+          mappingStats={mappingStats}
+          vectorFieldCount={vectorFieldCount}
+          open={open}
+          setOpen={setOpen}
+        />,
+      ]
+    : [
+        <IndexStatusStat index={index} open={open} setOpen={setOpen} />,
+        <StatefulIndexStorageStat index={index} open={open} setOpen={setOpen} />,
+        <StatefulDocumentCountStat
+          open={open}
+          setOpen={setOpen}
+          index={index}
+          mappingStats={mappingStats}
+        />,
+        ...(Array.isArray(index.aliases) && index.aliases.length > 0
+          ? [<AliasesStat aliases={index.aliases} open={open} setOpen={setOpen} />]
+          : []),
+        <AISearchQuickStat
+          mappingStats={mappingStats}
+          vectorFieldCount={vectorFieldCount}
+          open={open}
+          setOpen={setOpen}
+        />,
+      ];
 
   return (
     <EuiPanel
       paddingSize="none"
       data-test-subj="quickStats"
       hasShadow={false}
-      css={() => ({
-        border: euiTheme.border.thin,
-        background: euiTheme.colors.lightestShade,
-        overflow: 'hidden',
-      })}
+      css={QuickStatsPanelStyle(euiTheme)}
     >
-      <EuiFlexGroup gutterSize="none">
-        <EuiFlexItem>
-          <QuickStat
-            open={open}
-            setOpen={setOpen}
-            icon="documents"
-            iconColor={euiTheme.colors.fullShade}
-            title={i18n.translate('xpack.searchIndices.quickStats.document_count_heading', {
-              defaultMessage: 'Document count',
-            })}
-            data-test-subj="QuickStatsDocumentCount"
-            secondaryTitle={<EuiI18nNumber value={docCount ?? 0} />}
-            stats={[
-              {
-                title: i18n.translate('xpack.searchIndices.quickStats.documents.totalTitle', {
-                  defaultMessage: 'Total',
-                }),
-                description: <EuiI18nNumber value={docCount ?? 0} />,
-              },
-              {
-                title: i18n.translate('xpack.searchIndices.quickStats.documents.indexSize', {
-                  defaultMessage: 'Index Size',
-                }),
-                description: index.size ?? '0b',
-              },
-            ]}
-            tooltipContent={i18n.translate('xpack.searchIndices.quickStats.documentCountTooltip', {
-              defaultMessage:
-                'This excludes nested documents, which Elasticsearch uses internally to store chunks of vectors.',
-            })}
-            first
-          />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <QuickStat
-            open={open}
-            setOpen={setOpen}
-            icon="sparkles"
-            iconColor={euiTheme.colors.fullShade}
-            title={i18n.translate('xpack.searchIndices.quickStats.ai_search_heading', {
-              defaultMessage: 'AI Search',
-            })}
-            data-test-subj="QuickStatsAIMappings"
-            secondaryTitle={
-              vectorFieldCount > 0
-                ? i18n.translate('xpack.searchIndices.quickStats.total_count', {
-                    defaultMessage: '{value, plural, one {# Field} other {# Fields}}',
-                    values: {
-                      value: vectorFieldCount,
-                    },
-                  })
-                : i18n.translate('xpack.searchIndices.quickStats.no_vector_fields', {
-                    defaultMessage: 'Not configured',
-                  })
-            }
-            content={vectorFieldCount === 0 && <SetupAISearchButton />}
-            stats={[
-              {
-                title: i18n.translate('xpack.searchIndices.quickStats.sparse_vector', {
-                  defaultMessage: 'Sparse Vector',
-                }),
-                description: i18n.translate('xpack.searchIndices.quickStats.sparse_vector_count', {
-                  defaultMessage: '{value, plural, one {# Field} other {# Fields}}',
-                  values: { value: mappingStats.sparse_vector },
-                }),
-              },
-              {
-                title: i18n.translate('xpack.searchIndices.quickStats.dense_vector', {
-                  defaultMessage: 'Dense Vector',
-                }),
-                description: i18n.translate('xpack.searchIndices.quickStats.dense_vector_count', {
-                  defaultMessage: '{value, plural, one {# Field} other {# Fields}}',
-                  values: { value: mappingStats.dense_vector },
-                }),
-              },
-              {
-                title: i18n.translate('xpack.searchIndices.quickStats.semantic_text', {
-                  defaultMessage: 'Semantic Text',
-                }),
-                description: i18n.translate('xpack.searchIndices.quickStats.semantic_text_count', {
-                  defaultMessage: '{value, plural, one {# Field} other {# Fields}}',
-                  values: { value: mappingStats.semantic_text },
-                }),
-              },
-            ]}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {isStateless ? (
+        <StatelessQuickStats>{stats}</StatelessQuickStats>
+      ) : (
+        <QuickStatsContainer>{stats}</QuickStatsContainer>
+      )}
     </EuiPanel>
   );
 };

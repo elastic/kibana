@@ -74,6 +74,9 @@ import {
   validateKafkaHosts,
   validateKafkaPartitioningGroupEvents,
   validateDynamicKafkaTopics,
+  validateKibanaURL,
+  validateKibanaAPIKey,
+  validateKibanaAPIKeySecret,
 } from './output_form_validators';
 import { confirmUpdate } from './confirm_update';
 
@@ -97,6 +100,10 @@ export interface OutputFormInputsType {
   caTrustedFingerprintInput: ReturnType<typeof useInput>;
   serviceTokenInput: ReturnType<typeof useInput>;
   serviceTokenSecretInput: ReturnType<typeof useSecretInput>;
+  syncIntegrationsInput: ReturnType<typeof useSwitchInput>;
+  kibanaURLInput: ReturnType<typeof useInput>;
+  kibanaAPIKeyInput: ReturnType<typeof useInput>;
+  kibanaAPIKeySecretInput: ReturnType<typeof useSecretInput>;
   sslCertificateInput: ReturnType<typeof useInput>;
   sslKeyInput: ReturnType<typeof useInput>;
   sslKeySecretInput: ReturnType<typeof useSecretInput>;
@@ -262,7 +269,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     isDisabled('preset')
   );
 
-  // Remtote ES inputs
+  // Remote ES inputs
   const serviceTokenInput = useInput(
     (output as NewRemoteElasticsearchOutput)?.service_token ?? '',
     validateServiceToken,
@@ -273,6 +280,29 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     (output as NewRemoteElasticsearchOutput)?.secrets?.service_token ?? '',
     validateServiceTokenSecret,
     isDisabled('service_token')
+  );
+
+  const syncIntegrationsInput = useSwitchInput(
+    (output as NewRemoteElasticsearchOutput)?.sync_integrations ?? false,
+    isDisabled('sync_integrations')
+  );
+
+  const kibanaAPIKeyInput = useInput(
+    (output as NewRemoteElasticsearchOutput)?.kibana_api_key ?? '',
+    syncIntegrationsInput.value ? validateKibanaAPIKey : undefined,
+    isDisabled('kibana_api_key')
+  );
+
+  const kibanaAPIKeySecretInput = useSecretInput(
+    (output as NewRemoteElasticsearchOutput)?.secrets?.kibana_api_key ?? '',
+    syncIntegrationsInput.value ? validateKibanaAPIKeySecret : undefined,
+    isDisabled('kibana_api_key')
+  );
+
+  const kibanaURLInput = useInput(
+    (output as NewRemoteElasticsearchOutput)?.kibana_url ?? '',
+    (val) => validateKibanaURL(val, syncIntegrationsInput.value),
+    isDisabled('kibana_url')
   );
   /*
   Shipper feature flag - currently depends on the content of the yaml
@@ -556,6 +586,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     caTrustedFingerprintInput,
     serviceTokenInput,
     serviceTokenSecretInput,
+    kibanaAPIKeyInput,
+    kibanaAPIKeySecretInput,
+    syncIntegrationsInput,
+    kibanaURLInput,
     sslCertificateInput,
     sslKeyInput,
     sslKeySecretInput,
@@ -615,6 +649,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     const caTrustedFingerprintValid = caTrustedFingerprintInput.validate();
     const serviceTokenValid = serviceTokenInput.validate();
     const serviceTokenSecretValid = serviceTokenSecretInput.validate();
+    const kibanaAPIKeyValid = kibanaAPIKeyInput.validate();
+    const kibanaAPIKeySecretValid = kibanaAPIKeySecretInput.validate();
+    const kibanaURLInputValid = kibanaURLInput.validate();
     const sslCertificateValid = sslCertificateInput.validate();
     const sslKeyValid = sslKeyInput.validate();
     const sslKeySecretValid = sslKeySecretInput.validate();
@@ -666,7 +703,12 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
         additionalYamlConfigValid &&
         nameInputValid &&
         ((serviceTokenInput.value && serviceTokenValid) ||
-          (serviceTokenSecretInput.value && serviceTokenSecretValid))
+          (serviceTokenSecretInput.value && serviceTokenSecretValid)) &&
+        ((!syncIntegrationsInput.value && kibanaURLInputValid) ||
+          (syncIntegrationsInput.value &&
+            ((kibanaAPIKeyInput.value && kibanaAPIKeyValid) ||
+              (kibanaAPIKeySecretInput.value && kibanaAPIKeySecretValid)) &&
+            kibanaURLInputValid))
       );
     } else {
       // validate ES
@@ -695,6 +737,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     caTrustedFingerprintInput,
     serviceTokenInput,
     serviceTokenSecretInput,
+    kibanaAPIKeyInput,
+    kibanaAPIKeySecretInput,
+    syncIntegrationsInput,
+    kibanaURLInput,
     sslCertificateInput,
     sslKeyInput,
     sslKeySecretInput,
@@ -912,6 +958,18 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
               ...shipperParams,
             } as NewLogstashOutput;
           case outputType.RemoteElasticsearch:
+            let secrets;
+            if (!serviceTokenInput.value && serviceTokenSecretInput.value) {
+              secrets = {
+                service_token: serviceTokenSecretInput.value,
+              };
+            }
+            if (!kibanaAPIKeyInput.value && kibanaAPIKeySecretInput.value) {
+              secrets = {
+                ...(secrets ?? {}),
+                kibana_api_key: kibanaAPIKeySecretInput.value,
+              };
+            }
             return {
               name: nameInput.value,
               type: outputType.RemoteElasticsearch,
@@ -921,12 +979,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
               preset: presetInput.value,
               config_yaml: additionalYamlConfigInput.value,
               service_token: serviceTokenInput.value || undefined,
-              ...(!serviceTokenInput.value &&
-                serviceTokenSecretInput.value && {
-                  secrets: {
-                    service_token: serviceTokenSecretInput.value,
-                  },
-                }),
+              kibana_api_key: kibanaAPIKeyInput.value || undefined,
+              ...(secrets ? { secrets } : {}),
+              sync_integrations: syncIntegrationsInput.value,
+              kibana_url: kibanaURLInput.value || null,
               proxy_id: proxyIdValue,
               ...shipperParams,
             } as NewRemoteElasticsearchOutput;
@@ -1036,6 +1092,10 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     presetInput.value,
     serviceTokenInput.value,
     serviceTokenSecretInput.value,
+    kibanaAPIKeyInput.value,
+    kibanaAPIKeySecretInput.value,
+    syncIntegrationsInput.value,
+    kibanaURLInput.value,
     caTrustedFingerprintInput.value,
     confirm,
     notifications.toasts,

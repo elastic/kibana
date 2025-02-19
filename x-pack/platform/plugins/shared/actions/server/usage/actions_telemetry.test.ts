@@ -6,7 +6,9 @@
  */
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { errors } from '@elastic/elasticsearch';
 import {
   getCounts,
   getExecutionsPerDayCount,
@@ -14,9 +16,13 @@ import {
   getTotalCount,
 } from './actions_telemetry';
 
-const mockLogger = loggingSystemMock.create().get();
+let logger: MockedLogger;
 
 describe('actions telemetry', () => {
+  beforeEach(() => {
+    logger = loggerMock.create();
+  });
+
   test('getTotalCount should replace first symbol . to __ for action types names', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
     mockEsClient.search.mockResponse(
@@ -107,7 +113,7 @@ describe('actions telemetry', () => {
         },
       }
     );
-    const telemetry = await getTotalCount(mockEsClient, 'test', mockLogger);
+    const telemetry = await getTotalCount(mockEsClient, 'test', logger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
 
@@ -126,22 +132,84 @@ describe('actions telemetry', () => {
     `);
   });
 
-  test('getTotalCount should return empty results if query throws error', async () => {
+  test('getTotalCount should return empty results and log warning if query throws error', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
     mockEsClient.search.mockRejectedValue(new Error('oh no'));
 
-    const telemetry = await getTotalCount(mockEsClient, 'test', mockLogger);
+    const telemetry = await getTotalCount(mockEsClient, 'test', logger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      `Error executing actions telemetry task: getTotalCount - {}`
+
+    const loggerCalls = loggingSystemMock.collect(logger);
+    expect(loggerCalls.debug).toHaveLength(0);
+    expect(loggerCalls.warn).toHaveLength(1);
+    expect(loggerCalls.warn[0][0]).toEqual(
+      `Error executing actions telemetry task: getTotalCount - Error: oh no`
     );
+    // logger meta
+    expect(loggerCalls.warn[0][1]?.tags).toEqual(['actions', 'telemetry-failed']);
+    expect(loggerCalls.warn[0][1]?.error?.stack_trace).toBeDefined();
+
     expect(telemetry).toMatchInlineSnapshot(`
       Object {
         "countByType": Object {},
         "countGenAiProviderTypes": Object {},
         "countTotal": 0,
         "errorMessage": "oh no",
+        "hasErrors": true,
+      }
+    `);
+  });
+
+  test('getTotalCount should return empty results and log debug if query throws search_phase_execution_exception error', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockRejectedValueOnce(
+      new errors.ResponseError({
+        warnings: [],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        meta: {} as any,
+        body: {
+          error: {
+            root_cause: [],
+            type: 'search_phase_execution_exception',
+            reason: 'no_shard_available_action_exception',
+            phase: 'fetch',
+            grouped: true,
+            failed_shards: [],
+            caused_by: {
+              type: 'no_shard_available_action_exception',
+              reason: 'This is the nested reason',
+            },
+          },
+        },
+        statusCode: 503,
+        headers: {},
+      })
+    );
+
+    const telemetry = await getTotalCount(mockEsClient, 'test', logger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+
+    const loggerCalls = loggingSystemMock.collect(logger);
+    expect(loggerCalls.debug).toHaveLength(1);
+    expect(loggerCalls.debug[0][0]).toMatchInlineSnapshot(`
+      "Error executing actions telemetry task: getTotalCount - ResponseError: search_phase_execution_exception
+      	Caused by:
+      		no_shard_available_action_exception: This is the nested reason"
+    `);
+    // logger meta
+    expect(loggerCalls.debug[0][1]?.tags).toEqual(['actions', 'telemetry-failed']);
+    expect(loggerCalls.debug[0][1]?.error?.stack_trace).toBeDefined();
+
+    expect(loggerCalls.warn).toHaveLength(0);
+
+    expect(telemetry).toMatchInlineSnapshot(`
+      Object {
+        "countByType": Object {},
+        "countGenAiProviderTypes": Object {},
+        "countTotal": 0,
+        "errorMessage": "no_shard_available_action_exception",
         "hasErrors": true,
       }
     `);
@@ -202,7 +270,7 @@ describe('actions telemetry', () => {
         ],
       },
     });
-    const telemetry = await getInUseTotalCount(mockEsClient, 'test', mockLogger);
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test', logger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     expect(telemetry).toMatchInlineSnapshot(`
@@ -287,7 +355,7 @@ describe('actions telemetry', () => {
         ],
       },
     });
-    const telemetry = await getInUseTotalCount(mockEsClient, 'test', mockLogger, undefined, [
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test', logger, undefined, [
       {
         id: 'test',
         actionTypeId: '.email',
@@ -332,16 +400,23 @@ describe('actions telemetry', () => {
     `);
   });
 
-  test('getInUseTotalCount should return empty results if query throws error', async () => {
+  test('getInUseTotalCount should return empty results and log warning if query throws error', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
     mockEsClient.search.mockRejectedValue(new Error('oh no'));
 
-    const telemetry = await getInUseTotalCount(mockEsClient, 'test', mockLogger);
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test', logger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      `Error executing actions telemetry task: getInUseTotalCount - {}`
+    const loggerCalls = loggingSystemMock.collect(logger);
+    expect(loggerCalls.debug).toHaveLength(0);
+    expect(loggerCalls.warn).toHaveLength(1);
+    expect(loggerCalls.warn[0][0]).toEqual(
+      `Error executing actions telemetry task: getInUseTotalCount - Error: oh no`
     );
+    // logger meta
+    expect(loggerCalls.warn[0][1]?.tags).toEqual(['actions', 'telemetry-failed']);
+    expect(loggerCalls.warn[0][1]?.error?.stack_trace).toBeDefined();
+
     expect(telemetry).toMatchInlineSnapshot(`
       Object {
         "countByAlertHistoryConnectorType": 0,
@@ -350,6 +425,62 @@ describe('actions telemetry', () => {
         "countNamespaces": 0,
         "countTotal": 0,
         "errorMessage": "oh no",
+        "hasErrors": true,
+      }
+    `);
+  });
+
+  test('getInUseTotalCount should return empty results and log debug if query throws search_phase_execution_exception error', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockRejectedValueOnce(
+      new errors.ResponseError({
+        warnings: [],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        meta: {} as any,
+        body: {
+          error: {
+            root_cause: [],
+            type: 'search_phase_execution_exception',
+            reason: 'no_shard_available_action_exception',
+            phase: 'fetch',
+            grouped: true,
+            failed_shards: [],
+            caused_by: {
+              type: 'no_shard_available_action_exception',
+              reason: 'This is the nested reason',
+            },
+          },
+        },
+        statusCode: 503,
+        headers: {},
+      })
+    );
+
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test', logger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+
+    const loggerCalls = loggingSystemMock.collect(logger);
+    expect(loggerCalls.debug).toHaveLength(1);
+    expect(loggerCalls.debug[0][0]).toMatchInlineSnapshot(`
+      "Error executing actions telemetry task: getInUseTotalCount - ResponseError: search_phase_execution_exception
+      	Caused by:
+      		no_shard_available_action_exception: This is the nested reason"
+    `);
+    // logger meta
+    expect(loggerCalls.debug[0][1]?.tags).toEqual(['actions', 'telemetry-failed']);
+    expect(loggerCalls.debug[0][1]?.error?.stack_trace).toBeDefined();
+
+    expect(loggerCalls.warn).toHaveLength(0);
+
+    expect(telemetry).toMatchInlineSnapshot(`
+      Object {
+        "countByAlertHistoryConnectorType": 0,
+        "countByType": Object {},
+        "countEmailByService": Object {},
+        "countNamespaces": 0,
+        "countTotal": 0,
+        "errorMessage": "no_shard_available_action_exception",
         "hasErrors": true,
       }
     `);
@@ -445,7 +576,7 @@ describe('actions telemetry', () => {
         },
       }
     );
-    const telemetry = await getTotalCount(mockEsClient, 'test', mockLogger, [
+    const telemetry = await getTotalCount(mockEsClient, 'test', logger, [
       {
         id: 'test',
         actionTypeId: '.test',
@@ -501,7 +632,7 @@ describe('actions telemetry', () => {
         },
       }
     );
-    const telemetry = await getTotalCount(mockEsClient, 'test', mockLogger, [
+    const telemetry = await getTotalCount(mockEsClient, 'test', logger, [
       {
         id: 'system_action:system-connector-test.system-action',
         actionTypeId: 'test.system-action',
@@ -615,7 +746,7 @@ describe('actions telemetry', () => {
         ],
       },
     });
-    const telemetry = await getInUseTotalCount(mockEsClient, 'test', mockLogger, undefined, [
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test', logger, undefined, [
       {
         id: 'anotherServerLog',
         actionTypeId: '.server-log',
@@ -721,7 +852,7 @@ describe('actions telemetry', () => {
       },
     });
 
-    const telemetry = await getInUseTotalCount(mockEsClient, 'test', mockLogger, undefined, []);
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test', logger, undefined, []);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     expect(telemetry).toMatchInlineSnapshot(`
@@ -827,7 +958,7 @@ describe('actions telemetry', () => {
         ],
       },
     });
-    const telemetry = await getInUseTotalCount(mockEsClient, 'test', mockLogger);
+    const telemetry = await getInUseTotalCount(mockEsClient, 'test', logger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(2);
     expect(telemetry).toMatchInlineSnapshot(`
@@ -961,7 +1092,7 @@ describe('actions telemetry', () => {
         },
       }
     );
-    const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test', mockLogger);
+    const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test', logger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
     expect(telemetry).toStrictEqual({
@@ -995,16 +1126,24 @@ describe('actions telemetry', () => {
     });
   });
 
-  test('getExecutionsPerDayCount should return empty results if query throws error', async () => {
+  test('getExecutionsPerDayCount should return empty results and log warning if query throws error', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
     mockEsClient.search.mockRejectedValue(new Error('oh no'));
 
-    const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test', mockLogger);
+    const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test', logger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
-    expect(mockLogger.warn).toHaveBeenCalledWith(
-      `Error executing actions telemetry task: getExecutionsPerDayCount - {}`
+
+    const loggerCalls = loggingSystemMock.collect(logger);
+    expect(loggerCalls.debug).toHaveLength(0);
+    expect(loggerCalls.warn).toHaveLength(1);
+    expect(loggerCalls.warn[0][0]).toEqual(
+      `Error executing actions telemetry task: getExecutionsPerDayCount - Error: oh no`
     );
+    // logger meta
+    expect(loggerCalls.warn[0][1]?.tags).toEqual(['actions', 'telemetry-failed']);
+    expect(loggerCalls.warn[0][1]?.error?.stack_trace).toBeDefined();
+
     expect(telemetry).toMatchInlineSnapshot(`
       Object {
         "avgExecutionTime": 0,
@@ -1015,6 +1154,64 @@ describe('actions telemetry', () => {
         "countRunOutcomeByConnectorType": Object {},
         "countTotal": 0,
         "errorMessage": "oh no",
+        "hasErrors": true,
+      }
+    `);
+  });
+
+  test('getExecutionsPerDayCount should return empty results and log debug if query throws search_phase_execution_exception error', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockRejectedValueOnce(
+      new errors.ResponseError({
+        warnings: [],
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        meta: {} as any,
+        body: {
+          error: {
+            root_cause: [],
+            type: 'search_phase_execution_exception',
+            reason: 'no_shard_available_action_exception',
+            phase: 'fetch',
+            grouped: true,
+            failed_shards: [],
+            caused_by: {
+              type: 'no_shard_available_action_exception',
+              reason: 'This is the nested reason',
+            },
+          },
+        },
+        statusCode: 503,
+        headers: {},
+      })
+    );
+
+    const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test', logger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+
+    const loggerCalls = loggingSystemMock.collect(logger);
+    expect(loggerCalls.debug).toHaveLength(1);
+    expect(loggerCalls.debug[0][0]).toMatchInlineSnapshot(`
+      "Error executing actions telemetry task: getExecutionsPerDayCount - ResponseError: search_phase_execution_exception
+      	Caused by:
+      		no_shard_available_action_exception: This is the nested reason"
+    `);
+    // logger meta
+    expect(loggerCalls.debug[0][1]?.tags).toEqual(['actions', 'telemetry-failed']);
+    expect(loggerCalls.debug[0][1]?.error?.stack_trace).toBeDefined();
+
+    expect(loggerCalls.warn).toHaveLength(0);
+
+    expect(telemetry).toMatchInlineSnapshot(`
+      Object {
+        "avgExecutionTime": 0,
+        "avgExecutionTimeByType": Object {},
+        "countByType": Object {},
+        "countFailed": 0,
+        "countFailedByType": Object {},
+        "countRunOutcomeByConnectorType": Object {},
+        "countTotal": 0,
+        "errorMessage": "no_shard_available_action_exception",
         "hasErrors": true,
       }
     `);

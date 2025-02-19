@@ -33,6 +33,7 @@ export class DataStreamSpacesAdapter extends IndexPatternAdapter {
         esClient,
         logger,
         totalFieldsLimit: this.totalFieldsLimit,
+        writeIndexOnly: this.writeIndexOnly,
       }),
       `update space data streams`
     );

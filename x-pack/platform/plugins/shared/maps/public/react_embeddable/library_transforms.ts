@@ -35,7 +35,7 @@ export function initializeLibraryTransforms(
 ): HasLibraryTransforms<MapSerializedState, MapSerializedState> {
   return {
     canLinkToLibrary: async () => {
-      const { maps } = getCore().application.capabilities;
+      const { maps_v2: maps } = getCore().application.capabilities;
       return maps.save && savedMap.getSavedObjectId() === undefined;
     },
     saveToLibrary: async (title: string) => {

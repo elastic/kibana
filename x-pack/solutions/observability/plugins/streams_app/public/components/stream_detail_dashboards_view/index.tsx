@@ -6,21 +6,25 @@
  */
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ReadStreamDefinition } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
+import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import { AddDashboardFlyout } from './add_dashboard_flyout';
 import { DashboardsTable } from './dashboard_table';
 import { useDashboardsApi } from '../../hooks/use_dashboards_api';
 import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
 
-export function StreamDetailDashboardsView({ definition }: { definition?: ReadStreamDefinition }) {
+export function StreamDetailDashboardsView({
+  definition,
+}: {
+  definition?: IngestStreamGetResponse;
+}) {
   const [query, setQuery] = useState('');
 
   const [isAddDashboardFlyoutOpen, setIsAddDashboardFlyoutOpen] = useState(false);
 
-  const dashboardsFetch = useDashboardsFetch(definition?.name);
-  const { addDashboards, removeDashboards } = useDashboardsApi(definition?.name);
+  const dashboardsFetch = useDashboardsFetch(definition?.stream.name);
+  const { addDashboards, removeDashboards } = useDashboardsApi(definition?.stream.name);
 
   const [isUnlinkLoading, setIsUnlinkLoading] = useState(false);
   const linkedDashboards = useMemo(() => {
@@ -95,7 +99,7 @@ export function StreamDetailDashboardsView({ definition }: { definition?: ReadSt
         {definition && isAddDashboardFlyoutOpen ? (
           <AddDashboardFlyout
             linkedDashboards={linkedDashboards}
-            entityId={definition.name}
+            entityId={definition.stream.name}
             onAddDashboards={async (dashboards) => {
               await addDashboards(dashboards);
               await dashboardsFetch.refresh();

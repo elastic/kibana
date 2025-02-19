@@ -93,6 +93,7 @@ describe('Security Plugin', () => {
             "asScoped": [Function],
             "withoutRequest": Object {
               "enabled": false,
+              "includeSavedObjectNames": true,
               "log": [Function],
             },
           },

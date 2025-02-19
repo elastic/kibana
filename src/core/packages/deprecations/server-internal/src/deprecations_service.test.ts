@@ -18,6 +18,8 @@ import { coreUsageDataServiceMock } from '@kbn/core-usage-data-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import { DeprecationsService, DeprecationsSetupDeps } from './deprecations_service';
 import { firstValueFrom } from 'rxjs';
 
@@ -37,7 +39,8 @@ describe('DeprecationsService', () => {
     coreUsageData = coreUsageDataServiceMock.createSetupContract();
     router = httpServiceMock.createRouter();
     http.createRouter.mockReturnValue(router);
-    deprecationsCoreSetupDeps = { http, coreUsageData, logging: loggingMock };
+    const docLinks: DocLinksServiceSetup = docLinksServiceMock.createSetupContract();
+    deprecationsCoreSetupDeps = { http, coreUsageData, logging: loggingMock, docLinks };
   });
 
   afterEach(() => {

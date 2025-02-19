@@ -32,6 +32,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const security = getPageObject('security');
   const kibanaServer = getService('kibanaServer');
   const browser = getService('browser');
+  const esArchiver = getService('esArchiver');
 
   const hasFocus = async (testSubject: string) => {
     const targetElement = await testSubjects.find(testSubject);
@@ -1071,6 +1072,48 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await cases.navigation.navigateToSingleCase('cases', theCase.id, 'fake');
           await testSubjects.existOrFail('case-view-tab-title-activity');
         });
+      });
+    });
+
+    describe('Tabs - alerts linked to case', () => {
+      before(async () => {
+        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/rule_registry/alerts');
+        await cases.navigation.navigateToApp();
+        const theCase = await cases.api.createCase();
+        await cases.casesTable.waitForCasesToBeListed();
+        await retry.try(async () => {
+          await cases.api.createAttachment({
+            caseId: theCase.id,
+            params: {
+              type: AttachmentType.alert,
+              alertId: ['NoxgpHkBqbdrfX07MqXV'],
+              index: '.alerts-observability.apm.alerts',
+              rule: { id: 'id', name: 'name' },
+              owner: theCase.owner,
+            },
+          });
+        });
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+        await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts/');
+      });
+
+      beforeEach(async () => {
+        await cases.navigation.navigateToApp();
+        await cases.casesTable.goToFirstListedCase();
+        await header.waitUntilLoadingHasFinished();
+      });
+
+      it('should show the right amount of alerts linked to a case', async () => {
+        const visibleText = await testSubjects.getVisibleText('case-view-alerts-stats-badge');
+        expect(visibleText).to.be('1');
+      });
+
+      it('should render the alerts table when opening the alerts tab', async () => {
+        await testSubjects.click('case-view-tab-title-alerts');
+        await testSubjects.existOrFail('alertsTableEmptyState');
       });
     });
 

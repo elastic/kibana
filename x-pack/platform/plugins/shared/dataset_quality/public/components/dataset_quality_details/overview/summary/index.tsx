@@ -48,7 +48,7 @@ const failedDocsColumnTooltip = (
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function Summary() {
-  const { isServerless } = useDatasetQualityDetailsContext();
+  const { isFailureStoreEnabled } = useDatasetQualityDetailsContext();
   const {
     isSummaryPanelLoading,
     totalDocsCount,
@@ -103,7 +103,7 @@ export default function Summary() {
           isLoading={isSummaryPanelLoading}
           tooltip={degradedDocsTooltip}
         />
-        {!isServerless && (
+        {isFailureStoreEnabled && (
           <PanelIndicator
             label={overviewPanelDatasetQualityIndicatorFailedDocs}
             value={totalFailedDocsCount}

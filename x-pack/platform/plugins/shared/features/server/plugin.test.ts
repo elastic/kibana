@@ -62,8 +62,11 @@ describe('Features Plugin', () => {
       Array [
         "baz",
         "discover",
+        "discover_v2",
         "visualize",
+        "visualize_v2",
         "dashboard",
+        "dashboard_v2",
         "dev_tools",
         "advancedSettings",
         "indexPatterns",

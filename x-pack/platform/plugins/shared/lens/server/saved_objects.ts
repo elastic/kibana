@@ -31,7 +31,7 @@ export function setupSavedObjects(
       getTitle: (obj: { attributes: { title: string } }) => obj.attributes.title,
       getInAppUrl: (obj: { id: string }) => ({
         path: `/app/lens${getEditPath(obj.id)}`,
-        uiCapabilitiesPath: 'visualize.show',
+        uiCapabilitiesPath: 'visualize_v2.show',
       }),
     },
     migrations: () =>

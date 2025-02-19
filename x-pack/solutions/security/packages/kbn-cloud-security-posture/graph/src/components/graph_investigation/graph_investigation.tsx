@@ -20,7 +20,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { Graph, isEntityNode } from '../../..';
 import { type UseFetchGraphDataParams, useFetchGraphData } from '../../hooks/use_fetch_graph_data';
 import { GRAPH_INVESTIGATION_TEST_ID } from '../test_ids';
-import { EVENT_ID, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
+import { EVENT_ID, GRAPH_NODES_LIMIT, TOGGLE_SEARCH_BAR_STORAGE_KEY } from '../../common/constants';
 import { Actions } from '../controls/actions';
 import { AnimatedSearchBarContainer, useBorder } from './styles';
 import { CONTROLLED_BY_GRAPH_INVESTIGATION_FILTER, addFilter } from './search_filters';
@@ -195,6 +195,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
           start: timeRange.from,
           end: timeRange.to,
         },
+        nodesLimit: GRAPH_NODES_LIMIT,
       },
       options: {
         refetchOnWindowFocus: false,

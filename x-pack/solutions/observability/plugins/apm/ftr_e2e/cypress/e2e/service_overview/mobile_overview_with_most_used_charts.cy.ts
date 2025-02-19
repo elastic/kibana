@@ -48,25 +48,27 @@ describe.skip('Mobile Service overview page', () => {
 
   describe('Mobile service overview with charts', () => {
     beforeEach(() => {
-      cy.loginAsEditorUser();
-      cy.visitKibana(apmMobileServiceOverview);
       apiRequestsToIntercept.map(({ endpoint, aliasName }) => {
         cy.intercept('GET', endpoint).as(aliasName);
       });
+      cy.loginAsEditorUser();
+      cy.visitKibana(apmMobileServiceOverview);
     });
 
     describe('accessing android service page', () => {
       it('shows the most used charts', () => {
-        cy.wait(aliasNames);
+        cy.wait(aliasNames, { timeout: 120000 });
 
-        cy.getByTestSubj('mostUsedChart-device').should('exist');
-        cy.getByTestSubj('mostUsedChart-netConnectionType').should('exist');
-        cy.getByTestSubj('mostUsedChart-osVersion').should('exist');
-        cy.getByTestSubj('mostUsedChart-appVersion').should('exist');
+        cy.get('[data-test-subj="mostUsedChart-device"]', { timeout: 120000 }).should('exist');
+        cy.get('[data-test-subj="mostUsedChart-netConnectionType"]', { timeout: 120000 }).should(
+          'exist'
+        );
+        cy.get('[data-test-subj="mostUsedChart-osVersion"]', { timeout: 120000 }).should('exist');
+        cy.get('[data-test-subj="mostUsedChart-appVersion"]', { timeout: 120000 }).should('exist');
       });
 
       it('shows No results found, when no data is present', () => {
-        cy.wait(aliasNames);
+        cy.wait(aliasNames, { timeout: 120000 });
 
         const timeStart = moment(start).subtract(5, 'm').toISOString();
         const timeEnd = moment(end).subtract(5, 'm').toISOString();

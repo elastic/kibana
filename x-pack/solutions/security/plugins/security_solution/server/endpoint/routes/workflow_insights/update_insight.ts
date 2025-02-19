@@ -46,7 +46,7 @@ export const registerUpdateInsightsRoute = (
         },
       },
       withEndpointAuthz(
-        { all: ['canWriteWorkflowInsights'] },
+        { all: ['canReadWorkflowInsights'] },
         endpointContext.logFactory.get('workflowInsights'),
         updateInsightsRouteHandler(endpointContext)
       )
@@ -63,9 +63,19 @@ const updateInsightsRouteHandler = (
 > => {
   const logger = endpointContext.logFactory.get('workflowInsights');
 
+  const isOnlyActionTypeUpdate = (body: Partial<UpdateWorkflowInsightsRequestBody>): boolean => {
+    // Type guard is done by schema validation
+    if (!body?.action?.type) return false;
+    // Make sure the body only contains the action.type field
+    return Object.keys(body).length === 1 && Object.keys(body.action).length === 1;
+  };
+
   return async (_, request, response) => {
     const { insightId } = request.params;
-
+    const { canWriteWorkflowInsights } = await endpointContext.service.getEndpointAuthz(request);
+    if (!canWriteWorkflowInsights && !isOnlyActionTypeUpdate(request.body)) {
+      return response.forbidden({ body: 'Unauthorized to update workflow insights' });
+    }
     logger.debug(`Updating insight ${insightId}`);
     try {
       const body = await securityWorkflowInsightsService.update(

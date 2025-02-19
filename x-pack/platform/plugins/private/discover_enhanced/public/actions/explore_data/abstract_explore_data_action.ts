@@ -114,7 +114,7 @@ export abstract class AbstractExploreDataAction {
     const { core, plugins } = this.params.start();
     const { capabilities } = core.application;
 
-    if (capabilities.discover && !capabilities.discover.show) return false;
+    if (capabilities.discover_v2 && !capabilities.discover_v2.show) return false;
     if (!plugins.discover.locator) return false;
 
     return shared.hasExactlyOneDataView(embeddable);

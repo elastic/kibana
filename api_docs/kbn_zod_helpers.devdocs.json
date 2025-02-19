@@ -60,6 +60,41 @@
       },
       {
         "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.assertAllParsableSchemas",
+        "type": "Function",
+        "tags": [],
+        "label": "assertAllParsableSchemas",
+        "description": [
+          "\nAsserts that the schema is recursively parsable (ie, it is\ncomposed entirely of parsable schemas)"
+        ],
+        "signature": [
+          "(outerSchema: Zod.ZodType<any, Zod.ZodTypeDef, any>) => Set<{ key: string; schema: DangerousParsableSchema; }>"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod-helpers/src/deep_strict.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.assertAllParsableSchemas.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "outerSchema",
+            "description": [],
+            "signature": [
+              "Zod.ZodType<any, Zod.ZodTypeDef, any>"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/src/deep_strict.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
         "id": "def-common.buildRouteValidationWithZod",
         "type": "Function",
         "tags": [],
@@ -87,6 +122,39 @@
               "ZodSchema"
             ],
             "path": "src/platform/packages/shared/kbn-zod-helpers/src/build_route_validation_with_zod.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/zod-helpers",
+        "id": "def-common.DeepStrict",
+        "type": "Function",
+        "tags": [],
+        "label": "DeepStrict",
+        "description": [],
+        "signature": [
+          "(schema: TSchema) => Zod.ZodEffects<TSchema, TSchema[\"_output\"], unknown>"
+        ],
+        "path": "src/platform/packages/shared/kbn-zod-helpers/src/deep_strict.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/zod-helpers",
+            "id": "def-common.DeepStrict.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "TSchema"
+            ],
+            "path": "src/platform/packages/shared/kbn-zod-helpers/src/deep_strict.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

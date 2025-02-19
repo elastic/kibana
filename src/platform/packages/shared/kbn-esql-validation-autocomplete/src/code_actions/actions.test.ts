@@ -280,7 +280,7 @@ describe('quick fixes logic', () => {
       { relaxOnMissingCallbacks: false },
       { relaxOnMissingCallbacks: false },
     ]) {
-      for (const fn of getAllFunctions({ type: 'eval' })) {
+      for (const fn of getAllFunctions({ type: 'scalar' })) {
         if (FULL_TEXT_SEARCH_FUNCTIONS.includes(fn.name)) {
           testQuickFixes(
             `FROM index | WHERE ${BROKEN_PREFIX}${fn.name}()`,
@@ -289,7 +289,7 @@ describe('quick fixes logic', () => {
           );
         }
       }
-      for (const fn of getAllFunctions({ type: 'eval' })) {
+      for (const fn of getAllFunctions({ type: 'scalar' })) {
         if (FULL_TEXT_SEARCH_FUNCTIONS.includes(fn.name)) continue;
         // add an A to the function name to make it invalid
         testQuickFixes(

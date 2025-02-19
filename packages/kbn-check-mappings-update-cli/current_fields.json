@@ -321,6 +321,7 @@
     "filter",
     "indexPattern",
     "status",
+    "timestampField",
     "type"
   ],
   "epm-packages": [
@@ -914,6 +915,15 @@
     "username"
   ],
   "search-telemetry": [],
+  "security-ai-prompt": [
+    "description",
+    "model",
+    "prompt",
+    "prompt.default",
+    "promptGroupId",
+    "promptId",
+    "provider"
+  ],
   "security-rule": [
     "rule_id",
     "version"

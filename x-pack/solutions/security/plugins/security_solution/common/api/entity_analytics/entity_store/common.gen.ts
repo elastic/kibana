@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod';
 
 export type EntityType = z.infer<typeof EntityType>;
-export const EntityType = z.enum(['user', 'host', 'service', 'universal']);
+export const EntityType = z.enum(['user', 'host', 'service']);
 export type EntityTypeEnum = typeof EntityType.enum;
 export const EntityTypeEnum = EntityType.enum;
 
@@ -41,6 +41,23 @@ export const EngineDescriptor = z.object({
     .regex(/[smdh]$/)
     .optional()
     .default('24h'),
+  timestampField: z.string().optional(),
+  timeout: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('180s'),
+  frequency: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('1m'),
+  delay: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('1m'),
+  docsPerSecond: z.number().int().optional(),
   error: z.object({}).optional(),
 });
 
@@ -63,6 +80,7 @@ export type EngineComponentStatus = z.infer<typeof EngineComponentStatus>;
 export const EngineComponentStatus = z.object({
   id: z.string(),
   installed: z.boolean(),
+  metadata: z.object({}).optional(),
   resource: EngineComponentResource,
   health: z.enum(['green', 'yellow', 'red', 'unknown']).optional(),
   errors: z

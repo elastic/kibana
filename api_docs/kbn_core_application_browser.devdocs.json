@@ -663,7 +663,7 @@
               "\nGets the read-only capabilities."
             ],
             "signature": [
-              "{ readonly [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; readonly navLinks: Readonly<{ [x: string]: boolean; }>; readonly management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; readonly catalogue: Readonly<{ [x: string]: boolean; }>; }"
+              "{ readonly [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; readonly navLinks: Readonly<{ [x: string]: boolean; }>; readonly management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; readonly catalogue: Readonly<{ [x: string]: boolean; }>; readonly discover?: Readonly<{}> | undefined; readonly dashboard?: Readonly<{}> | undefined; readonly maps?: Readonly<{}> | undefined; readonly visualize?: Readonly<{}> | undefined; }"
             ],
             "path": "src/core/packages/application/browser/src/contracts.ts",
             "deprecated": false,
@@ -1036,8 +1036,8 @@
                 "path": "src/platform/plugins/shared/management/public/application.tsx"
               },
               {
-                "plugin": "@kbn/core-application-browser-mocks",
-                "path": "packages/core/application/core-application-browser-mocks/src/application_service.mock.ts"
+                "plugin": "@kbn/core",
+                "path": "src/core/packages/application/browser-mocks/src/application_service.mock.ts"
               },
               {
                 "plugin": "fleet",

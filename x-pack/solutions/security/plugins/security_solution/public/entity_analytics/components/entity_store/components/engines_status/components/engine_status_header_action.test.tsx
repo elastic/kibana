@@ -14,6 +14,7 @@ import type { GetEntityStoreStatusResponse } from '../../../../../../../common/a
 import { EntityType } from '../../../../../../../common/entity_analytics/types';
 import { TestProviders } from '../../../../../../common/mock';
 import type { EngineComponentStatus } from '../../../../../../../common/api/entity_analytics';
+import { defaultOptions } from '../../../../../../../server/lib/entity_analytics/entity_store/constants';
 
 jest.mock('../../../hooks/use_entity_store');
 jest.mock('../helpers');
@@ -28,12 +29,11 @@ const defaultComponent: EngineComponentStatus = {
 };
 
 const defaultEngineResponse: GetEntityStoreStatusResponse['engines'][0] = {
+  ...defaultOptions,
   type: EntityType.user,
   indexPattern: '',
   status: 'started',
-  fieldHistoryLength: 0,
   components: [defaultComponent],
-  lookbackPeriod: '',
 };
 
 describe('EngineStatusHeaderAction', () => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { resolve } from 'path';
 import { services } from './services';
 import { pageObjects } from './page_objects';
@@ -22,6 +23,8 @@ export default async function ({ readConfigFile }) {
   return {
     services,
     pageObjects,
+
+    testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
 
     servers: kibanaFunctionalConfig.get('servers'),
 
@@ -48,6 +51,7 @@ export default async function ({ readConfigFile }) {
         '--server.restrictInternalApis=false',
         // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
         `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
+        `--xpack.fleet.internal.registry.kibanaVersionCheckEnabled=false`,
       ],
     },
     uiSettings: {

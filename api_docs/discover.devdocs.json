@@ -867,12 +867,12 @@
           {
             "parentPluginId": "discover",
             "id": "def-public.DiscoverServices.capabilities",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "capabilities",
             "description": [],
             "signature": [
-              "Capabilities"
+              "{ [key: string]: Record<string, boolean | Record<string, boolean>>; navLinks: Record<string, boolean>; management: { [sectionId: string]: Record<string, boolean>; }; catalogue: Record<string, boolean>; } & { discover?: {} | undefined; dashboard?: {} | undefined; maps?: {} | undefined; visualize?: {} | undefined; }"
             ],
             "path": "src/platform/plugins/shared/discover/public/build_services.ts",
             "deprecated": false,

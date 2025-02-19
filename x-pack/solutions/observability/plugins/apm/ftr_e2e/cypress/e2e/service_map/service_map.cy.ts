@@ -29,7 +29,7 @@ const detailedServiceMap = url.format({
   },
 });
 
-// Failing: See https://github.com/elastic/kibana/issues/207005
+// Flaky: https://github.com/elastic/kibana/issues/207005
 describe.skip('service map', () => {
   before(() => {
     synthtrace.index(
@@ -53,7 +53,7 @@ describe.skip('service map', () => {
       cy.intercept('GET', '/internal/apm/service-map?*').as('serviceMap');
     });
 
-    it.skip('shows nodes in service map', () => {
+    it('shows nodes in service map', () => {
       cy.visitKibana(serviceMapHref);
       cy.wait('@serviceMap');
 
@@ -62,14 +62,14 @@ describe.skip('service map', () => {
       cy.withHidden('[data-test-subj="headerGlobalNav"]', () =>
         cy.getByTestSubj('serviceMap').matchImage({
           imagesPath: '{spec_path}/snapshots',
-          title: 'global_service_map',
+          title: 'service_map',
           matchAgainstPath: 'cypress/e2e/service_map/snapshots/service_map.png',
           maxDiffThreshold: 0.02, // maximum threshold above which the test should fail
         })
       );
     });
 
-    it.skip('shows nodes in detailed service map', () => {
+    it('shows nodes in detailed service map', () => {
       cy.visitKibana(detailedServiceMap);
       cy.wait('@serviceMap');
       cy.contains('h1', 'opbeans-java');
@@ -90,7 +90,10 @@ describe.skip('service map', () => {
       it('shows empty state', () => {
         cy.visitKibana(serviceMapHref);
         // we need to dismiss the service-group call out first
+        cy.waitUntilPageContentIsLoaded();
         cy.getByTestSubj('apmUnifiedSearchBar').type('_id : foo{enter}');
+        cy.wait('@serviceMap');
+
         cy.contains('No services available');
         // search bar is still visible
         cy.getByTestSubj('apmUnifiedSearchBar');

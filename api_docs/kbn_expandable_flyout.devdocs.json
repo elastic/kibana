@@ -714,22 +714,6 @@
             "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-public.FlyoutPanelProps.state",
-            "type": "Object",
-            "tags": [],
-            "label": "state",
-            "description": [
-              "\nTracks visual state such as whether the panel is collapsed"
-            ],
-            "signature": [
-              "Record<string, unknown> | undefined"
-            ],
-            "path": "x-pack/solutions/security/packages/expandable-flyout/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

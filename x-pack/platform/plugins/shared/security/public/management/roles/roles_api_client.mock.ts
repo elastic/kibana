@@ -12,5 +12,6 @@ export const rolesAPIClientMock = {
     deleteRole: jest.fn(),
     saveRole: jest.fn(),
     bulkUpdateRoles: jest.fn(),
+    queryRoles: jest.fn(),
   }),
 };

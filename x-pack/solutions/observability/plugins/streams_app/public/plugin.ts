@@ -18,6 +18,7 @@ import {
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { STREAMS_APP_ID } from '@kbn/deeplinks-observability/constants';
+import { DataStreamsStatsService } from '@kbn/dataset-quality-plugin/public';
 import type {
   ConfigSchema,
   StreamsAppPublicSetup,
@@ -38,7 +39,7 @@ export class StreamsAppPlugin
 {
   logger: Logger;
 
-  constructor(context: PluginInitializerContext<ConfigSchema>) {
+  constructor(private readonly context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
   }
   setup(
@@ -119,13 +120,18 @@ export class StreamsAppPlugin
           coreSetup.getStartServices(),
         ]);
 
-        const services: StreamsAppServices = {};
+        const services: StreamsAppServices = {
+          dataStreamsClient: new DataStreamsStatsService()
+            .start({ http: coreStart.http })
+            .getClient(),
+        };
 
         return renderApp({
           coreStart,
           pluginsStart,
           services,
           appMountParameters,
+          isServerless: this.context.env.packageInfo.buildFlavor === 'serverless',
         });
       },
     });

@@ -9,7 +9,7 @@ xpack.observabilityLogsExplorer.enabled: false
 xpack.observability.enabled: false
 xpack.securitySolution.enabled: false
 xpack.serverless.observability.enabled: false
-enterpriseSearch.enabled: false
+xpack.search.enabled: false
 xpack.osquery.enabled: false
 
 # Enable fleet on search projects for agentless features
@@ -43,16 +43,19 @@ xpack.fleet.internal.registry.excludePackages: [
 
   # Profiling integrations
   'profiler_agent',
+
+  # Search connectors
+  'elastic_connectors',
 ]
 
 ## Fine-tune the search solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
   ### Dashboards feature is moved from Analytics category to the Search one.
-  dashboard.category: "enterpriseSearch"
+  dashboard_v2.category: "enterpriseSearch"
   ### Dev Tools feature is moved from Analytics category to the Search one.
   dev_tools.category: "enterpriseSearch"
   ### Discover feature is moved from Analytics category to the Search one.
-  discover.category: "enterpriseSearch"
+  discover_v2.category: "enterpriseSearch"
   ### Machine Learning feature is moved from Analytics category to the Management one.
   ml.category: "management"
   ### Stack Alerts feature is moved from Analytics category to the Search one renamed to simply `Alerts`.
@@ -75,9 +78,6 @@ xpack.serverless.search.enabled: true
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/elasticsearch
-
-## Set the dev project switcher current type
-xpack.serverless.plugin.developer.projectSwitcher.currentType: 'search'
 
 # Specify in telemetry the project type
 telemetry.labels.serverless: search
@@ -116,7 +116,7 @@ xpack.ml.compatibleModuleType: 'search'
 data_visualizer.resultLinks.fileBeat.enabled: false
 
 # Search Notebooks
-xpack.search.notebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json
+xpack.searchNotebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json
 
 # Semantic text UI
 
@@ -131,3 +131,6 @@ aiAssistantManagementSelection.preferredAIAssistantType: "observability"
 xpack.observabilityAiAssistantManagement.logSourcesEnabled: false
 xpack.observabilityAiAssistantManagement.spacesEnabled: false
 xpack.observabilityAiAssistantManagement.visibilityEnabled: false
+
+# Synonyms UI
+xpack.searchSynonyms.enabled: true

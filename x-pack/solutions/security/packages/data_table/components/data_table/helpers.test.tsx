@@ -5,15 +5,14 @@
  * 2.0.
  */
 
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { ColumnHeaderOptions } from '../../common/types';
 import {
+  addBuildingBlockStyle,
   hasCellActions,
   mapSortDirectionToDirection,
   mapSortingColumns,
-  addBuildingBlockStyle,
 } from './helpers';
-
-import { euiThemeVars } from '@kbn/ui-theme';
 import { mockDnsEvent } from '../../mock/mock_timeline_data';
 
 describe('helpers', () => {
@@ -178,7 +177,7 @@ describe('helpers', () => {
   });
 
   describe('addBuildingBlockStyle', () => {
-    const THEME = { eui: euiThemeVars, darkMode: false };
+    const THEME = { eui: { euiColorHighlight: 'euiColorHighlight' }, darkMode: false } as EuiTheme;
 
     test('it calls `setCellProps` with background color when event is a building block', () => {
       const mockedSetCellProps = jest.fn();
@@ -191,12 +190,12 @@ describe('helpers', () => {
 
       expect(mockedSetCellProps).toBeCalledWith({
         style: {
-          backgroundColor: euiThemeVars.euiColorHighlight,
+          backgroundColor: 'euiColorHighlight',
         },
       });
     });
 
-    test('it call `setCellProps` reseting the background color when event is not a building block', () => {
+    test('it call `setCellProps` resetting the background color when event is not a building block', () => {
       const mockedSetCellProps = jest.fn();
 
       addBuildingBlockStyle(mockDnsEvent, THEME, mockedSetCellProps);

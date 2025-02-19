@@ -6,8 +6,6 @@
  */
 
 import React from 'react';
-
-import { DefaultDraggable } from '../../../common/components/draggables';
 import { FormattedDuration } from '../formatted_duration';
 
 export const EVENT_DURATION_FIELD_NAME = 'event.duration';
@@ -17,29 +15,10 @@ export const EVENT_DURATION_FIELD_NAME = 'event.duration';
  * duration of time, (e.g. `event.duration`)
  */
 export const Duration = React.memo<{
-  contextId: string;
-  eventId: string;
   fieldName: string;
-  fieldType: string;
-  isAggregatable: boolean;
-  isDraggable: boolean;
   value?: string | null;
-}>(({ contextId, eventId, fieldName, fieldType, isAggregatable, isDraggable, value }) =>
-  isDraggable ? (
-    <DefaultDraggable
-      id={`duration-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-      fieldType={fieldType}
-      isAggregatable={isAggregatable}
-      isDraggable={isDraggable}
-      field={fieldName}
-      tooltipContent={null}
-      value={value}
-    >
-      <FormattedDuration maybeDurationNanoseconds={value} tooltipTitle={fieldName} />
-    </DefaultDraggable>
-  ) : (
-    <FormattedDuration maybeDurationNanoseconds={value} tooltipTitle={fieldName} />
-  )
-);
+}>(({ fieldName, value }) => (
+  <FormattedDuration maybeDurationNanoseconds={value} tooltipTitle={fieldName} />
+));
 
 Duration.displayName = 'Duration';

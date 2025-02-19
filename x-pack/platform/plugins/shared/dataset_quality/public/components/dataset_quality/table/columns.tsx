@@ -179,7 +179,7 @@ export const getDatasetQualityTableColumns = ({
   isActiveDataset,
   timeRange,
   urlService,
-  failureStoreEnabled,
+  isFailureStoreEnabled,
 }: {
   fieldFormats: FieldFormatsStart;
   canUserMonitorDataset: boolean;
@@ -192,7 +192,7 @@ export const getDatasetQualityTableColumns = ({
   isActiveDataset: (lastActivity: number) => boolean;
   timeRange: TimeRangeConfig;
   urlService: BrowserUrlService;
-  failureStoreEnabled: boolean;
+  isFailureStoreEnabled: boolean;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
     {
@@ -335,7 +335,7 @@ export const getDatasetQualityTableColumns = ({
       ),
       width: '140px',
     },
-    ...(failureStoreEnabled
+    ...(isFailureStoreEnabled
       ? [
           {
             name: (

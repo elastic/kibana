@@ -145,7 +145,7 @@ export class EditInLensAction implements Action<EmbeddableApiContext> {
       return false;
 
     const vis = embeddable.getVis();
-    const { visualize } = getCapabilities();
+    const { visualize_v2: visualize } = getCapabilities();
     if (!vis || !visualize.show) {
       return false;
     }

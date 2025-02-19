@@ -37,7 +37,7 @@ export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
         advancedSettings: ['all'],
         dev_tools: ['all'],
         fleet: ['all'],
-        generalCasesV2: ['all'],
+        generalCasesV3: ['all'],
         indexPatterns: ['all'],
         osquery: ['all'],
         savedObjectsManagement: ['all'],

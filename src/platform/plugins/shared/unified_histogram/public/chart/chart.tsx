@@ -276,7 +276,7 @@ export function Chart({
 
   const canEditVisualizationOnTheFly = canCustomizeVisualization && chartVisible;
   const canSaveVisualization =
-    canEditVisualizationOnTheFly && services.capabilities.dashboard?.showWriteControls;
+    canEditVisualizationOnTheFly && services.capabilities.dashboard_v2?.showWriteControls;
 
   const actions: IconButtonGroupProps['buttons'] = [];
 

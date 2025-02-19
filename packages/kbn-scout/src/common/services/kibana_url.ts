@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
 import { ScoutTestConfig } from '../../types';
-import { serviceLoadedMsg } from '../../playwright/utils';
+import { ScoutLogger } from './logger';
 
 export interface PathOptions {
   /**
@@ -50,6 +49,10 @@ export class KibanaUrl {
     return url.href;
   }
 
+  domain() {
+    return this.#baseUrl.hostname;
+  }
+
   /**
    * Get the URL for an app
    * @param appName name of the app to get the URL for
@@ -65,10 +68,10 @@ export class KibanaUrl {
   }
 }
 
-export function createKbnUrl(scoutConfig: ScoutTestConfig, log: ToolingLog) {
+export function createKbnUrl(scoutConfig: ScoutTestConfig, log: ScoutLogger) {
   const kbnUrl = new KibanaUrl(new URL(scoutConfig.hosts.kibana));
 
-  log.debug(serviceLoadedMsg('kbnUrl'));
+  log.serviceLoaded('kbnUrl');
 
   return kbnUrl;
 }

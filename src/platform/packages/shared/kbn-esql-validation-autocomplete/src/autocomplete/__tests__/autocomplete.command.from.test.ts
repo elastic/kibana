@@ -40,12 +40,10 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from /index', visibleIndices);
       });
 
-      test('suggests visible indices on comma', async () => {
+      test("doesn't create suggestions after an open quote", async () => {
         const { assertSuggestions } = await setup();
 
-        await assertSuggestions('FROM a,/', visibleIndices);
-        await assertSuggestions('FROM a, /', visibleIndices);
-        await assertSuggestions('from *,/', visibleIndices);
+        await assertSuggestions('FROM " /"', []);
       });
 
       test('can suggest integration data sources', async () => {
@@ -72,7 +70,7 @@ describe('autocomplete.suggest', () => {
     describe('... METADATA <fields>', () => {
       const metadataFieldsAndIndex = metadataFields.filter((field) => field !== '_index');
 
-      test('on <kbd>SPACE</kbd> without comma ",", suggests adding metadata', async () => {
+      test('on <// FROM something METADATA field1, /kbd>SPACE</kbd> without comma ",", suggests adding metadata', async () => {
         const recommendedQueries = getRecommendedQueries({
           fromCommand: '',
           timeField: 'dateField',
@@ -88,10 +86,29 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions('from a, b /', expected);
       });
 
+      test('partially-typed METADATA keyword', async () => {
+        const { assertSuggestions } = await setup();
+
+        assertSuggestions('FROM index1 MET/', ['METADATA $0']);
+      });
+
+      test('not before first index', async () => {
+        const { assertSuggestions } = await setup();
+
+        assertSuggestions('FROM MET/', visibleIndices);
+      });
+
       test('on <kbd>SPACE</kbd> after "METADATA" keyword suggests all metadata fields', async () => {
         const { assertSuggestions } = await setup();
 
         await assertSuggestions('from a, b METADATA /', metadataFields);
+      });
+
+      test('metadata field prefixes', async () => {
+        const { assertSuggestions } = await setup();
+
+        await assertSuggestions('from a, b METADATA _/', metadataFields);
+        await assertSuggestions('from a, b METADATA _sour/', metadataFields);
       });
 
       test('on <kbd>SPACE</kbd> after "METADATA" column suggests command and pipe operators', async () => {

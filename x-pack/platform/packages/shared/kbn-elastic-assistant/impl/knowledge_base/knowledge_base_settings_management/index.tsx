@@ -31,6 +31,7 @@ import {
 import { css } from '@emotion/react';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
+import { useSearchParams } from 'react-router-dom-v5-compat';
 import { ProductDocumentationManagement } from '../../assistant/settings/product_documentation';
 import { KnowledgeBaseTour } from '../../tour/knowledge_base';
 import { AlertsSettingsManagement } from '../../assistant/settings/alerts_settings/alerts_settings_management';
@@ -83,6 +84,11 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
     enabled: isAssistantEnabled,
   });
   const isKbSetup = isKnowledgeBaseSetup(kbStatus);
+  const [searchParams] = useSearchParams();
+  const initialSearchTerm = useMemo(
+    () => (searchParams.get('entry_search_term') as string) ?? undefined,
+    [searchParams]
+  );
 
   const [deleteKBItem, setDeleteKBItem] = useState<DocumentEntry | IndexEntry | null>(null);
   const [duplicateKBItem, setDuplicateKBItem] = useState<KnowledgeBaseEntryCreateProps | null>(
@@ -286,8 +292,9 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
         placeholder: i18n.SEARCH_PLACEHOLDER,
       },
       filters: [],
+      defaultQuery: initialSearchTerm,
     }),
-    [isFetchingEntries, handleRefreshTable, onDocumentClicked, onIndexClicked]
+    [isFetchingEntries, handleRefreshTable, onDocumentClicked, onIndexClicked, initialSearchTerm]
   );
 
   const flyoutTitle = useMemo(() => {

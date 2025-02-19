@@ -447,6 +447,22 @@
           },
           {
             "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.hideRunQueryButton",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideRunQueryButton",
+            "description": [
+              "Hide the Run query button which appears when editor is inlined"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
             "id": "def-public.ESQLEditorProps.editorIsInline",
             "type": "CompoundType",
             "tags": [],

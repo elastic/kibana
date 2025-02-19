@@ -23,11 +23,6 @@ paths:
                   type: integer
                   description: The number of historical values to keep for each field.
                   default: 10
-                lookbackPeriod: 
-                  type: string
-                  description: The lookback period for the entity store
-                  default: 24h
-                  pattern: '[smdh]$'
                 indexPattern:
                   $ref: './common.schema.yaml#/components/schemas/IndexPattern'
                 filter:
@@ -38,6 +33,33 @@ paths:
                     $ref: './common.schema.yaml#/components/schemas/EntityType'
                 enrichPolicyExecutionInterval:
                   $ref: './common.schema.yaml#/components/schemas/Interval'
+                timestampField:
+                  type: string
+                  description: The field to use as the timestamp.
+                  default: '@timestamp'
+                lookbackPeriod: 
+                  type: string
+                  default: 24h
+                  pattern: '[smdh]$'
+                  description: The amount of time the transform looks back to calculate the aggregations.
+                timeout:
+                  type: string
+                  default: 180s
+                  pattern: '[smdh]$'
+                  description: The timeout for initializing the aggregating transform.
+                frequency:
+                  type: string 
+                  default: 1m
+                  pattern: '[smdh]$'
+                  description: The frequency at which the transform will run.
+                delay:
+                  type: string
+                  default: 1m 
+                  pattern: '[smdh]$'               
+                  description: The delay before the transform will run.
+                docsPerSecond:
+                  type: integer  
+                  description: The number of documents per second to process.    
       responses:
         '200':
           description: Successful response

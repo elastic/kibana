@@ -40,7 +40,7 @@ import {
 } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { EndpointExceptionsViewer } from '../../../endpoint_exceptions/endpoint_exceptions_viewer';
-import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
+import { DetectionEngineAlertsTable } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -87,7 +87,7 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { SecurityPageName } from '../../../../app/types';
-import { ALERTS_TABLE_REGISTRY_CONFIG_IDS, APP_UI_ID } from '../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../common/containers/use_full_screen';
 import { Display } from '../../../../explore/hosts/pages/display';
 
@@ -114,6 +114,7 @@ import {
 import { ExecutionEventsTable } from '../../../rule_monitoring';
 import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
+import { RuleGaps } from '../../../rule_gaps/components/rule_gaps';
 
 import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
 
@@ -146,6 +147,7 @@ import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manu
 // eslint-disable-next-line no-restricted-imports
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -286,7 +288,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const mlCapabilities = useMlCapabilities();
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
-
+  const storeGapsInEventLogEnabled = useIsExperimentalFeatureEnabled('storeGapsInEventLogEnabled');
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
 
@@ -501,10 +503,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const renderGroupedAlertTable = useCallback(
     (groupingFilters: Filter[]) => {
       return (
-        <AlertsTableComponent
-          configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS}
+        <DetectionEngineAlertsTable
+          tableType={TableId.alertsOnRuleDetailsPage}
           inputFilters={[...alertMergedFilters, ...groupingFilters]}
-          tableId={TableId.alertsOnRuleDetailsPage}
           onRuleChange={refreshRule}
         />
       );
@@ -547,6 +548,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const hasResponseActions =
     ruleActionsData != null && (ruleActionsData.responseActions || []).length > 0;
   const hasActions = hasNotificationActions || hasResponseActions;
+
+  const isRuleEnabled = isExistingRule && (rule?.enabled ?? false);
 
   return (
     <>
@@ -627,7 +630,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             !hasUserCRUDPermission(canUserCRUD) ||
                             (isMlRule(rule?.type) && !hasMlPermissions)
                           }
-                          enabled={isExistingRule && (rule?.enabled ?? false)}
+                          enabled={isRuleEnabled}
                           startMlJobsIfNeeded={startMlJobsIfNeeded}
                           onChange={handleOnChangeEnabledRule}
                           ruleName={rule?.name}
@@ -796,6 +799,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       theme={theme}
                     />
                     <EuiSpacer size="xl" />
+                    {storeGapsInEventLogEnabled && (
+                      <>
+                        <RuleGaps ruleId={ruleId} enabled={isRuleEnabled} />
+                        <EuiSpacer size="xl" />
+                      </>
+                    )}
                     <RuleBackfillsInfo ruleId={ruleId} />
                   </>
                 </Route>

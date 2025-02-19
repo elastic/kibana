@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { SolutionSideNavPanel, type SolutionSideNavPanelProps } from './solution_side_nav_panel';
-import { BETA_LABEL } from './beta_badge';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { TelemetryContextProvider } from './telemetry/telemetry_context';
@@ -47,8 +46,6 @@ const mockItems: SolutionSideNavItem[] = [
     isBeta: true,
   },
 ];
-
-const betaMockItemsCount = mockItems.filter((item) => item.isBeta).length;
 
 const mockCategories: LinkCategories = [
   {
@@ -98,7 +95,6 @@ describe('SolutionSideNavPanel', () => {
     mockItems.forEach((item) => {
       expect(result.getByText(item.label)).toBeInTheDocument();
     });
-    expect(result.queryAllByText(BETA_LABEL).length).toBe(betaMockItemsCount);
   });
 
   it('should only render categories with items', () => {

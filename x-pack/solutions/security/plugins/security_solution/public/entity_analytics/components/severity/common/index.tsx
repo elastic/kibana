@@ -6,34 +6,36 @@
  */
 
 import React from 'react';
-
 import { EuiHealth, EuiTextColor, useEuiTheme } from '@elastic/eui';
-
-import styled, { css } from 'styled-components';
+import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 
 import { RISK_SEVERITY_COLOUR } from '../../../common/utils';
 import { HoverPopover } from '../../../../common/components/hover_popover';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 
-const RiskBadge = styled.div<{
-  $severity: RiskSeverity;
-  $hideBackgroundColor: boolean;
+const RiskBadge = styled('div', {
+  shouldForwardProp: (prop) => !['severity', 'hideBackgroundColor'].includes(prop),
+})<{
+  severity: RiskSeverity;
+  hideBackgroundColor: boolean;
 }>`
-  ${({ theme, color, $severity, $hideBackgroundColor }) => css`
+  ${({ theme: { euiTheme }, color, severity, hideBackgroundColor }) => css`
     width: fit-content;
-    padding-right: ${theme.eui.euiSizeS};
-    padding-left: ${theme.eui.euiSizeXS};
+    padding-right: ${euiTheme.size.s};
+    padding-left: ${euiTheme.size.xs};
 
-    ${($severity === 'Critical' || $severity === 'High') &&
-    !$hideBackgroundColor &&
+    ${(severity === 'Critical' || severity === 'High') &&
+    !hideBackgroundColor &&
     css`
       background-color: ${color};
       border-radius: 999px; // pill shaped
     `};
   `}
 `;
+
 const TooltipContainer = styled.div`
-  padding: ${({ theme }) => theme.euiSizeS};
+  padding: ${({ theme: { euiTheme } }) => euiTheme.size.s};
 `;
 
 export const RiskScoreLevel: React.FC<{
@@ -77,8 +79,8 @@ const RiskScoreBadge: React.FC<{
   return (
     <RiskBadge
       color={euiTheme.colors.backgroundBaseDanger}
-      $severity={severity}
-      $hideBackgroundColor={hideBackgroundColor}
+      severity={severity}
+      hideBackgroundColor={hideBackgroundColor}
       data-test-subj={dataTestSubj ?? 'risk-score'}
     >
       <EuiTextColor color="default">

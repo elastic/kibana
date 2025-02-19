@@ -24,11 +24,14 @@ paths:
                     type: boolean
                   attackDiscoveryAlertFiltering:
                     type: boolean
+                  contentReferencesEnabled:
+                    type: boolean
                   defendInsights:
                     type: boolean
                 required:
                   - assistantModelEvaluation
                   - attackDiscoveryAlertFiltering
+                  - contentReferencesEnabled
                   - defendInsights
         '400':
           description: Generic Error

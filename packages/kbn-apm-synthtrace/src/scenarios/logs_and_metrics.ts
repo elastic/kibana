@@ -38,6 +38,9 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
     bootstrap: async ({ logsEsClient }) => {
       if (isLogsDb) await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
     },
+    teardown: async ({ logsEsClient }) => {
+      await logsEsClient.deleteIndexTemplate(IndexTemplateName.LogsDb);
+    },
     generate: ({ range, clients: { logsEsClient, apmEsClient } }) => {
       const { numServices = 3 } = runOptions.scenarioOpts || {};
       const { logger } = runOptions;

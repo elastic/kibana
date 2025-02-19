@@ -31,7 +31,7 @@ import type {
   PublicAlertsClient,
   RecoveredAlertData,
 } from '@kbn/alerting-plugin/server/alerts_client/types';
-import { getEcsGroups, type Group } from '@kbn/observability-alerting-rule-utils';
+import { getEcsGroups, type Group } from '@kbn/alerting-rule-utils';
 
 import { ecsFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/ecs_field_map';
 import { decodeOrThrow } from '@kbn/io-ts-utils';

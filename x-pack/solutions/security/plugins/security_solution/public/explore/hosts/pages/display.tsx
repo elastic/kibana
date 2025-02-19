@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
-export const Display = styled.div<{ show: boolean }>`
-  ${({ show }) => (show ? '' : 'display: none;')};
-`;
+export const Display = styled.div<{ show: boolean }>(({ show }) => ({
+  display: show ? undefined : 'none',
+}));
 
 Display.displayName = 'Display';

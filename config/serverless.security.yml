@@ -1,24 +1,30 @@
 # Security Project config
 
 ## Disable plugins
-enterpriseSearch.enabled: false
+xpack.search.enabled: false
 xpack.apm.enabled: false
 xpack.infra.enabled: false
 xpack.observabilityLogsExplorer.enabled: false
 xpack.observability.enabled: false
 xpack.observabilityAIAssistant.enabled: false
-xpack.search.notebooks.enabled: false
+xpack.searchNotebooks.enabled: false
 xpack.searchPlayground.enabled: false
 xpack.searchInferenceEndpoints.enabled: false
 xpack.inventory.enabled: false
 xpack.searchIndices.enabled: false
+xpack.searchSynonyms.enabled: false
 
 ## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
-  ### Dashboard feature is hidden in Role management since it's automatically granted by SIEM feature.
-  dashboard.hidden: true
-  ### Discover feature is hidden in Role management since it's automatically granted by SIEM feature.
+  ### The following features are hidden in Role management since they're automatically granted by SIEM feature.
   discover.hidden: true
+  discover_v2.hidden: true
+  dashboard.hidden: true
+  dashboard_v2.hidden: true
+  visualize.hidden: true
+  visualize_v2.hidden: true
+  maps.hidden: true
+  maps_v2.hidden: true
   ### Machine Learning feature is moved from Analytics category to the Security one as the last item.
   ml:
     category: "security"
@@ -29,25 +35,25 @@ xpack.features.overrides:
       ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
       ### Visualize features.
       all.composedOf:
-        - feature: "discover"
+        - feature: "discover_v2"
           privileges: [ "all" ]
-        - feature: "dashboard"
+        - feature: "dashboard_v2"
           privileges: [ "all" ]
-        - feature: "visualize"
+        - feature: "visualize_v2"
           privileges: [ "all" ]
-        - feature: "maps"
+        - feature: "maps_v2"
           privileges: [ "all" ]
       # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
       # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
       ### Dashboard, and Visualize apps.
       read.composedOf:
-        - feature: "discover"
+        - feature: "discover_v2"
           privileges: [ "read" ]
-        - feature: "dashboard"
+        - feature: "dashboard_v2"
           privileges: [ "read" ]
-        - feature: "visualize"
+        - feature: "visualize_v2"
           privileges: [ "read" ]
-        - feature: "maps"
+        - feature: "maps_v2"
           privileges: [ "read" ]
 
   ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
@@ -56,25 +62,29 @@ xpack.features.overrides:
       ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
       ### Visualize features.
       all.composedOf:
-        - feature: "discover"
+        - feature: "discover_v2"
           privileges: [ "all" ]
-        - feature: "dashboard"
+        - feature: "dashboard_v2"
           privileges: [ "all" ]
-        - feature: "visualize"
+        - feature: "visualize_v2"
           privileges: [ "all" ]
-        - feature: "maps"
+        - feature: "maps_v2"
+          privileges: [ "all" ]
+        - feature: "savedQueryManagement"
           privileges: [ "all" ]
       # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
       # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
       ### Dashboard, and Visualize apps.
       read.composedOf:
-        - feature: "discover"
+        - feature: "discover_v2"
           privileges: [ "read" ]
-        - feature: "dashboard"
+        - feature: "dashboard_v2"
           privileges: [ "read" ]
-        - feature: "visualize"
+        - feature: "visualize_v2"
           privileges: [ "read" ]
-        - feature: "maps"
+        - feature: "maps_v2"
+          privileges: [ "read" ]
+        - feature: "savedQueryManagement"
           privileges: [ "read" ]
 
 ## Cloud settings
@@ -97,9 +107,6 @@ newsfeed.enabled: true
 
 ## Set the home route
 uiSettings.overrides.defaultRoute: /app/security/get_started
-
-## Set the dev project switcher current type
-xpack.serverless.plugin.developer.projectSwitcher.currentType: 'security'
 
 # Specify in telemetry the project type
 telemetry.labels.serverless: security
@@ -135,6 +142,9 @@ xpack.fleet.internal.registry.excludePackages: [
 
     # Unsupported in serverless
     'cloud_defend',
+
+    # Search connectors
+    'elastic_connectors',
   ]
 # fleet_server package installed to publish agent metrics
 xpack.fleet.packages:
@@ -167,5 +177,7 @@ xpack.index_management.enableProjectLevelRetentionChecks: true
 
 # Experimental Security Solution features
 
-# This feature is disabled in Serverless until fully performance tested within a Serverless environment
-xpack.securitySolution.enableExperimental: ['entityStoreDisabled']
+# These features are disabled in Serverless until fully tested
+xpack.securitySolution.enableExperimental:
+  - entityStoreDisabled
+  - siemMigrationsDisabled

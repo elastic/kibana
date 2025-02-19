@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { SIEM_MIGRATIONS_FEATURE_ID } from '@kbn/security-solution-features/constants';
 import {
   SecurityPageName,
   SECURITY_FEATURE_ID,
@@ -24,7 +25,7 @@ export const siemMigrationsLinks: LinkItem = {
   }),
   landingIcon: SiemMigrationsIcon,
   path: SIEM_MIGRATIONS_RULES_PATH,
-  capabilities: [`${SECURITY_FEATURE_ID}.show`],
+  capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SIEM_MIGRATIONS_FEATURE_ID}.all`]],
   skipUrlState: true,
   hideTimeline: true,
   globalSearchKeywords: [
@@ -32,6 +33,11 @@ export const siemMigrationsLinks: LinkItem = {
       defaultMessage: 'SIEM Rule Migrations',
     }),
   ],
-  experimentalKey: 'siemMigrationsEnabled',
+  hideWhenExperimentalKey: 'siemMigrationsDisabled',
   isBeta: true,
+  betaOptions: {
+    text: i18n.translate('xpack.securitySolution.appLinks.siemMigrationsRulesTechnicalPreview', {
+      defaultMessage: 'Technical Preview',
+    }),
+  },
 };

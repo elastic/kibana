@@ -76,7 +76,7 @@
       "osquery",
       "savedObjectsTaggingOss",
       "guidedOnboarding",
-      "integrationAssistant",
+      "automaticImport",
       "serverless"
     ],
     "requiredBundles": [

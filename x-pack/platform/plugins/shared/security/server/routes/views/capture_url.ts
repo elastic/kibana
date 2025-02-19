@@ -19,7 +19,19 @@ export function defineCaptureURLRoutes({ httpResources }: RouteDefinitionParams)
       validate: {
         query: schema.object({ next: schema.maybe(schema.string()) }, { unknowns: 'ignore' }),
       },
-      options: { authRequired: false, excludeFromOAS: true },
+      options: { excludeFromOAS: true },
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because it is used for anonymous access.',
+        },
+        authc: {
+          enabled: false,
+          reason:
+            'This route is opted out from authentication because it is used for anonymous access.',
+        },
+      },
     },
     (context, request, response) => response.renderAnonymousCoreApp()
   );

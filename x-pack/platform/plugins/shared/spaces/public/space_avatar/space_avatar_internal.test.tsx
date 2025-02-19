@@ -19,7 +19,7 @@ test('renders without crashing', () => {
   const wrapper = shallow(<SpaceAvatarInternal space={{ name: '', id: '' }} />);
   expect(wrapper).toMatchInlineSnapshot(`
     <EuiAvatar
-      color="#DA8B45"
+      color="#FFC9C2"
       data-test-subj="space-avatar-"
       initials=""
       initialsLength={2}
@@ -34,7 +34,7 @@ test('renders with a space name entirely made of whitespace', () => {
   const wrapper = shallow(<SpaceAvatarInternal space={{ name: '      ', id: '' }} />);
   expect(wrapper).toMatchInlineSnapshot(`
     <EuiAvatar
-      color="#D36086"
+      color="#61A2FF"
       data-test-subj="space-avatar-"
       initials=""
       initialsLength={2}
@@ -62,7 +62,7 @@ test('removes aria-label when instructed not to announce the space name', () => 
       <EuiAvatar
         aria-hidden={true}
         aria-label=""
-        color="#DA8B45"
+        color="#FFC9C2"
         data-test-subj="space-avatar-"
         initials=""
         initialsLength={2}

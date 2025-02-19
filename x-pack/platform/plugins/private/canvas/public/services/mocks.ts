@@ -20,7 +20,6 @@ import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public
 import { reportingPluginMock } from '@kbn/reporting-plugin/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mocks';
 
 import { setKibanaServices } from './kibana_services';
 import { getId } from '../lib/get_id';
@@ -61,7 +60,6 @@ export const setStubKibanaServices = () => {
       reporting: reportingPluginMock.createStartContract(),
       spaces: spacesPluginMock.createStartContract(),
       uiActions: uiActionsPluginMock.createStartContract(),
-      visualizations: visualizationsPluginMock.createStartContract(),
     },
     coreMock.createPluginInitializerContext()
   );

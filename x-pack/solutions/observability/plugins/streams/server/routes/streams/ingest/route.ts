@@ -17,7 +17,7 @@ import { z } from '@kbn/zod';
 import { createServerRoute } from '../../create_server_route';
 
 const readIngestRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{id}/_ingest',
+  endpoint: 'GET /api/streams/{name}/_ingest',
   options: {
     access: 'internal',
   },
@@ -29,14 +29,14 @@ const readIngestRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ id: z.string() }),
+    path: z.object({ name: z.string() }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<IngestGetResponse> => {
     const { streamsClient } = await getScopedClients({
       request,
     });
 
-    const name = params.path.id;
+    const name = params.path.name;
 
     const definition = await streamsClient.getStream(name);
 
@@ -53,7 +53,7 @@ const readIngestRoute = createServerRoute({
 });
 
 const upsertIngestRoute = createServerRoute({
-  endpoint: 'PUT /api/streams/{id}/_ingest',
+  endpoint: 'PUT /api/streams/{name}/_ingest',
   options: {
     access: 'internal',
   },
@@ -66,7 +66,7 @@ const upsertIngestRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      id: z.string(),
+      name: z.string(),
     }),
     body: ingestUpsertRequestSchema,
   }),
@@ -75,7 +75,7 @@ const upsertIngestRoute = createServerRoute({
       request,
     });
 
-    const name = params.path.id;
+    const name = params.path.name;
 
     const assets = await assetClient.getAssets({
       entityId: name,
@@ -95,7 +95,7 @@ const upsertIngestRoute = createServerRoute({
 
     return await streamsClient.upsertStream({
       request: upsertRequest,
-      name: params.path.id,
+      name: params.path.name,
     });
   },
 });

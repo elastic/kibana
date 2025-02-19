@@ -50,6 +50,7 @@ export const RuleDetailsInError = z.object({
 export type BulkActionsDryRunErrCode = z.infer<typeof BulkActionsDryRunErrCode>;
 export const BulkActionsDryRunErrCode = z.enum([
   'IMMUTABLE',
+  'PREBUILT_CUSTOMIZATION_LICENSE',
   'MACHINE_LEARNING_AUTH',
   'MACHINE_LEARNING_INDEX_PATTERN',
   'ESQL_INDEX_PATTERN',

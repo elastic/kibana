@@ -95,6 +95,18 @@ export const buildkiteProperties: Record<PropertyName, MappingProperty> = {
   },
 };
 
+export const fileInfoProperties: Record<PropertyName, MappingProperty> = {
+  path: {
+    type: 'keyword',
+  },
+  owner: {
+    type: 'keyword',
+  },
+  area: {
+    type: 'keyword',
+  },
+};
+
 export const reporterProperties: Record<PropertyName, MappingProperty> = {
   name: {
     type: 'text',
@@ -113,6 +125,18 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
   },
   duration: {
     type: 'long',
+  },
+  config: {
+    type: 'object',
+    properties: {
+      file: {
+        type: 'object',
+        properties: fileInfoProperties,
+      },
+      category: {
+        type: 'keyword',
+      },
+    },
   },
 };
 
@@ -168,5 +192,9 @@ export const testProperties: Record<PropertyName, MappingProperty> = {
         type: 'long',
       },
     },
+  },
+  file: {
+    type: 'object',
+    properties: fileInfoProperties,
   },
 };

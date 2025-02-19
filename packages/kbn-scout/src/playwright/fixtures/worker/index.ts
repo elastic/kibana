@@ -9,7 +9,7 @@
 
 export { coreWorkerFixtures } from './core_fixtures';
 export type {
-  ToolingLog,
+  ScoutLogger,
   ScoutTestConfig,
   KibanaUrl,
   EsClient,
@@ -25,3 +25,9 @@ export type { UiSettingsFixture } from './ui_settings';
 
 export { scoutSpaceParallelFixture } from './scout_space';
 export type { ScoutSpaceParallelFixture } from './scout_space';
+
+export { apiFixtures } from './apis';
+export type { ApiFixtures, ApiParallelWorkerFixtures } from './apis';
+
+export { synthtraceFixture } from './synthtrace';
+export type { SynthtraceFixture } from './synthtrace';

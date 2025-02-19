@@ -15,6 +15,83 @@ Array [
                 "id": "url_create",
                 "includeIn": "all",
                 "name": "Create Short URLs",
+                "replacedBy": Array [
+                  Object {
+                    "feature": "discover_v2",
+                    "privileges": Array [
+                      "url_create",
+                    ],
+                  },
+                ],
+                "savedObject": Object {
+                  "all": Array [
+                    "url",
+                  ],
+                  "read": Array [],
+                },
+                "ui": Array [
+                  "createShortUrl",
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      Object {
+        "name": "Store Search Sessions",
+        "privilegeGroups": Array [
+          Object {
+            "groupType": "independent",
+            "privileges": Array [
+              Object {
+                "api": Array [
+                  "store_search_session",
+                ],
+                "id": "store_search_session",
+                "includeIn": "all",
+                "management": Object {
+                  "kibana": Array [
+                    "search_sessions",
+                  ],
+                },
+                "name": "Store Search Sessions",
+                "replacedBy": Array [
+                  Object {
+                    "feature": "discover_v2",
+                    "privileges": Array [
+                      "store_search_session",
+                    ],
+                  },
+                ],
+                "savedObject": Object {
+                  "all": Array [
+                    "search-session",
+                  ],
+                  "read": Array [],
+                },
+                "ui": Array [
+                  "storeSearchSession",
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  Object {
+    "id": "discover_v2",
+    "subFeatures": Array [
+      Object {
+        "name": "Short URLs",
+        "privilegeGroups": Array [
+          Object {
+            "groupType": "independent",
+            "privileges": Array [
+              Object {
+                "id": "url_create",
+                "includeIn": "all",
+                "name": "Create Short URLs",
                 "savedObject": Object {
                   "all": Array [
                     "url",
@@ -76,6 +153,43 @@ Array [
                 "id": "url_create",
                 "includeIn": "all",
                 "name": "Create Short URLs",
+                "replacedBy": Array [
+                  Object {
+                    "feature": "visualize_v2",
+                    "privileges": Array [
+                      "url_create",
+                    ],
+                  },
+                ],
+                "savedObject": Object {
+                  "all": Array [
+                    "url",
+                  ],
+                  "read": Array [],
+                },
+                "ui": Array [
+                  "createShortUrl",
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  Object {
+    "id": "visualize_v2",
+    "subFeatures": Array [
+      Object {
+        "name": "Short URLs",
+        "privilegeGroups": Array [
+          Object {
+            "groupType": "independent",
+            "privileges": Array [
+              Object {
+                "id": "url_create",
+                "includeIn": "all",
+                "name": "Create Short URLs",
                 "savedObject": Object {
                   "all": Array [
                     "url",
@@ -94,6 +208,83 @@ Array [
   },
   Object {
     "id": "dashboard",
+    "subFeatures": Array [
+      Object {
+        "name": "Short URLs",
+        "privilegeGroups": Array [
+          Object {
+            "groupType": "independent",
+            "privileges": Array [
+              Object {
+                "id": "url_create",
+                "includeIn": "all",
+                "name": "Create Short URLs",
+                "replacedBy": Array [
+                  Object {
+                    "feature": "dashboard_v2",
+                    "privileges": Array [
+                      "url_create",
+                    ],
+                  },
+                ],
+                "savedObject": Object {
+                  "all": Array [
+                    "url",
+                  ],
+                  "read": Array [],
+                },
+                "ui": Array [
+                  "createShortUrl",
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      Object {
+        "name": "Store Search Sessions",
+        "privilegeGroups": Array [
+          Object {
+            "groupType": "independent",
+            "privileges": Array [
+              Object {
+                "api": Array [
+                  "store_search_session",
+                ],
+                "id": "store_search_session",
+                "includeIn": "all",
+                "management": Object {
+                  "kibana": Array [
+                    "search_sessions",
+                  ],
+                },
+                "name": "Store Search Sessions",
+                "replacedBy": Array [
+                  Object {
+                    "feature": "dashboard_v2",
+                    "privileges": Array [
+                      "store_search_session",
+                    ],
+                  },
+                ],
+                "savedObject": Object {
+                  "all": Array [
+                    "search-session",
+                  ],
+                  "read": Array [],
+                },
+                "ui": Array [
+                  "storeSearchSession",
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  Object {
+    "id": "dashboard_v2",
     "subFeatures": Array [
       Object {
         "name": "Short URLs",
@@ -199,6 +390,121 @@ Array [
                 "id": "url_create",
                 "includeIn": "all",
                 "name": "Create Short URLs",
+                "replacedBy": Array [
+                  Object {
+                    "feature": "discover_v2",
+                    "privileges": Array [
+                      "url_create",
+                    ],
+                  },
+                ],
+                "savedObject": Object {
+                  "all": Array [
+                    "url",
+                  ],
+                  "read": Array [],
+                },
+                "ui": Array [
+                  "createShortUrl",
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      Object {
+        "name": "Store Search Sessions",
+        "privilegeGroups": Array [
+          Object {
+            "groupType": "independent",
+            "privileges": Array [
+              Object {
+                "api": Array [
+                  "store_search_session",
+                ],
+                "id": "store_search_session",
+                "includeIn": "all",
+                "management": Object {
+                  "kibana": Array [
+                    "search_sessions",
+                  ],
+                },
+                "name": "Store Search Sessions",
+                "replacedBy": Array [
+                  Object {
+                    "feature": "discover_v2",
+                    "privileges": Array [
+                      "store_search_session",
+                    ],
+                  },
+                ],
+                "savedObject": Object {
+                  "all": Array [
+                    "search-session",
+                  ],
+                  "read": Array [],
+                },
+                "ui": Array [
+                  "storeSearchSession",
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      Object {
+        "name": "Reporting",
+        "privilegeGroups": Array [
+          Object {
+            "groupType": "independent",
+            "privileges": Array [
+              Object {
+                "api": Array [
+                  "generateReport",
+                ],
+                "id": "generate_report",
+                "includeIn": "all",
+                "management": Object {
+                  "insightsAndAlerting": Array [
+                    "reporting",
+                  ],
+                },
+                "name": "Generate CSV reports",
+                "replacedBy": Array [
+                  Object {
+                    "feature": "discover_v2",
+                    "privileges": Array [
+                      "generate_report",
+                    ],
+                  },
+                ],
+                "savedObject": Object {
+                  "all": Array [],
+                  "read": Array [],
+                },
+                "ui": Array [
+                  "generateCsv",
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  Object {
+    "id": "discover_v2",
+    "subFeatures": Array [
+      Object {
+        "name": "Short URLs",
+        "privilegeGroups": Array [
+          Object {
+            "groupType": "independent",
+            "privileges": Array [
+              Object {
+                "id": "url_create",
+                "includeIn": "all",
+                "name": "Create Short URLs",
                 "savedObject": Object {
                   "all": Array [
                     "url",
@@ -290,6 +596,82 @@ Array [
                 "id": "url_create",
                 "includeIn": "all",
                 "name": "Create Short URLs",
+                "replacedBy": Array [
+                  Object {
+                    "feature": "visualize_v2",
+                    "privileges": Array [
+                      "url_create",
+                    ],
+                  },
+                ],
+                "savedObject": Object {
+                  "all": Array [
+                    "url",
+                  ],
+                  "read": Array [],
+                },
+                "ui": Array [
+                  "createShortUrl",
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      Object {
+        "name": "Reporting",
+        "privilegeGroups": Array [
+          Object {
+            "groupType": "independent",
+            "privileges": Array [
+              Object {
+                "api": Array [
+                  "generateReport",
+                ],
+                "id": "generate_report",
+                "includeIn": "all",
+                "management": Object {
+                  "insightsAndAlerting": Array [
+                    "reporting",
+                  ],
+                },
+                "minimumLicense": "gold",
+                "name": "Generate PDF or PNG reports",
+                "replacedBy": Array [
+                  Object {
+                    "feature": "visualize_v2",
+                    "privileges": Array [
+                      "generate_report",
+                    ],
+                  },
+                ],
+                "savedObject": Object {
+                  "all": Array [],
+                  "read": Array [],
+                },
+                "ui": Array [
+                  "generateScreenshot",
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  Object {
+    "id": "visualize_v2",
+    "subFeatures": Array [
+      Object {
+        "name": "Short URLs",
+        "privilegeGroups": Array [
+          Object {
+            "groupType": "independent",
+            "privileges": Array [
+              Object {
+                "id": "url_create",
+                "includeIn": "all",
+                "name": "Create Short URLs",
                 "savedObject": Object {
                   "all": Array [
                     "url",
@@ -339,6 +721,150 @@ Array [
   },
   Object {
     "id": "dashboard",
+    "subFeatures": Array [
+      Object {
+        "name": "Short URLs",
+        "privilegeGroups": Array [
+          Object {
+            "groupType": "independent",
+            "privileges": Array [
+              Object {
+                "id": "url_create",
+                "includeIn": "all",
+                "name": "Create Short URLs",
+                "replacedBy": Array [
+                  Object {
+                    "feature": "dashboard_v2",
+                    "privileges": Array [
+                      "url_create",
+                    ],
+                  },
+                ],
+                "savedObject": Object {
+                  "all": Array [
+                    "url",
+                  ],
+                  "read": Array [],
+                },
+                "ui": Array [
+                  "createShortUrl",
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      Object {
+        "name": "Store Search Sessions",
+        "privilegeGroups": Array [
+          Object {
+            "groupType": "independent",
+            "privileges": Array [
+              Object {
+                "api": Array [
+                  "store_search_session",
+                ],
+                "id": "store_search_session",
+                "includeIn": "all",
+                "management": Object {
+                  "kibana": Array [
+                    "search_sessions",
+                  ],
+                },
+                "name": "Store Search Sessions",
+                "replacedBy": Array [
+                  Object {
+                    "feature": "dashboard_v2",
+                    "privileges": Array [
+                      "store_search_session",
+                    ],
+                  },
+                ],
+                "savedObject": Object {
+                  "all": Array [
+                    "search-session",
+                  ],
+                  "read": Array [],
+                },
+                "ui": Array [
+                  "storeSearchSession",
+                ],
+              },
+            ],
+          },
+        ],
+      },
+      Object {
+        "name": "Reporting",
+        "privilegeGroups": Array [
+          Object {
+            "groupType": "independent",
+            "privileges": Array [
+              Object {
+                "api": Array [
+                  "generateReport",
+                ],
+                "id": "generate_report",
+                "includeIn": "all",
+                "management": Object {
+                  "insightsAndAlerting": Array [
+                    "reporting",
+                  ],
+                },
+                "minimumLicense": "gold",
+                "name": "Generate PDF or PNG reports",
+                "replacedBy": Array [
+                  Object {
+                    "feature": "dashboard_v2",
+                    "privileges": Array [
+                      "generate_report",
+                    ],
+                  },
+                ],
+                "savedObject": Object {
+                  "all": Array [],
+                  "read": Array [],
+                },
+                "ui": Array [
+                  "generateScreenshot",
+                ],
+              },
+              Object {
+                "api": Array [
+                  "downloadCsv",
+                ],
+                "id": "download_csv_report",
+                "includeIn": "all",
+                "management": Object {
+                  "insightsAndAlerting": Array [
+                    "reporting",
+                  ],
+                },
+                "name": "Generate CSV reports from Discover session panels",
+                "replacedBy": Array [
+                  Object {
+                    "feature": "dashboard_v2",
+                    "privileges": Array [
+                      "download_csv_report",
+                    ],
+                  },
+                ],
+                "savedObject": Object {
+                  "all": Array [],
+                  "read": Array [],
+                },
+                "ui": Array [
+                  "downloadCsv",
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  Object {
+    "id": "dashboard_v2",
     "subFeatures": Array [
       Object {
         "name": "Short URLs",
@@ -558,6 +1084,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -573,6 +1100,36 @@ Array [
       "management": Object {
         "kibana": Array [
           "search_sessions",
+        ],
+      },
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "dashboard_v2",
+            "privileges": Array [
+              "all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "all",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "dashboard_v2",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
         ],
       },
       "savedObject": Object {
@@ -618,6 +1175,36 @@ Array [
       "catalogue": Array [
         "dashboard",
       ],
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "dashboard_v2",
+            "privileges": Array [
+              "read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "read",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "dashboard_v2",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [],
         "read": Array [
@@ -629,7 +1216,113 @@ Array [
           "links",
           "map",
           "dashboard",
+          "tag",
           "query",
+        ],
+      },
+      "ui": Array [
+        "show",
+      ],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a basic license returns the dashboard_v2 feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "alerting": Object {
+        "alert": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+        "rule": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+      },
+      "api": Array [
+        "bulkGetUserProfiles",
+        "dashboardUsageStats",
+        "store_search_session",
+      ],
+      "app": Array [
+        "dashboards",
+        "kibana",
+      ],
+      "cases": Object {
+        "all": Array [],
+        "assign": Array [],
+        "create": Array [],
+        "createComment": Array [],
+        "delete": Array [],
+        "push": Array [],
+        "read": Array [],
+        "reopenCase": Array [],
+        "settings": Array [],
+        "update": Array [],
+      },
+      "catalogue": Array [
+        "dashboard",
+      ],
+      "management": Object {
+        "kibana": Array [
+          "search_sessions",
+        ],
+      },
+      "savedObject": Object {
+        "all": Array [
+          "dashboard",
+          "url",
+          "search-session",
+        ],
+        "read": Array [
+          "index-pattern",
+          "search",
+          "visualization",
+          "canvas-workpad",
+          "lens",
+          "links",
+          "map",
+          "tag",
+        ],
+      },
+      "ui": Array [
+        "createNew",
+        "show",
+        "showWriteControls",
+        "createShortUrl",
+        "storeSearchSession",
+      ],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "bulkGetUserProfiles",
+        "dashboardUsageStats",
+      ],
+      "app": Array [
+        "dashboards",
+        "kibana",
+      ],
+      "catalogue": Array [
+        "dashboard",
+      ],
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "index-pattern",
+          "search",
+          "visualization",
+          "canvas-workpad",
+          "lens",
+          "links",
+          "map",
+          "dashboard",
           "tag",
         ],
       },
@@ -722,6 +1415,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -737,6 +1431,36 @@ Array [
       "management": Object {
         "kibana": Array [
           "search_sessions",
+        ],
+      },
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "discover_v2",
+            "privileges": Array [
+              "all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "all",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "discover_v2",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
         ],
       },
       "savedObject": Object {
@@ -772,12 +1496,129 @@ Array [
       "catalogue": Array [
         "discover",
       ],
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "discover_v2",
+            "privileges": Array [
+              "read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "read",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "discover_v2",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [],
         "read": Array [
           "index-pattern",
           "search",
           "query",
+        ],
+      },
+      "ui": Array [
+        "show",
+      ],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a basic license returns the discover_v2 feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "alerting": Object {
+        "alert": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+        "rule": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+      },
+      "api": Array [
+        "fileUpload:analyzeFile",
+        "store_search_session",
+      ],
+      "app": Array [
+        "discover",
+        "kibana",
+      ],
+      "cases": Object {
+        "all": Array [],
+        "assign": Array [],
+        "create": Array [],
+        "createComment": Array [],
+        "delete": Array [],
+        "push": Array [],
+        "read": Array [],
+        "reopenCase": Array [],
+        "settings": Array [],
+        "update": Array [],
+      },
+      "catalogue": Array [
+        "discover",
+      ],
+      "management": Object {
+        "kibana": Array [
+          "search_sessions",
+        ],
+      },
+      "savedObject": Object {
+        "all": Array [
+          "search",
+          "url",
+          "search-session",
+        ],
+        "read": Array [
+          "index-pattern",
+        ],
+      },
+      "ui": Array [
+        "show",
+        "save",
+        "createShortUrl",
+        "storeSearchSession",
+      ],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [],
+      "app": Array [
+        "discover",
+        "kibana",
+      ],
+      "catalogue": Array [
+        "discover",
+      ],
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "index-pattern",
+          "search",
         ],
       },
       "ui": Array [
@@ -1027,6 +1868,7 @@ Array [
         "read": Array [],
       },
       "ui": Array [
+        "showQueries",
         "saveQuery",
       ],
     },
@@ -1043,7 +1885,9 @@ Array [
           "query",
         ],
       },
-      "ui": Array [],
+      "ui": Array [
+        "showQueries",
+      ],
     },
     "privilegeId": "read",
   },
@@ -1075,6 +1919,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1088,11 +1933,41 @@ Array [
         "visualize",
       ],
       "management": Object {},
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "visualize_v2",
+            "privileges": Array [
+              "all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "all",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "visualize_v2",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "visualization",
-          "query",
           "lens",
+          "query",
           "url",
         ],
         "read": Array [
@@ -1124,13 +1999,130 @@ Array [
       "catalogue": Array [
         "visualize",
       ],
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "visualize_v2",
+            "privileges": Array [
+              "read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "read",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "visualize_v2",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [],
         "read": Array [
           "index-pattern",
           "search",
           "visualization",
+          "lens",
+          "tag",
           "query",
+        ],
+      },
+      "ui": Array [
+        "show",
+      ],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a basic license returns the visualize_v2 feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "alerting": Object {
+        "alert": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+        "rule": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+      },
+      "api": Array [],
+      "app": Array [
+        "visualize",
+        "lens",
+        "kibana",
+      ],
+      "cases": Object {
+        "all": Array [],
+        "assign": Array [],
+        "create": Array [],
+        "createComment": Array [],
+        "delete": Array [],
+        "push": Array [],
+        "read": Array [],
+        "reopenCase": Array [],
+        "settings": Array [],
+        "update": Array [],
+      },
+      "catalogue": Array [
+        "visualize",
+      ],
+      "management": Object {},
+      "savedObject": Object {
+        "all": Array [
+          "visualization",
+          "lens",
+          "url",
+        ],
+        "read": Array [
+          "index-pattern",
+          "search",
+          "tag",
+        ],
+      },
+      "ui": Array [
+        "show",
+        "delete",
+        "save",
+        "createShortUrl",
+      ],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [],
+      "app": Array [
+        "visualize",
+        "lens",
+        "kibana",
+      ],
+      "catalogue": Array [
+        "visualize",
+      ],
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "index-pattern",
+          "search",
+          "visualization",
           "lens",
           "tag",
         ],
@@ -1222,6 +2214,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1237,6 +2230,36 @@ Array [
       "management": Object {
         "kibana": Array [
           "search_sessions",
+        ],
+      },
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "dashboard_v2",
+            "privileges": Array [
+              "all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "all",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "dashboard_v2",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
         ],
       },
       "savedObject": Object {
@@ -1282,6 +2305,36 @@ Array [
       "catalogue": Array [
         "dashboard",
       ],
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "dashboard_v2",
+            "privileges": Array [
+              "read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "read",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "dashboard_v2",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [],
         "read": Array [
@@ -1293,7 +2346,113 @@ Array [
           "links",
           "map",
           "dashboard",
+          "tag",
           "query",
+        ],
+      },
+      "ui": Array [
+        "show",
+      ],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a enterprise license returns the dashboard_v2 feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "alerting": Object {
+        "alert": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+        "rule": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+      },
+      "api": Array [
+        "bulkGetUserProfiles",
+        "dashboardUsageStats",
+        "store_search_session",
+      ],
+      "app": Array [
+        "dashboards",
+        "kibana",
+      ],
+      "cases": Object {
+        "all": Array [],
+        "assign": Array [],
+        "create": Array [],
+        "createComment": Array [],
+        "delete": Array [],
+        "push": Array [],
+        "read": Array [],
+        "reopenCase": Array [],
+        "settings": Array [],
+        "update": Array [],
+      },
+      "catalogue": Array [
+        "dashboard",
+      ],
+      "management": Object {
+        "kibana": Array [
+          "search_sessions",
+        ],
+      },
+      "savedObject": Object {
+        "all": Array [
+          "dashboard",
+          "url",
+          "search-session",
+        ],
+        "read": Array [
+          "index-pattern",
+          "search",
+          "visualization",
+          "canvas-workpad",
+          "lens",
+          "links",
+          "map",
+          "tag",
+        ],
+      },
+      "ui": Array [
+        "createNew",
+        "show",
+        "showWriteControls",
+        "createShortUrl",
+        "storeSearchSession",
+      ],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [
+        "bulkGetUserProfiles",
+        "dashboardUsageStats",
+      ],
+      "app": Array [
+        "dashboards",
+        "kibana",
+      ],
+      "catalogue": Array [
+        "dashboard",
+      ],
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "index-pattern",
+          "search",
+          "visualization",
+          "canvas-workpad",
+          "lens",
+          "links",
+          "map",
+          "dashboard",
           "tag",
         ],
       },
@@ -1386,6 +2545,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1401,6 +2561,36 @@ Array [
       "management": Object {
         "kibana": Array [
           "search_sessions",
+        ],
+      },
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "discover_v2",
+            "privileges": Array [
+              "all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "all",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "discover_v2",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
         ],
       },
       "savedObject": Object {
@@ -1436,12 +2626,129 @@ Array [
       "catalogue": Array [
         "discover",
       ],
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "discover_v2",
+            "privileges": Array [
+              "read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "read",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "discover_v2",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [],
         "read": Array [
           "index-pattern",
           "search",
           "query",
+        ],
+      },
+      "ui": Array [
+        "show",
+      ],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a enterprise license returns the discover_v2 feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "alerting": Object {
+        "alert": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+        "rule": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+      },
+      "api": Array [
+        "fileUpload:analyzeFile",
+        "store_search_session",
+      ],
+      "app": Array [
+        "discover",
+        "kibana",
+      ],
+      "cases": Object {
+        "all": Array [],
+        "assign": Array [],
+        "create": Array [],
+        "createComment": Array [],
+        "delete": Array [],
+        "push": Array [],
+        "read": Array [],
+        "reopenCase": Array [],
+        "settings": Array [],
+        "update": Array [],
+      },
+      "catalogue": Array [
+        "discover",
+      ],
+      "management": Object {
+        "kibana": Array [
+          "search_sessions",
+        ],
+      },
+      "savedObject": Object {
+        "all": Array [
+          "search",
+          "url",
+          "search-session",
+        ],
+        "read": Array [
+          "index-pattern",
+        ],
+      },
+      "ui": Array [
+        "show",
+        "save",
+        "createShortUrl",
+        "storeSearchSession",
+      ],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [],
+      "app": Array [
+        "discover",
+        "kibana",
+      ],
+      "catalogue": Array [
+        "discover",
+      ],
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "index-pattern",
+          "search",
         ],
       },
       "ui": Array [
@@ -1691,6 +2998,7 @@ Array [
         "read": Array [],
       },
       "ui": Array [
+        "showQueries",
         "saveQuery",
       ],
     },
@@ -1707,7 +3015,9 @@ Array [
           "query",
         ],
       },
-      "ui": Array [],
+      "ui": Array [
+        "showQueries",
+      ],
     },
     "privilegeId": "read",
   },
@@ -1739,6 +3049,7 @@ Array [
       ],
       "cases": Object {
         "all": Array [],
+        "assign": Array [],
         "create": Array [],
         "createComment": Array [],
         "delete": Array [],
@@ -1752,11 +3063,41 @@ Array [
         "visualize",
       ],
       "management": Object {},
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "visualize_v2",
+            "privileges": Array [
+              "all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "all",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "visualize_v2",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_all",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [
           "visualization",
-          "query",
           "lens",
+          "query",
           "url",
         ],
         "read": Array [
@@ -1788,13 +3129,130 @@ Array [
       "catalogue": Array [
         "visualize",
       ],
+      "replacedBy": Object {
+        "default": Array [
+          Object {
+            "feature": "visualize_v2",
+            "privileges": Array [
+              "read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "read",
+            ],
+          },
+        ],
+        "minimal": Array [
+          Object {
+            "feature": "visualize_v2",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+          Object {
+            "feature": "savedQueryManagement",
+            "privileges": Array [
+              "minimal_read",
+            ],
+          },
+        ],
+      },
       "savedObject": Object {
         "all": Array [],
         "read": Array [
           "index-pattern",
           "search",
           "visualization",
+          "lens",
+          "tag",
           "query",
+        ],
+      },
+      "ui": Array [
+        "show",
+      ],
+    },
+    "privilegeId": "read",
+  },
+]
+`;
+
+exports[`buildOSSFeatures with a enterprise license returns the visualize_v2 feature augmented with appropriate sub feature privileges 1`] = `
+Array [
+  Object {
+    "privilege": Object {
+      "alerting": Object {
+        "alert": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+        "rule": Object {
+          "all": Array [],
+          "read": Array [],
+        },
+      },
+      "api": Array [],
+      "app": Array [
+        "visualize",
+        "lens",
+        "kibana",
+      ],
+      "cases": Object {
+        "all": Array [],
+        "assign": Array [],
+        "create": Array [],
+        "createComment": Array [],
+        "delete": Array [],
+        "push": Array [],
+        "read": Array [],
+        "reopenCase": Array [],
+        "settings": Array [],
+        "update": Array [],
+      },
+      "catalogue": Array [
+        "visualize",
+      ],
+      "management": Object {},
+      "savedObject": Object {
+        "all": Array [
+          "visualization",
+          "lens",
+          "url",
+        ],
+        "read": Array [
+          "index-pattern",
+          "search",
+          "tag",
+        ],
+      },
+      "ui": Array [
+        "show",
+        "delete",
+        "save",
+        "createShortUrl",
+      ],
+    },
+    "privilegeId": "all",
+  },
+  Object {
+    "privilege": Object {
+      "api": Array [],
+      "app": Array [
+        "visualize",
+        "lens",
+        "kibana",
+      ],
+      "catalogue": Array [
+        "visualize",
+      ],
+      "savedObject": Object {
+        "all": Array [],
+        "read": Array [
+          "index-pattern",
+          "search",
+          "visualization",
           "lens",
           "tag",
         ],

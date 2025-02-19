@@ -8,7 +8,6 @@
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
 import { ASSET_INVENTORY_PATH } from '../../common/constants';
@@ -17,6 +16,7 @@ import { PluginTemplateWrapper } from '../common/components/plugin_template_wrap
 import { SecurityRoutePageWrapper } from '../common/components/security_route_page_wrapper';
 import { DataViewContext } from './hooks/data_view_context';
 import { AssetInventoryProvider } from './provider';
+import { useDataView } from './hooks/use_asset_inventory_data_table/use_data_view';
 
 const AssetsPageLazy = lazy(() => import('./pages'));
 
@@ -31,8 +31,10 @@ const queryClient = new QueryClient({
   },
 });
 
+const ASSET_INVENTORY_INDEX_PATTERN = 'logs-cloud_asset_inventory.asset_inventory-*';
+
 export const AssetInventoryRoutes = () => {
-  const dataViewQuery = useDataView('asset-inventory-logs');
+  const dataViewQuery = useDataView(ASSET_INVENTORY_INDEX_PATTERN);
 
   const dataViewContextValue = {
     dataView: dataViewQuery.data!, // eslint-disable-line @typescript-eslint/no-non-null-assertion

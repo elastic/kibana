@@ -351,7 +351,7 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -359,7 +359,23 @@
                 "section": "def-public.ActionDefinition",
                 "text": "ActionDefinition"
               },
-              "<any>) => void; }"
+              "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>>) => void; }"
             ],
             "path": "x-pack/solutions/observability/plugins/slo/public/types.ts",
             "deprecated": false,
@@ -845,7 +861,7 @@
                 "section": "def-public.NavigationSection",
                 "text": "NavigationSection"
               },
-              "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; }>; deepLinks: ",
+              "[]>) => void; }; updateGlobalNavigation: ({ capabilities, deepLinks, updater$, }: { capabilities: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean | Readonly<{ [x: string]: boolean; }>; }>; navLinks: Readonly<{ [x: string]: boolean; }>; management: Readonly<{ [x: string]: Readonly<{ [x: string]: boolean; }>; }>; catalogue: Readonly<{ [x: string]: boolean; }>; discover?: Readonly<{}> | undefined; dashboard?: Readonly<{}> | undefined; maps?: Readonly<{}> | undefined; visualize?: Readonly<{}> | undefined; }>; deepLinks: ",
               "AppDeepLink",
               "<string>[]; updater$: ",
               "Subject",
@@ -1378,7 +1394,7 @@
         "label": "sloPaths",
         "description": [],
         "signature": [
-          "{ slos: string; slosSettings: string; slosWelcome: string; slosOutdatedDefinitions: string; sloCreate: string; sloCreateWithEncodedForm: (encodedParams: string) => string; sloEdit: (sloId: string) => string; sloEditWithEncodedForm: (sloId: string, encodedParams: string) => string; sloDetails: (sloId: string, instanceId?: string | undefined, remoteName?: string | undefined, tabId?: string | undefined) => string; }"
+          "{ slos: string; slosSettings: string; slosWelcome: string; slosOutdatedDefinitions: string; sloCreate: string; sloCreateWithEncodedForm: (encodedParams: string) => string; sloEdit: (sloId: string) => string; sloEditWithEncodedForm: (sloId: string, encodedParams: string) => string; sloDetails: (sloId: string, instanceId: string, remoteName?: string | undefined, tabId?: string | undefined) => string; }"
         ],
         "path": "x-pack/solutions/observability/plugins/slo/common/index.ts",
         "deprecated": false,

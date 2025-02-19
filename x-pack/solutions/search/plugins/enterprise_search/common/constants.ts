@@ -208,6 +208,7 @@ export const MANAGE_API_KEYS_URL = '/app/management/security/api_keys';
 
 export const ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT = 25;
 
+// TODO: Remove?
 export const ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE = 'elastic-crawler';
 
 export const DEFAULT_PIPELINE_NAME = 'search-default-ingestion';
@@ -235,7 +236,6 @@ export const defaultConnectorsPipelineMeta: DefaultConnectorsPipelineMeta = {
 export enum INGESTION_METHOD_IDS {
   API = 'api',
   CONNECTOR = 'connector',
-  CRAWLER = 'crawler',
 }
 
 export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {

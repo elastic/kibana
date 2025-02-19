@@ -47,7 +47,7 @@ import {
   convertMigrationCustomRuleToSecurityRulePayload,
   isMigrationCustomRule,
 } from '../../../../../common/siem_migrations/rules/utils';
-import { useUpdateMigrationRules } from '../../logic/use_update_migration_rules';
+import { useUpdateMigrationRule } from '../../logic/use_update_migration_rule';
 import { UpdatedByLabel } from './updated_by';
 
 /*
@@ -93,9 +93,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
 
     const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
 
-    const { mutateAsync: updateMigrationRules } = useUpdateMigrationRules(
-      ruleMigration.migration_id
-    );
+    const { mutateAsync: updateMigrationRule } = useUpdateMigrationRule(ruleMigration);
 
     const [isUpdating, setIsUpdating] = useState(false);
     const isLoading = isDataLoading || isUpdating;
@@ -107,23 +105,21 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
         }
         setIsUpdating(true);
         try {
-          await updateMigrationRules([
-            {
-              id: ruleMigration.id,
-              elastic_rule: {
-                title: ruleName,
-                query: ruleQuery,
-                query_language: 'esql',
-              },
+          await updateMigrationRule({
+            id: ruleMigration.id,
+            elastic_rule: {
+              title: ruleName,
+              query: ruleQuery,
+              query_language: 'esql',
             },
-          ]);
+          });
         } catch (error) {
           addError(error, { title: logicI18n.UPDATE_MIGRATION_RULES_FAILURE });
         } finally {
           setIsUpdating(false);
         }
       },
-      [addError, ruleMigration, isLoading, updateMigrationRules]
+      [isLoading, updateMigrationRule, ruleMigration, addError]
     );
 
     const ruleDetailsToOverview = useMemo(() => {
@@ -248,7 +244,14 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
           <EuiSpacer size="s" />
           <UpdatedByLabel ruleMigration={ruleMigration} />
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>
+        <EuiFlyoutBody
+          // EUI TODO: We need to set transform to 'none' to avoid drag/drop issues in the flyout caused by the
+          // `transform: translateZ(0)` workaround for the mask image bug in Chromium.
+          // https://github.com/elastic/eui/pull/7855.
+          // We need to remove this workaround once it is fixed in EUI:
+          // https://github.com/elastic/eui/issues/8269.
+          css={{ '.euiFlyoutBody__overflow': { transform: 'none' } }}
+        >
           <EuiSkeletonLoading
             isLoading={isLoading}
             loadingContent={

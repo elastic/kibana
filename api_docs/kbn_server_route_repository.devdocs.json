@@ -173,7 +173,7 @@
         "label": "registerRoutes",
         "description": [],
         "signature": [
-          "({\n  core,\n  repository,\n  logger,\n  dependencies,\n}: { core: ",
+          "({\n  core,\n  repository,\n  logger,\n  dependencies,\n  runDevModeChecks,\n}: { core: ",
           "CoreSetup",
           "<{}, unknown>; repository: Record<string, ",
           {
@@ -199,7 +199,7 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; dependencies: TDependencies; }) => void"
+          "; dependencies: TDependencies; runDevModeChecks: boolean; }) => void"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository/src/register_routes.ts",
         "deprecated": false,
@@ -210,7 +210,7 @@
             "id": "def-server.registerRoutes.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  core,\n  repository,\n  logger,\n  dependencies,\n}",
+            "label": "{\n  core,\n  repository,\n  logger,\n  dependencies,\n  runDevModeChecks,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-server-route-repository/src/register_routes.ts",
             "deprecated": false,
@@ -291,6 +291,17 @@
                 "signature": [
                   "TDependencies"
                 ],
+                "path": "src/platform/packages/shared/kbn-server-route-repository/src/register_routes.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/server-route-repository",
+                "id": "def-server.registerRoutes.$1.runDevModeChecks",
+                "type": "boolean",
+                "tags": [],
+                "label": "runDevModeChecks",
+                "description": [],
                 "path": "src/platform/packages/shared/kbn-server-route-repository/src/register_routes.ts",
                 "deprecated": false,
                 "trackAdoption": false

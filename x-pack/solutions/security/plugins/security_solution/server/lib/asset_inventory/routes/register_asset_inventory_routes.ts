@@ -14,8 +14,9 @@ export const registerAssetInventoryRoutes = ({
   router,
   logger,
   config,
+  getStartServices,
 }: AssetInventoryRoutesDeps) => {
   enableAssetInventoryRoute(router, logger, config);
   deleteAssetInventoryRoute(router, logger);
-  statusAssetInventoryRoute(router, logger);
+  statusAssetInventoryRoute(router, logger, getStartServices);
 };

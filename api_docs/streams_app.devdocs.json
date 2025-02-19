@@ -117,8 +117,8 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamDefinition",
-            "text": "IngestStreamDefinition"
+            "section": "def-common.StreamDefinition",
+            "text": "StreamDefinition"
           },
           "; }"
         ],
@@ -140,8 +140,8 @@
             "pluginId": "@kbn/streams-schema",
             "scope": "common",
             "docId": "kibKbnStreamsSchemaPluginApi",
-            "section": "def-common.IngestStreamDefinition",
-            "text": "IngestStreamDefinition"
+            "section": "def-common.StreamDefinition",
+            "text": "StreamDefinition"
           },
           "; }"
         ],

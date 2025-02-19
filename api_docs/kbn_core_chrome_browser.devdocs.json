@@ -133,6 +133,22 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-public.ChromeBreadcrumbsAppendExtension.order",
+            "type": "number",
+            "tags": [],
+            "label": "order",
+            "description": [
+              "The order in which the extension should be appended to the breadcrumbs. Default is 50"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/core/packages/chrome/browser/src/breadcrumb.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1908,19 +1924,19 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-browser",
-            "id": "def-public.ChromeStart.getBreadcrumbsAppendExtension$",
+            "id": "def-public.ChromeStart.getBreadcrumbsAppendExtensions$",
             "type": "Function",
             "tags": [],
-            "label": "getBreadcrumbsAppendExtension$",
+            "label": "getBreadcrumbsAppendExtensions$",
             "description": [
-              "\nGet an observable of the current extension appended to breadcrumbs"
+              "\nGet an observable of the current extensions appended to breadcrumbs"
             ],
             "signature": [
               "() => ",
               "Observable",
               "<",
               "ChromeBreadcrumbsAppendExtension",
-              " | undefined>"
+              "[]>"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
@@ -1938,9 +1954,9 @@
               "\nMount an element next to the last breadcrumb"
             ],
             "signature": [
-              "(breadcrumbsAppendExtension?: ",
+              "(breadcrumbsAppendExtension: ",
               "ChromeBreadcrumbsAppendExtension",
-              " | undefined) => void"
+              ") => () => void"
             ],
             "path": "src/core/packages/chrome/browser/src/contracts.ts",
             "deprecated": false,
@@ -1954,13 +1970,12 @@
                 "label": "breadcrumbsAppendExtension",
                 "description": [],
                 "signature": [
-                  "ChromeBreadcrumbsAppendExtension",
-                  " | undefined"
+                  "ChromeBreadcrumbsAppendExtension"
                 ],
                 "path": "src/core/packages/chrome/browser/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -3181,7 +3196,7 @@
         "label": "AppDeepLinkId",
         "description": [],
         "signature": [
-          "\"fleet\" | \"graph\" | \"ml\" | \"monitoring\" | \"profiling\" | \"metrics\" | \"management\" | \"apm\" | \"synthetics\" | \"ux\" | \"canvas\" | \"logs\" | \"dashboards\" | \"slo\" | \"observabilityAIAssistant\" | \"home\" | \"integrations\" | \"discover\" | \"observability-overview\" | \"streams\" | \"inventory\" | \"dev_tools\" | \"maps\" | \"visualize\" | \"dev_tools:console\" | \"dev_tools:searchprofiler\" | \"dev_tools:painless_lab\" | \"dev_tools:grokdebugger\" | \"ml:notifications\" | \"ml:nodes\" | \"ml:overview\" | \"ml:memoryUsage\" | \"ml:settings\" | \"ml:dataVisualizer\" | \"ml:logPatternAnalysis\" | \"ml:logRateAnalysis\" | \"ml:singleMetricViewer\" | \"ml:anomalyDetection\" | \"ml:anomalyExplorer\" | \"ml:dataDrift\" | \"ml:dataFrameAnalytics\" | \"ml:resultExplorer\" | \"ml:analyticsMap\" | \"ml:aiOps\" | \"ml:changePointDetections\" | \"ml:modelManagement\" | \"ml:nodesOverview\" | \"ml:esqlDataVisualizer\" | \"ml:fileUpload\" | \"ml:indexDataVisualizer\" | \"ml:calendarSettings\" | \"ml:filterListsSettings\" | \"ml:suppliedConfigurations\" | \"osquery\" | \"management:transform\" | \"management:watcher\" | \"management:cases\" | \"management:tags\" | \"management:maintenanceWindows\" | \"management:cross_cluster_replication\" | \"management:dataViews\" | \"management:spaces\" | \"management:settings\" | \"management:users\" | \"management:migrate_data\" | \"management:search_sessions\" | \"management:data_quality\" | \"management:filesManagement\" | \"management:pipelines\" | \"management:roles\" | \"management:reporting\" | \"management:aiAssistantManagementSelection\" | \"management:securityAiAssistantManagement\" | \"management:observabilityAiAssistantManagement\" | \"management:api_keys\" | \"management:license_management\" | \"management:index_lifecycle_management\" | \"management:index_management\" | \"management:ingest_pipelines\" | \"management:jobsListLink\" | \"management:objects\" | \"management:remote_clusters\" | \"management:role_mappings\" | \"management:rollup_jobs\" | \"management:snapshot_restore\" | \"management:triggersActions\" | \"management:triggersActionsConnectors\" | \"management:upgrade_assistant\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessElasticsearch\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchInferenceEndpoints\" | \"searchSynonyms\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"searchInferenceEndpoints:inferenceEndpoints\" | \"searchSynonyms:synonyms\" | \"elasticsearchStart\" | \"elasticsearchIndices\" | \"enterpriseSearchElasticsearch\" | \"enterpriseSearchVectorSearch\" | \"enterpriseSearchSemanticSearch\" | \"enterpriseSearchAISearch\" | \"elasticsearchIndices:createIndex\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"logs:anomalies\" | \"observability-overview:cases\" | \"observability-overview:alerts\" | \"observability-overview:rules\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\" | \"securitySolutionUI\" | \"securitySolutionUI:\" | \"securitySolutionUI:cases\" | \"securitySolutionUI:alerts\" | \"securitySolutionUI:rules\" | \"securitySolutionUI:policy\" | \"securitySolutionUI:overview\" | \"securitySolutionUI:dashboards\" | \"securitySolutionUI:kubernetes\" | \"securitySolutionUI:cases_create\" | \"securitySolutionUI:cases_configure\" | \"securitySolutionUI:hosts\" | \"securitySolutionUI:users\" | \"securitySolutionUI:cloud_defend-policies\" | \"securitySolutionUI:cloud_security_posture-dashboard\" | \"securitySolutionUI:cloud_security_posture-findings\" | \"securitySolutionUI:cloud_security_posture-benchmarks\" | \"securitySolutionUI:network\" | \"securitySolutionUI:data_quality\" | \"securitySolutionUI:explore\" | \"securitySolutionUI:assets\" | \"securitySolutionUI:cloud_defend\" | \"securitySolutionUI:notes\" | \"securitySolutionUI:administration\" | \"securitySolutionUI:asset_inventory\" | \"securitySolutionUI:attack_discovery\" | \"securitySolutionUI:blocklist\" | \"securitySolutionUI:cloud_security_posture-rules\" | \"securitySolutionUI:detections\" | \"securitySolutionUI:detection_response\" | \"securitySolutionUI:endpoints\" | \"securitySolutionUI:event_filters\" | \"securitySolutionUI:exceptions\" | \"securitySolutionUI:host_isolation_exceptions\" | \"securitySolutionUI:hosts-all\" | \"securitySolutionUI:hosts-anomalies\" | \"securitySolutionUI:hosts-risk\" | \"securitySolutionUI:hosts-events\" | \"securitySolutionUI:hosts-sessions\" | \"securitySolutionUI:hosts-uncommon_processes\" | \"securitySolutionUI:investigations\" | \"securitySolutionUI:get_started\" | \"securitySolutionUI:machine_learning-landing\" | \"securitySolutionUI:network-anomalies\" | \"securitySolutionUI:network-dns\" | \"securitySolutionUI:network-events\" | \"securitySolutionUI:network-flows\" | \"securitySolutionUI:network-http\" | \"securitySolutionUI:network-tls\" | \"securitySolutionUI:response_actions_history\" | \"securitySolutionUI:rules-add\" | \"securitySolutionUI:rules-create\" | \"securitySolutionUI:rules-landing\" | \"securitySolutionUI:siem_migrations-rules\" | \"securitySolutionUI:threat_intelligence\" | \"securitySolutionUI:timelines\" | \"securitySolutionUI:timelines-templates\" | \"securitySolutionUI:trusted_apps\" | \"securitySolutionUI:users-all\" | \"securitySolutionUI:users-anomalies\" | \"securitySolutionUI:users-authentications\" | \"securitySolutionUI:users-events\" | \"securitySolutionUI:users-risk\" | \"securitySolutionUI:entity_analytics\" | \"securitySolutionUI:entity_analytics-management\" | \"securitySolutionUI:entity_analytics-asset-classification\" | \"securitySolutionUI:entity_analytics-entity_store_management\" | \"securitySolutionUI:coverage-overview\" | \"fleet:settings\" | \"fleet:agents\" | \"fleet:policies\" | \"fleet:data_streams\" | \"fleet:enrollment_tokens\" | \"fleet:uninstall_tokens\""
+          "\"fleet\" | \"graph\" | \"ml\" | \"monitoring\" | \"profiling\" | \"metrics\" | \"management\" | \"apm\" | \"synthetics\" | \"ux\" | \"canvas\" | \"logs\" | \"dashboards\" | \"slo\" | \"observabilityAIAssistant\" | \"home\" | \"integrations\" | \"discover\" | \"maps\" | \"visualize\" | \"observability-overview\" | \"streams\" | \"inventory\" | \"dev_tools\" | \"dev_tools:console\" | \"dev_tools:searchprofiler\" | \"dev_tools:painless_lab\" | \"dev_tools:grokdebugger\" | \"ml:notifications\" | \"ml:nodes\" | \"ml:overview\" | \"ml:memoryUsage\" | \"ml:settings\" | \"ml:dataVisualizer\" | \"ml:logPatternAnalysis\" | \"ml:logRateAnalysis\" | \"ml:singleMetricViewer\" | \"ml:anomalyDetection\" | \"ml:anomalyExplorer\" | \"ml:dataDrift\" | \"ml:dataFrameAnalytics\" | \"ml:resultExplorer\" | \"ml:analyticsMap\" | \"ml:aiOps\" | \"ml:changePointDetections\" | \"ml:modelManagement\" | \"ml:nodesOverview\" | \"ml:esqlDataVisualizer\" | \"ml:fileUpload\" | \"ml:indexDataVisualizer\" | \"ml:calendarSettings\" | \"ml:filterListsSettings\" | \"ml:suppliedConfigurations\" | \"osquery\" | \"management:transform\" | \"management:watcher\" | \"management:tags\" | \"management:cases\" | \"management:maintenanceWindows\" | \"management:cross_cluster_replication\" | \"management:dataViews\" | \"management:spaces\" | \"management:settings\" | \"management:users\" | \"management:migrate_data\" | \"management:search_sessions\" | \"management:data_quality\" | \"management:data_usage\" | \"management:filesManagement\" | \"management:pipelines\" | \"management:roles\" | \"management:reporting\" | \"management:aiAssistantManagementSelection\" | \"management:securityAiAssistantManagement\" | \"management:observabilityAiAssistantManagement\" | \"management:api_keys\" | \"management:license_management\" | \"management:index_lifecycle_management\" | \"management:index_management\" | \"management:ingest_pipelines\" | \"management:jobsListLink\" | \"management:objects\" | \"management:remote_clusters\" | \"management:role_mappings\" | \"management:rollup_jobs\" | \"management:snapshot_restore\" | \"management:triggersActions\" | \"management:triggersActionsConnectors\" | \"management:upgrade_assistant\" | \"enterpriseSearch\" | \"enterpriseSearchContent\" | \"enterpriseSearchApplications\" | \"enterpriseSearchAnalytics\" | \"serverlessElasticsearch\" | \"serverlessConnectors\" | \"serverlessWebCrawlers\" | \"searchPlayground\" | \"searchInferenceEndpoints\" | \"searchSynonyms\" | \"searchHomepage\" | \"enterpriseSearchContent:connectors\" | \"enterpriseSearchContent:webCrawlers\" | \"enterpriseSearchApplications:searchApplications\" | \"searchInferenceEndpoints:inferenceEndpoints\" | \"searchSynonyms:synonyms\" | \"elasticsearchStart\" | \"elasticsearchIndices\" | \"enterpriseSearchElasticsearch\" | \"enterpriseSearchVectorSearch\" | \"enterpriseSearchSemanticSearch\" | \"enterpriseSearchAISearch\" | \"elasticsearchIndices:createIndex\" | \"observability-logs-explorer\" | \"last-used-logs-viewer\" | \"observabilityOnboarding\" | \"logs:settings\" | \"logs:stream\" | \"logs:log-categories\" | \"logs:anomalies\" | \"observability-overview:cases\" | \"observability-overview:alerts\" | \"observability-overview:rules\" | \"observability-overview:cases_create\" | \"observability-overview:cases_configure\" | \"metrics:settings\" | \"metrics:hosts\" | \"metrics:inventory\" | \"metrics:metrics-explorer\" | \"metrics:assetDetails\" | \"apm:services\" | \"apm:traces\" | \"apm:dependencies\" | \"apm:service-map\" | \"apm:settings\" | \"apm:service-groups-list\" | \"apm:storage-explorer\" | \"synthetics:overview\" | \"synthetics:certificates\" | \"profiling:functions\" | \"profiling:stacktraces\" | \"profiling:flamegraphs\" | \"inventory:datastreams\" | \"streams:overview\" | \"securitySolutionUI\" | \"securitySolutionUI:\" | \"securitySolutionUI:cases\" | \"securitySolutionUI:alerts\" | \"securitySolutionUI:rules\" | \"securitySolutionUI:policy\" | \"securitySolutionUI:overview\" | \"securitySolutionUI:dashboards\" | \"securitySolutionUI:kubernetes\" | \"securitySolutionUI:cases_create\" | \"securitySolutionUI:cases_configure\" | \"securitySolutionUI:hosts\" | \"securitySolutionUI:users\" | \"securitySolutionUI:cloud_defend-policies\" | \"securitySolutionUI:cloud_security_posture-dashboard\" | \"securitySolutionUI:cloud_security_posture-findings\" | \"securitySolutionUI:cloud_security_posture-benchmarks\" | \"securitySolutionUI:network\" | \"securitySolutionUI:data_quality\" | \"securitySolutionUI:explore\" | \"securitySolutionUI:assets\" | \"securitySolutionUI:cloud_defend\" | \"securitySolutionUI:notes\" | \"securitySolutionUI:administration\" | \"securitySolutionUI:asset_inventory\" | \"securitySolutionUI:attack_discovery\" | \"securitySolutionUI:blocklist\" | \"securitySolutionUI:cloud_security_posture-rules\" | \"securitySolutionUI:detections\" | \"securitySolutionUI:detection_response\" | \"securitySolutionUI:endpoints\" | \"securitySolutionUI:event_filters\" | \"securitySolutionUI:exceptions\" | \"securitySolutionUI:host_isolation_exceptions\" | \"securitySolutionUI:hosts-all\" | \"securitySolutionUI:hosts-anomalies\" | \"securitySolutionUI:hosts-risk\" | \"securitySolutionUI:hosts-events\" | \"securitySolutionUI:hosts-sessions\" | \"securitySolutionUI:hosts-uncommon_processes\" | \"securitySolutionUI:investigations\" | \"securitySolutionUI:get_started\" | \"securitySolutionUI:machine_learning-landing\" | \"securitySolutionUI:network-anomalies\" | \"securitySolutionUI:network-dns\" | \"securitySolutionUI:network-events\" | \"securitySolutionUI:network-flows\" | \"securitySolutionUI:network-http\" | \"securitySolutionUI:network-tls\" | \"securitySolutionUI:response_actions_history\" | \"securitySolutionUI:rules-add\" | \"securitySolutionUI:rules-create\" | \"securitySolutionUI:rules-landing\" | \"securitySolutionUI:siem_migrations-rules\" | \"securitySolutionUI:threat_intelligence\" | \"securitySolutionUI:timelines\" | \"securitySolutionUI:timelines-templates\" | \"securitySolutionUI:trusted_apps\" | \"securitySolutionUI:users-all\" | \"securitySolutionUI:users-anomalies\" | \"securitySolutionUI:users-authentications\" | \"securitySolutionUI:users-events\" | \"securitySolutionUI:users-risk\" | \"securitySolutionUI:entity_analytics\" | \"securitySolutionUI:entity_analytics-management\" | \"securitySolutionUI:entity_analytics-asset-classification\" | \"securitySolutionUI:entity_analytics-entity_store_management\" | \"securitySolutionUI:coverage-overview\" | \"fleet:settings\" | \"fleet:agents\" | \"fleet:policies\" | \"fleet:data_streams\" | \"fleet:enrollment_tokens\" | \"fleet:uninstall_tokens\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,

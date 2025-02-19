@@ -13,6 +13,7 @@ import type { SolutionId } from '@kbn/core-chrome-browser';
 import { schema } from '@kbn/config-schema';
 import { parseNextURL } from '@kbn/std';
 
+import camelcaseKeys from 'camelcase-keys';
 import type { CloudConfigType } from './config';
 
 import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
@@ -215,6 +216,24 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
               {
                 next: schema.maybe(schema.string()),
                 onboarding_token: schema.maybe(schema.string()),
+                security: schema.maybe(
+                  schema.object({
+                    use_case: schema.oneOf([
+                      schema.literal('siem'),
+                      schema.literal('cloud'),
+                      schema.literal('edr'),
+                      schema.literal('other'),
+                    ]),
+                    migration: schema.maybe(
+                      schema.object({
+                        value: schema.boolean(),
+                        type: schema.maybe(
+                          schema.oneOf([schema.literal('splunk'), schema.literal('other')])
+                        ),
+                      })
+                    ),
+                  })
+                ),
               },
               { unknowns: 'ignore' }
             )
@@ -237,9 +256,16 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         // need to get reed of ../../ to make sure we will not be out of space basePath
         const normalizedRoute = new URL(route, 'https://localhost');
 
-        const queryOnboardingToken = request.url.searchParams.get('onboarding_token');
+        const queryOnboardingToken = request.query?.onboarding_token ?? undefined;
+        const queryOnboardingSecurityRaw = request.query?.security ?? undefined;
+        const queryOnboardingSecurity = queryOnboardingSecurityRaw
+          ? camelcaseKeys(queryOnboardingSecurityRaw, {
+              deep: true,
+            })
+          : undefined;
+
         const solutionType = this.config.onboarding?.default_solution;
-        if (queryOnboardingToken) {
+        if (queryOnboardingToken || queryOnboardingSecurity) {
           core
             .getStartServices()
             .then(async ([coreStart]) => {
@@ -251,6 +277,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
                 logger: this.logger,
                 onboardingToken: queryOnboardingToken,
                 solutionType,
+                security: queryOnboardingSecurity,
               });
             })
             .catch((errorMsg) => this.logger.error(errorMsg));

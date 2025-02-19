@@ -36,7 +36,40 @@ xpack.features.overrides:
       url_create:
         disabled: true
         includeIn: "read"
+  dashboard_v2:
+    privileges:
+      ### Dashboard's `All` feature privilege should implicitly grant `All` access to Maps and Visualize features.
+      all.composedOf:
+        - feature: "maps_v2"
+          privileges: [ "all" ]
+        - feature: "visualize_v2"
+          privileges: [ "all" ]
+      ### Dashboard's `Read` feature privilege should implicitly grant `Read` access to Maps and Visualize features.
+      ### Additionally, it should implicitly grant privilege to create short URLs in Visualize app.
+      read.composedOf:
+        - feature: "maps_v2"
+          privileges: [ "read" ]
+        - feature: "visualize_v2"
+          privileges: [ "read" ]
+    ### All Dashboard sub-feature privileges should be hidden: reporting capabilities will be granted via dedicated
+    ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
+    subFeatures.privileges:
+      download_csv_report.disabled: true
+      generate_report.disabled: true
+      store_search_session.disabled: true
+      url_create:
+        disabled: true
+        includeIn: "read"
   discover:
+    ### All Discover sub-feature privileges should be hidden: reporting capabilities will be granted via dedicated
+    ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
+    subFeatures.privileges:
+      generate_report.disabled: true
+      store_search_session.disabled: true
+      url_create:
+        disabled: true
+        includeIn: "read"
+  discover_v2:
     ### All Discover sub-feature privileges should be hidden: reporting capabilities will be granted via dedicated
     ### Reporting feature and short URL sub-feature privilege should be granted for both `All` and `Read`.
     subFeatures.privileges:
@@ -48,17 +81,20 @@ xpack.features.overrides:
   ### Shared images feature is hidden in Role management since it's not needed.
   filesSharedImage.hidden: true
   ### Maps feature is hidden in Role management since it's automatically granted by Dashboard feature.
-  maps.hidden: true
+  maps_v2.hidden: true
   ### Reporting feature is supposed to give access to reporting capabilities across different features.
   reporting:
     privileges:
       all.composedOf:
-        - feature: "dashboard"
+        - feature: "dashboard_v2"
           privileges: [ "download_csv_report" ]
-        - feature: "discover"
+        - feature: "discover_v2"
           privileges: [ "generate_report" ]
   ### Visualize feature is hidden in Role management since it's automatically granted by Dashboard feature.
   visualize:
+    ### The short URL sub-feature privilege should be always granted.
+    subFeatures.privileges.url_create.includeIn: "read"
+  visualize_v2:
     hidden: true
     ### The short URL sub-feature privilege should be always granted.
     subFeatures.privileges.url_create.includeIn: "read"
@@ -235,5 +271,17 @@ xpack.dataUsage.enabled: true
 # This feature is disabled in Serverless until fully tested within a Serverless environment
 xpack.dataUsage.enableExperimental: ['dataUsageDisabled']
 
-# Ensure Serverless is using the Amsterdam theme
-uiSettings.experimental.defaultTheme: "amsterdam"
+# This feature is disabled in Serverless until Inference Endpoint become enabled within a Serverless environment
+xpack.stack_connectors.enableExperimental: ['inferenceConnectorOff']
+
+# This is the definition introducing pre-configured Kibana Connector for Elastic default LLM
+Elastic-Inference-Rainbow-Sprinkles:
+    name: Elastic-Inference-Rainbow-Sprinkles
+    actionTypeId: .inference
+    exposeConfig: true
+    config:
+      provider: 'elastic'
+      taskType: 'chat_completion'
+      inferenceId: '.rainbow-sprinkles-elastic'
+      providerConfig:
+        model_id: 'rainbow-sprinkles'

@@ -13,14 +13,16 @@ import {
   RuleTranslationResult,
 } from '../../../../../../../../common/siem_migrations/constants';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
+import type { SiemMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
 import type { ChatModel } from '../../../util/actions_client_chat';
+import { cleanMarkdown, generateAssistantComment } from '../../../util/comments';
 import type { GraphNode } from '../../types';
 import { MATCH_PREBUILT_RULE_PROMPT } from './prompts';
-import { cleanMarkdown, generateAssistantComment } from '../../../util/comments';
 
 interface GetMatchPrebuiltRuleNodeParams {
   model: ChatModel;
   logger: Logger;
+  telemetryClient: SiemMigrationTelemetryClient;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
 }
 
@@ -32,6 +34,7 @@ interface GetMatchedRuleResponse {
 export const getMatchPrebuiltRuleNode = ({
   model,
   ruleMigrationsRetriever,
+  telemetryClient,
   logger,
 }: GetMatchPrebuiltRuleNodeParams): GraphNode => {
   return async (state) => {
@@ -42,6 +45,8 @@ export const getMatchPrebuiltRuleNode = ({
       techniqueIds.join(',')
     );
     if (prebuiltRules.length === 0) {
+      telemetryClient.reportPrebuiltRulesMatch({ preFilterRules: [] });
+
       return {
         comments: [
           generateAssistantComment(
@@ -58,12 +63,14 @@ export const getMatchPrebuiltRuleNode = ({
       return {
         name: rule.name,
         description: rule.description,
+        query: rule.target?.type !== 'machine_learning' ? rule.target?.query : '',
       };
     });
 
     const splunkRule = {
       title: state.original_rule.title,
       description: state.original_rule.description,
+      query: state.original_rule.query,
     };
 
     /*
@@ -80,6 +87,10 @@ export const getMatchPrebuiltRuleNode = ({
 
     if (response.match) {
       const matchedRule = prebuiltRules.find((r) => r.name === response.match);
+      telemetryClient.reportPrebuiltRulesMatch({
+        preFilterRules: prebuiltRules,
+        postFilterRule: matchedRule,
+      });
       if (matchedRule) {
         return {
           comments,

@@ -20,8 +20,8 @@ export const getMonitorAction = createAsyncAction<
 >('[MONITOR DETAILS] GET MONITOR');
 
 export const getMonitorLastRunAction = createAsyncAction<
-  { monitorId: string; locationId: string },
-  PingsResponse
+  { monitorId: string; locationLabel: string },
+  { ping?: Ping }
 >('[MONITOR DETAILS] GET LAST RUN');
 
 export const resetMonitorLastRunAction = createAction('[MONITOR DETAILS] LAST RUN RESET');

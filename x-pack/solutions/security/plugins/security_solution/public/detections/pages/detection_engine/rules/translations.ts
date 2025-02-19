@@ -1453,3 +1453,10 @@ export const RULE_UPDATES_DOCUMENTATION_LINK = i18n.translate(
     defaultMessage: "See what's new in Prebuilt Security Detection Rules",
   }
 );
+
+export const COLUMN_TOTAL_UNFILLED_GAPS_DURATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.columnTotalUnfilledGapsDuration',
+  {
+    defaultMessage: 'Unfilled gaps duration',
+  }
+);

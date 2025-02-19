@@ -47,6 +47,7 @@ export const SearchIndexDetailsPage = () => {
   const tabId = decodeURIComponent(useParams<{ tabId: string }>().tabId);
 
   const {
+    cloud,
     console: consolePlugin,
     docLinks,
     application,
@@ -290,7 +291,12 @@ export const SearchIndexDetailsPage = () => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFlexGroup>
-                    <QuickStats indexDocuments={indexDocuments} index={index} mappings={mappings} />
+                    <QuickStats
+                      isStateless={cloud?.isServerlessEnabled ?? false}
+                      indexDocuments={indexDocuments}
+                      index={index}
+                      mappings={mappings}
+                    />
                   </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>

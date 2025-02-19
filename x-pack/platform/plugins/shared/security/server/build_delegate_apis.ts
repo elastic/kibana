@@ -43,6 +43,7 @@ export const buildSecurityApi = ({
       withoutRequest: {
         log: audit.withoutRequest.log,
         enabled: audit.withoutRequest.enabled,
+        includeSavedObjectNames: audit.withoutRequest.includeSavedObjectNames,
       },
     },
   };

@@ -9,6 +9,7 @@ import type {
   RuleResponse,
   RuleUpdateProps,
 } from '../../../../../../../common/api/detection_engine/model/rule_schema';
+import type { PrebuiltRulesCustomizationStatus } from '../../../../../../../common/detection_engine/prebuilt_rules/prebuilt_rule_customization_status';
 import type { IPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { applyRuleDefaults } from './apply_rule_defaults';
 import { calculateRuleSource } from './rule_source/calculate_rule_source';
@@ -17,14 +18,14 @@ interface ApplyRuleUpdateProps {
   prebuiltRuleAssetClient: IPrebuiltRuleAssetsClient;
   existingRule: RuleResponse;
   ruleUpdate: RuleUpdateProps;
-  isRuleCustomizationEnabled: boolean;
+  ruleCustomizationStatus: PrebuiltRulesCustomizationStatus;
 }
 
 export const applyRuleUpdate = async ({
   prebuiltRuleAssetClient,
   existingRule,
   ruleUpdate,
-  isRuleCustomizationEnabled,
+  ruleCustomizationStatus,
 }: ApplyRuleUpdateProps): Promise<RuleResponse> => {
   const nextRule: RuleResponse = {
     ...applyRuleDefaults(ruleUpdate),
@@ -48,7 +49,7 @@ export const applyRuleUpdate = async ({
   nextRule.rule_source = await calculateRuleSource({
     rule: nextRule,
     prebuiltRuleAssetClient,
-    isRuleCustomizationEnabled,
+    ruleCustomizationStatus,
   });
 
   return nextRule;
