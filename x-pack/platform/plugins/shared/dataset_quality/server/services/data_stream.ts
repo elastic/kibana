@@ -15,7 +15,7 @@ import { reduceAsyncChunks } from '../utils/reduce_async_chunks';
 class DataStreamService {
   public async getMatchingDataStreams(
     esClient: ElasticsearchClient,
-    datasetName: string
+    datasetName: string | string[]
   ): Promise<IndicesDataStream[]> {
     try {
       const { data_streams: dataStreamsInfo } = await esClient.indices.getDataStream({

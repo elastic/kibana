@@ -5054,7 +5054,14 @@ paths:
               properties:
                 records:
                   items:
-                    $ref: '#/components/schemas/Security_Entity_Analytics_API_CreateAssetCriticalityRecord'
+                    allOf:
+                      - $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityRecordIdParts'
+                      - type: object
+                        properties:
+                          criticality_level:
+                            $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevelsForBulkUpload'
+                        required:
+                          - criticality_level
                   maxItems: 1000
                   minItems: 1
                   type: array
@@ -16176,6 +16183,8 @@ paths:
                               type: string
                             memory:
                               type: string
+                bumpRevision:
+                  type: boolean
                 data_output_id:
                   nullable: true
                   type: string
@@ -51915,6 +51924,15 @@ components:
         - high_impact
         - extreme_impact
       type: string
+    Security_Entity_Analytics_API_AssetCriticalityLevelsForBulkUpload:
+      description: The criticality level of the asset for bulk upload. The value `unassigned` is used to indicate that the criticality level is not assigned and is only used for bulk upload.
+      enum:
+        - low_impact
+        - medium_impact
+        - high_impact
+        - extreme_impact
+        - unassigned
+      type: string
     Security_Entity_Analytics_API_AssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_CreateAssetCriticalityRecord'
@@ -52247,7 +52265,6 @@ components:
         - user
         - host
         - service
-        - universal
       type: string
     Security_Entity_Analytics_API_HostEntity:
       type: object
@@ -52323,7 +52340,6 @@ components:
         - host.name
         - user.name
         - service.name
-        - related.entity
       type: string
     Security_Entity_Analytics_API_IndexPattern:
       type: string

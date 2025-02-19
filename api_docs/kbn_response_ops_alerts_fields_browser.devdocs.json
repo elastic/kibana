@@ -21,7 +21,7 @@
           },
           ">"
         ],
-        "path": "packages/response-ops/alerts_fields_browser/components/field_browser/field_browser.tsx",
+        "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/components/field_browser/field_browser.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -52,7 +52,7 @@
         "tags": [],
         "label": "FieldBrowserOptions",
         "description": [],
-        "path": "packages/response-ops/alerts_fields_browser/types.ts",
+        "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -67,7 +67,7 @@
               "CreateFieldComponent",
               " | undefined"
             ],
-            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -82,7 +82,7 @@
               "GetFieldTableColumns",
               " | undefined"
             ],
-            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -98,7 +98,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -112,7 +112,7 @@
         "tags": [],
         "label": "FieldBrowserProps",
         "description": [],
-        "path": "packages/response-ops/alerts_fields_browser/types.ts",
+        "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -128,7 +128,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -152,7 +152,7 @@
               },
               ">; }"
             ],
-            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -168,7 +168,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -184,7 +184,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -202,7 +202,7 @@
             "signature": [
               "(columnId: string) => void"
             ],
-            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -216,7 +216,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/response-ops/alerts_fields_browser/types.ts",
+                "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -243,7 +243,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -259,7 +259,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "path": "src/platform/packages/shared/response-ops/alerts-fields-browser/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
