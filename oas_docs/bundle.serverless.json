@@ -25914,9 +25914,9 @@
                           }
                         },
                         "required": [
-                          "id",
                           "name",
-                          "host_urls"
+                          "host_urls",
+                          "id"
                         ],
                         "type": "object"
                       },
@@ -26253,9 +26253,9 @@
                         }
                       },
                       "required": [
-                        "id",
                         "name",
-                        "host_urls"
+                        "host_urls",
+                        "id"
                       ],
                       "type": "object"
                     }
@@ -26520,9 +26520,9 @@
                         }
                       },
                       "required": [
-                        "id",
                         "name",
-                        "host_urls"
+                        "host_urls",
+                        "id"
                       ],
                       "type": "object"
                     }
@@ -26603,9 +26603,6 @@
                     },
                     "minItems": 1,
                     "type": "array"
-                  },
-                  "id": {
-                    "type": "string"
                   },
                   "is_default": {
                     "type": "boolean"
@@ -26711,7 +26708,6 @@
                   }
                 },
                 "required": [
-                  "id",
                   "proxy_id"
                 ],
                 "type": "object"
@@ -26848,9 +26844,9 @@
                         }
                       },
                       "required": [
-                        "id",
                         "name",
-                        "host_urls"
+                        "host_urls",
+                        "id"
                       ],
                       "type": "object"
                     }
