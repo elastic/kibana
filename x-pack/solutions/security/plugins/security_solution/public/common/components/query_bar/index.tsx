@@ -46,12 +46,14 @@ export const isDataView = (obj: unknown): obj is DataView =>
   obj != null && typeof obj === 'object' && Object.hasOwn(obj, 'getName');
 
 const CustomStylesWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
+  const wrapperClassName = 'ruleEditQueryBarWrapper';
+
   const customCss = css`
-    .kbnQueryBar__filterButtonGroup {
+    .${wrapperClassName} .kbnQueryBar__filterButtonGroup {
       align-self: start;
     }
 
-    .kbnQueryBar__wrap {
+    .${wrapperClassName} .kbnQueryBar__wrap {
       height: auto !important;
     }
   `;
@@ -59,7 +61,7 @@ const CustomStylesWrapper: FC<PropsWithChildren<unknown>> = ({ children }) => {
   return (
     <>
       <Global styles={customCss} />
-      {children}
+      <div className={wrapperClassName}>{children}</div>
     </>
   );
 };
