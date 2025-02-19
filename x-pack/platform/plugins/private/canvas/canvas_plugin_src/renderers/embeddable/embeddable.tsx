@@ -22,12 +22,7 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { CANVAS_EMBEDDABLE_CLASSNAME } from '../../../common/lib';
 import { RendererStrings } from '../../../i18n';
-import {
-  CanvasContainerApi,
-  EmbeddableInput,
-  RendererFactory,
-  RendererHandlers,
-} from '../../../types';
+import { CanvasContainerApi, RendererFactory, RendererHandlers } from '../../../types';
 import { EmbeddableExpression } from '../../expression_types/embeddable';
 import { StartDeps } from '../../plugin';
 import { embeddableInputToExpression } from './embeddable_input_to_expression';
@@ -46,7 +41,7 @@ const renderReactEmbeddable = ({
 }: {
   type: string;
   uuid: string;
-  input: EmbeddableInput;
+  input: { filters?: Filter[] };
   container: CanvasContainerApi;
   handlers: RendererHandlers;
   core: CoreStart;
@@ -75,7 +70,7 @@ const renderReactEmbeddable = ({
         key={`${type}_${uuid}`}
         onAnyStateChange={(newState) => {
           const newExpression = embeddableInputToExpression(
-            newState.rawState as unknown as EmbeddableInput,
+            newState.rawState,
             type,
             undefined,
             true
@@ -117,7 +112,7 @@ const renderReactEmbeddable = ({
 export const embeddableRendererFactory = (
   core: CoreStart,
   plugins: StartDeps
-): RendererFactory<EmbeddableExpression<EmbeddableInput> & { canvasApi: CanvasContainerApi }> => {
+): RendererFactory<EmbeddableExpression & { canvasApi: CanvasContainerApi }> => {
   return () => ({
     name: 'embeddable',
     displayName: strings.getDisplayName(),
@@ -146,7 +141,7 @@ export const embeddableRendererFactory = (
           return ReactDOM.unmountComponentAtNode(domNode);
         });
       } else {
-        api.setFilters(input.filters);
+        api.setFilters((input as { filters?: Filter[] }).filters);
       }
     },
   });

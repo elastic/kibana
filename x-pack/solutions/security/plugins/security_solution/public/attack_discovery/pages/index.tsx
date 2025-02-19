@@ -30,7 +30,6 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { SecurityPageName } from '../../../common/constants';
 import { HeaderPage } from '../../common/components/header_page';
 import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_query';
-import { useSpaceId } from '../../common/hooks/use_space_id';
 import { useKibana } from '../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../common/lib/kuery';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
@@ -53,8 +52,6 @@ const AttackDiscoveryPageComponent: React.FC = () => {
     services: { uiSettings },
   } = useKibana();
 
-  const spaceId = useSpaceId() ?? 'default';
-
   const {
     assistantFeatures: { attackDiscoveryAlertFiltering },
     http,
@@ -72,17 +69,17 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   // time selection:
   const [start, setStart] = useLocalStorage<string>(
-    `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${spaceId}.${START_LOCAL_STORAGE_KEY}`,
+    `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${START_LOCAL_STORAGE_KEY}`,
     DEFAULT_START
   );
   const [end, setEnd] = useLocalStorage<string>(
-    `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${spaceId}.${END_LOCAL_STORAGE_KEY}`,
+    `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${END_LOCAL_STORAGE_KEY}`,
     DEFAULT_END
   );
 
   // search bar query:
   const [query, setQuery] = useLocalStorage<Query>(
-    `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${spaceId}.${QUERY_LOCAL_STORAGE_KEY}`,
+    `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${QUERY_LOCAL_STORAGE_KEY}`,
     getDefaultQuery(),
     {
       raw: false,
@@ -93,7 +90,7 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
   // search bar filters:
   const [filters, setFilters] = useLocalStorage<Filter[]>(
-    `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${spaceId}.${FILTERS_LOCAL_STORAGE_KEY}`,
+    `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${FILTERS_LOCAL_STORAGE_KEY}`,
     [],
     {
       raw: false,
@@ -107,12 +104,12 @@ const AttackDiscoveryPageComponent: React.FC = () => {
   // get the last selected connector ID from local storage:
   const [localStorageAttackDiscoveryConnectorId, setLocalStorageAttackDiscoveryConnectorId] =
     useLocalStorage<string>(
-      `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${spaceId}.${CONNECTOR_ID_LOCAL_STORAGE_KEY}`
+      `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${CONNECTOR_ID_LOCAL_STORAGE_KEY}`
     );
 
   const [localStorageAttackDiscoveryMaxAlerts, setLocalStorageAttackDiscoveryMaxAlerts] =
     useLocalStorage<string>(
-      `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${spaceId}.${MAX_ALERTS_LOCAL_STORAGE_KEY}`,
+      `${DEFAULT_ASSISTANT_NAMESPACE}.${ATTACK_DISCOVERY_STORAGE_KEY}.${MAX_ALERTS_LOCAL_STORAGE_KEY}`,
       `${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`
     );
 
