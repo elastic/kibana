@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const find = getService('find');
+  const queryBar = getService('queryBar');
   const { common, dashboard, header, discover } = getPageObjects([
     'common',
     'dashboard',
@@ -122,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const urlTemplate =
         "{{kibanaUrl}}/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:'{{context.panel.timeRange.from}}',to:'{{context.panel.timeRange.to}}'))" +
         "&_a=(columns:!(_source),filters:{{rison context.panel.filters}},index:'{{context.panel.indexPatternId}}',interval:auto," +
-        "query:(language:{{context.panel.query.language}},query:'{{context.panel.query.query}}'),sort:!())";
+        "query:(language:{{context.panel.query.language}},query:'clientip:239.190.189.77'),sort:!())";
       await testSubjects.click('actionFactoryItem-URL_DRILLDOWN');
       await dashboardDrilldownsManage.fillInDashboardToURLDrilldownWizard({
         drilldownName,
@@ -145,7 +146,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitForDiscoverAppOnScreen();
       await header.waitUntilLoadingHasFinished();
       await discover.waitForDocTableLoadingComplete();
-      expect(await discover.getHitCount()).to.be('4,633');
+      expect(await queryBar.getQueryString()).to.be('clientip:239.190.189.77');
+      expect(await discover.getHitCount()).to.be('6');
     });
   });
 }
