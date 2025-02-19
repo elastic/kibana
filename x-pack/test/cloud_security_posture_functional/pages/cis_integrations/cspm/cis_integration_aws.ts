@@ -30,6 +30,7 @@ export default function (providerContext: FtrProviderContext) {
   const pageObjects = getPageObjects(['cloudPostureDashboard', 'cisAddIntegration', 'header']);
   const retry = getService('retry');
   const logger = getService('log');
+  const saveIntegrationPolicyTimeout = 1000 * 30; // 30 seconds
 
   describe('Test adding Cloud Security Posture Integrations CSPM AWS', function () {
     this.tags(['cloud_security_posture_cis_integration_cspm_aws']);
@@ -51,6 +52,7 @@ export default function (providerContext: FtrProviderContext) {
       });
       it('Hyperlink on PostInstallation Modal should have the correct URL', async () => {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await cisIntegrationAws.getPostInstallCloudFormationModal()) !== undefined).to.be(
@@ -83,6 +85,7 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.fillInTextField(ROLE_ARN_TEST_ID, roleArn);
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
@@ -119,15 +122,18 @@ export default function (providerContext: FtrProviderContext) {
           DIRECT_ACCESS_SECRET_KEY_TEST_ID,
           directAccessSecretKey
         );
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        expect(
-          (await cisIntegration.getFieldValueInEditPage(DIRECT_ACCESS_KEY_ID_TEST_ID)) ===
-            directAccessKeyId
-        ).to.be(true);
-        expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+          await cisIntegration.navigateToIntegrationCspList();
+          expect(
+            (await cisIntegration.getFieldValueInEditPage(DIRECT_ACCESS_KEY_ID_TEST_ID)) ===
+              directAccessKeyId
+          ).to.be(true);
+          expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
+        });
       });
     });
 
@@ -151,19 +157,22 @@ export default function (providerContext: FtrProviderContext) {
           TEMP_ACCESS_SESSION_TOKEN_TEST_ID,
           tempAccessSessionToken
         );
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        await cisIntegration.clickFirstElementOnIntegrationTable();
-        expect(
-          (await cisIntegration.getValueInEditPage(TEMP_ACCESS_KEY_ID_TEST_ID)) === accessKeyId
-        ).to.be(true);
-        expect(
-          (await cisIntegration.getValueInEditPage(TEMP_ACCESS_SESSION_TOKEN_TEST_ID)) ===
-            tempAccessSessionToken
-        ).to.be(true);
-        expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+          await cisIntegration.navigateToIntegrationCspList();
+          await cisIntegration.clickFirstElementOnIntegrationTable();
+          expect(
+            (await cisIntegration.getValueInEditPage(TEMP_ACCESS_KEY_ID_TEST_ID)) === accessKeyId
+          ).to.be(true);
+          expect(
+            (await cisIntegration.getValueInEditPage(TEMP_ACCESS_SESSION_TOKEN_TEST_ID)) ===
+              tempAccessSessionToken
+          ).to.be(true);
+          expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
+        });
       });
     });
 
@@ -182,19 +191,22 @@ export default function (providerContext: FtrProviderContext) {
           SHARED_CREDETIALS_PROFILE_NAME_TEST_ID,
           sharedCredentialProfileName
         );
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        await cisIntegration.clickFirstElementOnIntegrationTable();
-        expect(
-          (await cisIntegration.getValueInEditPage(SHARED_CREDENTIALS_FILE_TEST_ID)) ===
-            sharedCredentialFile
-        ).to.be(true);
-        expect(
-          (await cisIntegration.getValueInEditPage(SHARED_CREDETIALS_PROFILE_NAME_TEST_ID)) ===
-            sharedCredentialProfileName
-        ).to.be(true);
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+          await cisIntegration.navigateToIntegrationCspList();
+          await cisIntegration.clickFirstElementOnIntegrationTable();
+          expect(
+            (await cisIntegration.getValueInEditPage(SHARED_CREDENTIALS_FILE_TEST_ID)) ===
+              sharedCredentialFile
+          ).to.be(true);
+          expect(
+            (await cisIntegration.getValueInEditPage(SHARED_CREDETIALS_PROFILE_NAME_TEST_ID)) ===
+              sharedCredentialProfileName
+          ).to.be(true);
+        });
       });
     });
 
@@ -202,12 +214,15 @@ export default function (providerContext: FtrProviderContext) {
       it('CIS_AWS Single Cloud Formation workflow', async () => {
         await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect(
-          (await cisIntegration.getUrlOnPostInstallModal()) ===
-            'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'
-        );
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect(
+            (await cisIntegration.getUrlOnPostInstallModal()) ===
+              'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html'
+          );
+        });
       });
     });
 
@@ -218,13 +233,16 @@ export default function (providerContext: FtrProviderContext) {
         await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
         await cisIntegration.clickOptionButton(AWS_MANUAL_TEST_ID);
         await cisIntegration.fillInTextField(ROLE_ARN_TEST_ID, roleArn);
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        expect((await cisIntegration.getFieldValueInEditPage(ROLE_ARN_TEST_ID)) === roleArn).to.be(
-          true
-        );
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+          await cisIntegration.navigateToIntegrationCspList();
+          expect(
+            (await cisIntegration.getFieldValueInEditPage(ROLE_ARN_TEST_ID)) === roleArn
+          ).to.be(true);
+        });
       });
     });
 
@@ -244,15 +262,18 @@ export default function (providerContext: FtrProviderContext) {
           DIRECT_ACCESS_SECRET_KEY_TEST_ID,
           directAccessSecretKey
         );
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        expect(
-          (await cisIntegration.getFieldValueInEditPage(DIRECT_ACCESS_KEY_ID_TEST_ID)) ===
-            directAccessKeyId
-        ).to.be(true);
-        expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+          await cisIntegration.navigateToIntegrationCspList();
+          expect(
+            (await cisIntegration.getFieldValueInEditPage(DIRECT_ACCESS_KEY_ID_TEST_ID)) ===
+              directAccessKeyId
+          ).to.be(true);
+          expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
+        });
       });
     });
 
@@ -277,19 +298,22 @@ export default function (providerContext: FtrProviderContext) {
           TEMP_ACCESS_SESSION_TOKEN_TEST_ID,
           tempAccessSessionToken
         );
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        await cisIntegration.clickFirstElementOnIntegrationTable();
-        expect(
-          (await cisIntegration.getValueInEditPage(TEMP_ACCESS_KEY_ID_TEST_ID)) === accessKeyId
-        ).to.be(true);
-        expect(
-          (await cisIntegration.getValueInEditPage(TEMP_ACCESS_SESSION_TOKEN_TEST_ID)) ===
-            tempAccessSessionToken
-        ).to.be(true);
-        expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+          await cisIntegration.navigateToIntegrationCspList();
+          await cisIntegration.clickFirstElementOnIntegrationTable();
+          expect(
+            (await cisIntegration.getValueInEditPage(TEMP_ACCESS_KEY_ID_TEST_ID)) === accessKeyId
+          ).to.be(true);
+          expect(
+            (await cisIntegration.getValueInEditPage(TEMP_ACCESS_SESSION_TOKEN_TEST_ID)) ===
+              tempAccessSessionToken
+          ).to.be(true);
+          expect(await cisIntegration.getReplaceSecretButton('secret-access-key')).to.not.be(null);
+        });
       });
     });
 
@@ -309,19 +333,22 @@ export default function (providerContext: FtrProviderContext) {
           SHARED_CREDETIALS_PROFILE_NAME_TEST_ID,
           sharedCredentialProfileName
         );
+        await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
-        await cisIntegration.navigateToIntegrationCspList();
-        await cisIntegration.clickFirstElementOnIntegrationTable();
-        expect(
-          (await cisIntegration.getValueInEditPage(SHARED_CREDENTIALS_FILE_TEST_ID)) ===
-            sharedCredentialFile
-        ).to.be(true);
-        expect(
-          (await cisIntegration.getValueInEditPage(SHARED_CREDETIALS_PROFILE_NAME_TEST_ID)) ===
-            sharedCredentialProfileName
-        ).to.be(true);
+        await retry.tryForTime(saveIntegrationPolicyTimeout, async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
+          expect((await cisIntegration.getPostInstallModal()) !== undefined).to.be(true);
+          await cisIntegration.navigateToIntegrationCspList();
+          await cisIntegration.clickFirstElementOnIntegrationTable();
+          expect(
+            (await cisIntegration.getValueInEditPage(SHARED_CREDENTIALS_FILE_TEST_ID)) ===
+              sharedCredentialFile
+          ).to.be(true);
+          expect(
+            (await cisIntegration.getValueInEditPage(SHARED_CREDETIALS_PROFILE_NAME_TEST_ID)) ===
+              sharedCredentialProfileName
+          ).to.be(true);
+        });
       });
     });
   });
