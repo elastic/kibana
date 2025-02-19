@@ -39,5 +39,5 @@ export function getTraceDocumentOverview(doc: DataTableRecord): TraceDocumentOve
   return fields.reduce((acc, field) => {
     acc[field] = formatField(field);
     return acc;
-  }, {} as { [key in keyof TraceDocumentOverview]?: string | number | undefined }) as TraceDocumentOverview;
+  }, {} as { [key in keyof TraceDocumentOverview]?: string | number }) as TraceDocumentOverview;
 }
