@@ -16,5 +16,3 @@ export type {
   EmbeddableRegistryDefinition,
 } from './types';
 export { ViewMode } from './types';
-export type { SavedObjectEmbeddableInput } from './lib';
-export { isSavedObjectEmbeddableInput } from './lib';
