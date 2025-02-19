@@ -119,9 +119,8 @@
     "@kbn/config",
     "@kbn/response-ops-rule-params",
     "@kbn/charts-theme",
-    "@kbn/core-test-helpers-model-versions",
-    "@kbn/deeplinks-management",
-    "@kbn/traced-es-client"
+    "@kbn/traced-es-client",
+    "@kbn/observability-utils-common"
   ],
   "exclude": ["target/**/*"]
 }

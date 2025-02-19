@@ -83,7 +83,6 @@
     "@kbn/ai-assistant-icon",
     "@kbn/rule-data-utils",
     "@kbn/utility-types",
-    "@kbn/alerts-ui-shared",
     "@kbn/traced-es-client"
   ],
   "exclude": ["target/**/*"]

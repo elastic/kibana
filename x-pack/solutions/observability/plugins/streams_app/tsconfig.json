@@ -54,9 +54,6 @@
     "@kbn/dashboard-plugin",
     "@kbn/react-kibana-mount",
     "@kbn/fields-metadata-plugin",
-    "@kbn/datemath",
-    "@kbn/dataset-quality-plugin",
-    "@kbn/search-types",
     "@kbn/traced-es-client"
   ]
 }
