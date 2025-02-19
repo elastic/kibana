@@ -20,7 +20,7 @@ export JOB="$SCOUT_CONFIG_GROUP_KEY"
 exitCode=0
 
 echo "--- downloading scout test configuration"
-download_artifact scout_test_configs .
+download_artifact scout_test_configs.json .
 configs=$(jq -r '.[env.SCOUT_CONFIG_GROUP_KEY].configs[]' scout_test_configs.json)
 group=$(jq -r '.[env.SCOUT_CONFIG_GROUP_KEY].group' scout_test_configs.json)
 
