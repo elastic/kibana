@@ -412,8 +412,12 @@ export class SettingsPageObject extends FtrService {
     });
   }
 
+  async changePopularity(value: string) {
+    await this.testSubjects.setValue('editorFieldCount', value, { clearWithKeyboard: true });
+  }
+
   async increasePopularity() {
-    await this.testSubjects.setValue('editorFieldCount', '1', { clearWithKeyboard: true });
+    await this.changePopularity('1');
   }
 
   async getPopularity() {
