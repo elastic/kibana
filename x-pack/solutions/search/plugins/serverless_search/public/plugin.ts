@@ -29,6 +29,7 @@ import {
 import { createIndexDocumentsContent } from './application/components/index_documents/documents_tab';
 import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
 import { navigationTree } from './navigation_tree';
+import { WORKFLOW_LOCALSTORAGE_KEY, WorkflowId } from '@kbn/search-shared-ui';
 
 export class ServerlessSearchPlugin
   implements
@@ -151,6 +152,12 @@ export class ServerlessSearchPlugin
       visibleIn: [],
       async mount({}: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
+        const query = new URLSearchParams(window.location.search);
+        const onboardingToken = query.get('onboarding_token');
+        // note: test with http://localhost:5601/app/cloud/onboarding?next=/app/elasticsearch&onboarding_token=vector
+        if (onboardingToken) {
+          localStorage.setItem(WORKFLOW_LOCALSTORAGE_KEY, onboardingTokenToWorkflowId(onboardingToken));
+        }
         coreStart.chrome.docTitle.change(homeTitle);
         coreStart.application.navigateToApp(searchIndices.startAppId);
         return () => {};
@@ -210,4 +217,15 @@ export class ServerlessSearchPlugin
   }
 
   public stop() {}
+}
+
+// possible onboarding tokens now: 'general' | 'vector' | 'timeseries';
+
+function onboardingTokenToWorkflowId(token: string | undefined | null): WorkflowId {
+  switch (token) {
+    case 'vector':
+      return 'vector';
+    default:
+      return 'default';
+  }
 }

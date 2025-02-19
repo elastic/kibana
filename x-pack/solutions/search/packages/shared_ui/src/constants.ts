@@ -1,0 +1,1 @@
+export const WORKFLOW_LOCALSTORAGE_KEY = 'search_onboarding_workflow';

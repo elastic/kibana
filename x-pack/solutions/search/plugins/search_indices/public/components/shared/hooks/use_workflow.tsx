@@ -11,12 +11,13 @@ import {
   SemanticIngestDataCodeExamples,
   DefaultIngestDataCodeExamples,
 } from '../../../code_examples/ingest_data';
-import { WorkflowId, workflows } from '../../../code_examples/workflows';
+import { workflows } from '../../../code_examples/workflows';
 import {
   DefaultCodeExamples,
   DenseVectorCodeExamples,
   SemanticCodeExamples,
 } from '../../../code_examples/create_index';
+import { WORKFLOW_LOCALSTORAGE_KEY, WorkflowId } from '@kbn/search-shared-ui';
 
 const workflowIdToCreateIndexExamples = (type: WorkflowId) => {
   switch (type) {
@@ -40,18 +41,15 @@ const workflowIdToIngestDataExamples = (type: WorkflowId) => {
   }
 };
 
-const WORKFLOW_LOCALSTORAGE_KEY = 'search_onboarding_workflow';
-
 function isWorkflowId(value: string | null): value is WorkflowId {
   return value === 'default' || value === 'vector' || value === 'semantic';
 }
 
 export const useWorkflow = () => {
-  // TODO: in the future this will be dynamic based on the onboarding token
-  // or project sub-type
   const localStorageWorkflow = localStorage.getItem(WORKFLOW_LOCALSTORAGE_KEY);
+  const workflowId = isWorkflowId(localStorageWorkflow) ? localStorageWorkflow : null;
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<WorkflowId>(
-    isWorkflowId(localStorageWorkflow) ? localStorageWorkflow : 'default'
+    workflowId || 'default'
   );
   return {
     selectedWorkflowId,

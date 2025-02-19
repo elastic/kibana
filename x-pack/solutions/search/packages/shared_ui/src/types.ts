@@ -1,0 +1,1 @@
+export type WorkflowId = 'default' | 'vector' | 'semantic';
