@@ -630,6 +630,17 @@ export const ARCHIVE = i18n.translate('xpack.alerting.maintenanceWindows.archive
   defaultMessage: 'Archive',
 });
 
+export const COPY_ID = i18n.translate('xpack.alerting.maintenanceWindows.copyId', {
+  defaultMessage: 'Copy ID',
+});
+
+export const COPY_ID_ACTION_SUCCESS = i18n.translate(
+  'xpack.alerting.maintenanceWindows.copyId.success',
+  {
+    defaultMessage: 'Copied maintenance window ID to clipboard',
+  }
+);
+
 export const ARCHIVE_TITLE = i18n.translate('xpack.alerting.maintenanceWindows.archive.title', {
   defaultMessage: 'Archive maintenance window',
 });

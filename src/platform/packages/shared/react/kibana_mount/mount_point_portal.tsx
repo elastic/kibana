@@ -14,9 +14,11 @@ import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { useIfMounted } from './utils';
 
 export interface MountPointPortalProps {
-  setMountPoint: (mountPoint: MountPoint<HTMLElement> | undefined) => void;
+  setMountPoint: SetMountPointFn;
   children: React.ReactNode;
 }
+type SetMountPointFn = (mountPoint: MountPoint | undefined) => UnsetMountPointFn | void;
+type UnsetMountPointFn = () => void;
 
 /**
  * Utility component to portal a part of a react application into the provided `MountPoint`.
@@ -31,7 +33,7 @@ export const MountPointPortal: FC<PropsWithChildren<MountPointPortalProps>> = ({
   const ifMounted = useIfMounted();
 
   useEffect(() => {
-    setMountPoint((element) => {
+    const unsetMountPoint = setMountPoint((element) => {
       ifMounted(() => {
         el.current = element;
         setShouldRender(true);
@@ -52,6 +54,9 @@ export const MountPointPortal: FC<PropsWithChildren<MountPointPortalProps>> = ({
         setShouldRender(false);
         el.current = undefined;
       });
+      if (unsetMountPoint) {
+        unsetMountPoint();
+      }
       setMountPoint(undefined);
     };
   }, [setMountPoint, ifMounted]);
