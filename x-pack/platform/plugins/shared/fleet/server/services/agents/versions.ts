@@ -15,7 +15,6 @@ import semverGte from 'semver/functions/gte';
 import semverGt from 'semver/functions/gt';
 import semverRcompare from 'semver/functions/rcompare';
 import semverLt from 'semver/functions/lt';
-import semverCoerce from 'semver/functions/coerce';
 import semverParse from 'semver/functions/parse';
 
 import { REPO_ROOT } from '@kbn/repo-info';
