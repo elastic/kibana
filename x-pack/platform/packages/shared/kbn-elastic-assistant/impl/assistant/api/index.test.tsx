@@ -42,9 +42,9 @@ const fetchConnectorArgs: FetchConnectorExecuteAction = {
   message: 'This is a test',
   conversationId: 'test',
   replacements: {},
-  screenContext: { 
+  screenContext: {
     timeZone: 'America/New_York',
-  }
+  },
 };
 const streamingDefaults = {
   method: 'POST',

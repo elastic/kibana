@@ -67,7 +67,7 @@ export const useSendMessage = (): UseSendMessage => {
           traceOptions,
           screenContext: {
             timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          }
+          },
         });
       } finally {
         clearTimeout(timeoutId);
