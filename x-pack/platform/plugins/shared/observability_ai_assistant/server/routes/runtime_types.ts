@@ -8,7 +8,6 @@ import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import {
   type ConversationCreateRequest,
-  type ConversationRequestBase,
   type ConversationUpdateRequest,
   type Message,
   MessageRole,
@@ -50,16 +49,27 @@ export const messageRt: t.Type<Message> = t.type({
   ]),
 });
 
-export const baseConversationRt: t.Type<ConversationRequestBase> = t.type({
-  '@timestamp': t.string,
-  conversation: t.type({
-    title: t.string,
-  }),
-  messages: t.array(messageRt),
-  labels: t.record(t.string, t.string),
-  numeric_labels: t.record(t.string, t.number),
-  public: toBooleanRt,
+const tokenCountRt = t.type({
+  prompt: t.number,
+  completion: t.number,
+  total: t.number,
 });
+
+export const conversationCreateRt: t.Type<ConversationCreateRequest> = t.intersection([
+  t.type({
+    '@timestamp': t.string,
+    conversation: t.type({
+      title: t.string,
+    }),
+    messages: t.array(messageRt),
+    labels: t.record(t.string, t.string),
+    numeric_labels: t.record(t.string, t.number),
+    public: toBooleanRt,
+  }),
+  t.partial({
+    systemMessage: t.string,
+  }),
+]);
 
 export const assistantScopeType = t.union([
   t.literal('observability'),
@@ -67,17 +77,8 @@ export const assistantScopeType = t.union([
   t.literal('all'),
 ]);
 
-export const conversationCreateRt: t.Type<ConversationCreateRequest> = t.intersection([
-  baseConversationRt,
-  t.type({
-    conversation: t.type({
-      title: t.string,
-    }),
-  }),
-]);
-
 export const conversationUpdateRt: t.Type<ConversationUpdateRequest> = t.intersection([
-  baseConversationRt,
+  conversationCreateRt,
   t.type({
     conversation: t.intersection([
       t.type({
@@ -85,11 +86,7 @@ export const conversationUpdateRt: t.Type<ConversationUpdateRequest> = t.interse
         title: t.string,
       }),
       t.partial({
-        token_count: t.type({
-          prompt: t.number,
-          completion: t.number,
-          total: t.number,
-        }),
+        token_count: tokenCountRt, // deprecated, but kept for backwards compatibility
       }),
     ]),
   }),

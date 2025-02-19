@@ -92,10 +92,9 @@ describe('getGeneratedTitle', () => {
     await lastValueFrom(title$);
 
     const [name, params] = chatSpy.mock.calls[0];
-
     expect(name).toEqual('generate_title');
-    expect(params.messages.length).toBe(2);
-    expect(params.messages[1].message.content).toContain('A message');
+    expect(params.messages.length).toBe(1);
+    expect(params.messages[0].message.content).toContain('A message');
   });
 
   it('strips quotes from the title', async () => {

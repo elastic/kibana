@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { BuildkiteMetadata, HostMetadata } from '../../../datasources';
 
 /**
@@ -61,6 +62,7 @@ export interface ScoutTestRunInfo {
   id: string;
   config?: {
     file?: ScoutFileInfo;
+    category?: ScoutTestRunConfigCategory;
   };
   status?: string;
   duration?: number;

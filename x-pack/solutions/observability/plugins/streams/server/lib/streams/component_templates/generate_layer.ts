@@ -10,13 +10,19 @@ import {
   MappingDateProperty,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
-import { WiredStreamDefinition, isDslLifecycle, isIlmLifecycle, isRoot } from '@kbn/streams-schema';
+import {
+  WiredStreamDefinition,
+  getAdvancedParameters,
+  isDslLifecycle,
+  isIlmLifecycle,
+  isRoot,
+} from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings } from './logs_layer';
 import { getComponentTemplateName } from './name';
 
 export function generateLayer(
-  id: string,
+  name: string,
   definition: WiredStreamDefinition,
   isServerless: boolean
 ): ClusterPutComponentTemplateRequest {
@@ -25,6 +31,13 @@ export function generateLayer(
     const property: MappingProperty = {
       type: props.type,
     };
+
+    const advancedParameters = getAdvancedParameters(field, props);
+
+    if (Object.keys(advancedParameters).length > 0) {
+      Object.assign(property, advancedParameters);
+    }
+
     if (field === '@timestamp') {
       // @timestamp can't ignore malformed dates as it's used for sorting in logsdb
       (property as MappingDateProperty).ignore_malformed = false;
@@ -32,11 +45,12 @@ export function generateLayer(
     if (props.type === 'date' && props.format) {
       (property as MappingDateProperty).format = props.format;
     }
+
     properties[field] = property;
   });
 
   return {
-    name: getComponentTemplateName(id),
+    name: getComponentTemplateName(name),
     template: {
       lifecycle: getTemplateLifecycle(definition, isServerless),
       settings: getTemplateSettings(definition, isServerless),
@@ -49,7 +63,7 @@ export function generateLayer(
     version: ASSET_VERSION,
     _meta: {
       managed: true,
-      description: `Default settings for the ${id} stream`,
+      description: `Default settings for the ${name} stream`,
     },
   };
 }

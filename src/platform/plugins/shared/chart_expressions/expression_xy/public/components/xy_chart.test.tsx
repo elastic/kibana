@@ -62,6 +62,7 @@ import { DataLayers } from './data_layers';
 import { SplitChart } from './split_chart';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
 import type { LayerCellValueActions } from '../types';
+import { EuiThemeProvider } from '@elastic/eui';
 
 const onClickValue = jest.fn();
 const onClickMultiValue = jest.fn();
@@ -3192,21 +3193,31 @@ describe('XYChart component', () => {
           },
         ]),
       ]);
-      const component = mount(<XYChart {...defaultProps} args={args} />);
+      const component = mount(
+        <EuiThemeProvider>
+          <XYChart {...defaultProps} args={args} />
+        </EuiThemeProvider>
+      );
       const groupedAnnotation = component.find(LineAnnotation);
 
       expect(groupedAnnotation.length).toEqual(1);
       // styles are passed because they are shared, dataValues is rounded to the interval
       expect(groupedAnnotation).toMatchSnapshot();
       // renders numeric icon for grouped annotations
-      const marker = mount(<div>{groupedAnnotation.prop('marker') as React.ReactNode}</div>);
+      const marker = mount(
+        <EuiThemeProvider>
+          <div>{groupedAnnotation.prop('marker') as React.ReactNode}</div>
+        </EuiThemeProvider>
+      );
       const numberIcon = marker.find('NumberIcon');
       expect(numberIcon.length).toEqual(1);
       expect(numberIcon.text()).toEqual('3');
 
       // checking tooltip
       const renderLinks = mount(
-        <div>{(groupedAnnotation.prop('customTooltip') as Function)!()}</div>
+        <EuiThemeProvider>
+          <div>{(groupedAnnotation.prop('customTooltip') as Function)!()}</div>
+        </EuiThemeProvider>
       );
       expect(renderLinks.text()).toEqual(
         'Event 1Mar 18, 2022 @ 04:25:00.000Event 2Mar 18, 2022 @ 04:25:00.020Event 3Mar 18, 2022 @ 04:25:00.001'

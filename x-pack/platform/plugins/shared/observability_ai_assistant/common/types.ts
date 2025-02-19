@@ -56,6 +56,7 @@ export interface Conversation {
     title: string;
     last_updated: string;
   };
+  systemMessage?: string;
   messages: Message[];
   labels: Record<string, string>;
   numeric_labels: Record<string, number>;
