@@ -6,13 +6,13 @@
  */
 
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { OriginalRule } from '../../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { SplunkSeverity } from '../../../../../../types';
 import {
   DEFAULT_TRANSLATION_SEVERITY,
   ELASTIC_SEVERITY_TO_RISK_SCORE_MAP,
-} from '../../../../../../../../../../common/siem_migrations/constants';
-import { SPLUNK_ELASTIC_ALERT_SEVERITY_MAP } from '../../../../../../../constants';
-import type { SplunkSeverity } from '../../../../../../../../../../common/siem_migrations/types';
-import type { OriginalRule } from '../../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+  SPLUNK_ELASTIC_ALERT_SEVERITY_MAP,
+} from '../../../../../../constants';
 
 export const mapSplunkSeverityToElasticSeverity = (splunkSeverity?: SplunkSeverity): Severity => {
   if (!splunkSeverity) {
