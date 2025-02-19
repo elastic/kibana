@@ -20,15 +20,15 @@ export async function downloadTelemetryTemplate({ githubToken }: { githubToken: 
     },
   });
 
-  if (Array.isArray(file.data)) {
+  if (!Array.isArray(file.data) && file.data.type === 'file') {
+    return JSON.parse(Buffer.from(file.data.content!, 'base64').toString()) as {
+      index_patterns: string[];
+      mappings: {
+        properties: Record<string, any>;
+      };
+      settings: Record<string, any>;
+    };
+  } else {
     throw new Error('Expected single response, got array');
   }
-
-  return JSON.parse(Buffer.from(file.data.content!, 'base64').toString()) as {
-    index_patterns: string[];
-    mappings: {
-      properties: Record<string, any>;
-    };
-    settings: Record<string, any>;
-  };
 }
