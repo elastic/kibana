@@ -238,10 +238,11 @@ export class BaseValidator {
       }
 
       const ownerSpaceIds = getArtifactOwnerSpaceIds(item);
+      const activeSpaceId = await this.getActiveSpaceId();
 
       if (
         ownerSpaceIds.length > 1 ||
-        (ownerSpaceIds.length === 1 && ownerSpaceIds[0] !== (await this.getActiveSpaceId()))
+        (ownerSpaceIds.length === 1 && ownerSpaceIds[0] !== activeSpaceId)
       ) {
         throw new EndpointArtifactExceptionValidationError(
           `Endpoint authorization failure. ${NO_GLOBAL_ARTIFACT_AUTHZ_MESSAGE}`,
