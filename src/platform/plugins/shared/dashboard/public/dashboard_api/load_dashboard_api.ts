@@ -20,7 +20,7 @@ import {
   getDashboardBackupService,
 } from '../services/dashboard_backup_service';
 import { UnsavedPanelState } from '../dashboard_container/types';
-import { DEFAULT_DASHBOARD_INPUT } from './default_dashboard_input';
+import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
 
 export async function loadDashboardApi({
   getCreationOptions,
@@ -62,7 +62,7 @@ export async function loadDashboardApi({
   })();
 
   const combinedSessionState: DashboardState = {
-    ...DEFAULT_DASHBOARD_INPUT,
+    ...DEFAULT_DASHBOARD_STATE,
     ...(savedObjectResult?.dashboardInput ?? {}),
     ...sessionStorageInput,
   };

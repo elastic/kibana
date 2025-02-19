@@ -8,7 +8,11 @@
 import { z } from '@kbn/zod';
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { errors } from '@elastic/elasticsearch';
-import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import {
+  QueryDslQueryContainer,
+  SearchHit,
+  SearchRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 import { AuthenticatedUser } from '@kbn/core-security-common';
 import {
   contentReferenceBlock,
@@ -17,6 +21,7 @@ import {
   IndexEntry,
 } from '@kbn/elastic-assistant-common';
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { isString } from 'lodash';
 
 export const isModelAlreadyExistsError = (error: Error) => {
   return (
@@ -217,13 +222,8 @@ export const getStructuredToolForIndexEntry = ({
         const result = await esClient.search(params);
 
         const kbDocs = result.hits.hits.map((hit) => {
-          const esqlQuery = `FROM ${hit._index} ${
-            hit._id ? `METADATA _id\n | WHERE _id == "${hit._id}"` : ''
-          }`;
-
           const reference =
-            contentReferencesStore &&
-            contentReferencesStore.add((p) => esqlQueryReference(p.id, esqlQuery, hit._index));
+            contentReferencesStore && contentReferencesStore.add((p) => createReference(p.id, hit));
 
           if (indexEntry.outputFields && indexEntry.outputFields.length > 0) {
             return indexEntry.outputFields.reduce(
@@ -256,4 +256,24 @@ export const getStructuredToolForIndexEntry = ({
     tags: ['knowledge-base'],
     // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts
   }) as unknown as DynamicStructuredTool;
+};
+
+const createReference = (id: string, hit: SearchHit<unknown>) => {
+  const hitIndex = hit._index;
+  const hitId = hit._id;
+  const esqlQuery = `FROM ${hitIndex} ${hitId ? `METADATA _id\n | WHERE _id == "${hitId}"` : ''}`;
+
+  let timerange;
+  const source = hit._source as Record<string, unknown>;
+
+  if ('@timestamp' in source && isString(source['@timestamp']) && hitId) {
+    timerange = { from: source['@timestamp'], to: source['@timestamp'] };
+  }
+
+  return esqlQueryReference({
+    id,
+    query: esqlQuery,
+    label: `Index: ${hit._index}`,
+    timerange,
+  });
 };

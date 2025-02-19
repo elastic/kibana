@@ -29,7 +29,7 @@ import { aggregationFunctionDefinitions } from '../definitions/generated/aggrega
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
-import { groupingFunctionDefinitions } from '../definitions/grouping';
+import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { getTestFunctions } from './test_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnits } from '../definitions/literals';

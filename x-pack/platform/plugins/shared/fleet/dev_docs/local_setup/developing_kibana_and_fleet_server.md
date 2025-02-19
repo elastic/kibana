@@ -301,7 +301,7 @@ docker run  --add-host host.docker.internal:host-gateway  \
   --env FLEET_ENROLL=1  --env FLEET_INSECURE=true\
   --env FLEET_URL=https://localhost:8220 \
   --env FLEET_ENROLLMENT_TOKEN=enrollment_token \
-  docker.elastic.co/beats/elastic-agent:8.13.0-SNAPSHOT # <-- Update this version as needed
+  docker.elastic.co/elastic-agent/elastic-agent:8.13.0-SNAPSHOT # <-- Update this version as needed
 ```
 
 You can also use the [run_dockerized_agent.sh](./run_dockerized_elastic_agent.sh) script to make this process easier. This script will run a Docker container with Elastic Agent and enroll it to your local Fleet Server. You can also use it to run a Dockerized Fleet Server container if you don't need to develop Fleet Server locally.

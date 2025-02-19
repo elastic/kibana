@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiBetaBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiPageTemplate,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
@@ -26,16 +19,19 @@ import {
 import { QueryClientProvider } from '@tanstack/react-query';
 import { BoolQuery, Filter } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import { alertProducersData } from '@kbn/response-ops-alerts-table/constants';
+import { alertsTableQueryClient } from '@kbn/response-ops-alerts-table/query_client';
+import { defaultAlertsTableSort } from '@kbn/response-ops-alerts-table/configuration';
+import { AlertsTableSupportedConsumers } from '@kbn/response-ops-alerts-table/types';
+import { AlertActionsCell } from './alert_actions_cell';
 import { ALERTS_PAGE_ID } from '../../../../common/constants';
 import { QuickFiltersMenuItem } from '../../alerts_search_bar/quick_filters';
 import { NoPermissionPrompt } from '../../../components/prompts/no_permission_prompt';
-import { ALERT_TABLE_GLOBAL_CONFIG_ID } from '../../../constants';
 import { useRuleStats } from '../hooks/use_rule_stats';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
-import { alertProducersData } from '../../alerts_table/constants';
 import { UrlSyncedAlertsSearchBar } from '../../alerts_search_bar/url_synced_alerts_search_bar';
 import { useKibana } from '../../../../common/lib/kibana';
-import { alertsTableQueryClient } from '../../alerts_table/query_client';
 import {
   alertSearchBarStateContainer,
   Provider,
@@ -53,10 +49,7 @@ import {
   useRuleTypeIdsByFeatureId,
 } from '../hooks/use_rule_type_ids_by_feature_id';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../../translations';
-import { AlertsTableSupportedConsumers } from '../../alerts_table/types';
 import { NON_SIEM_CONSUMERS } from '../../alerts_search_bar/constants';
-
-const AlertsTable = lazy(() => import('../../alerts_table/alerts_table_state'));
 
 /**
  * A unified view for all types of alerts
@@ -119,7 +112,8 @@ const PageContentComponent: React.FC<PageContentProps> = ({
   authorizedToReadAnyRules,
   ruleTypeIdsByFeatureId,
 }) => {
-  const { alertsTableConfigurationRegistry } = useKibana().services;
+  const { data, http, notifications, fieldFormats, application, licensing, settings } =
+    useKibana().services;
   const ruleTypeIdsByFeatureIdEntries = Object.entries(ruleTypeIdsByFeatureId);
 
   const [esQuery, setEsQuery] = useState({ bool: {} } as { bool: BoolQuery });
@@ -256,21 +250,29 @@ const PageContentComponent: React.FC<PageContentProps> = ({
             onEsQueryChange={setEsQuery}
             onFilterSelected={onFilterSelected}
           />
-          <Suspense fallback={<EuiLoadingSpinner />}>
-            <AlertsTable
-              // Here we force a rerender when switching feature ids to prevent the data grid
-              // columns alignment from breaking after a change in the number of columns
-              key={ruleTypeIds.join()}
-              id="stack-alerts-page-table"
-              configurationId={ALERT_TABLE_GLOBAL_CONFIG_ID}
-              alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-              ruleTypeIds={ruleTypeIds}
-              consumers={consumers}
-              query={esQuery}
-              showAlertStatusWithFlapping
-              initialPageSize={20}
-            />
-          </Suspense>
+          <AlertsTable
+            // Here we force a rerender when switching feature ids to prevent the data grid
+            // columns alignment from breaking after a change in the number of columns
+            key={ruleTypeIds.join()}
+            id="stack-alerts-page-table"
+            ruleTypeIds={ruleTypeIds}
+            consumers={consumers}
+            query={esQuery}
+            initialSort={defaultAlertsTableSort}
+            showAlertStatusWithFlapping
+            initialPageSize={20}
+            showInspectButton
+            renderActionsCell={AlertActionsCell}
+            services={{
+              data,
+              http,
+              notifications,
+              fieldFormats,
+              application,
+              licensing,
+              settings,
+            }}
+          />
         </EuiFlexGroup>
       )}
     </>

@@ -44,6 +44,9 @@ export const registerSiemRuleMigrationsUpdateRoute = (
           const { migration_id: migrationId } = req.params;
           const rulesToUpdate = req.body;
 
+          if (rulesToUpdate.length === 0) {
+            return res.noContent();
+          }
           const ids = rulesToUpdate.map((rule) => rule.id);
 
           const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);

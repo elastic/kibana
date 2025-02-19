@@ -173,6 +173,7 @@ export const StreamActionParamsSchema = schema.object({
   // abort signal from client
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
+  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
 });
 
 export const StreamingResponseSchema = schema.any();

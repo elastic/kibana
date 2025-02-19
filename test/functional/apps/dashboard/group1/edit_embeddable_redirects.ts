@@ -90,7 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newTitle = 'test create panel originatingApp';
       await dashboard.loadSavedDashboard('few panels');
       await dashboard.switchToEditMode();
-      await dashboardAddPanel.clickMarkdownQuickButton();
+      await dashboardAddPanel.clickAddMarkdownPanel();
       await visualize.saveVisualizationExpectSuccess(newTitle, {
         saveAsNew: true,
         redirectToOrigin: false,

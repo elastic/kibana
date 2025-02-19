@@ -311,7 +311,7 @@ export async function getPackageSavedObjects(
   return result;
 }
 
-async function getInstalledPackageSavedObjects(
+export async function getInstalledPackageSavedObjects(
   savedObjectsClient: SavedObjectsClientContract,
   options: Omit<GetInstalledPackagesOptions, 'savedObjectsClient' | 'esClient'>
 ) {

@@ -207,6 +207,7 @@ export class ObservabilityPlugin
         },
         logger: this.logger,
         repository: getObservabilityServerRouteRepository(config),
+        isDev: this.initContext.env.mode.dev,
       });
     });
     /**

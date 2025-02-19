@@ -14,7 +14,6 @@ import type {
   RuleUpgradeSpecifier,
 } from '../../../../../../common/api/detection_engine';
 import { usePrebuiltRulesCustomizationStatus } from '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status';
-import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import { RuleUpgradeTab } from '../../../../rule_management/components/rule_details/three_way_diff';
 import { PerFieldRuleDiffTab } from '../../../../rule_management/components/rule_details/per_field_rule_diff_tab';
@@ -128,8 +127,6 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     tags: [],
     ruleSource: [],
   });
-  const { addError } = useAppToasts();
-
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
   const {
@@ -196,21 +193,15 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
           pickVersion: 'MERGED',
           rules: ruleUpgradeSpecifiers,
         });
-      } catch (err) {
-        addError(err, { title: i18n.UPDATE_ERROR });
+      } catch {
+        // Error is handled by the mutation's onError callback, so no need to do anything here
       } finally {
         const upgradedRuleIdsSet = new Set(upgradingRuleIds);
 
         setLoadingRules((prev) => prev.filter((id) => !upgradedRuleIdsSet.has(id)));
       }
     },
-    [
-      confirmLegacyMLJobs,
-      confirmConflictsUpgrade,
-      rulesUpgradeState,
-      upgradeSpecificRulesRequest,
-      addError,
-    ]
+    [confirmLegacyMLJobs, confirmConflictsUpgrade, rulesUpgradeState, upgradeSpecificRulesRequest]
   );
 
   const upgradeRulesToTarget = useCallback(
@@ -233,15 +224,15 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
           pickVersion: 'TARGET',
           rules: ruleUpgradeSpecifiers,
         });
-      } catch (err) {
-        addError(err, { title: i18n.UPDATE_ERROR });
+      } catch {
+        // Error is handled by the mutation's onError callback, so no need to do anything here
       } finally {
         const upgradedRuleIdsSet = new Set(ruleIds);
 
         setLoadingRules((prev) => prev.filter((id) => !upgradedRuleIdsSet.has(id)));
       }
     },
-    [confirmLegacyMLJobs, rulesUpgradeState, upgradeSpecificRulesRequest, addError]
+    [confirmLegacyMLJobs, rulesUpgradeState, upgradeSpecificRulesRequest]
   );
 
   const upgradeRules = useCallback(

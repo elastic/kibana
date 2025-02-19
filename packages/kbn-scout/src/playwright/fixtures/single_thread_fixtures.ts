@@ -8,7 +8,14 @@
  */
 
 import { mergeTests } from 'playwright/test';
-import { coreWorkerFixtures, esArchiverFixture, uiSettingsFixture } from './worker';
+import {
+  ApiFixtures,
+  apiFixtures,
+  coreWorkerFixtures,
+  esArchiverFixture,
+  uiSettingsFixture,
+  synthtraceFixture,
+} from './worker';
 import type {
   EsArchiverFixture,
   EsClient,
@@ -17,23 +24,25 @@ import type {
   ScoutLogger,
   ScoutTestConfig,
   UiSettingsFixture,
+  SynthtraceFixture,
 } from './worker';
 import {
   scoutPageFixture,
   browserAuthFixture,
   pageObjectsFixture,
   validateTagsFixture,
-  BrowserAuthFixture,
-  ScoutPage,
-  PageObjects,
 } from './test';
-export type { PageObjects, ScoutPage } from './test';
+import type { BrowserAuthFixture, ScoutPage, PageObjects } from './test';
+export type { ScoutPage, PageObjects } from './test';
 
 export const scoutFixtures = mergeTests(
   // worker scope fixtures
   coreWorkerFixtures,
   esArchiverFixture,
   uiSettingsFixture,
+  synthtraceFixture,
+  // api fixtures
+  apiFixtures,
   // test scope fixtures
   browserAuthFixture,
   scoutPageFixture,
@@ -47,7 +56,7 @@ export interface ScoutTestFixtures {
   pageObjects: PageObjects;
 }
 
-export interface ScoutWorkerFixtures {
+export interface ScoutWorkerFixtures extends ApiFixtures {
   log: ScoutLogger;
   config: ScoutTestConfig;
   kbnUrl: KibanaUrl;
@@ -55,4 +64,7 @@ export interface ScoutWorkerFixtures {
   esClient: EsClient;
   esArchiver: EsArchiverFixture;
   uiSettings: UiSettingsFixture;
+  apmSynthtraceEsClient: SynthtraceFixture['apmSynthtraceEsClient'];
+  infraSynthtraceEsClient: SynthtraceFixture['infraSynthtraceEsClient'];
+  otelSynthtraceEsClient: SynthtraceFixture['otelSynthtraceEsClient'];
 }
