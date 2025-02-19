@@ -10,8 +10,8 @@ interface DashboardFileNamePartsProps {
 }
 
 interface SdkNameAndLanguage {
-  sdkName: 'apm' | 'edot' | 'otel_other';
-  language: string;
+  sdkName?: 'apm' | 'edot' | 'otel_other';
+  language?: string;
 }
 
 export interface DashboardFileParts extends SdkNameAndLanguage {
@@ -23,10 +23,14 @@ const getSdkNameAndLanguage = (agentNameParts: string[]): SdkNameAndLanguage => 
   if (agentNameParts.length === 1) {
     return { sdkName: 'apm', language: agentNameParts[0] };
   }
-  if (agentNameParts[agentNameParts.length - 1] === 'elastic') {
-    return { sdkName: 'edot', language: agentNameParts[LANGUAGE_INDEX] };
+  if (agentNameParts[0].toLocaleLowerCase() === 'opentelemetry') {
+    if (agentNameParts[agentNameParts.length - 1] === 'elastic') {
+      return { sdkName: 'edot', language: agentNameParts[LANGUAGE_INDEX] };
+    }
+    return { sdkName: 'otel_other', language: agentNameParts[LANGUAGE_INDEX] };
   }
-  return { sdkName: 'otel_other', language: agentNameParts[LANGUAGE_INDEX] };
+
+  return { sdkName: undefined, language: undefined };
 };
 
 export const getDashboardFileNameParts = ({
@@ -41,3 +45,10 @@ export const getDashboardFileNameParts = ({
   const { sdkName, language } = getSdkNameAndLanguage(agentNameParts);
   return { dataFormat, sdkName, language };
 };
+
+export async function loadDashboardFile(filename: string): Promise<any> {
+  return import(
+    /* webpackChunkName: "lazyNodeJsDashboard" */
+    `./${filename}.json`
+  );
+}

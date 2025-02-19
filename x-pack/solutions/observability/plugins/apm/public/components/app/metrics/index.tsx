@@ -45,6 +45,10 @@ export function Metrics() {
     serverlessType,
   });
 
+  // if (!hasDashboardFile && telemetrySdkName) {
+  // Fallback message here
+  // }
+
   if (hasStaticDashboard && dataView) {
     return (
       <JsonMetricsDashboard
