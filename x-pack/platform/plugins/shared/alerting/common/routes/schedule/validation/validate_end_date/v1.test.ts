@@ -23,15 +23,6 @@ describe('validateEndDate', () => {
     expect(validateEndDate('2025-02-17T05:05:00.000Z')).toBeUndefined();
   });
 
-  it('validates end date with time offset correctly', () => {
-    expect(validateEndDate('2025-02-10T21:30:00.000+05:30')).toBeUndefined();
-  });
-
-  it('validates for a future date without timezone correctly', () => {
-    const futureDate = '2025-01-02T00:00:00.000';
-    expect(validateEndDate(futureDate)).toBeUndefined();
-  });
-
   it('throws error for invalid date', () => {
     expect(validateEndDate('invalid-date')).toEqual('Invalid snooze end date: invalid-date');
   });
@@ -46,6 +37,12 @@ describe('validateEndDate', () => {
   it('throws error when not ISO format', () => {
     expect(validateEndDate('Feb 18 2025')).toEqual(
       'Invalid end date format: Feb 18 2025. Use ISO 8601 YYYY-MM-DDTHH:mm:ss.sssZ'
+    );
+  });
+
+  it('throws error when end date with time offset', () => {
+    expect(validateEndDate('2025-02-10T21:30:00.000+05:30')).toEqual(
+      'Invalid end date format: 2025-02-10T21:30:00.000+05:30. Use ISO 8601 YYYY-MM-DDTHH:mm:ss.sssZ'
     );
   });
 });

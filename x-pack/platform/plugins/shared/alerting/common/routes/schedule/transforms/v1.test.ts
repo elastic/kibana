@@ -18,7 +18,7 @@ describe('transformSchedule', () => {
         dtstart: '2021-05-10T00:00:00.000Z',
         freq: undefined,
         interval: undefined,
-        tzid: 'Africa/Abidjan',
+        tzid: 'UTC',
         until: undefined,
       },
     });
@@ -35,7 +35,7 @@ describe('transformSchedule', () => {
         dtstart: '2021-05-10T00:00:00.000Z',
         freq: undefined,
         interval: undefined,
-        tzid: 'Africa/Abidjan',
+        tzid: 'UTC',
         until: undefined,
       },
     });
@@ -43,7 +43,11 @@ describe('transformSchedule', () => {
 
   it('transforms start date and tzid correctly', () => {
     expect(
-      transformSchedule({ duration: '1500s', start: '2025-02-10T21:30:00.000+05:30' })
+      transformSchedule({
+        duration: '1500s',
+        start: '2025-02-10T21:30.00.000Z',
+        timezone: 'America/New_York',
+      })
     ).toEqual({
       duration: 1500000,
       rRule: {
@@ -51,27 +55,10 @@ describe('transformSchedule', () => {
         bymonthday: undefined,
         byweekday: undefined,
         count: undefined,
-        dtstart: '2025-02-10T21:30:00.000+05:30',
+        dtstart: '2025-02-10T21:30.00.000Z',
         freq: undefined,
         interval: undefined,
         tzid: 'America/New_York',
-        until: undefined,
-      },
-    });
-  });
-
-  it('transforms start date without timezone correctly', () => {
-    expect(transformSchedule({ duration: '500s', start: '2025-01-02T00:00:00.000' })).toEqual({
-      duration: 500000,
-      rRule: {
-        bymonth: undefined,
-        bymonthday: undefined,
-        byweekday: undefined,
-        count: undefined,
-        dtstart: '2025-01-02T00:00:00.000',
-        freq: undefined,
-        interval: undefined,
-        tzid: 'Africa/Abidjan',
         until: undefined,
       },
     });
@@ -94,7 +81,7 @@ describe('transformSchedule', () => {
         dtstart: '2025-02-17T19:04:46.320Z',
         freq: 3,
         interval: 1,
-        tzid: 'Africa/Abidjan',
+        tzid: 'UTC',
         until: '2025-05-17T05:05:00.000Z',
       },
     });
@@ -122,7 +109,7 @@ describe('transformSchedule', () => {
         dtstart: '2025-02-17T19:04:46.320Z',
         freq: 1,
         interval: 1,
-        tzid: 'Africa/Abidjan',
+        tzid: 'UTC',
         until: '2025-12-17T05:05:00.000Z',
       },
     });
@@ -145,7 +132,7 @@ describe('transformSchedule', () => {
         dtstart: '2025-01-14T05:05:00.000Z',
         freq: 2,
         interval: 2,
-        tzid: 'Africa/Abidjan',
+        tzid: 'UTC',
         until: undefined,
       },
     });
@@ -167,7 +154,7 @@ describe('transformSchedule', () => {
         dtstart: '2025-01-14T05:05:00.000Z',
         freq: undefined,
         interval: undefined,
-        tzid: 'Africa/Abidjan',
+        tzid: 'UTC',
         until: undefined,
       },
     });
@@ -190,7 +177,7 @@ describe('transformSchedule', () => {
         dtstart: '2025-01-14T05:05:00.000Z',
         freq: undefined,
         interval: undefined,
-        tzid: 'Africa/Abidjan',
+        tzid: 'UTC',
         until: undefined,
       },
     });

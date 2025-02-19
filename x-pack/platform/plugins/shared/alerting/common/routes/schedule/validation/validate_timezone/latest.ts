@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { transformSchedule } from './latest';
-export { transformSchedule as transformScheduleV1 } from './v1';
+export * from './v1';

@@ -6,7 +6,9 @@
  */
 
 export { scheduleRequestSchema } from './schema/latest';
+export { transformSchedule } from './transforms/latest';
 export type { ScheduleRequest } from './types/latest';
 
 export { scheduleRequestSchema as scheduleRequestSchemaV1 } from './schema/v1';
+export { transformSchedule as transformScheduleV1 } from './transforms/v1';
 export type { ScheduleRequest as ScheduleRequestV1 } from './types/v1';

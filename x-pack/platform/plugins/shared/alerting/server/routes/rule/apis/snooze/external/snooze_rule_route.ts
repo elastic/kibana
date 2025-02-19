@@ -15,7 +15,7 @@ import { ILicenseState, RuleMutedError } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
-import { transformSchedule } from '../../../../../../common/routes/schedule/transforms';
+import { transformSchedule } from '../../../../../../common/routes/schedule';
 import type { SnoozeRuleOptions } from '../../../../../application/rule/methods/snooze';
 
 export const snoozeRuleRoute = (

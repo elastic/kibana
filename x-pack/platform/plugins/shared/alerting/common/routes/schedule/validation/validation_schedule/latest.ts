@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { scheduleRequestSchema } from './latest';
-export { scheduleRequestSchema as scheduleRequestSchemaV1 } from './v1';
+export * from './v1';
