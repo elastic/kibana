@@ -924,7 +924,10 @@ export const getUserInputModelDeploymentParamsProvider =
     modelId: string,
     initialParams?: TrainedModelDeploymentStatsResponse,
     deploymentIds?: string[]
-  ): Promise<MlStartTrainedModelDeploymentRequestNew | void> => {
+  ): Promise<{
+    apiParams: MlStartTrainedModelDeploymentRequestNew;
+    uiParams: DeploymentParamsUI;
+  } | void> => {
     const deploymentParamsMapper = new DeploymentParamsMapper(
       modelId,
       getNewJobLimits(),
@@ -953,7 +956,11 @@ export const getUserInputModelDeploymentParamsProvider =
                 modelId={modelId}
                 onConfigChange={(config) => {
                   modalSession.close();
-                  resolve(deploymentParamsMapper.mapUiToApiDeploymentParams(config));
+
+                  resolve({
+                    apiParams: deploymentParamsMapper.mapUiToApiDeploymentParams(config),
+                    uiParams: config,
+                  });
                 }}
                 onClose={() => {
                   modalSession.close();

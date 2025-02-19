@@ -9,11 +9,10 @@ import { useEffect, useMemo } from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { useStorage } from '@kbn/ml-local-storage';
 import { ML_SCHEDULED_MODEL_DEPLOYMENTS } from '../../../../common/types/storage';
-import type { TrainedModelsService } from '../trained_models_service';
+import type { ScheduledDeployment, TrainedModelsService } from '../trained_models_service';
 import { useMlKibana } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useSavedObjectsApiService } from '../../services/ml_api_service/saved_objects';
-import type { StartAllocationParams } from '../../services/ml_api_service/trained_models';
 
 /**
  * Hook that initializes the shared TrainedModelsService instance with storage
@@ -25,7 +24,7 @@ export function useInitTrainedModelsService(
 ): TrainedModelsService {
   const {
     services: {
-      mlServices: { trainedModelsService },
+      mlServices: { trainedModelsService, telemetry },
     },
   } = useMlKibana();
 
@@ -37,11 +36,11 @@ export function useInitTrainedModelsService(
 
   const [scheduledDeployments, setScheduledDeployments] = useStorage<
     typeof ML_SCHEDULED_MODEL_DEPLOYMENTS,
-    StartAllocationParams[]
+    ScheduledDeployment[]
   >(ML_SCHEDULED_MODEL_DEPLOYMENTS, defaultScheduledDeployments);
 
   const scheduledDeployments$ = useMemo(
-    () => new BehaviorSubject<StartAllocationParams[]>(scheduledDeployments),
+    () => new BehaviorSubject<ScheduledDeployment[]>(scheduledDeployments),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
@@ -54,6 +53,7 @@ export function useInitTrainedModelsService(
       displaySuccessToast,
       savedObjectsApiService,
       canManageSpacesAndSavedObjects,
+      telemetryService: telemetry,
     });
 
     return () => {

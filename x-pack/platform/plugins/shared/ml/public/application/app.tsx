@@ -99,7 +99,12 @@ const App: FC<AppProps> = ({
       uiActions: deps.uiActions,
       unifiedSearch: deps.unifiedSearch,
       usageCollection: deps.usageCollection,
-      mlServices: getMlGlobalServices(coreStart, deps.data.dataViews, deps.usageCollection),
+      mlServices: getMlGlobalServices(
+        coreStart,
+        deps.data.dataViews,
+        deps.telemetry,
+        deps.usageCollection
+      ),
       spaces: deps.spaces,
     };
   }, [deps, coreStart]);

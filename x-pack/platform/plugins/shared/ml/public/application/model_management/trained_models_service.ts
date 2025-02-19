@@ -46,6 +46,8 @@ import type {
 } from '../services/ml_api_service/trained_models';
 import { type TrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import type { SavedObjectsApiService } from '../services/ml_api_service/saved_objects';
+import type { ITelemetryClient } from '../../services/telemetry/types';
+import type { DeploymentParamsUI } from './deployment_setup';
 
 interface ModelDownloadStatus {
   [modelId: string]: ModelDownloadState;
@@ -54,13 +56,16 @@ interface ModelDownloadStatus {
 const DOWNLOAD_POLL_INTERVAL = 3000;
 
 interface TrainedModelsServiceInit {
-  scheduledDeployments$: BehaviorSubject<StartAllocationParams[]>;
-  setScheduledDeployments: (deployments: StartAllocationParams[]) => void;
+  scheduledDeployments$: BehaviorSubject<ScheduledDeployment[]>;
+  setScheduledDeployments: (deployments: ScheduledDeployment[]) => void;
   displayErrorToast: (error: ErrorType, title?: string) => void;
   displaySuccessToast: (toast: { title: string; text: string }) => void;
   savedObjectsApiService: SavedObjectsApiService;
   canManageSpacesAndSavedObjects: boolean;
+  telemetryService: ITelemetryClient;
 }
+
+export type ScheduledDeployment = StartAllocationParams & { uiParams: DeploymentParamsUI };
 
 export class TrainedModelsService {
   private readonly _reloadSubject$ = new Subject();
@@ -71,16 +76,17 @@ export class TrainedModelsService {
   private pollingSubscription?: Subscription;
   private abortedDownloads = new Set<string>();
   private downloadStatusFetchInProgress = false;
-  private setScheduledDeployments?: (deployingModels: StartAllocationParams[]) => void;
+  private setScheduledDeployments?: (deployingModels: ScheduledDeployment[]) => void;
   private displayErrorToast?: (error: ErrorType, title?: string) => void;
   private displaySuccessToast?: (toast: { title: string; text: string }) => void;
   private subscription!: Subscription;
-  private _scheduledDeployments$ = new BehaviorSubject<StartAllocationParams[]>([]);
+  private _scheduledDeployments$ = new BehaviorSubject<ScheduledDeployment[]>([]);
   private destroySubscription?: Subscription;
   private readonly _isLoading$ = new BehaviorSubject<boolean>(true);
   private savedObjectsApiService!: SavedObjectsApiService;
   private canManageSpacesAndSavedObjects!: boolean;
   private isInitialized = false;
+  private telemetryService!: ITelemetryClient;
 
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
 
@@ -91,6 +97,7 @@ export class TrainedModelsService {
     displaySuccessToast,
     savedObjectsApiService,
     canManageSpacesAndSavedObjects,
+    telemetryService,
   }: TrainedModelsServiceInit) {
     // Always cancel any pending destroy when trying to initialize
     if (this.destroySubscription) {
@@ -109,6 +116,7 @@ export class TrainedModelsService {
     this.displayErrorToast = displayErrorToast;
     this.displaySuccessToast = displaySuccessToast;
     this.savedObjectsApiService = savedObjectsApiService;
+    this.telemetryService = telemetryService;
 
     this.setupFetchingSubscription();
     this.setupDeploymentSubscription();
@@ -144,12 +152,14 @@ export class TrainedModelsService {
   public startModelDeployment(
     modelId: string,
     deploymentParams: CommonDeploymentParams,
+    uiParams: DeploymentParamsUI,
     adaptiveAllocationsParams?: AdaptiveAllocationsParams
   ) {
     const newDeployment = {
       modelId,
       deploymentParams,
       adaptiveAllocationsParams,
+      uiParams,
     };
     const currentDeployments = this._scheduledDeployments$.getValue();
     this.setScheduledDeployments?.([...currentDeployments, newDeployment]);
@@ -417,7 +427,7 @@ export class TrainedModelsService {
     );
   }
 
-  private handleDeployment$(deployment: StartAllocationParams) {
+  private handleDeployment$(deployment: ScheduledDeployment) {
     return of(deployment).pipe(
       // Wait for the model to be ready for deployment (downloaded or started)
       switchMap(() => {
@@ -428,7 +438,28 @@ export class TrainedModelsService {
         return firstValueFrom(
           this.trainedModelsApiService.startModelAllocation(deployment).pipe(
             tap({
-              next: () => {
+              next: (res) => {
+                const {
+                  modelId,
+                  uiParams: { optimized, adaptiveResources, vCPUUsage },
+                  deploymentParams,
+                } = deployment;
+
+                const { assignment } = res;
+
+                this.telemetryService.trackTrainedModelsDeploymentCreated({
+                  model_id: modelId,
+                  optimized,
+                  adaptiveResources,
+                  vCPUUsage,
+                  number_of_allocations: deploymentParams.number_of_allocations,
+                  threads_per_allocation: assignment.task_parameters.threads_per_allocation,
+                  min_number_of_allocations:
+                    assignment.adaptive_allocations?.min_number_of_allocations,
+                  max_number_of_allocations:
+                    assignment.adaptive_allocations?.max_number_of_allocations,
+                });
+
                 this.displaySuccessToast?.({
                   title: i18n.translate('xpack.ml.trainedModels.modelsList.startSuccess', {
                     defaultMessage: 'Deployment started',
