@@ -132,7 +132,7 @@ export class RuleMigrationTaskRunner {
     } catch (error) {
       migrationTaskTelemetry.failure(error);
       if (error instanceof AbortError) {
-        this.logger.info('Abort signal received, stopping');
+        this.logger.info('Abort signal received, stopping initialization');
         return;
       } else {
         this.logger.error(`Error initializing migration: ${error}`);
@@ -288,7 +288,7 @@ export class RuleMigrationTaskRunner {
   }
 
   private isRateLimitError(error: Error) {
-    return error.message.match(/429/);
+    return error.message.match(/\b429\b/); // "429" (whole word in the error message): Too Many Requests.
   }
 
   private async sleep(seconds: number) {

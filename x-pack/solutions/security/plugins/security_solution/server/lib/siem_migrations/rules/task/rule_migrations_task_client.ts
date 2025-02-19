@@ -22,7 +22,7 @@ import type {
 } from './types';
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
 
-type MigrationsRunning = Map<string, RuleMigrationTaskRunner>;
+export type MigrationsRunning = Map<string, RuleMigrationTaskRunner>;
 
 export class RuleMigrationsTaskClient {
   constructor(
