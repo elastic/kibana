@@ -89,7 +89,7 @@ export async function deserializeState(
       // provide a fallback
       return {
         ...newState,
-        attributes: newAttributes || newState.attributes || fallbackAttributes,
+        attributes: newAttributes ?? newState.attributes ?? fallbackAttributes,
       };
     } catch (e) {
       // return an empty Lens document if no saved object is found
