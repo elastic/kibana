@@ -759,7 +759,6 @@ const enrichOperators = (
       // so we are overriding to add proper support
       supportedCommands,
       supportedOptions,
-      // @TODO: change to operator type
       type: 'operator' as const,
       validate: validators[op.name],
       ...(isNotOperator ? { ignoreAsSuggestion: true } : {}),

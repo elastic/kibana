@@ -94,8 +94,9 @@ function createComparisonDefinition(
   };
 }
 
-// these functions are also in the operatorFunctionDefinitions, we use them though explicitly
-// and there is no good way to disntiguish them from the operatorFunctionDefinitions
+// these functions are also in the operatorFunctionDefinitions. There is no way to extract them from there
+// because the operatorFunctionDefinitions are generated from ES definitions. This is why we need to
+// duplicate them here
 export const comparisonFunctions: FunctionDefinition[] = [
   {
     name: '==',
