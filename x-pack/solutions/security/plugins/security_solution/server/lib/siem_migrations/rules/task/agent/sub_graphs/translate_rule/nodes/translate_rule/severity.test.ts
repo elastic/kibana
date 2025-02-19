@@ -37,6 +37,7 @@ describe('tests', () => {
           expect(
             getElasticRiskScoreFromOriginalRule({
               ...defaultSplunkRule,
+              /* @ts-expect-error because vendor type is "splunk" which raises error below */
               vendor: 'not_splunk',
               query_language: 'not_spl',
             })
@@ -107,7 +108,7 @@ describe('tests', () => {
           expect(
             getElasticSeverityFromOriginalRule({
               ...defaultSplunkRule,
-              /* @ts-expect-error because vendor type if "splunk" which raises error below */
+              /* @ts-expect-error because vendor type is "splunk" which raises error below */
               vendor: undefined,
               query_language: 'not_spl',
             })
