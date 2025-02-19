@@ -16,6 +16,8 @@ test -z "$EXTRA_ARGS" || buildkite-agent meta-data set "ftr-extra-args" "$EXTRA_
 
 export JOB="$SCOUT_CONFIG_GROUP_KEY"
 
+FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${SCOUT_CONFIG_GROUP_KEY}"
+
 # a Scout failure will result in the script returning an exit code of 10
 EXIT_CODE=0
 
@@ -65,16 +67,16 @@ while read -r config_path; do
   done
 done <<< "$configs"
 
-# Print test summary
-echo "====== Test Summary ======"
-if [[ ${#results[@]} -ne 0 ]]; then
+echo "--- Scout Test Run Complete: Summary"
+if [[ "$results" ]]; then
   echo "✅ Passed:"
   printf "%s\n" "${results[@]}"
 fi
 
-if [[ ${#failed_configs[@]} -ne 0 ]]; then
+if [[ "$failedConfigs" ]]; then
   echo "❌ Failed:"
   printf "%s\n" "${failed_configs[@]}"
+  buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
 fi
 
 exit $EXIT_CODE

@@ -43,13 +43,19 @@ describe('getScoutPlaywrightConfigs', () => {
     const plugins = getScoutPlaywrightConfigs(['x-pack/'], mockLog);
 
     expect(plugins.size).toBe(2);
-    expect(plugins.get('plugin_a')).toEqual([
-      'x-pack/platform/plugins/plugin_a/ui_tests/playwright.config.ts',
-      'x-pack/platform/plugins/plugin_a/ui_tests/parallel.playwright.config.ts',
-    ]);
-    expect(plugins.get('plugin_b')).toEqual([
-      'x-pack/solutions/security/plugins/plugin_b/ui_tests/playwright.config.ts',
-    ]);
+    expect(plugins.get('plugin_a')).toEqual({
+      configs: [
+        'x-pack/platform/plugins/plugin_a/ui_tests/playwright.config.ts',
+        'x-pack/platform/plugins/plugin_a/ui_tests/parallel.playwright.config.ts',
+      ],
+      group: 'platform',
+      pluginPath: 'x-pack/platform/plugins/plugin_a',
+    });
+    expect(plugins.get('plugin_b')).toEqual({
+      configs: ['x-pack/solutions/security/plugins/plugin_b/ui_tests/playwright.config.ts'],
+      group: 'security',
+      pluginPath: 'x-pack/solutions/security/plugins/plugin_b',
+    });
   });
 
   it('should log a warning if a file path does not match the expected pattern', () => {
