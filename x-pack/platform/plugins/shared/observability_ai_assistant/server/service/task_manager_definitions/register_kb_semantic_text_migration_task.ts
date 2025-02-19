@@ -28,16 +28,21 @@ export async function registerAndScheduleKbSemanticTextMigrationTask({
   logger,
   core,
   config,
+  indexAssetsUpdatedPromise,
 }: {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   config: ObservabilityAIAssistantConfig;
+  indexAssetsUpdatedPromise: Promise<void>;
 }) {
   const [coreStart, pluginsStart] = await core.getStartServices();
 
   // register task
   registerKbSemanticTextMigrationTask({ taskManager, logger, coreStart, config });
+
+  // wait for index assets to be updated
+  await indexAssetsUpdatedPromise;
 
   // schedule task
   await scheduleKbSemanticTextMigrationTask({ taskManager: pluginsStart.taskManager, logger });
