@@ -7,8 +7,9 @@
 
 import { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
 import { InfiniteData } from '@tanstack/query-core/src/types';
+import { LastConversation } from '../../assistant_context';
 import { FetchConversationsResponse } from '../api';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { getDefaultNewSystemPrompt, getDefaultSystemPrompt } from '../use_conversation/helpers';
@@ -18,13 +19,14 @@ import { Conversation } from '../../..';
 
 export interface Props {
   allSystemPrompts: PromptResponse[];
-  conversationId: string;
+  lastConversation: LastConversation;
   conversations: Record<string, Conversation>;
   defaultConnector?: AIConnector;
   mayUpdateConversations: boolean;
   refetchCurrentUserConversations: <TPageData>(
     options?: RefetchOptions & RefetchQueryFilters<TPageData>
   ) => Promise<QueryObserverResult<InfiniteData<FetchConversationsResponse>, unknown>>;
+  setLastConversation: Dispatch<SetStateAction<LastConversation | undefined>>;
 }
 
 interface UseCurrentConversation {
@@ -32,7 +34,13 @@ interface UseCurrentConversation {
   currentSystemPrompt: PromptResponse | undefined;
   handleCreateConversation: () => Promise<void>;
   handleOnConversationDeleted: (cTitle: string) => Promise<void>;
-  handleOnConversationSelected: ({ cId }: { cId: string }) => Promise<void>;
+  handleOnConversationSelected: ({
+    cId,
+    cTitle,
+  }: {
+    cId: string;
+    cTitle?: string;
+  }) => Promise<void>;
   refetchCurrentConversation: (options?: {
     cId?: string;
     isStreamRefetch?: boolean;
@@ -48,11 +56,12 @@ interface UseCurrentConversation {
  */
 export const useCurrentConversation = ({
   allSystemPrompts,
-  conversationId,
+  lastConversation,
   conversations,
   defaultConnector,
   mayUpdateConversations,
   refetchCurrentUserConversations,
+  setLastConversation,
 }: Props): UseCurrentConversation => {
   const { deleteConversation, getConversation, setApiConfig } = useConversation();
   const [currentConversation, setCurrentConversation] = useState<Conversation | undefined>();
@@ -140,25 +149,37 @@ export const useCurrentConversation = ({
   );
 
   const handleOnConversationSelected = useCallback(
-    async ({ cId }: { cId: string }) => {
+    async ({
+      cId,
+      cTitle,
+      apiConfig: providedApiConfig,
+    }: {
+      apiConfig?: ApiConfig;
+      cId: string;
+      cTitle?: string;
+    }) => {
       if (cId === '') {
-        const apiConfig = defaultConnector
-          ? {
-              connectorId: defaultConnector.id ?? '',
-              actionTypeId: defaultConnector.actionTypeId ?? '',
-            }
-          : undefined;
+        const apiConfig =
+          providedApiConfig ??
+          (currentConversation?.apiConfig
+            ? currentConversation.apiConfig
+            : defaultConnector
+            ? {
+                connectorId: defaultConnector.id ?? '',
+                actionTypeId: defaultConnector.actionTypeId ?? '',
+              }
+            : undefined);
 
-        // Merge apiConfig from currentConversation if it exists
-        const mergedApiConfig = currentConversation?.apiConfig
-          ? currentConversation.apiConfig
-          : apiConfig;
         const newConversationDefaultSystemPrompt = getDefaultNewSystemPrompt(allSystemPrompts);
+        setLastConversation({
+          id: '',
+          title: cTitle ?? '',
+        });
         return setCurrentConversation({
-          ...(mergedApiConfig
+          ...(apiConfig
             ? {
                 apiConfig: {
-                  ...mergedApiConfig,
+                  ...apiConfig,
                   ...(newConversationDefaultSystemPrompt?.id
                     ? { defaultSystemPromptId: newConversationDefaultSystemPrompt?.id }
                     : {}),
@@ -169,18 +190,27 @@ export const useCurrentConversation = ({
           messages: [],
           replacements: {},
           category: 'assistant',
-          title: '',
+          title: cTitle ?? '',
         });
       }
+      setLastConversation({
+        id: cId,
+      });
       // refetch will set the currentConversation
       await refetchCurrentConversation({ cId });
     },
-    [allSystemPrompts, currentConversation?.apiConfig, defaultConnector, refetchCurrentConversation]
+    [
+      allSystemPrompts,
+      currentConversation?.apiConfig,
+      defaultConnector,
+      refetchCurrentConversation,
+      setLastConversation,
+    ]
   );
   useEffect(() => {
     if (!mayUpdateConversations || !!currentConversation) return;
-    handleOnConversationSelected({ cId: conversationId ?? '' });
-  }, [conversationId, handleOnConversationSelected, currentConversation, mayUpdateConversations]);
+    handleOnConversationSelected({ cId: lastConversation.id, cTitle: lastConversation.title });
+  }, [lastConversation, handleOnConversationSelected, currentConversation, mayUpdateConversations]);
 
   const handleOnConversationDeleted = useCallback(
     async (cTitle: string) => {

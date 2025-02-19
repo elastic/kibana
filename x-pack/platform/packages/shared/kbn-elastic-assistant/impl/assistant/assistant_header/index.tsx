@@ -16,6 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { ApiConfig } from '@kbn/elastic-assistant-common';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 import { DataStreamApis } from '../use_data_stream_apis';
 import { Conversation } from '../../..';
@@ -38,7 +39,15 @@ interface OwnProps {
   onCloseFlyout?: () => void;
   chatHistoryVisible?: boolean;
   setChatHistoryVisible?: React.Dispatch<React.SetStateAction<boolean>>;
-  onConversationSelected: ({ cId }: { cId: string }) => void;
+  onConversationSelected: ({
+    cId,
+    cTitle,
+    apiConfig,
+  }: {
+    apiConfig?: ApiConfig;
+    cId: string;
+    cTitle?: string;
+  }) => void;
   conversations: Record<string, Conversation>;
   conversationsLoaded: boolean;
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
@@ -85,9 +94,11 @@ export const AssistantHeader: React.FC<Props> = ({
   );
 
   const onConversationChange = useCallback(
-    (updatedConversation: Conversation) => {
+    (updatedConversation: Conversation, apiConfig?: ApiConfig) => {
       onConversationSelected({
         cId: updatedConversation.id,
+        cTitle: updatedConversation.title,
+        ...(apiConfig ? { apiConfig } : {}),
       });
     },
     [onConversationSelected]

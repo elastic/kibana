@@ -61,7 +61,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
   const {
     http,
     assistantAvailability: { isAssistantEnabled },
-    getLastConversationId,
+    getLastConversation,
   } = useAssistantContext();
   const {
     allSystemPrompts,
@@ -76,7 +76,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
     conversations,
     defaultConnector,
     refetchCurrentUserConversations,
-    conversationId: getLastConversationId(),
+    lastConversation: getLastConversation(),
     mayUpdateConversations:
       isFetchedCurrentUserConversations &&
       isFetchedPrompts &&

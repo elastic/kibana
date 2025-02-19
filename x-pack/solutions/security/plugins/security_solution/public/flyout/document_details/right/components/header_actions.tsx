@@ -51,8 +51,10 @@ export const HeaderActions: VFC = memo(() => {
       {showAssistant && (
         <EuiFlexItem grow={false}>
           <NewChatByTitle
-            conversationTitle={
-              isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID
+            selectedConversation={
+              isAlert
+                ? { title: ALERT_SUMMARY_CONVERSATION_ID }
+                : { title: EVENT_SUMMARY_CONVERSATION_ID }
             }
             promptContextId={promptContextId}
             iconOnly

@@ -8,14 +8,14 @@
 import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { useAssistantContext } from '../assistant_context';
+import { SelectedConversation, useAssistantContext } from '../assistant_context';
 
 import * as i18n from './translations';
 
 export interface Props {
   children?: React.ReactNode;
   /** Optionally automatically add this context to a conversation when the assistant is shown */
-  conversationTitle?: string;
+  selectedConversation?: SelectedConversation;
   /** Defaults to `discuss`. If null, the button will not have an icon */
   iconType?: string | null;
   /** Optionally specify a well known ID, or default to a UUID */
@@ -26,7 +26,7 @@ export interface Props {
 
 const NewChatByTitleComponent: React.FC<Props> = ({
   children = i18n.NEW_CHAT,
-  conversationTitle,
+  selectedConversation,
   iconType,
   promptContextId,
   iconOnly = false,
@@ -36,11 +36,11 @@ const NewChatByTitleComponent: React.FC<Props> = ({
   // proxy show / hide calls to assistant context, using our internal prompt context id:
   const showOverlay = useCallback(() => {
     showAssistantOverlay({
-      conversationTitle,
+      selectedConversation,
       promptContextId,
       showOverlay: true,
     });
-  }, [conversationTitle, promptContextId, showAssistantOverlay]);
+  }, [selectedConversation, promptContextId, showAssistantOverlay]);
 
   const icon = useMemo(() => {
     if (iconType === null) {

@@ -29,7 +29,6 @@ import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
 import styled from '@emotion/styled';
 
-import { isEmpty } from 'lodash';
 import useEvent from 'react-use/lib/useEvent';
 import { AssistantBody } from './assistant_body';
 import { useCurrentConversation } from './use_current_conversation';
@@ -38,7 +37,7 @@ import { useChatSend } from './chat_send/use_chat_send';
 import { ChatSend } from './chat_send';
 import { getDefaultConnector } from './helpers';
 
-import { useAssistantContext } from '../assistant_context';
+import { LastConversation, useAssistantContext } from '../assistant_context';
 import { ContextPills } from './context_pills';
 import { getNewSelectedPromptContext } from '../data_anonymization/get_new_selected_prompt_context';
 import type { PromptContext, SelectedPromptContext } from './prompt_context/types';
@@ -61,7 +60,7 @@ const CommentContainer = styled('span')`
 
 export interface Props {
   chatHistoryVisible?: boolean;
-  conversationTitle?: string;
+  lastConversation?: LastConversation;
   onCloseFlyout?: () => void;
   promptContextId?: string;
   setChatHistoryVisible?: Dispatch<SetStateAction<boolean>>;
@@ -74,7 +73,7 @@ export interface Props {
  */
 const AssistantComponent: React.FC<Props> = ({
   chatHistoryVisible,
-  conversationTitle,
+  lastConversation,
   onCloseFlyout,
   promptContextId = '',
   setChatHistoryVisible,
@@ -86,11 +85,11 @@ const AssistantComponent: React.FC<Props> = ({
     assistantTelemetry,
     augmentMessageCodeBlocks,
     getComments,
-    getLastConversationId,
+    getLastConversation,
     http,
     promptContexts,
     currentUserAvatar,
-    setLastConversationId,
+    setLastConversation,
     contentReferencesVisible,
     showAnonymizedValues,
     setContentReferencesVisible,
@@ -144,9 +143,10 @@ const AssistantComponent: React.FC<Props> = ({
     conversations,
     defaultConnector,
     refetchCurrentUserConversations,
-    conversationId: getLastConversationId(conversationTitle),
+    lastConversation: lastConversation ?? getLastConversation(lastConversation),
     mayUpdateConversations:
       isFetchedConnectors && isFetchedCurrentUserConversations && isFetchedPrompts,
+    setLastConversation,
   });
 
   const isInitialLoad = useMemo(() => {
@@ -186,24 +186,40 @@ const AssistantComponent: React.FC<Props> = ({
   // Settings modal state (so it isn't shared between assistant instances like Timeline)
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
 
-  // Remember last selection for reuse after keyboard shortcut is pressed.
-  // Clear it if there is no connectors
-  useEffect(() => {
-    if (isFetchedConnectors && !connectors?.length) {
-      return setLastConversationId('');
-    }
-
-    if (!currentConversation?.excludeFromLastConversationStorage) {
-      setLastConversationId(!isEmpty(currentConversation?.id) ? currentConversation?.id : '');
-    }
-  }, [
-    isFetchedConnectors,
-    connectors?.length,
-    conversations,
-    currentConversation,
-    isLoadingCurrentUserConversations,
-    setLastConversationId,
-  ]);
+  // // Remember last selection for reuse after keyboard shortcut is pressed.
+  // // Clear it if there is no connectors
+  // useEffect(() => {
+  //   if (isLoadingCurrentUserConversations) {
+  //     console.log('useEffect 0');
+  //     return;
+  //   }
+  //   if (isFetchedConnectors && !connectors?.length) {
+  //     console.log('useEffect 1');
+  //     return setLastConversation({ id: '' });
+  //   }
+  //
+  //   if (!currentConversation?.excludeFromLastConversationStorage) {
+  //     console.log('useEffect 2', {
+  //       result:
+  //         currentConversation && !isEmpty(currentConversation?.id)
+  //           ? { id: currentConversation.id }
+  //           : { id: '' },
+  //       currentConversation,
+  //     });
+  //     setLastConversation(
+  //       currentConversation && !isEmpty(currentConversation?.id)
+  //         ? { id: currentConversation.id }
+  //         : { id: '' }
+  //     );
+  //   }
+  // }, [
+  //   isFetchedConnectors,
+  //   connectors?.length,
+  //   conversations,
+  //   currentConversation,
+  //   isLoadingCurrentUserConversations,
+  //   setLastConversation,
+  // ]);
 
   const [autoPopulatedOnce, setAutoPopulatedOnce] = useState<boolean>(false);
 
@@ -307,15 +323,13 @@ const AssistantComponent: React.FC<Props> = ({
   });
 
   useEffect(() => {
-    // Adding `conversationTitle !== selectedConversationTitle` to prevent auto-run still executing after changing selected conversation
+    // Adding `conversationTitle !== selectedConversationTitle` to
     if (
       currentConversation?.messages.length ||
-      (currentConversation && conversationTitle !== currentConversation?.title)
+      // prevent auto-run still executing after changing selected conversation
+      (currentConversation && lastConversation?.title !== currentConversation?.title) ||
+      autoPopulatedOnce
     ) {
-      return;
-    }
-
-    if (autoPopulatedOnce) {
       return;
     }
 
@@ -349,11 +363,10 @@ const AssistantComponent: React.FC<Props> = ({
       }
     }
   }, [
-    currentConversation?.messages,
     promptContexts,
     promptContextId,
-    conversationTitle,
-    currentConversation?.title,
+    lastConversation,
+    currentConversation,
     selectedPromptContexts,
     autoPopulatedOnce,
     isLoadingAnonymizationFields,

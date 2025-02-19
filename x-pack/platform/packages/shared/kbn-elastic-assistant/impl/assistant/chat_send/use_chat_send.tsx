@@ -56,6 +56,7 @@ export const useChatSend = ({
     assistantTelemetry,
     toasts,
     assistantAvailability: { isAssistantEnabled },
+    setLastConversation,
   } = useAssistantContext();
   const [userPrompt, setUserPrompt] = useState<string | null>(null);
 
@@ -88,6 +89,11 @@ export const useChatSend = ({
       if (currentConversation.id === '') {
         // create conversation with empty title, GENERATE_CHAT_TITLE graph step will properly title
         newConvo = await createConversation(currentConversation);
+        if (newConvo?.id) {
+          setLastConversation({
+            id: newConvo.id,
+          });
+        }
       }
       const convo: Conversation = { ...currentConversation, ...(newConvo ?? {}) };
       const userMessage = getCombinedMessage({

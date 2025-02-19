@@ -39,6 +39,7 @@ import {
   DEFAULT_KNOWLEDGE_BASE_SETTINGS,
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
   LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
+  LAST_SELECTED_CONVERSATION_LOCAL_STORAGE_KEY,
   SHOW_ANONYMIZED_VALUES_LOCAL_STORAGE_KEY,
   STREAMING_LOCAL_STORAGE_KEY,
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
@@ -47,16 +48,23 @@ import { useCapabilities } from '../assistant/api/capabilities/use_capabilities'
 import { SettingsTabs } from '../assistant/settings/types';
 import { AssistantNavLink } from './assistant_nav_link';
 
+export type SelectedConversation = { id: string } | { title: string };
+export interface LastConversation {
+  id: string;
+  title?: string;
+}
+
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
   promptContextId?: string;
-  conversationTitle?: string;
+  // id if the conversation exists in the data stream, title if it's a new conversation
+  selectedConversation?: SelectedConversation;
 }
 
 type ShowAssistantOverlay = ({
   showOverlay,
   promptContextId,
-  conversationTitle,
+  selectedConversation,
 }: ShowAssistantOverlayProps) => void;
 export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -108,7 +116,7 @@ export interface UseAssistantContext {
   http: HttpSetup;
   inferenceEnabled: boolean;
   knowledgeBase: KnowledgeBaseConfig;
-  getLastConversationId: (conversationTitle?: string) => string;
+  getLastConversation: (selectedConversation?: SelectedConversation) => LastConversation;
   promptContexts: Record<string, PromptContext>;
   navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   nameSpace: string;
@@ -120,7 +128,7 @@ export interface UseAssistantContext {
   setContentReferencesVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
-  setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setLastConversation: React.Dispatch<React.SetStateAction<LastConversation | undefined>>;
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs | null>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
@@ -179,8 +187,15 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       defaultTraceOptions
     );
 
-  const [localStorageLastConversationId, setLocalStorageLastConversationId] =
-    useLocalStorage<string>(`${nameSpace}.${LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY}`);
+  // Legacy fallback: used only if the new storage value is not yet set
+  const [localStorageLastConversationId] = useLocalStorage<string>(
+    `${nameSpace}.${LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY}`
+  );
+
+  const [localStorageLastConversation, setLocalStorageLastConversation] =
+    useLocalStorage<LastConversation>(
+      `${nameSpace}.${LAST_SELECTED_CONVERSATION_LOCAL_STORAGE_KEY}`
+    );
 
   /**
    * Local storage for knowledge base configuration, prefixed by assistant nameSpace
@@ -281,12 +296,67 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
    */
   const codeBlockRef = useRef(() => {});
 
-  const getLastConversationId = useCallback(
-    // if a conversationId has been provided, use that
-    // if not, check local storage
-    // last resort, empty id
-    (conversationId?: string) => conversationId ?? localStorageLastConversationId ?? '',
-    [localStorageLastConversationId]
+  const getLastConversation = useCallback(
+    (selectedConversation?: SelectedConversation): LastConversation => {
+      console.log('getLastConversation', {
+        selectedConversation,
+        localStorageLastConversation,
+        localStorageLastConversationId,
+      });
+
+      let nextConversation: LastConversation = { id: '' };
+      // Type guard to check if selectedConversation has a 'title'
+      if (selectedConversation && 'title' in selectedConversation) {
+        nextConversation = {
+          id: '',
+          title: selectedConversation.title,
+        };
+        setLocalStorageLastConversation(nextConversation);
+        console.log('getLastConversation 1', nextConversation);
+        return nextConversation;
+      }
+
+      // If selectedConversation exists and has an 'id', return it with no 'title'
+      if (selectedConversation && 'id' in selectedConversation) {
+        nextConversation = { id: selectedConversation.id };
+        setLocalStorageLastConversation(nextConversation);
+        console.log('getLastConversation 2', nextConversation);
+        return nextConversation;
+      }
+
+      // Check if localStorageLastConversation has a 'title'
+      if (localStorageLastConversation && 'title' in localStorageLastConversation) {
+        nextConversation = {
+          id: '',
+          title: localStorageLastConversation.title,
+        };
+        setLocalStorageLastConversation(nextConversation);
+        console.log('getLastConversation 3', nextConversation);
+        return nextConversation;
+      }
+
+      // If localStorageLastConversation, return it
+      if (localStorageLastConversation && 'id' in localStorageLastConversation) {
+        nextConversation = localStorageLastConversation;
+        setLocalStorageLastConversation(nextConversation);
+        console.log('getLastConversation 4', nextConversation);
+        return nextConversation;
+      }
+
+      // If localStorageLastConversationId exists, use it as 'id'
+      if (localStorageLastConversationId) {
+        nextConversation = { id: localStorageLastConversationId };
+        setLocalStorageLastConversation(nextConversation);
+        console.log('getLastConversation 5', nextConversation);
+        return nextConversation;
+      }
+
+      // Default to an empty 'id'
+      setLocalStorageLastConversation(nextConversation);
+      console.log('getLastConversation 1', nextConversation);
+      return nextConversation;
+    },
+    [localStorageLastConversation, localStorageLastConversationId, setLocalStorageLastConversation]
   );
 
   // Fetch assistant capabilities
@@ -337,8 +407,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       toasts,
       traceOptions: sessionStorageTraceOptions,
       unRegisterPromptContext,
-      getLastConversationId,
-      setLastConversationId: setLocalStorageLastConversationId,
+      getLastConversation,
+      setLastConversation: setLocalStorageLastConversation,
       currentAppId,
       codeBlockRef,
       userProfileService,
@@ -378,8 +448,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       toasts,
       sessionStorageTraceOptions,
       unRegisterPromptContext,
-      getLastConversationId,
-      setLocalStorageLastConversationId,
+      getLastConversation,
+      setLocalStorageLastConversation,
       currentAppId,
       codeBlockRef,
       userProfileService,
