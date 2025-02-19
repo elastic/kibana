@@ -436,43 +436,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "stackAlerts",
-        "id": "def-common.ComparatorFnNames",
-        "type": "Object",
-        "tags": [],
-        "label": "ComparatorFnNames",
-        "description": [],
-        "signature": [
-          "Set<",
-          "Comparator",
-          ">"
-        ],
-        "path": "x-pack/platform/plugins/shared/stack_alerts/common/comparator.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "stackAlerts",
-        "id": "def-common.ComparatorFns",
-        "type": "Object",
-        "tags": [],
-        "label": "ComparatorFns",
-        "description": [],
-        "signature": [
-          "Map<",
-          "Comparator",
-          ", ",
-          "ComparatorFn",
-          ">"
-        ],
-        "path": "x-pack/platform/plugins/shared/stack_alerts/common/comparator.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   }
 }
