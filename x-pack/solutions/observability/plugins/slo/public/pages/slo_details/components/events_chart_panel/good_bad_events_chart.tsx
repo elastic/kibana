@@ -31,17 +31,10 @@ export interface Props {
   data?: GetPreviewDataResponse;
   slo?: SLOWithSummaryResponse;
   isLoading?: boolean;
-  bottomTitle?: string;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function GoodBadEventsChart({
-  bottomTitle,
-  data,
-  slo,
-  onBrushed,
-  isLoading = false,
-}: Props) {
+export function GoodBadEventsChart({ data, slo, onBrushed, isLoading = false }: Props) {
   const { charts, uiSettings, discover } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
@@ -91,99 +84,95 @@ export function GoodBadEventsChart({
     }
   };
 
+  if (isLoading) {
+    return <EuiLoadingChart size="m" mono data-test-subj="sliEventsChartLoading" />;
+  }
+
   return (
-    <>
-      {isLoading && <EuiLoadingChart size="m" mono data-test-subj="sliEventsChartLoading" />}
-
-      {!isLoading && (
-        <Chart size={{ height: 200, width: '100%' }} ref={chartRef}>
-          <ObservabilityAnnotations annotations={annotations} />
-          <Settings
-            theme={{
-              chartMargins: { top: 30 },
-            }}
-            baseTheme={baseTheme}
-            showLegend={true}
-            legendPosition={Position.Left}
-            noResults={
-              <EuiIcon
-                type="visualizeApp"
-                size="l"
-                color="subdued"
-                title={i18n.translate('xpack.slo.goodBadEventsChart.euiIcon.noResultsLabel', {
-                  defaultMessage: 'no results',
-                })}
-              />
-            }
-            onPointerUpdate={handleCursorUpdate}
-            externalPointerEvents={{
-              tooltip: { visible: true },
-            }}
-            pointerUpdateDebounce={0}
-            pointerUpdateTrigger={'x'}
-            locale={i18n.getLocale()}
-            onElementClick={barClickHandler as ElementClickListener}
-            onBrushEnd={wrapOnBrushEnd((brushArea) => {
-              onBrushed?.(getBrushTimeBounds(brushArea));
+    <Chart size={{ height: 200, width: '100%' }} ref={chartRef}>
+      <ObservabilityAnnotations annotations={annotations} />
+      <Settings
+        theme={{
+          chartMargins: { top: 30 },
+        }}
+        baseTheme={baseTheme}
+        showLegend={true}
+        legendPosition={Position.Left}
+        noResults={
+          <EuiIcon
+            type="visualizeApp"
+            size="l"
+            color="subdued"
+            title={i18n.translate('xpack.slo.goodBadEventsChart.euiIcon.noResultsLabel', {
+              defaultMessage: 'no results',
             })}
-            onAnnotationClick={onAnnotationClick}
           />
-          <Axis
-            id="bottom"
-            title={bottomTitle}
-            position={Position.Bottom}
-            showOverlappingTicks
-            tickFormat={(d) => moment(d).format(dateFormat)}
-          />
-          <Axis
-            id="left"
-            position={Position.Left}
-            tickFormat={(d) => numeral(d).format(yAxisNumberFormat)}
-            domain={domain}
-          />
-          <>
-            <BarSeries
-              id={goodEventId}
-              color={euiTheme.colors.success}
-              barSeriesStyle={{
-                rect: { fill: euiTheme.colors.success },
-                displayValue: { fill: euiTheme.colors.success },
-              }}
-              xScaleType={ScaleType.Time}
-              yScaleType={ScaleType.Linear}
-              xAccessor="key"
-              yAccessors={['value']}
-              stackAccessors={[0]}
-              data={
-                data?.map((datum) => ({
-                  key: new Date(datum.date).getTime(),
-                  value: datum.events?.good,
-                })) ?? []
-              }
-            />
+        }
+        onPointerUpdate={handleCursorUpdate}
+        externalPointerEvents={{
+          tooltip: { visible: true },
+        }}
+        pointerUpdateDebounce={0}
+        pointerUpdateTrigger={'x'}
+        locale={i18n.getLocale()}
+        onElementClick={barClickHandler as ElementClickListener}
+        onBrushEnd={wrapOnBrushEnd((brushArea) => {
+          onBrushed?.(getBrushTimeBounds(brushArea));
+        })}
+        onAnnotationClick={onAnnotationClick}
+      />
+      <Axis
+        id="bottom"
+        position={Position.Bottom}
+        showOverlappingTicks
+        tickFormat={(d) => moment(d).format(dateFormat)}
+      />
+      <Axis
+        id="left"
+        position={Position.Left}
+        tickFormat={(d) => numeral(d).format(yAxisNumberFormat)}
+        domain={domain}
+      />
 
-            <BarSeries
-              id={badEventId}
-              color={euiTheme.colors.danger}
-              barSeriesStyle={{
-                rect: { fill: euiTheme.colors.danger },
-                displayValue: { fill: euiTheme.colors.danger },
-              }}
-              xScaleType={ScaleType.Time}
-              yScaleType={ScaleType.Linear}
-              xAccessor="key"
-              yAccessors={['value']}
-              stackAccessors={[0]}
-              data={
-                data?.map((datum) => ({
-                  key: new Date(datum.date).getTime(),
-                  value: datum.events?.bad,
-                })) ?? []
-              }
-            />
-          </>
-        </Chart>
-      )}
-    </>
+      <BarSeries
+        id={goodEventId}
+        color={euiTheme.colors.success}
+        barSeriesStyle={{
+          rect: { fill: euiTheme.colors.success },
+          displayValue: { fill: euiTheme.colors.success },
+        }}
+        xScaleType={ScaleType.Time}
+        yScaleType={ScaleType.Linear}
+        xAccessor="key"
+        yAccessors={['value']}
+        stackAccessors={[0]}
+        data={
+          data?.map((datum) => ({
+            key: new Date(datum.date).getTime(),
+            value: datum.events?.good,
+          })) ?? []
+        }
+      />
+
+      <BarSeries
+        id={badEventId}
+        color={euiTheme.colors.danger}
+        barSeriesStyle={{
+          rect: { fill: euiTheme.colors.danger },
+          displayValue: { fill: euiTheme.colors.danger },
+        }}
+        xScaleType={ScaleType.Time}
+        yScaleType={ScaleType.Linear}
+        xAccessor="key"
+        yAccessors={['value']}
+        stackAccessors={[0]}
+        data={
+          data?.map((datum) => ({
+            key: new Date(datum.date).getTime(),
+            value: datum.events?.bad,
+          })) ?? []
+        }
+      />
+    </Chart>
   );
 }

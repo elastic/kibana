@@ -65,7 +65,7 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
       </EuiTitle>
     );
 
-  const showViewEventsLink = ![
+  const canLinkToDiscover = ![
     'sli.apm.transactionErrorRate',
     'sli.apm.transactionDuration',
   ].includes(slo.indicator.type);
@@ -75,7 +75,7 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexGroup>
           <EuiFlexGroup direction="column" gutterSize="none">
-            <EuiFlexItem grow={1}> {title}</EuiFlexItem>
+            <EuiFlexItem grow={1}>{title}</EuiFlexItem>
             {selectedTabId !== 'history' && (
               <EuiFlexItem>
                 <EuiText color="subdued" size="s">
@@ -86,7 +86,7 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
-          {showViewEventsLink && (
+          {canLinkToDiscover && (
             <EuiFlexItem grow={0}>
               <EuiLink
                 color="text"
