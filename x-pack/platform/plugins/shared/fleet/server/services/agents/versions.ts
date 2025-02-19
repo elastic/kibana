@@ -110,11 +110,17 @@ export const getAvailableVersions = async ({
   // fetch from the live API more than `TIME_BETWEEN_FETCHES` milliseconds.
   const apiVersions = await fetchAgentVersionsFromApi();
 
+  const allowedSuffixes = ['-rc', '-beta', '-alpha', '+build'];
+
   // Take each version and compare to our `MINIMUM_SUPPORTED_VERSION` - we
   // only want support versions in the final result. We'll also sort by newest version first.
   availableVersions = uniq(
     [...availableVersions, ...apiVersions]
-      .map((item: any) => (item.includes('+build') ? item : semverCoerce(item)?.version || ''))
+      .map((item: any) =>
+        allowedSuffixes.some((suffix) => item.includes(suffix))
+          ? item
+          : semverCoerce(item)?.version || ''
+      )
       .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
       .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1))
   );
