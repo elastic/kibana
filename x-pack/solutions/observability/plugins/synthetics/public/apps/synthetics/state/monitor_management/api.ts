@@ -68,7 +68,7 @@ export const fetchProjectAPIKey = async (
 ): Promise<ProjectAPIKeyResponse> => {
   return await apiService.get(SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_APIKEY, {
     accessToElasticManagedLocations,
-    spaces,
+    spaces: JSON.stringify(spaces),
   });
 };
 
