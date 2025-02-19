@@ -9,24 +9,28 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, FieldValues, Path, useFormContext } from 'react-hook-form';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 
 import { ClientPluginsStart } from '../../../../../plugin';
-import { PrivateLocation } from '../../../../../../common/runtime_types';
 
-export const NAMESPACES_NAME = 'spaces';
+interface SpaceSelectorProps {
+  module: 'location' | 'apiKey';
+}
 
-export const SpaceSelector: React.FC = () => {
+export const SpaceSelector = <T extends FieldValues>({ module }: SpaceSelectorProps) => {
+  const NAMESPACES_NAME = 'spaces' as Path<T>;
   const { services } = useKibana<ClientPluginsStart>();
   const [spacesList, setSpacesList] = React.useState<Array<{ id: string; label: string }>>([]);
   const data = services.spaces?.ui.useSpaces();
+
+  const HELP_TEXT = module === 'location' ? LOCATION_HELP_TEXT : API_KEY_HELP_TEXT;
 
   const {
     control,
     formState: { isSubmitted },
     trigger,
-  } = useFormContext<PrivateLocation>();
+  } = useFormContext<T>();
   const { isTouched, error } = control.getFieldState(NAMESPACES_NAME);
 
   const showFieldInvalid = (isSubmitted || isTouched) && !!error;
@@ -122,6 +126,13 @@ const SPACES_LABEL = i18n.translate('xpack.synthetics.privateLocation.spacesLabe
   defaultMessage: 'Spaces ',
 });
 
-const HELP_TEXT = i18n.translate('xpack.synthetics.privateLocation.spacesHelpText', {
-  defaultMessage: 'Select the spaces where this location will be available.',
+const LOCATION_HELP_TEXT = i18n.translate(
+  'xpack.synthetics.privateLocation.locationSpacesHelpText',
+  {
+    defaultMessage: 'Select the spaces where this location will be available.',
+  }
+);
+
+const API_KEY_HELP_TEXT = i18n.translate('xpack.synthetics.privateLocation.apiKeySpacesHelpText', {
+  defaultMessage: 'Select the spaces where this API key will be available.',
 });

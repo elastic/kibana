@@ -88,7 +88,10 @@ class ApiService {
     const { version, spaceId, ...queryParams } = params;
     const response = await this._http!.fetch<T>({
       path: this.parseApiUrl(apiUrl, spaceId),
-      query: queryParams,
+      query: {
+        ...queryParams,
+        spaces: queryParams.spaces ? JSON.stringify(queryParams.spaces) : undefined,
+      },
       version,
       ...(options ?? {}),
       ...(spaceId ? { prependBasePath: false } : {}),

@@ -62,7 +62,7 @@ export const LocationForm = ({ privateLocations }: { privateLocations: PrivateLo
         <EuiSpacer />
         <BrowserMonitorCallout />
         <EuiSpacer />
-        <SpaceSelector />
+        <SpaceSelector module="location" />
       </EuiForm>
     </>
   );
