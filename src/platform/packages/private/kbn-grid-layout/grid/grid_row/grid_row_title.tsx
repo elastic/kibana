@@ -93,7 +93,7 @@ export const GridRowTitle = React.memo(
             })}
             iconType={'arrowDown'}
             onClick={toggleIsCollapsed}
-            css={accordianButtonStyles}
+            css={styles.accordianButton}
             size="m"
             id={`kbnGridRowTitle-${rowIndex}`}
             aria-controls={`kbnGridRow-${rowIndex}`}
@@ -109,7 +109,7 @@ export const GridRowTitle = React.memo(
           </EuiButtonEmpty>
         </EuiFlexItem>
         {!readOnly && editTitleOpen ? (
-          <EuiFlexItem grow={true}>
+          <EuiFlexItem grow={true} css={styles.titleInput}>
             {/* @ts-ignore - EUI typing issue that will be resolved with https://github.com/elastic/eui/pull/8307 */}
             <EuiInlineEditTitle
               size="xs"
@@ -149,18 +149,33 @@ export const GridRowTitle = React.memo(
   }
 );
 
-const accordianButtonStyles = ({ euiTheme }: UseEuiTheme) =>
-  css({
-    '&:focus': {
-      backgroundColor: 'unset',
-    },
-    svg: {
-      transition: `transform ${euiTheme.animation.fast} ease`,
-      transform: 'rotate(0deg)',
-      '.kbnGridRowContainer--collapsed &': {
-        transform: 'rotate(-90deg) !important',
+const styles = {
+  titleInput: {
+    // if field-sizing is supported, grow width to text; otherwise, fill available space
+    '@supports (field-sizing: content)': {
+      minWidth: 0,
+      '.euiFlexItem:has(input)': {
+        flexGrow: 0,
+        maxWidth: 'calc(100% - 80px)', // don't extend past parent
+      },
+      input: {
+        fieldSizing: 'content',
       },
     },
-  });
+  },
+  accordianButton: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      '&:focus': {
+        backgroundColor: 'unset',
+      },
+      svg: {
+        transition: `transform ${euiTheme.animation.fast} ease`,
+        transform: 'rotate(0deg)',
+        '.kbnGridRowContainer--collapsed &': {
+          transform: 'rotate(-90deg) !important',
+        },
+      },
+    }),
+};
 
 GridRowTitle.displayName = 'GridRowTitle';
