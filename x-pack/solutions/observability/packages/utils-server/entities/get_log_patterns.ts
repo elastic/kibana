@@ -20,7 +20,7 @@ import { pValueToLabel } from '@kbn/observability-utils-common/ml/p_value_to_lab
 import { calculateAuto } from '@kbn/calculate-auto';
 import { omit, orderBy, uniqBy } from 'lodash';
 import moment from 'moment';
-import { ObservabilityElasticsearchClient } from '../es/client/create_observability_es_client';
+import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { kqlQuery } from '../es/queries/kql_query';
 import { rangeQuery } from '../es/queries/range_query';
 
@@ -55,7 +55,7 @@ export type FieldPatternResultWithChanges = FieldPatternResult<true>;
 interface CategorizeTextOptions {
   query: QueryDslQueryContainer;
   metadata: string[];
-  esClient: ObservabilityElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   samplingProbability: number;
   fields: string[];
   index: string | string[];
@@ -255,7 +255,7 @@ export async function runCategorizeTextAggregation({
 }
 
 interface LogPatternOptions {
-  esClient: ObservabilityElasticsearchClient;
+  esClient: TracedElasticsearchClient;
   start: number;
   end: number;
   index: string | string[];
