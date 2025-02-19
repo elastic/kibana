@@ -69,7 +69,7 @@ import {
   filterMaintenanceWindowsIds,
 } from '../task_runner/maintenance_windows';
 import { ErrorWithType } from '../lib/error_with_type';
-import { RuntimeFieldManager } from './RuntimeFieldsManager';
+import { RuntimeFieldManager } from './runtime_fields_manager';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
