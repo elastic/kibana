@@ -75,9 +75,8 @@ export function ManagementBottomBar({
         onClick={onConfirm}
         isLoading={isLoading}
       >
-         {confirmButton}
+        {confirmButton}
       </EuiButton>
-
     </EuiFlexGroup>
   );
 }
