@@ -6,8 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-import { schema } from '@kbn/config-schema';
+import { TypeOf, schema } from '@kbn/config-schema';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { dataViewSpecSchema } from '../common';
 import { oneOfLiterals, validateKQLStringFilter, LEGACY_COMPARATORS } from '../common/utils';
@@ -85,3 +84,5 @@ export const customThresholdParamsSchema = schema.object(
   },
   { unknowns: 'allow' }
 );
+
+export type CustomThresholdParams = TypeOf<typeof customThresholdParamsSchema>;
