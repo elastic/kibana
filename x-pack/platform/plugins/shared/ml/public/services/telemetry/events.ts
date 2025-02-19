@@ -14,13 +14,13 @@ import {
 
 const trainedModelsDeploymentSchema: SchemaObject<TrainedModelsDeploymentEbtProps>['properties'] = {
   model_id: {
-    type: 'text',
+    type: 'keyword',
     _meta: {
       description: 'The ID of the trained model',
     },
   },
   optimized: {
-    type: 'text',
+    type: 'keyword',
     _meta: {
       description: 'The optimized setting of the deployment',
     },
@@ -32,9 +32,9 @@ const trainedModelsDeploymentSchema: SchemaObject<TrainedModelsDeploymentEbtProp
     },
   },
   vCPUUsage: {
-    type: 'text',
+    type: 'keyword',
     _meta: {
-      description: 'The vCPU usage level',
+      description: 'The vCPU/VCU usage level',
     },
   },
   number_of_allocations: {
