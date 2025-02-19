@@ -6,6 +6,7 @@
  */
 
 import { useState } from 'react';
+import { WORKFLOW_LOCALSTORAGE_KEY, WorkflowId } from '@kbn/search-shared-ui';
 import {
   DenseVectorIngestDataCodeExamples,
   SemanticIngestDataCodeExamples,
@@ -17,7 +18,6 @@ import {
   DenseVectorCodeExamples,
   SemanticCodeExamples,
 } from '../../../code_examples/create_index';
-import { WORKFLOW_LOCALSTORAGE_KEY, WorkflowId } from '@kbn/search-shared-ui';
 
 const workflowIdToCreateIndexExamples = (type: WorkflowId) => {
   switch (type) {
@@ -48,9 +48,7 @@ function isWorkflowId(value: string | null): value is WorkflowId {
 export const useWorkflow = () => {
   const localStorageWorkflow = localStorage.getItem(WORKFLOW_LOCALSTORAGE_KEY);
   const workflowId = isWorkflowId(localStorageWorkflow) ? localStorageWorkflow : null;
-  const [selectedWorkflowId, setSelectedWorkflowId] = useState<WorkflowId>(
-    workflowId || 'default'
-  );
+  const [selectedWorkflowId, setSelectedWorkflowId] = useState<WorkflowId>(workflowId || 'default');
   return {
     selectedWorkflowId,
     setSelectedWorkflowId: (workflowId: WorkflowId) => {
