@@ -6,12 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  UseAbortableAsync,
-  useAbortableAsync,
-} from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { omit } from 'lodash';
 import { isRequestAbortedError } from '@kbn/server-route-repository-client';
+import { UseAbortableAsync, useAbortableAsync } from '@kbn/react-hooks';
 import { useKibana } from './use_kibana';
 
 export const useStreamsAppFetch: UseAbortableAsync<{}, { disableToastOnError?: boolean }> = (
