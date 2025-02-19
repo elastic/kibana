@@ -51,7 +51,7 @@ export function GeoFieldWorkspacePanel(props: Props) {
           <h2>
             <strong>{getVisualizeGeoFieldMessage(props.fieldType)}</strong>
           </h2>
-          <GlobeIllustration aria-hidden={true} css={promptIllustrationStyle}/>
+          <GlobeIllustration aria-hidden={true} css={promptIllustrationStyle} />
           <Droppable
             css={DroppableStyles}
             dataTestSubj="lnsGeoFieldWorkspace"

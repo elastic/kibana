@@ -362,7 +362,7 @@ export function LayerPanel(props: LayerPanelProps) {
         tabIndex={-1}
         ref={registerLayerRef}
         css={css`
-          margin-bottom:  ${euiTheme.size.base};
+          margin-bottom: ${euiTheme.size.base};
           // disable focus ring for mouse clicks, leave it for keyboard users
           &:focus:not(:focus-visible) {
             animation: none !important; // sass-lint:disable-line no-important
@@ -490,28 +490,30 @@ export function LayerPanel(props: LayerPanelProps) {
               return (
                 <EuiFormRow
                   css={css`
-                     padding: ${euiTheme.size.base};
+                    padding: ${euiTheme.size.base};
                     &:last-child {
-                      border-radius: 0 0 ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium};
+                      border-radius: 0 0 ${euiTheme.border.radius.medium}
+                        ${euiTheme.border.radius.medium};
                     }
 
                     // Add border to the top of the next same panel
-                    &+& {
+                    & + & {
                       border-top: ${euiTheme.border.thin};
                       margin-top: 0;
                     }
 
-                    &>* {
+                    & > * {
                       margin-bottom: 0;
                     }
 
                     // Targeting EUI class as we are unable to apply a class to this element in component
                     &,
                     .euiFormRow__fieldWrapper {
-                      &>*+* {
+                      & > * + * {
                         margin-top: ${euiTheme.size.s};
                       }
-                    }`}
+                    }
+                  `}
                   className="lnsLayerPanel__row"
                   fullWidth
                   label={
