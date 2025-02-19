@@ -346,6 +346,7 @@ describe('Observability AI Assistant client', () => {
           {
             connectorId: 'foo',
             stream: true,
+            system: EXPECTED_STORED_SYSTEM_MESSAGE,
             messages: expect.arrayContaining([
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
@@ -916,6 +917,7 @@ describe('Observability AI Assistant client', () => {
           {
             connectorId: 'foo',
             stream: true,
+            system: EXPECTED_STORED_SYSTEM_MESSAGE,
             messages: expect.arrayContaining([
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
@@ -1077,6 +1079,7 @@ describe('Observability AI Assistant client', () => {
           {
             connectorId: 'foo',
             stream: true,
+            system: EXPECTED_STORED_SYSTEM_MESSAGE,
             messages: expect.arrayContaining([
               { role: 'user', content: 'How many alerts do I have?' },
             ]),

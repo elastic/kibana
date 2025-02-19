@@ -164,6 +164,19 @@
         "resolve_during_rolling_upgrade": false
       }
     ],
+    "transforms_index": [
+      {
+        "level": "critical",
+        "message": "Old index with a compatibility version < 8.0",
+        "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
+        "details": "This index has version: 7.17.25",
+        "resolve_during_rolling_upgrade": false,
+        "_meta": {
+          "reindex_required": true,
+          "transform_ids": ["abc"]
+        }
+      }
+    ],
     "myindex": [
       {
         "level": "critical",

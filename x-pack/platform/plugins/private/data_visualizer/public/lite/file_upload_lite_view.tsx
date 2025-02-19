@@ -13,6 +13,7 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
@@ -38,6 +39,7 @@ import { IndexInput } from './index_input';
 import { OverallUploadStatus } from './overall_upload_status';
 import { ImportErrors } from './import_errors';
 import { DataViewIllustration } from './data_view_illustration';
+import { useDataVisualizerKibana } from '../application/kibana_context';
 
 interface Props {
   dataStart: DataPublicPluginStart;
@@ -61,6 +63,12 @@ export const FileUploadLiteView: FC<Props> = ({
   indexSettings,
   onClose,
 }) => {
+  const {
+    services: {
+      application: { navigateToApp },
+    },
+  } = useDataVisualizerKibana();
+
   const [indexName, setIndexName] = useState<string>('');
   const [indexValidationStatus, setIndexValidationStatus] = useState<STATUS>(STATUS.NOT_STARTED);
 
@@ -83,6 +91,11 @@ export const FileUploadLiteView: FC<Props> = ({
   const fileClashes = useMemo(
     () => uploadStatus.fileClashes.some((f) => f.clash),
     [uploadStatus.fileClashes]
+  );
+
+  const fullFileUpload = useCallback(
+    () => navigateToApp('home', { path: '#/tutorial_directory/fileDataViz' }),
+    [navigateToApp]
   );
 
   useEffect(() => {
@@ -127,6 +140,23 @@ export const FileUploadLiteView: FC<Props> = ({
                     <FormattedMessage
                       id="xpack.dataVisualizer.file.uploadView.uploadFileDescription"
                       defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index. The data can also be automatically vectorized using semantic text."
+                    />
+
+                    <br />
+
+                    <FormattedMessage
+                      id="xpack.dataVisualizer.file.uploadView.uploadFileDescriptionLink"
+                      defaultMessage="If you need to customize the file upload process, the full version is available {fullToolLink}."
+                      values={{
+                        fullToolLink: (
+                          <EuiLink onClick={fullFileUpload}>
+                            <FormattedMessage
+                              id="xpack.dataVisualizer.file.uploadView.uploadFileDescriptionLinkText"
+                              defaultMessage="here"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
                     />
                   </p>
                 </EuiText>

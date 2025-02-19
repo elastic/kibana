@@ -71,7 +71,7 @@ export type LogViewTypestate =
     }
   | {
       value: 'updating';
-      context: LogViewContextWithReference;
+      context: LogViewContextWithReference & LogViewContextWithLogView;
     }
   | {
       value: 'loadingFailed';
@@ -83,11 +83,17 @@ export type LogViewTypestate =
     }
   | {
       value: 'resolutionFailed';
-      context: LogViewContextWithReference & LogViewContextWithLogView & LogViewContextWithError;
+      context: LogViewContextWithReference &
+        LogViewContextWithLogView &
+        LogViewContextWithStatus &
+        LogViewContextWithError;
     }
   | {
       value: 'checkingStatusFailed';
-      context: LogViewContextWithReference & LogViewContextWithLogView & LogViewContextWithError;
+      context: LogViewContextWithReference &
+        LogViewContextWithLogView &
+        LogViewContextWithResolvedLogView &
+        LogViewContextWithError;
     };
 
 export type LogViewContext = LogViewTypestate['context'];

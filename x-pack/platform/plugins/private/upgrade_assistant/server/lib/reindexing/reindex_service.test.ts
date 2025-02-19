@@ -164,6 +164,11 @@ describe('reindexService', () => {
       const reindexWarnings = await service.detectReindexWarnings(indexName);
       expect(reindexWarnings).toEqual([
         {
+          flow: 'readonly',
+          warningType: 'makeIndexReadonly',
+        },
+        {
+          flow: 'reindex',
           warningType: 'replaceIndexWithAlias',
         },
       ]);
@@ -829,7 +834,7 @@ describe('reindexService', () => {
       );
 
       it('moves existing aliases over to new index', async () => {
-        clusterClient.asCurrentUser.indices.getAlias.mockResponseOnce({
+        clusterClient.asCurrentUser.indices.get.mockResponseOnce({
           myIndex: {
             aliases: {
               myAlias: {},
