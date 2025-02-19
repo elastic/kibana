@@ -128,13 +128,21 @@ export const createExceptionListItemForCreate = (listId: string): CreateExceptio
 };
 
 /**
+ * Checks the provided `tag` string to see if it is an owner apace ID tag
+ * @param tag
+ */
+export const isOwnerSpaceIdTag = (tag: string): boolean => {
+  return tag.startsWith(OWNER_SPACE_ID_TAG_PREFIX);
+};
+
+/**
  * Returns an array with all owner space IDs for the artifact
  */
 export const getArtifactOwnerSpaceIds = (
   item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
 ): string[] => {
   return (item.tags ?? []).reduce((acc, tag) => {
-    if (tag.startsWith(OWNER_SPACE_ID_TAG_PREFIX)) {
+    if (isOwnerSpaceIdTag(tag)) {
       acc.push(tag.substring(OWNER_SPACE_ID_TAG_PREFIX.length));
     }
 
@@ -183,5 +191,5 @@ export const setArtifactOwnerSpaceId = (
 export const hasArtifactOwnerSpaceId = (
   item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
 ): boolean => {
-  return (item.tags ?? []).some((tag) => tag.startsWith(OWNER_SPACE_ID_TAG_PREFIX));
+  return (item.tags ?? []).some((tag) => isOwnerSpaceIdTag(tag));
 };
