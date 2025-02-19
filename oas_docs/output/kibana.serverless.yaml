@@ -44755,8 +44755,6 @@ components:
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_User'
               type: array
-          required:
-            - id
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
     Security_AI_Assistant_API_EsqlContentReference:
       allOf:
@@ -44915,8 +44913,6 @@ components:
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_User'
               type: array
-          required:
-            - id
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
     Security_AI_Assistant_API_InputSchema:
       description: Array of objects defining the input schema, allowing the LLM to extract structured data to be used in retrieval
