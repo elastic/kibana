@@ -174,8 +174,15 @@ export interface Signature {
   returnType: FunctionReturnType;
 }
 
+export enum FunctionDefinitionTypes {
+  AGG = 'agg',
+  SCALAR = 'scalar',
+  OPERATOR = 'operator',
+  GROUPING = 'grouping',
+}
+
 export interface FunctionDefinition {
-  type: 'agg' | 'scalar' | 'operator' | 'grouping';
+  type: FunctionDefinitionTypes;
   preview?: boolean;
   ignoreAsSuggestion?: boolean;
   name: string;

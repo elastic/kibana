@@ -19,6 +19,7 @@ import {
   isIdentifier,
 } from '@kbn/esql-ast';
 import { ENRICH_MODES } from '../definitions/settings';
+import { FunctionDefinitionTypes } from '../definitions/types';
 import { EDITOR_MARKER } from './constants';
 import {
   isOptionItem,
@@ -139,7 +140,7 @@ function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
 }
 
 function isOperator(node: ESQLFunction) {
-  return getFunctionDefinition(node.name)?.type === 'operator';
+  return getFunctionDefinition(node.name)?.type === FunctionDefinitionTypes.OPERATOR;
 }
 
 /**

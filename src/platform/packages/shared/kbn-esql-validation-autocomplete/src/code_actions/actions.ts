@@ -74,7 +74,7 @@ export const getCompatibleFunctionDefinitions = (
   command: string,
   option: string | undefined
 ): string[] => {
-  const fnSupportedByCommand = getAllFunctions({ type: ['scalar', 'agg'] }).filter(
+  const fnSupportedByCommand = getAllFunctions({ type: [FunctionDefinitionTypes.SCALAR, FunctionDefinitionTypes.AGG] }).filter(
     ({ name, supportedCommands, supportedOptions }) =>
       option ? supportedOptions?.includes(option) : supportedCommands.includes(command)
   );

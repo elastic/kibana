@@ -36,7 +36,7 @@ import {
   onOption,
   withOption,
 } from './options';
-import type { CommandDefinition } from './types';
+import { type CommandDefinition, FunctionDefinitionTypes } from './types';
 import { suggest as suggestForSort } from '../autocomplete/commands/sort';
 import { suggest as suggestForKeep } from '../autocomplete/commands/keep';
 import { suggest as suggestForDrop } from '../autocomplete/commands/drop';
@@ -81,10 +81,14 @@ const statsValidator = (command: ESQLCommand) => {
 
   if (statsArg.length) {
     function isAggFunction(arg: ESQLAstItem): arg is ESQLFunction {
-      return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === 'agg';
+      return (
+        isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === FunctionDefinitionTypes.AGG
+      );
     }
     function isOtherFunction(arg: ESQLAstItem): arg is ESQLFunction {
-      return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type !== 'agg';
+      return (
+        isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type !== FunctionDefinitionTypes.AGG
+      );
     }
 
     function checkAggExistence(arg: ESQLFunction): boolean {

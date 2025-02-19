@@ -11,7 +11,11 @@ import { i18n } from '@kbn/i18n';
 import type { ItemKind, SuggestionRawDefinition } from './types';
 import { operatorsDefinitions } from '../definitions/all_operators';
 import { getOperatorSuggestion, TRIGGER_SUGGESTION_COMMAND } from './factories';
-import { CommandDefinition, CommandTypeDefinition } from '../definitions/types';
+import {
+  CommandDefinition,
+  CommandTypeDefinition,
+  FunctionDefinitionTypes,
+} from '../definitions/types';
 import { getCommandDefinition } from '../shared/helpers';
 import { getCommandSignature } from '../definitions/helpers';
 import { buildDocumentation } from './documentation_util';
@@ -134,7 +138,7 @@ export const listCompleteItem: SuggestionRawDefinition = {
   label: '( ... )',
   text: '( $0 )',
   asSnippet: true,
-  kind: 'Operator',
+  kind: FunctionDefinitionTypes.OPERATOR,
   detail: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.listDoc', {
     defaultMessage: 'List of items ( ...)',
   }),
