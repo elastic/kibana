@@ -56,7 +56,6 @@ export const DropIllustration = ({ title, titleId, ...props }: Omit<EuiIconProps
   );
 };
 
-
 const pulseArrow = keyframes`
   0% {
     transform: translateY(0%);
@@ -81,7 +80,7 @@ const pulseArrow = keyframes`
   95% {
     transform: translateY(0);
   }
-`
+`;
 
 const pulseContinuous = keyframes`
   0% {
@@ -99,4 +98,4 @@ const pulseContinuous = keyframes`
   100% { 
     transform: translateY(10%);
   }
-`
+`;
