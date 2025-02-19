@@ -31,7 +31,7 @@ pageLoadAssetSize:
   dataUsage: 30000
   dataViewEditor: 28082
   dataViewFieldEditor: 42021
-  dataViewManagement: 5300
+  dataViewManagement: 6250
   dataViews: 65000
   dataVisualizer: 27530
   devTools: 38637
@@ -122,8 +122,8 @@ pageLoadAssetSize:
   observabilityShared: 80000
   osquery: 107090
   painlessLab: 179748
-  presentationPanel: 55463
-  presentationUtil: 58834
+  presentationPanel: 44000
+  presentationUtil: 33905
   profiling: 36694
   remoteClusters: 51327
   reporting: 58600
