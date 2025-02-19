@@ -69,13 +69,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('changing popularity for one field does not affect the other', async function () {
       expect(await PageObjects.settings.getPopularity()).to.be('1');
-      await PageObjects.settings.changePopularity('5');
+      await PageObjects.settings.setPopularity(5);
       await PageObjects.settings.controlChangeSave();
 
       await PageObjects.settings.openControlsByName('bytes');
       expect(await PageObjects.settings.getPopularity()).to.be('0');
       await testSubjects.click('toggleAdvancedSetting');
-      await PageObjects.settings.changePopularity('7');
+      await PageObjects.settings.setPopularity(7);
       await PageObjects.settings.controlChangeSave();
 
       await browser.refresh();
