@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ItemKind, SuggestionRawDefinition } from './types';
-import { builtinFunctions } from '../definitions/builtin';
+import { operatorsDefinitions } from '../definitions/all_operators';
 import { getOperatorSuggestion, TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { CommandDefinition, CommandTypeDefinition } from '../definitions/types';
 import { getCommandDefinition } from '../shared/helpers';
@@ -24,7 +24,7 @@ const techPreviewLabel = i18n.translate(
 );
 
 export function getAssignmentDefinitionCompletitionItem() {
-  const assignFn = builtinFunctions.find(({ name }) => name === '=')!;
+  const assignFn = operatorsDefinitions.find(({ name }) => name === '=')!;
   return getOperatorSuggestion(assignFn);
 }
 

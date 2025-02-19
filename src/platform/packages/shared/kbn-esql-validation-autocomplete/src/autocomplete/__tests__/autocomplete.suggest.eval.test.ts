@@ -59,7 +59,7 @@ describe('autocomplete.suggest', () => {
       ]);
 
       await assertSuggestions('from a | eval doubleField /', [
-        ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
+        ...getFunctionSignaturesByReturnType('eval', 'any', { operators: true, skipAssign: true }, [
           'double',
         ]),
         ',',
@@ -145,7 +145,7 @@ describe('autocomplete.suggest', () => {
       await assertSuggestions('from a | eval a=round(doubleField) /', [
         ',',
         '| ',
-        ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
+        ...getFunctionSignaturesByReturnType('eval', 'any', { operators: true, skipAssign: true }, [
           'double',
           'long',
         ]),
@@ -362,7 +362,7 @@ describe('autocomplete.suggest', () => {
       await assertSuggestions('from a | eval var0 = abs(doubleField) / | eval abs(var0)', [
         ',',
         '| ',
-        ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
+        ...getFunctionSignaturesByReturnType('eval', 'any', { operators: true, skipAssign: true }, [
           'double',
         ]),
       ]);
@@ -454,7 +454,7 @@ describe('autocomplete.suggest', () => {
 
                 // Wehther to prepend comma to suggestion string
                 // E.g. if true, "fieldName" -> "fieldName, "
-                const shouldAddComma = hasMoreMandatoryArgs && fn.type !== 'builtin';
+                const shouldAddComma = hasMoreMandatoryArgs && fn.type !== 'operator';
 
                 const constantOnlyParamDefs = typesToSuggestNext.filter(
                   (p) => p.constantOnly || /_literal/.test(p.type as string)
@@ -551,9 +551,12 @@ describe('autocomplete.suggest', () => {
           ...dateSuggestions,
           ',',
           '| ',
-          ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
-            'integer',
-          ]),
+          ...getFunctionSignaturesByReturnType(
+            'eval',
+            'any',
+            { operators: true, skipAssign: true },
+            ['integer']
+          ),
         ],
         { triggerCharacter: ' ' }
       );

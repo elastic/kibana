@@ -80,7 +80,7 @@ describe('hidden functions', () => {
   it('does not suggest hidden operators', async () => {
     setTestFunctions([
       {
-        type: 'builtin',
+        type: 'operator',
         name: 'HIDDEN_OPERATOR',
         description: 'This is a hidden function',
         supportedCommands: ['eval', 'where', 'row', 'sort'],
@@ -97,7 +97,7 @@ describe('hidden functions', () => {
         ],
       },
       {
-        type: 'builtin',
+        type: 'operator',
         name: 'VISIBLE_OPERATOR',
         description: 'This is a visible function',
         supportedCommands: ['eval', 'where', 'row', 'sort'],

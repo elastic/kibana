@@ -104,7 +104,7 @@ import {
   checkFunctionInvocationComplete,
 } from './helper';
 import { FunctionParameter, isParameterType } from '../definitions/types';
-import { comparisonFunctions } from '../definitions/builtin';
+import { comparisonFunctions } from '../definitions/all_operators';
 import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
 
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
@@ -992,11 +992,11 @@ async function getFunctionArgsSuggestions(
 
   const shouldAddComma =
     hasMoreMandatoryArgs &&
-    fnDefinition.type !== 'builtin' &&
+    fnDefinition.type !== 'operator' &&
     !isCursorFollowedByComma &&
     !canBeBooleanCondition;
   const shouldAdvanceCursor =
-    hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && !isCursorFollowedByComma;
+    hasMoreMandatoryArgs && fnDefinition.type !== 'operator' && !isCursorFollowedByComma;
 
   const suggestedConstants = uniq(
     typesToSuggestNext

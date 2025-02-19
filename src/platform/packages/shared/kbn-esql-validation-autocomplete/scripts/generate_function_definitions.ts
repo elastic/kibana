@@ -760,7 +760,7 @@ const enrichOperators = (
       supportedCommands,
       supportedOptions,
       // @TODO: change to operator type
-      type: 'builtin' as const,
+      type: 'operator' as const,
       validate: validators[op.name],
       ...(isNotOperator ? { ignoreAsSuggestion: true } : {}),
     };
@@ -769,7 +769,7 @@ const enrichOperators = (
 
 function printGeneratedFunctionsFile(
   functionDefinitions: FunctionDefinition[],
-  functionsType: 'aggregation' | 'scalar' | 'operators' | 'grouping'
+  functionsType: 'aggregation' | 'scalar' | 'operator' | 'grouping'
 ) {
   /**
    * Deals with asciidoc internal cross-references in the function descriptions
@@ -864,7 +864,7 @@ ${
 import { isLiteralItem } from '../../shared/helpers';`
     : ''
 }
-${functionsType === 'operators' ? `import { isNumericType } from '../../shared/esql_types';` : ''}
+${functionsType === 'operator' ? `import { isNumericType } from '../../shared/esql_types';` : ''}
 
 
 
@@ -944,7 +944,7 @@ ${functionsType === 'operators' ? `import { isNumericType } from '../../shared/e
   );
   await writeFile(
     join(__dirname, '../src/definitions/generated/operators.ts'),
-    printGeneratedFunctionsFile(enrichOperators(operatorDefinitions), 'operators')
+    printGeneratedFunctionsFile(enrichOperators(operatorDefinitions), 'operator')
   );
   await writeFile(
     join(__dirname, '../src/definitions/generated/grouping_functions.ts'),

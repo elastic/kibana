@@ -175,7 +175,7 @@ export interface Signature {
 }
 
 export interface FunctionDefinition {
-  type: 'builtin' | 'agg' | 'scalar' | 'operator' | 'grouping';
+  type: 'agg' | 'scalar' | 'operator' | 'grouping';
   preview?: boolean;
   ignoreAsSuggestion?: boolean;
   name: string;

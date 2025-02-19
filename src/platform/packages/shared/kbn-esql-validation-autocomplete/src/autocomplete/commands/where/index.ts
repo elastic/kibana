@@ -8,7 +8,7 @@
  */
 
 import { Walker, type ESQLSingleAstItem, type ESQLFunction } from '@kbn/esql-ast';
-import { logicalOperators } from '../../../definitions/builtin';
+import { logicalOperators } from '../../../definitions/all_operators';
 import { CommandSuggestParams, isParameterType } from '../../../definitions/types';
 import { isFunctionItem } from '../../../shared/helpers';
 import type { SuggestionRawDefinition } from '../../types';
