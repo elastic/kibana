@@ -208,7 +208,7 @@ export async function getCategorizationGraph({ client, model }: CategorizationGr
     .addEdge(START, 'modelInput')
     .addEdge('modelOutput', END)
     .addEdge('modelInput', 'handleValidatePipeline')
-    .addEdge('handleCategorization', 'handleValidatePipeline')
+    .addEdge('handleCategorization', 'handleCategorizationValidation')
     .addEdge('handleInvalidCategorization', 'handleValidatePipeline')
     .addEdge('handleErrors', 'handleValidatePipeline')
     .addEdge('handleReview', 'handleValidatePipeline')

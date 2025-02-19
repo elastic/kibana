@@ -29,12 +29,12 @@ import { agentPolicyService, auditLoggingService } from '../services';
 
 export const TYPE = 'fleet:unenroll-inactive-agents-task';
 export const VERSION = '1.0.0';
+export const POLICIES_BATCHSIZE = 500;
 const TITLE = 'Fleet Unenroll Inactive Agent Task';
 const SCOPE = ['fleet'];
 const INTERVAL = '10m';
 const TIMEOUT = '1m';
 const UNENROLLMENT_BATCHSIZE = 1000;
-const POLICIES_BATCHSIZE = 500;
 
 interface UnenrollInactiveAgentsTaskSetupContract {
   core: CoreSetup;
@@ -143,8 +143,10 @@ export class UnenrollInactiveAgentsTask {
         perPage: UNENROLLMENT_BATCHSIZE,
       });
       if (!res.agents.length) {
-        this.endRun('No inactive agents to unenroll');
-        return;
+        this.logger.debug(
+          '[UnenrollInactiveAgentsTask] No inactive agents to unenroll in agent policy batch'
+        );
+        continue;
       }
       agentCounter += res.agents.length;
       if (agentCounter >= UNENROLLMENT_BATCHSIZE) {

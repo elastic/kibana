@@ -131,11 +131,14 @@
     "@kbn/unified-search-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/utility-types",
+    "@kbn/response-ops-alerts-table",
+    "@kbn/alerting-types",
     "@kbn/core-http-server-utils",
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-ui-settings-server",
     "@kbn/core-security-server",
     "@kbn/charts-theme",
     "@kbn/response-ops-rule-params",
+    "@kbn/unsaved-changes-prompt",
   ]
 }

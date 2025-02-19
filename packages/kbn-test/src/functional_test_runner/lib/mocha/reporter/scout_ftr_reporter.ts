@@ -68,7 +68,10 @@ export class ScoutFTRReporter {
     this.codeOwnersEntries = getCodeOwnersEntries();
     this.baseTestRunInfo = {
       id: this.runId,
-      config: { file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, config.path)) },
+      config: {
+        file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, config.path)),
+        category: config.get('testConfigCategory'),
+      },
     };
 
     // Register event listeners

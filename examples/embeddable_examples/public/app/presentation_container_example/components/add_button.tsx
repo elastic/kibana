@@ -32,7 +32,7 @@ export function AddButton({ pageApi, uiActions }: { pageApi: unknown; uiActions:
         return (
           <EuiContextMenuItem
             key={action.id}
-            icon="share"
+            icon={action?.getIconType(actionContext) ?? ''}
             onClick={() => {
               action.execute(actionContext);
               setIsPopoverOpen(false);

@@ -231,8 +231,8 @@ export class ImportResolver {
   resolve(req: string, dirname: string): ResolveResult | null {
     // transform webpack loader requests and focus on the actual file selected
     const lastExI = req.lastIndexOf('!');
-    if (lastExI > -1) {
-      const quesI = req.lastIndexOf('?');
+    const quesI = req.lastIndexOf('?');
+    if (lastExI > -1 || quesI > -1) {
       const prefix = req.slice(0, lastExI + 1);
       const postfix = quesI > -1 ? req.slice(quesI) : '';
       const result = this.resolve(req.slice(lastExI + 1, quesI > -1 ? quesI : undefined), dirname);

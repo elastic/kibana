@@ -9,9 +9,9 @@ import React, { useMemo } from 'react';
 import { EuiButtonGroup } from '@elastic/eui';
 import { OnboardingTopicId } from '../../constants';
 import { useOnboardingContext } from '../onboarding_context';
-import { useTopic } from '../hooks/use_topic_id';
 import type { TopicConfig } from '../../types';
 import { SiemMigrationSetupTour } from '../../../siem_migrations/rules/components/tours/setup_guide';
+import { useUrlDetail } from '../hooks/use_url_detail';
 
 const getLabel = (topicConfig: TopicConfig) => {
   if (topicConfig.id === OnboardingTopicId.siemMigrations) {
@@ -26,7 +26,7 @@ const getLabel = (topicConfig: TopicConfig) => {
 
 export const OnboardingHeaderTopicSelector = React.memo(() => {
   const { config } = useOnboardingContext();
-  const [topicId, setTopicId] = useTopic();
+  const { topicId, setTopic } = useUrlDetail();
 
   const selectorOptions = useMemo(
     () =>
@@ -49,7 +49,7 @@ export const OnboardingHeaderTopicSelector = React.memo(() => {
       legend="Topic selector"
       options={selectorOptions}
       idSelected={topicId}
-      onChange={(id) => setTopicId(id as OnboardingTopicId)}
+      onChange={(id) => setTopic(id as OnboardingTopicId)}
       isFullWidth
     />
   );

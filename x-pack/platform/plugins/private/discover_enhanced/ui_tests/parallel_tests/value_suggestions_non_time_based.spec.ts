@@ -19,14 +19,14 @@ spaceTest.describe(
       await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME.NO_TIME_FIELD);
     });
 
-    spaceTest.afterAll(async ({ scoutSpace }) => {
-      await scoutSpace.uiSettings.unset('defaultIndex');
-      await scoutSpace.savedObjects.cleanStandardList();
-    });
-
     spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
       await pageObjects.discover.goto();
+    });
+
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.uiSettings.unset('defaultIndex');
+      await scoutSpace.savedObjects.cleanStandardList();
     });
 
     spaceTest(

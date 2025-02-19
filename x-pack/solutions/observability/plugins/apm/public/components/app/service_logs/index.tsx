@@ -52,7 +52,7 @@ export function ClassicServiceLogsStream() {
 
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
-  } = useAnyOfApmParams('/services/{serviceName}/logs');
+  } = useAnyOfApmParams('/services/{serviceName}/logs', '/mobile-services/{serviceName}/logs');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 

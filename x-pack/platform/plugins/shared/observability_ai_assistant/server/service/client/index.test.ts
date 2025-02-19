@@ -44,7 +44,7 @@ interface ChunkDelta {
 
 type LlmSimulator = ReturnType<typeof createLlmSimulator>;
 
-const EXPECTED_STORED_SYSTEM_MESSAGE = `system`;
+const EXPECTED_STORED_SYSTEM_MESSAGE = `this is a system message`;
 
 const nextTick = () => {
   return new Promise(process.nextTick);
@@ -185,7 +185,7 @@ describe('Observability AI Assistant client', () => {
 
     knowledgeBaseServiceMock.getUserInstructions.mockResolvedValue([]);
 
-    functionClientMock.getInstructions.mockReturnValue(['system']);
+    functionClientMock.getInstructions.mockReturnValue([EXPECTED_STORED_SYSTEM_MESSAGE]);
     functionClientMock.getAdhocInstructions.mockReturnValue([]);
 
     return new ObservabilityAIAssistantClient({
@@ -206,18 +206,6 @@ describe('Observability AI Assistant client', () => {
       },
       scopes: ['all'],
     });
-  }
-
-  function system(content: string | Omit<Message['message'], 'role'>): Message {
-    return merge(
-      {
-        '@timestamp': new Date().toString(),
-        message: {
-          role: MessageRole.System,
-        },
-      },
-      typeof content === 'string' ? { message: { content } } : content
-    );
   }
 
   function user(content: string | Omit<Message['message'], 'role'>): Message {
@@ -286,7 +274,7 @@ describe('Observability AI Assistant client', () => {
       stream = observableIntoStream(
         client.complete({
           connectorId: 'foo',
-          messages: [system('This is a system message'), user('How many alerts do I have?')],
+          messages: [user('How many alerts do I have?')],
           functionClient: functionClientMock,
           signal: new AbortController().signal,
           persist: true,
@@ -313,6 +301,8 @@ describe('Observability AI Assistant client', () => {
           expect.objectContaining({
             connectorId: 'foo',
             stream: false,
+            system:
+              'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.',
             functionCalling: 'auto',
             toolChoice: expect.objectContaining({
               function: 'title_conversation',
@@ -346,6 +336,7 @@ describe('Observability AI Assistant client', () => {
           {
             connectorId: 'foo',
             stream: true,
+            system: EXPECTED_STORED_SYSTEM_MESSAGE,
             messages: expect.arrayContaining([
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
@@ -497,14 +488,8 @@ describe('Observability AI Assistant client', () => {
               user: {
                 name: 'johndoe',
               },
+              systemMessage: EXPECTED_STORED_SYSTEM_MESSAGE,
               messages: [
-                {
-                  '@timestamp': expect.any(String),
-                  message: {
-                    content: EXPECTED_STORED_SYSTEM_MESSAGE,
-                    role: MessageRole.System,
-                  },
-                },
                 {
                   '@timestamp': expect.any(String),
                   message: {
@@ -567,10 +552,7 @@ describe('Observability AI Assistant client', () => {
                   labels: {},
                   numeric_labels: {},
                   public: false,
-                  messages: [
-                    system('This is a system message'),
-                    user('How many alerts do I have?'),
-                  ],
+                  messages: [user('How many alerts do I have?')],
                 },
               },
             ],
@@ -585,7 +567,7 @@ describe('Observability AI Assistant client', () => {
       stream = observableIntoStream(
         await client.complete({
           connectorId: 'foo',
-          messages: [system('This is a system message'), user('How many alerts do I have?')],
+          messages: [user('How many alerts do I have?')],
           functionClient: functionClientMock,
           signal: new AbortController().signal,
           conversationId: 'my-conversation-id',
@@ -645,14 +627,8 @@ describe('Observability AI Assistant client', () => {
           user: {
             name: 'johndoe',
           },
+          systemMessage: EXPECTED_STORED_SYSTEM_MESSAGE,
           messages: [
-            {
-              '@timestamp': expect.any(String),
-              message: {
-                content: EXPECTED_STORED_SYSTEM_MESSAGE,
-                role: MessageRole.System,
-              },
-            },
             {
               '@timestamp': expect.any(String),
               message: {
@@ -694,7 +670,7 @@ describe('Observability AI Assistant client', () => {
       stream = observableIntoStream(
         await client.complete({
           connectorId: 'foo',
-          messages: [system('This is a system message'), user('How many alerts do I have?')],
+          messages: [user('How many alerts do I have?')],
           functionClient: functionClientMock,
           signal: new AbortController().signal,
           title: 'My predefined title',
@@ -784,7 +760,7 @@ describe('Observability AI Assistant client', () => {
       stream = observableIntoStream(
         await client.complete({
           connectorId: 'foo',
-          messages: [system('This is a system message'), user('How many alerts do I have?')],
+          messages: [user('How many alerts do I have?')],
           functionClient: functionClientMock,
           signal: new AbortController().signal,
           title: 'My predefined title',
@@ -845,13 +821,6 @@ describe('Observability AI Assistant client', () => {
           signal: expect.any(AbortSignal),
           connectorId: 'foo',
           messages: [
-            {
-              '@timestamp': expect.any(String),
-              message: {
-                role: MessageRole.System,
-                content: EXPECTED_STORED_SYSTEM_MESSAGE,
-              },
-            },
             {
               '@timestamp': expect.any(String),
               message: {
@@ -916,6 +885,7 @@ describe('Observability AI Assistant client', () => {
           {
             connectorId: 'foo',
             stream: true,
+            system: EXPECTED_STORED_SYSTEM_MESSAGE,
             messages: expect.arrayContaining([
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
@@ -983,13 +953,6 @@ describe('Observability AI Assistant client', () => {
           expect(
             (internalUserEsClientMock.index.mock.lastCall![0] as any).document.messages
           ).toEqual([
-            {
-              '@timestamp': expect.any(String),
-              message: {
-                content: EXPECTED_STORED_SYSTEM_MESSAGE,
-                role: MessageRole.System,
-              },
-            },
             {
               '@timestamp': expect.any(String),
               message: {
@@ -1077,6 +1040,7 @@ describe('Observability AI Assistant client', () => {
           {
             connectorId: 'foo',
             stream: true,
+            system: EXPECTED_STORED_SYSTEM_MESSAGE,
             messages: expect.arrayContaining([
               { role: 'user', content: 'How many alerts do I have?' },
             ]),
@@ -1221,7 +1185,7 @@ describe('Observability AI Assistant client', () => {
       stream = observableIntoStream(
         await client.complete({
           connectorId: 'foo',
-          messages: [system('This is a system message'), user('How many alerts do I have?')],
+          messages: [user('How many alerts do I have?')],
           functionClient: functionClientMock,
           signal: new AbortController().signal,
           persist: false,
@@ -1346,7 +1310,7 @@ describe('Observability AI Assistant client', () => {
       stream = observableIntoStream(
         await client.complete({
           connectorId: 'foo',
-          messages: [system('This is a system message'), user('How many alerts do I have?')],
+          messages: [user('How many alerts do I have?')],
           functionClient: functionClientMock,
           signal: new AbortController().signal,
           title: 'My predefined title',
@@ -1424,7 +1388,7 @@ describe('Observability AI Assistant client', () => {
       const stream = observableIntoStream(
         await client.complete({
           connectorId: 'foo',
-          messages: [system('This is a system message'), user('How many alerts do I have?')],
+          messages: [user('How many alerts do I have?')],
           functionClient: functionClientMock,
           signal: new AbortController().signal,
           persist: false,
@@ -1512,7 +1476,7 @@ describe('Observability AI Assistant client', () => {
       stream = observableIntoStream(
         await client.complete({
           connectorId: 'foo',
-          messages: [system('This is a system message'), user('How many alerts do I have?')],
+          messages: [user('How many alerts do I have?')],
           functionClient: functionClientMock,
           signal: new AbortController().signal,
           title: 'My predefined title',
@@ -1577,7 +1541,7 @@ describe('Observability AI Assistant client', () => {
     client
       .complete({
         connectorId: 'foo',
-        messages: [system('This is a system message'), user('A user message to cause completion')],
+        messages: [user('A user message to cause completion')],
         functionClient: functionClientMock,
         signal: new AbortController().signal,
         title: 'My predefined title',
@@ -1586,9 +1550,7 @@ describe('Observability AI Assistant client', () => {
       .subscribe(() => {}); // To trigger call to chat
     await nextTick();
 
-    expect(chatSpy.mock.calls[0][1].messages[0].message.content).toEqual(
-      EXPECTED_STORED_SYSTEM_MESSAGE
-    );
+    expect(chatSpy.mock.calls[0][1].systemMessage).toEqual(EXPECTED_STORED_SYSTEM_MESSAGE);
   });
 
   describe('when executing an action', () => {
@@ -1605,10 +1567,7 @@ describe('Observability AI Assistant client', () => {
 
       const complete$ = await client.complete({
         connectorId: 'foo',
-        messages: [
-          system('This is a system message'),
-          user('Can you call the my_action function?'),
-        ],
+        messages: [user('Can you call the my_action function?')],
         functionClient: new ChatFunctionClient([
           {
             actions: [

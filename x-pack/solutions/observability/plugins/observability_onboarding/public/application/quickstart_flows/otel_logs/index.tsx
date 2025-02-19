@@ -20,6 +20,7 @@ import {
   EuiLink,
   EuiImage,
   EuiCallOut,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -58,16 +59,11 @@ export const OtelLogsPanel: React.FC = () => {
   }, []);
 
   const {
-    services: {
-      share,
-      http,
-      context: { isServerless, stackVersion },
-    },
+    services: { share, http },
   } = useKibana<ObservabilityOnboardingAppServices>();
 
   const AGENT_CDN_BASE_URL = 'artifacts.elastic.co/downloads/beats/elastic-agent';
-  const agentVersion =
-    isServerless && setup ? setup.elasticAgentVersionInfo.agentVersion : stackVersion;
+  const agentVersion = setup?.elasticAgentVersionInfo.agentVersion ?? '';
   const urlEncodedAgentVersion = encodeURIComponent(agentVersion);
 
   const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
@@ -147,32 +143,39 @@ rm ./otel.yml && cp ./otel_samples/platformlogs_hostmetrics.yml ./otel.yml && mk
                       setSelectedTab(id);
                     }}
                   />
-                  <EuiText>
-                    <p>{selectedContent.firstStepTitle}</p>
-                  </EuiText>
-                  <EuiFlexItem>
-                    <EuiCodeBlock language="sh" isCopyable overflowHeight={300}>
-                      {selectedContent.content}
-                    </EuiCodeBlock>
-                  </EuiFlexItem>
-                  <EuiFlexItem align="left">
-                    <EuiFlexGroup>
-                      <EuiCopy textToCopy={selectedContent.content}>
-                        {(copy) => (
-                          <EuiButton
-                            data-test-subj="observabilityOnboardingOtelLogsPanelButton"
-                            iconType="copyClipboard"
-                            onClick={copy}
-                          >
-                            {i18n.translate(
-                              'xpack.observability_onboarding.installOtelCollector.configStep.copyCommand',
-                              { defaultMessage: 'Copy to clipboard' }
+
+                  {(!setup || !apiKeyData) && <EuiSkeletonText lines={6} />}
+
+                  {setup && apiKeyData && (
+                    <>
+                      <EuiText>
+                        <p>{selectedContent.firstStepTitle}</p>
+                      </EuiText>
+                      <EuiFlexItem>
+                        <EuiCodeBlock language="sh" isCopyable overflowHeight={300}>
+                          {selectedContent.content}
+                        </EuiCodeBlock>
+                      </EuiFlexItem>
+                      <EuiFlexItem align="left">
+                        <EuiFlexGroup>
+                          <EuiCopy textToCopy={selectedContent.content}>
+                            {(copy) => (
+                              <EuiButton
+                                data-test-subj="observabilityOnboardingOtelLogsPanelButton"
+                                iconType="copyClipboard"
+                                onClick={copy}
+                              >
+                                {i18n.translate(
+                                  'xpack.observability_onboarding.installOtelCollector.configStep.copyCommand',
+                                  { defaultMessage: 'Copy to clipboard' }
+                                )}
+                              </EuiButton>
                             )}
-                          </EuiButton>
-                        )}
-                      </EuiCopy>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
+                          </EuiCopy>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                    </>
+                  )}
                 </EuiFlexGroup>
               ),
             },

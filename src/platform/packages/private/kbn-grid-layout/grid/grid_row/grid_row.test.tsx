@@ -9,19 +9,28 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { GridRow, GridRowProps } from './grid_row';
+import { GridRow, type GridRowProps } from './grid_row';
 import { gridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
 import { getSampleLayout } from '../test_utils/sample_layout';
+import { GridLayoutContext, type GridLayoutContextType } from '../use_grid_layout_context';
 
 describe('GridRow', () => {
-  const renderGridRow = (propsOverrides: Partial<GridRowProps> = {}) => {
+  const renderGridRow = (
+    propsOverrides: Partial<GridRowProps> = {},
+    contextOverrides: Partial<GridLayoutContextType> = {}
+  ) => {
     return render(
-      <GridRow
-        rowIndex={0}
-        renderPanelContents={mockRenderPanelContents}
-        gridLayoutStateManager={gridLayoutStateManagerMock}
-        {...propsOverrides}
-      />
+      <GridLayoutContext.Provider
+        value={
+          {
+            renderPanelContents: mockRenderPanelContents,
+            gridLayoutStateManager: gridLayoutStateManagerMock,
+            ...contextOverrides,
+          } as GridLayoutContextType
+        }
+      >
+        <GridRow rowIndex={0} {...propsOverrides} />
+      </GridLayoutContext.Provider>
     );
   };
 

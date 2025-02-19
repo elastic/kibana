@@ -67,3 +67,22 @@ steps:
           limit: 3
         - exit_status: '*'
           limit: 1
+
+  - command: .buildkite/scripts/steps/functional/scout_ui_tests.sh
+    label: 'Scout UI Tests'
+    agents:
+      image: family/kibana-ubuntu-2004
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-8
+      preemptible: true
+    depends_on: build
+    env:
+      PING_SLACK_TEAM: "@appex-qa-team"
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 2
+        - exit_status: '*'
+          limit: 1

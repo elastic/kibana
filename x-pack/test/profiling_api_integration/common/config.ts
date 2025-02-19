@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
@@ -83,6 +84,7 @@ export function createTestConfig(
     const esServer = servers.elasticsearch as UrlObject;
 
     return {
+      testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles: [require.resolve('../tests')],
       servers,
       servicesRequiredForTestAnalysis: ['profilingFtrConfig', 'registry'],
