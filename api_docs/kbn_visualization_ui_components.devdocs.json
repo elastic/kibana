@@ -1358,7 +1358,7 @@
         "label": "NewBucketButton",
         "description": [],
         "signature": [
-          "({ label, onClick, isDisabled, className, \"data-test-subj\": dataTestSubj, }: NewBucketButtonProps) => React.JSX.Element"
+          "({ label, onClick, isDisabled, \"data-test-subj\": dataTestSubj, }: NewBucketButtonProps) => React.JSX.Element"
         ],
         "path": "src/platform/packages/shared/kbn-visualization-ui-components/components/drag_drop_bucket/new_bucket_button.tsx",
         "deprecated": false,
@@ -1369,7 +1369,7 @@
             "id": "def-public.NewBucketButton.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  label,\n  onClick,\n  isDisabled,\n  className,\n  'data-test-subj': dataTestSubj = 'lns-newBucket-add',\n}",
+            "label": "{\n  label,\n  onClick,\n  isDisabled,\n  'data-test-subj': dataTestSubj = 'lns-newBucket-add',\n}",
             "description": [],
             "signature": [
               "NewBucketButtonProps"

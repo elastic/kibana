@@ -1,8 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/streams-schema",
-  "owner": "@elastic/streams-program-team",
-  "group": "observability",
-  "visibility": "shared"
-}
-
