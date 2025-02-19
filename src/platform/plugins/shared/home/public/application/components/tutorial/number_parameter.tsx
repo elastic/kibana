@@ -10,7 +10,7 @@
 import React from 'react';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 
-interface NumberParameterProps {
+export interface NumberParameterProps {
   id: string;
   label: string;
   value: number;

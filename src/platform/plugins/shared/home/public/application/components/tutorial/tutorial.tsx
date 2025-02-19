@@ -23,6 +23,7 @@ import type {
   InstructionSetType,
   ParamType,
   StatusCheckType,
+  InstructionsType,
 } from '../../../services/tutorials/types';
 import { TutorialsCategory as TutorialCategoryType } from '../../../../common/constants';
 import type { CustomStatusCheckCallback } from '../../../services/tutorials/tutorial_service';
@@ -60,6 +61,7 @@ type StatusCheckStatesType = 'HAS_DATA' | 'NO_DATA' | 'ERROR' | 'NOT_CHECKED' | 
 
 interface TutorialState {
   notFound: boolean;
+  params: ParamType[];
   paramValues: { [key: string]: string | number }; // how does it connect with server
   statusCheckStates: StatusCheckStatesType[];
   tutorial: TutorialType | null;
@@ -74,6 +76,7 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
 
     this.state = {
       notFound: false,
+      params: [],
       paramValues: {},
       statusCheckStates: [],
       tutorial: null,
@@ -94,7 +97,7 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
   }
 
   async componentDidMount() {
-    const tutorial = await this.props.getTutorial(this.props.tutorialId);
+    const tutorial: TutorialType = await this.props.getTutorial(this.props.tutorialId);
     if (!this._isMounted) {
       return;
     }
@@ -148,7 +151,9 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
   };
 
   initInstructionsState = () => {
-    const instructions = this.getInstructions();
+    const instructions: InstructionsType = this.getInstructions() || { instructionSets: [] };
+
+    const params = instructions.params || [];
     const paramValues: TutorialState['paramValues'] = {};
     if (instructions && instructions.params) {
       instructions.params.forEach((param: ParamType) => {
@@ -161,6 +166,7 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
     );
 
     this.setState({
+      params,
       paramValues,
       statusCheckStates,
     });
@@ -337,7 +343,7 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
               this.onStatusCheck(index);
             }}
             offset={currentOffset}
-            params={instructionSet.params} // no params on type
+            params={this.state.params}
             paramValues={this.state.paramValues}
             setParameter={this.setParameter}
             replaceTemplateStrings={this.props.replaceTemplateStrings}

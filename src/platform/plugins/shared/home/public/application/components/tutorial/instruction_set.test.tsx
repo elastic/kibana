@@ -9,10 +9,11 @@
 
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { InstructionSet, InstructionVariantShape } from './instruction_set';
+import { InstructionSet } from './instruction_set';
 import * as StatusCheckStates from './status_check_states';
 import { fireEvent, render } from '@testing-library/react';
 import { getServices } from '../../kibana_services';
+import type { InstructionVariantType } from '../../../services/tutorials/types';
 
 jest.mock('../../kibana_services', () => ({
   getServices: jest.fn(),
@@ -28,7 +29,7 @@ const instructions = [
     commands: ['do more stuff in command line'],
   },
 ];
-const instructionVariants: InstructionVariantShape[] = [
+const instructionVariants: InstructionVariantType[] = [
   {
     id: 'OSX',
     instructions,
@@ -53,11 +54,12 @@ const defaultProps = {
   offset: 1,
   paramValues: {},
   statusCheckConfig: {
-    success: 'custom success msg',
-    error: 'custom error msg',
     title: 'custom title',
     text: 'custom status check description',
     btnLabel: 'custom btn label',
+    success: 'custom success msg',
+    error: 'custom error msg',
+    esHitsCheck: { index: 'index', query: {} },
   },
   replaceTemplateStrings: mockReplaceTemplateStrings,
   isCloudEnabled: false,

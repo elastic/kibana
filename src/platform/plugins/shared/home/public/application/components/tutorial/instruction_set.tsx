@@ -24,7 +24,7 @@ import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/st
 import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme'; // FIXME: remove this, and access style variables from EUI context
 import { Instruction } from './instruction';
-import { ParameterForm, ParameterFormProps } from './parameter_form';
+import { ParameterForm } from './parameter_form';
 import { Content } from './content';
 import { INSTRUCTION_VARIANT, getDisplayText } from '../../..';
 import * as StatusCheckStates from './status_check_states';
@@ -32,6 +32,7 @@ import type {
   InstructionSetType,
   InstructionVariantType,
   InstructionType,
+  ParamType,
 } from '../../../services/tutorials/types';
 
 interface InstructionStep {
@@ -47,8 +48,8 @@ interface InstructionSetProps extends InstructionSetType {
   statusCheckState: keyof typeof StatusCheckStates;
   onStatusCheck: () => void;
   offset: number;
-  params: ParameterFormProps['params']; // check. there are no params coming from server
-  paramValues: { [key: string]: string | number }; // check
+  params: ParamType[];
+  paramValues: { [key: string]: string | number };
   setParameter: (paramId: string, newValue: string) => void;
   replaceTemplateStrings: (text: string) => string;
   isCloudEnabled: boolean;
@@ -235,7 +236,7 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
             textPre={instruction.textPre}
             textPost={instruction.textPost}
             replaceTemplateStrings={this.props.replaceTemplateStrings}
-            customComponentName={instruction.customComponentName}
+            customComponentName={instruction.customComponentName as string}
             variantId={instructionVariant.id as keyof typeof INSTRUCTION_VARIANT}
             isCloudEnabled={this.props.isCloudEnabled}
           />

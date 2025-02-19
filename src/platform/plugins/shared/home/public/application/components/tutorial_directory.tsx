@@ -16,9 +16,9 @@ import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { TutorialsCategory } from '../../../common/constants';
 import { Synopsis } from './synopsis';
-import { Tutorial } from './tutorial/tutorial';
 import { HomeKibanaServices, getServices } from '../kibana_services';
 import { getTutorials } from '../load_tutorials';
+import type { TutorialType } from '../../services/tutorials/types';
 
 const SAMPLE_DATA_TAB_ID = 'sampleData';
 const integrationsTitle = i18n.translate('home.breadcrumbs.integrationsAppTitle', {
@@ -31,9 +31,9 @@ interface TutorialDirectoryUiProps {
   isCloudEnabled: boolean;
   intl: InjectedIntl;
 }
-interface TutorialCard extends Pick<Tutorial, 'id' | 'name' | 'category'> {
+interface TutorialCard extends Pick<TutorialType, 'id' | 'category' | 'name'> {
   url: string;
-  description: Tutorial['shortDescription'];
+  description: TutorialType['shortDescription'];
   icon?: string;
   isBeta?: boolean;
   onClick?: () => void;
@@ -93,12 +93,12 @@ class TutorialDirectoryUi extends React.Component<
   async componentDidMount() {
     this._isMounted = true;
     this.setBreadcrumbs();
-    const tutorialConfigs: Tutorial[] = await getTutorials();
+    const tutorialConfigs: TutorialType[] = await getTutorials();
     if (!this._isMounted) {
       return;
     }
 
-    let tutorialCards: TutorialCard[] = tutorialConfigs.map((tutorialConfig: Tutorial) => {
+    let tutorialCards: TutorialCard[] = tutorialConfigs.map((tutorialConfig: TutorialType) => {
       // add base path to SVG based icons
       let icon = tutorialConfig.euiIconType;
       if (icon && icon.includes('/')) {
@@ -113,8 +113,7 @@ class TutorialDirectoryUi extends React.Component<
         description: tutorialConfig.shortDescription,
         url: this.props.addBasePath(`#/tutorial/${tutorialConfig.id}`),
         elasticCloud: tutorialConfig.elasticCloud,
-        // Beta label is skipped on the tutorial overview page for now. Too many beta labels.
-        // isBeta: tutorialConfig.isBeta,
+        isBeta: tutorialConfig.isBeta,
       };
     });
 

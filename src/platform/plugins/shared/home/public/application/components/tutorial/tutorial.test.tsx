@@ -12,6 +12,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { SavedObjectsBatchResponse } from '@kbn/core-saved-objects-api-browser';
 import { Tutorial } from './tutorial';
+import { TutorialType } from '../../../services/tutorials/types';
 
 jest.mock('../../kibana_services', () => ({
   getServices: () => ({
@@ -71,7 +72,7 @@ const tutorial = {
 };
 const loadTutorialPromise = Promise.resolve(tutorial);
 const getTutorial = (id: string) => {
-  return loadTutorialPromise as Promise<Tutorial>;
+  return loadTutorialPromise as Promise<TutorialType>;
 };
 const addBasePath = (path: string) => {
   return `BASE_PATH/${path}`;
@@ -113,7 +114,7 @@ describe('Tutorial component', () => {
         onPrem: buildInstructionSet('onPrem'),
       });
       const getBasicTutorial = () => {
-        return loadBasicTutorialPromise as unknown as Promise<Tutorial>;
+        return loadBasicTutorialPromise as unknown as Promise<TutorialType>;
       };
       const { queryByTestId } = render(
         <IntlProvider locale="en">
