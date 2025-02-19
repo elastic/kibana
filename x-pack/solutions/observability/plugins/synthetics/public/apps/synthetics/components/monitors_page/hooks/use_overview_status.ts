@@ -7,6 +7,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import useDebounce from 'react-use/lib/useDebounce';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import { selectOverviewPageState } from '../../../state';
 import {
@@ -14,7 +15,6 @@ import {
   quietFetchOverviewStatusAction,
   selectOverviewStatus,
 } from '../../../state/overview_status';
-import useDebounce from 'react-use/lib/useDebounce';
 
 export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLocation: boolean }) {
   const pageState = useSelector(selectOverviewPageState);
@@ -54,13 +54,11 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
     () => {
       // Don't load on initial mount, only meant to handle pageState changes
       if (isInitialMount.current || !loaded) {
-        if (loaded) {
-          // setting false here to account for debounce timing
-          isInitialMount.current = false;
-          return;
-        }
-        dispatch(fetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
+        // setting false here to account for debounce timing
+        isInitialMount.current = false;
+        return;
       }
+      dispatch(fetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
     },
     100,
     [pageState, scopeStatusByLocation]
