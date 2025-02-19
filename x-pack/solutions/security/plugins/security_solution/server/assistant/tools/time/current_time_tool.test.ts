@@ -48,7 +48,7 @@ describe('CurrentTimeTool', () => {
     });
 
     it.each([
-      // kibana settings timezone
+      // kibana settings timezone and no screen context timezone
       ['Browser', undefined,'Local time: 14/02/2025, 07:33:12 GMT'],
       [undefined, undefined,'Local time: 14/02/2025, 07:33:12 GMT'],
       ['Europe/Zurich', undefined,'Local time: 14/02/2025, 08:33:12 GMT+1 (14/02/2025, 07:33:12 GMT)'],
@@ -57,7 +57,14 @@ describe('CurrentTimeTool', () => {
       ['MST', undefined,'Local time: 14/02/2025, 00:33:12 GMT-7 (14/02/2025, 07:33:12 GMT)'],
       ['America/Los_Angeles', undefined,'Local time: 13/02/2025, 23:33:12 GMT-8 (14/02/2025, 07:33:12 GMT)'],
 
-      // screen context timezone
+      // kibana settings timezone and screen context timezone
+      ['Europe/Zurich', 'America/Denver','Local time: 14/02/2025, 08:33:12 GMT+1 (14/02/2025, 07:33:12 GMT)'],
+      ['Europe/Warsaw', 'America/Denver','Local time: 14/02/2025, 08:33:12 GMT+1 (14/02/2025, 07:33:12 GMT)'],
+      ['America/Denver', 'Europe/Warsaw','Local time: 14/02/2025, 00:33:12 GMT-7 (14/02/2025, 07:33:12 GMT)'],
+      ['MST', 'Europe/Warsaw','Local time: 14/02/2025, 00:33:12 GMT-7 (14/02/2025, 07:33:12 GMT)'],
+      ['America/Los_Angeles', 'Europe/Warsaw','Local time: 13/02/2025, 23:33:12 GMT-8 (14/02/2025, 07:33:12 GMT)'],
+
+      // screen context timezone and Browser kibana setting timezone
       ['Browser', "Europe/London",'Local time: 14/02/2025, 07:33:12 GMT'],
       ['Browser', "Europe/Zurich",'Local time: 14/02/2025, 08:33:12 GMT+1 (14/02/2025, 07:33:12 GMT)'],
       ['Browser', "Europe/Warsaw",'Local time: 14/02/2025, 08:33:12 GMT+1 (14/02/2025, 07:33:12 GMT)'],
