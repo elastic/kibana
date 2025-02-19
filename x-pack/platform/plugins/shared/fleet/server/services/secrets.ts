@@ -12,8 +12,6 @@ import { set } from '@kbn/safer-lodash-set';
 
 import type {
   KafkaOutput,
-  NewElasticsearchOutput,
-  NewLogstashOutput,
   NewRemoteElasticsearchOutput,
   Output,
   OutputSecretPath,
@@ -300,28 +298,12 @@ function getOutputSecretPaths(
 ): OutputSecretPath[] {
   const outputSecretPaths: OutputSecretPath[] = [];
 
-  if (outputType === 'logstash') {
-    const logstashOutput = output as NewLogstashOutput;
-    if (logstashOutput?.secrets?.ssl?.key) {
-      outputSecretPaths.push({
-        path: 'secrets.ssl.key',
-        value: logstashOutput.secrets.ssl.key,
-      });
-    }
-  }
-
   if (outputType === 'kafka') {
     const kafkaOutput = output as KafkaOutput;
     if (kafkaOutput?.secrets?.password) {
       outputSecretPaths.push({
         path: 'secrets.password',
         value: kafkaOutput.secrets.password,
-      });
-    }
-    if (kafkaOutput?.secrets?.ssl?.key) {
-      outputSecretPaths.push({
-        path: 'secrets.ssl.key',
-        value: kafkaOutput.secrets.ssl.key,
       });
     }
   }
@@ -340,22 +322,14 @@ function getOutputSecretPaths(
         value: remoteESOutput.secrets.kibana_api_key,
       });
     }
-    if (remoteESOutput?.secrets?.ssl?.key) {
-      outputSecretPaths.push({
-        path: 'secrets.ssl.key',
-        value: remoteESOutput.secrets.ssl.key,
-      });
-    }
   }
 
-  if (outputType === 'elasticsearch') {
-    const esOutput = output as NewElasticsearchOutput;
-    if (esOutput?.secrets?.ssl?.key) {
-      outputSecretPaths.push({
-        path: 'secrets.ssl.key',
-        value: esOutput.secrets.ssl.key,
-      });
-    }
+  // common to all outputs
+  if (output?.secrets?.ssl?.key) {
+    outputSecretPaths.push({
+      path: 'secrets.ssl.key',
+      value: output.secrets.ssl.key,
+    });
   }
 
   return outputSecretPaths;

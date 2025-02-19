@@ -974,6 +974,12 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                 kibana_api_key: kibanaAPIKeySecretInput.value,
               };
             }
+            if (!sslKeyInput.value && sslKeySecretInput.value) {
+              secrets = {
+                ...(secrets ?? {}),
+                key: sslKeySecretInput.value,
+              };
+            }
             return {
               name: nameInput.value,
               type: outputType.RemoteElasticsearch,
@@ -996,14 +1002,6 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
                   (val) => val !== ''
                 ),
               },
-              ...(!sslKeyInput.value &&
-                sslKeySecretInput.value && {
-                  secrets: {
-                    ssl: {
-                      key: sslKeySecretInput.value,
-                    },
-                  },
-                }),
             } as NewRemoteElasticsearchOutput;
           case outputType.Elasticsearch:
           default:

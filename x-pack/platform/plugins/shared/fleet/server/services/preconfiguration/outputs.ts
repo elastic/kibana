@@ -167,27 +167,21 @@ async function verifySecret(hash: string, secret: string) {
 }
 
 async function hashSecrets(output: PreconfiguredOutput) {
+  let secrets: Record<string, any> = {};
+
   if (output.type === 'kafka') {
     const kafkaOutput = output as KafkaOutput;
+
     if (typeof kafkaOutput.secrets?.password === 'string') {
       const password = await hashSecret(kafkaOutput.secrets?.password);
-      return {
+      secrets = {
         password,
-      };
-    }
-    if (typeof kafkaOutput.secrets?.ssl?.key === 'string') {
-      const key = await hashSecret(kafkaOutput.secrets?.ssl?.key);
-      return {
-        ssl: {
-          key,
-        },
       };
     }
   }
 
   if (output.type === 'remote_elasticsearch') {
     const remoteESOutput = output as NewRemoteElasticsearchOutput;
-    let secrets;
     if (typeof remoteESOutput.secrets?.service_token === 'string') {
       const serviceToken = await hashSecret(remoteESOutput.secrets?.service_token);
       secrets = {
@@ -201,27 +195,17 @@ async function hashSecrets(output: PreconfiguredOutput) {
         kibana_api_key: kibanaAPIKey,
       };
     }
-    if (typeof remoteESOutput.secrets?.ssl?.key === 'string') {
-      const key = await hashSecret(remoteESOutput.secrets?.ssl?.key);
-      return {
-        ssl: {
-          key,
-        },
-      };
-    }
-    return secrets;
   }
-  // es and logstash types have only `ssl.key`
+  // common to all types
   if (typeof output.secrets?.ssl?.key === 'string') {
     const key = await hashSecret(output.secrets?.ssl?.key);
-    return {
-      ssl: {
-        key,
-      },
+    secrets = {
+      ...(secrets ? secrets : {}),
+      key,
     };
   }
 
-  return undefined;
+  return secrets;
 }
 
 export async function cleanPreconfiguredOutputs(
