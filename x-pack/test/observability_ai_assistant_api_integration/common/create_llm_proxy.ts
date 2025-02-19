@@ -8,9 +8,10 @@
 import { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import http, { type Server } from 'http';
-import { once, pull } from 'lodash';
+import { isString, once, pull } from 'lodash';
 import OpenAI from 'openai';
 import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
+import pRetry from 'p-retry';
 import { createOpenAiChunk } from './create_openai_chunk';
 
 type Request = http.IncomingMessage;
@@ -27,24 +28,21 @@ interface RequestInterceptor {
   when: (body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming) => boolean;
 }
 
+export interface ToolCall {
+  content?: string;
+  tool_calls?: Array<{
+    id: string;
+    index: string | number;
+    function?: {
+      name: string;
+      arguments: string;
+    };
+  }>;
+}
 export interface LlmResponseSimulator {
   body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
   status: (code: number) => Promise<void>;
-  next: (
-    msg:
-      | string
-      | {
-          content?: string;
-          tool_calls?: Array<{
-            id: string;
-            index: string | number;
-            function?: {
-              name: string;
-              arguments: string;
-            };
-          }>;
-        }
-  ) => Promise<void>;
+  next: (msg: string | ToolCall) => Promise<void>;
   tokenCount: (msg: { completion: number; prompt: number; total: number }) => Promise<void>;
   error: (error: any) => Promise<void>;
   complete: () => Promise<void>;
@@ -105,32 +103,60 @@ export class LlmProxy {
   }
 
   waitForAllInterceptorsSettled() {
-    return Promise.all(this.interceptors);
+    return pRetry(
+      async () => {
+        if (this.interceptors.length === 0) {
+          return;
+        }
+
+        const unsettledInterceptors = this.interceptors.map((i) => i.name).join(', ');
+        this.log.debug(
+          `Waiting for the following interceptors to be called: ${unsettledInterceptors}`
+        );
+        if (this.interceptors.length > 0) {
+          throw new Error(`Interceptors were not called: ${unsettledInterceptors}`);
+        }
+      },
+      { retries: 5, maxTimeout: 1000 }
+    ).catch((error) => {
+      this.clear();
+      throw error;
+    });
   }
 
-  interceptConversation({
-    name = 'default_interceptor_conversation_name',
-    response,
-  }: {
-    name?: string;
-    response: string;
-  }) {
-    return this.intercept(name, (body) => !isFunctionTitleRequest(body), response);
+  interceptConversation(
+    msg: string | ToolCall,
+    {
+      name = 'default_interceptor_conversation_name',
+    }: {
+      name?: string;
+    } = {}
+  ) {
+    return this.intercept(name, (body) => !isFunctionTitleRequest(body), msg);
   }
 
   interceptConversationTitle(title: string) {
-    return this.intercept('conversation_title', (body) => isFunctionTitleRequest(body), [
+    return this.intercept(
+      `conversation_title_interceptor_${title.split(' ').join('_')}`,
+      (body) => isFunctionTitleRequest(body),
       {
-        function_call: {
-          name: TITLE_CONVERSATION_FUNCTION_NAME,
-          arguments: JSON.stringify({ title }),
-        },
-      },
-    ]);
+        content: '',
+        tool_calls: [
+          {
+            id: 'id',
+            index: 0,
+            function: {
+              name: TITLE_CONVERSATION_FUNCTION_NAME,
+              arguments: JSON.stringify({ title }),
+            },
+          },
+        ],
+      }
+    );
   }
 
   intercept<
-    TResponseChunks extends Array<Record<string, unknown>> | string | undefined = undefined
+    TResponseChunks extends Array<string | ToolCall> | ToolCall | string | undefined = undefined
   >(
     name: string,
     when: RequestInterceptor['when'],
@@ -212,7 +238,9 @@ export class LlmProxy {
 
     const parsedChunks = Array.isArray(responseChunks)
       ? responseChunks
-      : responseChunks.split(' ').map((token, i) => (i === 0 ? token : ` ${token}`));
+      : isString(responseChunks)
+      ? responseChunks.split(' ').map((token, i) => (i === 0 ? token : ` ${token}`))
+      : [responseChunks];
 
     return {
       completeAfterIntercept: async () => {

@@ -282,7 +282,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(status).to.be(200);
 
         const interceptPromises = proxy
-          .interceptConversation({ name: 'conversation', response: 'I, the LLM, hear you!' })
+          .interceptConversation('I, the LLM, hear you!')
           .completeAfterIntercept();
 
         const messages: Message[] = [
