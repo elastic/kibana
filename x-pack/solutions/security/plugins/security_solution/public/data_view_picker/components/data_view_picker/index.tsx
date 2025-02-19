@@ -6,10 +6,10 @@
  */
 
 import { DataViewPicker as UnifiedDataViewPicker } from '@kbn/unified-search-plugin/public';
-import React, { useCallback, useRef, useMemo, memo, useState, useEffect } from 'react';
+import React, { useCallback, useRef, useMemo, memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
+import { DataView, type DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerScopeName } from '../../constants';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../../constants';
@@ -21,7 +21,7 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
   const dispatch = useDispatch();
 
   const {
-    services: { dataViewEditor, data, dataViewFieldEditor },
+    services: { dataViewEditor, data, dataViewFieldEditor, fieldFormats },
   } = useKibana();
 
   const closeDataViewEditor = useRef<() => void | undefined>();
@@ -99,24 +99,19 @@ export const DataViewPicker = memo((props: { scope: DataViewPickerScopeName }) =
 
   const { adhocDataViews: adhocDataViewSpecs, dataViews } = useSelector(sharedStateSelector);
 
-  const [adhocDataViews, setAdhocDataViews] = useState<DataView[]>([]);
-  const [managedDataViews, setManagedDataViews] = useState<DataViewListItem[]>([]);
+  const managedDataViews = useMemo(() => {
+    const managed: DataViewListItem[] = dataViews.map((spec) => ({
+      id: spec.id ?? '',
+      title: spec.title ?? '',
+      name: spec.name,
+    }));
 
-  useEffect(() => {
-    (async () => {
-      const adhoc = await Promise.all(
-        adhocDataViewSpecs.map((dvSpec) => data.dataViews.create(dvSpec))
-      );
-      setAdhocDataViews(adhoc);
+    return managed;
+  }, [dataViews]);
 
-      const managed: DataViewListItem[] = dataViews.map((spec) => ({
-        id: spec.id ?? '',
-        title: spec.title ?? '',
-        name: spec.name,
-      }));
-      setManagedDataViews(managed);
-    })();
-  }, [data.dataViews, adhocDataViewSpecs, dataViews]);
+  const adhocDataViews = useMemo(() => {
+    return adhocDataViewSpecs.map((spec) => new DataView({ spec, fieldFormats }));
+  }, [adhocDataViewSpecs, fieldFormats]);
 
   return (
     <UnifiedDataViewPicker
