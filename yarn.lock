@@ -5480,7 +5480,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ecs-data-quality-dashboard@link:x-pack/solutions/security/packages/ecs_data_quality_dashboard":
+"@kbn/ecs-data-quality-dashboard@link:x-pack/solutions/security/packages/ecs-data-quality-dashboard":
   version "0.0.0"
   uid ""
 
@@ -6284,11 +6284,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-application@link:src/platform/packages/private/kbn-management/settings/application":
+"@kbn/management-settings-application@link:src/platform/packages/shared/kbn-management/settings/application":
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-components-field-category@link:src/platform/packages/private/kbn-management/settings/components/field_category":
+"@kbn/management-settings-components-field-category@link:src/platform/packages/shared/kbn-management/settings/components/field_category":
   version "0.0.0"
   uid ""
 
@@ -6300,7 +6300,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-components-form@link:src/platform/packages/private/kbn-management/settings/components/form":
+"@kbn/management-settings-components-form@link:src/platform/packages/shared/kbn-management/settings/components/form":
   version "0.0.0"
   uid ""
 
@@ -6324,7 +6324,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-storybook-config@link:packages/kbn-management/storybook/config":
+"@kbn/management-storybook-config@link:src/platform/packages/shared/kbn-management/storybook/config":
   version "0.0.0"
   uid ""
 
@@ -7216,7 +7216,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-side-nav@link:x-pack/solutions/security/packages/side_nav":
+"@kbn/security-solution-side-nav@link:x-pack/solutions/security/packages/side-nav":
   version "0.0.0"
   uid ""
 
@@ -7240,7 +7240,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-data-table@link:x-pack/solutions/security/packages/data_table":
+"@kbn/securitysolution-data-table@link:x-pack/solutions/security/packages/data-table":
   version "0.0.0"
   uid ""
 
@@ -7332,7 +7332,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-common-settings@link:src/platform/packages/private/serverless/settings/common":
+"@kbn/serverless-common-settings@link:src/platform/packages/shared/serverless/settings/common":
   version "0.0.0"
   uid ""
 
@@ -7356,11 +7356,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-storybook-config@link:packages/serverless/storybook/config":
+"@kbn/serverless-storybook-config@link:src/platform/packages/shared/serverless/storybook/config":
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-types@link:src/platform/packages/private/serverless/types":
+"@kbn/serverless-types@link:src/platform/packages/shared/serverless/types":
   version "0.0.0"
   uid ""
 
@@ -7668,6 +7668,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/storage-adapter@link:src/platform/packages/shared/kbn-storage-adapter":
+  version "0.0.0"
+  uid ""
+
 "@kbn/storybook@link:packages/kbn-storybook":
   version "0.0.0"
   uid ""
@@ -7805,6 +7809,10 @@
   uid ""
 
 "@kbn/tooling-log@link:packages/kbn-tooling-log":
+  version "0.0.0"
+  uid ""
+
+"@kbn/traced-es-client@link:src/platform/packages/shared/kbn-traced-es-client":
   version "0.0.0"
   uid ""
 
@@ -15717,10 +15725,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^132.0.0:
-  version "132.0.1"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-132.0.1.tgz#55f288943ac68ad262b3267e7696538d4bda918a"
-  integrity sha512-M3XyeyOdYfEiw3plMeEvF/iMwluOH9+8K5mJwFmxllFBPfHvDGX1Oeys3GNzMyhqQ1lJbRX7B6bp+323LLd5lg==
+chromedriver@^133.0.0:
+  version "133.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-133.0.0.tgz#56dedd23974f986ef5fb1ec3402d2d5b845e35dc"
+  integrity sha512-7arRrtD9WGSlemMLE4IOoD42OSKKyOtQP/Z0x/WB5jYSaCzcI95j67EK0wQ2w1y5IjSJnYvnmXOJM6Nla4OG2w==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.7.4"
@@ -30631,7 +30639,7 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.28.0:
+selenium-webdriver@^4.28.1:
   version "4.28.1"
   resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.28.1.tgz#0f6cc4fbc83cee3fdf8b116257656892957b72da"
   integrity sha512-TwbTpu/NUQkorBODGAkGowJ8sar63bvqi66/tjqhS05rBl34HkVp8DoRg1cOv2iSnNonVSbkxazS3wjbc+NRtg==
