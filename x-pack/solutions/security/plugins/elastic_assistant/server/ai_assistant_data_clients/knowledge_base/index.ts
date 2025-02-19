@@ -710,7 +710,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     auditLogger?: AuditLogger;
     id: string;
     knowledgeBaseEntry: KnowledgeBaseEntryUpdateProps;
-    telemetry: AnalyticsServiceSetup
+    telemetry: AnalyticsServiceSetup;
   }): Promise<{
     errors: BulkOperationError[];
     updatedEntry: KnowledgeBaseEntryResponse | null | undefined;
@@ -738,13 +738,12 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       let response;
       let errors;
       try {
-
         response = await this.createKnowledgeBaseEntry({
-         auditLogger,
-         knowledgeBaseEntry,
-         global: false,
-         telemetry
-       });
+          auditLogger,
+          knowledgeBaseEntry,
+          global: false,
+          telemetry,
+        });
       } catch (e) {
         errors = e;
       }
