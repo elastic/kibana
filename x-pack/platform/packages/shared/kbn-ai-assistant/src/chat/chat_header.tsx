@@ -49,10 +49,11 @@ export function ChatHeader({
   licenseInvalid,
   loading,
   title,
-  onCopyConversation,
+  onCopyConversationToClipboard,
   onSaveTitle,
   onToggleFlyoutPositionMode,
   navigateToConversation,
+  onCopyUrl,
 }: {
   connectors: UseGenAIConnectorsResult;
   conversationId?: string;
@@ -60,10 +61,11 @@ export function ChatHeader({
   licenseInvalid: boolean;
   loading: boolean;
   title: string;
-  onCopyConversation: () => void;
+  onCopyConversationToClipboard: () => void;
   onSaveTitle: (title: string) => void;
   onToggleFlyoutPositionMode?: (newFlyoutPositionMode: FlyoutPositionMode) => void;
   navigateToConversation?: (nextConversationId?: string) => void;
+  onCopyUrl: () => void;
 }) {
   const theme = useEuiTheme();
   const breakpoint = useCurrentEuiBreakpoint();
@@ -152,7 +154,8 @@ export function ChatHeader({
             {conversationId ? (
               <EuiFlexItem grow={false}>
                 <ChatContextMenu
-                  onCopyConversationClick={onCopyConversation}
+                  onCopyToClipboardClick={onCopyConversationToClipboard}
+                  onCopyUrlClick={onCopyUrl}
                   disabled={licenseInvalid}
                 />
               </EuiFlexItem>
@@ -224,12 +227,7 @@ export function ChatHeader({
               ) : null}
 
               <EuiFlexItem grow={false}>
-                <ChatActionsMenu
-                  connectors={connectors}
-                  conversationId={conversationId}
-                  disabled={licenseInvalid}
-                  onCopyConversationClick={onCopyConversation}
-                />
+                <ChatActionsMenu connectors={connectors} disabled={licenseInvalid} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

@@ -140,7 +140,7 @@ export function ChatBody({
   const chatService = useAIAssistantChatService();
 
   const {
-    services: { uiSettings, notifications },
+    services: { uiSettings, notifications, http },
   } = useKibana();
 
   const simulateFunctionCalling = uiSettings!.get<boolean>(
@@ -251,7 +251,7 @@ export function ChatBody({
     }
   });
 
-  const handleCopyConversation = () => {
+  const handleCopyConversationToClipboard = () => {
     try {
       const deserializedMessages = (conversation.value?.messages ?? messages).map(
         deserializeMessage
@@ -281,16 +281,21 @@ export function ChatBody({
 
   const handleCopyUrl = () => {
     try {
-      const deserializedMessages = (conversation.value?.messages ?? messages).map(
-        deserializeMessage
+      const conversationId = conversation.value?.conversation?.id;
+      if (!conversationId) {
+        throw new Error('Cannot copy URL if the conversation is not stored');
+      }
+
+      const conversationUrl = http?.basePath.prepend(
+        `/app/observabilityAIAssistant/conversations/${conversationId}`
       );
 
-      const content = JSON.stringify({
-        title: initialTitle,
-        messages: deserializedMessages,
-      });
+      if (!conversationUrl) {
+        throw new Error('Conversation URL does not exist');
+      }
 
-      navigator.clipboard?.writeText(content || '');
+      const urlToCopy = new URL(conversationUrl, window.location.origin).toString();
+      navigator.clipboard?.writeText(urlToCopy);
 
       notifications!.toasts.addSuccess({
         title: i18n.translate('xpack.aiAssistant.copyUrlSuccessToast', {
@@ -567,7 +572,8 @@ export function ChatBody({
           licenseInvalid={!hasCorrectLicense && !initialConversationId}
           loading={isLoading}
           title={title}
-          onCopyConversation={handleCopyConversation}
+          onCopyConversationToClipboard={handleCopyConversationToClipboard}
+          onCopyUrl={handleCopyUrl}
           onSaveTitle={(newTitle) => {
             saveTitle(newTitle);
           }}
