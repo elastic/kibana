@@ -15,7 +15,6 @@ export default function getAllSpacesTestSuite(context: DeploymentAgnosticFtrProv
     getAllTestSuiteFactory(context);
 
   const spaces = ['default', 'space_1', 'space_2', 'space_3'];
-
   // these are used to determine expected results for tests where the `include_authorized_purposes` option is enabled
   const authorizedAll = {
     any: true,
