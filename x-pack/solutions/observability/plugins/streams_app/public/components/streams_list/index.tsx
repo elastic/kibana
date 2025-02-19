@@ -142,6 +142,7 @@ export function StreamsList({
                   })}
                 </EuiButtonEmpty>
               )}
+              <EuiFlexItem grow={true} />
               <EuiSwitch
                 label={i18n.translate('xpack.streams.streamsTable.showClassicStreams', {
                   defaultMessage: 'Show classic streams',
