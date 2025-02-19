@@ -188,7 +188,9 @@ export const getSearchEmbeddableFactory = ({
           serializeState: () => serialize(savedObjectId$.getValue()),
           getInspectorAdapters: () => searchEmbeddable.stateManager.inspectorAdapters.getValue(),
           supportedTriggers: () => {
-            return [APPLY_FILTER_TRIGGER];
+            // No triggers are supported, but this is still required to pass the drilldown
+            // compatibilty check and ensure top-level drilldowns (e.g. URL) work as expected
+            return [];
           },
         },
         {
