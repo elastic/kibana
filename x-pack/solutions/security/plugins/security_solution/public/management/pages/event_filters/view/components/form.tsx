@@ -49,11 +49,7 @@ import {
   PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY,
   PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
-import {
-  isFilterProcessDescendantsEnabled,
-  isFilterProcessDescendantsTag,
-  isPolicySelectionTag,
-} from '../../../../../../common/endpoint/service/artifacts/utils';
+import { isFilterProcessDescendantsEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
 import {
   ENDPOINT_FIELDS_SEARCH_STRATEGY,
   eventsIndexPattern,
@@ -101,12 +97,6 @@ const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = OPERATING_SYSTEM
   value: os,
   inputDisplay: OS_TITLES[os],
 }));
-
-// Defines the tag categories for Event Filters, using the given order.
-const TAG_FILTERS = Object.freeze({
-  policySelection: isPolicySelectionTag,
-  processDescendantsFiltering: isFilterProcessDescendantsTag,
-});
 
 const getAddedFieldsCounts = (formFields: string[]): { [k: string]: number } =>
   formFields.reduce<{ [k: string]: number }>((allFields, field) => {
@@ -195,7 +185,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         undefined,
         ENDPOINT_FIELDS_SEARCH_STRATEGY
       );
-      const { getTagsUpdatedBy } = useGetUpdatedTags(exception, TAG_FILTERS);
+      const { getTagsUpdatedBy } = useGetUpdatedTags(exception);
       const euiTheme = useEuiTheme();
 
       const isFilterProcessDescendantsFeatureEnabled = useIsExperimentalFeatureEnabled(

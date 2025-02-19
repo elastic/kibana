@@ -17,7 +17,6 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { isPolicySelectionTag } from '../../../../../../common/endpoint/service/artifacts/utils';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { isValidIPv4OrCIDR } from '../../../../../../common/endpoint/utils/is_valid_ip';
 import type {
@@ -42,6 +41,7 @@ import {
 } from './translations';
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { FormattedError } from '../../../../components/formatted_error';
+import { useGetUpdatedTags } from '../../../../hooks/artifacts';
 
 export const testIdPrefix = 'hostIsolationExceptions-form';
 
@@ -67,8 +67,8 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
     const [hasBeenInputIpVisited, setHasBeenInputIpVisited] = useState(false);
     const [hasNameError, setHasNameError] = useState(!exception.name);
     const [hasIpError, setHasIpError] = useState(!ipEntry.value);
-
     const getTestId = useTestIdGenerator(testIdPrefix);
+    const { getTagsUpdatedBy } = useGetUpdatedTags(exception);
 
     const [selectedPolicies, setSelectedPolicies] = useState<EffectedPolicySelection>({
       isGlobal: isArtifactGlobal(exception),
@@ -138,18 +138,14 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
           setSelectedPolicies(selection);
         }
 
-        const tags = getArtifactTagsByPolicySelection(selection);
-
-        // Make sure we don't drop other `tags` the artifact might have assigned to it
-        (exception.tags ?? []).forEach((existingTag) => {
-          if (!isPolicySelectionTag(existingTag)) {
-            tags.push(existingTag);
-          }
-        });
+        const tags = getTagsUpdatedBy(
+          'policySelection',
+          getArtifactTagsByPolicySelection(selection)
+        );
 
         notifyOfChange({ tags });
       },
-      [exception.tags, notifyOfChange]
+      [getTagsUpdatedBy, notifyOfChange]
     );
 
     const handleOnDescriptionChange = useCallback(

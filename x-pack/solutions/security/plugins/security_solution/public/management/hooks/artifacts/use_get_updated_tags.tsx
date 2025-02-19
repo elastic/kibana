@@ -18,10 +18,7 @@ interface TagFiltersType {
   [tagCategory: string]: TagFilter;
 }
 
-type GetTagsUpdatedBy<TagFilters extends TagFiltersType> = (
-  tagType: keyof TagFilters,
-  newTags: string[]
-) => string[];
+type GetTagsUpdatedBy<TagFilters> = (tagType: keyof TagFilters, newTags: string[]) => string[];
 
 const DEFAULT_FILTERS = Object.freeze({
   policySelection: isPolicySelectionTag,
@@ -56,7 +53,7 @@ const DEFAULT_FILTERS = Object.freeze({
  * @param filters
  * @returns `getTagsUpdatedBy(tagCategory, ['new', 'tags'])`
  */
-export const useGetUpdatedTags = <TagFilters extends TagFiltersType>(
+export const useGetUpdatedTags = <TagFilters extends TagFiltersType = typeof DEFAULT_FILTERS>(
   exception: Partial<Pick<ExceptionListItemSchema, 'tags'>>,
   filters: TagFilters = DEFAULT_FILTERS as unknown as TagFilters
 ): Readonly<{
