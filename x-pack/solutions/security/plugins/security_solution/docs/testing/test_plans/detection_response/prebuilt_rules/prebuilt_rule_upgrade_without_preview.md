@@ -20,6 +20,7 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
+  - [User stories](#user-stories)
   - [Terminology](#terminology)
   - [Assumptions](#assumptions)
   - [Non-functional requirements](#non-functional-requirements)
@@ -81,52 +82,30 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Tickets
 
-- [Users can Customize Prebuilt Detection Rules](https://github.com/elastic/security-team/issues/1974) epic
+- [Users can Customize Prebuilt Detection Rules](https://github.com/elastic/security-team/issues/1974) (internal)
+- [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
+- [Tests for prebuilt rule upgrade workflow](https://github.com/elastic/kibana/issues/202078)
 
-**Milestone 3 - Prebuilt Rules Customization:**
+### User stories
 
-- [Milestone 3 epic ticket](https://github.com/elastic/kibana/issues/174168)
-- [Tests for prebuilt rule upgrade workflow #202078](https://github.com/elastic/kibana/issues/202078)
+**Prebuilt rule upgrade workflow:**
 
-**Milestone 2:**
-
-- [Ensure full test coverage for existing workflows of installing and upgrading prebuilt rules](https://github.com/elastic/kibana/issues/148176)
-- [Write test plan and add test coverage for the new workflows of installing and upgrading prebuilt rules](https://github.com/elastic/kibana/issues/148192)
+- User can upgrade a single prebuilt rule to its latest version without previewing the incoming updates.
+- User can bulk upgrade multiple prebuilt rules to their latest versions without previewing the incoming updates.
 
 ### Terminology
 
-- **EPR**: [Elastic Package Registry](https://github.com/elastic/package-registry), service that hosts our **Package**.
-
-- **Package**: `security_detection_engine` Fleet package that we use to distribute prebuilt detection rules in the form of `security-rule` assets (saved objects).
-
-- **Real package**: actual latest stable package distributed and pulled from EPR via Fleet.
-
-- **Mock rules**: `security-rule` assets that are indexed into the `.kibana_security_solution` index directly in the test setup, either by using the ES client _in integration tests_ or by an API request _in Cypress tests_.
-
-- **Air-gapped environment**: an environment where Kibana doesn't have access to the internet. In general, EPR is not available in such environments, except the cases when the user runs a custom EPR inside the environment.
-
-- **CTA**: "call to action", usually a button, a link, or a callout message with a button, etc, that invites the user to do some action.
-  - CTA to install prebuilt rules - at this moment, it's a link button with a counter (implemented) and a callout with a link button (not yet implemented) on the Rule Management page.
-  - CTA to upgrade prebuilt rules - at this moment, it's a tab with a counter (implemented) and a callout with a link button (not yet implemented) on the Rule Management page.
+- [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
+- **CTA to install prebuilt rules**: a link button with a counter on the Rule Management page.
+- **CTA to upgrade prebuilt rules**: a tab with a counter on the Rule Management page.
 
 ### Assumptions
 
-- Below scenarios only apply to prebuilt detection rules.
-- EPR is available for fetching the package with prebuilt rules unless explicitly indicated otherwise.
-- Only the latest **stable** package is checked for installation/upgrade and pre-release packages are ignored.
-- Users have the required [privileges for managing detection rules](https://www.elastic.co/guide/en/security/current/detections-permissions-section.html).
-- Users are:
-  - on the `Basic` license and higher in self-hosted and ECH environments;
-  - on the `Essentials` tier and higher in Serverless environments.
+- [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
 
 ### Non-functional requirements
 
-- Notifications, rule installation and rule upgrade workflows should work:
-  - regardless of the package type: with historical rule versions or without;
-  - regardless of the package registry availability: i.e., they should also work in air-gapped environments.
-- Rule installation and upgrade workflows should work with packages containing up to 15000 historical rule versions. This is the max number of versions of all rules in the package. This limit is enforced by Fleet.
-- Kibana should not crash with Out Of Memory exception during package installation.
-- For test purposes, it should be possible to use detection rules package versions lower than the latest.
+- [Common non-functional requirements](./prebuilt_rules_common_info.md#common-non-functional-requirements).
 
 ### Functional requirements
 
