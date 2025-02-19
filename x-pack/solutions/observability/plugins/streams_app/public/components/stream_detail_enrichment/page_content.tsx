@@ -18,13 +18,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IngestStreamGetResponse, isRootStreamDefinition } from '@kbn/streams-schema';
+import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
 import { UseDefinitionReturn, useDefinition } from './hooks/use_definition';
 import { useKibana } from '../../hooks/use_kibana';
-import { RootStreamEmptyPrompt } from './root_stream_empty_prompt';
 import { DraggableProcessorListItem } from './processors_list';
 import { SortableList } from './sortable_list';
 import { ManagementBottomBar } from '../management_bottom_bar';
@@ -34,6 +33,7 @@ import {
   UseProcessingSimulatorReturn,
   useProcessingSimulator,
 } from './hooks/use_processing_simulator';
+import { StreamEnrichmentContextProvider } from './services/stream_enrichment_service';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -42,7 +42,23 @@ interface StreamDetailEnrichmentContentProps {
   refreshDefinition: () => void;
 }
 
-export function StreamDetailEnrichmentContent({
+export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentContentProps) {
+  const { core, dependencies } = useKibana();
+  const { toasts } = core.notifications;
+  const { streamsRepositoryClient } = dependencies.start.streams;
+
+  return (
+    <StreamEnrichmentContextProvider
+      definition={props.definition}
+      streamsRepositoryClient={streamsRepositoryClient}
+      toasts={toasts}
+    >
+      <StreamDetailEnrichmentContentImpl {...props} />
+    </StreamEnrichmentContextProvider>
+  );
+}
+
+export function StreamDetailEnrichmentContentImpl({
   definition,
   refreshDefinition,
 }: StreamDetailEnrichmentContentProps) {
@@ -77,10 +93,6 @@ export function StreamDetailEnrichmentContent({
     navigateToUrl: core.application.navigateToUrl,
     openConfirm: core.overlays.openConfirm,
   });
-
-  if (isRootStreamDefinition(definition.stream)) {
-    return <RootStreamEmptyPrompt />;
-  }
 
   return (
     <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>

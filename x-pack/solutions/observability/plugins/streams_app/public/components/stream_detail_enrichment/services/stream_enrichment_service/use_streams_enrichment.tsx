@@ -5,27 +5,54 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { createActorContext } from '@xstate5/react';
+import { createConsoleInspector } from '@kbn/xstate-utils';
 import {
   streamEnrichmentService,
   createCategorizeLogsServiceImplementations,
 } from './stream_enrichment_state_machine';
-import { StreamEnrichmentEventParams, StreamEnrichmentServiceDependencies } from './types';
+import {
+  StreamEnrichmentEventParams,
+  StreamEnrichmentInput,
+  StreamEnrichmentServiceDependencies,
+} from './types';
 
 const StreamEnrichmentContext = createActorContext(streamEnrichmentService);
 
+const consoleInspector = createConsoleInspector();
+
 export const StreamEnrichmentContextProvider = ({
   children,
+  definition,
   ...deps
-}: React.PropsWithChildren<StreamEnrichmentServiceDependencies>) => {
+}: React.PropsWithChildren<StreamEnrichmentServiceDependencies & StreamEnrichmentInput>) => {
   return (
     <StreamEnrichmentContext.Provider
       logic={streamEnrichmentService.provide(createCategorizeLogsServiceImplementations(deps))}
+      options={{
+        inspect: consoleInspector,
+        input: {
+          definition,
+        },
+      }}
     >
-      {children}
+      <ListenForDefinitionChanges definition={definition}>{children}</ListenForDefinitionChanges>
     </StreamEnrichmentContext.Provider>
   );
+};
+
+const ListenForDefinitionChanges = ({
+  children,
+  definition,
+}: React.PropsWithChildren<StreamEnrichmentInput>) => {
+  const service = StreamEnrichmentContext.useActorRef();
+
+  useEffect(() => {
+    service.send({ type: 'stream.received', definition });
+  }, [definition, service]);
+
+  return children;
 };
 
 export const useStreamsEnrichmentEvents = () => {
