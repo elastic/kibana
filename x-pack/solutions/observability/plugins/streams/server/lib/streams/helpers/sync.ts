@@ -11,7 +11,7 @@ import {
   StreamDefinition,
   UnwiredStreamDefinition,
   WiredStreamDefinition,
-  isIlmLifecycle,
+  isInheritLifecycle,
 } from '@kbn/streams-schema';
 import { isResponseError } from '@kbn/es-errors';
 import {
@@ -341,5 +341,6 @@ async function ensureForkedIndexTemplate({
 }
 
 function requiresForkedTemplate(definition: UnwiredStreamDefinition) {
-  return isIlmLifecycle(definition.ingest.lifecycle);
+  const hasLifecycleChanges = !isInheritLifecycle(definition.ingest.lifecycle);
+  return hasLifecycleChanges;
 }
