@@ -11,6 +11,7 @@ const INITIAL_STATE = {
   agentName: undefined,
   runtimeName: undefined,
   serverlessType: undefined,
+  telemetrySdkName: undefined,
 };
 
 export function useServiceAgentFetcher({

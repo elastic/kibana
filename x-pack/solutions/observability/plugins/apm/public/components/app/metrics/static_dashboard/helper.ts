@@ -12,10 +12,13 @@ import {
   loadDashboardFile,
 } from './dashboards/dashboard_catalog';
 
+// import { loadDashboardFile } from './dashboards/dashboard_catalog';
+// import { getDashboardFileNameParts } from './dashboards/get_dashboard_file_name_parts';
 interface DashboardFileProps {
   agentName?: string;
   runtimeName?: string;
   serverlessType?: string;
+  telemetrySdkName?: string;
 }
 
 export interface MetricsDashboardProps extends DashboardFileProps {
@@ -25,6 +28,11 @@ export interface MetricsDashboardProps extends DashboardFileProps {
 export function hasDashboardFile(props: DashboardFileProps) {
   return !!getDashboardFileName(props);
 }
+
+// export function hasDashboardFile(props: DashboardFileProps) {
+//   const { dataFormat, sdkName, language } = getDashboardFileNameParts(props);
+//   return !!dataFormat && !!sdkName && !!language;
+// }
 
 function getDashboardFileName({ agentName }: DashboardFileProps) {
   const dashboardFile = agentName && AGENT_NAME_DASHBOARD_FILE_MAPPING[agentName];
@@ -43,6 +51,16 @@ export async function convertSavedDashboardToPanels(
   props: MetricsDashboardProps,
   dataView: DataView
 ): Promise<DashboardPanelMap | undefined> {
+  // const { dataFormat, sdkName, language } = getDashboardFileNameParts(props);
+  // if (!dataFormat && !sdkName && !language) {
+  //   return undefined;
+  // }
+  // const filename = `${dataFormat}-${sdkName}-${language}`;
+  // const dashboardJSON = await loadDashboardFile(filename);
+
+  // if (!dashboardJSON) {
+  //   return undefined;
+  // }
   const dashboardFilename = getDashboardFileName(props);
   const dashboardJSON = !!dashboardFilename
     ? await loadDashboardFile(dashboardFilename)
