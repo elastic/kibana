@@ -22,18 +22,17 @@ import { useGetPreviewData } from '../../../../hooks/use_get_preview_data';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { TimeBounds } from '../../types';
 import { getDiscoverLink } from '../../utils/get_discover_link';
-import { SloTabId } from '../slo_details';
 import { GoodBadEventsChart } from './good_bad_events_chart';
 import { MetricTimesliceEventsChart } from './metric_timeslice_events_chart';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
   range: { from: Date; to: Date };
-  selectedTabId: SloTabId;
+  hideRangeDurationLabel?: boolean;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props) {
+export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, onBrushed }: Props) {
   const { discover, uiSettings } = useKibana().services;
   const { isLoading, data } = useGetPreviewData({
     range,
@@ -90,7 +89,7 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
                 <h2>{getChartTitle()}</h2>
               </EuiTitle>
             </EuiFlexItem>
-            {selectedTabId !== 'history' && (
+            {!hideRangeDurationLabel && (
               <EuiFlexItem>
                 <EuiText color="subdued" size="s">
                   {i18n.translate('xpack.slo.sloDetails.eventsChartPanel.duration', {

@@ -111,12 +111,7 @@ export function SLODetailsHistory({ slo, isAutoRefreshing, selectedTabId }: Prop
         onBrushed={onBrushed}
       />
 
-      <EventsChartPanel
-        slo={slo}
-        range={range}
-        selectedTabId={selectedTabId}
-        onBrushed={onBrushed}
-      />
+      <EventsChartPanel slo={slo} range={range} hideRangeDurationLabel onBrushed={onBrushed} />
     </EuiFlexGroup>
   );
 }
