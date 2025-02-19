@@ -25,7 +25,7 @@ import { useAnnotations } from '@kbn/observability-plugin/public';
 import { TimeBounds } from '../../types';
 import { getBrushTimeBounds } from '../../../../utils/slo/duration';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { openInDiscover } from '../../../../utils/slo/get_discover_link';
+import { openInDiscover } from '../../utils/get_discover_link';
 
 export interface Props {
   data?: GetPreviewDataResponse;

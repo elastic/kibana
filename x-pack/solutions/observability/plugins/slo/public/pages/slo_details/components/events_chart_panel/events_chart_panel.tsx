@@ -27,7 +27,7 @@ import { SloTabId } from '../slo_details';
 import { useGetPreviewData } from '../../../../hooks/use_get_preview_data';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { GoodBadEventsChart } from './good_bad_events_chart';
-import { getDiscoverLink } from '../../../../utils/slo/get_discover_link';
+import { getDiscoverLink } from '../../utils/get_discover_link';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
