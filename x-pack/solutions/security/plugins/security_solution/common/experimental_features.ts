@@ -252,9 +252,9 @@ export const allowedExperimentalValues = Object.freeze({
   defendInsights: false,
 
   /**
-   * Enables flyout history and new preview navigation
+   * Disables flyout history and new preview navigation
    */
-  newExpandableFlyoutNavigationEnabled: false,
+  newExpandableFlyoutNavigationDisabled: false,
 
   /**
    * Enables CrowdStrike's RunScript RTR command
