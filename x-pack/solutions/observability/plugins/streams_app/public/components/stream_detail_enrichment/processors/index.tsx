@@ -255,7 +255,7 @@ export function EditProcessorPanel({
     <strong>{processor.type.toUpperCase()}</strong>
   ) : (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-      <EuiIcon type="grab" />
+      <EuiIcon type="grabOmnidirectional" />
       <strong>{processor.type.toUpperCase()}</strong>
       <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
         {processorDescription}

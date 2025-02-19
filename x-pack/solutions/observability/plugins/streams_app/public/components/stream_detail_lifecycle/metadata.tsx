@@ -118,7 +118,10 @@ export function RetentionMetadata({
         defaultMessage: 'Inherited from',
       })}{' '}
       {isWiredStreamGetResponse(definition) ? (
-        <EuiLink
+        <EuiBadge
+          iconType="popout"
+          iconSide="right"
+          color="hollow"
           data-test-subj="streamsAppRetentionMetadataLink"
           target="_blank"
           href={router.link('/{key}/{tab}', {
@@ -128,8 +131,8 @@ export function RetentionMetadata({
             },
           })}
         >
-          [{definition.effective_lifecycle.from}]
-        </EuiLink>
+          {definition.effective_lifecycle.from}
+        </EuiBadge>
       ) : (
         i18n.translate('xpack.streams.streamDetailLifecycle.localOverride', {
           defaultMessage: 'the underlying data stream',

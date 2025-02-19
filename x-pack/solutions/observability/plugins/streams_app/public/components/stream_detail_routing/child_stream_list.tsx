@@ -146,6 +146,7 @@ export function ChildStreamList({
           <NestedView last>
             <EuiPanel hasShadow={false} hasBorder paddingSize="none">
               <EuiButtonEmpty
+                color="text"
                 iconType="plus"
                 data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
                 onClick={() => {
