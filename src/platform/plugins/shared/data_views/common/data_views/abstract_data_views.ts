@@ -191,9 +191,7 @@ export abstract class AbstractDataView {
     this.sourceFilters = [...(spec.sourceFilters || [])];
     this.type = spec.type;
     this.typeMeta = spec.typeMeta;
-    this.fieldAttrs = new Map(
-      Object.entries(cloneDeep({ ...extractedFieldAttrs, ...spec.fieldAttrs }))
-    );
+    this.fieldAttrs = new Map(Object.entries({ ...extractedFieldAttrs, ...spec.fieldAttrs }));
     this.runtimeFieldMap = cloneDeep(spec.runtimeFieldMap) || {};
     this.namespaces = spec.namespaces || [];
     this.name = spec.name || '';
