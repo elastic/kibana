@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { AbortableAsyncState } from '@kbn/react-hooks';
-import type { UnparsedEsqlResponse } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { orderBy } from 'lodash';
 
 interface Timeseries<T extends string> {

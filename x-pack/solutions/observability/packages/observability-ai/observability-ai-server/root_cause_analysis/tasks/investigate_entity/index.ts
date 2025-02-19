@@ -11,7 +11,7 @@ import { analyzeDocuments } from '@kbn/observability-utils-server/entities/analy
 import { getDataStreamsForEntity } from '@kbn/observability-utils-server/entities/get_data_streams_for_entity';
 import { getAlertsForEntity } from '@kbn/observability-utils-server/entities/signals/get_alerts_for_entity';
 import { getSlosForEntity } from '@kbn/observability-utils-server/entities/signals/get_slos_for_entity';
-import { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { RootCauseAnalysisContext } from '../../types';
 import { stringifySummaries } from '../../util/stringify_summaries';
 import { analyzeLogPatterns } from '../analyze_log_patterns';
@@ -251,7 +251,7 @@ async function analyzeDataStreamsForEntity({
   end: number;
   kuery: string;
   dataStreams: string[];
-  esClient: ObservabilityElasticsearchClient;
+  esClient: TracedElasticsearchClient;
 }) {
   const analysis = await analyzeDocuments({
     esClient,
