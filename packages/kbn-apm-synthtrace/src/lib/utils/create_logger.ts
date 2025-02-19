@@ -13,7 +13,8 @@ export enum LogLevel {
   trace = 0,
   debug = 1,
   info = 2,
-  error = 3,
+  warn = 3,
+  error = 4,
 }
 
 function getTimeString() {
@@ -38,7 +39,7 @@ export function createLogger(logLevel: LogLevel) {
       }
     },
     warn: (...args: any[]) => {
-      if (logLevel <= LogLevel.error) {
+      if (logLevel <= LogLevel.warn) {
         // eslint-disable-next-line no-console
         console.warn(getTimeString(), ...args);
       }

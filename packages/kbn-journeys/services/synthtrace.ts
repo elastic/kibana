@@ -56,6 +56,10 @@ class LoggerAdapter implements Logger {
     this.log.info(args.join(this.joiner));
   }
 
+  warn(...args: any[]): void {
+    this.log.warning(args.join(this.joiner));
+  }
+
   error(arg: string | Error): void {
     this.log.error(arg);
   }
