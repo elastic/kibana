@@ -56,7 +56,7 @@ export function ChildStreamList({
           size="s"
           className={css`
             height: 40px;
-            align-content: center;
+            align-content: flexStart;
             font-weight: bold;
           `}
         >
