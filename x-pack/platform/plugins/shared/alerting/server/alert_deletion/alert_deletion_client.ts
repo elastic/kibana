@@ -5,22 +5,26 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { ElasticsearchClient, ISavedObjectsRepository, Logger, SavedObjectsUtils } from '@kbn/core/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
   ConcreteTaskInstance,
 } from '@kbn/task-manager-plugin/server';
-import { RULES_SETTINGS_SAVED_OBJECT_TYPE, RulesSettingsAlertDeletionProperties } from '../types';
+import { RULES_SETTINGS_SAVED_OBJECT_TYPE, RuleTypeRegistry, RulesSettingsAlertDeletionProperties, RulesSettingsProperties } from '../types';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { spaceIdToNamespace } from '../lib';
+import { GetAlertIndicesAlias, spaceIdToNamespace } from '../lib';
+import { IEventLogger } from '@kbn/event-log-plugin/server';
 
 export const ALERT_DELETION_TASK_TYPE = 'alert-deletion';
 
 interface ConstructorOpts {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
+  eventLogger: IEventLogger;
+  getAlertIndicesAlias: GetAlertIndicesAlias;
   internalSavedObjectsRepositoryPromise: Promise<ISavedObjectsRepository>;
   logger: Logger;
+  ruleTypeRegistry: RuleTypeRegistry;
   spacesStartPromise: Promise<SpacesPluginStart | undefined>;
   taskManagerSetup: TaskManagerSetupContract;
   taskManagerStartPromise: Promise<TaskManagerStartContract>;
@@ -28,13 +32,19 @@ interface ConstructorOpts {
 
 export class AlertDeletionClient {
   private logger: Logger;
+  private eventLogger: IEventLogger;
   private elasticsearchClientPromise: Promise<ElasticsearchClient>;
+  private readonly getAlertIndicesAlias: GetAlertIndicesAlias;
+  private readonly ruleTypeRegistry: RuleTypeRegistry;
   private readonly internalSavedObjectsRepositoryPromise: Promise<ISavedObjectsRepository>;
   private readonly spacesPluginStartPromise: Promise<SpacesPluginStart | undefined>;
   private readonly taskManagerStartPromise: Promise<TaskManagerStartContract>;
 
   constructor(opts: ConstructorOpts) {
     this.elasticsearchClientPromise = opts.elasticsearchClientPromise;
+    this.eventLogger = opts.eventLogger;
+    this.getAlertIndicesAlias = opts.getAlertIndicesAlias;
+    this.ruleTypeRegistry = opts.ruleTypeRegistry;
     this.internalSavedObjectsRepositoryPromise = opts.internalSavedObjectsRepositoryPromise;
     this.logger = opts.logger;
     this.spacesPluginStartPromise = opts.spacesStartPromise;
@@ -73,6 +83,7 @@ export class AlertDeletionClient {
       });
     } catch (err) {
       this.logger.error(`Error scheduling alert deletion task: ${err.message}`);
+      throw err;
     }
   }
 
@@ -86,6 +97,7 @@ export class AlertDeletionClient {
     abortController: AbortController
   ) => {
     try {
+      const runDate = new Date();
       const esClient = await this.elasticsearchClientPromise;
       const internalSavedObjectsRepository = await this.internalSavedObjectsRepositoryPromise;
       const spaces = await this.spacesPluginStartPromise;
@@ -93,12 +105,20 @@ export class AlertDeletionClient {
       const namespaces = spaceIds.map((spaceId: string) => spaceIdToNamespace(spaces, spaceId));
 
       // Query for rules settings in the specified spaces
-      const rulesSettings = internalSavedObjectsRepository.find({
+      const rulesSettings = await internalSavedObjectsRepository.find<RulesSettingsProperties>({
         type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
         namespaces,
       });
 
       // For each rules settings, call the library function to delete alerts
+      rulesSettings.saved_objects.forEach((settings) => {
+        const namespace = settings.namespaces && settings.namespaces.length > 0 ? settings.namespaces[0] : undefined;
+        const spaceId = SavedObjectsUtils.namespaceIdToString(namespace);
+
+        const indices = this.getAlertIndicesAlias(this.ruleTypeRegistry.getAllTypes(), spaceId);
+      });
+
+      // Add event log entry
     } catch (err) {}
   };
 }

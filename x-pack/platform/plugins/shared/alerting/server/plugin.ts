@@ -130,6 +130,7 @@ export const EVENT_LOG_ACTIONS = {
   executeTimeout: 'execute-timeout',
   untrackedInstance: 'untracked-instance',
   gap: 'gap',
+  deleteAlert: 'delete-alert',
 };
 export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
@@ -303,20 +304,23 @@ export class AlertingPlugin {
       taskRunnerFactory: this.taskRunnerFactory,
     });
 
+    this.eventLogger = plugins.eventLog.getLogger({
+      event: { provider: EVENT_LOG_PROVIDER },
+    });
+
     this.alertDeletionClient = new AlertDeletionClient({
       elasticsearchClientPromise: core
             .getStartServices()
             .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+      eventLogger: this.eventLogger,
+      getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       internalSavedObjectsRepositoryPromise: core.getStartServices().then(([{ savedObjects }]) =>
         savedObjects.createInternalRepository([RULES_SETTINGS_SAVED_OBJECT_TYPE])),
       logger: this.logger,
+      ruleTypeRegistry: this.ruleTypeRegistry!,
       spacesStartPromise: core.getStartServices().then(([_, alertingStart]) => alertingStart.spaces),
       taskManagerSetup: plugins.taskManager,
       taskManagerStartPromise,
-    });
-
-    this.eventLogger = plugins.eventLog.getLogger({
-      event: { provider: EVENT_LOG_PROVIDER },
     });
 
     this.eventLogService = plugins.eventLog;
