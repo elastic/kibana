@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useAbortableAsync } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { i18n } from '@kbn/i18n';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { useAbortableAsync } from '@kbn/react-hooks';
 import { useKibana } from './use_kibana';
 
 const getDetailsFromErrorResponse = (error: IHttpFetchError<ResponseErrorBody>) =>

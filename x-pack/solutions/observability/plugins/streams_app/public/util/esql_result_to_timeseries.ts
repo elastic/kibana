@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
-import type { UnparsedEsqlResponse } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import type { AbortableAsyncState } from '@kbn/react-hooks';
+import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { orderBy } from 'lodash';
 
 interface Timeseries<T extends string> {
