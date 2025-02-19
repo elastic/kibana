@@ -60,6 +60,5 @@
     "@kbn/search-types",
     "@kbn/object-utils",
     "@kbn/traced-es-client",
-    "@kbn/xstate-utils"
   ]
 }
