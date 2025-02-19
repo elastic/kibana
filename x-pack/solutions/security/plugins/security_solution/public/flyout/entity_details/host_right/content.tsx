@@ -51,20 +51,22 @@ export const HostPanelContent = ({
 
   return (
     <FlyoutBody>
-      {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
-        <>
-          <FlyoutRiskSummary
-            entityType={EntityType.host}
-            riskScoreData={riskScoreState}
-            recalculatingScore={recalculatingScore}
-            queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
-            openDetailsPanel={openDetailsPanel}
-            isPreviewMode={isPreviewMode}
-            isLinkEnabled={isLinkEnabled}
-          />
-          <EuiHorizontalRule />
-        </>
-      )}
+      {Array.isArray(riskScoreState.data) &&
+        riskScoreState.isModuleEnabled &&
+        riskScoreState.data.length > 0 && (
+          <>
+            <FlyoutRiskSummary
+              entityType={EntityType.host}
+              riskScoreData={riskScoreState}
+              recalculatingScore={recalculatingScore}
+              queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
+              openDetailsPanel={openDetailsPanel}
+              isPreviewMode={isPreviewMode}
+              isLinkEnabled={isLinkEnabled}
+            />
+            <EuiHorizontalRule />
+          </>
+        )}
       <AssetCriticalityAccordion
         entity={{ name: hostName, type: EntityType.host }}
         onChange={onAssetCriticalityChange}
