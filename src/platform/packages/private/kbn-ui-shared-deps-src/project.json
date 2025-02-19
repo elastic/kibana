@@ -10,7 +10,15 @@
       "!{projectRoot}/target/**/*"
     ]
   },
+  "implicitDependencies": [
+    "@kbn/ui-shared-deps-npm"
+  ],
   "targets": {
+    "build": {
+      "outputs": [
+        "{workspaceRoot}/bazel-bin/packages/kbn-ui-shared-deps-src"
+      ]
+    },
     "typecheck": {
       "inputs": [
         "src",

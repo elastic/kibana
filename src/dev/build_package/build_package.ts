@@ -20,7 +20,7 @@ const PATH_TO_WEBPACK_CLI = 'node_modules/.bin/webpack-cli';
 
 const getTargetDirForPackage = (packageFolder: string) => {
   // TODO: change this to avoid bazel-bin
-  return path.resolve(REPO_ROOT, 'bazel-bin', 'packages', packageFolder);
+  return path.resolve(REPO_ROOT, 'bazel-bin', packageFolder);
 };
 
 const getFullOutputPath = (packageFolder: string, commandName: string) => {
@@ -89,10 +89,10 @@ async function buildPackage(
     fs.readFileSync(path.resolve(packageRoot, 'package.json')).toString()
   );
   const packageName = packageConfig.name;
-  const packageFolder = path.basename(packageRoot);
+  const packageRelPath = path.relative(REPO_ROOT, packageRoot);
   const srcs = packageConfig.buildSourcePaths;
 
-  const outPath = getFullOutputPath(packageFolder, taskName);
+  const outPath = getFullOutputPath(packageRelPath, taskName);
   const webpackArgs = [
     '--config',
     path.resolve(packageRoot, 'webpack.config.js'),
@@ -114,7 +114,7 @@ async function buildPackage(
   await copySources({
     log,
     root: packageRoot,
-    targetDir: getTargetDirForPackage(packageFolder),
+    targetDir: getTargetDirForPackage(packageRelPath),
     files: srcs,
   });
 

@@ -10,6 +10,9 @@
     ]
   },
   "targets": {
+    "build": {
+      "outputs": ["{workspaceRoot}/bazel-bin/packages/kbn-ui-shared-deps-npm"]
+    },
     "typecheck": {
       "inputs": [
         "src",
