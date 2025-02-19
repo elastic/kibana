@@ -497,6 +497,7 @@ src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-rule
 src/platform/packages/shared/kbn-osquery-io-ts-types @elastic/security-asset-management
 src/platform/packages/shared/kbn-palettes @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-ux-infra_services-team
+src/platform/packages/shared/kbn-react-dom @elastic/appex-sharedux
 src/platform/packages/shared/kbn-react-field @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-react-hooks @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-recently-accessed @elastic/appex-sharedux
