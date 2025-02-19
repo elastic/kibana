@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { NewChat } from '@kbn/elastic-assistant';
+import { NewChatByTitle, useAssistantOverlay } from '@kbn/elastic-assistant';
 import { useUserData } from '../../../../detections/components/user_info';
 import { TabNavigation } from '../../../../common/components/navigation/tab_navigation';
 import { usePrebuiltRulesStatus } from '../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_status';
@@ -86,9 +86,26 @@ export const RulesTableToolbar = React.memo(() => {
     () => rules.filter((rule) => selectedRuleIds.includes(rule.id)),
     [rules, selectedRuleIds]
   );
+
+  const selectedRuleNames = useMemo(() => selectedRules.map((rule) => rule.name), [selectedRules]);
   const getPromptContext = useCallback(
     async () => getPromptContextFromDetectionRules(selectedRules),
     [selectedRules]
+  );
+
+  const chatTitle = useMemo(() => {
+    return `${i18nAssistant.DETECTION_RULES_CONVERSATION_ID} - ${selectedRuleNames.join(', ')}`;
+  }, [selectedRuleNames]);
+
+  const { showAssistantOverlay } = useAssistantOverlay(
+    'detection-rules',
+    chatTitle,
+    i18nAssistant.RULE_MANAGEMENT_CONTEXT_DESCRIPTION,
+    getPromptContext,
+    null,
+    i18nAssistant.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS,
+    i18nAssistant.RULE_MANAGEMENT_CONTEXT_TOOLTIP,
+    isAssistantEnabled
   );
 
   return (
@@ -98,15 +115,7 @@ export const RulesTableToolbar = React.memo(() => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         {hasAssistantPrivilege && selectedRules.length > 0 && (
-          <NewChat
-            category="detection-rules"
-            conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
-            description={i18nAssistant.RULE_MANAGEMENT_CONTEXT_DESCRIPTION}
-            getPromptContext={getPromptContext}
-            suggestedUserPrompt={i18nAssistant.EXPLAIN_THEN_SUMMARIZE_RULE_DETAILS}
-            tooltip={i18nAssistant.RULE_MANAGEMENT_CONTEXT_TOOLTIP}
-            isAssistantEnabled={isAssistantEnabled}
-          />
+          <NewChatByTitle showAssistantOverlay={showAssistantOverlay} />
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

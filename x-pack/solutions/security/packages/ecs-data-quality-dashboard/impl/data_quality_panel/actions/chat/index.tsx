@@ -52,7 +52,7 @@ const ChatActionComponent: FC<Props> = ({ indexName, markdownComment, chatTitle 
     isAssistantEnabled
   );
   return (
-    <NewChatByTitle asLink showAssistantOverlay={showAssistantOverlay} iconType={null}>
+    <NewChatByTitle asLink showAssistantOverlay={showAssistantOverlay}>
       <span css={styles.linkText}>
         <AssistantIcon />
         {ASK_ASSISTANT}

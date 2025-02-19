@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
-import { NewChat } from '@kbn/elastic-assistant';
+import { NewChatByTitle, useAssistantOverlay } from '@kbn/elastic-assistant';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import type { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 
 import * as i18n from './translations';
-import * as i18nAssistant from '../../../pages/detection_engine/rules/translations';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 
 interface RuleStatusFailedCallOutProps {
+  ruleNameForChat: string;
   ruleName?: string | undefined;
   dataSources?: string[] | undefined;
   date: string;
@@ -29,6 +29,7 @@ interface RuleStatusFailedCallOutProps {
 
 const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> = ({
   ruleName,
+  ruleNameForChat,
   dataSources,
   date,
   message,
@@ -42,6 +43,20 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
         ? `Rule name: ${ruleName}\nData sources: ${dataSources}\nError message: ${message}`
         : `Error message: ${message}`,
     [message, ruleName, dataSources]
+  );
+
+  const chatTitle = useMemo(() => {
+    return `${ruleNameForChat} - ${title} ${date}`;
+  }, [date, title, ruleNameForChat]);
+  const { showAssistantOverlay } = useAssistantOverlay(
+    'detection-rules',
+    chatTitle,
+    i18n.ASK_ASSISTANT_DESCRIPTION,
+    getPromptContext,
+    null,
+    i18n.ASK_ASSISTANT_USER_PROMPT,
+    i18n.ASK_ASSISTANT_TOOLTIP,
+    isAssistantEnabled
   );
   if (!shouldBeDisplayed) {
     return null;
@@ -77,18 +92,9 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
           {message}
         </EuiCodeBlock>
         {hasAssistantPrivilege && (
-          <NewChat
-            category="detection-rules"
-            color={color}
-            conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
-            description={i18n.ASK_ASSISTANT_DESCRIPTION}
-            getPromptContext={getPromptContext}
-            suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
-            tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
-            isAssistantEnabled={isAssistantEnabled}
-          >
+          <NewChatByTitle showAssistantOverlay={showAssistantOverlay} color={color}>
             {i18n.ASK_ASSISTANT_ERROR_BUTTON}
-          </NewChat>
+          </NewChatByTitle>
         )}
       </EuiCallOut>
     </div>

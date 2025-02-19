@@ -14,6 +14,8 @@ export interface Props {
   /** Optionally render new chat as a link */
   asLink?: boolean;
   children?: React.ReactNode;
+  /** Optionally specify color of empty button */
+  color?: 'text' | 'accent' | 'primary' | 'success' | 'warning' | 'danger';
   showAssistantOverlay: (show: boolean) => void;
   /** Defaults to `discuss`. If null, the button will not have an icon */
   iconType?: string | null;
@@ -24,6 +26,7 @@ export interface Props {
 const NewChatByTitleComponent: React.FC<Props> = ({
   asLink = false,
   children = i18n.NEW_CHAT,
+  color = 'primary',
   showAssistantOverlay,
   iconType,
   iconOnly = false,
@@ -44,7 +47,7 @@ const NewChatByTitleComponent: React.FC<Props> = ({
   return useMemo(
     () =>
       asLink ? (
-        <EuiLink data-test-subj="newChatLink" onClick={showOverlay}>
+        <EuiLink color={color} data-test-subj="newChatLink" onClick={showOverlay}>
           {children}
         </EuiLink>
       ) : iconOnly ? (
@@ -59,6 +62,7 @@ const NewChatByTitleComponent: React.FC<Props> = ({
         </EuiToolTip>
       ) : (
         <EuiButtonEmpty
+          color={color}
           data-test-subj="newChatByTitle"
           iconType={icon}
           onClick={showOverlay}
@@ -67,7 +71,7 @@ const NewChatByTitleComponent: React.FC<Props> = ({
           {children}
         </EuiButtonEmpty>
       ),
-    [children, icon, showOverlay, iconOnly]
+    [asLink, color, showOverlay, children, iconOnly, icon]
   );
 };
 
