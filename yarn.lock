@@ -6281,11 +6281,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-application@link:src/platform/packages/private/kbn-management/settings/application":
+"@kbn/management-settings-application@link:src/platform/packages/shared/kbn-management/settings/application":
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-components-field-category@link:src/platform/packages/private/kbn-management/settings/components/field_category":
+"@kbn/management-settings-components-field-category@link:src/platform/packages/shared/kbn-management/settings/components/field_category":
   version "0.0.0"
   uid ""
 
@@ -6297,7 +6297,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-components-form@link:src/platform/packages/private/kbn-management/settings/components/form":
+"@kbn/management-settings-components-form@link:src/platform/packages/shared/kbn-management/settings/components/form":
   version "0.0.0"
   uid ""
 
@@ -6321,7 +6321,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-storybook-config@link:packages/kbn-management/storybook/config":
+"@kbn/management-storybook-config@link:src/platform/packages/shared/kbn-management/storybook/config":
   version "0.0.0"
   uid ""
 

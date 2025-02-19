@@ -607,17 +607,17 @@ packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 src/platform/packages/shared/kbn-management/cards_navigation @elastic/kibana-management
 src/platform/plugins/shared/management @elastic/kibana-management
-src/platform/packages/private/kbn-management/settings/application @elastic/kibana-management
-src/platform/packages/private/kbn-management/settings/components/field_category @elastic/kibana-management
+src/platform/packages/shared/kbn-management/settings/application @elastic/kibana-management
+src/platform/packages/shared/kbn-management/settings/components/field_category @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/components/field_input @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/components/field_row @elastic/kibana-management
-src/platform/packages/private/kbn-management/settings/components/form @elastic/kibana-management
+src/platform/packages/shared/kbn-management/settings/components/form @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/field_definition @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/setting_ids @elastic/appex-sharedux @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/section_registry @elastic/appex-sharedux @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/types @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/utilities @elastic/kibana-management
-packages/kbn-management/storybook/config @elastic/kibana-management
+src/platform/packages/shared/kbn-management/storybook/config @elastic/kibana-management
 test/plugin_functional/plugins/management_test_plugin @elastic/kibana-management
 packages/kbn-manifest @elastic/kibana-core
 src/platform/packages/private/kbn-mapbox-gl @elastic/kibana-gis
