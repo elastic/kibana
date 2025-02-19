@@ -1,8 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type {
@@ -19,7 +21,7 @@ import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { Required, ValuesType } from 'utility-types';
 import { DedotObject } from '@kbn/utility-types';
 import { unflattenObject } from '@kbn/task-manager-plugin/server/metrics/lib';
-import { esqlResultToPlainObjects } from '../esql_result_to_plain_objects';
+import { esqlResultToPlainObjects } from './esql_result_to_plain_objects';
 
 type SearchRequest = ESSearchRequest & {
   index: string | string[];
@@ -78,7 +80,7 @@ export type EsqlQueryResponse = UnparsedEsqlResponse | ParsedEsqlResponse;
  * An Elasticsearch Client with a fully typed `search` method and built-in
  * APM instrumentation.
  */
-export interface ObservabilityElasticsearchClient {
+export interface TracedElasticsearchClient {
   search<TDocument = unknown, TSearchRequest extends SearchRequest = SearchRequest>(
     operationName: string,
     parameters: TSearchRequest
@@ -108,7 +110,7 @@ export interface ObservabilityElasticsearchClient {
   client: ElasticsearchClient;
 }
 
-export function createObservabilityEsClient({
+export function createTracedEsClient({
   client,
   logger,
   plugin,
@@ -118,7 +120,7 @@ export function createObservabilityEsClient({
   logger: Logger;
   plugin?: string;
   labels?: Record<string, string>;
-}): ObservabilityElasticsearchClient {
+}): TracedElasticsearchClient {
   // wraps the ES calls in a named APM span for better analysis
   // (otherwise it would just eg be a _search span)
   const callWithLogger = <T>(

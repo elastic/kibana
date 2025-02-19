@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { getTimeZone } from '@kbn/observability-utils-browser/utils/ui_settings/get_timezone';
 import { css } from '@emotion/css';
 import { AbortableAsyncState } from '@kbn/react-hooks';
-import type { UnparsedEsqlResponse } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
 import { useKibana } from '../../hooks/use_kibana';
 import { LoadingPanel } from '../loading_panel';

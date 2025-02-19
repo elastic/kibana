@@ -16,14 +16,9 @@
     "target/**/*"
   ],
   "kbn_references": [
+    "@kbn/core",
     "@kbn/es-types",
-    "@kbn/es-query",
-    "@kbn/observability-utils-common",
-    "@kbn/traced-es-client",
-    "@kbn/alerting-plugin",
-    "@kbn/rule-registry-plugin",
-    "@kbn/rule-data-utils",
-    "@kbn/aiops-log-pattern-analysis",
-    "@kbn/calculate-auto",
+    "@kbn/es-errors",
+    "@kbn/core-test-helpers-kbn-server",
   ]
 }
