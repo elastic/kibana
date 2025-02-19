@@ -475,6 +475,42 @@ export async function pickTestGroupRunOrder() {
     bk.uploadArtifacts('ftr_run_order.json');
   }
 
+  const rawScoutConfigs = {
+    discover_enhanced: {
+      group: 'platform',
+      pluginPath: 'x-pack/platform/plugins/private/discover_enhanced',
+      configs: [
+        'x-pack/platform/plugins/private/discover_enhanced/ui_tests/parallel.playwright.config.ts',
+        'x-pack/platform/plugins/private/discover_enhanced/ui_tests/playwright.config.ts',
+      ],
+    },
+    maps: {
+      group: 'platform',
+      pluginPath: 'x-pack/platform/plugins/shared/maps',
+      configs: ['x-pack/platform/plugins/shared/maps/ui_tests/playwright.config.ts'],
+    },
+    observability_onboarding: {
+      group: 'observability',
+      pluginPath: 'x-pack/solutions/observability/plugins/observability_onboarding',
+      configs: [
+        'x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/parallel.playwright.config.ts',
+        'x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/playwright.config.ts',
+      ],
+    },
+  };
+
+  Fs.writeFileSync('scout_test_configs.json', JSON.stringify(rawScoutConfigs, null, 2));
+  bk.uploadArtifacts('scout_test_configs.json');
+
+  const pluginsWithScoutConfigs: string[] = Object.keys(rawScoutConfigs);
+  const scoutGroups = pluginsWithScoutConfigs.map((plugin) => {
+    return {
+      title: plugin,
+      key: plugin,
+      queue: defaultQueue,
+    };
+  });
+
   // upload the step definitions to Buildkite
   bk.uploadSteps(
     [
@@ -556,6 +592,34 @@ export async function pickTestGroupRunOrder() {
                   },
                 })
               ),
+          }
+        : [],
+      scoutGroups.length
+        ? {
+            group: 'Scout Configs',
+            key: 'scout-configs',
+            depends_on: FTR_CONFIGS_DEPS,
+            steps: scoutGroups.map(
+              ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
+                label: title,
+                command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
+                timeout_in_minutes: 60,
+                agents: expandAgentQueue(queue),
+                env: {
+                  SCOUT_CONFIG_GROUP_KEY: key,
+                  ...ftrExtraArgs,
+                  ...envFromlabels,
+                },
+                retry: {
+                  automatic: [
+                    { exit_status: '-1', limit: 3 },
+                    ...(FTR_CONFIGS_RETRY_COUNT > 0
+                      ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
+                      : []),
+                  ],
+                },
+              })
+            ),
           }
         : [],
     ].flat()
