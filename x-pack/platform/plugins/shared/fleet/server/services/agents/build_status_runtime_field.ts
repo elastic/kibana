@@ -103,14 +103,18 @@ function _buildSource(
   });
 
   return `
-    long lastCheckinMillis = ${field('last_checkin')}.size() > 0
+    long lastCheckinMillis = doc.containsKey(${fieldPath('last_checkin')}) && ${field(
+    'last_checkin'
+  )}.size() > 0
       ? ${field('last_checkin')}.value.toInstant().toEpochMilli()
       : (
           ${field('enrolled_at')}.size() > 0
           ? ${field('enrolled_at')}.value.toInstant().toEpochMilli()
           : -1
         );
-    if (${field('active')}.size() > 0 && ${field('active')}.value == false) {
+    if (!doc.containsKey(${fieldPath('active')}) || (${field('active')}.size() > 0 && ${field(
+    'active'
+  )}.value == false)) {
       emit('unenrolled');
     }
     ${agentIsInactiveCondition ? `else if (${agentIsInactiveCondition}) {emit('inactive');}` : ''}
