@@ -53,7 +53,7 @@ export function useGetPreviewData({
             },
             groupings,
             remoteName,
-            ...(!!objective && { objective }),
+            objective,
           },
         },
         signal,
