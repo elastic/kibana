@@ -82,7 +82,7 @@ export const useAssistantOverlay = (
 
   const { refetch } = useFetchCurrentUserConversations({
     http,
-    filter: `title:${conversationTitle}`,
+    filter: `title:"${conversationTitle}"`,
     // prevent from running automatically
     isAssistantEnabled: false,
   });
@@ -117,7 +117,7 @@ export const useAssistantOverlay = (
     // shouldCreateConversation should only be passed for
     // non-default conversations that may need to be initialized
     async (showOverlay: boolean) => {
-      if (promptContextId != null && isAssistantEnabled) {
+      if (promptContextId != null && isAssistantEnabled && conversationTitle != null) {
         const refetched = await refetch();
         const conversation =
           refetched && conversationTitle

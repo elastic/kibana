@@ -323,13 +323,18 @@ const AssistantComponent: React.FC<Props> = ({
   });
 
   useEffect(() => {
-    // Adding `conversationTitle !== selectedConversationTitle` to
+    // reset PromptContexts state when conversation changes
     if (
-      currentConversation?.messages.length ||
-      // prevent auto-run still executing after changing selected conversation
-      (currentConversation && lastConversation?.title !== currentConversation?.title) ||
-      autoPopulatedOnce
+      autoPopulatedOnce &&
+      currentConversation &&
+      lastConversation?.title !== currentConversation?.title
     ) {
+      setAutoPopulatedOnce(false);
+      setSelectedPromptContexts({});
+      setUserPrompt(null);
+      return;
+    }
+    if (currentConversation?.messages.length || autoPopulatedOnce) {
       return;
     }
 
@@ -363,16 +368,16 @@ const AssistantComponent: React.FC<Props> = ({
       }
     }
   }, [
-    promptContexts,
-    promptContextId,
-    lastConversation,
-    currentConversation,
-    selectedPromptContexts,
-    autoPopulatedOnce,
-    isLoadingAnonymizationFields,
-    isErrorAnonymizationFields,
     anonymizationFields,
+    autoPopulatedOnce,
+    currentConversation,
+    isErrorAnonymizationFields,
     isFetchedAnonymizationFields,
+    isLoadingAnonymizationFields,
+    lastConversation?.title,
+    promptContextId,
+    promptContexts,
+    selectedPromptContexts,
     setUserPrompt,
   ]);
 
