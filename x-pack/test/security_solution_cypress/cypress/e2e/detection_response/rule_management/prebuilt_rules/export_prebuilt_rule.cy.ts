@@ -6,7 +6,7 @@
  */
 
 import { bulkExportRules } from '../../../../tasks/rules_bulk_actions';
-import { exportRuleFromDetailsPage, visitRuleDetailsPage } from '../../../../tasks/rule_details';
+import { exportRuleFromDetailsPage } from '../../../../tasks/rule_details';
 import {
   expectedExportedRule,
   expectedExportedRules,
@@ -19,7 +19,7 @@ import {
   filterByElasticRules,
   selectAllRules,
 } from '../../../../tasks/alerts_detection_rules';
-import { TOASTER_BODY } from '../../../../screens/alerts_detection_rules';
+import { RULE_NAME, TOASTER_BODY } from '../../../../screens/alerts_detection_rules';
 import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import { createAndInstallMockedPrebuiltRules } from '../../../../tasks/api_calls/prebuilt_rules';
@@ -96,8 +96,7 @@ describe(
 
       it('can export a non-customized prebuilt rule from the rule details page', function () {
         findRuleByRuleId(PREBUILT_RULE_ID).as('prebuiltRuleResponse');
-        visitRuleDetailsPage(PREBUILT_RULE_ID);
-        visitRuleDetailsPage(PREBUILT_RULE_ID);
+        cy.get(RULE_NAME).contains('Non-customized prebuilt rule').click();
         exportRuleFromDetailsPage();
         cy.wait('@bulk_action').then(({ response }) => {
           cy.wrap(response?.body).should('eql', expectedExportedRule(this.prebuiltRuleResponse));
@@ -109,7 +108,7 @@ describe(
         patchRule(PREBUILT_RULE_ID, { name: 'Customized prebuilt rule' }).as(
           'prebuiltRuleResponse'
         ); // We want to make this a customized prebuilt rule
-        visitRuleDetailsPage(PREBUILT_RULE_ID);
+        cy.get(RULE_NAME).contains('Customized prebuilt rule').click();
         exportRuleFromDetailsPage();
         cy.wait('@bulk_action').then(({ response }) => {
           cy.wrap(response?.body).should('eql', expectedExportedRule(this.prebuiltRuleResponse));
@@ -118,7 +117,7 @@ describe(
       });
 
       it('can export a custom rule from the rule details page', function () {
-        visitRuleDetailsPage('custom_rule_id');
+        cy.get(RULE_NAME).contains('Custom rule to export').click();
         exportRuleFromDetailsPage();
         cy.wait('@bulk_action').then(({ response }) => {
           cy.wrap(response?.body).should('eql', expectedExportedRule(this.customRuleResponse));
