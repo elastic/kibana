@@ -45,6 +45,9 @@ export const riskEngineConfigurationTypeMappings: SavedObjectsType['mappings'] =
         },
       },
     },
+    excludeAlertStatuses: {
+      type: 'keyword',
+    },
   },
 };
 
@@ -59,6 +62,28 @@ const version1: SavedObjectsModelVersion = {
   ],
 };
 
+const version2: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        excludeAlertStatuses: { type: 'keyword' },
+      },
+    },
+    {
+      type: 'data_backfill',
+      backfillFn: (document) => {
+        return {
+          attributes: {
+            ...document.attributes,
+            excludeAlertStatuses: document.attributes.excludeAlertStatuses || ['closed'],
+          },
+        };
+      },
+    },
+  ],
+};
+
 export const riskEngineConfigurationType: SavedObjectsType = {
   name: riskEngineConfigurationTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
@@ -67,5 +92,6 @@ export const riskEngineConfigurationType: SavedObjectsType = {
   mappings: riskEngineConfigurationTypeMappings,
   modelVersions: {
     1: version1,
+    2: version2,
   },
 };

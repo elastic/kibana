@@ -97,7 +97,6 @@ Object {
         "type": "reindex",
       },
       "details": "This index has version: 7.17.28-8.0.0",
-      "frozen": true,
       "index": "frozen_index",
       "isCritical": true,
       "message": "Old index with a compatibility version < 8.0",
@@ -176,6 +175,22 @@ Object {
     Object {
       "correctiveAction": Object {
         "blockerForReindexing": undefined,
+        "transformIds": Array [
+          "abc",
+        ],
+        "type": "reindex",
+      },
+      "details": "This index has version: 7.17.25",
+      "index": "transforms_index",
+      "isCritical": true,
+      "message": "Old index with a compatibility version < 8.0",
+      "resolveDuringUpgrade": false,
+      "type": "index_settings",
+      "url": "https://www.elastic.co/guide/en/elasticsearch/reference/master/breaking-changes-9.0.html",
+    },
+    Object {
+      "correctiveAction": Object {
+        "blockerForReindexing": undefined,
         "type": "reindex",
       },
       "details": "This index has version: 7.17.25",
@@ -217,7 +232,7 @@ Object {
       "url": "https://github.com/elastic/elasticsearch/pull/117172",
     },
   ],
-  "totalCriticalDeprecations": 8,
+  "totalCriticalDeprecations": 9,
   "totalCriticalHealthIssues": 0,
 }
 `;

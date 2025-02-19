@@ -21,12 +21,13 @@ import {
   IlmLocatorParams,
   PolicyFromES,
 } from '@kbn/index-lifecycle-management-common-shared';
-import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import { i18n } from '@kbn/i18n';
+import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../hooks/use_kibana';
 import { EditLifecycleModal, LifecycleEditAction } from './modal';
 import { RetentionSummary } from './summary';
 import { RetentionMetadata } from './metadata';
+import { getFormattedError } from '../../util/errors';
 
 function useLifecycleState({
   definition,
@@ -156,7 +157,7 @@ export function StreamDetailLifecycle({
         title: i18n.translate('xpack.streams.streamDetailLifecycle.failed', {
           defaultMessage: 'Failed to update lifecycle',
         }),
-        toastMessage: 'body' in error ? error.body.message : error.message,
+        toastMessage: getFormattedError(error).message,
       });
     } finally {
       setUpdateInProgress(false);

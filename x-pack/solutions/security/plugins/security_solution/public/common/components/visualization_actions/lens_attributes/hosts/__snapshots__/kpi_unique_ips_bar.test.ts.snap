@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`kpiUniqueIpsBarLensAttributes should render 1`] = `
+exports[`getKpiUniqueIpsBarLensAttributes should render 1`] = `
 Object {
   "description": "",
   "references": Array [
