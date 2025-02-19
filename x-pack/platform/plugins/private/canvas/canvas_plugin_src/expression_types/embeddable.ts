@@ -6,14 +6,12 @@
  */
 
 import { ExpressionTypeDefinition } from '@kbn/expressions-plugin/common';
-import { EmbeddableInput } from '../../types';
 import { EmbeddableTypes } from './embeddable_types';
 
 export const EmbeddableExpressionType = 'embeddable';
-export type { EmbeddableInput };
 export { EmbeddableTypes };
 
-export interface EmbeddableExpression<Input extends EmbeddableInput> {
+export interface EmbeddableExpression {
   /**
    * The type of the expression result
    */
@@ -21,7 +19,7 @@ export interface EmbeddableExpression<Input extends EmbeddableInput> {
   /**
    * The input to be passed to the embeddable
    */
-  input: Input;
+  input: Record<string, unknown>;
   /**
    * The type of embeddable
    */
@@ -35,11 +33,11 @@ export interface EmbeddableExpression<Input extends EmbeddableInput> {
 
 export const embeddableType = (): ExpressionTypeDefinition<
   typeof EmbeddableExpressionType,
-  EmbeddableExpression<any>
+  EmbeddableExpression
 > => ({
   name: EmbeddableExpressionType,
   to: {
-    render: (embeddableExpression: EmbeddableExpression<any>) => {
+    render: (embeddableExpression: EmbeddableExpression) => {
       return {
         type: 'render',
         as: EmbeddableExpressionType,

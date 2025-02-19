@@ -31,6 +31,7 @@ export const RunActionParamsSchema = schema.object({
   signal: schema.maybe(schema.any()),
   timeout: schema.maybe(schema.number()),
   raw: schema.maybe(schema.boolean()),
+  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
 });
 
 export const BedrockMessageSchema = schema.object(
