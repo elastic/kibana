@@ -257,8 +257,7 @@ export function WorkspacePanelWrapper({
             position: absolute;
           }
           ${isFullscreen &&
-          `
-            margin-bottom: 0;
+          ` margin-bottom: 0;
             .lnsWorkspacePanelWrapper__pageContentBody {
               box-shadow: none;
               border-radius: 0;

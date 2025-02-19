@@ -77,7 +77,7 @@ export function ExpressionWrapper({
   if (!expression) return null;
   return (
     <div
-      className={classNames('lnsExpressionRenderer', className)}
+      className={classNames('lnsExpressionRenderer', 'eui-scrollBar', className)}
       css={lnsExpressionRendererStyle}
       style={style}
       data-test-subj="lens-embeddable"

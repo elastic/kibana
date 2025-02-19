@@ -21,7 +21,6 @@ import {
   useEuiTheme,
   EuiSpacer,
   UseEuiTheme,
-  useEuiScrollBar,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -669,7 +668,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         value={dropProps.value}
         order={dropProps.order}
       >
-        <div className="lnsWorkspacePanelWrapper__pageContentBody" css={pageContentBodyStyles}>
+        <div
+          className="lnsWorkspacePanelWrapper__pageContentBody eui-scrollBar"
+          css={pageContentBodyStyles}
+        >
           {renderWorkspaceContents()}
         </div>
       </Droppable>
@@ -786,7 +788,7 @@ export const VisualizationWrapper = ({
 
   return (
     <div
-      className="lnsExpressionRenderer"
+      className="lnsExpressionRenderer eui-scrollBar"
       css={[
         lnsExpressionRendererStyle,
         `
@@ -851,7 +853,6 @@ export const promptIllustrationStyle = ({ euiTheme }: UseEuiTheme) => {
 };
 
 export const pageContentBodyStyles = ({ euiTheme }: UseEuiTheme) => {
-  const euiScrollBar = useEuiScrollBar();
   return css`
     flex-grow: 1;
     display: flex;
@@ -861,7 +862,6 @@ export const pageContentBodyStyles = ({ euiTheme }: UseEuiTheme) => {
     border-radius: ${euiTheme.border.radius.medium};
     background: ${euiTheme.colors.emptyShade};
     height: 100%;
-    ${euiScrollBar};
     & > * {
       flex: 1 1 100%;
       display: flex;
