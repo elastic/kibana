@@ -40,7 +40,6 @@ export const deserializeState = async ({
   serializedState: SerializedPanelState<SearchEmbeddableSerializedState>;
   discoverServices: DiscoverServices;
 }) => {
-  debugger;
   const panelState = pick(serializedState.rawState, EDITABLE_PANEL_KEYS);
   const savedObjectId = serializedState.rawState.savedObjectId;
   if (savedObjectId) {
