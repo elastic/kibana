@@ -3950,7 +3950,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-rule-utils@link:x-pack/platform/packages/shared/alerting_rule_utils":
+"@kbn/alerting-rule-utils@link:x-pack/platform/packages/shared/alerting-rule-utils":
   version "0.0.0"
   uid ""
 
@@ -6558,11 +6558,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-alert-details@link:x-pack/solutions/observability/packages/alert_details":
+"@kbn/observability-alert-details@link:x-pack/solutions/observability/packages/alert-details":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-alerting-test-data@link:x-pack/solutions/observability/packages/alerting_test_data":
+"@kbn/observability-alerting-test-data@link:x-pack/solutions/observability/packages/alerting-test-data":
   version "0.0.0"
   uid ""
 
@@ -6570,7 +6570,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-get-padded-alert-time-range-util@link:x-pack/solutions/observability/packages/get_padded_alert_time_range_util":
+"@kbn/observability-get-padded-alert-time-range-util@link:x-pack/solutions/observability/packages/get-padded-alert-time-range-util":
   version "0.0.0"
   uid ""
 
