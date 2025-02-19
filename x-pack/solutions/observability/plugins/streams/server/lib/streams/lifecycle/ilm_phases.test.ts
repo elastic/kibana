@@ -8,7 +8,7 @@
 import { ilmPhases } from './ilm_phases';
 
 describe('lifecycle helpers', () => {
-  describe('ilmStats', () => {
+  describe('ilmPhases', () => {
     it('aggregates size of each phase', () => {
       const stats = ilmPhases({
         policy: {
