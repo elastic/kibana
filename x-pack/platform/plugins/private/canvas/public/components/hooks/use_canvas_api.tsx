@@ -9,7 +9,6 @@ import { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { BehaviorSubject, Subject } from 'rxjs';
 
-import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 import { ViewMode } from '@kbn/presentation-publishing';
 
 import { embeddableInputToExpression } from '../../../canvas_plugin_src/renderers/embeddable/embeddable_input_to_expression';
@@ -28,7 +27,7 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
   const dispatch = useDispatch();
 
   const createNewEmbeddable = useCallback(
-    (type: string, embeddableInput: EmbeddableInput) => {
+    (type: string, embeddableInput: object) => {
       if (trackCanvasUiMetric) {
         trackCanvasUiMetric(METRIC_TYPE.CLICK, type);
       }
@@ -60,7 +59,7 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
         initialState,
       }: {
         panelType: string;
-        initialState: EmbeddableInput;
+        initialState: object;
       }) => {
         createNewEmbeddable(panelType, initialState);
       },
