@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, unmountComponentAtNode } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
@@ -58,9 +58,10 @@ export const getMetricVisRenderer = (
     reuseDomNode: true,
     render: async (domNode, { visData, visConfig, overrides }, handlers) => {
       const { core, plugins } = deps.getStartDeps();
+      const root = createRoot(domNode);
 
       handlers.onDestroy(() => {
-        unmountComponentAtNode(domNode);
+        root.unmount();
       });
 
       const filterable = visData.rows.length
@@ -85,7 +86,7 @@ export const getMetricVisRenderer = (
       };
 
       const { MetricVis } = await import('../components/metric_vis');
-      render(
+      root.render(
         <KibanaRenderContextProvider {...core}>
           <div
             data-test-subj="mtrVis"
@@ -106,8 +107,7 @@ export const getMetricVisRenderer = (
               overrides={overrides}
             />
           </div>
-        </KibanaRenderContextProvider>,
-        domNode
+        </KibanaRenderContextProvider>
       );
     },
   });
