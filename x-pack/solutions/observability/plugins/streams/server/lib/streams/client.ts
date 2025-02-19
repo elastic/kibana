@@ -226,6 +226,7 @@ export class StreamsClient {
       }
     }
   }
+
   /**
    * Creates or updates a stream. The routing of the parent is
    * also updated (including syncing to Elasticsearch).
