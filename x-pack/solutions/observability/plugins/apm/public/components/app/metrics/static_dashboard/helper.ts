@@ -16,6 +16,8 @@ interface DashboardFileProps {
   agentName?: string;
   runtimeName?: string;
   serverlessType?: string;
+  telemetrySdkName?: string;
+  telemetrySdkLanguage?: string;
 }
 
 export interface MetricsDashboardProps extends DashboardFileProps {

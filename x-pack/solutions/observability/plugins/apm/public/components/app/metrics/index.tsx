@@ -22,10 +22,16 @@ import { isLogsOnlySignal } from '../../../utils/get_signal_type';
 import { ServiceTabEmptyState } from '../service_tab_empty_state';
 
 export function Metrics() {
-  const { agentName, runtimeName, serverlessType } = useApmServiceContext();
+  const {
+    agentName,
+    runtimeName,
+    serverlessType,
+    serviceEntitySummary,
+    telemetrySdkLanguage,
+    telemetrySdkName,
+  } = useApmServiceContext();
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
   const { dataView } = useAdHocApmDataView();
-  const { serviceEntitySummary } = useApmServiceContext();
 
   const hasLogsOnlySignal =
     serviceEntitySummary?.dataStreamTypes && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
@@ -40,6 +46,8 @@ export function Metrics() {
 
   const hasStaticDashboard = hasDashboardFile({
     agentName,
+    telemetrySdkLanguage,
+    telemetrySdkName,
     runtimeName,
     serverlessType,
   });

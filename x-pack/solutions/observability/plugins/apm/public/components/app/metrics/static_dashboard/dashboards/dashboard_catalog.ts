@@ -18,6 +18,10 @@ export const AGENT_NAME_DASHBOARD_FILE_MAPPING: Record<string, string> = {
   'opentelemetry/dotnet/elastic': 'opentelemetry_dotnet',
 };
 
+export const TELEMETRY_SDK_DASHBOARD_FILE_MAPPING: Record<string, string> = {
+  // to be implemented
+};
+
 /**
  * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
  * See https://webpack.js.org/api/module-methods/#magic-comments
