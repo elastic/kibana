@@ -20,7 +20,20 @@
     "classes": [],
     "functions": [],
     "interfaces": [],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.ScoutTestRunConfigCategory",
+        "type": "Enum",
+        "tags": [],
+        "label": "ScoutTestRunConfigCategory",
+        "description": [],
+        "path": "packages/kbn-scout-info/src/reporting.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "@kbn/scout-info",
