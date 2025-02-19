@@ -1429,6 +1429,7 @@
         "eslint-plugin-mocha",
         "eslint-plugin-no-unsanitized",
         "eslint-plugin-node",
+        "eslint-plugin-playwright",
         "eslint-plugin-react",
         "eslint-plugin-react-hooks",
         "eslint-plugin-react-perf",
