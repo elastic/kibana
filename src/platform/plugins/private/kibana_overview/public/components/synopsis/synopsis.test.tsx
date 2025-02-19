@@ -25,52 +25,50 @@ describe('Synopsis component', () => {
     expect(getByText('this is a great tutorial about...')).toBeInTheDocument();
   });
 
-  describe('renders props', () => {
-    test('iconType', () => {
-      const { container } = render(
-        <Synopsis
-          id={'tutorial'}
-          description="this is a great tutorial about..."
-          title="Great tutorial"
-          url="link_to_item"
-          iconType="logoApache"
-          wrapInPanel
-        />
-      );
+  test('iconType', () => {
+    const { container } = render(
+      <Synopsis
+        id={'tutorial'}
+        description="this is a great tutorial about..."
+        title="Great tutorial"
+        url="link_to_item"
+        iconType="logoApache"
+        wrapInPanel
+      />
+    );
 
-      const icon = container.querySelector('[data-euiicon-type="logoApache"]');
-      expect(icon).toBeInTheDocument();
-    });
+    const icon = container.querySelector('[data-euiicon-type="logoApache"]');
+    expect(icon).toBeInTheDocument();
+  });
 
-    test('iconUrl', () => {
-      const { getByRole } = render(
-        <Synopsis
-          id={'tutorial'}
-          description="this is a great tutorial about..."
-          title="Great tutorial"
-          url="link_to_item"
-          iconUrl="icon_url"
-          wrapInPanel
-        />
-      );
-      const anchorElement = getByRole('link', {
-        name: 'Great tutorial',
-      });
-      expect(anchorElement).toHaveAttribute('href', 'link_to_item');
+  test('iconUrl', () => {
+    const { getByRole } = render(
+      <Synopsis
+        id={'tutorial'}
+        description="this is a great tutorial about..."
+        title="Great tutorial"
+        url="link_to_item"
+        iconUrl="icon_url"
+        wrapInPanel
+      />
+    );
+    const anchorElement = getByRole('link', {
+      name: 'Great tutorial',
     });
+    expect(anchorElement).toHaveAttribute('href', 'link_to_item');
+  });
 
-    test('isBeta', () => {
-      const { getByText } = render(
-        <Synopsis
-          id={'tutorial'}
-          description="this is a great tutorial about..."
-          title="Great tutorial"
-          url="link_to_item"
-          isBeta={true}
-          wrapInPanel
-        />
-      );
-      expect(getByText('Beta')).toBeInTheDocument();
-    });
+  test('isBeta', () => {
+    const { getByText } = render(
+      <Synopsis
+        id={'tutorial'}
+        description="this is a great tutorial about..."
+        title="Great tutorial"
+        url="link_to_item"
+        isBeta={true}
+        wrapInPanel
+      />
+    );
+    expect(getByText('Beta')).toBeInTheDocument();
   });
 });

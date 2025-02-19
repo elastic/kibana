@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import classNames from 'classnames';
 import { EuiCard, EuiCardProps, EuiIcon, IconType } from '@elastic/eui';
 
 export interface SynopsisProps {
@@ -33,6 +34,10 @@ export function Synopsis({
   wrapInPanel,
 }: SynopsisProps) {
   let optionalImg;
+
+  const classes = classNames('homSynopsis__card', {
+    'homSynopsis__card--noPanel': !wrapInPanel,
+  });
   const betaBadgeProps = isBeta ? { label: 'Beta' } : undefined;
   if (iconUrl) {
     optionalImg = <img alt="" className="synopsisIcon" src={iconUrl} />;
@@ -43,7 +48,7 @@ export function Synopsis({
   return (
     <EuiCard
       {...(betaBadgeProps && { betaBadgeProps })}
-      className={`homSynopsis__card ${!wrapInPanel ? 'homSynopsis__card--noPanel' : ''}`}
+      className={classes}
       layout="horizontal"
       icon={optionalImg}
       titleSize="xs"
