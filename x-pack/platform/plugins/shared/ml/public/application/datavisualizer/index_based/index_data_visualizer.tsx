@@ -87,12 +87,12 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
         icon: 'createAdvancedJob',
         type: 'file',
         getUrl: async () => {
-          if (mlManagementLocator) {
-            return await mlManagementLocator?.getRedirectUrl({
+          return (
+            (await mlManagementLocator?.getRedirectUrl({
               sectionId: 'ml',
               appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED}?index=${dataViewId}`,
-            });
-          }
+            })) ?? ''
+          );
         },
         canDisplay: async () => {
           try {
@@ -123,12 +123,13 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
         icon: 'classificationJob',
         type: 'file',
         getUrl: async () => {
-          if (mlManagementLocator) {
-            return await mlManagementLocator?.getRedirectUrl({
+          if (!mlManagementLocator) return '';
+          return (
+            (await mlManagementLocator?.getRedirectUrl({
               sectionId: 'ml',
               appId: `analytics/${ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB}?index=${dataViewId}`,
-            });
-          }
+            })) ?? ''
+          );
         },
         canDisplay: async () => {
           return (
@@ -153,10 +154,12 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
           icon: m.logo?.icon ?? '',
           type: 'index',
           getUrl: async () => {
-            return await mlManagementLocator?.getRedirectUrl({
-              sectionId: 'ml',
-              appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER}?id=${m.id}&index=${dataViewId}`,
-            });
+            return (
+              (await mlManagementLocator?.getRedirectUrl({
+                sectionId: 'ml',
+                appId: `anomaly_detection/${ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER}?id=${m.id}&index=${dataViewId}`,
+              })) ?? ''
+            );
           },
           canDisplay: async () => {
             try {

@@ -27,7 +27,7 @@ import {
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
 import type { MlCalendar } from '../../../../../../../../../../../common/types/calendars';
-import { useMlApi, useMlKibana } from '../../../../../../../../../contexts/kibana';
+import { useMlApi } from '../../../../../../../../../contexts/kibana';
 import { GLOBAL_CALENDAR } from '../../../../../../../../../../../common/constants/calendars';
 import { ML_PAGES } from '../../../../../../../../../../../common/constants/locator';
 import { DescriptionDst } from './description_dst';
@@ -39,11 +39,6 @@ interface Props {
 }
 
 export const CalendarsSelection: FC<Props> = ({ isDst = false }) => {
-  const {
-    services: {
-      application: { getUrlForApp },
-    },
-  } = useMlKibana();
   const mlApi = useMlApi();
 
   const { jobCreator, jobCreatorUpdate } = useContext(JobCreatorContext);

@@ -13,6 +13,7 @@ import { useMlKibana } from './kibana_context';
 import { ML_APP_LOCATOR } from '../../../../common/constants/locator';
 import type { MlLocatorParams } from '../../../../common/types/locator';
 import { MlManagementLocatorInternal } from '../../../locator/ml_management_locator';
+import type { NavigateToMlManagementLink } from '../../jobs/new_job/common/job_creator/util/general';
 
 export const useMlManagementLocator = () => {
   const {
@@ -75,7 +76,7 @@ export const useNavigateToManagementMlLink = (appId: string) => {
   } = useMlKibana();
 
   const redirectToMlPage: NavigateToMlManagementLink = useCallback(
-    async (_page: MlLocatorParams['page'], pageState?: MlLocatorParams['pageState']) => {
+    async (_page, pageState?) => {
       if (mlManagementLocatorInternal) {
         const modifiedPageState: MlLocatorParams['pageState'] = pageState ?? {};
         if (globalState?.refreshInterval !== undefined) {

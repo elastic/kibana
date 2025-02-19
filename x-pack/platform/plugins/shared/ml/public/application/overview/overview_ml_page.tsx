@@ -73,12 +73,13 @@ export const MLOverviewCard = ({
             size="s"
             iconType={iconType}
             onClick={() => navigateToPath(path)}
-            aria-label={title}
+            aria-labelledby="mlOverviewCardTitle"
           />
         }
         title={title}
         titleSize="s"
         titleElement="h3"
+        id="mlOverviewCardTitle"
       >
         <EuiFlexItem grow={true}>
           <EuiSpacer size="m" />

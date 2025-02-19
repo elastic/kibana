@@ -29,7 +29,6 @@ import type {
   Detector,
 } from '../../../../../../../common/types/anomaly_detection_jobs';
 import type { NewJobCapsService } from '../../../../../services/new_job_capabilities/new_job_capabilities_service';
-import type { NavigateToPath } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
 import type { JobCreatorType } from '..';
 import { CREATED_BY_LABEL, JOB_TYPE } from '../../../../../../../common/constants/new_job';
@@ -266,13 +265,16 @@ export function convertToAdvancedJob(
   });
 }
 
-export function resetAdvancedJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
+export function resetAdvancedJob(
+  jobCreator: JobCreatorType,
+  navigateToPath: NavigateToMlManagementLink
+) {
   jobCreator.createdBy = null;
   jobCloningService.stashJobForCloning(jobCreator, true, false);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB);
 }
 
-export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToPath) {
+export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToMlManagementLink) {
   jobCreator.jobId = '';
   jobCloningService.stashJobForCloning(jobCreator, true, true);
   navigateToPath(ML_PAGES.ANOMALY_DETECTION_CREATE_JOB);
@@ -280,7 +282,7 @@ export function resetJob(jobCreator: JobCreatorType, navigateToPath: NavigateToP
 
 export function advancedStartDatafeed(
   jobCreator: JobCreatorType | null,
-  navigateToPath: NavigateToPath
+  navigateToPath: NavigateToMlManagementLink
 ) {
   if (jobCreator !== null) {
     jobCloningService.stashJobForCloning(jobCreator, false, false);
