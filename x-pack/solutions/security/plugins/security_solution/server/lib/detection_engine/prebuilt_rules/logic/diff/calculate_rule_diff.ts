@@ -66,9 +66,9 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
   const { base, current, target } = args;
 
   invariant(current != null, 'current version is required');
-  const diffableCurrentVersion = convertRuleToDiffable(
-    convertPrebuiltRuleAssetToRuleResponse(current)
-  );
+  const diffableCurrentVersion = convertRuleToDiffable(current);
+  const isRuleCustomized =
+    current.rule_source.type === 'external' && current.rule_source.is_customized === true;
 
   invariant(target != null, 'target version is required');
   const diffableTargetVersion = convertRuleToDiffable(
@@ -80,11 +80,14 @@ export const calculateRuleDiff = (args: RuleVersions): CalculateRuleDiffResult =
     ? convertRuleToDiffable(convertPrebuiltRuleAssetToRuleResponse(base))
     : undefined;
 
-  const fieldsDiff = calculateRuleFieldsDiff({
-    base_version: diffableBaseVersion || MissingVersion,
-    current_version: diffableCurrentVersion,
-    target_version: diffableTargetVersion,
-  });
+  const fieldsDiff = calculateRuleFieldsDiff(
+    {
+      base_version: diffableBaseVersion || MissingVersion,
+      current_version: diffableCurrentVersion,
+      target_version: diffableTargetVersion,
+    },
+    isRuleCustomized
+  );
 
   const {
     numberFieldsWithUpdates,

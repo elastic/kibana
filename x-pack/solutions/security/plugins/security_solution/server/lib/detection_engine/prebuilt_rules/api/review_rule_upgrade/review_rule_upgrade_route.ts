@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { REVIEW_RULE_UPGRADE_URL } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import {
+  REVIEW_RULE_UPGRADE_URL,
+  ReviewRuleUpgradeRequestBody,
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import {
@@ -34,7 +38,11 @@ export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => 
     .addVersion(
       {
         version: '1',
-        validate: {},
+        validate: {
+          request: {
+            body: buildRouteValidationWithZod(ReviewRuleUpgradeRequestBody),
+          },
+        },
       },
       reviewRuleUpgradeHandler
     );

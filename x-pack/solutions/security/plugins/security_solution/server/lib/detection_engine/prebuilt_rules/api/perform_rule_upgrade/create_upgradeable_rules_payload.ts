@@ -58,17 +58,23 @@ export const createModifiedPrebuiltRuleAssets = ({
               assertPickVersionIsTarget({ ruleId, requestBody });
             }
 
-            const calculatedRuleDiff = calculateRuleFieldsDiff({
-              base_version: upgradeableRule.base
-                ? convertRuleToDiffable(
-                    convertPrebuiltRuleAssetToRuleResponse(upgradeableRule.base)
-                  )
-                : MissingVersion,
-              current_version: convertRuleToDiffable(upgradeableRule.current),
-              target_version: convertRuleToDiffable(
-                convertPrebuiltRuleAssetToRuleResponse(upgradeableRule.target)
-              ),
-            }) as AllFieldsDiff;
+            const isRuleCustomized =
+              current.rule_source.type === 'external' && current.rule_source.is_customized === true;
+
+            const calculatedRuleDiff = calculateRuleFieldsDiff(
+              {
+                base_version: upgradeableRule.base
+                  ? convertRuleToDiffable(
+                      convertPrebuiltRuleAssetToRuleResponse(upgradeableRule.base)
+                    )
+                  : MissingVersion,
+                current_version: convertRuleToDiffable(upgradeableRule.current),
+                target_version: convertRuleToDiffable(
+                  convertPrebuiltRuleAssetToRuleResponse(upgradeableRule.target)
+                ),
+              },
+              isRuleCustomized
+            ) as AllFieldsDiff;
 
             if (mode === 'ALL_RULES' && globalPickVersion === 'MERGED') {
               const fieldsWithConflicts = Object.keys(getFieldsDiffConflicts(calculatedRuleDiff));
