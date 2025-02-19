@@ -14,17 +14,20 @@ import {
   Condition,
   processorDefinitionSchema,
   isSchema,
-  RecursiveRecord,
+  FlattenRecord,
 } from '@kbn/streams-schema';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
+import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
 import { processorConverter } from '../utils';
 
-type Simulation = APIReturnType<'POST /api/streams/{name}/processing/_simulate'>;
+export type Simulation = APIReturnType<'POST /api/streams/{name}/processing/_simulate'>;
+export type ProcessorMetrics =
+  Simulation['processors_metrics'][keyof Simulation['processors_metrics']];
 
 export interface TableColumn {
   name: string;
@@ -40,7 +43,7 @@ export interface UseProcessingSimulatorReturn {
   hasLiveChanges: boolean;
   error?: IHttpFetchError<ResponseErrorBody>;
   isLoading: boolean;
-  samples: RecursiveRecord[];
+  samples: FlattenRecord[];
   simulation?: Simulation | null;
   tableColumns: TableColumn[];
   refreshSamples: () => void;
@@ -105,7 +108,7 @@ export const useProcessingSimulator = ({
             });
           }
         },
-        500
+        800
       ),
     []
   );
@@ -117,15 +120,15 @@ export const useProcessingSimulator = ({
 
   const {
     loading: isLoadingSamples,
-    value: samples,
+    value: sampleDocs,
     refresh: refreshSamples,
   } = useStreamsAppFetch(
-    ({ signal }) => {
+    async ({ signal }) => {
       if (!definition) {
-        return { documents: [] };
+        return [];
       }
 
-      return streamsRepositoryClient.fetch('POST /api/streams/{name}/_sample', {
+      const samplesBody = await streamsRepositoryClient.fetch('POST /api/streams/{name}/_sample', {
         signal,
         params: {
           path: { name: definition.stream.name },
@@ -137,21 +140,22 @@ export const useProcessingSimulator = ({
           },
         },
       });
+
+      return samplesBody.documents.map((doc) => flattenObjectNestedLast(doc)) as FlattenRecord[];
     },
     [definition, streamsRepositoryClient, start, end, samplingCondition],
     { disableToastOnError: true }
   );
-
-  const sampleDocs = samples?.documents;
 
   const {
     loading: isLoadingSimulation,
     value: simulation,
     error: simulationError,
   } = useStreamsAppFetch(
-    ({ signal }) => {
-      if (!definition || isEmpty<RecursiveRecord[]>(sampleDocs) || isEmpty(liveDraftProcessors)) {
-        return Promise.resolve(null);
+    ({ signal }): Promise<Simulation> => {
+      if (!definition || isEmpty<FlattenRecord[]>(sampleDocs) || isEmpty(liveDraftProcessors)) {
+        // This is a hack to avoid losing the previous value of the simulation once the conditions are not met. The state management refactor will fix this.
+        return Promise.resolve(simulation!);
       }
 
       const processing = liveDraftProcessors.map(processorConverter.toAPIDefinition);
@@ -162,7 +166,8 @@ export const useProcessingSimulator = ({
 
       // Each processor should meet the minimum schema requirements to run the simulation
       if (!hasValidProcessors) {
-        return Promise.resolve(null);
+        // This is a hack to avoid losing the previous value of the simulation once the conditions are not met. The state management refactor will fix this.
+        return Promise.resolve(simulation!);
       }
 
       return streamsRepositoryClient.fetch('POST /api/streams/{name}/processing/_simulate', {
@@ -171,7 +176,7 @@ export const useProcessingSimulator = ({
           path: { name: definition.stream.name },
           body: {
             documents: sampleDocs,
-            processing: liveDraftProcessors.map(processorConverter.toAPIDefinition),
+            processing: liveDraftProcessors.map(processorConverter.toSimulateDefinition),
           },
         },
       });
