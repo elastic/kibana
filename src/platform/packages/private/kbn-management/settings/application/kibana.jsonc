@@ -1,9 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/management-settings-application",
-  "owner": [
-    "@elastic/kibana-management"
-  ],
-  "group": "platform",
-  "visibility": "private"
-}

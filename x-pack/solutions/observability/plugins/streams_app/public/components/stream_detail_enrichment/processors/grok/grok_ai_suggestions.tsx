@@ -22,15 +22,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useWatch, useFormContext } from 'react-hook-form';
-import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
-import { IngestStreamGetResponse, FlattenRecord } from '@kbn/streams-schema';
+import { FlattenRecord } from '@kbn/streams-schema';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
-import { useBoolean } from '@kbn/react-hooks';
+import { useAbortController, useBoolean } from '@kbn/react-hooks';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
 import { UseProcessingSimulatorReturn } from '../../hooks/use_processing_simulator';
-import { useStreamsEnrichmentContext } from '../../enrichment_context';
+import { useSimulatorContext } from '../../simulator_context';
+import { useStreamsEnrichmentSelector } from '../../services/stream_enrichment_service';
 
 const RefreshButton = ({
   generatePatterns,
@@ -121,14 +121,13 @@ function useAiEnabled() {
 }
 
 function InnerGrokAiSuggestions({
-  definition,
   refreshSimulation,
   filteredSamples,
 }: {
-  definition: IngestStreamGetResponse;
   refreshSimulation: UseProcessingSimulatorReturn['refreshSimulation'];
   filteredSamples: FlattenRecord[];
 }) {
+  const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
   const { dependencies } = useKibana();
   const {
     streams: { streamsRepositoryClient },
@@ -320,7 +319,7 @@ function InnerGrokAiSuggestions({
 
 export function GrokAiSuggestions() {
   const isAiEnabled = useAiEnabled();
-  const props = useStreamsEnrichmentContext();
+  const props = useSimulatorContext();
 
   if (!isAiEnabled || !props.filteredSamples.length) {
     return null;
