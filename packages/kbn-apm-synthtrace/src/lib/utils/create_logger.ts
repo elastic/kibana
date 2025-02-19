@@ -37,6 +37,12 @@ export function createLogger(logLevel: LogLevel) {
         console.log(getTimeString(), ...args);
       }
     },
+    warn: (...args: any[]) => {
+      if (logLevel <= LogLevel.error) {
+        // eslint-disable-next-line no-console
+        console.warn(getTimeString(), ...args);
+      }
+    },
     error: (...args: any[]) => {
       if (logLevel <= LogLevel.error) {
         // eslint-disable-next-line no-console
@@ -52,5 +58,6 @@ export interface Logger {
   perf: <T>(name: string, cb: () => T) => T;
   debug: (...args: any[]) => void;
   info: (...args: any[]) => void;
+  warn: (...args: any[]) => void;
   error: (...args: any[]) => void;
 }
