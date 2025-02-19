@@ -41,11 +41,16 @@ export class RuleMigrationsDataBaseClient {
       return this.currentUser.profile_uid;
     }
     const username = this.currentUser.username;
-    const users = await this.esScopedClient.asCurrentUser.security.getUser({
-      username,
-      with_profile_uid: true,
-    });
-    return users[username].profile_uid;
+    try {
+      const users = await this.esScopedClient.asCurrentUser.security.getUser({
+        username,
+        with_profile_uid: true,
+      });
+      return users[username].profile_uid;
+    } catch (error) {
+      this.logger.error(`Error getting profile_uid for user ${username}: ${error}`);
+      return username;
+    }
   }
 
   protected processResponseHits<T extends object>(
