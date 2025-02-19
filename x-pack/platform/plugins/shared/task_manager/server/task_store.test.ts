@@ -36,7 +36,10 @@ import { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { MsearchError } from './lib/msearch_error';
 import { getUserScope } from './lib/api_key_utils';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
-import type { EncryptedSavedObjectsClient, EncryptedSavedObjectsClientOptions } from '@kbn/encrypted-saved-objects-shared';
+import type {
+  EncryptedSavedObjectsClient,
+  EncryptedSavedObjectsClientOptions,
+} from '@kbn/encrypted-saved-objects-shared';
 
 const mockGetValidatedTaskInstanceFromReading = jest.fn();
 const mockGetValidatedTaskInstanceForUpdating = jest.fn();

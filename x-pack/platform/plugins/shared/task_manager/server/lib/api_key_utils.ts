@@ -18,13 +18,13 @@ export interface GrantAPIKeyResult {
 }
 
 const getCredentialsFromRequest = (request: KibanaRequest) => {
-  const authorizationHeaderValue = request.headers['authorization'];
+  const authorizationHeaderValue = request.headers.authorization;
   if (!authorizationHeaderValue || typeof authorizationHeaderValue !== 'string') {
     return null;
   }
   const [scheme] = authorizationHeaderValue.split(/\s+/);
   return authorizationHeaderValue.substring(scheme.length + 1);
-}
+};
 
 export const isRequestApiKeyType = (request: KibanaRequest, security: SecurityServiceStart) => {
   const user = security.authc.getCurrentUser(request);

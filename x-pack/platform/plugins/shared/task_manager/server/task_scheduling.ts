@@ -98,9 +98,11 @@ export class TaskScheduling {
         traceparent: traceparent || '',
         enabled: modifiedTask.enabled ?? true,
       },
-      {
-        request: options?.request,
-      }
+      options?.request
+        ? {
+            request: options?.request,
+          }
+        : undefined
     );
   }
 
@@ -132,9 +134,14 @@ export class TaskScheduling {
       })
     );
 
-    return await this.store.bulkSchedule(modifiedTasks, {
-      request: options?.request,
-    });
+    return await this.store.bulkSchedule(
+      modifiedTasks,
+      options?.request
+        ? {
+            request: options?.request,
+          }
+        : undefined
+    );
   }
 
   public async bulkDisable(taskIds: string[], clearStateIdsOrBoolean?: string[] | boolean) {
