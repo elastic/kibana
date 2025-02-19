@@ -48,7 +48,10 @@ const mockUseSourcererDataView = useSourcererDataView as jest.MockedFunction<
 const getBooleanValueMock = jest.fn();
 
 const defaultProps = {
+  connectorId: undefined,
+  onConnectorIdSelected: jest.fn(),
   onClose: jest.fn(),
+  stats: null,
 };
 
 const renderComponent = async () => {
