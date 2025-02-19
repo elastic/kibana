@@ -11,7 +11,6 @@ import { EuiPopover, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import type { VersionsPickerOptionEnum } from './versions_picker/versions_picker';
-import { useFieldUpgradeContext } from '../rule_upgrade/field_upgrade_context';
 import { getOptionDetails } from './utils';
 
 /**
@@ -30,10 +29,7 @@ interface ComparisonSideHelpInfoProps {
 export function ComparisonSideHelpInfo({ options }: ComparisonSideHelpInfoProps): JSX.Element {
   const [isPopoverOpen, togglePopover] = useToggle(false);
 
-  const { hasResolvedValueDifferentFromSuggested } = useFieldUpgradeContext();
-  const optionsWithDescriptions = options.map((option) =>
-    getOptionDetails(option, hasResolvedValueDifferentFromSuggested)
-  );
+  const optionsWithDescriptions = options.map((option) => getOptionDetails(option));
 
   const button = (
     <EuiButtonIcon
