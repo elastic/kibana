@@ -62,9 +62,22 @@ describe('Enterprise Search node deprecation', () => {
     const deprecations = getEnterpriseSearchNodeDeprecation(config, notCloud, docsUrl);
     expect(deprecations).toHaveLength(1);
     const steps = deprecations[0].correctiveActions.manualSteps;
-    expect(steps).toHaveLength(4);
+    expect(steps).toHaveLength(5);
     const stepsStr = steps.join(', ');
     expect(stepsStr).toMatch("remove 'enterpriseSearch.host'");
+    expect(stepsStr).toMatch("remove 'enterpriseSearch.customHeaders'");
+    expect(stepsStr).toMatch('Stop all your Enterprise Search nodes');
+  });
+
+  it('Tells you to remove the custom headers config if running self-managed without host', () => {
+    const config = { customHeaders: {} } as ConfigType;
+    const deprecations = getEnterpriseSearchNodeDeprecation(config, notCloud, docsUrl);
+    expect(deprecations).toHaveLength(1);
+    const steps = deprecations[0].correctiveActions.manualSteps;
+    expect(steps).toHaveLength(5);
+    const stepsStr = steps.join(', ');
+    expect(stepsStr).toMatch("remove 'enterpriseSearch.host'");
+    expect(stepsStr).toMatch("remove 'enterpriseSearch.customHeaders'");
     expect(stepsStr).toMatch('Stop all your Enterprise Search nodes');
   });
 
@@ -130,13 +143,13 @@ describe('getEnterpriseSearchPre8IndexDeprecations', () => {
       Promise.resolve([
         {
           name: '.ent-search-index_without_datastream',
-          isDatastream: false,
-          datastreamName: '',
+          hasDatastream: false,
+          datastreams: [],
         },
         {
           name: '.ent-search-with_data_stream',
-          isDatastream: true,
-          datastreamName: 'datastream-testing',
+          hasDatastream: true,
+          datastreams: ['datastream-testing'],
         },
       ])
     );
@@ -168,8 +181,8 @@ describe('getEnterpriseSearchPre8IndexDeprecations', () => {
       Promise.resolve([
         {
           name: '.ent-search-index_without_datastream',
-          isDatastream: false,
-          datastreamName: '',
+          hasDatastream: false,
+          datastreams: [''],
         },
       ])
     );

@@ -49,7 +49,7 @@ export function getEnterpriseSearchNodeDeprecation(
   cloud: CloudSetup,
   docsUrl: string
 ): DeprecationsDetails[] {
-  if (config.host) {
+  if (config.host || config.customHeaders) {
     const steps = [];
     let addendum: string = '';
     const isCloud = !!cloud?.cloudId;
@@ -96,6 +96,10 @@ export function getEnterpriseSearchNodeDeprecation(
           i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.removeconfig', {
             defaultMessage: "Edit 'kibana.yml' to remove 'enterpriseSearch.host'",
           }),
+          i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.removecustomconfig', {
+            defaultMessage:
+              "Edit 'kibana.yml' to remove 'enterpriseSearch.customHeaders' if it exists",
+          }),
           i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.restart', {
             defaultMessage: 'Restart Kibana',
           }),
@@ -107,7 +111,7 @@ export function getEnterpriseSearchNodeDeprecation(
         level: 'critical',
         deprecationType: 'feature',
         title: i18n.translate('xpack.enterpriseSearch.deprecations.entsearchhost.title', {
-          defaultMessage: 'Enterprise Search host(s) must be removed',
+          defaultMessage: 'Enterprise Search host(s) and configuration must be removed',
         }),
         message: {
           type: 'markdown',
@@ -120,6 +124,7 @@ export function getEnterpriseSearchNodeDeprecation(
               'Enterprise Search is not supported in versions >= 9.x.\n\n' +
               'Please note the following:\n' +
               '- You must remove any Enterprise Search nodes from your deployment to proceed with the upgrade.\n' +
+              '- You must also remove any Enterprise Search configuration elements in your Kibana config.\n' +
               '- If you are currently using App Search, Workplace Search, or the Elastic Web Crawler, these features will ' +
               'cease to function if you remove Enterprise Search from your deployment. Therefore, it is critical to ' +
               'first [migrate your Enterprise Search use cases]({migration_link}) before decommissioning your ' +
@@ -291,8 +296,12 @@ export async function getEnterpriseSearchPre8IndexDeprecations(
   let indicesList = '';
   let datastreamsList = '';
   for (const index of entSearchIndices) {
-    if (index.isDatastream) {
-      datastreamsList += `${index.name}\n`;
+    if (index.hasDatastream) {
+      indicesList += `${index.name}\n`;
+      for (const datastream of index.datastreams) {
+        if (datastream === '') continue;
+        datastreamsList += `${datastream}\n`;
+      }
     } else {
       indicesList += `${index.name}\n`;
     }
@@ -305,8 +314,8 @@ export async function getEnterpriseSearchPre8IndexDeprecations(
       'The following indices are found to be incompatible for upgrade:\n\n' +
       '```\n' +
       `${indicesList}` +
-      '\n```\n\n' +
-      'These indices must be either set to read-only or deleted before upgrading. ';
+      '\n```\n' +
+      'These indices must be either set to read-only or deleted before upgrading.\n';
   }
 
   if (datastreamsList.length > 0) {
@@ -314,7 +323,7 @@ export async function getEnterpriseSearchPre8IndexDeprecations(
       '\nThe following data streams are found to be incompatible for upgrade:\n\n' +
       '```\n' +
       `${datastreamsList}` +
-      '\n```\n\n' +
+      '\n```\n' +
       'Using the "quick resolve" button below will roll over any datastreams and set all incompatible indices to read-only.\n\n' +
       'Alternatively, manually deleting these indices and data streams will also unblock your upgrade.';
   } else {
@@ -347,13 +356,13 @@ export async function getEnterpriseSearchPre8IndexDeprecations(
         i18n.translate(
           'xpack.enterpriseSearch.deprecations.incompatibleEnterpriseSearchIndexes.deleteIndices',
           {
-            defaultMessage: 'Set all incompatible indices to read only, or',
+            defaultMessage: 'Set all incompatible indices and data streams to read only, or',
           }
         ),
         i18n.translate(
           'xpack.enterpriseSearch.deprecations.incompatibleEnterpriseSearchIndexes.deleteIndices',
           {
-            defaultMessage: 'Delete all incompatible indices',
+            defaultMessage: 'Delete all incompatible indices and data streams',
           }
         ),
       ],
