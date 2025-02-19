@@ -75,7 +75,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     initialValues = {},
   } = props;
 
-  const { http, docLinks, notifications, ruleTypeRegistry, ...deps } = plugins;
+  const { http, docLinks, notifications, ruleTypeRegistry, fieldsMetadata, ...deps } = plugins;
   const { toasts } = notifications;
 
   const { mutate, isLoading: isSaving } = useCreateRule({
@@ -121,6 +121,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     validConsumers,
     filteredRuleTypes,
     connectorFeatureId,
+    fieldsMetadata,
   });
 
   const onSave = useCallback(

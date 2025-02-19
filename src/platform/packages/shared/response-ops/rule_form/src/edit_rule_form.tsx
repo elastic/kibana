@@ -52,7 +52,8 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     onChangeMetaData,
     initialMetadata,
   } = props;
-  const { http, notifications, docLinks, ruleTypeRegistry, application, ...deps } = plugins;
+  const { http, notifications, docLinks, ruleTypeRegistry, application, fieldsMetadata, ...deps } =
+    plugins;
   const { toasts } = notifications;
 
   const { mutate, isLoading: isSaving } = useUpdateRule({
@@ -96,6 +97,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     ruleTypeRegistry,
     id,
     connectorFeatureId,
+    fieldsMetadata,
   });
 
   const onSave = useCallback(

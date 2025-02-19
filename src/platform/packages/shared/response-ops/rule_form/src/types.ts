@@ -23,6 +23,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import {
   MinimumScheduleInterval,
   Rule,
@@ -68,6 +69,7 @@ export interface RuleFormPlugins {
   docLinks: DocLinksStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
+  fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
 export interface RuleFormState<

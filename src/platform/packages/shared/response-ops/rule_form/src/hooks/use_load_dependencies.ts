@@ -26,6 +26,7 @@ import {
 import type { RuleTypeRegistryContract } from '../common/types';
 import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '../constants';
 import { useLoadRuleTypeAadTemplateField } from '../common/hooks/use_load_rule_type_aad_template_fields';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export interface UseLoadDependencies {
   http: HttpStart;
@@ -38,6 +39,7 @@ export interface UseLoadDependencies {
   validConsumers?: RuleCreationValidConsumer[];
   filteredRuleTypes?: string[];
   connectorFeatureId?: string;
+  fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
 export const useLoadDependencies = (props: UseLoadDependencies) => {
@@ -50,6 +52,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     capabilities,
     filteredRuleTypes = [],
     connectorFeatureId,
+    fieldsMetadata,
   } = props;
 
   const canReadConnectors = !!capabilities.actions?.show;
@@ -129,6 +132,7 @@ export const useLoadDependencies = (props: UseLoadDependencies) => {
     ruleTypeId: computedRuleTypeId,
     enabled: !!computedRuleTypeId && canReadConnectors,
     cacheTime: 0,
+    fieldsMetadata,
   });
 
   const ruleType = useMemo(() => {

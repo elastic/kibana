@@ -16,31 +16,31 @@ import {
   fetchRuleTypeAadTemplateFields,
   getDescription,
 } from '@kbn/alerts-ui-shared/src/common/apis';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export interface UseLoadRuleTypeAadTemplateFieldProps {
   http: HttpStart;
   ruleTypeId?: string;
   enabled: boolean;
   cacheTime?: number;
+  fieldsMetadata?: FieldsMetadataPublicStart;
 }
 
 export const useLoadRuleTypeAadTemplateField = (props: UseLoadRuleTypeAadTemplateFieldProps) => {
   const ecsFlat = useRef<Record<string, any>>({});
-  const { http, ruleTypeId, enabled, cacheTime } = props;
+  const { http, ruleTypeId, enabled, cacheTime, fieldsMetadata } = props;
 
   const queryFn = async () => {
     if (!ruleTypeId) {
       return;
     }
+
     if (isEmpty(ecsFlat.current)) {
-      // If we use import { EcsFlat } from '@elastic/ecs' then it will sometimes balloon the bundle size
-      // by about 1MB, or not, depending on how Webpack is feeling today. If you delete this dynamic import,
-      // it's possible that it won't make the bundle size explode, and then you will commit that change, and
-      // we will all continue to live our lives safe and secure, falsely believing that the danger has passed,
-      // until one day somebody makes another change to this package and, for mysterious, unknowable reasons,
-      // Webpack decides that today the bundle size shall be engorged once again.
-      // To avoid all that maybe just don't delete this dynamic import.
-      ecsFlat.current = await import('@elastic/ecs').then((ecs) => ecs.EcsFlat);
+      const fmClient = await fieldsMetadata?.getClient();
+      if (fmClient) {
+        const { fields } = await fmClient.find({});
+        ecsFlat.current = fields;
+      }
     }
 
     return fetchRuleTypeAadTemplateFields({ http, ruleTypeId });
