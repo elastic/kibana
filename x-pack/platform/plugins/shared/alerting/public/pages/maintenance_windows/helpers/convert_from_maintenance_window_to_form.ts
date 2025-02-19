@@ -26,7 +26,10 @@ export const convertFromMaintenanceWindowToForm = (
     endDate: endDate.toISOString(),
     timezone: [maintenanceWindow.rRule.tzid],
     recurring,
-    solutionId: maintenanceWindow.categoryIds?.[0],
+    solutionId:
+      maintenanceWindow.categoryIds && maintenanceWindow.categoryIds.length === 1
+        ? maintenanceWindow.categoryIds[0]
+        : undefined,
     scopedQuery: maintenanceWindow.scopedQuery,
   };
   if (!recurring) return form;
