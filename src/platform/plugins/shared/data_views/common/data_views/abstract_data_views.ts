@@ -389,8 +389,10 @@ export abstract class AbstractDataView {
   }
 
   protected toSpecShared(includeFields = true): DataViewSpec {
-    // if fields aren't included, don't include count
+    // `cloneDeep` is added to make sure that the original fieldAttrs map is not modified with the following `delete` operation.
     const fieldAttrs = cloneDeep(Object.fromEntries(this.fieldAttrs.entries()));
+
+    // if fields aren't included, don't include count
     if (!includeFields) {
       Object.keys(fieldAttrs).forEach((key) => {
         delete fieldAttrs[key].count;
