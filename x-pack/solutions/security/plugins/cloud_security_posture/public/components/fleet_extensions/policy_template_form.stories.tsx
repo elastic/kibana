@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 import { Meta, Story } from '@storybook/react';
+import type { ArgTypes } from '@storybook/react';
 
 import {
   NewPackagePolicy,
@@ -14,24 +15,42 @@ import {
   SetupTechnology,
 } from '@kbn/fleet-plugin/public/types';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
-import { action } from '@storybook/addon-actions';
-import { NewPackagePolicyPostureInput } from './utils';
-import {
-  getMockPackageInfo,
-  getMockPolicyAWS,
-  getMockPolicyAzure,
-  getMockPolicyGCP,
-} from './mocks';
+import { getMockPackageInfo, getMockPolicyAWS } from './mocks';
 import { CspPolicyTemplateForm } from './policy_template_form';
 import { StorybookProvider } from '../../../.storybook/decorators/storybook_provider';
-import {
-  changePolicyName,
-  toggleSetupTechnology,
-} from './policy_template_form.stories.interactions';
+import { testAWSInteractions, testGCPInteractions } from './policy_template_form.stories.test';
+
+const argTypes: ArgTypes = {
+  isAgentlessEnabled: {
+    control: {
+      type: 'boolean',
+    },
+  },
+  defaultSetupTechnology: {
+    control: {
+      type: 'select',
+      options: Object.values(SetupTechnology),
+    },
+  },
+  isEditPage: {
+    control: {
+      type: 'boolean',
+    },
+  },
+  onChange: { action: 'onChange' },
+  handleSetupTechnologyChange: { action: 'handleSetupTechnologyChange' },
+  validationResults: { control: false },
+  packageInfo: { control: false },
+  integrationToEnable: {
+    control: false,
+  },
+  newPolicy: { control: false },
+};
 
 export default {
   title: 'Integration Components/PolicyTemplateForm',
   component: CspPolicyTemplateForm,
+  argTypes,
   decorators: [
     (CspPolicyTemplateFormChild) => {
       return (
@@ -47,121 +66,54 @@ export default {
   ],
 } as Meta;
 
+const defaultArgs: PackagePolicyReplaceDefineStepExtensionComponentProps = {
+  defaultSetupTechnology: SetupTechnology.AGENTLESS,
+  integrationToEnable: 'cspm',
+  isAgentlessEnabled: true,
+  isEditPage: false,
+  newPolicy: getMockPolicyAWS(),
+  packageInfo: {
+    ...getMockPackageInfo(),
+    version: '1.13.0',
+  },
+  validationResults: undefined,
+};
+
 const Template: Story<PackagePolicyReplaceDefineStepExtensionComponentProps> = (args) => {
   const [packagePolicy, setPackagePolicy] = useState<Partial<NewPackagePolicy>>(args.newPolicy);
-  const [integrationToEnable, setIntegrationToEnable] = useState(args.integrationToEnable);
 
-  const onChange = (opts: { isValid: boolean; updatedPolicy: Partial<NewPackagePolicy> }) => {
-    action('onChange', { allowFunction: true })(opts);
-    setPackagePolicy(opts.updatedPolicy);
+  const onChange = (changed: { isValid: boolean; updatedPolicy: NewPackagePolicy }) => {
+    setPackagePolicy(changed.updatedPolicy);
+    args.onChange(changed);
   };
+
+  const defaultSetupTechnology = args.isAgentlessEnabled
+    ? args.defaultSetupTechnology
+    : SetupTechnology.AGENT_BASED;
 
   return (
     <CspPolicyTemplateForm
+      defaultSetupTechnology={defaultSetupTechnology}
+      handleSetupTechnologyChange={args.handleSetupTechnologyChange}
+      integrationToEnable={args.integrationToEnable}
+      isAgentlessEnabled={args.isAgentlessEnabled}
+      isEditPage={args.isEditPage}
       // @ts-expect-error
       newPolicy={packagePolicy}
-      isEditPage={false}
       onChange={onChange}
-      integrationToEnable={integrationToEnable}
-      setIntegrationToEnable={setIntegrationToEnable}
       packageInfo={args.packageInfo}
-      isAgentlessEnabled={args.isAgentlessEnabled}
-      defaultSetupTechnology={args.defaultSetupTechnology}
+      setIntegrationToEnable={() => {}}
     />
   );
 };
 
-const packageInfo = getMockPackageInfo();
+export const Default = Template.bind({});
+Default.args = defaultArgs;
 
-const mockAwsPolicy = getMockPolicyAWS();
-const mockAwsInput = {
-  ...mockAwsPolicy.inputs[0],
-  type: 'cloudbeat/cis_aws', // Ensure the type is 'cloudbeat/cis_aws'
-  policy_template: 'cspm',
-} as NewPackagePolicyPostureInput;
+// export const TestAWS = Template.bind({});
+// TestAWS.args = defaultArgs;
+// TestAWS.play = testAWSInteractions;
 
-const defaultPropsAWS: PackagePolicyReplaceDefineStepExtensionComponentProps = {
-  newPolicy: mockAwsPolicy,
-  input: mockAwsInput,
-  updatePolicy: action('updatePolicy'),
-  onChange: (opts: { isValid: boolean; updatedPolicy: Partial<NewPackagePolicy> }) => {
-    action('onChange')(opts);
-  },
-  // @ts-expect-error
-  packageInfo,
-  setIsValid: () => {},
-  disabled: false,
-  hasInvalidRequiredVars: false,
-  isAgentlessEnabled: true,
-  defaultSetupTechnology: SetupTechnology.AGENTLESS,
-  integrationToEnable: 'cloudbeat/cis_aws',
-};
-
-export const AWSForm = Template.bind({});
-AWSForm.args = defaultPropsAWS;
-AWSForm.play = async ({ canvasElement }) => {
-  changePolicyName({ canvasElement, policyName: 'AWS Package Policy' });
-  toggleSetupTechnology({ canvasElement, toggle: 'agent-based' });
-  // toggleSetupTechnology({ canvasElement, toggle: 'agentless' });
-};
-
-const mockGCPPolicy = getMockPolicyGCP();
-const mockGCPInput = {
-  ...mockGCPPolicy.inputs[0],
-  type: 'cloudbeat/cis_gcp', // Ensure the type is 'cloudbeat/cis_gcp'
-  policy_template: 'cspm',
-} as NewPackagePolicyPostureInput;
-
-const defaultPropsGCP: PackagePolicyReplaceDefineStepExtensionComponentProps = {
-  newPolicy: mockGCPPolicy,
-  input: mockGCPInput,
-  updatePolicy: action('updatePolicy'),
-  onChange: (opts: { isValid: boolean; updatedPolicy: Partial<NewPackagePolicy> }) => {
-    action('onChange')(opts);
-  },
-  // @ts-expect-error
-  packageInfo,
-  setIsValid: () => {},
-  disabled: false,
-  hasInvalidRequiredVars: false,
-  isAgentlessEnabled: true,
-  defaultSetupTechnology: SetupTechnology.AGENTLESS,
-  integrationToEnable: 'cloudbeat/cis_gcp',
-};
-
-export const GCPForm = Template.bind({});
-GCPForm.args = defaultPropsGCP;
-// GCPForm.play = async ({ canvasElement }) => {
-//   changePolicyName({ canvasElement, policyName: 'GCP Package Policy' });
-//   toggleSetupTechnology({ canvasElement, toggle: 'agent-based' });
-// };
-
-const mockAzurePolicy = getMockPolicyAzure();
-const mockAzureInput = {
-  ...mockAzurePolicy.inputs[0],
-  type: 'cloudbeat/cis_azure', // Ensure the type is 'cloudbeat/cis_azure'
-  policy_template: 'cspm',
-} as NewPackagePolicyPostureInput;
-
-const defaultPropsAzure: PackagePolicyReplaceDefineStepExtensionComponentProps = {
-  newPolicy: mockAzurePolicy,
-  input: mockAzureInput,
-  updatePolicy: action('updatePolicy'),
-  onChange: (opts: { isValid: boolean; updatedPolicy: Partial<NewPackagePolicy> }) => {
-    action('onChange')(opts);
-  },
-  // @ts-expect-error
-  packageInfo,
-  setIsValid: () => {},
-  disabled: false,
-  hasInvalidRequiredVars: false,
-  isAgentlessEnabled: true,
-  defaultSetupTechnology: SetupTechnology.AGENTLESS,
-  integrationToEnable: 'cloudbeat/cis_azure',
-};
-
-export const AzureForm = Template.bind({});
-AzureForm.args = defaultPropsAzure;
-// AzureForm.play = async ({ canvasElement }) => {
-//   changePolicyName({ canvasElement, policyName: 'Azure Package Policy' });
-// };
+// export const TestGCP = Template.bind({});
+// TestGCP.args = defaultArgs;
+// TestGCP.play = testGCPInteractions;

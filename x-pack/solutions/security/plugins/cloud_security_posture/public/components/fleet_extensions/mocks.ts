@@ -264,6 +264,34 @@ const getPolicyMock = (
 
 export const getPackageInfoMock = () => {
   return {
+    policy_templates: [
+      {
+        name: 'cspm',
+        title: 'CSPM',
+        description: 'CSPM',
+
+        inputs: [
+          {
+            type: 'cloudbeat/cis_gcp',
+            title: 'GCP',
+            description: '',
+            vars: [
+              {
+                name: 'cloud_shell_url',
+                type: 'text',
+                title: 'CloudShell URL',
+                multi: false,
+                required: true,
+                show_user: false,
+                description: 'A URL to CloudShell for creating a new deployment',
+                default:
+                  'https://shell.cloud.google.com/cloudshell/?ephemeral=true&cloudshell_git_repo=https%3A%2F%2Fgithub.com%2Felastic%2Fcloudbeat&cloudshell_git_branch=8.18&cloudshell_workspace=deploy%2Fdeployment-manager&show=terminal',
+              },
+            ],
+          },
+        ],
+      },
+    ],
     data_streams: [
       {
         dataset: 'cloud_security_posture.findings',

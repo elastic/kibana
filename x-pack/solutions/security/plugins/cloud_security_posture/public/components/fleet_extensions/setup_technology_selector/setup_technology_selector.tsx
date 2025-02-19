@@ -87,12 +87,15 @@ export const SetupTechnologySelector = ({
     },
   ];
 
-  const [radioIdSelected, setRadioIdSelected] = useState(
-    SetupTechnology.AGENTLESS === setupTechnology ? radioGroupItemId1 : radioGroupItemId2
-  );
+  // const [radioIdSelected, setRadioIdSelected] = useState(
+  //   SetupTechnology.AGENTLESS === setupTechnology ? radioGroupItemId1 : radioGroupItemId2
+  // );
+
+  const radioIdSelected =
+    SetupTechnology.AGENTLESS === setupTechnology ? radioGroupItemId1 : radioGroupItemId2;
 
   const onChange = (optionId: string) => {
-    setRadioIdSelected(optionId);
+    // setRadioIdSelected(optionId);
     onSetupTechnologyChange(
       optionId === radioGroupItemId1 ? SetupTechnology.AGENTLESS : SetupTechnology.AGENT_BASED
     );
