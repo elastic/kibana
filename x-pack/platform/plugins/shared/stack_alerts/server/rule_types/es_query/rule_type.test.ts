@@ -12,7 +12,8 @@ import { RuleExecutorServicesMock, alertsMock } from '@kbn/alerting-plugin/serve
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { getRuleType } from './rule_type';
-import { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
+import { EsQueryRuleState } from './rule_type_params';
+import { EsQueryRuleParams } from '@kbn/response-ops-rule-params/es_query';
 import { ActionContext } from './action_context';
 import type { ESSearchResponse, ESSearchRequest } from '@kbn/es-types';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';

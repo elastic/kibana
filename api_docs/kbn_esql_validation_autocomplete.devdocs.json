@@ -1265,7 +1265,7 @@
             "section": "def-common.ESQLCallbacks",
             "text": "ESQLCallbacks"
           },
-          " | undefined) => { getFieldsByType: (expectedType?: string | string[], ignored?: string[]) => Promise<",
+          " | undefined) => { getFieldsByType: (expectedType?: string | readonly string[], ignored?: string[]) => Promise<",
           {
             "pluginId": "@kbn/esql-validation-autocomplete",
             "scope": "common",
@@ -2784,7 +2784,7 @@
             "references": [
               {
                 "plugin": "@kbn/monaco",
-                "path": "src/platform/packages/shared/kbn-monaco/src/esql/lib/hover/hover.ts"
+                "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/lib/hover/hover.ts"
               }
             ]
           },
