@@ -39,6 +39,7 @@ import type {
   FleetRequestHandlerContext,
   GetAgentPolicyOutputsRequestSchema,
   GetListAgentPolicyOutputsRequestSchema,
+  GetAutoUpgradeAgentsStatusRequestSchema,
 } from '../../types';
 
 import type {
@@ -61,6 +62,7 @@ import { createAgentPolicyWithPackages } from '../../services/agent_policy_creat
 import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
 import { packagePolicyToSimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
+import { getAutoUpgradeAgentsStatus } from '../../services/agents';
 
 export async function populateAssignedAgentsCount(
   agentClient: AgentClient,
@@ -293,6 +295,20 @@ export const getOneAgentPolicyHandler: FleetRequestHandler<
   }
 };
 
+export const getAutoUpgradeAgentsStatusHandler: FleetRequestHandler<
+  TypeOf<typeof GetAutoUpgradeAgentsStatusRequestSchema.params>,
+  undefined
+> = async (context, request, response) => {
+  const [_, fleetContext] = await Promise.all([context.core, context.fleet]);
+
+  const agentClient = fleetContext.agentClient.asCurrentUser;
+
+  const body = await getAutoUpgradeAgentsStatus(agentClient, request.params.agentPolicyId);
+  return response.ok({
+    body,
+  });
+};
+
 export const createAgentPolicyHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof CreateAgentPolicyRequestSchema.query>,
@@ -381,7 +397,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
-  const { force, space_ids: spaceIds, ...data } = request.body;
+  const { force, bumpRevision, space_ids: spaceIds, ...data } = request.body;
 
   let spaceId = fleetContext.spaceId;
 
@@ -407,7 +423,7 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       esClient,
       request.params.agentPolicyId,
       data,
-      { force, user, spaceId }
+      { force, bumpRevision, user, spaceId }
     );
 
     let item: any = agentPolicy;
