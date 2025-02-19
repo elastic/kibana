@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { getAncestorsAndSelf } from '@kbn/streams-schema';
 import { IndicesIndexTemplate } from '@elastic/elasticsearch/lib/api/types';
 import { ASSET_VERSION } from '../../../../common/constants';
@@ -20,49 +21,11 @@ export function generateWiredIndexTemplate(name: string, isServerless: boolean) 
     return [...acc, getStreamLayerComponentName(ancestorName)];
   }, [] as string[]);
 
-  return generateIndexTemplate({
-    name,
-    composedOf,
-    isServerless,
-    priority: 200,
-  });
-}
-
-export function generateUnwiredIndexTemplate(
-  name: string,
-  existingTemplate: IndicesIndexTemplate,
-  isServerless: boolean
-) {
-  const composedOf = [
-    ...existingTemplate.composed_of,
-    getBaseLayerComponentName(name),
-    getStreamLayerComponentName(name),
-  ];
-
-  return generateIndexTemplate({
-    name,
-    composedOf,
-    isServerless,
-    priority: (existingTemplate.priority ?? 0) + 100,
-  });
-}
-
-function generateIndexTemplate({
-  name,
-  composedOf,
-  isServerless,
-  priority,
-}: {
-  name: string;
-  composedOf: string[];
-  isServerless: boolean;
-  priority: number;
-}) {
   return {
     name: getIndexTemplateName(name),
     index_patterns: [name],
     composed_of: composedOf,
-    priority,
+    priority: 200,
     version: ASSET_VERSION,
     _meta: {
       managed: true,
@@ -90,5 +53,30 @@ function generateIndexTemplate({
     allow_auto_create: true,
     // ignore missing component templates to be more robust against out-of-order syncs
     ignore_missing_component_templates: composedOf,
+  };
+}
+
+export function generateUnwiredIndexTemplate(
+  name: string,
+  existingTemplate: IndicesIndexTemplate,
+  isServerless: boolean
+) {
+  const composedOf = [
+    ...existingTemplate.composed_of,
+    getBaseLayerComponentName(name),
+    getStreamLayerComponentName(name),
+  ];
+
+  return {
+    ...omit(existingTemplate, ['template']),
+    name: getIndexTemplateName(name),
+    index_patterns: [name],
+    composed_of: composedOf,
+    priority: (existingTemplate.priority ?? 0) + 100,
+    ignore_missing_component_templates: [
+      ...(existingTemplate.ignore_missing_component_templates ?? []),
+      getBaseLayerComponentName(name),
+      getStreamLayerComponentName(name),
+    ],
   };
 }
