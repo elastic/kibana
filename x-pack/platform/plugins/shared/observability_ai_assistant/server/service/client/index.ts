@@ -492,7 +492,6 @@ export class ObservabilityAIAssistantClient {
       functionCalling: (simulateFunctionCalling ? 'simulated' : 'auto') as FunctionCallingMode,
     };
 
-    // TODO: decrease log level
     this.dependencies.logger.debug(
       `Calling inference client with for name: "${name}" with options: ${JSON.stringify(options)}`
     );
