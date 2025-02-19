@@ -16,6 +16,7 @@ import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
   FILTER_PROCESS_DESCENDANTS_TAG,
   GLOBAL_ARTIFACT_TAG,
+  OWNER_SPACE_ID_TAG_PREFIX,
 } from './constants';
 
 export type TagFilter = (tag: string) => boolean;
@@ -117,4 +118,63 @@ export const createExceptionListItemForCreate = (listId: string): CreateExceptio
     type: 'simple',
     os_types: ['windows'],
   };
+};
+
+/**
+ * Returns an array with all owner space IDs for the artifact
+ */
+export const getArtifactOwnerSpaceIds = (
+  item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
+): string[] => {
+  return (item.tags ?? []).reduce((acc, tag) => {
+    if (tag.startsWith(OWNER_SPACE_ID_TAG_PREFIX)) {
+      acc.push(tag.substring(OWNER_SPACE_ID_TAG_PREFIX.length));
+    }
+
+    return acc;
+  }, [] as string[]);
+};
+
+/** Returns an Artifact `tag` value for a given space id */
+export const buildSpaceOwnerIdTag = (spaceId: string): string => {
+  if (spaceId.trim() === '') {
+    throw new Error('spaceId must be a string with a length greater than zero.');
+  }
+
+  return `${OWNER_SPACE_ID_TAG_PREFIX}${spaceId}`;
+};
+
+/**
+ * Sets the owner space id on the given artifact, if not already present.
+ *
+ * NOTE: this utility will mutate the artifact exception list item provided on input.
+ *
+ * @param item
+ * @param spaceId
+ */
+export const setArtifactOwnerSpaceId = (
+  item: Partial<Pick<ExceptionListItemSchema, 'tags'>>,
+  spaceId: string
+): void => {
+  if (spaceId.trim() === '') {
+    throw new Error('spaceId must be a string with a length greater than zero.');
+  }
+
+  if (!getArtifactOwnerSpaceIds(item).includes(spaceId)) {
+    if (!item.tags) {
+      item.tags = [];
+    }
+
+    item.tags.push(buildSpaceOwnerIdTag(spaceId));
+  }
+};
+
+/**
+ * Checks to see if the artifact item has at least 1 owner space id tag
+ * @param item
+ */
+export const hasArtifactOwnerSpaceId = (
+  item: Partial<Pick<ExceptionListItemSchema, 'tags'>>
+): boolean => {
+  return (item.tags ?? []).some((tag) => tag.startsWith(OWNER_SPACE_ID_TAG_PREFIX));
 };

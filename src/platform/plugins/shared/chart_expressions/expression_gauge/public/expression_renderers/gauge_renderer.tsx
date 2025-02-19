@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { css } from '@emotion/react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -93,7 +94,18 @@ export const gaugeRenderer: (
     const { GaugeComponent } = await import('../components/gauge_component');
     render(
       <KibanaRenderContextProvider {...core}>
-        <div className="gauge-container" data-test-subj="gaugeChart">
+        <div
+          className="eui-scrollBar"
+          data-test-subj="gaugeChart"
+          css={css`
+            height: 100%;
+            width: 100%;
+            // the FocusTrap is adding extra divs which are making the visualization redraw twice
+            // with a visible glitch. This make the chart library resilient to this extra reflow
+            overflow: hidden;
+            user-select: text;
+          `}
+        >
           <GaugeComponent
             {...config}
             setChartSize={setChartSize}
