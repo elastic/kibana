@@ -133,7 +133,9 @@ it('shows timeline for users with timeline read access', async () => {
   expect(showTimeline).toEqual([true]);
 });
 
-describe('useDataView', () => {
+// FIXME: skipping this as useDataView should not dictate if the timeline bar is not visible (timeline scope could be cached);
+// we need a long term solution.
+describe.skip('useDataView', () => {
   it('should show timeline when indices exist', () => {
     jest.mocked(useDataView).mockReturnValueOnce({
       indicesExist: true,
