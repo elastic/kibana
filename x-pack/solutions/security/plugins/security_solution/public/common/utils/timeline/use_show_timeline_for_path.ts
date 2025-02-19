@@ -21,18 +21,19 @@ const isTimelinePathVisible = (currentPath: string): boolean => {
 };
 
 export const useShowTimelineForGivenPath = () => {
-  const { indicesExist, dataView } = useDataView(SourcererScopeName.timeline);
+  const { indicesExist, dataView, status } = useDataView(SourcererScopeName.timeline);
   const {
     services: {
       application: { capabilities },
     },
   } = useKibana();
   const userHasSecuritySolutionVisible = hasAccessToSecuritySolution(capabilities);
-  const dataViewId = dataView?.id;
 
   const isTimelineAllowed = useMemo(
-    () => userHasSecuritySolutionVisible && (indicesExist || typeof dataViewId === 'undefined'),
-    [indicesExist, dataViewId, userHasSecuritySolutionVisible]
+    () =>
+      userHasSecuritySolutionVisible &&
+      (indicesExist || (status === 'ready' && dataView && dataView?.id === '')),
+    [userHasSecuritySolutionVisible, indicesExist, status, dataView]
   );
 
   const getIsTimelineVisible = useCallback(

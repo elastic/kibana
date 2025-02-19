@@ -57,7 +57,11 @@ export const useInitDataViewPicker = () => {
     dispatch(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        scope: [DataViewPickerScopeName.default, DataViewPickerScopeName.timeline],
+        scope: [
+          DataViewPickerScopeName.default,
+          DataViewPickerScopeName.timeline,
+          DataViewPickerScopeName.analyzer,
+        ],
       })
     );
 
