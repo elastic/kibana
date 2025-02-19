@@ -19,7 +19,7 @@ import {
 
 import * as i18n from '../translations';
 
-const CHECKBOX_OPTIONS = [
+const RADIO_OPTIONS = [
   {
     id: DEFAULT_APP_CATEGORIES.observability.id,
     label: i18n.CREATE_FORM_CATEGORY_OBSERVABILITY_RULES,
@@ -38,20 +38,20 @@ const CHECKBOX_OPTIONS = [
 ].sort((a, b) => a.id.localeCompare(b.id));
 
 export interface MaintenanceWindowCategorySelectionProps {
-  selectedCategories: string[];
-  availableCategories: string[];
+  selectedSolution: string;
+  availableSolutions: string[];
   errors?: string[];
   isLoading?: boolean;
   isScopedQueryEnabled?: boolean;
-  onChange: (categories: string[]) => void;
+  onChange: (solution: string) => void;
 }
 
 export const MaintenanceWindowCategorySelection = (
   props: MaintenanceWindowCategorySelectionProps
 ) => {
   const {
-    selectedCategories,
-    availableCategories,
+    selectedSolution,
+    availableSolutions,
     errors = [],
     isLoading = false,
     isScopedQueryEnabled = false,
@@ -59,15 +59,15 @@ export const MaintenanceWindowCategorySelection = (
   } = props;
 
   const options = useMemo(() => {
-    return CHECKBOX_OPTIONS.map((option) => ({
+    return RADIO_OPTIONS.map((option) => ({
       ...option,
-      disabled: !availableCategories.includes(option.id),
+      disabled: !availableSolutions.includes(option.id), // try to disable and see how it looks
     })).sort((a, b) => a.id.localeCompare(b.id));
-  }, [availableCategories]);
+  }, [availableSolutions]);
 
   const onRadioChange = useCallback(
     (id: string) => {
-      onChange([id]);
+      onChange(id);
     },
     [onChange]
   );
@@ -77,11 +77,11 @@ export const MaintenanceWindowCategorySelection = (
       <EuiRadioGroup
         data-test-subj="maintenanceWindowCategorySelectionRadioGroup"
         options={options}
-        idSelected={selectedCategories[0]}
+        idSelected={selectedSolution}
         onChange={onRadioChange}
       />
     );
-  }, [options, selectedCategories, onRadioChange]);
+  }, [options, selectedSolution, onRadioChange]);
 
   if (isLoading) {
     return (

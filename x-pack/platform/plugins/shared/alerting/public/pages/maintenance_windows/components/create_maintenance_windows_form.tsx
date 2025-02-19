@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import moment from 'moment';
 import {
   FIELD_TYPES,
@@ -91,8 +91,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     (initialValue?.scopedQuery?.filters as Filter[]) || []
   );
   const [scopedQueryErrors, setScopedQueryErrors] = useState<string[]>([]);
-  const hasSetInitialCategories = useRef<boolean>(false);
-  const categoryIdsHistory = useRef<string[]>([]);
 
   const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
 
@@ -168,7 +166,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           formData.timezone ? formData.timezone[0] : defaultTimezone,
           formData.recurringSchedule
         ),
-        categoryIds: formData.categoryIds,
+        categoryIds: formData.solutionId ? [formData.solutionId] : undefined,
         scopedQuery: scopedQueryPayload,
       };
 
@@ -201,9 +199,9 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     onSubmit: submitMaintenanceWindow,
   });
 
-  const [{ recurring, timezone, categoryIds }, _, mounted] = useFormData<FormProps>({
+  const [{ recurring, timezone, solutionId }, _, mounted] = useFormData<FormProps>({
     form,
-    watch: ['recurring', 'timezone', 'categoryIds', 'scopedQuery'],
+    watch: ['recurring', 'timezone', 'solutionId', 'scopedQuery'],
   });
 
   const isRecurring = recurring || false;
@@ -221,46 +219,46 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     return ruleTypes.filter((ruleType) => VALID_CATEGORIES.includes(ruleType.category));
   }, [ruleTypes]);
 
-  const availableCategories = useMemo(() => {
+  const availableSolutions = useMemo(() => {
     return [...new Set(validRuleTypes.map((ruleType) => ruleType.category))];
   }, [validRuleTypes]);
 
   const ruleTypeIds = useMemo(() => {
-    if (!Array.isArray(validRuleTypes) || !Array.isArray(categoryIds) || !mounted) {
+    if (!Array.isArray(validRuleTypes) || !solutionId || !mounted) {
       return [];
     }
 
     const uniqueRuleTypeIds = new Set<string>();
 
     validRuleTypes.forEach((ruleType) => {
-      if (categoryIds.includes(ruleType.category)) {
+      if (solutionId === ruleType.category) {
         uniqueRuleTypeIds.add(ruleType.id);
       }
     });
 
     return [...uniqueRuleTypeIds];
-  }, [validRuleTypes, categoryIds, mounted]);
+  }, [validRuleTypes, solutionId, mounted]);
 
-  const onCategoryIdsChange = useCallback(
-    (ids: string[]) => {
-      if (!categoryIds) {
+  const onSolutionIdChange = useCallback(
+    (id: string) => {
+      if (!solutionId) {
         return;
       }
-      setFieldValue('categoryIds', ids);
+      setFieldValue('solutionId', id);
     },
-    [categoryIds, setFieldValue]
+    [solutionId, setFieldValue]
   );
 
   const onScopeQueryToggle = useCallback(
     (isEnabled: boolean) => {
       if (isEnabled) {
-        setFieldValue('categoryIds', [categoryIds?.sort()[0] || availableCategories.sort()[0]]);
+        setFieldValue('solutionId', availableSolutions.sort()[0]);
       } else {
-        setFieldValue('categoryIds', categoryIdsHistory.current);
+        setFieldValue('solutionId', undefined);
       }
       setIsScopedQueryEnabled(isEnabled);
     },
-    [categoryIds, availableCategories, setFieldValue]
+    [setFieldValue, availableSolutions]
   );
 
   const onQueryChange = useCallback(
@@ -298,51 +296,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     }
     return m;
   }, [closeModal, archiveMaintenanceWindow, isModalVisible, maintenanceWindowId, onSuccess]);
-
-  // For create mode, we want to initialize options to the rule type category the
-  // user has access
-  useEffect(() => {
-    if (isEditMode) {
-      return;
-    }
-    if (!mounted) {
-      return;
-    }
-    if (hasSetInitialCategories.current) {
-      return;
-    }
-    if (!validRuleTypes.length) {
-      return;
-    }
-    setFieldValue('categoryIds', [...new Set(validRuleTypes.map((ruleType) => ruleType.category))]);
-    hasSetInitialCategories.current = true;
-  }, [isEditMode, mounted, setFieldValue, validRuleTypes]);
-
-  // For edit mode, if a maintenance window => category_ids is not an array, this means
-  // the maintenance window was created before the introduction of category filters.
-  // For backwards compat we will initialize all options for these.
-  useEffect(() => {
-    if (!isEditMode) {
-      return;
-    }
-    if (!mounted) {
-      return;
-    }
-    if (hasSetInitialCategories.current) {
-      return;
-    }
-    if (Array.isArray(categoryIds)) {
-      return;
-    }
-    setFieldValue('categoryIds', VALID_CATEGORIES);
-    hasSetInitialCategories.current = true;
-  }, [isEditMode, categoryIds, mounted, setFieldValue]);
-
-  useEffect(() => {
-    if (!isScopedQueryEnabled && Array.isArray(categoryIds)) {
-      categoryIdsHistory.current = categoryIds;
-    }
-  }, [categoryIds, isScopedQueryEnabled]);
 
   return (
     <Form form={form} data-test-subj="createMaintenanceWindowForm">
@@ -460,15 +413,15 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
         </EuiFlexItem>
         <EuiHorizontalRule margin="xl" />
         <EuiFlexItem>
-          <UseField path="categoryIds">
+          <UseField path="solutionId">
             {(field) => (
               <MaintenanceWindowCategorySelection
                 isScopedQueryEnabled={isScopedQueryEnabled}
                 isLoading={isLoadingRuleTypes}
-                selectedCategories={categoryIds || []}
-                availableCategories={availableCategories}
+                selectedSolution={solutionId || ''} // add default
+                availableSolutions={availableSolutions}
                 errors={field.errors.map((error) => error.message)}
-                onChange={onCategoryIdsChange}
+                onChange={onSolutionIdChange}
               />
             )}
           </UseField>
