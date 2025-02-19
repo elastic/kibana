@@ -40,12 +40,12 @@ import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../common/service
 
 export const TYPE = 'fleet:automatic-agent-upgrade-task';
 export const VERSION = '1.0.0';
-export const AGENT_POLICIES_BATCHSIZE = 500;
-export const AGENTS_BATCHSIZE = 10000;
 const TITLE = 'Fleet Automatic agent upgrades';
 const SCOPE = ['fleet'];
 const INTERVAL = '30s';
 const TIMEOUT = '10m';
+const AGENT_POLICIES_BATCHSIZE = 500;
+const AGENTS_BATCHSIZE = 10000;
 const MIN_AGENTS_FOR_ROLLOUT = 10;
 const MIN_UPGRADE_DURATION_SECONDS = 600;
 type AgentWithDefinedVersion = Agent & { agent: FleetServerAgentMetadata };
