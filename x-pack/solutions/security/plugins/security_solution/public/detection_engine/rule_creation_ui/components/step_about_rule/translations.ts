@@ -98,9 +98,27 @@ export const ADD_RULE_SETUP_HELP_TEXT = i18n.translate(
   }
 );
 
-export const FIELD_NOT_EDITABLE_TOOLTIP_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldNotEditableTooltipText',
+export const AUTHOR_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldAuthorLabel',
   {
-    defaultMessage: 'This field is not editable',
+    defaultMessage: 'Author',
   }
 );
+
+export const LICENSE_FIELD_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldLicenseLabel',
+  {
+    defaultMessage: 'License',
+  }
+);
+
+export const FIELD_NOT_EDITABLE_TOOLTIP_TEXT = (fieldName: string) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldNotEditableTooltipText',
+    {
+      defaultMessage: "{fieldName} can't be edited for Elastic rules.",
+      values: {
+        fieldName,
+      },
+    }
+  );
