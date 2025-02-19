@@ -94,6 +94,6 @@ export async function fetchRelatedSavedObjects(
     monitoringOutput,
     downloadSourceUri,
     downloadSourceProxyUri,
-    fleetServerHosts,
+    fleetServerHost: fleetServerHosts,
   };
 }

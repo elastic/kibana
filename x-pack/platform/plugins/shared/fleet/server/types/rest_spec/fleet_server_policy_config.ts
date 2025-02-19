@@ -16,14 +16,12 @@ const secretRefSchema = schema.oneOf([
   schema.string(),
 ]);
 
-export const FleetServerHostSchema = schema.object({
-  id: schema.string(),
-  name: schema.string(),
-  host_urls: schema.arrayOf(schema.string(), { minSize: 1 }),
-  is_default: schema.boolean({ defaultValue: false }),
+export const FleetServerHostBaseSchema = schema.object({
+  name: schema.maybe(schema.string()),
+  host_urls: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
+  is_default: schema.maybe(schema.boolean({ defaultValue: false })),
   is_internal: schema.maybe(schema.boolean()),
-  is_preconfigured: schema.boolean({ defaultValue: false }),
-  proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+  proxy_id: schema.nullable(schema.string()),
   secrets: schema.maybe(
     schema.object({
       ssl: schema.maybe(
@@ -53,6 +51,16 @@ export const FleetServerHostSchema = schema.object({
   ),
 });
 
+export const FleetServerHostSchema = FleetServerHostBaseSchema.extends({
+  id: schema.string(),
+  name: schema.string(),
+  host_urls: schema.arrayOf(schema.string(), { minSize: 1 }),
+  is_default: schema.boolean({ defaultValue: false }),
+  is_internal: schema.maybe(schema.boolean()),
+  is_preconfigured: schema.boolean({ defaultValue: false }),
+  proxy_id: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
+});
+
 export const FleetServerHostResponseSchema = schema.object({
   item: FleetServerHostSchema,
 });
@@ -69,15 +77,7 @@ export const GetOneFleetServerHostRequestSchema = {
 
 export const PutFleetServerHostRequestSchema = {
   params: schema.object({ itemId: schema.string() }),
-  body: FleetServerHostSchema.extends({
-    name: schema.maybe(schema.string()),
-    host_urls: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
-    is_default: schema.maybe(schema.boolean({ defaultValue: false })),
-    is_internal: schema.maybe(schema.boolean()),
-    proxy_id: schema.nullable(schema.string()),
-    // remove is_preconfigured from schema
-    is_preconfigured: undefined,
-  }),
+  body: FleetServerHostBaseSchema,
 };
 
 export const GetAllFleetServerHostRequestSchema = {};

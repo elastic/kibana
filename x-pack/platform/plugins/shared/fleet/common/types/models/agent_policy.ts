@@ -126,6 +126,7 @@ export interface FullAgentPolicyInput {
   };
   streams?: FullAgentPolicyInputStream[];
   processors?: FullAgentPolicyAddFields[];
+  ssl?: BaseSSLConfig;
   [key: string]: any;
 }
 
@@ -145,6 +146,7 @@ export type FullAgentPolicyOutputPermissions = Record<string, SecurityRoleDescri
 export type FullAgentPolicyOutput = Pick<Output, 'type' | 'hosts' | 'ca_sha256'> & {
   proxy_url?: string;
   proxy_headers?: any;
+  ssl?: BaseSSLConfig;
   [key: string]: any;
 };
 
@@ -221,17 +223,20 @@ export interface FullAgentPolicy {
   };
 }
 
+export interface BaseSSLConfig {
+  verification_mode?: string;
+  certificate_authorities?: string[];
+  renegotiation?: string;
+  certificate?: string;
+  key?: string;
+  client_authentication?: string;
+}
+
 export interface FullAgentPolicyFleetConfig {
   hosts: string[];
   proxy_url?: string;
   proxy_headers?: any;
-  ssl?: {
-    verification_mode?: string;
-    certificate_authorities?: string[];
-    renegotiation?: string;
-    certificate?: string;
-    key?: string;
-  };
+  ssl?: BaseSSLConfig;
   secrets?: { key?: SOSecret };
 }
 

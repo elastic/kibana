@@ -28,6 +28,7 @@ import type {
   AgentPolicy,
 } from '../../types';
 import type {
+  FullAgentPolicyInput,
   FullAgentPolicyMonitoring,
   FullAgentPolicyOutputPermissions,
   PackageInfo,
@@ -45,8 +46,6 @@ import { pkgToPkgKey, splitPkgKey } from '../epm/registry';
 import { appContextService } from '../app_context';
 
 import { getFleetServerHostsSecretReferences, getOutputSecretReferences } from '../secrets';
-
-import { policyHasFleetServer } from '../../../common/services';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
@@ -89,7 +88,7 @@ export async function getFullAgentPolicy(
     outputs,
     proxies,
     dataOutput,
-    fleetServerHosts,
+    fleetServerHost,
     monitoringOutput,
     downloadSourceUri,
     downloadSourceProxyUri,
@@ -136,7 +135,12 @@ export async function getFullAgentPolicy(
     if (output) {
       input.use_output = getOutputIdForAgentPolicy(output);
     }
-
+    if (input.type === 'fleet-server' && fleetServerHost) {
+      const sslInputConfig = generateSSLConfigForFleetServerInput(fleetServerHost);
+      if (sslInputConfig) {
+        input = { ...input, ...sslInputConfig };
+      }
+    }
     return input;
   });
   const features = (agentPolicy.agent_features || []).reduce((acc, { name, ...featureConfig }) => {
@@ -145,14 +149,13 @@ export async function getFullAgentPolicy(
   }, {} as NonNullable<FullAgentPolicy['agent']>['features']);
 
   const outputSecretReferences = outputs.flatMap((output) => getOutputSecretReferences(output));
-  const fleetserverHostSecretReferences = fleetServerHosts
-    ? getFleetServerHostsSecretReferences(fleetServerHosts)
+  const fleetserverHostSecretReferences = fleetServerHost
+    ? getFleetServerHostsSecretReferences(fleetServerHost)
     : [];
 
   const packagePolicySecretReferences = (agentPolicy?.package_policies || []).flatMap(
     (policy) => policy.secret_references || []
   );
-  const hasFleetServer = policyHasFleetServer(agentPolicy);
 
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
@@ -161,9 +164,8 @@ export async function getFullAgentPolicy(
         acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
           output,
           output.proxy_id ? proxies.find((proxy) => output.proxy_id === proxy.id) : undefined,
-          fleetServerHosts,
-          hasFleetServer,
-          standalone
+          standalone,
+          fleetServerHost
         );
 
         return acc;
@@ -280,8 +282,8 @@ export async function getFullAgentPolicy(
   }, {});
 
   // only add fleet server hosts if not in standalone
-  if (!standalone && fleetServerHosts) {
-    fullAgentPolicy.fleet = generateFleetConfig(fleetServerHosts, proxies);
+  if (!standalone && fleetServerHost) {
+    fullAgentPolicy.fleet = generateFleetConfig(fleetServerHost, proxies);
   }
 
   const settingsValues = getSettingsValuesForAgentPolicy(
@@ -343,30 +345,6 @@ export function generateFleetConfig(
     hosts: fleetServerHost.host_urls,
   };
 
-  if (fleetServerHost.ssl) {
-    config.ssl = {
-      ...(fleetServerHost.ssl.certificate_authorities && {
-        certificate_authorities: fleetServerHost.ssl.certificate_authorities,
-      }),
-      ...(fleetServerHost.ssl.certificate && {
-        certificate: fleetServerHost.ssl.certificate,
-      }),
-      ...(fleetServerHost.ssl.key &&
-        !fleetServerHost?.secrets?.ssl?.key && {
-          key: fleetServerHost.ssl.key,
-        }),
-    };
-  }
-
-  if (fleetServerHost.secrets) {
-    config.secrets = {
-      ...(fleetServerHost?.secrets?.ssl?.key &&
-        !fleetServerHost?.ssl?.key && {
-          key: fleetServerHost.secrets?.ssl?.key,
-        }),
-    };
-  }
-
   const fleetServerHostproxy = fleetServerHost.proxy_id
     ? proxies.find((proxy) => proxy.id === fleetServerHost.proxy_id)
     : null;
@@ -394,53 +372,42 @@ export function generateFleetConfig(
   return config;
 }
 
-function generateSSLConfigForElasticSearch(
-  output: Output,
-  fleetServerHost: FleetServerHost | undefined,
-  hasFleetServer?: boolean
-) {
-  let config: Partial<FullAgentPolicyOutput> = {};
-  // These settings are generated only for fleet server policies
-  if (!hasFleetServer) return;
+// Generate the SSL configs for fleet-server type input
+// Corresponding to --fleet-server-cert, --fleet-server-cert-key, --certificate-authorites cli options
+function generateSSLConfigForFleetServerInput(fleetServerHost: FleetServerHost) {
+  const inputConfig: Partial<FullAgentPolicyInput> = {};
 
-  if (output.type === outputType.Elasticsearch && fleetServerHost?.ssl) {
-    if (fleetServerHost.ssl) {
-      config = {
-        ...(fleetServerHost.ssl.es_certificate_authorities && {
-          certificate_authorities: fleetServerHost.ssl.es_certificate_authorities,
+  if (fleetServerHost?.ssl) {
+    inputConfig.ssl = {
+      ...(fleetServerHost.ssl.certificate_authorities && {
+        certificate_authorities: fleetServerHost.ssl.certificate_authorities,
+      }),
+      ...(fleetServerHost.ssl.certificate && {
+        certificate: fleetServerHost.ssl.certificate,
+      }),
+      ...(fleetServerHost.ssl.key &&
+        !fleetServerHost?.secrets?.ssl?.key && {
+          key: fleetServerHost.ssl.key,
         }),
-        ...(fleetServerHost.ssl.es_certificate && {
-          certificate: fleetServerHost.ssl.es_certificate,
-        }),
-        ...(fleetServerHost.ssl.es_key &&
-          !fleetServerHost?.secrets?.ssl?.es_key && {
-            key: fleetServerHost.ssl.es_key,
-          }),
-        ...(fleetServerHost.ssl.client_auth && {
-          client_authentication: fleetServerHost.ssl.client_auth,
-        }),
-      };
-    }
+    };
   }
-  if (output.type === outputType.Elasticsearch && fleetServerHost?.secrets) {
-    if (fleetServerHost.secrets) {
-      config.secrets = {
-        ...(fleetServerHost?.secrets?.ssl?.es_key &&
-          !fleetServerHost?.ssl?.es_key && {
-            key: fleetServerHost.secrets?.ssl?.es_key,
-          }),
-      };
-    }
+
+  if (fleetServerHost?.secrets) {
+    inputConfig.secrets = {
+      ...(fleetServerHost?.secrets?.ssl?.key &&
+        !fleetServerHost?.ssl?.key && {
+          key: fleetServerHost.secrets?.ssl?.key,
+        }),
+    };
   }
-  return config;
+  return inputConfig;
 }
 
 export function transformOutputToFullPolicyOutput(
   output: Output,
   proxy?: FleetProxy,
-  fleetServerHost?: FleetServerHost,
-  hasFleetServer?: boolean,
-  standalone = false
+  standalone = false,
+  fleetServerHost?: FleetServerHost
 ): FullAgentPolicyOutput {
   const {
     config_yaml,
@@ -562,15 +529,6 @@ export function transformOutputToFullPolicyOutput(
     ...(secrets ? { secrets } : {}),
     ...(ca_trusted_fingerprint ? { 'ssl.ca_trusted_fingerprint': ca_trusted_fingerprint } : {}),
   };
-
-  if (fleetServerHost) {
-    const elasticSearchSSLConfigs = generateSSLConfigForElasticSearch(
-      output,
-      fleetServerHost,
-      hasFleetServer
-    );
-    if (elasticSearchSSLConfigs) newOutput.ssl = elasticSearchSSLConfigs;
-  }
 
   if (proxy) {
     newOutput.proxy_url = proxy.url;
