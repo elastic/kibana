@@ -6,10 +6,10 @@
  */
 
 import {
-  InheritedFieldDefinition,
   StreamGetResponse,
   WiredStreamGetResponse,
   findInheritedLifecycle,
+  getInheritedFieldsFromAncestors,
   isGroupStreamDefinition,
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
@@ -79,12 +79,7 @@ export async function readStream({
     stream: streamDefinition,
     dashboards,
     effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
-    inherited_fields: ancestors.reduce((acc, def) => {
-      Object.entries(def.ingest.wired.fields).forEach(([key, fieldDef]) => {
-        acc[key] = { ...fieldDef, from: def.name };
-      });
-      return acc;
-    }, {} as InheritedFieldDefinition),
+    inherited_fields: getInheritedFieldsFromAncestors(ancestors),
   };
 
   return body;

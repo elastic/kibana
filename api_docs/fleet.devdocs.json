@@ -1824,6 +1824,20 @@
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.NewPackagePolicy.additional_datastreams_permissions",
+            "type": "Array",
+            "tags": [],
+            "label": "additional_datastreams_permissions",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3068,7 +3082,7 @@
                         "section": "def-common.PackagePolicyConfigRecord",
                         "text": "PackagePolicyConfigRecord"
                       },
-                      " | undefined; elasticsearch?: { [key: string]: any; privileges?: { cluster?: string[] | undefined; } | undefined; } | undefined; overrides?: { inputs?: { [key: string]: any; } | undefined; } | null | undefined; supports_agentless?: boolean | null | undefined; }"
+                      " | undefined; elasticsearch?: { [key: string]: any; privileges?: { cluster?: string[] | undefined; } | undefined; } | undefined; overrides?: { inputs?: { [key: string]: any; } | undefined; } | null | undefined; supports_agentless?: boolean | null | undefined; additional_datastreams_permissions?: string[] | undefined; }"
                     ],
                     "path": "x-pack/platform/plugins/shared/fleet/public/types/ui_extensions.ts",
                     "deprecated": false,
@@ -26525,6 +26539,20 @@
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.NewPackagePolicy.additional_datastreams_permissions",
+            "type": "Array",
+            "tags": [],
+            "label": "additional_datastreams_permissions",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -30531,7 +30559,7 @@
         "label": "PackageSpecCategory",
         "description": [],
         "signature": [
-          "\"connector\" | \"monitoring\" | \"security\" | \"observability\" | \"infrastructure\" | \"kubernetes\" | \"cloud\" | \"custom\" | \"advanced_analytics_ueba\" | \"analytics_engine\" | \"application_observability\" | \"auditd\" | \"authentication\" | \"aws\" | \"azure\" | \"big_data\" | \"cdn_security\" | \"config_management\" | \"connector_client\" | \"containers\" | \"crawler\" | \"credential_management\" | \"crm\" | \"custom_logs\" | \"database_security\" | \"datastore\" | \"dns_security\" | \"edr_xdr\" | \"cloudsecurity_cdr\" | \"elasticsearch_sdk\" | \"elastic_stack\" | \"email_security\" | \"firewall_security\" | \"google_cloud\" | \"iam\" | \"ids_ips\" | \"java_observability\" | \"language_client\" | \"languages\" | \"load_balancer\" | \"message_queue\" | \"native_search\" | \"network\" | \"network_security\" | \"notification\" | \"os_system\" | \"process_manager\" | \"productivity\" | \"productivity_security\" | \"proxy_security\" | \"sdk_search\" | \"stream_processing\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"virtualization\" | \"vpn_security\" | \"vulnerability_management\" | \"web\" | \"web_application_firewall\" | \"websphere\" | \"workplace_search_content_source\" | \"app_search\" | \"enterprise_search\" | \"workplace_search\""
+          "\"connector\" | \"monitoring\" | \"security\" | \"observability\" | \"infrastructure\" | \"kubernetes\" | \"cloud\" | \"custom\" | \"web\" | \"advanced_analytics_ueba\" | \"analytics_engine\" | \"application_observability\" | \"auditd\" | \"authentication\" | \"aws\" | \"azure\" | \"big_data\" | \"cdn_security\" | \"config_management\" | \"connector_client\" | \"containers\" | \"crawler\" | \"credential_management\" | \"crm\" | \"custom_logs\" | \"database_security\" | \"datastore\" | \"dns_security\" | \"edr_xdr\" | \"cloudsecurity_cdr\" | \"elasticsearch_sdk\" | \"elastic_stack\" | \"email_security\" | \"firewall_security\" | \"google_cloud\" | \"iam\" | \"ids_ips\" | \"java_observability\" | \"language_client\" | \"languages\" | \"load_balancer\" | \"message_queue\" | \"native_search\" | \"network\" | \"network_security\" | \"notification\" | \"os_system\" | \"process_manager\" | \"productivity\" | \"productivity_security\" | \"proxy_security\" | \"sdk_search\" | \"stream_processing\" | \"support\" | \"threat_intel\" | \"ticketing\" | \"version_control\" | \"virtualization\" | \"vpn_security\" | \"vulnerability_management\" | \"web_application_firewall\" | \"websphere\" | \"workplace_search_content_source\" | \"app_search\" | \"enterprise_search\" | \"workplace_search\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/types/models/package_spec.ts",
         "deprecated": false,
@@ -31232,6 +31260,17 @@
             "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.AGENT_POLICY_API_ROUTES.AUTO_UPGRADE_AGENTS_STATUS_PATTERN",
+            "type": "string",
+            "tags": [],
+            "label": "AUTO_UPGRADE_AGENTS_STATUS_PATTERN",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -31296,6 +31335,38 @@
               {
                 "parentPluginId": "fleet",
                 "id": "def-common.agentPolicyRouteService.getInfoPath.$1",
+                "type": "string",
+                "tags": [],
+                "label": "agentPolicyId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.agentPolicyRouteService.getAutoUpgradeAgentsStatusPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getAutoUpgradeAgentsStatusPath",
+            "description": [],
+            "signature": [
+              "(agentPolicyId: string) => string"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-common.agentPolicyRouteService.getAutoUpgradeAgentsStatusPath.$1",
                 "type": "string",
                 "tags": [],
                 "label": "agentPolicyId",
@@ -32757,6 +32828,22 @@
             "type": "Function",
             "tags": [],
             "label": "getListLimitedPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.epmRouteService.getDatastreamsPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getDatastreamsPath",
             "description": [],
             "signature": [
               "() => string"

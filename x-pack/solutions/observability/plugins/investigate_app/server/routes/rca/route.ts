@@ -14,7 +14,7 @@ import {
 import { z } from '@kbn/zod';
 import datemath from '@elastic/datemath';
 import { OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID } from '@kbn/management-settings-ids';
-import { createObservabilityEsClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
+import { createTracedEsClient } from '@kbn/traced-es-client';
 import { preconditionFailed } from '@hapi/boom';
 import { createInvestigateAppServerRoute } from '../create_investigate_app_server_route';
 import { investigationRepositoryFactory } from '../../services/investigation_repository';
@@ -69,7 +69,7 @@ export const rootCauseAnalysisRoute = createInvestigateAppServerRoute({
 
     const repository = investigationRepositoryFactory({ soClient, logger });
 
-    const esClient = createObservabilityEsClient({
+    const esClient = createTracedEsClient({
       client: coreEsClient,
       logger,
       plugin: 'investigateApp',

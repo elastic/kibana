@@ -1265,7 +1265,7 @@
             "section": "def-common.ESQLCallbacks",
             "text": "ESQLCallbacks"
           },
-          " | undefined) => { getFieldsByType: (expectedType?: string | string[], ignored?: string[]) => Promise<",
+          " | undefined) => { getFieldsByType: (expectedType?: string | readonly string[], ignored?: string[]) => Promise<",
           {
             "pluginId": "@kbn/esql-validation-autocomplete",
             "scope": "common",
@@ -2784,7 +2784,7 @@
             "references": [
               {
                 "plugin": "@kbn/monaco",
-                "path": "src/platform/packages/shared/kbn-monaco/src/esql/lib/hover/hover.ts"
+                "path": "src/platform/packages/shared/kbn-monaco/src/languages/esql/lib/hover/hover.ts"
               }
             ]
           },
@@ -4401,6 +4401,28 @@
       }
     ],
     "misc": [
+      {
+        "parentPluginId": "@kbn/esql-validation-autocomplete",
+        "id": "def-common.aggregationFunctionDefinitions",
+        "type": "Array",
+        "tags": [],
+        "label": "aggregationFunctionDefinitions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/esql-validation-autocomplete",
+            "scope": "common",
+            "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+            "section": "def-common.FunctionDefinition",
+            "text": "FunctionDefinition"
+          },
+          "[]"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/generated/aggregation_functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/esql-validation-autocomplete",
         "id": "def-common.ErrorTypes",

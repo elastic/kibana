@@ -26,8 +26,6 @@ interface Arguments {
   title: string | null;
 }
 
-type Output = EmbeddableExpression<VisualizeInput & { savedObjectId: string }>;
-
 const defaultTimeRange = {
   from: 'now-15m',
   to: 'now',
@@ -37,7 +35,7 @@ export function savedVisualization(): ExpressionFunctionDefinition<
   'savedVisualization',
   ExpressionValueFilter | null,
   Arguments,
-  Output
+  EmbeddableExpression
 > {
   const { help, args: argHelp } = getFunctionHelp().savedVisualization;
   return {

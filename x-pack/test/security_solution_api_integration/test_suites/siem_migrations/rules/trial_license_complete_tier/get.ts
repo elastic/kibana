@@ -79,7 +79,7 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch migration rules
         let response = await migrationRulesRoutes.get({
           migrationId,
-          filters: { searchTerm: 'Elastic' },
+          queryParams: { search_term: 'Elastic' },
         });
         expect(response.body.total).toEqual(5);
         expect(response.body.data).toEqual(expectedRuleDocuments);
@@ -96,7 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch migration rules
         response = await migrationRulesRoutes.get({
           migrationId,
-          filters: { searchTerm: 'Splunk' },
+          queryParams: { search_term: 'Splunk' },
         });
         expect(response.body.total).toEqual(5);
         expect(response.body.data).toEqual(expectedRuleDocuments);
@@ -116,7 +116,7 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch migration rules by existing ids
         let response = await migrationRulesRoutes.get({
           migrationId,
-          filters: { ids: expectedIds },
+          queryParams: { ids: expectedIds },
         });
         expect(response.body.total).toEqual(3);
         expect(response.body.data.map(({ id }) => id).sort()).toEqual(expectedIds);
@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch migration rules by non-existing id
         response = await migrationRulesRoutes.get({
           migrationId,
-          filters: { ids: [uuidv4()] },
+          queryParams: { ids: [uuidv4()] },
         });
         expect(response.body.total).toEqual(0);
       });
@@ -148,14 +148,14 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch migration rules matched Elastic prebuilt rules
         let response = await migrationRulesRoutes.get({
           migrationId,
-          filters: { prebuilt: true },
+          queryParams: { is_prebuilt: true },
         });
         expect(response.body.total).toEqual(3);
 
         // fetch custom translated migration rules
         response = await migrationRulesRoutes.get({
           migrationId,
-          filters: { prebuilt: false },
+          queryParams: { is_prebuilt: false },
         });
         expect(response.body.total).toEqual(7);
       });
@@ -179,14 +179,14 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch installed migration rules
         let response = await migrationRulesRoutes.get({
           migrationId,
-          filters: { installed: true },
+          queryParams: { is_installed: true },
         });
         expect(response.body.total).toEqual(2);
 
         // fetch non-installed migration rules
         response = await migrationRulesRoutes.get({
           migrationId,
-          filters: { installed: false },
+          queryParams: { is_installed: false },
         });
         expect(response.body.total).toEqual(8);
       });
@@ -209,14 +209,14 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch failed migration rules
         let response = await migrationRulesRoutes.get({
           migrationId,
-          filters: { failed: true },
+          queryParams: { is_failed: true },
         });
         expect(response.body.total).toEqual(4);
 
         // fetch non-failed migration rules
         response = await migrationRulesRoutes.get({
           migrationId,
-          filters: { failed: false },
+          queryParams: { is_failed: false },
         });
         expect(response.body.total).toEqual(6);
       });
@@ -244,14 +244,14 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch failed migration rules
         let response = await migrationRulesRoutes.get({
           migrationId,
-          filters: { fullyTranslated: true },
+          queryParams: { is_fully_translated: true },
         });
         expect(response.body.total).toEqual(6);
 
         // fetch non-failed migration rules
         response = await migrationRulesRoutes.get({
           migrationId,
-          filters: { fullyTranslated: false },
+          queryParams: { is_fully_translated: false },
         });
         expect(response.body.total).toEqual(4);
       });
@@ -279,14 +279,14 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch failed migration rules
         let response = await migrationRulesRoutes.get({
           migrationId,
-          filters: { partiallyTranslated: true },
+          queryParams: { is_partially_translated: true },
         });
         expect(response.body.total).toEqual(4);
 
         // fetch non-failed migration rules
         response = await migrationRulesRoutes.get({
           migrationId,
-          filters: { partiallyTranslated: false },
+          queryParams: { is_partially_translated: false },
         });
         expect(response.body.total).toEqual(6);
       });
@@ -314,14 +314,14 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch failed migration rules
         let response = await migrationRulesRoutes.get({
           migrationId,
-          filters: { untranslatable: true },
+          queryParams: { is_untranslatable: true },
         });
         expect(response.body.total).toEqual(5);
 
         // fetch non-failed migration rules
         response = await migrationRulesRoutes.get({
           migrationId,
-          filters: { untranslatable: false },
+          queryParams: { is_untranslatable: false },
         });
         expect(response.body.total).toEqual(5);
       });
@@ -350,16 +350,14 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch migration rules
         let response = await migrationRulesRoutes.get({
           migrationId,
-          sortField: 'elastic_rule.title',
-          sortDirection: 'asc',
+          queryParams: { sort_field: 'elastic_rule.title', sort_direction: 'asc' },
         });
         expect(response.body.data.map((rule) => rule.elastic_rule?.title)).toEqual(titles.sort());
 
         // fetch migration rules
         response = await migrationRulesRoutes.get({
           migrationId,
-          sortField: 'elastic_rule.title',
-          sortDirection: 'desc',
+          queryParams: { sort_field: 'elastic_rule.title', sort_direction: 'desc' },
         });
         expect(response.body.data.map((rule) => rule.elastic_rule?.title)).toEqual(
           titles.sort().reverse()
@@ -389,8 +387,7 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch migration rules
         let response = await migrationRulesRoutes.get({
           migrationId,
-          sortField: 'elastic_rule.severity',
-          sortDirection: 'asc',
+          queryParams: { sort_field: 'elastic_rule.severity', sort_direction: 'asc' },
         });
         expect(response.body.data.map((rule) => rule.elastic_rule?.severity)).toEqual([
           'low',
@@ -403,8 +400,7 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch migration rules
         response = await migrationRulesRoutes.get({
           migrationId,
-          sortField: 'elastic_rule.severity',
-          sortDirection: 'desc',
+          queryParams: { sort_field: 'elastic_rule.severity', sort_direction: 'desc' },
         });
         expect(response.body.data.map((rule) => rule.elastic_rule?.severity)).toEqual([
           'critical',
@@ -438,8 +434,7 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch migration rules
         let response = await migrationRulesRoutes.get({
           migrationId,
-          sortField: 'elastic_rule.risk_score',
-          sortDirection: 'asc',
+          queryParams: { sort_field: 'elastic_rule.risk_score', sort_direction: 'asc' },
         });
         expect(response.body.data.map((rule) => rule.elastic_rule?.risk_score)).toEqual(
           riskScores.sort((a, b) => {
@@ -450,8 +445,7 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch migration rules
         response = await migrationRulesRoutes.get({
           migrationId,
-          sortField: 'elastic_rule.risk_score',
-          sortDirection: 'desc',
+          queryParams: { sort_field: 'elastic_rule.risk_score', sort_direction: 'desc' },
         });
         expect(response.body.data.map((rule) => rule.elastic_rule?.risk_score)).toEqual(
           riskScores
@@ -485,8 +479,7 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch migration rules
         let response = await migrationRulesRoutes.get({
           migrationId,
-          sortField: 'elastic_rule.prebuilt_rule_id',
-          sortDirection: 'asc',
+          queryParams: { sort_field: 'elastic_rule.prebuilt_rule_id', sort_direction: 'asc' },
         });
         expect(response.body.data.map((rule) => rule.elastic_rule?.prebuilt_rule_id)).toEqual([
           undefined,
@@ -499,8 +492,7 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch migration rules
         response = await migrationRulesRoutes.get({
           migrationId,
-          sortField: 'elastic_rule.prebuilt_rule_id',
-          sortDirection: 'desc',
+          queryParams: { sort_field: 'elastic_rule.prebuilt_rule_id', sort_direction: 'desc' },
         });
         expect(response.body.data.map((rule) => rule.elastic_rule?.prebuilt_rule_id)).toEqual([
           'rule-2',
@@ -536,8 +528,7 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch migration rules
         let response = await migrationRulesRoutes.get({
           migrationId,
-          sortField: 'translation_result',
-          sortDirection: 'asc',
+          queryParams: { sort_field: 'translation_result', sort_direction: 'asc' },
         });
         expect(response.body.data.map((rule) => rule.translation_result)).toEqual([
           RuleTranslationResult.UNTRANSLATABLE,
@@ -548,8 +539,7 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch migration rules
         response = await migrationRulesRoutes.get({
           migrationId,
-          sortField: 'translation_result',
-          sortDirection: 'desc',
+          queryParams: { sort_field: 'translation_result', sort_direction: 'desc' },
         });
         expect(response.body.data.map((rule) => rule.translation_result)).toEqual([
           RuleTranslationResult.FULL,
@@ -572,16 +562,14 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch migration rules
         let response = await migrationRulesRoutes.get({
           migrationId,
-          sortField: 'updated_at',
-          sortDirection: 'asc',
+          queryParams: { sort_field: 'updated_at', sort_direction: 'asc' },
         });
         const ascSorted = response.body.data.map((rule) => rule.updated_at);
 
         // fetch migration rules
         response = await migrationRulesRoutes.get({
           migrationId,
-          sortField: 'updated_at',
-          sortDirection: 'desc',
+          queryParams: { sort_field: 'updated_at', sort_direction: 'desc' },
         });
         const descSorted = response.body.data.map((rule) => rule.updated_at);
 
@@ -612,8 +600,7 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch migration rules
         const response = await migrationRulesRoutes.get({
           migrationId,
-          page: 3,
-          perPage: 7,
+          queryParams: { page: 3, per_page: 7 },
         });
         const start = 3 * 7;
         expect(response.body.data.map((rule) => rule.elastic_rule?.title)).toEqual(
@@ -643,7 +630,7 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch migration rules
         const response = await migrationRulesRoutes.get({
           migrationId,
-          page: 3,
+          queryParams: { page: 3 },
         });
         const defaultSize = 10;
         expect(response.body.data.map((rule) => rule.elastic_rule?.title)).toEqual(
@@ -673,7 +660,7 @@ export default ({ getService }: FtrProviderContext) => {
         // fetch migration rules
         const response = await migrationRulesRoutes.get({
           migrationId,
-          perPage: 18,
+          queryParams: { per_page: 18 },
         });
         expect(response.body.data.map((rule) => rule.elastic_rule?.title)).toEqual(
           titles.slice(0, 18)
