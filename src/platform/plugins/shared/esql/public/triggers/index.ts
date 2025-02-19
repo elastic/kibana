@@ -11,7 +11,13 @@ export {
   updateESQLQueryTrigger,
   UPDATE_ESQL_QUERY_TRIGGER,
 } from './update_esql_query/update_esql_query_trigger';
-export { UpdateESQLQueryAction } from './update_esql_query/update_esql_query_actions';
+export {
+  UpdateESQLQueryAction,
+  ACTION_UPDATE_ESQL_QUERY,
+} from './update_esql_query/update_esql_query_actions';
 
 export { esqlControlTrigger, ESQL_CONTROL_TRIGGER } from './esql_controls/esql_control_trigger';
-export { CreateESQLControlAction } from './esql_controls/esql_control_action';
+export {
+  CreateESQLControlAction,
+  ACTION_CREATE_ESQL_CONTROL,
+} from './esql_controls/esql_control_action';

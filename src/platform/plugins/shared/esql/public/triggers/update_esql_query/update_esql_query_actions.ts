@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
-const ACTION_UPDATE_ESQL_QUERY = 'ACTION_UPDATE_ESQL_QUERY';
+export const ACTION_UPDATE_ESQL_QUERY = 'ACTION_UPDATE_ESQL_QUERY';
 
 interface Context {
   queryString: string;
