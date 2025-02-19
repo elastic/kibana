@@ -14,7 +14,7 @@ import {
   nullableMetaOrUndefined,
   serializerOrUndefined,
   tie_breaker_id,
-  timestampOrUndefined,
+  timestampFromEsResponse,
   updated_at,
   updated_by,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -47,7 +47,7 @@ import {
 
 export const searchEsListItemSchema = t.exact(
   t.type({
-    '@timestamp': timestampOrUndefined,
+    '@timestamp': timestampFromEsResponse,
     binary: binaryOrUndefined,
     boolean: booleanOrUndefined,
     byte: byteOrUndefined,

@@ -8,7 +8,7 @@ import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { RulesClient } from '@kbn/alerting-plugin/server';
 import { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { termQuery } from '@kbn/observability-utils-server/es/queries/term_query';
-import { IStorageClient } from '@kbn/observability-utils-server/es/storage';
+import { IStorageClient } from '@kbn/storage-adapter';
 import { keyBy } from 'lodash';
 import objectHash from 'object-hash';
 import pLimit from 'p-limit';
