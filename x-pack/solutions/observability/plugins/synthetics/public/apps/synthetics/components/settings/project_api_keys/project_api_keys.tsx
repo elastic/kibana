@@ -13,18 +13,18 @@ import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import { FormProvider } from 'react-hook-form';
+import { SyntheticsProjectAPIKey } from '../../../../../../common/runtime_types/settings/api_key';
 import { HelpCommands } from './help_commands';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { fetchProjectAPIKey } from '../../../state/monitor_management/api';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { ApiKeyBtn } from './api_key_btn';
 import { useEnablement } from '../../../hooks';
 import { SpaceSelector } from '../components/spaces_select';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
+import { ApiKeyBtn } from './api_key_btn';
 
 const syntheticsTestRunDocsLink =
   'https://www.elastic.co/guide/en/observability/current/synthetic-run-tests.html';
-
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export const ProjectAPIKeys = () => {
@@ -33,23 +33,25 @@ export const ProjectAPIKeys = () => {
   const [loadAPIKey, setLoadAPIKey] = useState(false);
   const [accessToElasticManagedLocations, setAccessToElasticManagedLocations] = useState(true);
 
+  const form = useFormWrapped({
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
+    shouldFocusError: true,
+    defaultValues: {
+      spaces: [ALL_SPACES_ID],
+    },
+  });
+
+  const { handleSubmit } = form;
+
   const { spaces: spacesApi } = useKibana<ClientPluginsStart>().services;
+  const spaces = useMemo(() => form.getValues()?.spaces, [form]);
 
   const ContextWrapper = useMemo(
     () =>
       spacesApi ? spacesApi.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
     [spacesApi]
   );
-
-  const form = useFormWrapped({
-    mode: 'onSubmit',
-    reValidateMode: 'onChange',
-    shouldFocusError: true,
-    defaultValues: {
-      apiKey,
-      spaces: [ALL_SPACES_ID],
-    },
-  });
 
   const kServices = useKibana<ClientPluginsStart>().services;
   const canSaveIntegrations: boolean =
@@ -62,14 +64,20 @@ export const ProjectAPIKeys = () => {
     if (loadAPIKey) {
       return fetchProjectAPIKey(
         accessToElasticManagedLocations && Boolean(canUsePublicLocations),
-        form.getValues()?.spaces
+        spaces
       );
     }
     return null;
     // FIXME: Dario thinks there is a better way to do this but
     // he's getting tired and maybe the Synthetics folks can fix it
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loadAPIKey, canUsePublicLocations]);
+  }, [loadAPIKey, canUsePublicLocations, spaces]);
+
+  const onSubmit = (formData: SyntheticsProjectAPIKey) => {
+    if (formData.spaces?.length) {
+      setLoadAPIKey(true);
+    }
+  };
 
   useEffect(() => {
     if (data?.apiKey) {
@@ -128,7 +136,7 @@ export const ProjectAPIKeys = () => {
                   }}
                   disabled={!canUsePublicLocations}
                 />
-                <SpaceSelector module="apiKey" />
+                <SpaceSelector helpText={API_KEY_HELP_TEXT} />
               </EuiForm>
             ) : (
               <>
@@ -149,7 +157,7 @@ export const ProjectAPIKeys = () => {
           actions={
             <ApiKeyBtn
               loading={loading}
-              setLoadAPIKey={setLoadAPIKey}
+              onClick={handleSubmit(onSubmit)}
               apiKey={apiKey}
               isDisabled={!canSave || !canManageApiKeys}
             />
@@ -194,3 +202,7 @@ const GET_API_KEY_REDUCED_PERMISSIONS_LABEL = i18n.translate(
       'Use an API key to push monitors remotely from a CLI or CD pipeline. To generate an API key, you must have permissions to manage API keys and Uptime write access. Please contact your administrator.',
   }
 );
+
+const API_KEY_HELP_TEXT = i18n.translate('xpack.synthetics.privateLocation.apiKeySpacesHelpText', {
+  defaultMessage: 'Select the spaces where this API key will be available.',
+});

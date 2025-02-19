@@ -15,16 +15,14 @@ import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import { ClientPluginsStart } from '../../../../../plugin';
 
 interface SpaceSelectorProps {
-  module: 'location' | 'apiKey';
+  helpText: string;
 }
 
-export const SpaceSelector = <T extends FieldValues>({ module }: SpaceSelectorProps) => {
+export const SpaceSelector = <T extends FieldValues>({ helpText }: SpaceSelectorProps) => {
   const NAMESPACES_NAME = 'spaces' as Path<T>;
   const { services } = useKibana<ClientPluginsStart>();
   const [spacesList, setSpacesList] = React.useState<Array<{ id: string; label: string }>>([]);
   const data = services.spaces?.ui.useSpaces();
-
-  const HELP_TEXT = module === 'location' ? LOCATION_HELP_TEXT : API_KEY_HELP_TEXT;
 
   const {
     control,
@@ -53,7 +51,7 @@ export const SpaceSelector = <T extends FieldValues>({ module }: SpaceSelectorPr
     <EuiFormRow
       fullWidth
       label={SPACES_LABEL}
-      helpText={HELP_TEXT}
+      helpText={helpText}
       isInvalid={showFieldInvalid}
       error={showFieldInvalid ? NAMESPACES_NAME : undefined}
     >
@@ -124,15 +122,4 @@ const allSpacesOption = {
 
 const SPACES_LABEL = i18n.translate('xpack.synthetics.privateLocation.spacesLabel', {
   defaultMessage: 'Spaces ',
-});
-
-const LOCATION_HELP_TEXT = i18n.translate(
-  'xpack.synthetics.privateLocation.locationSpacesHelpText',
-  {
-    defaultMessage: 'Select the spaces where this location will be available.',
-  }
-);
-
-const API_KEY_HELP_TEXT = i18n.translate('xpack.synthetics.privateLocation.apiKeySpacesHelpText', {
-  defaultMessage: 'Select the spaces where this API key will be available.',
 });
