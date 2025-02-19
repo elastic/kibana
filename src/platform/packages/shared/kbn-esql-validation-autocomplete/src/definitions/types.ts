@@ -16,7 +16,12 @@ import type {
   ESQLSource,
 } from '@kbn/esql-ast';
 import { GetColumnsByTypeFn, SuggestionRawDefinition } from '../autocomplete/types';
-import type { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
+import type {
+  ESQLCallbacks,
+  ESQLControlVariable,
+  ESQLVariableType,
+  ESQLSourceResult,
+} from '../shared/types';
 
 /**
  * All supported field types in ES|QL. This is all the types
@@ -245,6 +250,8 @@ export interface CommandSuggestParams<CommandName extends string> {
    */
   previousCommands?: ESQLCommand[];
   callbacks?: ESQLCallbacks;
+  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined;
+  supportsControls?: boolean;
 }
 
 export type CommandSuggestFunction<CommandName extends string> = (

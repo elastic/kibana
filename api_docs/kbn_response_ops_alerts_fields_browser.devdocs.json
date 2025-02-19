@@ -1,0 +1,290 @@
+{
+  "id": "@kbn/response-ops-alerts-fields-browser",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-fields-browser",
+        "id": "def-public.FieldBrowser",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldBrowser",
+        "description": [],
+        "signature": [
+          "React.NamedExoticComponent<",
+          {
+            "pluginId": "@kbn/response-ops-alerts-fields-browser",
+            "scope": "public",
+            "docId": "kibKbnResponseOpsAlertsFieldsBrowserPluginApi",
+            "section": "def-public.FieldBrowserProps",
+            "text": "FieldBrowserProps"
+          },
+          ">"
+        ],
+        "path": "packages/response-ops/alerts_fields_browser/components/field_browser/field_browser.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-fields-browser",
+            "id": "def-public.FieldBrowser.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-fields-browser",
+        "id": "def-public.FieldBrowserOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldBrowserOptions",
+        "description": [],
+        "path": "packages/response-ops/alerts_fields_browser/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-fields-browser",
+            "id": "def-public.FieldBrowserOptions.createFieldButton",
+            "type": "Function",
+            "tags": [],
+            "label": "createFieldButton",
+            "description": [],
+            "signature": [
+              "CreateFieldComponent",
+              " | undefined"
+            ],
+            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-fields-browser",
+            "id": "def-public.FieldBrowserOptions.getFieldTableColumns",
+            "type": "Function",
+            "tags": [],
+            "label": "getFieldTableColumns",
+            "description": [],
+            "signature": [
+              "GetFieldTableColumns",
+              " | undefined"
+            ],
+            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-fields-browser",
+            "id": "def-public.FieldBrowserOptions.preselectedCategoryIds",
+            "type": "Array",
+            "tags": [],
+            "label": "preselectedCategoryIds",
+            "description": [
+              "\nCategories that should be selected initially"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/response-ops-alerts-fields-browser",
+        "id": "def-public.FieldBrowserProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "FieldBrowserProps",
+        "description": [],
+        "path": "packages/response-ops/alerts_fields_browser/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-fields-browser",
+            "id": "def-public.FieldBrowserProps.columnIds",
+            "type": "Array",
+            "tags": [],
+            "label": "columnIds",
+            "description": [
+              "The timeline's current column headers"
+            ],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-fields-browser",
+            "id": "def-public.FieldBrowserProps.browserFields",
+            "type": "Object",
+            "tags": [],
+            "label": "browserFields",
+            "description": [
+              "A map of categoryId -> metadata about the fields in that category"
+            ],
+            "signature": [
+              "{ [x: string]: Partial<",
+              {
+                "pluginId": "@kbn/alerting-types",
+                "scope": "common",
+                "docId": "kibKbnAlertingTypesPluginApi",
+                "section": "def-common.BrowserField",
+                "text": "BrowserField"
+              },
+              ">; }"
+            ],
+            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-fields-browser",
+            "id": "def-public.FieldBrowserProps.isEventViewer",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isEventViewer",
+            "description": [
+              "When true, this Fields Browser is being used as an \"events viewer\""
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-fields-browser",
+            "id": "def-public.FieldBrowserProps.onResetColumns",
+            "type": "Function",
+            "tags": [],
+            "label": "onResetColumns",
+            "description": [
+              "Callback to reset the default columns"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-fields-browser",
+            "id": "def-public.FieldBrowserProps.onToggleColumn",
+            "type": "Function",
+            "tags": [],
+            "label": "onToggleColumn",
+            "description": [
+              "Callback to toggle a field column"
+            ],
+            "signature": [
+              "(columnId: string) => void"
+            ],
+            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/response-ops-alerts-fields-browser",
+                "id": "def-public.FieldBrowserProps.onToggleColumn.$1",
+                "type": "string",
+                "tags": [],
+                "label": "columnId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/response-ops/alerts_fields_browser/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-fields-browser",
+            "id": "def-public.FieldBrowserProps.options",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [
+              "The options to customize the field browser, supporting columns rendering and button to create fields"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/response-ops-alerts-fields-browser",
+                "scope": "public",
+                "docId": "kibKbnResponseOpsAlertsFieldsBrowserPluginApi",
+                "section": "def-public.FieldBrowserOptions",
+                "text": "FieldBrowserOptions"
+              },
+              " | undefined"
+            ],
+            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/response-ops-alerts-fields-browser",
+            "id": "def-public.FieldBrowserProps.width",
+            "type": "number",
+            "tags": [],
+            "label": "width",
+            "description": [
+              "The width of the field browser"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/response-ops/alerts_fields_browser/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

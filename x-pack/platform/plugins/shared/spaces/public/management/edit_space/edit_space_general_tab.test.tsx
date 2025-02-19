@@ -205,7 +205,7 @@ describe('EditSpaceSettings', () => {
         name: 'Updated Name Of Space',
         initials: 'UN',
         imageUrl: '',
-        color: '#D6BF57',
+        color: '#FFC7DB',
       });
     });
 
@@ -284,7 +284,7 @@ describe('EditSpaceSettings', () => {
       expect(updateSpaceSpy).toHaveBeenCalledWith({
         ...spaceToUpdate,
         name: 'Updated Existing Space',
-        color: '#D6BF57',
+        color: '#FFC7DB',
         initials: 'UE',
         imageUrl: '',
       });
