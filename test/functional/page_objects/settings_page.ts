@@ -419,7 +419,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async increasePopularity() {
-    await this.setPopularity(1);
+    await this.setPopularity(Number(await this.getPopularity()) + 1);
   }
 
   async getPopularity() {
