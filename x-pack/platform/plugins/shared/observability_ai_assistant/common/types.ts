@@ -64,7 +64,7 @@ export interface Conversation {
   public: boolean;
 }
 
-export type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
+type ConversationRequestBase = Omit<Conversation, 'user' | 'conversation' | 'namespace'> & {
   conversation: { title: string; id?: string };
 };
 
