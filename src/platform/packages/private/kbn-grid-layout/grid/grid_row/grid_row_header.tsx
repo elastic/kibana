@@ -60,7 +60,7 @@ export const GridRowHeader = React.memo(
        */
       const panelCountSubscription = gridLayoutStateManager.gridLayout$
         .pipe(
-          map((layout) => Object.keys(layout[rowIndex].panels).length),
+          map((layout) => Object.keys(layout[rowIndex]?.panels ?? {}).length),
           distinctUntilChanged()
         )
         .subscribe((count) => {
