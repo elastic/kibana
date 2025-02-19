@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { SplunkSeverity } from '../../../../../../types';
 import type { OriginalRule } from '../../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
-import type { SplunkSeverity } from '../../../../../../../../../../common/siem_migrations/types';
 import {
   getElasticRiskScoreFromOriginalRule,
   getElasticSeverityFromOriginalRule,
