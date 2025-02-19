@@ -80,7 +80,7 @@ const _buildInactiveCondition = (opts: {
 
   return `lastCheckinMillis > 0 && doc.containsKey(${fieldPath('policy_id')}) && ${field(
     'policy_id'
-  )}.size() > 0 && ${policyClauses}`;
+  )}.size() > 0 && (${policyClauses})`;
 };
 
 function _buildSource(
