@@ -5,36 +5,42 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiButtonIcon, EuiLink, EuiToolTip } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+
+import { useAssistantContext } from '../assistant_context';
 
 import * as i18n from './translations';
 
 export interface Props {
-  /** Optionally render new chat as a link */
-  asLink?: boolean;
   children?: React.ReactNode;
-  /** Optionally specify color of empty button */
-  color?: 'text' | 'accent' | 'primary' | 'success' | 'warning' | 'danger';
-  showAssistantOverlay: (show: boolean) => void;
+  /** Optionally automatically add this context to a conversation when the assistant is shown */
+  conversationTitle?: string;
   /** Defaults to `discuss`. If null, the button will not have an icon */
   iconType?: string | null;
+  /** Optionally specify a well known ID, or default to a UUID */
+  promptContextId?: string;
   /** Defaults to false. If true, shows icon button without text */
   iconOnly?: boolean;
 }
 
 const NewChatByTitleComponent: React.FC<Props> = ({
-  asLink = false,
   children = i18n.NEW_CHAT,
-  color = 'primary',
-  showAssistantOverlay,
+  conversationTitle,
   iconType,
+  promptContextId,
   iconOnly = false,
 }) => {
+  const { showAssistantOverlay } = useAssistantContext();
+
   // proxy show / hide calls to assistant context, using our internal prompt context id:
   const showOverlay = useCallback(() => {
-    showAssistantOverlay(true);
-  }, [showAssistantOverlay]);
+    showAssistantOverlay({
+      conversationTitle,
+      promptContextId,
+      showOverlay: true,
+    });
+  }, [conversationTitle, promptContextId, showAssistantOverlay]);
 
   const icon = useMemo(() => {
     if (iconType === null) {
@@ -46,11 +52,7 @@ const NewChatByTitleComponent: React.FC<Props> = ({
 
   return useMemo(
     () =>
-      asLink ? (
-        <EuiLink color={color} data-test-subj="newChatLink" onClick={showOverlay}>
-          {children}
-        </EuiLink>
-      ) : iconOnly ? (
+      iconOnly ? (
         <EuiToolTip content={i18n.NEW_CHAT}>
           <EuiButtonIcon
             data-test-subj="newChatByTitle"
@@ -62,7 +64,6 @@ const NewChatByTitleComponent: React.FC<Props> = ({
         </EuiToolTip>
       ) : (
         <EuiButtonEmpty
-          color={color}
           data-test-subj="newChatByTitle"
           iconType={icon}
           onClick={showOverlay}
@@ -71,7 +72,7 @@ const NewChatByTitleComponent: React.FC<Props> = ({
           {children}
         </EuiButtonEmpty>
       ),
-    [asLink, color, showOverlay, children, iconOnly, icon]
+    [children, icon, showOverlay, iconOnly]
   );
 };
 
