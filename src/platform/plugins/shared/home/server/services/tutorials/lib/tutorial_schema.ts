@@ -52,6 +52,7 @@ const statusCheckSchema = schema.object({
     query: schema.recordOf(schema.string(), schema.any()),
   }),
 });
+export type StatusCheckSchema = TypeOf<typeof statusCheckSchema>;
 
 const instructionSchema = schema.object({
   title: schema.maybe(schema.string()),

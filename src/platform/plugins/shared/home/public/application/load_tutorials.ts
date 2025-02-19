@@ -11,7 +11,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { getServices } from './kibana_services';
-import { Tutorial } from './components/tutorial/tutorial';
+import type { TutorialType } from '../services/tutorials/types';
 
 const baseUrl = getServices().addBasePath('/api/kibana/home/tutorials');
 const headers = new Headers();
@@ -20,7 +20,7 @@ headers.append('Content-Type', 'application/json');
 headers.append('kbn-xsrf', 'kibana');
 headers.append(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
 
-let tutorials: Tutorial[] = [];
+let tutorials: TutorialType[] = [];
 let tutorialsLoaded = false;
 
 async function loadTutorials(): Promise<void> {
@@ -51,7 +51,7 @@ async function loadTutorials(): Promise<void> {
   }
 }
 
-export async function getTutorials(): Promise<Tutorial[]> {
+export async function getTutorials(): Promise<TutorialType[]> {
   if (!tutorialsLoaded) {
     await loadTutorials();
   }
@@ -59,7 +59,7 @@ export async function getTutorials(): Promise<Tutorial[]> {
   return _.cloneDeep(tutorials);
 }
 
-export async function getTutorial(id: string): Promise<Tutorial> {
+export async function getTutorial(id: string): Promise<TutorialType> {
   if (!tutorialsLoaded) {
     await loadTutorials();
   }

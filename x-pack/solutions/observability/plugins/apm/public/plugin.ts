@@ -288,19 +288,16 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
     );
 
     // Registers custom component that is going to be render on fleet section
-    pluginSetupDeps.home?.tutorials.registerCustomComponent(
-      'TutorialFleetInstructions',
-      () => import('./tutorial/tutorial_fleet_instructions')
+    pluginSetupDeps.home?.tutorials.registerCustomComponent('TutorialFleetInstructions', () =>
+      import('./tutorial/tutorial_fleet_instructions').then((mod) => mod.TutorialFleetInstructions)
     );
 
-    pluginSetupDeps.home?.tutorials.registerCustomComponent(
-      'TutorialConfigAgent',
-      () => import('./tutorial/config_agent')
+    pluginSetupDeps.home?.tutorials.registerCustomComponent('TutorialConfigAgent', () =>
+      import('./tutorial/config_agent').then((mod) => mod.TutorialConfigAgent)
     );
 
-    pluginSetupDeps.home?.tutorials.registerCustomComponent(
-      'TutorialConfigAgentRumScript',
-      () => import('./tutorial/config_agent/rum_script')
+    pluginSetupDeps.home?.tutorials.registerCustomComponent('TutorialConfigAgentRumScript', () =>
+      import('./tutorial/config_agent/rum_script').then((mod) => mod.TutorialConfigAgentRumScript)
     );
 
     pluginSetupDeps.uiActions.registerTrigger({

@@ -9,16 +9,12 @@
 
 import React from 'react';
 import { EuiPanel } from '@elastic/eui';
+import { ParamType } from '../../../services/tutorials/types';
 import { NumberParameter } from './number_parameter';
 import { StringParameter } from './string_parameter';
 
-interface ParameterFormParam {
-  label: string;
-  type: 'string' | 'number';
-  id: string;
-}
 export interface ParameterFormProps {
-  params: ParameterFormParam[];
+  params: ParamType[];
   paramValues: { [key: string]: number | string };
   setParameter: (id: string, value: any) => void;
 }

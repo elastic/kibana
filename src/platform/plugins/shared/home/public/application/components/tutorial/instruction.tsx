@@ -12,15 +12,12 @@ import { EuiCodeBlock, EuiSpacer, EuiLoadingSpinner, EuiErrorBoundary } from '@e
 import { INSTRUCTION_VARIANT } from '../../..';
 import { Content } from './content';
 import { getServices } from '../../kibana_services';
+import { InstructionType } from '../../../services/tutorials/types';
 
-export interface InstructionProps {
+export interface InstructionProps extends InstructionType {
   variantId: keyof typeof INSTRUCTION_VARIANT;
   paramValues: { [key: string]: string | number };
   isCloudEnabled: boolean;
-  textPre?: string;
-  textPost?: string;
-  commands?: string[];
-  customComponentName?: string;
   replaceTemplateStrings: (text: string, paramValues?: InstructionProps['paramValues']) => string;
 }
 
@@ -58,7 +55,7 @@ export function Instruction({
   const customComponent = tutorialService.getCustomComponent(customComponentName as string);
   const LazyCustomComponent = useMemo(() => {
     if (customComponent) {
-      return React.lazy(() => customComponent());
+      return React.lazy(() => customComponent().then((component) => ({ default: component })));
     }
   }, [customComponent]);
 

@@ -7,23 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TutorialsRegistry } from './tutorials_registry';
-export type { TutorialsRegistrySetup, TutorialsRegistryStart } from './tutorials_registry';
-
-export { TutorialsCategory } from './lib/tutorials_registry_types';
-
-export type {
+import type {
+  TutorialSchema,
   InstructionSetSchema,
   ParamsSchema,
   StatusCheckSchema,
-  InstructionsSchema,
   InstructionVariant,
   Instruction,
-  DashboardSchema,
-  ArtifactsSchema,
-  TutorialSchema,
-  TutorialProvider,
-  TutorialContext,
-  TutorialContextFactory,
-  ScopedTutorialContextFactory,
-} from './lib/tutorials_registry_types';
+} from '../../../server';
+
+export type TutorialType = TutorialSchema;
+export type InstructionSetType = InstructionSetSchema;
+export type ParamType = ParamsSchema;
+export type StatusCheckType = StatusCheckSchema;
+export type InstructionVariantType = InstructionVariant;
+export type InstructionType = Instruction;

@@ -17,6 +17,7 @@ export type {
   DashboardSchema,
   InstructionsSchema,
   ParamsSchema,
+  StatusCheckSchema,
   InstructionSetSchema,
   InstructionVariant,
   Instruction,

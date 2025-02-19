@@ -13,23 +13,36 @@ import { Content } from './content';
 
 describe('Content component', () => {
   test('should render Content component with markdown', async () => {
-    const { getByText } = render(
+    const { container } = render(
       <Content
         text={'I am *some* [content](https://en.wikipedia.org/wiki/Content) with `markdown`'}
       />
     );
-
-    // Check if the italicized text is rendered
-    expect(getByText('some', { selector: 'em' })).toBeInTheDocument();
-
-    // Check if the link is rendered
-    expect(getByText('content', { selector: 'a' })).toBeInTheDocument();
-    expect(getByText('content').closest('a')).toHaveAttribute(
-      'href',
-      'https://en.wikipedia.org/wiki/Content'
-    );
-
-    // Check if the inline code is rendered
-    expect(getByText('markdown', { selector: 'code' })).toBeInTheDocument();
+    expect(container).toMatchInlineSnapshot(`
+    <div>
+      <div
+        class="euiText euiMarkdownFormat emotion-euiText-m-euiTextColor-default-euiMarkdownFormat-m-default"
+      >
+        <p>
+          I am 
+          <em>
+            some
+          </em>
+           
+          <a
+            class="euiLink emotion-euiLink-primary"
+            href="https://en.wikipedia.org/wiki/Content"
+            rel="noreferrer"
+          >
+            content
+          </a>
+           with 
+          <code>
+            markdown
+          </code>
+        </p>
+      </div>
+    </div>
+    `);
   });
 });

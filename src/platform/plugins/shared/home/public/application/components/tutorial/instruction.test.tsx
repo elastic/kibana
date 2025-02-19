@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Instruction, InstructionProps } from './instruction';
 
@@ -22,16 +22,18 @@ jest.mock('../../kibana_services', () => ({
       getTheme: () => ({ darkMode: false }),
     },
     tutorialService: {
-      getCustomComponent: jest
-        .fn()
-        .mockResolvedValue({ default: () => <div>Custom Component</div> }),
+      getCustomComponent: (customComponentName: string) => {
+        if (customComponentName === 'customComponent') {
+          return () => Promise.resolve(() => <div>Custom Component</div>);
+        }
+        return () => Promise.resolve(() => <div>Component Not Found</div>);
+      },
     },
   }),
 }));
+// function TutorialConfigAgentRumScript
 
-const replaceTemplateStrings = (text: string) => {
-  return text;
-};
+const replaceTemplateStrings = (text: string) => text;
 const commonProps: InstructionProps = {
   variantId: 'OSX',
   paramValues: {},
@@ -61,8 +63,28 @@ describe('Instruction component', () => {
     expect(getByText('echo "Hello, World!"')).toBeInTheDocument();
   });
 
-  test.skip('should render with customComponentName', async () => {
-    // TODO
+  test('should render with customComponentName', async () => {
+    const { getByText } = render(
+      <IntlProvider locale="en">
+        <Instruction {...commonProps} customComponentName={'customComponent'} />
+      </IntlProvider>
+    );
+
+    await waitFor(() => {
+      expect(getByText('Custom Component')).toBeInTheDocument();
+    });
+  });
+
+  test("shouldn't render with non existent component name", async () => {
+    const { getByText } = render(
+      <IntlProvider locale="en">
+        <Instruction {...commonProps} customComponentName={'fake'} />
+      </IntlProvider>
+    );
+
+    await waitFor(() => {
+      expect(getByText('Component Not Found')).toBeInTheDocument();
+    });
   });
 
   test('should render with isCloudEnabled', async () => {

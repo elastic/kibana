@@ -20,6 +20,7 @@ import {
   EuiTitle,
   EuiSplitPanel,
 } from '@elastic/eui';
+import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme'; // FIXME: remove this, and access style variables from EUI context
 import { Instruction } from './instruction';
@@ -27,48 +28,27 @@ import { ParameterForm, ParameterFormProps } from './parameter_form';
 import { Content } from './content';
 import { INSTRUCTION_VARIANT, getDisplayText } from '../../..';
 import * as StatusCheckStates from './status_check_states';
+import type {
+  InstructionSetType,
+  InstructionVariantType,
+  InstructionType,
+} from '../../../services/tutorials/types';
 
-interface InstructionShape {
-  title: string;
-  commands?: string[];
-  customComponentName?: string;
-  textPost?: string;
-  textPre?: string;
-}
 interface InstructionStep {
   key: number | string;
   title: string;
   children: React.JSX.Element;
   status?: 'incomplete' | 'complete' | 'warning' | 'danger';
 }
-export interface InstructionVariantShape {
-  id: keyof typeof INSTRUCTION_VARIANT;
-  instructions: InstructionShape[];
-  initialSelected?: boolean;
-}
 
-export interface StatusCheckConfigShape {
-  success: string;
-  error: string;
-  title: string;
-  text: string;
-  btnLabel: string;
-}
-
-interface InstructionSetProps {
-  title: string;
-  callOut?: {
-    iconType: string;
-    message: string;
-    title: string;
-  };
-  instructionVariants: InstructionVariantShape[];
-  statusCheckConfig: StatusCheckConfigShape;
+interface InstructionSetProps extends InstructionSetType {
+  instructionVariants: InstructionSetType['instructionVariants'];
+  statusCheckConfig: InstructionSetType['statusCheck'];
   statusCheckState: keyof typeof StatusCheckStates;
   onStatusCheck: () => void;
   offset: number;
-  params: ParameterFormProps['params'];
-  paramValues: { [key: string]: string | number };
+  params: ParameterFormProps['params']; // check. there are no params coming from server
+  paramValues: { [key: string]: string | number }; // check
   setParameter: (paramId: string, newValue: string) => void;
   replaceTemplateStrings: (text: string) => string;
   isCloudEnabled: boolean;
@@ -92,10 +72,10 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
     this.state = this.initializeState(this.tabs);
   }
 
-  initializeTabs(instructionVariants: InstructionVariantShape[]) {
+  initializeTabs(instructionVariants: InstructionSetType['instructionVariants']) {
     return instructionVariants.map((variant) => ({
       id: variant.id,
-      name: getDisplayText(variant.id),
+      name: getDisplayText(variant.id as keyof typeof INSTRUCTION_VARIANT),
       initialSelected: variant.initialSelected,
     }));
   }
@@ -144,7 +124,7 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
       case StatusCheckStates.FETCHING:
         return null; // Don't show any message while fetching or if you haven't yet checked.
       case StatusCheckStates.HAS_DATA:
-        message = this.props.statusCheckConfig.success
+        message = this.props.statusCheckConfig?.success
           ? this.props.statusCheckConfig.success
           : this.props.intl.formatMessage({
               id: 'home.tutorial.instructionSet.successLabel',
@@ -154,7 +134,7 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
         break;
       case StatusCheckStates.ERROR:
       case StatusCheckStates.NO_DATA:
-        message = this.props.statusCheckConfig.error
+        message = this.props.statusCheckConfig?.error
           ? this.props.statusCheckConfig.error
           : this.props.intl.formatMessage({
               id: 'home.tutorial.instructionSet.noDataLabel',
@@ -204,14 +184,14 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
     const { statusCheckState, statusCheckConfig, onStatusCheck } = this.props;
     const checkStatusStep = (
       <Fragment>
-        <Content text={statusCheckConfig.text} />
+        <Content text={statusCheckConfig?.text || ''} />
 
         <EuiSpacer size="s" />
         <EuiButton
           onClick={onStatusCheck}
           isLoading={statusCheckState === StatusCheckStates.FETCHING}
         >
-          {statusCheckConfig.btnLabel || (
+          {statusCheckConfig?.btnLabel || (
             <FormattedMessage
               id="home.tutorial.instructionSet.checkStatusButtonLabel"
               defaultMessage="Check status"
@@ -225,7 +205,7 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
 
     return {
       title:
-        statusCheckConfig.title ||
+        statusCheckConfig?.title ||
         this.props.intl.formatMessage({
           id: 'home.tutorial.instructionSet.statusCheckTitle',
           defaultMessage: 'Status Check',
@@ -238,7 +218,7 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
 
   renderInstructions = () => {
     const instructionVariant = this.props.instructionVariants.find(
-      (variant: InstructionVariantShape) => {
+      (variant: InstructionVariantType) => {
         return variant.id === this.state.selectedTabId;
       }
     );
@@ -246,8 +226,8 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
       return;
     }
 
-    const steps: InstructionStep[] = instructionVariant.instructions.map(
-      (instruction: InstructionShape, index: number) => {
+    const steps: EuiContainedStepProps[] = instructionVariant.instructions.map(
+      (instruction: InstructionType, index: number) => {
         const step = (
           <Instruction
             commands={instruction.commands}
@@ -256,12 +236,12 @@ class InstructionSetUi extends React.Component<InstructionSetProps, InstructionS
             textPost={instruction.textPost}
             replaceTemplateStrings={this.props.replaceTemplateStrings}
             customComponentName={instruction.customComponentName}
-            variantId={instructionVariant.id}
+            variantId={instructionVariant.id as keyof typeof INSTRUCTION_VARIANT}
             isCloudEnabled={this.props.isCloudEnabled}
           />
         );
         return {
-          title: instruction.title,
+          title: instruction.title || '',
           children: step,
           key: index,
         };
