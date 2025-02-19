@@ -12,6 +12,7 @@ import type { ReindexState } from '../../../use_reindex';
 import type { UpdateIndexState } from '../../../use_update_index';
 import { LoadingState } from '../../../../../../types';
 import { cloneDeep } from 'lodash';
+import { EnrichedDeprecationInfo } from '../../../../../../../../../common/types';
 
 jest.mock('../../../../../../../app_context', () => {
   const { docLinksServiceMock } = jest.requireActual('@kbn/core-doc-links-browser-mocks');
@@ -38,6 +39,13 @@ jest.mock('../../../../../../../app_context', () => {
 });
 
 describe('ReindexDetailsFlyoutStep', () => {
+  const deprecation: EnrichedDeprecationInfo = {
+    isCritical: true,
+    message: 'foo',
+    resolveDuringUpgrade: false,
+    type: 'index_settings',
+    url: 'https://te.st',
+  };
   const defaultReindexState: ReindexState = {
     loadingState: LoadingState.Success,
     meta: {
@@ -65,6 +73,7 @@ describe('ReindexDetailsFlyoutStep', () => {
         startReadonly={jest.fn()}
         reindexState={defaultReindexState}
         updateIndexState={defaultUpdateIndexState}
+        deprecation={deprecation}
       />
     );
 
@@ -206,6 +215,94 @@ describe('ReindexDetailsFlyoutStep', () => {
     `);
   });
 
+  it('renders correct guidance for indices with transforms', () => {
+    const wrapper = shallow(
+      <ReindexDetailsFlyoutStep
+        closeFlyout={jest.fn()}
+        startReindex={jest.fn()}
+        startReadonly={jest.fn()}
+        reindexState={defaultReindexState}
+        updateIndexState={defaultUpdateIndexState}
+        deprecation={{
+          ...deprecation,
+          correctiveAction: { type: 'reindex', transformIds: ['abc', 'def'] },
+        }}
+      />
+    );
+    expect(wrapper).toMatchInlineSnapshot(`
+      <Fragment>
+        <EuiFlyoutBody>
+          <EuiText>
+            <ESTransformsTargetGuidance
+              deprecation={
+                Object {
+                  "correctiveAction": Object {
+                    "transformIds": Array [
+                      "abc",
+                      "def",
+                    ],
+                    "type": "reindex",
+                  },
+                  "isCritical": true,
+                  "message": "foo",
+                  "resolveDuringUpgrade": false,
+                  "type": "index_settings",
+                  "url": "https://te.st",
+                }
+              }
+            />
+          </EuiText>
+          <EuiSpacer />
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiButtonEmpty
+                flush="left"
+                iconType="cross"
+                onClick={[MockFunction]}
+              >
+                <MemoizedFormattedMessage
+                  defaultMessage="Close"
+                  id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.closeButtonLabel"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiFlexGroup
+                gutterSize="s"
+              >
+                <EuiFlexItem
+                  grow={false}
+                >
+                  <EuiButton
+                    color="primary"
+                    data-test-subj="startReindexingButton"
+                    disabled={false}
+                    fill={true}
+                    isLoading={false}
+                    onClick={[MockFunction]}
+                  >
+                    <MemoizedFormattedMessage
+                      defaultMessage="Start reindexing"
+                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.reindexButton.runReindexLabel"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </Fragment>
+    `);
+  });
+
   it('renders for readonly indices (warning deprecation)', () => {
     const props = cloneDeep(defaultReindexState);
     props.meta.isReadonly = true;
@@ -217,6 +314,7 @@ describe('ReindexDetailsFlyoutStep', () => {
         startReadonly={jest.fn()}
         reindexState={props}
         updateIndexState={defaultUpdateIndexState}
+        deprecation={deprecation}
       />
     );
 

@@ -11,4 +11,5 @@
 export const TITLE = 'kbn-management storybook';
 
 /** The remote URL of the root from which Storybook loads stories for kbn-management. */
-export const URL = 'https://github.com/elastic/kibana/tree/main/packages/kbn-management';
+export const URL =
+  'https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/kbn-management';

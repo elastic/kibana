@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/** The title of the Storybook. */
-export const TITLE = 'Serverless Storybook';
-
-/** The remote URL of the root from which Storybook loads stories for Serverless. */
-export const URL = 'https://github.com/elastic/kibana/tree/main/packages/serverless';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../../../../../..',
+  roots: [
+    '<rootDir>/src/platform/packages/shared/kbn-management/settings/components/field_category',
+  ],
+};
