@@ -308,7 +308,13 @@ export const getVisualizeEmbeddableFactory: (deps: {
           },
         ],
         savedObjectProperties: getUnchangingComparator(),
-        linkedToLibrary: [linkedToLibrary$, (value) => linkedToLibrary$.next(value)],
+        linkedToLibrary: [
+          linkedToLibrary$,
+          (value) => linkedToLibrary$.next(value),
+          (a, b) => {
+            return a === undefined || b === undefined ? true : a === b;
+          },
+        ],
       }
     );
 
