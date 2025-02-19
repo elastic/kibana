@@ -7,30 +7,26 @@
 
 import { AreaSeries, Axis, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
-import React, { useRef } from 'react';
+import { useActiveCursor } from '@kbn/charts-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { useAnnotations } from '@kbn/observability-plugin/public';
 import { GetPreviewDataResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { useActiveCursor } from '@kbn/charts-plugin/public';
+import { max, min } from 'lodash';
 import moment from 'moment';
+import React, { useRef } from 'react';
+import { useKibana } from '../../../../hooks/use_kibana';
 import { getBrushTimeBounds } from '../../../../utils/slo/duration';
 import { TimeBounds } from '../../types';
-import { useKibana } from '../../../../hooks/use_kibana';
+import { TimesliceAnnotation } from './timeslice_annotation';
 
 export function EventsAreaChart({
   slo,
   data,
-  minValue,
-  maxValue,
-  annotation,
   onBrushed,
 }: {
   data?: GetPreviewDataResponse;
-  maxValue?: number | null;
-  minValue?: number | null;
   slo: SLOWithSummaryResponse;
-  annotation?: React.ReactNode;
   onBrushed?: (timeBounds: TimeBounds) => void;
 }) {
   const { charts, uiSettings } = useKibana().services;
@@ -42,6 +38,18 @@ export function EventsAreaChart({
   const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
     isDateHistogram: true,
   });
+
+  const values = (data ?? []).map((row) => {
+    if (slo.indicator.type === 'sli.metric.timeslice') {
+      return row.sliValue;
+    } else {
+      return row?.events?.total ?? 0;
+    }
+  });
+  const maxValue = max(values);
+  const minValue = min(values);
+
+  const annotation = <TimesliceAnnotation slo={slo} minValue={minValue} maxValue={maxValue} />;
 
   const threshold =
     slo.indicator.type === 'sli.metric.timeslice'

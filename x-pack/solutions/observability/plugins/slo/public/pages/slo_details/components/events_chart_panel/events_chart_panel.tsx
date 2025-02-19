@@ -16,18 +16,16 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { max, min } from 'lodash';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { TimesliceAnnotation } from './timeslice_annotation';
-import { EventsAreaChart } from './events_area_chart';
-import { TimeBounds } from '../../types';
-import { SloTabId } from '../slo_details';
+import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import React from 'react';
 import { useGetPreviewData } from '../../../../hooks/use_get_preview_data';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { GoodBadEventsChart } from './good_bad_events_chart';
+import { TimeBounds } from '../../types';
 import { getDiscoverLink } from '../../utils/get_discover_link';
+import { SloTabId } from '../slo_details';
+import { EventsAreaChart } from './events_area_chart';
+import { GoodBadEventsChart } from './good_bad_events_chart';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -66,18 +64,6 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
         </h2>
       </EuiTitle>
     );
-
-  const values = (data ?? []).map((row) => {
-    if (slo.indicator.type === 'sli.metric.timeslice') {
-      return row.sliValue;
-    } else {
-      return row?.events?.total ?? 0;
-    }
-  });
-  const maxValue = max(values);
-  const minValue = min(values);
-
-  const annotation = <TimesliceAnnotation slo={slo} minValue={minValue} maxValue={maxValue} />;
 
   const showViewEventsLink = ![
     'sli.apm.transactionErrorRate',
@@ -128,29 +114,14 @@ export function EventsChartPanel({ slo, range, selectedTabId, onBrushed }: Props
 
         <EuiFlexItem>
           {slo.indicator.type !== 'sli.metric.timeslice' ? (
-            <GoodBadEventsChart
-              isLoading={isLoading}
-              data={data}
-              annotation={annotation}
-              slo={slo}
-              onBrushed={onBrushed}
-            />
+            <GoodBadEventsChart isLoading={isLoading} data={data} slo={slo} onBrushed={onBrushed} />
           ) : (
             <>
               {isLoading && (
                 <EuiLoadingChart size="m" mono data-test-subj="sliEventsChartLoading" />
               )}
 
-              {!isLoading && (
-                <EventsAreaChart
-                  slo={slo}
-                  data={data}
-                  annotation={annotation}
-                  minValue={minValue}
-                  maxValue={maxValue}
-                  onBrushed={onBrushed}
-                />
-              )}
+              {!isLoading && <EventsAreaChart slo={slo} data={data} onBrushed={onBrushed} />}
             </>
           )}
         </EuiFlexItem>
