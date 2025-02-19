@@ -18,6 +18,7 @@ import classNames from 'classnames';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
 import { LensInspector } from '../lens_inspector_service';
 import { UserMessage } from '../types';
+import { lnsExpressionRendererStyle } from '../expression_renderer_styles';
 
 export interface ExpressionWrapperProps {
   ExpressionRenderer: ReactExpressionRendererType;
@@ -77,6 +78,7 @@ export function ExpressionWrapper({
   return (
     <div
       className={classNames('lnsExpressionRenderer', className)}
+      css={lnsExpressionRendererStyle}
       style={style}
       data-test-subj="lens-embeddable"
     >

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './workspace_panel_wrapper.scss';
-
 import React, { useState } from 'react';
 import {
   EuiPopover,
