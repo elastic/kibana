@@ -455,71 +455,67 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await getIlmStats(apiClient, indexName, 400);
       });
 
-      it('returns not found when the policy does not exist', async () => {
-        const indexName = 'logs.ilmpolicydontexists';
-        await putStream(apiClient, indexName, {
-          dashboards: [],
-          stream: {
-            ingest: {
-              ...wiredPutBody.stream.ingest,
-              routing: [],
-              lifecycle: { ilm: { policy: 'this-stream-policy-does-not-exist' } },
+      if (!isServerless) {
+        it('returns not found when the policy does not exist', async () => {
+          const indexName = 'logs.ilmpolicydontexists';
+          await putStream(apiClient, indexName, {
+            dashboards: [],
+            stream: {
+              ingest: {
+                ...wiredPutBody.stream.ingest,
+                routing: [],
+                lifecycle: { ilm: { policy: 'this-stream-policy-does-not-exist' } },
+              },
             },
-          },
+          });
+          await getIlmStats(apiClient, indexName, 404);
         });
-        await getIlmStats(apiClient, indexName, 404);
-      });
 
-      it('returns the effective ilm phases', async () => {
-        const indexName = 'logs.ilmwithphases';
-        const policyName = 'streams_ilm_hotwarmdelete';
-        await esClient.ilm.putLifecycle({
-          name: policyName,
-          policy: {
+        it('returns the effective ilm phases', async () => {
+          const indexName = 'logs.ilmwithphases';
+          const policyName = 'streams_ilm_hotwarmdelete';
+          await esClient.ilm.putLifecycle({
+            name: policyName,
+            policy: {
+              phases: {
+                hot: { actions: { rollover: { max_age: '30m' } } },
+                warm: { min_age: '5d', actions: {} },
+                delete: { min_age: '10d', actions: {} },
+              },
+            },
+          });
+
+          await putStream(apiClient, indexName, {
+            dashboards: [],
+            stream: {
+              ingest: {
+                ...wiredPutBody.stream.ingest,
+                routing: [],
+                lifecycle: { ilm: { policy: policyName } },
+              },
+            },
+          });
+
+          const stats = await getIlmStats(apiClient, indexName, 200);
+          rawExpect(stats).toEqual({
             phases: {
-              hot: { actions: { rollover: { max_age: '30m' } } },
-              warm: { min_age: '5d', actions: {} },
-              delete: { min_age: '10d', actions: {} },
+              hot: {
+                name: 'hot',
+                size_in_bytes: rawExpect.any(Number),
+                rollover: { max_age: '30m' },
+                min_age: '0ms',
+              },
+              warm: {
+                name: 'warm',
+                min_age: '5d',
+                size_in_bytes: rawExpect.any(Number),
+              },
+              delete: {
+                name: 'delete',
+                min_age: '10d',
+              },
             },
-          },
-        });
-
-        await putStream(apiClient, indexName, {
-          dashboards: [],
-          stream: {
-            ingest: {
-              ...wiredPutBody.stream.ingest,
-              routing: [],
-              lifecycle: { ilm: { policy: policyName } },
-            },
-          },
-        });
-
-        const stats = await getIlmStats(apiClient, indexName, 200);
-        rawExpect(stats).toEqual({
-          phases: {
-            hot: {
-              name: 'hot',
-              size_in_bytes: rawExpect.any(Number),
-              rollover: { max_age: '30m' },
-              min_age: '0ms',
-            },
-            warm: {
-              name: 'warm',
-              min_age: '5d',
-              size_in_bytes: rawExpect.any(Number),
-            },
-            delete: {
-              name: 'delete',
-              min_age: '10d',
-            },
-          },
-        });
-      });
-
-      if (isServerless) {
-        it('is not enabled in serverless', async () => {
-          await getIlmStats(apiClient, 'logs', 400);
+          });
         });
       }
     });

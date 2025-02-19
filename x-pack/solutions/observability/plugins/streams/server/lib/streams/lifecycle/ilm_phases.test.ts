@@ -69,7 +69,18 @@ describe('lifecycle helpers', () => {
       });
 
       expect(stats).toEqual({
-        hot: { name: 'hot', size_in_bytes: 200, min_age: undefined },
+        hot: {
+          name: 'hot',
+          size_in_bytes: 200,
+          min_age: undefined,
+          rollover: {
+            max_age: undefined,
+            max_docs: undefined,
+            max_primary_shard_docs: undefined,
+            max_primary_shard_size: undefined,
+            max_size: undefined,
+          },
+        },
         warm: { name: 'warm', size_in_bytes: 30, min_age: '2d' },
         cold: { name: 'cold', size_in_bytes: 20, min_age: '5d' },
         frozen: { name: 'frozen', size_in_bytes: 25, min_age: '7d' },
@@ -111,7 +122,18 @@ describe('lifecycle helpers', () => {
       });
 
       expect(stats).toEqual({
-        hot: { name: 'hot', size_in_bytes: 20, min_age: undefined },
+        hot: {
+          name: 'hot',
+          size_in_bytes: 20,
+          min_age: undefined,
+          rollover: {
+            max_age: undefined,
+            max_docs: undefined,
+            max_primary_shard_docs: undefined,
+            max_primary_shard_size: undefined,
+            max_size: undefined,
+          },
+        },
         warm: { name: 'warm', size_in_bytes: 0, min_age: '2d' },
       });
     });
