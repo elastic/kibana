@@ -65,7 +65,6 @@ export function RetentionMetadata({
           <EuiButton
             data-test-subj="streamsAppRetentionMetadataEditDataRetentionButton"
             size="s"
-            fullWidth
             onClick={toggleMenu}
           >
             {i18n.translate('xpack.streams.entityDetailViewWithoutParams.editDataRetention', {
@@ -232,7 +231,7 @@ function MetadataRow({
     <EuiFlexGroup alignItems="center" gutterSize="xl" responsive={false}>
       <EuiFlexItem grow={1}>
         <EuiText>
-          <b>{metadata}</b>
+          <h5>{metadata}</h5>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={4}>{value}</EuiFlexItem>

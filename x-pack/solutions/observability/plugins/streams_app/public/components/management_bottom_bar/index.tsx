@@ -37,13 +37,11 @@ export function ManagementBottomBar({
       <EuiButtonEmpty
         data-test-subj="streamsAppManagementBottomBarCancelChangesButton"
         color="text"
-        size="s"
-        iconType="cross"
         onClick={handleCancel}
         disabled={disabled}
       >
         {i18n.translate('xpack.streams.streamDetailView.managementTab.bottomBar.cancel', {
-          defaultMessage: 'Cancel changes',
+          defaultMessage: 'Cancel',
         })}
       </EuiButtonEmpty>
       <EuiButton
@@ -51,8 +49,6 @@ export function ManagementBottomBar({
         disabled={disabled}
         color="primary"
         fill
-        size="s"
-        iconType="check"
         onClick={onConfirm}
         isLoading={isLoading}
       >

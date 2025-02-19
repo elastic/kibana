@@ -40,7 +40,7 @@ export function WiredStreamDetailManagement({
         <StreamDetailRouting definition={definition} refreshDefinition={refreshDefinition} />
       ),
       label: i18n.translate('xpack.streams.streamDetailView.routingTab', {
-        defaultMessage: 'Streams Partitioning',
+        defaultMessage: 'Partitioning',
       }),
     },
     enrich: {
@@ -48,7 +48,7 @@ export function WiredStreamDetailManagement({
         <StreamDetailEnrichment definition={definition} refreshDefinition={refreshDefinition} />
       ),
       label: i18n.translate('xpack.streams.streamDetailView.enrichmentTab', {
-        defaultMessage: 'Extract field',
+        defaultMessage: 'Processors',
       }),
     },
     schemaEditor: {

@@ -149,6 +149,7 @@ export function AddProcessorPanel({ onAddProcessor, onWatchProcessor }: AddProce
                 )}
               </EuiButtonEmpty>
               <EuiButton
+                fill
                 data-test-subj="streamsAppAddProcessorPanelAddProcessorButton"
                 size="s"
                 onClick={methods.handleSubmit(handleSubmit)}
