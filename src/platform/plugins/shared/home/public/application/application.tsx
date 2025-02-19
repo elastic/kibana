@@ -17,11 +17,11 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { SampleDataTabKibanaProvider } from '@kbn/home-sample-data-tab';
 
-// @ts-ignore
 import { HomeApp } from './components/home_app';
 import { getServices } from './kibana_services';
 
 import './index.scss';
+import { FeatureCatalogueEntry } from '../services';
 
 export const renderApp = async (
   element: HTMLElement,
@@ -30,9 +30,10 @@ export const renderApp = async (
 ) => {
   const { featureCatalogue, chrome, dataViewsService: dataViews, trackUiMetric } = getServices();
 
-  // FIXME: use featureCatalogue.getFeatures$()
-  const directories = featureCatalogue.get();
-
+  let directories: FeatureCatalogueEntry[] = [];
+  featureCatalogue.getFeatures$().subscribe((features) => {
+    directories = features;
+  });
   // Filters solutions by available nav links
   const navLinksSubscription = chrome.navLinks.getNavLinks$().subscribe((navLinks) => {
     const solutions = featureCatalogue
