@@ -52096,6 +52096,8 @@ components:
             properties:
               message:
                 type: string
+              metadata:
+                type: object
               title:
                 type: string
           type: array
