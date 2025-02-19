@@ -21,7 +21,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - [Useful information](#useful-information)
   - [Tickets](#tickets)
+  - [User stories](#user-stories)
   - [Terminology](#terminology)
+  - [Assumptions](#assumptions)
+  - [Non-functional requirements](#non-functional-requirements)
 - [Scenarios](#scenarios)
   - [Core Functionality](#core-functionality)
     - [Scenario: Importing an unmodified prebuilt rule with a matching rule\_id and version](#scenario-importing-an-unmodified-prebuilt-rule-with-a-matching-rule_id-and-version)
@@ -43,15 +46,33 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 ### Tickets
 
-- [Rule Immutability/Customization](https://github.com/elastic/security-team/issues/1974)
-- [Rule Importing Feature](https://github.com/elastic/kibana/issues/180168)
-- [Rule Import API PR](https://github.com/elastic/kibana/pull/190198)
+- [Users can Customize Prebuilt Detection Rules](https://github.com/elastic/security-team/issues/1974) (internal)
+- [Users can Customize Prebuilt Detection Rules: Milestone 3](https://github.com/elastic/kibana/issues/174168)
+- [Allow importing prebuilt rules at the API level](https://github.com/elastic/kibana/issues/180168)
+- [Benchmark performance of importing a large number of prebuilt rules](https://github.com/elastic/kibana/issues/195632)
+- [Tests for prebuilt rule import/export workflow](https://github.com/elastic/kibana/issues/202079)
+
+### User stories
+
+**Prebuilt rule import workflow:**
+
+- User can import a single prebuilt rule on the Rule Management page.
+- User can import multiple prebuilt rules on the Rule Management page.
+- User can import prebuilt non-customized rules.
+- User can import prebuilt customized rules.
+- User can import any combination of prebuilt non-customized, prebuilt customized, and custom rules.
 
 ### Terminology
 
-- **prebuilt rule**: A rule contained in our `Prebuilt Security Detection Rules` integration in Fleet.
-- **custom rule**: A rule defined by the user, which has no relation to the prebuilt rules
-- **rule source, or ruleSource**: A field on the rule that defines the rule's categorization
+- [Common terminology](./prebuilt_rules_common_info.md#common-terminology).
+
+### Assumptions
+
+- [Common assumptions](./prebuilt_rules_common_info.md#common-assumptions).
+
+### Non-functional requirements
+
+- [Common non-functional requirements](./prebuilt_rules_common_info.md#common-non-functional-requirements).
 
 ## Scenarios
 
