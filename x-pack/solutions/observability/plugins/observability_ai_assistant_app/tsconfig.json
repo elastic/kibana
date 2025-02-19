@@ -70,7 +70,6 @@
     "@kbn/cloud-plugin",
     "@kbn/logs-data-access-plugin",
     "@kbn/ai-assistant-common",
-    "@kbn/observability-utils-server",
     "@kbn/observability-utils-common",
     "@kbn/slo-plugin",
     "@kbn/spaces-plugin",
@@ -84,6 +83,7 @@
     "@kbn/ai-assistant-icon",
     "@kbn/rule-data-utils",
     "@kbn/utility-types",
+    "@kbn/traced-es-client"
   ],
   "exclude": ["target/**/*"]
 }
