@@ -601,7 +601,7 @@ export async function pickTestGroupRunOrder() {
             depends_on: FTR_CONFIGS_DEPS,
             steps: scoutGroups.map(
               ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
-                label: title,
+                label: `Scout Tests: ${title}`,
                 command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
                 timeout_in_minutes: 60,
                 agents: expandAgentQueue(queue),
