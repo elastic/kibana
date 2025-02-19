@@ -29,6 +29,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { ITelemetryClient } from '../../../../../services/telemetry/types';
 import { SpaceManagementContextWrapper } from '../../../../components/space_management_context_wrapper';
 import { UpgradeWarning } from '../../../../components/upgrade/upgrade_warning';
 import { getMlGlobalServices } from '../../../../util/get_services';
@@ -56,6 +57,7 @@ interface Props {
   fieldFormats: FieldFormatsStart;
   isServerless: boolean;
   mlFeatures: MlFeatures;
+  telemetry: ITelemetryClient;
 }
 
 export const JobsListPage: FC<Props> = ({
@@ -68,6 +70,7 @@ export const JobsListPage: FC<Props> = ({
   fieldFormats,
   isServerless,
   mlFeatures,
+  telemetry,
 }) => {
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
@@ -79,8 +82,8 @@ export const JobsListPage: FC<Props> = ({
   const [refreshJobs, setRefreshJobs] = useState<(() => void) | null>(null);
 
   const mlServices = useMemo(
-    () => getMlGlobalServices(coreStart, data.dataViews, usageCollection),
-    [coreStart, data.dataViews, usageCollection]
+    () => getMlGlobalServices(coreStart, data.dataViews, telemetry, usageCollection),
+    [coreStart, data.dataViews, telemetry, usageCollection]
   );
 
   const check = async () => {

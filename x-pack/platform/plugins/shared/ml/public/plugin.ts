@@ -177,6 +177,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     this.telemetry.setup({ analytics: core.analytics });
 
+    const telemetryClient = this.telemetry.start();
+
     core.application.register({
       id: PLUGIN_ID,
       title: i18n.translate('xpack.ml.plugin.title', {
@@ -220,7 +222,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             unifiedSearch: pluginsStart.unifiedSearch,
             usageCollection: pluginsSetup.usageCollection,
             spaces: pluginsStart.spaces,
-            telemetry: this.telemetry.start(),
+            telemetry: telemetryClient,
           },
           params,
           this.isServerless,
@@ -241,6 +243,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
         core,
         {
           usageCollection: pluginsSetup.usageCollection,
+          telemetry: telemetryClient,
         },
         this.isServerless,
         this.enabledFeatures

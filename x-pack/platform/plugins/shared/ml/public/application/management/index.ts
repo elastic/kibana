@@ -13,11 +13,12 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { MlFeatures } from '../../../common/constants/app';
 import type { MlStartDependencies } from '../../plugin';
+import type { ITelemetryClient } from '../../services/telemetry/types';
 
 export function registerManagementSection(
   management: ManagementSetup,
   core: CoreSetup<MlStartDependencies>,
-  deps: { usageCollection?: UsageCollectionSetup },
+  deps: { usageCollection?: UsageCollectionSetup; telemetry: ITelemetryClient },
   isServerless: boolean,
   mlFeatures: MlFeatures
 ) {

@@ -26,7 +26,11 @@ export async function resolveEmbeddableAnomalyChartsUserInput(
 ): Promise<Pick<AnomalyChartsEmbeddableState, 'jobIds' | 'title' | 'maxSeriesToPlot'>> {
   const { http, overlays, ...startServices } = coreStart;
   const adJobsApiService = jobsApiProvider(new HttpService(http));
-  const mlServices = getMlGlobalServices(coreStart, pluginStart.data.dataViews);
+  const mlServices = getMlGlobalServices(
+    coreStart,
+    pluginStart.data.dataViews,
+    pluginStart.telemetry
+  );
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
 
   return new Promise(async (resolve, reject) => {

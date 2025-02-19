@@ -15,7 +15,9 @@ interface TelemetryServiceSetupParams {
 }
 
 export class TelemetryService {
-  constructor(private analytics?: AnalyticsServiceSetup) {}
+  private analytics?: AnalyticsServiceSetup;
+
+  constructor() {}
 
   public setup({ analytics }: TelemetryServiceSetupParams) {
     this.analytics = analytics;

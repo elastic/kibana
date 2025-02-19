@@ -15,6 +15,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { ITelemetryClient } from '../../../services/telemetry/types';
 import { getMlGlobalServices } from '../../../application/util/get_services';
 
 export interface FlyoutComponentProps {
@@ -27,6 +28,7 @@ export function createFlyout(
   share: SharePluginStart,
   data: DataPublicPluginStart,
   dashboardService: DashboardStart,
+  telemetry: ITelemetryClient,
   lens?: LensPublicStart
 ): Promise<void> {
   const {
@@ -52,7 +54,7 @@ export function createFlyout(
               data,
               lens,
               dashboardService,
-              mlServices: getMlGlobalServices(coreStart, data.dataViews),
+              mlServices: getMlGlobalServices(coreStart, data.dataViews, telemetry),
             }}
           >
             <FlyoutComponent
