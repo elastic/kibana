@@ -139,9 +139,10 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
     request.authzResult?.[FLEET_API_PRIVILEGES.AGENT_POLICIES.READ] === true;
   const authzFleetAgentRead = request.authzResult?.[FLEET_API_PRIVILEGES.AGENTS.READ] === true;
 
-  const soClient = authzFleetReadAgentPolicies
-    ? coreContext.savedObjects.client
-    : fleetContext.internalSoClient;
+  const soClient =
+    authzFleetReadAgentPolicies || authzFleetAgentRead
+      ? coreContext.savedObjects.client
+      : fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
   const {
@@ -204,9 +205,10 @@ export const bulkGetAgentPoliciesHandler: FleetRequestHandler<
       request.authzResult?.[FLEET_API_PRIVILEGES.AGENT_POLICIES.READ] === true;
     const authzFleetAgentRead = request.authzResult?.[FLEET_API_PRIVILEGES.AGENTS.READ] === true;
 
-    const soClient = authzFleetReadAgentPolicies
-      ? coreContext.savedObjects.client
-      : fleetContext.internalSoClient;
+    const soClient =
+      authzFleetReadAgentPolicies || authzFleetAgentRead
+        ? coreContext.savedObjects.client
+        : fleetContext.internalSoClient;
 
     const { full: withPackagePolicies = false, ignoreMissing = false, ids } = request.body;
     if (!authzFleetReadAgentPolicies && withPackagePolicies) {
