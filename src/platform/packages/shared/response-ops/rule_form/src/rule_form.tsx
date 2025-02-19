@@ -195,6 +195,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     shouldUseRuleProducer,
     canShowConsumerSelection,
     initialValues,
+    fieldsMetadata,
   ]);
 
   return (
