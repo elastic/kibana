@@ -22,14 +22,10 @@ import { useKnowledgeBase } from '../hooks';
 
 export function ChatActionsMenu({
   connectors,
-  conversationId,
   disabled,
-  onCopyConversationClick,
 }: {
   connectors: UseGenAIConnectorsResult;
-  conversationId?: string;
   disabled: boolean;
-  onCopyConversationClick: () => void;
 }) {
   const { application, http } = useKibana().services;
   const knowledgeBase = useKnowledgeBase();

@@ -16,10 +16,12 @@ import {
 import { i18n } from '@kbn/i18n';
 
 export function ChatContextMenu({
-  onCopyConversationClick,
+  onCopyToClipboardClick,
+  onCopyUrlClick,
   disabled,
 }: {
-  onCopyConversationClick: () => void;
+  onCopyToClipboardClick: () => void;
+  onCopyUrlClick: () => void;
   disabled: boolean;
 }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -53,26 +55,26 @@ export function ChatContextMenu({
         size="s"
         items={[
           <EuiContextMenuItem
-            key="copyConversation"
+            key="copyConversationToClipboard"
             icon="copyClipboard"
             onClick={() => {
-              onCopyConversationClick();
+              onCopyToClipboardClick();
               setIsPopoverOpen(false);
             }}
           >
-            {i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.copyConversation', {
-              defaultMessage: 'Copy conversation',
+            {i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.copyToClipboard', {
+              defaultMessage: 'Copy to clipboard',
             })}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="copyURL"
             icon="link"
             onClick={() => {
-              navigator.clipboard.writeText(window.location.href);
+              onCopyUrlClick();
               setIsPopoverOpen(false);
             }}
           >
-            {i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.copyURL', {
+            {i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.copyUrl', {
               defaultMessage: 'Copy URL',
             })}
           </EuiContextMenuItem>,
