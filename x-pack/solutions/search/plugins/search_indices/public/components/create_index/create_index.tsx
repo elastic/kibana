@@ -7,6 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 
+import { WorkflowId } from '@kbn/search-shared-ui';
 import type { IndicesStatusResponse } from '../../../common';
 
 import { AnalyticsEvents } from '../../analytics/constants';
@@ -23,7 +24,6 @@ import { CreateIndexPanel } from '../shared/create_index_panel/create_index_pane
 import { CreateIndexCodeView } from './create_index_code_view';
 import { CreateIndexUIView } from './create_index_ui_view';
 import { useWorkflow } from '../shared/hooks/use_workflow';
-import { WorkflowId } from '@kbn/search-shared-ui';
 
 function initCreateIndexState() {
   const defaultIndexName = generateRandomIndexName();

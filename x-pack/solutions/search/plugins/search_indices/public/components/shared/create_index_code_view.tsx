@@ -17,6 +17,7 @@ import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import { useSearchApiKey } from '@kbn/search-api-keys-components';
 import { i18n } from '@kbn/i18n';
+import { WorkflowId } from '@kbn/search-shared-ui';
 import { Languages, AvailableLanguages, LanguageOptions } from '../../code_examples';
 
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
@@ -29,7 +30,6 @@ import { LanguageSelector } from './language_selector';
 import { GuideSelector } from './guide_selector';
 import { Workflow } from '../../code_examples/workflows';
 import { CreateIndexCodeExamples } from '../../types';
-import { WorkflowId } from '@kbn/search-shared-ui';
 
 export interface CreateIndexCodeViewProps {
   selectedLanguage: AvailableLanguages;

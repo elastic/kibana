@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import { WorkflowId } from '@kbn/search-shared-ui';
 import type { IndicesStatusResponse } from '../../../common';
 
 import { AnalyticsEvents } from '../../analytics/constants';
@@ -24,7 +25,6 @@ import { CreateIndexPanel } from '../shared/create_index_panel/create_index_pane
 import { useKibana } from '../../hooks/use_kibana';
 import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 import { useWorkflow } from '../shared/hooks/use_workflow';
-import { WorkflowId } from '@kbn/search-shared-ui';
 
 function initCreateIndexState(): CreateIndexFormState {
   const defaultIndexName = generateRandomIndexName();
