@@ -17,6 +17,7 @@ import {
   useLoadRuleTypesQuery,
   useFetchFlappingSettings,
 } from '@kbn/alerts-ui-shared';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import {
   useLoadConnectors,
   useLoadConnectorTypes,
@@ -26,7 +27,6 @@ import {
 import type { RuleTypeRegistryContract } from '../common/types';
 import { IS_RULE_SPECIFIC_FLAPPING_ENABLED } from '../constants';
 import { useLoadRuleTypeAadTemplateField } from '../common/hooks/use_load_rule_type_aad_template_fields';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export interface UseLoadDependencies {
   http: HttpStart;
