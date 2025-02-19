@@ -19,7 +19,7 @@ import { isEmpty } from 'lodash';
 import React, { useMemo } from 'react';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
-import { calculateBaseComparisonDiff } from '../topn_functions/utils';
+import { calculateBaseComparisonDiff, scaleAndRoundValue } from '../topn_functions/utils';
 import { SummaryItem } from './summary_item';
 
 interface FrameValue {
@@ -41,10 +41,6 @@ const ESTIMATED_VALUE_LABEL = i18n.translate('xpack.profiling.diffTopNFunctions.
   defaultMessage: 'Estimated value',
 }) as string;
 
-function getScaleFactor(scaleFactor: number = 1) {
-  return scaleFactor;
-}
-
 export function FramesSummary({
   baseValue,
   comparisonValue,
@@ -53,11 +49,14 @@ export function FramesSummary({
   compressed = false,
 }: Props) {
   const baselineScaledTotalSamples = baseValue
-    ? baseValue.totalCount * getScaleFactor(baseValue.scaleFactor)
+    ? scaleAndRoundValue({ value: baseValue.totalCount, scaleFactor: baseValue.scaleFactor })
     : 0;
 
   const comparisonScaledTotalSamples = comparisonValue
-    ? comparisonValue.totalCount * getScaleFactor(comparisonValue.scaleFactor)
+    ? scaleAndRoundValue({
+        value: comparisonValue.totalCount,
+        scaleFactor: comparisonValue.scaleFactor,
+      })
     : 0;
 
   const { co2EmissionDiff, costImpactDiff, totalSamplesDiff } = useMemo(() => {
