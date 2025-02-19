@@ -23,8 +23,8 @@ import { CreateIndexFormState, CreateIndexViewMode } from '../../types';
 import { CreateIndexPanel } from '../shared/create_index_panel/create_index_panel';
 import { useKibana } from '../../hooks/use_kibana';
 import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
-import { WorkflowId } from '../../code_examples/workflows';
 import { useWorkflow } from '../shared/hooks/use_workflow';
+import { WorkflowId } from '@kbn/search-shared-ui';
 
 function initCreateIndexState(): CreateIndexFormState {
   const defaultIndexName = generateRandomIndexName();

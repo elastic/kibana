@@ -27,8 +27,9 @@ import { APIKeyCallout } from './api_key_callout';
 import { CodeSample } from './code_sample';
 import { LanguageSelector } from './language_selector';
 import { GuideSelector } from './guide_selector';
-import { Workflow, WorkflowId } from '../../code_examples/workflows';
+import { Workflow } from '../../code_examples/workflows';
 import { CreateIndexCodeExamples } from '../../types';
+import { WorkflowId } from '@kbn/search-shared-ui';
 
 export interface CreateIndexCodeViewProps {
   selectedLanguage: AvailableLanguages;

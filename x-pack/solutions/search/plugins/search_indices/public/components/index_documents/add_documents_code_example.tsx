@@ -24,7 +24,7 @@ import { generateSampleDocument } from '../../utils/document_generation';
 import { getDefaultCodingLanguage } from '../../utils/language';
 import { GuideSelector } from '../shared/guide_selector';
 import { useWorkflow } from '../shared/hooks/use_workflow';
-import { WorkflowId } from '../../code_examples/workflows';
+import { WorkflowId } from '@kbn/search-shared-ui';
 
 export const exampleTexts = [
   'Yellowstone National Park is one of the largest national parks in the United States. It ranges from the Wyoming to Montana and Idaho, and contains an area of 2,219,791 acress across three different states. Its most famous for hosting the geyser Old Faithful and is centered on the Yellowstone Caldera, the largest super volcano on the American continent. Yellowstone is host to hundreds of species of animal, many of which are endangered or threatened. Most notably, it contains free-ranging herds of bison and elk, alongside bears, cougars and wolves. The national park receives over 4.5 million visitors annually and is a UNESCO World Heritage Site.',

@@ -51,9 +51,9 @@ export const useWorkflow = () => {
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<WorkflowId>(workflowId || 'default');
   return {
     selectedWorkflowId,
-    setSelectedWorkflowId: (workflowId: WorkflowId) => {
-      localStorage.setItem(WORKFLOW_LOCALSTORAGE_KEY, workflowId);
-      setSelectedWorkflowId(workflowId);
+    setSelectedWorkflowId: (newWorkflowId: WorkflowId) => {
+      localStorage.setItem(WORKFLOW_LOCALSTORAGE_KEY, newWorkflowId);
+      setSelectedWorkflowId(newWorkflowId);
     },
     workflow: workflows.find((workflow) => workflow.id === selectedWorkflowId),
     createIndexExamples: workflowIdToCreateIndexExamples(selectedWorkflowId),
