@@ -39,7 +39,23 @@ export const GetPackagesRequestSchema = {
 export const KibanaAssetReferenceSchema = schema.object({
   id: schema.string(),
   originId: schema.maybe(schema.string()),
-  type: schema.string(),
+  type: schema.oneOf([
+    schema.oneOf([
+      schema.literal('dashboard'),
+      schema.literal('lens'),
+      schema.literal('visualization'),
+      schema.literal('search'),
+      schema.literal('index-pattern'),
+      schema.literal('map'),
+      schema.literal('ml-module'),
+      schema.literal('security-rule'),
+      schema.literal('csp-rule-template'),
+      schema.literal('osquery-pack-asset'),
+      schema.literal('osquery-saved-query'),
+      schema.literal('tag'),
+    ]),
+    schema.string(),
+  ]),
 });
 
 export const EsAssetReferenceSchema = schema.object({
@@ -149,7 +165,7 @@ export const PackageInfoSchema = schema
         schema.literal('integration'),
         schema.literal('input'),
         schema.literal('content'),
-        schema.any(),
+        schema.string(),
       ])
     ),
     path: schema.maybe(schema.string()),
