@@ -10,6 +10,7 @@ import { matchPath } from 'react-router-dom';
 import {
   CASES_PATH,
   ALERTS_PATH,
+  ATTACK_DISCOVERY_PATH,
   HOSTS_PATH,
   USERS_PATH,
   NETWORK_PATH,
@@ -29,7 +30,12 @@ export const sourcererPaths = [
   OVERVIEW_PATH,
 ];
 
-const detectionsPaths = [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${CASES_PATH}/:detailName`];
+const detectionsPaths = [
+  ALERTS_PATH,
+  `${RULES_PATH}/id/:id`,
+  `${CASES_PATH}/:detailName`,
+  ATTACK_DISCOVERY_PATH,
+];
 
 export const getScopeFromPath = (
   pathname: string
