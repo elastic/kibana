@@ -8,12 +8,16 @@
  */
 
 import { z } from '@kbn/zod';
+import { BooleanFromString } from '@kbn/zod-helpers';
 
 export function createLargeSchema() {
   return z.object({
     string: z.string().max(10).min(1),
     maybeNumber: z.number().max(1000).min(1).optional(),
     booleanDefault: z.boolean({ description: 'defaults to to true' }).default(true),
+    booleanFromString: BooleanFromString.default(false).describe(
+      'boolean or string "true" or "false"'
+    ),
     ipType: z.string().ip({ version: 'v4' }),
     literalType: z.literal('literallythis'),
     neverType: z.never(),
