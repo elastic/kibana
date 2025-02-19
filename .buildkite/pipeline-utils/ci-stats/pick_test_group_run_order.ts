@@ -475,41 +475,42 @@ export async function pickTestGroupRunOrder() {
     bk.uploadArtifacts('ftr_run_order.json');
   }
 
-  const rawScoutConfigs = {
-    discover_enhanced: {
-      group: 'platform',
-      pluginPath: 'x-pack/platform/plugins/private/discover_enhanced',
-      configs: [
-        'x-pack/platform/plugins/private/discover_enhanced/ui_tests/parallel.playwright.config.ts',
-        'x-pack/platform/plugins/private/discover_enhanced/ui_tests/playwright.config.ts',
-      ],
-    },
-    maps: {
-      group: 'platform',
-      pluginPath: 'x-pack/platform/plugins/shared/maps',
-      configs: ['x-pack/platform/plugins/shared/maps/ui_tests/playwright.config.ts'],
-    },
-    observability_onboarding: {
-      group: 'observability',
-      pluginPath: 'x-pack/solutions/observability/plugins/observability_onboarding',
-      configs: [
-        'x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/parallel.playwright.config.ts',
-        'x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/playwright.config.ts',
-      ],
-    },
-  };
+  const rawScoutConfigs: Record<string, { group: string; pluginPath: string; configs: string[] }> =
+    {
+      discover_enhanced: {
+        group: 'platform',
+        pluginPath: 'x-pack/platform/plugins/private/discover_enhanced',
+        configs: [
+          'x-pack/platform/plugins/private/discover_enhanced/ui_tests/parallel.playwright.config.ts',
+          'x-pack/platform/plugins/private/discover_enhanced/ui_tests/playwright.config.ts',
+        ],
+      },
+      maps: {
+        group: 'platform',
+        pluginPath: 'x-pack/platform/plugins/shared/maps',
+        configs: ['x-pack/platform/plugins/shared/maps/ui_tests/playwright.config.ts'],
+      },
+      observability_onboarding: {
+        group: 'observability',
+        pluginPath: 'x-pack/solutions/observability/plugins/observability_onboarding',
+        configs: [
+          'x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/parallel.playwright.config.ts',
+          'x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/playwright.config.ts',
+        ],
+      },
+    };
 
   Fs.writeFileSync('scout_test_configs.json', JSON.stringify(rawScoutConfigs, null, 2));
   bk.uploadArtifacts('scout_test_configs.json');
 
   const pluginsWithScoutConfigs: string[] = Object.keys(rawScoutConfigs);
-  const scoutGroups = pluginsWithScoutConfigs.map((plugin) => {
-    return {
-      title: plugin,
-      key: plugin,
-      queue: defaultQueue,
-    };
-  });
+
+  const scoutGroups = pluginsWithScoutConfigs.map((plugin) => ({
+    title: plugin,
+    key: plugin,
+    group: rawScoutConfigs[plugin].group,
+    queue: defaultQueue,
+  }));
 
   // upload the step definitions to Buildkite
   bk.uploadSteps(
@@ -600,8 +601,8 @@ export async function pickTestGroupRunOrder() {
             key: 'scout-configs',
             depends_on: FTR_CONFIGS_DEPS,
             steps: scoutGroups.map(
-              ({ title, key, queue = defaultQueue }): BuildkiteStep => ({
-                label: `Scout Tests: ${title}`,
+              ({ title, key, group, queue = defaultQueue }): BuildkiteStep => ({
+                label: `Scout tests: [ ${group} / ${title} ] plugin`,
                 command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
                 timeout_in_minutes: 60,
                 agents: expandAgentQueue(queue),
