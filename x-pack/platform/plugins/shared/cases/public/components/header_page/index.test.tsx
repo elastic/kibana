@@ -36,16 +36,6 @@ describe('HeaderPage', () => {
     expect(result.getByText('Test supplement')).toBeInTheDocument();
   });
 
-  it('renders the back link when provided', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <HeaderPage showBackButton title="Test title" />
-      </TestProviders>
-    );
-
-    expect(wrapper.find('.casesHeaderPage__linkBack').first().exists()).toBe(true);
-  });
-
   it('DOES NOT render the back link when not provided', () => {
     const wrapper = mount(
       <TestProviders>

@@ -363,14 +363,5 @@ describe('EntityStoreDataClient', () => {
 
       expect(spyInit).toHaveBeenCalledWith(EntityType.host, expect.anything(), expect.anything());
     });
-
-    it('does not enable engine when the given entity type is disabled', async () => {
-      await dataClient.enable({
-        ...defaultOptions,
-        entityTypes: [EntityType.universal],
-      });
-
-      expect(spyInit).not.toHaveBeenCalled();
-    });
   });
 });

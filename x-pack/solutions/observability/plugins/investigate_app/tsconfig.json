@@ -60,7 +60,6 @@
     "@kbn/observability-plugin",
     "@kbn/observability-shared-plugin",
     "@kbn/observability-utils-browser",
-    "@kbn/observability-utils-server",
     "@kbn/presentation-containers",
     "@kbn/react-kibana-context-theme",
     "@kbn/rule-data-utils",
@@ -86,5 +85,7 @@
     "@kbn/dev-cli-runner",
     "@kbn/datemath",
     "@kbn/sse-utils-client",
+    "@kbn/traced-es-client",
+    "@kbn/react-hooks",
   ],
 }
