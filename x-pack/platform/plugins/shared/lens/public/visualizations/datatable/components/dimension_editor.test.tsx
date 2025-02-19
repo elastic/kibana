@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
-import { act, render, screen } from '@testing-library/react';
+import { act, screen } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
@@ -18,9 +18,9 @@ import { createMockDatasource, createMockFramePublicAPI } from '../../../mocks';
 import { TableDimensionEditor, TableDimensionEditorProps } from './dimension_editor';
 import { ColumnState } from '../../../../common/expressions';
 import { capitalize } from 'lodash';
-import { I18nProvider } from '@kbn/i18n-react';
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { getKbnPalettes } from '@kbn/palettes';
+import { renderWithProviders } from '../../../test_utils/test_utils';
 
 describe('data table dimension editor', () => {
   let user: UserEvent;
@@ -111,12 +111,12 @@ describe('data table dimension editor', () => {
   });
 
   const renderTableDimensionEditor = (overrideProps?: Partial<TableDimensionEditorProps>) => {
-    return render(<TableDimensionEditor {...props} {...overrideProps} />, {
+    return renderWithProviders(<TableDimensionEditor {...props} {...overrideProps} />, {
       wrapper: ({ children }) => (
-        <I18nProvider>
+        <>
           <div ref={props.panelRef} />
           {children}
-        </I18nProvider>
+        </>
       ),
     });
   };

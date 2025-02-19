@@ -7,7 +7,7 @@
 
 import { ReactWrapper, ShallowWrapper, ComponentType, mount } from 'enzyme';
 import React, { ChangeEvent } from 'react';
-import { screen, act, render, within } from '@testing-library/react';
+import { screen, act, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import {
@@ -51,6 +51,7 @@ import { AdvancedOptions } from './advanced_options';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { LensAppServices } from '../../../app_plugin/types';
+import { renderWithProviders } from '../../../test_utils/test_utils';
 
 jest.mock('./reference_editor', () => ({
   ReferenceEditor: () => null,
@@ -302,7 +303,7 @@ describe('FormBasedDimensionEditor', () => {
       );
     };
 
-    const rtlRender = render(
+    const rtlRender = renderWithProviders(
       <FormBasedDimensionEditorComponent {...defaultProps} {...propsOverrides} />,
       {
         wrapper: Wrapper,

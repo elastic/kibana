@@ -90,13 +90,16 @@ export function FrameLayout(props: FrameLayoutProps) {
             <section
               className={'hide-for-sharing'}
               aria-labelledby="dataPanelId"
-              css={[sidebarStyles, css`
-                ${isFullscreen &&
-                `
+              css={[
+                sidebarStyles,
+                css`
+                  ${isFullscreen &&
+                  `
                 // Hide the datapanel in fullscreen mode. Using display: none does trigger
                 // a rerender when the container becomes visible again, maybe pushing offscreen is better
                 display: none;`}
-              `]}
+                `,
+              ]}
             >
               <EuiScreenReaderOnly>
                 <h2 id="dataPanelId">
@@ -126,7 +129,8 @@ export function FrameLayout(props: FrameLayoutProps) {
                 &:first-child {
                   padding-left: ${euiTheme.euiTheme.size.base};
                 }
-                ${isFullscreen && `
+                ${isFullscreen &&
+                `
                   flex: 1;
                   padding: 0;`}
               `}
@@ -143,16 +147,19 @@ export function FrameLayout(props: FrameLayoutProps) {
               <div className="hide-for-sharing">{props.suggestionsPanel}</div>
             </section>
             <section
-              css={[sidebarStyles, css`
-                flex-basis: 25%;
-                min-width: 358px;
-                max-width: 440px;
-                max-height: 100%;
-                ${euiBreakpoint(euiTheme, ['xs', 's', 'm'])} {
-                  max-width: 100%;
-                }
-                ${isFullscreen && `flex: 1; max-width: none;`}
-              `]}
+              css={[
+                sidebarStyles,
+                css`
+                  flex-basis: 25%;
+                  min-width: 358px;
+                  max-width: 440px;
+                  max-height: 100%;
+                  ${euiBreakpoint(euiTheme, ['xs', 's', 'm'])} {
+                    max-width: 100%;
+                  }
+                  ${isFullscreen && `flex: 1; max-width: none;`}
+                `,
+              ]}
               className="hide-for-sharing"
               aria-labelledby="configPanel"
             >

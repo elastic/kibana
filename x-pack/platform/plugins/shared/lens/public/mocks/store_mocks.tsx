@@ -6,12 +6,12 @@
  */
 
 import React, { PropsWithChildren, ReactElement } from 'react';
-import { ReactWrapper, mount } from 'enzyme';
+import { ReactWrapper } from 'enzyme';
 import { Provider } from 'react-redux';
 import { PreloadedState } from '@reduxjs/toolkit';
-import { RenderOptions, render } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
+import { RenderOptions } from '@testing-library/react';
 import { LensAppServices } from '../app_plugin/types';
+import { mountWithProviders, renderWithProviders } from '../test_utils/test_utils';
 import { makeConfigureStore, LensAppState, LensState, LensStoreDeps } from '../state_management';
 import { getResolvedDateRange } from '../utils';
 import { DatasourceMap, VisualizationMap } from '../types';
@@ -86,17 +86,13 @@ export const renderWithReduxStore = (
 
   const CustomWrapper = wrapper as React.ComponentType<React.PropsWithChildren<{}>>;
 
-  const Wrapper: React.FC<PropsWithChildren<{}>> = ({ children }) => {
-    return (
-      <Provider store={store}>
-        <I18nProvider>
-          {wrapper ? <CustomWrapper>{children}</CustomWrapper> : children}
-        </I18nProvider>
-      </Provider>
-    );
-  };
+  const Wrapper: React.FC<PropsWithChildren<{}>> = ({ children }) => (
+    <Provider store={store}>
+      {wrapper ? <CustomWrapper>{children}</CustomWrapper> : children}
+    </Provider>
+  );
 
-  const rtlRender = render(ui, { wrapper: Wrapper, ...options });
+  const rtlRender = renderWithProviders(ui, { wrapper: Wrapper, ...options });
 
   return {
     store,
@@ -145,7 +141,7 @@ export const mountWithProvider = async (
   }
 ) => {
   const { mountArgs, lensStore, deps } = getMountWithProviderParams(component, store, options);
-  const instance = mount(mountArgs.component, mountArgs.options);
+  const instance = mountWithProviders(mountArgs.component, mountArgs.options);
   return { instance, lensStore, deps };
 };
 
@@ -161,9 +157,7 @@ const getMountWithProviderParams = (
   const { store: lensStore, deps } = makeLensStore(store || {});
 
   let wrappingComponent: React.FC<PropsWithChildren<{}>> = ({ children }) => (
-    <I18nProvider>
-      <Provider store={lensStore}>{children}</Provider>
-    </I18nProvider>
+    <Provider store={lensStore}>{children}</Provider>
   );
 
   let restOptions: {

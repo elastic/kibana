@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UseEuiTheme, useEuiScrollBar } from '@elastic/eui';
+import { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const lnsExpressionRendererStyle = (euiThemeContext: UseEuiTheme) => {
@@ -17,6 +17,5 @@ export const lnsExpressionRendererStyle = (euiThemeContext: UseEuiTheme) => {
     overflow: auto;
     // important for visualizations with no padding
     border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
-    ${useEuiScrollBar()};
   `;
 };

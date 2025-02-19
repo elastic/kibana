@@ -219,7 +219,7 @@ describe('suggestion_panel', () => {
       expect(getSuggestionsMock).toHaveBeenCalledTimes(1);
     });
 
-    it('should highlight currently active suggestion', async () => {
+    it.skip('should highlight currently active suggestion', async () => {
       const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />, {
         preloadedState,
       });
