@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { EuiFlexItem, EuiCard, EuiIcon, EuiFlexGrid, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
@@ -24,6 +24,7 @@ interface Props {
   setHasActionsUpgradeableByTrial?: (value: boolean) => void;
   setAllActionTypes?: (actionsType: ActionTypeIndex) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
+  searchValue?: string;
 }
 
 export const ActionTypeMenu = ({
@@ -32,6 +33,7 @@ export const ActionTypeMenu = ({
   setHasActionsUpgradeableByTrial,
   setAllActionTypes,
   actionTypeRegistry,
+  searchValue,
 }: Props) => {
   const {
     http,
@@ -95,7 +97,19 @@ export const ActionTypeMenu = ({
       };
     });
 
-  const cardNodes = registeredActionTypes
+  const filteredConnectors = useMemo(() => {
+    return registeredActionTypes.filter((connector) => {
+      const trimmedSearchValue = searchValue.trim().toLowerCase();
+      const textSearchTargets = [
+        connector.name.toLowerCase(),
+        connector.selectedMessage?.toLowerCase(),
+        connector.actionType?.name.toLowerCase(),
+      ];
+      return textSearchTargets.some((text) => text?.includes(trimmedSearchValue));
+    });
+  }, [registeredActionTypes]);
+
+  const cardNodes = filteredConnectors
     .sort((a, b) => actionTypeCompare(a.actionType, b.actionType))
     .map((item, index) => {
       const checkEnabledResult = checkActionTypeEnabled(item.actionType);
