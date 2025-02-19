@@ -107,7 +107,7 @@ export function StreamDetailEnrichmentContent({
     : undefined;
 
   return (
-    <SimulatorContextProvider processingSimulator={processingSimulator}>
+    <SimulatorContextProvider processingSimulator={processingSimulator} definition={definition}>
       <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
         <EuiSplitPanel.Inner
           paddingSize="none"
@@ -120,8 +120,8 @@ export function StreamDetailEnrichmentContent({
             {(EuiResizablePanel, EuiResizableButton) => (
               <>
                 <EuiResizablePanel
-                  initialSize={30}
-                  minSize="400px"
+                  initialSize={40}
+                  minSize="480px"
                   tabIndex={0}
                   paddingSize="none"
                   css={verticalFlexCss}
@@ -139,7 +139,7 @@ export function StreamDetailEnrichmentContent({
                 </EuiResizablePanel>
                 <EuiResizableButton indicator="border" accountForScrollbars="both" />
                 <EuiResizablePanel
-                  initialSize={70}
+                  initialSize={60}
                   minSize="300px"
                   tabIndex={0}
                   paddingSize="s"

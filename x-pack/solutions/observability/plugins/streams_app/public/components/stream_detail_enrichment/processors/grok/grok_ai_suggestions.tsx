@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useWatch, useFormContext } from 'react-hook-form';
-import { FlattenRecord } from '@kbn/streams-schema';
+import { FlattenRecord, IngestStreamGetResponse } from '@kbn/streams-schema';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { UseGenAIConnectorsResult } from '@kbn/observability-ai-assistant-plugin/public/hooks/use_genai_connectors';
 import { useAbortController, useBoolean } from '@kbn/react-hooks';
@@ -30,7 +30,6 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { GrokFormState, ProcessorFormState } from '../../types';
 import { UseProcessingSimulatorReturn } from '../../hooks/use_processing_simulator';
 import { useSimulatorContext } from '../../simulator_context';
-import { useStreamsEnrichmentSelector } from '../../services/stream_enrichment_service';
 
 const RefreshButton = ({
   generatePatterns,
@@ -123,11 +122,12 @@ function useAiEnabled() {
 function InnerGrokAiSuggestions({
   refreshSimulation,
   filteredSamples,
+  definition,
 }: {
   refreshSimulation: UseProcessingSimulatorReturn['refreshSimulation'];
   filteredSamples: FlattenRecord[];
+  definition: IngestStreamGetResponse;
 }) {
-  const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
   const { dependencies } = useKibana();
   const {
     streams: { streamsRepositoryClient },
@@ -235,7 +235,7 @@ function InnerGrokAiSuggestions({
         {filteredSuggestions.map((suggestion) => {
           return (
             <EuiFlexGroup responsive={false} wrap={false} key={suggestion.pattern}>
-              <EuiFlexItem grow>
+              <EuiFlexItem grow basis="0">
                 <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
                   <EuiCodeBlock paddingSize="s">{suggestion.pattern}</EuiCodeBlock>
                   <EuiBadge color="hollow">

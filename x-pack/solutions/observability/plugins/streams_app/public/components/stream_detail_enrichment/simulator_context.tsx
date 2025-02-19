@@ -7,23 +7,31 @@
 
 import React, { useMemo } from 'react';
 import { createContext } from 'react';
+import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import { UseProcessingSimulatorReturn } from './hooks/use_processing_simulator';
 
-export const context = createContext<UseProcessingSimulatorReturn | undefined>(undefined);
+export const context = createContext<SimulatorContextValue | undefined>(undefined);
+
+export interface SimulatorContextValue extends UseProcessingSimulatorReturn {
+  definition: IngestStreamGetResponse;
+}
 
 export function SimulatorContextProvider({
   processingSimulator,
+  definition,
 
   children,
 }: {
   processingSimulator: UseProcessingSimulatorReturn;
+  definition: IngestStreamGetResponse;
   children: React.ReactNode;
 }) {
   const contextValue = useMemo(() => {
     return {
+      definition,
       ...processingSimulator,
     };
-  }, [processingSimulator]);
+  }, [definition, processingSimulator]);
   return <context.Provider value={contextValue}>{children}</context.Provider>;
 }
 
