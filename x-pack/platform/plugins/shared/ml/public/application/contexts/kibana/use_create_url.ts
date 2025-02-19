@@ -42,24 +42,67 @@ export const useMlLink = (params: MlLocatorParams, getUrlParams?: LocatorGetUrlP
   const [href, setHref] = useState<string>(params.page);
   const mlLocator = useMlLocator();
 
-  useEffect(() => {
-    let isCancelled = false;
-    const generateUrl = async (_params: MlLocatorParams) => {
-      if (mlLocator) {
-        const url = await mlLocator.getUrl(_params, getUrlParams);
-        if (!isCancelled) {
-          setHref(url);
+  useEffect(
+    function generateMlLink() {
+      let isCancelled = false;
+      const generateUrl = async (_params: MlLocatorParams) => {
+        if (mlLocator) {
+          const url = await mlLocator.getUrl(_params, getUrlParams);
+          if (!isCancelled) {
+            setHref(url);
+          }
         }
-      }
-    };
-    generateUrl(params);
-    return () => {
-      isCancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params, getUrlParams]);
+      };
+      generateUrl(params);
+      return () => {
+        isCancelled = true;
+      };
+    },
+    [params, getUrlParams, mlLocator]
+  );
 
   return href;
+};
+
+export const useNavigateToManagementMlLink = (appId: string) => {
+  const mlManagementLocatorInternal = useMlManagementLocatorInternal();
+  const [globalState] = useUrlState('_g');
+
+  const {
+    services: {
+      application: { navigateToUrl },
+    },
+  } = useMlKibana();
+
+  const redirectToMlPage: NavigateToMlManagementLink = useCallback(
+    async (_page: MlLocatorParams['page'], pageState?: MlLocatorParams['pageState']) => {
+      if (mlManagementLocatorInternal) {
+        const modifiedPageState: MlLocatorParams['pageState'] = pageState ?? {};
+        if (globalState?.refreshInterval !== undefined) {
+          // @ts-expect-error globalState override
+          modifiedPageState.globalState = {
+            // @ts-expect-error globalState override
+            ...(modifiedPageState.globalState ?? {}),
+            refreshInterval: globalState.refreshInterval,
+          };
+        }
+
+        const { path } = await mlManagementLocatorInternal.getUrl(
+          // @ts-expect-error globalState modification
+          { page: _page, pageState: modifiedPageState },
+          appId
+        );
+        await mlManagementLocatorInternal.navigate(path, appId);
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('mlManagementLocatorInternal is not defined');
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [MlManagementLocatorInternal, navigateToUrl, appId]
+  );
+
+  return redirectToMlPage;
 };
 
 export const useCreateAndNavigateToMlLink = (
@@ -146,4 +189,60 @@ export const useCreateAndNavigateToManagementMlLink = (
 
   // returns the onClick callback
   return useCallback(() => redirectToMlPage(page), [redirectToMlPage, page]);
+};
+
+export const useMlManagementLink = (
+  page: MlLocatorParams['page'],
+  appId: string,
+  pageState?: MlLocatorParams['pageState']
+): string => {
+  const [href, setHref] = useState<string>('');
+  const mlManagementLocatorInternal = useMlManagementLocatorInternal();
+  const [globalState] = useUrlState('_g');
+
+  useEffect(
+    function generateMlManagementLink() {
+      let isCancelled = false;
+      const generateUrl = async (_page: MlLocatorParams['page']) => {
+        if (mlManagementLocatorInternal) {
+          const modifiedPageState: MlLocatorParams['pageState'] = pageState ?? {};
+          if (globalState?.refreshInterval !== undefined) {
+            // @ts-expect-error globalState override
+            modifiedPageState.globalState = {
+              // @ts-expect-error globalState override
+              ...(modifiedPageState.globalState ?? {}),
+              refreshInterval: globalState.refreshInterval,
+            };
+          }
+
+          const { url } = await mlManagementLocatorInternal.getUrl(
+            // @ts-expect-error globalState modification
+            { page: _page, pageState: modifiedPageState },
+            appId
+          );
+          if (!isCancelled && url) {
+            setHref(url);
+          }
+        } else {
+          // eslint-disable-next-line no-console
+          console.error('mlManagementLocatorInternal is not defined');
+        }
+      };
+      generateUrl(page);
+      return () => {
+        isCancelled = true;
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      mlManagementLocatorInternal,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify(pageState),
+      globalState?.refreshInterval,
+      appId,
+      page,
+    ]
+  );
+
+  return href;
 };

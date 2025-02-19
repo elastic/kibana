@@ -14,6 +14,7 @@ import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
+import { useUrlState } from '@kbn/ml-url-state';
 import { OverviewStatsBar } from '../components/collapsible_panel/collapsible_panel';
 import type { MlStorageKey, TMlStorageMapped } from '../../../common/types/storage';
 import { ML_OVERVIEW_PANELS, ML_OVERVIEW_PANELS_EXTENDED } from '../../../common/types/storage';
@@ -85,8 +86,12 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
   const { notificationsCounts } = useMlNotifications();
   const errorsAndWarningCount =
     (notificationsCounts?.error ?? 0) + (notificationsCounts?.warning ?? 0);
+  const [pageState, setPageState] = useUrlState('_g');
 
-  const [selectedTabId, setSelectedTabId] = useState<TabIdType>(TAB_IDS.OVERVIEW);
+  const selectedTabId = pageState?.tab ?? TAB_IDS.OVERVIEW;
+  const setSelectedTabId = (tabId: TabIdType) => {
+    setPageState({ tab: tabId });
+  };
   const [adLazyJobCount, setAdLazyJobCount] = useState(0);
   const [dfaLazyJobCount, setDfaLazyJobCount] = useState(0);
   const [memoryUsageStats, setMemoryUsageStats] = useState<StatEntry[]>([]);

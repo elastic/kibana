@@ -73,6 +73,7 @@ export const MLOverviewCard = ({
             size="s"
             iconType={iconType}
             onClick={() => navigateToPath(path)}
+            aria-label={title}
           />
         }
         title={title}
