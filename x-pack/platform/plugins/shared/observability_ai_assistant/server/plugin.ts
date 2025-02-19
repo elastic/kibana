@@ -125,9 +125,10 @@ export class ObservabilityAIAssistantPlugin
     }));
 
     // Update existing index assets (mappings, templates, etc). This will not create assets if they do not exist.
-    updateExistingIndexAssets({ logger: this.logger.get('index_assets'), core }).catch((e) =>
-      this.logger.error(`Index assets could not be updated: ${e.message}`)
-    );
+    const indexAssetsUpdatedPromise = updateExistingIndexAssets({
+      logger: this.logger.get('index_assets'),
+      core,
+    }).catch((e) => this.logger.error(`Index assets could not be updated: ${e.message}`));
 
     // register task to migrate knowledge base entries to include semantic_text field
     registerAndScheduleKbSemanticTextMigrationTask({
@@ -135,6 +136,7 @@ export class ObservabilityAIAssistantPlugin
       taskManager: plugins.taskManager,
       logger: this.logger.get('kb_semantic_text_migration_task'),
       config: this.config,
+      indexAssetsUpdatedPromise,
     }).catch((e) =>
       this.logger.error(
         `Knowledge base semantic_text migration task could not be registered: ${e.message}`
