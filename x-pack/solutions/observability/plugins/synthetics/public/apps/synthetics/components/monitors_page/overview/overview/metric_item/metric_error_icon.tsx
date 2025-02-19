@@ -68,6 +68,15 @@ export const MetricErrorIcon = ({ configIdByLocation }: { configIdByLocation: st
           dispatch(toggleErrorPopoverOpen(configIdByLocation));
         }
       }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          if (configIdByLocation === isPopoverOpen) {
+            dispatch(toggleErrorPopoverOpen(null));
+          } else {
+            dispatch(toggleErrorPopoverOpen(configIdByLocation));
+          }
+        }
+      }}
     >
       <EuiButtonIcon
         data-test-subj="syntheticsMetricItemIconButton"
@@ -82,22 +91,3 @@ export const MetricErrorIcon = ({ configIdByLocation }: { configIdByLocation: st
 const ERROR_DETAILS = i18n.translate('xpack.synthetics.errorDetails.label', {
   defaultMessage: 'Error details',
 });
-
-// const StyledIcon = euiStyled.div<{ boxShadow: string }>`
-//   box-sizing: border-box;
-//   display: flex;
-//   flex-direction: column;
-//   align-items: center;
-//   gap: 10px;
-//   width: 32px;
-//   height: 32px;
-//   background: ${({ theme }) =>
-//     theme.darkMode ? theme.eui.euiColorDarkestShade : theme.eui.euiColorLightestShade};
-//   border: 1px solid ${({ theme }) =>
-//     theme.darkMode ? theme.eui.euiColorDarkShade : theme.eui.euiColorLightShade};
-//   ${({ boxShadow }) => boxShadow}
-//   border-radius: 16px;
-//   flex: none;
-//   order: 0;
-//   flex-grow: 0;
-// `;

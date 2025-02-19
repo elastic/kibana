@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiLink,
   EuiSpacer,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from '@emotion/styled';
@@ -132,7 +133,17 @@ export const MetricItemIcon = ({
                 <EuiSpacer size="s" />
               </>
             )}
-            <EuiCallOut title={latestPing?.error?.message} color="danger" iconType="warning" />
+            <EuiCallOut
+              title={
+                latestPing?.error?.message ? (
+                  latestPing?.error?.message
+                ) : (
+                  <EuiSkeletonText lines={2} />
+                )
+              }
+              color="danger"
+              iconType="warning"
+            />
           </div>
           <EuiPopoverFooter>
             <EuiButton
