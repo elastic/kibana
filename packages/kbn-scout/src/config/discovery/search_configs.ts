@@ -34,33 +34,48 @@ export const getScoutPlaywrightConfigs = (searchPaths: string[], log: ToolingLog
     'x-pack/solutions/security': 'security',
     'x-pack/solutions/search': 'search',
     'x-pack/solutions/observability': 'observability',
-    'platform/plugins': 'platform',
+    'x-pack/platform/plugins': 'platform',
+    'src/platform/plugins': 'platform',
   };
 
-  // Group config files by plugin
-  const plugins = files.reduce((acc: Map<string, PluginScoutConfig>, filePath: string) => {
-    const match = filePath.match(
-      /(x-pack\/(?:solutions\/[^\/]+|platform)\/plugins\/(?:[^\/]+\/)*([^\/]+))\/ui_tests\//
-    );
-    const pluginPath = match ? match[1] : null;
-    const pluginName = match ? match[2] : null;
+  const matchPluginPath = (filePath: string): { pluginPath: string; pluginName: string } | null => {
+    const regexes = [
+      /(x-pack\/platform\/plugins\/(?:private|shared|[^\/]+)\/([^\/]+))\/ui_tests\//,
+      /(x-pack\/solutions\/[^\/]+\/plugins\/([^\/]+))\/ui_tests\//,
+      /(src\/platform\/plugins\/(?:private|shared)?\/?([^\/]+))\/ui_tests\//,
+    ];
 
-    if (pluginPath && pluginName) {
-      // Find the matching type or default to "unknown"
-      const group =
-        Object.entries(typeMappings).find(([key]) => filePath.includes(key))?.[1] || 'unknown';
-
-      if (!acc.has(pluginName)) {
-        acc.set(pluginName, { group, pluginPath, configs: [] });
+    for (const regex of regexes) {
+      const match = filePath.match(regex);
+      if (match) {
+        return { pluginPath: match[1], pluginName: match[2] };
       }
+    }
+    return null;
+  };
 
-      acc.get(pluginName)!.configs.push(filePath);
-    } else {
+  const plugins = new Map<string, PluginScoutConfig>();
+
+  files.forEach((filePath) => {
+    const matchResult = matchPluginPath(filePath);
+    if (!matchResult) {
       log.warning(`Unable to extract plugin name from path: ${filePath}`);
+      return;
     }
 
-    return acc;
-  }, new Map<string, PluginScoutConfig>());
+    const { pluginPath, pluginName } = matchResult;
+    const group =
+      Object.entries(typeMappings).find(([key]) => filePath.includes(key))?.[1] || 'unknown';
+
+    if (!plugins.has(pluginName)) {
+      plugins.set(pluginName, { group, pluginPath, configs: [] });
+    }
+
+    const pluginData = plugins.get(pluginName)!;
+    if (!pluginData.configs.includes(filePath)) {
+      pluginData.configs.push(filePath);
+    }
+  });
 
   return plugins;
 };
