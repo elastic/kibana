@@ -33,7 +33,7 @@ export const modelsListRouteFactory = (navigateToApp: NavigateToApp): MlRoute =>
     getStackManagementBreadcrumb(navigateToApp),
     {
       text: i18n.translate('xpack.ml.trainedModelsBreadcrumbs.trainedModelsLabel', {
-        defaultMessage: 'Machine Learning Trained Models',
+        defaultMessage: 'Trained Models',
       }),
     },
   ],

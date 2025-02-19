@@ -40,6 +40,7 @@ export class MlManagementLocatorInternal {
 
   private getPath = (params: MlLocatorParams) => {
     let path: string = '';
+    if (!params?.page) return path;
     if (!this.validPaths.has(params.page)) {
       throw new Error('Page type is not provided or unknown');
     }
@@ -83,11 +84,14 @@ export class MlManagementLocatorInternal {
     return path;
   };
 
-  public readonly getUrl = async (params: MlLocatorParams, appId: string = 'anomaly_detection') => {
-    const path = this.getPath(params);
+  public readonly getUrl = async (
+    params: MlLocatorParams | undefined,
+    appId: string = 'anomaly_detection'
+  ) => {
+    const path = params ? this.getPath(params) : '';
     const url = await this._locator?.getUrl({
       sectionId: this._sectionId,
-      appId: `${appId}/${path}`,
+      appId: `${appId}${path ? '/' + path : ''}`,
     });
     return { path, url };
   };

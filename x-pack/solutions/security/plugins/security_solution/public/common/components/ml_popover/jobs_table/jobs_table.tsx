@@ -185,7 +185,7 @@ export const NoItemsMessage = React.memo(() => {
     services: { ml },
   } = useKibana();
 
-  const createNewAnomalyDetectionJoUrl = useMlManagementHref(ml, {
+  const createNewAnomalyDetectionJobUrl = useMlManagementHref(ml, {
     page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
   });
 
@@ -195,7 +195,7 @@ export const NoItemsMessage = React.memo(() => {
       titleSize="xs"
       actions={
         <EuiButton
-          href={createNewAnomalyDetectionJoUrl}
+          href={createNewAnomalyDetectionJobUrl}
           iconType="popout"
           iconSide="right"
           size="s"
