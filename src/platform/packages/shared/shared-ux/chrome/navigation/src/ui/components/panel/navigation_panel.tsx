@@ -57,9 +57,11 @@ export const NavigationPanel: FC = () => {
       let doClose = true;
 
       if (target) {
-        // Only close if we are not clicking on the currently selected nav node
+        // Only close if we are not clicking on the currently selected nav node or its child or grandchild
         const testSubj =
-          getTargetTestSubj(target) ?? getTargetTestSubj((target as HTMLElement).parentNode);
+          getTargetTestSubj(target) ??
+          getTargetTestSubj((target as HTMLElement).parentNode ?? null) ??
+          getTargetTestSubj((target as HTMLElement).parentNode?.parentNode ?? null);
 
         if (
           testSubj?.includes(`nav-item-${selectedNode?.path}`) ||
