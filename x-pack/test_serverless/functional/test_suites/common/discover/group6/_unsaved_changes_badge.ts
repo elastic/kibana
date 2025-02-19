@@ -50,11 +50,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update(defaultSettings);
       await PageObjects.common.navigateToApp('discover');
-      await dataViews.createFromSearchBar({
-        name: 'lo', // Must be anything but log/logs
-        adHoc: true,
-        hasTimeField: true,
-      });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
     });
@@ -71,6 +66,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should show the badge only after changes to a persisted saved search', async () => {
+      await dataViews.createFromSearchBar({
+        name: 'lo', // Must be anything but log/logs
+        adHoc: true,
+        hasTimeField: true,
+      });
       await PageObjects.discover.saveSearch(SAVED_SEARCH_NAME);
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
