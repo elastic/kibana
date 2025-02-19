@@ -5054,7 +5054,14 @@ paths:
               properties:
                 records:
                   items:
-                    $ref: '#/components/schemas/Security_Entity_Analytics_API_CreateAssetCriticalityRecord'
+                    allOf:
+                      - $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityRecordIdParts'
+                      - type: object
+                        properties:
+                          criticality_level:
+                            $ref: '#/components/schemas/Security_Entity_Analytics_API_AssetCriticalityLevelsForBulkUpload'
+                        required:
+                          - criticality_level
                   maxItems: 1000
                   minItems: 1
                   type: array
@@ -12826,6 +12833,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -12834,6 +12842,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get agent binary download sources
       tags:
         - Elastic Agent binary download sources
@@ -12913,6 +12922,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -12921,6 +12931,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Create an agent binary download source
       tags:
         - Elastic Agent binary download sources
@@ -12962,6 +12973,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -12970,6 +12982,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Delete an agent binary download source
       tags:
         - Elastic Agent binary download sources
@@ -13023,6 +13036,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -13031,6 +13045,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get an agent binary download source
       tags:
         - Elastic Agent binary download sources
@@ -13115,6 +13130,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -13123,6 +13139,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Update an agent binary download source
       tags:
         - Elastic Agent binary download sources
@@ -13384,6 +13401,12 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  additional_datastreams_permissions:
+                                    description: Additional datastream permissions, that will be added to the agent policy.
+                                    items:
+                                      type: string
+                                    nullable: true
+                                    type: array
                                   agents:
                                     type: number
                                   created_at:
@@ -13833,6 +13856,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -13841,6 +13865,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get agent policies
       tags:
         - Elastic Agent policies
@@ -14258,6 +14283,12 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                additional_datastreams_permissions:
+                                  description: Additional datastream permissions, that will be added to the agent policy.
+                                  items:
+                                    type: string
+                                  nullable: true
+                                  type: array
                                 agents:
                                   type: number
                                 created_at:
@@ -14697,6 +14728,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -14705,6 +14737,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Create an agent policy
       tags:
         - Elastic Agent policies
@@ -14940,6 +14973,12 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  additional_datastreams_permissions:
+                                    description: Additional datastream permissions, that will be added to the agent policy.
+                                    items:
+                                      type: string
+                                    nullable: true
+                                    type: array
                                   agents:
                                     type: number
                                   created_at:
@@ -15380,6 +15419,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -15388,6 +15428,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Bulk get agent policies
       tags:
         - Elastic Agent policies
@@ -15601,6 +15642,12 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                additional_datastreams_permissions:
+                                  description: Additional datastream permissions, that will be added to the agent policy.
+                                  items:
+                                    type: string
+                                  nullable: true
+                                  type: array
                                 agents:
                                   type: number
                                 created_at:
@@ -16040,6 +16087,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -16048,6 +16096,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get an agent policy
       tags:
         - Elastic Agent policies
@@ -16134,6 +16183,8 @@ paths:
                               type: string
                             memory:
                               type: string
+                bumpRevision:
+                  type: boolean
                 data_output_id:
                   nullable: true
                   type: string
@@ -16473,6 +16524,12 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                additional_datastreams_permissions:
+                                  description: Additional datastream permissions, that will be added to the agent policy.
+                                  items:
+                                    type: string
+                                  nullable: true
+                                  type: array
                                 agents:
                                   type: number
                                 created_at:
@@ -16912,6 +16969,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -16920,6 +16978,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Update an agent policy
       tags:
         - Elastic Agent policies
@@ -17154,6 +17213,12 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                additional_datastreams_permissions:
+                                  description: Additional datastream permissions, that will be added to the agent policy.
+                                  items:
+                                    type: string
+                                  nullable: true
+                                  type: array
                                 agents:
                                   type: number
                                 created_at:
@@ -17593,6 +17658,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -17601,6 +17667,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Copy an agent policy
       tags:
         - Elastic Agent policies
@@ -17644,6 +17711,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -17652,6 +17720,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
         '404':
           content:
             application/json:
@@ -17660,6 +17729,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -17668,6 +17738,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Download an agent policy
       tags:
         - Elastic Agent policies
@@ -18011,6 +18082,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -18019,6 +18091,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get a full agent policy
       tags:
         - Elastic Agent policies
@@ -18108,6 +18181,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -18116,6 +18190,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get outputs for an agent policy
       tags:
         - Elastic Agent policies
@@ -18169,6 +18244,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -18177,6 +18253,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Delete an agent policy
       tags:
         - Elastic Agent policies
@@ -18284,6 +18361,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -18292,6 +18370,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get outputs for agent policies
       tags:
         - Elastic Agent policies
@@ -18376,6 +18455,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -18384,6 +18464,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get an agent status summary
       tags:
         - Elastic Agent status
@@ -18452,6 +18533,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -18460,6 +18542,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get incoming agent data
       tags:
         - Elastic Agents
@@ -18837,6 +18920,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -18845,6 +18929,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get agents
       tags:
         - Elastic Agents
@@ -18895,6 +18980,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -18903,6 +18989,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get agents by action ids
       tags:
         - Elastic Agents
@@ -18946,6 +19033,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -18954,6 +19042,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Delete an agent
       tags:
         - Elastic Agents
@@ -19272,6 +19361,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -19280,6 +19370,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get an agent
       tags:
         - Elastic Agents
@@ -19613,6 +19704,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -19621,6 +19713,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Update an agent
       tags:
         - Elastic Agents
@@ -19750,6 +19843,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -19758,6 +19852,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Create an agent action
       tags:
         - Elastic Agent actions
@@ -19806,6 +19901,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -19814,6 +19910,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Reassign an agent
       tags:
         - Elastic Agent actions
@@ -19869,6 +19966,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -19877,6 +19975,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Request agent diagnostics
       tags:
         - Elastic Agent actions
@@ -19965,6 +20064,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -19973,6 +20073,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Upgrade an agent
       tags:
         - Elastic Agent actions
@@ -20039,6 +20140,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -20047,6 +20149,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get agent uploads
       tags:
         - Elastic Agents
@@ -20198,6 +20301,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -20206,6 +20310,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get an agent action status
       tags:
         - Elastic Agent actions
@@ -20285,6 +20390,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -20293,6 +20399,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Cancel an agent action
       tags:
         - Elastic Agent actions
@@ -20324,6 +20431,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -20332,6 +20440,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get available agent versions
       tags:
         - Elastic Agents
@@ -20391,6 +20500,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -20399,6 +20509,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Bulk reassign agents
       tags:
         - Elastic Agent actions
@@ -20458,6 +20569,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -20466,6 +20578,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Bulk request diagnostics from agents
       tags:
         - Elastic Agent actions
@@ -20530,6 +20643,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -20538,6 +20652,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Bulk unenroll agents
       tags:
         - Elastic Agent actions
@@ -20602,6 +20717,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -20610,6 +20726,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Bulk update agent tags
       tags:
         - Elastic Agent actions
@@ -20680,6 +20797,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -20688,6 +20806,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Bulk upgrade agents
       tags:
         - Elastic Agent actions
@@ -20732,6 +20851,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -20740,6 +20860,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Delete an uploaded file
       tags:
         - Elastic Agents
@@ -20773,6 +20894,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -20781,6 +20903,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get an uploaded file
       tags:
         - Elastic Agents
@@ -20835,6 +20958,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -20843,6 +20967,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get agent setup info
       tags:
         - Elastic Agents
@@ -20893,6 +21018,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -20901,6 +21027,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Initiate agent setup
       tags:
         - Elastic Agents
@@ -20943,6 +21070,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -20951,6 +21079,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get agent tags
       tags:
         - Elastic Agents
@@ -20990,6 +21119,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -20998,6 +21128,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Check permissions
       tags:
         - Fleet internals
@@ -21088,6 +21219,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -21096,6 +21228,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get data streams
       tags:
         - Data streams
@@ -21213,6 +21346,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -21221,6 +21355,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get enrollment API keys
       tags:
         - Fleet enrollment API keys
@@ -21303,6 +21438,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -21311,6 +21447,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Create an enrollment API key
       tags:
         - Fleet enrollment API keys
@@ -21354,6 +21491,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -21362,6 +21500,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Revoke an enrollment API key
       tags:
         - Fleet enrollment API keys
@@ -21422,6 +21561,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -21430,6 +21570,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get an enrollment API key
       tags:
         - Fleet enrollment API keys
@@ -21514,6 +21655,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -21522,6 +21664,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Bulk get assets
       tags:
         - Elastic Package Manager (EPM)
@@ -21579,6 +21722,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -21587,6 +21731,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get package categories
       tags:
         - Elastic Package Manager (EPM)
@@ -21715,6 +21860,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -21723,6 +21869,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Create a custom integration
       tags:
         - Elastic Package Manager (EPM)
@@ -21791,6 +21938,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -21799,6 +21947,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get data streams
       tags:
         - Data streams
@@ -22185,6 +22334,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -22193,6 +22343,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get packages
       tags:
         - Elastic Package Manager (EPM)
@@ -22305,6 +22456,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -22313,6 +22465,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Install a package by upload
       tags:
         - Elastic Package Manager (EPM)
@@ -22481,6 +22634,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -22489,6 +22643,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Bulk install packages
       tags:
         - Elastic Package Manager (EPM)
@@ -22590,6 +22745,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -22598,6 +22754,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Delete a package
       tags:
         - Elastic Package Manager (EPM)
@@ -23062,6 +23219,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -23070,6 +23228,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get a package
       tags:
         - Elastic Package Manager (EPM)
@@ -23205,6 +23364,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -23213,6 +23373,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Install a package from the registry
       tags:
         - Elastic Package Manager (EPM)
@@ -23667,6 +23828,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -23675,6 +23837,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Update package settings
       tags:
         - Elastic Package Manager (EPM)
@@ -23712,6 +23875,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -23720,6 +23884,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get a package file
       tags:
         - Elastic Package Manager (EPM)
@@ -23797,6 +23962,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -23805,6 +23971,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Authorize transforms
       tags:
         - Elastic Package Manager (EPM)
@@ -23845,6 +24012,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -23853,6 +24021,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get package stats
       tags:
         - Elastic Package Manager (EPM)
@@ -23992,6 +24161,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -24000,6 +24170,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get installed packages
       tags:
         - Elastic Package Manager (EPM)
@@ -24031,6 +24202,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -24039,6 +24211,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get a limited package list
       tags:
         - Elastic Package Manager (EPM)
@@ -24132,6 +24305,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -24140,6 +24314,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get an inputs template
       tags:
         - Elastic Package Manager (EPM)
@@ -24170,6 +24345,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -24178,6 +24354,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get a package signature verification key ID
       tags:
         - Elastic Package Manager (EPM)
@@ -24244,6 +24421,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -24252,6 +24430,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get Fleet Server hosts
       tags:
         - Fleet Server hosts
@@ -24343,6 +24522,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -24351,6 +24531,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Create a Fleet Server host
       tags:
         - Fleet Server hosts
@@ -24392,6 +24573,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -24400,6 +24582,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Delete a Fleet Server host
       tags:
         - Fleet Server hosts
@@ -24459,6 +24642,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -24467,6 +24651,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get a Fleet Server host
       tags:
         - Fleet Server hosts
@@ -24556,6 +24741,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -24564,6 +24750,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Update a Fleet Server host
       tags:
         - Fleet Server hosts
@@ -24615,6 +24802,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -24623,6 +24811,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
         '404':
           content:
             application/json:
@@ -24631,6 +24820,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -24639,6 +24829,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Check Fleet Server health
       tags:
         - Fleet internals
@@ -24683,6 +24874,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -24691,6 +24883,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get a full K8s agent manifest
       tags:
         - Elastic Agent policies
@@ -24729,6 +24922,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -24737,6 +24931,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
         '404':
           content:
             application/json:
@@ -24745,6 +24940,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -24753,6 +24949,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Download an agent manifest
       tags:
         - Elastic Agent policies
@@ -24789,6 +24986,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -24797,6 +24995,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Generate a Logstash API key
       tags:
         - Fleet outputs
@@ -24839,6 +25038,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -24847,6 +25047,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
         '500':
           content:
             application/json:
@@ -24855,6 +25056,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -24863,6 +25065,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Rotate a Fleet message signing key pair
       tags:
         - Message Signing Service
@@ -25600,6 +25803,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -25608,6 +25812,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get outputs
       tags:
         - Fleet outputs
@@ -27042,6 +27247,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -27050,6 +27256,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Create output
       tags:
         - Fleet outputs
@@ -27091,6 +27298,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -27099,6 +27307,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
         '404':
           content:
             application/json:
@@ -27107,6 +27316,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -27115,6 +27325,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Delete output
       tags:
         - Fleet outputs
@@ -27845,6 +28056,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -27853,6 +28065,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get output
       tags:
         - Fleet outputs
@@ -29271,6 +29484,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -29279,6 +29493,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Update output
       tags:
         - Fleet outputs
@@ -29322,6 +29537,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -29330,6 +29546,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get the latest output health
       tags:
         - Fleet outputs
@@ -29397,6 +29614,12 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        additional_datastreams_permissions:
+                          description: Additional datastream permissions, that will be added to the agent policy.
+                          items:
+                            type: string
+                          nullable: true
+                          type: array
                         agents:
                           type: number
                         created_at:
@@ -29788,6 +30011,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -29796,6 +30020,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get package policies
       tags:
         - Fleet package policies
@@ -29826,6 +30051,12 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties:
+                    additional_datastreams_permissions:
+                      description: Additional datastream permissions, that will be added to the agent policy.
+                      items:
+                        type: string
+                      nullable: true
+                      type: array
                     description:
                       description: Package policy description
                       type: string
@@ -30057,6 +30288,12 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties:
+                    additional_datastreams_permissions:
+                      description: Additional datastream permissions, that will be added to the agent policy.
+                      items:
+                        type: string
+                      nullable: true
+                      type: array
                     description:
                       type: string
                     force:
@@ -30233,6 +30470,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      additional_datastreams_permissions:
+                        description: Additional datastream permissions, that will be added to the agent policy.
+                        items:
+                          type: string
+                        nullable: true
+                        type: array
                       agents:
                         type: number
                       created_at:
@@ -30614,6 +30857,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -30622,6 +30866,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
         '409':
           content:
             application/json:
@@ -30630,6 +30875,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -30638,6 +30884,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Create a package policy
       tags:
         - Fleet package policies
@@ -30690,6 +30937,12 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        additional_datastreams_permissions:
+                          description: Additional datastream permissions, that will be added to the agent policy.
+                          items:
+                            type: string
+                          nullable: true
+                          type: array
                         agents:
                           type: number
                         created_at:
@@ -31072,6 +31325,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -31080,6 +31334,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
         '404':
           content:
             application/json:
@@ -31137,6 +31392,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -31145,6 +31401,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Delete a package policy
       tags:
         - Fleet package policies
@@ -31178,6 +31435,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      additional_datastreams_permissions:
+                        description: Additional datastream permissions, that will be added to the agent policy.
+                        items:
+                          type: string
+                        nullable: true
+                        type: array
                       agents:
                         type: number
                       created_at:
@@ -31559,6 +31822,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -31567,6 +31831,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
         '404':
           content:
             application/json:
@@ -31614,6 +31879,12 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties:
+                    additional_datastreams_permissions:
+                      description: Additional datastream permissions, that will be added to the agent policy.
+                      items:
+                        type: string
+                      nullable: true
+                      type: array
                     description:
                       description: Package policy description
                       type: string
@@ -31839,6 +32110,12 @@ paths:
                 - additionalProperties: false
                   type: object
                   properties:
+                    additional_datastreams_permissions:
+                      description: Additional datastream permissions, that will be added to the agent policy.
+                      items:
+                        type: string
+                      nullable: true
+                      type: array
                     description:
                       type: string
                     force:
@@ -32014,6 +32291,12 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      additional_datastreams_permissions:
+                        description: Additional datastream permissions, that will be added to the agent policy.
+                        items:
+                          type: string
+                        nullable: true
+                        type: array
                       agents:
                         type: number
                       created_at:
@@ -32395,6 +32678,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -32403,6 +32687,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
         '403':
           content:
             application/json:
@@ -32411,6 +32696,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -32419,6 +32705,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Update a package policy
       tags:
         - Fleet package policies
@@ -32541,6 +32828,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -32549,6 +32837,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Bulk delete package policies
       tags:
         - Fleet package policies
@@ -32615,6 +32904,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -32623,6 +32913,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Upgrade a package policy
       tags:
         - Fleet package policies
@@ -32774,6 +33065,12 @@ paths:
                           - additionalProperties: false
                             type: object
                             properties:
+                              additional_datastreams_permissions:
+                                description: Additional datastream permissions, that will be added to the agent policy.
+                                items:
+                                  type: string
+                                nullable: true
+                                type: array
                               agents:
                                 type: number
                               created_at:
@@ -33147,6 +33444,12 @@ paths:
                           - additionalProperties: false
                             type: object
                             properties:
+                              additional_datastreams_permissions:
+                                description: Additional datastream permissions, that will be added to the agent policy.
+                                items:
+                                  type: string
+                                nullable: true
+                                type: array
                               description:
                                 description: Package policy description
                                 type: string
@@ -33409,6 +33712,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -33417,6 +33721,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Dry run a package policy upgrade
       tags:
         - Fleet package policies
@@ -33489,6 +33794,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -33497,6 +33803,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get proxies
       tags:
         - Fleet proxies
@@ -33600,6 +33907,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -33608,6 +33916,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Create a proxy
       tags:
         - Fleet proxies
@@ -33649,6 +33958,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -33657,6 +33967,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Delete a proxy
       tags:
         - Fleet proxies
@@ -33722,6 +34033,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -33730,6 +34042,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get a proxy
       tags:
         - Fleet proxies
@@ -33835,6 +34148,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -33843,6 +34157,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Update a proxy
       tags:
         - Fleet proxies
@@ -33893,6 +34208,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -33901,6 +34217,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Create a service token
       tags:
         - Fleet service tokens
@@ -33972,6 +34289,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -33980,6 +34298,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
         '404':
           content:
             application/json:
@@ -34099,6 +34418,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -34107,6 +34427,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
         '404':
           content:
             application/json:
@@ -34169,6 +34490,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -34177,6 +34499,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
         '500':
           content:
             application/json:
@@ -34274,6 +34597,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -34282,6 +34606,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get metadata for latest uninstall tokens
       tags:
         - Fleet uninstall tokens
@@ -34338,6 +34663,7 @@ paths:
                 description: Generic Error
                 type: object
                 properties:
+                  attributes: {}
                   error:
                     type: string
                   message:
@@ -34346,6 +34672,7 @@ paths:
                     type: number
                 required:
                   - message
+                  - attributes
       summary: Get a decrypted uninstall token
       tags:
         - Fleet uninstall tokens
@@ -51597,6 +51924,15 @@ components:
         - high_impact
         - extreme_impact
       type: string
+    Security_Entity_Analytics_API_AssetCriticalityLevelsForBulkUpload:
+      description: The criticality level of the asset for bulk upload. The value `unassigned` is used to indicate that the criticality level is not assigned and is only used for bulk upload.
+      enum:
+        - low_impact
+        - medium_impact
+        - high_impact
+        - extreme_impact
+        - unassigned
+      type: string
     Security_Entity_Analytics_API_AssetCriticalityRecord:
       allOf:
         - $ref: '#/components/schemas/Security_Entity_Analytics_API_CreateAssetCriticalityRecord'
@@ -51929,7 +52265,6 @@ components:
         - user
         - host
         - service
-        - universal
       type: string
     Security_Entity_Analytics_API_HostEntity:
       type: object
@@ -52005,7 +52340,6 @@ components:
         - host.name
         - user.name
         - service.name
-        - related.entity
       type: string
     Security_Entity_Analytics_API_IndexPattern:
       type: string

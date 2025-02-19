@@ -13,5 +13,7 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/node-libs-browser-webpack-plugin",
+  ]
 }
