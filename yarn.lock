@@ -5462,7 +5462,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ecs-data-quality-dashboard@link:x-pack/solutions/security/packages/ecs_data_quality_dashboard":
+"@kbn/ecs-data-quality-dashboard@link:x-pack/solutions/security/packages/ecs-data-quality-dashboard":
   version "0.0.0"
   uid ""
 
@@ -7202,7 +7202,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-side-nav@link:x-pack/solutions/security/packages/side_nav":
+"@kbn/security-solution-side-nav@link:x-pack/solutions/security/packages/side-nav":
   version "0.0.0"
   uid ""
 
@@ -7226,7 +7226,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-data-table@link:x-pack/solutions/security/packages/data_table":
+"@kbn/securitysolution-data-table@link:x-pack/solutions/security/packages/data-table":
   version "0.0.0"
   uid ""
 
