@@ -157,9 +157,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('successfully upserts a GroupStream from _group', async () => {
         const response = await apiClient
-          .fetch('PUT /api/streams/{id}/_group', {
+          .fetch('PUT /api/streams/{name}/_group', {
             params: {
-              path: { id: 'test-group-3' },
+              path: { name: 'test-group-3' },
               body: {
                 group: {
                   members: ['logs.test2'],
@@ -176,9 +176,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('successfully reads a GroupStream from _group', async () => {
         const response = await apiClient
-          .fetch('GET /api/streams/{id}/_group', {
+          .fetch('GET /api/streams/{name}/_group', {
             params: {
-              path: { id: 'test-group-3' },
+              path: { name: 'test-group-3' },
             },
           })
           .expect(200);

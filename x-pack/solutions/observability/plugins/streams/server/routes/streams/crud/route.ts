@@ -166,9 +166,9 @@ export const editStreamRoute = createServerRoute({
 
     if (
       isGroupStreamDefinition({ ...params.body.stream, name: params.path.name }) &&
-      params.path.name.startsWith('logs')
+      params.path.name.startsWith('logs.')
     ) {
-      throw badRequest('A group stream name can not start with logs.');
+      throw badRequest('A group stream name can not start with [logs.]');
     }
 
     const body = isGroupStreamDefinitionBase(params.body.stream)

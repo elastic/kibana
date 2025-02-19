@@ -16,7 +16,7 @@ import {
 import { createServerRoute } from '../../create_server_route';
 
 const readGroupRoute = createServerRoute({
-  endpoint: 'GET /api/streams/{id}/_group',
+  endpoint: 'GET /api/streams/{name}/_group',
   options: {
     access: 'internal',
   },
@@ -28,14 +28,14 @@ const readGroupRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ id: z.string() }),
+    path: z.object({ name: z.string() }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<GroupObjectGetResponse> => {
     const { streamsClient } = await getScopedClients({
       request,
     });
 
-    const name = params.path.id;
+    const { name } = params.path;
 
     const definition = await streamsClient.getStream(name);
 
@@ -48,7 +48,7 @@ const readGroupRoute = createServerRoute({
 });
 
 const upsertGroupRoute = createServerRoute({
-  endpoint: 'PUT /api/streams/{id}/_group',
+  endpoint: 'PUT /api/streams/{name}/_group',
   options: {
     access: 'internal',
   },
@@ -61,7 +61,7 @@ const upsertGroupRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      id: z.string(),
+      name: z.string(),
     }),
     body: groupObjectUpsertRequestSchema,
   }),
@@ -70,7 +70,11 @@ const upsertGroupRoute = createServerRoute({
       request,
     });
 
-    const name = params.path.id;
+    const { name } = params.path;
+
+    if (name.startsWith('logs.')) {
+      throw badRequest('A group stream name can not start with [logs.]');
+    }
 
     const assets = await assetClient.getAssets({
       entityId: name,
@@ -90,7 +94,7 @@ const upsertGroupRoute = createServerRoute({
 
     return await streamsClient.upsertStream({
       request: upsertRequest,
-      name: params.path.id,
+      name,
     });
   },
 });
