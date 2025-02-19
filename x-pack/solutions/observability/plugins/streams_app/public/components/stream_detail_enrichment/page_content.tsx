@@ -18,12 +18,13 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { IngestStreamGetResponse, isRootStreamDefinition } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
-import { UseDefinitionReturn } from './hooks/use_definition';
+import { UseDefinitionReturn, useDefinition } from './hooks/use_definition';
 import { useKibana } from '../../hooks/use_kibana';
+import { RootStreamEmptyPrompt } from './root_stream_empty_prompt';
 import { DraggableProcessorListItem } from './processors_list';
 import { SortableList } from './sortable_list';
 import { ManagementBottomBar } from '../management_bottom_bar';
@@ -33,12 +34,6 @@ import {
   UseProcessingSimulatorReturn,
   useProcessingSimulator,
 } from './hooks/use_processing_simulator';
-import {
-  StreamEnrichmentContextProvider,
-  StreamsEnrichmentEvents,
-  useStreamsEnrichmentEvents,
-  useStreamsEnrichmentSelector,
-} from './services/stream_enrichment_service';
 import { SimulatorContextProvider } from './simulator_context';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
@@ -48,51 +43,23 @@ interface StreamDetailEnrichmentContentProps {
   refreshDefinition: () => void;
 }
 
-export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentContentProps) {
-  const { core, dependencies } = useKibana();
-  const { toasts } = core.notifications;
-  const { streamsRepositoryClient } = dependencies.start.streams;
-
-  return (
-    <StreamEnrichmentContextProvider
-      definition={props.definition}
-      refreshDefinition={props.refreshDefinition}
-      streamsRepositoryClient={streamsRepositoryClient}
-      toasts={toasts}
-    >
-      <StreamDetailEnrichmentContentImpl />
-    </StreamEnrichmentContextProvider>
-  );
-}
-
-export function StreamDetailEnrichmentContentImpl() {
+export function StreamDetailEnrichmentContent({
+  definition,
+  refreshDefinition,
+}: StreamDetailEnrichmentContentProps) {
   const { appParams, core } = useKibana();
 
-  // const {
-  //   // processors,
-  //   addProcessor,
-  //   updateProcessor,
-  //   deleteProcessor,
-  //   // resetChanges,
-  //   // saveChanges,
-  //   reorderProcessors,
-  //   // hasChanges,
-  //   // isSavingChanges,
-  // } = useDefinition(definition, refreshDefinition);
-
   const {
+    processors,
     addProcessor,
     updateProcessor,
     deleteProcessor,
-    reorderProcessors,
     resetChanges,
     saveChanges,
-  } = useStreamsEnrichmentEvents();
-
-  const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
-  const processors = useStreamsEnrichmentSelector((state) => state.context.processors);
-  const hasChanges = useStreamsEnrichmentSelector((state) => state.context.hasStagedChanges);
-  const isSavingChanges = useStreamsEnrichmentSelector((state) => state.matches('updatingStream'));
+    reorderProcessors,
+    hasChanges,
+    isSavingChanges,
+  } = useDefinition(definition, refreshDefinition);
 
   const processingSimulator = useProcessingSimulator({ definition, processors });
 
@@ -115,6 +82,10 @@ export function StreamDetailEnrichmentContentImpl() {
     navigateToUrl: core.application.navigateToUrl,
     openConfirm: core.overlays.openConfirm,
   });
+
+  if (isRootStreamDefinition(definition.stream)) {
+    return <RootStreamEmptyPrompt />;
+  }
 
   const isNonAdditiveSimulation = simulation && simulation.is_non_additive_simulation;
   const isSubmitDisabled = Boolean(!hasChanges || isNonAdditiveSimulation);
@@ -206,10 +177,10 @@ export function StreamDetailEnrichmentContentImpl() {
 interface ProcessorsEditorProps {
   definition: IngestStreamGetResponse;
   processors: UseDefinitionReturn['processors'];
-  onAddProcessor: StreamsEnrichmentEvents['addProcessor'];
-  onDeleteProcessor: StreamsEnrichmentEvents['deleteProcessor'];
-  onReorderProcessor: StreamsEnrichmentEvents['reorderProcessors'];
-  onUpdateProcessor: StreamsEnrichmentEvents['updateProcessor'];
+  onAddProcessor: UseDefinitionReturn['addProcessor'];
+  onDeleteProcessor: UseDefinitionReturn['deleteProcessor'];
+  onReorderProcessor: UseDefinitionReturn['reorderProcessors'];
+  onUpdateProcessor: UseDefinitionReturn['updateProcessor'];
   onWatchProcessor: UseProcessingSimulatorReturn['watchProcessor'];
   simulation: UseProcessingSimulatorReturn['simulation'];
 }
@@ -230,7 +201,7 @@ const ProcessorsEditor = React.memo(
     const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
       if (source && destination) {
         const items = euiDragDropReorder(processors, source.index, destination.index);
-        onReorderProcessor({ processors: items });
+        onReorderProcessor(items);
       }
     };
 

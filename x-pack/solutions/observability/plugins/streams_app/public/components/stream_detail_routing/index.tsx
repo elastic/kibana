@@ -122,7 +122,7 @@ export function StreamDetailRouting({
                   />
                 </EuiResizablePanel>
 
-                <EuiResizableButton />
+                <EuiResizableButton accountForScrollbars="both" />
 
                 <EuiResizablePanel
                   initialSize={70}

@@ -38,9 +38,9 @@ import {
   isDissectProcessor,
 } from '../utils';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
-import { StreamsEnrichmentEvents } from '../services/stream_enrichment_service';
 import { ProcessorMetrics, UseProcessingSimulatorReturn } from '../hooks/use_processing_simulator';
 import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
+import { UseDefinitionReturn } from '../hooks/use_definition';
 
 export interface ProcessorPanelProps {
   definition: IngestStreamGetResponse;
@@ -50,13 +50,13 @@ export interface ProcessorPanelProps {
 
 export interface AddProcessorPanelProps extends ProcessorPanelProps {
   isInitiallyOpen?: boolean;
-  onAddProcessor: StreamsEnrichmentEvents['addProcessor'];
+  onAddProcessor: UseDefinitionReturn['addProcessor'];
 }
 
 export interface EditProcessorPanelProps extends ProcessorPanelProps {
   processor: ProcessorDefinitionWithUIAttributes;
-  onDeleteProcessor: StreamsEnrichmentEvents['deleteProcessor'];
-  onUpdateProcessor: StreamsEnrichmentEvents['updateProcessor'];
+  onDeleteProcessor: UseDefinitionReturn['deleteProcessor'];
+  onUpdateProcessor: UseDefinitionReturn['updateProcessor'];
 }
 
 export function AddProcessorPanel({
@@ -89,9 +89,9 @@ export function AddProcessorPanel({
   const handleSubmit: SubmitHandler<ProcessorFormState> = async (data) => {
     const processingDefinition = convertFormStateToProcessor(data);
 
-    closePanel();
     onWatchProcessor({ id: 'draft', deleteIfExists: true });
-    onAddProcessor({ processor: processingDefinition });
+    onAddProcessor(processingDefinition, data.detected_fields);
+    closePanel();
   };
 
   const handleCancel = () => {
@@ -241,22 +241,18 @@ export function EditProcessorPanel({
   const handleSubmit: SubmitHandler<ProcessorFormState> = (data) => {
     const processorDefinition = convertFormStateToProcessor(data);
 
-    onUpdateProcessor({
-      id: processor.id,
-      processorUpdate: processorDefinition,
-      status: isDraft ? 'draft' : 'updated',
-    });
+    onUpdateProcessor(processor.id, processorDefinition, isDraft ? 'draft' : 'updated');
     closePanel();
   };
 
   const handleProcessorDelete = () => {
+    onDeleteProcessor(processor.id);
     closePanel();
-    onDeleteProcessor({ id: processor.id });
   };
 
   const handleCancel = () => {
-    closePanel();
     methods.reset();
+    closePanel();
   };
 
   const confirmDiscardAndClose = useDiscardConfirm(handleCancel);
