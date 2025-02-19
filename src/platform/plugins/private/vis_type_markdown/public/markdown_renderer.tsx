@@ -8,7 +8,7 @@
  */
 
 import React, { lazy } from 'react';
-import { createRoot } from 'react-dom/client';
+import { unmountComponentAtNode, render } from '@kbn/react-dom';
 
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
@@ -34,18 +34,18 @@ export const getMarkdownVisRenderer: ({
   reuseDomNode: true,
   render: async (domNode, { visParams }, handlers) => {
     const [core] = await getStartDeps();
-    const root = createRoot(domNode);
 
     handlers.onDestroy(() => {
-      root.unmount();
+      unmountComponentAtNode(domNode);
     });
 
-    root.render(
+    render(
       <KibanaRenderContextProvider {...core}>
         <VisualizationContainer className="markdownVis" handlers={handlers}>
           <MarkdownVisComponent {...visParams} renderComplete={handlers.done} />
         </VisualizationContainer>
-      </KibanaRenderContextProvider>
+      </KibanaRenderContextProvider>,
+      domNode
     );
   },
 });

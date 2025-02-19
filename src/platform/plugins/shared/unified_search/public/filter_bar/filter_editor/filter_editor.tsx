@@ -41,7 +41,6 @@ import {
 } from '@kbn/es-query';
 import { merge } from 'lodash';
 import React, { Component } from 'react';
-import { flushSync } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -620,11 +619,6 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
 
     this.props.onLocalFilterUpdate?.(newFilter);
     this.setState({ localFilter: newFilter });
-
-    // if there is an immediate onSubmit, this makes sure the filter will be submitted with the new state
-    flushSync(() => {
-      this.setState({ localFilter: newFilter });
-    });
   };
 
   private onSubmit = () => {

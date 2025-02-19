@@ -6737,6 +6737,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/react-dom@link:src/platform/packages/shared/kbn-react-dom":
+  version "0.0.0"
+  uid ""
+
 "@kbn/react-field@link:src/platform/packages/shared/kbn-react-field":
   version "0.0.0"
   uid ""
