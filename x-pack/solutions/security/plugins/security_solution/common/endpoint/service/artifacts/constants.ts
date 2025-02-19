@@ -15,6 +15,9 @@ export const GLOBAL_ARTIFACT_TAG = `${BY_POLICY_ARTIFACT_TAG_PREFIX}all`;
 
 export const FILTER_PROCESS_DESCENDANTS_TAG = 'filter_process_descendants';
 
+/** The tag prefix that tracks the space(s) that is considered the "owner" of the artifact.  */
+export const OWNER_SPACE_ID_TAG_PREFIX = 'ownerSpaceId:';
+
 export const PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY: EntryMatch = Object.freeze({
   field: 'event.category',
   operator: 'included',
