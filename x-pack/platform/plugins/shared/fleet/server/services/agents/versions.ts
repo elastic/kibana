@@ -16,6 +16,7 @@ import semverGt from 'semver/functions/gt';
 import semverRcompare from 'semver/functions/rcompare';
 import semverLt from 'semver/functions/lt';
 import semverCoerce from 'semver/functions/coerce';
+import semverParse from 'semver/functions/parse';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 
@@ -110,18 +111,22 @@ export const getAvailableVersions = async ({
   // fetch from the live API more than `TIME_BETWEEN_FETCHES` milliseconds.
   const apiVersions = await fetchAgentVersionsFromApi();
 
-  const allowedSuffixes = ['-rc', '-beta', '-alpha', '+build'];
-
   // Take each version and compare to our `MINIMUM_SUPPORTED_VERSION` - we
   // only want support versions in the final result. We'll also sort by newest version first.
   availableVersions = uniq(
     [...availableVersions, ...apiVersions]
-      .map((item: any) =>
-        allowedSuffixes.some((suffix) => item.includes(suffix))
-          ? item
-          : semverCoerce(item)?.version || ''
-      )
-      .filter((v: any) => semverGte(v, MINIMUM_SUPPORTED_VERSION))
+      .filter((v: any) => {
+        const parsedVersion = semverParse(v);
+        if (
+          parsedVersion?.prerelease?.length &&
+          !parsedVersion.prerelease.some(
+            (prerelease) => typeof prerelease === 'string' && prerelease.includes('+build')
+          )
+        ) {
+          return false;
+        }
+        return semverGte(v, MINIMUM_SUPPORTED_VERSION);
+      })
       .sort((a: any, b: any) => (semverGt(a, b) ? -1 : 1))
   );
 
