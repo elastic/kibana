@@ -703,13 +703,17 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    */
   public updateKnowledgeBaseEntry = async ({
     auditLogger,
+    id,
     knowledgeBaseEntry,
+    telemetry,
   }: {
     auditLogger?: AuditLogger;
+    id: string;
     knowledgeBaseEntry: KnowledgeBaseEntryUpdateProps;
+    telemetry: AnalyticsServiceSetup
   }): Promise<{
     errors: BulkOperationError[];
-    updatedEntry: KnowledgeBaseEntryResponse;
+    updatedEntry: KnowledgeBaseEntryResponse | null | undefined;
   }> => {
     const authenticatedUser = this.options.currentUser;
 
@@ -719,7 +723,34 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       );
     }
 
-    await validateDocumentsModification(this, authenticatedUser, [knowledgeBaseEntry.id], 'update');
+    await validateDocumentsModification(this, authenticatedUser, [id], 'update');
+
+    const userFilter = getKBUserFilter(authenticatedUser);
+    const entries = await this.findDocuments<EsKnowledgeBaseEntrySchema>({
+      page: 1,
+      perPage: 1,
+      filter: `_id:"${id}" AND ${userFilter}`,
+    });
+
+    const existingEntry = transformESSearchToKnowledgeBaseEntry(entries.data)?.[0];
+
+    if (existingEntry?.users?.length === 0 && knowledgeBaseEntry?.users?.length) {
+      let response;
+      let errors;
+      try {
+
+        response = await this.createKnowledgeBaseEntry({
+         auditLogger,
+         knowledgeBaseEntry,
+         global: false,
+         telemetry
+       });
+      } catch (e) {
+        errors = e;
+      }
+
+      return { errors, updatedEntry: response };
+    }
 
     this.options.logger.debug(
       () => `Updating Knowledge Base Entry:\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`

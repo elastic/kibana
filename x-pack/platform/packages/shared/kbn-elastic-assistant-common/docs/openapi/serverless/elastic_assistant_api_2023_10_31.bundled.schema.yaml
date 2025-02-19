@@ -1393,8 +1393,6 @@ components:
               items:
                 $ref: '#/components/schemas/User'
               type: array
-          required:
-            - id
         - $ref: '#/components/schemas/DocumentEntryCreateFields'
     EsqlContentReference:
       allOf:
@@ -1565,8 +1563,6 @@ components:
               items:
                 $ref: '#/components/schemas/User'
               type: array
-          required:
-            - id
         - $ref: '#/components/schemas/IndexEntryCreateFields'
     InputSchema:
       description: >-

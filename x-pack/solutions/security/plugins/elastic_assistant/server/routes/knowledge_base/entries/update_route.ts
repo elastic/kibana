@@ -63,8 +63,10 @@ export const updateKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
 
           const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
           const updateResponse = await kbDataClient?.updateKnowledgeBaseEntry({
-            knowledgeBaseEntry: { ...request.body, id: request.params.id },
+            id: request.params.id,
+            knowledgeBaseEntry: request.body,
             auditLogger: ctx.elasticAssistant.auditLogger,
+            telemetry: ctx.elasticAssistant.telemetry,
           });
 
           if (updateResponse?.updatedEntry) {
@@ -74,7 +76,7 @@ export const updateKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
           }
 
           return assistantResponse.error({
-            body: updateResponse?.errors?.[0].message ?? `Knowledge Base Entry was not created`,
+            body: updateResponse?.errors?.[0].message ?? `Knowledge Base Entry was not updated`,
             statusCode: 400,
           });
         } catch (err) {
