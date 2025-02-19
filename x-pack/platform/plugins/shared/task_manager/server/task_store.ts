@@ -34,7 +34,7 @@ import {
 } from '@kbn/core/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
-import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 
 import { decodeRequestVersion, encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { nodeBuilder } from '@kbn/es-query';

@@ -23,10 +23,7 @@ import {
   CoreStatus,
 } from '@kbn/core/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
-import type {
-  EncryptedSavedObjectsPluginStart,
-  EncryptedSavedObjectsPluginSetup,
-} from '@kbn/encrypted-saved-objects-plugin/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
@@ -69,7 +66,7 @@ export interface TaskManagerSetupContract {
    * @param taskDefinitions - The Kibana task definitions dictionary
    */
   registerTaskDefinitions: (taskDefinitions: TaskDefinitionRegistry) => void;
-  registerEncryptedSavedObjects: (plugin: EncryptedSavedObjectsPluginSetup) => void;
+  registerCanEncryptedSavedObjects: (canEncrypt: boolean) => void;
 }
 
 export type TaskManagerStartContract = Pick<
@@ -87,7 +84,7 @@ export type TaskManagerStartContract = Pick<
     removeIfExists: TaskStore['remove'];
   } & {
     getRegisteredTypes: () => string[];
-    registerEncryptedSavedObjectsPlugin: (plugin: EncryptedSavedObjectsPluginStart) => void;
+    registerEncryptedSavedObjectsClient: (client: EncryptedSavedObjectsClient) => void;
   };
 
 export interface TaskManagerPluginsStart {
@@ -275,14 +272,8 @@ export class TaskManagerPlugin
       registerTaskDefinitions: (taskDefinition: TaskDefinitionRegistry) => {
         this.definitions.registerTaskDefinitions(taskDefinition);
       },
-      registerEncryptedSavedObjects: (plugin) => {
-        plugin.registerType({
-          type: TASK_SO_NAME,
-          attributesToEncrypt: new Set(['userScope.apiKey']),
-          attributesToIncludeInAAD: new Set(['id', 'taskType']),
-          enforceRandomId: false,
-        });
-        this.canEncryptSavedObjects = plugin.canEncrypt;
+      registerCanEncryptedSavedObjects: (canEncrypt: boolean) => {
+        this.canEncryptSavedObjects = canEncrypt;
       },
     };
   }
@@ -432,12 +423,8 @@ export class TaskManagerPlugin
       bulkUpdateSchedules: (...args) => taskScheduling.bulkUpdateSchedules(...args),
       getRegisteredTypes: () => this.definitions.getAllTypes(),
       bulkUpdateState: (...args) => taskScheduling.bulkUpdateState(...args),
-      registerEncryptedSavedObjectsPlugin: (plugin) => {
-        taskStore.registerEncryptedSavedObjectsClient(
-          plugin.getClient({
-            includedHiddenTypes: [TASK_SO_NAME],
-          })
-        );
+      registerEncryptedSavedObjectsClient: (client: EncryptedSavedObjectsClient) => {
+        taskStore.registerEncryptedSavedObjectsClient(client);
       },
     };
   }

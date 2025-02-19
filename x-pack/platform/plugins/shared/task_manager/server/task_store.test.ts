@@ -24,7 +24,7 @@ import {
   httpServerMock,
   savedObjectsServiceMock,
 } from '@kbn/core/server/mocks';
-import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { TaskStore, SearchOpts, AggregationOpts, taskInstanceToAttributes } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { SavedObjectAttributes, SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -36,6 +36,7 @@ import { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
 import { MsearchError } from './lib/msearch_error';
 import { getUserScope } from './lib/api_key_utils';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
+import type { EncryptedSavedObjectsClient, EncryptedSavedObjectsClientOptions } from '@kbn/encrypted-saved-objects-shared';
 
 const mockGetValidatedTaskInstanceFromReading = jest.fn();
 const mockGetValidatedTaskInstanceForUpdating = jest.fn();
@@ -54,9 +55,18 @@ jest.mock('./lib/api_key_utils', () => ({
   getUserScope: jest.fn(),
 }));
 
+function createEncryptedSavedObjectsClientMock(opts?: EncryptedSavedObjectsClientOptions) {
+  return {
+    getDecryptedAsInternalUser: jest.fn(),
+    createPointInTimeFinderDecryptedAsInternalUser: jest.fn((findOptions, deps) =>
+      savedObjectsClientMock.create().createPointInTimeFinder(findOptions, deps)
+    ),
+  } as unknown as jest.Mocked<EncryptedSavedObjectsClient>;
+}
+
 const savedObjectsClient = savedObjectsRepositoryMock.create();
 const scopedSavedObjectsClient = savedObjectsRepositoryMock.create();
-const esoClient = encryptedSavedObjectsMock.createClient();
+const esoClient = createEncryptedSavedObjectsClientMock();
 
 const serializer = savedObjectsServiceMock.createSerializer();
 const adHocTaskCounter = new AdHocTaskCounter();

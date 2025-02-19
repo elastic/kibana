@@ -7,10 +7,24 @@
 
 import { SecurityServiceStart } from '@kbn/core/server';
 import { KibanaRequest } from '@kbn/core/server';
-import { GrantAPIKeyResult, HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { truncate } from 'lodash';
 import { TaskUserScope } from '../task';
+
+export interface GrantAPIKeyResult {
+  id: string;
+  name: string;
+  api_key: string;
+}
+
+const getCredentialsFromRequest = (request: KibanaRequest) => {
+  const authorizationHeaderValue = request.headers['authorization'];
+  if (!authorizationHeaderValue || typeof authorizationHeaderValue !== 'string') {
+    return null;
+  }
+  const [scheme] = authorizationHeaderValue.split(/\s+/);
+  return authorizationHeaderValue.substring(scheme.length + 1);
+}
 
 export const isRequestApiKeyType = (request: KibanaRequest, security: SecurityServiceStart) => {
   const user = security.authc.getCurrentUser(request);
@@ -18,9 +32,9 @@ export const isRequestApiKeyType = (request: KibanaRequest, security: SecuritySe
 };
 
 export const getApiKeyFromRequest = (request: KibanaRequest, name: string) => {
-  const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
-  if (authorizationHeader?.credentials) {
-    const apiKey = Buffer.from(authorizationHeader.credentials, 'base64').toString().split(':');
+  const credentials = getCredentialsFromRequest(request);
+  if (credentials) {
+    const apiKey = Buffer.from(credentials, 'base64').toString().split(':');
 
     return {
       name,

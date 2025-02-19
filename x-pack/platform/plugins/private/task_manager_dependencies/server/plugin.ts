@@ -27,10 +27,21 @@ export interface TaskManagerDependenciesPluginStart {
 
 export class TaskManagerDependenciesPlugin {
   public setup(core: CoreSetup, plugin: TaskManagerDependenciesPluginSetup) {
-    plugin.taskManager.registerEncryptedSavedObjects(plugin.encryptedSavedObjects);
+    plugin.encryptedSavedObjects.registerType({
+      type: 'task',
+      attributesToEncrypt: new Set(['userScope.apiKey']),
+      attributesToIncludeInAAD: new Set(['id', 'taskType']),
+      enforceRandomId: false,
+    });
+
+    plugin.taskManager.registerCanEncryptedSavedObjects(plugin.encryptedSavedObjects.canEncrypt);
   }
 
   public start(core: CoreStart, plugin: TaskManagerDependenciesPluginStart) {
-    plugin.taskManager.registerEncryptedSavedObjectsPlugin(plugin.encryptedSavedObjects);
+    plugin.taskManager.registerEncryptedSavedObjectsClient(
+      plugin.encryptedSavedObjects.getClient({
+        includedHiddenTypes: ['task'],
+      })
+    );
   }
 }
