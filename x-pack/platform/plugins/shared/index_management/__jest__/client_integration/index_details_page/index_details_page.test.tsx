@@ -533,6 +533,27 @@ describe('<IndexDetailsPage />', () => {
     });
   });
 
+  describe('Semantic Text Banner', () => {
+    beforeEach(async () => {
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            core: {
+              application: { capabilities: { ml: { canGetTrainedModels: true } } },
+            },
+          },
+        });
+      });
+      testBed.component.update();
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+    });
+
+    it('semantic text banner is visible', async () => {
+      expect(testBed.actions.mappings.isSemanticTextBannerVisible()).toBe(true);
+    });
+  });
+
   describe('Mappings tab', () => {
     beforeEach(async () => {
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
