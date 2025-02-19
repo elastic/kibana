@@ -26,8 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/211215
-  describe.skip('extension getCellRenderers', () => {
+  describe('extension getCellRenderers', () => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsViewer();
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -38,8 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('ES|QL mode', () => {
-      // FLAKY: https://github.com/elastic/kibana/issues/211174
-      describe.skip('Log Level Badge Cell', () => {
+      describe('Log Level Badge Cell', () => {
         it('should render log.level badge cell', async () => {
           const state = kbnRison.encode({
             dataSource: { type: 'esql' },
@@ -60,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
           expect(await logLevelBadge.getVisibleText()).to.be('debug');
           expect(await logLevelBadge.getComputedStyle('background-color')).to.be(
-            'rgba(232, 241, 255, 1)'
+            'rgba(189, 215, 255, 1)'
           );
         });
 
@@ -201,7 +199,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
             expect(await logLevelBadge.getVisibleText()).to.be('debug');
             expect(await logLevelBadge.getComputedStyle('background-color')).to.be(
-              'rgba(232, 241, 255, 1)'
+              'rgba(189, 215, 255, 1)'
             );
           });
 
@@ -218,7 +216,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             logLevelBadge = await firstCell.findByTestSubject('*logLevelBadgeCell-');
             expect(await logLevelBadge.getVisibleText()).to.be('debug');
             expect(await logLevelBadge.getComputedStyle('background-color')).to.be(
-              'rgba(232, 241, 255, 1)'
+              'rgba(189, 215, 255, 1)'
             );
           });
         });
