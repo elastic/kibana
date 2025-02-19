@@ -19,7 +19,7 @@ import { ShareMenu } from '../components/share_tabs';
 interface ShareMenuManagerStartDeps {
   core: CoreStart;
   shareRegistry: ShareRegistry;
-  disableEmbed: boolean;
+  isServerless: boolean;
 }
 
 export class ShareMenuManager {
@@ -27,7 +27,7 @@ export class ShareMenuManager {
   private shareRegistry?: ShareRegistry;
   private container = document.createElement('div');
 
-  start({ core, shareRegistry, disableEmbed }: ShareMenuManagerStartDeps) {
+  start({ core, shareRegistry, isServerless }: ShareMenuManagerStartDeps) {
     this.shareRegistry = shareRegistry;
 
     return {
@@ -49,10 +49,10 @@ export class ShareMenuManager {
 
         this.toggleShareContextMenu({
           ...options,
-          allowEmbed: disableEmbed ? false : options.allowEmbed,
+          allowEmbed: isServerless ? false : options.allowEmbed,
           onClose,
           menuItems,
-          publicAPIEnabled: !disableEmbed,
+          publicAPIEnabled: !isServerless,
           ...core,
         });
       },
