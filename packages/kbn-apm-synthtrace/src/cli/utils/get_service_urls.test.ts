@@ -108,7 +108,8 @@ describe('getServiceUrls', () => {
     });
 
     it('Fails to discover ES if Kibana URL is not reachable', async () => {
-      const kibana = 'http://elastic:changeme@not-reachable:5601';
+      const authStr = 'elastic:changeme@';
+      const kibana = `http://${authStr}not-reachable:5601`;
 
       mockFetchWithAllowedSegments(['localhost']);
       await expectServiceUrls(
@@ -118,7 +119,7 @@ describe('getServiceUrls', () => {
           esUrl: 'http://elastic:changeme@localhost:9200',
           kibanaUrl: 'http://elastic:changeme@localhost:5601',
         },
-        `Could not discover Elasticsearch URL based on Kibana URL ${kibana}.`
+        `Could not discover Elasticsearch URL based on Kibana URL ${kibana.replace(authStr, '.*')}.` // On CI auth is stripped
       );
     });
   });
