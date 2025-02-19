@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import React, { useCallback } from 'react';
 import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton, useEuiTheme } from '@elastic/eui';
 import classNames from 'classnames';
@@ -120,9 +119,9 @@ export function WorkspacePanelWrapper({
   displayOptions,
 }: WorkspacePanelWrapperProps) {
   const dispatchLens = useLensDispatch();
-  
-  const euiThemeContext  = useEuiTheme();
-  const {euiTheme} = euiThemeContext;
+
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
 
   const changesApplied = useLensSelector(selectChangesApplied);
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
@@ -178,7 +177,8 @@ export function WorkspacePanelWrapper({
             direction="row"
             css={css`
               margin-bottom: ${euiTheme.size.xs};
-              ${isFullscreen && `
+              ${isFullscreen &&
+              `
                 background-color: ${euiTheme.colors.emptyShade};
                 justify-content: flex-end;
                 margin-bottom: 0;
@@ -256,7 +256,8 @@ export function WorkspacePanelWrapper({
             height: 100%;
             position: absolute;
           }
-          ${isFullscreen && `
+          ${isFullscreen &&
+          `
             margin-bottom: 0;
             .lnsWorkspacePanelWrapper__pageContentBody {
               box-shadow: none;

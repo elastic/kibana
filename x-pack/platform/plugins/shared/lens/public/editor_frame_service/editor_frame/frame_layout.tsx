@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './frame_layout.scss';
-
 import React from 'react';
 import {
   EuiScreenReaderOnly,
@@ -16,9 +14,9 @@ import {
   EuiPageBody,
   useEuiTheme,
   euiBreakpoint,
+  UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import classNames from 'classnames';
 import { css } from '@emotion/react';
 import { useLensSelector, selectIsFullscreenDatasource } from '../../state_management';
 
@@ -70,22 +68,35 @@ export function FrameLayout(props: FrameLayoutProps) {
             ${euiBreakpoint(euiTheme, ['xs', 's', 'm'])} {
               position: static;
             }
-            ${isFullscreen &&
-            `.lnsFrameLayout__sidebar--left {
-              // Hide the datapanel in fullscreen mode. Using display: none does trigger
-              // a rerender when the container becomes visible again, maybe pushing offscreen is better
-              display: none;
-            }`}
           `}
         >
           <EuiPageBody
             restrictWidth={false}
             className="lnsFrameLayout__pageContent"
             aria-labelledby="lns_ChartTitle"
+            css={css`
+              overflow: hidden;
+              flex-grow: 1;
+              flex-direction: row;
+              ${euiBreakpoint(euiTheme, ['xs', 's', 'm'])} {
+                flex-wrap: wrap;
+                overflow: auto;
+                > * {
+                  flex-basis: 100%;
+                }
+              }
+            `}
           >
             <section
-              className={'lnsFrameLayout__sidebar lnsFrameLayout__sidebar--left hide-for-sharing'}
+              className={'hide-for-sharing'}
               aria-labelledby="dataPanelId"
+              css={[sidebarStyles, css`
+                ${isFullscreen &&
+                `
+                // Hide the datapanel in fullscreen mode. Using display: none does trigger
+                // a rerender when the container becomes visible again, maybe pushing offscreen is better
+                display: none;`}
+              `]}
             >
               <EuiScreenReaderOnly>
                 <h2 id="dataPanelId">
@@ -97,9 +108,28 @@ export function FrameLayout(props: FrameLayoutProps) {
               {props.dataPanel}
             </section>
             <section
-              className={classNames('lnsFrameLayout__pageBody', {
-                'lnsFrameLayout__pageBody-isFullscreen': isFullscreen,
-              })}
+              className="eui-scrollBar"
+              css={css`
+                min-width: 432px;
+                overflow: hidden auto;
+                display: flex;
+                flex-direction: column;
+                flex: 1 1 100%;
+                // Leave out bottom padding so the suggestions scrollbar stays flush to window edge
+                // Leave out left padding so the left sidebar's focus states are visible outside of content bounds
+                // This also means needing to add same amount of margin to page content and suggestion items
+                padding: ${euiTheme.euiTheme.size.base} ${euiTheme.euiTheme.size.base} 0;
+                position: relative;
+                z-index: 1;
+                border-left: ${euiTheme.euiTheme.border.thin};
+                border-right: ${euiTheme.euiTheme.border.thin};
+                &:first-child {
+                  padding-left: ${euiTheme.euiTheme.size.base};
+                }
+                ${isFullscreen && `
+                  flex: 1;
+                  padding: 0;`}
+              `}
               aria-labelledby="workspaceId"
             >
               <EuiScreenReaderOnly>
@@ -110,21 +140,20 @@ export function FrameLayout(props: FrameLayoutProps) {
                 </h2>
               </EuiScreenReaderOnly>
               {props.workspacePanel}
-              <div className="lnsFrameLayout__suggestionPanel hide-for-sharing">
-                {props.suggestionsPanel}
-              </div>
+              <div className="hide-for-sharing">{props.suggestionsPanel}</div>
             </section>
             <section
-              css={css`
-                ${isFullscreen && `flex: 1; max-width: none;`}
-              `}
-              className={classNames(
-                'lnsFrameLayout__sidebar lnsFrameLayout__sidebar--right',
-                'hide-for-sharing',
-                {
-                  'lnsFrameLayout__sidebar-isFullscreen': isFullscreen,
+              css={[sidebarStyles, css`
+                flex-basis: 25%;
+                min-width: 358px;
+                max-width: 440px;
+                max-height: 100%;
+                ${euiBreakpoint(euiTheme, ['xs', 's', 'm'])} {
+                  max-width: 100%;
                 }
-              )}
+                ${isFullscreen && `flex: 1; max-width: none;`}
+              `]}
+              className="hide-for-sharing"
               aria-labelledby="configPanel"
             >
               <EuiScreenReaderOnly>
@@ -142,3 +171,17 @@ export function FrameLayout(props: FrameLayoutProps) {
     </EuiFlexGroup>
   );
 }
+
+const sidebarStyles = (euiThemeContext: UseEuiTheme) => css`
+  margin: 0;
+  flex: 1 0 18%;
+  min-width: 304px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
+    > .lnsFrameLayout__sidebar {
+      min-height: ${euiThemeContext.euiTheme.size.l} * 15;
+    }
+  }
+`;
