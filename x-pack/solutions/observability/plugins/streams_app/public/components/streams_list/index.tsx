@@ -78,6 +78,7 @@ export function StreamsList({
 }) {
   const [collapsed, setCollapsed] = React.useState<Record<string, boolean>>({});
   const [showClassic, setShowClassic] = React.useState(true);
+  const [shortNames, setShortNames] = React.useState(true);
   const items = useMemo(() => {
     return streams ?? [];
   }, [streams]);
@@ -149,6 +150,14 @@ export function StreamsList({
                 checked={showClassic}
                 onChange={(e) => setShowClassic(e.target.checked)}
               />
+              <EuiSwitch
+                label={i18n.translate('xpack.streams.streamsTable.shortStreamNames', {
+                  defaultMessage: 'Short stream names',
+                })}
+                compressed
+                checked={shortNames}
+                onChange={(e) => setShortNames(e.target.checked)}
+              />
             </EuiFlexGroup>
           </EuiFlexItem>
         </>
@@ -160,6 +169,7 @@ export function StreamsList({
             node={tree}
             collapsed={collapsed}
             setCollapsed={setCollapsed}
+            shortNames={shortNames}
           />
         ))}
       </EuiFlexItem>
@@ -171,10 +181,12 @@ function StreamNode({
   node,
   collapsed,
   setCollapsed,
+  shortNames,
 }: {
   node: StreamTree;
   collapsed: Record<string, boolean>;
   setCollapsed: (collapsed: Record<string, boolean>) => void;
+  shortNames: boolean;
 }) {
   const router = useStreamsAppRouter();
   const {
@@ -241,13 +253,15 @@ function StreamNode({
             <EuiIcon type={collapsed?.[node.name] ? 'arrowRight' : 'arrowDown'} />
           </button>
         )}
-        <EuiLink
-          data-test-subj="streamsAppStreamNodeLink"
-          color="text"
-          href={router.link('/{key}', { path: { key: node.name } })}
-        >
-          {node.name}
-        </EuiLink>
+        <EuiToolTip content={node.name}>
+          <EuiLink
+            data-test-subj="streamsAppStreamNodeLink"
+            color="text"
+            href={router.link('/{key}', { path: { key: node.name } })}
+          >
+            {shortNames ? node.name.split('.').pop() : node.name}
+          </EuiLink>
+        </EuiToolTip>
         {node.type === 'root' && (
           <EuiBadge color="hollow">
             <EuiIcon type="branch" size="s" />
@@ -315,7 +329,7 @@ function StreamNode({
           <EuiFlexGroup direction="column" gutterSize="xs">
             {node.children.map((child, index) => (
               <NestedView key={child.name} last={index === node.children.length - 1}>
-                <StreamNode node={child} collapsed={collapsed} setCollapsed={setCollapsed} />
+                <StreamNode node={child} collapsed={collapsed} setCollapsed={setCollapsed} shortNames={shortNames}/>
               </NestedView>
             ))}
           </EuiFlexGroup>
