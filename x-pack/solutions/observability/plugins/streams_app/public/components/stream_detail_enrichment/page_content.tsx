@@ -33,7 +33,12 @@ import {
   UseProcessingSimulatorReturn,
   useProcessingSimulator,
 } from './hooks/use_processing_simulator';
-import { StreamEnrichmentContextProvider } from './services/stream_enrichment_service';
+import {
+  StreamEnrichmentContextProvider,
+  StreamsEnrichmentEvents,
+  useStreamsEnrichmentEvents,
+  useStreamsEnrichmentSelector,
+} from './services/stream_enrichment_service';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -50,31 +55,43 @@ export function StreamDetailEnrichmentContent(props: StreamDetailEnrichmentConte
   return (
     <StreamEnrichmentContextProvider
       definition={props.definition}
+      refreshDefinition={props.refreshDefinition}
       streamsRepositoryClient={streamsRepositoryClient}
       toasts={toasts}
     >
-      <StreamDetailEnrichmentContentImpl {...props} />
+      <StreamDetailEnrichmentContentImpl />
     </StreamEnrichmentContextProvider>
   );
 }
 
-export function StreamDetailEnrichmentContentImpl({
-  definition,
-  refreshDefinition,
-}: StreamDetailEnrichmentContentProps) {
+export function StreamDetailEnrichmentContentImpl() {
   const { appParams, core } = useKibana();
 
+  // const {
+  //   // processors,
+  //   addProcessor,
+  //   updateProcessor,
+  //   deleteProcessor,
+  //   // resetChanges,
+  //   // saveChanges,
+  //   reorderProcessors,
+  //   // hasChanges,
+  //   // isSavingChanges,
+  // } = useDefinition(definition, refreshDefinition);
+
   const {
-    processors,
     addProcessor,
     updateProcessor,
     deleteProcessor,
+    reorderProcessors,
     resetChanges,
     saveChanges,
-    reorderProcessors,
-    hasChanges,
-    isSavingChanges,
-  } = useDefinition(definition, refreshDefinition);
+  } = useStreamsEnrichmentEvents();
+
+  const definition = useStreamsEnrichmentSelector((state) => state.context.definition);
+  const processors = useStreamsEnrichmentSelector((state) => state.context.processors);
+  const hasChanges = useStreamsEnrichmentSelector((state) => state.context.hasStagedChanges);
+  const isSavingChanges = useStreamsEnrichmentSelector((state) => state.matches('updatingStream'));
 
   const {
     hasLiveChanges,
@@ -161,10 +178,10 @@ export function StreamDetailEnrichmentContentImpl({
 interface ProcessorsEditorProps {
   definition: IngestStreamGetResponse;
   processors: UseDefinitionReturn['processors'];
-  onAddProcessor: UseDefinitionReturn['addProcessor'];
-  onDeleteProcessor: UseDefinitionReturn['deleteProcessor'];
-  onReorderProcessor: UseDefinitionReturn['reorderProcessors'];
-  onUpdateProcessor: UseDefinitionReturn['updateProcessor'];
+  onAddProcessor: StreamsEnrichmentEvents['addProcessor'];
+  onDeleteProcessor: StreamsEnrichmentEvents['deleteProcessor'];
+  onReorderProcessor: StreamsEnrichmentEvents['reorderProcessors'];
+  onUpdateProcessor: StreamsEnrichmentEvents['updateProcessor'];
   onWatchProcessor: UseProcessingSimulatorReturn['watchProcessor'];
 }
 
@@ -183,7 +200,7 @@ const ProcessorsEditor = React.memo(
     const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
       if (source && destination) {
         const items = euiDragDropReorder(processors, source.index, destination.index);
-        onReorderProcessor(items);
+        onReorderProcessor({ processors: items });
       }
     };
 

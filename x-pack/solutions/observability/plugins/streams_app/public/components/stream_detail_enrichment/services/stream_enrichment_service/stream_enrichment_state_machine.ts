@@ -40,6 +40,7 @@ export const streamEnrichmentService = setup({
   actions: {
     notifyUpsertStreamSuccess: getPlaceholderFor(createUpsertStreamSuccessNofitier),
     notifyUpsertStreamFailure: getPlaceholderFor(createUpsertStreamFailureNofitier),
+    refreshDefinition: () => {},
     storeDefinition: assign((_, params: { definition: IngestStreamGetResponse }) => ({
       definition: params.definition,
     })),
@@ -80,12 +81,6 @@ export const streamEnrichmentService = setup({
         ),
       })
     ),
-    updateFields: assign(
-      ({ context }, params: Pick<StreamEnrichmentEventByType<'processors.add'>, 'fields'>) => {
-        // TODO: implement mergeFields logic
-        return {};
-      }
-    ),
     deriveStagedChangesFlag: assign(({ context }) => {
       const { initialProcessors, processors } = context;
       return {
@@ -103,7 +98,7 @@ export const streamEnrichmentService = setup({
     isWiredStream: ({ context }) => isWiredStreamGetResponse(context.definition),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwDoBXFDWgjEgGwwC9IBiWI0y4rMBgBukANoAGALqJQABwD2sDA3koZIAB6IAjAA4AzBV3aATABYAnBf0BWC9oDsANgdmANCACeifbosUzMxcg-XFtcQN9AF8oj1RMXEJicgo6ZUYWVjooDglpJBAFJRU1Aq0ESwcKEz0HY0izO0aPbwRdMwCrCwcTB30nOwHo2PB0bHweFLSGZjZs3O18uUV01XVym3Eqmt06vX19Rotmrx8bbSMa5ycnM132mxi4scTJvjh5JhEIAGEcDCYECSvC4bwo-EE3zy6iKq1KoA2W2qtXqByOJ1a+m6l0cZhM+hM7WM4jMT1GCQmyXesE+3z+AKBb1BVOosggJAIYGhBVhJXWiBMThMFAOdn0ekaNkO7lOCBsLhFJnMFkFvRs520ZPi42BKWINK+kHpgN1lAgGFgsiYJE82QACmh5AJYDS0LAOLJHc7XbAKCQIBBuctihg1mVEBYnLoRQ5tKZjirYxZdC1EEL-PjdpGHFtdmZNSNta8WfraUb-iawebLdbbSgoA6nXAfR6vc35G6KBAwEwwJyg4UVnzwwhI9H9LH45Zetpk6m5eIbEYCTZnK48T15VqXpTeOCPobfhXGSzq1abfa2y6O+7PU3r53iB3u2gB7zQ-DNBHxOIKCSTJGmzqroIEypiujCniQoOA48r2NoTiLtuFKmvuBp0seqFnrWl73i2d7ejerLsv2UgwkOH78qOUYxnGAHTkmKayiYdh-rO3QGNYFh2OqyE6mCpaHsaJ57thF71ngGBkFQ1olBQQgYGAADuAAiHIkA6YAKcpXBSTJHIfvJimqX2YBYJyEAAGKKYCsBvhRYYIhGBIismQQqucUpCvO1hOBQ2iNGEdwOFYMEWHxxZ7oJGEMlhFrnnWUCSdJsmGdpJmcuZkDWT2EDukoKUGaoRnKWpBAacQ6X2SGjlfqOmwUHsBzmNo8pbPo84gUutybKEMHiL4TjhYWO6oVQbIGRJTIQKoYCpCgQjyAA1nNRa7ik40kdkpoIHQi1YEVKB5NVcJUb0wqitYErqtK85OI4lzmGuE4BTUEXrZQm2TUlTJgGgjpoBQ54EAAZh2lBrWNE0MFNVK7QtTqHcdZE8g5n7lOdIq2FdDxSoE86TtUsFtQFq42CBMQjCg8jdvABSQ285E1ejiAALROPO7N-j+PO8zzhLvWNtD0BkbCQEzp0jni875sKKrNectyy04wzPChYLTKLWT1hLw5OQg-QdLYrWwbGAw2NLsqyxQ8srghgSmCrgsCQeMWVlSuuUSOAwXKbIX3FcETzqYHTnKFA2wSH-TOyWrvlrFVbxTh9aNoRbqe7V5QhUuWx4vKzi6C4HOyqbFA9WENyxmYsG6DHUVx0eCenkn4lJXpqW1e+mdplYjWrv7dSB0xrT+-5gU-ns4g3LXI3q7H6Hx+7okt4lyX6XJ6VlRVWnGRnLMIK4VR+8mg+OEHsp+L7hKhIX1f3Vus-8fPZaN0vKRiav7eHSVGVmRZOW2T3lRUwegbYBVamEXw4hzCdWONUa+91JTigpo-SKG1obbUZqjZmVFLatCjFUUwVcgqxgggWNWT964LwgAAJXkPIAgpogHezqEYEkAxC4WAiCSMCiBjCdC6ANAwFteiUyiEAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5RgHYCcCWBjAFgZQBc0wBDAWwGJYjSyA6YrMDAN0gG0AGAXUVAAcA9rAwEMglHxAAPRABYATABoQAT0QA2AJwBWOloDsAZjlGAjGYMbLZowF87K1JlyFi5OhhSiMJADYYAF5eUBRcvEggQiJiElKyCHJaGvoaBgpanHLWBpwKOkYq6ghmnDoAHHScukZahmba5VoOTujY+DQeXj7+QSFhZhECwj5xkQk6nCkmCgra6RpJOjpFiAZmCnRyBjuLNrrlci3gba6d9MSwgn5sEADCOBh+EG60VOcMcGAE4VLRo5JxogLGY5HQ0lpFHkzMkDFpVghymY6DoFJxODDyjotAo5BUdMdnO1Xh5Ltdbg8ni9zu93PQAK78CAkAhgX6Rf6xQGgBIKdJ0IxGbFGdGTLQi8oIoz5cFacoaMo1OVyQ6E04dOmfK43SCU54k+gQDCwfh+EiqEIABTQgiYsCuaFgFH4NrtDtgdBIEAg7OGMXE3JkwLylV0ZgKfNy+SyCJ0GlD5QMFVqcPlSTVLg1tC15N1j31HyNJrNFpQUGttrg7udrqrgkddAgYD83zZPD+Iy58WDClDOnD0p2eUmcgRcjxKKR0rMTQMSMU9kcJ0zBpzOvu+epmqLpvNVtr9vrTpdlcPDeI9abaF9UU7Ae7CGSnHBCkFdQxxj5hTUiGlm0skzYkiOhWEKGbEh8ZLrnqW7ZjuJb7qe1Ynm6R50IyzKsjenL3kCJQhvo-YRkO0ajj+JRynQViJoYxhGOsvbgWcmpQRSm6rvBe5lngGBkPSZpcnQLAYGAADuAAiLIkNaYDCWJVC8fxLIBkJIkSa2WCshAABiInPLA2F3mMPKIHUmyGOU5SCnOpQaBo37FImehNEY5QhrUIE4kxWaknAuYblSHHGrupZQDxfECSpcnqaymmQLpzYQE6IgRcpEiqWJkkENJxDRYZ-rGUG+EWAK1iLAsVjLAYCLlDKtRGIsGTVPGi6tCuHwYcp3E0hAEhgJ4KAsIIADW-VEsx2adWI3V0ggXhDVgaUoOE+UAg+fKbIKwqitUEpSlYdCYiB462DC9HeauU0hAaFBgGgNpoHQu4EAAZvW9DjT5DJMl1YXnHNg22ktK3thyRmBryGibUK4o7bDkrkUkKQKtsc6cCK2zaASxwoIITbwJEn0Gh2BUQ4gAC0GgIuTr50K+FgquOrkgfkF0dd43hiL0gSQCTa14SKehzLoCgwuOkK1DVljgrk1RaOGvYZGzmrdFzATBGWfNdnhaJgosiwFCLTQxuRFizPoIqlG5Gzy+UyvZqxeaBecWu4SZCAMQKrmviYkJYkkCKLHT8ZYhY8t2ZY9u+dqbHO9uwUIWWFaoY6ruFQkWJ6BoOh4km6RyBsnAI8U8wCuKSbo3MIEwlHFx+dB7GFgnXFhYpkWFTh6drAqXu1YKSQqjn8LkcYBh0C56yJliaMGLXa6xwW8fFi34VKYJ0VZTlslqWnZOIkXvc+wP-vD455hbEOdnpOG1hHEuROQfXC+wR4nGhav7coBlMVgHFOl6UlXeD4Nhwi2JCTGbkGpxmquRKyRh9BDhDIYOozR77qkuj9aaf06RAJ1lZFEMJUSQmsKiWqZFiiQnBBsPEMJ8hJFqtjNqEEWJP0gAAJUEIIAgxMwakwfFZPQcYMhCgajiZYCIzbInjBiWo9DRZxgcA4IAA */
   id: 'enrichStream',
   context: ({ input }) => ({
     definition: input.definition,
@@ -111,9 +106,15 @@ export const streamEnrichmentService = setup({
     processors: [],
     hasStagedChanges: false,
   }),
-  initial: 'uninitialized',
+  initial: 'listeningForDefinitionChanges',
+  on: {
+    'stream.received': {
+      target: '.initializing',
+      actions: [{ type: 'storeDefinition', params: ({ event }) => event }],
+    },
+  },
   states: {
-    uninitialized: {
+    listeningForDefinitionChanges: {
       on: {
         'stream.received': {
           target: 'initializing',
@@ -129,24 +130,28 @@ export const streamEnrichmentService = setup({
         },
         {
           target: 'resolvedChildStream',
+          actions: enqueueActions(({ check, enqueue }) => {
+            enqueue({
+              type: 'setupProcessors',
+              params: ({ context }) => ({ definition: context.definition }),
+            });
+            // Setup fields for wired stream only
+            if (check('isWiredStream')) {
+              enqueue({
+                type: 'setupFields',
+                params: ({ context }) => ({
+                  definition: context.definition as WiredStreamGetResponse,
+                }),
+              });
+            }
+
+            enqueue({ type: 'deriveStagedChangesFlag' });
+          }),
         },
       ],
     },
     resolvedChildStream: {
       type: 'parallel',
-      entry: enqueueActions(({ check, enqueue }) => {
-        enqueue({
-          type: 'setupProcessors',
-          params: ({ context }) => ({ definition: context.definition }),
-        });
-        // Setup fields for wired stream only
-        if (check('isWiredStream')) {
-          enqueue({
-            type: 'setupFields',
-            params: ({ context }) => ({ definition: context.definition as WiredStreamGetResponse }),
-          });
-        }
-      }),
       states: {
         displayingProcessors: {
           on: {
@@ -194,9 +199,9 @@ export const streamEnrichmentService = setup({
         },
       },
       on: {
-        'stream.received': {
+        'stream.reset': {
           target: 'initializing',
-          actions: [{ type: 'storeDefinition', params: ({ event }) => event }],
+          reenter: true,
         },
         'stream.update': {
           guard: 'hasStagedChanges',
@@ -213,8 +218,8 @@ export const streamEnrichmentService = setup({
           fields: context.fields,
         }),
         onDone: {
-          target: 'resolvedChildStream',
-          actions: [{ type: 'notifyUpsertStreamSuccess' }],
+          target: 'listeningForDefinitionChanges',
+          actions: [{ type: 'notifyUpsertStreamSuccess' }, { type: 'refreshDefinition' }],
         },
         onError: {
           target: 'resolvedChildStream',
@@ -229,6 +234,7 @@ export const streamEnrichmentService = setup({
 });
 
 export const createCategorizeLogsServiceImplementations = ({
+  refreshDefinition,
   streamsRepositoryClient,
   toasts,
 }: StreamEnrichmentServiceDependencies): MachineImplementationsFrom<
@@ -238,6 +244,7 @@ export const createCategorizeLogsServiceImplementations = ({
     upsertStream: createUpsertStreamActor({ streamsRepositoryClient }),
   },
   actions: {
+    refreshDefinition,
     notifyUpsertStreamSuccess: createUpsertStreamSuccessNofitier({ toasts }),
     notifyUpsertStreamFailure: createUpsertStreamFailureNofitier({ toasts }),
   },

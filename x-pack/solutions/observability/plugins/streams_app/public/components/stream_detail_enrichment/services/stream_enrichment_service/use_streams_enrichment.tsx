@@ -18,9 +18,41 @@ import {
   StreamEnrichmentServiceDependencies,
 } from './types';
 
+const consoleInspector = createConsoleInspector();
+
 const StreamEnrichmentContext = createActorContext(streamEnrichmentService);
 
-const consoleInspector = createConsoleInspector();
+export const useStreamsEnrichmentSelector = StreamEnrichmentContext.useSelector;
+
+export type StreamsEnrichmentEvents = ReturnType<typeof useStreamsEnrichmentEvents>;
+
+export const useStreamsEnrichmentEvents = () => {
+  const service = StreamEnrichmentContext.useActorRef();
+
+  return useMemo(
+    () => ({
+      addProcessor: (params: StreamEnrichmentEventParams<'processors.add'>) => {
+        service.send({ type: 'processors.add', ...params });
+      },
+      updateProcessor: (params: StreamEnrichmentEventParams<'processors.update'>) => {
+        service.send({ type: 'processors.update', ...params });
+      },
+      deleteProcessor: (params: StreamEnrichmentEventParams<'processors.delete'>) => {
+        service.send({ type: 'processors.delete', ...params });
+      },
+      reorderProcessors: (params: StreamEnrichmentEventParams<'processors.reorder'>) => {
+        service.send({ type: 'processors.reorder', ...params });
+      },
+      resetChanges: () => {
+        service.send({ type: 'stream.reset' });
+      },
+      saveChanges: () => {
+        service.send({ type: 'stream.update' });
+      },
+    }),
+    [service]
+  );
+};
 
 export const StreamEnrichmentContextProvider = ({
   children,
@@ -53,29 +85,4 @@ const ListenForDefinitionChanges = ({
   }, [definition, service]);
 
   return children;
-};
-
-export const useStreamsEnrichmentEvents = () => {
-  const service = StreamEnrichmentContext.useActorRef();
-
-  return useMemo(
-    () => ({
-      addProcessor: (params: StreamEnrichmentEventParams<'processors.add'>) => {
-        service.send({ type: 'processors.add', ...params });
-      },
-      updateProcessor: (params: StreamEnrichmentEventParams<'processors.update'>) => {
-        service.send({ type: 'processors.update', ...params });
-      },
-      deleteProcessor: (params: StreamEnrichmentEventParams<'processors.delete'>) => {
-        service.send({ type: 'processors.delete', ...params });
-      },
-      reorderProcessors: (params: StreamEnrichmentEventParams<'processors.reorder'>) => {
-        service.send({ type: 'processors.reorder', ...params });
-      },
-      saveChanges: () => {
-        service.send({ type: 'stream.update' });
-      },
-    }),
-    [service]
-  );
 };

@@ -11,6 +11,7 @@ import { FieldDefinition, IngestStreamGetResponse, ProcessorDefinition } from '@
 import { ProcessorDefinitionWithUIAttributes } from '../../types';
 
 export interface StreamEnrichmentServiceDependencies {
+  refreshDefinition: () => void;
   streamsRepositoryClient: StreamsRepositoryClient;
   toasts: IToasts;
 }
@@ -29,6 +30,7 @@ export interface StreamEnrichmentContext {
 
 export type StreamEnrichmentEvent =
   | { type: 'stream.received'; definition: IngestStreamGetResponse }
+  | { type: 'stream.reset' }
   | { type: 'stream.update' }
   | { type: 'simulation.viewDataPreview' }
   | { type: 'simulation.viewDetectedFields' }

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { getPlaceholderFor } from '@kbn/xstate-utils';
 import { FieldDefinition, IngestUpsertRequest } from '@kbn/streams-schema';
 import { ErrorActorEvent, fromPromise } from 'xstate5';
 import { errors as esErrors } from '@elastic/elasticsearch';
@@ -20,8 +19,6 @@ type UpsertStreamResponse = APIReturnType<'PUT /api/streams/{name}/_ingest'>;
 interface UpsertStreamInput extends Pick<StreamEnrichmentContext, 'definition' | 'processors'> {
   fields?: FieldDefinition;
 }
-
-export const upsertStreamStub = getPlaceholderFor(createUpsertStreamActor);
 
 export function createUpsertStreamActor({
   streamsRepositoryClient,
