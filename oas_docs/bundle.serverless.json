@@ -22022,7 +22022,28 @@
                                 "type": "string"
                               },
                               "type": {
-                                "type": "string"
+                                "anyOf": [
+                                  {
+                                    "enum": [
+                                      "dashboard",
+                                      "lens",
+                                      "visualization",
+                                      "search",
+                                      "index-pattern",
+                                      "map",
+                                      "ml-module",
+                                      "security-rule",
+                                      "csp-rule-template",
+                                      "osquery-pack-asset",
+                                      "osquery-saved-query",
+                                      "tag"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
                               }
                             },
                             "required": [
@@ -22389,7 +22410,28 @@
                                         "type": "string"
                                       },
                                       "type": {
-                                        "type": "string"
+                                        "anyOf": [
+                                          {
+                                            "enum": [
+                                              "dashboard",
+                                              "lens",
+                                              "visualization",
+                                              "search",
+                                              "index-pattern",
+                                              "map",
+                                              "ml-module",
+                                              "security-rule",
+                                              "csp-rule-template",
+                                              "osquery-pack-asset",
+                                              "osquery-saved-query",
+                                              "tag"
+                                            ],
+                                            "type": "string"
+                                          },
+                                          {
+                                            "type": "string"
+                                          }
+                                        ]
                                       }
                                     },
                                     "required": [
@@ -22505,7 +22547,28 @@
                                       "type": "string"
                                     },
                                     "type": {
-                                      "type": "string"
+                                      "anyOf": [
+                                        {
+                                          "enum": [
+                                            "dashboard",
+                                            "lens",
+                                            "visualization",
+                                            "search",
+                                            "index-pattern",
+                                            "map",
+                                            "ml-module",
+                                            "security-rule",
+                                            "csp-rule-template",
+                                            "osquery-pack-asset",
+                                            "osquery-saved-query",
+                                            "tag"
+                                          ],
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
                                     }
                                   },
                                   "required": [
@@ -22711,7 +22774,9 @@
                                 ],
                                 "type": "string"
                               },
-                              {}
+                              {
+                                "type": "string"
+                              }
                             ]
                           },
                           "vars": {
@@ -22852,7 +22917,28 @@
                                 "type": "string"
                               },
                               "type": {
-                                "type": "string"
+                                "anyOf": [
+                                  {
+                                    "enum": [
+                                      "dashboard",
+                                      "lens",
+                                      "visualization",
+                                      "search",
+                                      "index-pattern",
+                                      "map",
+                                      "ml-module",
+                                      "security-rule",
+                                      "csp-rule-template",
+                                      "osquery-pack-asset",
+                                      "osquery-saved-query",
+                                      "tag"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
                               }
                             },
                             "required": [
@@ -23046,7 +23132,28 @@
                                               "type": "string"
                                             },
                                             "type": {
-                                              "type": "string"
+                                              "anyOf": [
+                                                {
+                                                  "enum": [
+                                                    "dashboard",
+                                                    "lens",
+                                                    "visualization",
+                                                    "search",
+                                                    "index-pattern",
+                                                    "map",
+                                                    "ml-module",
+                                                    "security-rule",
+                                                    "csp-rule-template",
+                                                    "osquery-pack-asset",
+                                                    "osquery-saved-query",
+                                                    "tag"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "type": "string"
+                                                }
+                                              ]
                                             }
                                           },
                                           "required": [
@@ -23623,7 +23730,28 @@
                                 "type": "string"
                               },
                               "type": {
-                                "type": "string"
+                                "anyOf": [
+                                  {
+                                    "enum": [
+                                      "dashboard",
+                                      "lens",
+                                      "visualization",
+                                      "search",
+                                      "index-pattern",
+                                      "map",
+                                      "ml-module",
+                                      "security-rule",
+                                      "csp-rule-template",
+                                      "osquery-pack-asset",
+                                      "osquery-saved-query",
+                                      "tag"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
                               }
                             },
                             "required": [
@@ -23941,7 +24069,28 @@
                                       "type": "string"
                                     },
                                     "type": {
-                                      "type": "string"
+                                      "anyOf": [
+                                        {
+                                          "enum": [
+                                            "dashboard",
+                                            "lens",
+                                            "visualization",
+                                            "search",
+                                            "index-pattern",
+                                            "map",
+                                            "ml-module",
+                                            "security-rule",
+                                            "csp-rule-template",
+                                            "osquery-pack-asset",
+                                            "osquery-saved-query",
+                                            "tag"
+                                          ],
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
                                     }
                                   },
                                   "required": [
@@ -24057,7 +24206,28 @@
                                     "type": "string"
                                   },
                                   "type": {
-                                    "type": "string"
+                                    "anyOf": [
+                                      {
+                                        "enum": [
+                                          "dashboard",
+                                          "lens",
+                                          "visualization",
+                                          "search",
+                                          "index-pattern",
+                                          "map",
+                                          "ml-module",
+                                          "security-rule",
+                                          "csp-rule-template",
+                                          "osquery-pack-asset",
+                                          "osquery-saved-query",
+                                          "tag"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -24302,7 +24472,9 @@
                               ],
                               "type": "string"
                             },
-                            {}
+                            {
+                              "type": "string"
+                            }
                           ]
                         },
                         "vars": {
@@ -24488,7 +24660,28 @@
                                 "type": "string"
                               },
                               "type": {
-                                "type": "string"
+                                "anyOf": [
+                                  {
+                                    "enum": [
+                                      "dashboard",
+                                      "lens",
+                                      "visualization",
+                                      "search",
+                                      "index-pattern",
+                                      "map",
+                                      "ml-module",
+                                      "security-rule",
+                                      "csp-rule-template",
+                                      "osquery-pack-asset",
+                                      "osquery-saved-query",
+                                      "tag"
+                                    ],
+                                    "type": "string"
+                                  },
+                                  {
+                                    "type": "string"
+                                  }
+                                ]
                               }
                             },
                             "required": [
@@ -24803,7 +24996,28 @@
                                       "type": "string"
                                     },
                                     "type": {
-                                      "type": "string"
+                                      "anyOf": [
+                                        {
+                                          "enum": [
+                                            "dashboard",
+                                            "lens",
+                                            "visualization",
+                                            "search",
+                                            "index-pattern",
+                                            "map",
+                                            "ml-module",
+                                            "security-rule",
+                                            "csp-rule-template",
+                                            "osquery-pack-asset",
+                                            "osquery-saved-query",
+                                            "tag"
+                                          ],
+                                          "type": "string"
+                                        },
+                                        {
+                                          "type": "string"
+                                        }
+                                      ]
                                     }
                                   },
                                   "required": [
@@ -24919,7 +25133,28 @@
                                     "type": "string"
                                   },
                                   "type": {
-                                    "type": "string"
+                                    "anyOf": [
+                                      {
+                                        "enum": [
+                                          "dashboard",
+                                          "lens",
+                                          "visualization",
+                                          "search",
+                                          "index-pattern",
+                                          "map",
+                                          "ml-module",
+                                          "security-rule",
+                                          "csp-rule-template",
+                                          "osquery-pack-asset",
+                                          "osquery-saved-query",
+                                          "tag"
+                                        ],
+                                        "type": "string"
+                                      },
+                                      {
+                                        "type": "string"
+                                      }
+                                    ]
                                   }
                                 },
                                 "required": [
@@ -25164,7 +25399,9 @@
                               ],
                               "type": "string"
                             },
-                            {}
+                            {
+                              "type": "string"
+                            }
                           ]
                         },
                         "vars": {
