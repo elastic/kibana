@@ -209,7 +209,7 @@ const mergeFields = (
       if (
         !(field.name in currentFields) &&
         !(field.name in definition.inherited_fields) &&
-        field.type !== 'unmapped'
+        field.type !== undefined
       ) {
         acc[field.name] = { type: field.type };
       }
