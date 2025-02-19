@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { defaultConfig } from '@kbn/storybook';
+
 module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../../../..',
-  roots: [
-    '<rootDir>/src/platform/packages/private/kbn-management/settings/components/field_category',
-  ],
+  ...defaultConfig,
+  stories: ['../../**/*.stories.+(tsx|mdx)'],
+  reactOptions: {
+    strictMode: true,
+  },
 };
