@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './layer_panel.scss';
-
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   EuiPanel,

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './workspace_panel_wrapper.scss';
 
 import React, { useCallback } from 'react';
 import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton, useEuiTheme } from '@elastic/eui';
@@ -121,7 +120,9 @@ export function WorkspacePanelWrapper({
   displayOptions,
 }: WorkspacePanelWrapperProps) {
   const dispatchLens = useLensDispatch();
-  const { euiTheme } = useEuiTheme();
+  
+  const euiThemeContext  = useEuiTheme();
+  const {euiTheme} = euiThemeContext;
 
   const changesApplied = useLensSelector(selectChangesApplied);
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
@@ -175,11 +176,14 @@ export function WorkspacePanelWrapper({
             alignItems="flexEnd"
             gutterSize="s"
             direction="row"
-            className={classNames({
-              'lnsWorkspacePanelWrapper__toolbar--fullscreen': isFullscreen,
-            })}
             css={css`
               margin-bottom: ${euiTheme.size.xs};
+              ${isFullscreen && `
+                background-color: ${euiTheme.colors.emptyShade};
+                justify-content: flex-end;
+                margin-bottom: 0;
+                padding: ${euiTheme.size.s} ${euiTheme.size.s} 0;
+              `}
             `}
             responsive={false}
           >
@@ -236,16 +240,28 @@ export function WorkspacePanelWrapper({
         contentProps={{
           className: 'lnsWorkspacePanelWrapper__content',
         }}
-        className={classNames('lnsWorkspacePanelWrapper stretch-for-sharing', {
-          'lnsWorkspacePanelWrapper--fullscreen': isFullscreen,
-        })}
+        className={classNames('lnsWorkspacePanelWrapper stretch-for-sharing')}
         css={css`
           height: 100%;
+          margin-bottom: ${euiTheme.size.base};
+          display: flex;
+          flex-direction: column;
+          position: relative; // For positioning the dnd overlay
+          min-height: 400px;
+          overflow: visible;
+          height: 100%;
+
           .lnsWorkspacePanelWrapper__content {
             width: 100%;
             height: 100%;
             position: absolute;
           }
+          ${isFullscreen && `
+            margin-bottom: 0;
+            .lnsWorkspacePanelWrapper__pageContentBody {
+              box-shadow: none;
+              border-radius: 0;
+            }`}
         `}
         color="transparent"
       >

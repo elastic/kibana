@@ -15,6 +15,7 @@ import { Droppable } from '@kbn/dom-drag-drop';
 import { IndexPattern } from '../../../types';
 import { getVisualizeGeoFieldMessage } from '../../../utils';
 import { APP_ID } from '../../../../common/constants';
+import { pageContentBodyStyles, promptIllustrationStyle } from './workspace_panel';
 
 interface Props {
   fieldType: string;
@@ -44,13 +45,13 @@ export function GeoFieldWorkspacePanel(props: Props) {
   }
 
   return (
-    <div className="lnsWorkspacePanelWrapper__pageContentBody">
-      <EuiText className="lnsWorkspacePanel__emptyContent" textAlign="center" size="s">
+    <div className="lnsWorkspacePanelWrapper__pageContentBody" css={pageContentBodyStyles}>
+      <EuiText textAlign="center" size="s">
         <div>
           <h2>
             <strong>{getVisualizeGeoFieldMessage(props.fieldType)}</strong>
           </h2>
-          <GlobeIllustration aria-hidden={true} className="lnsWorkspacePanel__promptIllustration" />
+          <GlobeIllustration aria-hidden={true} css={promptIllustrationStyle}/>
           <Droppable
             css={DroppableStyles}
             dataTestSubj="lnsGeoFieldWorkspace"

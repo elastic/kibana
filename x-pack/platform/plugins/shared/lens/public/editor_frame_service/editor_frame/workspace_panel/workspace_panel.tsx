@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef, Fragment } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toExpression } from '@kbn/interpreter';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiButtonEmpty, EuiLink, EuiTextColor, transparentize, useEuiTheme } from '@elastic/eui';
+import { EuiText, EuiButtonEmpty, EuiLink, EuiTextColor, transparentize, useEuiTheme, EuiSpacer, UseEuiTheme, useEuiScrollBar } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
@@ -52,6 +52,7 @@ import { WorkspacePanelWrapper } from './workspace_panel_wrapper';
 import applyChangesIllustrationDark from '../../../assets/render_dark@2x.png';
 import applyChangesIllustrationLight from '../../../assets/render_light@2x.png';
 import { getOriginalRequestErrorMessages } from '../../error_helper';
+import {lnsExpressionRendererStyle} from '../../../expression_renderer_styles'
 import {
   onActiveDataChange,
   useLensDispatch,
@@ -499,7 +500,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
     return (
       <EuiText
-        className="lnsWorkspacePanel__emptyContent"
         textAlign="center"
         data-test-subj="workspace-drag-drop-prompt"
         size="s"
@@ -507,13 +507,12 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         <div>
           <DropIllustration
             aria-hidden={true}
-            className="lnsWorkspacePanel__promptIllustration"
-            css={css`
+            css={[css`
               filter: 
                 drop-shadow(0 6px 12px ${transparentize(euiTheme.colors.shadow, .2)}) 
                 drop-shadow(0 4px 4px ${transparentize(euiTheme.colors.shadow, .2)}) 
                 drop-shadow(0 2px 2px ${transparentize(euiTheme.colors.shadow, .2)});
-              `}
+              `, promptIllustrationStyle]}
               
           />
           <h2>
@@ -528,15 +527,19 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
             </strong>
           </h2>
           {!expressionExists && (
-            <>
-              <EuiTextColor color="subdued" component="div">
-                <p>
+            <div css={css`
+              .domDroppable--active & {
+                filter: blur(5px);
+                transition: filter ${euiTheme.animation.fast} ease-in-out;
+              }  
+            `}>
+              <EuiTextColor color="subdued" component="p">
                   {i18n.translate('xpack.lens.editorFrame.emptyWorkspaceHeading', {
                     defaultMessage: 'Lens is the recommended editor for creating visualizations',
                   })}
-                </p>
               </EuiTextColor>
-              <p className="lnsWorkspacePanel__actions">
+              <EuiSpacer size="s"/>
+              <p>
                 <EuiLink
                   href="https://www.elastic.co/products/kibana/feedback"
                   target="_blank"
@@ -547,7 +550,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
                   })}
                 </EuiLink>
               </p>
-            </>
+            </div>
           )}
         </div>
       </EuiText>
@@ -565,7 +568,6 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
 
     return (
       <EuiText
-        className="lnsWorkspacePanel__emptyContent"
         textAlign="center"
         data-test-subj="workspace-apply-changes-prompt"
         size="s"
@@ -573,7 +575,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         <div>
           <img
             aria-hidden={true}
-            className="lnsWorkspacePanel__promptIllustration"
+            css={promptIllustrationStyle}
             src={IS_DARK_THEME ? applyChangesIllustrationDark : applyChangesIllustrationLight}
             alt={applyChangesString}
           />
@@ -584,7 +586,8 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
               })}
             </strong>
           </h2>
-          <p className="lnsWorkspacePanel__actions">
+          <EuiSpacer size="s"/>
+          <p>
             <EuiButtonEmpty
               size="s"
               className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
@@ -652,20 +655,17 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         className={classNames('lnsWorkspacePanel__dragDrop', {
           'lnsWorkspacePanel__dragDrop--fullscreen': isFullscreen,
         })}
-        css={css({
-          ...(isFullscreen
-            ? {
-                border: 'none !important',
-              }
-            : {}),
-        })}
+        css={css`
+          ${isFullscreen && `border: none !important;`}
+          `}
+       
         dataTestSubj="lnsWorkspace"
         dropTypes={suggestionForDraggedField ? ['field_add'] : undefined}
         onDrop={onDrop}
         value={dropProps.value}
         order={dropProps.order}
       >
-        <div className="lnsWorkspacePanelWrapper__pageContentBody">{renderWorkspaceContents()}</div>
+        <div className="lnsWorkspacePanelWrapper__pageContentBody" css={pageContentBodyStyles}>{renderWorkspaceContents()}</div>
       </Droppable>
     );
   };
@@ -744,6 +744,7 @@ export const VisualizationWrapper = ({
     onComponentRendered();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  const {euiTheme} = useEuiTheme()
 
   const searchContext = useLensSelector(selectExecutionContextSearch);
   // Used for reporting
@@ -780,6 +781,13 @@ export const VisualizationWrapper = ({
   return (
     <div
       className="lnsExpressionRenderer"
+      css={[lnsExpressionRendererStyle, `
+       .domDroppable--active & {
+          filter: blur(${euiTheme.size.xs}) !important;
+          opacity: .25 !important;
+          transition: filter ${euiTheme.animation.normal} ease-in-out, opacity ${euiTheme.animation.normal} ease-in-out;
+        }`
+      ]}
       data-shared-items-container
       data-render-complete={isRenderComplete}
       data-shared-item=""
@@ -820,3 +828,38 @@ export const VisualizationWrapper = ({
     </div>
   );
 };
+
+
+
+export const promptIllustrationStyle = ({euiTheme} : UseEuiTheme) => {
+  return css`
+  overflow: visible; // Shows arrow animation when it gets out of bounds
+  margin-top: 0;
+  margin-bottom: -${euiTheme.size.base};
+
+  margin-right: auto;
+  margin-left: auto;
+  max-width: 176px;
+  max-height: 176px;
+`}
+
+export const pageContentBodyStyles = ({euiTheme} : UseEuiTheme) => {
+  const euiScrollBar = useEuiScrollBar();
+  return css`
+    flex-grow: 1;
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  border: ${euiTheme.border.thin};
+  border-radius: ${euiTheme.border.radius.medium};
+  background: ${euiTheme.colors.emptyShade};
+  height: 100%;
+  ${euiScrollBar};
+  &>* {
+    flex: 1 1 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  `
+}

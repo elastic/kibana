@@ -17,7 +17,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import moment from 'moment';
-import { EuiCallOut, UseEuiTheme, useEuiBreakpoint } from '@elastic/eui';
+import { EuiCallOut, UseEuiTheme, euiBreakpoint, useEuiBreakpoint } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SerializedStyles, css } from '@emotion/react';
 import { LENS_APP_LOCATOR } from '../../common/locator/locator';
@@ -103,22 +103,22 @@ function getSaveButtonMeta({
   }
 }
 
-const NavItemWithDividerStyles = ({ euiTheme }: UseEuiTheme) => css`
-  @include euiBreakpoint('m', 'l', 'xl') {
-    margin-right: $euiSizeM;
+const NavItemWithDividerStyles = (euiThemeContext: UseEuiTheme) => css`
+  ${euiBreakpoint(euiThemeContext, ['m', 'l', 'xl'])} {
+    margin-right: ${euiThemeContext.euiTheme.size.m};
     position: relative;
   }
   ${useEuiBreakpoint(['m', 'l', 'xl'])} {
-    margin-right: ${euiTheme.size.m};
+    margin-right: ${euiThemeContext.euiTheme.size.m};
     position: relative;
     &:after {
-      border-right: ${euiTheme.border.thin};
+      border-right: ${euiThemeContext.euiTheme.border.thin};
       bottom: 0;
       content: '';
       display: block;
       pointer-events: none;
       position: absolute;
-      right: -${euiTheme.size.s};
+      right: -${euiThemeContext.euiTheme.size.s};
       top: 0;
     }
   }
