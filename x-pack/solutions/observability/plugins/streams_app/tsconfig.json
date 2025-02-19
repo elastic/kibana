@@ -59,6 +59,7 @@
     "@kbn/dataset-quality-plugin",
     "@kbn/search-types",
     "@kbn/object-utils",
-    "@kbn/traced-es-client"
+    "@kbn/traced-es-client",
+    "@kbn/xstate-utils"
   ]
 }
