@@ -46,6 +46,7 @@ const TITLE = 'Fleet Automatic agent upgrades';
 const SCOPE = ['fleet'];
 const INTERVAL = '30s';
 const TIMEOUT = '10m';
+const MIN_AGENTS_FOR_ROLLOUT = 10;
 const MIN_UPGRADE_DURATION_SECONDS = 600;
 type AgentWithDefinedVersion = Agent & { agent: FleetServerAgentMetadata };
 
@@ -305,7 +306,7 @@ export class AutomaticAgentUpgradeTask {
       await sendUpgradeAgentsActions(soClient, esClient, {
         agents: agentsForUpgrade,
         version,
-        upgradeDurationSeconds: this.getUpgradeDurationSeconds(agentsForUpgrade.length),
+        ...this.getUpgradeDurationSeconds(agentsForUpgrade.length),
         isAutomatic: true,
       });
     }
@@ -314,10 +315,14 @@ export class AutomaticAgentUpgradeTask {
   }
 
   private getUpgradeDurationSeconds(nAgents: number) {
-    const calculatedUpgradeDurationSeconds = Math.round(nAgents * 0.03);
-    return calculatedUpgradeDurationSeconds > MIN_UPGRADE_DURATION_SECONDS
-      ? calculatedUpgradeDurationSeconds
-      : MIN_UPGRADE_DURATION_SECONDS;
+    if (nAgents < MIN_AGENTS_FOR_ROLLOUT) {
+      return {};
+    }
+    const upgradeDurationSeconds = Math.max(
+      MIN_UPGRADE_DURATION_SECONDS,
+      Math.round(nAgents * 0.03)
+    );
+    return { upgradeDurationSeconds };
   }
 
   public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
