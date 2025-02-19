@@ -81,7 +81,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryUpdateProps'
+              allOf:
+                - $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryUpdateProps'
+                - type: object
+                  properties:
+                    id:
+                      $ref: '../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
+
       responses:
         200:
           description: Successful request returning the updated Knowledge Base Entry

@@ -113,7 +113,7 @@ export const BaseCreateProps = BaseRequiredFields.merge(BaseDefaultableFields);
 export type BaseUpdateProps = z.infer<typeof BaseUpdateProps>;
 export const BaseUpdateProps = BaseCreateProps.partial().merge(
   z.object({
-    id: NonEmptyString.optional(),
+    id: NonEmptyString,
   })
 );
 

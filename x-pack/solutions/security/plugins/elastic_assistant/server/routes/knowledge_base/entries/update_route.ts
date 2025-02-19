@@ -63,8 +63,7 @@ export const updateKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
 
           const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
           const updateResponse = await kbDataClient?.updateKnowledgeBaseEntry({
-            id: request.params.id,
-            knowledgeBaseEntry: request.body,
+            knowledgeBaseEntry: { ...request.body, id: request.params.id },
             auditLogger: ctx.elasticAssistant.auditLogger,
             telemetry: ctx.elasticAssistant.telemetry,
           });

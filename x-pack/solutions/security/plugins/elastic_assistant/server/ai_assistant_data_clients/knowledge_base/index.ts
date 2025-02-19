@@ -703,12 +703,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    */
   public updateKnowledgeBaseEntry = async ({
     auditLogger,
-    id,
     knowledgeBaseEntry,
     telemetry,
   }: {
     auditLogger?: AuditLogger;
-    id: string;
     knowledgeBaseEntry: KnowledgeBaseEntryUpdateProps;
     telemetry: AnalyticsServiceSetup;
   }): Promise<{
@@ -723,13 +721,13 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       );
     }
 
-    await validateDocumentsModification(this, authenticatedUser, [id], 'update');
+    await validateDocumentsModification(this, authenticatedUser, [knowledgeBaseEntry.id], 'update');
 
     const userFilter = getKBUserFilter(authenticatedUser);
     const entries = await this.findDocuments<EsKnowledgeBaseEntrySchema>({
       page: 1,
       perPage: 1,
-      filter: `_id:"${id}" AND ${userFilter}`,
+      filter: `_id:"${knowledgeBaseEntry.id}" AND ${userFilter}`,
     });
 
     const existingEntry = transformESSearchToKnowledgeBaseEntry(entries.data)?.[0];

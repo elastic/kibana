@@ -83,7 +83,11 @@ export type UpdateKnowledgeBaseEntryRequestParamsInput = z.input<
 export type UpdateKnowledgeBaseEntryRequestBody = z.infer<
   typeof UpdateKnowledgeBaseEntryRequestBody
 >;
-export const UpdateKnowledgeBaseEntryRequestBody = KnowledgeBaseEntryUpdateProps;
+export const UpdateKnowledgeBaseEntryRequestBody = KnowledgeBaseEntryUpdateProps.merge(
+  z.object({
+    id: NonEmptyString.optional(),
+  })
+);
 export type UpdateKnowledgeBaseEntryRequestBodyInput = z.input<
   typeof UpdateKnowledgeBaseEntryRequestBody
 >;
