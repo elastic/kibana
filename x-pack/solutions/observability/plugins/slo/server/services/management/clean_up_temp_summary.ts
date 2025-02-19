@@ -57,7 +57,7 @@ export class CleanUpTempSummary {
 
   private async shouldOpenCircuitBreaker() {
     const results = await this.esClient.count(
-      { index: SUMMARY_TEMP_INDEX_NAME },
+      { index: SUMMARY_TEMP_INDEX_NAME, terminate_after: 1 },
       { signal: this.abortController.signal }
     );
     return results.count === 0;
