@@ -19,14 +19,12 @@ import {
   EXCEPTIONS,
   USERS,
   DETECTION_RESPONSE,
-  DASHBOARDS,
   CSP_DASHBOARD,
   INDICATORS,
   BLOCKLIST,
   CSP_BENCHMARKS,
   CSP_FINDINGS,
   POLICIES,
-  EXPLORE,
   SETTINGS,
   ENTITY_ANALYTICS,
 } from '../../../screens/security_header';
@@ -60,12 +58,8 @@ import {
   ENTITY_ANALYTICS_URL,
   INDICATORS_URL,
   DISCOVER_URL,
-  RULES_LANDING_URL,
   RULES_COVERAGE_URL,
-  INVESTIGATIONS_URL,
   OSQUERY_URL,
-  MACHINE_LEARNING_LANDING_URL,
-  ASSETS_URL,
   FLEET_URL,
   CLOUD_DEFEND_URL,
   HOSTS_URL,
@@ -90,11 +84,6 @@ describe('top-level navigation common to all pages in the Security app', { tags:
   beforeEach(() => {
     login();
     visitWithTimeRange(TIMELINES_URL);
-  });
-
-  it('navigates to the Dashboards landing page', () => {
-    navigateFromHeaderTo(DASHBOARDS);
-    cy.url().should('include', DASHBOARDS_URL);
   });
 
   it('navigates to the Overview page', () => {
@@ -130,11 +119,6 @@ describe('top-level navigation common to all pages in the Security app', { tags:
   it('navigates to the Timelines page', () => {
     navigateFromHeaderTo(TIMELINES);
     cy.url().should('include', TIMELINES_URL);
-  });
-
-  it('navigates to the Explore landing page', () => {
-    navigateFromHeaderTo(EXPLORE);
-    cy.url().should('include', EXPLORE_URL);
   });
 
   it('navigates to the Hosts page', () => {
@@ -262,11 +246,6 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
     cy.url().should('include', DISCOVER_URL);
   });
 
-  it('navigates to the Dashboards landing page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.DASHBOARDS, true);
-    cy.url().should('include', DASHBOARDS_URL);
-  });
-
   it('navigates to the Overview page', () => {
     navigateFromHeaderTo(ServerlessHeaders.OVERVIEW, true);
     cy.url().should('include', OVERVIEW_URL);
@@ -287,10 +266,6 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
     cy.url().should('include', CSP_DASHBOARD_URL);
   });
 
-  it('navigates to the Rules landing page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.RULES_LANDING, true);
-    cy.url().should('include', RULES_LANDING_URL);
-  });
   it('navigates to the Rules page', () => {
     navigateFromHeaderTo(ServerlessHeaders.RULES, true);
     cy.url().should('include', RULES_MANAGEMENT_URL);
@@ -326,11 +301,6 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
     cy.url().should('include', CASES_URL);
   });
 
-  it('navigates to the Investigations page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.INVESTIGATIONS, true);
-    cy.url().should('include', INVESTIGATIONS_URL);
-  });
-
   it('navigates to the Timelines page', () => {
     navigateFromHeaderTo(ServerlessHeaders.TIMELINES, true);
     cy.url().should('include', TIMELINES_URL);
@@ -343,11 +313,6 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
   it('navigates to the Indicators page', () => {
     navigateFromHeaderTo(ServerlessHeaders.THREAT_INTELLIGENCE, true);
     cy.url().should('include', INDICATORS_URL);
-  });
-
-  it('navigates to the Explore landing page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.EXPLORE, true);
-    cy.url().should('include', EXPLORE_URL);
   });
 
   it('navigates to the Hosts page', () => {
@@ -365,10 +330,6 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
     cy.url().should('include', USERS_URL);
   });
 
-  it('navigates to the Assets page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.ASSETS, true);
-    cy.url().should('include', ASSETS_URL);
-  });
   it('navigates to the Endpoints page', () => {
     navigateFromHeaderTo(ServerlessHeaders.ENDPOINTS, true);
     cy.url().should('include', ENDPOINTS_URL);
@@ -380,9 +341,5 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
   it('navigates to the Cloud defend page', () => {
     navigateFromHeaderTo(ServerlessHeaders.CLOUD_DEFEND, true);
     cy.url().should('include', CLOUD_DEFEND_URL);
-  });
-  it('navigates to the Machine learning landing page', () => {
-    navigateFromHeaderTo(ServerlessHeaders.MACHINE_LEARNING, true);
-    cy.url().should('include', MACHINE_LEARNING_LANDING_URL);
   });
 });
