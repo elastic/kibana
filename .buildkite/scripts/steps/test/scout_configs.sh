@@ -56,7 +56,7 @@ while read -r config_path; do
   for mode in $RUN_MODE_LIST; do
     echo "--- Running tests: $config_path ($mode)"
 
-    if ! node scripts/scout run-tests "$mode" --config "$config_path" --kibana-install-dir "$KIBANA_DIR"; then
+    if ! node scripts/scout run-tests "$mode" --config "$config_path" --kibana-install-dir "$KIBANA_BUILD_LOCATION"; then
       failed_configs+=("$config_path ($mode)")
       EXIT_CODE=1
     else
