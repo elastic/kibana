@@ -215,15 +215,15 @@ export class BaseValidator {
     updatedItem: Partial<Pick<ExceptionListItemSchema, 'tags'>>,
     currentItem: Pick<ExceptionListItemSchema, 'tags'>
   ): Promise<void> {
-    if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-      if (this.wasOwnerSpaceIdTagsChanged(updatedItem, currentItem)) {
-        if (!(await this.endpointAuthzPromise).canManageGlobalArtifacts) {
-          throw new EndpointArtifactExceptionValidationError(
-            `Endpoint authorization failure. ${NO_GLOBAL_ARTIFACT_AUTHZ_MESSAGE}`,
-            403
-          );
-        }
-      }
+    if (
+      this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled &&
+      this.wasOwnerSpaceIdTagsChanged(updatedItem, currentItem) &&
+      !(await this.endpointAuthzPromise).canManageGlobalArtifacts
+    ) {
+      throw new EndpointArtifactExceptionValidationError(
+        `Endpoint authorization failure. ${NO_GLOBAL_ARTIFACT_AUTHZ_MESSAGE}`,
+        403
+      );
     }
   }
 
@@ -233,13 +233,15 @@ export class BaseValidator {
       item.tags &&
       item.tags.length > 0
     ) {
+      if ((await this.endpointAuthzPromise).canManageGlobalArtifacts) {
+        return;
+      }
+
       const ownerSpaceIds = getArtifactOwnerSpaceIds(item);
 
       if (
         ownerSpaceIds.length > 1 ||
-        (ownerSpaceIds.length === 1 &&
-          ownerSpaceIds[0] !== (await this.getActiveSpaceId()) &&
-          !(await this.endpointAuthzPromise).canManageGlobalArtifacts)
+        (ownerSpaceIds.length === 1 && ownerSpaceIds[0] !== (await this.getActiveSpaceId()))
       ) {
         throw new EndpointArtifactExceptionValidationError(
           `Endpoint authorization failure. ${NO_GLOBAL_ARTIFACT_AUTHZ_MESSAGE}`,
