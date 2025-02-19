@@ -144,14 +144,14 @@ describe('useDataView', () => {
     expect(result.current).toEqual([true]);
   });
 
-  it('should show timeline when dataView.id is undefined', () => {
+  it('should not show timeline when indices do not exist', () => {
     jest.mocked(useDataView).mockReturnValueOnce({
       indicesExist: false,
-      dataView: { title: '' },
+      dataView: { title: 'pattern-1' },
       status: 'ready',
     });
     const { result } = renderShowTimeline();
-    expect(result.current).toEqual([true]);
+    expect(result.current).toEqual([false]);
   });
 
   it('should not show timeline when dataViewId is not null and indices does not exist', () => {
