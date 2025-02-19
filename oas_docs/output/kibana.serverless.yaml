@@ -52096,8 +52096,6 @@ components:
             properties:
               message:
                 type: string
-              metadata:
-                type: object
               title:
                 type: string
           type: array
@@ -52112,6 +52110,8 @@ components:
           type: string
         installed:
           type: boolean
+        metadata:
+          type: object
         resource:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineComponentResource'
       required:
