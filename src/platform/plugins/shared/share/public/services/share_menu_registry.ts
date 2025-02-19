@@ -107,6 +107,7 @@ export class ShareRegistry implements ShareRegistryApi {
   start({ urlService, anonymousAccessServiceProvider }: ShareRegistryApiStart) {
     this.urlService = urlService;
     this.anonymousAccessServiceProvider = anonymousAccessServiceProvider;
+    return this;
   }
 
   getShareConfigOptionsForObject(

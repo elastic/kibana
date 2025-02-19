@@ -144,17 +144,15 @@ export class SharePlugin
   }
 
   public start(core: CoreStart): SharePublicStart {
-    const disableEmbed = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
-
-    this.shareRegistry.start({
-      urlService: this.url!,
-      anonymousAccessServiceProvider: () => this.anonymousAccessServiceProvider!(),
-    });
+    const isServerless = this.initializerContext.env.packageInfo.buildFlavor === 'serverless';
 
     const sharingContextMenuStart = this.shareContextMenu.start({
       core,
-      shareRegistry: this.shareRegistry,
-      disableEmbed,
+      isServerless,
+      shareRegistry: this.shareRegistry.start({
+        urlService: this.url!,
+        anonymousAccessServiceProvider: () => this.anonymousAccessServiceProvider!(),
+      }),
     });
 
     return {

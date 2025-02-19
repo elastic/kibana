@@ -162,7 +162,7 @@ export interface SharingData {
 }
 
 export abstract class ShareRegistryApi {
-  abstract start(args: ShareRegistryApiStart): void;
+  abstract start(args: ShareRegistryApiStart): ShareRegistryApi;
 
   abstract registerShareIntegration<I extends ShareIntegration>(shareObject: string, arg: I): void;
   abstract registerShareIntegration<I extends ShareIntegration>(arg: I): void;
@@ -295,6 +295,7 @@ export interface UrlParamExtension {
 export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
   anchorElement: HTMLElement;
   allowShortUrl: boolean;
+  allowEmbed: boolean;
   onClose?: () => void;
   publicAPIEnabled?: boolean;
 }
