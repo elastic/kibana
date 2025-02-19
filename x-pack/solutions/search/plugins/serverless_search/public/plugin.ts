@@ -219,11 +219,13 @@ export class ServerlessSearchPlugin
   public stop() {}
 }
 
-// possible onboarding tokens now: 'general' | 'vector' | 'timeseries';
+// possible onboarding tokens now: 'general' | 'vector' | 'timeseries' for serverless, 'vectorsearch' or 'search' for hosted
 
 function onboardingTokenToWorkflowId(token: string | undefined | null): WorkflowId {
   switch (token) {
     case 'vector':
+      return 'vector';
+    case 'vectorsearch':
       return 'vector';
     default:
       return 'default';
