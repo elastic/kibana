@@ -216,6 +216,7 @@ function StreamNode({
         alignItems="center"
         className={css`
           padding: ${euiThemeVars.euiSizeXS};
+          padding-left: ${euiThemeVars.euiSizeS};
           border-radius: ${euiThemeVars.euiBorderRadius};
           &:hover {
             background-color: ${euiThemeVars.euiColorLightestShade};
