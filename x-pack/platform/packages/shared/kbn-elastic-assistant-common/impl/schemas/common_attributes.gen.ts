@@ -49,6 +49,9 @@ export const SortOrder = z.enum(['asc', 'desc']);
 export type SortOrderEnum = typeof SortOrder.enum;
 export const SortOrderEnum = SortOrder.enum;
 
+/**
+ * User screen context
+ */
 export type ScreenContext = z.infer<typeof ScreenContext>;
 export const ScreenContext = z.object({
   /**
