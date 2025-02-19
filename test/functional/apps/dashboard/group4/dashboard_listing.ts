@@ -18,9 +18,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
+  const kibanaServer = getService('kibanaServer');
 
-  // Failing: See https://github.com/elastic/kibana/issues/192564
-  describe.skip('dashboard listing page', function describeIndexTests() {
+  describe('dashboard listing page', function describeIndexTests() {
     const dashboardName = 'Dashboard Listing Test';
 
     before(async function () {
@@ -29,6 +29,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('create prompt', () => {
       it('appears when there are no dashboards', async function () {
+        await kibanaServer.savedObjects.clean({ types: ['dashboard'] });
+        await dashboard.navigateToApp();
         const promptExists = await dashboard.getCreateDashboardPromptExists();
         expect(promptExists).to.be(true);
       });
