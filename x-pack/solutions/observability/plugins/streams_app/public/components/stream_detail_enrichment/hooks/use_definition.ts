@@ -7,8 +7,7 @@
 
 import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
-import { useBoolean } from '@kbn/react-hooks';
+import { useAbortController, useBoolean } from '@kbn/react-hooks';
 import {
   IngestStreamGetResponse,
   isWiredStreamGetResponse,
@@ -210,7 +209,7 @@ const mergeFields = (
       if (
         !(field.name in currentFields) &&
         !(field.name in definition.inherited_fields) &&
-        field.type !== 'unmapped'
+        field.type !== undefined
       ) {
         acc[field.name] = { type: field.type };
       }
