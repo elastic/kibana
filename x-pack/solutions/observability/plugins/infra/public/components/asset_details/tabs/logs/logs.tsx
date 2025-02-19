@@ -7,10 +7,8 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { LogStream } from '@kbn/logs-shared-plugin/public';
 import {
   DEFAULT_LOG_VIEW,
   getLogsLocatorFromUrlService,
@@ -19,9 +17,10 @@ import {
 } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
+import { LazySavedSearchComponent } from '@kbn/saved-search-component';
+import useAsync from 'react-use/lib/useAsync';
 import moment from 'moment';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { InfraLoadingPanel } from '../../../loading';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useDataViewsContext } from '../../hooks/use_data_views';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
@@ -31,13 +30,26 @@ import { useIntersectingState } from '../../hooks/use_intersecting_state';
 const TEXT_QUERY_THROTTLE_INTERVAL_MS = 500;
 
 export const Logs = () => {
+  const {
+    services: {
+      logsDataAccess: {
+        services: { logSourcesService },
+      },
+      embeddable,
+      dataViews,
+      data: {
+        search: { searchSource },
+      },
+    },
+  } = useKibanaContextForPlugin();
+
   const ref = useRef<HTMLDivElement>(null);
   const { getDateRangeInTimestamp, dateRange, autoRefresh } = useDatePickerContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
   const { asset } = useAssetDetailsRenderPropsContext();
   const { logs } = useDataViewsContext();
 
-  const { loading: logViewLoading, reference: logViewReference } = logs ?? {};
+  const { reference: logViewReference } = logs ?? {};
 
   const { services } = useKibanaContextForPlugin();
   const logsLocator = getLogsLocatorFromUrlService(services.share.url)!;
@@ -51,6 +63,9 @@ export const Logs = () => {
     dateRange,
     autoRefresh,
   });
+
+  const timeRange = useMemo(() => ({ from: dateRange.from, to: dateRange.to }), [dateRange]);
+  const logSources = useAsync(logSourcesService.getFlattenedLogSources);
 
   useDebounce(
     () => {
@@ -132,34 +147,19 @@ export const Logs = () => {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
-        {logViewLoading || !logViewReference ? (
-          <InfraLoadingPanel
-            width="100%"
-            height="60vh"
-            text={
-              <FormattedMessage
-                id="xpack.infra.hostsViewPage.tabs.logs.loadingEntriesLabel"
-                defaultMessage="Loading entries"
-              />
-            }
-          />
-        ) : (
-          <LogStream
-            logView={logView}
-            startTimestamp={state.startTimestamp}
-            endTimestamp={state.currentTimestamp}
-            startDateExpression={
-              state.autoRefresh && !state.autoRefresh.isPaused ? state.dateRange.from : undefined
-            }
-            endDateExpression={
-              state.autoRefresh && !state.autoRefresh.isPaused ? state.dateRange.to : undefined
-            }
+        {logSources.value && embeddable ? (
+          <LazySavedSearchComponent
+            dependencies={{ embeddable, searchSource, dataViews }}
+            index={logSources.value}
+            timeRange={timeRange}
             query={filter}
-            height="60vh"
-            showFlyoutAction
-            isStreaming={state.autoRefresh && !state.autoRefresh.isPaused}
+            height={'60vh'}
+            displayOptions={{
+              enableDocumentViewer: true,
+              enableFilters: false,
+            }}
           />
-        )}
+        ) : null}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

@@ -7,13 +7,12 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LogStream } from '@kbn/logs-shared-plugin/public';
 import React, { useMemo } from 'react';
+import { LazySavedSearchComponent } from '@kbn/saved-search-component';
+import useAsync from 'react-use/lib/useAsync';
 import { InfraLoadingPanel } from '../../../../../../components/loading';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
-import { useLogViewReference } from '../../../../../../hooks/use_log_view_reference';
 import { buildCombinedAssetFilter } from '../../../../../../utils/filters/build';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { useLogsSearchUrlState } from '../../../hooks/use_logs_search_url_state';
@@ -37,9 +36,28 @@ export const LogsTabContent = () => {
 
 export const LogsTabLogStreamContent = () => {
   const [filterQuery] = useLogsSearchUrlState();
-  const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
+  const {
+    getDateRangeAsTimestamp,
+    searchCriteria: { dateRange },
+  } = useUnifiedSearchContext();
+
+  const {
+    services: {
+      logsDataAccess: {
+        services: { logSourcesService },
+      },
+      embeddable,
+      dataViews,
+      data: {
+        search: { searchSource },
+      },
+    },
+  } = useKibanaContextForPlugin();
+
   const { from, to } = useMemo(() => getDateRangeAsTimestamp(), [getDateRangeAsTimestamp]);
   const { hostNodes, loading } = useHostsViewContext();
+  const timeRange = useMemo(() => ({ from: dateRange.from, to: dateRange.to }), [dateRange]);
+  const logSources = useAsync(logSourcesService.getFlattenedLogSources);
 
   const hostsFilterQuery = useMemo(
     () =>
@@ -49,14 +67,6 @@ export const LogsTabLogStreamContent = () => {
       }),
     [hostNodes]
   );
-
-  const { logViewReference: logView, loading: logViewLoading } = useLogViewReference({
-    id: 'hosts-logs-view',
-    name: i18n.translate('xpack.infra.hostsViewPage.tabs.logs.LogsByHostWidgetName', {
-      defaultMessage: 'Logs by host',
-    }),
-    extraFields: ['host.name'],
-  });
 
   const logsLinkToStreamQuery = useMemo(() => {
     const hostsFilterQueryParam = createHostsFilterQueryParam(hostNodes.map((p) => p.name));
@@ -68,7 +78,7 @@ export const LogsTabLogStreamContent = () => {
     return filterQuery.query || hostsFilterQueryParam;
   }, [filterQuery.query, hostNodes]);
 
-  if (loading || logViewLoading || !logView) {
+  if (loading) {
     return <LogsTabLoadingContent />;
   }
 
@@ -79,25 +89,25 @@ export const LogsTabLogStreamContent = () => {
           <LogsSearchBar />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <LogsLinkToStream
-            startTime={from}
-            endTime={to}
-            query={logsLinkToStreamQuery}
-            logView={logView}
-          />
+          <LogsLinkToStream startTime={from} endTime={to} query={logsLinkToStreamQuery} />
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiFlexItem>
-        <LogStream
-          height={500}
-          logView={logView}
-          startTimestamp={from}
-          endTimestamp={to}
-          filters={[hostsFilterQuery]}
-          query={filterQuery}
-          showFlyoutAction
-        />
+        {logSources.value && embeddable ? (
+          <LazySavedSearchComponent
+            dependencies={{ embeddable, searchSource, dataViews }}
+            index={logSources.value}
+            timeRange={timeRange}
+            query={filterQuery}
+            filters={[hostsFilterQuery]}
+            height={'60vh'}
+            displayOptions={{
+              enableDocumentViewer: true,
+              enableFilters: true,
+            }}
+          />
+        ) : null}
       </EuiFlexItem>
     </EuiFlexGroup>
   );
