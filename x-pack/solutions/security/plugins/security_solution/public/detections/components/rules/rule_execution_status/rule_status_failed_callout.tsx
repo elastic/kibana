@@ -10,7 +10,7 @@ import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 
-import { NewChatByTitle, useAssistantOverlay } from '@kbn/elastic-assistant';
+import { NewChat } from '@kbn/elastic-assistant';
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import type { RuleExecutionStatus } from '../../../../../common/api/detection_engine/rule_monitoring';
 import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
@@ -48,16 +48,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
   const chatTitle = useMemo(() => {
     return `${ruleNameForChat} - ${title} ${date}`;
   }, [date, title, ruleNameForChat]);
-  const { showAssistantOverlay } = useAssistantOverlay(
-    'detection-rules',
-    chatTitle,
-    i18n.ASK_ASSISTANT_DESCRIPTION,
-    getPromptContext,
-    null,
-    i18n.ASK_ASSISTANT_USER_PROMPT,
-    i18n.ASK_ASSISTANT_TOOLTIP,
-    isAssistantEnabled
-  );
+
   if (!shouldBeDisplayed) {
     return null;
   }
@@ -92,9 +83,18 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
           {message}
         </EuiCodeBlock>
         {hasAssistantPrivilege && (
-          <NewChatByTitle showAssistantOverlay={showAssistantOverlay} color={color}>
+          <NewChat
+            category="detection-rules"
+            color={color}
+            conversationId={chatTitle}
+            description={i18n.ASK_ASSISTANT_DESCRIPTION}
+            getPromptContext={getPromptContext}
+            suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
+            tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
+            isAssistantEnabled={isAssistantEnabled}
+          >
             {i18n.ASK_ASSISTANT_ERROR_BUTTON}
-          </NewChatByTitle>
+          </NewChat>
         )}
       </EuiCallOut>
     </div>
