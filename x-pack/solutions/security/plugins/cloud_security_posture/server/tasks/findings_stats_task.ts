@@ -353,7 +353,7 @@ const getVulnStatsTrendDocIndexingPromises = (
         cloudAccountId,
         {
           cloudAccountId: accountScore.key,
-          cloudAccountName: accountScore.cloud_account_name.buckets[0].key,
+          cloudAccountName: accountScore.cloud_account_name.buckets[0]?.key || '',
           critical: accountScore.critical.doc_count,
           high: accountScore.high.doc_count,
           medium: accountScore.medium.doc_count,
