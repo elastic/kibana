@@ -51,9 +51,7 @@ export function getViewDiscoverSessionAction(application: ApplicationStart, loca
       const { capabilities } = application;
       const hasDiscoverPermissions =
         (capabilities.discover_v2.show as boolean) || (capabilities.discover_v2.save as boolean);
-
-      if (!hasDiscoverPermissions) return false;
-      return compatibilityCheck(embeddable);
+      return hasDiscoverPermissions && compatibilityCheck(embeddable);
     }
   } as ActionDefinition<EmbeddableApiContext>
 }
