@@ -117,7 +117,7 @@ export const MetricItemIcon = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPopoverTitle>
-          <div style={{ width: '300px' }}>
+          <div style={{ width: '300px', overflowWrap: 'break-word' }}>
             {latestPing?.url?.full && (
               <>
                 {i18n.translate('xpack.synthetics.metricItemIcon.div.urlLabel', {
