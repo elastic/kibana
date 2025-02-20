@@ -187,7 +187,7 @@ export interface FunctionDefinition {
   examples?: string[];
   validate?: (fnDef: ESQLFunction) => ESQLMessage[];
   operator?: string;
-  customSnippet?: string;
+  customParametersSnippet?: string;
 }
 
 export interface CommandSuggestParams<CommandName extends string> {

@@ -701,7 +701,7 @@ const enrichQueryStringFunction = (functionDefinition: FunctionDefinition): Func
   ) {
     return {
       ...functionDefinition,
-      customSnippet: `"""$0"""`,
+      customParametersSnippet: `"""$0"""`,
     };
   }
   return functionDefinition;
@@ -834,7 +834,7 @@ function printGeneratedFunctionsFile(
     functionDefinition: FunctionDefinition,
     functionNames: string[]
   ) => {
-    const { type, name, description, alias, signatures, operator, customSnippet } =
+    const { type, name, description, alias, signatures, operator, customParametersSnippet } =
       functionDefinition;
 
     let functionName = operator?.toLowerCase() ?? name.toLowerCase();
@@ -858,7 +858,9 @@ function printGeneratedFunctionsFile(
     supportedOptions: ${JSON.stringify(functionDefinition.supportedOptions)},
     validate: ${functionDefinition.validate || 'undefined'},
     examples: ${JSON.stringify(functionDefinition.examples || [])},${
-      customSnippet ? `\ncustomSnippet: ${JSON.stringify(customSnippet)},` : ''
+      customParametersSnippet
+        ? `\ncustomParametersSnippet: ${JSON.stringify(customParametersSnippet)},`
+        : ''
     }
 }`;
   };
