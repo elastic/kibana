@@ -116,7 +116,7 @@ export function StreamsList({
             </h2>
           </EuiTitle>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
+            <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="spaceBetween">
               {Object.keys(collapsed).length === 0 ? (
                 <EuiButtonEmpty
                   data-test-subj="streamsAppStreamsListCollapseAllButton"
@@ -142,23 +142,26 @@ export function StreamsList({
                   })}
                 </EuiButtonEmpty>
               )}
-              <EuiFlexItem grow={true} />
-              <EuiSwitch
-                label={i18n.translate('xpack.streams.streamsTable.showClassicStreams', {
-                  defaultMessage: 'Show classic streams',
-                })}
-                compressed
-                checked={showClassic}
-                onChange={(e) => setShowClassic(e.target.checked)}
-              />
-              <EuiSwitch
-                label={i18n.translate('xpack.streams.streamsTable.shortStreamNames', {
-                  defaultMessage: 'Short stream names',
-                })}
-                compressed
-                checked={shortNames}
-                onChange={(e) => setShortNames(e.target.checked)}
-              />
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup gutterSize="s">
+                  <EuiSwitch
+                    label={i18n.translate('xpack.streams.streamsTable.showClassicStreams', {
+                      defaultMessage: 'Show classic streams',
+                    })}
+                    compressed
+                    checked={showClassic}
+                    onChange={(e) => setShowClassic(e.target.checked)}
+                  />
+                  <EuiSwitch
+                    label={i18n.translate('xpack.streams.streamsTable.shortStreamNames', {
+                      defaultMessage: 'Short stream names',
+                    })}
+                    compressed
+                    checked={shortNames}
+                    onChange={(e) => setShortNames(e.target.checked)}
+                  />
+                </EuiFlexGroup>
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         </>
@@ -260,7 +263,7 @@ function StreamNode({
             color="text"
             href={router.link('/{key}', { path: { key: node.name } })}
           >
-            {shortNames && node.type === 'wired' ? node.name.split('.').pop() : node.name}
+            {shortNames && node.type === 'wired' ? getSegments(node.name).pop() : node.name}
           </EuiLink>
         </EuiToolTip>
         {node.type === 'root' && (
@@ -330,7 +333,12 @@ function StreamNode({
           <EuiFlexGroup direction="column" gutterSize="xs">
             {node.children.map((child, index) => (
               <NestedView key={child.name} last={index === node.children.length - 1}>
-                <StreamNode node={child} collapsed={collapsed} setCollapsed={setCollapsed} shortNames={shortNames}/>
+                <StreamNode
+                  node={child}
+                  collapsed={collapsed}
+                  setCollapsed={setCollapsed}
+                  shortNames={shortNames}
+                />
               </NestedView>
             ))}
           </EuiFlexGroup>
