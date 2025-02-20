@@ -977,7 +977,9 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
             if (!sslKeyInput.value && sslKeySecretInput.value) {
               secrets = {
                 ...(secrets ?? {}),
-                key: sslKeySecretInput.value,
+                ssl: {
+                  key: sslKeySecretInput.value,
+                },
               };
             }
             return {

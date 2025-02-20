@@ -201,7 +201,7 @@ async function hashSecrets(output: PreconfiguredOutput) {
     const key = await hashSecret(output.secrets?.ssl?.key);
     secrets = {
       ...(secrets ? secrets : {}),
-      key,
+      ssl: { key },
     };
   }
 
