@@ -4,11 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
+import type {
+  ObservabilitySharedPluginSetup,
+  ObservabilitySharedPluginStart,
+} from '@kbn/observability-shared-plugin/public';
 import type { StreamsPluginSetup, StreamsPluginStart } from '@kbn/streams-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { SharePublicSetup, SharePublicStart } from '@kbn/share-plugin/public/plugin';
@@ -19,31 +23,27 @@ import {
   ObservabilityAIAssistantPublicSetup,
   ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { AppMountParameters } from '@kbn/core/public';
+import { StreamsAppPublicSetup, StreamsAppPublicStart } from '@kbn/streams-app-plugin/public';
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
 
-export interface StreamsApplicationProps {
-  appMountParameters: AppMountParameters;
-  PageTemplate: React.FC<React.PropsWithChildren<{}>>;
-}
-
-export type StreamsApplicationComponentType = React.FC<StreamsApplicationProps>;
-
-export interface StreamsAppSetupDependencies {
+export interface ObservabilityStreamsWrapperSetupDependencies {
   streams: StreamsPluginSetup;
-  data: DataPublicPluginSetup;
+  streamsApp: StreamsAppPublicSetup;
   dataViews: DataViewsPublicPluginSetup;
+  observabilityShared: ObservabilitySharedPluginSetup;
   unifiedSearch: {};
   share: SharePublicSetup;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicSetup;
 }
 
-export interface StreamsAppStartDependencies {
+export interface ObservabilityStreamsWrapperStartDependencies {
   streams: StreamsPluginStart;
+  streamsApp: StreamsAppPublicStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  observabilityShared: ObservabilitySharedPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   share: SharePublicStart;
   savedObjectsTagging: SavedObjectTaggingPluginStart;
@@ -52,8 +52,6 @@ export interface StreamsAppStartDependencies {
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
 }
 
-export interface StreamsAppPublicSetup {}
+export interface ObservabilityStreamsWrapperPublicSetup {}
 
-export interface StreamsAppPublicStart {
-  createStreamsApplicationComponent: () => StreamsApplicationComponentType;
-}
+export interface ObservabilityStreamsWrapperPublicStart {}

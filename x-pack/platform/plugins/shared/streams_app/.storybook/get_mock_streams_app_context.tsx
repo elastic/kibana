@@ -9,7 +9,6 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
-import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
@@ -27,7 +26,6 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
     core,
     dependencies: {
       start: {
-        observabilityShared: {} as unknown as ObservabilitySharedPluginStart,
         dataViews: {} as unknown as DataViewsPublicPluginStart,
         data: {} as unknown as DataPublicPluginStart,
         unifiedSearch: {} as unknown as UnifiedSearchPublicPluginStart,

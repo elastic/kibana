@@ -13,9 +13,16 @@ import type {
   StreamsAppSetupDependencies,
   StreamsAppStartDependencies,
   ConfigSchema,
+  StreamsApplicationComponentType,
+  StreamsApplicationProps,
 } from './types';
 
-export type { StreamsAppPublicSetup, StreamsAppPublicStart };
+export type {
+  StreamsAppPublicSetup,
+  StreamsAppPublicStart,
+  StreamsApplicationComponentType,
+  StreamsApplicationProps,
+};
 
 export const plugin: PluginInitializer<
   StreamsAppPublicSetup,

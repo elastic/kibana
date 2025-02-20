@@ -9,4 +9,5 @@ import { IDataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public';
 
 export interface StreamsAppServices {
   dataStreamsClient: Promise<IDataStreamsStatsClient>;
+  PageTemplate: React.FC<React.PropsWithChildren<{}>>;
 }
