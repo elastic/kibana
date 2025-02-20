@@ -152,15 +152,6 @@ export class ServerlessSearchPlugin
       visibleIn: [],
       async mount({}: AppMountParameters) {
         const [coreStart] = await core.getStartServices();
-        const query = new URLSearchParams(window.location.search);
-        const onboardingToken = query.get('onboarding_token');
-        // note: test with http://localhost:5601/app/cloud/onboarding?next=/app/elasticsearch&onboarding_token=vector
-        if (onboardingToken) {
-          localStorage.setItem(
-            WORKFLOW_LOCALSTORAGE_KEY,
-            onboardingTokenToWorkflowId(onboardingToken)
-          );
-        }
         coreStart.chrome.docTitle.change(homeTitle);
         coreStart.application.navigateToApp(searchIndices.startAppId);
         return () => {};
@@ -220,17 +211,4 @@ export class ServerlessSearchPlugin
   }
 
   public stop() {}
-}
-
-// possible onboarding tokens now: 'general' | 'vector' | 'timeseries' for serverless, 'vectorsearch' or 'search' for hosted
-
-function onboardingTokenToWorkflowId(token: string | undefined | null): WorkflowId {
-  switch (token) {
-    case 'vector':
-      return 'vector';
-    case 'vectorsearch':
-      return 'vector';
-    default:
-      return 'default';
-  }
 }

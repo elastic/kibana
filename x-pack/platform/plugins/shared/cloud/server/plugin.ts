@@ -265,9 +265,6 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
           : undefined;
 
         const solutionType = this.config.onboarding?.default_solution;
-        if (queryOnboardingToken) {
-          normalizedRoute.searchParams.set('onboarding_token', queryOnboardingToken);
-        }
 
         if (queryOnboardingToken || queryOnboardingSecurity) {
           core

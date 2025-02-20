@@ -14,4 +14,4 @@ export const INDEX_DOCUMENT_ROUTE = '/internal/search_indices/{indexName}/docume
 
 export const SEARCH_DOCUMENTS_ROUTE = '/internal/search_indices/{indexName}/documents/search';
 
-export const GET_ONBOARDING_DATA_ROUTE = '/internal/search_indices/onboarding_data';
+export const GET_ONBOARDING_TOKEN_ROUTE = '/internal/search_indices/onboarding_token';
