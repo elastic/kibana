@@ -197,6 +197,11 @@ export class AutomaticAgentUpgradeTask {
     return `policy_id:${agentPolicy.id} AND ${AgentStatusKueryHelper.buildKueryForActiveAgents()}`;
   }
 
+  private getOnOrUpdatingToVersionKuery(agentPolicy: AgentPolicy, version: string) {
+    const updatingToKuery = `(status:updating AND upgrade_details.target_version:${version} AND NOT upgrade_details.state:UPG_FAILED)`;
+    return `policy_id:${agentPolicy.id} AND (agent.version:${version} OR ${updatingToKuery})`;
+  }
+
   private async processRequiredVersion(
     esClient: ElasticsearchClient,
     soClient: SavedObjectsClientContract,
@@ -216,7 +221,7 @@ export class AutomaticAgentUpgradeTask {
     const totalOnOrUpdatingToTargetVersionAgents = await this.getAgentCount(
       esClient,
       soClient,
-      `policy_id:${agentPolicy.id} AND agent.version:${requiredVersion.version} OR (status:updating AND upgrade_details.target_version:${requiredVersion.version})`
+      this.getOnOrUpdatingToVersionKuery(agentPolicy, requiredVersion.version)
     );
     numberOfAgentsForUpgrade -= totalOnOrUpdatingToTargetVersionAgents;
     // Return if target is already met.
@@ -288,12 +293,7 @@ export class AutomaticAgentUpgradeTask {
       if (agentsForUpgrade.length >= numberOfAgentsForUpgrade) {
         break;
       }
-      const keepAgentForUpgrade =
-        agent.agent.version !== version &&
-        (agent.status !== 'updating' || AgentStatusKueryHelper.isStuckInUpdating(agent)) &&
-        isAgentUpgradeable(agent) &&
-        semverGt(version, agent.agent.version);
-      if (keepAgentForUpgrade) {
+      if (this.isAgentEligibleForUpgrade(agent, version)) {
         agentsForUpgrade.push(agent);
       }
     }
@@ -312,6 +312,15 @@ export class AutomaticAgentUpgradeTask {
     }
 
     return numberOfAgentsForUpgrade - agentsForUpgrade.length;
+  }
+
+  private isAgentEligibleForUpgrade(agent: AgentWithDefinedVersion, version: string) {
+    return (
+      isAgentUpgradeable(agent) &&
+      (agent.status !== 'updating' ||
+        (agent.agent.version === version && AgentStatusKueryHelper.isStuckInUpdating(agent))) &&
+      semverGt(version, agent.agent.version)
+    );
   }
 
   private getUpgradeDurationSeconds(nAgents: number) {
