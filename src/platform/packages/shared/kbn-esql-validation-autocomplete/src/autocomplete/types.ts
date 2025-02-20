@@ -15,7 +15,7 @@ export type ItemKind =
   | 'Field'
   | 'Variable'
   | 'Class'
-  | FunctionDefinitionTypes.OPERATOR
+  | 'Operator'
   | 'Value'
   | 'Constant'
   | 'Keyword'

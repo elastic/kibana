@@ -95,7 +95,7 @@ export function getOperatorSuggestion(fn: FunctionDefinition): SuggestionRawDefi
     label: fn.name.toUpperCase(),
     text: hasArgs ? `${fn.name.toUpperCase()} $0` : fn.name.toUpperCase(),
     asSnippet: hasArgs,
-    kind: FunctionDefinitionTypes.OPERATOR,
+    kind: 'Operator',
     detail: fn.description,
     documentation: {
       value: '',
