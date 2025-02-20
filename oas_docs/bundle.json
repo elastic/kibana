@@ -4360,6 +4360,10 @@
                       "start": {
                         "description": "Start date and time of the snooze schedule in ISO 8601 format.",
                         "type": "string"
+                      },
+                      "timezone": {
+                        "description": "Timezone of the snooze schedule.",
+                        "type": "string"
                       }
                     },
                     "required": [
