@@ -24,12 +24,9 @@ interface ShareMenuManagerStartDeps {
 
 export class ShareMenuManager {
   private isOpen = false;
-  private shareRegistry?: ShareRegistry;
   private container = document.createElement('div');
 
   start({ core, shareRegistry, isServerless }: ShareMenuManagerStartDeps) {
-    this.shareRegistry = shareRegistry;
-
     return {
       /**
        * Collects share menu items from registered providers and mounts the share context menu under
@@ -42,7 +39,7 @@ export class ShareMenuManager {
           options.onClose?.();
         };
 
-        const menuItems = this.shareRegistry!.resolveShareItemsForShareContext({
+        const menuItems = shareRegistry.resolveShareItemsForShareContext({
           ...options,
           onClose,
         });

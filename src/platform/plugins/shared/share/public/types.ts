@@ -77,6 +77,7 @@ export type LinkShare = ShareImplementationFactory<
 export type EmbedShare = ShareImplementationFactory<
   'embed',
   {
+    anonymousAccess: AnonymousAccessServiceContract;
     shortUrlService: ReturnType<BrowserUrlService['shortUrls']['get']>;
   }
 >;
@@ -107,6 +108,10 @@ export interface ExportShare
     sortOrder?: number;
     label: string;
     exportType: string;
+    disabled?: boolean;
+    helpText?: ReactElement;
+    renderCopyURLButton?: ReactElement;
+    generateExportButton?: ReactElement;
     generateAssetExport: (args: ScreenshotExportOpts) => Promise<unknown>;
     generateValueExport: (args: ScreenshotExportOpts) => string | undefined;
     warnings?: Array<{ title: string; message: string }>;
@@ -120,14 +125,14 @@ export interface ExportShare
 export type ShareActionIntents = LinkShare | EmbedShare | ShareIntegration;
 
 // Example usage
-type LinkShareConfig = ShareImplementation<LinkShare>;
-type EmbedShareConfig = ShareImplementation<EmbedShare>;
-type ExportShareConfig = ShareImplementation<ExportShare>;
-type ShareIntegrationConfig = ShareImplementation<ShareIntegration>;
+export type LinkShareConfig = ShareImplementation<LinkShare>;
+export type EmbedShareConfig = ShareImplementation<EmbedShare>;
+export type ExportShareConfig = ShareImplementation<ExportShare>;
+export type ShareIntegrationConfig = ShareImplementation<ShareIntegration>;
 
 export type ShareConfigs = LinkShareConfig | EmbedShareConfig | ExportShareConfig;
 
-type LinkShareUIConfig = ShareActionUserInputBase<{
+export type LinkShareUIConfig = ShareActionUserInputBase<{
   /**
    *
    * @description allows a consumer to provide a custom method which when invoked
@@ -136,7 +141,7 @@ type LinkShareUIConfig = ShareActionUserInputBase<{
   delegatedShareUrlHandler?: () => string;
 }>;
 
-type EmbedShareUIConfig = ShareActionUserInputBase<{
+export type EmbedShareUIConfig = ShareActionUserInputBase<{
   embedUrlParamExtensions?: UrlParamExtension[];
   computeAnonymousCapabilities?: (anonymousUserCapabilities: Capabilities) => boolean;
   /**

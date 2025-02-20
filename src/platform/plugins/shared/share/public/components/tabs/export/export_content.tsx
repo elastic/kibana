@@ -26,12 +26,12 @@ import {
   EuiIconTip,
   type EuiRadioGroupOption,
 } from '@elastic/eui';
-import { ShareMenuItemV2 } from '../../../types';
 import { type IShareContext } from '../../context';
+import { ExportShareConfig } from '../../../types';
 
 type ExportProps = Pick<IShareContext, 'isDirty' | 'objectId' | 'objectType' | 'onClose'> & {
   layoutOption?: 'print';
-  aggregateReportTypes: ShareMenuItemV2[];
+  aggregateReportTypes: ExportShareConfig[];
   intl: InjectedIntl;
   publicAPIEnabled: boolean;
 };
@@ -195,7 +195,7 @@ const ExportContentUi = ({
           <EuiFlexGroup direction="row" justifyContent={'spaceBetween'}>
             <EuiRadioGroup
               options={radioOptions}
-              onChange={(id) => setSelectedRadio(id as SupportedExportTypes)}
+              onChange={(id) => setSelectedRadio(id)}
               name="image reporting radio group"
               idSelected={selectedRadio}
               legend={{

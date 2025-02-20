@@ -27,8 +27,8 @@ import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { format as formatUrl, parse as parseUrl } from 'url';
 import { AnonymousAccessState } from '../../../../common';
 
-import type { IShareContext, ShareContextObjectTypeConfig } from '../../context';
-import type { EmbedShare } from '../../../services/share_orchestrator';
+import type { IShareContext } from '../../context';
+import type { EmbedShareConfig, EmbedShareUIConfig } from '../../../types';
 
 type EmbedProps = Pick<
   IShareContext,
@@ -38,11 +38,10 @@ type EmbedProps = Pick<
   | 'objectType'
   | 'isDirty'
   | 'allowShortUrl'
-  | 'anonymousAccess'
-> & {
-  objectConfig?: ShareContextObjectTypeConfig;
-  shortUrlService: ReturnType<EmbedShare['config']>['shortUrlService'];
-};
+> &
+  Extract<EmbedShareConfig, 'config'> & {
+    objectConfig: EmbedShareUIConfig;
+  };
 
 interface UrlParams {
   [extensionName: string]: {

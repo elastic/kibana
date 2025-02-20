@@ -13,7 +13,7 @@ import {
   ShareMenuRegistrySetup,
   ShareMenuRegistryStart,
 } from './share_menu_registry';
-import { ShareMenuItemV2, ShareContext } from '../types';
+import { ShareContext } from '../types';
 
 const createSetupMock = (): jest.Mocked<ShareMenuRegistrySetup> => {
   const setup = {
