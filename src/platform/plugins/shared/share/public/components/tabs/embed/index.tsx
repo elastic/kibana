@@ -33,10 +33,10 @@ const EmbedTabContent: NonNullable<IEmbedTab['content']> = ({ state, dispatch })
         shareableUrlForSavedObject,
         shareableUrl,
         objectType,
-        objectConfig: objectTypeMeta?.config?.embed,
+        objectConfig: objectTypeMeta?.config,
         isDirty,
-        anonymousAccess: shareMenuItems.config.anonymousAccess,
         allowShortUrl,
+        anonymousAccess: shareMenuItems.config.anonymousAccess,
         shortUrlService: shareMenuItems.config.shortUrlService,
         shareableUrlLocatorParams,
       }}
