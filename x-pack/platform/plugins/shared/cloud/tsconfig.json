@@ -19,7 +19,6 @@
     "@kbn/logging",
     "@kbn/core-saved-objects-server",
     "@kbn/std",
-    "@kbn/cloud-plugin",
   ],
   "exclude": [
     "target/**/*",
