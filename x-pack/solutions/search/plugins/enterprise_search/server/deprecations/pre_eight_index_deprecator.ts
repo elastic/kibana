@@ -12,7 +12,6 @@ const ENT_SEARCH_DATASTREAM_PATTERN = [
   'logs-enterprise_search.*',
   'logs-app_search.*',
   'logs-workplace_search.*',
-  'logs-crawler-*',
 ];
 
 export interface EnterpriseSearchIndexMapping {
