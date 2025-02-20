@@ -6,10 +6,12 @@
  */
 
 import { KbnClient } from '@kbn/scout';
+import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_BULK_ACTION,
 } from '@kbn/security-solution-plugin/common/constants';
+import { CUSTOM_QUERY_RULE } from '../../../test_data';
 
 export interface DetectionRuleFixture {
   createCustomQueryRule: () => Promise<void>;
@@ -18,23 +20,11 @@ export interface DetectionRuleFixture {
 
 export const createDetectionRuleFixture = async ({ kbnClient }: { kbnClient: KbnClient }) => {
   const detectionRuleHelper: DetectionRuleFixture = {
-    createCustomQueryRule: async () => {
-      const indexes = ['apm-*-transaction*'];
+    createCustomQueryRule: async (body: QueryRuleCreateProps = CUSTOM_QUERY_RULE) => {
       await kbnClient.request({
         method: 'POST',
         path: DETECTION_ENGINE_RULES_URL,
-        body: {
-          index: indexes,
-          name: 'Alert Testing Query',
-          description: 'Tests a simple query',
-          enabled: true,
-          risk_score: 1,
-          rule_id: 'rule1',
-          severity: 'high',
-          type: 'query',
-          query: '*:*',
-          from: '1900-01-01T00:00:00.000Z',
-        },
+        body,
       });
     },
 
