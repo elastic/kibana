@@ -21,8 +21,8 @@ import {
   IlmLocatorParams,
   PolicyFromES,
 } from '@kbn/index-lifecycle-management-common-shared';
-import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import { i18n } from '@kbn/i18n';
+import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../hooks/use_kibana';
 import { EditLifecycleModal, LifecycleEditAction } from './modal';
 import { RetentionSummary } from './summary';
