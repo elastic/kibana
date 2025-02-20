@@ -48,8 +48,8 @@ export function GoodBadEventsChart({ data, slo, onBrushed, isLoading }: Props) {
   const dateFormat = uiSettings.get('dateFormat');
 
   const intervalInMilliseconds =
-    data && data.length > 2
-      ? moment(data[1].date).valueOf() - moment(data[0].date).valueOf()
+    data && data.results.length > 2
+      ? moment(data.results[1].date).valueOf() - moment(data.results[0].date).valueOf()
       : 10 * 60000;
 
   const goodEventId = i18n.translate('xpack.slo.sloDetails.eventsChartPanel.goodEventsLabel', {
@@ -137,7 +137,7 @@ export function GoodBadEventsChart({ data, slo, onBrushed, isLoading }: Props) {
         xAccessor="key"
         yAccessors={['value']}
         stackAccessors={[0]}
-        data={(data ?? []).map((datum) => ({
+        data={(data?.results ?? []).map((datum) => ({
           key: new Date(datum.date).getTime(),
           value: datum.events?.good,
         }))}
@@ -155,7 +155,7 @@ export function GoodBadEventsChart({ data, slo, onBrushed, isLoading }: Props) {
         xAccessor="key"
         yAccessors={['value']}
         stackAccessors={[0]}
-        data={(data ?? []).map((datum) => ({
+        data={(data?.results ?? []).map((datum) => ({
           key: new Date(datum.date).getTime(),
           value: datum.events?.bad,
         }))}

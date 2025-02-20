@@ -43,7 +43,7 @@ export function MetricTimesliceEventsChart({ slo, isLoading, data, onBrushed }: 
     return null;
   }
 
-  const values = (data ?? []).map((row) => row.sliValue);
+  const values = (data?.results ?? []).map((row) => row.sliValue);
   const maxValue = max(values);
   const minValue = min(values);
   const threshold = slo.indicator.params.metric.threshold;
@@ -105,7 +105,7 @@ export function MetricTimesliceEventsChart({ slo, isLoading, data, onBrushed }: 
         yScaleType={ScaleType.Linear}
         xAccessor="date"
         yAccessors={['value']}
-        data={(data ?? []).map((datum) => ({
+        data={(data?.results ?? []).map((datum) => ({
           date: new Date(datum.date).getTime(),
           value: datum.sliValue,
         }))}

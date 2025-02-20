@@ -59,7 +59,7 @@ export function useGetPreviewData({
         signal,
       });
 
-      return Array.isArray(response) ? response : [];
+      return response;
     },
     retry: false,
     refetchOnWindowFocus: false,
