@@ -29,15 +29,10 @@ import { useMlKibana } from '../contexts/kibana';
 
 interface DeleteModelsModalProps {
   models: TrainedModelUIItem[];
-  onClose: (refreshList?: boolean) => void;
-  setSelectedModels: (models: TrainedModelUIItem[]) => void;
+  onClose: (refreshList?: boolean, deleteSucceeded?: boolean) => void;
 }
 
-export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({
-  models,
-  onClose,
-  setSelectedModels,
-}) => {
+export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose }) => {
   const {
     services: {
       mlServices: { trainedModelsService },
@@ -76,8 +71,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({
       })
       .subscribe({
         next: () => {
-          setSelectedModels([]);
-          onClose(false);
+          onClose(false, true);
         },
         error: () => {
           setIsDeleting(false);
@@ -89,7 +83,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({
 
   return canDeleteModel ? (
     <EuiModal
-      onClose={onClose.bind(null, false)}
+      onClose={onClose.bind(null, false, false)}
       initialFocus="[name=cancelModelDeletion]"
       data-test-subj="mlModelsDeleteModal"
     >
@@ -192,7 +186,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose.bind(null, false)} name="cancelModelDeletion">
+        <EuiButtonEmpty onClick={onClose.bind(null, false, false)} name="cancelModelDeletion">
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.deleteModal.cancelButtonLabel"
             defaultMessage="Cancel"

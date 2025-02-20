@@ -688,7 +688,7 @@ export const ModelsList: FC<Props> = ({
         </div>
         {modelsToDelete.length > 0 && (
           <DeleteModelsModal
-            onClose={(refreshList) => {
+            onClose={(refreshList, deleteSucceeded) => {
               setItemIdToExpandedRowMap((prev) => {
                 const newMap = { ...prev };
                 modelsToDelete.forEach((model) => {
@@ -699,11 +699,14 @@ export const ModelsList: FC<Props> = ({
 
               setModelsToDelete([]);
 
+              if (deleteSucceeded) {
+                setSelectedModels([]);
+              }
+
               if (refreshList) {
                 fetchModels();
               }
             }}
-            setSelectedModels={setSelectedModels}
             models={modelsToDelete}
           />
         )}
