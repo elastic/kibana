@@ -10,11 +10,11 @@
 import { HttpSetup } from '@kbn/core/public';
 import type { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import type {
-  RulesSettingsAlertsDeletion,
-  RulesSettingsAlertsDeletionProperties,
+  RulesSettingsAlertDeletion,
+  RulesSettingsAlertDeletionProperties,
 } from '@kbn/alerting-types/rule_settings';
 
-const rewriteBodyRes: RewriteRequestCase<RulesSettingsAlertsDeletion> = ({ ...rest }: any) => ({
+const rewriteBodyRes: RewriteRequestCase<RulesSettingsAlertDeletion> = ({ ...rest }: any) => ({
   ...rest,
 });
 
@@ -23,11 +23,11 @@ export const updateAlertsDeletionSettings = async ({
   alertsDeletionSettings,
 }: {
   http: HttpSetup;
-  alertsDeletionSettings: RulesSettingsAlertsDeletionProperties;
+  alertsDeletionSettings: RulesSettingsAlertDeletionProperties;
 }) => {
   // TODO: https://github.com/elastic/kibana/issues/209258
 
-  const response: AsApiContract<RulesSettingsAlertsDeletion> = await new Promise((resolve) => {
+  const response: AsApiContract<RulesSettingsAlertDeletion> = await new Promise((resolve) => {
     resolve({
       is_active_alerts_deletion_enabled: alertsDeletionSettings.isActiveAlertsDeletionEnabled,
       is_inactive_alerts_deletion_enabled: alertsDeletionSettings.isInactiveAlertsDeletionEnabled,

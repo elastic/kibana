@@ -12,11 +12,14 @@ import {
   DEFAULT_FLAPPING_SETTINGS,
   DEFAULT_QUERY_DELAY_SETTINGS,
   RulesSettingsFlappingProperties,
+  DEFAULT_ALERT_DELETION_SETTINGS,
+  RulesSettingsAlertDeletionClientApi,
 } from '../types';
 
 export type RulesSettingsClientMock = jest.Mocked<RulesSettingsClientApi>;
 export type RulesSettingsFlappingClientMock = jest.Mocked<RulesSettingsFlappingClientApi>;
 export type RulesSettingsQueryDelayClientMock = jest.Mocked<RulesSettingsQueryDelayClientApi>;
+export type RulesSettingsAlertDeletionClientMock = jest.Mocked<RulesSettingsAlertDeletionClientApi>;
 
 // Warning: Becareful when resetting all mocks in tests as it would clear
 // the mock return value on the flapping
@@ -29,9 +32,14 @@ const createRulesSettingsClientMock = (flappingOverride?: RulesSettingsFlappingP
     get: jest.fn().mockReturnValue(DEFAULT_QUERY_DELAY_SETTINGS),
     update: jest.fn(),
   };
+  const alertDeletionMocked: RulesSettingsAlertDeletionClientMock = {
+    get: jest.fn().mockReturnValue(DEFAULT_ALERT_DELETION_SETTINGS),
+    update: jest.fn(),
+  };
   const mocked: RulesSettingsClientMock = {
     flapping: jest.fn().mockReturnValue(flappingMocked),
     queryDelay: jest.fn().mockReturnValue(queryDelayMocked),
+    alertDeletion: jest.fn().mockReturnValue(alertDeletionMocked),
   };
   return mocked;
 };

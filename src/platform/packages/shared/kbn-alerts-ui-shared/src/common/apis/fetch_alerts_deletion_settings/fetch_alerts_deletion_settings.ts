@@ -9,7 +9,7 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import type { AsApiContract } from '@kbn/actions-types';
-import type { RulesSettingsAlertsDeletion } from '@kbn/alerting-types';
+import type { RulesSettingsAlertDeletion } from '@kbn/alerting-types';
 
 const transformAlertsDeletionSettingsResponse = ({
   active_alerts_deletion_threshold: activeAlertsDeletionThreshold,
@@ -20,7 +20,7 @@ const transformAlertsDeletionSettingsResponse = ({
   created_by: createdBy,
   updated_at: updatedAt,
   updated_by: updatedBy,
-}: AsApiContract<RulesSettingsAlertsDeletion>): RulesSettingsAlertsDeletion => ({
+}: AsApiContract<RulesSettingsAlertDeletion>): RulesSettingsAlertDeletion => ({
   activeAlertsDeletionThreshold,
   isActiveAlertsDeletionEnabled,
   inactiveAlertsDeletionThreshold,
