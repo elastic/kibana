@@ -167,6 +167,9 @@ export function ObservabilityAlertsCommonProvider({
 
   // Query Bar
   const getQueryBar = async () => {
+    await retry.try(async () => {
+      await testSubjects.existOrFail('queryInput');
+    });
     return await testSubjects.find('queryInput');
   };
 

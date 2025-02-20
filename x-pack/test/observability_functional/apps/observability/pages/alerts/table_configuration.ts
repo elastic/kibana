@@ -20,7 +20,7 @@ import {
 } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default ({ getService, getPageObject }: FtrProviderContext) => {
+export default ({ getService }: FtrProviderContext) => {
   describe('Observability alerts table configuration', function () {
     this.tags('includeFirefox');
 
