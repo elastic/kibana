@@ -309,20 +309,24 @@ export async function buildWebpackBundles(
   log: ToolingLog,
   { quiet, dist }: { quiet: boolean; dist: boolean }
 ) {
-  async function buildPackage(packageName: string) {
+  async function buildPackages(packageNames: string[]) {
     const stdioOptions: Array<'ignore' | 'pipe' | 'inherit'> = quiet
       ? ['ignore', 'pipe', 'pipe']
       : ['inherit', 'inherit', 'inherit'];
 
-    await execa('yarn', ['build', ...(dist ? ['--dist'] : [])], {
-      cwd: path.resolve(REPO_ROOT, 'packages', packageName),
-      stdio: stdioOptions,
-    });
+    log.info(`Building webpack artifacts for packages: ${packageNames.join(', ')}`);
+
+    const packagesFilter = ['--projects', packageNames.join(',')];
+    await execa(
+      'nx',
+      ['run-many', '--target=build', ...packagesFilter, ...(dist ? ['--', '--dist'] : [])],
+      {
+        cwd: path.resolve(REPO_ROOT),
+        stdio: stdioOptions,
+      }
+    );
   }
 
-  const packageNames = ['kbn-ui-shared-deps-npm', 'kbn-ui-shared-deps-src', 'kbn-monaco'];
-  for (const packageName of packageNames) {
-    log.info(`building ${packageName}`);
-    await buildPackage(packageName);
-  }
+  const packageNames = ['@kbn/ui-shared-deps-npm', '@kbn/ui-shared-deps-src', '@kbn/monaco'];
+  await buildPackages(packageNames);
 }
