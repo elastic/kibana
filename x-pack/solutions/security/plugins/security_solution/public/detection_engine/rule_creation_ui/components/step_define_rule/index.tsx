@@ -505,6 +505,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             onSavedQueryError: handleSavedQueryError,
             defaultSavedQuery,
             onOpenTimeline,
+            bubbleSubmitEvent: true,
           } as QueryBarFieldProps
         }
       />

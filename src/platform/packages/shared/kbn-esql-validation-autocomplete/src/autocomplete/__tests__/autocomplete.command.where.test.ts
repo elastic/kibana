@@ -60,7 +60,7 @@ describe('WHERE <expression>', () => {
           'where',
           'boolean',
           {
-            builtin: true,
+            operators: true,
           },
           undefined,
           ['and', 'or', 'not']
@@ -122,7 +122,7 @@ describe('WHERE <expression>', () => {
           ...getFunctionSignaturesByReturnType('where', 'any', { scalar: true }),
         ]);
         await assertSuggestions(`from a | where keywordField >= keywordField ${op} doubleField /`, [
-          ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['double']),
+          ...getFunctionSignaturesByReturnType('where', 'boolean', { operators: true }, ['double']),
         ]);
         await assertSuggestions(
           `from a | where keywordField >= keywordField ${op} doubleField == /`,
@@ -158,9 +158,12 @@ describe('WHERE <expression>', () => {
       const { assertSuggestions } = await setup();
 
       await assertSuggestions('from a | stats a=avg(doubleField) | where a /', [
-        ...getFunctionSignaturesByReturnType('where', 'any', { builtin: true, skipAssign: true }, [
-          'double',
-        ]),
+        ...getFunctionSignaturesByReturnType(
+          'where',
+          'any',
+          { operators: true, skipAssign: true },
+          ['double']
+        ),
       ]);
     });
 
@@ -212,8 +215,8 @@ describe('WHERE <expression>', () => {
       const { assertSuggestions } = await setup();
 
       await assertSuggestions('from a | where log10(doubleField) /', [
-        ...getFunctionSignaturesByReturnType('where', 'double', { builtin: true }, ['double']),
-        ...getFunctionSignaturesByReturnType('where', 'boolean', { builtin: true }, ['double']),
+        ...getFunctionSignaturesByReturnType('where', 'double', { operators: true }, ['double']),
+        ...getFunctionSignaturesByReturnType('where', 'boolean', { operators: true }, ['double']),
       ]);
     });
 
@@ -239,7 +242,7 @@ describe('WHERE <expression>', () => {
         ...getFunctionSignaturesByReturnType(
           'where',
           'boolean',
-          { builtin: true },
+          { operators: true },
           ['boolean'],
           [':']
         ),
@@ -320,7 +323,7 @@ describe('WHERE <expression>', () => {
         ...getFunctionSignaturesByReturnType(
           'where',
           'any',
-          { builtin: true, skipAssign: true },
+          { operators: true, skipAssign: true },
           ['double'],
           [':']
         ),

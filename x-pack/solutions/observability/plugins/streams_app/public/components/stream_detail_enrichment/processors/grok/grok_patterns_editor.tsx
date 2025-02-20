@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   useFormContext,
   useFieldArray,
@@ -25,8 +24,10 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import React from 'react';
 import { SortableList } from '../../sortable_list';
 import { GrokFormState } from '../../types';
+import { GrokAiSuggestions } from './grok_ai_suggestions';
 
 export const GrokPatternsEditor = () => {
   const {
@@ -59,41 +60,45 @@ export const GrokPatternsEditor = () => {
   const getRemovePatternHandler = (id: number) => (fields.length > 1 ? () => remove(id) : null);
 
   return (
-    <EuiFormRow
-      label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditorLabel',
-        { defaultMessage: 'Grok patterns editor' }
-      )}
-    >
-      <EuiPanel color="subdued" paddingSize="s">
-        <SortableList onDragItem={handlerPatternDrag}>
-          {fieldsWithError.map((field, idx) => (
-            <DraggablePatternInput
-              key={field.id}
-              field={field}
-              idx={idx}
-              onRemove={getRemovePatternHandler(idx)}
-              inputProps={register(`patterns.${idx}.value`, {
-                required: i18n.translate(
-                  'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditorRequiredError',
-                  { defaultMessage: 'A pattern is required.' }
-                ),
-              })}
-            />
-          ))}
-        </SortableList>
+    <>
+      <EuiFormRow
+        label={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditorLabel',
+          { defaultMessage: 'Grok patterns editor' }
+        )}
+      >
+        <EuiPanel color="subdued" paddingSize="none">
+          <SortableList onDragItem={handlerPatternDrag}>
+            {fieldsWithError.map((field, idx) => (
+              <DraggablePatternInput
+                key={field.id}
+                field={field}
+                idx={idx}
+                onRemove={getRemovePatternHandler(idx)}
+                inputProps={register(`patterns.${idx}.value`, {
+                  required: i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditorRequiredError',
+                    { defaultMessage: 'A pattern is required.' }
+                  ),
+                })}
+              />
+            ))}
+          </SortableList>
+        </EuiPanel>
+      </EuiFormRow>
+      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" wrap>
+        <GrokAiSuggestions />
         <EuiButtonEmpty
           data-test-subj="streamsAppGrokPatternsEditorAddPatternButton"
           onClick={handleAddPattern}
-          iconType="plusInCircle"
         >
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditor.addPattern',
             { defaultMessage: 'Add pattern' }
           )}
         </EuiButtonEmpty>
-      </EuiPanel>
-    </EuiFormRow>
+      </EuiFlexGroup>
+    </>
   );
 };
 
@@ -132,7 +137,7 @@ const DraggablePatternInput = ({
           <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
             <EuiPanel
               color="transparent"
-              paddingSize="xs"
+              paddingSize="s"
               {...provided.dragHandleProps}
               aria-label={i18n.translate(
                 'xpack.streams.streamDetailView.managementTab.enrichment.processor.grokEditor.dragHandleLabel',

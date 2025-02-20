@@ -46,6 +46,8 @@ import { suggest as suggestForJoin } from '../autocomplete/commands/join';
 import { suggest as suggestForFrom } from '../autocomplete/commands/from';
 import { suggest as suggestForRow } from '../autocomplete/commands/row';
 import { suggest as suggestForShow } from '../autocomplete/commands/show';
+import { suggest as suggestForGrok } from '../autocomplete/commands/grok';
+import { suggest as suggestForDissect } from '../autocomplete/commands/dissect';
 
 const statsValidator = (command: ESQLCommand) => {
   const messages: ESQLMessage[] = [];
@@ -141,7 +143,7 @@ const statsValidator = (command: ESQLCommand) => {
       }
       // now check that:
       // * the agg function is at root level
-      // * or if it's a builtin function, then all operands are agg functions or literals
+      // * or if it's a operators function, then all operands are agg functions or literals
       // * or if it's a eval function then all arguments are agg functions or literals
       function checkFunctionContent(arg: ESQLFunction) {
         // TODO the grouping function check may not
@@ -454,7 +456,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
-    examples: ['… | dissect a "%{b} %{c}"'],
+    examples: ['… | DISSECT a "%{b} %{c}" APPEND_SEPARATOR = ":"'],
     options: [appendSeparatorOption],
     modes: [],
     signature: {
@@ -464,6 +466,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
     },
+    suggest: suggestForDissect,
   },
   {
     name: 'grok',
@@ -471,7 +474,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
       defaultMessage:
         'Extracts multiple string values from a single string input, based on a pattern',
     }),
-    examples: ['… | grok a "%{IP:b} %{NUMBER:c}"'],
+    examples: ['… | GROK a "%{IP:b} %{NUMBER:c}"'],
     options: [],
     modes: [],
     signature: {
@@ -481,6 +484,7 @@ export const commandDefinitions: Array<CommandDefinition<any>> = [
         { name: 'pattern', type: 'string', constantOnly: true },
       ],
     },
+    suggest: suggestForGrok,
   },
   {
     name: 'mv_expand',

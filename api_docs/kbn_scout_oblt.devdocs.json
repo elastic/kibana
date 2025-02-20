@@ -1229,7 +1229,9 @@
           "EsArchiverFixture",
           "; } & { uiSettings: ",
           "UiSettingsFixture",
-          "; } & { fleetApi: ",
+          "; } & ",
+          "SynthtraceFixture",
+          " & { fleetApi: ",
           "FleetApiFixture",
           "; } & { kbnUrl: ",
           {

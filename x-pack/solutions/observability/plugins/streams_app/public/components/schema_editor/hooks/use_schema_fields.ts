@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import {
   NamedFieldDefinitionConfig,
   WiredStreamGetResponse,
@@ -14,10 +13,12 @@ import {
 } from '@kbn/streams-schema';
 import { isEqual, omit } from 'lodash';
 import { useMemo, useCallback } from 'react';
+import { useAbortController } from '@kbn/react-hooks';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { SchemaField, isSchemaFieldTyped } from '../types';
 import { convertToFieldDefinitionConfig } from '../utils';
+import { getFormattedError } from '../../../util/errors';
 
 export const useSchemaFields = ({
   definition,
@@ -143,7 +144,7 @@ export const useSchemaFields = ({
             defaultMessage: 'Something went wrong editing the {field} field',
             values: { field: field.name },
           }),
-          toastMessage: error.body.message,
+          toastMessage: getFormattedError(error).message,
           toastLifeTimeMs: 5000,
         });
       }
@@ -191,7 +192,7 @@ export const useSchemaFields = ({
             defaultMessage: 'Something went wrong unmapping the {field} field',
             values: { field: fieldName },
           }),
-          toastMessage: error.message,
+          toastMessage: getFormattedError(error).message,
           toastLifeTimeMs: 5000,
         });
       }
