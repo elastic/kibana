@@ -39,6 +39,7 @@ import {
   useStreamsEnrichmentEvents,
   useStreamsEnrichmentSelector,
 } from './services/stream_enrichment_service';
+import { SimulatorContextProvider } from './simulator_context';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -93,15 +94,19 @@ export function StreamDetailEnrichmentContentImpl() {
   const hasChanges = useStreamsEnrichmentSelector((state) => state.context.hasStagedChanges);
   const isSavingChanges = useStreamsEnrichmentSelector((state) => state.matches('updatingStream'));
 
+  const processingSimulator = useProcessingSimulator({ definition, processors });
+
   const {
     hasLiveChanges,
     isLoading,
     refreshSamples,
-    samples,
+    filteredSamples,
     simulation,
     tableColumns,
     watchProcessor,
-  } = useProcessingSimulator({ definition, processors });
+    selectedDocsFilter,
+    setSelectedDocsFilter,
+  } = processingSimulator;
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges || hasLiveChanges,
@@ -131,66 +136,70 @@ export function StreamDetailEnrichmentContentImpl() {
     : undefined;
 
   return (
-    <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
-      <EuiSplitPanel.Inner
-        paddingSize="none"
-        css={css`
-          display: flex;
-          overflow: hidden auto;
-        `}
-      >
-        <EuiResizableContainer>
-          {(EuiResizablePanel, EuiResizableButton) => (
-            <>
-              <EuiResizablePanel
-                initialSize={30}
-                minSize="400px"
-                tabIndex={0}
-                paddingSize="none"
-                css={verticalFlexCss}
-              >
-                <ProcessorsEditor
-                  definition={definition}
-                  processors={processors}
-                  onUpdateProcessor={updateProcessor}
-                  onDeleteProcessor={deleteProcessor}
-                  onWatchProcessor={watchProcessor}
-                  onAddProcessor={addProcessor}
-                  onReorderProcessor={reorderProcessors}
-                  simulation={simulation}
-                />
-              </EuiResizablePanel>
-              <EuiResizableButton indicator="border" accountForScrollbars="both" />
-              <EuiResizablePanel
-                initialSize={70}
-                minSize="300px"
-                tabIndex={0}
-                paddingSize="s"
-                css={verticalFlexCss}
-              >
-                <MemoSimulationPlayground
-                  definition={definition}
-                  columns={tableColumns}
-                  simulation={simulation}
-                  samples={samples}
-                  onRefreshSamples={refreshSamples}
-                  isLoading={isLoading}
-                />
-              </EuiResizablePanel>
-            </>
-          )}
-        </EuiResizableContainer>
-      </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner grow={false} color="subdued">
-        <ManagementBottomBar
-          confirmTooltip={confirmTooltip}
-          onCancel={resetChanges}
-          onConfirm={saveChanges}
-          isLoading={isSavingChanges}
-          disabled={isSubmitDisabled}
-        />
-      </EuiSplitPanel.Inner>
-    </EuiSplitPanel.Outer>
+    <SimulatorContextProvider processingSimulator={processingSimulator} definition={definition}>
+      <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
+        <EuiSplitPanel.Inner
+          paddingSize="none"
+          css={css`
+            display: flex;
+            overflow: hidden auto;
+          `}
+        >
+          <EuiResizableContainer>
+            {(EuiResizablePanel, EuiResizableButton) => (
+              <>
+                <EuiResizablePanel
+                  initialSize={40}
+                  minSize="480px"
+                  tabIndex={0}
+                  paddingSize="none"
+                  css={verticalFlexCss}
+                >
+                  <ProcessorsEditor
+                    definition={definition}
+                    processors={processors}
+                    onUpdateProcessor={updateProcessor}
+                    onDeleteProcessor={deleteProcessor}
+                    onWatchProcessor={watchProcessor}
+                    onAddProcessor={addProcessor}
+                    onReorderProcessor={reorderProcessors}
+                    simulation={simulation}
+                  />
+                </EuiResizablePanel>
+                <EuiResizableButton indicator="border" accountForScrollbars="both" />
+                <EuiResizablePanel
+                  initialSize={60}
+                  minSize="300px"
+                  tabIndex={0}
+                  paddingSize="s"
+                  css={verticalFlexCss}
+                >
+                  <MemoSimulationPlayground
+                    definition={definition}
+                    columns={tableColumns}
+                    simulation={simulation}
+                    filteredSamples={filteredSamples}
+                    onRefreshSamples={refreshSamples}
+                    isLoading={isLoading}
+                    selectedDocsFilter={selectedDocsFilter}
+                    setSelectedDocsFilter={setSelectedDocsFilter}
+                  />
+                </EuiResizablePanel>
+              </>
+            )}
+          </EuiResizableContainer>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner grow={false} color="subdued">
+          <ManagementBottomBar
+            confirmTooltip={confirmTooltip}
+            onCancel={resetChanges}
+            onConfirm={saveChanges}
+            isLoading={isSavingChanges}
+            disabled={isSubmitDisabled}
+          />
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+    </SimulatorContextProvider>
   );
 }
 

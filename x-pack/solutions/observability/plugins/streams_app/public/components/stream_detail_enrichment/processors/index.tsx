@@ -41,6 +41,7 @@ import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 import { StreamsEnrichmentEvents } from '../services/stream_enrichment_service';
 import { ProcessorMetrics, UseProcessingSimulatorReturn } from '../hooks/use_processing_simulator';
 import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
+import { UseDefinitionReturn } from '../hooks/use_definition';
 
 export interface ProcessorPanelProps {
   definition: IngestStreamGetResponse;
