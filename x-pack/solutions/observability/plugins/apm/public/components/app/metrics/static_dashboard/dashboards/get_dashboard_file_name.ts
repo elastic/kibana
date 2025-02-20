@@ -4,6 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { ElasticAgentName, OpenTelemetryAgentName } from '@kbn/elastic-agent-utils';
+import { ELASTIC_AGENT_NAMES } from '@kbn/elastic-agent-utils';
+import { OPEN_TELEMETRY_BASE_AGENT_NAMES } from '@kbn/elastic-agent-utils/src/agent_names';
+
 interface DashboardFileNamePartsProps {
   agentName?: string;
   telemetrySdkName?: string;
@@ -18,12 +23,25 @@ export interface DashboardFileParts extends SdkNameAndLanguage {
   dataFormat: 'otel_native' | 'classic_apm';
 }
 
-const getSdkNameAndLanguage = (agentNameParts: string[]): SdkNameAndLanguage => {
+const ElasticAgentNamesSet = new Set(ELASTIC_AGENT_NAMES);
+const OpenTelemetryBaseSet = new Set(OPEN_TELEMETRY_BASE_AGENT_NAMES);
+
+const isElasticAgent = (agentName: string): agentName is ElasticAgentName => {
+  return ElasticAgentNamesSet.has(agentName as ElasticAgentName) === true;
+};
+
+const isOpenTelemetry = (agentNameBase: string): agentNameBase is OpenTelemetryAgentName => {
+  return OpenTelemetryBaseSet.has(agentNameBase as OpenTelemetryAgentName) === true;
+};
+
+const getSdkNameAndLanguage = (agentName: string): SdkNameAndLanguage => {
   const LANGUAGE_INDEX = 1;
-  if (agentNameParts.length === 1) {
-    return { sdkName: 'apm', language: agentNameParts[0] };
+  if (isElasticAgent(agentName)) {
+    return { sdkName: 'apm', language: agentName };
   }
-  if (agentNameParts[0].toLocaleLowerCase() === 'opentelemetry') {
+  const agentNameParts = agentName.split('/');
+
+  if (isOpenTelemetry(agentNameParts[0].toLocaleLowerCase() as OpenTelemetryAgentName)) {
     if (agentNameParts[agentNameParts.length - 1] === 'elastic') {
       return { sdkName: 'edot', language: agentNameParts[LANGUAGE_INDEX] };
     }
@@ -41,8 +59,7 @@ export const getDashboardFileName = ({
     throw new Error(`agent name is not defined`);
   }
   const dataFormat = telemetrySdkName ? 'otel_native' : 'classic_apm';
-  const agentNameParts = agentName.split('/');
-  const { sdkName, language } = getSdkNameAndLanguage(agentNameParts);
+  const { sdkName, language } = getSdkNameAndLanguage(agentName);
   if (!dataFormat || !sdkName || !language) {
     return undefined;
   }
