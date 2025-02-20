@@ -123,7 +123,13 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
   ].flat();
 };
 
+// See https://github.com/elastic/kibana/pull/211847/files#diff-0efda7ded7bf269691d976e1dbefcda12399cac99d4c788bf422f63527f30260R10-R15
 const ENT_SEARCH_INDICES_PREFIX = '.ent-search-';
+const ENT_SEARCH_DATASTREAM_PREFIXES = [
+  'logs-enterprise_search.',
+  'logs-app_search.',
+  'logs-workplace_search.',
+];
 
 export const getEnrichedDeprecations = async (
   dataClient: IScopedClusterClient
@@ -173,11 +179,15 @@ export const getEnrichedDeprecations = async (
         deprecation.index
       );
 
+      // Early exclusion of deprecations
       if (
-        // Early exclusion of enterprise search indices that need to be reindexed
-        deprecation.index &&
-        deprecation.index.startsWith(ENT_SEARCH_INDICES_PREFIX) &&
-        correctiveAction?.type === 'reindex'
+        (deprecation.type === 'index_settings' &&
+          correctiveAction?.type === 'reindex' &&
+          deprecation.index?.startsWith(ENT_SEARCH_INDICES_PREFIX)) ||
+        (deprecation.type === 'data_streams' &&
+          correctiveAction?.type === 'dataStream' &&
+          correctiveAction.metadata.reindexRequired &&
+          ENT_SEARCH_DATASTREAM_PREFIXES.some((prefix) => deprecation.index?.startsWith(prefix)))
       ) {
         return [];
       }
