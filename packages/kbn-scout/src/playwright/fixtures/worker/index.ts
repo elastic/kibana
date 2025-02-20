@@ -28,3 +28,6 @@ export type { ScoutSpaceParallelFixture } from './scout_space';
 
 export { apiFixtures } from './apis';
 export type { ApiFixtures, ApiParallelWorkerFixtures } from './apis';
+
+export { synthtraceFixture } from './synthtrace';
+export type { SynthtraceFixture } from './synthtrace';

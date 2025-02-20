@@ -5,7 +5,14 @@
  * 2.0.
  */
 import React, { lazy, Suspense, useMemo, useCallback, useEffect, useRef } from 'react';
-import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
+import {
+  COLOR_MODES_STANDARD,
+  EuiButtonGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonText,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { AvailablePackagesHookType, IntegrationCardItem } from '@kbn/fleet-plugin/public';
 import { noop } from 'lodash';
 
@@ -30,6 +37,7 @@ import { useIntegrationCardList } from './use_integration_card_list';
 import { IntegrationTabId } from './types';
 import { IntegrationCardTopCallout } from './callouts/integration_card_top_callout';
 import { trackOnboardingLinkClick } from '../../../lib/telemetry';
+import { useIntegrationCardGridTabsStyles } from './integration_card_grid_tabs.styles';
 
 export interface IntegrationsCardGridTabsProps {
   installedIntegrationsCount: number;
@@ -49,6 +57,8 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
   ({ installedIntegrationsCount, isAgentRequired, useAvailablePackages }) => {
     const { spaceId } = useOnboardingContext();
     const scrollElement = useRef<HTMLDivElement>(null);
+    const { colorMode } = useEuiTheme();
+    const isDark = colorMode === COLOR_MODES_STANDARD.dark;
     const [toggleIdSelected, setSelectedTabIdToStorage] = useStoredIntegrationTabId(
       spaceId,
       DEFAULT_TAB.id
@@ -77,6 +87,8 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
     });
 
     const selectedTab = useMemo(() => INTEGRATION_TABS_BY_ID[toggleIdSelected], [toggleIdSelected]);
+
+    const buttonGroupStyles = useIntegrationCardGridTabsStyles();
 
     const onSearchTermChanged = useCallback(
       (searchQuery: string) => {
@@ -144,6 +156,7 @@ export const IntegrationsCardGridTabsComponent = React.memo<IntegrationsCardGrid
       >
         <EuiFlexItem grow={false}>
           <EuiButtonGroup
+            css={isDark ? buttonGroupStyles : undefined}
             buttonSize="compressed"
             color="primary"
             idSelected={toggleIdSelected}

@@ -41,6 +41,7 @@ run(
 
     log.verbose('Loading Storybook:', configDir);
 
+    // TODO: once storybook is upgraded into a newer version, --no-deprecation flag could be removed when invoking it through the package.json script
     runStorybookCli({ configDir, name: alias });
   },
   {

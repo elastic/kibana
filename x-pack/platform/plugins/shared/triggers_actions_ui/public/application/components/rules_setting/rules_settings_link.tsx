@@ -19,6 +19,7 @@ export const RulesSettingsLink = () => {
 
   const { show, readFlappingSettingsUI, readQueryDelaySettingsUI } = capabilities.rulesSettings;
 
+  // TODO: https://github.com/elastic/kibana/issues/208615
   if (!show || (!readFlappingSettingsUI && !readQueryDelaySettingsUI)) {
     return null;
   }

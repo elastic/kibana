@@ -337,6 +337,7 @@ export const GridExample = ({
               rowHeight,
               columnCount: DASHBOARD_GRID_COLUMN_COUNT,
             }}
+            useCustomDragHandle={true}
             renderPanelContents={renderPanelContents}
             onLayoutChange={(newLayout) => {
               const { panels, rows } = gridLayoutToDashboardPanelMap(
