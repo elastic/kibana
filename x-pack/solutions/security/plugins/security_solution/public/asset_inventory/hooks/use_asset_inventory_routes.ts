@@ -14,7 +14,7 @@ export const useAssetInventoryRoutes = () => {
 
   return useMemo(() => {
     const postEnableAssetInventory = async () => {
-      return http.fetch<{ response: string }>('/api/asset_inventory/enable', {
+      return http.fetch<{ response: string }>('/api/entity_store/enable', {
         method: 'POST',
         version: API_VERSIONS.public.v1,
         body: JSON.stringify({}),
@@ -33,7 +33,7 @@ export const useAssetInventoryRoutes = () => {
 
     return {
       getAssetInventoryStatus,
-      enableAssetInventory,
+      postEnableAssetInventory,
     };
   }, [http]);
 };

@@ -6,7 +6,6 @@
  */
 
 import React, { lazy, Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
@@ -17,6 +16,7 @@ import { SecurityRoutePageWrapper } from '../common/components/security_route_pa
 import { DataViewContext } from './hooks/data_view_context';
 import { AssetInventoryProvider } from './provider';
 import { useDataView } from './hooks/use_asset_inventory_data_table/use_data_view';
+import { Loading } from './components/loading';
 
 const AssetsPageLazy = lazy(() => import('./pages'));
 
@@ -49,7 +49,7 @@ export const AssetInventoryRoutes = () => {
         <SecurityRoutePageWrapper pageName={SecurityPageName.assetInventory}>
           <DataViewContext.Provider value={dataViewContextValue}>
             <SecuritySolutionPageWrapper noPadding>
-              <Suspense fallback={<EuiLoadingSpinner />}>
+              <Suspense fallback={<Loading />}>
                 <AssetInventoryProvider>
                   <AssetsPageLazy />
                 </AssetInventoryProvider>
