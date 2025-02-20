@@ -34,15 +34,6 @@ jest.mock('../services/maintenance_windows_api/delete', () => ({
 
 const { deleteMaintenanceWindow } = jest.requireMock('../services/maintenance_windows_api/delete');
 
-// const maintenanceWindow = {
-//   title: 'delete',
-//   duration: 1,
-//   rRule: {
-//     dtstart: '2023-03-23T19:16:21.293Z',
-//     tzid: 'America/New_York',
-//   },
-// };
-
 let appMockRenderer: AppMockRenderer;
 
 describe('useArchiveMaintenanceWindow', () => {
@@ -57,9 +48,8 @@ describe('useArchiveMaintenanceWindow', () => {
       wrapper: appMockRenderer.AppWrapper,
     });
 
-    await act(async () => {
-      result.current.mutate({ maintenanceWindowId: '123' });
-    });
+    result.current.mutate({ maintenanceWindowId: '123' });
+
     await waitFor(() => expect(mockAddSuccess).toBeCalledWith('Deleted maintenance window'));
   });
 
@@ -70,9 +60,7 @@ describe('useArchiveMaintenanceWindow', () => {
       wrapper: appMockRenderer.AppWrapper,
     });
 
-    await act(async () => {
-      result.current.mutate({ maintenanceWindowId: '123' });
-    });
+    result.current.mutate({ maintenanceWindowId: '123' });
 
     await waitFor(() =>
       expect(mockAddDanger).toBeCalledWith('Failed to delete maintenance window.')
