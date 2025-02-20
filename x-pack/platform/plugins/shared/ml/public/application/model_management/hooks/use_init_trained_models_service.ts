@@ -13,6 +13,9 @@ import type { ScheduledDeployment, TrainedModelsService } from '../trained_model
 import { useMlKibana } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
 import { useSavedObjectsApiService } from '../../services/ml_api_service/saved_objects';
+import { useEnabledFeatures, useMlServerInfo } from '../../contexts/ml';
+import { useCloudCheck } from '../../components/node_available_warning/hooks';
+import { getNewJobLimits } from '../../services/ml_server_info';
 
 /**
  * Hook that initializes the shared TrainedModelsService instance with storage
@@ -31,6 +34,11 @@ export function useInitTrainedModelsService(
   const { displayErrorToast, displaySuccessToast } = useToastNotificationService();
 
   const savedObjectsApiService = useSavedObjectsApiService();
+
+  const { showNodeInfo } = useEnabledFeatures();
+  const { nlpSettings } = useMlServerInfo();
+  const cloudInfo = useCloudCheck();
+  const mlServerLimits = getNewJobLimits();
 
   const defaultScheduledDeployments = useMemo(() => [], []);
 
@@ -54,6 +62,7 @@ export function useInitTrainedModelsService(
       savedObjectsApiService,
       canManageSpacesAndSavedObjects,
       telemetryService: telemetry,
+      deploymentParamsMapperConfig: [mlServerLimits, cloudInfo, showNodeInfo, nlpSettings],
     });
 
     return () => {

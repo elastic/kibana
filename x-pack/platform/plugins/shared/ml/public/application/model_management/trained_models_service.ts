@@ -33,6 +33,7 @@ import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { isEqual } from 'lodash';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import { i18n } from '@kbn/i18n';
+import type { MlServerLimits } from '../../../common/types/ml_server_info';
 import {
   isBaseNLPModelItem,
   isNLPModelItem,
@@ -40,20 +41,29 @@ import {
   type TrainedModelUIItem,
 } from '../../../common/types/trained_models';
 import type {
-  CommonDeploymentParams,
-  AdaptiveAllocationsParams,
   StartAllocationParams,
+  UpdateAllocationParams,
 } from '../services/ml_api_service/trained_models';
 import { type TrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import type { SavedObjectsApiService } from '../services/ml_api_service/saved_objects';
 import type { ITelemetryClient } from '../../services/telemetry/types';
 import type { DeploymentParamsUI } from './deployment_setup';
+import { DeploymentParamsMapper } from './deployment_params_mapper';
+import type { CloudInfo } from '../services/ml_server_info';
+import type { NLPSettings } from '../../../common/constants/app';
 
 interface ModelDownloadStatus {
   [modelId: string]: ModelDownloadState;
 }
 
 const DOWNLOAD_POLL_INTERVAL = 3000;
+
+export type DeploymentParamsMapperConfig = [
+  mlServerLimits: MlServerLimits,
+  cloudInfo: CloudInfo,
+  showNodeInfo: boolean,
+  nlpSettings?: NLPSettings
+];
 
 interface TrainedModelsServiceInit {
   scheduledDeployments$: BehaviorSubject<ScheduledDeployment[]>;
@@ -63,9 +73,12 @@ interface TrainedModelsServiceInit {
   savedObjectsApiService: SavedObjectsApiService;
   canManageSpacesAndSavedObjects: boolean;
   telemetryService: ITelemetryClient;
+  deploymentParamsMapperConfig: DeploymentParamsMapperConfig;
 }
 
-export type ScheduledDeployment = StartAllocationParams & { uiParams: DeploymentParamsUI };
+export interface ScheduledDeployment extends DeploymentParamsUI {
+  modelId: string;
+}
 
 export class TrainedModelsService {
   private readonly _reloadSubject$ = new Subject();
@@ -87,6 +100,7 @@ export class TrainedModelsService {
   private canManageSpacesAndSavedObjects!: boolean;
   private isInitialized = false;
   private telemetryService!: ITelemetryClient;
+  private deploymentParamsMapperConfig!: DeploymentParamsMapperConfig;
 
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
 
@@ -98,6 +112,7 @@ export class TrainedModelsService {
     savedObjectsApiService,
     canManageSpacesAndSavedObjects,
     telemetryService,
+    deploymentParamsMapperConfig,
   }: TrainedModelsServiceInit) {
     // Always cancel any pending destroy when trying to initialize
     if (this.destroySubscription) {
@@ -110,6 +125,7 @@ export class TrainedModelsService {
     this.subscription = new Subscription();
     this.isInitialized = true;
     this.canManageSpacesAndSavedObjects = canManageSpacesAndSavedObjects;
+    this.deploymentParamsMapperConfig = deploymentParamsMapperConfig;
 
     this.setScheduledDeployments = setScheduledDeployments;
     this._scheduledDeployments$ = scheduledDeployments$;
@@ -128,11 +144,11 @@ export class TrainedModelsService {
     distinctUntilChanged(isEqual)
   );
 
-  public get scheduledDeployments$(): Observable<StartAllocationParams[]> {
+  public get scheduledDeployments$(): Observable<ScheduledDeployment[]> {
     return this._scheduledDeployments$;
   }
 
-  public get scheduledDeployments(): StartAllocationParams[] {
+  public get scheduledDeployments(): ScheduledDeployment[] {
     return this._scheduledDeployments$.getValue();
   }
 
@@ -149,17 +165,10 @@ export class TrainedModelsService {
     this._reloadSubject$.next(timestamp);
   }
 
-  public startModelDeployment(
-    modelId: string,
-    deploymentParams: CommonDeploymentParams,
-    uiParams: DeploymentParamsUI,
-    adaptiveAllocationsParams?: AdaptiveAllocationsParams
-  ) {
+  public startModelDeployment(modelId: string, deploymentParams: DeploymentParamsUI) {
     const newDeployment = {
       modelId,
-      deploymentParams,
-      adaptiveAllocationsParams,
-      uiParams,
+      ...deploymentParams,
     };
     const currentDeployments = this._scheduledDeployments$.getValue();
     this.setScheduledDeployments?.([...currentDeployments, newDeployment]);
@@ -188,12 +197,14 @@ export class TrainedModelsService {
       });
   }
 
-  public updateModelDeployment(
-    modelId: string,
-    deploymentId: string,
-    config: AdaptiveAllocationsParams
-  ) {
-    from(this.trainedModelsApiService.updateModelDeployment(modelId, deploymentId, config))
+  public updateModelDeployment(modelId: string, config: DeploymentParamsUI) {
+    from(
+      this.trainedModelsApiService.updateModelDeployment(
+        modelId,
+        config.deploymentId!,
+        this.getUpdateModelAllocationParams(modelId, config)
+      )
+    )
       .pipe(
         finalize(() => {
           this.fetchModels();
@@ -207,7 +218,7 @@ export class TrainedModelsService {
             }),
             text: i18n.translate('xpack.ml.trainedModels.modelsList.updateSuccessText', {
               defaultMessage: '"{deploymentId}" has been updated successfully.',
-              values: { deploymentId },
+              values: { deploymentId: config.deploymentId },
             }),
           });
         },
@@ -216,7 +227,7 @@ export class TrainedModelsService {
             error,
             i18n.translate('xpack.ml.trainedModels.modelsList.updateFailed', {
               defaultMessage: 'Failed to update "{deploymentId}"',
-              values: { deploymentId },
+              values: { deploymentId: config.deploymentId },
             })
           );
         },
@@ -276,7 +287,7 @@ export class TrainedModelsService {
 
     // If removing by deploymentId, filter deployments matching that ID.
     if (deploymentId) {
-      updated = updated.filter((d) => d.deploymentParams.deployment_id !== deploymentId);
+      updated = updated.filter((d) => d.deploymentId !== deploymentId);
     }
 
     this.setScheduledDeployments?.(updated);
@@ -434,25 +445,18 @@ export class TrainedModelsService {
         return this.waitForModelReady(deployment.modelId);
       }),
       tap(() => this.setDeployingStateForModel(deployment.modelId)),
-      exhaustMap(() => {
+      map(() => this.getStartModelAllocationParams(deployment)),
+      exhaustMap((apiParams) => {
         return firstValueFrom(
-          this.trainedModelsApiService.startModelAllocation(deployment).pipe(
+          this.trainedModelsApiService.startModelAllocation(apiParams).pipe(
             tap({
-              next: (res) => {
-                const {
-                  modelId,
-                  uiParams: { optimized, adaptiveResources, vCPUUsage },
-                  deploymentParams,
-                } = deployment;
-
-                const { assignment } = res;
-
+              next: ({ assignment }) => {
                 this.telemetryService.trackTrainedModelsDeploymentCreated({
-                  model_id: modelId,
-                  optimized,
-                  adaptiveResources,
-                  vCPUUsage,
-                  number_of_allocations: deploymentParams.number_of_allocations,
+                  model_id: apiParams.modelId,
+                  optimized: deployment.optimized,
+                  adaptiveResources: deployment.adaptiveResources,
+                  vCPUUsage: deployment.vCPUUsage,
+                  number_of_allocations: apiParams.deploymentParams.number_of_allocations,
                   threads_per_allocation: assignment.task_parameters.threads_per_allocation,
                   min_number_of_allocations:
                     assignment.adaptive_allocations?.min_number_of_allocations,
@@ -467,7 +471,7 @@ export class TrainedModelsService {
                   text: i18n.translate('xpack.ml.trainedModels.modelsList.startSuccessText', {
                     defaultMessage: '"{deploymentId}" has started successfully.',
                     values: {
-                      deploymentId: deployment.deploymentParams.deployment_id,
+                      deploymentId: deployment.deploymentId,
                     },
                   }),
                 });
@@ -479,7 +483,7 @@ export class TrainedModelsService {
                 i18n.translate('xpack.ml.trainedModels.modelsList.startFailed', {
                   defaultMessage: 'Failed to start "{deploymentId}"',
                   values: {
-                    deploymentId: deployment.deploymentParams.deployment_id,
+                    deploymentId: deployment.deploymentId,
                   },
                 })
               );
@@ -488,7 +492,7 @@ export class TrainedModelsService {
             }),
             finalize(() => {
               this.removeScheduledDeployments({
-                deploymentId: deployment.deploymentParams.deployment_id!,
+                deploymentId: deployment.deploymentId,
               });
               // Manually update the BehaviorSubject to ensure proper cleanup
               // if user navigates away, as localStorage hook won't be available to handle updates
@@ -504,11 +508,50 @@ export class TrainedModelsService {
     );
   }
 
-  private isModelAlreadyDeployed(model: TrainedModelUIItem, deployment: StartAllocationParams) {
+  private getStartModelAllocationParams(deployment: ScheduledDeployment): StartAllocationParams {
+    const apiParams = new DeploymentParamsMapper(
+      deployment.modelId,
+      ...this.deploymentParamsMapperConfig
+    ).mapUiToApiDeploymentParams(deployment);
+
+    return {
+      modelId: deployment.modelId,
+      deploymentParams: {
+        deployment_id: apiParams.deployment_id,
+        threads_per_allocation: apiParams.threads_per_allocation!,
+        priority: apiParams.priority!,
+        number_of_allocations: apiParams.number_of_allocations,
+      },
+      ...(apiParams.adaptive_allocations && {
+        adaptiveAllocationsParams: {
+          adaptive_allocations: apiParams.adaptive_allocations,
+        },
+      }),
+    };
+  }
+
+  private getUpdateModelAllocationParams(
+    modelId: string,
+    uiParams: DeploymentParamsUI
+  ): UpdateAllocationParams {
+    const apiParams = new DeploymentParamsMapper(
+      modelId,
+      ...this.deploymentParamsMapperConfig
+    ).mapUiToApiDeploymentParams(uiParams);
+
+    return apiParams.adaptive_allocations
+      ? { adaptive_allocations: apiParams.adaptive_allocations }
+      : {
+          number_of_allocations: apiParams.number_of_allocations!,
+          adaptive_allocations: { enabled: false },
+        };
+  }
+
+  private isModelAlreadyDeployed(model: TrainedModelUIItem, deployment: ScheduledDeployment) {
     return !!(
       model &&
       isNLPModelItem(model) &&
-      (model.deployment_ids.includes(deployment.deploymentParams.deployment_id!) ||
+      (model.deployment_ids.includes(deployment.deploymentId!) ||
         model.state === MODEL_STATE.STARTING)
     );
   }
