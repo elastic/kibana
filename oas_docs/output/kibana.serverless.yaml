@@ -17881,6 +17881,22 @@ paths:
                                   proxy_headers: {}
                                   proxy_url:
                                     type: string
+                                  secrets:
+                                    additionalProperties: false
+                                    type: object
+                                    properties:
+                                      ssl:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          key:
+                                            additionalProperties: false
+                                            type: object
+                                            properties:
+                                              id:
+                                                type: string
+                                        required:
+                                          - key
                                   ssl:
                                     additionalProperties: false
                                     type: object
