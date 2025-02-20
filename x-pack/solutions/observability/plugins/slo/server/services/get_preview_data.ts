@@ -146,8 +146,8 @@ export class GetPreviewData {
           ],
         },
       },
-      aggs: {
-        perInterval: {
+      aggs: this.addExtraTermsOrMultiTermsAgg(
+        {
           date_histogram: {
             field: '@timestamp',
             fixed_interval: options.interval,
@@ -179,12 +179,14 @@ export class GetPreviewData {
             },
           },
         },
-      },
+        options.groupBy
+      ),
     });
 
     const results =
+      // @ts-ignore
       response.aggregations?.perInterval.buckets.map((bucket) => {
-        const good = (bucket.good?.value as number) ?? 0;
+        const good = bucket.good?.value ?? 0;
         const total = bucket.total?.value ?? 0;
         return {
           date: bucket.key_as_string,
@@ -197,7 +199,26 @@ export class GetPreviewData {
         };
       }) ?? [];
 
-    return { results };
+    // @ts-ignore
+    const groups = response.aggregations?.perGroup?.buckets?.reduce((acc, group) => {
+      // @ts-ignore
+      acc[group.key] = group.perInterval.buckets.map((bucket) => {
+        const good = bucket.good?.value ?? 0;
+        const total = bucket.total?.value ?? 0;
+        return {
+          date: bucket.key_as_string,
+          sliValue: computeSLIForPreview(good, total),
+          events: {
+            good,
+            bad: total - good,
+            total,
+          },
+        };
+      });
+      return acc;
+    }, {});
+
+    return { results, groups };
   }
 
   private async getAPMTransactionErrorPreviewData(
