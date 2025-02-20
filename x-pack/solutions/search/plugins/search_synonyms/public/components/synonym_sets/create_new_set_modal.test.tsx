@@ -77,7 +77,7 @@ describe('CreateNewSetModal', () => {
     });
   });
 
-  it('should note use mutation when cancel is pressed', () => {
+  it('should not call mutation when cancel is pressed', () => {
     render(
       <Wrapper>
         <CreateSynonymsSetModal onClose={onClose} />
