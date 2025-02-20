@@ -26,10 +26,18 @@ jest.mock('rxjs', () => {
 });
 
 const mockSearch = jest.fn();
+const mockAddDanger = jest.fn();
 (getUnifiedDocViewerServices as jest.Mock).mockReturnValue({
   data: {
     search: {
       search: mockSearch,
+    },
+  },
+  core: {
+    notifications: {
+      toasts: {
+        addDanger: mockAddDanger,
+      },
     },
   },
 });
@@ -74,8 +82,9 @@ describe('useTransaction hook', () => {
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
   });
 
-  it('should handle errors and set transaction.name as empty string', async () => {
-    (lastValueFrom as jest.Mock).mockResolvedValue(new Error('Search error'));
+  it('should handle errors and set transaction.name as empty string, and show a toast error', async () => {
+    const errorMessage = 'Search error';
+    (lastValueFrom as jest.Mock).mockRejectedValue(new Error(errorMessage));
 
     const { result } = renderHook(() => useTransactionContext(), { wrapper });
 
@@ -84,6 +93,12 @@ describe('useTransaction hook', () => {
     expect(result.current.loading).toBe(false);
     expect(result.current.transaction).toEqual({ name: '' });
     expect(lastValueFrom).toHaveBeenCalledTimes(1);
+    expect(mockAddDanger).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: 'An error occurred while fetching the transaction',
+        text: errorMessage,
+      })
+    );
   });
 
   it('should set transaction.name as empty string and stop loading when transactionId is not provided', async () => {
