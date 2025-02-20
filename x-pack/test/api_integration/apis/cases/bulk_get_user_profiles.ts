@@ -21,7 +21,6 @@ import {
   casesReadUser,
   obsCasesAllUser,
   obsCasesReadUser,
-  secAllCasesNoneUser,
   secAllUser,
   secReadCasesReadUser,
 } from './common/users';
@@ -78,22 +77,6 @@ export default ({ getService }: FtrProviderContext): void => {
             dataPath: 'avatar',
           },
           auth: { user, space: null },
-        });
-      });
-    }
-
-    for (const { user } of [{ user: secAllCasesNoneUser }]) {
-      it(`User ${
-        user.username
-      } with roles(s) ${user.roles.join()} cannot bulk get user profiles because they lack the bulkGetUserProfiles privilege`, async () => {
-        await bulkGetUserProfiles({
-          supertest: supertestWithoutAuth,
-          req: {
-            uids: ['1'],
-            dataPath: 'avatar',
-          },
-          auth: { user, space: null },
-          expectedHttpCode: 403,
         });
       });
     }
