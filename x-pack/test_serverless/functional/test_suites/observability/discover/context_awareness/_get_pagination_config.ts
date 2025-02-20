@@ -6,14 +6,10 @@
  */
 
 import kbnRison from '@kbn/rison';
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, discover, svlCommonPage } = getPageObjects([
-    'common',
-    'discover',
-    'svlCommonPage',
-  ]);
+  const PageObjects = getPageObjects(['common', 'discover', 'svlCommonPage']);
   const testSubjects = getService('testSubjects');
   const dataViews = getService('dataViews');
   const dataGrid = getService('dataGrid');
@@ -32,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('extension getPaginationConfig', () => {
     before(async () => {
-      await svlCommonPage.loginAsAdmin();
+      await PageObjects.svlCommonPage.loginAsViewer();
       // To load more than 500 records
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.update({
@@ -49,15 +45,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('ES|QL mode', () => {
       it('should render default pagination with page numbers', async () => {
+        const limit = 200;
         const state = kbnRison.encode({
           dataSource: { type: 'esql' },
-          query: { esql: 'from logstash* | sort @timestamp desc' },
+          query: { esql: `from logstash* | sort @timestamp desc | limit ${limit}` },
         });
-        await common.navigateToActualUrl('discover', `?_a=${state}`, {
+        await PageObjects.common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
-        await discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
 
+        await dataGrid.scrollTo(200);
+
+        await PageObjects.discover.waitUntilSearchingHasFinished();
         // In ESQL Mode, pagination is disabled
         await testSubjects.missingOrFail('tablePaginationPopoverButton');
         await testSubjects.missingOrFail('pagination-button-previous');
@@ -67,15 +67,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('data view mode', () => {
       it('should render default pagination with page numbers', async () => {
-        await common.navigateToActualUrl('discover', undefined, {
+        const defaultPageLimit = 500;
+        await PageObjects.common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
         await dataViews.switchTo('my-example-logs,logstash*');
-        await discover.waitUntilSearchingHasFinished();
-        await testSubjects.existOrFail('tablePaginationPopoverButton');
-        await testSubjects.existOrFail('pagination-button-previous');
-        await testSubjects.existOrFail('pagination-button-next');
-        await dataGrid.checkCurrentRowsPerPageToBe(100);
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await dataGrid.scrollTo(defaultPageLimit);
+
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await testSubjects.missingOrFail('tablePaginationPopoverButton');
+        await testSubjects.missingOrFail('pagination-button-previous');
+        await testSubjects.missingOrFail('pagination-button-next');
+
+        await testSubjects.existOrFail('unifiedDataTableFooter');
+        await testSubjects.existOrFail('dscGridSampleSizeFetchMoreLink');
+
+        // Clicking on Load more should fetch more data and hide the footer
+        const loadMoreButton = await testSubjects.find('dscGridSampleSizeFetchMoreLink');
+        await loadMoreButton.click();
+
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+
+        await testSubjects.missingOrFail('unifiedDataTableFooter');
+        await testSubjects.missingOrFail('dscGridSampleSizeFetchMoreLink');
       });
     });
   });
