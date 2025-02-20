@@ -258,7 +258,14 @@ export const HostIsolationExceptionsForm = memo<ArtifactFormComponentProps>(
     return (
       <EuiForm
         component="div"
-        error={error && <FormattedError error={error} />}
+        error={
+          error && (
+            <FormattedError
+              error={error}
+              data-test-subj={'hostIsolationExceptions-form-submitError'}
+            />
+          )
+        }
         isInvalid={!!error}
         data-test-subj="hostIsolationExceptions-form"
       >

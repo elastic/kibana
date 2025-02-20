@@ -26,7 +26,7 @@ import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../../../common/endpoint/service/artifacts';
 import { ListOperatorEnum, ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
-import type { IHttpFetchError } from '@kbn/core/public';
+import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 
 jest.mock('../../../../../common/hooks/use_license', () => {
   const licenseServiceInstance = {
@@ -571,7 +571,7 @@ describe('blocklist form', () => {
 
   it('should display submit errors', async () => {
     const message = 'foo - something went wrong';
-    const { getByTestId } = render(createProps({ error: new Error(message) as IHttpFetchError }));
+    const { getByTestId } = render(createProps({ error: createHttpFetchError(message) }));
 
     expect(getByTestId('blocklist-form-submitError').textContent).toMatch(message);
   });
