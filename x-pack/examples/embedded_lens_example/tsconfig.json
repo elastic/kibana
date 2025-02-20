@@ -16,7 +16,6 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
-    "@kbn/embeddable-plugin",
     "@kbn/lens-plugin",
     "@kbn/developer-examples-plugin",
     "@kbn/data-views-plugin",
