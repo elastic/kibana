@@ -486,7 +486,11 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       <EuiForm
         component="div"
         data-test-subj={getTestId('')}
-        error={submitError ? <FormattedError error={submitError} /> : undefined}
+        error={
+          submitError ? (
+            <FormattedError error={submitError} data-test-subj={getTestId('submitError')} />
+          ) : undefined
+        }
         isInvalid={!!submitError}
       >
         <EuiTitle size="xs">
