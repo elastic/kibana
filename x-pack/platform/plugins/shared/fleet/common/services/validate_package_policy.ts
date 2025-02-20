@@ -59,12 +59,12 @@ export type PackagePolicyValidationResults = {
 } & PackagePolicyConfigValidationResults;
 
 const validatePackageRequiredVars = (
-  stream: NewPackagePolicyInputStream,
+  streamOrInput: Pick<NewPackagePolicyInputStream | PackagePolicyInput, 'vars' | 'enabled'>,
   requiredVars?: RegistryRequiredVars
 ) => {
   const evaluatedRequiredVars: ValidationRequiredVars = {};
 
-  if (!requiredVars || !stream.vars || !stream.enabled) {
+  if (!requiredVars || !streamOrInput.vars || !streamOrInput.enabled) {
     return null;
   }
 
@@ -83,8 +83,8 @@ const validatePackageRequiredVars = (
 
     if (evaluatedRequiredVars[requiredVarDefinitionName]) {
       requiredVarDefinitionConstraints.forEach((requiredCondition) => {
-        if (stream.vars && stream.vars[requiredCondition.name]) {
-          const varItem = stream.vars[requiredCondition.name];
+        if (streamOrInput.vars && streamOrInput.vars[requiredCondition.name]) {
+          const varItem = streamOrInput.vars[requiredCondition.name];
 
           if (varItem) {
             if (
@@ -204,6 +204,21 @@ export const validatePackagePolicy = (
     });
     return varDefs;
   }, {});
+  const inputRequiredVarsDefsByPolicyTemplateAndType = packageInfo.policy_templates.reduce<
+    Record<string, RegistryRequiredVars | undefined>
+  >((reqVarDefs, policyTemplate) => {
+    const inputs = getNormalizedInputs(policyTemplate);
+    inputs.forEach((input) => {
+      const requiredVarDefKey = hasIntegrations
+        ? `${policyTemplate.name}-${input.type}`
+        : input.type;
+
+      if ((input.vars || []).length) {
+        reqVarDefs[requiredVarDefKey] = input.required_vars;
+      }
+    });
+    return reqVarDefs;
+  }, {});
 
   const dataStreams = getNormalizedDataStreams(packageInfo);
   const streamsByDatasetAndInput = dataStreams.reduce<Record<string, RegistryStream>>(
@@ -237,12 +252,13 @@ export const validatePackagePolicy = (
     const inputKey = hasIntegrations ? `${input.policy_template}-${input.type}` : input.type;
     const inputValidationResults: PackagePolicyInputValidationResults = {
       vars: undefined,
+      required_vars: undefined,
       streams: {},
     };
 
     // Validate input-level var fields
     const inputVars = Object.entries(input.vars || {});
-    if (inputVars.length) {
+    if (inputVars.length && input.enabled) {
       inputValidationResults.vars = inputVars.reduce((results, [name, configEntry]) => {
         results[name] = input.enabled
           ? validatePackagePolicyConfig(
@@ -254,8 +270,19 @@ export const validatePackagePolicy = (
           : null;
         return results;
       }, {} as ValidationEntry);
+
+      const requiredVars = validatePackageRequiredVars(
+        input,
+        inputRequiredVarsDefsByPolicyTemplateAndType[inputKey]
+      );
+      if (requiredVars) {
+        inputValidationResults.required_vars = requiredVars;
+      } else {
+        delete inputValidationResults.required_vars;
+      }
     } else {
       delete inputValidationResults.vars;
+      delete inputValidationResults.required_vars;
     }
 
     // Validate each input stream with var definitions
@@ -497,9 +524,12 @@ export const countValidationErrors = (
     | PackagePolicyInputValidationResults
     | PackagePolicyConfigValidationResults
 ): number => {
-  const flattenedValidation = getFlattenedObject(validationResults);
+  // Required vars groups count as 1 error
+  const { required_vars: requiredVarsValidationResults, ...validationResultsWithoutRequiredVars } =
+    validationResults;
+  const flattenedValidation = getFlattenedObject(validationResultsWithoutRequiredVars);
   const errors = Object.values(flattenedValidation).filter((value) => Boolean(value)) || [];
-  return errors.length;
+  return errors.length + (requiredVarsValidationResults ? 1 : 0);
 };
 
 export const validationHasErrors = (
