@@ -53,6 +53,24 @@ describe('<Findings />', () => {
     expect(screen.getByText(/add kspm integration/i)).toBeInTheDocument();
   });
 
+  it('verifies CSPM and KSPM integration buttons have link and are clickable', async () => {
+    server.use(statusHandlers.notInstalledHandler);
+    renderFindingsPage();
+
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+    const cspmButton = await waitFor(() =>
+      screen.getByRole('link', { name: /add cspm integration/i })
+    );
+    const kspmButton = await waitFor(() =>
+      screen.getByRole('link', { name: /add kspm integration/i })
+    );
+
+    expect(cspmButton).toHaveAttribute('href', expect.stringContaining('add-integration/cspm'));
+    expect(cspmButton).toBeEnabled();
+    expect(kspmButton).toHaveAttribute('href', expect.stringContaining('add-integration/kspm'));
+    expect(kspmButton).toBeEnabled();
+  });
+
   it("renders the 'latest misconfigurations findings' DataTable component when the CSPM/KSPM integration status is not installed but there are findings", async () => {
     const finding1 = generateCspFinding('0003', 'failed');
     const finding2 = generateCspFinding('0004', 'passed');

@@ -176,7 +176,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           title: i18n.HOST_ID,
           description:
             data && data.host
-              ? hostIdRenderer({ host: data.host, noLink: true })
+              ? hostIdRenderer({ host: data.host, noLink: true, scopeId })
               : getEmptyTagValue(),
         },
         {
@@ -202,7 +202,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           ),
         },
       ],
-      [data, indexNames, hostName]
+      [data, scopeId, indexNames, hostName]
     );
     const firstColumn = useMemo(
       () =>

@@ -28762,6 +28762,17 @@ components:
             query:
               description: An ESQL query
               type: string
+            timerange:
+              description: Time range to select in the time picker.
+              type: object
+              properties:
+                from:
+                  type: string
+                to:
+                  type: string
+              required:
+                - from
+                - to
             type:
               enum:
                 - EsqlQuery

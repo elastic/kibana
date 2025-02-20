@@ -32,6 +32,7 @@ export async function startLiveDataUpload({
     logsEsClient,
     infraEsClient,
     syntheticsEsClient,
+    otelEsClient,
     entitiesEsClient,
     entitiesKibanaClient,
   } = await bootstrap(runOptions);
@@ -48,6 +49,7 @@ export async function startLiveDataUpload({
       apmEsClient,
       logsEsClient,
       infraEsClient,
+      otelEsClient,
       syntheticsEsClient,
       entitiesEsClient,
       entitiesKibanaClient,
@@ -72,6 +74,7 @@ export async function startLiveDataUpload({
           apmEsClient,
           logsEsClient,
           infraEsClient,
+          otelEsClient,
           syntheticsEsClient,
           entitiesEsClient,
           entitiesKibanaClient,
@@ -108,6 +111,7 @@ export async function startLiveDataUpload({
           infraEsClient,
           entitiesEsClient,
           syntheticsEsClient,
+          otelEsClient,
         },
       });
 

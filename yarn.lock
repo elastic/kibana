@@ -3950,7 +3950,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/alerting-rule-utils@link:x-pack/platform/packages/shared/alerting_rule_utils":
+"@kbn/alerting-rule-utils@link:x-pack/platform/packages/shared/alerting-rule-utils":
   version "0.0.0"
   uid ""
 
@@ -5462,7 +5462,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ecs-data-quality-dashboard@link:x-pack/solutions/security/packages/ecs_data_quality_dashboard":
+"@kbn/ecs-data-quality-dashboard@link:x-pack/solutions/security/packages/ecs-data-quality-dashboard":
   version "0.0.0"
   uid ""
 
@@ -6242,7 +6242,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/logs-overview@link:x-pack/platform/packages/shared/logs_overview":
+"@kbn/logs-overview@link:x-pack/platform/packages/shared/logs-overview":
   version "0.0.0"
   uid ""
 
@@ -6274,11 +6274,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-application@link:src/platform/packages/private/kbn-management/settings/application":
+"@kbn/management-settings-application@link:src/platform/packages/shared/kbn-management/settings/application":
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-components-field-category@link:src/platform/packages/private/kbn-management/settings/components/field_category":
+"@kbn/management-settings-components-field-category@link:src/platform/packages/shared/kbn-management/settings/components/field_category":
   version "0.0.0"
   uid ""
 
@@ -6290,7 +6290,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-settings-components-form@link:src/platform/packages/private/kbn-management/settings/components/form":
+"@kbn/management-settings-components-form@link:src/platform/packages/shared/kbn-management/settings/components/form":
   version "0.0.0"
   uid ""
 
@@ -6314,7 +6314,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-storybook-config@link:packages/kbn-management/storybook/config":
+"@kbn/management-storybook-config@link:src/platform/packages/shared/kbn-management/storybook/config":
   version "0.0.0"
   uid ""
 
@@ -6550,19 +6550,19 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-common@link:x-pack/solutions/observability/packages/observability_ai/observability_ai_common":
+"@kbn/observability-ai-common@link:x-pack/solutions/observability/packages/observability-ai/observability-ai-common":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-server@link:x-pack/solutions/observability/packages/observability_ai/observability_ai_server":
+"@kbn/observability-ai-server@link:x-pack/solutions/observability/packages/observability-ai/observability-ai-server":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-alert-details@link:x-pack/solutions/observability/packages/alert_details":
+"@kbn/observability-alert-details@link:x-pack/solutions/observability/packages/alert-details":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-alerting-test-data@link:x-pack/solutions/observability/packages/alerting_test_data":
+"@kbn/observability-alerting-test-data@link:x-pack/solutions/observability/packages/alerting-test-data":
   version "0.0.0"
   uid ""
 
@@ -6570,15 +6570,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-get-padded-alert-time-range-util@link:x-pack/solutions/observability/packages/get_padded_alert_time_range_util":
+"@kbn/observability-get-padded-alert-time-range-util@link:x-pack/solutions/observability/packages/get-padded-alert-time-range-util":
   version "0.0.0"
   uid ""
 
 "@kbn/observability-logs-explorer-plugin@link:x-pack/solutions/observability/plugins/observability_logs_explorer":
-  version "0.0.0"
-  uid ""
-
-"@kbn/observability-onboarding-e2e@link:x-pack/solutions/observability/plugins/observability_onboarding/e2e":
   version "0.0.0"
   uid ""
 
@@ -6598,15 +6594,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-browser@link:x-pack/solutions/observability/packages/utils_browser":
+"@kbn/observability-utils-browser@link:x-pack/solutions/observability/packages/utils-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-common@link:x-pack/solutions/observability/packages/utils_common":
+"@kbn/observability-utils-common@link:x-pack/solutions/observability/packages/utils-common":
   version "0.0.0"
   uid ""
 
-"@kbn/observability-utils-server@link:x-pack/solutions/observability/packages/utils_server":
+"@kbn/observability-utils-server@link:x-pack/solutions/observability/packages/utils-server":
   version "0.0.0"
   uid ""
 
@@ -6878,15 +6874,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-apis@link:packages/response-ops/alerts_apis":
+"@kbn/response-ops-alerts-apis@link:src/platform/packages/shared/response-ops/alerts-apis":
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-fields-browser@link:packages/response-ops/alerts_fields_browser":
+"@kbn/response-ops-alerts-fields-browser@link:src/platform/packages/shared/response-ops/alerts-fields-browser":
   version "0.0.0"
   uid ""
 
-"@kbn/response-ops-alerts-table@link:packages/response-ops/alerts_table":
+"@kbn/response-ops-alerts-table@link:src/platform/packages/shared/response-ops/alerts-table":
   version "0.0.0"
   uid ""
 
@@ -7014,6 +7010,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/scout-oblt@link:x-pack/solutions/observability/packages/kbn-scout-oblt":
+  version "0.0.0"
+  uid ""
+
 "@kbn/scout-reporting@link:packages/kbn-scout-reporting":
   version "0.0.0"
   uid ""
@@ -7106,7 +7106,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-shared-ui@link:x-pack/solutions/search/packages/shared_ui":
+"@kbn/search-shared-ui@link:x-pack/solutions/search/packages/shared-ui":
   version "0.0.0"
   uid ""
 
@@ -7174,7 +7174,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-distribution-bar@link:x-pack/solutions/security/packages/distribution_bar":
+"@kbn/security-solution-distribution-bar@link:x-pack/solutions/security/packages/distribution-bar":
   version "0.0.0"
   uid ""
 
@@ -7202,7 +7202,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-side-nav@link:x-pack/solutions/security/packages/side_nav":
+"@kbn/security-solution-side-nav@link:x-pack/solutions/security/packages/side-nav":
   version "0.0.0"
   uid ""
 
@@ -7226,7 +7226,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-data-table@link:x-pack/solutions/security/packages/data_table":
+"@kbn/securitysolution-data-table@link:x-pack/solutions/security/packages/data-table":
   version "0.0.0"
   uid ""
 
@@ -7318,7 +7318,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-common-settings@link:src/platform/packages/private/serverless/settings/common":
+"@kbn/serverless-common-settings@link:src/platform/packages/shared/serverless/settings/common":
   version "0.0.0"
   uid ""
 
@@ -7346,11 +7346,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-storybook-config@link:packages/serverless/storybook/config":
+"@kbn/serverless-storybook-config@link:src/platform/packages/shared/serverless/storybook/config":
   version "0.0.0"
   uid ""
 
-"@kbn/serverless-types@link:src/platform/packages/private/serverless/types":
+"@kbn/serverless-types@link:src/platform/packages/shared/serverless/types":
   version "0.0.0"
   uid ""
 
@@ -7662,6 +7662,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/storage-adapter@link:src/platform/packages/shared/kbn-storage-adapter":
+  version "0.0.0"
+  uid ""
+
 "@kbn/storybook@link:packages/kbn-storybook":
   version "0.0.0"
   uid ""
@@ -7674,7 +7678,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/streams-schema@link:x-pack/solutions/observability/packages/kbn-streams-schema":
+"@kbn/streams-schema@link:x-pack/platform/packages/shared/kbn-streams-schema":
   version "0.0.0"
   uid ""
 
@@ -7799,6 +7803,10 @@
   uid ""
 
 "@kbn/tooling-log@link:packages/kbn-tooling-log":
+  version "0.0.0"
+  uid ""
+
+"@kbn/traced-es-client@link:src/platform/packages/shared/kbn-traced-es-client":
   version "0.0.0"
   uid ""
 
@@ -14463,10 +14471,10 @@ babel-runtime@6.x:
     core-js "^2.4.0"
     regenerator-runtime "^0.11.0"
 
-backport@^9.6.4:
-  version "9.6.4"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-9.6.4.tgz#ea45ab97f32ebca1564269f92a6fc56eda703cdc"
-  integrity sha512-cTaItWSGoO33vOD/br/Di2KFesgHyE6UWuc0GN0IiFk13UqEadeURq3UOQptARyQC3Nz56Us5QYNJ3E5L61zYg==
+backport@^9.6.6:
+  version "9.6.6"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-9.6.6.tgz#ab7d0a1720eb5cd3ccef51cd79f1872bb9ed409c"
+  integrity sha512-X/2vWZNZP5wvbfWaxtLsXSbnOxANgoCh84IZavTS2X2/6X/si3cpUL0ky1fh+70bK5O8PI+3Fopp5srmeqHB1g==
   dependencies:
     "@octokit/rest" "^19.0.7"
     axios "^1.6.2"
@@ -15450,10 +15458,10 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^132.0.0:
-  version "132.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-132.0.0.tgz#0eef414ccf906313f7685edb772fbbfa374e100d"
-  integrity sha512-jECVJjty5ypYKptQ/QCf8Q0Iq0qq2eW5x1WnYwlGCgmBBcwDH+XrdjFKc4mA3lFO1p3dpOUgTbayKCiGpMPBjg==
+chromedriver@^133.0.0:
+  version "133.0.1"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-133.0.1.tgz#6fabe45f7ed5b2f6daf3bb6047159f970f203b89"
+  integrity sha512-Z9VrJ9547daetazzP4k+7COj0PTtkomvtt8OZr8swTzsqDOzG0Xymdxg0dUtptc4da3X9Zts1iZoxOkm7blx/g==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
     axios "^1.7.4"
