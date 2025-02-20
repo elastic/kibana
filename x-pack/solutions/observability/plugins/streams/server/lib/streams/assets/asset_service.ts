@@ -6,7 +6,7 @@
  */
 
 import { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
-import { StorageIndexAdapter } from '@kbn/observability-utils-server/es/storage';
+import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import { StreamsPluginStartDependencies } from '../../../types';
 import { AssetClient, StoredAssetLink } from './asset_client';
 import { AssetStorageSettings, assetStorageSettings } from './storage_settings';

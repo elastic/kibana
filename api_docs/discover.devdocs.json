@@ -3630,7 +3630,7 @@
             "section": "def-public.UnifiedHistogramContainerProps",
             "text": "UnifiedHistogramContainerProps"
           },
-          ", \"onBrushEnd\" | \"disabledActions\" | \"onFilter\" | \"withDefaultActions\">"
+          ", \"onBrushEnd\" | \"onFilter\" | \"withDefaultActions\" | \"disabledActions\">"
         ],
         "path": "src/platform/plugins/shared/discover/public/customizations/customization_types/histogram_customization.tsx",
         "deprecated": false,
