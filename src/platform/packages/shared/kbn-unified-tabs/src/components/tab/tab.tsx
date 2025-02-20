@@ -118,11 +118,11 @@ function getTabContainerCss(euiTheme: EuiThemeComputed, isSelected: boolean) {
 
     background-color: ${isSelected ? euiTheme.colors.emptyShade : euiTheme.colors.lightestShade};
     color: ${isSelected ? euiTheme.colors.text : euiTheme.colors.subduedText};
-    transition: background-color ${euiTheme.animation.normal};
+    transition: background-color ${euiTheme.animation.fast};
 
     .unifiedTabs__closeTabBtn {
       opacity: ${isSelected ? 1 : 0};
-      transition: opacity ${euiTheme.animation.normal};
+      transition: opacity ${euiTheme.animation.fast};
     }
 
     ${isSelected
