@@ -74,7 +74,9 @@ describe('#resolve()', () => {
   });
 
   it('returns null when the import cannot be resolved', () => {
-    expect(resolver.resolve('../../../../../../../invalid', FIXTURES_DIR)).toMatchInlineSnapshot(`null`);
+    expect(resolver.resolve('../../../../../../../invalid', FIXTURES_DIR)).toMatchInlineSnapshot(
+      `null`
+    );
     expect(resolver.resolve('src/invalid', FIXTURES_DIR)).toMatchInlineSnapshot(`null`);
     expect(resolver.resolve('kibana/invalid', FIXTURES_DIR)).toMatchInlineSnapshot(`null`);
     expect(resolver.resolve('@kbn/invalid', FIXTURES_DIR)).toMatchInlineSnapshot(`null`);
