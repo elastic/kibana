@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { IScopedClusterClient } from '@kbn/core/server';
 import { StreamsStorageClient } from '../service';
 import { GroupStream, GroupStreamChange } from './group_stream';
+import { ValidationResult } from './types';
 import { WiredStream, WiredStreamChange } from './wired_stream';
 
 interface ApplyChangeMap {
@@ -54,16 +56,30 @@ export class State {
     };
   }
 
-  validate() {
-    // Ask each stream within the state if they are in a valid state?
-    return { isValid: true };
+  async validate(
+    startingState: State,
+    scopedClusterClient: IScopedClusterClient
+  ): Promise<ValidationResult> {
+    const streams = [...this.wiredStreams, ...this.groupStreams];
+    // Should I use allSettled here?
+    const validationResults = await Promise.all(
+      streams.map((stream) => stream.validate(this, startingState, scopedClusterClient))
+    );
+
+    const isValid = validationResults.every((validationResult) => validationResult.isValid);
+    const errors = validationResults.flatMap((validationResult) => validationResult.errors);
+
+    return {
+      isValid,
+      errors,
+    };
   }
 
   changes() {
     // Find all streams marked as changed and order them by their impact level
   }
 
-  commitChanges() {
+  async commitChanges() {
     // Based on .changes(), go off and do the actual work in ES
   }
 

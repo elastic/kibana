@@ -11,8 +11,10 @@ import {
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { cloneDeep } from 'lodash';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { StreamsStorageClient } from '../service';
 import { State } from './state';
+import { Stream, ValidationResult } from './types';
 
 // Or should this be Ingest stream?
 export interface UpsertWiredStreamChange {
@@ -34,7 +36,7 @@ export interface DeleteWiredStreamChange {
 export type WiredStreamChange = UpsertWiredStreamChange | DeleteWiredStreamChange;
 
 // This class should live somewhere else later
-export class WiredStream {
+export class WiredStream implements Stream {
   private definition: WiredStreamDefinition;
   private changed: boolean = false;
 
@@ -45,6 +47,58 @@ export class WiredStream {
   clone() {
     // Do I need to deep clone the definition here or would a reference or shallow clone suffice?
     return new WiredStream(cloneDeep(this.definition));
+  }
+
+  private markAsChanged() {
+    this.changed = true;
+  }
+
+  async validate(
+    desiredState: State,
+    startingState: State,
+    scopedClusterClient: IScopedClusterClient
+  ): Promise<ValidationResult> {
+    const existsInStartingState = startingState.wiredStreams.find(
+      (wiredStream) => wiredStream.definition.name === this.definition.name
+    );
+
+    if (!existsInStartingState) {
+      // Check for the data stream conflict
+      try {
+        const dataStreamResult = await scopedClusterClient.asCurrentUser.indices.getDataStream({
+          name: this.definition.name,
+        });
+
+        if (dataStreamResult.data_streams.length !== 0) {
+          return {
+            isValid: false,
+            errors: [
+              `Cannot create wired stream "${this.definition.name}" due to conflict caused by existing data stream`,
+            ],
+          };
+        }
+      } catch (error) {
+        // What if this errors?
+      }
+
+      // check for the index conflict
+      try {
+        await scopedClusterClient.asCurrentUser.indices.get({
+          index: this.definition.name,
+        });
+
+        return {
+          isValid: false,
+          errors: [
+            `Cannot create wired stream "${this.definition.name}" due to conflict caused by existing index`,
+          ],
+        };
+      } catch (error) {
+        // What if this errors?
+      }
+    }
+
+    return { isValid: true, errors: [] };
   }
 
   static applyChange(requestedChange: WiredStreamChange, newState: State) {
@@ -71,10 +125,6 @@ export class WiredStream {
       wiredStream.markAsChanged();
       newState.wiredStreams.push(wiredStream);
     }
-  }
-
-  private markAsChanged() {
-    this.changed = true;
   }
 
   private static applyDelete(requestedChange: DeleteWiredStreamChange, newState: State) {

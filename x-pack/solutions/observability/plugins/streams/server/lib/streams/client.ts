@@ -119,26 +119,28 @@ export class StreamsClient {
     return rootLogsStreamExists;
   }
 
-  private async attemptChanges(
-    requestedChanges: StateChange[],
-    storageClient: StreamsStorageClient,
-    dryRun: boolean = false
-  ) {
-    const startingState = await State.currentState(storageClient);
+  // What should this function return?
+  private async attemptChanges(requestedChanges: StateChange[], dryRun: boolean = false) {
+    const startingState = await State.currentState(this.dependencies.storageClient);
     // Optional: Validate the starting state for drift outside of Streams
 
     const desiredState = startingState.applyChanges(requestedChanges);
 
-    const validationResult = desiredState.validate();
+    const validationResult = await desiredState.validate(
+      startingState,
+      this.dependencies.scopedClusterClient
+    );
+
     if (!validationResult.isValid) {
-      return; // Report errors
+      // How do these translate to HTTP errors?
+      return validationResult.errors;
     }
 
     if (dryRun) {
       return desiredState.changes();
     } else {
       try {
-        desiredState.commitChanges();
+        await desiredState.commitChanges();
       } catch (error) {
         // Rollback to currentState
       }
@@ -150,19 +152,16 @@ export class StreamsClient {
    * If it is already enabled, it is a noop.
    */
   async enableStreams(): Promise<EnableStreamsResponse> {
-    await this.attemptChanges(
-      [
-        {
-          stream_type: 'wired',
-          change: 'upsert',
-          request: {
-            dashboards: [],
-            stream: rootStreamDefinition,
-          },
+    await this.attemptChanges([
+      {
+        stream_type: 'wired',
+        change: 'upsert',
+        request: {
+          dashboards: [],
+          stream: rootStreamDefinition,
         },
-      ],
-      this.dependencies.storageClient
-    );
+      },
+    ]);
 
     const isEnabled = await this.isStreamsEnabled();
 

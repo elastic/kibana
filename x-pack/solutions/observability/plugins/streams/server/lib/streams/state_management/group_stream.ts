@@ -11,8 +11,10 @@ import {
   isGroupStreamDefinition,
 } from '@kbn/streams-schema';
 import { cloneDeep } from 'lodash';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { StreamsStorageClient } from '../service';
 import { State } from './state';
+import { Stream, ValidationResult } from './types';
 
 export interface UpsertGroupStreamChange {
   stream_type: 'group';
@@ -30,7 +32,7 @@ export type GroupStreamChange = UpsertGroupStreamChange | DeleteGroupStreamChang
 
 // This class should live somewhere else later
 // These classes probably have some shared interface that we should extract so that it is clear what new stream types need to adhere to.
-export class GroupStream {
+export class GroupStream implements Stream {
   private definition: GroupStreamDefinition;
 
   constructor(definition: GroupStreamDefinition) {
@@ -40,6 +42,14 @@ export class GroupStream {
   clone() {
     // Do I need to deep clone the definition here or would a reference or shallow clone suffice?
     return new GroupStream(cloneDeep(this.definition));
+  }
+
+  async validate(
+    desiredState: State,
+    startingState: State,
+    scopedClusterClient: IScopedClusterClient
+  ): Promise<ValidationResult> {
+    throw new Error('Method not implemented.');
   }
 
   static applyChange(requestedChange: GroupStreamChange, newState: State) {
