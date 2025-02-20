@@ -189,6 +189,9 @@ xpack.fleet.internal.registry.excludePackages: [
 
     # Profiling integrations
     'profiler_agent',
+
+    # Search connectors
+    'elastic_connectors',
   ]
 
 ## Required for force installation of integration packages

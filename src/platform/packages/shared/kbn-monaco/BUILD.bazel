@@ -28,6 +28,7 @@ SHARED_DEPS = [
   "//src/platform/packages/shared/kbn-ui-theme",
   "//src/platform/packages/shared/kbn-esql-validation-autocomplete",
   "//src/platform/packages/shared/kbn-esql-ast",
+  "//packages/kbn-node-libs-browser-webpack-plugin",
   "@npm//antlr4",
   "@npm//monaco-editor",
   "@npm//monaco-yaml",
@@ -41,7 +42,6 @@ webpack_cli(
     "@npm//terser-webpack-plugin",
     "@npm//@babel/runtime",
     "@npm//babel-loader",
-    "@npm//raw-loader",
     "@npm//rxjs",
 
     "webpack.config.js",
@@ -59,11 +59,9 @@ webpack_cli(
   env = select({
     "//:dist": {
       "NODE_ENV": "production",
-      "NODE_OPTIONS": "--openssl-legacy-provider",
     },
     "//conditions:default": {
       "NODE_ENV": "development",
-      "NODE_OPTIONS": "--openssl-legacy-provider",
     },
   }),
   visibility = ["//visibility:public"],

@@ -56,7 +56,7 @@ test.describe(
       await customLogs.selectPlatform('windows');
       await expect(customLogs.autoDownloadConfigurationToggle).toBeDisabled();
       await expect(customLogs.windowsInstallElasticAgentDocLink).toBeVisible();
-      await expect(customLogs.installCodeSnippet).not.toBeVisible();
+      await expect(customLogs.installCodeSnippet).toBeHidden();
       await expect(
         customLogs.configureElasticAgentStep.getByText('Step 2 is disabled')
       ).toBeVisible();

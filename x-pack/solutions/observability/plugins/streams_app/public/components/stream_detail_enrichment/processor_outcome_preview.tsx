@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import {
   EuiFlexGroup,
@@ -18,57 +18,42 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
-import { flattenObject } from '@kbn/object-utils';
 import { isEmpty } from 'lodash';
-import { RecursiveRecord } from '@kbn/streams-schema';
+import { SampleDocument } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
-import { TableColumn, UseProcessingSimulatorReturn } from './hooks/use_processing_simulator';
+import {
+  DocsFilterOption,
+  TableColumn,
+  UseProcessingSimulatorReturn,
+  docsFilterOptions,
+} from './hooks/use_processing_simulator';
 import { AssetImage } from '../asset_image';
 
 interface ProcessorOutcomePreviewProps {
   columns: TableColumn[];
   isLoading: UseProcessingSimulatorReturn['isLoading'];
   simulation: UseProcessingSimulatorReturn['simulation'];
-  samples: UseProcessingSimulatorReturn['samples'];
+  filteredSamples: UseProcessingSimulatorReturn['samples'];
   onRefreshSamples: UseProcessingSimulatorReturn['refreshSamples'];
+  selectedDocsFilter: UseProcessingSimulatorReturn['selectedDocsFilter'];
+  setSelectedDocsFilter: UseProcessingSimulatorReturn['setSelectedDocsFilter'];
 }
 
 export const ProcessorOutcomePreview = ({
   columns,
   isLoading,
   simulation,
-  samples,
+  filteredSamples,
   onRefreshSamples,
+  selectedDocsFilter,
+  setSelectedDocsFilter,
 }: ProcessorOutcomePreviewProps) => {
   const { dependencies } = useKibana();
   const { data } = dependencies.start;
 
   const { timeRange, setTimeRange } = useDateRange({ data });
-
-  const [selectedDocsFilter, setSelectedDocsFilter] =
-    useState<DocsFilterOption>('outcome_filter_all');
-
-  const simulationDocuments = useMemo(() => {
-    if (!simulation?.documents) {
-      return samples.map((doc) => flattenObject(doc)) as RecursiveRecord[];
-    }
-
-    const filterDocuments = (filter: DocsFilterOption) => {
-      switch (filter) {
-        case 'outcome_filter_matched':
-          return simulation.documents.filter((doc) => doc.isMatch);
-        case 'outcome_filter_unmatched':
-          return simulation.documents.filter((doc) => !doc.isMatch);
-        case 'outcome_filter_all':
-        default:
-          return simulation.documents;
-      }
-    };
-
-    return filterDocuments(selectedDocsFilter).map((doc) => doc.value);
-  }, [samples, simulation?.documents, selectedDocsFilter]);
 
   const tableColumns = useMemo(() => {
     switch (selectedDocsFilter) {
@@ -97,37 +82,11 @@ export const ProcessorOutcomePreview = ({
         />
       </EuiFlexItem>
       <EuiSpacer size="m" />
-      <OutcomePreviewTable documents={simulationDocuments} columns={tableColumns} />
+      <OutcomePreviewTable documents={filteredSamples} columns={tableColumns} />
       {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
     </>
   );
 };
-
-const docsFilterOptions = {
-  outcome_filter_all: {
-    id: 'outcome_filter_all',
-    label: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.all',
-      { defaultMessage: 'All samples' }
-    ),
-  },
-  outcome_filter_matched: {
-    id: 'outcome_filter_matched',
-    label: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.matched',
-      { defaultMessage: 'Matched' }
-    ),
-  },
-  outcome_filter_unmatched: {
-    id: 'outcome_filter_unmatched',
-    label: i18n.translate(
-      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.unmatched',
-      { defaultMessage: 'Unmatched' }
-    ),
-  },
-} as const;
-
-type DocsFilterOption = keyof typeof docsFilterOptions;
 
 interface OutcomeControlsProps {
   docsFilter: DocsFilterOption;
@@ -211,7 +170,7 @@ const OutcomeControls = ({
 };
 
 interface OutcomePreviewTableProps {
-  documents: RecursiveRecord[];
+  documents: SampleDocument[];
   columns: string[];
 }
 

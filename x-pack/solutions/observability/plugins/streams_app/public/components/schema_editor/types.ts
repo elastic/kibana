@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { FieldDefinitionConfig, WiredStreamDefinition } from '@kbn/streams-schema';
+import {
+  FieldDefinitionConfig,
+  FieldDefinitionConfigAdvancedParameters,
+  WiredStreamDefinition,
+} from '@kbn/streams-schema';
 
 export type SchemaFieldStatus = 'inherited' | 'mapped' | 'unmapped';
 export type SchemaFieldType = FieldDefinitionConfig['type'];
@@ -13,16 +17,19 @@ export type SchemaFieldType = FieldDefinitionConfig['type'];
 export interface BaseSchemaField extends Omit<FieldDefinitionConfig, 'type'> {
   name: string;
   parent: string;
+  format?: string;
 }
 
 export interface MappedSchemaField extends BaseSchemaField {
   status: 'inherited' | 'mapped';
   type: SchemaFieldType;
+  additionalParameters?: FieldDefinitionConfigAdvancedParameters;
 }
 
 export interface UnmappedSchemaField extends BaseSchemaField {
   status: 'unmapped';
-  type?: SchemaFieldType | undefined;
+  type?: SchemaFieldType;
+  additionalParameters?: FieldDefinitionConfigAdvancedParameters;
 }
 
 export type SchemaField = MappedSchemaField | UnmappedSchemaField;
