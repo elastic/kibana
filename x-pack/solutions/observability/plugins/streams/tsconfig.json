@@ -37,6 +37,7 @@
     "@kbn/streams-schema",
     "@kbn/es-errors",
     "@kbn/server-route-repository-utils",
+    "@kbn/inference-plugin",
     "@kbn/storage-adapter",
     "@kbn/traced-es-client"
   ]
