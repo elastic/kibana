@@ -57,7 +57,6 @@ packages/kbn-cli-dev-mode @elastic/kibana-operations
 packages/kbn-dependency-ownership @elastic/kibana-security
 packages/kbn-dependency-usage @elastic/kibana-security
 packages/kbn-docs-utils @elastic/kibana-operations
-packages/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-eslint-config @elastic/kibana-operations
 packages/kbn-eslint-plugin-css @elastic/appex-sharedux
 packages/kbn-eslint-plugin-disable @elastic/kibana-operations
@@ -452,6 +451,7 @@ src/platform/packages/shared/kbn-dom-drag-drop @elastic/kibana-visualizations @e
 src/platform/packages/shared/kbn-ebt-tools @elastic/kibana-core
 src/platform/packages/shared/kbn-elastic-agent-utils @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-es @elastic/kibana-operations
+src/platform/packages/shared/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-es-errors @elastic/kibana-core
 src/platform/packages/shared/kbn-es-query @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-es-types @elastic/kibana-core @elastic/obs-knowledge-team

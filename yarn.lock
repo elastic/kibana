@@ -5549,7 +5549,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es-archiver@link:packages/kbn-es-archiver":
+"@kbn/es-archiver@link:src/platform/packages/shared/kbn-es-archiver":
   version "0.0.0"
   uid ""
 
