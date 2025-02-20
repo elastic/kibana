@@ -578,8 +578,8 @@ export class GetPreviewData {
           filter,
         },
       },
-      aggs: {
-        perInterval: {
+      aggs: this.addExtraTermsOrMultiTermsAgg(
+        {
           date_histogram: {
             field: timestampField,
             fixed_interval: options.interval,
@@ -588,11 +588,10 @@ export class GetPreviewData {
               max: options.range.end,
             },
           },
-          aggs: {
-            ...getCustomMetricIndicatorAggregation.execute('metric'),
-          },
+          aggs: getCustomMetricIndicatorAggregation.execute('metric'),
         },
-      },
+        options.groupBy
+      ),
     });
 
     interface Bucket {
@@ -608,7 +607,20 @@ export class GetPreviewData {
           sliValue: bucket.metric.value ?? null,
         };
       }) ?? [];
-    return { results };
+
+    // @ts-ignore
+    const groups = response.aggregations?.perGroup?.buckets?.reduce((acc, group) => {
+      // @ts-ignore
+      acc[group.key] = group.perInterval.buckets.map((bucket) => {
+        return {
+          date: bucket.key_as_string,
+          sliValue: bucket.metric.value ?? null,
+        };
+      });
+      return acc;
+    }, {});
+
+    return { results, groups };
   }
 
   private async getCustomKQLPreviewData(
