@@ -10,5 +10,5 @@ node scripts/scout discover-playwright-configs --save
 buildkite-agent artifact upload scout_test_configs.json
 
 
-echo '--- Scout Pick Test Group Run Order'
-ts-node "$(dirname "${0}")/scout_pick_test_group_run_order.ts"
+echo '--- Scout Test Run Builder'
+ts-node "$(dirname "${0}")/scout_test_run_builder.ts"

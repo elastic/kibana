@@ -46,8 +46,9 @@ if [[ -z "$RUN_MODE_LIST" ]]; then
   exit 1
 fi
 
-failedConfigs=""
-results=()
+failedConfigs=()
+configWithoutTests=()
+passedConfigs=()
 
 # Run tests for each config
 while read -r config_path; do
@@ -58,19 +59,31 @@ while read -r config_path; do
   for mode in $RUN_MODE_LIST; do
     echo "--- Running tests: $config_path ($mode)"
 
-    if ! node scripts/scout run-tests "$mode" --config "$config_path" --kibana-install-dir "$KIBANA_BUILD_LOCATION"; then
+    node scripts/scout run-tests "$mode" --config "$config_path" --kibana-install-dir "$KIBANA_BUILD_LOCATION"
+    EXIT_CODE=$?
+
+    if [[ $EXIT_CODE -eq 2 ]]; then
+      configWithoutTests+=("$config_path ($mode) No tests found")
+      # Reset exit code to 0, no failure if there are no tests
+      EXIT_CODE=0
+    elif [[ $EXIT_CODE -ne 0 ]]; then
       failedConfigs+=("$config_path ($mode) ❌")
-      EXIT_CODE=1
     else
-      results+=("$config_path ($mode) ✅")
+      passedConfigs+=("$config_path ($mode) ✅")
     fi
   done
 done <<< "$configs"
 
 echo "--- Scout Test Run Complete: Summary"
-if [[ "$results" ]]; then
+if [[ "$passedConfigs" ]]; then
   echo "✅ Passed:"
-  printf "%s\n" "${results[@]}"
+  printf "%s\n" "${passedConfigs[@]}"
+fi
+
+if [[ "$configWithoutTests" ]]; then
+  echo "No tests in config:"
+  printf "%s\n" "${configWithoutTests[@]}"
+  buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$configWithoutTests"
 fi
 
 if [[ "$failedConfigs" ]]; then

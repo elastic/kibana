@@ -1,6 +1,6 @@
 steps:
-  - command: .buildkite/scripts/steps/test/scout_pipeline_builder.sh
-    label: 'Scout Test Steps Builder'
+  - command: .buildkite/scripts/steps/test/scout_test_run_builder.sh
+    label: 'Scout Test Run Builder'
     agents:
       machineType: n2-standard-2
       diskSizeGb: 75
