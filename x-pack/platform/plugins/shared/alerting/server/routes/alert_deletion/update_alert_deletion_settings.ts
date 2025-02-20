@@ -7,14 +7,14 @@
 
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { ILicenseState } from '../lib';
-import { verifyAccessAndContext, RewriteResponseCase, RewriteRequestCase } from './lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
+import { ILicenseState } from '../../lib';
+import { verifyAccessAndContext, RewriteResponseCase, RewriteRequestCase } from '../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../types';
 import {
   API_PRIVILEGES,
   RulesSettingsAlertDeletion,
   RulesSettingsAlertDeletionProperties,
-} from '../../common';
+} from '../../../common';
 
 const bodySchema = schema.object({
   is_active_alerts_deletion_enabled: schema.boolean(),

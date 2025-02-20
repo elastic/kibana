@@ -6,17 +6,17 @@
  */
 
 import { httpServiceMock } from '@kbn/core/server/mocks';
-import { licenseStateMock } from '../lib/license_state.mock';
-import { mockHandlerArguments } from './_mock_handler_arguments';
+import { licenseStateMock } from '../../lib/license_state.mock';
+import { mockHandlerArguments } from '../_mock_handler_arguments';
 import {
   rulesSettingsClientMock,
   RulesSettingsClientMock,
-} from '../rules_settings/rules_settings_client.mock';
+} from '../../rules_settings/rules_settings_client.mock';
 import { updateAlertDeletionSettingsRoute } from './update_alert_deletion_settings';
 
 let rulesSettingsClient: RulesSettingsClientMock;
 
-jest.mock('../lib/license_api_access', () => ({
+jest.mock('../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 

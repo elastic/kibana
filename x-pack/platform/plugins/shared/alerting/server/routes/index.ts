@@ -46,8 +46,8 @@ import { bulkDisableRulesRoute } from './rule/apis/bulk_disable/bulk_disable_rul
 import { cloneRuleRoute } from './rule/apis/clone/clone_rule_route';
 import { getFlappingSettingsRoute } from './get_flapping_settings';
 import { updateFlappingSettingsRoute } from './update_flapping_settings';
-import { getAlertDeletionSettingsRoute } from './get_alert_deletion_settings';
-import { updateAlertDeletionSettingsRoute } from './update_alert_deletion_settings';
+import { getAlertDeletionSettingsRoute } from './alert_deletion/get_alert_deletion_settings';
+import { updateAlertDeletionSettingsRoute } from './alert_deletion/update_alert_deletion_settings';
 import { getRuleTagsRoute } from './rule/apis/tags/get_rule_tags';
 import { getScheduleFrequencyRoute } from './rule/apis/get_schedule_frequency';
 import { bulkUntrackAlertsRoute } from './rule/apis/bulk_untrack';

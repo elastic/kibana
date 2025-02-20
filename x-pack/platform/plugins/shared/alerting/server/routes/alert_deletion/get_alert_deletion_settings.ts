@@ -6,10 +6,10 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { ILicenseState } from '../lib';
-import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import { verifyAccessAndContext, RewriteResponseCase } from './lib';
-import { API_PRIVILEGES, RulesSettingsAlertDeletion } from '../../common';
+import { ILicenseState } from '../../lib';
+import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../types';
+import { verifyAccessAndContext, RewriteResponseCase } from '../lib';
+import { API_PRIVILEGES, RulesSettingsAlertDeletion } from '../../../common';
 
 const rewriteBodyRes: RewriteResponseCase<RulesSettingsAlertDeletion> = ({
   activeAlertsDeletionThreshold,
