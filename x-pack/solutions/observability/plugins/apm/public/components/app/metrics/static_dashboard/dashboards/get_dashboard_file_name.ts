@@ -34,18 +34,25 @@ const isOpenTelemetry = (agentNameBase: string): agentNameBase is OpenTelemetryA
   return OpenTelemetryBaseSet.has(agentNameBase as OpenTelemetryAgentName) === true;
 };
 
+// We use the language name in the file name so we want to have a valid filename and to lowercase it
+const standardizeLanguageName = (languageName?: string) =>
+  languageName ? languageName.toLowerCase().replace('/', '_') : undefined;
+
 const getSdkNameAndLanguage = (agentName: string): SdkNameAndLanguage => {
   const LANGUAGE_INDEX = 1;
   if (isElasticAgent(agentName)) {
-    return { sdkName: 'apm', language: agentName };
+    return { sdkName: 'apm', language: standardizeLanguageName(agentName) };
   }
   const agentNameParts = agentName.split('/');
 
   if (isOpenTelemetry(agentNameParts[0].toLocaleLowerCase() as OpenTelemetryAgentName)) {
     if (agentNameParts[agentNameParts.length - 1] === 'elastic') {
-      return { sdkName: 'edot', language: agentNameParts[LANGUAGE_INDEX] };
+      return { sdkName: 'edot', language: standardizeLanguageName(agentNameParts[LANGUAGE_INDEX]) };
     }
-    return { sdkName: 'otel_other', language: agentNameParts[LANGUAGE_INDEX] };
+    return {
+      sdkName: 'otel_other',
+      language: standardizeLanguageName(agentNameParts[LANGUAGE_INDEX]),
+    };
   }
 
   return { sdkName: undefined, language: undefined };

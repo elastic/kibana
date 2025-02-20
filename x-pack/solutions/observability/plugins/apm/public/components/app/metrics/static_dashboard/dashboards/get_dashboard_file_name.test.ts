@@ -17,7 +17,12 @@ describe('getDashboardFileName', () => {
     {
       agentName: 'iOS/swift',
       telemetrySdkName: undefined,
-      filename: 'classic_apm-apm-iOS/swift',
+      filename: 'classic_apm-apm-ios_swift',
+    },
+    {
+      agentName: 'android/java',
+      telemetrySdkName: undefined,
+      filename: 'classic_apm-apm-android_java',
     },
     {
       agentName: 'opentelemetry/java/test/elastic',
@@ -57,6 +62,11 @@ describe('getDashboardFileName', () => {
       agentName: 'otlp/nodejs',
       telemetrySdkName: 'opentelementry',
       filename: 'otel_native-otel_other-nodejs',
+    },
+    {
+      agentName: 'otlp/Android',
+      telemetrySdkName: 'opentelementry',
+      filename: 'otel_native-otel_other-android',
     },
     {
       agentName: 'test/java/test/something-else/',
