@@ -17,7 +17,6 @@ import {
 } from '../../factories';
 import { ESQLVariableType } from '../../../shared/types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
-import { pushItUpInTheList } from '../../helper';
 import { byCompleteItem, getDateHistogramCompletionItem, getPosition } from './util';
 
 export async function suggest({
@@ -31,10 +30,10 @@ export async function suggest({
 }: CommandSuggestParams<'stats'>): Promise<SuggestionRawDefinition[]> {
   const pos = getPosition(innerText, command);
 
-  const columnSuggestions = pushItUpInTheList(
-    await getColumnsByType('any', [], { advanceCursor: true, openSuggestions: true }),
-    true
-  );
+  const columnSuggestions = await getColumnsByType('any', [], {
+    advanceCursor: true,
+    openSuggestions: true,
+  });
   const controlSuggestions = getControlSuggestionIfSupported(
     Boolean(supportsControls),
     ESQLVariableType.FUNCTIONS,

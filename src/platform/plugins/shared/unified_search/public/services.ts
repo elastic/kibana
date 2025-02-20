@@ -9,9 +9,13 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { ESQLEditorRegistry } from '@kbn/esql-registry/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
 
 export const [getCoreStart, setCoreStart] = createGetterSetter<CoreStart>('CoreStart');
 
 export const [getIndexPatterns, setIndexPatterns] =
   createGetterSetter<DataViewsContract>('IndexPatterns');
+
+export const [getEsqlRegistry, setEsqlRegistry] =
+  createGetterSetter<ESQLEditorRegistry>('EsqlRegistry');

@@ -2,20 +2,14 @@
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": [
-      "jest",
-      "node"
-    ]
   },
   "include": [
-    "src/**/*",
-    "**/*.ts", "scripts",
+    "../../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
   ],
   "kbn_references": [
-    "@kbn/i18n",
-    "@kbn/esql-ast",
-    "@kbn/utility-types",
-    "@kbn/esql-registry"
+    "@kbn/core",
   ],
   "exclude": [
     "target/**/*",

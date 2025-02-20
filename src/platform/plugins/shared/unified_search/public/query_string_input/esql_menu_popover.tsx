@@ -22,6 +22,7 @@ import { FEEDBACK_LINK } from '@kbn/esql-utils';
 import { getRecommendedQueries } from '@kbn/esql-validation-autocomplete';
 import { LanguageDocumentationFlyout } from '@kbn/language-documentation';
 import type { IUnifiedSearchPluginServices } from '../types';
+import { getEsqlRegistry } from '../services';
 
 export interface ESQLMenuPopoverProps {
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
@@ -66,6 +67,18 @@ export const ESQLMenuPopover: React.FC<ESQLMenuPopoverProps> = ({
           timeField: timeFieldName,
         })
       );
+
+      const esqlRegistry = getEsqlRegistry();
+      if (esqlRegistry) {
+        const recommendedQueriesFromRegistry =
+          esqlRegistry?.getExtension(adHocDataview.name)?.recommendedQueries ?? [];
+        recommendedQueries.push(
+          ...recommendedQueriesFromRegistry.map((extension) => ({
+            label: extension.name,
+            queryString: `${queryString} \n ${extension.query}`,
+          }))
+        );
+      }
     }
     const panels = [
       {

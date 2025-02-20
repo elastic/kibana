@@ -22,10 +22,11 @@
       "data",
       "uiActions",
       "screenshotMode",
-      "savedObjectsManagement"
+      "savedObjectsManagement",
     ],
     "optionalPlugins": [
-      "usageCollection"
+      "usageCollection",
+      "esqlRegistry",
     ],
     "requiredBundles": [
       "kibanaUtils",

@@ -19,6 +19,7 @@
       "dataViews",
       "uiActions",
       "contentManagement",
+      "esqlRegistry"
     ],
     "requiredBundles": [
       "kibanaReact",

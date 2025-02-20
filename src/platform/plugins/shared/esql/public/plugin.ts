@@ -15,6 +15,7 @@ import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-ty
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { ESQLEditorRegistry } from '@kbn/esql-registry/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   updateESQLQueryTrigger,
@@ -41,6 +42,7 @@ interface EsqlPluginStartDependencies {
   data: DataPublicPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
+  esqlRegistry: ESQLEditorRegistry;
 }
 
 export interface EsqlPluginStart {
@@ -69,6 +71,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       uiActions,
       fieldsMetadata,
       usageCollection,
+      esqlRegistry,
     }: EsqlPluginStartDependencies
   ): EsqlPluginStart {
     const storage = new Storage(localStorage);
@@ -107,6 +110,7 @@ export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
       expressions,
       storage,
       uiActions,
+      esqlRegistry,
       this.indexManagement,
       fieldsMetadata,
       usageCollection
