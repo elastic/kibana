@@ -4093,7 +4093,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/babel-transform@link:packages/kbn-babel-transform":
+"@kbn/babel-transform@link:src/platform/packages/private/kbn-babel-transform":
   version "0.0.0"
   uid ""
 
