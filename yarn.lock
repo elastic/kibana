@@ -7657,6 +7657,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/storage-adapter@link:src/platform/packages/shared/kbn-storage-adapter":
+  version "0.0.0"
+  uid ""
+
 "@kbn/storybook@link:packages/kbn-storybook":
   version "0.0.0"
   uid ""
@@ -7794,6 +7798,10 @@
   uid ""
 
 "@kbn/tooling-log@link:packages/kbn-tooling-log":
+  version "0.0.0"
+  uid ""
+
+"@kbn/traced-es-client@link:src/platform/packages/shared/kbn-traced-es-client":
   version "0.0.0"
   uid ""
 

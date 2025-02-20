@@ -170,7 +170,7 @@ describe('function validation', () => {
         it('list type', async () => {
           const testFn: FunctionDefinition = {
             name: 'in',
-            type: 'builtin',
+            type: 'operator',
             description: '',
             supportedCommands: ['row'],
             signatures: [
