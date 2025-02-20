@@ -6,6 +6,10 @@
  */
 
 import { useMemo } from 'react';
+import type {
+  AssetInventoryEnableResponse,
+  AssetInventoryStatusResponse,
+} from '../../../common/api/asset_inventory/types';
 import { API_VERSIONS } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -14,7 +18,7 @@ export const useAssetInventoryRoutes = () => {
 
   return useMemo(() => {
     const postEnableAssetInventory = async () => {
-      return http.fetch<{ response: string }>('/api/entity_store/enable', {
+      return http.fetch<AssetInventoryEnableResponse>('/api/asset_inventory/enable', {
         method: 'POST',
         version: API_VERSIONS.public.v1,
         body: JSON.stringify({}),
@@ -22,9 +26,7 @@ export const useAssetInventoryRoutes = () => {
     };
 
     const getAssetInventoryStatus = async () => {
-      return http.fetch<{
-        status: string;
-      }>('/api/asset_inventory/status', {
+      return http.fetch<AssetInventoryStatusResponse>('/api/asset_inventory/status', {
         method: 'GET',
         version: API_VERSIONS.public.v1,
         query: {},

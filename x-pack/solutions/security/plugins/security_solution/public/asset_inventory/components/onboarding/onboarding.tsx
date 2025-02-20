@@ -17,17 +17,27 @@ import { Loading } from '../loading';
  * matches, it will render the child components.
  */
 export const Onboarding: FC<PropsWithChildren> = ({ children }) => {
-  const { status } = useAssetInventoryContext();
+  const { status, privileges, isLoading } = useAssetInventoryContext();
+
+  if (isLoading) {
+    return <Loading />;
+  }
 
   // Render different screens based on the onboarding status.
   switch (status) {
-    case 'loading': // The onboarding status is currently loading.
-      return <Loading />;
     case 'disabled': // The user has not yet started the onboarding process.
       return <GetStarted />;
-    // case 'initializing': // Todo: The onboarding process is currently initializing.
-    // case 'empty': // Todo: Onboarding cannot proceed because no relevant data was found.
-    // case 'permission_denied': // Todo: User lacks the necessary permissions to proceed.
+    case 'initializing': // Todo: The onboarding process is currently initializing.
+      return <div>{'Initializing...'}</div>;
+    case 'empty': // Todo: Onboarding cannot proceed because no relevant data was found.
+      return <div>{'No data found.'}</div>;
+    case 'permission_denied': // Todo: User lacks the necessary permissions to proceed.
+      return (
+        <div>
+          {'Permission denied.'}
+          <pre>{JSON.stringify(privileges)}</pre>
+        </div>
+      );
     default:
       // If no onboarding status matches, render the child components.
       return children;

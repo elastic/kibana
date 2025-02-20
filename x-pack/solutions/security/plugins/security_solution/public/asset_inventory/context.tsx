@@ -6,9 +6,14 @@
  */
 
 import React, { createContext, memo, useContext } from 'react';
+import type { UseAssetInventory } from './hooks/use_asset_inventory';
 import { useAssetInventory } from './hooks/use_asset_inventory';
 
-export const AssetInventoryContext = createContext<undefined | { status: string }>(undefined);
+const defaultContextValue: UseAssetInventory = {
+  isLoading: true,
+};
+
+export const AssetInventoryContext = createContext<UseAssetInventory>(defaultContextValue);
 
 export interface AssetInventoryContextProviderProps {
   /**

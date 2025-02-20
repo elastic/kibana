@@ -14,8 +14,13 @@ import { useAssetInventoryRoutes } from '../../../hooks/use_asset_inventory_rout
 export const useEnableAssetInventory = () => {
   const { postEnableAssetInventory } = useAssetInventoryRoutes();
   const [error, setError] = useState<string | null>(null);
+  const [isEnabling, setIsEnabling] = useState(false);
 
   const mutation = useMutation(postEnableAssetInventory, {
+    onMutate: () => {
+      setIsEnabling(true);
+      setError(null);
+    },
     onError: (err: { body?: ServerApiError }) => {
       const errorMessage =
         err?.body?.message ||
@@ -26,11 +31,12 @@ export const useEnableAssetInventory = () => {
           }
         );
       setError(errorMessage);
+      setIsEnabling(false);
     },
   });
 
   return {
-    isEnabling: mutation.isLoading,
+    isEnabling,
     error,
     setError,
     handleEnableClick: () => mutation.mutate(),
