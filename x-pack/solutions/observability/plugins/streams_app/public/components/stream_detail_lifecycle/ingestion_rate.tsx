@@ -98,7 +98,7 @@ export function IngestionRate({
         interval,
       };
     },
-    [data.search, definition, stats, isLoadingStats, timeRange]
+    [data.search, definition, stats, isLoadingStats, timeRange, calcAutoInterval]
   );
 
   return (
