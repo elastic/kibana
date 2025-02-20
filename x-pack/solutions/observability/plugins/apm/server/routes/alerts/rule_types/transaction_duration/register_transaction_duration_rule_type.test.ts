@@ -458,7 +458,7 @@ describe('registerTransactionDurationRuleType', () => {
           'kibana.alert.reason':
             'Avg. latency is 1,000 ms in the last 5 days for service: synthtrace-high-cardinality-0, env: Synthtrace: many_errors, type: request. Alert when > 149 ms.',
           'agent.name': 'java',
-          labels: { custom_label: [Array] },
+          labels: { custom_label: [] },
           'service.environment': 'Synthtrace: many_errors',
           'service.name': 'synthtrace-high-cardinality-0',
           'transaction.type': 'request',
