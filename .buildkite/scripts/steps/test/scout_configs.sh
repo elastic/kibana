@@ -46,7 +46,7 @@ if [[ -z "$RUN_MODE_LIST" ]]; then
   exit 1
 fi
 
-failedConfigs=""
+failedConfigs=()
 results=()
 
 # Run tests for each config
@@ -59,7 +59,7 @@ while read -r config_path; do
     echo "--- Running tests: $config_path ($mode)"
 
     if ! node scripts/scout run-tests "$mode" --config "$config_path" --kibana-install-dir "$KIBANA_BUILD_LOCATION"; then
-      failed_configs+=("$config_path ($mode)")
+      failed_configs+=("$config_path ($mode) ❌")
       EXIT_CODE=1
     else
       results+=("$config_path ($mode) ✅")
@@ -75,7 +75,7 @@ fi
 
 if [[ "$failedConfigs" ]]; then
   echo "❌ Failed:"
-  printf "%s\n" "${failed_configs[@]}"
+  printf "%s\n" "${failedConfigs[@]}"
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
 fi
 
