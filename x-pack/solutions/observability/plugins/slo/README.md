@@ -18,11 +18,11 @@ See the [kibana contributing guide](https://github.com/elastic/kibana/blob/main/
   <dd>Execute this to create a distributable version of this plugin that can be installed in Kibana</dd>
 
   <dt><code>yarn plugin-helpers dev --watch</code></dt>
-    <dd>Execute this to build your plugin ui browser side so Kibana could pick up when started in development</dd>
+    <dd>Execute this to build your plugin UI browser-side so Kibana could pick up when started in development</dd>
 </dl>
 
-
 ## API Integration Tests
+
 The SLO tests are located under `x-pack/test/api_integration/deployment_agnostic/apis/observability/slo` folder. In order to run the SLO tests of your interest, you can grep accordingly. Use the commands below to run all SLO tests (`grep=SLO`) on stateful or serverless.
 
 ### Stateful
