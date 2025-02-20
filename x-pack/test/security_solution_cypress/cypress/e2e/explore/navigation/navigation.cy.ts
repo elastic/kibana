@@ -19,12 +19,14 @@ import {
   EXCEPTIONS,
   USERS,
   DETECTION_RESPONSE,
+  DASHBOARDS,
   CSP_DASHBOARD,
   INDICATORS,
   BLOCKLIST,
   CSP_BENCHMARKS,
   CSP_FINDINGS,
   POLICIES,
+  EXPLORE,
   SETTINGS,
   ENTITY_ANALYTICS,
 } from '../../../screens/security_header';
@@ -86,6 +88,11 @@ describe('top-level navigation common to all pages in the Security app', { tags:
     visitWithTimeRange(TIMELINES_URL);
   });
 
+  it('navigates to the Dashboards landing page', () => {
+    navigateFromHeaderTo(DASHBOARDS);
+    cy.url().should('include', DASHBOARDS_URL);
+  });
+
   it('navigates to the Overview page', () => {
     navigateFromHeaderTo(OVERVIEW);
     cy.url().should('include', OVERVIEW_URL);
@@ -119,6 +126,11 @@ describe('top-level navigation common to all pages in the Security app', { tags:
   it('navigates to the Timelines page', () => {
     navigateFromHeaderTo(TIMELINES);
     cy.url().should('include', TIMELINES_URL);
+  });
+
+  it('navigates to the Explore landing page', () => {
+    navigateFromHeaderTo(EXPLORE);
+    cy.url().should('include', EXPLORE_URL);
   });
 
   it('navigates to the Hosts page', () => {
