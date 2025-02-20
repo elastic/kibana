@@ -38,17 +38,15 @@ export async function getValidatedESClient(
     ...esClientOptions,
   });
 
-  await es.info().then(
-    (esInfo) => {
-      if (log !== undefined) {
-        log.info(`Connected to Elasticsearch node '${esInfo.name}'`);
-      }
-    },
-    (err) => {
-      const msg = `Failed to connect to Elasticsearch\n${err}`;
-      throw cli ? createFailError(msg) : Error(msg);
+  try {
+    const esInfo = await es.info();
+    if (log !== undefined) {
+      log.info(`Connected to Elasticsearch node '${esInfo.name}'`);
     }
-  );
+  } catch (err) {
+    const msg = `Failed to connect to Elasticsearch\n${err}`;
+    throw cli ? createFailError(msg) : Error(msg);
+  }
 
   return es;
 }

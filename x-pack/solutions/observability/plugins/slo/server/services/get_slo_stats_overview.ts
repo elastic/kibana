@@ -5,22 +5,19 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/logging';
-import {
-  GetOverviewParams,
-  GetOverviewResponse,
-} from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
-import { AlertsClient } from '@kbn/rule-registry-plugin/server';
-import moment from 'moment';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { Logger } from '@kbn/logging';
 import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
+import { AlertsClient } from '@kbn/rule-registry-plugin/server';
+import { GetSLOStatsOverviewParams, GetSLOStatsOverviewResponse } from '@kbn/slo-schema';
+import moment from 'moment';
 import { typedSearch } from '../utils/queries';
+import { getSummaryIndices, getSloSettings } from './slo_settings';
 import { getElasticsearchQueryOrThrow, parseStringFilters } from './transform_generators';
-import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
 
-export class GetSLOsOverview {
+export class GetSLOStatsOverview {
   constructor(
     private soClient: SavedObjectsClientContract,
     private esClient: ElasticsearchClient,
@@ -30,9 +27,9 @@ export class GetSLOsOverview {
     private racClient: AlertsClient
   ) {}
 
-  public async execute(params: GetOverviewParams = {}): Promise<GetOverviewResponse> {
+  public async execute(params: GetSLOStatsOverviewParams): Promise<GetSLOStatsOverviewResponse> {
     const settings = await getSloSettings(this.soClient);
-    const { indices } = await getListOfSummaryIndices(this.esClient, settings);
+    const { indices } = await getSummaryIndices(this.esClient, settings);
 
     const kqlQuery = params.kqlQuery ?? '';
     const filters = params.filters ?? '';
