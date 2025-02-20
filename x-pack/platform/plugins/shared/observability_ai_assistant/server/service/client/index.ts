@@ -493,7 +493,8 @@ export class ObservabilityAIAssistantClient {
     };
 
     this.dependencies.logger.debug(
-      `Calling inference client with for name: "${name}" with options: ${JSON.stringify(options)}`
+      () =>
+        `Calling inference client with for name: "${name}" with options: ${JSON.stringify(options)}`
     );
 
     if (stream) {
