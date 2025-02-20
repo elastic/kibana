@@ -51,7 +51,7 @@ import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { AdditionalFieldGroups } from '@kbn/unified-field-list';
 import { useDataGridInTableSearch } from '@kbn/data-grid-in-table-search';
-import { useDebounceFn } from '@kbn/react-hooks';
+import { useThrottleFn } from '@kbn/react-hooks';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
 import {
   UnifiedDataTableSettings,
@@ -1162,7 +1162,7 @@ export const UnifiedDataTable = ({
     [rowCount]
   );
 
-  const { run: throttledHandleItemsRendered } = useDebounceFn(handleItemsRendered, { wait: 500 });
+  const { run: throttledHandleItemsRendered } = useThrottleFn(handleItemsRendered, { wait: 500 });
 
   const virtualizationOptions = useMemo(() => {
     // Don't use row overscan when showing Document column since
