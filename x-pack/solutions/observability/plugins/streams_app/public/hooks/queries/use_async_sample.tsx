@@ -8,7 +8,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
   Condition,
-  RecursiveRecord,
+  SampleDocument,
   WiredStreamGetResponse,
   conditionToQueryDsl,
   getFields,
@@ -38,7 +38,7 @@ export const useAsyncSample = (options: Options) => {
   // Documents
   const [isLoadingDocuments, toggleIsLoadingDocuments] = useToggle(false);
   const [documentsError, setDocumentsError] = useState();
-  const [documents, setDocuments] = useState<RecursiveRecord[]>([]);
+  const [documents, setDocuments] = useState<SampleDocument[]>([]);
 
   // Document counts / percentage
   const [isLoadingDocumentCounts, toggleIsLoadingDocumentCounts] = useToggle(false);
