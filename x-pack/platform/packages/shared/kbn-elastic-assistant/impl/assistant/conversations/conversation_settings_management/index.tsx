@@ -27,7 +27,6 @@ import * as i18n from './translations';
 
 import { useFetchCurrentUserConversations, useFetchPrompts } from '../../api';
 import { useAssistantContext } from '../../../assistant_context';
-import { useConversationDeleted } from '../conversation_settings/use_conversation_deleted';
 import { useFlyoutModalVisibility } from '../../common/components/assistant_settings_management/flyout/use_flyout_modal_visibility';
 import { Flyout } from '../../common/components/assistant_settings_management/flyout';
 import { CANCEL, DELETE, SETTINGS_UPDATED_TOAST_TITLE } from '../../settings/translations';
@@ -99,6 +98,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const {
     assistantStreamingEnabled,
     conversationsSettingsBulkActions,
+    onConversationDeleted,
     resetConversationsSettings,
     saveConversationsSettings,
     setConversationSettings,
@@ -167,17 +167,10 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
     [openEditFlyout]
   );
 
-  const onConversationDeleted = useConversationDeleted({
-    conversationSettings: conversations,
-    conversationsSettingsBulkActions,
-    setConversationSettings,
-    setConversationsSettingsBulkActions,
-  });
-
   const onDeleteActionClicked = useCallback(
     (rowItem: ConversationTableItem) => {
       setDeletedConversation(rowItem);
-      onConversationDeleted(rowItem.title);
+      onConversationDeleted(rowItem.id);
 
       closeEditFlyout();
       openConfirmModal();

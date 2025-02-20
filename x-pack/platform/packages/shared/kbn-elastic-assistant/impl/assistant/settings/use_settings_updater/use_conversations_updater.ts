@@ -17,6 +17,7 @@ interface UseConversationsUpdater {
   assistantStreamingEnabled: boolean;
   conversationSettings: Record<string, Conversation>;
   conversationsSettingsBulkActions: ConversationsBulkActions;
+  onConversationDeleted: (cId: string) => void;
   resetConversationsSettings: () => void;
   setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setConversationsSettingsBulkActions: React.Dispatch<
@@ -54,6 +55,32 @@ export const useConversationsUpdater = (
     setUpdatedAssistantStreamingEnabled(assistantStreamingEnabled);
   }, [assistantStreamingEnabled, conversations]);
 
+  const onConversationDeleted = useCallback(
+    (cId: string) => {
+      const conversationId = Object.values(conversations).find((c) => c.id === cId)?.id;
+      // If matching conversation is not found, do nothing
+      if (!conversationId) {
+        return;
+      }
+
+      const updatedConversationSettings = { ...conversations };
+      delete updatedConversationSettings[conversationId];
+
+      setConversationSettings(updatedConversationSettings);
+      setConversationsSettingsBulkActions({
+        ...conversationsSettingsBulkActions,
+        delete: {
+          ids: [...(conversationsSettingsBulkActions.delete?.ids ?? []), conversationId],
+        },
+      });
+    },
+    [
+      conversations,
+      conversationsSettingsBulkActions,
+      setConversationSettings,
+      setConversationsSettingsBulkActions,
+    ]
+  );
   /**
    * Save all pending settings
    */
@@ -101,6 +128,7 @@ export const useConversationsUpdater = (
     assistantStreamingEnabled: updatedAssistantStreamingEnabled,
     conversationSettings,
     conversationsSettingsBulkActions,
+    onConversationDeleted,
     resetConversationsSettings,
     saveConversationsSettings,
     setUpdatedAssistantStreamingEnabled,

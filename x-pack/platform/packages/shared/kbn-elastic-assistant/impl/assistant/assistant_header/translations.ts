@@ -49,20 +49,6 @@ export const RESET_CONVERSATION = i18n.translate(
   }
 );
 
-export const SHOW_ANONYMIZED = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.showAnonymizedToggleLabel',
-  {
-    defaultMessage: 'Show anonymized',
-  }
-);
-
-export const SHOW_REAL_VALUES = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.showAnonymizedToggleRealValuesLabel',
-  {
-    defaultMessage: 'Show real values',
-  }
-);
-
 export const ANONYMIZE_VALUES = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.anonymizeValues',
   {
