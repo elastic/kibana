@@ -17,18 +17,15 @@ import {
   EuiForm,
   EuiFormRow,
   EuiPanel,
-  EuiRadio,
   EuiSpacer,
   EuiText,
   useIsWithinBreakpoints,
   EuiTitle,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import * as Constants from '../../../../shared/constants';
-import { KibanaLogic } from '../../../../shared/kibana';
 import { isValidIndexName } from '../../../utils/validate_index_name';
 import { GeneratedConfigFields } from '../../connector_detail/components/generated_config_fields';
 
@@ -36,7 +33,6 @@ import { ConnectorViewLogic } from '../../connector_detail/connector_view_logic'
 import { NewConnectorLogic } from '../../new_index/method_connector/new_connector_logic';
 
 import { ChooseConnector } from './components/choose_connector';
-import { ConnectorDescriptionPopover } from './components/connector_description_popover';
 import { ManualConfiguration } from './components/manual_configuration';
 import { SelfManagePreference } from './create_connector';
 
@@ -52,12 +48,9 @@ export const StartStep: React.FC<StartStepProps> = ({
   title,
   selfManagePreference,
   setCurrentStep,
-  onSelfManagePreferenceChange,
   error,
 }) => {
   const isMediumDevice = useIsWithinBreakpoints(['xs', 's', 'm', 'l']);
-  const elasticManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'elasticManagedRadioButton' });
-  const selfManagedRadioButtonId = useGeneratedHtmlId({ prefix: 'selfManagedRadioButton' });
 
   const {
     rawName,
@@ -66,12 +59,10 @@ export const StartStep: React.FC<StartStepProps> = ({
     generatedConfigData,
     isGenerateLoading,
     isCreateLoading,
-    isFormDirty,
   } = useValues(NewConnectorLogic);
   const { setRawName, createConnector, generateConnectorName, setFormDirty } =
     useActions(NewConnectorLogic);
   const { connector } = useValues(ConnectorViewLogic);
-  const { isAgentlessEnabled } = useValues(KibanaLogic);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
@@ -183,69 +174,6 @@ export const StartStep: React.FC<StartStepProps> = ({
           </EuiPanel>
         </EuiFlexItem>
         {/* Set up */}
-        <EuiFlexItem>
-          <EuiPanel hasShadow={false} hasBorder paddingSize="l">
-            <EuiTitle size="s">
-              <h4>
-                {i18n.translate('xpack.enterpriseSearch.createConnector.startStep.h4.setUpLabel', {
-                  defaultMessage: 'Setup',
-                })}
-              </h4>
-            </EuiTitle>
-            <EuiSpacer size="m" />
-            <EuiText size="s">
-              <p>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.createConnector.startStep.p.whereDoYouWantLabel',
-                  {
-                    defaultMessage: 'Choose how to deploy and manage your connector:',
-                  }
-                )}
-              </p>
-            </EuiText>
-            <EuiSpacer size="m" />
-            <EuiFlexGroup gutterSize="xs">
-              <EuiFlexItem grow={false}>
-                <EuiRadio
-                  id={elasticManagedRadioButtonId}
-                  label={i18n.translate(
-                    'xpack.enterpriseSearch.createConnector.startStep.euiRadio.elasticManagedLabel',
-                    { defaultMessage: 'Elastic managed' }
-                  )}
-                  checked={selfManagePreference === 'native'}
-                  disabled={
-                    selectedConnector?.isNative === false || !isAgentlessEnabled || isFormDirty
-                  }
-                  onChange={() => onSelfManagePreferenceChange('native')}
-                  name="setUp"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ConnectorDescriptionPopover
-                  showIsOnlySelfManaged={selectedConnector?.isNative === false}
-                  isNative
-                />
-              </EuiFlexItem>
-              &nbsp; &nbsp;
-              <EuiFlexItem grow={false}>
-                <EuiRadio
-                  id={selfManagedRadioButtonId}
-                  label={i18n.translate(
-                    'xpack.enterpriseSearch.createConnector.startStep.euiRadio.selfManagedLabel',
-                    { defaultMessage: 'Self-managed' }
-                  )}
-                  checked={selfManagePreference === 'selfManaged'}
-                  disabled={isFormDirty}
-                  onChange={() => onSelfManagePreferenceChange('selfManaged')}
-                  name="setUp"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <ConnectorDescriptionPopover showIsOnlySelfManaged={false} isNative={false} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
         {selfManagePreference === 'selfManaged' ? (
           <EuiFlexItem>
             <EuiPanel

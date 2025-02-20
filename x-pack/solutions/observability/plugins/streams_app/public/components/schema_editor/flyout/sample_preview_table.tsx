@@ -83,7 +83,7 @@ const SamplePreviewTableContent = ({
   }
 
   if ((value && value.status === 'failure') || error) {
-    const formattedError = getFormattedError(error);
+    const formattedError = error && getFormattedError(error);
     return (
       <EuiCallOut
         color="danger"

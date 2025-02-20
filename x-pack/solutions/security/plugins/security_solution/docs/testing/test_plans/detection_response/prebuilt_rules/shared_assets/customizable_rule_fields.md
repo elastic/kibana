@@ -1,4 +1,4 @@
-### Customizable rule fields
+# Customizable rule fields
 
 These are fields in the detection rule schema that are able to be customized on a prebuilt rule.
 
