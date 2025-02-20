@@ -334,9 +334,10 @@ export function generateFleetConfig(
 
   // generating the ssl configs for checking into Fleet
   // These are set in ES or remote ES outputs and correspond to --certificate-authorities, --elastic-agent-cert and --elastic-agent-cert-key cli options
-  const output = agentPolicy?.data_output_id
-    ? outputs.find((o) => o.id === agentPolicy.data_output_id)
-    : outputs.find((o) => o.is_default);
+  const output =
+    agentPolicy?.data_output_id || agentPolicy?.monitoring_output_id
+      ? outputs.find((o) => o.id === agentPolicy.data_output_id)
+      : outputs.find((o) => o.is_default);
 
   if (
     output &&

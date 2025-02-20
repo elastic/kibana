@@ -79,6 +79,7 @@ export const SSLFormSection: React.FunctionComponent<Props> = (props) => {
           {...inputs.sslKeyInput.formRowProps}
           useSecretsStorage={useSecretsStorage}
           onToggleSecretStorage={onToggleSecretAndClearValue}
+          disabled={!useSecretsStorage}
         >
           <EuiTextArea
             fullWidth

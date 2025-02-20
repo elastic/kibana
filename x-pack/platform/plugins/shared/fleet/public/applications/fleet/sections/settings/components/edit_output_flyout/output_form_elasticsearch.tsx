@@ -109,7 +109,7 @@ export const OutputFormElasticsearchSection: React.FunctionComponent<Props> = (p
       <EuiSpacer size="m" />
       <SSLFormSection
         inputs={inputs}
-        useSecretsStorage={useSecretsStorage}
+        useSecretsStorage={false}
         isConvertedToSecret={isConvertedToSecret.sslKey}
         onToggleSecretAndClearValue={onToggleSecretAndClearValue}
       />
