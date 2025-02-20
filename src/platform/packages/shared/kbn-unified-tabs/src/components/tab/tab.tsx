@@ -109,6 +109,7 @@ function getTabContainerCss(euiTheme: EuiThemeComputed, isSelected: boolean) {
   return css`
     display: inline-flex;
     border-right: ${euiTheme.border.thin};
+    border-color: ${euiTheme.colors.lightShade};
     height: ${euiTheme.size.xl};
     padding-left: ${euiTheme.size.m};
     padding-right: ${euiTheme.size.xs};
