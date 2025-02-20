@@ -75,7 +75,7 @@ export class ObservabilityStreamsWrapperPlugin
 {
   logger: Logger;
 
-  constructor(private readonly context: PluginInitializerContext<ConfigSchema>) {
+  constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
   }
   setup(
