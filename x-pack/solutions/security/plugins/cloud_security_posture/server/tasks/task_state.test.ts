@@ -104,7 +104,7 @@ describe('finding stats task state', () => {
         low: { doc_count: 120 },
       };
 
-      await  getVulnStatsTrendDocIndexingPromises(esClient, vulnStatsAggs);
+      await getVulnStatsTrendDocIndexingPromises(esClient, vulnStatsAggs);
 
       expect(esClient.index).toHaveBeenCalledWith({
         index: expect.any(String),
