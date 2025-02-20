@@ -152,7 +152,7 @@ const getEntity = (row: DataTableRecord): EntityEcs => {
 
 const ASSET_INVENTORY_TABLE_ID = 'asset-inventory-table';
 
-const AllAssets = ({
+export const AllAssets = ({
   nonPersistedFilters,
   height,
   hasDistributionBar = true,

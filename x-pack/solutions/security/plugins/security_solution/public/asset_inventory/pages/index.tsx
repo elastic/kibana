@@ -12,7 +12,7 @@ import { AllAssets } from './all_assets';
 const AssetsPage = () => {
   return (
     <Onboarding>
-      <AllAssets rows={[]} isLoading={false} loadMore={() => {}} />
+      <AllAssets />
     </Onboarding>
   );
 };
