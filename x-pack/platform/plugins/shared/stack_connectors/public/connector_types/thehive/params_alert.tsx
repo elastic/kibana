@@ -72,7 +72,7 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
     );
   };
 
-  const onSelectMessageVariable = (template: Template) => {
+  const onSelectTemplate = (template: Template) => {
     editAction(
       'subActionParams',
       {
@@ -261,7 +261,7 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
             <TemplateOptions
               buttonTitle={translations.SELECT_BODY_TEMPLATE_POPOVER_BUTTON}
               paramsProperty="body"
-              onSelectEventHandler={onSelectMessageVariable}
+              onSelectEventHandler={onSelectTemplate}
             />
           </>
         }

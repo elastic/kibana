@@ -438,7 +438,7 @@ describe('TheHiveConnector', () => {
     };
 
     const { body, ...restOfAlert } = alert;
-    const expectedAlertBody = { ...restOfAlert, ...JSON.parse(body ?? '{}') };
+    const expectedAlertBody = { ...JSON.parse(body ?? '{}'), ...restOfAlert };
 
     it('TheHive API call is successful with correct parameters', async () => {
       await connector.createAlert(alert, connectorUsageCollector);
@@ -462,7 +462,7 @@ describe('TheHiveConnector', () => {
       // @ts-ignore
       connector.request = mockError;
 
-      await expect(connector.createAlert(alert, connectorUsageCollector)).rejects.toThrow(
+      await expect(connector.createAlert(expectedAlertBody, connectorUsageCollector)).rejects.toThrow(
         'API Error'
       );
     });

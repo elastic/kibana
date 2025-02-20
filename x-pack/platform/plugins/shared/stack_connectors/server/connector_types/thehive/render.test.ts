@@ -26,7 +26,7 @@ const params = {
 
 const variables = {
   url: 'https://example.com',
-  rule: { params: { severity: 'medium' } },
+  context: { rule: { severity: 'high' } },
   alert: { uuid: 'test123' },
 };
 const logger = loggingSystemMock.createLogger();
@@ -42,7 +42,7 @@ describe('TheHive - renderParameterTemplates', () => {
       source: 'source',
       sourceRef: variables.alert.uuid,
       tlp: 2,
-      severity: 2,
+      severity: 3,
       body: `{"observables":[{"datatype":"url","data":"${variables.url}"}],"tags":["test"]}`,
     });
   });
