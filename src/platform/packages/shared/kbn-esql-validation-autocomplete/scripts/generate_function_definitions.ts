@@ -286,6 +286,12 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
   count: {
     signatures: [{ params: [{ supportsWildcard: true }] }],
   },
+  qstr: {
+    customParametersSnippet: `"""$0"""`,
+  },
+  kql: {
+    customParametersSnippet: `"""$0"""`,
+  },
 };
 
 const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
@@ -330,7 +336,7 @@ function getFunctionDefinition(ESFunctionDefinition: Record<string, any>): Funct
           description: undefined,
           ...(FULL_TEXT_SEARCH_FUNCTIONS.includes(ESFunctionDefinition.name)
             ? // Default to false. If set to true, this parameter does not accept a function or literal, only fields.
-              idx === 0
+              param.name === 'field'
               ? { fieldsOnly: true }
               : { constantOnly: true }
             : {}),
@@ -810,7 +816,8 @@ function printGeneratedFunctionsFile(
     functionDefinition: FunctionDefinition,
     functionNames: string[]
   ) => {
-    const { type, name, description, alias, signatures, operator } = functionDefinition;
+    const { type, name, description, alias, signatures, operator, customParametersSnippet } =
+      functionDefinition;
 
     let functionName = operator?.toLowerCase() ?? name.toLowerCase();
     if (functionName.includes('not')) {
@@ -832,7 +839,11 @@ function printGeneratedFunctionsFile(
     supportedCommands: ${JSON.stringify(functionDefinition.supportedCommands)},
     supportedOptions: ${JSON.stringify(functionDefinition.supportedOptions)},
     validate: ${functionDefinition.validate || 'undefined'},
-    examples: ${JSON.stringify(functionDefinition.examples || [])},
+    examples: ${JSON.stringify(functionDefinition.examples || [])},${
+      customParametersSnippet
+        ? `\ncustomParametersSnippet: ${JSON.stringify(customParametersSnippet)},`
+        : ''
+    }
 }`;
   };
 
