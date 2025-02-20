@@ -46,7 +46,7 @@ describe('finding stats task state', () => {
       expect(esClient.index).not.toHaveBeenCalled();
     });
 
-    it('should correctly process vulnerability stats and call esClient.index', () => {
+    it('should correctly process vulnerability stats and call esClient.index', async () => {
       const vulnStatsAggs = {
         vulnerabilities_stats_by_cloud_account: {
           buckets: [
@@ -66,7 +66,7 @@ describe('finding stats task state', () => {
         low: { doc_count: 200 },
       };
 
-      getVulnStatsTrendDocIndexingPromises(esClient, vulnStatsAggs);
+      await getVulnStatsTrendDocIndexingPromises(esClient, vulnStatsAggs);
 
       expect(esClient.index).toHaveBeenCalledWith({
         index: expect.any(String),
@@ -84,7 +84,7 @@ describe('finding stats task state', () => {
       });
     });
 
-    it('should handle missing cloud account name gracefully', () => {
+    it('should handle missing cloud account name gracefully', async () => {
       const vulnStatsAggs = {
         vulnerabilities_stats_by_cloud_account: {
           buckets: [
@@ -104,7 +104,7 @@ describe('finding stats task state', () => {
         low: { doc_count: 120 },
       };
 
-      getVulnStatsTrendDocIndexingPromises(esClient, vulnStatsAggs);
+      await  getVulnStatsTrendDocIndexingPromises(esClient, vulnStatsAggs);
 
       expect(esClient.index).toHaveBeenCalledWith({
         index: expect.any(String),
