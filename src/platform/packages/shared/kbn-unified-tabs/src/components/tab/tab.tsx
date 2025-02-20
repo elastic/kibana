@@ -125,6 +125,12 @@ function getTabContainerCss(euiTheme: EuiThemeComputed, isSelected: boolean) {
       transition: opacity ${euiTheme.animation.fast};
     }
 
+    &:hover {
+      .unifiedTabs__closeTabBtn {
+        opacity: 1;
+      }
+    }
+
     ${isSelected
       ? `
           .unifiedTabs__tabBtn {
@@ -136,10 +142,6 @@ function getTabContainerCss(euiTheme: EuiThemeComputed, isSelected: boolean) {
           &:hover {
             background-color: ${euiTheme.colors.lightShade};
             color: ${euiTheme.colors.text};
-
-            .unifiedTabs__closeTabBtn {
-              opacity: 1;
-            }
         }`}
   `;
 }
