@@ -19,6 +19,7 @@ import {
   getFunctionSignaturesByReturnType,
   setup,
 } from './helpers';
+import { FULL_TEXT_SEARCH_FUNCTIONS } from '../../shared/constants';
 
 describe('WHERE <expression>', () => {
   const allEvalFns = getFunctionSignaturesByReturnType('where', 'any', {
@@ -150,9 +151,7 @@ describe('WHERE <expression>', () => {
         ...getFieldNamesByType('any')
           .map((field) => `${field} `)
           .map(attachTriggerCommand),
-        ...allEvalFns.filter(
-          (fn) => fn.label !== 'QSTR' && fn.label !== 'KQL' && fn.label !== 'MATCH'
-        ),
+        ...allEvalFns.filter((fn) => !FULL_TEXT_SEARCH_FUNCTIONS.includes(fn.label!.toLowerCase())),
       ]);
     });
 
