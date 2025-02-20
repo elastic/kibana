@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  EuiPanel,
 } from '@elastic/eui';
 import type { RulesSettingsAlertDeletionProperties } from '@kbn/alerting-types/rule_settings';
 import * as i18n from './translations';
@@ -43,6 +44,8 @@ export const RulesSettingsAlertsDeletionSection = memo((props: Props) => {
       />
     );
   }
+
+  const affectedAlerts = 0;
 
   return (
     <EuiForm data-test-subj="rulesSettingsAlertDeletionSection">
@@ -123,11 +126,10 @@ export const RulesSettingsAlertsDeletionSection = memo((props: Props) => {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        {/* // TODO: https://github.com/elastic/kibana/issues/209266
         <EuiSpacer size="m" />
         <EuiPanel borderRadius="none" color="subdued">
-          {ALERT_DELETION_LAST_RUN}
-        </EuiPanel> */}
+          {i18n.ALERT_DELETION_AFFECTED_ALERTS(affectedAlerts)}
+        </EuiPanel>
       </EuiDescribedFormGroup>
     </EuiForm>
   );
