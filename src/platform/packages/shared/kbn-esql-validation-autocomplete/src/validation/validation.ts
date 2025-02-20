@@ -35,6 +35,7 @@ import {
   CommandModeDefinition,
   CommandOptionsDefinition,
   FunctionParameter,
+  FunctionDefinitionTypes,
 } from '../definitions/types';
 import {
   areFieldAndVariableTypesCompatible,
