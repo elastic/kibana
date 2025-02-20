@@ -1,11 +1,16 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "checkJs": true,
     "outDir": "target/types",
-    "types": ["@kbn/ambient-ui-types"]
+    "types": [
+      "jest",
+      "node"
+    ]
   },
   "include": [
-    "**/*.ts",
+    "index.js",
+    "types.ts"
   ],
   "exclude": [
     "target/**/*",

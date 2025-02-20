@@ -1,4 +1,6 @@
+load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+load("//src/dev/bazel:index.bzl", "pkg_npm", "ts_project")
 
 SRCS = glob(
   [
@@ -21,14 +23,17 @@ SRCS = glob(
 )
 
 BUNDLER_DEPS = [
-  "//packages/kbn-peggy",
-  "@npm//peggy",
-  "@npm//webpack",
+  "@npm//node-libs-browser",
 ]
 
+filegroup(
+  name = 'root_pkg_json',
+  srcs = ["//:package.json"]
+)
+
 js_library(
-  name = "kbn-peggy-loader",
-  package_name = "@kbn/peggy-loader",
+  name = "kbn-node-libs-browser-webpack-plugin",
+  package_name = "@kbn/node-libs-browser-webpack-plugin",
   srcs = ["package.json"] + SRCS,
   deps = BUNDLER_DEPS,
   visibility = ["//visibility:public"],
