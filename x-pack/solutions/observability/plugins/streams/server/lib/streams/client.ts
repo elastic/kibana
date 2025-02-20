@@ -28,7 +28,6 @@ import {
   isChildOf,
   isGroupStreamDefinition,
   isIngestStreamDefinition,
-  isDslLifecycle,
   isInheritLifecycle,
   isRootStreamDefinition,
   isUnwiredStreamDefinition,
@@ -220,7 +219,7 @@ export class StreamsClient {
 
       // inherit lifecycle is a noop for unwired streams, it keeps the
       // data stream configuration as-is
-      if (isDslLifecycle(definition.ingest.lifecycle)) {
+      if (!isInheritLifecycle(definition.ingest.lifecycle)) {
         await this.updateStreamLifecycle(definition, definition.ingest.lifecycle);
       }
     }
