@@ -78,8 +78,8 @@ export class StreamsPlugin
         }: {
           request: KibanaRequest;
         }): Promise<RouteHandlerScopedClients> => {
-          const [coreStart, assetClient] = await Promise.all([
-            core.getStartServices().then(([_coreStart]) => _coreStart),
+          const [[coreStart, pluginsStart], assetClient] = await Promise.all([
+            core.getStartServices(),
             assetService.getClientWithRequest({ request }),
           ]);
 
@@ -87,13 +87,9 @@ export class StreamsPlugin
 
           const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
           const soClient = coreStart.savedObjects.getScopedClient(request);
+          const inferenceClient = pluginsStart.inference.getClient({ request });
 
-          return {
-            scopedClusterClient,
-            soClient,
-            assetClient,
-            streamsClient,
-          };
+          return { scopedClusterClient, soClient, assetClient, streamsClient, inferenceClient };
         },
       },
       core,
