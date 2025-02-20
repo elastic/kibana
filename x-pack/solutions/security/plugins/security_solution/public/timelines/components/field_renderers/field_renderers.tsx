@@ -19,6 +19,7 @@ import { DefaultDraggable } from '../../../common/components/draggables';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
 import * as i18n from '../../../explore/network/components/details/translations';
+import type { SourcererScopeName } from '../../../sourcerer/store/model';
 
 export const IpOverviewId = 'ip-overview';
 
@@ -91,6 +92,7 @@ interface HostIdRendererTypes {
   host: HostEcs;
   ipFilter?: string;
   noLink?: boolean;
+  scopeId: string | undefined;
 }
 
 export const hostIdRenderer = ({
@@ -98,6 +100,7 @@ export const hostIdRenderer = ({
   host,
   ipFilter,
   noLink,
+  scopeId,
 }: HostIdRendererTypes): React.ReactElement =>
   host.id && host.ip && (ipFilter == null || host.ip.includes(ipFilter)) ? (
     <>
@@ -110,6 +113,7 @@ export const hostIdRenderer = ({
           value={host.id[0]}
           isAggregatable={true}
           fieldType={'keyword'}
+          scopeId={scopeId}
         >
           {noLink ? (
             <>{host.id}</>
@@ -126,6 +130,7 @@ export const hostIdRenderer = ({
   );
 
 export const hostNameRenderer = (
+  scopeId: SourcererScopeName,
   host?: HostEcs,
   ipFilter?: string,
   contextID?: string
@@ -143,6 +148,7 @@ export const hostNameRenderer = (
       value={host.name[0]}
       isAggregatable={true}
       fieldType={'keyword'}
+      scopeId={scopeId}
     >
       <HostDetailsLink hostName={host.name[0]}>
         {host.name ? host.name : getEmptyTagValue()}

@@ -19,9 +19,11 @@ import React, { useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 import { WiredStreamDefinition } from '@kbn/streams-schema';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
+import useToggle from 'react-use/lib/useToggle';
 import { SamplePreviewTable } from './sample_preview_table';
 import { FieldSummary } from './field_summary';
 import { SchemaField } from '../types';
+import { AdvancedFieldMappingOptions } from './advanced_field_mapping_options';
 
 export interface SchemaEditorFlyoutProps {
   field: SchemaField;
@@ -40,6 +42,8 @@ export const SchemaEditorFlyout = ({
   isEditingByDefault = false,
   withFieldSimulation = false,
 }: SchemaEditorFlyoutProps) => {
+  const [isEditing, toggleEditMode] = useToggle(isEditingByDefault);
+
   const [nextField, setNextField] = useReducer(
     (prev: SchemaField, updated: Partial<SchemaField>) =>
       ({
@@ -66,9 +70,15 @@ export const SchemaEditorFlyout = ({
         <EuiFlexGroup direction="column">
           <FieldSummary
             field={nextField}
-            isEditingByDefault={isEditingByDefault}
+            isEditing={isEditing}
+            toggleEditMode={toggleEditMode}
             onChange={setNextField}
             stream={stream}
+          />
+          <AdvancedFieldMappingOptions
+            field={nextField}
+            onChange={setNextField}
+            isEditing={isEditing}
           />
           {withFieldSimulation && (
             <EuiFlexItem grow={false}>

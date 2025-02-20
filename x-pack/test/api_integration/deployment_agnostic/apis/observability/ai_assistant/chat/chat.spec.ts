@@ -23,13 +23,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     {
       '@timestamp': new Date().toISOString(),
       message: {
-        role: MessageRole.System,
-        content: 'You are a helpful assistant',
-      },
-    },
-    {
-      '@timestamp': new Date().toISOString(),
-      message: {
         role: MessageRole.User,
         content: 'Good morning!',
       },
@@ -63,6 +56,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         params: {
           body: {
             name: 'my_api_call',
+            systemMessage: 'You are a helpful assistant',
             messages,
             connectorId: 'does not exist',
             functions: [],
@@ -98,6 +92,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               .on('error', reject)
               .send({
                 name: 'my_api_call',
+                systemMessage: 'You are a helpful assistant',
                 messages,
                 connectorId,
                 functions: [],
@@ -154,6 +149,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           params: {
             body: {
               name: 'my_api_call',
+              systemMessage: 'You are a helpful assistant',
               messages,
               connectorId,
               functions: [],

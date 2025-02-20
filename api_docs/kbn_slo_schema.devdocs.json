@@ -850,7 +850,7 @@
         "label": "FindSLOGroupsParams",
         "description": [],
         "signature": [
-          "{ page?: string | undefined; perPage?: string | undefined; groupBy?: \"status\" | \"slo.instanceId\" | \"_index\" | \"ungrouped\" | \"slo.tags\" | \"slo.indicator.type\" | undefined; groupsFilter?: string | string[] | undefined; kqlQuery?: string | undefined; filters?: string | undefined; }"
+          "{ page?: string | undefined; perPage?: string | undefined; groupBy?: \"status\" | \"slo.id\" | \"slo.instanceId\" | \"_index\" | \"ungrouped\" | \"slo.tags\" | \"slo.indicator.type\" | undefined; groupsFilter?: string | string[] | undefined; kqlQuery?: string | undefined; filters?: string | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/find_group.ts",
         "deprecated": false,
@@ -865,7 +865,7 @@
         "label": "FindSLOGroupsResponse",
         "description": [],
         "signature": [
-          "{ page: number; perPage: number; total: number; results: { group: string; groupBy: \"status\" | \"slo.instanceId\" | \"_index\" | \"ungrouped\" | \"slo.tags\" | \"slo.indicator.type\"; summary: { total: number; worst: { sliValue: number; status: string; slo: { id: string; instanceId: string; name: string; } & { groupings?: { [x: string]: unknown; } | undefined; }; }; violated: number; healthy: number; degrading: number; noData: number; }; }[]; }"
+          "{ page: number; perPage: number; total: number; results: { group: string; groupBy: \"status\" | \"slo.id\" | \"slo.instanceId\" | \"_index\" | \"ungrouped\" | \"slo.tags\" | \"slo.indicator.type\"; summary: { total: number; worst: { sliValue: number; status: string; slo: { id: string; instanceId: string; name: string; } & { groupings?: { [x: string]: unknown; } | undefined; }; }; violated: number; healthy: number; degrading: number; noData: number; }; }[]; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-slo-schema/src/rest_specs/routes/find_group.ts",
         "deprecated": false,
@@ -5555,7 +5555,9 @@
           "LiteralC",
           "<\"slo.instanceId\">, ",
           "LiteralC",
-          "<\"_index\">]>; groupsFilter: ",
+          "<\"_index\">, ",
+          "LiteralC",
+          "<\"slo.id\">]>; groupsFilter: ",
           "UnionC",
           "<[",
           "ArrayC",
@@ -5609,7 +5611,9 @@
           "LiteralC",
           "<\"slo.instanceId\">, ",
           "LiteralC",
-          "<\"_index\">]>; summary: ",
+          "<\"_index\">, ",
+          "LiteralC",
+          "<\"slo.id\">]>; summary: ",
           "TypeC",
           "<{ total: ",
           "NumberC",
@@ -17312,7 +17316,9 @@
           "LiteralC",
           "<\"slo.instanceId\">, ",
           "LiteralC",
-          "<\"_index\">]>; summary: ",
+          "<\"_index\">, ",
+          "LiteralC",
+          "<\"slo.id\">]>; summary: ",
           "TypeC",
           "<{ total: ",
           "NumberC",
