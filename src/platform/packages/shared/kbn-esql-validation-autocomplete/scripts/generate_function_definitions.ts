@@ -864,11 +864,15 @@ ${
 import { isLiteralItem } from '../../shared/helpers';`
     : ''
 }
+<<<<<<< HEAD
 ${
   functionsType === FunctionDefinitionTypes.OPERATOR
     ? `import { isNumericType } from '../../shared/esql_types';`
     : ''
 }
+=======
+${functionsType === 'operator' ? `import { isNumericType } from '../../shared/esql_types';` : ''}
+>>>>>>> main
 
 
 

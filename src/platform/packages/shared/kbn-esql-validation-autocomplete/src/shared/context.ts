@@ -140,7 +140,11 @@ function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
 }
 
 function isOperator(node: ESQLFunction) {
+<<<<<<< HEAD
   return getFunctionDefinition(node.name)?.type === FunctionDefinitionTypes.OPERATOR;
+=======
+  return getFunctionDefinition(node.name)?.type === 'operator';
+>>>>>>> main
 }
 
 /**
