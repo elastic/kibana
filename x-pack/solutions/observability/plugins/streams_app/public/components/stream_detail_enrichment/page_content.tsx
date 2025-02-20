@@ -34,6 +34,7 @@ import {
   UseProcessingSimulatorReturn,
   useProcessingSimulator,
 } from './hooks/use_processing_simulator';
+import { SimulatorContextProvider } from './simulator_context';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -60,15 +61,19 @@ export function StreamDetailEnrichmentContent({
     isSavingChanges,
   } = useDefinition(definition, refreshDefinition);
 
+  const processingSimulator = useProcessingSimulator({ definition, processors });
+
   const {
     hasLiveChanges,
     isLoading,
     refreshSamples,
-    samples,
+    filteredSamples,
     simulation,
     tableColumns,
     watchProcessor,
-  } = useProcessingSimulator({ definition, processors });
+    selectedDocsFilter,
+    setSelectedDocsFilter,
+  } = processingSimulator;
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: hasChanges || hasLiveChanges,
@@ -82,67 +87,90 @@ export function StreamDetailEnrichmentContent({
     return <RootStreamEmptyPrompt />;
   }
 
+  const isNonAdditiveSimulation = simulation && simulation.is_non_additive_simulation;
+  const isSubmitDisabled = Boolean(!hasChanges || isNonAdditiveSimulation);
+
+  const confirmTooltip = isNonAdditiveSimulation
+    ? {
+        title: i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.nonAdditiveProcessorsTooltip.title',
+          { defaultMessage: 'Non additive simulation detected' }
+        ),
+        content: i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.nonAdditiveProcessorsTooltip.content',
+          {
+            defaultMessage:
+              'We currently prevent adding processors that change/remove existing data. Please update your processor configurations to continue.',
+          }
+        ),
+      }
+    : undefined;
+
   return (
-    <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
-      <EuiSplitPanel.Inner
-        paddingSize="none"
-        css={css`
-          display: flex;
-          overflow: auto;
-        `}
-      >
-        <EuiResizableContainer>
-          {(EuiResizablePanel, EuiResizableButton) => (
-            <>
-              <EuiResizablePanel
-                initialSize={25}
-                minSize="400px"
-                tabIndex={0}
-                paddingSize="none"
-                css={verticalFlexCss}
-              >
-                <ProcessorsEditor
-                  definition={definition}
-                  processors={processors}
-                  onUpdateProcessor={updateProcessor}
-                  onDeleteProcessor={deleteProcessor}
-                  onWatchProcessor={watchProcessor}
-                  onAddProcessor={addProcessor}
-                  onReorderProcessor={reorderProcessors}
-                />
-              </EuiResizablePanel>
-
-              <EuiResizableButton indicator="border" accountForScrollbars="both" />
-
-              <EuiResizablePanel
-                initialSize={75}
-                minSize="300px"
-                tabIndex={0}
-                paddingSize="s"
-                css={verticalFlexCss}
-              >
-                <MemoSimulationPlayground
-                  definition={definition}
-                  columns={tableColumns}
-                  simulation={simulation}
-                  samples={samples}
-                  onRefreshSamples={refreshSamples}
-                  isLoading={isLoading}
-                />
-              </EuiResizablePanel>
-            </>
-          )}
-        </EuiResizableContainer>
-      </EuiSplitPanel.Inner>
-      <EuiSplitPanel.Inner grow={false} color="subdued">
-        <ManagementBottomBar
-          onCancel={resetChanges}
-          onConfirm={saveChanges}
-          isLoading={isSavingChanges}
-          disabled={!hasChanges}
-        />
-      </EuiSplitPanel.Inner>
-    </EuiSplitPanel.Outer>
+    <SimulatorContextProvider processingSimulator={processingSimulator} definition={definition}>
+      <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
+        <EuiSplitPanel.Inner
+          paddingSize="none"
+          css={css`
+            display: flex;
+            overflow: hidden auto;
+          `}
+        >
+          <EuiResizableContainer>
+            {(EuiResizablePanel, EuiResizableButton) => (
+              <>
+                <EuiResizablePanel
+                  initialSize={40}
+                  minSize="480px"
+                  tabIndex={0}
+                  paddingSize="none"
+                  css={verticalFlexCss}
+                >
+                  <ProcessorsEditor
+                    definition={definition}
+                    processors={processors}
+                    onUpdateProcessor={updateProcessor}
+                    onDeleteProcessor={deleteProcessor}
+                    onWatchProcessor={watchProcessor}
+                    onAddProcessor={addProcessor}
+                    onReorderProcessor={reorderProcessors}
+                    simulation={simulation}
+                  />
+                </EuiResizablePanel>
+                <EuiResizableButton indicator="border" accountForScrollbars="both" />
+                <EuiResizablePanel
+                  initialSize={60}
+                  minSize="300px"
+                  tabIndex={0}
+                  paddingSize="s"
+                  css={verticalFlexCss}
+                >
+                  <MemoSimulationPlayground
+                    definition={definition}
+                    columns={tableColumns}
+                    simulation={simulation}
+                    filteredSamples={filteredSamples}
+                    onRefreshSamples={refreshSamples}
+                    isLoading={isLoading}
+                    selectedDocsFilter={selectedDocsFilter}
+                    setSelectedDocsFilter={setSelectedDocsFilter}
+                  />
+                </EuiResizablePanel>
+              </>
+            )}
+          </EuiResizableContainer>
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner grow={false} color="subdued">
+          <ManagementBottomBar
+            confirmTooltip={confirmTooltip}
+            onCancel={resetChanges}
+            onConfirm={saveChanges}
+            isLoading={isSavingChanges}
+            disabled={isSubmitDisabled}
+          />
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+    </SimulatorContextProvider>
   );
 }
 
@@ -154,6 +182,7 @@ interface ProcessorsEditorProps {
   onReorderProcessor: UseDefinitionReturn['reorderProcessors'];
   onUpdateProcessor: UseDefinitionReturn['updateProcessor'];
   onWatchProcessor: UseProcessingSimulatorReturn['watchProcessor'];
+  simulation: UseProcessingSimulatorReturn['simulation'];
 }
 
 const ProcessorsEditor = React.memo(
@@ -165,6 +194,7 @@ const ProcessorsEditor = React.memo(
     onReorderProcessor,
     onUpdateProcessor,
     onWatchProcessor,
+    simulation,
   }: ProcessorsEditorProps) => {
     const { euiTheme } = useEuiTheme();
 
@@ -228,6 +258,7 @@ const ProcessorsEditor = React.memo(
                   onDeleteProcessor={onDeleteProcessor}
                   onUpdateProcessor={onUpdateProcessor}
                   onWatchProcessor={onWatchProcessor}
+                  processorMetrics={simulation?.processors_metrics[processor.id]}
                 />
               ))}
             </SortableList>
@@ -237,6 +268,7 @@ const ProcessorsEditor = React.memo(
             definition={definition}
             onAddProcessor={onAddProcessor}
             onWatchProcessor={onWatchProcessor}
+            processorMetrics={simulation?.processors_metrics.draft}
           />
         </EuiPanel>
       </>

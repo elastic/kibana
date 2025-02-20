@@ -6,10 +6,7 @@
  */
 
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import type { SearchEmbeddableSerializedState } from '@kbn/discover-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/types';
-import type { Filter } from '@kbn/es-query';
-import type { ViewMode } from '@kbn/presentation-publishing';
 import {
   EmbeddableTypes,
   EmbeddableExpressionType,
@@ -24,19 +21,11 @@ interface Arguments {
   id: string;
 }
 
-type Output = EmbeddableExpression<
-  Partial<SearchEmbeddableSerializedState> & {
-    id: string;
-    filters?: Filter[];
-    viewMode?: ViewMode;
-  }
->;
-
 export function savedSearch(): ExpressionFunctionDefinition<
   'savedSearch',
   ExpressionValueFilter | null,
   Arguments,
-  Output
+  EmbeddableExpression
 > {
   const { help, args: argHelp } = getFunctionHelp().savedSearch;
   return {

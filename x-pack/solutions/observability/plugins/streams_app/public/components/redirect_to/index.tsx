@@ -15,7 +15,11 @@ import { useStreamsAppParams } from '../../hooks/use_streams_app_params';
 export function RedirectTo<
   TPath extends PathsOf<StreamsAppRoutes>,
   TParams extends TypeOf<StreamsAppRoutes, TPath, false>
->({ path, params }: { path: TPath; params?: DeepPartial<TParams> }) {
+>({
+  children,
+  path,
+  params,
+}: React.PropsWithChildren<{ path: TPath; params?: DeepPartial<TParams> }>) {
   const router = useStreamsAppRouter();
   const currentParams = useStreamsAppParams('/*');
   useLayoutEffect(() => {
@@ -23,5 +27,5 @@ export function RedirectTo<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <></>;
+  return children ?? null;
 }
