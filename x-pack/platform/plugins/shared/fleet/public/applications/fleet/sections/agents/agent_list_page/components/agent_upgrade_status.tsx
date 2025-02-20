@@ -288,17 +288,6 @@ export const AgentUpgradeStatus: React.FC<{
   const notUpgradeableMessage = getNotUpgradeableMessage(agent, latestAgentVersion);
   const retryDelays = useConfig().autoUpgrades?.retryDelays ?? AUTO_UPGRADE_DEFAULT_RETRIES;
 
-  if (isAgentUpgradable && isAgentUpgradeAvailable(agent, latestAgentVersion)) {
-    return (
-      <EuiBadge color="hollow" iconType="sortUp">
-        <FormattedMessage
-          id="xpack.fleet.agentUpgradeStatusBadge.upgradeAvailable"
-          defaultMessage="Upgrade available"
-        />
-      </EuiBadge>
-    );
-  }
-
   if (agent.upgrade_details && status) {
     return (
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
@@ -336,6 +325,17 @@ export const AgentUpgradeStatus: React.FC<{
           />
         </EuiFlexItem>
       </EuiFlexGroup>
+    );
+  }
+
+  if (isAgentUpgradable && isAgentUpgradeAvailable(agent, latestAgentVersion)) {
+    return (
+      <EuiBadge color="hollow" iconType="sortUp">
+        <FormattedMessage
+          id="xpack.fleet.agentUpgradeStatusBadge.upgradeAvailable"
+          defaultMessage="Upgrade available"
+        />
+      </EuiBadge>
     );
   }
 
