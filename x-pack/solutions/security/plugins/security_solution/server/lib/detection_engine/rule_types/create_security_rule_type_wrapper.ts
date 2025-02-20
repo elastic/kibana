@@ -48,7 +48,6 @@ import { TIMESTAMP_RUNTIME_FIELD } from './constants';
 import { buildTimestampRuntimeMapping } from './utils/build_timestamp_runtime_mapping';
 import { alertsFieldMap, rulesFieldMap } from '../../../../common/field_maps';
 import { sendAlertSuppressionTelemetryEvent } from './utils/telemetry/send_alert_suppression_telemetry_event';
-import { buildTimeRangeFilter } from './utils/build_events_query';
 
 const aliasesFieldMap: FieldMap = {};
 Object.entries(aadFieldConversion).forEach(([key, value]) => {
@@ -81,6 +80,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
     experimentalFeatures,
     alerting,
     analytics,
+    isServerless,
   }) =>
   (type) => {
     const { alertIgnoreFields: ignoreFields, alertMergeStrategy: mergeStrategy } = config;
@@ -258,8 +258,9 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           // move this collection of lines into a function in utils
           // so that we can use it in create rules route, bulk, etc.
           let skipExecution: boolean = false;
-          try {
-            if (!isMachineLearningParams(params)) {
+
+          if (!isMachineLearningParams(params)) {
+            try {
               const indexPatterns = new IndexPatternsFetcher(scopedClusterClient.asInternalUser);
               const existingIndices = await indexPatterns.getExistingIndices(inputIndex);
 
@@ -275,7 +276,15 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                   wrapperWarnings.push(readIndexWarningMessage);
                 }
               }
+            } catch (exc) {
+              await ruleExecutionLogger.logStatusChange({
+                newStatus: RuleExecutionStatusEnum['partial failure'],
+                message: `Check privileges failed to execute ${exc}`,
+              });
+              wrapperWarnings.push(`Check privileges failed to execute ${exc}`);
+            }
 
+            try {
               const timestampFieldCaps = await withSecuritySpan('fieldCaps', () =>
                 services.scopedClusterClient.asCurrentUser.fieldCaps(
                   {
@@ -302,34 +311,36 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 wrapperWarnings.push(warningMissingTimestampFieldsMessage);
               }
               skipExecution = foundNoIndices;
+            } catch (exc) {
+              await ruleExecutionLogger.logStatusChange({
+                newStatus: RuleExecutionStatusEnum['partial failure'],
+                message: `Timestamp fields check failed to execute ${exc}`,
+              });
+              wrapperWarnings.push(`Timestamp fields check failed to execute ${exc}`);
+            }
 
-              const frozenFieldCaps = await services.scopedClusterClient.asCurrentUser.fieldCaps({
-                index: inputIndex,
-                fields: ['_id'],
-                ignore_unavailable: true,
-                index_filter: buildTimeRangeFilter({
+            if (!isServerless) {
+              try {
+                const frozenWarning = await checkForFrozenIndices({
+                  inputIndices: inputIndex,
+                  internalEsClient: services.scopedClusterClient.asInternalUser,
+                  currentUserEsClient: services.scopedClusterClient.asCurrentUser,
                   to: params.to,
                   from: params.from,
                   primaryTimestamp,
                   secondaryTimestamp,
-                }),
-              });
-
-              const frozenWarning = await checkForFrozenIndices({
-                fieldCapsResponse: frozenFieldCaps,
-                inputIndices: inputIndex,
-                esClient: services.scopedClusterClient.asCurrentUser,
-              });
-              if (frozenWarning) {
-                wrapperWarnings.push(frozenWarning);
+                });
+                if (frozenWarning) {
+                  wrapperWarnings.push(frozenWarning);
+                }
+              } catch (exc) {
+                await ruleExecutionLogger.logStatusChange({
+                  newStatus: RuleExecutionStatusEnum['partial failure'],
+                  message: `Frozen indices check failed to execute ${exc}`,
+                });
+                wrapperWarnings.push(`Frozen indices check failed to execute ${exc}`);
               }
             }
-          } catch (exc) {
-            await ruleExecutionLogger.logStatusChange({
-              newStatus: RuleExecutionStatusEnum['partial failure'],
-              message: `Check privileges failed to execute ${exc}`,
-            });
-            wrapperWarnings.push(`Check privileges failed to execute ${exc}`);
           }
 
           const {

@@ -94,6 +94,7 @@ import type {
 import type { BuildReasonMessage } from './reason_formatters';
 import { getSuppressionTerms } from './suppression_utils';
 import { robustGet } from './source_fields_merging/utils/robust_field_access';
+import { buildTimeRangeFilter } from './build_events_query';
 
 export const MAX_RULE_GAP_RATIO = 4;
 
@@ -193,14 +194,34 @@ export const hasTimestampFields = async (args: {
 };
 
 export const checkForFrozenIndices = async ({
-  fieldCapsResponse,
   inputIndices,
-  esClient,
+  internalEsClient,
+  currentUserEsClient,
+  to,
+  from,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: {
-  fieldCapsResponse: FieldCapsResponse;
   inputIndices: string[];
-  esClient: ElasticsearchClient;
+  internalEsClient: ElasticsearchClient;
+  currentUserEsClient: ElasticsearchClient;
+  to: string;
+  from: string;
+  primaryTimestamp: string;
+  secondaryTimestamp: string | undefined;
 }): Promise<string | undefined> => {
+  const fieldCapsResponse = await currentUserEsClient.fieldCaps({
+    index: inputIndices,
+    fields: ['_id'],
+    ignore_unavailable: true,
+    index_filter: buildTimeRangeFilter({
+      to,
+      from,
+      primaryTimestamp,
+      secondaryTimestamp,
+    }),
+  });
+
   const responseIndices = isArray(fieldCapsResponse.indices)
     ? fieldCapsResponse.indices
     : [fieldCapsResponse.indices];
@@ -212,7 +233,7 @@ export const checkForFrozenIndices = async ({
     const frozenIndices = [];
     // See https://www.elastic.co/guide/en/elasticsearch/reference/current/data-tiers.html#data-tier-allocation for
     // details on _tier_preference
-    const tierPreferencesResp = await esClient.indices.getSettings({
+    const tierPreferencesResp = await internalEsClient.indices.getSettings({
       // Use the original index patterns again instead of just the concrete names of the partial indices:
       // the list of concrete indices could be huge and make the request URL too large, but we know the list of index patterns works
       index: inputIndices,
