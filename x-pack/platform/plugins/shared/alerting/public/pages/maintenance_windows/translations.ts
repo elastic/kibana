@@ -636,7 +636,7 @@ export const DELETE_MODAL_TITLE = i18n.translate(
 export const DELETE_MODAL_SUBTITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.deleteModal.subtitle',
   {
-    defaultMessage: 'Not sure what.',
+    defaultMessage: "You won't be able to recover a deleted maintenance window.",
   }
 );
 
@@ -702,18 +702,6 @@ export const ARCHIVE_CALLOUT_SUBTITLE = i18n.translate(
       'The changes you have made here will not be saved. Are you sure you want to discard these unsaved changes and archive this maintenance window?',
   }
 );
-
-export const DELETE = i18n.translate('xpack.alerting.maintenanceWindows.delete', {
-  defaultMessage: 'Delete',
-});
-
-export const DELETE_TITLE = i18n.translate('xpack.alerting.maintenanceWindows.delete.title', {
-  defaultMessage: 'Delete maintenance window',
-});
-
-export const DELETE_SUBTITLE = i18n.translate('xpack.alerting.maintenanceWindows.delete.subtitle', {
-  defaultMessage: 'Not sure what!.',
-});
 
 export const EXPERIMENTAL_LABEL = i18n.translate(
   'xpack.alerting.maintenanceWindows.badge.experimentalLabel',
