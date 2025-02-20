@@ -148,13 +148,13 @@ export async function mountApp(
   }
 ) {
   const { createEditorFrame, attributeService, topNavMenuEntryGenerators, locator } = mountProps;
+  const { contextType, initialContext, initialStateFromLocator, originatingApp } =
+    getInitialContext(params.history) || {};
+
   const [[coreStart, startDependencies], instance] = await Promise.all([
     core.getStartServices(),
     createEditorFrame(),
   ]);
-
-  const { contextType, initialContext, initialStateFromLocator, originatingApp } =
-    getInitialContext(params.history) || {};
 
   const lensServices = await getLensServices(
     coreStart,

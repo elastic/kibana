@@ -342,14 +342,11 @@ export class LensPlugin {
     const startServices = createStartServicesGetter(core.getStartServices);
 
     const getStartServicesForEmbeddable = async (): Promise<LensEmbeddableStartServices> => {
-      const { setUsageCollectionStart, initMemoizedErrorNotification } = await import(
-        './async_services'
-      );
       const { core: coreStart, plugins } = startServices();
 
-      const { visualizationMap, datasourceMap } = await this.initEditorFrameService();
-      const [{ getLensAttributeService }, eventAnnotationService] = await Promise.all([
+      const [{ getLensAttributeService, setUsageCollectionStart, initMemoizedErrorNotification }, { visualizationMap, datasourceMap }, eventAnnotationService] = await Promise.all([
         import('./async_services'),
+        this.initEditorFrameService(),
         plugins.eventAnnotation.getService(),
       ]);
 
@@ -390,7 +387,7 @@ export class LensPlugin {
       embeddable.registerReactEmbeddableFactory(LENS_EMBEDDABLE_TYPE, async () => {
         const [deps, { createLensEmbeddableFactory }] = await Promise.all([
           getStartServicesForEmbeddable(),
-          import('./react_embeddable/lens_embeddable'),
+          import('./async_services'),
         ]);
         return createLensEmbeddableFactory(deps);
       });
@@ -466,7 +463,7 @@ export class LensPlugin {
       () => startServices().plugins.fieldFormats.deserialize,
       () => startServices().plugins.data.datatableUtilities,
       async () => {
-        const { getTimeZone } = await import('./utils');
+        const { getTimeZone } = await import('./async_services');
         return getTimeZone(core.uiSettings);
       },
       () => startServices().plugins.data.nowProvider.get()
@@ -479,21 +476,20 @@ export class LensPlugin {
       mount: async (params: AppMountParameters) => {
         const { core: coreStart, plugins: deps } = startServices();
 
-        await this.initParts(
-          core,
-          data,
-          charts,
-          expressions,
-          fieldFormats,
-          deps.fieldFormats.deserialize
-        );
-
-        const {
-          mountApp,
+        const [{ mountApp,
           getLensAttributeService,
           setUsageCollectionStart,
-          initMemoizedErrorNotification,
-        } = await import('./async_services');
+          initMemoizedErrorNotification }] = await Promise.all([
+            import('./async_services'),
+            this.initParts(
+              core,
+              data,
+              charts,
+              expressions,
+              fieldFormats,
+              deps.fieldFormats.deserialize
+            )
+          ]);
 
         if (deps.usageCollection) {
           setUsageCollectionStart(deps.usageCollection);
@@ -538,11 +534,11 @@ export class LensPlugin {
         plugins.fieldFormats.deserialize
       );
       // This needs to be executed before the import call to avoid race conditions
-      const [visualizationMap, datasourceMap] = await Promise.all([
+      const [visualizationMap, datasourceMap, { setVisualizationMap, setDatasourceMap }] = await Promise.all([
         this.editorFrameService!.loadVisualizations(),
         this.editorFrameService!.loadDatasources(),
+        import('./async_services')
       ]);
-      const { setVisualizationMap, setDatasourceMap } = await import('./async_services');
       setDatasourceMap(datasourceMap);
       setVisualizationMap(visualizationMap);
       return { datasourceMap, visualizationMap };
@@ -749,16 +745,15 @@ export class LensPlugin {
         return Boolean(core.application.capabilities.visualize_v2?.show);
       },
       getXyVisTypes: async () => {
-        const { visualizationSubtypes } = await import('./visualizations/xy/types');
+        const { visualizationSubtypes } = await import('./async_services');
         return visualizationSubtypes;
       },
 
       stateHelperApi: async () => {
-        const { createFormulaPublicApi, createChartInfoApi, suggestionsApi } = await import(
-          './async_services'
-        );
+        const [{ createFormulaPublicApi, createChartInfoApi, suggestionsApi }, { visualizationMap, datasourceMap }] = await Promise.all([
+          import('./async_services'), this.initEditorFrameService()
+        ]);
 
-        const { visualizationMap, datasourceMap } = await this.initEditorFrameService();
         return {
           formula: createFormulaPublicApi(),
           chartInfo: createChartInfoApi(
@@ -788,8 +783,9 @@ export class LensPlugin {
       // TODO: remove this in faviour of the custom action thing
       // This is currently used in Discover by the unified histogram plugin
       EditLensConfigPanelApi: async () => {
-        const { visualizationMap, datasourceMap } = await this.initEditorFrameService();
-        const { getEditLensConfiguration } = await import('./async_services');
+        const [{ visualizationMap, datasourceMap }, { getEditLensConfiguration }] = await Promise.all([
+          this.initEditorFrameService(), import('./async_services')
+        ]);
         const Component = await getEditLensConfiguration(
           core,
           startDependencies,
@@ -801,5 +797,5 @@ export class LensPlugin {
     };
   }
 
-  stop() {}
+  stop() { }
 }

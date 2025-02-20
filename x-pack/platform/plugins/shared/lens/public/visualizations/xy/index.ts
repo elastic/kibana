@@ -27,7 +27,6 @@ export class XyVisualization {
     { editorFrame }: XyVisualizationPluginSetupPlugins
   ) {
     editorFrame.registerVisualization(async () => {
-      const { getXyVisualization } = await import('../../async_services');
       const [
         coreStart,
         {
@@ -40,7 +39,8 @@ export class XyVisualization {
           dataViews,
         },
       ] = await core.getStartServices();
-      const [palettes, eventAnnotationService] = await Promise.all([
+      const [{ getXyVisualization }, palettes, eventAnnotationService] = await Promise.all([
+        import('../../async_services'),
         charts.palettes.getPalettes(),
         eventAnnotation.getService(),
       ]);
