@@ -8,7 +8,7 @@
  */
 
 import { isEqual } from 'lodash';
-import type { InternalStateStore } from '../redux';
+import type { InternalStateStore, RuntimeStateManager } from '../redux';
 import type { DiscoverServices } from '../../../../build_services';
 import type { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
 import type { DiscoverDataStateContainer } from '../discover_data_state_container';
@@ -38,6 +38,7 @@ export const buildStateSubscribe =
     appState,
     dataState,
     internalState,
+    runtimeStateManager,
     savedSearchState,
     services,
     setDataView,
@@ -45,6 +46,7 @@ export const buildStateSubscribe =
     appState: DiscoverAppStateContainer;
     dataState: DiscoverDataStateContainer;
     internalState: InternalStateStore;
+    runtimeStateManager: RuntimeStateManager;
     savedSearchState: DiscoverSavedSearchContainer;
     services: DiscoverServices;
     setDataView: DiscoverStateContainer['actions']['setDataView'];
@@ -107,6 +109,7 @@ export const buildStateSubscribe =
         savedSearch,
         isEsqlMode,
         internalState,
+        runtimeStateManager,
         services,
       });
 

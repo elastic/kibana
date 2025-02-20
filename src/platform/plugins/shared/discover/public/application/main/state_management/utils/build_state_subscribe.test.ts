@@ -30,6 +30,7 @@ describe('buildStateSubscribe', () => {
       savedSearchState: stateContainer.savedSearchState,
       dataState: stateContainer.dataState,
       internalState: stateContainer.internalState,
+      runtimeStateManager: stateContainer.runtimeStateManager,
       services: discoverServiceMock,
       setDataView: stateContainer.actions.setDataView,
     });

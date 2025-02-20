@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { TimeRange } from '@kbn/es-query';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
@@ -20,7 +20,6 @@ export interface DiscoverInternalState {
   dataViewId: string | undefined;
   isDataViewLoading: boolean;
   savedDataViews: DataViewListItem[];
-  adHocDataViews: DataViewSpec[];
   defaultProfileAdHocDataViewIds: string[];
   expandedDoc: DataTableRecord | undefined;
   dataRequestParams: InternalStateDataRequestParams;

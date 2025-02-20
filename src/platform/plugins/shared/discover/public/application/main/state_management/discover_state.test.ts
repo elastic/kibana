@@ -729,7 +729,6 @@ describe('Test discover state actions', () => {
       state.savedSearchState.getCurrent$().getValue().searchSource?.getField('index')?.id
     ).toEqual(dataViewSpecMock.id);
     expect(state.savedSearchState.getHasChanged$().getValue()).toEqual(false);
-    expect(state.internalState.getState().adHocDataViews.length).toBe(1);
     expect(state.runtimeStateManager.adHocDataViews$.getValue().length).toBe(1);
   });
 
@@ -762,7 +761,6 @@ describe('Test discover state actions', () => {
     expect(state.appState.getState().dataSource).toEqual(
       createDataViewDataSource({ dataViewId: adHocDataViewId! })
     );
-    expect(state.internalState.getState().adHocDataViews[0].id).toBe(adHocDataViewId);
     expect(state.runtimeStateManager.adHocDataViews$.getValue()[0].id).toBe(adHocDataViewId);
   });
 
@@ -932,7 +930,6 @@ describe('Test discover state actions', () => {
     expect(state.appState.getState().dataSource).toEqual(
       createDataViewDataSource({ dataViewId: 'ad-hoc-id' })
     );
-    expect(state.internalState.getState().adHocDataViews[0].id).toBe('ad-hoc-id');
     expect(state.runtimeStateManager.adHocDataViews$.getValue()[0].id).toBe('ad-hoc-id');
     unsubscribe();
   });

@@ -20,12 +20,7 @@ export const setDataView: InternalStateThunkActionCreator<[DataView]> =
 
 export const setAdHocDataViews: InternalStateThunkActionCreator<[DataView[]]> =
   (adHocDataViews) =>
-  (dispatch, _, { runtimeStateManager }) => {
-    dispatch(
-      internalStateSlice.actions.setAdHocDataViews(
-        adHocDataViews.map((dataView) => dataView.toSpec(false))
-      )
-    );
+  (_, __, { runtimeStateManager }) => {
     runtimeStateManager.adHocDataViews$.next(adHocDataViews);
   };
 

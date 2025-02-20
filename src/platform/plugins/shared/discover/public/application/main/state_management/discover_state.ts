@@ -455,6 +455,7 @@ export function getDiscoverStateContainer({
       appStateContainer,
       dataStateContainer,
       internalState,
+      runtimeStateManager,
       savedSearchContainer,
       globalStateContainer,
       services,
@@ -485,6 +486,7 @@ export function getDiscoverStateContainer({
         savedSearchState: savedSearchContainer,
         dataState: dataStateContainer,
         internalState,
+        runtimeStateManager,
         services,
         setDataView,
       })

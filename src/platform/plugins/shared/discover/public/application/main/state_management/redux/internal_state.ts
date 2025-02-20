@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { v4 as uuidv4 } from 'uuid';
 import {
@@ -24,7 +24,6 @@ import type { DiscoverInternalState, InternalStateDataRequestParams } from './ty
 const initialState: DiscoverInternalState = {
   dataViewId: undefined,
   isDataViewLoading: false,
-  adHocDataViews: [],
   defaultProfileAdHocDataViewIds: [],
   savedDataViews: [],
   expandedDoc: undefined,
@@ -53,10 +52,6 @@ export const internalStateSlice = createSlice({
 
     setIsDataViewLoading: (state, action: PayloadAction<boolean>) => {
       state.isDataViewLoading = action.payload;
-    },
-
-    setAdHocDataViews: (state, action: PayloadAction<DataViewSpec[]>) => {
-      state.adHocDataViews = action.payload;
     },
 
     setDefaultProfileAdHocDataViewIds: (state, action: PayloadAction<string[]>) => {

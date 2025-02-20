@@ -26,12 +26,13 @@ import {
 import { DiscoverGlobalStateContainer } from '../discover_global_state_container';
 import { DiscoverServices } from '../../../../build_services';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';
-import { InternalStateStore, internalStateActions } from '../redux';
+import { InternalStateStore, RuntimeStateManager, internalStateActions } from '../redux';
 
 interface LoadSavedSearchDeps {
   appStateContainer: DiscoverAppStateContainer;
   dataStateContainer: DiscoverDataStateContainer;
   internalState: InternalStateStore;
+  runtimeStateManager: RuntimeStateManager;
   savedSearchContainer: DiscoverSavedSearchContainer;
   globalStateContainer: DiscoverGlobalStateContainer;
   services: DiscoverServices;
@@ -49,8 +50,14 @@ export const loadSavedSearch = async (
 ): Promise<SavedSearch> => {
   addLog('[discoverState] loadSavedSearch');
   const { savedSearchId, initialAppState } = params ?? {};
-  const { appStateContainer, internalState, savedSearchContainer, globalStateContainer, services } =
-    deps;
+  const {
+    appStateContainer,
+    internalState,
+    runtimeStateManager,
+    savedSearchContainer,
+    globalStateContainer,
+    services,
+  } = deps;
 
   const appStateExists = !appStateContainer.isEmptyURL();
   const appState = appStateExists ? appStateContainer.getState() : initialAppState;
@@ -71,6 +78,7 @@ export const loadSavedSearch = async (
         query: appState?.query,
         services,
         internalState,
+        runtimeStateManager,
       })
     );
   }
@@ -106,6 +114,7 @@ export const loadSavedSearch = async (
         savedSearch: nextSavedSearch,
         services,
         internalState,
+        runtimeStateManager,
       });
       const dataViewDifferentToAppState = stateDataView.id !== savedSearchDataViewId;
       if (
@@ -192,12 +201,14 @@ const getStateDataView = async (
     savedSearch,
     services,
     internalState,
+    runtimeStateManager,
   }: {
     dataViewId?: string;
     query: DiscoverAppState['query'];
     savedSearch?: SavedSearch;
     services: DiscoverServices;
     internalState: InternalStateStore;
+    runtimeStateManager: RuntimeStateManager;
   }
 ) => {
   const { dataView, dataViewSpec } = params;
@@ -218,6 +229,7 @@ const getStateDataView = async (
     isEsqlMode: isEsqlQuery,
     services,
     internalState,
+    runtimeStateManager,
   });
 
   return result.dataView;
