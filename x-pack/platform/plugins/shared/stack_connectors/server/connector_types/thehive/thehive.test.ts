@@ -462,9 +462,9 @@ describe('TheHiveConnector', () => {
       // @ts-ignore
       connector.request = mockError;
 
-      await expect(connector.createAlert(expectedAlertBody, connectorUsageCollector)).rejects.toThrow(
-        'API Error'
-      );
+      await expect(
+        connector.createAlert(expectedAlertBody, connectorUsageCollector)
+      ).rejects.toThrow('API Error');
     });
   });
 });
