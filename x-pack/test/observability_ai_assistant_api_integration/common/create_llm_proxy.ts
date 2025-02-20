@@ -12,7 +12,7 @@ import { isString, once, pull } from 'lodash';
 import OpenAI from 'openai';
 import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
 import pRetry from 'p-retry';
-import { ChatCompletionChunkToolCall } from '@kbn/inference-common';
+import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import { createOpenAiChunk } from './create_openai_chunk';
 
 type Request = http.IncomingMessage;

@@ -16,7 +16,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import type OpenAI from 'openai';
 import { type AdHocInstruction } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { ChatCompletionChunkToolCall } from '@kbn/inference-common';
+import type { ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import {
   createLlmProxy,
   LlmProxy,
