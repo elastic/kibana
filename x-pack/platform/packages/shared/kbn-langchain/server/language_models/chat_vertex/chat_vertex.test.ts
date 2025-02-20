@@ -236,7 +236,7 @@ describe('ActionsClientChatVertexAI', () => {
 
       await expect(
         actionsClientChatVertexAI._generate(callMessages, callOptions, callRunManager)
-      ).resolves.toEqual({"generations": [], "llmOutput": {}});
+      ).resolves.toEqual({ generations: [], llmOutput: {} });
     });
   });
 
