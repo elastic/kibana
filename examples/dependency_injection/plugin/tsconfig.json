@@ -10,8 +10,9 @@
     "target/**/*",
   ],
   "kbn_references": [
-    "@kbn/core",
-    "@kbn/developer-examples-plugin",
-    "@kbn/dependency-injection-service-example-plugin",
+    "@kbn/core-di-server",
+    "@kbn/config-schema",
+    "@kbn/core-http-server",
+    "@kbn/dependency-injection-example-service",
   ]
 }

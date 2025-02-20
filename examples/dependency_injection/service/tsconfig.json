@@ -10,7 +10,9 @@
     "target/**/*",
   ],
   "kbn_references": [
-    "@kbn/core",
-    "@kbn/developer-examples-plugin"
+    "@kbn/config-schema",
+    "@kbn/core-di-server",
+    "@kbn/core-http-server",
+    "@kbn/core-di"
   ]
 }
