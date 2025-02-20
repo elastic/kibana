@@ -540,6 +540,20 @@ describe('schema validation', () => {
             },
           ],
         },
+        unknown: 'test',
+        conditions: {
+          other: 'test',
+        },
+        owner: {
+          other: 'test',
+        },
+        source: {
+          other: 'test',
+          license: 'basic',
+        },
+        discovery: {
+          other: 'test',
+        },
       } as any,
       metadata: {
         has_policies: true,
