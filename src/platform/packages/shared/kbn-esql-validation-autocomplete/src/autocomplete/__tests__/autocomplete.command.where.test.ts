@@ -150,7 +150,9 @@ describe('WHERE <expression>', () => {
         ...getFieldNamesByType('any')
           .map((field) => `${field} `)
           .map(attachTriggerCommand),
-        ...allEvalFns.filter((fn) => fn.label !== 'QSTR' && fn.label !== 'KQL' && fn.label !== 'MATCH'),
+        ...allEvalFns.filter(
+          (fn) => fn.label !== 'QSTR' && fn.label !== 'KQL' && fn.label !== 'MATCH'
+        ),
       ]);
     });
 

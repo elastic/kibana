@@ -226,7 +226,9 @@ export function getFunctionSignaturesByReturnType(
         };
       }
       return {
-        text: customSnippet ? `${name.toUpperCase()}(${customSnippet})` : `${name.toUpperCase()}($0)`,
+        text: customSnippet
+          ? `${name.toUpperCase()}(${customSnippet})`
+          : `${name.toUpperCase()}($0)`,
         label: name.toUpperCase(),
       };
     });
