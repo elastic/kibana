@@ -46,7 +46,7 @@ import { toExpressionAst } from '../../embeddable/to_ast';
 import { AttributeService } from './attribute_service';
 import { VisualizationsStartDeps } from '../../plugin';
 import { Embeddable } from './embeddable';
-import { EmbeddableOutput } from './i_embeddable';
+import { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 
 export interface VisualizeEmbeddableDeps {
   start: StartServicesGetter<
