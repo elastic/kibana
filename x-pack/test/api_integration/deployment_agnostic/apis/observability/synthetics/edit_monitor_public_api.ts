@@ -18,6 +18,7 @@ import { LOCAL_PUBLIC_LOCATION } from './helpers/location';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('EditMonitorsPublicAPI - Public location', function () {
+    this.tags(['skipCloud', 'skipMKI']);
     const supertestAPI = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');
