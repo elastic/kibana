@@ -72,7 +72,12 @@ import {
 } from './rules_settings';
 import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
 import { ILicenseState, LicenseState } from './lib/license_state';
-import { AlertingRequestHandlerContext, ALERTING_FEATURE_ID, RuleAlertData, RULES_SETTINGS_SAVED_OBJECT_TYPE } from './types';
+import {
+  AlertingRequestHandlerContext,
+  ALERTING_FEATURE_ID,
+  RuleAlertData,
+  RULES_SETTINGS_SAVED_OBJECT_TYPE,
+} from './types';
 import { defineRoutes } from './routes';
 import {
   AlertInstanceContext,
@@ -130,7 +135,7 @@ export const EVENT_LOG_ACTIONS = {
   executeTimeout: 'execute-timeout',
   untrackedInstance: 'untracked-instance',
   gap: 'gap',
-  deleteAlert: 'delete-alert',
+  deleteAlerts: 'delete-alerts',
 };
 export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
@@ -310,15 +315,20 @@ export class AlertingPlugin {
 
     this.alertDeletionClient = new AlertDeletionClient({
       elasticsearchClientPromise: core
-            .getStartServices()
-            .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
+        .getStartServices()
+        .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
       eventLogger: this.eventLogger,
       getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
-      internalSavedObjectsRepositoryPromise: core.getStartServices().then(([{ savedObjects }]) =>
-        savedObjects.createInternalRepository([RULES_SETTINGS_SAVED_OBJECT_TYPE])),
+      internalSavedObjectsRepositoryPromise: core
+        .getStartServices()
+        .then(([{ savedObjects }]) =>
+          savedObjects.createInternalRepository([RULES_SETTINGS_SAVED_OBJECT_TYPE])
+        ),
       logger: this.logger,
       ruleTypeRegistry: this.ruleTypeRegistry!,
-      spacesStartPromise: core.getStartServices().then(([_, alertingStart]) => alertingStart.spaces),
+      spacesStartPromise: core
+        .getStartServices()
+        .then(([_, alertingStart]) => alertingStart.spaces),
       taskManagerSetup: plugins.taskManager,
       taskManagerStartPromise,
     });

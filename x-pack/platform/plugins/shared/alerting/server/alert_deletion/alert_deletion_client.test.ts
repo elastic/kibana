@@ -7,13 +7,14 @@
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
-import { taskManagerMock } from "@kbn/task-manager-plugin/server/mocks";
-import { AlertDeletionClient } from "./alert_deletion_client";
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { AlertDeletionClient } from './alert_deletion_client';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import { elasticsearchServiceMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../types';
+import { RULES_SETTINGS_SAVED_OBJECT_TYPE, RulesSettingsAlertDeletionProperties } from '../types';
+import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, SPACE_IDS } from '@kbn/rule-data-utils';
 
 const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
@@ -38,17 +39,17 @@ const inactiveAlertsQuery = (days: number = 30, spaceId: string = 'space-1') => 
                   {
                     bool: {
                       minimum_should_match: 1,
-                      should: [{ match_phrase: { 'event.kind': 'close' } } ]
-                    }
+                      should: [{ match_phrase: { 'event.kind': 'close' } }],
+                    },
                   },
                   {
                     bool: {
                       minimum_should_match: 1,
-                      should: [ { range: { '@timestamp': {lt: `now-${days}d` } }}]
-                    }
-                  }
-                ]
-              }
+                      should: [{ range: { '@timestamp': { lt: `now-${days}d` } } }],
+                    },
+                  },
+                ],
+              },
             },
             {
               bool: {
@@ -56,17 +57,23 @@ const inactiveAlertsQuery = (days: number = 30, spaceId: string = 'space-1') => 
                   {
                     bool: {
                       minimum_should_match: 1,
-                      should: [{ match_phrase: { 'kibana.alert.workflow_status': 'closed' } } ]
-                    }
+                      should: [{ match_phrase: { 'kibana.alert.workflow_status': 'closed' } }],
+                    },
                   },
                   {
                     bool: {
                       minimum_should_match: 1,
-                      should: [ { range: { 'kibana.alert.workflow_status_updated_at': {lt: `now-${days}d` } }}]
-                    }
-                  }
-                ]
-              }
+                      should: [
+                        {
+                          range: {
+                            'kibana.alert.workflow_status_updated_at': { lt: `now-${days}d` },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
             },
             {
               bool: {
@@ -74,29 +81,29 @@ const inactiveAlertsQuery = (days: number = 30, spaceId: string = 'space-1') => 
                   {
                     bool: {
                       minimum_should_match: 1,
-                      should: [{ match_phrase: { 'kibana.alert.status': 'untracked' } } ]
-                    }
+                      should: [{ match_phrase: { 'kibana.alert.status': 'untracked' } }],
+                    },
                   },
                   {
                     bool: {
                       minimum_should_match: 1,
-                      should: [ { range: { 'kibana.alert.end': {lt: `now-${days}d` } }}]
-                    }
-                  }
-                ]
-              }
-            }
-          ]
-        }
+                      should: [{ range: { 'kibana.alert.end': { lt: `now-${days}d` } } }],
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        },
       },
       {
         bool: {
           minimum_should_match: 1,
-          should: [ { match: { 'kibana.space_ids': spaceId }}]
-        }
-      }
-    ]
-  }
+          should: [{ match: { 'kibana.space_ids': spaceId } }],
+        },
+      },
+    ],
+  },
 });
 
 const activeAlertsQuery = (days: number = 45, spaceId: string = 'space-1') => ({
@@ -109,43 +116,42 @@ const activeAlertsQuery = (days: number = 45, spaceId: string = 'space-1') => ({
             {
               bool: {
                 minimum_should_match: 1,
-                should: [{ match_phrase: { 'event.kind': 'open' }}]
-              }
+                should: [{ match_phrase: { 'event.kind': 'open' } }],
+              },
             },
             {
               bool: {
                 minimum_should_match: 1,
-                should: [{ match_phrase: { 'event.kind': 'active' }}]
-              }
-            }
-
-          ]
-        }
+                should: [{ match_phrase: { 'event.kind': 'active' } }],
+              },
+            },
+          ],
+        },
       },
       {
         bool: {
           minimum_should_match: 1,
-          should: [ { range: { 'kibana.alert.start': { lt: `now-${days}d`} }}]
-        }
+          should: [{ range: { 'kibana.alert.start': { lt: `now-${days}d` } } }],
+        },
       },
       {
         bool: {
           must_not: {
             bool: {
               minimum_should_match: 1,
-              should: [ { exists: { field: 'kibana.alert.end' }}]
-            }
-          }
-        }
+              should: [{ exists: { field: 'kibana.alert.end' } }],
+            },
+          },
+        },
       },
       {
         bool: {
           minimum_should_match: 1,
-          should: [ { match: { 'kibana.space_ids': spaceId }}]
-        }
-      }
-    ]
-  }
+          should: [{ match: { 'kibana.space_ids': spaceId } }],
+        },
+      },
+    ],
+  },
 });
 
 const alertDeletionTaskInstance = {
@@ -158,8 +164,65 @@ const alertDeletionTaskInstance = {
   startedAt: null,
   retryAt: null,
   state: {},
-  params: { spaceIds: ['default', 'space-1', 'another-space']},
+  params: { spaceIds: ['default', 'space-1', 'another-space'] },
   ownerId: null,
+};
+
+const mockCreatePointInTimeFinderAsInternalUser = (
+  response: {
+    saved_objects: Array<{
+      id: string;
+      type: string;
+      attributes: RulesSettingsAlertDeletionProperties;
+      references?: Array<{ id: string; name: string; type: string }>;
+      namespaces?: string[];
+    }>;
+  } = {
+    saved_objects: [
+      {
+        id: 'alert-deletion-settings',
+        type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+        attributes: {
+          isActiveAlertsDeletionEnabled: false,
+          isInactiveAlertsDeletionEnabled: true,
+          activeAlertsDeletionThreshold: 1,
+          inactiveAlertsDeletionThreshold: 30,
+        },
+        references: [],
+      },
+      {
+        id: 'space-1:alert-deletion-settings',
+        type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+        attributes: {
+          isActiveAlertsDeletionEnabled: false,
+          isInactiveAlertsDeletionEnabled: true,
+          activeAlertsDeletionThreshold: 1,
+          inactiveAlertsDeletionThreshold: 30,
+        },
+        references: [],
+        namespaces: ['space-1'],
+      },
+      {
+        id: 'another-space:alert-deletion-settings',
+        type: RULES_SETTINGS_SAVED_OBJECT_TYPE,
+        attributes: {
+          isActiveAlertsDeletionEnabled: true,
+          isInactiveAlertsDeletionEnabled: true,
+          activeAlertsDeletionThreshold: 90,
+          inactiveAlertsDeletionThreshold: 30,
+        },
+        references: [],
+        namespaces: ['another-space'],
+      },
+    ],
+  }
+) => {
+  internalSavedObjectsRepository.createPointInTimeFinder = jest.fn().mockResolvedValue({
+    close: jest.fn(),
+    find: function* asyncGenerator() {
+      yield response;
+    },
+  });
 };
 
 describe('AlertDeletionClient', () => {
@@ -207,57 +270,82 @@ describe('AlertDeletionClient', () => {
 
     test('should log and re-throw error if error scheduling task', async () => {
       taskManagerStart.ensureScheduled.mockRejectedValue(new Error('Fail to schedule task'));
-      await expect(alertDeletionClient.scheduleTask(['space-1'])).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail to schedule task"`);
-      expect(logger.error).toHaveBeenCalledWith('Error scheduling alert deletion task: Fail to schedule task');
+      await expect(
+        alertDeletionClient.scheduleTask(['space-1'])
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail to schedule task"`);
+      expect(logger.error).toHaveBeenCalledWith(
+        'Error scheduling alert deletion task: Fail to schedule task'
+      );
     });
   });
 
   describe('previewTask', () => {
     test('should return count of inactive alerts', async () => {
-      esClient.count.mockResolvedValue({  count: 1, _shards: { failed: 0, successful: 0, total: 0}  });
-      const result = await alertDeletionClient.previewTask({
-        isActiveAlertsDeletionEnabled: false,
-        isInactiveAlertsDeletionEnabled: true,
-        activeAlertsDeletionThreshold: 1,
-        inactiveAlertsDeletionThreshold: 30,
-      }, 'space-1');
+      esClient.count.mockResolvedValue({
+        count: 1,
+        _shards: { failed: 0, successful: 0, total: 0 },
+      });
+      const result = await alertDeletionClient.previewTask(
+        {
+          isActiveAlertsDeletionEnabled: false,
+          isInactiveAlertsDeletionEnabled: true,
+          activeAlertsDeletionThreshold: 1,
+          inactiveAlertsDeletionThreshold: 30,
+        },
+        'space-1'
+      );
 
       expect(esClient.count).toHaveBeenCalledTimes(1);
-    expect(esClient.count).toHaveBeenCalledWith({
-      index: ['index1', 'index2'],
-      query: inactiveAlertsQuery(),
-    });
+      expect(esClient.count).toHaveBeenCalledWith({
+        index: ['index1', 'index2'],
+        query: inactiveAlertsQuery(),
+      });
 
-    expect(result).toEqual(1);
+      expect(result).toEqual(1);
     });
 
     test('should return count of active alerts', async () => {
-      esClient.count.mockResolvedValue({  count: 3, _shards: { failed: 0, successful: 0, total: 0}  });
-      const result = await alertDeletionClient.previewTask({
-        isActiveAlertsDeletionEnabled: true,
-        isInactiveAlertsDeletionEnabled: false,
-        activeAlertsDeletionThreshold: 45,
-        inactiveAlertsDeletionThreshold: 1,
-      }, 'space-1');
+      esClient.count.mockResolvedValue({
+        count: 3,
+        _shards: { failed: 0, successful: 0, total: 0 },
+      });
+      const result = await alertDeletionClient.previewTask(
+        {
+          isActiveAlertsDeletionEnabled: true,
+          isInactiveAlertsDeletionEnabled: false,
+          activeAlertsDeletionThreshold: 45,
+          inactiveAlertsDeletionThreshold: 1,
+        },
+        'space-1'
+      );
 
       expect(esClient.count).toHaveBeenCalledTimes(1);
-    expect(esClient.count).toHaveBeenCalledWith({
-      index: ['index1', 'index2'],
-      query: activeAlertsQuery(),
-    });
+      expect(esClient.count).toHaveBeenCalledWith({
+        index: ['index1', 'index2'],
+        query: activeAlertsQuery(),
+      });
 
-    expect(result).toEqual(3);
+      expect(result).toEqual(3);
     });
 
     test('should return count of active and inactive alerts', async () => {
-      esClient.count.mockResolvedValueOnce({  count: 8, _shards: { failed: 0, successful: 0, total: 0}  });
-      esClient.count.mockResolvedValueOnce({  count: 1, _shards: { failed: 0, successful: 0, total: 0}  });
-      const result = await alertDeletionClient.previewTask({
-        isActiveAlertsDeletionEnabled: true,
-        isInactiveAlertsDeletionEnabled: true,
-        activeAlertsDeletionThreshold: 45,
-        inactiveAlertsDeletionThreshold: 30,
-      }, 'space-1');
+      esClient.count.mockResolvedValueOnce({
+        count: 8,
+        _shards: { failed: 0, successful: 0, total: 0 },
+      });
+      esClient.count.mockResolvedValueOnce({
+        count: 1,
+        _shards: { failed: 0, successful: 0, total: 0 },
+      });
+      const result = await alertDeletionClient.previewTask(
+        {
+          isActiveAlertsDeletionEnabled: true,
+          isInactiveAlertsDeletionEnabled: true,
+          activeAlertsDeletionThreshold: 45,
+          inactiveAlertsDeletionThreshold: 30,
+        },
+        'space-1'
+      );
 
       expect(esClient.count).toHaveBeenCalledTimes(2);
       expect(esClient.count).toHaveBeenNthCalledWith(1, {
@@ -269,30 +357,190 @@ describe('AlertDeletionClient', () => {
         query: inactiveAlertsQuery(),
       });
 
-    expect(result).toEqual(9);
+      expect(result).toEqual(9);
+    });
+
+    test('should throw error if count query throws error', async () => {
+      esClient.count.mockRejectedValue(new Error('Fail to count alerts'));
+      await expect(
+        alertDeletionClient.previewTask(
+          {
+            isActiveAlertsDeletionEnabled: false,
+            isInactiveAlertsDeletionEnabled: true,
+            activeAlertsDeletionThreshold: 1,
+            inactiveAlertsDeletionThreshold: 30,
+          },
+          'space-1'
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Fail to count alerts"`);
+
+      expect(esClient.count).toHaveBeenCalledTimes(1);
+      expect(esClient.count).toHaveBeenCalledWith({
+        index: ['index1', 'index2'],
+        query: inactiveAlertsQuery(),
+      });
+      expect(logger.error).toHaveBeenCalledWith(
+        'Error determining the number of inactive alerts to delete: Fail to count alerts'
+      );
     });
   });
 
   describe('runTask', () => {
-    test('should delete inactive alerts using delete by query', async () => {
-      internalSavedObjectsRepository.find.mockResolvedValue({ saved_objects: [
-        { id: 'alert-deletion-settings', type: RULES_SETTINGS_SAVED_OBJECT_TYPE, attributes: { isActiveAlertsDeletionEnabled: false,
-          isInactiveAlertsDeletionEnabled: true,
-          activeAlertsDeletionThreshold: 1,
-          inactiveAlertsDeletionThreshold: 30, }, score: 0,  references: []},
-        { id: 'space-1:alert-deletion-settings', type: RULES_SETTINGS_SAVED_OBJECT_TYPE,attributes: { isActiveAlertsDeletionEnabled: false,
-          isInactiveAlertsDeletionEnabled: true,
-          activeAlertsDeletionThreshold: 1,
-          inactiveAlertsDeletionThreshold: 30, }, score: 0,  references: []},
-          { id: 'another-space:alert-deletion-settings', type: RULES_SETTINGS_SAVED_OBJECT_TYPE,attributes: { isActiveAlertsDeletionEnabled: true,
-            isInactiveAlertsDeletionEnabled: true,
-            activeAlertsDeletionThreshold: 90,
-            inactiveAlertsDeletionThreshold: 30, }, score: 0,  references: []},
-      ] });
-      esClient.deleteByQuery.mockResolvedValue({  deleted: 1  });
+    test('should look up rules settings and issue queries for each space setting', async () => {
+      mockCreatePointInTimeFinderAsInternalUser();
+      esClient.search.mockResolvedValueOnce({
+        took: 10,
+        timed_out: false,
+        _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+        hits: {
+          total: { relation: 'eq', value: 2 },
+          hits: [
+            {
+              _id: 'abc',
+              _index: '.internal.alerts-test.alerts-default-000001',
+              _seq_no: 41,
+              _primary_term: 665,
+              _source: {
+                [ALERT_INSTANCE_ID]: 'query matched',
+                [ALERT_RULE_UUID]: '1',
+                [SPACE_IDS]: ['another-space'],
+              },
+            },
+            {
+              _id: 'def',
+              _index: '.internal.alerts-test.alerts-default-000001',
+              _seq_no: 5,
+              _primary_term: 545,
+              _source: {
+                [ALERT_INSTANCE_ID]: 'threshold exceeded',
+                [ALERT_RULE_UUID]: '3',
+                [SPACE_IDS]: ['another-space'],
+              },
+            },
+          ],
+        },
+      });
+      esClient.bulk.mockResolvedValueOnce({
+        errors: false,
+        took: 10,
+        items: [
+          {
+            delete: {
+              _index: '.internal.alerts-test.alerts-default-000001',
+              _id: 'abc',
+              result: 'deleted',
+              status: 200,
+            },
+          },
+          {
+            delete: {
+              _index: '.internal.alerts-test.alerts-default-000001',
+              _id: 'def',
+              result: 'deleted',
+              status: 200,
+            },
+          },
+        ],
+      });
+      esClient.deleteByQuery.mockResolvedValueOnce({ deleted: 3 });
+      esClient.deleteByQuery.mockResolvedValueOnce({ deleted: 10 });
+      esClient.deleteByQuery.mockResolvedValueOnce({ deleted: 123 });
+      getAlertIndicesAliasMock.mockReturnValueOnce(['index1', 'index2']);
+      getAlertIndicesAliasMock.mockReturnValueOnce(['alert-index-1']);
+      getAlertIndicesAliasMock.mockReturnValueOnce(['index1', 'index2', 'alert-index-3']);
 
       // @ts-ignore - accessing private function for testing
       await alertDeletionClient.runTask(alertDeletionTaskInstance, new AbortController());
+
+      // 3 settings with isInactiveAlertsDeletionEnabled = true, should be 3 delete by queries
+      expect(esClient.deleteByQuery).toHaveBeenCalledTimes(3);
+      expect(esClient.deleteByQuery).toHaveBeenNthCalledWith(
+        1,
+        {
+          index: ['index1', 'index2'],
+          query: inactiveAlertsQuery(30, 'default'),
+        },
+        { signal: expect.any(AbortSignal) }
+      );
+      expect(esClient.deleteByQuery).toHaveBeenNthCalledWith(
+        2,
+        {
+          index: ['alert-index-1'],
+          query: inactiveAlertsQuery(30, 'space-1'),
+        },
+        { signal: expect.any(AbortSignal) }
+      );
+      expect(esClient.deleteByQuery).toHaveBeenNthCalledWith(
+        3,
+        {
+          index: ['index1', 'index2', 'alert-index-3'],
+          query: inactiveAlertsQuery(30, 'another-space'),
+        },
+        { signal: expect.any(AbortSignal) }
+      );
+
+      // 1 setting with isActiveAlertsDeletionEnabled = true
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+      expect(esClient.search).toHaveBeenCalledWith(
+        {
+          index: ['index1', 'index2', 'alert-index-3'],
+          query: activeAlertsQuery(90, 'another-space'),
+          _source: [ALERT_RULE_UUID, SPACE_IDS, ALERT_INSTANCE_ID],
+        },
+        { signal: expect.any(AbortSignal) }
+      );
+      expect(esClient.bulk).toHaveBeenCalledTimes(1);
+      expect(esClient.bulk).toHaveBeenCalledWith(
+        {
+          operations: [
+            { delete: { _index: '.internal.alerts-test.alerts-default-000001', _id: 'abc' } },
+            { delete: { _index: '.internal.alerts-test.alerts-default-000001', _id: 'def' } },
+          ],
+        },
+        { signal: expect.any(AbortSignal) }
+      );
+      expect(taskManagerStart.bulkUpdateState).toHaveBeenCalledWith(
+        ['task:1', 'task:3'],
+        expect.any(Function)
+      );
+
+      expect(eventLogger.logEvent).toHaveBeenCalledTimes(3);
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(1, {
+        '@timestamp': expect.any(String),
+        event: {
+          action: 'delete-alerts',
+          outcome: 'success',
+          start: expect.any(String),
+          end: expect.any(String),
+          duration: expect.any(String),
+        },
+        message: 'Alert deletion task deleted 3 alerts',
+        kibana: { space_ids: ['default'] },
+      });
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(2, {
+        '@timestamp': expect.any(String),
+        event: {
+          action: 'delete-alerts',
+          outcome: 'success',
+          start: expect.any(String),
+          end: expect.any(String),
+          duration: expect.any(String),
+        },
+        message: 'Alert deletion task deleted 10 alerts',
+        kibana: { space_ids: ['space-1'] },
+      });
+      expect(eventLogger.logEvent).toHaveBeenNthCalledWith(3, {
+        '@timestamp': expect.any(String),
+        event: {
+          action: 'delete-alerts',
+          outcome: 'success',
+          start: expect.any(String),
+          end: expect.any(String),
+          duration: expect.any(String),
+        },
+        message: 'Alert deletion task deleted 125 alerts',
+        kibana: { space_ids: ['another-space'] },
+      });
     });
   });
 });
