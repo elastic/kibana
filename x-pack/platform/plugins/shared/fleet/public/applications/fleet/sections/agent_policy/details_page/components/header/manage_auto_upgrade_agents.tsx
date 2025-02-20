@@ -32,8 +32,14 @@ export const ManageAutoUpgradeAgentsBadge: React.FC<Props> = ({
 }: Props) => {
   const { data: autoUpgradeAgentsStatus } = useGetAutoUpgradeAgentsStatusQuery(agentPolicy.id);
   const hasErrors = useMemo(() => {
-    return autoUpgradeAgentsStatus?.currentVersions.some((value) => value.failedUpgradeAgents > 0);
-  }, [autoUpgradeAgentsStatus]);
+    return autoUpgradeAgentsStatus?.currentVersions
+      .filter((value) =>
+        (agentPolicy.required_versions ?? [])
+          .map((reqVersion) => reqVersion.version)
+          .includes(value.version)
+      )
+      .some((value) => value.failedUpgradeAgents > 0);
+  }, [autoUpgradeAgentsStatus, agentPolicy.required_versions]);
 
   return (
     <EuiFlexGroup
