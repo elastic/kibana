@@ -1,0 +1,13 @@
+steps:
+  - command: .buildkite/scripts/steps/test/scout_pipeline_builder.sh
+    label: 'Scout Test Steps Builder'
+    agents:
+      machineType: n2-standard-2
+      diskSizeGb: 75
+    timeout_in_minutes: 10
+    env:
+      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout_configs.sh'
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
