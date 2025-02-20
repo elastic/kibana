@@ -45,10 +45,10 @@ export const useQuickPromptUpdater = ({
     allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.quick)
   );
 
-  const selectedQuickPrompt: PromptResponse | undefined = useMemo(() => {
-    const sip = quickPromptSettings.find((qp) => qp.id === selectedQuickPromptId);
-    return sip;
-  }, [quickPromptSettings, selectedQuickPromptId]);
+  const selectedQuickPrompt: PromptResponse | undefined = useMemo(
+    () => quickPromptSettings.find((qp) => qp.id === selectedQuickPromptId),
+    [quickPromptSettings, selectedQuickPromptId]
+  );
 
   useEffect(() => {
     // Update quick prompts settings when prompts are loaded
@@ -85,18 +85,15 @@ export const useQuickPromptUpdater = ({
       );
 
       if (isNew) {
-        setPromptsBulkActions((prev) => {
-          const newBulkActions = {
-            ...prev,
-            create: [
-              ...(promptsBulkActions.create ?? []),
-              {
-                ...newSelectedQuickPrompt,
-              },
-            ],
-          };
-          return newBulkActions;
-        });
+        setPromptsBulkActions((prev) => ({
+          ...prev,
+          create: [
+            ...(promptsBulkActions.create ?? []),
+            {
+              ...newSelectedQuickPrompt,
+            },
+          ],
+        }));
       }
 
       setSelectedQuickPromptId(newSelectedQuickPrompt.id);

@@ -80,10 +80,10 @@ export const useSystemPromptUpdater = ({
   // System Prompt Selection State
   const [selectedSystemPromptId, setSelectedSystemPromptId] = useState<string | undefined>();
 
-  const selectedSystemPrompt: SystemPromptSettings | undefined = useMemo(() => {
-    const sip = systemPromptSettingsUpdates.find((sp) => sp.id === selectedSystemPromptId);
-    return sip;
-  }, [selectedSystemPromptId, systemPromptSettingsUpdates]);
+  const selectedSystemPrompt: SystemPromptSettings | undefined = useMemo(
+    () => systemPromptSettingsUpdates.find((sp) => sp.id === selectedSystemPromptId),
+    [selectedSystemPromptId, systemPromptSettingsUpdates]
+  );
 
   const systemPrompts = useMemo(() => {
     return allPrompts.data.filter((p) => p.promptType === PromptTypeEnum.system);
@@ -155,15 +155,12 @@ export const useSystemPromptUpdater = ({
       );
 
       if (isNew) {
-        setPromptsBulkActions((prev) => {
-          const newBulkActions = {
-            ...prev,
-            // only creating one at a time. initially we create it with empty id,
-            // and once they type the title the id becomes the same as the title until it is saved
-            create: [newSelectedSystemPrompt],
-          };
-          return newBulkActions;
-        });
+        setPromptsBulkActions((prev) => ({
+          ...prev,
+          // only creating one at a time. initially we create it with empty id,
+          // and once they type the title the id becomes the same as the title until it is saved
+          create: [newSelectedSystemPrompt],
+        }));
       }
 
       setSelectedSystemPromptId(newSelectedSystemPrompt.id);
@@ -266,51 +263,47 @@ export const useSystemPromptUpdater = ({
         });
         // Update and Create prompts can happen at the same time, as we have to unchecked the previous default prompt
         // Each prompt can be updated or created
-        setPromptsBulkActions(() => {
-          const newBulkActions = {
-            update: [
-              ...defaultNewSystemPrompts
-                .filter(
-                  (p) => p.id !== selectedSystemPrompt.id && shouldUpdateNewDefaultSystemPrompts(p)
-                )
-                .map((p) => ({
-                  ...p,
-                  isNewConversationDefault: false,
-                })),
+        setPromptsBulkActions(() => ({
+          update: [
+            ...defaultNewSystemPrompts
+              .filter(
+                (p) => p.id !== selectedSystemPrompt.id && shouldUpdateNewDefaultSystemPrompts(p)
+              )
+              .map((p) => ({
+                ...p,
+                isNewConversationDefault: false,
+              })),
 
-              ...(shouldUpdateSelectedSystemPrompt
-                ? [
-                    {
-                      ...selectedSystemPrompt,
-                      isNewConversationDefault: isChecked,
-                    },
-                  ]
-                : []),
-            ],
-            create: [
-              ...defaultNewSystemPrompts
-                .filter(
-                  (p) =>
-                    p.name !== selectedSystemPrompt.name && shouldCreateNewDefaultSystemPrompts(p)
-                )
-                .map((p) => ({
-                  ...p,
-                  isNewConversationDefault: false,
-                })),
+            ...(shouldUpdateSelectedSystemPrompt
+              ? [
+                  {
+                    ...selectedSystemPrompt,
+                    isNewConversationDefault: isChecked,
+                  },
+                ]
+              : []),
+          ],
+          create: [
+            ...defaultNewSystemPrompts
+              .filter(
+                (p) =>
+                  p.name !== selectedSystemPrompt.name && shouldCreateNewDefaultSystemPrompts(p)
+              )
+              .map((p) => ({
+                ...p,
+                isNewConversationDefault: false,
+              })),
 
-              ...(shouldCreateSelectedSystemPrompt
-                ? [
-                    {
-                      ...selectedSystemPrompt,
-                      isNewConversationDefault: isChecked,
-                    },
-                  ]
-                : []),
-            ],
-          };
-
-          return newBulkActions;
-        });
+            ...(shouldCreateSelectedSystemPrompt
+              ? [
+                  {
+                    ...selectedSystemPrompt,
+                    isNewConversationDefault: isChecked,
+                  },
+                ]
+              : []),
+          ],
+        }));
       }
     },
     [selectedSystemPrompt, systemPromptSettingsUpdates]

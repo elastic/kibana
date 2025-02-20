@@ -93,13 +93,8 @@ export const getDefaultSystemPrompt = ({
 }: {
   allSystemPrompts: PromptResponse[];
   conversation: Conversation | undefined;
-}): PromptResponse | undefined => {
-  const conversationSystemPrompt = allSystemPrompts.find(
-    (prompt) => prompt.id === conversation?.apiConfig?.defaultSystemPromptId
-  );
-
-  return conversationSystemPrompt;
-};
+}): PromptResponse | undefined =>
+  allSystemPrompts.find((prompt) => prompt.id === conversation?.apiConfig?.defaultSystemPromptId);
 
 /**
  * Returns the API config for a conversation

@@ -162,11 +162,13 @@ export const useChatSend = ({
       assistantTelemetry,
       createConversation,
       currentConversation,
+      getConversation,
       http,
       isSetupComplete,
       selectedPromptContexts,
       sendMessage,
       setCurrentConversation,
+      setLastConversation,
       setSelectedPromptContexts,
       toasts,
     ]

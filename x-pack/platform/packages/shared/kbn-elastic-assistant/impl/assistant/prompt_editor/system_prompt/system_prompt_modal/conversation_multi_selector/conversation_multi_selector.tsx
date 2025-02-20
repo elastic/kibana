@@ -55,7 +55,7 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
         );
         onConversationSelectionChange(newConversationSelection);
       },
-      [conversations, selectedOptions, onConversationSelectionChange]
+      [conversations, onConversationSelectionChange]
     );
 
     // Callback for when user selects a conversation
