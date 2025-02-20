@@ -12,7 +12,10 @@ import type {
   TrainedModelsApiService,
 } from '../services/ml_api_service/trained_models';
 import { TrainedModelsService } from './trained_models_service';
-import type { TrainedModelUIItem } from '../../../common/types/trained_models';
+import type {
+  StartTrainedModelDeploymentResponse,
+  TrainedModelUIItem,
+} from '../../../common/types/trained_models';
 import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { i18n } from '@kbn/i18n';
 import type { MlTrainedModelConfig } from '@elastic/elasticsearch/lib/api/types';
@@ -185,7 +188,39 @@ describe('TrainedModelsService', () => {
 
     mockTrainedModelsApiService.getTrainedModelsList.mockResolvedValueOnce([mockModel]);
 
-    mockTrainedModelsApiService.startModelAllocation.mockReturnValueOnce(of({ acknowledge: true }));
+    mockTrainedModelsApiService.startModelAllocation.mockReturnValueOnce(
+      of({
+        assignment: {
+          task_parameters: {
+            model_id: 'deploy-model',
+            model_bytes: 1000,
+            allocation_id: 'test-allocation',
+            priority: 'normal',
+            number_of_allocations: 1,
+            threads_per_allocation: 1,
+            queue_capacity: 1024,
+            deployment_id: 'my-deployment-id',
+            cache_size: '1mb',
+          },
+          node_count: 1,
+          routing_table: {
+            'node-1': {
+              routing_state: 'started',
+              reason: '',
+              current_allocations: 1,
+              target_allocations: 1,
+            },
+          },
+          assignment_state: 'started',
+          start_time: 1234567890,
+          adaptive_allocations: {
+            enabled: true,
+            min_number_of_allocations: 1,
+            max_number_of_allocations: 4,
+          },
+        },
+      })
+    );
 
     // Start deployment
     trainedModelsService.startModelDeployment('deploy-model', {
@@ -230,7 +265,9 @@ describe('TrainedModelsService', () => {
     const deploymentError = new Error('Deployment error');
 
     mockTrainedModelsApiService.startModelAllocation.mockReturnValueOnce(
-      throwError(() => deploymentError) as unknown as Observable<{ acknowledge: boolean }>
+      throwError(
+        () => deploymentError
+      ) as unknown as Observable<StartTrainedModelDeploymentResponse>
     );
 
     trainedModelsService.startModelDeployment('error-model', {
