@@ -53,7 +53,7 @@ paths-ignore:
   - packages/kbn-ftr-*
   - packages/kbn-generate
   - src/platform/packages/private/kbn-get-repo-files
-  - packages/kbn-import-resolver
+  - src/platform/packages/private/kbn-import-resolver
   - packages/kbn-jest-*
   - packages/kbn-journeys
   - packages/kbn-kibana-manifest-schema

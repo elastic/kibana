@@ -26,7 +26,7 @@ describe('#resolve()', () => {
   it('resolves imports to packages', () => {
     expect(resolver.resolve('@kbn/box', FIXTURES_DIR)).toMatchInlineSnapshot(`
       Object {
-        "absolute": <absolute path>/packages/kbn-import-resolver/src/__fixtures__/packages/box/index.js,
+        "absolute": <absolute path>/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/packages/box/index.js,
         "pkgId": "@kbn/box",
         "type": "file",
       }
@@ -36,7 +36,7 @@ describe('#resolve()', () => {
   it('resolves node_module imports', () => {
     expect(resolver.resolve('foo', FIXTURES_DIR)).toMatchInlineSnapshot(`
       Object {
-        "absolute": <absolute path>/packages/kbn-import-resolver/src/__fixtures__/node_modules/foo/index.js,
+        "absolute": <absolute path>/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/node_modules/foo/index.js,
         "nodeModule": "foo",
         "type": "file",
       }
@@ -47,7 +47,7 @@ describe('#resolve()', () => {
     expect(resolver.resolve('bar', Path.join(FIXTURES_DIR, 'packages', 'box')))
       .toMatchInlineSnapshot(`
       Object {
-        "absolute": <absolute path>/packages/kbn-import-resolver/src/__fixtures__/packages/box/node_modules/bar/index.js,
+        "absolute": <absolute path>/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/packages/box/node_modules/bar/index.js,
         "nodeModule": "bar",
         "type": "file",
       }
@@ -66,7 +66,7 @@ describe('#resolve()', () => {
   it('resolves relative paths', () => {
     expect(resolver.resolve('./bar', Path.resolve(FIXTURES_DIR, 'src/bar'))).toMatchInlineSnapshot(`
       Object {
-        "absolute": <absolute path>/packages/kbn-import-resolver/src/__fixtures__/src/bar/bar.js,
+        "absolute": <absolute path>/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/src/bar/bar.js,
         "pkgId": "@kbn/bar",
         "type": "file",
       }
@@ -74,7 +74,7 @@ describe('#resolve()', () => {
   });
 
   it('returns null when the import cannot be resolved', () => {
-    expect(resolver.resolve('../../../../invalid', FIXTURES_DIR)).toMatchInlineSnapshot(`null`);
+    expect(resolver.resolve('../../../../../../../invalid', FIXTURES_DIR)).toMatchInlineSnapshot(`null`);
     expect(resolver.resolve('src/invalid', FIXTURES_DIR)).toMatchInlineSnapshot(`null`);
     expect(resolver.resolve('kibana/invalid', FIXTURES_DIR)).toMatchInlineSnapshot(`null`);
     expect(resolver.resolve('@kbn/invalid', FIXTURES_DIR)).toMatchInlineSnapshot(`null`);
@@ -135,10 +135,10 @@ describe('#getPackageIdForPath()', () => {
 describe('#getAbsolutePackageDir()', () => {
   it('returns path for package', () => {
     expect(resolver.getAbsolutePackageDir('@kbn/box')).toMatchInlineSnapshot(
-      `<absolute path>/packages/kbn-import-resolver/src/__fixtures__/packages/box`
+      `<absolute path>/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/packages/box`
     );
     expect(resolver.getAbsolutePackageDir('@kbn/bar')).toMatchInlineSnapshot(
-      `<absolute path>/packages/kbn-import-resolver/src/__fixtures__/src/bar`
+      `<absolute path>/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/src/bar`
     );
   });
   it('returns null for node_modules', () => {
