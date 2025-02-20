@@ -6,132 +6,195 @@
  */
 
 import React from 'react';
-import { EuiImage, EuiEmptyPrompt, EuiButton, EuiLink, useEuiTheme, EuiTitle } from '@elastic/eui';
+import {
+  EuiImage,
+  EuiEmptyPrompt,
+  EuiButton,
+  EuiLink,
+  useEuiTheme,
+  EuiTitle,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiCallOut,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import illustration from '../../../common/images/information_light.png';
-import { OnboardingTitle } from './onboarding_title';
+import { Title } from '../title';
+import { CenteredWrapper } from './centered_wrapper';
+import { HoverForExplanation } from './hover_for_explanation';
+import { useEnableAssetInventory } from './hooks/use_enable_asset_inventory';
 
 const ASSET_INVENTORY_DOCS_URL = 'https://ela.st/asset-inventory';
 const TEST_SUBJ = 'assetInventory:onboarding:get-started';
 
-const TextUnderlineDotted = ({ children }: { children: React.ReactNode }) => (
-  <u
-    css={css`
-      text-decoration: underline;
-      text-decoration-style: dotted;
-    `}
-  >
-    {children}
-  </u>
-);
-
-export const GetStarted = ({ docsUrl = ASSET_INVENTORY_DOCS_URL }: { docsUrl?: string }) => {
+export const GetStarted = () => {
   const { euiTheme } = useEuiTheme();
+  const { isEnabling, error, setError, handleEnableClick } = useEnableAssetInventory();
 
   return (
-    <>
-      <OnboardingTitle />
-      <EuiEmptyPrompt
-        css={css`
-        max-width: 734px;
-        && > .euiEmptyPrompt__main {
-          gap: ${euiTheme.size.xl};
-        }
-        && {
-          margin-top: ${euiTheme.size.xxxl}};
-        }
-      `}
-        data-test-subj={TEST_SUBJ}
-        icon={
-          <EuiImage
-            url={illustration}
-            alt={i18n.translate(
-              'xpack.securitySolution.assetInventory.emptyState.illustrationAlt',
-              {
-                defaultMessage: 'No results',
-              }
-            )}
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <Title />
+        <CenteredWrapper>
+          <EuiEmptyPrompt
             css={css`
-              width: 380px;
+              && > .euiEmptyPrompt__main {
+                gap: ${euiTheme.size.xxl};
+              }
             `}
-          />
-        }
-        title={
-          <h2>
-            <FormattedMessage
-              id="xpack.securitySolution.assetInventory.onboarding.getStarted.title"
-              defaultMessage="Get Started with Asset Inventory"
-            />
-          </h2>
-        }
-        layout="horizontal"
-        color="plain"
-        body={
-          <>
-            <p>
-              <FormattedMessage
-                id="xpack.securitySolution.assetInventory.onboarding.getStarted.description"
-                defaultMessage="Asset Inventory gives you a unified view of all assets detected by Elastic Security, including those observed in logs, events, or discovered through integrations with sources like {identity_providers}, {cloud_services}, {mdms}, and configuration management {databases}."
-                values={{
-                  identity_providers: (
-                    <TextUnderlineDotted>
-                      <FormattedMessage
-                        id="xpack.securitySolution.assetInventory.onboarding.getStarted.description.identityProviders"
-                        defaultMessage="identity providers"
-                      />
-                    </TextUnderlineDotted>
-                  ),
-                  cloud_services: (
-                    <TextUnderlineDotted>
-                      <FormattedMessage
-                        id="xpack.securitySolution.assetInventory.onboarding.getStarted.description.cloudServices"
-                        defaultMessage="cloud services"
-                      />
-                    </TextUnderlineDotted>
-                  ),
-                  mdms: <TextUnderlineDotted>{'MDMs'}</TextUnderlineDotted>,
-                  databases: (
-                    <TextUnderlineDotted>
-                      <FormattedMessage
-                        id="xpack.securitySolution.assetInventory.onboarding.getStarted.description.databases"
-                        defaultMessage="databases"
-                      />
-                    </TextUnderlineDotted>
-                  ),
-                }}
+            data-test-subj={TEST_SUBJ}
+            icon={
+              <EuiImage
+                url={illustration}
+                alt={i18n.translate(
+                  'xpack.securitySolution.assetInventory.emptyState.illustrationAlt',
+                  {
+                    defaultMessage: 'No results',
+                  }
+                )}
+                css={css`
+                  width: 380px;
+                `}
               />
-            </p>
-          </>
-        }
-        actions={[
-          <EuiButton color="primary" fill onClick={() => {}} iconType="plusInCircle">
-            <FormattedMessage
-              id="xpack.securitySolution.assetInventory.emptyState.resetFiltersButton"
-              defaultMessage="Enable Asset Inventory"
-            />
-          </EuiButton>,
-        ]}
-        footer={
-          <>
-            <EuiTitle size="xxs">
-              <strong>
+            }
+            title={
+              <h2>
                 <FormattedMessage
-                  id="xpack.securitySolution.assetInventory.emptyState.needHelp"
-                  defaultMessage="Need help?"
+                  id="xpack.securitySolution.assetInventory.onboarding.getStarted.title"
+                  defaultMessage="Get Started with Asset Inventory"
                 />
-              </strong>
-            </EuiTitle>{' '}
-            <EuiLink href={docsUrl} target="_blank">
-              <FormattedMessage
-                id="xpack.securitySolution.assetInventory.emptyState.readDocumentation"
-                defaultMessage="Read documentation"
-              />
-            </EuiLink>
-          </>
-        }
-      />
-    </>
+              </h2>
+            }
+            layout="horizontal"
+            color="plain"
+            body={
+              <>
+                <p>
+                  <FormattedMessage
+                    id="xpack.securitySolution.assetInventory.onboarding.getStarted.description"
+                    defaultMessage="Asset Inventory gives you a unified view of all assets detected by Elastic Security, including those observed in logs, events, or discovered through integrations with sources like {identity_providers}, {cloud_services}, {mdms}, and configuration management {databases}."
+                    values={{
+                      identity_providers: (
+                        <HoverForExplanation
+                          tooltipContent={
+                            <FormattedMessage
+                              id="xpack.securitySolution.assetInventory.onboarding.getStarted.description.identityProviders.helperText"
+                              defaultMessage="Identity providers are services that store and manage user identities."
+                            />
+                          }
+                        >
+                          <FormattedMessage
+                            id="xpack.securitySolution.assetInventory.onboarding.getStarted.description.identityProviders"
+                            defaultMessage="identity providers"
+                          />
+                        </HoverForExplanation>
+                      ),
+                      cloud_services: (
+                        <HoverForExplanation
+                          tooltipContent={
+                            <FormattedMessage
+                              id="xpack.securitySolution.assetInventory.onboarding.getStarted.description.cloudServices.helperText"
+                              defaultMessage="Cloud services are services that provide cloud-based infrastructure, platforms, or software."
+                            />
+                          }
+                        >
+                          <FormattedMessage
+                            id="xpack.securitySolution.assetInventory.onboarding.getStarted.description.cloudServices"
+                            defaultMessage="cloud services"
+                          />
+                        </HoverForExplanation>
+                      ),
+                      mdms: (
+                        <HoverForExplanation
+                          tooltipContent={
+                            <FormattedMessage
+                              id="xpack.securitySolution.assetInventory.onboarding.getStarted.description.mdms.helperText"
+                              defaultMessage="Mobile Device Managers (MDMs) are services that manage mobile devices."
+                            />
+                          }
+                        >
+                          {'MDMs'}
+                        </HoverForExplanation>
+                      ),
+                      databases: (
+                        <HoverForExplanation
+                          tooltipContent={
+                            <FormattedMessage
+                              id="xpack.securitySolution.assetInventory.onboarding.getStarted.description.databases.helperText"
+                              defaultMessage="Databases are services that store and manage data."
+                            />
+                          }
+                        >
+                          <FormattedMessage
+                            id="xpack.securitySolution.assetInventory.onboarding.getStarted.description.databases"
+                            defaultMessage="databases"
+                          />
+                        </HoverForExplanation>
+                      ),
+                    }}
+                  />
+                </p>
+                {error && (
+                  <EuiCallOut
+                    onDismiss={() => setError(null)}
+                    title={
+                      <FormattedMessage
+                        id="xpack.securitySolution.assetInventory.onboarding.getStarted.errorTitle"
+                        defaultMessage="Sorry, there was an error"
+                      />
+                    }
+                    color="danger"
+                    iconType="error"
+                  >
+                    <p>{error}</p>
+                  </EuiCallOut>
+                )}
+              </>
+            }
+            actions={[
+              <EuiButton
+                color="primary"
+                fill
+                onClick={handleEnableClick}
+                iconType="plusInCircle"
+                isLoading={isEnabling}
+              >
+                {isEnabling ? (
+                  <FormattedMessage
+                    id="xpack.securitySolution.assetInventory.emptyState.resetFiltersButton.loading"
+                    defaultMessage="Enabling Asset Inventory"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.securitySolution.assetInventory.emptyState.resetFiltersButton"
+                    defaultMessage="Enable Asset Inventory"
+                  />
+                )}
+              </EuiButton>,
+            ]}
+            footer={
+              <>
+                <EuiTitle size="xxs">
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.securitySolution.assetInventory.emptyState.needHelp"
+                      defaultMessage="Need help?"
+                    />
+                  </strong>
+                </EuiTitle>{' '}
+                <EuiLink href={ASSET_INVENTORY_DOCS_URL} target="_blank">
+                  <FormattedMessage
+                    id="xpack.securitySolution.assetInventory.emptyState.readDocumentation"
+                    defaultMessage="Read documentation"
+                  />
+                </EuiLink>
+              </>
+            }
+          />
+        </CenteredWrapper>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './onboarding';
+export { Onboarding } from './onboarding';
