@@ -11,6 +11,7 @@ import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { waitFor, renderHook } from '@testing-library/react';
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { EcsFlat } from '@elastic/ecs';
 
 import { useLoadRuleTypeAadTemplateField } from './use_load_rule_type_aad_template_fields';
 
@@ -21,6 +22,14 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 const http = httpServiceMock.createStartContract();
+const fieldsMetadataMock = {
+  useFieldsMetadata: jest.fn(),
+  getClient: jest.fn(() =>
+    Promise.resolve({
+      find: () => Promise.resolve({ fields: EcsFlat }),
+    })
+  ),
+};
 
 describe('useLoadRuleTypeAadTemplateFields', () => {
   beforeEach(() => {
@@ -43,6 +52,7 @@ describe('useLoadRuleTypeAadTemplateFields', () => {
       () =>
         useLoadRuleTypeAadTemplateField({
           http,
+          fieldsMetadata: fieldsMetadataMock,
           ruleTypeId: 'ruleTypeId',
           enabled: true,
         }),
