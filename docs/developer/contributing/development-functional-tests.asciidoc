@@ -311,7 +311,7 @@ The `FunctionalTestRunner` comes with three built-in services:
 * Use `config.get(path)` to read any value from the config file
 
 **log:**:::
-// * Source: {kibana-blob}packages/kbn-dev-utils/src/tooling_log/tooling_log.js[packages/kbn-dev-utils/src/tooling_log/tooling_log.js]
+// * Source: {kibana-blob}src/platform/packages/shared/kbn-dev-utils/src/tooling_log/tooling_log.js[src/platform/packages/shared/kbn-dev-utils/src/tooling_log/tooling_log.js]
 * `ToolingLog` instances are readable streams. The instance provided by this service is automatically piped to stdout by the `FunctionalTestRunner` CLI
 * `log.verbose()`, `log.debug()`, `log.info()`, `log.warning()` all work just like console.log but produce more organized output
 

@@ -1436,7 +1436,7 @@
     "@kbn/dev-cli-errors": "link:src/platform/packages/shared/kbn-dev-cli-errors",
     "@kbn/dev-cli-runner": "link:src/platform/packages/shared/kbn-dev-cli-runner",
     "@kbn/dev-proc-runner": "link:src/platform/packages/shared/kbn-dev-proc-runner",
-    "@kbn/dev-utils": "link:packages/kbn-dev-utils",
+    "@kbn/dev-utils": "link:src/platform/packages/shared/kbn-dev-utils",
     "@kbn/docs-utils": "link:packages/kbn-docs-utils",
     "@kbn/es": "link:packages/kbn-es",
     "@kbn/es-archiver": "link:packages/kbn-es-archiver",

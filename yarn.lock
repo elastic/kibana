@@ -5421,7 +5421,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dev-utils@link:packages/kbn-dev-utils":
+"@kbn/dev-utils@link:src/platform/packages/shared/kbn-dev-utils":
   version "0.0.0"
   uid ""
 
