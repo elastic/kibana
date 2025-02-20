@@ -60,6 +60,7 @@ describe('Custom Query Alerts', () => {
     version: '8.3',
     publicBaseUrl,
     alerting,
+    isServerless: false,
   });
   const eventsTelemetry = createMockTelemetryEventsSender(true);
 
