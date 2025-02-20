@@ -12,7 +12,6 @@ import expect from '@kbn/expect';
 import {
   ChatCompletionChunkEvent,
   ConversationCreateEvent,
-  ConversationUpdateEvent,
   MessageAddEvent,
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
@@ -23,7 +22,7 @@ import {
   LlmProxy,
   ToolMessage,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import { decodeEvents, getConversationCreatedEvent, getConversationUpdatedEvent } from '../helpers';
+import { decodeEvents, getConversationCreatedEvent } from '../helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
 import { clearConversations } from '../knowledge_base/helpers';
@@ -263,14 +262,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       });
 
       it('has the correct title', () => {
-        expect(
-          omit(
-            events[4],
-            'conversation.id',
-            'conversation.last_updated',
-            'conversation.token_count'
-          )
-        ).to.eql({
+        expect(omit(events[4], 'conversation.id', 'conversation.last_updated')).to.eql({
           type: StreamingChatResponseEventType.ConversationCreate,
           conversation: {
             title: 'Title for at new conversation',
@@ -365,7 +357,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     describe('when updating an existing conversation', () => {
       let conversationCreatedEvent: ConversationCreateEvent;
-      let conversationUpdatedEvent: ConversationUpdateEvent;
 
       before(async () => {
         proxy.interceptTitle('LLM-generated title').catch((e) => {
@@ -435,24 +426,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(updatedResponse.status).to.be(200);
 
         await proxy.waitForAllInterceptorsSettled();
-
-        conversationUpdatedEvent = getConversationUpdatedEvent(updatedResponse.body);
       });
 
       after(async () => {
         await clearConversations(es);
-      });
-
-      it('has correct token count for a new conversation', async () => {
-        expect(conversationCreatedEvent.conversation.token_count?.completion).to.be.greaterThan(0);
-        expect(conversationCreatedEvent.conversation.token_count?.prompt).to.be.greaterThan(0);
-        expect(conversationCreatedEvent.conversation.token_count?.total).to.be.greaterThan(0);
-      });
-
-      it('has correct token count for the updated conversation', async () => {
-        expect(conversationUpdatedEvent.conversation.token_count!.total).to.be.greaterThan(
-          conversationCreatedEvent.conversation.token_count!.total
-        );
       });
     });
 

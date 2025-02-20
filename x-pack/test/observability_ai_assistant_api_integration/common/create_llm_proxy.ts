@@ -37,7 +37,6 @@ export interface LlmResponseSimulator {
   requestBody: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
   status: (code: number) => Promise<void>;
   next: (msg: string | ToolMessage) => Promise<void>;
-  tokenCount: (msg: { completion: number; prompt: number; total: number }) => Promise<void>;
   error: (error: any) => Promise<void>;
   complete: () => Promise<void>;
   rawWrite: (chunk: string) => Promise<void>;
@@ -192,17 +191,6 @@ export class LlmProxy {
                   Connection: 'keep-alive',
                 });
               }),
-              tokenCount: (msg) => {
-                const chunk = {
-                  object: 'chat.completion.chunk',
-                  usage: {
-                    completion_tokens: msg.completion,
-                    prompt_tokens: msg.prompt,
-                    total_tokens: msg.total,
-                  },
-                };
-                return write(`data: ${JSON.stringify(chunk)}\n\n`);
-              },
               next: (msg) => {
                 const chunk = createOpenAiChunk(msg);
                 return write(`data: ${JSON.stringify(chunk)}\n\n`);
@@ -248,7 +236,7 @@ export class LlmProxy {
         for (const chunk of parsedChunks) {
           await simulator.next(chunk);
         }
-        await simulator.tokenCount({ completion: 1, prompt: 1, total: 1 });
+
         await simulator.complete();
 
         return simulator;

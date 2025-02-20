@@ -136,11 +136,6 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
           ],
           conversation: {
             title: 'My old conversation',
-            token_count: {
-              completion: 1,
-              prompt: 1,
-              total: 2,
-            },
           },
           '@timestamp': '2024-04-18T14:29:22.948',
           public: false,
