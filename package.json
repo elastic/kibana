@@ -1430,7 +1430,7 @@
     "@kbn/core-ui-settings-browser-mocks": "link:src/core/packages/ui-settings/browser-mocks",
     "@kbn/core-ui-settings-server-mocks": "link:src/core/packages/ui-settings/server-mocks",
     "@kbn/core-usage-data-server-mocks": "link:src/core/packages/usage-data/server-mocks",
-    "@kbn/cypress-config": "link:packages/kbn-cypress-config",
+    "@kbn/cypress-config": "link:src/platform/packages/shared/kbn-cypress-config",
     "@kbn/dependency-ownership": "link:packages/kbn-dependency-ownership",
     "@kbn/dependency-usage": "link:packages/kbn-dependency-usage",
     "@kbn/dev-cli-errors": "link:packages/kbn-dev-cli-errors",
