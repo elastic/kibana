@@ -12,11 +12,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';
-import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { showErrorToast } from '@kbn/cloud-security-posture';
 import type { IKibanaSearchResponse, IKibanaSearchRequest } from '@kbn/search-types';
-import { useGetCspBenchmarkRulesStatesApi } from '@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api';
 import type { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
 import { useKibana } from '../../common/lib/kibana';
 import { MAX_ASSETS_TO_LOAD, ASSET_INVENTORY_INDEX_PATTERN } from '../constants';
@@ -42,28 +39,6 @@ const getRuntimeMappingsFromSort = (sort: string[][]) => {
         },
       };
     }, {});
-};
-
-const buildMutedRulesFilter = (rulesStates: CspBenchmarkRulesStates): QueryDslQueryContainer[] => {
-  const mutedRules = Object.fromEntries(
-    Object.entries(rulesStates).filter(([_key, value]) => value.muted === true)
-  );
-
-  const mutedRulesFilterQuery = Object.keys(mutedRules).map((key) => {
-    // const rule = mutedRules[key];
-    return {
-      bool: {
-        must: [
-          // TODO Determine which rules are mutable
-          // { term: { 'rule.benchmark.id': rule.benchmark_id } },
-          // { term: { 'rule.benchmark.version': rule.benchmark_version } },
-          // { term: { 'rule.benchmark.rule_number': rule.rule_number } },
-        ],
-      },
-    };
-  });
-
-  return mutedRulesFilterQuery;
 };
 
 const getMultiFieldsSort = (sort: string[][]) => {
@@ -100,13 +75,7 @@ const getSortField = ({ field, direction }: { field: string; direction: string }
   return { [field]: direction };
 };
 
-const getAssetsQuery = (
-  { query, sort }: UseAssetsOptions,
-  rulesStates: CspBenchmarkRulesStates,
-  pageParam: unknown
-) => {
-  const mutedRulesFilterQuery = buildMutedRulesFilter(rulesStates);
-
+const getAssetsQuery = ({ query, sort }: UseAssetsOptions, pageParam: unknown) => {
   return {
     index: ASSET_INVENTORY_INDEX_PATTERN,
     sort: getMultiFieldsSort(sort),
@@ -125,7 +94,7 @@ const getAssetsQuery = (
       bool: {
         ...query?.bool,
         filter: [...(query?.bool?.filter ?? [])],
-        must_not: [...(query?.bool?.must_not ?? []), ...mutedRulesFilterQuery],
+        must_not: [...(query?.bool?.must_not ?? [])],
       },
     },
     ...(pageParam ? { from: pageParam } : {}),
@@ -164,17 +133,14 @@ export function useFetchData(options: UseAssetsOptions) {
     data,
     notifications: { toasts },
   } = useKibana().services;
-  const { data: rulesStates } = useGetCspBenchmarkRulesStatesApi();
-
   return useInfiniteQuery(
-    ['asset_inventory', { params: options }, rulesStates],
+    ['asset_inventory', { params: options }],
     async ({ pageParam }) => {
       const {
         rawResponse: { hits, aggregations },
       } = await lastValueFrom(
         data.search.search<LatestAssetsRequest, LatestAssetsResponse>({
-          // ruleStates always exists since it under the `enabled` dependency.
-          params: getAssetsQuery(options, rulesStates!, pageParam) as LatestAssetsRequest['params'], // eslint-disable-line @typescript-eslint/no-non-null-assertion
+          params: getAssetsQuery(options, pageParam) as LatestAssetsRequest['params'],
         })
       );
       if (!aggregations) throw new Error('expected aggregations to be an defined');
@@ -188,7 +154,7 @@ export function useFetchData(options: UseAssetsOptions) {
       };
     },
     {
-      enabled: options.enabled && !!rulesStates,
+      enabled: options.enabled,
       keepPreviousData: true,
       onError: (err: Error) => showErrorToast(toasts, err),
       getNextPageParam: (lastPage, allPages) => {
