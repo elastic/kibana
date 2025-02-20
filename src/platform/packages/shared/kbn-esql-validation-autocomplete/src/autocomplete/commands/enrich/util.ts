@@ -80,3 +80,25 @@ export const modeSuggestions: SuggestionRawDefinition[] = ENRICH_MODES.values.ma
     command: TRIGGER_SUGGESTION_COMMAND,
   })
 );
+
+export const onSuggestion: SuggestionRawDefinition = {
+  label: 'ON',
+  text: 'ON ',
+  kind: 'Reference',
+  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.onDoc', {
+    defaultMessage: 'On',
+  }),
+  sortText: '1',
+  command: TRIGGER_SUGGESTION_COMMAND,
+};
+
+export const withSuggestion: SuggestionRawDefinition = {
+  label: 'WITH',
+  text: 'WITH ',
+  kind: 'Reference',
+  detail: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.withDoc', {
+    defaultMessage: 'With',
+  }),
+  sortText: '1',
+  command: TRIGGER_SUGGESTION_COMMAND,
+};

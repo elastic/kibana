@@ -377,6 +377,7 @@ export const buildMatchingFieldsDefinition = (
     command: TRIGGER_SUGGESTION_COMMAND,
   }));
 
+/** @deprecated options will be removed */
 export const buildOptionDefinition = (
   option: CommandOptionsDefinition,
   isAssignType: boolean = false

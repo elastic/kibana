@@ -51,7 +51,7 @@ describe('autocomplete.suggest', () => {
 
     it('suggests ON and WITH after policy name', async () => {
       const { assertSuggestions } = await setup();
-      await assertSuggestions(`from a | enrich policy /`, ['ON $0', 'WITH $0', '| ']);
+      await assertSuggestions(`from a | enrich policy /`, ['ON ', 'WITH ', '| ']);
     });
 
     it('suggests fields after ON', async () => {

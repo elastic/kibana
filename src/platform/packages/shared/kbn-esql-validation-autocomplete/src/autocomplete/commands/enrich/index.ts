@@ -10,7 +10,15 @@
 import { findFinalWord } from '../../../shared/helpers';
 import { CommandSuggestParams } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
-import { Position, getPosition, modeSuggestions, noPoliciesAvailableSuggestion } from './util';
+import {
+  Position,
+  getPosition,
+  modeSuggestions,
+  noPoliciesAvailableSuggestion,
+  onSuggestion,
+  withSuggestion,
+} from './util';
+import { pipeCompleteItem } from '../../complete_items';
 
 export async function suggest({
   innerText,
@@ -35,6 +43,9 @@ export async function suggest({
         });
       }
       return policies.length ? policies : [noPoliciesAvailableSuggestion];
+
+    case Position.AFTER_POLICY:
+      return [onSuggestion, withSuggestion, pipeCompleteItem];
 
     default:
       return [];
