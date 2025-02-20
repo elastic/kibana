@@ -104,7 +104,7 @@ import {
   checkFunctionInvocationComplete,
 } from './helper';
 import { FunctionParameter, isParameterType } from '../definitions/types';
-import { comparisonFunctions } from '../definitions/builtin';
+
 import {
   getRecommendedQueriesSuggestions,
   mapRecommendedQueriesFromRegistry,
