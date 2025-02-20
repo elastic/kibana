@@ -18,13 +18,13 @@ import { getAllFtrConfigsAndManifests } from './ftr_configs_manifest';
 
 const THIS_PATH = Path.resolve(
   REPO_ROOT,
-  'packages/kbn-test/src/functional_test_runner/lib/config/run_check_ftr_configs_cli.ts'
+  'src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/run_check_ftr_configs_cli.ts'
 );
 const THIS_REL = Path.relative(REPO_ROOT, THIS_PATH);
 
 const IGNORED_PATHS = [
   THIS_PATH,
-  Path.resolve(REPO_ROOT, 'packages/kbn-test/src/jest/run_check_jest_configs_cli.ts'),
+  Path.resolve(REPO_ROOT, 'src/platform/packages/shared/kbn-test/src/jest/run_check_jest_configs_cli.ts'),
   Path.resolve(
     REPO_ROOT,
     'x-pack/solutions/observability/plugins/observability_onboarding/e2e/playwright/playwright.config.ts'
