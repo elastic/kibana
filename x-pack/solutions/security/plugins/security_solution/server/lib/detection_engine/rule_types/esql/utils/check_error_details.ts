@@ -13,7 +13,7 @@ const USER_ERRORS_EXCEPTIONS = ['status_exception', 'verification_exception', 'p
  * user errors are excluded from SLO dashboards
  */
 export const checkErrorDetails = (error: unknown): { isUserError: boolean } => {
-  const errorType = (error as KbnSearchError).errBody?.error?.type;
+  const errorType = (error as KbnSearchError)?.errBody?.error?.type;
   if (USER_ERRORS_EXCEPTIONS.includes(errorType)) {
     return { isUserError: true };
   }
