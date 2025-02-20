@@ -43,6 +43,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     it('can be filtered to only show "all" when filter is cleared', async () => {
       // Clear status filter
       await alertControls.clearControlSelections('0');
+      await observability.alerts.common.waitForAlertTableToLoad();
       await retry.try(async () => {
         const tableRows = await observability.alerts.common.getTableCellsInRows();
         expect(tableRows.length).to.be(ALL_ALERTS);

@@ -50,6 +50,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     it('shows number of total and active alerts when there is no status filter', async () => {
       // Clear status filter
       await alertControls.clearControlSelections('0');
+      await observability.alerts.common.waitForAlertTableToLoad();
 
       await observability.components.alertSummaryWidget.getFullSizeComponentSelectorOrFail();
       await header.waitUntilLoadingHasFinished();

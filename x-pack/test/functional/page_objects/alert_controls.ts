@@ -13,7 +13,6 @@ export function AlertControlsProvider({ getService }: FtrProviderContext) {
   const find = getService('find');
   const log = getService('log');
   const retry = getService('retry');
-  const observability = getService('observability');
 
   return {
     async getControlElementById(controlId: string): Promise<WebElementWrapper> {
@@ -47,7 +46,6 @@ export function AlertControlsProvider({ getService }: FtrProviderContext) {
       log.debug(`clearing all selections from control ${controlId}`);
       await this.hoverOverExistingControl(controlId);
       await testSubjects.click(`control-action-${controlId}-erase`);
-      await observability.alerts.common.waitForAlertTableToLoad();
     },
 
     async optionsListOpenPopover(controlId: string) {

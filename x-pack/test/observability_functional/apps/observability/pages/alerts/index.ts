@@ -66,6 +66,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
       it('Clear status control', async () => {
         await alertControls.clearControlSelections('0');
+        await observability.alerts.common.waitForAlertTableToLoad();
       });
 
       it('Renders the correct number of cells (all alerts)', async () => {
@@ -119,6 +120,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           await observability.alerts.common.navigateToTimeWithData();
           // Clear active status
           await alertControls.clearControlSelections('0');
+          await observability.alerts.common.waitForAlertTableToLoad();
         });
 
         it('Correctly applies date picker selections', async () => {
