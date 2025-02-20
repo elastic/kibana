@@ -23,7 +23,11 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { ReindexStatus } from '../../../../../../../../../common/types';
+import {
+  EnrichedDeprecationInfo,
+  ReindexAction,
+  ReindexStatus,
+} from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex';
 import { useAppContext } from '../../../../../../../app_context';
@@ -32,6 +36,10 @@ import { FrozenCallOut } from '../frozen_callout';
 import type { UpdateIndexState } from '../../../use_update_index';
 import { FetchFailedCallOut } from '../fetch_failed_callout';
 import { ReindexingFailedCallOut } from '../reindexing_failed_callout';
+import { MlAnomalyGuidance } from './ml_anomaly_guidance';
+import { ESTransformsTargetGuidance } from './es_transform_target_guidance';
+
+const ML_ANOMALIES_PREFIX = '.ml-anomalies-';
 
 /**
  * Displays a flyout that shows the details / corrective action for a "reindex" deprecation for a given index.
@@ -39,10 +47,18 @@ import { ReindexingFailedCallOut } from '../reindexing_failed_callout';
 export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   reindexState: ReindexState;
   updateIndexState: UpdateIndexState;
+  deprecation: EnrichedDeprecationInfo;
   startReindex: () => void;
   startReadonly: () => void;
   closeFlyout: () => void;
-}> = ({ reindexState, updateIndexState, startReindex, startReadonly, closeFlyout }) => {
+}> = ({
+  reindexState,
+  updateIndexState,
+  deprecation,
+  startReindex,
+  startReadonly,
+  closeFlyout,
+}) => {
   const {
     services: {
       api,
@@ -57,8 +73,26 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
   const isCompleted = reindexStatus === ReindexStatus.completed || updateIndexStatus === 'complete';
   const hasFetchFailed = reindexStatus === ReindexStatus.fetchFailed;
   const hasReindexingFailed = reindexStatus === ReindexStatus.failed;
+  const correctiveAction = deprecation.correctiveAction as ReindexAction | undefined;
+  const isESTransformTarget = !!correctiveAction?.transformIds?.length;
+  const isMLAnomalyIndex = Boolean(indexName?.startsWith(ML_ANOMALIES_PREFIX));
 
   const { data: nodes } = api.useLoadNodeDiskSpace();
+
+  let showEsTransformsGuidance = false;
+  let showMlAnomalyReindexingGuidance = false;
+  let showReadOnlyGuidance = false;
+  let showDefaultGuidance = false;
+
+  if (isESTransformTarget) {
+    showEsTransformsGuidance = true;
+  } else if (meta.isReadonly) {
+    showReadOnlyGuidance = true;
+  } else if (isMLAnomalyIndex) {
+    showMlAnomalyReindexingGuidance = true;
+  } else {
+    showDefaultGuidance = true;
+  }
 
   return (
     <Fragment>
@@ -129,7 +163,9 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
         {meta.isFrozen && <FrozenCallOut />}
 
         <EuiText>
-          {meta.isReadonly && (
+          {showEsTransformsGuidance && <ESTransformsTargetGuidance deprecation={deprecation} />}
+          {showMlAnomalyReindexingGuidance && <MlAnomalyGuidance />}
+          {showReadOnlyGuidance && (
             <Fragment>
               <p>
                 <FormattedMessage
@@ -145,7 +181,7 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
               </p>
             </Fragment>
           )}
-          {!meta.isReadonly && (
+          {showDefaultGuidance && (
             <Fragment>
               <p>
                 <FormattedMessage
@@ -252,20 +288,24 @@ export const ReindexDetailsFlyoutStep: React.FunctionComponent<{
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
-              {!meta.isReadonly && !hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    onClick={startReadonly}
-                    disabled={loading}
-                    data-test-subj="startIndexReadonlyButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.startIndexReadonlyButton"
-                      defaultMessage="Mark as read-only"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              )}
+              {!meta.isReadonly &&
+                !hasFetchFailed &&
+                !isCompleted &&
+                hasRequiredPrivileges &&
+                !isESTransformTarget && (
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      onClick={startReadonly}
+                      disabled={loading}
+                      data-test-subj="startIndexReadonlyButton"
+                    >
+                      <FormattedMessage
+                        id="xpack.upgradeAssistant.esDeprecations.indices.indexFlyout.detailsStep.startIndexReadonlyButton"
+                        defaultMessage="Mark as read-only"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                )}
               {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
                 <EuiFlexItem grow={false}>
                   <EuiButton

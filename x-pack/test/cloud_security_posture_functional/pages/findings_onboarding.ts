@@ -44,7 +44,8 @@ export default ({ getPageObjects }: FtrProviderContext) => {
       await PageObjects.common.waitUntilUrlIncludes('add-integration/vuln_mgmt');
     });
 
-    it('Vulnerabilities - clicking on the `Third party integrations` prompt action button - `Wiz Integration`: navigates to the Wiz integration installation page', async () => {
+    // fixed by https://github.com/elastic/kibana/pull/211363 in v9.0
+    it.skip('Vulnerabilities - clicking on the `Third party integrations` prompt action button - `Wiz Integration`: navigates to the Wiz integration installation page', async () => {
       await findings.navigateToLatestVulnerabilitiesPage();
       await PageObjects.header.waitUntilLoadingHasFinished();
       const element = await thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt.getElement();
