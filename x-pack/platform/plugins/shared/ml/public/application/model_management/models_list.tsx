@@ -30,7 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { useStorage } from '@kbn/ml-local-storage';
-import { ELSER_ID_V1 } from '@kbn/ml-trained-models-utils';
+import { ELSER_ID_V1, MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { dynamic } from '@kbn/shared-ux-utility';
@@ -51,7 +51,6 @@ import type {
 import {
   isBaseNLPModelItem,
   isBuiltInModel,
-  isModelDeployed,
   isModelDownloadItem,
   isNLPModelItem,
 } from '../../../common/types/trained_models';
@@ -99,6 +98,9 @@ export const getDefaultModelsListState = (): ListingPageUrlState => ({
   sortDirection: 'asc',
   showAll: false,
 });
+
+const isModelDeployed = (item: TrainedModelUIItem) =>
+  isNLPModelItem(item) && item.state === MODEL_STATE.STARTED;
 
 interface Props {
   pageState?: ListingPageUrlState;
