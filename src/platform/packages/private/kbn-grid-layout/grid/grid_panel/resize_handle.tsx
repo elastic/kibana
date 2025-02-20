@@ -13,22 +13,12 @@ import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
-import { GridLayoutStateManager } from '../types';
 import { useGridLayoutEvents } from '../use_grid_layout_events';
 
 export const ResizeHandle = React.memo(
-  ({
-    gridLayoutStateManager,
-    rowIndex,
-    panelId,
-  }: {
-    gridLayoutStateManager: GridLayoutStateManager;
-    rowIndex: number;
-    panelId: string;
-  }) => {
+  ({ rowIndex, panelId }: { rowIndex: number; panelId: string }) => {
     const startInteraction = useGridLayoutEvents({
       interactionType: 'resize',
-      gridLayoutStateManager,
       panelId,
       rowIndex,
     });

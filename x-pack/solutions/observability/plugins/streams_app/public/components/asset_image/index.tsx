@@ -12,15 +12,15 @@ import { useState } from 'react';
 
 const imageSets = {
   welcome: {
-    light: import('./welcome_light.png'),
-    dark: import('./welcome_dark.png'),
+    light: () => import('./welcome_light.png'),
+    dark: () => import('./welcome_dark.png'),
     alt: i18n.translate('xpack.streams.streamDetailView.welcomeImage', {
       defaultMessage: 'Welcome image for the streams app',
     }),
   },
   noResults: {
-    light: import('./no_results_light.png'),
-    dark: import('./no_results_dark.png'),
+    light: () => import('./no_results_light.png'),
+    dark: () => import('./no_results_dark.png'),
     alt: i18n.translate('xpack.streams.streamDetailView.noResultsImage', {
       defaultMessage: 'No results image for the streams app',
     }),
@@ -38,7 +38,7 @@ export function AssetImage({ type = 'welcome', ...props }: AssetImageProps) {
   const [imageSrc, setImageSrc] = useState<string>();
 
   useEffect(() => {
-    const dynamicImageImport = colorMode === 'LIGHT' ? light : dark;
+    const dynamicImageImport = colorMode === 'LIGHT' ? light() : dark();
 
     dynamicImageImport.then((module) => setImageSrc(module.default));
   }, [colorMode, dark, light]);

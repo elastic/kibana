@@ -2247,6 +2247,14 @@
             "path": "x-pack/platform/plugins/shared/lens/public/lens_attribute_service.ts"
           },
           {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/initializers/initialize_integrations.ts"
+          },
+          {
+            "plugin": "lens",
+            "path": "x-pack/platform/plugins/shared/lens/public/react_embeddable/initializers/initialize_integrations.ts"
+          },
+          {
             "plugin": "maps",
             "path": "x-pack/platform/plugins/shared/maps/common/migrations/references.ts"
           },

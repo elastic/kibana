@@ -102,7 +102,10 @@ export function getQueryForFields(queryString: string, commands: ESQLCommand[]) 
 export function getSourcesFromCommands(commands: ESQLCommand[], sourceType: 'index' | 'policy') {
   const fromCommand = commands.find(({ name }) => name === 'from');
   const args = (fromCommand?.args ?? []) as ESQLSource[];
-  return args.filter((arg) => arg.sourceType === sourceType);
+  // the marker gets added in queries like "FROM "
+  return args.filter(
+    (arg) => arg.sourceType === sourceType && arg.name !== '' && arg.name !== EDITOR_MARKER
+  );
 }
 
 export function removeQuoteForSuggestedSources(suggestions: SuggestionRawDefinition[]) {
@@ -288,7 +291,7 @@ export function getValidSignaturesAndTypesToSuggestNext(
   // E.g. if true, "fieldName" -> "fieldName, "
   const alreadyHasComma = fullText ? fullText[offset] === ',' : false;
   const shouldAddComma =
-    hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && !alreadyHasComma;
+    hasMoreMandatoryArgs && fnDefinition.type !== 'operator' && !alreadyHasComma;
   const currentArg = enrichedArgs[argIndex];
   return {
     shouldAddComma,
@@ -607,7 +610,7 @@ export async function getSuggestionsToRightOfOperatorExpression({
         // technically another boolean value should be suggested, but it is a better experience
         // to actually suggest a wider set of fields/functions
         const typeToUse =
-          finalType === 'boolean' && getFunctionDefinition(operator.name)?.type === 'builtin'
+          finalType === 'boolean' && getFunctionDefinition(operator.name)?.type === 'operator'
             ? ['any']
             : (supportedTypes as string[]);
 
