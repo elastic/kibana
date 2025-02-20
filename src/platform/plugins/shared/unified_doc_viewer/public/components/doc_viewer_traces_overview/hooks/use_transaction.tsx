@@ -11,6 +11,7 @@ import createContainer from 'constate';
 import { useState, useEffect } from 'react';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { lastValueFrom } from 'rxjs';
+import { i18n } from '@kbn/i18n';
 import { getUnifiedDocViewerServices } from '../../../plugin';
 
 interface UseTransactionPrams {
@@ -55,7 +56,7 @@ async function getTransactionData({ transactionId, indexPattern, data }: GetTran
 }
 
 const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) => {
-  const { data } = getUnifiedDocViewerServices();
+  const { data, core } = getUnifiedDocViewerServices();
   const [transaction, setTransaction] = useState<{ [key: string]: string } | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -69,6 +70,14 @@ const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) =>
 
           setTransaction(transactionName ? { name: transactionName } : null);
         } catch (err) {
+          const error = err as Error;
+          core.notifications.toasts.addDanger({
+            title: i18n.translate('unifiedDocViewer.docViewerTracesOverview.useTransaction.error', {
+              defaultMessage: 'An error occurred while fetching the transaction',
+            }),
+            text: error.message,
+          });
+
           setTransaction({ name: '' });
         } finally {
           setLoading(false);
@@ -80,7 +89,7 @@ const useTransaction = ({ transactionId, indexPattern }: UseTransactionPrams) =>
     };
 
     fetchData();
-  }, [data, indexPattern, transactionId]);
+  }, [core.notifications.toasts, data, indexPattern, transactionId]);
 
   return { loading, transaction };
 };
