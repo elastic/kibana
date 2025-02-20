@@ -547,6 +547,8 @@
           "ReadonlyModeType",
           " | undefined; sensitive?: boolean | undefined; deprecation?: ",
           "DeprecationSettings",
+          " | undefined; solution?: ",
+          "UiSettingsSolution",
           " | undefined; }"
         ],
         "path": "src/core/packages/ui-settings/browser/src/types.ts",

@@ -15,8 +15,8 @@ export const rawRulesSettingsSchema = rawRulesSettingsSchemaV1.extends({
       createdBy: schema.nullable(schema.string()),
       isActiveAlertsDeletionEnabled: schema.boolean(),
       isInactiveAlertsDeletionEnabled: schema.boolean(),
-      activeAlertsDeletionThreshold: schema.number({ min: 1 }),
-      inactiveAlertsDeletionThreshold: schema.number({ min: 1 }),
+      activeAlertsDeletionThreshold: schema.number({ min: 1, max: 1000 }),
+      inactiveAlertsDeletionThreshold: schema.number({ min: 1, max: 1000 }),
       updatedAt: schema.string(),
       updatedBy: schema.nullable(schema.string()),
     })

@@ -208,8 +208,8 @@ describe('RulesSettingsAlertDeletionClient', () => {
         alertDeletion: expect.objectContaining({
           isActiveAlertsDeletionEnabled: false,
           isInactiveAlertsDeletionEnabled: false,
-          activeAlertsDeletionThreshold: 1,
-          inactiveAlertsDeletionThreshold: 1,
+          activeAlertsDeletionThreshold: 90,
+          inactiveAlertsDeletionThreshold: 90,
           createdBy: 'test name',
           updatedBy: 'test name',
           createdAt: expect.any(String),
