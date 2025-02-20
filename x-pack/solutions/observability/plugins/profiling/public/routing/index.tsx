@@ -218,7 +218,7 @@ const routes = {
                 element: (
                   <RouteBreadcrumb
                     title={i18n.translate('xpack.profiling.breadcrumb.topnFunctions', {
-                      defaultMessage: 'Top N functions',
+                      defaultMessage: 'TopN functions',
                     })}
                     href="/functions/topn"
                   >
@@ -233,7 +233,7 @@ const routes = {
                 element: (
                   <RouteBreadcrumb
                     title={i18n.translate('xpack.profiling.breadcrumb.differentialFunctions', {
-                      defaultMessage: 'Differential top N functions',
+                      defaultMessage: 'Differential topN functions',
                     })}
                     href="/functions/differential"
                   >
