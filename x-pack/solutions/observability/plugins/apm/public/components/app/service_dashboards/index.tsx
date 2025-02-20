@@ -21,6 +21,7 @@ import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plug
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { EmptyDashboards } from './empty_dashboards';
 import { GotoDashboard, LinkDashboard } from './actions';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -38,7 +39,6 @@ import { APM_APP_LOCATOR_ID } from '../../../locator/service_detail_locator';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { isLogsOnlySignal } from '../../../utils/get_signal_type';
-import { ViewMode } from '@kbn/presentation-publishing';
 
 export interface MergedServiceDashboard extends SavedApmCustomDashboard {
   title: string;
