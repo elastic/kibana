@@ -85,6 +85,7 @@ const { updateIsLoading, updateTotalCount } = dataTableActions;
 // - analyzer graph
 const MAX_ACTION_BUTTON_COUNT = 6;
 const DEFAULT_DATA_GRID_HEIGHT = 600;
+const DEFAULT_DATA_GRID_HEIGHT_MIN = 600;
 
 const ALERT_TABLE_CONSUMERS: AlertsTableProps['consumers'] = [AlertConsumers.SIEM];
 
@@ -102,6 +103,7 @@ export const FullWidthFlexGroupTable = styled(EuiFlexGroup)<{ $visible: boolean 
 `;
 
 const EuiDataGridContainer = styled.div<GridContainerProps>`
+  background: rgb(0, 0, 0, 0.05);
   ul.euiPagination__list {
     li.euiPagination__item:last-child {
       ${({ hideLastPage }) => {
@@ -250,7 +252,7 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
   const gridStyle = useMemo(
     () =>
       ({
-        border: 'none',
+        border: 'horizontal',
         fontSize: 's',
         header: 'underline',
         stripes: isEventRenderedView,
@@ -454,7 +456,9 @@ const DetectionEngineAlertsTableComponent: FC<Omit<DetectionEngineAlertTableProp
               // if records are too less, we don't want table to be of fixed height.
               // it should shrink to the content height.
               // Height setting enables/disables virtualization depending on fixed/undefined height values respectively.
-              height={count >= 20 ? `${DEFAULT_DATA_GRID_HEIGHT}px` : undefined}
+              height={
+                count >= 20 ? `${DEFAULT_DATA_GRID_HEIGHT}px` : `${DEFAULT_DATA_GRID_HEIGHT_MIN}px`
+              }
               initialPageSize={50}
               runtimeMappings={sourcererDataView?.runtimeFieldMap as RunTimeMappings}
               toolbarVisibility={toolbarVisibility}
