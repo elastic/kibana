@@ -26,4 +26,5 @@ export const startMigrationCardConfig: OnboardingCardConfig<StartMigrationCardMe
       )
   ),
   checkComplete: checkStartMigrationCardComplete,
+  badge: 'tech_preview',
 };
