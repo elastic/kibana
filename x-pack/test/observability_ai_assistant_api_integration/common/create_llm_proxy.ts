@@ -12,6 +12,7 @@ import { isString, once, pull } from 'lodash';
 import OpenAI from 'openai';
 import { TITLE_CONVERSATION_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/service/client/operators/get_generated_title';
 import pRetry from 'p-retry';
+import { ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import { createOpenAiChunk } from './create_openai_chunk';
 
 type Request = http.IncomingMessage;
@@ -28,21 +29,14 @@ interface RequestInterceptor {
   when: (body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming) => boolean;
 }
 
-export interface ToolCall {
+export interface ToolMessage {
   content?: string;
-  tool_calls?: Array<{
-    id: string;
-    index: string | number;
-    function?: {
-      name: string;
-      arguments: string;
-    };
-  }>;
+  tool_calls?: ChatCompletionChunkToolCall[];
 }
 export interface LlmResponseSimulator {
   requestBody: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
   status: (code: number) => Promise<void>;
-  next: (msg: string | ToolCall) => Promise<void>;
+  next: (msg: string | ToolMessage) => Promise<void>;
   tokenCount: (msg: { completion: number; prompt: number; total: number }) => Promise<void>;
   error: (error: any) => Promise<void>;
   complete: () => Promise<void>;
@@ -127,7 +121,7 @@ export class LlmProxy {
   }
 
   interceptConversation(
-    msg: Array<string | ToolCall> | ToolCall | string | undefined,
+    msg: Array<string | ToolMessage> | ToolMessage | string | undefined,
     {
       name = 'default_interceptor_conversation_name',
     }: {
@@ -149,8 +143,8 @@ export class LlmProxy {
         content: '',
         tool_calls: [
           {
-            id: 'id',
             index: 0,
+            toolCallId: 'id',
             function: {
               name: TITLE_CONVERSATION_FUNCTION_NAME,
               arguments: JSON.stringify({ title }),
@@ -162,7 +156,11 @@ export class LlmProxy {
   }
 
   intercept<
-    TResponseChunks extends Array<string | ToolCall> | ToolCall | string | undefined = undefined
+    TResponseChunks extends
+      | Array<string | ToolMessage>
+      | ToolMessage
+      | string
+      | undefined = undefined
   >(
     name: string,
     when: RequestInterceptor['when'],

@@ -16,10 +16,11 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import type OpenAI from 'openai';
 import { type AdHocInstruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { ChatCompletionChunkToolCall } from '@kbn/inference-common';
 import {
   createLlmProxy,
   LlmProxy,
-  ToolCall,
+  ToolMessage,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -52,7 +53,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
       instructions?: AdHocInstruction[];
       format?: 'openai' | 'default';
-      conversationResponse: string | ToolCall;
+      conversationResponse: string | ToolMessage;
     }) {
       const titleSimulatorPromise = proxy.interceptTitle('My Title');
       const conversationSimulatorPromise = proxy.interceptConversation(conversationResponse);
@@ -119,9 +120,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       },
     } as const;
 
-    const toolCallMock = {
-      id: 'fake-id',
-      index: 'fake-index',
+    const toolCallMock: ChatCompletionChunkToolCall = {
+      toolCallId: 'fake-index',
+      index: 0,
       function: {
         name: 'my_action',
         arguments: JSON.stringify({ foo: 'bar' }),
@@ -158,7 +159,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
 
       before(async () => {
-        const { conversationSimulator, responseBody } = await addInterceptorsAndCallComplete({
+        const { conversationSimulator } = await addInterceptorsAndCallComplete({
           instructions: [
             {
               text: 'This is a random instruction',

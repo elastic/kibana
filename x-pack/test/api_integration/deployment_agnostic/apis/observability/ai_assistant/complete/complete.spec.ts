@@ -21,7 +21,7 @@ import { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability
 import {
   createLlmProxy,
   LlmProxy,
-  ToolCall,
+  ToolMessage,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { decodeEvents, getConversationCreatedEvent, getConversationUpdatedEvent } from '../helpers';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
@@ -55,7 +55,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     async function getEvents(
       params: { screenContexts?: ObservabilityAIAssistantScreenContextRequest[] },
       title: string,
-      conversationResponse: string | ToolCall
+      conversationResponse: string | ToolMessage
     ) {
       void proxy.interceptTitle(title);
       void proxy.interceptConversation(conversationResponse);
@@ -315,8 +315,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           {
             tool_calls: [
               {
-                id: 'fake-id',
-                index: 'fake-index',
+                toolCallId: 'fake-id',
+                index: 1,
                 function: {
                   name: 'my_action',
                   arguments: JSON.stringify({ foo: 'bar' }),
