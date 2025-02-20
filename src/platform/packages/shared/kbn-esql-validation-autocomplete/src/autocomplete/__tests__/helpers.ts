@@ -215,7 +215,7 @@ export function getFunctionSignaturesByReturnType(
     })
     .sort(({ name: a }, { name: b }) => a.localeCompare(b))
     .map<PartialSuggestionWithText>((definition) => {
-      const { type, name, signatures } = definition;
+      const { type, name, signatures, customSnippet } = definition;
 
       if (type === 'builtin') {
         return {
@@ -226,7 +226,7 @@ export function getFunctionSignaturesByReturnType(
         };
       }
       return {
-        text: `${name.toUpperCase()}($0)`,
+        text: customSnippet ? `${name.toUpperCase()}(${customSnippet})` : `${name.toUpperCase()}($0)`,
         label: name.toUpperCase(),
       };
     });

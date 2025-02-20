@@ -40,7 +40,7 @@ describe('WHERE <expression>', () => {
           .map((name) => `${name} `)
           .map(attachTriggerCommand),
         attachTriggerCommand('var0 '),
-        ...allEvalFns.filter((fn) => fn.label !== 'QSTR'),
+        ...allEvalFns.filter((fn) => fn.label !== 'QSTR' && fn.label !== 'KQL'),
       ],
       {
         callbacks: {
@@ -150,7 +150,7 @@ describe('WHERE <expression>', () => {
         ...getFieldNamesByType('any')
           .map((field) => `${field} `)
           .map(attachTriggerCommand),
-        ...allEvalFns.filter((fn) => fn.label !== 'QSTR' && fn.label !== 'MATCH'),
+        ...allEvalFns.filter((fn) => fn.label !== 'QSTR' && fn.label !== 'KQL' && fn.label !== 'MATCH'),
       ]);
     });
 
