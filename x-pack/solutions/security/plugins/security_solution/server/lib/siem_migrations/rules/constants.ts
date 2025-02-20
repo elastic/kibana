@@ -6,6 +6,7 @@
  */
 
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import { defaultRiskScoreBySeverity } from '../../../../common/detection_engine/constants';
 import type { SplunkSeverity } from './types';
 
 export const SPLUNK_ELASTIC_ALERT_SEVERITY_MAP: Record<SplunkSeverity, Severity> = {
@@ -16,12 +17,7 @@ export const SPLUNK_ELASTIC_ALERT_SEVERITY_MAP: Record<SplunkSeverity, Severity>
   '5': 'critical',
 } as const;
 
-export const ELASTIC_SEVERITY_TO_RISK_SCORE_MAP: Record<Severity, number> = {
-  low: 21,
-  medium: 47,
-  high: 73,
-  critical: 100,
-};
+export const ELASTIC_SEVERITY_TO_RISK_SCORE_MAP = defaultRiskScoreBySeverity;
 
 export const DEFAULT_TRANSLATION_SEVERITY: Severity = 'low';
 
