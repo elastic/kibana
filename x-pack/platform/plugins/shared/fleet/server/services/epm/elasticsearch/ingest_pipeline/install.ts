@@ -25,7 +25,7 @@ import {
   FLEET_EVENT_INGESTED_PIPELINE_CONTENT,
 } from '../../../../constants';
 import { getPipelineNameForDatastream } from '../../../../../common/services';
-import type { ArchiveEntry, PackageInstallContext } from '../../../../../common/types';
+import type { ArchiveEntry, AssetsMap, PackageInstallContext } from '../../../../../common/types';
 
 import { appendMetadataToIngestPipeline } from '../meta';
 import { retryTransientEsErrors } from '../retry';
@@ -157,6 +157,19 @@ export async function installAllPipelines({
   > = [];
   const substitutions: RewriteSubstitution[] = [];
 
+  const pipelineAssetsMap: AssetsMap = new Map();
+
+  await packageInstallContext.archiveIterator.traverseEntries(
+    async (entry) => {
+      if (!entry.buffer) {
+        return;
+      }
+
+      pipelineAssetsMap.set(entry.path, entry.buffer);
+    },
+    (path) => pipelinePaths.includes(path)
+  );
+
   let datastreamPipelineCreated = false;
   pipelinePaths.forEach((path) => {
     const { name, extension } = getNameAndExtension(path);
@@ -169,7 +182,7 @@ export async function installAllPipelines({
       dataStream,
       packageVersion: packageInstallContext.packageInfo.version,
     });
-    const content = getAssetFromAssetsMap(packageInstallContext.assetsMap, path).toString('utf-8');
+    const content = getAssetFromAssetsMap(pipelineAssetsMap, path).toString('utf-8');
     pipelinesInfos.push({
       nameForInstallation,
       shouldInstallCustomPipelines: dataStream && isMainPipeline,

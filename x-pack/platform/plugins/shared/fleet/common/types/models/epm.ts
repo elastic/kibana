@@ -132,7 +132,10 @@ export interface ArchiveEntry {
 }
 
 export interface ArchiveIterator {
-  traverseEntries: (onEntry: (entry: ArchiveEntry) => Promise<void>) => Promise<void>;
+  traverseEntries: (
+    onEntry: (entry: ArchiveEntry) => Promise<void>,
+    readBuffer?: (path: string) => boolean
+  ) => Promise<void>;
   getPaths: () => Promise<string[]>;
 }
 
@@ -142,7 +145,7 @@ export interface PackageInstallContext {
    * @deprecated Use `archiveIterator` to access the package archive entries
    * without loading them all into memory at once.
    */
-  assetsMap: AssetsMap;
+  assetsMap: AssetsMap; // TODO remove
   paths: string[];
   archiveIterator: ArchiveIterator;
 }

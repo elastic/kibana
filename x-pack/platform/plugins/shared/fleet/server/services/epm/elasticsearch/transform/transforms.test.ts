@@ -26,6 +26,7 @@ import { createAppContextStartContractMock } from '../../../../mocks';
 import type { PackageInstallContext } from '../../../../../common/types';
 
 import { installTransforms } from './install';
+import { createArchiveIteratorFromMap } from '../../archive/archive_iterator';
 
 jest.mock('../../packages/get', () => {
   return { getInstallation: jest.fn(), getInstallationObject: jest.fn() };
@@ -292,6 +293,30 @@ _meta:
             sourceData.TRANSFORM,
           ],
         ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/beats.yml',
+              Buffer.from(sourceData.BEATS_FIELDS),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/agent.yml',
+              Buffer.from(sourceData.AGENT_FIELDS),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+              Buffer.from(sourceData.FIELDS),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              Buffer.from(sourceData.MANIFEST),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              Buffer.from(sourceData.TRANSFORM),
+            ],
+          ])
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
@@ -586,6 +611,22 @@ _meta:
             Buffer.from(sourceData.TRANSFORM),
           ],
         ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+              Buffer.from(sourceData.FIELDS),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              Buffer.from(sourceData.MANIFEST),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              Buffer.from(sourceData.TRANSFORM),
+            ],
+          ])
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
@@ -864,6 +905,18 @@ _meta:
             Buffer.from(sourceData.TRANSFORM),
           ],
         ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+              Buffer.from(sourceData.FIELDS),
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              Buffer.from(sourceData.TRANSFORM),
+            ],
+          ]) as any
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
@@ -1092,6 +1145,18 @@ _meta:
             sourceData.TRANSFORM,
           ],
         ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              sourceData.MANIFEST,
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              sourceData.TRANSFORM,
+            ],
+          ]) as any
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
@@ -1196,6 +1261,18 @@ _meta:
             sourceData.TRANSFORM,
           ],
         ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              sourceData.MANIFEST,
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              sourceData.TRANSFORM,
+            ],
+          ]) as any
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,
@@ -1295,6 +1372,22 @@ _meta:
             sourceData.TRANSFORM,
           ],
         ]),
+        archiveIterator: createArchiveIteratorFromMap(
+          new Map([
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
+              sourceData.FIELDS,
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
+              sourceData.MANIFEST,
+            ],
+            [
+              'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
+              sourceData.TRANSFORM,
+            ],
+          ]) as any
+        ),
       } as unknown as PackageInstallContext,
       esClient,
       savedObjectsClient,

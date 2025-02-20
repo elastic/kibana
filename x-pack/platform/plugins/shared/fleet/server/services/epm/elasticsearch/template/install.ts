@@ -48,7 +48,7 @@ import {
   forEachMappings,
 } from '../../../experimental_datastream_features_helper';
 import { appContextService } from '../../../app_context';
-import type { PackageInstallContext } from '../../../../../common/types';
+import type { AssetsMap, PackageInstallContext } from '../../../../../common/types';
 
 import {
   generateMappings,
@@ -131,14 +131,23 @@ const installPreBuiltTemplates = async (
 ) => {
   const templatePaths = packageInstallContext.paths.filter((path) => isTemplate(path));
   try {
+    const templateAssetsMap: AssetsMap = new Map();
+    await packageInstallContext.archiveIterator.traverseEntries(
+      async (entry) => {
+        if (!entry.buffer) {
+          return;
+        }
+
+        templateAssetsMap.set(entry.path, entry.buffer);
+      },
+      (path) => templatePaths.includes(path)
+    );
     await pMap(
       templatePaths,
       async (path) => {
         const { file } = getPathParts(path);
         const templateName = file.substr(0, file.lastIndexOf('.'));
-        const content = JSON.parse(
-          getAssetFromAssetsMap(packageInstallContext.assetsMap, path).toString('utf8')
-        );
+        const content = JSON.parse(getAssetFromAssetsMap(templateAssetsMap, path).toString('utf8'));
 
         const esClientParams = { name: templateName, body: content };
         const esClientRequestOptions = { ignore: [404] };
@@ -175,14 +184,23 @@ const installPreBuiltComponentTemplates = async (
 ) => {
   const templatePaths = packageInstallContext.paths.filter((path) => isComponentTemplate(path));
   try {
+    const templateAssetsMap: AssetsMap = new Map();
+    await packageInstallContext.archiveIterator.traverseEntries(
+      async (entry) => {
+        if (!entry.buffer) {
+          return;
+        }
+
+        templateAssetsMap.set(entry.path, entry.buffer);
+      },
+      (path) => templatePaths.includes(path)
+    );
     await pMap(
       templatePaths,
       async (path) => {
         const { file } = getPathParts(path);
         const templateName = file.substr(0, file.lastIndexOf('.'));
-        const content = JSON.parse(
-          getAssetFromAssetsMap(packageInstallContext.assetsMap, path).toString('utf8')
-        );
+        const content = JSON.parse(getAssetFromAssetsMap(templateAssetsMap, path).toString('utf8'));
 
         const esClientParams = {
           name: templateName,
