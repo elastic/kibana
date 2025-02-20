@@ -477,7 +477,7 @@ export class ObservabilityAIAssistantClient {
         })
       ).pipe(
         convertInferenceEventsToStreamingEvents(),
-        instrumentAndCountTokens(name),
+        apmInstrumentation(name),
         failOnNonExistingFunctionCall({ functions }),
         tap((event) => {
           if (
