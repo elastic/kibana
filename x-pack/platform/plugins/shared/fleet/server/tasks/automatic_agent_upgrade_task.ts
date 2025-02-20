@@ -221,7 +221,7 @@ export class AutomaticAgentUpgradeTask {
     numberOfAgentsForUpgrade -= totalOnOrUpdatingToTargetVersionAgents;
     // Return if target is already met.
     if (numberOfAgentsForUpgrade <= 0) {
-      this.logger.debug(
+      this.logger.info(
         `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: target percentage ${requiredVersion.percentage} already reached for version: ${requiredVersion.version})`
       );
       return;
@@ -258,8 +258,8 @@ export class AutomaticAgentUpgradeTask {
     }
 
     if (numberOfAgentsForUpgrade > 0) {
-      this.logger.debug(
-        `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: not enough candidate agents for upgrade (target version: ${requiredVersion.version}, percentage: ${requiredVersion.percentage})`
+      this.logger.info(
+        `[AutomaticAgentUpgradeTask] Agent policy ${agentPolicy.id}: not enough agents eligible for upgrade (target version: ${requiredVersion.version}, percentage: ${requiredVersion.percentage})`
       );
     }
   }
