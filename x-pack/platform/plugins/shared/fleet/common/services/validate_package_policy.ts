@@ -524,12 +524,24 @@ export const countValidationErrors = (
     | PackagePolicyInputValidationResults
     | PackagePolicyConfigValidationResults
 ): number => {
-  // Required vars groups count as 1 error
-  const { required_vars: requiredVarsValidationResults, ...validationResultsWithoutRequiredVars } =
-    validationResults;
-  const flattenedValidation = getFlattenedObject(validationResultsWithoutRequiredVars);
-  const errors = Object.values(flattenedValidation).filter((value) => Boolean(value)) || [];
-  return errors.length + (requiredVarsValidationResults ? 1 : 0);
+  const requiredVarGroupErrorKeys: Record<string, boolean> = {};
+  let otherErrors = 0;
+
+  // Flatten validation results and map to retrieve required var group errors vs other errors
+  // because required var groups should only count as 1 error
+  const flattenedValidation = getFlattenedObject(validationResults);
+  Object.entries(flattenedValidation).forEach(([key, value]) => {
+    if (key.startsWith('required_vars.')) {
+      requiredVarGroupErrorKeys.required_vars = true;
+    } else if (key.includes('.required_vars.')) {
+      const groupKey = key.replace(/^(.*)\.required_vars\..*$/, '$1');
+      requiredVarGroupErrorKeys[groupKey] = true;
+    } else if (Boolean(value)) {
+      otherErrors++;
+    }
+  });
+
+  return otherErrors + Object.keys(requiredVarGroupErrorKeys).length;
 };
 
 export const validationHasErrors = (
