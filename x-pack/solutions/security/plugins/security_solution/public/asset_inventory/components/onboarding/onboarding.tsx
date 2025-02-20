@@ -9,6 +9,7 @@ import React from 'react';
 import type { FC, PropsWithChildren } from 'react';
 import { GetStarted } from './get_started';
 import { useAssetInventoryContext } from '../../context';
+import { Loading } from '../loading';
 
 /**
  * This component serves as a wrapper to render appropriate onboarding screens
@@ -21,15 +22,12 @@ export const Onboarding: FC<PropsWithChildren> = ({ children }) => {
   // Render different screens based on the onboarding status.
   switch (status) {
     case 'loading': // The onboarding status is currently loading.
-      return <div>{'Loading'}</div>;
+      return <Loading />;
     case 'disabled': // The user has not yet started the onboarding process.
       return <GetStarted />;
-    // case 'initializing': // The onboarding process is currently initializing.
-    //   return <Initializing />;
-    // case 'no_data': // Onboarding cannot proceed because no relevant data was found.
-    //   return <NoDataFound />;
-    // case 'permission_denied': // User lacks the necessary permissions to proceed.
-    //   return <PermissionDenied />;
+    // case 'initializing': // Todo: The onboarding process is currently initializing.
+    // case 'empty': // Todo: Onboarding cannot proceed because no relevant data was found.
+    // case 'permission_denied': // Todo: User lacks the necessary permissions to proceed.
     default:
       // If no onboarding status matches, render the child components.
       return children;
