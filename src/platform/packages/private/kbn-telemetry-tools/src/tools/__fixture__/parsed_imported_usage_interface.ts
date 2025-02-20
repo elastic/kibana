@@ -10,14 +10,14 @@
 import { SyntaxKind } from 'typescript';
 import { ParsedUsageCollection } from '../ts_parser';
 
-export const parsedImportedInterfaceFromExport: ParsedUsageCollection[] = [
+export const parsedImportedUsageInterface: ParsedUsageCollection[] = [
   [
-    'packages/kbn-telemetry-tools/src/tools/__fixture__/telemetry_collectors/imported_interface_from_export/index.ts',
+    'src/platform/packages/private/kbn-telemetry-tools/src/tools/__fixture__/telemetry_collectors/imported_usage_interface.ts',
     {
-      collectorName: 'importing_from_export_collector',
+      collectorName: 'imported_usage_interface_collector',
       schema: {
         value: {
-          some_field: {
+          locale: {
             type: 'keyword',
           },
         },
@@ -25,7 +25,7 @@ export const parsedImportedInterfaceFromExport: ParsedUsageCollection[] = [
       fetch: {
         typeName: 'Usage',
         typeDescriptor: {
-          some_field: {
+          locale: {
             kind: SyntaxKind.StringKeyword,
             type: 'StringKeyword',
           },

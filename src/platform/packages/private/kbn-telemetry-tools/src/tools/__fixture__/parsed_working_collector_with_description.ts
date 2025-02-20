@@ -10,20 +10,17 @@
 import { SyntaxKind } from 'typescript';
 import { ParsedUsageCollection } from '../ts_parser';
 
-export const parsedWorkingCollector: ParsedUsageCollection = [
-  'packages/kbn-telemetry-tools/src/tools/__fixture__/telemetry_collectors/working_collector.ts',
+export const parsedCollectorWithDescription: ParsedUsageCollection = [
+  'src/platform/packages/private/kbn-telemetry-tools/src/tools/__fixture__/telemetry_collectors/working_collector_with_description.ts',
   {
-    collectorName: 'my_working_collector',
+    collectorName: 'my_working_collector_with_description',
     schema: {
       value: {
-        interface_terms: {
-          computed_term: {
-            total: { type: 'long' },
-            type: { type: 'boolean' },
-          },
-        },
         flat: {
           type: 'keyword',
+          _meta: {
+            description: 'A flat keyword string',
+          },
         },
         my_str: {
           type: 'text',
@@ -60,6 +57,10 @@ export const parsedWorkingCollector: ParsedUsageCollection = [
           },
         },
         my_str_array: { type: 'array', items: { type: 'keyword' } },
+        my_pass_through: {
+          type: 'pass_through',
+          _meta: { description: "Don't know what goes here. Simply passing it through." },
+        },
       },
     },
     fetch: {
@@ -107,17 +108,9 @@ export const parsedWorkingCollector: ParsedUsageCollection = [
             type: 'StringKeyword',
           },
         },
-        interface_terms: {
-          computed_term: {
-            total: {
-              kind: SyntaxKind.NumberKeyword,
-              type: 'NumberKeyword',
-            },
-            type: {
-              kind: SyntaxKind.BooleanKeyword,
-              type: 'BooleanKeyword',
-            },
-          },
+        my_pass_through: {
+          kind: SyntaxKind.UnknownKeyword,
+          type: 'UnknownKeyword',
         },
       },
     },

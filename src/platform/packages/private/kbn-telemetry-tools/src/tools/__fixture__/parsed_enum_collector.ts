@@ -11,7 +11,7 @@ import { SyntaxKind } from 'typescript';
 import { ParsedUsageCollection } from '../ts_parser';
 
 export const parsedEnumCollector: ParsedUsageCollection = [
-  'packages/kbn-telemetry-tools/src/tools/__fixture__/telemetry_collectors/enum_collector.ts',
+  'src/platform/packages/private/kbn-telemetry-tools/src/tools/__fixture__/telemetry_collectors/enum_collector.ts',
   {
     collectorName: 'my_enum_collector',
     fetch: {

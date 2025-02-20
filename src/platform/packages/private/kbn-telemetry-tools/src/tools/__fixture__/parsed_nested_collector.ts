@@ -10,27 +10,25 @@
 import { SyntaxKind } from 'typescript';
 import { ParsedUsageCollection } from '../ts_parser';
 
-export const parsedImportedSchemaCollector: ParsedUsageCollection[] = [
-  [
-    'packages/kbn-telemetry-tools/src/tools/__fixture__/telemetry_collectors/imported_schema.ts',
-    {
-      collectorName: 'with_imported_schema',
-      schema: {
-        value: {
-          locale: {
-            type: 'keyword',
-          },
-        },
-      },
-      fetch: {
-        typeName: 'Usage',
-        typeDescriptor: {
-          locale: {
-            kind: SyntaxKind.StringKeyword,
-            type: 'StringKeyword',
-          },
+export const parsedNestedCollector: ParsedUsageCollection = [
+  'src/platform/packages/private/kbn-telemetry-tools/src/tools/__fixture__/telemetry_collectors/nested_collector.ts',
+  {
+    collectorName: 'my_nested_collector',
+    schema: {
+      value: {
+        locale: {
+          type: 'keyword',
         },
       },
     },
-  ],
+    fetch: {
+      typeName: 'Usage',
+      typeDescriptor: {
+        locale: {
+          kind: SyntaxKind.StringKeyword,
+          type: 'StringKeyword',
+        },
+      },
+    },
+  },
 ];

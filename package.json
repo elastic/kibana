@@ -1520,7 +1520,7 @@
     "@kbn/styled-components-mapping-cli": "link:packages/kbn-styled-components-mapping-cli",
     "@kbn/synthetics-e2e": "link:x-pack/solutions/observability/plugins/synthetics/e2e",
     "@kbn/synthetics-private-location": "link:x-pack/packages/kbn-synthetics-private-location",
-    "@kbn/telemetry-tools": "link:packages/kbn-telemetry-tools",
+    "@kbn/telemetry-tools": "link:src/platform/packages/private/kbn-telemetry-tools",
     "@kbn/test": "link:packages/kbn-test",
     "@kbn/test-eui-helpers": "link:packages/kbn-test-eui-helpers",
     "@kbn/test-jest-helpers": "link:packages/kbn-test-jest-helpers",

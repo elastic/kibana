@@ -16,7 +16,7 @@ describe('createKibanaProgram', () => {
     expect([...parseUsageCollection(sourceFile, program)]).toMatchInlineSnapshot(`
       Array [
         Array [
-          "packages/kbn-telemetry-tools/src/tools/ts_program/__fixture__/with_kbn_package_import.ts",
+          "src/platform/packages/private/kbn-telemetry-tools/src/tools/ts_program/__fixture__/with_kbn_package_import.ts",
           Object {
             "collectorName": "with_kbn_package_import",
             "fetch": Object {
