@@ -95,7 +95,7 @@ const esEvents = toElasticsearchOutput([
 
 ### CLI
 
-Via the CLI, you can run scenarios, either using a fixed time range or continuously generating data. Scenarios are available in [`packages/kbn-apm-synthtrace/src/scenarios/`](https://github.com/elastic/kibana/blob/main/packages/kbn-apm-synthtrace/src/scenarios/).
+Via the CLI, you can run scenarios, either using a fixed time range or continuously generating data. Scenarios are available in [`src/platform/packages/shared/kbn-apm-synthtrace/src/scenarios/`](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-apm-synthtrace/src/scenarios/).
 
 For live data ingestion:
 
@@ -166,7 +166,7 @@ Note:
 Run the Jest tests:
 
 ```
-node scripts/jest --config ./packages/kbn-apm-synthtrace/jest.config.js
+node scripts/jest --config ./src/platform/packages/shared/kbn-apm-synthtrace/jest.config.js
 ```
 
 ## Typescript
@@ -174,5 +174,5 @@ node scripts/jest --config ./packages/kbn-apm-synthtrace/jest.config.js
 Run the type checker:
 
 ```
-node scripts/type_check.js --project packages/kbn-apm-synthtrace/tsconfig.json
+node scripts/type_check.js --project src/platform/packages/shared/kbn-apm-synthtrace/tsconfig.json
 ```
