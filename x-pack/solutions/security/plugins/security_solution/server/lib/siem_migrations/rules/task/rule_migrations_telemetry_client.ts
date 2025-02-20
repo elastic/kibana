@@ -70,7 +70,7 @@ export class SiemMigrationTelemetryClient {
       postFilterRuleCount: postFilterRule ? 1 : 0,
     });
   }
-  
+
   public startSiemMigrationTask() {
     const startTime = Date.now();
     const stats = { completed: 0, failed: 0 };
