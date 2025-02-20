@@ -16,7 +16,11 @@ import {
   EuiFlyoutBody,
   EuiSpacer,
   EuiFieldSearch,
-  EuiSelect,
+  EuiFilterGroup,
+  EuiFilterButton,
+  EuiPopover,
+  EuiSelectable,
+  EuiSelectableOption,
 } from '@elastic/eui';
 
 import { getConnectorCompatibility } from '@kbn/actions-plugin/common';
@@ -66,6 +70,38 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   const canSave = hasSaveActionsCapability(capabilities);
   const [showFormErrors, setShowFormErrors] = useState<boolean>(false);
   const [searchValue, setSearchValue] = useState<string>('');
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+
+  const categoryOptions: EuiSelectableOption[] = [
+    i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.alertingRules', {
+      defaultMessage: 'Alerting Rules',
+    }),
+    i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.cases', {
+      defaultMessage: 'Cases',
+    }),
+    i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.endpointSecurity', {
+      defaultMessage: 'Endpoint Security',
+    }),
+    i18n.translate(
+      'xpack.triggersActionsUI.sections.actionConnectorAdd.generativeAIObservability',
+      {
+        defaultMessage: 'Generative AI for Observability',
+      }
+    ),
+    i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.generativeAISearch', {
+      defaultMessage: 'Generative AI for Search',
+    }),
+    i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.generativeSecurity', {
+      defaultMessage: 'Generative AI for Security',
+    }),
+    i18n.translate('xpack.triggersActionsUI.sections.actionConnectorAdd.securitySolution', {
+      defaultMessage: 'Security Solution',
+    }),
+  ].map((label) => ({
+    label,
+    checked: selectedOptions.includes(label) ? 'on' : undefined,
+  }));
 
   const [preSubmitValidationErrorMessage, setPreSubmitValidationErrorMessage] =
     useState<ReactNode>(null);
@@ -206,6 +242,19 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     setSearchValue(e.target.value);
   }, []);
 
+  const onMultiFilterButtonClick = () => {
+    setIsPopoverOpen((prev) => !prev);
+  };
+
+  const closePopover = () => {
+    setIsPopoverOpen(false);
+  };
+
+  const onSelectOptionChange = (newOptions: EuiSelectableOption[]) => {
+    const selected = newOptions.filter((opt) => opt.checked === 'on').map((opt) => opt.label);
+    setSelectedOptions(selected);
+  };
+
   useEffect(() => {
     isMounted.current = true;
 
@@ -241,8 +290,42 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
               value={searchValue}
             />
           </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiFilterGroup>
+              <EuiPopover
+                button={
+                  <EuiFilterButton
+                    iconType="arrowDown"
+                    data-test-subj="compatibilityFilterBtn"
+                    isSelected={selectedOptions.length > 0}
+                    hasActiveFilters={selectedOptions.length > 0}
+                    numActiveFilters={selectedOptions.length}
+                    onClick={onMultiFilterButtonClick}
+                  >
+                    {i18n.translate(
+                      'xpack.triggersActionsUI.sections.actionConnectorAdd.compatibilityFilter',
+                      {
+                        defaultMessage: 'Compatibility',
+                      }
+                    )}
+                  </EuiFilterButton>
+                }
+                isOpen={isPopoverOpen}
+                closePopover={closePopover}
+              >
+                <EuiSelectable
+                  allowExclusions={false}
+                  options={categoryOptions}
+                  onChange={onSelectOptionChange}
+                  data-test-subj="selectCategory"
+                >
+                  {(list) => <div style={{ width: 300 }}>{list}</div>}
+                </EuiSelectable>
+              </EuiPopover>
+            </EuiFilterGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="m"></EuiSpacer>
+        <EuiSpacer size="m" />
         {hasConnectorTypeSelected ? (
           <>
             {groupActionTypeModel && (
@@ -334,6 +417,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
             setAllActionTypes={setAllActionTypes}
             actionTypeRegistry={actionTypeRegistry}
             searchValue={searchValue}
+            selectedOptions={selectedOptions}
           />
         )}
       </EuiFlyoutBody>

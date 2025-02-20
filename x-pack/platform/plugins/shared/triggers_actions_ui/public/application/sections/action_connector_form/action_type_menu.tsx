@@ -25,6 +25,7 @@ interface Props {
   setAllActionTypes?: (actionsType: ActionTypeIndex) => void;
   actionTypeRegistry: ActionTypeRegistryContract;
   searchValue?: string;
+  selectedOptions?: string[];
 }
 
 export const ActionTypeMenu = ({
@@ -33,7 +34,8 @@ export const ActionTypeMenu = ({
   setHasActionsUpgradeableByTrial,
   setAllActionTypes,
   actionTypeRegistry,
-  searchValue,
+  searchValue = '',
+  selectedOptions = [],
 }: Props) => {
   const {
     http,
@@ -41,6 +43,7 @@ export const ActionTypeMenu = ({
   } = useKibana().services;
   const [loadingActionTypes, setLoadingActionTypes] = useState<boolean>(false);
   const [actionTypesIndex, setActionTypesIndex] = useState<ActionTypeIndex | undefined>(undefined);
+
   useEffect(() => {
     (async () => {
       try {
@@ -98,16 +101,37 @@ export const ActionTypeMenu = ({
     });
 
   const filteredConnectors = useMemo(() => {
-    return registeredActionTypes.filter((connector) => {
-      const trimmedSearchValue = searchValue.trim().toLowerCase();
-      const textSearchTargets = [
-        connector.name.toLowerCase(),
-        connector.selectedMessage?.toLowerCase(),
-        connector.actionType?.name.toLowerCase(),
-      ];
-      return textSearchTargets.some((text) => text?.includes(trimmedSearchValue));
-    });
-  }, [registeredActionTypes]);
+    const filterByCategory = selectedOptions.length
+      ? registeredActionTypes.filter((connector) => {
+          const supportedFeatureIds = connector.actionType.supportedFeatureIds.map((feature) =>
+            feature.toLowerCase()
+          );
+          const selectedCategories = selectedOptions.map((selectedOption) =>
+            selectedOption.replace(/\s/g, '').toLowerCase()
+          );
+
+          return selectedCategories.some((selectedOption) =>
+            supportedFeatureIds.some(
+              (feature) => feature.includes(selectedOption) || selectedOption.includes(feature)
+            )
+          );
+        })
+      : registeredActionTypes;
+
+    const trimmedSearchValue = searchValue.trim().toLowerCase();
+    const filterBySearch = trimmedSearchValue
+      ? filterByCategory.filter((connector) => {
+          const textSearchTargets = [
+            connector.name.toLowerCase(),
+            connector.selectMessage?.toLowerCase(),
+            connector.actionType?.name.toLowerCase(),
+          ];
+          return textSearchTargets.some((text) => text?.includes(trimmedSearchValue));
+        })
+      : filterByCategory;
+
+    return filterBySearch;
+  }, [registeredActionTypes, selectedOptions, searchValue]);
 
   const cardNodes = filteredConnectors
     .sort((a, b) => actionTypeCompare(a.actionType, b.actionType))
