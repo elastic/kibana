@@ -123,6 +123,7 @@ describe('TableActionsPopover', () => {
         onCancel={() => {}}
         onArchive={() => {}}
         onCancelAndArchive={() => {}}
+        onDelete={() => {}}
       />
     );
     fireEvent.click(result.getByTestId('table-actions-icon-button'));

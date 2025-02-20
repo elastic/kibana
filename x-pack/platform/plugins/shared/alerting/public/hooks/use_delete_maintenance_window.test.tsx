@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { waitFor, renderHook, act } from '@testing-library/react';
+import { waitFor, renderHook } from '@testing-library/react';
 
 import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
 import { useDeleteMaintenanceWindow } from './use_delete_maintenance_window';
@@ -36,7 +36,7 @@ const { deleteMaintenanceWindow } = jest.requireMock('../services/maintenance_wi
 
 let appMockRenderer: AppMockRenderer;
 
-describe('useArchiveMaintenanceWindow', () => {
+describe('useDeleteMaintenanceWindow', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
