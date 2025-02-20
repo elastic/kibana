@@ -258,7 +258,7 @@ export const validatePackagePolicy = (
 
     // Validate input-level var fields
     const inputVars = Object.entries(input.vars || {});
-    if (inputVars.length && input.enabled) {
+    if (inputVars.length) {
       inputValidationResults.vars = inputVars.reduce((results, [name, configEntry]) => {
         results[name] = input.enabled
           ? validatePackagePolicyConfig(
@@ -271,10 +271,9 @@ export const validatePackagePolicy = (
         return results;
       }, {} as ValidationEntry);
 
-      const requiredVars = validatePackageRequiredVars(
-        input,
-        inputRequiredVarsDefsByPolicyTemplateAndType[inputKey]
-      );
+      const requiredVars =
+        input.enabled &&
+        validatePackageRequiredVars(input, inputRequiredVarsDefsByPolicyTemplateAndType[inputKey]);
       if (requiredVars) {
         inputValidationResults.required_vars = requiredVars;
       } else {
