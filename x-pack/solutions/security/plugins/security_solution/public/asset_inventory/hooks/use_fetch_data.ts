@@ -81,13 +81,6 @@ const getAssetsQuery = ({ query, sort }: UseAssetsOptions, pageParam: unknown) =
     sort: getMultiFieldsSort(sort),
     runtime_mappings: getRuntimeMappingsFromSort(sort),
     size: MAX_ASSETS_TO_LOAD,
-    aggs: {
-      count: {
-        terms: {
-          field: 'entity.id',
-        },
-      },
-    },
     ignore_unavailable: true,
     query: {
       ...query,
@@ -109,24 +102,8 @@ interface Asset {
   category: string;
 }
 
-interface AssetsAggs {
-  count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
-}
-
 type LatestAssetsRequest = IKibanaSearchRequest<estypes.SearchRequest>;
-type LatestAssetsResponse = IKibanaSearchResponse<estypes.SearchResponse<Asset, AssetsAggs>>;
-
-const getAggregationCount = (
-  buckets: Array<estypes.AggregationsStringRareTermsBucketKeys | undefined>
-) => {
-  const passed = buckets.find((bucket) => bucket?.key === 'passed');
-  const failed = buckets.find((bucket) => bucket?.key === 'failed');
-
-  return {
-    passed: passed?.doc_count || 0,
-    failed: failed?.doc_count || 0,
-  };
-};
+type LatestAssetsResponse = IKibanaSearchResponse<estypes.SearchResponse<Asset, never>>;
 
 export function useFetchData(options: UseAssetsOptions) {
   const {
@@ -137,20 +114,16 @@ export function useFetchData(options: UseAssetsOptions) {
     ['asset_inventory', { params: options }],
     async ({ pageParam }) => {
       const {
-        rawResponse: { hits, aggregations },
+        rawResponse: { hits },
       } = await lastValueFrom(
         data.search.search<LatestAssetsRequest, LatestAssetsResponse>({
           params: getAssetsQuery(options, pageParam) as LatestAssetsRequest['params'],
         })
       );
-      if (!aggregations) throw new Error('expected aggregations to be an defined');
-      if (!Array.isArray(aggregations.count.buckets))
-        throw new Error('expected buckets to be an array');
 
       return {
         page: hits.hits.map((hit) => buildDataTableRecord(hit as EsHitRecord)),
         total: number.is(hits.total) ? hits.total : 0,
-        count: getAggregationCount(aggregations.count.buckets),
       };
     },
     {
