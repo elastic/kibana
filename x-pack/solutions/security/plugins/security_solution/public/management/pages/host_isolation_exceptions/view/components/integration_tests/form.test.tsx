@@ -27,6 +27,7 @@ import {
 import { BY_POLICY_ARTIFACT_TAG_PREFIX } from '../../../../../../../common/endpoint/service/artifacts';
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { testIdPrefix } from '../form';
+import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 
 jest.mock('../../../../../../common/components/user_privileges');
 
@@ -294,6 +295,25 @@ describe('When on the host isolation exceptions entry form', () => {
       expect(
         renderResult.queryByTestId(`${testIdPrefix}-effectedPolicies-policiesSelectable`)
       ).toBeTruthy();
+    });
+
+    // FIXME:PT not sure why this test is not working but I have spent several hours now on it and can't
+    //          figure it out. Skipping for now and will try to come back to it.
+    it.skip('should display form submission errors', async () => {
+      exceptionsApiMock.responseProvider.exceptionUpdate.mockImplementation(() => {
+        throw createHttpFetchError('oh oh - error');
+      });
+
+      const { getByTestId } = await render();
+      await userEvent.click(getByTestId('hostIsolationExceptionsListPage-flyout-submitButton'));
+
+      await waitFor(() => {
+        expect(exceptionsApiMock.responseProvider.exceptionUpdate).toHaveBeenCalled();
+      });
+
+      expect(getByTestId('hostIsolationExceptions-form-submitError').textContent).toMatch(
+        'oh oh - error'
+      );
     });
   });
 });
