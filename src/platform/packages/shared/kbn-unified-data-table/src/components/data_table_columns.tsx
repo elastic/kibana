@@ -14,6 +14,7 @@ import {
   type EuiDataGridColumnCellAction,
   EuiScreenReaderOnly,
   EuiListGroupItemProps,
+  type EuiDataGridColumnSortingConfig,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
@@ -30,10 +31,15 @@ import {
   defaultTimeColumnWidth,
   ROWS_HEIGHT_OPTIONS,
   DEFAULT_CONTROL_COLUMN_WIDTH,
+  SCORE_COLUMN_NAME,
 } from '../constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { buildEditFieldButton } from './build_edit_field_button';
-import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_column_header';
+import {
+  DataTableColumnHeader,
+  DataTableScoreColumnHeader,
+  DataTableTimeColumnHeader,
+} from './data_table_column_header';
 import { UnifiedDataTableProps } from './data_table';
 
 export const getColumnDisplayName = (
@@ -56,6 +62,7 @@ export const getColumnDisplayName = (
 
 const DataTableColumnHeaderMemoized = React.memo(DataTableColumnHeader);
 const DataTableTimeColumnHeaderMemoized = React.memo(DataTableTimeColumnHeader);
+const DataTableScoreColumnHeaderMemoized = React.memo(DataTableScoreColumnHeader);
 
 export const OPEN_DETAILS = 'openDetails';
 export const SELECT_ROW = 'select';
@@ -118,6 +125,7 @@ function buildEuiGridColumn({
   customGridColumnsConfiguration,
   columnDisplay,
   onResize,
+  sortedColumns,
 }: {
   numberOfColumns: number;
   columnName: string;
@@ -141,6 +149,7 @@ function buildEuiGridColumn({
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
   columnDisplay?: string;
   onResize: UnifiedDataTableProps['onResize'];
+  sortedColumns?: EuiDataGridColumnSortingConfig[];
 }) {
   const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
     dataView,
@@ -177,6 +186,8 @@ function buildEuiGridColumn({
     dataViewField?.displayName,
     columnDisplay
   );
+
+  const isSorted = sortedColumns?.some((column) => column.id === columnName);
 
   let cellActions: EuiDataGridColumnCellAction[];
 
@@ -270,6 +281,20 @@ function buildEuiGridColumn({
     }
   }
 
+  if (column.id === SCORE_COLUMN_NAME) {
+    column.display = (
+      <DataTableScoreColumnHeaderMemoized
+        columnDisplayName={columnDisplayName}
+        isSorted={isSorted}
+        showColumnTokens={showColumnTokens}
+        dataView={dataView}
+        headerRowHeight={headerRowHeight}
+        columnName={columnName}
+        columnsMeta={columnsMeta}
+      />
+    );
+  }
+
   if (columnWidth > 0) {
     column.initialWidth = Number(columnWidth);
   }
@@ -309,6 +334,7 @@ export function getEuiGridColumns({
   headerRowHeightLines,
   customGridColumnsConfiguration,
   onResize,
+  sortedColumns,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -333,6 +359,7 @@ export function getEuiGridColumns({
   headerRowHeightLines: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
   onResize: UnifiedDataTableProps['onResize'];
+  sortedColumns?: EuiDataGridColumnSortingConfig[];
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
   const headerRowHeight = deserializeHeaderRowHeight(headerRowHeightLines);
@@ -362,6 +389,7 @@ export function getEuiGridColumns({
       customGridColumnsConfiguration,
       columnDisplay: settings?.columns?.[column]?.display,
       onResize,
+      sortedColumns,
     })
   );
 }

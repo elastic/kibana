@@ -176,7 +176,7 @@ export const RISK_SCORE_ENGINE_RUN_SUCCESS = i18n.translate(
 export const RISK_ENGINE_SAVED_OBJECT_CONFIGURATION_SUCCESS = i18n.translate(
   'xpack.securitySolution.riskScore.savedObject.configurationSuccess',
   {
-    defaultMessage: 'Risk engine Saved Object configuration updated successfully',
+    defaultMessage: 'Your configuration was updated.',
   }
 );
 

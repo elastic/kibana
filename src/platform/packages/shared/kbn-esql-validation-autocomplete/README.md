@@ -335,7 +335,7 @@ They look like this
 testSuggestions('from a | eval a = 1 year /', [
   ',',
   '| ',
-  ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
+  ...getFunctionSignaturesByReturnType('eval', 'any', { operators: true, skipAssign: true }, [
     'time_interval',
   ]),
 ]);
