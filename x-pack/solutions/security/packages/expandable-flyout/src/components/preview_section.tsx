@@ -92,7 +92,8 @@ export const PreviewSection: React.FC<PreviewSectionProps> = memo(
     // - if both the right and left sections are visible, we use the width of the right section (minus the same padding)
     const width = useMemo(() => {
       const percentage = rightPercentage ? rightPercentage : defaultPercentages.rightPercentage;
-      return showExpanded ? `calc(${percentage}% - 8px)` : `calc(100% - 8px)`;
+      // we need to keep 1px here to make sure users can click on the EuiResizableButton and resize the flyout with preview opened
+      return showExpanded ? `calc(${percentage}% - 1px)` : `calc(100% - 1px)`;
     }, [defaultPercentages.rightPercentage, rightPercentage, showExpanded]);
 
     const closeButton = (
