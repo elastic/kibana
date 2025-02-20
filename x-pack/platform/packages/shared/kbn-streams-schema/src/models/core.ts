@@ -33,6 +33,16 @@ export interface RecursiveRecord {
   [key: PropertyKey]: Primitive | Primitive[] | RecursiveRecord;
 }
 
-export const recursiveRecord: z.ZodType<RecursiveRecord> = z.record(
-  z.union([primitive, z.array(primitive), z.lazy(() => recursiveRecord)])
+export const recursiveRecord: z.ZodType<RecursiveRecord> = z.lazy(() =>
+  z.record(z.union([primitive, z.array(primitive), recursiveRecord]))
 );
+
+export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[]>;
+
+export const flattenRecord: z.ZodType<FlattenRecord> = z.record(
+  z.union([primitive, z.array(primitive)])
+);
+
+export const sampleDocument = recursiveRecord;
+
+export type SampleDocument = RecursiveRecord;
