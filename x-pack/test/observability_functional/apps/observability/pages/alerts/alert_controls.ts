@@ -14,7 +14,7 @@ const RECOVERED_ALERTS = 30;
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
-  const { alertControls } = getPageObjects(['alertControls']);
+  const { alertControls, header } = getPageObjects(['alertControls', 'header']);
 
   describe('Alert controls >', function () {
     this.tags('includeFirefox');
@@ -50,6 +50,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     it('can be filtered to only show "recovered" alerts using the filter button', async () => {
+      await header.waitUntilLoadingHasFinished();
       await alertControls.optionsListOpenPopover('0');
       await alertControls.optionsListPopoverSelectOption('recovered');
       await alertControls.optionsListEnsurePopoverIsClosed('0');

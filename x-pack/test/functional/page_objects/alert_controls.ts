@@ -66,12 +66,6 @@ export function AlertControlsProvider({ getService }: FtrProviderContext) {
       });
     },
 
-    async optionsListPopoverWaitForLoading() {
-      log.debug(`wait for the suggestions in the popover to load`);
-      await this.optionsListPopoverAssertOpen();
-      await testSubjects.waitForDeleted('optionsList-control-popover-loading');
-    },
-
     async optionsListPopoverSelectOption(availableOption: string) {
       log.debug(`selecting ${availableOption} from options list`);
       await this.optionsListPopoverAssertOpen();
