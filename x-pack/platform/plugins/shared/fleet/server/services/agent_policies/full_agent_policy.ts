@@ -160,6 +160,7 @@ export async function getFullAgentPolicy(
   const fullAgentPolicy: FullAgentPolicy = {
     id: agentPolicy.id,
     outputs: {
+      ...(fleetServerHost ? generateFleetServerOutputSSLConfig(fleetServerHost) : {}),
       ...outputs.reduce<FullAgentPolicy['outputs']>((acc, output) => {
         acc[getOutputIdForAgentPolicy(output)] = transformOutputToFullPolicyOutput(
           output,
@@ -167,7 +168,6 @@ export async function getFullAgentPolicy(
           standalone,
           fleetServerHost
         );
-
         return acc;
       }, {}),
     },
@@ -333,7 +333,7 @@ export async function getFullAgentPolicy(
   if (agentPolicy.overrides) {
     return deepMerge<FullAgentPolicy>(fullAgentPolicy, agentPolicy.overrides);
   }
-
+  console.log('##', fullAgentPolicy)
   return fullAgentPolicy;
 }
 
@@ -389,6 +389,9 @@ function generateSSLConfigForFleetServerInput(fleetServerHost: FleetServerHost) 
         !fleetServerHost?.secrets?.ssl?.key && {
           key: fleetServerHost.ssl.key,
         }),
+      ...(fleetServerHost.ssl.client_auth && {
+        client_authentication: fleetServerHost.ssl.client_auth,
+      }),
     };
   }
 
@@ -396,7 +399,7 @@ function generateSSLConfigForFleetServerInput(fleetServerHost: FleetServerHost) 
     inputConfig.secrets = {
       ...(fleetServerHost?.secrets?.ssl?.key &&
         !fleetServerHost?.ssl?.key && {
-          key: fleetServerHost.secrets?.ssl?.key,
+          ssl: { key: fleetServerHost.secrets?.ssl?.key },
         }),
     };
   }
@@ -576,6 +579,39 @@ export function transformOutputToFullPolicyOutput(
   }
 
   return newOutput;
+}
+
+// Generate the SSL configs for fleet server connection to ES
+// Corresponding to --fleet-server-es-ca, --fleet-server-es-cert, --fleet-server-es-cert-key cli options
+function generateFleetServerOutputSSLConfig(fleetServerHost: FleetServerHost) {
+  let outputConfig: Partial<FullAgentPolicyOutput> = {};
+  outputConfig = {
+    type: 'elasticsearch',
+  };
+
+  if (fleetServerHost?.ssl) {
+    outputConfig.ssl = {
+      ...(fleetServerHost.ssl.es_certificate_authorities && {
+        certificate_authorities: fleetServerHost.ssl.es_certificate_authorities,
+      }),
+      ...(fleetServerHost.ssl.es_certificate && {
+        certificate: fleetServerHost.ssl.es_certificate,
+      }),
+      ...(fleetServerHost.ssl.es_key &&
+        !fleetServerHost?.secrets?.ssl?.es_key && {
+          key: fleetServerHost.ssl.es_key,
+        }),
+    };
+  }
+  if (fleetServerHost?.secrets) {
+    outputConfig.secrets = {
+      ...(fleetServerHost?.secrets?.ssl?.es_key &&
+        !fleetServerHost?.ssl?.es_key && {
+          ssl: { key: fleetServerHost.secrets?.ssl?.es_key },
+        }),
+    };
+  }
+  return { [`fleetserver-${fleetServerHost?.id}`]: outputConfig };
 }
 
 export function getFullMonitoringSettings(
