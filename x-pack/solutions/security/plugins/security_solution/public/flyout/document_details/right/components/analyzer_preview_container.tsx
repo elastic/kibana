@@ -127,6 +127,9 @@ export const AnalyzerPreviewContainer: React.FC = () => {
 
 AnalyzerPreviewContainer.displayName = 'AnalyzerPreviewContainer';
 
+/**
+ * No data message for the analyzer preview.
+ */
 export const AnalyzerPreviewNoDataMessage: React.FC = () => {
   return (
     <FormattedMessage
