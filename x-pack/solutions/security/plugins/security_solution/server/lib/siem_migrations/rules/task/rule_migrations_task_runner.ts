@@ -202,10 +202,6 @@ export class RuleMigrationTaskRunner {
     }
   }
 
-  private async withAbort<T>(promise: Promise<T>): Promise<T> {
-    return Promise.race([promise, this.abort.promise]);
-  }
-
   private createMigrateRuleTask(invocationConfig: RunnableConfig) {
     assert(this.agent, 'agent is missing please call setup() first');
     const { agent } = this;
@@ -289,6 +285,10 @@ export class RuleMigrationTaskRunner {
 
   private isRateLimitError(error: Error) {
     return error.message.match(/\b429\b/); // "429" (whole word in the error message): Too Many Requests.
+  }
+
+  private async withAbort<T>(promise: Promise<T>): Promise<T> {
+    return Promise.race([promise, this.abort.promise]);
   }
 
   private async sleep(seconds: number) {
