@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CloudDataAttributes } from '@kbn/cloud-plugin/common/types';
 import { Logger, SavedObjectsClientContract, SavedObjectsServiceSetup } from '@kbn/core/server';
+import { CloudDataAttributes } from '../../common/types';
 import { CLOUD_DATA_SAVED_OBJECT_ID } from '../routes/constants';
 
 export const CLOUD_DATA_SAVED_OBJECT_TYPE = 'cloud' as const;
@@ -29,15 +29,17 @@ export function setupSavedObjects(savedObjects: SavedObjectsServiceSetup, logger
 }
 
 // needs a client with permissions to read the cloud data saved object
-export async function getOnboardingToken(savedObjectsClient: SavedObjectsClientContract): Promise<string | null> {
+export async function getOnboardingToken(
+  savedObjectsClient: SavedObjectsClientContract
+): Promise<string | null> {
   let cloudDataSo = null;
-    try {
-      cloudDataSo = await savedObjectsClient.get<CloudDataAttributes>(
-        CLOUD_DATA_SAVED_OBJECT_TYPE,
-        CLOUD_DATA_SAVED_OBJECT_ID
-      );
-    } catch (error) {
-      cloudDataSo = null;
-    }
+  try {
+    cloudDataSo = await savedObjectsClient.get<CloudDataAttributes>(
+      CLOUD_DATA_SAVED_OBJECT_TYPE,
+      CLOUD_DATA_SAVED_OBJECT_ID
+    );
+  } catch (error) {
+    cloudDataSo = null;
+  }
   return cloudDataSo?.attributes.onboardingData?.token || null;
 }

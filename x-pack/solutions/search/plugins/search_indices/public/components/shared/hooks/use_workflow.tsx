@@ -67,8 +67,8 @@ export const useWorkflow = () => {
   const localStorageWorkflow = localStorage.getItem(WORKFLOW_LOCALSTORAGE_KEY);
   const workflowId = isWorkflowId(localStorageWorkflow) ? localStorageWorkflow : null;
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<WorkflowId>(workflowId || 'default');
-  const {data } = useOnboardingTokenQuery();
-  
+  const { data } = useOnboardingTokenQuery();
+
   useEffect(() => {
     if (data?.token && !localStorageWorkflow) {
       setSelectedWorkflowId(onboardingTokenToWorkflowId(data.token));

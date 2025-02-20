@@ -14,8 +14,7 @@ import { QueryKeys } from '../../constants';
 
 import { useKibana } from '../use_kibana';
 
-export const useOnboardingTokenQuery = (
-): UseQueryResult<OnboardingTokenResponse> => {
+export const useOnboardingTokenQuery = (): UseQueryResult<OnboardingTokenResponse> => {
   const { http } = useKibana().services;
 
   return useQuery({
