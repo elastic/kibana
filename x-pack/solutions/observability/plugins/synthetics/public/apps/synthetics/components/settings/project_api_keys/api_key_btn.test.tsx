@@ -12,8 +12,6 @@ import { ApiKeyBtn } from './api_key_btn';
 import { render } from '../../../utils/testing';
 
 describe('<APIKeyButton />', () => {
-  const setLoadAPIKey = jest.fn();
-
   const clickCallback = jest.fn();
 
   it('calls delete monitor on monitor deletion', async () => {
@@ -21,7 +19,7 @@ describe('<APIKeyButton />', () => {
 
     expect(screen.getByText('Generate Project API key')).toBeInTheDocument();
     await userEvent.click(screen.getByTestId('uptimeMonitorManagementApiKeyGenerate'));
-    expect(setLoadAPIKey).toHaveBeenCalled();
+    expect(clickCallback).toHaveBeenCalled();
   });
 
   it('shows correct content on loading', () => {
