@@ -197,7 +197,7 @@ const AwsAccountTypeSelect = ({
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (updatedPolicy: NewPackagePolicy, fetchedPackagePolicies?: boolean) => void;
+  updatePolicy: (updatedPolicy: NewPackagePolicy, isLoadedPackagePolicies?: boolean) => void;
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
@@ -303,7 +303,7 @@ const GcpAccountTypeSelect = ({
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (updatedPolicy: NewPackagePolicy, fetchedPackagePolicies?: boolean) => void;
+  updatePolicy: (updatedPolicy: NewPackagePolicy, isLoadedPackagePolicies?: boolean) => void;
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
@@ -443,7 +443,7 @@ const AzureAccountTypeSelect = ({
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (updatedPolicy: NewPackagePolicy, fetchedPackagePolicies?: boolean) => void;
+  updatePolicy: (updatedPolicy: NewPackagePolicy, isLoadedPackagePolicies?: boolean) => void;
   disabled: boolean;
   packageInfo: PackageInfo;
   setupTechnology: SetupTechnology;
@@ -548,7 +548,7 @@ const useEnsureDefaultNamespace = ({
 }: {
   newPolicy: NewPackagePolicy;
   input: NewPackagePolicyPostureInput;
-  updatePolicy: (policy: NewPackagePolicy, fetchedPackagePolicies?: boolean) => void;
+  updatePolicy: (policy: NewPackagePolicy, isLoadedPackagePolicies?: boolean) => void;
 }) => {
   useEffect(() => {
     if (newPolicy.namespace === POSTURE_NAMESPACE) return;
@@ -572,7 +572,7 @@ const usePolicyTemplateInitialName = ({
   integration: CloudSecurityPolicyTemplate | undefined;
   newPolicy: NewPackagePolicy;
   packagePolicyList: PackagePolicy[] | undefined;
-  updatePolicy: (policy: NewPackagePolicy, fetchedPackagePolicies?: boolean) => void;
+  updatePolicy: (policy: NewPackagePolicy, isLoadedPackagePolicies?: boolean) => void;
   setCanFetchIntegration: (canFetch: boolean) => void;
 }) => {
   useEffect(() => {
@@ -628,7 +628,7 @@ const useCloudFormationTemplate = ({
 }: {
   packageInfo: PackageInfo;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (policy: NewPackagePolicy, fetchedPackagePolicies?: boolean) => void;
+  updatePolicy: (policy: NewPackagePolicy, isLoadedPackagePolicies?: boolean) => void;
 }) => {
   useEffect(() => {
     const templateUrl = getVulnMgmtCloudFormationDefaultValue(packageInfo);
@@ -743,8 +743,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     };
 
     const updatePolicy = useCallback(
-      (updatedPolicy: NewPackagePolicy, fetchedPackagePolicies?: boolean) => {
-        onChange({ isValid, updatedPolicy, fetchedPackagePolicies });
+      (updatedPolicy: NewPackagePolicy, isLoadedPackagePolicies?: boolean) => {
+        onChange({ isValid, updatedPolicy, isLoadedPackagePolicies });
       },
       [onChange, isValid]
     );

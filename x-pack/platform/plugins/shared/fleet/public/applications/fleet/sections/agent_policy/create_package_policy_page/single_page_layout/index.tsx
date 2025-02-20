@@ -270,9 +270,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
   >(
-    ({ isValid, updatedPolicy, fetchedPackagePolicies }) => {
+    ({ isValid, updatedPolicy, isLoadedPackagePolicies }) => {
       updatePackagePolicy(updatedPolicy);
-      setIsFetchedPackagePolicies(fetchedPackagePolicies);
+      setIsFetchedPackagePolicies(isLoadedPackagePolicies);
       setFormState((prevState) => {
         if (prevState === 'VALID' && !isValid) {
           return 'INVALID';
