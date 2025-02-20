@@ -159,8 +159,7 @@ export async function suggest({
         ignored.push('match');
       }
       if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_QSTR.has(c))) {
-        ignored.push('qstr');
-        ignored.push('kql');
+        ignored.push('kql', "qstr");
       }
       const last = previousCommands?.[previousCommands.length - 1];
       let columnSuggestions: SuggestionRawDefinition[] = [];
