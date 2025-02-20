@@ -55,7 +55,7 @@ export const MetricItemIcon = ({
   const testNowRun = useSelector(manualTestRunSelector(monitor.configId));
   const isPopoverOpen = useSelector(selectErrorPopoverState);
   const { latestPing } = useLatestError({
-    isPopoverOpen,
+    configIdByLocation,
     monitorId: monitor.configId,
     locationLabel: monitor.locationLabel,
   });
