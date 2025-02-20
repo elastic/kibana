@@ -25,6 +25,7 @@ import type { UseConversationListResult } from '../hooks/use_conversation_list';
 import { useConfirmModal, useConversationsByDate } from '../hooks';
 import { DATE_CATEGORY_LABELS } from '../i18n';
 import { NewChatButton } from '../buttons/new_chat_button';
+import { ConversationListItemLabel } from './conversation_list_item_label';
 
 const panelClassName = css`
   max-height: 100%;
@@ -152,11 +153,17 @@ export function ConversationList({
                         <EuiListGroupItem
                           data-test-subj="observabilityAiAssistantConversationsLink"
                           key={conversation.id}
-                          label={conversation.label}
+                          label={
+                            <ConversationListItemLabel
+                              labelText={conversation.label}
+                              isPublic={conversation.public}
+                            />
+                          }
                           size="s"
                           isActive={conversation.id === selectedConversationId}
                           isDisabled={isLoading}
                           showToolTip
+                          toolTipText={conversation.label}
                           href={conversation.href}
                           onClick={(event) => onClickConversation(event, conversation.id)}
                           extraAction={{

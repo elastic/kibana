@@ -13,6 +13,8 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSelectableOption,
+  EuiIcon,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -29,6 +31,7 @@ const sharedLabel = i18n.translate('xpack.aiAssistant.chatHeader.shareOptions.sh
 });
 
 export function ChatSharingMenu() {
+  const { euiTheme } = useEuiTheme();
   const [selectedValue, setSelectedValue] = useState('private');
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -53,7 +56,7 @@ export function ChatSharingMenu() {
 
   const renderOption = useCallback(
     (option: EuiSelectableOption<OptionData>) => (
-      <EuiFlexGroup gutterSize="xs" direction="column">
+      <EuiFlexGroup gutterSize="xs" direction="column" style={{ paddingBlock: euiTheme.size.xs }}>
         <EuiFlexItem grow={false}>
           <EuiText size="s">
             <strong>{option.label}</strong>
@@ -64,7 +67,7 @@ export function ChatSharingMenu() {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    []
+    [euiTheme.size.xs]
   );
 
   return (
@@ -77,6 +80,7 @@ export function ChatSharingMenu() {
           onClickAriaLabel="Toggle sharing options"
         >
           {selectedValue === 'shared' ? sharedLabel : privateLabel}
+          <EuiIcon type="arrowDown" size="m" style={{ paddingLeft: euiTheme.size.xs }} />
         </EuiBadge>
       }
       isOpen={isPopoverOpen}
