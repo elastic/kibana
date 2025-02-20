@@ -19,7 +19,7 @@ import {
 
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 
 import type { DashboardSearchOut } from '@kbn/dashboard-plugin/server/content_management';
 import type { SerializableRecord } from '@kbn/utility-types';
