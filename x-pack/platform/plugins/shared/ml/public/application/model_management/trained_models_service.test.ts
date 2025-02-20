@@ -50,6 +50,7 @@ describe('TrainedModelsService', () => {
       startModelAllocation: jest.fn(),
       updateModelDeployment: jest.fn(),
       getModelsDownloadStatus: jest.fn(),
+      deleteTrainedModel: jest.fn(),
     } as unknown as jest.Mocked<TrainedModelsApiService>;
 
     mockSavedObjectsApiService = {
@@ -344,5 +345,54 @@ describe('TrainedModelsService', () => {
         values: { deploymentId: 'my-deployment-id' },
       })
     );
+  });
+
+  it('deletes multiple models successfully', () => {
+    const modelIds = ['model-1', 'model-2'];
+
+    trainedModelsService
+      .deleteModels(modelIds, {
+        with_pipelines: false,
+        force: false,
+      })
+      .subscribe({
+        next: () => {
+          expect(mockTrainedModelsApiService.deleteTrainedModel).toHaveBeenCalledTimes(2);
+          expect(mockTrainedModelsApiService.deleteTrainedModel).toHaveBeenCalledWith({
+            modelId: 'model-1',
+            options: { with_pipelines: false, force: false },
+          });
+          expect(mockTrainedModelsApiService.deleteTrainedModel).toHaveBeenCalledWith({
+            modelId: 'model-2',
+            options: { with_pipelines: false, force: false },
+          });
+        },
+      });
+  });
+
+  it('handles deleteModels error', () => {
+    const modelIds = ['model-1', 'model-2'];
+    const error = new Error('Deletion failed');
+
+    mockTrainedModelsApiService.deleteTrainedModel.mockRejectedValue(error);
+
+    trainedModelsService
+      .deleteModels(modelIds, {
+        with_pipelines: false,
+        force: false,
+      })
+      .subscribe({
+        error: (err) => {
+          expect(mockDisplayErrorToast).toHaveBeenCalledWith(
+            error,
+            i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
+              defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
+              values: {
+                modelsCount: modelIds.length,
+              },
+            })
+          );
+        },
+      });
   });
 });

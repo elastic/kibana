@@ -43,6 +43,7 @@ import type {
   CommonDeploymentParams,
   AdaptiveAllocationsParams,
   StartAllocationParams,
+  DeleteModelParams,
 } from '../services/ml_api_service/trained_models';
 import { type TrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import type { SavedObjectsApiService } from '../services/ml_api_service/saved_objects';
@@ -60,11 +61,6 @@ interface TrainedModelsServiceInit {
   displaySuccessToast: (toast: { title: string; text: string }) => void;
   savedObjectsApiService: SavedObjectsApiService;
   canManageSpacesAndSavedObjects: boolean;
-}
-
-interface DeleteModelOptions {
-  with_pipelines?: boolean;
-  force?: boolean;
 }
 
 export class TrainedModelsService {
@@ -218,13 +214,13 @@ export class TrainedModelsService {
       });
   }
 
-  public deleteModel(modelIds: string[], options: DeleteModelOptions) {
+  public deleteModels(modelIds: string[], options: DeleteModelParams['options']) {
     return of(modelIds).pipe(
       tap(() => modelIds.forEach((modelId) => this.removeScheduledDeployments({ modelId }))),
       switchMap(() =>
         forkJoin(
           modelIds.map((modelId) =>
-            from(this.trainedModelsApiService.deleteTrainedModel(modelId, options))
+            from(this.trainedModelsApiService.deleteTrainedModel({ ...options, modelId }))
           )
         )
       ),

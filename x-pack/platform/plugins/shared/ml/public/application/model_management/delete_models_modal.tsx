@@ -70,7 +70,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({
   const deleteModels = useCallback(async () => {
     setIsDeleting(true);
     trainedModelsService
-      .deleteModel(modelIds, {
+      .deleteModels(modelIds, {
         with_pipelines: deletePipelines,
         force: pipelinesCount > 0,
       })
