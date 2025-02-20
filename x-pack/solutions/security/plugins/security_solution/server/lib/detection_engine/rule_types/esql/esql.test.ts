@@ -69,7 +69,7 @@ describe('esqlExecutor', () => {
       scheduleNotificationResponseActionsService: mockScheduleNotificationResponseActionsService,
     } as unknown as Parameters<typeof esqlExecutor>[0];
   });
-  
+
   describe('errors', () => {
     it('should return result with user error equal true when request fails with data verification exception', async () => {
       alertServices.scopedClusterClient.asCurrentUser.transport.request.mockRejectedValue(
