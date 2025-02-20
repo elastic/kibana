@@ -480,7 +480,6 @@ export class GetPreviewData {
       },
     });
 
-    // @ts-ignore buckets is not improperly typed
     interface Bucket {
       key_as_string: string;
       metric: { value: number };

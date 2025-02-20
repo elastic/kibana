@@ -21,6 +21,7 @@ const getPreviewDataParamsSchema = t.type({
       objective: objectiveSchema,
       remoteName: t.string,
       groupings: groupingsSchema,
+      groupBy: t.array(t.string),
     }),
   ]),
 });
