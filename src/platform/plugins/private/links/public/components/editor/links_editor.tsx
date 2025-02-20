@@ -178,7 +178,7 @@ const LinksEditor = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody css={styles.bodyStyles}>
         <EuiForm fullWidth>
           <EuiFormRow label={LinksStrings.editor.panelEditor.getLayoutSettingsTitle()}>
             <EuiButtonGroup
@@ -321,6 +321,14 @@ export default LinksEditor;
 
 const styles = {
   droppableStyles: ({ euiTheme }: UseEuiTheme) => css({ margin: `0 -${euiTheme.size.xs}` }),
+  bodyStyles: css({
+    // EUI TODO: We need to set transform to 'none' to avoid drag/drop issues in the flyout caused by the
+    // `transform: translateZ(0)` workaround for the mask image bug in Chromium.
+    // https://github.com/elastic/eui/pull/7855.
+    '& .euiFlyoutBody__overflow': {
+      transform: 'none',
+    },
+  }),
   flyoutStyles: ({ euiTheme }: UseEuiTheme) => {
     const euiFlyoutOpenAnimation = keyframes`
     0% {
@@ -346,12 +354,6 @@ const styles = {
     }`;
 
     return css({
-      // EUI TODO: We need to set transform to 'none' to avoid drag/drop issues in the flyout caused by the
-      // `transform: translateZ(0)` workaround for the mask image bug in Chromium.
-      // https://github.com/elastic/eui/pull/7855.
-      '.euiFlyoutBody__overflow': {
-        transform: 'none',
-      },
       '.linkEditor': {
         maxInlineSize: `calc(${euiTheme.size.xs} * 125)`,
         height: 'calc(100vh - var(--euiFixedHeadersOffset, 0))',
