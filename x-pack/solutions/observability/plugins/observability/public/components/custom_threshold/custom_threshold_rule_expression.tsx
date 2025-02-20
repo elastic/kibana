@@ -116,9 +116,6 @@ export default function Expressions(props: Props) {
 
   useEffect(() => {
     const groupingFields = Object.keys(fieldsQuery.data || {});
-    console.log('fieldsQuery', fieldsQuery);
-    console.log('groupingFields', groupingFields);
-
     if ((ruleParams.groupBy || []).length + groupingFields.length > MAX_SELECTABLE_RUNTIME_FIELDS) {
       setGroupByError(
         `You can't select more than ${MAX_SELECTABLE_RUNTIME_FIELDS - groupingFields.length} groups`
