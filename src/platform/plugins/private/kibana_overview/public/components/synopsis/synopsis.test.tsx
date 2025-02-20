@@ -8,59 +8,67 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
-
+import { render } from '@testing-library/react';
 import { Synopsis } from './synopsis';
 
-test('render', () => {
-  const component = shallow(
-    <Synopsis
-      id={'tutorial'}
-      description="this is a great tutorial about..."
-      title="Great tutorial"
-      url="link_to_item"
-    />
-  );
-  expect(component).toMatchSnapshot();
-});
+describe('Synopsis component', () => {
+  test('renders', () => {
+    const { getByText } = render(
+      <Synopsis
+        id={'tutorial'}
+        description="this is a great tutorial about..."
+        title="Great tutorial"
+        url="link_to_item"
+        wrapInPanel
+      />
+    );
+    expect(getByText('this is a great tutorial about...')).toBeInTheDocument();
+  });
 
-describe('props', () => {
   test('iconType', () => {
-    const component = shallow(
+    const { container } = render(
       <Synopsis
         id={'tutorial'}
         description="this is a great tutorial about..."
         title="Great tutorial"
         url="link_to_item"
         iconType="logoApache"
+        wrapInPanel
       />
     );
-    expect(component).toMatchSnapshot();
+
+    const icon = container.querySelector('[data-euiicon-type="logoApache"]');
+    expect(icon).toBeInTheDocument();
   });
 
   test('iconUrl', () => {
-    const component = shallow(
+    const { getByRole } = render(
       <Synopsis
         id={'tutorial'}
         description="this is a great tutorial about..."
         title="Great tutorial"
         url="link_to_item"
         iconUrl="icon_url"
+        wrapInPanel
       />
     );
-    expect(component).toMatchSnapshot();
+    const anchorElement = getByRole('link', {
+      name: 'Great tutorial',
+    });
+    expect(anchorElement).toHaveAttribute('href', 'link_to_item');
   });
 
   test('isBeta', () => {
-    const component = shallow(
+    const { getByText } = render(
       <Synopsis
         id={'tutorial'}
         description="this is a great tutorial about..."
         title="Great tutorial"
         url="link_to_item"
         isBeta={true}
+        wrapInPanel
       />
     );
-    expect(component).toMatchSnapshot();
+    expect(getByText('Beta')).toBeInTheDocument();
   });
 });

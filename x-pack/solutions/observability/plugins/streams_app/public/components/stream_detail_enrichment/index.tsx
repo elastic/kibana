@@ -6,7 +6,8 @@
  */
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import { IngestStreamGetResponse, isRootStreamDefinition } from '@kbn/streams-schema';
+import { RootStreamEmptyPrompt } from './root_stream_empty_prompt';
 
 const StreamDetailEnrichmentContent = dynamic(() =>
   import(/* webpackChunkName: "management_enrichment" */ './page_content').then((mod) => ({
@@ -24,6 +25,10 @@ export function StreamDetailEnrichment({
   refreshDefinition,
 }: StreamDetailEnrichmentProps) {
   if (!definition) return null;
+
+  if (isRootStreamDefinition(definition.stream)) {
+    return <RootStreamEmptyPrompt />;
+  }
 
   return (
     <StreamDetailEnrichmentContent definition={definition} refreshDefinition={refreshDefinition} />
