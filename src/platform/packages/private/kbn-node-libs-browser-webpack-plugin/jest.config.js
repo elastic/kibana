@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-node-libs-browser-webpack-plugin'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/platform/packages/private/kbn-node-libs-browser-webpack-plugin'],
 };

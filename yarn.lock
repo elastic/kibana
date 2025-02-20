@@ -6517,7 +6517,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/node-libs-browser-webpack-plugin@link:packages/kbn-node-libs-browser-webpack-plugin":
+"@kbn/node-libs-browser-webpack-plugin@link:src/platform/packages/private/kbn-node-libs-browser-webpack-plugin":
   version "0.0.0"
   uid ""
 
