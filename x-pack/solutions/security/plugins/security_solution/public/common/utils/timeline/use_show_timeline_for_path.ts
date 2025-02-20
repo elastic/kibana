@@ -12,12 +12,9 @@ import { getLinksWithHiddenTimeline } from '../../links';
 import { useKibana } from '../../lib/kibana';
 import { hasAccessToSecuritySolution } from '../../../helpers_access';
 
-// FIXME: there must be a better way of doing this
-const extraNonTimelinePaths: string[] = ['/explore'];
-
 const isTimelinePathVisible = (currentPath: string): boolean => {
   const groupLinksWithHiddenTimelinePaths = getLinksWithHiddenTimeline().map((l) => l.path);
-  const hiddenTimelineRoutes = [...groupLinksWithHiddenTimelinePaths, ...extraNonTimelinePaths];
+  const hiddenTimelineRoutes = [...groupLinksWithHiddenTimelinePaths];
   return !hiddenTimelineRoutes.find((route) => matchPath(currentPath, route));
 };
 
