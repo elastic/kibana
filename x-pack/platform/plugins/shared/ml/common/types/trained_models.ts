@@ -168,6 +168,17 @@ export type TrainedModelDeploymentStatsResponse = estypes.MlTrainedModelDeployme
   };
 };
 
+export interface StartTrainedModelDeploymentResponse {
+  // TODO update types in elasticsearch-specification
+  assignment: estypes.MlStartTrainedModelDeploymentResponse['assignment'] & {
+    adaptive_allocations?: {
+      enabled: boolean;
+      min_number_of_allocations?: number;
+      max_number_of_allocations?: number;
+    };
+  };
+}
+
 export interface AllocatedModel {
   key: string;
   deployment_id: string;

@@ -23,7 +23,9 @@
     "requiredBundles": [
       "kibanaReact"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": [
+      "observabilityAIAssistant"
+    ],
     "extraPublicDirs": []
   }
 }
