@@ -231,8 +231,8 @@ export interface UnifiedDataTableProps {
   /**
    * Manage pagination mode
    * @default 'standard'
-   * "standard" - Regular pagination with numbers and arrows to control the page
-   * "loadMore" - Hides the general pagination bar and shows Load more button at the bottom of the grid
+   * "multiPage" - Regular pagination with numbers and arrows to control the page
+   * "singlePage" - Hides the general pagination bar and shows Load more button at the bottom of the grid
    * "infinite" - Hides the general pagination bar and loads more data as the user scrolls [Not yet implemented]
    */
   paginationMode?: DataGridPaginationMode;
@@ -472,7 +472,7 @@ export const UnifiedDataTable = ({
   sort,
   isSortEnabled = true,
   isPaginationEnabled = true,
-  paginationMode = 'standard',
+  paginationMode = DEFAULT_PAGINATION_MODE,
   cellActionsTriggerId,
   cellActionsMetadata,
   cellActionsHandling = 'replace',

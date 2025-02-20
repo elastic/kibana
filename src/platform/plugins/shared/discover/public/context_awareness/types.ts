@@ -335,7 +335,7 @@ export interface Profile {
 
   /**
    * Allows setting the pagination mode and its configuration
-   * The `getPaginationConfig` extension point currently gives `paginationMode` which can be set to 'standard' | 'loadMore' | 'infinite';
+   * The `getPaginationConfig` extension point currently gives `paginationMode` which can be set to 'multiPage' | 'singlePage' | 'infinite';
    * Note: This extension point currently only returns `paginationMode` but can be extended to return `pageSize` etc as well.
    * @returns The pagination mode extension
    */

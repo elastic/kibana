@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { MAX_LOADED_GRID_ROWS } from '../constants';
+import { DEFAULT_PAGINATION_MODE, MAX_LOADED_GRID_ROWS } from '../constants';
 import { DataGridPaginationMode } from '../..';
 
 export interface UnifiedDataTableFooterProps {
@@ -66,8 +66,8 @@ export const UnifiedDataTableFooter: FC<PropsWithChildren<UnifiedDataTableFooter
   const isOnLastPage = pageIndex === pageCount - 1 && rowCount < totalHits;
 
   if (
-    (paginationMode === 'standard' && !isOnLastPage) ||
-    (paginationMode === 'loadMore' && !hasScrolledToBottom)
+    (paginationMode === DEFAULT_PAGINATION_MODE && !isOnLastPage) ||
+    (paginationMode === 'singlePage' && !hasScrolledToBottom)
   ) {
     return null;
   }

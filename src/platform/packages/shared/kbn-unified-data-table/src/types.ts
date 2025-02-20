@@ -58,4 +58,4 @@ export type CustomGridColumnsConfiguration = Record<
   (props: CustomGridColumnProps) => EuiDataGridColumn
 >;
 
-export type DataGridPaginationMode = 'standard' | 'loadMore' | 'infinite';
+export type DataGridPaginationMode = 'multiPage' | 'singlePage' | 'infinite';

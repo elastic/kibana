@@ -13,5 +13,5 @@ export const getPaginationConfig: DataSourceProfileProvider['profile']['getPagin
   prev
 ) => ({
   ...prev,
-  paginationMode: 'loadMore',
+  paginationMode: 'singlePage',
 });
