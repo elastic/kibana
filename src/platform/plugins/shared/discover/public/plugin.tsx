@@ -27,7 +27,6 @@ import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../common';
 import { registerFeature } from './register_feature';
 import { buildServices, UrlTracker } from './build_services';
-import { ViewSavedSearchAction } from './embeddable/actions/view_saved_search_action';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import {
   DiscoverContextAppLocator,
@@ -59,6 +58,7 @@ import { DataSourceProfileService } from './context_awareness/profiles/data_sour
 import { DocumentProfileService } from './context_awareness/profiles/document_profile';
 import { ProfilesManager } from './context_awareness/profiles_manager';
 import { DiscoverEBTManager } from './services/discover_ebt_manager';
+import { ACTION_VIEW_SAVED_SEARCH } from './embeddable/actions/constants';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -254,9 +254,10 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
-    const viewSavedSearchAction = new ViewSavedSearchAction(core.application, this.locator!);
-
-    plugins.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
+    plugins.uiActions.addTriggerActionAsync('CONTEXT_MENU_TRIGGER', ACTION_VIEW_SAVED_SEARCH, async () => {
+      const { getViewDiscoverSessionAction } = await import('./embeddable/actions/view_discover_session_action');
+      return getViewDiscoverSessionAction(core.application, this.locator!);
+    });
     plugins.uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
     plugins.uiActions.registerTrigger(DISCOVER_CELL_ACTIONS_TRIGGER);
 

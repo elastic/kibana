@@ -7,11 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Allows the getSharingData function to be lazy loadable
- */
-export async function loadSharingDataHelpers() {
-  return await import('./get_sharing_data');
-}
-
-//export { getSortForEmbeddable } from './sorting';
+export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';

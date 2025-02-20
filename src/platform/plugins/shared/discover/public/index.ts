@@ -39,5 +39,10 @@ export {
   type SearchEmbeddableApi,
   type NonPersistedDisplayOptions,
 } from './embeddable';
-export { loadSharingDataHelpers } from './utils';
+
+
+export async function loadSharingDataHelpers() {
+  return await import('./utils/get_sharing_data');
+}
+
 export type { DiscoverServices } from './build_services';
