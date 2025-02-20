@@ -13,7 +13,7 @@ import './loading.scss';
 
 export const Loading: React.FC = () => (
   <div className="enterpriseSearchLoading">
-    <EuiLoadingLogo size="xl" logo="logoEnterpriseSearch" />
+    <EuiLoadingLogo size="xl" logo="logoElasticsearch" />
   </div>
 );
 
