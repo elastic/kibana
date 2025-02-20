@@ -8,7 +8,9 @@
 import { test } from '@kbn/scout-security';
 
 test.describe('test', { tag: ['@svlSecurity'] }, () => {
-  test.beforeEach(async ({ browserAuth }) => {
+  test.beforeEach(async ({ browserAuth, detectionRuleApi }) => {
+    await detectionRuleApi.deleteAll();
+    await detectionRuleApi.createCustomQueryRule();
     await browserAuth.loginAsPlatformEngineer();
   });
 

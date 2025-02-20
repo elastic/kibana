@@ -13,6 +13,7 @@ import {
 } from '@kbn/scout';
 import { BrowserAuthFixture } from '@kbn/scout/src/playwright/fixtures/test/browser_auth';
 import { SecurityPageObjects } from '../page_objects';
+import { DetectionRuleFixture } from './worker/apis/detection_rule';
 
 export interface SecurityBrowserAuthFixture extends BrowserAuthFixture {
   loginAsPlatformEngineer: () => Promise<void>;
@@ -22,7 +23,9 @@ export interface SecurityTestFixtures extends ScoutTestFixtures {
   pageObjects: SecurityPageObjects;
 }
 
-export type SecurityWorkerFixtures = ScoutWorkerFixtures;
+export interface SecurityWorkerFixtures extends ScoutWorkerFixtures {
+  detectionRuleApi: DetectionRuleFixture;
+}
 
 export interface SecurityParallelTestFixtures extends ScoutParallelTestFixtures {
   pageObjects: SecurityPageObjects;

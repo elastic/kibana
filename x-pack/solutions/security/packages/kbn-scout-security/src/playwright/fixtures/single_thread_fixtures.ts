@@ -10,6 +10,7 @@ import { BrowserAuthFixture } from '@kbn/scout/src/playwright/fixtures/test/brow
 import { extendPageObjects } from '../page_objects';
 import { SecurityBrowserAuthFixture, SecurityTestFixtures, SecurityWorkerFixtures } from './types';
 import { extendBrowserAuth } from './authentication';
+import { createDetectionRuleFixture } from './worker/apis/detection_rule';
 
 export const test = base.extend<SecurityTestFixtures, SecurityWorkerFixtures>({
   browserAuth: async (
@@ -29,4 +30,11 @@ export const test = base.extend<SecurityTestFixtures, SecurityWorkerFixtures>({
     const extendedPageObjects = extendPageObjects(pageObjects, page);
     await use(extendedPageObjects);
   },
+  detectionRuleApi: [
+    async ({ kbnClient }, use) => {
+      const detectionRuleHelper = await createDetectionRuleFixture({ kbnClient });
+      await use(detectionRuleHelper);
+    },
+    { scope: 'worker' },
+  ],
 });
