@@ -5569,7 +5569,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/es@link:packages/kbn-es":
+"@kbn/es@link:src/platform/packages/shared/kbn-es":
   version "0.0.0"
   uid ""
 

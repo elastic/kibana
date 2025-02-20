@@ -52,7 +52,7 @@ export const serverless: Command = {
       --skipTeardown      If this process exits, leave the ES cluster running in the background
       --waitForReady      Wait for the ES cluster to be ready to serve requests
       --resources         Overrides resources under ES 'config/' directory, which are by default
-                          mounted from 'packages/kbn-es/src/serverless_resources/users'. Value should
+                          mounted from 'src/platform/packages/shared/kbn-es/src/serverless_resources/users'. Value should
                           be a valid file path (relative or absolute). This option can be used multiple
                           times if needing to override multiple files. The following files can be overwritten:
                           ${SERVERLESS_RESOURCES_PATHS.map((filePath) => basename(filePath)).join(

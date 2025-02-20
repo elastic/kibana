@@ -95,7 +95,7 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   kibanaUrl?: string;
   /**
    * Resource file(s) to overwrite
-   * (see list of files that can be overwritten under `packages/kbn-es/src/serverless_resources/users`)
+   * (see list of files that can be overwritten under `src/platform/packages/shared/kbn-es/src/serverless_resources/users`)
    */
   resources?: string | string[];
 }
@@ -808,7 +808,7 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
   Login with username ${chalk.bold.cyan(ELASTIC_SERVERLESS_SUPERUSER)} or ${chalk.bold.cyan(
     SYSTEM_INDICES_SUPERUSER
   )} and password ${chalk.bold.magenta(ELASTIC_SERVERLESS_SUPERUSER_PASSWORD)}
-  See packages/kbn-es/src/serverless_resources/README.md for additional information on authentication.
+  See src/platform/packages/shared/kbn-es/src/serverless_resources/README.md for additional information on authentication.
   Stop the cluster:     ${chalk.bold(`docker container stop ${nodeNames.join(' ')}`)}
     `);
 
