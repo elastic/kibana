@@ -36,6 +36,11 @@ export const SECURITY_MAX_SIGNALS = 'security_max_signals';
  */
 export const SECURITY_RULE_ID = 'security_rule_id';
 
+/**
+ * Rule status.
+ */
+export const SECURITY_RULE_STATUS = 'security_rule_status';
+
 // Schema field names and descriptions for APM custom context set by security rule executors
 
 /**
