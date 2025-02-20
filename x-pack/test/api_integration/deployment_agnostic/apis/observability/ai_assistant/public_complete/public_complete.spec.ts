@@ -78,9 +78,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       return String(response.body);
     }
 
-    async function getEvents(options: RequestOptions) {
-      const responseBody = await getResponseBody(options);
-      return responseBody
+    function formatResponseBody(body: string) {
+      return body
         .split('\n')
         .map((line) => line.trim())
         .filter(Boolean)
@@ -102,41 +101,40 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       proxy.close();
     });
 
+    const action = {
+      name: 'my_action',
+      description: 'My action',
+      parameters: {
+        type: 'object',
+        properties: {
+          foo: {
+            type: 'string',
+          },
+        },
+      },
+    } as const;
+
+    const toolCallMock = {
+      id: 'fake-id',
+      index: 'fake-index',
+      function: {
+        name: 'my_action',
+        arguments: JSON.stringify({ foo: 'bar' }),
+      },
+    };
+
     describe('after executing an action and closing the stream', () => {
       let events: StreamingChatResponseEvent[];
 
-      const fnName = 'my_action';
-      const fnArgs = JSON.stringify({ foo: 'bar' });
-
       before(async () => {
-        events = await getEvents({
-          actions: [
-            {
-              name: fnName,
-              description: 'My action',
-              parameters: {
-                type: 'object',
-                properties: {
-                  foo: {
-                    type: 'string',
-                  },
-                },
-              },
-            },
-          ],
+        const responseBody = await getResponseBody({
+          actions: [action],
           conversationResponse: {
-            tool_calls: [
-              {
-                id: 'fake-id',
-                index: 'fake-index',
-                function: {
-                  name: fnName,
-                  arguments: fnArgs,
-                },
-              },
-            ],
+            tool_calls: [toolCallMock],
           },
         });
+
+        return formatResponseBody(responseBody);
       });
 
       it('does not persist the conversation (the last event is not a conversationUpdated event)', () => {
@@ -144,8 +142,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         expect(lastEvent.type).to.not.be('conversationUpdate');
         expect(lastEvent.type).to.be('messageAdd');
         expect(lastEvent.message.message.function_call).to.eql({
-          name: fnName,
-          arguments: fnArgs,
+          name: 'my_action',
+          arguments: toolCallMock.function.arguments,
           trigger: MessageRole.Assistant,
         });
       });
@@ -155,40 +153,20 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
 
       before(async () => {
-        await getEvents({
+        const responseBody = await getResponseBody({
           instructions: [
             {
               text: 'This is a random instruction',
               instruction_type: 'user_instruction',
             },
           ],
-          actions: [
-            {
-              name: 'my_action',
-              description: 'My action',
-              parameters: {
-                type: 'object',
-                properties: {
-                  foo: {
-                    type: 'string',
-                  },
-                },
-              },
-            },
-          ],
+          actions: [action],
           conversationResponse: {
-            tool_calls: [
-              {
-                id: 'fake-id',
-                index: 'fake-index',
-                function: {
-                  name: 'my_action',
-                  arguments: JSON.stringify({ foo: 'bar' }),
-                },
-              },
-            ],
+            tool_calls: [toolCallMock],
           },
         });
+
+        return formatResponseBody(responseBody);
       });
 
       it.skip('includes the instruction in the system message', async () => {
