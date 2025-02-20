@@ -47,7 +47,6 @@ packages/kbn-ambient-storybook-types @elastic/kibana-operations
 packages/kbn-ambient-ui-types @elastic/kibana-operations
 packages/kbn-axe-config @elastic/kibana-qa
 packages/kbn-babel-preset @elastic/kibana-operations
-packages/kbn-babel-register @elastic/kibana-operations
 packages/kbn-babel-transform @elastic/kibana-operations
 packages/kbn-bazel-runner @elastic/kibana-operations
 packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
@@ -428,6 +427,7 @@ src/platform/packages/shared/kbn-apm-synthtrace @elastic/obs-ux-infra_services-t
 src/platform/packages/shared/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-apm-utils @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
+src/platform/packages/shared/kbn-babel-register @elastic/kibana-operations
 src/platform/packages/shared/kbn-calculate-auto @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-cases-components @elastic/response-ops
