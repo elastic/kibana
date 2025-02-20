@@ -356,28 +356,7 @@ export const buildPoliciesDefinitions = (
     command: TRIGGER_SUGGESTION_COMMAND,
   }));
 
-export const buildMatchingFieldsDefinition = (
-  matchingField: string,
-  fields: string[]
-): SuggestionRawDefinition[] =>
-  fields.map((label) => ({
-    label,
-    text: getSafeInsertText(label) + ' ',
-    kind: 'Variable',
-    detail: i18n.translate(
-      'kbn-esql-validation-autocomplete.esql.autocomplete.matchingFieldDefinition',
-      {
-        defaultMessage: `Use to match on {matchingField} on the policy`,
-        values: {
-          matchingField,
-        },
-      }
-    ),
-    sortText: 'D',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  }));
-
-/** @deprecated options will be removed */
+/** @deprecated — options will be removed */
 export const buildOptionDefinition = (
   option: CommandOptionsDefinition,
   isAssignType: boolean = false

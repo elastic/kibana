@@ -9,9 +9,10 @@
 
 import { ESQLCommand } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
+import { isSingleItem } from '../../../..';
 import { ENRICH_MODES } from '../../../definitions/settings';
 import { SuggestionRawDefinition } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
+import { TRIGGER_SUGGESTION_COMMAND, getSafeInsertText } from '../../factories';
 
 export enum Position {
   MODE = 'mode',
@@ -43,8 +44,14 @@ export const getPosition = (
     return Position.POLICY;
   }
 
-  if (command.args.length === 1) {
-    return Position.AFTER_POLICY;
+  const lastArg = command.args[command.args.length - 1];
+  if (isSingleItem(lastArg) && lastArg.name === 'on') {
+    if (innerText.match(/on\s+\S*$/i)) {
+      return Position.MATCH_FIELD;
+    }
+    if (innerText.match(/on\s+\S+\s+$/i)) {
+      return Position.AFTER_ON;
+    }
   }
 };
 
@@ -102,3 +109,24 @@ export const withSuggestion: SuggestionRawDefinition = {
   sortText: '1',
   command: TRIGGER_SUGGESTION_COMMAND,
 };
+
+export const buildMatchingFieldsDefinition = (
+  matchingField: string,
+  fields: string[]
+): SuggestionRawDefinition[] =>
+  fields.map((label) => ({
+    label,
+    text: getSafeInsertText(label) + ' ',
+    kind: 'Variable',
+    detail: i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.autocomplete.matchingFieldDefinition',
+      {
+        defaultMessage: `Use to match on {matchingField} on the policy`,
+        values: {
+          matchingField,
+        },
+      }
+    ),
+    sortText: 'D',
+    command: TRIGGER_SUGGESTION_COMMAND,
+  }));

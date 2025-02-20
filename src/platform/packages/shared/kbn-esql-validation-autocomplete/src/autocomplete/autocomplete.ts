@@ -60,7 +60,6 @@ import {
   buildPoliciesDefinitions,
   getNewVariableSuggestion,
   getFunctionSuggestions,
-  buildMatchingFieldsDefinition,
   getCompatibleLiterals,
   buildConstantsDefinitions,
   buildVariablesDefinitions,
@@ -99,13 +98,12 @@ import {
   getSuggestionsToRightOfOperatorExpression,
   checkFunctionInvocationComplete,
 } from './helper';
-import { FunctionParameter, isParameterType } from '../definitions/types';
+import { FunctionParameter, GetPolicyMetadataFn, isParameterType } from '../definitions/types';
 import { comparisonFunctions } from '../definitions/builtin';
 import { getRecommendedQueriesSuggestions } from './recommended_queries/suggestions';
 
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
-type GetPolicyMetadataFn = (name: string) => Promise<ESQLPolicy | undefined>;
 
 function hasSameArgBothSides(assignFn: ESQLFunction) {
   if (assignFn.name === '=' && isColumnItem(assignFn.args[0]) && assignFn.args[1]) {
@@ -205,7 +203,8 @@ export async function suggest(
     astContext.type === 'expression' ||
     (astContext.type === 'option' && astContext.command?.name === 'join') ||
     (astContext.type === 'option' && astContext.command?.name === 'dissect') ||
-    (astContext.type === 'option' && astContext.command?.name === 'from')
+    (astContext.type === 'option' && astContext.command?.name === 'from') ||
+    (astContext.type === 'option' && astContext.command?.name === 'enrich')
   ) {
     return getSuggestionsWithinCommandExpression(
       innerText,
@@ -215,6 +214,7 @@ export async function suggest(
       getFieldsByType,
       getFieldsMap,
       getPolicies,
+      getPolicyMetadata,
       getVariablesByType,
       resourceRetriever?.getPreferences,
       resourceRetriever,
@@ -381,6 +381,7 @@ async function getSuggestionsWithinCommandExpression(
   getColumnsByType: GetColumnsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
   getPolicies: GetPoliciesFn,
+  getPolicyMetadata: GetPolicyMetadataFn,
   getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined,
   getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
   callbacks?: ESQLCallbacks,
@@ -399,6 +400,7 @@ async function getSuggestionsWithinCommandExpression(
       innerText,
       command,
       getColumnsByType,
+      getAllColumnNames: () => Array.from(fieldsMap.keys()),
       columnExists: (col: string) => Boolean(getColumnByName(col, references)),
       getSuggestedVariableName: () => findNewVariable(anyVariables),
       getExpressionType: (expression: ESQLAstItem | undefined) =>
@@ -414,6 +416,7 @@ async function getSuggestionsWithinCommandExpression(
       getVariablesByType,
       supportsControls,
       getPolicies,
+      getPolicyMetadata,
     });
   } else {
     // The deprecated path.
@@ -1236,35 +1239,6 @@ async function getOptionArgsSuggestions(
   const anyVariables = collectVariables(commands, fieldsMap, innerText);
 
   if (command.name === 'enrich') {
-    if (option.name === 'on') {
-      // if it's a new expression, suggest fields to match on
-      if (
-        isNewExpression ||
-        noCaseCompare(findPreviousWord(innerText), 'ON') ||
-        (option && isAssignment(option.args[0]) && !option.args[1])
-      ) {
-        const policyName = isSourceItem(command.args[0]) ? command.args[0].name : undefined;
-        if (policyName) {
-          const policyMetadata = await getPolicyMetadata(policyName);
-          if (policyMetadata) {
-            suggestions.push(
-              ...buildMatchingFieldsDefinition(
-                policyMetadata.matchField,
-                Array.from(fieldsMap.keys())
-              )
-            );
-          }
-        }
-      } else {
-        // propose the with option
-        suggestions.push(
-          buildOptionDefinition(getCommandOption('with')!),
-          ...getFinalSuggestions({
-            comma: false,
-          })
-        );
-      }
-    }
     if (option.name === 'with') {
       const policyName = isSourceItem(command.args[0]) ? command.args[0].name : undefined;
       if (policyName) {
