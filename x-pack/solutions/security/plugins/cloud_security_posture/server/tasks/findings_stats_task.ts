@@ -339,7 +339,7 @@ const getFindingsScoresDocIndexingPromises = (
     });
   });
 
-const getVulnStatsTrendDocIndexingPromises = (
+export const getVulnStatsTrendDocIndexingPromises = (
   esClient: ElasticsearchClient,
   vulnStatsAggs?: VulnSeverityAggs
 ) => {
@@ -348,7 +348,6 @@ const getVulnStatsTrendDocIndexingPromises = (
   const scoreByCloudAccount = Object.fromEntries(
     vulnStatsAggs.vulnerabilities_stats_by_cloud_account.buckets.map((accountScore) => {
       const cloudAccountId = accountScore.key;
-
       return [
         cloudAccountId,
         {
