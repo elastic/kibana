@@ -37,7 +37,6 @@ export const AssistantSettingsModal: React.FC<Props> = React.memo(
     defaultConnector,
     isSettingsModalVisible,
     setIsSettingsModalVisible,
-    selectedConversationId,
     onConversationSelected,
     conversations,
     conversationsLoaded,
@@ -76,7 +75,6 @@ export const AssistantSettingsModal: React.FC<Props> = React.memo(
       isSettingsModalVisible && (
         <AssistantSettings
           defaultConnector={defaultConnector}
-          selectedConversationId={selectedConversationId}
           onConversationSelected={onConversationSelected}
           onClose={handleCloseModal}
           onSave={handleSave}

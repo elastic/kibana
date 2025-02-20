@@ -6,7 +6,7 @@
  */
 
 import { EuiFormRow, EuiLink } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -55,7 +55,13 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
     });
     const [conversationUpdates, setConversationUpdates] =
       useState<Conversation>(selectedConversation);
+    useEffect(() => {
+      if (selectedConversation?.id !== conversationUpdates?.id) {
+        setConversationUpdates(selectedConversation);
+      }
+    }, [conversationUpdates?.id, selectedConversation]);
     const selectedSystemPrompt = useMemo(() => {
+      console.log('selectedSystemPrompt conversationUpdates?', conversationUpdates);
       return getDefaultSystemPrompt({ allSystemPrompts, conversation: conversationUpdates });
     }, [allSystemPrompts, conversationUpdates]);
     const handleOnSystemPromptSelectionChange = useCallback(
@@ -98,6 +104,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
     );
 
     const selectedConnector = useMemo(() => {
+      console.log('selectedConnector conversationUpdates?', conversationUpdates);
       const selectedConnectorId: string | undefined = conversationUpdates?.apiConfig?.connectorId;
       if (areConnectorsFetched) {
         return connectors?.find((c) => c.id === selectedConnectorId);

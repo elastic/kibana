@@ -9,35 +9,20 @@ import { EuiFlexGroup, EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@
 import React from 'react';
 
 import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/find_anonymization_fields_route.gen';
-import { PerformAnonymizationFieldsBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { Stats } from '../../../data_anonymization_editor/stats';
 import { ContextEditor } from '../../../data_anonymization_editor/context_editor';
 import * as i18n from './translations';
-import { useAnonymizationListUpdate } from './use_anonymization_list_update';
+import { BatchUpdateListItem } from '../../../data_anonymization_editor/context_editor/types';
 
 export interface Props {
   anonymizationFields: FindAnonymizationFieldsResponse;
-  anonymizationFieldsBulkActions: PerformAnonymizationFieldsBulkActionRequestBody;
-  setAnonymizationFieldsBulkActions: React.Dispatch<
-    React.SetStateAction<PerformAnonymizationFieldsBulkActionRequestBody>
-  >;
-  setUpdatedAnonymizationData: React.Dispatch<
-    React.SetStateAction<FindAnonymizationFieldsResponse>
-  >;
+  onListUpdated: (updates: BatchUpdateListItem[]) => Promise<void>;
 }
 
 const AnonymizationSettingsComponent: React.FC<Props> = ({
   anonymizationFields,
-  anonymizationFieldsBulkActions,
-  setAnonymizationFieldsBulkActions,
-  setUpdatedAnonymizationData,
+  onListUpdated,
 }) => {
-  const onListUpdated = useAnonymizationListUpdate({
-    anonymizationFields,
-    anonymizationFieldsBulkActions,
-    setAnonymizationFieldsBulkActions,
-    setUpdatedAnonymizationData,
-  });
   return (
     <>
       <EuiTitle size={'s'}>

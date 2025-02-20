@@ -90,14 +90,14 @@ export const useConversationsUpdater = (
   ]);
 
   useEffect(() => {
-    // Update conversation settings when conversations are loaded
+    // Update conversa  tion settings when conversations are loaded
     if (conversationsLoaded && Object.keys(conversationSettings).length === 0) {
       setConversationSettings(conversations);
     }
   }, [conversationSettings, conversations, conversationsLoaded]);
 
   return {
-    assistantStreamingEnabled,
+    assistantStreamingEnabled: updatedAssistantStreamingEnabled,
     conversationSettings,
     conversationsSettingsBulkActions,
     resetConversationsSettings,
