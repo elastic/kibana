@@ -18,7 +18,6 @@ import { timeUnitsToSuggest } from '../definitions/literals';
 import {
   FunctionDefinition,
   CommandOptionsDefinition,
-  CommandModeDefinition,
   FunctionParameterType,
 } from '../definitions/types';
 import { shouldBeQuotedSource, shouldBeQuotedText } from '../shared/helpers';
@@ -398,42 +397,6 @@ export const buildOptionDefinition = (
   }
   return completeItem;
 };
-
-export const buildSettingDefinitions = (
-  setting: CommandModeDefinition
-): SuggestionRawDefinition[] => {
-  // for now there's just a single setting with one argument
-  return setting.values.map(({ name, description }) => ({
-    label: `${setting.prefix || ''}${name}`,
-    text: `${setting.prefix || ''}${name}:$0`,
-    asSnippet: true,
-    kind: 'Reference',
-    detail: description ? `${setting.description} - ${description}` : setting.description,
-    sortText: 'D',
-    command: TRIGGER_SUGGESTION_COMMAND,
-  }));
-};
-
-export const buildNoPoliciesAvailableDefinition = (): SuggestionRawDefinition => ({
-  label: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.noPoliciesLabel', {
-    defaultMessage: 'No available policy',
-  }),
-  text: '',
-  kind: 'Issue',
-  detail: i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.autocomplete.noPoliciesLabelsFound',
-    {
-      defaultMessage: 'Click to create',
-    }
-  ),
-  sortText: 'D',
-  command: {
-    id: 'esql.policies.create',
-    title: i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.createNewPolicy', {
-      defaultMessage: 'Click to create',
-    }),
-  },
-});
 
 export function getUnitDuration(unit: number = 1) {
   const filteredTimeLiteral = timeUnitsToSuggest.filter(({ name }) => {

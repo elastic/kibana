@@ -29,6 +29,7 @@ describe('autocomplete.suggest', () => {
         modes.map((mode) => `_${mode}:$0`),
         { triggerCharacter: '_' }
       );
+      await assertSuggestions('from a | enrich _any: /', []);
       for (const mode of modes) {
         await assertSuggestions(`from a | enrich _${mode}:/`, expectedPolicyNameSuggestions, {
           triggerCharacter: ':',
@@ -72,24 +73,27 @@ describe('autocomplete.suggest', () => {
         'var0 = ',
         ...getPolicyFields('policy'),
       ]);
-      assertSuggestions(`from a | enrich policy on b with var0 /`, ['= $0', ',', '| ']);
-      assertSuggestions(`from a | enrich policy on b with var0 = /`, [
+      await assertSuggestions(`from a | enrich policy on b with var0 /`, ['= $0', ',', '| ']);
+      await assertSuggestions(`from a | enrich policy on b with var0 = /`, [
         ...getPolicyFields('policy'),
       ]);
-      assertSuggestions(`from a | enrich policy on b with var0 = keywordField /`, [',', '| ']);
-      assertSuggestions(`from a | enrich policy on b with var0 = keywordField, /`, [
+      await assertSuggestions(`from a | enrich policy on b with var0 = keywordField /`, [
+        ',',
+        '| ',
+      ]);
+      await assertSuggestions(`from a | enrich policy on b with var0 = keywordField, /`, [
         'var1 = ',
         ...getPolicyFields('policy'),
       ]);
-      assertSuggestions(`from a | enrich policy on b with var0 = keywordField, var1 /`, [
+      await assertSuggestions(`from a | enrich policy on b with var0 = keywordField, var1 /`, [
         '= $0',
         ',',
         '| ',
       ]);
-      assertSuggestions(`from a | enrich policy on b with var0 = keywordField, var1 = /`, [
+      await assertSuggestions(`from a | enrich policy on b with var0 = keywordField, var1 = /`, [
         ...getPolicyFields('policy'),
       ]);
-      assertSuggestions(
+      await assertSuggestions(
         `from a | enrich policy with /`,
         ['var0 = ', ...getPolicyFields('policy')],
         { triggerCharacter: ' ' }

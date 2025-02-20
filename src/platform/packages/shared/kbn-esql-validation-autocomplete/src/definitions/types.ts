@@ -235,6 +235,10 @@ export interface CommandSuggestParams<CommandName extends string> {
    */
   getSources: () => Promise<ESQLSourceResult[]>;
   /**
+   * Fetch suggestions for all available policies
+   */
+  getPolicies: () => Promise<SuggestionRawDefinition[]>;
+  /**
    * Inspect the AST and returns the sources that are used in the query.
    * @param type
    * @returns

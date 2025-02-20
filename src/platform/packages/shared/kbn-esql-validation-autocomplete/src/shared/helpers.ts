@@ -11,7 +11,6 @@ import {
   Walker,
   type ESQLAstItem,
   type ESQLColumn,
-  type ESQLCommandMode,
   type ESQLCommandOption,
   type ESQLFunction,
   type ESQLLiteral,
@@ -20,6 +19,7 @@ import {
   type ESQLTimeInterval,
 } from '@kbn/esql-ast';
 import {
+  ESQLCommandMode,
   ESQLIdentifier,
   ESQLInlineCast,
   ESQLParamLiteral,
@@ -65,6 +65,7 @@ export function isSingleItem(arg: ESQLAstItem): arg is ESQLSingleAstItem {
   return arg && !Array.isArray(arg);
 }
 
+/** @deprecated — a "setting" is a concept we will be getting rid of soon */
 export function isSettingItem(arg: ESQLAstItem): arg is ESQLCommandMode {
   return isSingleItem(arg) && arg.type === 'mode';
 }

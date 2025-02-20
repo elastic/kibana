@@ -23,7 +23,6 @@ import {
   getCommandDefinition,
   getCommandOption,
   getFunctionDefinition,
-  getLastNonWhitespaceChar,
   isAssignment,
   isAssignmentComplete,
   isColumnItem,
@@ -33,7 +32,6 @@ import {
   isOptionItem,
   isRestartingExpression,
   isSourceCommand,
-  isSettingItem,
   isSourceItem,
   isTimeIntervalItem,
   getAllFunctions,
@@ -61,14 +59,12 @@ import {
   buildFieldsDefinitions,
   buildPoliciesDefinitions,
   getNewVariableSuggestion,
-  buildNoPoliciesAvailableDefinition,
   getFunctionSuggestions,
   buildMatchingFieldsDefinition,
   getCompatibleLiterals,
   buildConstantsDefinitions,
   buildVariablesDefinitions,
   buildOptionDefinition,
-  buildSettingDefinitions,
   buildValueDefinitions,
   getDateLiterals,
   buildFieldsDefinitionsWithMetadata,
@@ -223,16 +219,6 @@ export async function suggest(
       resourceRetriever?.getPreferences,
       resourceRetriever,
       supportsControls
-    );
-  }
-  if (astContext.type === 'setting') {
-    return getSettingArgsSuggestions(
-      innerText,
-      ast,
-      astContext,
-      getFieldsByType,
-      getFieldsMap,
-      getPolicyMetadata
     );
   }
   if (astContext.type === 'option') {
@@ -427,6 +413,7 @@ async function getSuggestionsWithinCommandExpression(
       callbacks,
       getVariablesByType,
       supportsControls,
+      getPolicies,
     });
   } else {
     // The deprecated path.
@@ -870,29 +857,10 @@ async function getExpressionSuggestionsByType(
         }
       }
     }
-    if (argDef.type === 'source') {
-      if (argDef.innerTypes?.includes('policy')) {
-        // ... | ENRICH <suggest>
-        const policies = await getPolicies();
-        const lastWord = findFinalWord(innerText);
-        if (lastWord !== '') {
-          policies.forEach((suggestion) => {
-            suggestions.push({
-              ...suggestion,
-              rangeToReplace: {
-                start: innerText.length - lastWord.length + 1,
-                end: innerText.length + 1,
-              },
-            });
-          });
-        }
-        suggestions.push(...(policies.length ? policies : [buildNoPoliciesAvailableDefinition()]));
-      }
-    }
   }
 
   const nonOptionArgs = command.args.filter(
-    (arg) => !isOptionItem(arg) && !isSettingItem(arg) && !Array.isArray(arg) && !arg.incomplete
+    (arg) => !isOptionItem(arg) && !Array.isArray(arg) && !arg.incomplete
   );
   // Perform some checks on mandatory arguments
   const mandatoryArgsAlreadyPresent =
@@ -1231,35 +1199,6 @@ async function getListArgsSuggestions(
           ))
         );
       }
-    }
-  }
-  return suggestions;
-}
-
-async function getSettingArgsSuggestions(
-  innerText: string,
-  commands: ESQLCommand[],
-  {
-    command,
-    node,
-  }: {
-    command: ESQLCommand;
-    node: ESQLSingleAstItem | undefined;
-  },
-  getFieldsByType: GetColumnsByTypeFn,
-  getFieldsMaps: GetFieldsMapFn,
-  getPolicyMetadata: GetPolicyMetadataFn
-) {
-  const suggestions = [];
-
-  const settingDefs = getCommandDefinition(command.name).modes || [];
-
-  if (settingDefs.length) {
-    const lastChar = getLastNonWhitespaceChar(innerText);
-    const matchingSettingDefs = settingDefs.filter(({ prefix }) => lastChar === prefix);
-    if (matchingSettingDefs.length) {
-      // COMMAND _<here>
-      suggestions.push(...matchingSettingDefs.flatMap(buildSettingDefinitions));
     }
   }
   return suggestions;
