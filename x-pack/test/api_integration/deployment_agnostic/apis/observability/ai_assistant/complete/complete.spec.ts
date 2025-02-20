@@ -110,12 +110,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             withInternalHeaders: true,
           });
 
-        proxy
-          .interceptConversation('Hello!')
-
-          .catch((e) => {
-            log.error(`Failed to intercept conversation ${e}`);
-          });
+        proxy.interceptConversation('Hello!').catch((e) => {
+          log.error(`Failed to intercept conversation ${e}`);
+        });
 
         const passThrough = new PassThrough();
         supertestEditorWithCookieCredentials
