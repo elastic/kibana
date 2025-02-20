@@ -58,7 +58,7 @@ export class ActionsClientChatVertexAI extends ChatVertexAI {
     this.#actionsClient = actionsClient;
     this.#connectorId = connectorId;
     // apiKey is required to build the client but is overridden by the actionsClient
-    const client = this.buildClient({apiKey: 'nothing', ...props});
+    const client = this.buildClient({ apiKey: 'nothing', ...props });
 
     this.connection = new ActionsClientChatConnection(
       {
