@@ -30,7 +30,7 @@ export const anonymizedValuesAndCitationsTourStep1 = {
     <EuiText size="s">
       <FormattedMessage
         id="xpack.elasticAssistant.anonymizedValuesAndCitations.tour.content.citedKnowledgeBaseEntries"
-        defaultMessage="Toggle to reveal or obfuscate field values in your chat stream. The data sent to the LLM is still anonymized based on settings in the Anonymization panel. Keyboard shortcut: <bold>{keyboardShortcut}</bold>"
+        defaultMessage="AI Assistant can now cite sources in its responses. Toggle citations by using this menu or <bold>{keyboardShortcut}</bold>"
         values={{
           keyboardShortcut: isMac ? '⌥ + c' : 'Alt + c',
           bold: (str) => <strong>{str}</strong>,
