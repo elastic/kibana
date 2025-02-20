@@ -1524,7 +1524,7 @@
     "@kbn/test": "link:src/platform/packages/shared/kbn-test",
     "@kbn/test-eui-helpers": "link:src/platform/packages/private/kbn-test-eui-helpers",
     "@kbn/test-jest-helpers": "link:src/platform/packages/shared/kbn-test-jest-helpers",
-    "@kbn/test-subj-selector": "link:packages/kbn-test-subj-selector",
+    "@kbn/test-subj-selector": "link:src/platform/packages/shared/kbn-test-subj-selector",
     "@kbn/test-suites-serverless": "link:x-pack/test_serverless",
     "@kbn/test-suites-src": "link:test",
     "@kbn/test-suites-xpack": "link:x-pack/test",
