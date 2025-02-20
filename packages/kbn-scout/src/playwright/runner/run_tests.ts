@@ -58,12 +58,13 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       // wait for 5 seconds
       await silence(log, 5000);
 
-      // Running 'npx playwright test --config=${playwrightConfigPath}'
+      // Running 'npx playwright test --config=${playwrightConfigPath} --project local'
       await procs.run(`playwright`, {
         cmd: resolve(REPO_ROOT, './node_modules/.bin/playwright'),
         args: [
           'test',
           `--config=${playwrightConfigPath}`,
+          `--project=local`,
           `--grep=${playwrightGrepTag}`,
           ...(options.headed ? ['--headed'] : []),
         ],
