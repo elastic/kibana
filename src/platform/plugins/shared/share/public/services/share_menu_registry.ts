@@ -125,7 +125,7 @@ export class ShareRegistry implements ShareRegistryApi {
 
   resolveShareItemsForShareContext({ objectType, ...shareContext }: ShareContext): ShareConfigs[] {
     if (!this.urlService || !this.anonymousAccessServiceProvider) {
-      throw new Error('ShareOptionsManager#start was not been invoked');
+      throw new Error('ShareOptionsManager#start was not invoked');
     }
 
     return this.getShareConfigOptionsForObject(objectType)
