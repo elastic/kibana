@@ -219,6 +219,7 @@ const AllAssets = ({
   });
 
   const rows = getRowsFromPages(rowsData?.pages);
+  const totalHits = rowsData?.pages[0].total || 0;
 
   const [columns, setColumns] = useLocalStorage(
     columnsLocalStorageKey,
@@ -364,7 +365,7 @@ const AllAssets = ({
 
   const externalAdditionalControls = (
     <AdditionalControls
-      total={rows.length}
+      total={totalHits}
       dataView={dataView}
       title={title}
       columns={currentColumns}
@@ -455,7 +456,7 @@ const AllAssets = ({
             }}
           >
             <EuiProgress size="xs" color="accent" style={loadingStyle} />
-            {!dataView ? null : loadingState === DataLoadingState.loaded && !rows.length ? (
+            {!dataView ? null : loadingState === DataLoadingState.loaded && totalHits === 0 ? (
               <EmptyState onResetFilters={onResetFilters} />
             ) : (
               <UnifiedDataTable
@@ -476,7 +477,7 @@ const AllAssets = ({
                 renderDocumentView={EmptyComponent}
                 sort={sort}
                 rowsPerPageState={pageSize}
-                totalHits={rows.length}
+                totalHits={totalHits}
                 services={services}
                 onUpdateRowsPerPage={onChangeItemsPerPage}
                 rowHeightState={0}
