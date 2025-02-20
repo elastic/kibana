@@ -160,7 +160,6 @@
     "@kbn/alerting-state-types",
     "@kbn/reporting-server",
     "@kbn/data-quality-plugin",
-    "@kbn/ml-trained-models-utils",
     "@kbn/observability-synthetics-test-data",
     "@kbn/ml-trained-models-utils",
     "@kbn/openapi-common",
