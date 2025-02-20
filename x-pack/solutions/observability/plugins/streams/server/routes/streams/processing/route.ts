@@ -6,6 +6,7 @@
  */
 
 import {
+  FlattenRecord,
   flattenRecord,
   namedFieldDefinitionConfigSchema,
   processorWithIdDefinitionSchema,
@@ -15,6 +16,7 @@ import { checkAccess } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
 import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';
 import { ProcessingSimulationParams, simulateProcessing } from './simulation_handler';
+import { handleProcessingSuggestion } from './suggestions_handler';
 
 const paramsSchema = z.object({
   path: z.object({ name: z.string() }),
@@ -50,6 +52,51 @@ export const simulateProcessorRoute = createServerRoute({
   },
 });
 
+export interface ProcessingSuggestionBody {
+  field: string;
+  connectorId: string;
+  samples: FlattenRecord[];
+}
+
+const processingSuggestionSchema = z.object({
+  field: z.string(),
+  connectorId: z.string(),
+  samples: z.array(flattenRecord),
+});
+
+const suggestionsParamsSchema = z.object({
+  path: z.object({ name: z.string() }),
+  body: processingSuggestionSchema,
+});
+
+export const processingSuggestionRoute = createServerRoute({
+  endpoint: 'POST /api/streams/{name}/processing/_suggestions',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
+  params: suggestionsParamsSchema,
+  handler: async ({ params, request, logger, getScopedClients }) => {
+    const { inferenceClient, scopedClusterClient, streamsClient } = await getScopedClients({
+      request,
+    });
+    return handleProcessingSuggestion(
+      params.path.name,
+      params.body,
+      inferenceClient,
+      scopedClusterClient,
+      streamsClient
+    );
+  },
+});
+
 export const processingRoutes = {
   ...simulateProcessorRoute,
+  ...processingSuggestionRoute,
 };

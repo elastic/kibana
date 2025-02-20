@@ -284,7 +284,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             <EuiToolTip
               content={
                 ruleSource?.type === 'external'
-                  ? I18n.AUTHOR_IMMUTABLE_FIELD_TOOLTIP_TEXT
+                  ? I18n.FIELD_NOT_EDITABLE_TOOLTIP_TEXT(I18n.AUTHOR_FIELD_LABEL)
                   : undefined
               }
               display="block"
@@ -307,7 +307,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
             <EuiToolTip
               content={
                 ruleSource?.type === 'external'
-                  ? I18n.LICENSE_IMMUTABLE_FIELD_TOOLTIP_TEXT
+                  ? I18n.FIELD_NOT_EDITABLE_TOOLTIP_TEXT(I18n.LICENSE_FIELD_LABEL)
                   : undefined
               }
               display="block"

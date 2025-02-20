@@ -8,36 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isNumericType } from '../shared/esql_types';
-import type { FunctionDefinition, FunctionParameterType, FunctionReturnType } from './types';
-import { operatorsFunctionDefinitions } from './generated/operators';
+import {
+  type FunctionDefinition,
+  type FunctionParameterType,
+  type FunctionReturnType,
+  FunctionDefinitionTypes,
+} from './types';
+import { operatorFunctionDefinitions } from './generated/operators';
 type MathFunctionSignature = [FunctionParameterType, FunctionParameterType, FunctionReturnType];
-
-function createMathDefinition(
-  name: string,
-  functionSignatures: MathFunctionSignature[],
-  description: string,
-  validate?: FunctionDefinition['validate']
-): FunctionDefinition {
-  return {
-    type: 'builtin',
-    name,
-    description,
-    supportedCommands: ['eval', 'where', 'row', 'stats', 'metrics', 'sort'],
-    supportedOptions: ['by'],
-    signatures: functionSignatures.map((functionSignature) => {
-      const [lhs, rhs, result] = functionSignature;
-      return {
-        params: [
-          { name: 'left', type: lhs },
-          { name: 'right', type: rhs },
-        ],
-        returnType: result,
-      };
-    }),
-    validate,
-  };
-}
 
 // https://www.elastic.co/guide/en/elasticsearch/reference/master/esql-functions-operators.html#_less_than
 const baseComparisonTypeTable: MathFunctionSignature[] = [
@@ -84,7 +62,7 @@ function createComparisonDefinition(
   });
 
   return {
-    type: 'builtin' as const,
+    type: FunctionDefinitionTypes.OPERATOR,
     name,
     description,
     supportedCommands: ['eval', 'where', 'row', 'sort'],
@@ -121,176 +99,9 @@ function createComparisonDefinition(
   };
 }
 
-const addTypeTable: MathFunctionSignature[] = [
-  ['date_period', 'date_period', 'date_period'],
-  ['date_period', 'date', 'date'],
-  ['date', 'date_period', 'date'],
-  ['date', 'time_duration', 'date'],
-  ['date', 'time_literal', 'date'],
-  ['double', 'double', 'double'],
-  ['double', 'integer', 'double'],
-  ['double', 'long', 'double'],
-  ['integer', 'double', 'double'],
-  ['integer', 'integer', 'integer'],
-  ['integer', 'long', 'long'],
-  ['long', 'double', 'double'],
-  ['long', 'integer', 'long'],
-  ['long', 'long', 'long'],
-  ['time_duration', 'date', 'date'],
-  ['time_duration', 'time_duration', 'time_duration'],
-  ['unsigned_long', 'unsigned_long', 'unsigned_long'],
-  ['time_literal', 'date', 'date'],
-];
-
-const subtractTypeTable: MathFunctionSignature[] = [
-  ['date_period', 'date_period', 'date_period'],
-  ['date', 'date_period', 'date'],
-  ['date', 'time_duration', 'date'],
-  ['date', 'time_literal', 'date'],
-  ['double', 'double', 'double'],
-  ['double', 'integer', 'double'],
-  ['double', 'long', 'double'],
-  ['integer', 'double', 'double'],
-  ['integer', 'integer', 'integer'],
-  ['integer', 'long', 'long'],
-  ['long', 'double', 'double'],
-  ['long', 'integer', 'long'],
-  ['long', 'long', 'long'],
-  ['time_duration', 'date', 'date'],
-  ['time_duration', 'time_duration', 'time_duration'],
-  ['unsigned_long', 'unsigned_long', 'unsigned_long'],
-  ['time_literal', 'date', 'date'],
-];
-
-const multiplyTypeTable: MathFunctionSignature[] = [
-  ['double', 'double', 'double'],
-  ['double', 'integer', 'double'],
-  ['double', 'long', 'double'],
-  ['integer', 'double', 'double'],
-  ['integer', 'integer', 'integer'],
-  ['integer', 'long', 'long'],
-  ['long', 'double', 'double'],
-  ['long', 'integer', 'long'],
-  ['long', 'long', 'long'],
-  ['unsigned_long', 'unsigned_long', 'unsigned_long'],
-];
-
-const divideTypeTable: MathFunctionSignature[] = [
-  ['double', 'double', 'double'],
-  ['double', 'integer', 'double'],
-  ['double', 'long', 'double'],
-  ['integer', 'double', 'double'],
-  ['integer', 'integer', 'integer'],
-  ['integer', 'long', 'long'],
-  ['long', 'double', 'double'],
-  ['long', 'integer', 'long'],
-  ['long', 'long', 'long'],
-  ['unsigned_long', 'unsigned_long', 'unsigned_long'],
-];
-
-const modulusTypeTable: MathFunctionSignature[] = [
-  ['double', 'double', 'double'],
-  ['double', 'integer', 'double'],
-  ['double', 'long', 'double'],
-  ['integer', 'double', 'double'],
-  ['integer', 'integer', 'integer'],
-  ['integer', 'long', 'long'],
-  ['long', 'double', 'double'],
-  ['long', 'integer', 'long'],
-  ['long', 'long', 'long'],
-  ['unsigned_long', 'unsigned_long', 'unsigned_long'],
-];
-
-export const mathFunctions: FunctionDefinition[] = [
-  createMathDefinition(
-    '+',
-    addTypeTable,
-    i18n.translate('kbn-esql-validation-autocomplete.esql.definition.addDoc', {
-      defaultMessage: 'Add (+)',
-    })
-  ),
-  createMathDefinition(
-    '-',
-    subtractTypeTable,
-    i18n.translate('kbn-esql-validation-autocomplete.esql.definition.subtractDoc', {
-      defaultMessage: 'Subtract (-)',
-    })
-  ),
-  createMathDefinition(
-    '*',
-    multiplyTypeTable,
-    i18n.translate('kbn-esql-validation-autocomplete.esql.definition.multiplyDoc', {
-      defaultMessage: 'Multiply (*)',
-    })
-  ),
-  createMathDefinition(
-    '/',
-    divideTypeTable,
-    i18n.translate('kbn-esql-validation-autocomplete.esql.definition.divideDoc', {
-      defaultMessage: 'Divide (/)',
-    }),
-    (fnDef) => {
-      const [left, right] = fnDef.args;
-      const messages = [];
-      if (!Array.isArray(left) && !Array.isArray(right)) {
-        if (right.type === 'literal' && isNumericType(right.literalType)) {
-          if (right.value === 0) {
-            messages.push({
-              type: 'warning' as const,
-              code: 'divideByZero',
-              text: i18n.translate(
-                'kbn-esql-validation-autocomplete.esql.divide.warning.divideByZero',
-                {
-                  defaultMessage: 'Cannot divide by zero: {left}/{right}',
-                  values: {
-                    left: left.text,
-                    right: right.value,
-                  },
-                }
-              ),
-              location: fnDef.location,
-            });
-          }
-        }
-      }
-      return messages;
-    }
-  ),
-  createMathDefinition(
-    '%',
-    modulusTypeTable,
-    i18n.translate('kbn-esql-validation-autocomplete.esql.definition.moduleDoc', {
-      defaultMessage: 'Module (%)',
-    }),
-    (fnDef) => {
-      const [left, right] = fnDef.args;
-      const messages = [];
-      if (!Array.isArray(left) && !Array.isArray(right)) {
-        if (right.type === 'literal' && isNumericType(right.literalType)) {
-          if (right.value === 0) {
-            messages.push({
-              type: 'warning' as const,
-              code: 'moduleByZero',
-              text: i18n.translate(
-                'kbn-esql-validation-autocomplete.esql.divide.warning.zeroModule',
-                {
-                  defaultMessage: 'Module by zero can return null value: {left}%{right}',
-                  values: {
-                    left: left.text,
-                    right: right.value,
-                  },
-                }
-              ),
-              location: fnDef.location,
-            });
-          }
-        }
-      }
-      return messages;
-    }
-  ),
-];
-
+// these functions are also in the operatorFunctionDefinitions. There is no way to extract them from there
+// because the operatorFunctionDefinitions are generated from ES definitions. This is why we need to
+// duplicate them here
 export const comparisonFunctions: FunctionDefinition[] = [
   {
     name: '==',
@@ -398,7 +209,7 @@ export const logicalOperators: FunctionDefinition[] = [
     }),
   },
 ].map(({ name, description }) => ({
-  type: 'builtin' as const,
+  type: FunctionDefinitionTypes.OPERATOR,
   name,
   description,
   supportedCommands: ['eval', 'where', 'row', 'sort'],
@@ -428,7 +239,7 @@ const nullFunctions: FunctionDefinition[] = [
     }),
   },
 ].map<FunctionDefinition>(({ name, description }) => ({
-  type: 'builtin',
+  type: FunctionDefinitionTypes.OPERATOR,
   name,
   description,
   supportedCommands: ['eval', 'where', 'row', 'sort'],
@@ -442,7 +253,7 @@ const nullFunctions: FunctionDefinition[] = [
 
 const otherDefinitions: FunctionDefinition[] = [
   {
-    type: 'builtin' as const,
+    type: FunctionDefinitionTypes.OPERATOR,
     name: 'not',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.notDoc', {
       defaultMessage: 'Not',
@@ -457,7 +268,7 @@ const otherDefinitions: FunctionDefinition[] = [
     ],
   },
   {
-    type: 'builtin' as const,
+    type: FunctionDefinitionTypes.OPERATOR,
     name: '=',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.assignDoc', {
       defaultMessage: 'Assign (=)',
@@ -484,7 +295,7 @@ const otherDefinitions: FunctionDefinition[] = [
     ],
   },
   {
-    type: 'builtin' as const,
+    type: FunctionDefinitionTypes.OPERATOR,
     name: 'as',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.asDoc', {
       defaultMessage: 'Rename as (AS)',
@@ -502,7 +313,7 @@ const otherDefinitions: FunctionDefinition[] = [
     ],
   },
   {
-    type: 'builtin' as const,
+    type: FunctionDefinitionTypes.OPERATOR,
     name: 'where',
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.whereDoc', {
       defaultMessage: 'WHERE operator',
@@ -522,7 +333,7 @@ const otherDefinitions: FunctionDefinition[] = [
   {
     // TODO — this shouldn't be a function or an operator...
     name: 'info',
-    type: 'builtin',
+    type: FunctionDefinitionTypes.OPERATOR,
     description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.infoDoc', {
       defaultMessage: 'Show information about the current ES node',
     }),
@@ -536,8 +347,8 @@ const otherDefinitions: FunctionDefinition[] = [
   },
 ];
 
-export const builtinFunctions: FunctionDefinition[] = [
-  ...operatorsFunctionDefinitions,
+export const operatorsDefinitions: FunctionDefinition[] = [
+  ...operatorFunctionDefinitions,
   ...logicalOperators,
   ...nullFunctions,
   ...otherDefinitions,
