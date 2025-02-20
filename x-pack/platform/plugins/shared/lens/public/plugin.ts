@@ -398,12 +398,12 @@ export class LensPlugin {
       // Let Dashboard know about the Lens panel type
       embeddable.registerAddFromLibraryType<LensSavedObjectAttributes>({
         onAdd: async (container, savedObject) => {
-          const { attributeService } = await getStartServicesForEmbeddable();
+          const services = await getStartServicesForEmbeddable();
           // deserialize the saved object from visualize library
           // this make sure to fit into the new embeddable model, where the following build()
           // function expects a fully loaded runtime state
           const state = await deserializeState(
-            attributeService,
+            services,
             { savedObjectId: savedObject.id },
             savedObject.references
           );
@@ -542,9 +542,6 @@ export class LensPlugin {
         this.editorFrameService!.loadVisualizations(),
         this.editorFrameService!.loadDatasources(),
       ]);
-      const { setVisualizationMap, setDatasourceMap } = await import('./async_services');
-      setDatasourceMap(datasourceMap);
-      setVisualizationMap(visualizationMap);
       return { datasourceMap, visualizationMap };
     };
 
@@ -675,7 +672,10 @@ export class LensPlugin {
     );
 
     // Allows the Lens embeddable to easily open the inline editing flyout
-    const editLensEmbeddableAction = new EditLensEmbeddableAction(startDependencies, core);
+    const editLensEmbeddableAction = new EditLensEmbeddableAction(core, async () => {
+      const { visualizationMap, datasourceMap } = await this.initEditorFrameService();
+      return { ...startDependencies, visualizationMap, datasourceMap };
+    });
     // embeddable inline edit panel action
     startDependencies.uiActions.addTriggerAction(
       IN_APP_EMBEDDABLE_EDIT_TRIGGER,
@@ -687,13 +687,7 @@ export class LensPlugin {
       ACTION_CREATE_ESQL_CHART,
       async () => {
         const { AddESQLPanelAction } = await import('./async_services');
-        return new AddESQLPanelAction(startDependencies, core, async () => {
-          if (!this.editorFrameService) {
-            await this.initEditorFrameService();
-          }
-
-          return this.editorFrameService!;
-        });
+        return new AddESQLPanelAction(core);
       }
     );
     startDependencies.uiActions.registerActionAsync('addLensPanelAction', async () => {
