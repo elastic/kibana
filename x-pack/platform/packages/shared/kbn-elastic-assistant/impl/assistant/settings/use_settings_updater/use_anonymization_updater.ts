@@ -52,8 +52,9 @@ export const useAnonymizationUpdater = ({
         anonymizationFieldsBulkActions.update?.length ||
         anonymizationFieldsBulkActions.delete?.ids?.length
       )
-    )
+    ) {
       setUpdatedAnonymizationData(anonymizationFields);
+    }
   }, [
     anonymizationFields,
     anonymizationFieldsBulkActions.create?.length,
@@ -70,6 +71,7 @@ export const useAnonymizationUpdater = ({
       anonymizationFieldsBulkActions.create ||
       anonymizationFieldsBulkActions.update ||
       anonymizationFieldsBulkActions.delete;
+
     const bulkAnonymizationFieldsResult = hasBulkAnonymizationFields
       ? await bulkUpdateAnonymizationFields(http, anonymizationFieldsBulkActions, toasts)
       : undefined;
