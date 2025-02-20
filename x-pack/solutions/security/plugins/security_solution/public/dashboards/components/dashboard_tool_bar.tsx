@@ -12,7 +12,8 @@ import { DashboardTopNav } from '@kbn/dashboard-plugin/public';
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common';
 import type { RedirectToProps } from '@kbn/dashboard-plugin/public/dashboard_container/types';
-import { ViewMode, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { SecurityPageName } from '../../../common';
 import { useCapabilities, useKibana, useNavigation } from '../../common/lib/kibana';
 import { APP_NAME } from '../../../common/constants';
@@ -55,7 +56,7 @@ const DashboardToolBarComponent = ({
   );
 
   useEffect(() => {
-    onLoad?.((viewMode) ?? 'view');
+    onLoad?.(viewMode ?? 'view');
   }, [onLoad, viewMode]);
 
   const embedSettings = useMemo(

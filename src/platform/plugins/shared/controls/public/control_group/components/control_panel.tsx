@@ -118,7 +118,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
     setInitialLoadComplete(true);
   }
 
-  const viewMode = (rawViewMode ?? 'view');
+  const viewMode = rawViewMode ?? 'view';
   const isEditable = viewMode === 'edit';
   const controlWidth = width ?? DEFAULT_CONTROL_WIDTH;
   const controlGrow = grow ?? DEFAULT_CONTROL_GROW;

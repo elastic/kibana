@@ -7,8 +7,8 @@
 
 import { useMemo } from 'react';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { useMlKibana } from '../contexts/kibana';
-import { ViewMode } from '@kbn/presentation-publishing';
 
 export type DashboardService = ReturnType<typeof dashboardServiceProvider>;
 export type DashboardItems = Awaited<ReturnType<DashboardService['fetchDashboards']>>;

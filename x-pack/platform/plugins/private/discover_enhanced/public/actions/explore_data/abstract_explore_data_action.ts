@@ -49,9 +49,7 @@ const isApiCompatible = (api: unknown | null): api is AbstractExploreDataActionA
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
   return (
-    isApiCompatible(api) &&
-    getInheritedViewMode(api) === 'view' &&
-    !apiIsOfType(api, LENS_DOC_TYPE)
+    isApiCompatible(api) && getInheritedViewMode(api) === 'view' && !apiIsOfType(api, LENS_DOC_TYPE)
   );
 };
 
