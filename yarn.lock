@@ -5405,7 +5405,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dev-cli-errors@link:packages/kbn-dev-cli-errors":
+"@kbn/dev-cli-errors@link:src/platform/packages/shared/kbn-dev-cli-errors":
   version "0.0.0"
   uid ""
 
