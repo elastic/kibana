@@ -5,32 +5,19 @@
  * 2.0.
  */
 
-import datemath from '@kbn/datemath';
-
 export const ingestionRateQuery = ({
   index,
   start,
   end,
+  interval,
   timestampField = '@timestamp',
-  bucketCount = 10,
 }: {
   index: string;
   start: string;
   end: string;
+  interval: string;
   timestampField?: string;
-  bucketCount?: number;
 }) => {
-  const startDate = datemath.parse(start);
-  const endDate = datemath.parse(end);
-  if (!startDate || !endDate) {
-    throw new Error(`Expected a valid start and end date but got [start: ${start} | end: ${end}]`);
-  }
-
-  const intervalInSeconds = Math.max(
-    Math.round(endDate.diff(startDate, 'seconds') / bucketCount),
-    1
-  );
-
   return {
     index,
     track_total_hits: false,
@@ -45,7 +32,7 @@ export const ingestionRateQuery = ({
         docs_count: {
           date_histogram: {
             field: timestampField,
-            fixed_interval: `${intervalInSeconds}s`,
+            fixed_interval: interval,
             min_doc_count: 0,
           },
         },

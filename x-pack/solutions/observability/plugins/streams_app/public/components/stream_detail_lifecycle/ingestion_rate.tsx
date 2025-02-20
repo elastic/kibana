@@ -8,9 +8,11 @@
 import moment from 'moment';
 import React from 'react';
 import { lastValueFrom } from 'rxjs';
+import { getCalculateAutoTimeExpression } from '@kbn/data-plugin/common';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { i18n } from '@kbn/i18n';
 import { IngestStreamGetResponse } from '@kbn/streams-schema';
+import datemath from '@kbn/datemath';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -40,11 +42,13 @@ export function IngestionRate({
   refreshStats: () => void;
 }) {
   const {
+    core,
     dependencies: {
       start: { data },
     },
   } = useKibana();
   const { timeRange, setTimeRange } = useDateRange({ data });
+  const calcAutoInterval = getCalculateAutoTimeExpression((key) => core.uiSettings.get(key));
 
   const {
     loading: isLoadingIngestionRate,
@@ -53,6 +57,13 @@ export function IngestionRate({
   } = useStreamsAppFetch(
     async ({ signal }) => {
       if (!definition || isLoadingStats || !stats?.bytesPerDay) {
+        return;
+      }
+
+      const start = datemath.parse(timeRange.from);
+      const end = datemath.parse(timeRange.to);
+      const interval = calcAutoInterval(timeRange);
+      if (!start || !end || !interval) {
         return;
       }
 
@@ -65,8 +76,9 @@ export function IngestionRate({
         >(
           {
             params: ingestionRateQuery({
-              start: timeRange.from,
-              end: timeRange.to,
+              interval,
+              start: start.format(),
+              end: end.format(),
               index: definition.stream.name,
             }),
           },
@@ -74,10 +86,17 @@ export function IngestionRate({
         )
       );
 
-      return rawResponse.aggregations.docs_count.buckets.map(({ key, doc_count: docCount }) => ({
-        key,
-        value: docCount * stats.bytesPerDoc,
-      }));
+      return {
+        buckets: rawResponse.aggregations.docs_count.buckets.map(
+          ({ key, doc_count: docCount }) => ({
+            key,
+            value: docCount * stats.bytesPerDoc,
+          })
+        ),
+        start: toLegendFormat(start),
+        end: toLegendFormat(end),
+        interval,
+      };
     },
     [data.search, definition, stats, isLoadingStats, timeRange]
   );
@@ -125,39 +144,57 @@ export function IngestionRate({
         justifyContent="center"
         alignItems="center"
         style={{ width: '100%', minHeight: '250px' }}
+        direction="column"
+        gutterSize="xs"
       >
         {ingestionRateError ? (
           'Failed to load ingestion rate'
         ) : isLoadingIngestionRate || isLoadingStats || !ingestionRate ? (
           <EuiLoadingChart />
         ) : (
-          <Chart size={{ height: 250 }}>
-            <Settings showLegend={false} />
-            <AreaSeries
-              id="ingestionRate"
-              name="Ingestion rate"
-              data={ingestionRate}
-              color="#61A2FF"
-              xScaleType="time"
-              xAccessor={'key'}
-              yAccessors={['value']}
-            />
+          <>
+            <Chart size={{ height: 250 }}>
+              <Settings showLegend={false} />
+              <AreaSeries
+                id="ingestionRate"
+                name="Ingestion rate"
+                data={ingestionRate.buckets}
+                color="#61A2FF"
+                xScaleType="time"
+                xAccessor={'key'}
+                yAccessors={['value']}
+              />
 
-            <Axis
-              id="bottom-axis"
-              position="bottom"
-              tickFormat={(value) => moment(value).format('YYYY-MM-DD HH:mm:ss')}
-              gridLine={{ visible: false }}
-            />
-            <Axis
-              id="left-axis"
-              position="left"
-              tickFormat={(value) => formatBytes(value)}
-              gridLine={{ visible: true }}
-            />
-          </Chart>
+              <Axis
+                id="bottom-axis"
+                position="bottom"
+                tickFormat={(value) => moment(value).format('YYYY-MM-DD HH:mm:ss')}
+                gridLine={{ visible: true }}
+              />
+              <Axis
+                id="left-axis"
+                position="left"
+                tickFormat={(value) => formatBytes(value)}
+                gridLine={{ visible: true }}
+              />
+            </Chart>
+
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem grow>
+                <EuiText size="xs">
+                  <b>
+                    {ingestionRate.start} - {ingestionRate.end} (interval: {ingestionRate.interval})
+                  </b>
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
         )}
       </EuiFlexGroup>
     </>
   );
+}
+
+function toLegendFormat(date: moment.Moment) {
+  return date.format('MMM DD, YYYY @ DD:mm:ss');
 }
