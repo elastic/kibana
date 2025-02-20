@@ -54,7 +54,6 @@ packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
 packages/kbn-ci-stats-performance-metrics @elastic/kibana-operations
 packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
-packages/kbn-code-owners @elastic/appex-qa
 packages/kbn-cypress-config @elastic/kibana-operations
 packages/kbn-dependency-ownership @elastic/kibana-security
 packages/kbn-dependency-usage @elastic/kibana-security
@@ -351,6 +350,7 @@ src/platform/packages/private/kbn-apm-config-loader @elastic/kibana-core @vignes
 src/platform/packages/private/kbn-babel-transform @elastic/kibana-operations
 src/platform/packages/private/kbn-ci-stats-core @elastic/kibana-operations
 src/platform/packages/private/kbn-ci-stats-reporter @elastic/kibana-operations
+src/platform/packages/private/kbn-code-owners @elastic/appex-qa
 src/platform/packages/private/kbn-config-mocks @elastic/kibana-core
 src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/private/kbn-generate-csv @elastic/appex-sharedux
