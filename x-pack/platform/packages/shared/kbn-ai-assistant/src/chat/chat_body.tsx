@@ -267,7 +267,7 @@ export function ChatBody({
 
       notifications!.toasts.addSuccess({
         title: i18n.translate('xpack.aiAssistant.copyConversationSuccessToast', {
-          defaultMessage: 'Conversation copied to clipboard',
+          defaultMessage: 'Conversation content copied to clipboard in JSON format',
         }),
       });
     } catch (error) {

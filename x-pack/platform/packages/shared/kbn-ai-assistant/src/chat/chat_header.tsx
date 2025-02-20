@@ -147,18 +147,19 @@ export function ChatHeader({
               />
             </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
-              <ChatSharingMenu />
-            </EuiFlexItem>
-
             {conversationId ? (
-              <EuiFlexItem grow={false}>
-                <ChatContextMenu
-                  onCopyToClipboardClick={onCopyConversationToClipboard}
-                  onCopyUrlClick={onCopyUrl}
-                  disabled={licenseInvalid}
-                />
-              </EuiFlexItem>
+              <>
+                <EuiFlexItem grow={false}>
+                  <ChatSharingMenu />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ChatContextMenu
+                    onCopyToClipboardClick={onCopyConversationToClipboard}
+                    onCopyUrlClick={onCopyUrl}
+                    disabled={licenseInvalid}
+                  />
+                </EuiFlexItem>
+              </>
             ) : null}
           </EuiFlexGroup>
 
