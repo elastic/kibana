@@ -74,7 +74,7 @@ export class GetPreviewData {
       return {
         perGroup: {
           terms: {
-            size: 10,
+            size: 5,
             field: groupBy[0],
           },
           aggs: { perInterval },
@@ -86,7 +86,7 @@ export class GetPreviewData {
     return {
       perGroup: {
         multi_terms: {
-          size: 10,
+          size: 5,
           terms: groupBy.map((group) => ({ field: group })),
         },
         aggs: { perInterval },
@@ -604,7 +604,7 @@ export class GetPreviewData {
       response.aggregations?.perInterval.buckets.map((bucket: Bucket) => {
         return {
           date: bucket.key_as_string,
-          sliValue: bucket.metric.value ?? null,
+          sliValue: bucket.metric?.value ?? null,
         };
       }) ?? [];
 
@@ -614,7 +614,7 @@ export class GetPreviewData {
       acc[group.key] = group.perInterval.buckets.map((bucket) => {
         return {
           date: bucket.key_as_string,
-          sliValue: bucket.metric.value ?? null,
+          sliValue: bucket.metric?.value ?? null,
         };
       });
       return acc;
