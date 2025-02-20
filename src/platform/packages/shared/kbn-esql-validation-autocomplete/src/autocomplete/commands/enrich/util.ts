@@ -9,6 +9,7 @@
 
 import { ESQLCommand } from '@kbn/esql-ast';
 import { i18n } from '@kbn/i18n';
+import { ENRICH_MODES } from '../../../definitions/settings';
 import { SuggestionRawDefinition } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 
@@ -66,40 +67,6 @@ export const noPoliciesAvailableSuggestion: SuggestionRawDefinition = {
       defaultMessage: 'Click to create',
     }),
   },
-};
-
-const ENRICH_MODES = {
-  name: 'ccq.mode',
-  description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.ccqModeDoc', {
-    defaultMessage: 'Cross-clusters query mode',
-  }),
-  prefix: '_',
-  values: [
-    {
-      name: 'any',
-      description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.ccqAnyDoc', {
-        defaultMessage: 'Enrich takes place on any cluster',
-      }),
-    },
-    {
-      name: 'coordinator',
-      description: i18n.translate(
-        'kbn-esql-validation-autocomplete.esql.definitions.ccqCoordinatorDoc',
-        {
-          defaultMessage: 'Enrich takes place on the coordinating cluster receiving an ES|QL',
-        }
-      ),
-    },
-    {
-      name: 'remote',
-      description: i18n.translate(
-        'kbn-esql-validation-autocomplete.esql.definitions.ccqRemoteDoc',
-        {
-          defaultMessage: 'Enrich takes place on the cluster hosting the target index.',
-        }
-      ),
-    },
-  ],
 };
 
 export const modeSuggestions: SuggestionRawDefinition[] = ENRICH_MODES.values.map(

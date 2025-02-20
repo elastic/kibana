@@ -10,7 +10,6 @@
 import { i18n } from '@kbn/i18n';
 import type { CommandModeDefinition } from './types';
 
-/** @deprecated — the concept of a "mode" will go away soon */
 export const ENRICH_MODES: CommandModeDefinition = {
   name: 'ccq.mode',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.ccqModeDoc', {
