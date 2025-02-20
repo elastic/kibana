@@ -78,7 +78,9 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
     }
   }
 
-  const routerLinkProps = getRouterLinkProps({ href: props.href, onClick: handleClick });
+  const routerLinkProps = props.href
+    ? getRouterLinkProps({ href: props.href, onClick: handleClick })
+    : { onClick: handleClick };
 
   const commonButtonProps = {
     isDisabled: isDisabled(),
