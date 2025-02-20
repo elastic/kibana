@@ -33,17 +33,20 @@ const getSdkNameAndLanguage = (agentNameParts: string[]): SdkNameAndLanguage => 
   return { sdkName: undefined, language: undefined };
 };
 
-export const getDashboardFileNameParts = ({
+export const getDashboardFileName = ({
   agentName,
   telemetrySdkName,
-}: DashboardFileNamePartsProps): DashboardFileParts => {
+}: DashboardFileNamePartsProps): string | undefined => {
   if (!agentName) {
     throw new Error(`agent name is not defined`);
   }
   const dataFormat = telemetrySdkName ? 'otel_native' : 'classic_apm';
   const agentNameParts = agentName.split('/');
   const { sdkName, language } = getSdkNameAndLanguage(agentNameParts);
-  return { dataFormat, sdkName, language };
+  if (!dataFormat || !sdkName || !language) {
+    return undefined;
+  }
+  return `${dataFormat}-${sdkName}-${language}`;
 };
 
 export async function loadDashboardFile(filename: string): Promise<any> {

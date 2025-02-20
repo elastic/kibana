@@ -7,13 +7,15 @@
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DashboardPanelMap } from '@kbn/dashboard-plugin/common';
+// Remove
 import {
   AGENT_NAME_DASHBOARD_FILE_MAPPING,
   loadDashboardFile,
 } from './dashboards/dashboard_catalog';
 
-// import { loadDashboardFile } from './dashboards/dashboard_catalog';
-// import { getDashboardFileNameParts } from './dashboards/get_dashboard_file_name_parts';
+// Uncomment
+// import { loadDashboardFile } from './dashboards/get_dashboard_file_name';
+// import { getDashboardFileName } from './dashboards/get_dashboard_file_name';
 interface DashboardFileProps {
   agentName?: string;
   runtimeName?: string;
@@ -29,11 +31,7 @@ export function hasDashboardFile(props: DashboardFileProps) {
   return !!getDashboardFileName(props);
 }
 
-// export function hasDashboardFile(props: DashboardFileProps) {
-//   const { dataFormat, sdkName, language } = getDashboardFileNameParts(props);
-//   return !!dataFormat && !!sdkName && !!language;
-// }
-
+// Remove
 function getDashboardFileName({ agentName }: DashboardFileProps) {
   const dashboardFile = agentName && AGENT_NAME_DASHBOARD_FILE_MAPPING[agentName];
   return dashboardFile;
@@ -51,16 +49,6 @@ export async function convertSavedDashboardToPanels(
   props: MetricsDashboardProps,
   dataView: DataView
 ): Promise<DashboardPanelMap | undefined> {
-  // const { dataFormat, sdkName, language } = getDashboardFileNameParts(props);
-  // if (!dataFormat && !sdkName && !language) {
-  //   return undefined;
-  // }
-  // const filename = `${dataFormat}-${sdkName}-${language}`;
-  // const dashboardJSON = await loadDashboardFile(filename);
-
-  // if (!dashboardJSON) {
-  //   return undefined;
-  // }
   const dashboardFilename = getDashboardFileName(props);
   const dashboardJSON = !!dashboardFilename
     ? await loadDashboardFile(dashboardFilename)
