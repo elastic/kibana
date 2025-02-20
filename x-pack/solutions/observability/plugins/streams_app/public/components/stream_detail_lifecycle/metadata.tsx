@@ -25,6 +25,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIconTip,
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
@@ -173,6 +174,10 @@ export function RetentionMetadata({
         metadata={i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRate', {
           defaultMessage: 'Ingestion',
         })}
+        tip={i18n.translate('xpack.streams.streamDetailLifecycle.ingestionRateDetails', {
+          defaultMessage:
+            'Estimated average (stream total size divided by the number of days since creation).',
+        })}
         value={
           statsError ? (
             '-'
@@ -207,19 +212,28 @@ export function RetentionMetadata({
 function MetadataRow({
   metadata,
   value,
+  tip,
   button,
 }: {
   metadata: string;
   value: ReactNode;
-  action?: string;
+  tip?: string;
   button?: ReactNode;
 }) {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="xl" responsive={false}>
       <EuiFlexItem grow={1}>
-        <EuiText>
-          <b>{metadata}</b>
-        </EuiText>
+        <EuiFlexGroup alignItems="center">
+          <EuiFlexItem grow={false}>
+            <b>{metadata}</b>
+          </EuiFlexItem>
+
+          {tip ? (
+            <EuiFlexItem grow={false}>
+              <EuiIconTip content={tip} position="right" />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={4}>{value}</EuiFlexItem>
       <EuiFlexItem grow={1}>{button}</EuiFlexItem>
