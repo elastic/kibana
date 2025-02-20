@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
-import { flattenObject } from '@kbn/object-utils';
+import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { isEmpty } from 'lodash';
 import { RecursiveRecord } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
@@ -52,15 +52,15 @@ export const ProcessorOutcomePreview = ({
 
   const simulationDocuments = useMemo(() => {
     if (!simulation?.documents) {
-      return samples.map((doc) => flattenObject(doc)) as RecursiveRecord[];
+      return samples.map((doc) => flattenObjectNestedLast(doc)) as RecursiveRecord[];
     }
 
     const filterDocuments = (filter: DocsFilterOption) => {
       switch (filter) {
         case 'outcome_filter_matched':
-          return simulation.documents.filter((doc) => doc.isMatch);
+          return simulation.documents.filter((doc) => doc.status === 'parsed');
         case 'outcome_filter_unmatched':
-          return simulation.documents.filter((doc) => !doc.isMatch);
+          return simulation.documents.filter((doc) => doc.status !== 'parsed');
         case 'outcome_filter_all':
         default:
           return simulation.documents;
