@@ -57,8 +57,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       title: string,
       conversationResponse: string | ToolCall
     ) {
-      void proxy.interceptConversationTitle(title).completeAfterIntercept();
-      void proxy.interceptConversation(conversationResponse).completeAfterIntercept();
+      void proxy.interceptConversationTitle(title);
+      void proxy.interceptConversation(conversationResponse);
 
       const supertestEditorWithCookieCredentials: SupertestWithRoleScope =
         await roleScopedSupertest.getSupertestWithRoleScope('editor', {
@@ -112,7 +112,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         proxy
           .interceptConversation('Hello!')
-          .completeAfterIntercept()
+
           .catch((e) => {
             log.error(`Failed to intercept conversation ${e}`);
           });
@@ -371,19 +371,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let conversationUpdatedEvent: ConversationUpdateEvent;
 
       before(async () => {
-        proxy
-          .interceptConversationTitle('LLM-generated title')
-          .completeAfterIntercept()
-          .catch((e) => {
-            throw new Error('Failed to intercept conversation title', e);
-          });
+        proxy.interceptConversationTitle('LLM-generated title').catch((e) => {
+          throw new Error('Failed to intercept conversation title', e);
+        });
 
-        proxy
-          .interceptConversation('Good night, sir!')
-          .completeAfterIntercept()
-          .catch((e) => {
-            throw new Error('Failed to intercept conversation ', e);
-          });
+        proxy.interceptConversation('Good night, sir!').catch((e) => {
+          throw new Error('Failed to intercept conversation ', e);
+        });
 
         const createResponse = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'POST /internal/observability_ai_assistant/chat/complete',
@@ -414,12 +408,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         });
 
-        proxy
-          .interceptConversation('Good night, sir!')
-          .completeAfterIntercept()
-          .catch((e) => {
-            log.error(`Failed to intercept conversation ${e}`);
-          });
+        proxy.interceptConversation('Good night, sir!').catch((e) => {
+          log.error(`Failed to intercept conversation ${e}`);
+        });
 
         const updatedResponse = await observabilityAIAssistantAPIClient.editor({
           endpoint: 'POST /internal/observability_ai_assistant/chat/complete',

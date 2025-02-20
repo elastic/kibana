@@ -246,8 +246,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
               const expectedResponse = 'My response';
 
               before(async () => {
-                void proxy.interceptConversationTitle(expectedTitle).completeAfterIntercept();
-                void proxy.interceptConversation(expectedResponse).completeAfterIntercept();
+                void proxy.interceptConversationTitle(expectedTitle);
+                void proxy.interceptConversation(expectedResponse);
 
                 await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');
                 await testSubjects.pressEnter(ui.pages.conversations.chatInput);
@@ -305,7 +305,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
               describe('and adding another prompt', () => {
                 before(async () => {
-                  void proxy.interceptConversation('My second response').completeAfterIntercept();
+                  void proxy.interceptConversation('My second response');
 
                   await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');
                   await testSubjects.pressEnter(ui.pages.conversations.chatInput);
@@ -390,11 +390,9 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
               describe('and sending another prompt', () => {
                 before(async () => {
-                  void proxy
-                    .interceptConversation(
-                      'Service Level Indicators (SLIs) are quantifiable defined metrics that measure the performance and availability of a service or distributed system.'
-                    )
-                    .completeAfterIntercept();
+                  void proxy.interceptConversation(
+                    'Service Level Indicators (SLIs) are quantifiable defined metrics that measure the performance and availability of a service or distributed system.'
+                  );
 
                   await testSubjects.setValue(
                     ui.pages.conversations.chatInput,

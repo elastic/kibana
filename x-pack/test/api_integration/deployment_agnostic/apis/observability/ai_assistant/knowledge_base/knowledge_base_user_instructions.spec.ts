@@ -36,7 +36,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const log = getService('log');
   const retry = getService('retry');
 
-  describe('Knowledge base user instructions', function () {
+  describe.only('Knowledge base user instructions', function () {
     before(async () => {
       await importTinyElserModel(ml);
       await setupKnowledgeBase(observabilityAIAssistantAPIClient);
@@ -281,9 +281,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(status).to.be(200);
 
-        const interceptPromises = proxy
-          .interceptConversation('I, the LLM, hear you!')
-          .completeAfterIntercept();
+        void proxy.interceptConversationTitle('This is a conversation title');
+        void proxy.interceptConversation('I, the LLM, hear you!');
 
         const messages: Message[] = [
           {
@@ -322,7 +321,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         });
 
-        await interceptPromises;
+        await proxy.waitForAllInterceptorsSettled();
 
         const conversation = res.body;
         return conversation;

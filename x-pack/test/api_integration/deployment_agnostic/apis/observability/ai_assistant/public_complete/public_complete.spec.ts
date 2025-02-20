@@ -54,13 +54,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       format?: 'openai' | 'default';
       conversationResponse: string | ToolCall;
     }) {
-      const titleSimulatorPromise = proxy
-        .interceptConversationTitle('My Title')
-        .completeAfterIntercept();
-
-      const conversationSimulatorPromise = proxy
-        .interceptConversation(conversationResponse)
-        .completeAfterIntercept();
+      const titleSimulatorPromise = proxy.interceptConversationTitle('My Title');
+      const conversationSimulatorPromise = proxy.interceptConversation(conversationResponse);
 
       const response = await observabilityAIAssistantAPIClient.admin({
         endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',

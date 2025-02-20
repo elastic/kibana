@@ -127,14 +127,18 @@ export class LlmProxy {
   }
 
   interceptConversation(
-    msg: string | ToolCall,
+    msg: Array<string | ToolCall> | ToolCall | string | undefined,
     {
       name = 'default_interceptor_conversation_name',
     }: {
       name?: string;
     } = {}
   ) {
-    return this.intercept(name, (body) => !isFunctionTitleRequest(body), msg);
+    return this.intercept(
+      name,
+      (body) => !isFunctionTitleRequest(body),
+      msg
+    ).completeAfterIntercept();
   }
 
   interceptConversationTitle(title: string) {
@@ -154,7 +158,7 @@ export class LlmProxy {
           },
         ],
       }
-    );
+    ).completeAfterIntercept();
   }
 
   intercept<
