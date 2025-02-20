@@ -7,20 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as z from '@kbn/zod';
+import stringify from 'json-stable-stringify';
+import objectHash from 'object-hash';
+import { IndexStorageSettings } from '..';
 
-/**
- * This is a helper schema to convert a boolean string ("true" or "false") to a
- * boolean. Useful for processing query params.
- *
- * Accepts "true" or "false" as strings, or a boolean.
- */
-export const BooleanFromString = z
-  .enum(['true', 'false'])
-  .or(z.boolean())
-  .transform((value) => {
-    if (typeof value === 'boolean') {
-      return value;
-    }
-    return value === 'true';
-  });
+export function getSchemaVersion(storage: IndexStorageSettings): string {
+  const version = objectHash(stringify(storage.schema.properties));
+  return version;
+}
