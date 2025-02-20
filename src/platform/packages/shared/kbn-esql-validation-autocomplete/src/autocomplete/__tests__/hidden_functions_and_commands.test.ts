@@ -98,11 +98,7 @@ describe('hidden functions', () => {
         ],
       },
       {
-<<<<<<< HEAD
         type: FunctionDefinitionTypes.OPERATOR,
-=======
-        type: 'operator',
->>>>>>> main
         name: 'VISIBLE_OPERATOR',
         description: 'This is a visible function',
         supportedCommands: ['eval', 'where', 'row', 'sort'],
