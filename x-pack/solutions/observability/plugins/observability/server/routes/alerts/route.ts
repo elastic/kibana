@@ -6,8 +6,8 @@
  */
 
 import {
-  getRelatedDashboardsParamsSchema,
-  GetRelatedDashboardsResponse,
+  getRecommendedDashboardsParamsSchema,
+  GetRecommendedDashboardsResponse,
 } from '@kbn/observability-schema';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 import { createDashboardsClient } from '../../services/create_dashboards_client';
@@ -15,7 +15,7 @@ import { SuggestedDashboardsClient } from '../../services/suggested_dashboards_c
 import { InvestigateAlertsClient } from '../../services/investigate_alerts_client';
 
 const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
-  endpoint: 'GET /api/observability/alerts/related_dashboards 2023-10-31',
+  endpoint: 'GET /api/observability/alerts/recommended_dashboards 2023-10-31',
   security: {
     authz: {
       enabled: false,
@@ -23,8 +23,8 @@ const alertsDynamicDashboardSuggestions = createObservabilityServerRoute({
     },
   },
   options: { access: 'public' },
-  params: getRelatedDashboardsParamsSchema,
-  handler: async (services): Promise<GetRelatedDashboardsResponse> => {
+  params: getRecommendedDashboardsParamsSchema,
+  handler: async (services): Promise<GetRecommendedDashboardsResponse> => {
     const { dependencies, params, request, context, logger } = services;
     const { alertId } = params.query;
     const { ruleRegistry } = dependencies;

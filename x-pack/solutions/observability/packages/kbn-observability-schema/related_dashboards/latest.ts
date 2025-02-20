@@ -11,7 +11,7 @@ export {
   recommendedDashboardSchema,
 } from './schema/recommended_dashboard/v1';
 export {
-  type GetRelatedDashboardsResponse,
-  getRelatedDashboardsResponseSchema,
-  getRelatedDashboardsParamsSchema,
+  type GetRecommendedDashboardsResponse,
+  getRecommendedDashboardsResponseSchema,
+  getRecommendedDashboardsParamsSchema,
 } from './rest_specs/get_related_dashboards/v1';
