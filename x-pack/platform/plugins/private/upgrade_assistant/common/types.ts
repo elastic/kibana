@@ -325,7 +325,8 @@ export interface SystemIndicesMigrationFeature {
   migration_status: MIGRATION_STATUS;
   indices: Array<{
     index: string;
-    version: string;
+    version?: string;
+    migration_status?: MIGRATION_STATUS;
     failure_cause?: {
       error: {
         type: string;
