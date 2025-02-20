@@ -6,6 +6,7 @@
  */
 
 import { estypes } from '@elastic/elasticsearch';
+import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/types';
 import { calculateAuto } from '@kbn/calculate-auto';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
@@ -42,6 +43,7 @@ interface Options {
   interval: string;
   remoteName?: string;
   groupings?: Groupings;
+  groupBy?: string[];
 }
 
 export class GetPreviewData {
@@ -61,6 +63,36 @@ export class GetPreviewData {
       }
     }
     return dataView?.getRuntimeMappings?.() ?? {};
+  }
+
+  private addExtraTermsOrMultiTermsAgg(
+    perInterval: AggregationsAggregationContainer,
+    groupBy?: string[]
+  ): Record<string, AggregationsAggregationContainer> {
+    if (!groupBy || groupBy.length === 0) return { perInterval };
+    if (groupBy.length === 1) {
+      return {
+        perGroup: {
+          terms: {
+            size: 10,
+            field: groupBy[0],
+          },
+          aggs: { perInterval },
+        },
+        perInterval,
+      };
+    }
+
+    return {
+      perGroup: {
+        multi_terms: {
+          size: 10,
+          terms: groupBy.map((group) => ({ field: group })),
+        },
+        aggs: { perInterval },
+      },
+      perInterval,
+    };
   }
 
   private async getAPMTransactionDurationPreviewData(
@@ -529,8 +561,8 @@ export class GetPreviewData {
           filter,
         },
       },
-      aggs: {
-        perInterval: {
+      aggs: this.addExtraTermsOrMultiTermsAgg(
+        {
           date_histogram: {
             field: timestampField,
             fixed_interval: options.interval,
@@ -544,10 +576,12 @@ export class GetPreviewData {
             total: { filter: totalQuery },
           },
         },
-      },
+        options.groupBy
+      ),
     });
 
     const results =
+      // @ts-ignore
       response.aggregations?.perInterval.buckets.map((bucket) => {
         const good = bucket.good?.doc_count ?? 0;
         const total = bucket.total?.doc_count ?? 0;
@@ -562,7 +596,26 @@ export class GetPreviewData {
         };
       }) ?? [];
 
-    return { results };
+    // @ts-ignore
+    const groups = response.aggregations?.perGroup?.buckets?.reduce((acc, group) => {
+      // @ts-ignore
+      acc[group.key] = group.perInterval.buckets.map((bucket) => {
+        const good = bucket.good?.doc_count ?? 0;
+        const total = bucket.total?.doc_count ?? 0;
+        return {
+          date: bucket.key_as_string,
+          sliValue: computeSLIForPreview(good, total),
+          events: {
+            good,
+            bad: total - good,
+            total,
+          },
+        };
+      });
+      return acc;
+    }, {});
+
+    return { results, groups };
   }
 
   private getGroupingFilters(options: Options): estypes.QueryDslQueryContainer[] | undefined {
@@ -681,6 +734,7 @@ export class GetPreviewData {
         remoteName: params.remoteName,
         groupings: params.groupings,
         interval: `${bucketSize}m`,
+        groupBy: params.groupBy,
       };
 
       const type = params.indicator.type;
