@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { useCallback } from 'react';
-import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
+import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from './use_kibana';
 
 export const useDashboardsApi = (name?: string) => {
