@@ -186,41 +186,6 @@ const AssistantComponent: React.FC<Props> = ({
   // Settings modal state (so it isn't shared between assistant instances like Timeline)
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
 
-  // // Remember last selection for reuse after keyboard shortcut is pressed.
-  // // Clear it if there is no connectors
-  // useEffect(() => {
-  //   if (isLoadingCurrentUserConversations) {
-  //     console.log('useEffect 0');
-  //     return;
-  //   }
-  //   if (isFetchedConnectors && !connectors?.length) {
-  //     console.log('useEffect 1');
-  //     return setLastConversation({ id: '' });
-  //   }
-  //
-  //   if (!currentConversation?.excludeFromLastConversationStorage) {
-  //     console.log('useEffect 2', {
-  //       result:
-  //         currentConversation && !isEmpty(currentConversation?.id)
-  //           ? { id: currentConversation.id }
-  //           : { id: '' },
-  //       currentConversation,
-  //     });
-  //     setLastConversation(
-  //       currentConversation && !isEmpty(currentConversation?.id)
-  //         ? { id: currentConversation.id }
-  //         : { id: '' }
-  //     );
-  //   }
-  // }, [
-  //   isFetchedConnectors,
-  //   connectors?.length,
-  //   conversations,
-  //   currentConversation,
-  //   isLoadingCurrentUserConversations,
-  //   setLastConversation,
-  // ]);
-
   const [autoPopulatedOnce, setAutoPopulatedOnce] = useState<boolean>(false);
 
   const [messageCodeBlocks, setMessageCodeBlocks] = useState<CodeBlockDetails[][]>();

@@ -11,7 +11,7 @@ import { useSearchParams } from 'react-router-dom-v5-compat';
 import { i18n } from '@kbn/i18n';
 import { SECURITY_AI_SETTINGS } from '@kbn/elastic-assistant/impl/assistant/settings/translations';
 import { CONVERSATIONS_TAB } from '@kbn/elastic-assistant/impl/assistant/settings/const';
-import type { SettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
+import type { ManagementSettingsTabs } from '@kbn/elastic-assistant/impl/assistant/settings/types';
 import { useKibana } from '../../common/lib/kibana';
 
 export const ManagementSettings = React.memo(() => {
@@ -31,7 +31,7 @@ export const ManagementSettings = React.memo(() => {
 
   const [searchParams] = useSearchParams();
   const currentTab = useMemo(
-    () => (searchParams.get('tab') as SettingsTabs) ?? CONVERSATIONS_TAB,
+    () => (searchParams.get('tab') as ManagementSettingsTabs) ?? CONVERSATIONS_TAB,
     [searchParams]
   );
 

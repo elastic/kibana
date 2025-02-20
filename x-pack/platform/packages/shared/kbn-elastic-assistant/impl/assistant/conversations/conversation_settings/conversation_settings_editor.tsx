@@ -61,7 +61,6 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
       }
     }, [conversationUpdates?.id, selectedConversation]);
     const selectedSystemPrompt = useMemo(() => {
-      console.log('selectedSystemPrompt conversationUpdates?', conversationUpdates);
       return getDefaultSystemPrompt({ allSystemPrompts, conversation: conversationUpdates });
     }, [allSystemPrompts, conversationUpdates]);
     const handleOnSystemPromptSelectionChange = useCallback(
@@ -104,7 +103,6 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
     );
 
     const selectedConnector = useMemo(() => {
-      console.log('selectedConnector conversationUpdates?', conversationUpdates);
       const selectedConnectorId: string | undefined = conversationUpdates?.apiConfig?.connectorId;
       if (areConnectorsFetched) {
         return connectors?.find((c) => c.id === selectedConnectorId);

@@ -45,7 +45,7 @@ import {
   TRACE_OPTIONS_SESSION_STORAGE_KEY,
 } from './constants';
 import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
-import { SettingsTabs } from '../assistant/settings/types';
+import { ModalSettingsTabs } from '../assistant/settings/types';
 import { AssistantNavLink } from './assistant_nav_link';
 
 export type SelectedConversation = { id: string } | { title: string };
@@ -121,7 +121,7 @@ export interface UseAssistantContext {
   navigateToApp: (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
   nameSpace: string;
   registerPromptContext: RegisterPromptContext;
-  selectedSettingsTab: SettingsTabs | null;
+  selectedSettingsTab: ModalSettingsTabs | null;
   contentReferencesVisible: boolean;
   showAnonymizedValues: boolean;
   setShowAnonymizedValues: React.Dispatch<React.SetStateAction<boolean>>;
@@ -129,7 +129,7 @@ export interface UseAssistantContext {
   setAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean | undefined>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
   setLastConversation: React.Dispatch<React.SetStateAction<LastConversation | undefined>>;
-  setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs | null>>;
+  setSelectedSettingsTab: React.Dispatch<React.SetStateAction<ModalSettingsTabs | null>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
   setTraceOptions: (traceOptions: {
@@ -289,7 +289,7 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
   /**
    * Settings State
    */
-  const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs | null>(null);
+  const [selectedSettingsTab, setSelectedSettingsTab] = useState<ModalSettingsTabs | null>(null);
 
   /**
    * Setting code block ref that can be used to store callback from parent components

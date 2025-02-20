@@ -30,12 +30,12 @@ import {
 } from './const';
 import { KnowledgeBaseSettingsManagement } from '../../knowledge_base/knowledge_base_settings_management';
 import { EvaluationSettings } from '.';
-import { SettingsTabs } from './types';
+import { ManagementSettingsTabs } from './types';
 
 interface Props {
   dataViews: DataViewsContract;
   onTabChange?: (tabId: string) => void;
-  currentTab: SettingsTabs;
+  currentTab: ManagementSettingsTabs;
 }
 
 /**

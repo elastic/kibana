@@ -23,7 +23,7 @@ interface UseConversationsUpdater {
     React.SetStateAction<ConversationsBulkActions>
   >;
   setUpdatedAssistantStreamingEnabled: React.Dispatch<React.SetStateAction<boolean>>;
-  saveConversationsSettings: () => Promise<boolean>;
+  saveConversationsSettings: (bulkActions?: ConversationsBulkActions) => Promise<boolean>;
 }
 
 export const useConversationsUpdater = (
@@ -54,43 +54,44 @@ export const useConversationsUpdater = (
     setUpdatedAssistantStreamingEnabled(assistantStreamingEnabled);
   }, [assistantStreamingEnabled, conversations]);
 
-  const hasBulkConversations =
-    conversationsSettingsBulkActions.create ||
-    conversationsSettingsBulkActions.update ||
-    conversationsSettingsBulkActions.delete;
-
   /**
    * Save all pending settings
    */
-  const saveConversationsSettings = useCallback(async (): Promise<boolean> => {
-    const bulkResult = hasBulkConversations
-      ? await bulkUpdateConversations(http, conversationsSettingsBulkActions, toasts)
-      : undefined;
-    const didUpdateAssistantStreamingEnabled =
-      assistantStreamingEnabled !== updatedAssistantStreamingEnabled;
+  const saveConversationsSettings = useCallback(
+    async (bulkActions?: ConversationsBulkActions): Promise<boolean> => {
+      // had trouble with conversationsSettingsBulkActions not updating fast enough
+      // from the setConversationsSettingsBulkActions in saveSystemPromptSettings
+      const bulkUpdates = bulkActions ?? conversationsSettingsBulkActions;
+      const hasBulkConversations = bulkUpdates.create || bulkUpdates.update || bulkUpdates.delete;
+      const bulkResult = hasBulkConversations
+        ? await bulkUpdateConversations(http, bulkUpdates, toasts)
+        : undefined;
+      const didUpdateAssistantStreamingEnabled =
+        assistantStreamingEnabled !== updatedAssistantStreamingEnabled;
 
-    setAssistantStreamingEnabled(updatedAssistantStreamingEnabled);
+      setAssistantStreamingEnabled(updatedAssistantStreamingEnabled);
 
-    if (didUpdateAssistantStreamingEnabled) {
-      assistantTelemetry?.reportAssistantSettingToggled({
-        assistantStreamingEnabled: updatedAssistantStreamingEnabled,
-      });
-    }
-    setConversationsSettingsBulkActions({});
-    return bulkResult?.success ?? true;
-  }, [
-    http,
-    toasts,
-    hasBulkConversations,
-    conversationsSettingsBulkActions,
-    assistantStreamingEnabled,
-    updatedAssistantStreamingEnabled,
-    setAssistantStreamingEnabled,
-    assistantTelemetry,
-  ]);
+      if (didUpdateAssistantStreamingEnabled) {
+        assistantTelemetry?.reportAssistantSettingToggled({
+          assistantStreamingEnabled: updatedAssistantStreamingEnabled,
+        });
+      }
+      setConversationsSettingsBulkActions({});
+      return bulkResult?.success ?? true;
+    },
+    [
+      http,
+      toasts,
+      conversationsSettingsBulkActions,
+      assistantStreamingEnabled,
+      updatedAssistantStreamingEnabled,
+      setAssistantStreamingEnabled,
+      assistantTelemetry,
+    ]
+  );
 
   useEffect(() => {
-    // Update conversa  tion settings when conversations are loaded
+    // Update conversation settings when conversations are loaded
     if (conversationsLoaded && Object.keys(conversationSettings).length === 0) {
       setConversationSettings(conversations);
     }

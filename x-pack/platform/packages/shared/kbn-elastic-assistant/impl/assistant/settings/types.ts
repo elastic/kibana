@@ -5,10 +5,23 @@
  * 2.0.
  */
 
-import { CONNECTORS_TAB, QUICK_PROMPTS_TAB, SYSTEM_PROMPTS_TAB } from './const';
+import {
+  ANONYMIZATION_TAB,
+  CONNECTORS_TAB,
+  CONVERSATIONS_TAB,
+  EVALUATION_TAB,
+  KNOWLEDGE_BASE_TAB,
+  QUICK_PROMPTS_TAB,
+  SYSTEM_PROMPTS_TAB,
+} from './const';
 
-export type BaseSettingsTabs = typeof QUICK_PROMPTS_TAB | typeof SYSTEM_PROMPTS_TAB;
+export type ModalSettingsTabs = typeof QUICK_PROMPTS_TAB | typeof SYSTEM_PROMPTS_TAB;
 
-export type AdditionalSettingsTabs = typeof CONNECTORS_TAB;
-
-export type SettingsTabs = BaseSettingsTabs | AdditionalSettingsTabs;
+export type ManagementSettingsTabs =
+  | typeof CONVERSATIONS_TAB
+  | typeof QUICK_PROMPTS_TAB
+  | typeof SYSTEM_PROMPTS_TAB
+  | typeof ANONYMIZATION_TAB
+  | typeof KNOWLEDGE_BASE_TAB
+  | typeof EVALUATION_TAB
+  | typeof CONNECTORS_TAB;

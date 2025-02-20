@@ -109,8 +109,8 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
 
   const handleSave = useCallback(
     async (param?: { callback?: () => void }) => {
-      await saveSystemPromptSettings();
-      await saveConversationsSettings();
+      const { conversationUpdates } = await saveSystemPromptSettings();
+      await saveConversationsSettings(conversationUpdates);
       await refetchSystemPromptConversations();
       toasts?.addSuccess({
         iconType: 'check',
@@ -127,7 +127,6 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
   }, [resetConversationsSettings, resetSystemPromptSettings]);
 
   const onCreate = useCallback(() => {
-    // TODO test this change
     onSystemPromptSelect('');
     openFlyout();
   }, [onSystemPromptSelect, openFlyout]);
@@ -158,8 +157,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
   const onDeleteConfirmed = useCallback(() => {
     closeConfirmModal();
     handleSave({ callback: refetchAll });
-    setConversationsSettingsBulkActions({});
-  }, [closeConfirmModal, handleSave, refetchAll, setConversationsSettingsBulkActions]);
+  }, [closeConfirmModal, handleSave, refetchAll]);
 
   const onSaveCancelled = useCallback(() => {
     closeFlyout();
@@ -169,8 +167,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
   const onSaveConfirmed = useCallback(() => {
     closeFlyout();
     handleSave({ callback: refetchAll });
-    setConversationsSettingsBulkActions({});
-  }, [closeFlyout, handleSave, refetchAll, setConversationsSettingsBulkActions]);
+  }, [closeFlyout, handleSave, refetchAll]);
 
   const confirmationTitle = useMemo(
     () =>

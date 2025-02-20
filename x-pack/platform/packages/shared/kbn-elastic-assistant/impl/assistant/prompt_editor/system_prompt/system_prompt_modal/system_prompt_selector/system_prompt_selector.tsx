@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -38,7 +38,27 @@ export type SystemPromptSelectorOption = EuiComboBoxOptionOption<{
   isDefault: boolean;
   isNewConversationDefault: boolean;
 }>;
-
+const formatSystemPromptsAsOptions = (
+  systemPrompts: SystemPromptSettings[]
+): SystemPromptSelectorOption[] =>
+  systemPrompts.reduce(
+    (acc: SystemPromptSelectorOption[], sp) =>
+      sp.id !== ''
+        ? [
+            ...acc,
+            {
+              value: {
+                isDefault: sp.isDefault ?? false,
+                isNewConversationDefault: sp.isNewConversationDefault ?? false,
+              },
+              label: sp.name,
+              id: sp.id,
+              'data-test-subj': `${TEST_IDS.SYSTEM_PROMPT_SELECTOR}-${sp.id}`,
+            },
+          ]
+        : acc,
+    []
+  );
 /**
  * Selector for choosing and deleting System Prompts
  */
@@ -53,25 +73,13 @@ export const SystemPromptSelector: React.FC<Props> = React.memo(
   }) => {
     // Form options
     const [options, setOptions] = useState<SystemPromptSelectorOption[]>(
-      systemPrompts.reduce(
-        (acc: SystemPromptSelectorOption[], sp) =>
-          sp.id !== ''
-            ? [
-                ...acc,
-                {
-                  value: {
-                    isDefault: sp.isDefault ?? false,
-                    isNewConversationDefault: sp.isNewConversationDefault ?? false,
-                  },
-                  label: sp.name,
-                  id: sp.id,
-                  'data-test-subj': `${TEST_IDS.SYSTEM_PROMPT_SELECTOR}-${sp.id}`,
-                },
-              ]
-            : acc,
-        []
-      )
+      formatSystemPromptsAsOptions(systemPrompts)
     );
+    useEffect(() => {
+      if (systemPrompts.length && !options.length) {
+        setOptions(formatSystemPromptsAsOptions(systemPrompts));
+      }
+    }, [options.length, systemPrompts]);
     const selectedOptions = useMemo<SystemPromptSelectorOption[]>(() => {
       return selectedSystemPrompt && selectedSystemPrompt.id !== ''
         ? [
