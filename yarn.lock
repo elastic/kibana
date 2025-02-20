@@ -3993,7 +3993,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-common-types@link:packages/kbn-ambient-common-types":
+"@kbn/ambient-common-types@link:src/platform/packages/private/kbn-ambient-common-types":
   version "0.0.0"
   uid ""
 
