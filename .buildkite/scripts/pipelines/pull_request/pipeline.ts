@@ -236,7 +236,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (
       (await doAnyChangesMatch([
-        /^packages\/kbn-securitysolution-.*/,
+        /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
         /^x-pack\/solutions\/security\/plugins\/security_solution/,
         /^x-pack\/test\/defend_workflows_cypress/,
         /^x-pack\/test\/security_solution_cypress/,
@@ -252,7 +253,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
     if (
       (await doAnyChangesMatch([
         /^package.json/,
-        /^packages\/kbn-securitysolution-.*/,
+        /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
         /^x-pack\/platform\/plugins\/shared\/alerting/,
         /^x-pack\/platform\/plugins\/shared\/data_views\/common/,
         /^x-pack\/solutions\/security\/plugins\/lists/,
@@ -297,7 +299,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       (await doAnyChangesMatch([
         /^package.json/,
         /^src\/platform\/packages\/shared\/kbn-discover-utils/,
-        /^packages\/kbn-doc-links/,
+        /^src\/platform\/packages\/shared\/kbn-doc-links/,
         /^src\/platform\/packages\/shared\/kbn-dom-drag-drop/,
         /^src\/platform\/packages\/shared\/kbn-es-query/,
         /^src\/platform\/packages\/shared\/kbn-i18n/,
@@ -308,7 +310,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^src\/platform\/packages\/shared\/kbn-rule-data-utils/,
         /^src\/platform\/packages\/shared\/kbn-safer-lodash-set/,
         /^src\/platform\/packages\/shared\/kbn-search-types/,
-        /^packages\/kbn-securitysolution-.*/,
+        /^src\/platform\/packages\/shared\/kbn-securitysolution-.*/,
+        /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-.*/,
         /^src\/platform\/packages\/shared\/kbn-securitysolution-ecs/,
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-io-ts-alerting-types/,
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-io-ts-list-types/,
@@ -316,8 +319,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-t-grid/,
         /^src\/platform\/packages\/shared\/kbn-ui-theme/,
         /^src\/platform\/packages\/shared\/kbn-utility-types/,
-        /^packages\/react/,
-        /^packages\/shared-ux/,
+        /^src\/platform\/packages\/shared\/react/,
+        /^src\/platform\/packages\/shared\/shared-ux/,
         /^src\/core/,
         /^src\/platform\/plugins\/shared\/charts/,
         /^src\/platform\/plugins\/shared\/controls/,
@@ -362,7 +365,7 @@ const getPipeline = (filename: string, removeSteps = true) => {
       (await doAnyChangesMatch([
         /^package.json/,
         /^src\/platform\/packages\/shared\/kbn-discover-utils/,
-        /^packages\/kbn-doc-links/,
+        /^src\/platform\/packages\/shared\/kbn-doc-links/,
         /^src\/platform\/packages\/shared\/kbn-dom-drag-drop/,
         /^src\/platform\/packages\/shared\/kbn-es-query/,
         /^src\/platform\/packages\/shared\/kbn-i18n/,
@@ -373,7 +376,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^src\/platform\/packages\/shared\/kbn-rule-data-utils/,
         /^src\/platform\/packages\/shared\/kbn-safer-lodash-set/,
         /^src\/platform\/packages\/shared\/kbn-search-types/,
-        /^packages\/kbn-securitysolution-.*/,
         /^src\/platform\/packages\/shared\/kbn-securitysolution-ecs/,
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-io-ts-alerting-types/,
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-io-ts-list-types/,
@@ -381,8 +383,8 @@ const getPipeline = (filename: string, removeSteps = true) => {
         /^x-pack\/solutions\/security\/packages\/kbn-securitysolution-t-grid/,
         /^src\/platform\/packages\/shared\/kbn-ui-theme/,
         /^src\/platform\/packages\/shared\/kbn-utility-types/,
-        /^packages\/react/,
-        /^packages\/shared-ux/,
+        /^src\/platform\/packages\/shared\/react/,
+        /^src\/platform\/packages\/shared\/shared-ux/,
         /^src\/core/,
         /^src\/platform\/plugins\/shared\/charts/,
         /^src\/platform\/plugins\/shared\/controls/,
