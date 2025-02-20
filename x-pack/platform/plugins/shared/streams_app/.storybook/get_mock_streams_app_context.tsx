@@ -38,6 +38,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
     },
     services: {
       dataStreamsClient: Promise.resolve({} as unknown as DataStreamsStatsClient),
+      PageTemplate: () => null,
     },
     isServerless: false,
   };

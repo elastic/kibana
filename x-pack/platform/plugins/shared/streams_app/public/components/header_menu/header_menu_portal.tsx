@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, ReactNode } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 // FIXME use import { toMountPoint } from '@kbn/react-kibana-mount';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import type { HeaderMenuPortalProps } from '../../types';
+import { AppMountParameters } from '@kbn/core/public';
+
+export interface HeaderMenuPortalProps {
+  children: ReactNode;
+  setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  theme$: AppMountParameters['theme$'];
+}
 
 // eslint-disable-next-line import/no-default-export
 export default function HeaderMenuPortal({
