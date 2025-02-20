@@ -68,6 +68,7 @@ export function KqlQueryEdit({
           isDisabled: isSavedQueryRule,
           defaultSavedQuery: savedQuery,
           resetToSavedQuery: isSavedQueryRule,
+          bubbleSubmitEvent: true,
         }}
       />
     </>
