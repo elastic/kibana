@@ -203,7 +203,7 @@ Tests should run at the positive security boundary condition, meaning that they 
  
 The functional UI tests now default to logging in with a user named `test_user` and the roles of this user can be changed dynamically without logging in and out.  
 
-In order to achieve this a new service was introduced called `createTestUserService` (see `packages/kbn-ftr-common-functional-ui-services/services/security/test_user.ts`). The purpose of this test user service is to create roles defined in the test config files and setRoles() or restoreDefaults().
+In order to achieve this a new service was introduced called `createTestUserService` (see `src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/security/test_user.ts`). The purpose of this test user service is to create roles defined in the test config files and setRoles() or restoreDefaults().
 
 An example of how to set the role like how its defined below:
 
