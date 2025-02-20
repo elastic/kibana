@@ -19,6 +19,7 @@ import {
 
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
+import { ViewMode } from '@kbn/presentation-publishing';
 
 import type { DashboardSearchOut } from '@kbn/dashboard-plugin/server/content_management';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -128,7 +129,7 @@ export function Dashboards() {
 
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const getInitialInput = () => ({
-      viewMode: 'view',
+      viewMode: 'view' as ViewMode,
       timeRange: { from: dateRange.from, to: dateRange.to },
     });
     return Promise.resolve<DashboardCreationOptions>({

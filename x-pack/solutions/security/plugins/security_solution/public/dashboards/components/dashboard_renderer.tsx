@@ -14,6 +14,7 @@ import type {
 } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
+import { ViewMode } from '@kbn/presentation-publishing';
 
 import { useDispatch } from 'react-redux';
 import { BehaviorSubject } from 'rxjs';
