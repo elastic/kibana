@@ -32,7 +32,7 @@ export class ShareRegistry implements ShareRegistryApi {
     this.registerEmbedShareAction();
   }
 
-  private readonly shareOptionsRegistry: Record<
+  private readonly shareOptionsStore: Record<
     string,
     Map<InternalShareActionIntent | `integration-${string}`, ShareActionIntents>
   > = {
@@ -43,11 +43,11 @@ export class ShareRegistry implements ShareRegistryApi {
     shareObject: string,
     shareActionIntent: ShareActionIntents
   ): void {
-    if (!this.shareOptionsRegistry[shareObject]) {
-      this.shareOptionsRegistry[shareObject] = new Map();
+    if (!this.shareOptionsStore[shareObject]) {
+      this.shareOptionsStore[shareObject] = new Map();
     }
 
-    const shareContextMap = this.shareOptionsRegistry[shareObject];
+    const shareContextMap = this.shareOptionsStore[shareObject];
 
     const recordKey =
       shareActionIntent.shareType === 'integration'
@@ -113,8 +113,8 @@ export class ShareRegistry implements ShareRegistryApi {
   getShareConfigOptionsForObject(
     objectType: ShareContext['objectType']
   ): Array<ShareActionIntents | undefined> {
-    const shareContextMap = this.shareOptionsRegistry[objectType];
-    const globalOptions = Array.from(this.shareOptionsRegistry[this.globalMarker].values());
+    const shareContextMap = this.shareOptionsStore[objectType];
+    const globalOptions = Array.from(this.shareOptionsStore[this.globalMarker].values());
 
     if (!shareContextMap) {
       return globalOptions;
