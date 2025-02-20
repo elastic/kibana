@@ -91,6 +91,7 @@ export interface CoreConfigUsageData {
     rewriteBasePath: boolean;
     keepaliveTimeout: number;
     socketTimeout: number;
+    protocol: 'http1' | 'http2';
     compression: {
       enabled: boolean;
       referrerWhitelistConfigured: boolean;

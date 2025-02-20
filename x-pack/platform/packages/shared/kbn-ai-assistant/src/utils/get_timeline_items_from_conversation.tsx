@@ -80,10 +80,6 @@ export function getTimelineItemsfromConversation({
     payload: ChatActionClickPayload;
   }) => void;
 }): ChatTimelineItem[] {
-  const messagesWithoutSystem = messages.filter(
-    (message) => message.message.role !== MessageRole.System
-  );
-
   const items: ChatTimelineItem[] = [
     {
       id: v4(),
@@ -100,7 +96,7 @@ export function getTimelineItemsfromConversation({
       }),
       role: MessageRole.User,
     },
-    ...messagesWithoutSystem.map((message, index) => {
+    ...messages.map((message, index) => {
       const id = v4();
 
       let title: React.ReactNode = '';
@@ -108,10 +104,8 @@ export function getTimelineItemsfromConversation({
       let element: React.ReactNode | undefined;
 
       const prevFunctionCall =
-        message.message.name &&
-        messagesWithoutSystem[index - 1] &&
-        messagesWithoutSystem[index - 1].message.function_call
-          ? messagesWithoutSystem[index - 1].message.function_call
+        message.message.name && messages[index - 1] && messages[index - 1].message.function_call
+          ? messages[index - 1].message.function_call
           : undefined;
 
       let role = message.message.function_call?.trigger || message.message.role;

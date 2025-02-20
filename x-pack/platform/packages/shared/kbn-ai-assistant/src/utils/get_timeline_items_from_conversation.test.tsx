@@ -62,13 +62,6 @@ describe('getTimelineItemsFromConversation', () => {
           {
             '@timestamp': new Date().toISOString(),
             message: {
-              role: MessageRole.System,
-              content: 'System',
-            },
-          },
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
               role: MessageRole.User,
               content: 'User',
             },
@@ -77,7 +70,7 @@ describe('getTimelineItemsFromConversation', () => {
         onActionClick: jest.fn(),
       });
     });
-    it('excludes the system message', () => {
+    it('includes the opening message and the user message', () => {
       expect(items.length).toBe(2);
       expect(items[0].title).toBe('started a conversation');
     });
@@ -113,13 +106,6 @@ describe('getTimelineItemsFromConversation', () => {
         hasConnector: true,
         chatState: ChatState.Ready,
         messages: [
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.System,
-              content: 'System',
-            },
-          },
           {
             '@timestamp': new Date().toISOString(),
             message: {
@@ -207,13 +193,6 @@ describe('getTimelineItemsFromConversation', () => {
           {
             '@timestamp': new Date().toISOString(),
             message: {
-              role: MessageRole.System,
-              content: 'System',
-            },
-          },
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
               role: MessageRole.User,
               content: 'Hello',
             },
@@ -282,13 +261,6 @@ describe('getTimelineItemsFromConversation', () => {
         hasConnector: true,
         chatState: ChatState.Ready,
         messages: [
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.System,
-              content: 'System',
-            },
-          },
           {
             '@timestamp': new Date().toISOString(),
             message: {
@@ -367,13 +339,6 @@ describe('getTimelineItemsFromConversation', () => {
           {
             '@timestamp': new Date().toISOString(),
             message: {
-              role: MessageRole.System,
-              content: 'System',
-            },
-          },
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
               role: MessageRole.Assistant,
               content: '',
               function_call: {
@@ -415,13 +380,6 @@ describe('getTimelineItemsFromConversation', () => {
         hasConnector: true,
         chatState: ChatState.Ready,
         messages: [
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.System,
-              content: 'System',
-            },
-          },
           {
             '@timestamp': new Date().toISOString(),
             message: {
@@ -491,13 +449,6 @@ describe('getTimelineItemsFromConversation', () => {
         hasConnector: true,
         chatState: ChatState.Loading,
         messages: [
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.System,
-              content: 'System',
-            },
-          },
           {
             '@timestamp': new Date().toISOString(),
             message: {

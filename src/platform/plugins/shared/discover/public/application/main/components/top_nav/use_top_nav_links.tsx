@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
@@ -54,6 +54,15 @@ export const useTopNavLinks = ({
   shouldShowESQLToDataViewTransitionModal: boolean;
 }): TopNavMenuData[] => {
   const dispatch = useInternalStateDispatch();
+  const [newSearchUrl, setNewSearchUrl] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    const fetchData = async () => {
+      const url = await services.locator.getUrl({});
+      setNewSearchUrl(url);
+    };
+    fetchData();
+  }, [services]);
+
   const discoverParams: AppMenuDiscoverParams = useMemo(
     () => ({
       isEsqlMode,
@@ -92,6 +101,7 @@ export const useTopNavLinks = ({
 
       if (!defaultMenu?.newItem?.disabled) {
         const newSearchMenuItem = getNewSearchAppMenuItem({
+          newSearchUrl,
           onNewSearch: () => {
             services.locator.navigate({});
           },
@@ -116,7 +126,7 @@ export const useTopNavLinks = ({
       }
 
       return items;
-    }, [discoverParams, state, services, defaultMenu, onOpenInspector]);
+    }, [discoverParams, state, services, defaultMenu, onOpenInspector, newSearchUrl]);
 
   const getAppMenuAccessor = useProfileAccessor('getAppMenu');
   const appMenuRegistry = useMemo(() => {
