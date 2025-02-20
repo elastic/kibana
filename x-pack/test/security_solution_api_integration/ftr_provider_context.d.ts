@@ -8,4 +8,5 @@ import { GenericFtrProviderContext } from '@kbn/test';
 
 import { services } from './config/serverless/services';
 
+export const ftrServices: services;
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;

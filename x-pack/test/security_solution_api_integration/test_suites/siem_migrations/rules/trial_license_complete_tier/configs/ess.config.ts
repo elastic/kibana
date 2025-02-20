@@ -11,11 +11,31 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../../../../../config/ess/config.base.trial')
   );
 
+  const defaultConfig = functionalConfig.getAll();
   return {
-    ...functionalConfig.getAll(),
+    ...defaultConfig,
     testFiles: [require.resolve('..')],
     junit: {
       reportName: 'SIEM Migrations Integration Tests - ESS Env - Trial License',
+    },
+    kbnTestServer: {
+      ...defaultConfig.kbnTestServer,
+      serverArgs: [
+        ...defaultConfig.kbnTestServer.serverArgs,
+        `--xpack.actions.preconfigured=${JSON.stringify({
+          'preconfigured-bedrock': {
+            name: 'preconfigured-bedrock',
+            actionTypeId: '.bedrock',
+            config: {
+              apiUrl: 'https://example.com',
+            },
+            secrets: {
+              username: 'elastic',
+              password: 'elastic',
+            },
+          },
+        })}`,
+      ],
     },
   };
 }
