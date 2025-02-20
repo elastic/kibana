@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { htmlIdGenerator, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { TabsBar } from '../tabs_bar';
 import { getTabAttributes } from '../../utils/get_tab_attributes';
@@ -35,7 +35,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   onChanged,
 }) => {
   const [tabContentId] = useState(() => htmlIdGenerator()());
-  const [state, setState] = useState<TabbedContentState>(() => {
+  const [state, _setState] = useState<TabbedContentState>(() => {
     return {
       items: initialItems,
       selectedItem:
@@ -45,19 +45,30 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   });
   const { items, selectedItem } = state;
 
+  const changeState = useCallback(
+    (getNextState: (prevState: TabbedContentState) => TabbedContentState) => {
+      _setState((prevState) => {
+        const nextState = getNextState(prevState);
+        onChanged(nextState);
+        return nextState;
+      });
+    },
+    [_setState, onChanged]
+  );
+
   const onSelect = useCallback(
     (item: TabItem) => {
-      setState((prevState) => ({
+      changeState((prevState) => ({
         ...prevState,
         selectedItem: item,
       }));
     },
-    [setState]
+    [changeState]
   );
 
   const onClose = useCallback(
     (item: TabItem) => {
-      setState((prevState) => {
+      changeState((prevState) => {
         const nextItems = prevState.items.filter((prevItem) => prevItem.id !== item.id);
         // TODO: better selection logic
         const nextSelectedItem = nextItems.length ? nextItems[nextItems.length - 1] : null;
@@ -69,22 +80,18 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
         };
       });
     },
-    [setState]
+    [changeState]
   );
 
   const onAdd = useCallback(() => {
     const newItem = createItem();
-    setState((prevState) => {
+    changeState((prevState) => {
       return {
         items: [...prevState.items, newItem],
         selectedItem: newItem,
       };
     });
-  }, [setState, createItem]);
-
-  useEffect(() => {
-    onChanged(state);
-  }, [state, onChanged]);
+  }, [changeState, createItem]);
 
   return (
     <EuiFlexGroup
