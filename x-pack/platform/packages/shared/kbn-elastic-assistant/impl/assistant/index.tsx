@@ -323,18 +323,24 @@ const AssistantComponent: React.FC<Props> = ({
   });
 
   useEffect(() => {
-    // reset PromptContexts state when conversation changes
     if (
       autoPopulatedOnce &&
       currentConversation &&
       lastConversation?.title !== currentConversation?.title
     ) {
+      // reset PromptContexts state when conversation changes
       setAutoPopulatedOnce(false);
       setSelectedPromptContexts({});
       setUserPrompt(null);
-      return;
     }
-    if (currentConversation?.messages.length || autoPopulatedOnce) {
+  }, [autoPopulatedOnce, currentConversation, lastConversation?.title, setUserPrompt]);
+
+  useEffect(() => {
+    if (
+      (currentConversation && lastConversation?.title !== currentConversation?.title) ||
+      currentConversation?.messages.length ||
+      autoPopulatedOnce
+    ) {
       return;
     }
 
