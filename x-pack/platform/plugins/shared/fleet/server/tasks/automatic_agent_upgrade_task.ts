@@ -74,12 +74,17 @@ export class AutomaticAgentUpgradeTask {
         title: TITLE,
         timeout: TIMEOUT,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
+          let cancelled = false;
+          const isCancelled = () => cancelled;
           return {
             run: async () => {
-              return this.runTask(taskInstance, core);
+              if (isCancelled()) {
+                this.abortController.abort('Task has been cancelled');
+              }
+              return this.runTask(taskInstance, core, isCancelled);
             },
             cancel: async () => {
-              this.abortController.abort('Task timed out');
+              cancelled = true;
             },
           };
         },
@@ -116,13 +121,58 @@ export class AutomaticAgentUpgradeTask {
     return `${TYPE}:${VERSION}`;
   }
 
+  public runTask = async (
+    taskInstance: ConcreteTaskInstance,
+    core: CoreSetup,
+    isCancelled: () => boolean
+  ) => {
+    if (!appContextService.getExperimentalFeatures().enableAutomaticAgentUpgrades) {
+      this.logger.debug(
+        '[AutomaticAgentUpgradeTask] Aborting runTask: automatic upgrades feature is disabled'
+      );
+      return;
+    }
+
+    if (!this.wasStarted) {
+      this.logger.debug('[AutomaticAgentUpgradeTask] Aborting runTask(): task not started yet');
+      return;
+    }
+    // Check that this task is current
+    if (taskInstance.id !== this.taskId) {
+      this.logger.debug(
+        `[AutomaticAgentUpgradeTask] Outdated task version: Got [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
+      );
+      return getDeleteTaskRunResult();
+    }
+
+    this.logger.info('[AutomaticAgentUpgradeTask] runTask() started');
+
+    const [coreStart] = await core.getStartServices();
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
+
+    try {
+      await this.checkAgentPoliciesForAutomaticUpgrades(esClient, soClient, isCancelled);
+      this.endRun('success');
+    } catch (err) {
+      if (err instanceof errors.RequestAbortedError) {
+        this.logger.warn(`[AutomaticAgentUpgradeTask] Request aborted due to timeout: ${err}`);
+        this.endRun();
+        return;
+      }
+      this.logger.error(`[AutomaticAgentUpgradeTask] Error: ${err}`);
+      this.endRun('error');
+    }
+  };
+
   private endRun(msg: string = '') {
     this.logger.info(`[AutomaticAgentUpgradeTask] runTask() ended${msg ? ': ' + msg : ''}`);
   }
 
   private async checkAgentPoliciesForAutomaticUpgrades(
     esClient: ElasticsearchClient,
-    soClient: SavedObjectsClientContract
+    soClient: SavedObjectsClientContract,
+    isCancelled: () => boolean
   ) {
     // Fetch custom agent policies with set required_versions in batches.
     const agentPolicyFetcher = await agentPolicyService.fetchAllAgentPolicies(soClient, {
@@ -139,6 +189,10 @@ export class AutomaticAgentUpgradeTask {
         return;
       }
       for (const agentPolicy of agentPolicyPageResults) {
+        if (isCancelled()) {
+          this.abortController.abort('Task has been cancelled');
+        }
+
         await this.checkAgentPolicyForAutomaticUpgrades(esClient, soClient, agentPolicy);
       }
     }
@@ -333,44 +387,4 @@ export class AutomaticAgentUpgradeTask {
     );
     return { upgradeDurationSeconds };
   }
-
-  public runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
-    if (!appContextService.getExperimentalFeatures().enableAutomaticAgentUpgrades) {
-      this.logger.debug(
-        '[AutomaticAgentUpgradeTask] Aborting runTask: automatic upgrades feature is disabled'
-      );
-      return;
-    }
-
-    if (!this.wasStarted) {
-      this.logger.debug('[AutomaticAgentUpgradeTask] Aborting runTask(): task not started yet');
-      return;
-    }
-    // Check that this task is current
-    if (taskInstance.id !== this.taskId) {
-      this.logger.debug(
-        `[AutomaticAgentUpgradeTask] Outdated task version: Got [${taskInstance.id}] from task instance. Current version is [${this.taskId}]`
-      );
-      return getDeleteTaskRunResult();
-    }
-
-    this.logger.info('[AutomaticAgentUpgradeTask] runTask() started');
-
-    const [coreStart] = await core.getStartServices();
-    const esClient = coreStart.elasticsearch.client.asInternalUser;
-    const soClient = new SavedObjectsClient(coreStart.savedObjects.createInternalRepository());
-
-    try {
-      await this.checkAgentPoliciesForAutomaticUpgrades(esClient, soClient);
-      this.endRun('success');
-    } catch (err) {
-      if (err instanceof errors.RequestAbortedError) {
-        this.logger.warn(`[AutomaticAgentUpgradeTask] Request aborted due to timeout: ${err}`);
-        this.endRun();
-        return;
-      }
-      this.logger.error(`[AutomaticAgentUpgradeTask] Error: ${err}`);
-      this.endRun('error');
-    }
-  };
 }
