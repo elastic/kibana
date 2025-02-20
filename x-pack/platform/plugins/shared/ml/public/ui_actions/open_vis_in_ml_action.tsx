@@ -56,9 +56,9 @@ export function createVisToADJobAction(
             telemetry
           );
         } else if (isMapApi(embeddable)) {
-          const [{ showMapVisToADJobFlyout }, [coreStart, { share, data, dashboard }]] =
+          const [{ showMapVisToADJobFlyout }, [coreStart, { share, data, dashboard, telemetry }]] =
             await Promise.all([import('../embeddables/job_creation/map'), getStartServices()]);
-          await showMapVisToADJobFlyout(embeddable, coreStart, share, data, dashboard);
+          await showMapVisToADJobFlyout(embeddable, coreStart, share, data, dashboard, telemetry);
         }
       } catch (e) {
         return Promise.reject();
