@@ -129,7 +129,7 @@ describe('GraphOverlay', () => {
       );
 
       expect(useStateSyncingActionsMock.mock.calls[0][0].indices).toEqual(
-        mockGlobalState.dataViewPicker.analyzer.dataView?.title?.split(',')
+        mockGlobalState.sourcerer.sourcererScopes.analyzer.selectedPatterns
       );
     });
   });

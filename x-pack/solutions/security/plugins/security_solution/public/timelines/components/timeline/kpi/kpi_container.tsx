@@ -11,8 +11,8 @@ import { useSelector } from 'react-redux';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { TimerangeInput } from '@kbn/timelines-plugin/common';
 import { EuiPanel } from '@elastic/eui';
-import { useBrowserFields } from '../../../../data_view_picker/hooks/use_browser_fields';
 import { TimelineId } from '../../../../../common/types';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import type { State } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -26,17 +26,15 @@ import {
   endSelector,
   startSelector,
 } from '../../../../common/components/super_date_picker/selectors';
-import { useSelectedPatterns } from '../../../../data_view_picker/hooks/use_selected_patterns';
-import { useDataView } from '../../../../data_view_picker/hooks/use_data_view';
 
 interface KpiExpandedProps {
   timelineId: string;
 }
 
 export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
-  const browserFields = useBrowserFields(SourcererScopeName.timeline);
-  const { dataView: sourcererDataView } = useDataView(SourcererScopeName.timeline);
-  const selectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+  const { browserFields, sourcererDataView, selectedPatterns } = useSourcererDataView(
+    SourcererScopeName.timeline
+  );
 
   const { uiSettings } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);

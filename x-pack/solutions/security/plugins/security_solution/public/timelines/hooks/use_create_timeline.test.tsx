@@ -13,19 +13,12 @@ import { TimelineId } from '../../../common/types';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { timelineActions } from '../store';
 import { inputsActions } from '../../common/store/inputs';
+import { sourcererActions } from '../../sourcerer/store';
 import { appActions } from '../../common/store/app';
 import { SourcererScopeName } from '../../sourcerer/store/model';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { TestProviders, mockGlobalState } from '../../common/mock';
 import { defaultUdtHeaders } from '../components/timeline/body/column_headers/default_headers';
-import { useSelectDataView } from '../../data_view_picker/hooks/use_select_data_view';
-
-jest.mock('../../data_view_picker/hooks/use_select_data_view', () => {
-  const mock = jest.fn();
-  return {
-    useSelectDataView: () => mock,
-  };
-});
 
 jest.mock('../../common/components/discover_in_timeline/use_discover_in_timeline_context');
 jest.mock('../../common/containers/use_global_time', () => {
@@ -62,10 +55,9 @@ describe('useCreateTimeline', () => {
 
   it('should dispatch correct actions when calling the returned function', async () => {
     const createTimeline = jest.spyOn(timelineActions, 'createTimeline');
+    const setSelectedDataView = jest.spyOn(sourcererActions, 'setSelectedDataView');
     const addLinkTo = jest.spyOn(inputsActions, 'addLinkTo');
     const addNotes = jest.spyOn(appActions, 'addNotes');
-
-    const setSelectedDataView = jest.mocked(useSelectDataView());
 
     const hookResult = renderHook(
       () =>
@@ -84,7 +76,7 @@ describe('useCreateTimeline', () => {
     expect(createTimeline.mock.calls[0][0].timelineType).toEqual(TimelineTypeEnum.default);
     expect(createTimeline.mock.calls[0][0].columns).toEqual(defaultUdtHeaders);
     expect(createTimeline.mock.calls[0][0].dataViewId).toEqual(
-      mockGlobalState.dataViewPicker.default.dataView?.id
+      mockGlobalState.sourcerer.defaultDataView.id
     );
     expect(createTimeline.mock.calls[0][0].indexNames).toEqual(
       expect.arrayContaining(
@@ -94,11 +86,11 @@ describe('useCreateTimeline', () => {
     expect(createTimeline.mock.calls[0][0].show).toEqual(true);
     expect(createTimeline.mock.calls[0][0].updated).toEqual(undefined);
     expect(createTimeline.mock.calls[0][0].excludedRowRendererIds).toHaveLength(RowRendererCount);
-    expect(setSelectedDataView.mock.calls[0][0].scope).toEqual([SourcererScopeName.timeline]);
-    expect(setSelectedDataView.mock.calls[0][0].id).toEqual(
-      mockGlobalState.dataViewPicker.default.dataView?.id
+    expect(setSelectedDataView.mock.calls[0][0].id).toEqual(SourcererScopeName.timeline);
+    expect(setSelectedDataView.mock.calls[0][0].selectedDataViewId).toEqual(
+      mockGlobalState.sourcerer.defaultDataView.id
     );
-    expect(setSelectedDataView.mock.calls[0][0].patterns).toEqual(
+    expect(setSelectedDataView.mock.calls[0][0].selectedPatterns).toEqual(
       expect.arrayContaining(
         mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline].selectedPatterns
       )

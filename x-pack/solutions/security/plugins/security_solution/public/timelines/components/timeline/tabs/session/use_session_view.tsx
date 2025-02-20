@@ -18,8 +18,8 @@ import {
 import { useDispatch } from 'react-redux';
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useSelectedPatterns } from '../../../../../data_view_picker/hooks/use_selected_patterns';
 import { DocumentDetailsRightPanelKey } from '../../../../../flyout/document_details/shared/constants/panel_keys';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import {
   getScopedActions,
   isActiveTimeline,
@@ -279,7 +279,7 @@ export const useSessionView = ({ scopeId, height }: { scopeId: string; height?: 
     [globalFullScreen, scopeId, timelineFullScreen]
   );
 
-  const selectedPatterns = useSelectedPatterns(SourcererScopeName.detections);
+  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.detections);
   const alertsIndex = useMemo(() => selectedPatterns.join(','), [selectedPatterns]);
 
   const { openFlyout } = useExpandableFlyoutApi();

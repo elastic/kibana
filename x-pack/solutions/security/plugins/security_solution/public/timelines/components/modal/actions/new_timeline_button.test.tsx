@@ -21,6 +21,7 @@ jest.mock('react-redux', () => {
 
   return {
     ...original,
+    useSelector: jest.fn(),
     useDispatch: () => jest.fn(),
   };
 });
@@ -51,7 +52,8 @@ describe('NewTimelineButton', () => {
   });
 
   it('should call the correct action with clicking on the new timeline button', async () => {
-    const dataViewId = 'security-solution-default';
+    const dataViewId = '';
+    const selectedPatterns: string[] = [];
 
     const spy = jest.spyOn(timelineActions, 'createTimeline');
 
@@ -65,18 +67,7 @@ describe('NewTimelineButton', () => {
         columns: defaultUdtHeaders,
         dataViewId,
         id: TimelineId.test,
-        indexNames: [
-          '.siem-signals-spacename',
-          'apm-*-transaction*',
-          'auditbeat-*',
-          'endgame-*',
-          'filebeat-*',
-          'logs-*',
-          'packetbeat-*',
-          'traces-apm*',
-          'winlogbeat-*',
-          '-*elastic-cloud-logs-*',
-        ],
+        indexNames: selectedPatterns,
         show: true,
         timelineType: 'default',
         updated: undefined,

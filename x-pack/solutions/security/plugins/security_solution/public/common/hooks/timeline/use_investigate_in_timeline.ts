@@ -8,12 +8,12 @@
 import { useCallback } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
-import { useSelectDataView } from '../../../data_view_picker/hooks/use_select_data_view';
 import { useCreateTimeline } from '../../../timelines/hooks/use_create_timeline';
 import { updateProviders, setFilters, applyKqlFilterQuery } from '../../../timelines/store/actions';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import type { DataProvider } from '../../../../common/types';
 import { sourcererSelectors } from '../../store';
+import { sourcererActions } from '../../store/actions';
 import { inputsActions } from '../../store/inputs';
 import { InputsModelId } from '../../store/inputs/constants';
 import type { TimeRange } from '../../store/inputs/model';
@@ -67,8 +67,6 @@ export const useInvestigateInTimeline = () => {
     timelineId: TimelineId.active,
     timelineType: TimelineTypeEnum.default,
   });
-
-  const setSelectedDataView = useSelectDataView();
 
   const investigateInTimeline = useCallback(
     async ({
@@ -126,24 +124,19 @@ export const useInvestigateInTimeline = () => {
         // Only show detection alerts
         // (This is required so the timeline event count matches the prevalence count)
         if (!keepDataView) {
-          setSelectedDataView({
-            scope: [SourcererScopeName.timeline],
-            id: defaultDataView.id,
-            patterns: [signalIndexName || ''],
-          });
+          dispatch(
+            sourcererActions.setSelectedDataView({
+              id: SourcererScopeName.timeline,
+              selectedDataViewId: defaultDataView.id,
+              selectedPatterns: [signalIndexName || ''],
+            })
+          );
         }
         // Unlock the time range from the global time range
         dispatch(inputsActions.removeLinkTo([InputsModelId.timeline, InputsModelId.global]));
       }
     },
-    [
-      clearTimelineTemplate,
-      clearTimelineDefault,
-      dispatch,
-      setSelectedDataView,
-      defaultDataView.id,
-      signalIndexName,
-    ]
+    [clearTimelineTemplate, clearTimelineDefault, dispatch, defaultDataView.id, signalIndexName]
   );
 
   return { investigateInTimeline };

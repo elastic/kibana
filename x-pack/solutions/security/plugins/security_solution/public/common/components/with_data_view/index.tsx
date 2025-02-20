@@ -9,9 +9,9 @@ import React from 'react';
 import type { ComponentType } from 'react';
 import type { ReactElement } from 'react-markdown';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { DataViewPickerScopeName } from '../../../data_view_picker/constants';
-import { useFullDataView } from '../../../data_view_picker/hooks/use_full_data_view';
 import { DataViewErrorComponent } from './data_view_error';
+import { useGetScopedSourcererDataView } from '../../../sourcerer/components/use_get_sourcerer_data_view';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 type OmitDataView<T> = T extends { dataView: DataView } ? Omit<T, 'dataView'> : T;
 
@@ -30,8 +30,8 @@ export const withDataView = <P extends WithDataViewArg>(
   fallback?: ReactElement
 ) => {
   const ComponentWithDataView = (props: OmitDataView<P>) => {
-    const dataView = useFullDataView({
-      dataViewPickerScope: DataViewPickerScopeName.timeline,
+    const dataView = useGetScopedSourcererDataView({
+      sourcererScope: SourcererScopeName.timeline,
     });
 
     if (!dataView) {

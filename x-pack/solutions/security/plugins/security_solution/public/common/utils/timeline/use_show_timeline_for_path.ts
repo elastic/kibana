@@ -9,16 +9,19 @@ import { useCallback, useMemo } from 'react';
 import { matchPath } from 'react-router-dom';
 
 import { getLinksWithHiddenTimeline } from '../../links';
+import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../sourcerer/containers';
 import { useKibana } from '../../lib/kibana';
 import { hasAccessToSecuritySolution } from '../../../helpers_access';
 
 const isTimelinePathVisible = (currentPath: string): boolean => {
   const groupLinksWithHiddenTimelinePaths = getLinksWithHiddenTimeline().map((l) => l.path);
-  const hiddenTimelineRoutes = [...groupLinksWithHiddenTimelinePaths];
+  const hiddenTimelineRoutes = groupLinksWithHiddenTimelinePaths;
   return !hiddenTimelineRoutes.find((route) => matchPath(currentPath, route));
 };
 
 export const useShowTimelineForGivenPath = () => {
+  const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.timeline);
   const {
     services: {
       application: { capabilities },
@@ -26,10 +29,9 @@ export const useShowTimelineForGivenPath = () => {
   } = useKibana();
   const userHasSecuritySolutionVisible = hasAccessToSecuritySolution(capabilities);
 
-  // FIXME: this used to be () => userHasSecuritySolutionVisible && (indicesExist || dataViewId === null)
   const isTimelineAllowed = useMemo(
-    () => userHasSecuritySolutionVisible,
-    [userHasSecuritySolutionVisible]
+    () => userHasSecuritySolutionVisible && (indicesExist || dataViewId === null),
+    [indicesExist, dataViewId, userHasSecuritySolutionVisible]
   );
 
   const getIsTimelineVisible = useCallback(

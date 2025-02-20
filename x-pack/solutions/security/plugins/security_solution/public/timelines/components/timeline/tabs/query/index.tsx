@@ -15,9 +15,6 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
-import { useSelectedPatterns } from '../../../../../data_view_picker/hooks/use_selected_patterns';
-import { useBrowserFields } from '../../../../../data_view_picker/hooks/use_browser_fields';
-import { useDataView } from '../../../../../data_view_picker/hooks/use_data_view';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import {
   DocumentDetailsLeftPanelKey,
@@ -42,6 +39,7 @@ import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { isActiveTimeline } from '../../../../../helpers';
 import type { TimelineModel } from '../../../../store/model';
 import { UnifiedTimelineBody } from '../../body/unified_timeline_body';
@@ -85,12 +83,15 @@ export const QueryTabContentComponent: React.FC<Props> = ({
   eventIdToNoteIds,
 }) => {
   const dispatch = useDispatch();
-
-  const { dataView, status: sourcererStatus } = useDataView(SourcererScopeName.timeline);
-  const browserFields = useBrowserFields(SourcererScopeName.timeline);
-  const loadingSourcerer = sourcererStatus !== 'ready';
-  const selectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
-
+  const {
+    browserFields,
+    dataViewId,
+    loading: loadingSourcerer,
+    // important to get selectedPatterns from useSourcererDataView
+    // in order to include the exclude filters in the search that are not stored in the timeline
+    selectedPatterns,
+    sourcererDataView,
+  } = useSourcererDataView(SourcererScopeName.timeline);
   /*
    * `pageIndex` needs to be maintained for each table in each tab independently
    * and consequently it cannot be the part of common redux state
@@ -125,13 +126,13 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     return combineQueries({
       config: esQueryConfig,
       dataProviders,
-      indexPattern: dataView,
+      indexPattern: sourcererDataView,
       browserFields,
       filters,
       kqlQuery,
       kqlMode,
     });
-  }, [esQueryConfig, dataProviders, dataView, browserFields, filters, kqlQuery, kqlMode]);
+  }, [esQueryConfig, dataProviders, sourcererDataView, browserFields, filters, kqlQuery, kqlMode]);
 
   useInvalidFilterQuery({
     id: timelineId,
@@ -173,7 +174,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   const [dataLoadingState, { events, inspect, totalCount, loadNextBatch, refreshedAt, refetch }] =
     useTimelineEvents({
-      dataViewId: dataView.id ?? '',
+      dataViewId,
       endDate: end,
       fields: timelineQueryFieldsFromColumns,
       filterQuery: combinedQueries?.filterQuery,
@@ -181,7 +182,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
       indexNames: selectedPatterns,
       language: kqlQuery.language,
       limit: sampleSize,
-      runtimeMappings: dataView.runtimeFieldMap as RunTimeMappings,
+      runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
       skip: !canQueryTimeline,
       sort: timelineQuerySortField,
       startDate: start,

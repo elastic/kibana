@@ -17,11 +17,11 @@ import type { FilterManager } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useDataView } from '../../../../data_view_picker/hooks/use_data_view';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import type { State, inputsModel } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store';
@@ -73,7 +73,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       services: { data },
     } = useKibana();
 
-    const { dataView: sourcererDataView } = useDataView(SourcererScopeName.timeline);
+    const { sourcererDataView } = useSourcererDataView(SourcererScopeName.timeline);
 
     const getIsDataProviderVisible = useMemo(
       () => timelineSelectors.dataProviderVisibilitySelector(),

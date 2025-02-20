@@ -13,13 +13,11 @@ import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
 import { dataTableActions, TableId, tableDefaults } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
-import { useSelectedPatterns } from '../../../../data_view_picker/hooks/use_selected_patterns';
-import { useBrowserFields } from '../../../../data_view_picker/hooks/use_browser_fields';
-import { useDataView } from '../../../../data_view_picker/hooks/use_data_view';
 import type { CustomBulkAction } from '../../../../../common/types';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { useKibana } from '../../../../common/lib/kibana';
 import { BULK_ADD_TO_TIMELINE_LIMIT } from '../../../../../common/constants';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import type { TimelineArgs } from '../../../../timelines/containers';
 import { useTimelineEventsHandler } from '../../../../timelines/containers';
 import { eventsViewerSelector } from '../../../../common/components/events_viewer/selectors';
@@ -65,11 +63,14 @@ export const useAddBulkToTimelineAction = ({
 }: UseAddBulkToTimelineActionProps) => {
   const [disableActionOnSelectAll, setDisabledActionOnSelectAll] = useState(false);
 
-  const { dataView } = useDataView(scopeId);
-  const browserFields = useBrowserFields(scopeId);
-  const selectedPatterns = useSelectedPatterns(scopeId);
-  const dataViewId = dataView?.id ?? '';
-
+  const {
+    browserFields,
+    dataViewId,
+    sourcererDataView,
+    // important to get selectedPatterns from useSourcererDataView
+    // in order to include the exclude filters in the search that are not stored in the timeline
+    selectedPatterns,
+  } = useSourcererDataView(scopeId);
   const dispatch = useDispatch();
   const { uiSettings } = useKibana().services;
 
@@ -93,13 +94,13 @@ export const useAddBulkToTimelineAction = ({
     return combineQueries({
       config: esQueryConfig,
       dataProviders: [],
-      indexPattern: dataView,
+      indexPattern: sourcererDataView,
       filters: combinedFilters,
       kqlQuery: { query: '', language: 'kuery' },
       browserFields,
       kqlMode: 'filter',
     });
-  }, [esQueryConfig, dataView, combinedFilters, browserFields]);
+  }, [esQueryConfig, sourcererDataView, combinedFilters, browserFields]);
 
   const filterQuery = useMemo(() => {
     if (!combinedQuery) return '';
@@ -117,7 +118,7 @@ export const useAddBulkToTimelineAction = ({
     sort: timelineQuerySortField,
     indexNames: selectedPatterns,
     filterQuery,
-    runtimeMappings: dataView.runtimeFieldMap as RunTimeMappings,
+    runtimeMappings: sourcererDataView.runtimeFieldMap as RunTimeMappings,
     limit: Math.min(BULK_ADD_TO_TIMELINE_LIMIT, totalCount),
     timerangeKind: 'absolute',
   });

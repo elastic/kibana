@@ -13,9 +13,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { EuiToolTip, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useBrowserFields } from '../../../../data_view_picker/hooks/use_browser_fields';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { DroppableWrapper } from '../../../../common/components/drag_and_drop/droppable_wrapper';
 import { droppableTimelineProvidersPrefix } from '../../../../common/components/drag_and_drop/helpers';
 
@@ -106,7 +106,7 @@ const CustomTooltipDiv = styled.div`
 
 export const DataProviders = React.memo<Props>(({ timelineId }) => {
   const dispatch = useDispatch();
-  const browserFields = useBrowserFields(SourcererScopeName.timeline);
+  const { browserFields } = useSourcererDataView(SourcererScopeName.timeline);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
 
   const dataProviders = useDeepEqualSelector(

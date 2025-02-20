@@ -11,7 +11,6 @@ import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 
 import type { FilterManager } from '@kbn/data-plugin/public';
-import { DataViewPicker } from '../../../../data_view_picker/components/data_view_picker';
 import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import type { KqlMode } from '../../../store/model';
@@ -23,6 +22,7 @@ import { QueryBarTimeline } from '../query_bar';
 
 import { TimelineDatePickerLock } from '../date_picker_lock';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { Sourcerer } from '../../../../sourcerer/components';
 import {
   DATA_PROVIDER_HIDDEN_EMPTY,
   DATA_PROVIDER_HIDDEN_POPULATED,
@@ -112,7 +112,7 @@ export const SearchOrFilter = React.memo<Props>(
             responsive={false}
           >
             <EuiFlexItem grow={false}>
-              <DataViewPicker scope={SourcererScopeName.timeline} />
+              <Sourcerer scope={SourcererScopeName.timeline} />
             </EuiFlexItem>
             <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container" grow={1}>
               <QueryBarTimeline

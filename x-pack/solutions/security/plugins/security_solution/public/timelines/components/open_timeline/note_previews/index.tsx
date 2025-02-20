@@ -20,7 +20,6 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useSelectedPatterns } from '../../../../data_view_picker/hooks/use_selected_patterns';
 import { useKibana } from '../../../../common/lib/kibana';
 import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/shared/constants/panel_keys';
 import type { TimelineResultNote } from '../types';
@@ -32,6 +31,7 @@ import * as i18n from './translations';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useDeleteNote } from './hooks/use_delete_note';
 import { getTimelineNoteSelector } from '../../timeline/tabs/notes/selectors';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
@@ -52,7 +52,7 @@ const ToggleEventDetailsButtonComponent: React.FC<ToggleEventDetailsButtonProps>
   eventId,
   timelineId,
 }) => {
-  const selectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.timeline);
 
   const { telemetry } = useKibana().services;
   const { openFlyout } = useExpandableFlyoutApi();

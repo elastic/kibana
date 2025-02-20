@@ -6,15 +6,15 @@
  */
 
 import { useMemo } from 'react';
-import { useBrowserFields } from '../../../../../data_view_picker/hooks/use_browser_fields';
 import { SourcererScopeName } from '../../../../../sourcerer/store/model';
+import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { requiredFieldsForActions } from '../../../../../detections/components/alerts_table/default_config';
 import { defaultUdtHeaders } from '../../body/column_headers/default_headers';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { memoizedGetTimelineColumnHeaders } from './utils';
 
 export const useTimelineColumns = (columns: ColumnHeaderOptions[]) => {
-  const browserFields = useBrowserFields(SourcererScopeName.timeline);
+  const { browserFields } = useSourcererDataView(SourcererScopeName.timeline);
 
   const localColumns = useMemo(() => columns ?? defaultUdtHeaders, [columns]);
 
