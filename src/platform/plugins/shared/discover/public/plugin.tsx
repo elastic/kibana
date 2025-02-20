@@ -254,10 +254,16 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
-    plugins.uiActions.addTriggerActionAsync('CONTEXT_MENU_TRIGGER', ACTION_VIEW_SAVED_SEARCH, async () => {
-      const { getViewDiscoverSessionAction } = await import('./embeddable/actions/view_discover_session_action');
-      return getViewDiscoverSessionAction(core.application, this.locator!);
-    });
+    plugins.uiActions.addTriggerActionAsync(
+      'CONTEXT_MENU_TRIGGER',
+      ACTION_VIEW_SAVED_SEARCH,
+      async () => {
+        const { getViewDiscoverSessionAction } = await import(
+          './embeddable/actions/view_discover_session_action'
+        );
+        return getViewDiscoverSessionAction(core.application, this.locator!);
+      }
+    );
     plugins.uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
     plugins.uiActions.registerTrigger(DISCOVER_CELL_ACTIONS_TRIGGER);
 

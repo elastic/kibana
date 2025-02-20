@@ -40,7 +40,6 @@ export {
   type NonPersistedDisplayOptions,
 } from './embeddable';
 
-
 export async function loadSharingDataHelpers() {
   return await import('./utils/get_sharing_data');
 }

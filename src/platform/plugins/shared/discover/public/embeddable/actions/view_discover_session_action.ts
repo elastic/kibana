@@ -9,15 +9,22 @@
 
 import type { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { apiCanAccessViewMode, getInheritedViewMode, type EmbeddableApiContext, apiIsOfType, CanAccessViewMode, HasType } from '@kbn/presentation-publishing';
-import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
+import {
+  apiCanAccessViewMode,
+  getInheritedViewMode,
+  type EmbeddableApiContext,
+  apiIsOfType,
+  CanAccessViewMode,
+  HasType,
+} from '@kbn/presentation-publishing';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
+import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import type { DiscoverAppLocator } from '../../../common';
 import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
 import { ACTION_VIEW_SAVED_SEARCH } from './constants';
-import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { PublishesSavedSearch, apiPublishesSavedSearch } from '../types';
-import { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 
 type ViewSavedSearchActionApi = CanAccessViewMode & HasType & PublishesSavedSearch;
 
@@ -32,7 +39,10 @@ export const compatibilityCheck = (
   );
 };
 
-export function getViewDiscoverSessionAction(application: ApplicationStart, locator: DiscoverAppLocator) {
+export function getViewDiscoverSessionAction(
+  application: ApplicationStart,
+  locator: DiscoverAppLocator
+) {
   return {
     id: ACTION_VIEW_SAVED_SEARCH,
     type: ACTION_VIEW_SAVED_SEARCH,
@@ -43,15 +53,16 @@ export function getViewDiscoverSessionAction(application: ApplicationStart, loca
       const locatorParams = getDiscoverLocatorParams(embeddable);
       await locator.navigate(locatorParams);
     },
-    getDisplayName: () => i18n.translate('discover.savedSearchEmbeddable.action.viewSavedSearch.displayName', {
-      defaultMessage: 'Open in Discover',
-    }),
+    getDisplayName: () =>
+      i18n.translate('discover.savedSearchEmbeddable.action.viewSavedSearch.displayName', {
+        defaultMessage: 'Open in Discover',
+      }),
     getIconType: () => 'discoverApp',
     isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
       const { capabilities } = application;
       const hasDiscoverPermissions =
         (capabilities.discover_v2.show as boolean) || (capabilities.discover_v2.save as boolean);
       return hasDiscoverPermissions && compatibilityCheck(embeddable);
-    }
-  } as ActionDefinition<EmbeddableApiContext>
+    },
+  } as ActionDefinition<EmbeddableApiContext>;
 }
