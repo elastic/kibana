@@ -73,7 +73,7 @@ export const useWorkflow = () => {
     if (data?.token && !localStorageWorkflow) {
       setSelectedWorkflowId(onboardingTokenToWorkflowId(data.token));
     }
-  }, [data]);
+  }, [data, localStorageWorkflow]);
   return {
     selectedWorkflowId,
     setSelectedWorkflowId: (newWorkflowId: WorkflowId) => {
