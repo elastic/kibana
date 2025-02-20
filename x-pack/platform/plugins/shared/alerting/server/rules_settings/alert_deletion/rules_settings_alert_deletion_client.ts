@@ -72,7 +72,7 @@ export class RulesSettingsAlertDeletionClient {
 
     const { attributes, version } = await this.getOrCreate();
     if (!attributes.alertDeletion) {
-      throw new Error('Alert deletion settings are undefined');
+      throw new Error('Existing alert deletion settings are undefined');
     }
 
     const modificationMetadata = await this.getModificationMetadata();
@@ -94,7 +94,7 @@ export class RulesSettingsAlertDeletionClient {
       );
 
       if (!result.attributes.alertDeletion) {
-        throw new Error('Alert deletion settings are undefined');
+        throw new Error('Alert deletion settings after update are undefined');
       }
       return result.attributes.alertDeletion;
     } catch (e) {
