@@ -475,43 +475,6 @@ export async function pickTestGroupRunOrder() {
     bk.uploadArtifacts('ftr_run_order.json');
   }
 
-  const rawScoutConfigs: Record<string, { group: string; pluginPath: string; configs: string[] }> =
-    {
-      discover_enhanced: {
-        group: 'platform',
-        pluginPath: 'x-pack/platform/plugins/private/discover_enhanced',
-        configs: [
-          'x-pack/platform/plugins/private/discover_enhanced/ui_tests/parallel.playwright.config.ts',
-          'x-pack/platform/plugins/private/discover_enhanced/ui_tests/playwright.config.ts',
-        ],
-      },
-      maps: {
-        group: 'platform',
-        pluginPath: 'x-pack/platform/plugins/shared/maps',
-        configs: ['x-pack/platform/plugins/shared/maps/ui_tests/playwright.config.ts'],
-      },
-      observability_onboarding: {
-        group: 'observability',
-        pluginPath: 'x-pack/solutions/observability/plugins/observability_onboarding',
-        configs: [
-          'x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/parallel.playwright.config.ts',
-          'x-pack/solutions/observability/plugins/observability_onboarding/ui_tests/playwright.config.ts',
-        ],
-      },
-    };
-
-  Fs.writeFileSync('scout_test_configs.json', JSON.stringify(rawScoutConfigs, null, 2));
-  bk.uploadArtifacts('scout_test_configs.json');
-
-  const pluginsWithScoutConfigs: string[] = Object.keys(rawScoutConfigs);
-
-  const scoutGroups = pluginsWithScoutConfigs.map((plugin) => ({
-    title: plugin,
-    key: plugin,
-    group: rawScoutConfigs[plugin].group,
-    queue: defaultQueue,
-  }));
-
   // upload the step definitions to Buildkite
   bk.uploadSteps(
     [
@@ -595,17 +558,48 @@ export async function pickTestGroupRunOrder() {
               ),
           }
         : [],
+    ].flat()
+  );
+}
+
+export async function pickScoutTestGroupRunOrder(scoutConfigsPath: string) {
+  const bk = new BuildkiteClient();
+
+  const FTR_CONFIGS_DEPS =
+    process.env.FTR_CONFIGS_DEPS !== undefined
+      ? process.env.FTR_CONFIGS_DEPS.split(',')
+          .map((t) => t.trim())
+          .filter(Boolean)
+      : ['build'];
+
+  const ftrExtraArgs: Record<string, string> = process.env.FTR_EXTRA_ARGS
+    ? { FTR_EXTRA_ARGS: process.env.FTR_EXTRA_ARGS }
+    : {};
+  const envFromlabels: Record<string, string> = collectEnvFromLabels();
+
+  const rawScoutConfigs = JSON.parse(Fs.readFileSync(scoutConfigsPath, 'utf-8'));
+  const pluginsWithScoutConfigs: string[] = Object.keys(rawScoutConfigs);
+
+  const scoutGroups = pluginsWithScoutConfigs.map((plugin) => ({
+    title: plugin,
+    key: plugin,
+    group: rawScoutConfigs[plugin].group,
+  }));
+
+  // upload the step definitions to Buildkite
+  bk.uploadSteps(
+    [
       scoutGroups.length
         ? {
             group: 'Scout Configs',
             key: 'scout-configs',
             depends_on: FTR_CONFIGS_DEPS,
             steps: scoutGroups.map(
-              ({ title, key, group, queue = defaultQueue }): BuildkiteStep => ({
+              ({ title, key, group }): BuildkiteStep => ({
                 label: `Scout: [ ${group} / ${title} ] plugin`,
                 command: getRequiredEnv('SCOUT_CONFIGS_SCRIPT'),
                 timeout_in_minutes: 60,
-                agents: expandAgentQueue(queue),
+                agents: expandAgentQueue('n2-4-spot'),
                 env: {
                   SCOUT_CONFIG_GROUP_KEY: key,
                   ...ftrExtraArgs,
@@ -614,9 +608,7 @@ export async function pickTestGroupRunOrder() {
                 retry: {
                   automatic: [
                     { exit_status: '-1', limit: 3 },
-                    ...(FTR_CONFIGS_RETRY_COUNT > 0
-                      ? [{ exit_status: '*', limit: FTR_CONFIGS_RETRY_COUNT }]
-                      : []),
+                    { exit_status: '*', limit: 1 },
                   ],
                 },
               })
