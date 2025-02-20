@@ -128,7 +128,7 @@ function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output 
   return {
     id: outputId ?? so.id,
     ...atributes,
-     ...(typeof ssl === 'string' ? { ssl: JSON.parse(ssl as string) } : {}),
+    ...(typeof ssl === 'string' ? { ssl: JSON.parse(ssl as string) } : {}),
     ...(proxyId ? { proxy_id: proxyId } : {}),
   };
 }
