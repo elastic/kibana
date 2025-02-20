@@ -56,8 +56,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       format = 'default',
       conversationResponse,
     }: RequestOptions) {
-      proxy.interceptConversationTitle('My Title').completeAfterIntercept();
-      proxy.interceptConversation(conversationResponse).completeAfterIntercept();
+      void proxy.interceptConversationTitle('My Title').completeAfterIntercept();
+      void proxy.interceptConversation(conversationResponse).completeAfterIntercept();
 
       const response = await observabilityAIAssistantAPIClient.admin({
         endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',

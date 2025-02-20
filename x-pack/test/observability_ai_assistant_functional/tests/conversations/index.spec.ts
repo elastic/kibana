@@ -305,7 +305,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
               describe('and adding another prompt', () => {
                 before(async () => {
-                  proxy.interceptConversation('My second response').completeAfterIntercept();
+                  void proxy.interceptConversation('My second response').completeAfterIntercept();
 
                   await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');
                   await testSubjects.pressEnter(ui.pages.conversations.chatInput);
