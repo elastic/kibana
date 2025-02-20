@@ -10,7 +10,7 @@
 import classNames from 'classnames';
 import React, { FC, ReactElement, useEffect, useState } from 'react';
 import { v4 } from 'uuid';
-import { Subscription } from 'rxjs';
+import { Subscription, switchMap } from 'rxjs';
 
 import { ViewMode, apiHasUniqueId } from '@kbn/presentation-publishing';
 import { Action } from '@kbn/ui-actions-plugin/public';
@@ -95,9 +95,17 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
       if (canceled) return;
 
       for (const action of frequentlyChangingActions) {
-        subscriptions.add(
-          action.subscribeToCompatibilityChanges(context, handleActionCompatibilityChange)
-        );
+        const compatibilitySubscription = action
+          .getCompatibilityChangesSubject(context)
+          ?.pipe(
+            switchMap(async () => {
+              return await action.isCompatible(context);
+            })
+          )
+          .subscribe(async (isCompatible) => {
+            handleActionCompatibilityChange(isCompatible, action);
+          });
+        subscriptions.add(compatibilitySubscription);
       }
     })();
 
