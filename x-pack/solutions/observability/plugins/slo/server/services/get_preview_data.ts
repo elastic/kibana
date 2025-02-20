@@ -584,7 +584,11 @@ export class GetPreviewData {
         perMinute: {
           date_histogram: {
             field: '@timestamp',
-            fixed_interval: '10m',
+            fixed_interval: options.interval,
+            extended_bounds: {
+              min: options.range.start,
+              max: options.range.end,
+            },
           },
           aggs: {
             good: {
