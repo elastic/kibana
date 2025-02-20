@@ -40,11 +40,11 @@ export function useInitTrainedModelsService(
   const { nlpSettings } = useMlServerInfo();
   const cloudInfo = useCloudCheck();
   const mlServerLimits = getNewJobLimits();
-  const deploymentParamsMapper = new DeploymentParamsMapper(
-    mlServerLimits,
-    cloudInfo,
-    showNodeInfo,
-    nlpSettings
+
+  const deploymentParamsMapper = useMemo(
+    () => new DeploymentParamsMapper(mlServerLimits, cloudInfo, showNodeInfo, nlpSettings),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
   );
 
   const defaultScheduledDeployments = useMemo(() => [], []);

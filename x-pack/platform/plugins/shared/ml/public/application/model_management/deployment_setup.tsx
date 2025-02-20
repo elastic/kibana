@@ -925,7 +925,6 @@ export const getUserInputModelDeploymentParamsProvider =
     deploymentIds?: string[]
   ): Promise<DeploymentParamsUI | void> => {
     const deploymentParamsMapper = new DeploymentParamsMapper(
-      modelId,
       getNewJobLimits(),
       cloudInfo,
       showNodeInfo,
@@ -952,7 +951,7 @@ export const getUserInputModelDeploymentParamsProvider =
                 modelId={modelId}
                 onConfigChange={(config) => {
                   modalSession.close();
-
+                  console.log('config: ', config);
                   resolve(config);
                 }}
                 onClose={() => {
