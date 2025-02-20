@@ -6661,7 +6661,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/peggy@link:packages/kbn-peggy":
+"@kbn/peggy@link:src/platform/packages/private/kbn-peggy":
   version "0.0.0"
   uid ""
 

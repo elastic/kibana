@@ -34,7 +34,7 @@ webpack_cli(
     "//src/platform/packages/shared/kbn-security-hardening",
     "//src/platform/packages/shared/kbn-std",
     "//src/platform/packages/shared/kbn-safer-lodash-set",
-    "//packages/kbn-peggy",
+    "//src/platform/packages/private/kbn-peggy",
     "//packages/kbn-peggy-loader",
     "//src/platform/packages/shared/shared-ux/error_boundary",
     "//src/platform/packages/shared/kbn-rison",
