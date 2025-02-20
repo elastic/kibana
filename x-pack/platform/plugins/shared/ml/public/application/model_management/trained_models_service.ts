@@ -33,37 +33,24 @@ import { MODEL_STATE } from '@kbn/ml-trained-models-utils';
 import { isEqual } from 'lodash';
 import type { ErrorType } from '@kbn/ml-error-utils';
 import { i18n } from '@kbn/i18n';
-import type { MlServerLimits } from '../../../common/types/ml_server_info';
 import {
   isBaseNLPModelItem,
   isNLPModelItem,
   type ModelDownloadState,
   type TrainedModelUIItem,
 } from '../../../common/types/trained_models';
-import type {
-  StartAllocationParams,
-  UpdateAllocationParams,
-} from '../services/ml_api_service/trained_models';
+import type { UpdateAllocationParams } from '../services/ml_api_service/trained_models';
 import { type TrainedModelsApiService } from '../services/ml_api_service/trained_models';
 import type { SavedObjectsApiService } from '../services/ml_api_service/saved_objects';
 import type { ITelemetryClient } from '../../services/telemetry/types';
 import type { DeploymentParamsUI } from './deployment_setup';
-import { DeploymentParamsMapper } from './deployment_params_mapper';
-import type { CloudInfo } from '../services/ml_server_info';
-import type { NLPSettings } from '../../../common/constants/app';
+import type { DeploymentParamsMapper } from './deployment_params_mapper';
 
 interface ModelDownloadStatus {
   [modelId: string]: ModelDownloadState;
 }
 
 const DOWNLOAD_POLL_INTERVAL = 3000;
-
-export type DeploymentParamsMapperConfig = [
-  mlServerLimits: MlServerLimits,
-  cloudInfo: CloudInfo,
-  showNodeInfo: boolean,
-  nlpSettings?: NLPSettings
-];
 
 interface TrainedModelsServiceInit {
   scheduledDeployments$: BehaviorSubject<ScheduledDeployment[]>;
@@ -73,7 +60,7 @@ interface TrainedModelsServiceInit {
   savedObjectsApiService: SavedObjectsApiService;
   canManageSpacesAndSavedObjects: boolean;
   telemetryService: ITelemetryClient;
-  deploymentParamsMapperConfig: DeploymentParamsMapperConfig;
+  deploymentParamsMapper: DeploymentParamsMapper;
 }
 
 export interface ScheduledDeployment extends DeploymentParamsUI {
@@ -100,7 +87,7 @@ export class TrainedModelsService {
   private canManageSpacesAndSavedObjects!: boolean;
   private isInitialized = false;
   private telemetryService!: ITelemetryClient;
-  private deploymentParamsMapperConfig!: DeploymentParamsMapperConfig;
+  private deploymentParamsMapper!: DeploymentParamsMapper;
 
   constructor(private readonly trainedModelsApiService: TrainedModelsApiService) {}
 
@@ -112,7 +99,7 @@ export class TrainedModelsService {
     savedObjectsApiService,
     canManageSpacesAndSavedObjects,
     telemetryService,
-    deploymentParamsMapperConfig,
+    deploymentParamsMapper,
   }: TrainedModelsServiceInit) {
     // Always cancel any pending destroy when trying to initialize
     if (this.destroySubscription) {
@@ -125,7 +112,7 @@ export class TrainedModelsService {
     this.subscription = new Subscription();
     this.isInitialized = true;
     this.canManageSpacesAndSavedObjects = canManageSpacesAndSavedObjects;
-    this.deploymentParamsMapperConfig = deploymentParamsMapperConfig;
+    this.deploymentParamsMapper = deploymentParamsMapper;
 
     this.setScheduledDeployments = setScheduledDeployments;
     this._scheduledDeployments$ = scheduledDeployments$;
@@ -445,7 +432,9 @@ export class TrainedModelsService {
         return this.waitForModelReady(deployment.modelId);
       }),
       tap(() => this.setDeployingStateForModel(deployment.modelId)),
-      map(() => this.getStartModelAllocationParams(deployment)),
+      map(() =>
+        this.deploymentParamsMapper.mapUiToApiDeploymentParams(deployment.modelId, deployment)
+      ),
       exhaustMap((apiParams) => {
         return firstValueFrom(
           this.trainedModelsApiService.startModelAllocation(apiParams).pipe(
@@ -508,42 +497,27 @@ export class TrainedModelsService {
     );
   }
 
-  private getStartModelAllocationParams(deployment: ScheduledDeployment): StartAllocationParams {
-    const apiParams = new DeploymentParamsMapper(
-      deployment.modelId,
-      ...this.deploymentParamsMapperConfig
-    ).mapUiToApiDeploymentParams(deployment);
-
-    return {
-      modelId: deployment.modelId,
-      deploymentParams: {
-        deployment_id: apiParams.deployment_id,
-        threads_per_allocation: apiParams.threads_per_allocation!,
-        priority: apiParams.priority!,
-        number_of_allocations: apiParams.number_of_allocations,
-      },
-      ...(apiParams.adaptive_allocations && {
-        adaptiveAllocationsParams: {
-          adaptive_allocations: apiParams.adaptive_allocations,
-        },
-      }),
-    };
-  }
-
   private getUpdateModelAllocationParams(
     modelId: string,
     uiParams: DeploymentParamsUI
   ): UpdateAllocationParams {
-    const apiParams = new DeploymentParamsMapper(
-      modelId,
-      ...this.deploymentParamsMapperConfig
-    ).mapUiToApiDeploymentParams(uiParams);
+    const apiParams = this.deploymentParamsMapper.mapUiToApiDeploymentParams(modelId, uiParams);
 
-    return apiParams.adaptive_allocations
-      ? { adaptive_allocations: apiParams.adaptive_allocations }
+    return apiParams.adaptiveAllocationsParams
+      ? {
+          adaptive_allocations: {
+            enabled: apiParams.adaptiveAllocationsParams.enabled,
+            min_number_of_allocations:
+              apiParams.adaptiveAllocationsParams.min_number_of_allocations,
+            max_number_of_allocations:
+              apiParams.adaptiveAllocationsParams.max_number_of_allocations,
+          },
+        }
       : {
-          number_of_allocations: apiParams.number_of_allocations!,
-          adaptive_allocations: { enabled: false },
+          number_of_allocations: apiParams.deploymentParams.number_of_allocations!,
+          adaptive_allocations: {
+            enabled: false,
+          },
         };
   }
 

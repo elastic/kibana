@@ -8,7 +8,7 @@ import { BehaviorSubject, throwError, of } from 'rxjs';
 import type { Observable } from 'rxjs';
 import type { SavedObjectsApiService } from '../services/ml_api_service/saved_objects';
 import type { TrainedModelsApiService } from '../services/ml_api_service/trained_models';
-import type { DeploymentParamsMapperConfig, ScheduledDeployment } from './trained_models_service';
+import type { ScheduledDeployment } from './trained_models_service';
 import { TrainedModelsService } from './trained_models_service';
 import type {
   StartTrainedModelDeploymentResponse,
@@ -21,6 +21,7 @@ import type { ITelemetryClient } from '../../services/telemetry/types';
 import type { DeploymentParamsUI } from './deployment_setup';
 import type { CloudInfo } from '../services/ml_server_info';
 import type { MlServerLimits } from '../../../common/types/ml_server_info';
+import { DeploymentParamsMapper } from './deployment_params_mapper';
 
 // Helper that resolves on the next microtask tick
 const flushPromises = () =>
@@ -75,11 +76,7 @@ describe('TrainedModelsService', () => {
     isMlAutoscalingEnabled: false,
   } as CloudInfo;
 
-  const deploymentParamsMapperConfig: DeploymentParamsMapperConfig = [
-    mlServerLimits,
-    cloudInfo,
-    true,
-  ];
+  const deploymentParamsMapper = new DeploymentParamsMapper(mlServerLimits, cloudInfo, true);
 
   const deploymentParamsUiMock: DeploymentParamsUI = {
     deploymentId: 'my-deployment-id',
@@ -126,7 +123,7 @@ describe('TrainedModelsService', () => {
       savedObjectsApiService: mockSavedObjectsApiService,
       canManageSpacesAndSavedObjects: true,
       telemetryService: mockTelemetryService,
-      deploymentParamsMapperConfig,
+      deploymentParamsMapper,
     });
 
     mockTrainedModelsApiService.getTrainedModelsList.mockResolvedValue([]);

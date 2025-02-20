@@ -16,6 +16,7 @@ import { useSavedObjectsApiService } from '../../services/ml_api_service/saved_o
 import { useEnabledFeatures, useMlServerInfo } from '../../contexts/ml';
 import { useCloudCheck } from '../../components/node_available_warning/hooks';
 import { getNewJobLimits } from '../../services/ml_server_info';
+import { DeploymentParamsMapper } from '../deployment_params_mapper';
 
 /**
  * Hook that initializes the shared TrainedModelsService instance with storage
@@ -39,6 +40,12 @@ export function useInitTrainedModelsService(
   const { nlpSettings } = useMlServerInfo();
   const cloudInfo = useCloudCheck();
   const mlServerLimits = getNewJobLimits();
+  const deploymentParamsMapper = new DeploymentParamsMapper(
+    mlServerLimits,
+    cloudInfo,
+    showNodeInfo,
+    nlpSettings
+  );
 
   const defaultScheduledDeployments = useMemo(() => [], []);
 
@@ -62,7 +69,7 @@ export function useInitTrainedModelsService(
       savedObjectsApiService,
       canManageSpacesAndSavedObjects,
       telemetryService: telemetry,
-      deploymentParamsMapperConfig: [mlServerLimits, cloudInfo, showNodeInfo, nlpSettings],
+      deploymentParamsMapper,
     });
 
     return () => {
