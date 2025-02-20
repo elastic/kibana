@@ -13,7 +13,7 @@ import { useKibana } from '../../lib/kibana';
 import { hasAccessToSecuritySolution } from '../../../helpers_access';
 
 // FIXME: there must be a better way of doing this
-const extraNonTimelinePaths: string[] = ['security/explore'];
+const extraNonTimelinePaths: string[] = ['/explore'];
 
 const isTimelinePathVisible = (currentPath: string): boolean => {
   const groupLinksWithHiddenTimelinePaths = getLinksWithHiddenTimeline().map((l) => l.path);
@@ -29,6 +29,7 @@ export const useShowTimelineForGivenPath = () => {
   } = useKibana();
   const userHasSecuritySolutionVisible = hasAccessToSecuritySolution(capabilities);
 
+  // FIXME: this used to be () => userHasSecuritySolutionVisible && (indicesExist || dataViewId === null)
   const isTimelineAllowed = useMemo(
     () => userHasSecuritySolutionVisible,
     [userHasSecuritySolutionVisible]
