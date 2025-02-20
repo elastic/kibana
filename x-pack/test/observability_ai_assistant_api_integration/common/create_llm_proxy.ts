@@ -20,7 +20,7 @@ type Response = http.ServerResponse<http.IncomingMessage> & { req: http.Incoming
 type RequestHandler = (
   request: Request,
   response: Response,
-  body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
+  requestBody: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
 ) => void;
 
 interface RequestInterceptor {
@@ -40,7 +40,7 @@ export interface ToolCall {
   }>;
 }
 export interface LlmResponseSimulator {
-  body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
+  requestBody: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
   status: (code: number) => Promise<void>;
   next: (msg: string | ToolCall) => Promise<void>;
   tokenCount: (msg: { completion: number; prompt: number; total: number }) => Promise<void>;
@@ -65,21 +65,23 @@ export class LlmProxy {
         this.log.info(`LLM request received`);
 
         const interceptors = this.interceptors.concat();
-        const body = await getRequestBody(request);
+        const requestBody = await getRequestBody(request);
 
         while (interceptors.length) {
           const interceptor = interceptors.shift()!;
 
-          if (interceptor.when(body)) {
+          if (interceptor.when(requestBody)) {
             pull(this.interceptors, interceptor);
-            interceptor.handle(request, response, body);
+            interceptor.handle(request, response, requestBody);
             return;
           }
         }
 
         const errorMessage = `No interceptors found to handle request: ${request.method} ${request.url}`;
-        this.log.error(`${errorMessage}. Messages: ${JSON.stringify(body.messages, null, 2)}`);
-        response.writeHead(500, { errorMessage, messages: JSON.stringify(body.messages) });
+        this.log.error(
+          `${errorMessage}. Messages: ${JSON.stringify(requestBody.messages, null, 2)}`
+        );
+        response.writeHead(500, { errorMessage, messages: JSON.stringify(requestBody.messages) });
         response.end();
       })
       .on('error', (error) => {
@@ -162,18 +164,14 @@ export class LlmProxy {
     when: RequestInterceptor['when'],
     responseChunks?: TResponseChunks
   ): TResponseChunks extends undefined
-    ? {
-        waitForIntercept: () => Promise<LlmResponseSimulator>;
-      }
-    : {
-        completeAfterIntercept: () => Promise<void>;
-      } {
+    ? { waitForIntercept: () => Promise<LlmResponseSimulator> }
+    : { completeAfterIntercept: () => Promise<LlmResponseSimulator> } {
     const waitForInterceptPromise = Promise.race([
       new Promise<LlmResponseSimulator>((outerResolve) => {
         this.interceptors.push({
           name,
           when,
-          handle: (request, response, body) => {
+          handle: (request, response, requestBody) => {
             this.log.info(`LLM request intercepted by "${name}"`);
 
             function write(chunk: string) {
@@ -184,7 +182,7 @@ export class LlmProxy {
             }
 
             const simulator: LlmResponseSimulator = {
-              body,
+              requestBody,
               status: once(async (status: number) => {
                 response.writeHead(status, {
                   'Content-Type': 'text/event-stream',
@@ -250,6 +248,8 @@ export class LlmProxy {
         }
         await simulator.tokenCount({ completion: 1, prompt: 1, total: 1 });
         await simulator.complete();
+
+        return simulator;
       },
     } as any;
   }
@@ -281,8 +281,11 @@ async function getRequestBody(
   });
 }
 
-export function isFunctionTitleRequest(body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming) {
+export function isFunctionTitleRequest(
+  requestBody: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
+) {
   return (
-    body.tools?.find((fn) => fn.function.name === TITLE_CONVERSATION_FUNCTION_NAME) !== undefined
+    requestBody.tools?.find((fn) => fn.function.name === TITLE_CONVERSATION_FUNCTION_NAME) !==
+    undefined
   );
 }

@@ -43,21 +43,24 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     let proxy: LlmProxy;
     let connectorId: string;
 
-    interface RequestOptions {
-      actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
-      instructions?: AdHocInstruction[];
-      format?: 'openai' | 'default';
-      conversationResponse: string | ToolCall;
-    }
-
-    async function getResponseBody({
+    async function addInterceptorsAndCallComplete({
       actions,
       instructions,
       format = 'default',
       conversationResponse,
-    }: RequestOptions) {
-      void proxy.interceptConversationTitle('My Title').completeAfterIntercept();
-      void proxy.interceptConversation(conversationResponse).completeAfterIntercept();
+    }: {
+      actions?: Array<Pick<FunctionDefinition, 'name' | 'description' | 'parameters'>>;
+      instructions?: AdHocInstruction[];
+      format?: 'openai' | 'default';
+      conversationResponse: string | ToolCall;
+    }) {
+      const titleSimulatorPromise = proxy
+        .interceptConversationTitle('My Title')
+        .completeAfterIntercept();
+
+      const conversationSimulatorPromise = proxy
+        .interceptConversation(conversationResponse)
+        .completeAfterIntercept();
 
       const response = await observabilityAIAssistantAPIClient.admin({
         endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
@@ -75,10 +78,17 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
       await proxy.waitForAllInterceptorsSettled();
 
-      return String(response.body);
+      const titleSimulator = await titleSimulatorPromise;
+      const conversationSimulator = await conversationSimulatorPromise;
+
+      return {
+        titleSimulator,
+        conversationSimulator,
+        responseBody: String(response.body),
+      };
     }
 
-    function formatResponseBody(body: string) {
+    function getEventsFromBody(body: string) {
       return body
         .split('\n')
         .map((line) => line.trim())
@@ -127,14 +137,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let events: StreamingChatResponseEvent[];
 
       before(async () => {
-        const responseBody = await getResponseBody({
+        const { responseBody } = await addInterceptorsAndCallComplete({
           actions: [action],
           conversationResponse: {
             tool_calls: [toolCallMock],
           },
         });
 
-        return formatResponseBody(responseBody);
+        events = getEventsFromBody(responseBody);
       });
 
       it('does not persist the conversation (the last event is not a conversationUpdated event)', () => {
@@ -153,7 +163,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let body: OpenAI.Chat.ChatCompletionCreateParamsNonStreaming;
 
       before(async () => {
-        const responseBody = await getResponseBody({
+        const { conversationSimulator, responseBody } = await addInterceptorsAndCallComplete({
           instructions: [
             {
               text: 'This is a random instruction',
@@ -166,10 +176,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           },
         });
 
-        return formatResponseBody(responseBody);
+        body = conversationSimulator.requestBody;
       });
 
-      it.skip('includes the instruction in the system message', async () => {
+      it('includes the instruction in the system message', async () => {
         expect(body.messages[0].content).to.contain('This is a random instruction');
       });
     });
@@ -178,7 +188,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let responseBody: string;
 
       before(async () => {
-        responseBody = await getResponseBody({ format: 'openai', conversationResponse: 'Hello' });
+        ({ responseBody } = await addInterceptorsAndCallComplete({
+          format: 'openai',
+          conversationResponse: 'Hello',
+        }));
       });
 
       function extractDataParts(lines: string[]) {
