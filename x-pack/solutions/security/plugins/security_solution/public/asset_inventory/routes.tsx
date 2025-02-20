@@ -17,6 +17,7 @@ import { DataViewContext } from './hooks/data_view_context';
 import { AssetInventoryProvider } from './provider';
 import { useDataView } from './hooks/use_asset_inventory_data_table/use_data_view';
 import { Loading } from './components/loading';
+import { ASSET_INVENTORY_INDEX_PATTERN } from './constants';
 
 const AssetsPageLazy = lazy(() => import('./pages'));
 
@@ -30,8 +31,6 @@ const queryClient = new QueryClient({
     },
   },
 });
-
-const ASSET_INVENTORY_INDEX_PATTERN = 'logs-cloud_asset_inventory.asset_inventory-*';
 
 export const AssetInventoryRoutes = () => {
   const dataViewQuery = useDataView(ASSET_INVENTORY_INDEX_PATTERN);

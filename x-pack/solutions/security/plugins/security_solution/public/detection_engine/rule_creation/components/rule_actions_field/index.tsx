@@ -78,6 +78,7 @@ const NOTIFY_WHEN_OPTIONS: NotifyWhenSelectOptions[] = [
 ];
 
 interface Props {
+  ruleTypeId?: string;
   field: FieldHook;
   messageVariables: ActionVariables;
   summaryMessageVariables: ActionVariables;
@@ -113,6 +114,7 @@ const ContainerActions = styled.div.attrs(
 `;
 
 export const RuleActionsField: React.FC<Props> = ({
+  ruleTypeId,
   field,
   messageVariables,
   summaryMessageVariables,
@@ -246,6 +248,7 @@ export const RuleActionsField: React.FC<Props> = ({
         setActionAlertsFilterProperty,
         featureId: SecurityConnectorFeatureId,
         producerId: AlertConsumers.SIEM,
+        ruleTypeId,
         defaultActionMessage: FORM_FOR_EACH_ALERT_BODY_MESSAGE,
         defaultSummaryMessage: FORM_SUMMARY_BODY_MESSAGE,
         hideActionHeader: true,
@@ -255,15 +258,16 @@ export const RuleActionsField: React.FC<Props> = ({
         disableErrorMessages: !isFormValidated,
       }),
     [
-      actions,
       getActionForm,
+      actions,
       messageVariables,
       summaryMessageVariables,
-      setActionFrequency,
       setActionIdByIndex,
-      setActionParamsProperty,
       setAlertActionsProperty,
+      setActionParamsProperty,
+      setActionFrequency,
       setActionAlertsFilterProperty,
+      ruleTypeId,
       isFormValidated,
     ]
   );
