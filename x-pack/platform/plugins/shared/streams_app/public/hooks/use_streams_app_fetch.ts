@@ -69,7 +69,6 @@ export const useStreamsAppFetch: UseAbortableAsync<{}, { disableToastOnError?: b
       return callback({ signal });
     },
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     deps,
     optionsForHook
   );
