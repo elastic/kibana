@@ -6621,7 +6621,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/openapi-generator@link:packages/kbn-openapi-generator":
+"@kbn/openapi-generator@link:src/platform/packages/shared/kbn-openapi-generator":
   version "0.0.0"
   uid ""
 
