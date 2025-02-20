@@ -17,7 +17,8 @@
       "usageCollection",
       "licensing",
       "taskManager",
-      "alerting"
+      "alerting",
+      "inference",
     ],
     "optionalPlugins": [
       "cloud",
