@@ -14,11 +14,10 @@ import type {
   PersistableState,
   PersistableStateDefinition,
 } from '@kbn/kibana-utils-plugin/common';
-import { ViewMode } from '@kbn/presentation-publishing';
 
 export type EmbeddableInput = {
   version?: string;
-  viewMode?: ViewMode;
+  viewMode?: 'view' | 'edit' | 'print' | 'preview';
   title?: string;
   description?: string;
   /**
