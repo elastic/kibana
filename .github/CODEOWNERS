@@ -85,7 +85,6 @@ packages/kbn-repo-file-maps @elastic/kibana-operations
 packages/kbn-repo-linter @elastic/kibana-operations
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
-packages/kbn-scout-info @elastic/appex-qa
 packages/kbn-scout-reporting @elastic/appex-qa
 packages/kbn-set-map @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
@@ -353,6 +352,7 @@ src/platform/packages/private/kbn-reporting/mocks_server @elastic/appex-sharedux
 src/platform/packages/private/kbn-reporting/public @elastic/appex-sharedux
 src/platform/packages/private/kbn-reporting/server @elastic/appex-sharedux
 src/platform/packages/private/kbn-saved-objects-settings @elastic/appex-sharedux
+src/platform/packages/private/kbn-scout-info @elastic/appex-qa
 src/platform/packages/private/kbn-screenshotting-server @elastic/appex-sharedux
 src/platform/packages/private/kbn-some-dev-log @elastic/kibana-operations
 src/platform/packages/private/kbn-stdio-dev-helpers @elastic/kibana-operations
