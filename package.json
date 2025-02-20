@@ -1492,7 +1492,7 @@
     "@kbn/repo-source-classifier": "link:packages/kbn-repo-source-classifier",
     "@kbn/repo-source-classifier-cli": "link:packages/kbn-repo-source-classifier-cli",
     "@kbn/reporting-mocks-server": "link:src/platform/packages/private/kbn-reporting/mocks_server",
-    "@kbn/scout": "link:packages/kbn-scout",
+    "@kbn/scout": "link:src/platform/packages/shared/kbn-scout",
     "@kbn/scout-info": "link:packages/kbn-scout-info",
     "@kbn/scout-oblt": "link:x-pack/solutions/observability/packages/kbn-scout-oblt",
     "@kbn/scout-reporting": "link:packages/kbn-scout-reporting",

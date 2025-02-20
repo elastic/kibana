@@ -7021,7 +7021,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/scout@link:packages/kbn-scout":
+"@kbn/scout@link:src/platform/packages/shared/kbn-scout":
   version "0.0.0"
   uid ""
 

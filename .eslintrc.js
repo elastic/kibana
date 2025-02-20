@@ -1441,13 +1441,13 @@ module.exports = {
     },
     {
       files: [
-        'packages/kbn-scout/src/playwright/**/*.ts',
+        'src/platform/packages/shared/kbn-scout/src/playwright/**/*.ts',
         'x-pack/solutions/observability/packages/kbn-scout-oblt/src/playwright/**/*.ts',
         'src/platform/plugins/**/ui_tests/**/*.ts',
         'x-pack/platform/plugins/**/ui_tests/**/*.ts',
         'x-pack/solutions/**/plugins/**/ui_tests/**/*.ts',
       ],
-      excludedFiles: ['packages/kbn-scout/src/playwright/**/*.test.ts'],
+      excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
       extends: ['plugin:playwright/recommended'],
       plugins: ['playwright'],
       settings: {
