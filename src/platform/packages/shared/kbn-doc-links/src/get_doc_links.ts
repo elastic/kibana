@@ -444,6 +444,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       privileges: `${SECURITY_SOLUTION_DOCS}endpoint-management-req.html`,
       manageDetectionRules: `${SECURITY_SOLUTION_DOCS}rules-ui-management.html`,
       createDetectionRules: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html`,
+      updatePrebuiltDetectionRules: isServerless
+        ? `${SERVERLESS_DOCS}security-prebuilt-rules-management.html#update-prebuilt-rules`
+        : `${SECURITY_SOLUTION_DOCS}prebuilt-rules-management.html#update-prebuilt-rules`,
       createEsqlRuleType: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#create-esql-rule`,
       ruleUiAdvancedParams: `${SECURITY_SOLUTION_DOCS}rules-ui-create.html#rule-ui-advanced-params`,
       entityAnalytics: {
@@ -677,6 +680,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       mappingRolesFieldRules: `${ELASTICSEARCH_DOCS}role-mapping-resources.html#mapping-roles-rule-field`,
       runAsPrivilege: `${ELASTICSEARCH_DOCS}security-privileges.html#_run_as_privilege`,
       deprecatedV1Endpoints: `${KIBANA_DOCS}breaking-changes-summary.html#breaking-199656`,
+      enableElasticSearchSecurityFeatures: `${ELASTICSEARCH_DOCS}security-minimal-setup.html#_enable_elasticsearch_security_features`,
     },
     spaces: {
       kibanaLegacyUrlAliases: `${KIBANA_DOCS}legacy-url-aliases.html`,
