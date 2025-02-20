@@ -55,11 +55,10 @@ export function RuleUpgradeHelper(): JSX.Element {
   const {
     docLinks: {
       links: {
-        securitySolution: { manageDetectionRules },
+        securitySolution: { updatePrebuiltDetectionRules },
       },
     },
   } = useKibana().services;
-  const manageDetectionRulesUpdateRulesSection = `${manageDetectionRules}#edit-rules-settings`;
 
   return (
     <FormattedMessage
@@ -67,7 +66,7 @@ export function RuleUpgradeHelper(): JSX.Element {
       defaultMessage="Understand how to&nbsp;{docsLink}."
       values={{
         docsLink: (
-          <EuiLink href={manageDetectionRulesUpdateRulesSection} target="_blank">
+          <EuiLink href={updatePrebuiltDetectionRules} target="_blank">
             {UPGRADE_RULES_DOCS_LINK}
           </EuiLink>
         ),
