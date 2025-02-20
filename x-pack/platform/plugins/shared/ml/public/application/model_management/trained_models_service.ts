@@ -214,32 +214,29 @@ export class TrainedModelsService {
       });
   }
 
-  public deleteModels(modelIds: string[], options: DeleteModelParams['options']) {
-    return of(modelIds).pipe(
-      tap(() => modelIds.forEach((modelId) => this.removeScheduledDeployments({ modelId }))),
-      switchMap(() =>
-        forkJoin(
-          modelIds.map((modelId) =>
-            from(this.trainedModelsApiService.deleteTrainedModel({ ...options, modelId }))
-          )
+  public async deleteModels(modelIds: string[], options: DeleteModelParams['options']) {
+    modelIds.forEach((modelId) => this.removeScheduledDeployments({ modelId }));
+    try {
+      await Promise.all(
+        modelIds.map((modelId) =>
+          this.trainedModelsApiService.deleteTrainedModel({
+            modelId,
+            ...options,
+          })
         )
-      ),
-      tap({
-        next: () => this.fetchModels(),
-        error: (error) => {
-          this.displayErrorToast?.(
-            error,
-            i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
-              defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
-              values: {
-                modelsCount: modelIds.length,
-              },
-            })
-          );
-          this.fetchModels();
-        },
-      })
-    );
+      );
+    } catch (error) {
+      this.displayErrorToast?.(
+        error,
+        i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
+          defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
+          values: {
+            modelsCount: modelIds.length,
+          },
+        })
+      );
+    }
+    this.fetchModels();
   }
 
   public stopModelDeployment(

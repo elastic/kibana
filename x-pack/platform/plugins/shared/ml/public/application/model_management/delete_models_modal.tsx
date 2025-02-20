@@ -64,19 +64,15 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
 
   const deleteModels = useCallback(async () => {
     setIsDeleting(true);
-    trainedModelsService
-      .deleteModels(modelIds, {
+    try {
+      await trainedModelsService.deleteModels(modelIds, {
         with_pipelines: deletePipelines,
         force: pipelinesCount > 0,
-      })
-      .subscribe({
-        next: () => {
-          onClose(false, true);
-        },
-        error: () => {
-          setIsDeleting(false);
-        },
       });
+      onClose(false, true);
+    } catch {
+      setIsDeleting(false);
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [modelIds, trainedModelsService, deletePipelines, pipelinesCount]);
