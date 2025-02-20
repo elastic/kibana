@@ -38,9 +38,9 @@ import {
   isDissectProcessor,
 } from '../utils';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
-import { UseDefinitionReturn } from '../hooks/use_definition';
 import { ProcessorMetrics, UseProcessingSimulatorReturn } from '../hooks/use_processing_simulator';
 import { ProcessorErrors, ProcessorMetricBadges } from './processor_metrics';
+import { UseDefinitionReturn } from '../hooks/use_definition';
 
 export interface ProcessorPanelProps {
   definition: IngestStreamGetResponse;
@@ -95,9 +95,9 @@ export function AddProcessorPanel({
   };
 
   const handleCancel = () => {
+    closePanel();
     methods.reset();
     onWatchProcessor({ id: 'draft', deleteIfExists: true });
-    closePanel();
   };
 
   const handleOpen = () => {
