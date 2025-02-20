@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { getOverviewParamsSchema } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
-import { GetSLOsOverview } from '../../services/get_slos_overview';
+import { getSLOStatsOverviewParamsSchema } from '@kbn/slo-schema';
+import { GetSLOStatsOverview } from '../../services/get_slo_stats_overview';
 import { createSloServerRoute } from '../create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 import { getSpaceId } from './utils/get_space_id';
 
-export const getSLOsOverview = createSloServerRoute({
+export const getSLOStatsOverview = createSloServerRoute({
   endpoint: 'GET /internal/observability/slos/overview',
   options: { access: 'internal' },
   security: {
@@ -19,7 +19,7 @@ export const getSLOsOverview = createSloServerRoute({
       requiredPrivileges: ['slo_read'],
     },
   },
-  params: getOverviewParamsSchema,
+  params: getSLOStatsOverviewParamsSchema,
   handler: async ({ context, params, request, logger, plugins }) => {
     await assertPlatinumLicense(plugins);
 
@@ -34,7 +34,7 @@ export const getSLOsOverview = createSloServerRoute({
     const alerting = await plugins.alerting.start();
     const rulesClient = await alerting.getRulesClientWithRequest(request);
 
-    const slosOverview = new GetSLOsOverview(
+    const slosOverview = new GetSLOStatsOverview(
       soClient,
       esClient,
       spaceId,
