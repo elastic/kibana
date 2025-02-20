@@ -16509,6 +16509,30 @@
                                     "proxy_url": {
                                       "type": "string"
                                     },
+                                    "secrets": {
+                                      "additionalProperties": false,
+                                      "properties": {
+                                        "ssl": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "key": {
+                                              "additionalProperties": false,
+                                              "properties": {
+                                                "id": {
+                                                  "type": "string"
+                                                }
+                                              },
+                                              "type": "object"
+                                            }
+                                          },
+                                          "required": [
+                                            "key"
+                                          ],
+                                          "type": "object"
+                                        }
+                                      },
+                                      "type": "object"
+                                    },
                                     "ssl": {
                                       "additionalProperties": false,
                                       "properties": {
