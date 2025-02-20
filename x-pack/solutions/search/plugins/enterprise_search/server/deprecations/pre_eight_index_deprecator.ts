@@ -27,20 +27,18 @@ export async function getPreEightEnterpriseSearchIndices(
   const entSearchIndices = await esClient.indices.get({
     index: `${ENT_SEARCH_INDEX_PREFIX}*`,
     ignore_unavailable: true,
-    expand_wildcards: ['all'],
+    expand_wildcards: ['all', 'hidden'],
   });
 
   const entSearchDatastreams = await esClient.indices.getDataStream({
     name: ENT_SEARCH_DATASTREAM_PATTERN.join(','),
-    expand_wildcards: ['all'],
+    expand_wildcards: ['all', 'hidden'],
   });
 
   const returnIndices: EnterpriseSearchIndexMapping[] = [];
   for (const [index, indexData] of Object.entries(entSearchIndices)) {
-    if (
-      indexData.settings?.index?.version?.created?.startsWith('7') &&
-      indexData.settings?.index?.blocks?.write !== 'true'
-    ) {
+    const isReadOnly = indexData.settings?.index?.verified_read_only ?? 'false';
+    if (indexData.settings?.index?.version?.created?.startsWith('7') && isReadOnly !== 'true') {
       const dataStreamName = indexData.data_stream;
       returnIndices.push({
         name: index,

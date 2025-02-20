@@ -32,6 +32,7 @@ const testIndices = {
         blocks: {
           write: 'true',
         },
+        verified_read_only: 'true',
       },
     },
     data_stream: 'datastream-123',
@@ -105,6 +106,7 @@ const testIndicesWithoutDatastream = {
         blocks: {
           write: 'true',
         },
+        verified_read_only: 'true',
       },
     },
   },
