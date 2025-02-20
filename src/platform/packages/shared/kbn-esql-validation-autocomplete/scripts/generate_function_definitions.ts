@@ -286,6 +286,12 @@ const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> 
   count: {
     signatures: [{ params: [{ supportsWildcard: true }] }],
   },
+  qstr: {
+    customParametersSnippet: `"""$0"""`,
+  },
+  kql: {
+    customParametersSnippet: `"""$0"""`,
+  },
 };
 
 const convertDateTime = (s: string) => (s === 'datetime' ? 'date' : s);
@@ -692,29 +698,6 @@ const enrichGrouping = (
   });
 };
 
-/** Enriches scalar functions that only accept a query parameter */
-const enrichQueryStringFunction = (functionDefinition: FunctionDefinition): FunctionDefinition => {
-  if (
-    functionDefinition.signatures.every(
-      (s) => s.params.length > 0 && s.params.every((p) => p.name === 'query')
-    )
-  ) {
-    return {
-      ...functionDefinition,
-      customParametersSnippet: `"""$0"""`,
-    };
-  }
-  return functionDefinition;
-};
-
-const enrichFlow = [enrichQueryStringFunction] as const;
-
-const enrichScalarFunction = (
-  scalarFunctionDefinitions: FunctionDefinition[]
-): FunctionDefinition[] => {
-  return scalarFunctionDefinitions.map(_.flow(...enrichFlow));
-};
-
 const enrichOperators = (
   operatorsFunctionDefinitions: FunctionDefinition[]
 ): FunctionDefinition[] => {
@@ -964,7 +947,7 @@ ${functionsType === 'operators' ? `import { isNumericType } from '../../shared/e
 
   await writeFile(
     join(__dirname, '../src/definitions/generated/scalar_functions.ts'),
-    printGeneratedFunctionsFile(enrichScalarFunction(scalarFunctionDefinitions), 'scalar')
+    printGeneratedFunctionsFile(scalarFunctionDefinitions, 'scalar')
   );
   await writeFile(
     join(__dirname, '../src/definitions/generated/aggregation_functions.ts'),
