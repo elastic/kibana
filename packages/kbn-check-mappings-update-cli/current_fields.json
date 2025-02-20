@@ -1129,63 +1129,6 @@
     "taskType"
   ],
   "telemetry": [],
-  "test-actions-export-hidden": [
-    "enabled",
-    "title"
-  ],
-  "test-deprecations-plugin": [
-    "title"
-  ],
-  "test-export-add": [
-    "title"
-  ],
-  "test-export-add-dep": [
-    "title"
-  ],
-  "test-export-invalid-transform": [
-    "title"
-  ],
-  "test-export-transform": [
-    "enabled",
-    "title"
-  ],
-  "test-export-transform-error": [
-    "title"
-  ],
-  "test-hidden-from-http-apis-importable-exportable": [
-    "title"
-  ],
-  "test-hidden-importable-exportable": [
-    "title"
-  ],
-  "test-hidden-non-importable-exportable": [
-    "title"
-  ],
-  "test-is-exportable": [
-    "enabled",
-    "title"
-  ],
-  "test-not-hidden-from-http-apis-importable-exportable": [
-    "title"
-  ],
-  "test-not-visible-in-management": [
-    "enabled",
-    "title"
-  ],
-  "test-visible-in-management": [
-    "enabled",
-    "title"
-  ],
-  "test-with-display-name": [
-    "enabled",
-    "title"
-  ],
-  "test_import_warning_1": [
-    "title"
-  ],
-  "test_import_warning_2": [
-    "title"
-  ],
   "threshold-explorer-view": [],
   "ui-metric": [
     "count"
