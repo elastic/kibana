@@ -333,7 +333,7 @@ export async function getFullAgentPolicy(
   if (agentPolicy.overrides) {
     return deepMerge<FullAgentPolicy>(fullAgentPolicy, agentPolicy.overrides);
   }
-  console.log('##', fullAgentPolicy)
+  console.log('##', fullAgentPolicy);
   return fullAgentPolicy;
 }
 
