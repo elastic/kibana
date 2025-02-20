@@ -121,7 +121,7 @@ function getTabContainerCss(euiTheme: EuiThemeComputed, isSelected: boolean) {
     transition: background-color ${euiTheme.animation.fast};
 
     .unifiedTabs__closeTabBtn {
-      opacity: ${isSelected ? 1 : 0};
+      opacity: 0;
       transition: opacity ${euiTheme.animation.fast};
     }
 
