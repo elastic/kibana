@@ -133,7 +133,7 @@ function getTabContainerCss(euiTheme: EuiThemeComputed, isSelected: boolean) {
           cursor: pointer;
 
           &:hover {
-            background-color: ${euiTheme.colors.mediumShade};
+            background-color: ${euiTheme.colors.lightShade};
             color: ${euiTheme.colors.text};
 
             .unifiedTabs__closeTabBtn {
