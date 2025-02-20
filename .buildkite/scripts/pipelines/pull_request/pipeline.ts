@@ -454,6 +454,21 @@ const getPipeline = (filename: string, removeSteps = true) => {
       );
     }
 
+    if (
+      (await doAnyChangesMatch([
+        /^packages\/kbn-scout/,
+        /^packages\/kbn-scout-info/,
+        /^packages\/kbn-scout-reporting/,
+        /^x-pack\/platform\/plugins\/shared\/maps/,
+        /^x-pack\/platform\/plugins\/private\/discover_enhanced/,
+        /^x-pack\/solutions\/observability\/plugins\/observability_onboarding/,
+        /^x-pack\/solutions\/observability\/packages\/kbn-scout-oblt/,
+      ])) ||
+      GITHUB_PR_LABELS.includes('ci:scout-ui-tests')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/scout_tests.yml'));
+    }
+
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/post_build.yml'));
 
     emitPipeline(pipeline);
