@@ -115,7 +115,7 @@ export class GetPreviewData {
         },
       },
       aggs: {
-        perMinute: {
+        perInterval: {
           date_histogram: {
             field: '@timestamp',
             fixed_interval: options.interval,
@@ -151,7 +151,7 @@ export class GetPreviewData {
     });
 
     const results =
-      response.aggregations?.perMinute.buckets.map((bucket) => {
+      response.aggregations?.perInterval.buckets.map((bucket) => {
         const good = (bucket.good?.value as number) ?? 0;
         const total = bucket.total?.value ?? 0;
         return {
@@ -217,7 +217,7 @@ export class GetPreviewData {
         },
       },
       aggs: {
-        perMinute: {
+        perInterval: {
           date_histogram: {
             field: '@timestamp',
             fixed_interval: options.interval,
@@ -249,7 +249,7 @@ export class GetPreviewData {
     });
 
     const results =
-      response.aggregations?.perMinute.buckets.map((bucket) => {
+      response.aggregations?.perInterval.buckets.map((bucket) => {
         const good = bucket.good?.doc_count ?? 0;
         const total = bucket.total?.doc_count ?? 0;
         return {
@@ -299,7 +299,7 @@ export class GetPreviewData {
         },
       },
       aggs: {
-        perMinute: {
+        perInterval: {
           date_histogram: {
             field: timestampField,
             fixed_interval: options.interval,
@@ -330,7 +330,7 @@ export class GetPreviewData {
 
     const results =
       // @ts-ignore buckets not typed properly
-      response.aggregations?.perMinute.buckets.map((bucket: Bucket) => {
+      response.aggregations?.perInterval.buckets.map((bucket: Bucket) => {
         const good = bucket.good?.value ?? 0;
         const total = bucket.total?.value ?? 0;
         return {
@@ -380,7 +380,7 @@ export class GetPreviewData {
         },
       },
       aggs: {
-        perMinute: {
+        perInterval: {
           date_histogram: {
             field: timestampField,
             fixed_interval: options.interval,
@@ -411,7 +411,7 @@ export class GetPreviewData {
 
     const results =
       // @ts-ignore buckets not typed properly
-      response.aggregations?.perMinute.buckets.map((bucket: Bucket) => {
+      response.aggregations?.perInterval.buckets.map((bucket: Bucket) => {
         const good = bucket.good?.value ?? 0;
         const total = bucket.total?.value ?? 0;
         return {
@@ -464,7 +464,7 @@ export class GetPreviewData {
         },
       },
       aggs: {
-        perMinute: {
+        perInterval: {
           date_histogram: {
             field: timestampField,
             fixed_interval: options.interval,
@@ -487,7 +487,7 @@ export class GetPreviewData {
 
     const results =
       // @ts-ignore buckets not typed properly
-      response.aggregations?.perMinute.buckets.map((bucket: Bucket) => {
+      response.aggregations?.perInterval.buckets.map((bucket: Bucket) => {
         return {
           date: bucket.key_as_string,
           sliValue: bucket.metric.value ?? null,
@@ -530,7 +530,7 @@ export class GetPreviewData {
         },
       },
       aggs: {
-        perMinute: {
+        perInterval: {
           date_histogram: {
             field: timestampField,
             fixed_interval: options.interval,
@@ -548,7 +548,7 @@ export class GetPreviewData {
     });
 
     const results =
-      response.aggregations?.perMinute.buckets.map((bucket) => {
+      response.aggregations?.perInterval.buckets.map((bucket) => {
         const good = bucket.good?.doc_count ?? 0;
         const total = bucket.total?.doc_count ?? 0;
         return {
@@ -616,7 +616,7 @@ export class GetPreviewData {
         },
       },
       aggs: {
-        perMinute: {
+        perInterval: {
           date_histogram: {
             field: '@timestamp',
             fixed_interval: options.interval,
@@ -644,7 +644,7 @@ export class GetPreviewData {
     });
 
     const results =
-      response.aggregations?.perMinute.buckets.map((bucket) => {
+      response.aggregations?.perInterval.buckets.map((bucket) => {
         const good = bucket.good?.doc_count ?? 0;
         const total = bucket.total?.doc_count ?? 0;
         return {
