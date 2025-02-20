@@ -8,35 +8,46 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { EuiCard, EuiCardProps, EuiIcon, IconType } from '@elastic/eui';
 
-import { EuiCard, EuiIcon } from '@elastic/eui';
-
+export interface SynopsisProps {
+  id: string;
+  title: string;
+  description: string;
+  iconUrl?: string;
+  iconType?: IconType;
+  url?: string;
+  isBeta?: boolean;
+  onClick?: EuiCardProps['onClick'];
+  wrapInPanel: boolean;
+}
 export function Synopsis({
   id,
+  title,
   description,
   iconUrl,
   iconType,
-  title,
   url,
-  wrapInPanel,
-  onClick,
   isBeta,
-}) {
+  onClick,
+  wrapInPanel,
+}: SynopsisProps) {
   let optionalImg;
+
+  const classes = classNames('homSynopsis__card', {
+    'homSynopsis__card--noPanel': !wrapInPanel,
+  });
+  const betaBadgeProps = isBeta ? { label: 'Beta' } : undefined;
   if (iconUrl) {
     optionalImg = <img alt="" className="synopsisIcon" src={iconUrl} />;
   } else if (iconType) {
     optionalImg = <EuiIcon color="text" size="l" title="" type={iconType} />;
   }
 
-  const classes = classNames('homSynopsis__card', {
-    'homSynopsis__card--noPanel': !wrapInPanel,
-  });
-
   return (
     <EuiCard
+      {...(betaBadgeProps && { betaBadgeProps })}
       className={classes}
       layout="horizontal"
       icon={optionalImg}
@@ -46,22 +57,7 @@ export function Synopsis({
       onClick={onClick}
       href={url}
       data-test-subj={`homeSynopsisLink${id.toLowerCase()}`}
-      betaBadgeProps={{ label: isBeta ? 'Beta' : null }}
       titleElement="h3"
     />
   );
 }
-
-Synopsis.propTypes = {
-  description: PropTypes.string.isRequired,
-  iconUrl: PropTypes.string,
-  iconType: PropTypes.string,
-  title: PropTypes.string.isRequired,
-  url: PropTypes.string,
-  onClick: PropTypes.func,
-  isBeta: PropTypes.bool,
-};
-
-Synopsis.defaultProps = {
-  isBeta: false,
-};
