@@ -10,7 +10,7 @@
 import { camelCase } from 'lodash';
 import { parse } from '@kbn/esql-ast';
 import { scalarFunctionDefinitions } from '../../definitions/generated/scalar_functions';
-import { builtinFunctions } from '../../definitions/builtin';
+import { operatorsDefinitions } from '../../definitions/all_operators';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { aggregationFunctionDefinitions } from '../../definitions/generated/aggregation_functions';
 import { timeUnitsToSuggest } from '../../definitions/literals';
@@ -137,7 +137,7 @@ export function getFunctionSignaturesByReturnType(
     agg,
     grouping,
     scalar,
-    builtin,
+    operators,
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
     skipAssign,
@@ -145,7 +145,7 @@ export function getFunctionSignaturesByReturnType(
     agg?: boolean;
     grouping?: boolean;
     scalar?: boolean;
-    builtin?: boolean;
+    operators?: boolean;
     skipAssign?: boolean;
   } = {},
   paramsTypes?: Readonly<FunctionParameterType[]>,
@@ -167,8 +167,8 @@ export function getFunctionSignaturesByReturnType(
   if (scalar) {
     list.push(...scalarFunctionDefinitions);
   }
-  if (builtin) {
-    list.push(...builtinFunctions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
+  if (operators) {
+    list.push(...operatorsDefinitions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
   }
 
   const deduped = Array.from(new Set(list));
@@ -217,7 +217,7 @@ export function getFunctionSignaturesByReturnType(
     .map<PartialSuggestionWithText>((definition) => {
       const { type, name, signatures } = definition;
 
-      if (type === 'builtin') {
+      if (type === 'operator') {
         return {
           text: signatures.some(({ params }) => params.length > 1)
             ? `${name.toUpperCase()} $0`

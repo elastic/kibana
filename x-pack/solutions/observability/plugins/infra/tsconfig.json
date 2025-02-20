@@ -115,13 +115,13 @@
     "@kbn/core-ui-settings-common",
     "@kbn/entityManager-plugin",
     "@kbn/zod",
-    "@kbn/observability-utils-server",
-    "@kbn/observability-utils-common",
     "@kbn/core-plugins-server",
     "@kbn/config",
     "@kbn/response-ops-rule-params",
     "@kbn/charts-theme",
     "@kbn/core-test-helpers-model-versions"
+    "@kbn/traced-es-client",
+    "@kbn/observability-utils-common"
   ],
   "exclude": ["target/**/*"]
 }
