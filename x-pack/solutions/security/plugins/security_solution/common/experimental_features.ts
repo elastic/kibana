@@ -263,12 +263,6 @@ export const allowedExperimentalValues = Object.freeze({
   crowdstrikeRunScriptEnabled: true,
 
   /**
-   * Enables the Asset Inventory Entity Store feature.
-   * Allows initializing the Universal Entity Store via the API.
-   */
-  assetInventoryStoreEnabled: false,
-
-  /**
    * Enables the Asset Inventory feature
    */
   assetInventoryUXEnabled: false,
