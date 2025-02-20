@@ -200,7 +200,7 @@ describe('RuleMigrationTaskRunner', () => {
             mockRuleMigrationsDataClient.rules.get
               .mockResolvedValue({ total: 0, data: [] })
               .mockResolvedValueOnce({
-                total: 1,
+                total: 2,
                 data: [
                   { id: ruleId, status: SiemMigrationStatus.PENDING },
                   { id: rule2Id, status: SiemMigrationStatus.PENDING },
@@ -276,7 +276,7 @@ describe('RuleMigrationTaskRunner', () => {
             mockRuleMigrationsDataClient.rules.get
               .mockResolvedValue({ total: 0, data: [] })
               .mockResolvedValueOnce({
-                total: 1,
+                total: 4,
                 data: [
                   { id: ruleId, status: SiemMigrationStatus.PENDING },
                   { id: rule2Id, status: SiemMigrationStatus.PENDING },
@@ -306,6 +306,75 @@ describe('RuleMigrationTaskRunner', () => {
 
             expect(mockRuleMigrationsDataClient.rules.saveCompleted).toHaveBeenCalledTimes(3); // rules 1, 2 and 3
             expect(mockRuleMigrationsDataClient.rules.saveError).toHaveBeenCalledTimes(1); // rule 4
+          });
+
+          it('should increase the executor sleep time when rate limited', async () => {
+            const getResponse = {
+              total: 1,
+              data: [{ id: ruleId, status: SiemMigrationStatus.PENDING }] as StoredRuleMigration[],
+            };
+            mockRuleMigrationsDataClient.rules.get.mockRestore();
+            mockRuleMigrationsDataClient.rules.get
+              .mockResolvedValue({ total: 0, data: [] })
+              .mockResolvedValueOnce(getResponse)
+              .mockResolvedValueOnce({ total: 0, data: [] })
+              .mockResolvedValueOnce(getResponse)
+              .mockResolvedValueOnce({ total: 0, data: [] })
+              .mockResolvedValueOnce(getResponse)
+              .mockResolvedValueOnce({ total: 0, data: [] })
+              .mockResolvedValueOnce(getResponse)
+              .mockResolvedValueOnce({ total: 0, data: [] })
+              .mockResolvedValueOnce(getResponse)
+              .mockResolvedValueOnce({ total: 0, data: [] })
+              .mockResolvedValueOnce(getResponse)
+              .mockResolvedValueOnce({ total: 0, data: [] });
+
+            /**
+             * Current EXECUTOR_SLEEP settings:
+             * initialValueSeconds: 3, multiplier: 2, limitSeconds: 96, // 1m36s (5 increases)
+             */
+
+            // @ts-expect-error (checking private properties)
+            expect(taskRunner.executorSleepMultiplier).toBe(3);
+
+            mockInvoke.mockResolvedValue({}).mockRejectedValueOnce(error); // rate limit and recovery
+            await expect(taskRunner.run({})).resolves.toBeUndefined(); // success
+
+            // @ts-expect-error (checking private properties)
+            expect(taskRunner.executorSleepMultiplier).toBe(6);
+
+            mockInvoke.mockResolvedValue({}).mockRejectedValueOnce(error); // rate limit and recovery
+            await expect(taskRunner.run({})).resolves.toBeUndefined(); // success
+
+            // @ts-expect-error (checking private properties)
+            expect(taskRunner.executorSleepMultiplier).toBe(12);
+
+            mockInvoke.mockResolvedValue({}).mockRejectedValueOnce(error); // rate limit and recovery
+            await expect(taskRunner.run({})).resolves.toBeUndefined(); // success
+
+            // @ts-expect-error (checking private properties)
+            expect(taskRunner.executorSleepMultiplier).toBe(24);
+
+            mockInvoke.mockResolvedValue({}).mockRejectedValueOnce(error); // rate limit and recovery
+            await expect(taskRunner.run({})).resolves.toBeUndefined(); // success
+
+            // @ts-expect-error (checking private properties)
+            expect(taskRunner.executorSleepMultiplier).toBe(48);
+
+            mockInvoke.mockResolvedValue({}).mockRejectedValueOnce(error); // rate limit and recovery
+            await expect(taskRunner.run({})).resolves.toBeUndefined(); // success
+
+            // @ts-expect-error (checking private properties)
+            expect(taskRunner.executorSleepMultiplier).toBe(96);
+
+            mockInvoke.mockResolvedValue({}).mockRejectedValueOnce(error); // rate limit and recovery
+            await expect(taskRunner.run({})).resolves.toBeUndefined(); // success
+
+            // @ts-expect-error (checking private properties)
+            expect(taskRunner.executorSleepMultiplier).toBe(96); // limit reached
+            expect(mockLogger.warn).toHaveBeenCalledWith(
+              'Executor sleep reached the maximum value'
+            );
           });
         });
       });

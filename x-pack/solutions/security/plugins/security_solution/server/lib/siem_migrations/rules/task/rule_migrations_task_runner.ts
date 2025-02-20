@@ -311,11 +311,12 @@ export class RuleMigrationTaskRunner {
   };
 
   private increaseExecutorSleep = () => {
-    if (this.executorSleepMultiplier > EXECUTOR_SLEEP.limitSeconds) {
+    const increasedMultiplier = this.executorSleepMultiplier * EXECUTOR_SLEEP.multiplier;
+    if (increasedMultiplier > EXECUTOR_SLEEP.limitSeconds) {
       this.logger.warn('Executor sleep reached the maximum value');
       return;
     }
-    this.executorSleepMultiplier *= EXECUTOR_SLEEP.multiplier;
+    this.executorSleepMultiplier = increasedMultiplier;
   };
 
   private async saveRuleProcessing(ruleMigration: StoredRuleMigration) {
