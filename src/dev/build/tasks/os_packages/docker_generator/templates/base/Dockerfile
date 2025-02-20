@@ -18,7 +18,7 @@ RUN microdnf install -y findutils tar gzip{{#fips}} perl make gcc{{/fips}}
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y curl
 {{/ubuntu}}
 {{#wolfi}}
-RUN apk --no-cache add curl
+RUN apk --no-cache add curl gnutar
 {{/wolfi}}
 
 {{#usePublicArtifact}}
