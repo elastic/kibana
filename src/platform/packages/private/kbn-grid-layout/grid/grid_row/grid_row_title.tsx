@@ -84,7 +84,7 @@ export const GridRowTitle = React.memo(
 
     return (
       <>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={styles.titleButton}>
           <EuiButtonEmpty
             buttonRef={collapseButtonRef}
             color="text"
@@ -93,7 +93,6 @@ export const GridRowTitle = React.memo(
             })}
             iconType={'arrowDown'}
             onClick={toggleIsCollapsed}
-            css={styles.accordianButton}
             size="m"
             id={`kbnGridRowTitle-${rowIndex}`}
             aria-controls={`kbnGridRow-${rowIndex}`}
@@ -109,7 +108,7 @@ export const GridRowTitle = React.memo(
           </EuiButtonEmpty>
         </EuiFlexItem>
         {!readOnly && editTitleOpen ? (
-          <EuiFlexItem grow={true} css={styles.titleInput}>
+          <EuiFlexItem grow={true} css={styles.editTitleInput}>
             {/* @ts-ignore - EUI typing issue that will be resolved with https://github.com/elastic/eui/pull/8307 */}
             <EuiInlineEditTitle
               size="xs"
@@ -150,7 +149,27 @@ export const GridRowTitle = React.memo(
 );
 
 const styles = {
-  titleInput: {
+  titleButton: ({ euiTheme }: UseEuiTheme) =>
+    css({
+      minWidth: 0,
+      button: {
+        '&:focus': {
+          backgroundColor: 'unset',
+        },
+        h2: {
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+        },
+        svg: {
+          transition: `transform ${euiTheme.animation.fast} ease`,
+          transform: 'rotate(0deg)',
+          '.kbnGridRowContainer--collapsed &': {
+            transform: 'rotate(-90deg) !important',
+          },
+        },
+      },
+    }),
+  editTitleInput: css({
     // if field-sizing is supported, grow width to text; otherwise, fill available space
     '@supports (field-sizing: content)': {
       minWidth: 0,
@@ -162,20 +181,7 @@ const styles = {
         fieldSizing: 'content',
       },
     },
-  },
-  accordianButton: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      '&:focus': {
-        backgroundColor: 'unset',
-      },
-      svg: {
-        transition: `transform ${euiTheme.animation.fast} ease`,
-        transform: 'rotate(0deg)',
-        '.kbnGridRowContainer--collapsed &': {
-          transform: 'rotate(-90deg) !important',
-        },
-      },
-    }),
+  }),
 };
 
 GridRowTitle.displayName = 'GridRowTitle';

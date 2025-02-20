@@ -93,6 +93,7 @@ export const GridRowHeader = React.memo(
       <>
         <EuiFlexGroup
           gutterSize="xs"
+          responsive={false}
           alignItems="center"
           css={styles.headerStyles}
           className="kbnGridRowHeader"
@@ -118,6 +119,7 @@ export const GridRowHeader = React.memo(
                     color="subdued"
                     size="s"
                     data-test-subj={`kbnGridRowHeader-${rowIndex}--panelCount`}
+                    className={'kbnGridLayout--panelCount'}
                   >
                     {i18n.translate('kbnGridLayout.rowHeader.panelCount', {
                       defaultMessage:
@@ -191,6 +193,9 @@ const styles = {
       },
       '.kbnGridLayout--deleteRowIcon': {
         marginLeft: euiTheme.size.xs,
+      },
+      '.kbnGridLayout--panelCount': {
+        textWrapMode: 'nowrap', // prevent panel count from wrapping
       },
       // these styles hide the delete + move actions by default and only show them on hover
       [`.kbnGridLayout--deleteRowIcon,
