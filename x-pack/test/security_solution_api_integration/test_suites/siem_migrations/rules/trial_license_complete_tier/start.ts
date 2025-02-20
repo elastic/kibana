@@ -65,6 +65,26 @@ export default ({ getService }: FtrProviderContext) => {
       expect(response.body.status).to.equal('running');
       expect(response.body.id).to.equal(migrationId);
     });
+
+    it('should return started false for already running migration', async () => {
+      await migrationRulesRoutes.start({
+        migrationId,
+        payload: {
+          connector_id: 'preconfigured-bedrock',
+        },
+      });
+
+      const response = await migrationRulesRoutes.start({
+        migrationId,
+        expectStatusCode: 200,
+        payload: {
+          connector_id: 'preconfigured-bedrock',
+        },
+      });
+
+      expect(response.body).to.eql({ started: false });
+    });
+
     describe('error scenarios', () => {
       it('should reject if connector_id is incorrect', async () => {
         const response = await migrationRulesRoutes.start({
