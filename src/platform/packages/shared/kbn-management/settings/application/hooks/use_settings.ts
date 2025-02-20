@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import { SolutionView } from '@kbn/spaces-plugin/common';
 import { useServices } from '../services';
 
 /**
@@ -21,13 +22,31 @@ import { useServices } from '../services';
  * @returns An array of settings metadata objects.
  */
 export const useSettings = (scope: UiSettingsScope) => {
-  const { getAllowlistedSettings, subscribeToUpdates } = useServices();
+  const { getAllowlistedSettings, subscribeToUpdates, getActiveSpace, subscribeToActiveSpace } =
+    useServices();
+  const [solutionView, setSolutionView] = useState<SolutionView>();
 
-  const [settings, setSettings] = useState(getAllowlistedSettings(scope));
+  useEffectOnce(() => {
+    const subscription = subscribeToActiveSpace(() => {
+      getActiveSpace().then((space) => {
+        setSolutionView(space.solution);
+      });
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  });
+
+  const [settings, setSettings] = useState(getAllowlistedSettings(scope, solutionView));
+
+  useEffect(() => {
+    setSettings(getAllowlistedSettings(scope, solutionView));
+  }, [solutionView, scope, getAllowlistedSettings]); // Update settings when solutionView changes
 
   useEffectOnce(() => {
     const subscription = subscribeToUpdates(() => {
-      setSettings(getAllowlistedSettings(scope));
+      setSettings(getAllowlistedSettings(scope, solutionView));
     }, scope);
 
     return () => {
