@@ -200,7 +200,6 @@ export function ShowShareModal({
   shareService.toggleShareContextMenu({
     isDirty,
     anchorElement,
-    allowEmbed: true,
     allowShortUrl,
     shareableUrl,
     objectId: savedObjectId,
@@ -229,12 +228,6 @@ export function ShowShareModal({
           ),
         },
         embed: {
-          embedUrlParamExtensions: [
-            {
-              paramName: 'embed',
-              component: EmbedUrlParamExtension,
-            },
-          ],
           draftModeCallOut: (
             <EuiCallOut
               color="warning"
@@ -251,6 +244,12 @@ export function ShowShareModal({
                 : shareModalStrings.getDraftShareWarning('embed')}
             </EuiCallOut>
           ),
+          embedUrlParamExtensions: [
+            {
+              paramName: 'embed',
+              component: EmbedUrlParamExtension,
+            },
+          ],
           computeAnonymousCapabilities: showPublicUrlSwitch,
         },
       },

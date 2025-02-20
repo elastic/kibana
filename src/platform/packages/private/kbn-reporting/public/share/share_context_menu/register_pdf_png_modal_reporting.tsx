@@ -13,7 +13,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { ShareContext } from '@kbn/share-plugin/public';
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
-import { ScreenshotExportOpts, ExportShare } from '@kbn/share-plugin/public/types';
+import { ExportGenerationOpts, ExportShare } from '@kbn/share-plugin/public/types';
 import { ApplicationStart } from '@kbn/core/public';
 import { ExportModalShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
 import { checkLicense } from '../../license_check';
@@ -154,7 +154,7 @@ export const reportingPDFExportProvider = ({
         });
     };
 
-    const generateExportUrlPDF = ({ optimizedForPrinting }: ScreenshotExportOpts) => {
+    const generateExportUrlPDF = ({ optimizedForPrinting }: ExportGenerationOpts) => {
       const jobParams = apiClient.getDecoratedJobParams(
         getJobParams({ ...jobProviderOptions, optimizedForPrinting }, 'printablePdfV2')()
       );
@@ -258,7 +258,7 @@ export const reportingPNGExportProvider = ({
       return new URL(relativePathPNG, window.location.href).toString();
     };
 
-    const generateReportPNG = ({ intl }: ScreenshotExportOpts) => {
+    const generateReportPNG = ({ intl }: ExportGenerationOpts) => {
       const decoratedJobParams = apiClient.getDecoratedJobParams({
         ...getJobParams(jobProviderOptions, 'pngV2')(),
       });

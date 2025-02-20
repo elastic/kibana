@@ -25,24 +25,29 @@ export const ShareMenu: FC<{ shareContext: IShareContext }> = ({ shareContext })
 export const ShareMenuTabs = () => {
   const shareContext = useShareTabsContext();
 
-  const { allowEmbed, objectTypeMeta, onClose, shareMenuItems, anchorElement, disabledShareUrl } =
-    shareContext;
+  const { objectTypeMeta, onClose, shareMenuItems, anchorElement } = shareContext;
 
   const tabs: Array<IModalTabDeclaration<any>> = [];
 
   // do not show the link tab if the share url is disabled
-  if (!disabledShareUrl) {
+  if (!objectTypeMeta?.config.link?.disabled) {
     tabs.push(linkTab);
   }
 
-  const enabledItems = shareMenuItems.filter(({ shareMenuItem }) => !shareMenuItem?.disabled);
-
   // do not show the export tab if the license is disabled
-  if (enabledItems.length > 0) {
+  if (
+    shareMenuItems.some(
+      (shareItem) => shareItem.shareType === 'integration' && shareItem.groupId === 'export'
+    )
+  ) {
     tabs.push(exportTab);
   }
 
-  if (allowEmbed) {
+  // embed is disabled in the serverless offering, hence the need to check that we received it
+  if (
+    shareMenuItems.some(({ shareType }) => shareType === 'embed') &&
+    !objectTypeMeta?.config?.embed?.disabled
+  ) {
     tabs.push(embedTab);
   }
 

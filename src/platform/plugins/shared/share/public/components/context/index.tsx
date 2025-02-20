@@ -11,16 +11,12 @@ import { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import { I18nStart } from '@kbn/core/public';
 import React, { type PropsWithChildren, createContext, useContext } from 'react';
 
-import type { ShareConfigs, ShareContext, ShareTypes } from '../../types';
+import type { ShareConfigs, ShareTypes, ShowShareMenuOptions } from '../../types';
 
-export interface IShareContext extends ShareContext {
-  allowEmbed: boolean;
-  allowShortUrl: boolean;
+export interface IShareContext extends ShowShareMenuOptions {
   shareMenuItems: ShareConfigs[];
   theme: ThemeServiceSetup;
   i18n: I18nStart;
-  publicAPIEnabled?: boolean;
-  anchorElement?: HTMLElement;
 }
 
 const ShareTabsContext = createContext<IShareContext | null>(null);

@@ -123,7 +123,11 @@ export class ShareRegistry implements ShareRegistryApi {
     return globalOptions.concat(Array.from(shareContextMap.values()));
   }
 
-  resolveShareItemsForShareContext({ objectType, ...shareContext }: ShareContext): ShareConfigs[] {
+  resolveShareItemsForShareContext({
+    objectType,
+    isServerless,
+    ...shareContext
+  }: ShareContext & { isServerless: boolean }): ShareConfigs[] {
     if (!this.urlService || !this.anonymousAccessServiceProvider) {
       throw new Error('ShareOptionsManager#start was not invoked');
     }
@@ -138,6 +142,8 @@ export class ShareRegistry implements ShareRegistryApi {
           ...shareContext,
         }),
       }))
-      .filter((shareAction) => shareAction.config);
+      .filter(
+        (shareAction) => shareAction.config || (shareAction.shareType === 'embed' && !isServerless)
+      );
   }
 }

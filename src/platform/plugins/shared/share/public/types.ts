@@ -39,6 +39,7 @@ type ShareActionUserInputBase<E extends Record<string, unknown> = Record<string,
     label: string;
   };
   snapshotShareWarning?: string;
+  disabled?: boolean;
 } & E;
 
 type ShareImplementationFactory<
@@ -112,8 +113,8 @@ export interface ExportShare
     helpText?: ReactElement;
     renderCopyURLButton?: ReactElement;
     generateExportButton?: ReactElement;
-    generateAssetExport: (args: ScreenshotExportOpts) => Promise<unknown>;
-    generateValueExport: (args: ScreenshotExportOpts) => string | undefined;
+    generateAssetExport: (args: ExportGenerationOpts) => Promise<unknown>;
+    generateValueExport: (args: ExportGenerationOpts) => string | undefined;
     warnings?: Array<{ title: string; message: string }>;
     requiresSavedState?: boolean;
     supportedLayoutOptions: ['print'];
@@ -237,7 +238,6 @@ export interface ShareContext {
   sharingData: { [key: string]: unknown };
   isDirty: boolean;
   onClose: () => void;
-  disabledShareUrl?: boolean;
   toasts: ToastsSetup;
 }
 
@@ -268,7 +268,7 @@ export interface ShareMenuItemLegacy extends ShareMenuItemBase {
   panel?: EuiContextMenuPanelDescriptor;
 }
 
-export interface ScreenshotExportOpts {
+export interface ExportGenerationOpts {
   optimizedForPrinting?: boolean;
   intl: InjectedIntl;
 }
@@ -298,9 +298,8 @@ export interface UrlParamExtension {
 
 /** @public */
 export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
-  anchorElement: HTMLElement;
+  anchorElement?: HTMLElement;
   allowShortUrl: boolean;
-  allowEmbed: boolean;
   onClose?: () => void;
   publicAPIEnabled?: boolean;
 }

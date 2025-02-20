@@ -685,9 +685,12 @@ export const LensTopNavMenu = ({
                         ? shareableUrl!
                         : savedObjectURL.href;
                     },
+                    // disable the menu if both shortURL permission and the visualization has not been saved
+                    // TODO: improve here the disabling state with more specific checks
+                    disabled: Boolean(!shareUrlEnabled && !currentDoc?.savedObjectId),
                   },
                   embed: {
-                    allowEmbed: true,
+                    disabled: true,
                     showPublicUrlSwitch: () => false,
                   },
                 },
@@ -695,9 +698,6 @@ export const LensTopNavMenu = ({
               sharingData,
               // only want to know about changes when savedObjectURL.href
               isDirty: isCurrentStateDirty || !currentDoc?.savedObjectId,
-              // disable the menu if both shortURL permission and the visualization has not been saved
-              // TODO: improve here the disabling state with more specific checks
-              disabledShareUrl: Boolean(!shareUrlEnabled && !currentDoc?.savedObjectId),
               onClose: () => {
                 anchorElement?.focus();
               },
