@@ -736,7 +736,11 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
       return (
         <EuiForm
           component="div"
-          error={submitError ? <FormattedError error={submitError} /> : undefined}
+          error={
+            submitError ? (
+              <FormattedError error={submitError} data-test-subj={getTestId('submitError')} />
+            ) : undefined
+          }
           isInvalid={!!submitError}
         >
           {detailsSection}
