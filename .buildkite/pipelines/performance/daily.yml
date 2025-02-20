@@ -20,7 +20,18 @@ steps:
     if: "build.env('KIBANA_BUILD_ID') == null || build.env('KIBANA_BUILD_ID') == ''"
 
   - label: '💪 Performance Tests with Playwright config'
-    command: .buildkite/scripts/steps/functional/performance_playwright.sh
+    plugins:
+      - custom-checkout#v1.0.0:
+          skip_checkout: true
+    command:
+      - echo "Manually fetching Kibana with SHA=$BUILDKITE_COMMIT..."
+      - wget -q "https://github.com/elastic/kibana/archive/$BUILDKITE_COMMIT.tar.gz" -O "kibana.tar.gz"
+      - echo "Extracting Kibana archive..."
+      - tar -xzf kibana.tar.gz
+      - echo "Setting executable permissions for the script..."
+      - chmod +x kibana-$BUILDKITE_COMMIT/.buildkite/scripts/steps/functional/performance_playwright.sh
+      - echo "Running Performance Playwright script..."
+      - ./kibana-$BUILDKITE_COMMIT/.buildkite/scripts/steps/functional/performance_playwright.sh
     env:
       PERFORMANCE_ENABLE_TELEMETRY: true
     agents:
