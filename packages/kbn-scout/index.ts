@@ -16,6 +16,7 @@ export {
   createPlaywrightConfig,
   createLazyPageObject,
   ingestTestDataHook,
+  ingestSynthtraceDataHook,
 } from './src/playwright';
 export type {
   ScoutPlaywrightOptions,
@@ -36,3 +37,8 @@ export type {
   ScoutServerConfig,
   ScoutTestConfig,
 } from './src/types';
+
+// re-export from Playwright
+export type { Locator } from 'playwright/test';
+
+export { measurePerformance, measurePerformanceAsync } from './src/common';

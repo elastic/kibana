@@ -71,48 +71,13 @@
       },
       {
         "parentPluginId": "@kbn/search-api-keys-components",
-        "id": "def-public.SearchApiKeyProvider",
-        "type": "Function",
-        "tags": [],
-        "label": "SearchApiKeyProvider",
-        "description": [],
-        "signature": [
-          "({ children }: { children?: React.ReactNode; }) => React.JSX.Element"
-        ],
-        "path": "x-pack/solutions/search/packages/kbn-search-api-keys-components/src/providers/search_api_key_provider.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/search-api-keys-components",
-            "id": "def-public.SearchApiKeyProvider.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ children }",
-            "description": [],
-            "signature": [
-              "{ children?: React.ReactNode; }"
-            ],
-            "path": "x-pack/solutions/search/packages/kbn-search-api-keys-components/src/providers/search_api_key_provider.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/search-api-keys-components",
         "id": "def-public.useSearchApiKey",
         "type": "Function",
         "tags": [],
         "label": "useSearchApiKey",
         "description": [],
         "signature": [
-          "() => { apiKey: string | null; toggleApiKeyVisibility: () => void; updateApiKey: ({ id, encoded }: { id: string; encoded: string; }) => void; status: ",
-          "Status",
-          "; }"
+          "() => UseSearchApiKeyParams"
         ],
         "path": "x-pack/solutions/search/packages/kbn-search-api-keys-components/src/hooks/use_search_api_key.ts",
         "deprecated": false,
@@ -125,23 +90,7 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/search-api-keys-components",
-        "id": "def-public.ApiKeyContext",
-        "type": "Object",
-        "tags": [],
-        "label": "ApiKeyContext",
-        "description": [],
-        "signature": [
-          "React.Context<APIKeyContext>"
-        ],
-        "path": "x-pack/solutions/search/packages/kbn-search-api-keys-components/src/providers/search_api_key_provider.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
   },
   "server": {
     "classes": [],

@@ -7,13 +7,8 @@ VERSION_QUALIFIER="${VERSION_QUALIFIER:=""}"
 
 BASE_VERSION="$(jq -r '.version' package.json)"
 
-if [[ -z "$VERSION_QUALIFIER" ]]; then
-  # NOTE: this is temporary and make sure we always produce 9.0.0 staging builds with qualifier tag -beta1 at the moment
-  if [[ "$BASE_VERSION" == "9.0.0" && "$RELEASE_BUILD" == "true" ]]; then
-    QUALIFIER_VERSION="$BASE_VERSION-beta1"
-  else
-    QUALIFIER_VERSION="$BASE_VERSION"
-  fi
+if [[ "$VERSION_QUALIFIER" == "" ]]; then
+  QUALIFIER_VERSION="$BASE_VERSION"
 else
   QUALIFIER_VERSION="$BASE_VERSION-$VERSION_QUALIFIER"
 fi

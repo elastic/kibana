@@ -34,9 +34,14 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
   const [isScanButtonDisabled, setIsScanButtonDisabled] = useState(true);
   const [scanCompleted, setIsScanCompleted] = useState(false);
   const [userTriggeredScan, setUserTriggeredScan] = useState(false);
+  const [insightGenerationFailures, setInsightGenerationFailures] = useState(false);
 
   const disableScanButton = () => {
     setIsScanButtonDisabled(true);
+  };
+
+  const onInsightGenerationFailure = () => {
+    setInsightGenerationFailures(true);
   };
 
   const [setScanOngoing, setScanCompleted] = [
@@ -57,6 +62,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
     endpointId,
     isPolling: isScanButtonDisabled,
     onSuccess: refetchInsights,
+    onInsightGenerationFailure,
   });
 
   const { mutate: triggerScan } = useTriggerScan({
@@ -86,13 +92,17 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
 
   const onScanButtonClick = useCallback(
     ({ actionTypeId, connectorId }: { actionTypeId: string; connectorId: string }) => {
+      if (insightGenerationFailures) {
+        setInsightGenerationFailures(false);
+      }
+
       setScanOngoing();
       if (!userTriggeredScan) {
         setUserTriggeredScan(true);
       }
       triggerScan({ endpointId, actionTypeId, connectorId });
     },
-    [setScanOngoing, userTriggeredScan, triggerScan, endpointId]
+    [insightGenerationFailures, setScanOngoing, userTriggeredScan, triggerScan, endpointId]
   );
 
   return (
@@ -131,7 +141,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
         <EuiSpacer size={'m'} />
         <WorkflowInsightsResults
           results={insights}
-          scanCompleted={scanCompleted && userTriggeredScan}
+          scanCompleted={!insightGenerationFailures && scanCompleted && userTriggeredScan}
           endpointId={endpointId}
         />
       </EuiAccordion>

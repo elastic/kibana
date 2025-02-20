@@ -5590,19 +5590,8 @@
                 "label": "type",
                 "description": [],
                 "signature": [
-                  "\"index_name\""
+                  "\"kibana_advanced_setting\""
                 ],
-                "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "logsShared",
-                "id": "def-common.defaultLogViewAttributes.logIndices.indexName",
-                "type": "string",
-                "tags": [],
-                "label": "indexName",
-                "description": [],
                 "path": "x-pack/platform/plugins/shared/logs_shared/common/log_views/defaults.ts",
                 "deprecated": false,
                 "trackAdoption": false

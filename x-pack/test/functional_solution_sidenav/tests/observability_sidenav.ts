@@ -70,7 +70,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         }
         await solutionNavigation.sidenav.clickPanelLink('metrics:inventory');
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({
-          text: 'Infrastructure inventory',
+          text: 'Infrastructure Inventory',
         });
 
         {
@@ -80,8 +80,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         // navigate to a different section
         await solutionNavigation.sidenav.openSection('project_settings_project_nav');
-        await solutionNavigation.sidenav.clickLink({ deepLinkId: 'management' });
-        await solutionNavigation.sidenav.expectLinkActive({ deepLinkId: 'management' });
+        await solutionNavigation.sidenav.clickLink({ navId: 'stack_management' });
+        await solutionNavigation.sidenav.expectLinkActive({ navId: 'stack_management' });
+        await solutionNavigation.sidenav.clickPanelLink('management:tags');
         await solutionNavigation.breadcrumbs.expectBreadcrumbExists({ text: 'Stack Management' });
 
         // navigate back to the home page using header logo

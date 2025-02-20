@@ -7,6 +7,7 @@
 
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
+import { CapabilitiesChecker } from '../../../../../../common/lib/capabilities/capabilities_checker';
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 import { AIActionTypeIds } from '../../common/connectors/constants';
 import type { AIConnectorCardMetadata } from './types';
@@ -15,10 +16,18 @@ export const checkAiConnectorsCardComplete: OnboardingCardCheckComplete<
   AIConnectorCardMetadata
 > = async ({ http, application, siemMigrations }) => {
   let isComplete = false;
-  const allConnectors = await loadConnectors({ http });
-  const { capabilities } = application;
+  const capabilities = new CapabilitiesChecker(application.capabilities);
 
-  const aiConnectors = allConnectors.reduce((acc: AIConnector[], connector) => {
+  const canExecuteConnectors = capabilities.has([['actions.show', 'actions.execute']]);
+  const canCreateConnectors = capabilities.has('actions.save');
+
+  if (!capabilities.has('actions.show')) {
+    return { isComplete, metadata: { connectors: [], canExecuteConnectors, canCreateConnectors } };
+  }
+
+  const allConnectors = await loadConnectors({ http });
+
+  const connectors = allConnectors.reduce<AIConnector[]>((acc, connector) => {
     if (!connector.isMissingSecrets && AIActionTypeIds.includes(connector.actionTypeId)) {
       acc.push(connector);
     }
@@ -27,19 +36,12 @@ export const checkAiConnectorsCardComplete: OnboardingCardCheckComplete<
 
   const storedConnectorId = siemMigrations.rules.connectorIdStorage.get();
   if (storedConnectorId) {
-    if (aiConnectors.length === 0) {
+    if (connectors.length === 0) {
       siemMigrations.rules.connectorIdStorage.remove();
     } else {
-      isComplete = aiConnectors.some((connector) => connector.id === storedConnectorId);
+      isComplete = connectors.some((connector) => connector.id === storedConnectorId);
     }
   }
 
-  return {
-    isComplete,
-    metadata: {
-      connectors: aiConnectors,
-      canExecuteConnectors: Boolean(capabilities.actions?.show && capabilities.actions?.execute),
-      canCreateConnectors: Boolean(capabilities.actions?.save),
-    },
-  };
+  return { isComplete, metadata: { connectors, canExecuteConnectors, canCreateConnectors } };
 };

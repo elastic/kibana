@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export function getIndexTemplateName(id: string) {
-  return `${id}@stream`;
+export function getIndexTemplateName(name: string) {
+  return `${name}@stream`;
 }

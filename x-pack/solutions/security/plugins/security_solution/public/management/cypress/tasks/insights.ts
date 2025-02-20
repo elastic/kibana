@@ -117,41 +117,52 @@ export const stubPutWorkflowInsightsApiResponse = () => {
   });
 };
 
-export const stubDefendInsightsApiResponse = () => {
-  cy.intercept('GET', '**/internal/elastic_assistant/defend_insights?status=running**', (req) => {
-    req.continue((res) => {
-      return res.send(200, {
-        data: [
-          {
-            timestamp: '2024-12-16T13:44:52.633Z',
-            id: 'd95561cb-1f75-4a6c-8be4-cb7529ddd5e0',
-            backingIndex:
-              '.ds-.kibana-elastic-ai-assistant-defend-insights-default-2024.12.16-000001',
-            createdAt: '2024-12-16T13:44:52.633Z',
-            updatedAt: '2024-12-16T13:44:52.633Z',
-            lastViewedAt: '2024-12-16T13:44:53.866Z',
-            users: [
-              {
-                id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-                name: 'elastic',
+export const stubDefendInsightsApiResponse = (
+  overrides: Record<string, string> = {},
+  config: { times?: number } = {}
+) => {
+  cy.intercept(
+    {
+      method: 'GET',
+      url: '**/internal/elastic_assistant/defend_insights?status=running**',
+      ...(config.times ? { times: config.times } : {}),
+    },
+    (req) => {
+      req.continue((res) => {
+        return res.send(200, {
+          data: [
+            {
+              timestamp: '2024-12-16T13:44:52.633Z',
+              id: 'd95561cb-1f75-4a6c-8be4-cb7529ddd5e0',
+              backingIndex:
+                '.ds-.kibana-elastic-ai-assistant-defend-insights-default-2024.12.16-000001',
+              createdAt: '2024-12-16T13:44:52.633Z',
+              updatedAt: '2024-12-16T13:44:52.633Z',
+              lastViewedAt: '2024-12-16T13:44:53.866Z',
+              users: [
+                {
+                  id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+                  name: 'elastic',
+                },
+              ],
+              namespace: 'default',
+              status: 'running',
+              apiConfig: {
+                connectorId: 'db760d65-6722-4646-955f-fbdc9851df86',
+                actionTypeId: '.bedrock',
               },
-            ],
-            namespace: 'default',
-            status: 'running',
-            apiConfig: {
-              connectorId: 'db760d65-6722-4646-955f-fbdc9851df86',
-              actionTypeId: '.bedrock',
+              endpointIds: ['33581c4f-bef1-4162-9809-4c208e2e1991'],
+              insightType: 'incompatible_antivirus',
+              insights: [],
+              generationIntervals: [],
+              averageIntervalMs: 0,
+              ...overrides,
             },
-            endpointIds: ['33581c4f-bef1-4162-9809-4c208e2e1991'],
-            insightType: 'incompatible_antivirus',
-            insights: [],
-            generationIntervals: [],
-            averageIntervalMs: 0,
-          },
-        ],
+          ],
+        });
       });
-    });
-  });
+    }
+  );
 };
 
 export const stubWorkflowInsightsApiResponse = (endpointId: string) => {

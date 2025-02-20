@@ -19,12 +19,12 @@ import { getProcessingPipelineName } from './name';
 import { formatToIngestProcessors } from '../helpers/processing';
 
 export function generateIngestPipeline(
-  id: string,
+  name: string,
   definition: StreamDefinition
 ): IngestPutPipelineRequest {
   const isWiredStream = isWiredStreamDefinition(definition);
   return {
-    id: getProcessingPipelineName(id),
+    id: getProcessingPipelineName(name),
     processors: [
       ...(isRoot(definition.name) ? logsDefaultPipelineProcessors : []),
       ...(!isRoot(definition.name) && isWiredStream
@@ -32,7 +32,7 @@ export function generateIngestPipeline(
             {
               script: {
                 source: `
-                  if (ctx.stream?.name != params.parentName) {
+                  if (ctx["stream.name"] != params.parentName) {
                     throw new IllegalArgumentException('stream.name is not set properly - did you send the document directly to a child stream instead of the main logs stream?');
                   }
                 `,
@@ -45,21 +45,24 @@ export function generateIngestPipeline(
           ]
         : []),
       {
-        set: {
-          field: 'stream.name',
-          value: definition.name,
+        script: {
+          source: 'ctx["stream.name"] = params.field',
+          lang: 'painless',
+          params: {
+            field: definition.name,
+          },
         },
       },
       ...((isWiredStream && formatToIngestProcessors(definition.ingest.processing)) || []),
       {
         pipeline: {
-          name: `${id}@stream.reroutes`,
+          name: `${name}@stream.reroutes`,
           ignore_missing_pipeline: true,
         },
       },
     ],
     _meta: {
-      description: `Default pipeline for the ${id} stream`,
+      description: `Default pipeline for the ${name} stream`,
       managed: true,
     },
     version: ASSET_VERSION,

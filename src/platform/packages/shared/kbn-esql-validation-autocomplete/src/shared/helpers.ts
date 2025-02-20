@@ -26,10 +26,10 @@ import {
   ESQLProperNode,
 } from '@kbn/esql-ast/src/types';
 import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
-import { builtinFunctions } from '../definitions/builtin';
+import { operatorsDefinitions } from '../definitions/all_operators';
 import { commandDefinitions } from '../definitions/commands';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
-import { groupingFunctionDefinitions } from '../definitions/grouping';
+import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { getTestFunctions } from './test_functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { timeUnits } from '../definitions/literals';
@@ -116,7 +116,7 @@ export function isMathFunction(query: string, offset: number) {
   const [opString] = queryTrimmed.split(' ').reverse();
   // compare last char for all math functions
   // limit only to 2 chars operators
-  const fns = builtinFunctions.filter(({ name }) => name.length < 3).map(({ name }) => name);
+  const fns = operatorsDefinitions.filter(({ name }) => name.length < 3).map(({ name }) => name);
   const tokenMatch = fns.some((op) => opString === op);
   // there's a match, that's good
   if (tokenMatch) {
@@ -143,7 +143,7 @@ let commandLookups: Map<string, CommandDefinition<string>> | undefined;
 function buildFunctionLookup() {
   // we always refresh if we have test functions
   if (!fnLookups || getTestFunctions().length) {
-    fnLookups = builtinFunctions
+    fnLookups = operatorsDefinitions
       .concat(
         scalarFunctionDefinitions,
         aggregationFunctionDefinitions,

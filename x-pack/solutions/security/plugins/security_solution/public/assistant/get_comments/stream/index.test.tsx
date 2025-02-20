@@ -13,10 +13,27 @@ import { StreamComment } from '.';
 import { useStream } from './use_stream';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import type { AsApiContract } from '@kbn/actions-plugin/common';
+
 const mockSetComplete = jest.fn();
 jest.mock('../../../detection_engine/rule_management/api/hooks/use_fetch_connectors_query');
 
 jest.mock('./use_stream');
+
+jest.mock('../../../common/lib/kibana', () => ({
+  useNavigation: jest.fn().mockReturnValue({
+    navigateTo: jest.fn(),
+  }),
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      discover: {
+        locator: jest.fn(),
+      },
+      application: {
+        navigateToApp: jest.fn(),
+      },
+    },
+  }),
+}));
 
 const content = 'Test Content';
 const mockAbortStream = jest.fn();
@@ -30,6 +47,7 @@ const testProps = {
   regenerateMessage: jest.fn(),
   setIsStreaming: jest.fn(),
   transformMessage: jest.fn(),
+  contentReferences: undefined,
 };
 
 const mockReader = jest.fn() as unknown as ReadableStreamDefaultReader<Uint8Array>;
@@ -59,6 +77,61 @@ describe('StreamComment', () => {
     render(<StreamComment {...testProps} />);
 
     expect(screen.getByText(content)).toBeInTheDocument();
+  });
+
+  it('renders citations correctly when content references are defined', () => {
+    render(
+      <StreamComment
+        {...{
+          ...testProps,
+          content: 'the sky is blue {reference(1234)}',
+          contentReferencesEnabled: true,
+          contentReferencesVisible: true,
+          contentReferences: {
+            '1234': {
+              id: '1234',
+              type: 'SecurityAlertsPage',
+            },
+          },
+        }}
+      />
+    );
+
+    expect(screen.getByText('[1]')).toBeInTheDocument();
+    expect(screen.getByTestId('ContentReferenceButton')).toBeEnabled();
+  });
+
+  it('renders citations correctly when content references null', () => {
+    render(
+      <StreamComment
+        {...{
+          ...testProps,
+          content: 'the sky is blue {reference(1234)}',
+          contentReferencesEnabled: true,
+          contentReferencesVisible: true,
+          contentReferences: null,
+        }}
+      />
+    );
+
+    expect(screen.getByText('[1]')).toBeInTheDocument();
+    expect(screen.getByTestId('ContentReferenceButton')).not.toBeEnabled();
+  });
+
+  it('renders citations correctly when content references are undefined', () => {
+    render(
+      <StreamComment
+        {...{
+          ...testProps,
+          content: 'the sky is blue {reference(1234)}',
+          contentReferencesEnabled: true,
+          contentReferencesVisible: true,
+          contentReferences: undefined,
+        }}
+      />
+    );
+
+    expect(screen.queryByText('[1]')).not.toBeInTheDocument();
   });
 
   it('renders cursor when content is loading', () => {

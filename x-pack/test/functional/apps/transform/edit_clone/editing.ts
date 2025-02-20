@@ -18,9 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const transform = getService('transform');
 
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/208872
-  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/208874
-  describe.skip('editing', function () {
+  describe('editing', function () {
     const transformConfigWithPivot: TransformPivotConfig = getPivotTransformConfig('editing');
     const transformConfigWithLatest: TransformLatestConfig = {
       ...getLatestTransformConfig('editing'),

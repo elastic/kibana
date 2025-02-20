@@ -20,7 +20,7 @@ import type {
 
 import path from 'node:path';
 import { ToolingLog } from '@kbn/tooling-log';
-import { SCOUT_REPORT_OUTPUT_ROOT } from '@kbn/scout-info';
+import { SCOUT_REPORT_OUTPUT_ROOT, ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import stripANSI from 'strip-ansi';
 import { REPO_ROOT } from '@kbn/repo-info';
 import {
@@ -107,6 +107,7 @@ export class ScoutPlaywrightReporter implements Reporter {
     if (config.configFile !== undefined) {
       configInfo = {
         file: this.getScoutFileInfoForPath(path.relative(REPO_ROOT, config.configFile)),
+        category: ScoutTestRunConfigCategory.UI_TEST,
       };
     }
 

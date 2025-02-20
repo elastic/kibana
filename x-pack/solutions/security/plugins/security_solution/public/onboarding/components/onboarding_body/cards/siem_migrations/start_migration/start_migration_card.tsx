@@ -15,11 +15,16 @@ import { useLatestStats } from '../../../../../../siem_migrations/rules/service/
 import { CenteredLoadingSpinner } from '../../../../../../common/components/centered_loading_spinner';
 import type { OnboardingCardComponent } from '../../../../../types';
 import { OnboardingCardContentPanel } from '../../common/card_content_panel';
+import type { StartMigrationCardMetadata } from './types';
 import { RuleMigrationsPanels } from './rule_migrations_panels';
 import { useStyles } from './start_migration_card.styles';
 import * as i18n from './translations';
+import {
+  MissingPrivilegesCallOut,
+  MissingPrivilegesDescription,
+} from '../../common/missing_privileges';
 
-export const StartMigrationCard: OnboardingCardComponent = React.memo(
+const StartMigrationsBody: OnboardingCardComponent = React.memo(
   ({ setComplete, isCardComplete, setExpandedCardId }) => {
     const styles = useStyles();
     const { data: migrationsStats, isLoading, refreshStats } = useLatestStats();
@@ -61,6 +66,28 @@ export const StartMigrationCard: OnboardingCardComponent = React.memo(
         </OnboardingCardContentPanel>
       </RuleMigrationDataInputWrapper>
     );
+  }
+);
+StartMigrationsBody.displayName = 'StartMigrationsBody';
+
+export const StartMigrationCard: OnboardingCardComponent<StartMigrationCardMetadata> = React.memo(
+  ({ checkCompleteMetadata, ...props }) => {
+    if (!checkCompleteMetadata) {
+      return <CenteredLoadingSpinner />;
+    }
+
+    const { missingCapabilities } = checkCompleteMetadata;
+    if (missingCapabilities.length > 0) {
+      return (
+        <OnboardingCardContentPanel>
+          <MissingPrivilegesCallOut>
+            <MissingPrivilegesDescription privileges={missingCapabilities} />
+          </MissingPrivilegesCallOut>
+        </OnboardingCardContentPanel>
+      );
+    }
+
+    return <StartMigrationsBody {...props} />;
   }
 );
 StartMigrationCard.displayName = 'StartMigrationCard';

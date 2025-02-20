@@ -32,7 +32,13 @@ export const PanelRouter = memo(function ({
     selectors.panelViewAndParameters(state.analyzer[id])
   );
   if (params.panelView === 'nodeDetail') {
-    return <NodeDetail id={id} nodeID={params.panelParameters.nodeID} />;
+    return (
+      <NodeDetail
+        id={id}
+        nodeID={params.panelParameters.nodeID}
+        nodeEventOnClick={nodeEventOnClick}
+      />
+    );
   } else if (params.panelView === 'nodeEvents') {
     return <NodeEvents id={id} nodeID={params.panelParameters.nodeID} />;
   } else if (params.panelView === 'nodeEventsInCategory') {

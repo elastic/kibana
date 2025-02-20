@@ -6,8 +6,12 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import { Agent, PACKAGE_POLICY_SAVED_OBJECT_TYPE, PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  AgentPolicyServiceInterface,
+  AgentService,
+  PackagePolicyClient,
+} from '@kbn/fleet-plugin/server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { NATIVE_CONNECTOR_DEFINITIONS, fetchConnectors } from '@kbn/search-connectors';
 import { getPackageInfo } from '@kbn/fleet-plugin/server/services/epm/packages';
@@ -25,10 +29,19 @@ export interface PackageConnectorSettings {
   service_type: string;
 }
 
+export type AgentMetadata = Pick<Agent, 'last_checkin_status' | 'id' | 'status'>;
+
 export interface PackagePolicyMetadata {
   package_policy_id: string;
+  package_policy_name: string;
+  package_name: string;
   agent_policy_ids: string[];
   connector_settings: PackageConnectorSettings;
+}
+
+// Agent metadata is only returned when there is an agent associated with the policy
+export interface PackagePolicyAndAgentMetadata extends PackagePolicyMetadata {
+  agent_metadata?: AgentMetadata;
 }
 
 const connectorsInputName = 'connectors-py';
@@ -41,18 +54,21 @@ export class AgentlessConnectorsInfraService {
   private esClient: ElasticsearchClient;
   private packagePolicyService: PackagePolicyClient;
   private agentPolicyService: AgentPolicyServiceInterface;
+  private agentService: AgentService;
 
   constructor(
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     packagePolicyService: PackagePolicyClient,
     agentPolicyService: AgentPolicyServiceInterface,
+    agentService: AgentService,
     logger: Logger
   ) {
     this.logger = logger;
     this.soClient = soClient;
     this.esClient = esClient;
     this.packagePolicyService = packagePolicyService;
+    this.agentService = agentService;
     this.agentPolicyService = agentPolicyService;
   }
 
@@ -124,6 +140,8 @@ export class AgentlessConnectorsInfraService {
 
               policiesMetadata.push({
                 package_policy_id: policy.id,
+                package_policy_name: policy.name,
+                package_name: policy.package?.name || '',
                 agent_policy_ids: policy.policy_ids,
                 connector_settings: {
                   id: input.compiled_input.connector_id,
@@ -248,6 +266,54 @@ export class AgentlessConnectorsInfraService {
     }
   };
 
+  public getAgentPolicyForConnectorId = async ({
+    connectorId,
+  }: {
+    connectorId: string;
+  }): Promise<PackagePolicyAndAgentMetadata | null> => {
+    const allPolicies = await this.getConnectorPackagePolicies();
+
+    const policies = getPoliciesByConnectorId(allPolicies, connectorId);
+
+    if (!policies || policies.length === 0) {
+      return null;
+    }
+
+    const [policy] = policies;
+
+    if (policy && policy.agent_policy_ids.length > 0) {
+      const policyId = policy!.agent_policy_ids[0];
+
+      const listAgentsResponse = await this.agentService.asInternalUser.listAgents({
+        kuery: `fleet-agents.policy_id:${policyId}`,
+        showInactive: false,
+      });
+
+      if (!listAgentsResponse || listAgentsResponse.agents.length === 0) {
+        // If no agents assigned to policy, just return the policy
+        return policy;
+      } else {
+        if (listAgentsResponse.agents.length > 1) {
+          this.logger.warn(
+            `More than one agent assigned to policy ${policyId} that manages connector with id ${connectorId}`
+          );
+        }
+
+        // Return the first (and only) agentless host associated with this policy
+        return {
+          ...policy,
+          agent_metadata: {
+            id: listAgentsResponse.agents[0].id,
+            last_checkin_status: listAgentsResponse.agents[0].last_checkin_status,
+            status: listAgentsResponse.agents[0].status,
+          },
+        };
+      }
+    }
+
+    return policy;
+  };
+
   private getPackageVersion = async (): Promise<string> => {
     this.logger.debug(`Fetching ${pkgName} version`);
 
@@ -312,4 +378,24 @@ export const getPoliciesToDelete = (
   }
 
   return results;
+};
+
+export const getPoliciesByConnectorId = (
+  packagePolicies: PackagePolicyMetadata[],
+  connectorId: string
+): PackagePolicyMetadata[] => {
+  return packagePolicies.filter(
+    (packagePolicy) =>
+      packagePolicy.connector_settings.id === connectorId ||
+      packagePolicy.package_policy_id === connectorId
+  );
+};
+
+export const getConnectorPolicyId = (
+  packagePolicies: PackagePolicyMetadata[],
+  connectorId: string
+): string[] => {
+  return getPoliciesByConnectorId(packagePolicies, connectorId).map(
+    (policy) => policy.package_policy_id
+  );
 };

@@ -7,24 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable import/no-default-export */
 import { externals } from '@kbn/ui-shared-deps-src';
-import { stringifyRequest } from 'loader-utils';
 import { resolve } from 'path';
-import webpack, { Configuration, Stats } from 'webpack';
-import webpackMerge from 'webpack-merge';
+import webpack, { Configuration } from 'webpack';
+import { merge as webpackMerge } from 'webpack-merge';
+import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 import { REPO_ROOT } from './lib/constants';
 import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
 import 'webpack-dev-server'; // Extends webpack configuration with `devServer` property
 
 type Preset = string | [string, Record<string, unknown>] | Record<string, unknown>;
-
-const stats = {
-  ...Stats.presetToOptions('minimal'),
-  colors: true,
-  errorDetails: true,
-  errors: true,
-  moduleTrace: true,
-};
 
 function isProgressPlugin(plugin: any) {
   return 'handler' in plugin && plugin.showActiveModules && plugin.showModules;
@@ -35,7 +28,10 @@ function isHtmlPlugin(plugin: any): plugin is { options: { template: string } } 
 }
 
 interface BabelLoaderRule extends webpack.RuleSetRule {
-  use: webpack.RuleSetLoader[];
+  use: Array<{
+    loader: 'babel-loader';
+    [key: string]: unknown;
+  }>;
 }
 
 function isBabelLoaderRule(rule: webpack.RuleSetRule): rule is BabelLoaderRule {
@@ -44,7 +40,7 @@ function isBabelLoaderRule(rule: webpack.RuleSetRule): rule is BabelLoaderRule {
     Array.isArray(rule.use) &&
     rule.use.some(
       (l) =>
-        typeof l === 'object' && typeof l.loader === 'string' && l.loader.includes('babel-loader')
+        typeof l === 'object' && typeof l?.loader === 'string' && l?.loader.includes('babel-loader')
     )
   );
 }
@@ -69,12 +65,14 @@ function isDesiredPreset(preset: Preset) {
 }
 
 // Extend the Storybook Webpack config with some customizations
-/* eslint-disable import/no-default-export */
+/**
+ * @returns {import('webpack').Configuration}
+ */
 export default ({ config: storybookConfig }: { config: Configuration }) => {
   const config: Configuration = {
     devServer: {
       devMiddleware: {
-        stats,
+        stats: 'errors-only',
       },
     },
     externals,
@@ -91,9 +89,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         },
         {
           test: /\.(html|md|txt|tmpl)$/,
-          use: {
-            loader: 'raw-loader',
-          },
+          type: 'asset/source',
         },
         {
           test: /\.peggy$/,
@@ -119,10 +115,13 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
               loader: 'sass-loader',
               options: {
                 additionalData(content: string, loaderContext: any) {
-                  return `@import ${stringifyRequest(
-                    loaderContext,
-                    resolve(REPO_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
-                  )};\n${content}`;
+                  const req = JSON.stringify(
+                    loaderContext.utils.contextify(
+                      loaderContext.context || loaderContext.rootContext,
+                      resolve(REPO_ROOT, 'src/core/public/styles/core_app/_globals_v8light.scss')
+                    )
+                  );
+                  return `@import ${req};\n${content}`;
                 },
                 implementation: require('sass-embedded'),
                 sassOptions: {
@@ -133,39 +132,9 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
             },
           ],
         },
-        {
-          test: /node_modules\/@?xstate5\/.*\.js$/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              babelrc: false,
-              presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-              plugins: ['@babel/plugin-transform-logical-assignment-operators'],
-            },
-          },
-        },
-        {
-          test: /\.js$/,
-          include: /node_modules[\\\/]@dagrejs/,
-          use: {
-            loader: 'babel-loader',
-            options: {
-              presets: ['@babel/preset-env'], // Doesn't work with @kbn/babel-preset/webpack_preset
-              plugins: ['@babel/plugin-proposal-class-properties'],
-            },
-          },
-        },
-        {
-          test: /node_modules[\/\\]@?xyflow[\/\\].*.js$/,
-          loaders: 'babel-loader',
-          options: {
-            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
-            plugins: ['@babel/plugin-transform-logical-assignment-operators'],
-          },
-        },
       ],
     },
-    plugins: [new IgnoreNotFoundExportPlugin()],
+    plugins: [new NodeLibsBrowserPlugin(), new IgnoreNotFoundExportPlugin()],
     resolve: {
       extensions: ['.js', '.mjs', '.ts', '.tsx', '.json', '.mdx'],
       mainFields: ['browser', 'main'],
@@ -175,16 +144,16 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         vega: resolve(REPO_ROOT, 'node_modules/vega/build-es5/vega.js'),
       },
     },
-    stats,
+    stats: 'errors-only',
   };
 
   // Override storybookConfig mainFields instead of merging with config
   delete storybookConfig.resolve?.mainFields;
 
-  const updatedModuleRules = [];
+  const updatedModuleRules: webpack.RuleSetRule[] = [];
   // clone and modify the module.rules config provided by storybook so that the default babel plugins run after the typescript preset
   for (const originalRule of storybookConfig.module?.rules ?? []) {
-    const rule = { ...originalRule };
+    const rule = typeof originalRule !== 'string' ? { ...originalRule } : {};
     updatedModuleRules.push(rule);
 
     if (isBabelLoaderRule(rule)) {
@@ -237,7 +206,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
     filteredStorybookPlugins.push(plugin);
   }
 
-  return webpackMerge(
+  return webpackMerge<object>(
     {
       ...storybookConfig,
       plugins: filteredStorybookPlugins,

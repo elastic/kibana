@@ -34,13 +34,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('successfully creates a GroupStream', async () => {
         await apiClient
-          .fetch('PUT /api/streams/{id}', {
+          .fetch('PUT /api/streams/{name}', {
             params: {
-              path: { id: 'test-group' },
+              path: { name: 'test-group' },
               body: {
                 stream: {
                   group: {
-                    members: ['logs', 'logs.test2'],
+                    members: ['logs', 'logs.test2', 'logs'],
                   },
                 },
                 dashboards: [],
@@ -53,9 +53,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('successfully creates a second GroupStream', async () => {
         await apiClient
-          .fetch('PUT /api/streams/{id}', {
+          .fetch('PUT /api/streams/{name}', {
             params: {
-              path: { id: 'test-group-too' },
+              path: { name: 'test-group-too' },
               body: {
                 stream: {
                   group: {
@@ -72,9 +72,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('unsuccessfully updates a GroupStream with an uknown stream', async () => {
         await apiClient
-          .fetch('PUT /api/streams/{id}', {
+          .fetch('PUT /api/streams/{name}', {
             params: {
-              path: { id: 'test-group' },
+              path: { name: 'test-group' },
               body: {
                 stream: {
                   group: {
@@ -90,9 +90,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('unsuccessfully updates a GroupStream with an itself as a member', async () => {
         await apiClient
-          .fetch('PUT /api/streams/{id}', {
+          .fetch('PUT /api/streams/{name}', {
             params: {
-              path: { id: 'test-group' },
+              path: { name: 'test-group' },
               body: {
                 stream: {
                   group: {
@@ -108,9 +108,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('unsuccessfully updates a GroupStream with a forbidden member', async () => {
         await apiClient
-          .fetch('PUT /api/streams/{id}', {
+          .fetch('PUT /api/streams/{name}', {
             params: {
-              path: { id: 'test-group' },
+              path: { name: 'test-group' },
               body: {
                 stream: {
                   group: {
@@ -126,9 +126,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('successfully deletes a GroupStream', async () => {
         await apiClient
-          .fetch('DELETE /api/streams/{id}', {
+          .fetch('DELETE /api/streams/{name}', {
             params: {
-              path: { id: 'test-group-too' },
+              path: { name: 'test-group-too' },
             },
           })
           .expect(200);
@@ -136,9 +136,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       it('successfully reads a GroupStream', async () => {
         const response = await apiClient
-          .fetch('GET /api/streams/{id}', {
+          .fetch('GET /api/streams/{name}', {
             params: {
-              path: { id: 'test-group' },
+              path: { name: 'test-group' },
             },
           })
           .expect(200);

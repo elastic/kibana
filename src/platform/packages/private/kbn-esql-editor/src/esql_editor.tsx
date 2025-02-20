@@ -317,6 +317,19 @@ export const ESQLEditor = memo(function ESQLEditor({
     );
   });
 
+  monaco.editor.registerCommand('esql.control.functions.create', async (...args) => {
+    const position = editor1.current?.getPosition();
+    await triggerControl(
+      query.esql,
+      ESQLVariableType.FUNCTIONS,
+      position,
+      uiActions,
+      esqlVariables,
+      onSaveControl,
+      onCancelControl
+    );
+  });
+
   const styles = esqlEditorStyles(
     theme.euiTheme,
     editorHeight,

@@ -17,6 +17,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { docLinks } from '../../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { SynonymSets } from '../synonym_sets/synonym_sets';
 import { useFetchSynonymsSets } from '../../hooks/use_fetch_synonyms_sets';
@@ -50,7 +51,12 @@ export const SearchSynonymsOverview = () => {
         rightSideItems={[
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiLink data-test-subj="searchSynonymsSearchSynonymsOverviewApiDocumentationLink">
+              <EuiLink
+                data-test-subj="searchSynonymsSearchSynonymsOverviewApiDocumentationLink"
+                external
+                target="_blank"
+                href={docLinks.synonymsApi}
+              >
                 <FormattedMessage
                   id="xpack.searchSynonyms.synonymsSetDetail.documentationLink"
                   defaultMessage="API Documentation"

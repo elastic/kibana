@@ -46,6 +46,7 @@ export enum ESQLVariableType {
   TIME_LITERAL = 'time_literal',
   FIELDS = 'fields',
   VALUES = 'values',
+  FUNCTIONS = 'functions',
 }
 
 export interface ESQLCallbacks {

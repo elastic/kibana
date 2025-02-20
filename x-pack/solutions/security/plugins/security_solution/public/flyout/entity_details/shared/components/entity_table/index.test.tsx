@@ -37,7 +37,6 @@ const testFieldWithPreview: EntityTableRow<BasicEntityData> = {
 const mockProps = {
   contextID: 'testContextID',
   scopeId: 'testScopeId',
-  isDraggable: false,
   data: { isLoading: false },
   entityFields: [testField],
 };
