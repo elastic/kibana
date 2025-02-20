@@ -150,7 +150,6 @@ const defaultArgs = {
   streaming: false,
   maxRetries: 0,
   onFailedAttempt,
-  apiKey: 'mock',
   convertSystemMessageToHumanContent: false,
 };
 
