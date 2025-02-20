@@ -3997,7 +3997,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-ftr-types@link:packages/kbn-ambient-ftr-types":
+"@kbn/ambient-ftr-types@link:src/platform/packages/private/kbn-ambient-ftr-types":
   version "0.0.0"
   uid ""
 
