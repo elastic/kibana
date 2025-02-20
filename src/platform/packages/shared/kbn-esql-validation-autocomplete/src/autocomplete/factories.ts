@@ -27,7 +27,7 @@ import { DOUBLE_BACKTICK, SINGLE_TICK_REGEX } from '../shared/constants';
 import { ESQLRealField } from '../validation/types';
 import { isNumericType } from '../shared/esql_types';
 import { getTestFunctions } from '../shared/test_functions';
-import { builtinFunctions } from '../definitions/builtin';
+import { operatorsDefinitions } from '../definitions/all_operators';
 import { ESQLVariableType, ESQLControlVariable } from '../shared/types';
 
 const techPreviewLabel = i18n.translate(
@@ -168,7 +168,9 @@ export const getOperatorSuggestions = (
   predicates?: FunctionFilterPredicates & { leftParamType?: FunctionParameterType }
 ): SuggestionRawDefinition[] => {
   const filteredDefinitions = filterFunctionDefinitions(
-    getTestFunctions().length ? [...builtinFunctions, ...getTestFunctions()] : builtinFunctions,
+    getTestFunctions().length
+      ? [...operatorsDefinitions, ...getTestFunctions()]
+      : operatorsDefinitions,
     predicates
   );
 
@@ -188,7 +190,7 @@ export const getOperatorSuggestions = (
 };
 
 export const getSuggestionsAfterNot = (): SuggestionRawDefinition[] => {
-  return builtinFunctions
+  return operatorsDefinitions
     .filter(({ name }) => name === 'like' || name === 'rlike' || name === 'in')
     .map(getOperatorSuggestion);
 };

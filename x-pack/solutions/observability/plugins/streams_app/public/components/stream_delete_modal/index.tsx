@@ -19,9 +19,9 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import React from 'react';
 import { isDescendantOf } from '@kbn/streams-schema';
+import { useAbortController } from '@kbn/react-hooks';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 

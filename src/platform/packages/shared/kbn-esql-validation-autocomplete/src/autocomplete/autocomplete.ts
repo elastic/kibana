@@ -110,6 +110,8 @@ import {
   mapRecommendedQueriesFromRegistry,
 } from './recommended_queries/suggestions';
 
+import { comparisonFunctions } from '../definitions/all_operators';
+
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
 type GetPolicyMetadataFn = (name: string) => Promise<ESQLPolicy | undefined>;
@@ -1024,11 +1026,11 @@ async function getFunctionArgsSuggestions(
 
   const shouldAddComma =
     hasMoreMandatoryArgs &&
-    fnDefinition.type !== 'builtin' &&
+    fnDefinition.type !== 'operator' &&
     !isCursorFollowedByComma &&
     !canBeBooleanCondition;
   const shouldAdvanceCursor =
-    hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' && !isCursorFollowedByComma;
+    hasMoreMandatoryArgs && fnDefinition.type !== 'operator' && !isCursorFollowedByComma;
 
   const suggestedConstants = uniq(
     typesToSuggestNext
