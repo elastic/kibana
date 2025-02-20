@@ -55,7 +55,7 @@ paths-ignore:
   - src/platform/packages/private/kbn-get-repo-files
   - src/platform/packages/private/kbn-import-resolver
   - packages/kbn-jest-*
-  - packages/kbn-journeys
+  - src/platform/packages/private/kbn-journeys
   - packages/kbn-kibana-manifest-schema
   - packages/kbn-managed-vscode-config
   - packages/kbn-managed-vscode-config-cli
