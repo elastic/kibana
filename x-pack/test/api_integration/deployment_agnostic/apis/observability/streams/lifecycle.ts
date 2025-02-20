@@ -355,7 +355,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ? {
                 lifecycle: { data_retention: lifecycle.dsl.data_retention },
                 settings: {
-                  'index.lifecycle.prefer_ilm': false,
+                  ...(isServerless
+                    ? {}
+                    : {
+                        'index.lifecycle.prefer_ilm': false,
+                      }),
                   'index.default_pipeline': 'logs@default-pipeline',
                 },
               }
@@ -408,24 +412,40 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       if (!isServerless) {
-        it('does not allow dsl lifecycle if the data stream is managed by ilm', async () => {
+        it('allows dsl lifecycle if the data stream is managed by ilm', async () => {
           const indexName = 'unwired-stream-ilm-to-dsl';
           const clean = await createDataStream(indexName, { ilm: { policy: 'my-policy' } });
 
-          await putStream(
-            apiClient,
-            indexName,
-            {
-              dashboards: [],
-              stream: {
-                ingest: {
-                  ...unwiredPutBody.stream.ingest,
-                  lifecycle: { dsl: { data_retention: '1d' } },
-                },
+          await putStream(apiClient, indexName, {
+            dashboards: [],
+            stream: {
+              ingest: {
+                ...unwiredPutBody.stream.ingest,
+                lifecycle: { dsl: { data_retention: '1d' } },
               },
             },
-            400
-          );
+          });
+
+          await expectLifecycle([indexName], { dsl: { data_retention: '1d' } });
+
+          await clean();
+        });
+
+        it('allows ilm lifecycle on unwired streams', async () => {
+          const indexName = 'unwired-stream-ilm';
+          const clean = await createDataStream(indexName, { ilm: { policy: 'my-policy' } });
+
+          await putStream(apiClient, indexName, {
+            dashboards: [],
+            stream: {
+              ingest: {
+                ...unwiredPutBody.stream.ingest,
+                lifecycle: { ilm: { policy: 'my-updated-policy' } },
+              },
+            },
+          });
+
+          await expectLifecycle([indexName], { ilm: { policy: 'my-updated-policy' } });
 
           await clean();
         });
