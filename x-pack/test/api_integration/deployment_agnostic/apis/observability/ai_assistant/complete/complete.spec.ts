@@ -57,7 +57,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       title: string,
       conversationResponse: string | ToolCall
     ) {
-      void proxy.interceptConversationTitle(title);
+      void proxy.interceptTitle(title);
       void proxy.interceptConversation(conversationResponse);
 
       const supertestEditorWithCookieCredentials: SupertestWithRoleScope =
@@ -371,7 +371,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let conversationUpdatedEvent: ConversationUpdateEvent;
 
       before(async () => {
-        proxy.interceptConversationTitle('LLM-generated title').catch((e) => {
+        proxy.interceptTitle('LLM-generated title').catch((e) => {
           throw new Error('Failed to intercept conversation title', e);
         });
 

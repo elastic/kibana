@@ -141,7 +141,7 @@ export class LlmProxy {
     ).completeAfterIntercept();
   }
 
-  interceptConversationTitle(title: string) {
+  interceptTitle(title: string) {
     return this.intercept(
       `conversation_title_interceptor_${title.split(' ').join('_')}`,
       (body) => isFunctionTitleRequest(body),

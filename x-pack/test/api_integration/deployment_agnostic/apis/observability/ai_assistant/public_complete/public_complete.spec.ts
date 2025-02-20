@@ -54,7 +54,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       format?: 'openai' | 'default';
       conversationResponse: string | ToolCall;
     }) {
-      const titleSimulatorPromise = proxy.interceptConversationTitle('My Title');
+      const titleSimulatorPromise = proxy.interceptTitle('My Title');
       const conversationSimulatorPromise = proxy.interceptConversation(conversationResponse);
 
       const response = await observabilityAIAssistantAPIClient.admin({
