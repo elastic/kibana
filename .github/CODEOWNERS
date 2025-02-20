@@ -97,7 +97,6 @@ packages/kbn-scout @elastic/appex-qa
 packages/kbn-scout-info @elastic/appex-qa
 packages/kbn-scout-reporting @elastic/appex-qa
 packages/kbn-set-map @elastic/kibana-operations
-packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 packages/kbn-stdio-dev-helpers @elastic/kibana-operations
 packages/kbn-storybook @elastic/kibana-operations
@@ -369,6 +368,7 @@ src/platform/packages/private/kbn-reporting/public @elastic/appex-sharedux
 src/platform/packages/private/kbn-reporting/server @elastic/appex-sharedux
 src/platform/packages/private/kbn-saved-objects-settings @elastic/appex-sharedux
 src/platform/packages/private/kbn-screenshotting-server @elastic/appex-sharedux
+src/platform/packages/private/kbn-some-dev-log @elastic/kibana-operations
 src/platform/packages/private/kbn-timelion-grammar @elastic/kibana-visualizations
 src/platform/packages/private/kbn-tinymath @elastic/kibana-visualizations
 src/platform/packages/private/kbn-transpose-utils @elastic/kibana-visualizations
