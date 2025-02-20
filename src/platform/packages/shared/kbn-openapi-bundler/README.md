@@ -27,13 +27,13 @@ Following the recommendations provided in `@kbn/openapi-generator` you should ha
 Currently package supports only programmatic API. As the next step you need to create a JavaScript script file like below and put it to `my-plugin/scripts/openapi`
 
 ```ts
-require('../../../../../src/setup_node_env');
+require('../../../../../../../../src/setup_node_env');
 const { bundle } = require('@kbn/openapi-bundler');
 const { join, resolve } = require('path');
 
 // define ROOT as `my-plugin` instead of `my-plugin/scripts/openapi`
 // pay attention to this constant when your script's location is different
-const ROOT = resolve(__dirname, '../..');
+const ROOT = resolve(__dirname, '../../../../..');
 
 bundle({
   // Glob pattern to find OpenAPI specification files
@@ -174,7 +174,7 @@ To let this package help you with merging OpenAPI specifications you should have
 Currently package supports only programmatic API. As the next step you need to create a JavaScript script file like below
 
 ```ts
-require('../../src/setup_node_env');
+require('../../../../../src/setup_node_env');
 const { resolve } = require('path');
 const { merge } = require('@kbn/openapi-bundler');
 const { REPO_ROOT } = require('@kbn/repo-info');
@@ -739,7 +739,7 @@ To specify a custom tag with `x-displayName` to assign that tag to all operation
 const { bundle } = require('@kbn/openapi-bundler');
 const { join, resolve } = require('path');
 
-const ROOT = resolve(__dirname, '../..');
+const ROOT = resolve(__dirname, '../../../../..');
 
 (async () => {
   await bundle({
@@ -791,11 +791,11 @@ In case you decide to contribute to the `kbn-openapi-bundler` package please mak
 To run package tests use the following command in the repo root folder
 
 ```bash
-yarn test:jest packages/kbn-openapi-bundler
+yarn test:jest src/platform/packages/shared/kbn-openapi-bundler
 ```
 
 Jest watch mode can be enabled by passing `--watch` flag
 
 ```bash
-yarn test:jest packages/kbn-openapi-bundler --watch
+yarn test:jest src/platform/packages/shared/kbn-openapi-bundler --watch
 ```

@@ -6613,7 +6613,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/openapi-bundler@link:packages/kbn-openapi-bundler":
+"@kbn/openapi-bundler@link:src/platform/packages/shared/kbn-openapi-bundler":
   version "0.0.0"
   uid ""
 
