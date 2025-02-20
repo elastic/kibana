@@ -82,7 +82,6 @@ packages/kbn-node-libs-browser-webpack-plugin @elastic/kibana-operations
 packages/kbn-openapi-bundler @elastic/security-detection-rule-management
 packages/kbn-openapi-generator @elastic/security-detection-rule-management
 packages/kbn-optimizer @elastic/kibana-operations
-packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 packages/kbn-peggy @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
 packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
@@ -353,6 +352,7 @@ src/platform/packages/private/kbn-lens-formula-docs @elastic/kibana-visualizatio
 src/platform/packages/private/kbn-managed-content-badge @elastic/kibana-visualizations
 src/platform/packages/private/kbn-mapbox-gl @elastic/kibana-presentation
 src/platform/packages/private/kbn-mock-idp-utils @elastic/kibana-security
+src/platform/packages/private/kbn-optimizer-webpack-helpers @elastic/kibana-operations
 src/platform/packages/private/kbn-panel-loader @elastic/kibana-presentation
 src/platform/packages/private/kbn-react-mute-legacy-root-warning @elastic/appex-sharedux
 src/platform/packages/private/kbn-repo-packages @elastic/kibana-operations
