@@ -16,18 +16,13 @@ import { createFailError } from '@kbn/dev-cli-errors';
 
 import { getAllFtrConfigsAndManifests } from './ftr_configs_manifest';
 
-const THIS_PATH = Path.resolve(
-  REPO_ROOT,
-  'src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/run_check_ftr_configs_cli.ts'
-);
-const THIS_REL = Path.relative(REPO_ROOT, THIS_PATH);
+const THIS_PATH =
+  'src/platform/packages/shared/kbn-test/src/functional_test_runner/lib/config/run_check_ftr_configs_cli.ts';
 
 const IGNORED_PATHS = [
   THIS_PATH,
-  Path.resolve(
-    REPO_ROOT,
-    'src/platform/packages/shared/kbn-test/src/jest/run_check_jest_configs_cli.ts'
-  ),
+  'src/platform/packages/shared/kbn-test/src/jest/run_check_jest_configs_cli.ts',
+  'src/platform/packages/shared/kbn-test/src/jest/transforms/babel/transformer_config.js',
 ];
 
 export async function runCheckFtrConfigsCli() {
@@ -49,7 +44,7 @@ export async function runCheckFtrConfigsCli() {
       const loadingConfigs = [];
 
       const possibleConfigs = files.filter((file) => {
-        if (IGNORED_PATHS.includes(file)) {
+        if (IGNORED_PATHS.map((rel) => Path.resolve(REPO_ROOT, rel)).includes(file)) {
           return false;
         }
 
@@ -83,6 +78,12 @@ export async function runCheckFtrConfigsCli() {
           return false;
         }
 
+        // No FTR configs in /scripts/
+        if (file.match(/\/scripts\//)) {
+          return false;
+        }
+
+        // No FTR configs in mock files
         if (file.match(/(mock|mocks).ts$/)) {
           return false;
         }
@@ -145,7 +146,7 @@ Serverless tests:\n${(manifestPaths.serverless as string[]).join('\n')}
           `
         );
         throw createFailError(
-          `Please add the listed paths to the correct manifest files. If it's not an FTR config, you can add it to the IGNORED_PATHS in ${THIS_REL} or contact #kibana-operations`
+          `Please add the listed paths to the correct manifest files. If it's not an FTR config, you can add it to the IGNORED_PATHS in ${THIS_PATH} or contact #kibana-operations`
         );
       }
     },
