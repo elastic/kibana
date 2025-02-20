@@ -38,6 +38,7 @@ import { APM_APP_LOCATOR_ID } from '../../../locator/service_detail_locator';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { isLogsOnlySignal } from '../../../utils/get_signal_type';
+import { ViewMode } from '@kbn/presentation-publishing';
 
 export interface MergedServiceDashboard extends SavedApmCustomDashboard {
   title: string;
@@ -100,7 +101,7 @@ export function ServiceDashboards() {
 
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const getInitialInput = () => ({
-      viewMode: 'view',
+      viewMode: 'view' as ViewMode,
       timeRange: { from: rangeFrom, to: rangeTo },
     });
     return Promise.resolve<DashboardCreationOptions>({
