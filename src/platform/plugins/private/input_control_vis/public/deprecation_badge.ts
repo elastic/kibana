@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
   apiCanAccessViewMode,
@@ -31,7 +30,7 @@ const isApiCompatible = (api: unknown | null): api is InputControlDeprecationAct
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
   return (
     isApiCompatible(api) &&
-    getInheritedViewMode(api) === ViewMode.EDIT &&
+    getInheritedViewMode(api) === 'edit' &&
     api.getVis().type.name === INPUT_CONTROL_VIS_TYPE
   );
 };

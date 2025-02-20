@@ -11,7 +11,6 @@ import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { useParams } from 'react-router-dom';
 import { pick } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { ViewMode } from '@kbn/embeddable-plugin/common';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { useCapabilities } from '../../../common/lib/kibana';
@@ -30,6 +29,7 @@ import { DashboardToolBar } from '../../components/dashboard_tool_bar';
 
 import { useDashboardRenderer } from '../../hooks/use_dashboard_renderer';
 import { DashboardTitle } from '../../components/dashboard_title';
+import { ViewMode } from '@kbn/presentation-publishing';
 
 interface DashboardViewProps {
   initialViewMode: ViewMode;

@@ -14,7 +14,7 @@ import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
 import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/public';
-import { EmbeddableInput, ViewMode } from '@kbn/embeddable-plugin/common';
+import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 import { EmbeddableError, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';
 
@@ -73,7 +73,7 @@ export abstract class Embeddable<
       ...output,
     };
     this.input = {
-      viewMode: ViewMode.EDIT,
+      viewMode: 'edit',
       ...input,
     };
 

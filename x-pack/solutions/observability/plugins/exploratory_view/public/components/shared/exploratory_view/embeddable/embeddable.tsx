@@ -15,7 +15,6 @@ import {
   LensPublicStart,
   XYState,
 } from '@kbn/lens-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
 import styled from '@emotion/styled';
 import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
@@ -211,7 +210,7 @@ export default function Embeddable(props: ExploratoryEmbeddableComponentProps) {
         onBrushEnd={onBrushEnd}
         withDefaultActions={Boolean(withActions)}
         extraActions={actions}
-        viewMode={ViewMode.VIEW}
+        viewMode={'view'}
         searchSessionId={searchSessionId}
         onLoad={(loading, inspectorAdapters) => {
           reportEvent(inspectorAdapters);

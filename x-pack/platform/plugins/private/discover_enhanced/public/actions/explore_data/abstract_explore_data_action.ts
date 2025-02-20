@@ -8,7 +8,6 @@
 import { CoreStart } from '@kbn/core/public';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { DOC_TYPE as LENS_DOC_TYPE } from '@kbn/lens-plugin/common/constants';
@@ -51,7 +50,7 @@ const isApiCompatible = (api: unknown | null): api is AbstractExploreDataActionA
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
   return (
     isApiCompatible(api) &&
-    getInheritedViewMode(api) === ViewMode.VIEW &&
+    getInheritedViewMode(api) === 'view' &&
     !apiIsOfType(api, LENS_DOC_TYPE)
   );
 };

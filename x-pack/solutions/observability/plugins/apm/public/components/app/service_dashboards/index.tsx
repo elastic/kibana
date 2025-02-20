@@ -17,7 +17,6 @@ import {
   EuiLoadingLogo,
 } from '@elastic/eui';
 
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DashboardApi, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -101,7 +100,7 @@ export function ServiceDashboards() {
 
   const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const getInitialInput = () => ({
-      viewMode: ViewMode.VIEW,
+      viewMode: 'view',
       timeRange: { from: rangeFrom, to: rangeTo },
     });
     return Promise.resolve<DashboardCreationOptions>({

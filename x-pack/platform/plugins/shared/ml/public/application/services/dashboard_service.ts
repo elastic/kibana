@@ -7,8 +7,8 @@
 
 import { useMemo } from 'react';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useMlKibana } from '../contexts/kibana';
+import { ViewMode } from '@kbn/presentation-publishing';
 
 export type DashboardService = ReturnType<typeof dashboardServiceProvider>;
 export type DashboardItems = Awaited<ReturnType<DashboardService['fetchDashboards']>>;
@@ -38,10 +38,10 @@ export function dashboardServiceProvider(dashboardService: DashboardStart) {
     /**
      * Generates dashboard url
      */
-    async getDashboardUrl(dashboardId: string, viewMode: ViewMode = ViewMode.EDIT) {
+    async getDashboardUrl(dashboardId: string, viewMode: ViewMode = 'edit') {
       return await dashboardService.locator?.getUrl({
         dashboardId,
-        viewMode: ViewMode.EDIT,
+        viewMode: 'edit',
         useHash: false,
       });
     },

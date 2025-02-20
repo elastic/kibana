@@ -12,9 +12,9 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 
-import { ReactEmbeddableRenderer, ViewMode } from '@kbn/embeddable-plugin/public';
+import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import { useSearchApi, type ViewMode as ViewModeType } from '@kbn/presentation-publishing';
+import { useSearchApi, type ViewMode } from '@kbn/presentation-publishing';
 
 import type { ControlGroupApi } from '../..';
 import {
@@ -38,7 +38,7 @@ export interface ControlGroupRendererProps {
     initialState: Partial<ControlGroupRuntimeState>,
     builder: ControlGroupStateBuilder
   ) => Promise<Partial<ControlGroupCreationOptions>>;
-  viewMode?: ViewModeType;
+  viewMode?: ViewMode;
   filters?: Filter[];
   timeRange?: TimeRange;
   query?: Query;
@@ -70,7 +70,7 @@ export const ControlGroupRenderer = ({
   });
 
   const viewMode$ = useMemo(
-    () => new BehaviorSubject<ViewModeType>(viewMode ?? ViewMode.VIEW),
+    () => new BehaviorSubject<ViewMode>(viewMode ?? 'view'),
     // viewMode only used as initial value - changes do not effect memoized value.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []

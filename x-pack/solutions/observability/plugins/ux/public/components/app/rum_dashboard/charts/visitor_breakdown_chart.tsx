@@ -7,7 +7,6 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import {
   CountIndexPatternColumn,
   PersistedIndexPatternLayer,
@@ -97,7 +96,7 @@ export function VisitorBreakdownChart({
         from: start ?? '',
         to: end ?? '',
       }}
-      viewMode={ViewMode.VIEW}
+      viewMode={'view'}
       onFilter={filterHandler}
     />
   );

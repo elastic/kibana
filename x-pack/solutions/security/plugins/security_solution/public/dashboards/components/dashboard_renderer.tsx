@@ -13,7 +13,6 @@ import type {
   DashboardLocatorParams,
 } from '@kbn/dashboard-plugin/public';
 import { DashboardRenderer as DashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 
 import { useDispatch } from 'react-redux';
@@ -41,7 +40,7 @@ const DashboardRendererComponent = ({
   query,
   savedObjectId,
   timeRange,
-  viewMode = ViewMode.VIEW,
+  viewMode = 'view',
 }: {
   canReadDashboard: boolean;
   dashboardContainer?: DashboardApi;

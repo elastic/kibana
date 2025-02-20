@@ -8,7 +8,6 @@
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiLoadingChart, OnTimeChangeProps } from '@elastic/eui';
-import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { KibanaErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
 import { flyoutDegradedDocsTrendText } from '../../../../../common/translations';
@@ -73,7 +72,7 @@ export function TrendDocsChart({
               overrides={{
                 settings: { legendAction: 'ignore' },
               }}
-              viewMode={ViewMode.VIEW}
+              viewMode={'view'}
               hidePanelTitles={true}
               disabledActions={DISABLED_ACTIONS}
               timeRange={timeRange}
