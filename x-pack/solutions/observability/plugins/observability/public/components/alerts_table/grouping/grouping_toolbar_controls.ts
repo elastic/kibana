@@ -5,30 +5,21 @@
  * 2.0.
  */
 
-import { useMemo, useCallback } from 'react';
-import { type AlertsGroupingProps, useAlertsGroupingState } from '@kbn/alerts-grouping';
+import React, { useCallback } from 'react';
+import { useAlertsGroupingState } from '@kbn/alerts-grouping';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
-import { AlertsByGroupingAgg } from '../types';
+import { useKibana } from '../../../utils/kibana_react';
 
-interface GetPersistentControlsParams {
+interface GroupingToolbarControlsProps {
   groupingId: string;
   ruleTypeIds: string[];
   maxGroupingLevels?: number;
-  services: Pick<
-    AlertsGroupingProps<AlertsByGroupingAgg>['services'],
-    'dataViews' | 'http' | 'notifications'
-  >;
 }
 
-export const getPersistentControlsHook =
-  ({
-    groupingId,
-    ruleTypeIds,
-    maxGroupingLevels = 3,
-    services: { dataViews, http, notifications },
-  }: GetPersistentControlsParams) =>
-  () => {
+export const GroupingToolbarControls = React.memo<GroupingToolbarControlsProps>(
+  ({ groupingId, ruleTypeIds, maxGroupingLevels = 3 }) => {
+    const { dataViews, http, notifications } = useKibana().services;
     const { grouping, updateGrouping } = useAlertsGroupingState(groupingId);
 
     const onGroupChange = useCallback(
@@ -48,7 +39,7 @@ export const getPersistentControlsHook =
       toasts: notifications.toasts,
     });
 
-    const groupSelector = useGetGroupSelectorStateless({
+    return useGetGroupSelectorStateless({
       groupingId,
       onGroupChange,
       fields: dataView?.fields ?? [],
@@ -56,10 +47,5 @@ export const getPersistentControlsHook =
         grouping.options?.filter((option) => !grouping.activeGroups.includes(option.key)) ?? [],
       maxGroupingLevels,
     });
-
-    return useMemo(() => {
-      return {
-        right: groupSelector,
-      };
-    }, [groupSelector]);
-  };
+  }
+);
