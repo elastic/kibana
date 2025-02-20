@@ -37,6 +37,7 @@
     "@kbn/server-route-repository-utils",
     "@kbn/inference-plugin",
     "@kbn/storage-adapter",
-    "@kbn/traced-es-client"
+    "@kbn/traced-es-client",
+    "@kbn/es-query"
   ]
 }
