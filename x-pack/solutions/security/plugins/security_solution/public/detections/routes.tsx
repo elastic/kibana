@@ -10,7 +10,7 @@ import type { RouteProps, RouteComponentProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
 import { ALERTS_PATH, DETECTIONS_PATH } from '../../common/constants';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
-import { Alerts } from './pages/alerts';
+import { routes as alertsRoutes } from './pages/alerts';
 
 const AlertsRoutes = () => <Alerts />;
 
@@ -26,8 +26,5 @@ export const routes: RouteProps[] = [
     path: DETECTIONS_PATH,
     component: DetectionsRedirects,
   },
-  {
-    path: ALERTS_PATH,
-    component: AlertsRoutes,
-  },
+  ...alertsRoutes,
 ];

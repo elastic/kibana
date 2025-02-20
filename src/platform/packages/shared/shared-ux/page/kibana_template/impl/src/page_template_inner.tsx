@@ -36,16 +36,20 @@ export const KibanaPageTemplateInner: FC<Props> = memo(
     emptyPageBody,
     ...rest
   }) => {
+    console.log({ pageHeader, children, isEmptyState, pageSideBar, pageSideBarProps, emptyPageBody, rest });
     const header = useMemo(() => {
       if (isEmptyState && pageHeader && !children) {
+        console.log('null header');
         return null;
       } else if (pageHeader) {
+        console.log('pageHeader');
         return <EuiPageTemplate.Header {...pageHeader} />;
       }
     }, [pageHeader, children, isEmptyState]);
 
     const sideBar = useMemo(() => {
       if (pageSideBar) {
+        console.log('have sidebar');
         const sideBarProps = { ...pageSideBarProps };
         sideBarProps.sticky = true;
         return (
@@ -56,6 +60,7 @@ export const KibanaPageTemplateInner: FC<Props> = memo(
 
     const content = useMemo(() => {
       if (isEmptyState && pageHeader && !children) {
+        console.log('emptyPrompt');
         const { iconType, pageTitle, description, rightSideItems } = pageHeader;
         const title = pageTitle ? <h1>{pageTitle}</h1> : undefined;
         const body = description ? <p>{description}</p> : undefined;
@@ -69,8 +74,10 @@ export const KibanaPageTemplateInner: FC<Props> = memo(
           />
         );
       } else if (isEmptyState && emptyPageBody) {
+        console.log('emptyPageBody');
         return emptyPageBody;
       } else {
+        console.log('naked children');
         return children;
       }
     }, [children, emptyPageBody, isEmptyState, pageHeader]);

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import React, { FC, memo } from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
 
 import {
@@ -18,50 +18,47 @@ import { KibanaPageTemplateProps } from '@kbn/shared-ux-page-kibana-template-typ
 
 import { KibanaPageTemplateInner, KibanaPageTemplateWithSolutionNav } from './page_template_inner';
 
-export const _KibanaPageTemplate: FC<KibanaPageTemplateProps> = ({
-  className,
-  children,
-  solutionNav,
-  noDataConfig,
-  ...rest
-}) => {
-  /**
-   * If passing the custom template of `noDataConfig`
-   */
-  if (noDataConfig && solutionNav) {
-    return (
-      <NoDataConfigPageWithSolutionNavBar
-        data-test-subj={rest['data-test-subj']}
-        className={className}
-        noDataConfig={noDataConfig}
-        solutionNav={solutionNav}
-      />
-    );
-  }
+export const _KibanaPageTemplate: FC<KibanaPageTemplateProps> = memo(
+  ({ className, children, solutionNav, noDataConfig, ...rest }) => {
+    // console.log({ noDataConfig, solutionNav, rest });
+    /**
+     * If passing the custom template of `noDataConfig`
+     */
+    if (noDataConfig && solutionNav) {
+      return (
+        <NoDataConfigPageWithSolutionNavBar
+          data-test-subj={rest['data-test-subj']}
+          className={className}
+          noDataConfig={noDataConfig}
+          solutionNav={solutionNav}
+        />
+      );
+    }
 
-  if (noDataConfig) {
-    return (
-      <NoDataConfigPage
-        data-test-subj={rest['data-test-subj']}
-        className={className}
-        noDataConfig={noDataConfig}
-      />
-    );
-  }
+    if (noDataConfig) {
+      return (
+        <NoDataConfigPage
+          data-test-subj={rest['data-test-subj']}
+          className={className}
+          noDataConfig={noDataConfig}
+        />
+      );
+    }
 
-  if (solutionNav) {
-    return (
-      <KibanaPageTemplateWithSolutionNav
-        className={className}
-        solutionNav={solutionNav}
-        children={children}
-        {...rest}
-      />
-    );
-  }
+    if (solutionNav) {
+      return (
+        <KibanaPageTemplateWithSolutionNav
+          className={className}
+          solutionNav={solutionNav}
+          children={children}
+          {...rest}
+        />
+      );
+    }
 
-  return <KibanaPageTemplateInner className={className} children={children} {...rest} />;
-};
+    return <KibanaPageTemplateInner className={className} children={children} {...rest} />;
+  }
+);
 
 /**
  * Kibana-specific wrapper of EuiPageTemplate and it's namespaced components

@@ -39,11 +39,7 @@ export const AppRoutes: React.FC<AppRoutesProps> = React.memo(({ services, subPl
           {...rest}
           key={rest.path}
           render={(props) => {
-            return (
-              <PluginTemplateWrapper>
-                <Component {...props} services={services} />
-              </PluginTemplateWrapper>
-            );
+            return <Component {...props} services={services} />;
           }}
         />
       );
@@ -51,10 +47,12 @@ export const AppRoutes: React.FC<AppRoutesProps> = React.memo(({ services, subPl
   }, [services, subPluginRoutes]);
   return (
     <Routes>
-      {appRoutes}
-      <Route>
-        <RedirectRoute capabilities={services.application.capabilities} />
-      </Route>
+      <PluginTemplateWrapper>
+        {appRoutes}
+        <Route>
+          <RedirectRoute capabilities={services.application.capabilities} />
+        </Route>
+      </PluginTemplateWrapper>
     </Routes>
   );
 });

@@ -33,6 +33,6 @@ export const renderApp = ({
   );
   return () => {
     services.data.search.session.clear();
-    // unmountComponentAtNode(element);
+    unmountComponentAtNode(element);
   };
 };

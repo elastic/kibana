@@ -39,7 +39,10 @@ const ThreatIntelligence = memo(() => {
     http,
     application: { capabilities },
   } = useKibana().services;
-  const ThreatIntelligencePlugin = threatIntelligence.getComponent();
+  const ThreatIntelligencePlugin = useMemo(
+    () => threatIntelligence.getComponent(),
+    [threatIntelligence]
+  );
 
   const { read: hasAccessToTimeline } = extractTimelineCapabilities(capabilities);
 
