@@ -25,24 +25,29 @@ const getPreviewDataParamsSchema = t.type({
   ]),
 });
 
-const getPreviewDataResponseSchema = t.array(
-  t.intersection([
-    t.type({
-      date: dateType,
-      sliValue: t.union([t.number, t.null]),
+const previewDataResponseSchema = t.intersection([
+  t.type({
+    date: dateType,
+    sliValue: t.union([t.number, t.null]),
+  }),
+  t.partial({
+    events: t.type({
+      good: t.number,
+      bad: t.number,
+      total: t.number,
     }),
-    t.partial({
-      events: t.type({
-        good: t.number,
-        bad: t.number,
-        total: t.number,
-      }),
-    }),
-  ])
-);
+  }),
+]);
+
+const getPreviewDataResponseSchema = t.intersection([
+  t.type({
+    results: t.array(previewDataResponseSchema),
+  }),
+  t.partial({ groups: t.record(t.string, t.array(previewDataResponseSchema)) }),
+]);
 
 type GetPreviewDataParams = t.TypeOf<typeof getPreviewDataParamsSchema.props.body>;
 type GetPreviewDataResponse = t.OutputOf<typeof getPreviewDataResponseSchema>;
 
-export { getPreviewDataParamsSchema, getPreviewDataResponseSchema };
+export { getPreviewDataParamsSchema, getPreviewDataResponseSchema, previewDataResponseSchema };
 export type { GetPreviewDataParams, GetPreviewDataResponse };

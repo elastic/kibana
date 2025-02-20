@@ -43,6 +43,7 @@ interface Options {
   remoteName?: string;
   groupings?: Groupings;
 }
+
 export class GetPreviewData {
   constructor(
     private esClient: ElasticsearchClient,
@@ -96,7 +97,7 @@ export class GetPreviewData {
       ? `${options.remoteName}:${indicator.params.index}`
       : indicator.params.index;
 
-    const result = await typedSearch(this.esClient, {
+    const response = await typedSearch(this.esClient, {
       index,
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
@@ -149,8 +150,8 @@ export class GetPreviewData {
       },
     });
 
-    return (
-      result.aggregations?.perMinute.buckets.map((bucket) => {
+    const results =
+      response.aggregations?.perMinute.buckets.map((bucket) => {
         const good = (bucket.good?.value as number) ?? 0;
         const total = bucket.total?.value ?? 0;
         return {
@@ -162,8 +163,9 @@ export class GetPreviewData {
             bad: total - good,
           },
         };
-      }) ?? []
-    );
+      }) ?? [];
+
+    return { results };
   }
 
   private async getAPMTransactionErrorPreviewData(
@@ -198,7 +200,7 @@ export class GetPreviewData {
       ? `${options.remoteName}:${indicator.params.index}`
       : indicator.params.index;
 
-    const result = await this.esClient.search({
+    const response = await typedSearch(this.esClient, {
       index,
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
@@ -246,19 +248,21 @@ export class GetPreviewData {
       },
     });
 
-    // @ts-ignore buckets is not improperly typed
-    return result.aggregations?.perMinute.buckets.map((bucket) => ({
-      date: bucket.key_as_string,
-      sliValue:
-        !!bucket.good && !!bucket.total
-          ? computeSLIForPreview(bucket.good.doc_count, bucket.total.doc_count)
-          : null,
-      events: {
-        good: bucket.good?.doc_count ?? 0,
-        bad: (bucket.total?.doc_count ?? 0) - (bucket.good?.doc_count ?? 0),
-        total: bucket.total?.doc_count ?? 0,
-      },
-    }));
+    const results =
+      response.aggregations?.perMinute.buckets.map((bucket) => {
+        const good = bucket.good?.doc_count ?? 0;
+        const total = bucket.total?.doc_count ?? 0;
+        return {
+          date: bucket.key_as_string,
+          sliValue: computeSLIForPreview(good, total),
+          events: {
+            good,
+            bad: total - good,
+            total,
+          },
+        };
+      }) ?? [];
+    return { results };
   }
 
   private async getHistogramPreviewData(
@@ -283,7 +287,7 @@ export class GetPreviewData {
       ? `${options.remoteName}:${indicator.params.index}`
       : indicator.params.index;
 
-    const result = await this.esClient.search({
+    const response = await this.esClient.search({
       index,
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
@@ -318,19 +322,28 @@ export class GetPreviewData {
       },
     });
 
-    // @ts-ignore buckets is not improperly typed
-    return result.aggregations?.perMinute.buckets.map((bucket) => ({
-      date: bucket.key_as_string,
-      sliValue:
-        !!bucket.good && !!bucket.total
-          ? computeSLIForPreview(bucket.good.value, bucket.total.value)
-          : null,
-      events: {
-        good: bucket.good?.value ?? 0,
-        bad: (bucket.total?.value ?? 0) - (bucket.good?.value ?? 0),
-        total: bucket.total?.value ?? 0,
-      },
-    }));
+    interface Bucket {
+      key_as_string: string;
+      good: { value: number };
+      total: { value: number };
+    }
+
+    const results =
+      // @ts-ignore buckets not typed properly
+      response.aggregations?.perMinute.buckets.map((bucket: Bucket) => {
+        const good = bucket.good?.value ?? 0;
+        const total = bucket.total?.value ?? 0;
+        return {
+          date: bucket.key_as_string,
+          sliValue: computeSLIForPreview(good, total),
+          events: {
+            good,
+            bad: total - good,
+            total,
+          },
+        };
+      }) ?? [];
+    return { results };
   }
 
   private async getCustomMetricPreviewData(
@@ -355,7 +368,7 @@ export class GetPreviewData {
       ? `${options.remoteName}:${indicator.params.index}`
       : indicator.params.index;
 
-    const result = await this.esClient.search({
+    const response = await this.esClient.search({
       index,
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
@@ -390,19 +403,29 @@ export class GetPreviewData {
       },
     });
 
-    // @ts-ignore buckets is not improperly typed
-    return result.aggregations?.perMinute.buckets.map((bucket) => ({
-      date: bucket.key_as_string,
-      sliValue:
-        !!bucket.good && !!bucket.total
-          ? computeSLIForPreview(bucket.good.value, bucket.total.value)
-          : null,
-      events: {
-        good: bucket.good?.value ?? 0,
-        bad: (bucket.total?.value ?? 0) - (bucket.good?.value ?? 0),
-        total: bucket.total?.value ?? 0,
-      },
-    }));
+    interface Bucket {
+      key_as_string: string;
+      good: { value: number };
+      total: { value: number };
+    }
+
+    const results =
+      // @ts-ignore buckets not typed properly
+      response.aggregations?.perMinute.buckets.map((bucket: Bucket) => {
+        const good = bucket.good?.value ?? 0;
+        const total = bucket.total?.value ?? 0;
+        return {
+          date: bucket.key_as_string,
+          sliValue: computeSLIForPreview(good, total),
+          events: {
+            good,
+            bad: total - good,
+            total,
+          },
+        };
+      }) ?? [];
+
+    return { results };
   }
 
   private async getTimesliceMetricPreviewData(
@@ -429,7 +452,7 @@ export class GetPreviewData {
       ? `${options.remoteName}:${indicator.params.index}`
       : indicator.params.index;
 
-    const result = await this.esClient.search({
+    const response = await this.esClient.search({
       index,
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
@@ -458,10 +481,20 @@ export class GetPreviewData {
     });
 
     // @ts-ignore buckets is not improperly typed
-    return result.aggregations?.perMinute.buckets.map((bucket) => ({
-      date: bucket.key_as_string,
-      sliValue: !!bucket.metric ? bucket.metric.value : null,
-    }));
+    interface Bucket {
+      key_as_string: string;
+      metric: { value: number };
+    }
+
+    const results =
+      // @ts-ignore buckets not typed properly
+      response.aggregations?.perMinute.buckets.map((bucket: Bucket) => {
+        return {
+          date: bucket.key_as_string,
+          sliValue: bucket.metric.value ?? null,
+        };
+      }) ?? [];
+    return { results };
   }
 
   private async getCustomKQLPreviewData(
@@ -486,7 +519,7 @@ export class GetPreviewData {
       ? `${options.remoteName}:${indicator.params.index}`
       : indicator.params.index;
 
-    const result = await this.esClient.search({
+    const response = await typedSearch(this.esClient, {
       index,
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
@@ -515,19 +548,22 @@ export class GetPreviewData {
       },
     });
 
-    // @ts-ignore buckets is not improperly typed
-    return result.aggregations?.perMinute.buckets.map((bucket) => ({
-      date: bucket.key_as_string,
-      sliValue:
-        !!bucket.good && !!bucket.total
-          ? computeSLIForPreview(bucket.good.doc_count, bucket.total.doc_count)
-          : null,
-      events: {
-        good: bucket.good?.doc_count ?? 0,
-        bad: (bucket.total?.doc_count ?? 0) - (bucket.good?.doc_count ?? 0),
-        total: bucket.total?.doc_count ?? 0,
-      },
-    }));
+    const results =
+      response.aggregations?.perMinute.buckets.map((bucket) => {
+        const good = bucket.good?.doc_count ?? 0;
+        const total = bucket.total?.doc_count ?? 0;
+        return {
+          date: bucket.key_as_string,
+          sliValue: computeSLIForPreview(good, total),
+          events: {
+            good,
+            bad: total - good,
+            total,
+          },
+        };
+      }) ?? [];
+
+    return { results };
   }
 
   private getGroupingFilters(options: Options): estypes.QueryDslQueryContainer[] | undefined {
@@ -564,7 +600,7 @@ export class GetPreviewData {
       ? `${options.remoteName}:${SYNTHETICS_INDEX_PATTERN}`
       : SYNTHETICS_INDEX_PATTERN;
 
-    const result = await this.esClient.search({
+    const response = await typedSearch(this.esClient, {
       index,
       runtime_mappings: await this.buildRuntimeMappings({
         dataViewId: indicator.params.dataViewId,
@@ -598,13 +634,6 @@ export class GetPreviewData {
                 },
               },
             },
-            bad: {
-              filter: {
-                term: {
-                  'monitor.status': 'down',
-                },
-              },
-            },
             total: {
               filter: {
                 match_all: {},
@@ -615,25 +644,22 @@ export class GetPreviewData {
       },
     });
 
-    const data: GetPreviewDataResponse = [];
+    const results =
+      response.aggregations?.perMinute.buckets.map((bucket) => {
+        const good = bucket.good?.doc_count ?? 0;
+        const total = bucket.total?.doc_count ?? 0;
+        return {
+          date: bucket.key_as_string,
+          sliValue: computeSLIForPreview(good, total),
+          events: {
+            good,
+            bad: total - good,
+            total,
+          },
+        };
+      }) ?? [];
 
-    // @ts-ignore buckets is not improperly typed
-    result.aggregations?.perMinute.buckets.forEach((bucket) => {
-      const good = bucket.good?.doc_count ?? 0;
-      const bad = bucket.bad?.doc_count ?? 0;
-      const total = bucket.total?.doc_count ?? 0;
-      data.push({
-        date: bucket.key_as_string,
-        sliValue: computeSLIForPreview(good, total),
-        events: {
-          good,
-          bad,
-          total,
-        },
-      });
-    });
-
-    return data;
+    return { results };
   }
 
   public async execute(params: GetPreviewDataParams): Promise<GetPreviewDataResponse> {
@@ -678,7 +704,7 @@ export class GetPreviewData {
           assertNever(type);
       }
     } catch (err) {
-      return [];
+      return { results: [] };
     }
   }
 }
