@@ -42,3 +42,7 @@ export type FlattenRecord = Record<PropertyKey, Primitive | Primitive[]>;
 export const flattenRecord: z.ZodType<FlattenRecord> = z.record(
   z.union([primitive, z.array(primitive)])
 );
+
+export const sampleDocument = recursiveRecord;
+
+export type SampleDocument = RecursiveRecord;

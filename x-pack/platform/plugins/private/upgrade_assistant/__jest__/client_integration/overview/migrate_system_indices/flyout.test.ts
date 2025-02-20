@@ -9,7 +9,7 @@ import { act } from 'react-dom/test-utils';
 
 import { OverviewTestBed, setupOverviewPage } from '../overview.helpers';
 import { setupEnvironment } from '../../helpers';
-import { systemIndicesMigrationStatus } from './mocks';
+import { systemIndicesMigrationStatus, systemIndicesMigrationErrorStatus } from './mocks';
 
 describe('Overview - Migrate system indices - Flyout', () => {
   let testBed: OverviewTestBed;
@@ -38,5 +38,37 @@ describe('Overview - Migrate system indices - Flyout', () => {
 
     expect(tableCellsValues.length).toBe(systemIndicesMigrationStatus.features.length);
     expect(tableCellsValues).toMatchSnapshot();
+  });
+
+  test('shows migration errors inline within the table row', async () => {
+    httpRequestsMockHelpers.setLoadSystemIndicesMigrationStatus(systemIndicesMigrationErrorStatus);
+
+    await act(async () => {
+      testBed = await setupOverviewPage(httpSetup);
+    });
+
+    const { component, actions, table } = testBed;
+
+    component.update();
+
+    await actions.clickViewSystemIndicesState();
+
+    const { rows } = table.getMetaData('flyoutDetails');
+
+    expect(rows[0].columns[1].value).toBe('Migration failed');
+
+    await act(async () => {
+      rows[0].reactWrapper.find('button').simulate('click');
+    });
+
+    component.update();
+
+    const { rows: resultRows } = table.getMetaData('flyoutDetails');
+
+    // Should contain two errors about the migration
+    // We expect results to be on the second row, given that the first row is used as an expander
+    // and the second holds the collapsible content
+    expect(resultRows[1].reactWrapper.text()).toContain('.kibanamapper_parsing_exception');
+    expect(resultRows[1].reactWrapper.text()).toContain('.logsmapper_parsing_exception');
   });
 });
