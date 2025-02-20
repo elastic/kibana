@@ -6,7 +6,7 @@
  */
 
 import {
-  RecursiveRecord,
+  SampleDocument,
   conditionSchema,
   conditionToQueryDsl,
   getFields,
@@ -165,7 +165,7 @@ export const sampleStreamRoute = createServerRoute({
       ...searchBody,
     });
 
-    return { documents: results.hits.hits.map((hit) => hit._source) as RecursiveRecord[] };
+    return { documents: results.hits.hits.map((hit) => hit._source) as SampleDocument[] };
   },
 });
 
