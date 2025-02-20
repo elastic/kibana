@@ -28,7 +28,7 @@ export const useLatestError = ({
 
   useEffect(() => {
     if (monitorId && locationLabel && isPopoverOpen) {
-      dispatch(getMonitorLastRunAction.get({ monitorId, locationId: locationLabel }));
+      dispatch(getMonitorLastRunAction.get({ monitorId, locationLabel }));
     }
   }, [dispatch, monitorId, locationLabel, lastRefresh, isPopoverOpen]);
 
