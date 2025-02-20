@@ -439,7 +439,7 @@ export class ObservabilityAIAssistantClient {
       stream: TStream;
     }
   ): TStream extends true
-    ? Observable<ChatCompletionChunkEvent | TokenCountEvent | ChatCompletionMessageEvent>
+    ? Observable<ChatCompletionChunkEvent | ChatCompletionMessageEvent>
     : Promise<ChatCompleteResponse> {
     let tools: Record<string, { description: string; schema: any }> | undefined;
     let toolChoice: ToolChoiceType | { function: string } | undefined;
@@ -489,7 +489,7 @@ export class ObservabilityAIAssistantClient {
         }),
         shareReplay()
       ) as TStream extends true
-        ? Observable<ChatCompletionChunkEvent | TokenCountEvent | ChatCompletionMessageEvent>
+        ? Observable<ChatCompletionChunkEvent | ChatCompletionMessageEvent>
         : never;
     } else {
       return this.dependencies.inferenceClient.chatComplete({
