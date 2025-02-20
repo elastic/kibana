@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FunctionDefinition } from '../../definitions/types';
+import { FunctionDefinition, FunctionDefinitionTypes } from '../../definitions/types';
 import { setTestFunctions } from '../../shared/test_functions';
 import { setup } from './helpers';
 
@@ -23,7 +23,7 @@ describe('function validation', () => {
           const definitions: FunctionDefinition[] = [
             {
               name: 'test',
-              type: 'scalar',
+              type: FunctionDefinitionTypes.SCALAR,
               description: '',
               supportedCommands: ['eval'],
               signatures: [
@@ -39,7 +39,7 @@ describe('function validation', () => {
             },
             {
               name: 'returns_integer',
-              type: 'scalar',
+              type: FunctionDefinitionTypes.SCALAR,
               description: '',
               supportedCommands: ['eval'],
               signatures: [
@@ -51,7 +51,7 @@ describe('function validation', () => {
             },
             {
               name: 'returns_double',
-              type: 'scalar',
+              type: FunctionDefinitionTypes.SCALAR,
               description: '',
               supportedCommands: ['eval'],
               signatures: [
@@ -145,7 +145,7 @@ describe('function validation', () => {
         it('any type', async () => {
           const testFn: FunctionDefinition = {
             name: 'test',
-            type: 'scalar',
+            type: FunctionDefinitionTypes.SCALAR,
             description: '',
             supportedCommands: ['eval'],
             signatures: [
@@ -170,7 +170,7 @@ describe('function validation', () => {
         it('list type', async () => {
           const testFn: FunctionDefinition = {
             name: 'in',
-            type: 'builtin',
+            type: FunctionDefinitionTypes.OPERATOR,
             description: '',
             supportedCommands: ['row'],
             signatures: [
@@ -198,7 +198,7 @@ describe('function validation', () => {
       it('checks types by signature', async () => {
         const testFn: FunctionDefinition = {
           name: 'test',
-          type: 'scalar',
+          type: FunctionDefinitionTypes.SCALAR,
           description: '',
           supportedCommands: ['eval'],
           signatures: [
@@ -269,7 +269,7 @@ describe('function validation', () => {
       const testFns: FunctionDefinition[] = [
         {
           name: 'test',
-          type: 'scalar',
+          type: FunctionDefinitionTypes.SCALAR,
           description: '',
           supportedCommands: ['eval'],
           signatures: [
@@ -288,7 +288,7 @@ describe('function validation', () => {
         },
         {
           name: 'variadic_fn',
-          type: 'scalar',
+          type: FunctionDefinitionTypes.SCALAR,
           description: '',
           supportedCommands: ['eval'],
           signatures: [
@@ -327,7 +327,7 @@ describe('function validation', () => {
       const testFns: FunctionDefinition[] = [
         {
           name: 'test',
-          type: 'scalar',
+          type: FunctionDefinitionTypes.SCALAR,
           description: '',
           supportedCommands: ['eval'],
           signatures: [
@@ -354,7 +354,7 @@ describe('function validation', () => {
       setTestFunctions([
         {
           name: 'supports_all',
-          type: 'scalar',
+          type: FunctionDefinitionTypes.SCALAR,
           description: '',
           supportedCommands: ['eval'],
           signatures: [
@@ -366,7 +366,7 @@ describe('function validation', () => {
         },
         {
           name: 'does_not_support_all',
-          type: 'scalar',
+          type: FunctionDefinitionTypes.SCALAR,
           description: '',
           supportedCommands: ['eval'],
           signatures: [
@@ -397,7 +397,7 @@ describe('function validation', () => {
       setTestFunctions([
         {
           name: 'test',
-          type: 'scalar',
+          type: FunctionDefinitionTypes.SCALAR,
           description: '',
           supportedCommands: ['eval'],
           signatures: [
@@ -428,7 +428,7 @@ describe('function validation', () => {
       setTestFunctions([
         {
           name: 'test',
-          type: 'scalar',
+          type: FunctionDefinitionTypes.SCALAR,
           description: '',
           supportedCommands: ['eval'],
           signatures: [
@@ -440,7 +440,7 @@ describe('function validation', () => {
         },
         {
           name: 'test2',
-          type: 'scalar',
+          type: FunctionDefinitionTypes.SCALAR,
           description: '',
           supportedCommands: ['eval'],
           signatures: [
@@ -476,7 +476,7 @@ describe('function validation', () => {
       setTestFunctions([
         {
           name: 'test',
-          type: 'scalar',
+          type: FunctionDefinitionTypes.SCALAR,
           description: '',
           supportedCommands: ['eval'],
           signatures: [
@@ -510,7 +510,7 @@ describe('function validation', () => {
       setTestFunctions([
         {
           name: 'test1',
-          type: 'scalar',
+          type: FunctionDefinitionTypes.SCALAR,
           description: '',
           supportedCommands: ['eval'],
           signatures: [
@@ -522,7 +522,7 @@ describe('function validation', () => {
         },
         {
           name: 'test2',
-          type: 'scalar',
+          type: FunctionDefinitionTypes.SCALAR,
           description: '',
           supportedCommands: ['eval'],
           signatures: [
@@ -534,7 +534,7 @@ describe('function validation', () => {
         },
         {
           name: 'test3',
-          type: 'scalar',
+          type: FunctionDefinitionTypes.SCALAR,
           description: '',
           supportedCommands: ['eval'],
           signatures: [
@@ -561,7 +561,7 @@ describe('function validation', () => {
         setTestFunctions([
           {
             name: 'eval_fn',
-            type: 'scalar',
+            type: FunctionDefinitionTypes.SCALAR,
             description: '',
             supportedCommands: ['eval'],
             signatures: [
@@ -573,7 +573,7 @@ describe('function validation', () => {
           },
           {
             name: 'stats_fn',
-            type: 'agg',
+            type: FunctionDefinitionTypes.AGG,
             description: '',
             supportedCommands: ['stats'],
             signatures: [
@@ -585,7 +585,7 @@ describe('function validation', () => {
           },
           {
             name: 'row_fn',
-            type: 'scalar',
+            type: FunctionDefinitionTypes.SCALAR,
             description: '',
             supportedCommands: ['row'],
             signatures: [
@@ -597,7 +597,7 @@ describe('function validation', () => {
           },
           {
             name: 'where_fn',
-            type: 'scalar',
+            type: FunctionDefinitionTypes.SCALAR,
             description: '',
             supportedCommands: ['where'],
             signatures: [
@@ -609,7 +609,7 @@ describe('function validation', () => {
           },
           {
             name: 'sort_fn',
-            type: 'scalar',
+            type: FunctionDefinitionTypes.SCALAR,
             description: '',
             supportedCommands: ['sort'],
             signatures: [
@@ -649,7 +649,7 @@ describe('function validation', () => {
         setTestFunctions([
           {
             name: 'supports_by_option',
-            type: 'scalar',
+            type: FunctionDefinitionTypes.SCALAR,
             description: '',
             supportedCommands: ['eval'],
             supportedOptions: ['by'],
@@ -662,7 +662,7 @@ describe('function validation', () => {
           },
           {
             name: 'does_not_support_by_option',
-            type: 'scalar',
+            type: FunctionDefinitionTypes.SCALAR,
             description: '',
             supportedCommands: ['eval'],
             supportedOptions: [],
@@ -676,7 +676,7 @@ describe('function validation', () => {
 
           {
             name: 'agg_fn',
-            type: 'agg',
+            type: FunctionDefinitionTypes.AGG,
             description: '',
             supportedCommands: ['stats'],
             supportedOptions: [],
@@ -703,7 +703,7 @@ describe('function validation', () => {
         setTestFunctions([
           {
             name: 'test',
-            type: 'scalar',
+            type: FunctionDefinitionTypes.SCALAR,
             description: '',
             supportedCommands: ['eval'],
             signatures: [
@@ -715,7 +715,7 @@ describe('function validation', () => {
           },
           {
             name: 'test2',
-            type: 'scalar',
+            type: FunctionDefinitionTypes.SCALAR,
             description: '',
             supportedCommands: ['eval'],
             signatures: [
@@ -736,7 +736,7 @@ describe('function validation', () => {
         setTestFunctions([
           {
             name: 'agg_fn',
-            type: 'agg',
+            type: FunctionDefinitionTypes.AGG,
             description: '',
             supportedCommands: ['stats'],
             signatures: [
@@ -748,7 +748,7 @@ describe('function validation', () => {
           },
           {
             name: 'scalar_fn',
-            type: 'scalar',
+            type: FunctionDefinitionTypes.SCALAR,
             description: '',
             supportedCommands: ['stats'],
             signatures: [
