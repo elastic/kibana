@@ -1471,7 +1471,7 @@
     "@kbn/management-storybook-config": "link:src/platform/packages/shared/kbn-management/storybook/config",
     "@kbn/manifest": "link:packages/kbn-manifest",
     "@kbn/mock-idp-plugin": "link:packages/kbn-mock-idp-plugin",
-    "@kbn/mock-idp-utils": "link:packages/kbn-mock-idp-utils",
+    "@kbn/mock-idp-utils": "link:src/platform/packages/private/kbn-mock-idp-utils",
     "@kbn/observability-synthetics-test-data": "link:x-pack/solutions/observability/packages/synthetics_test_data",
     "@kbn/openapi-bundler": "link:packages/kbn-openapi-bundler",
     "@kbn/openapi-generator": "link:packages/kbn-openapi-generator",
