@@ -41,12 +41,12 @@ export class ShareMenuManager {
 
         const menuItems = shareRegistry.resolveShareItemsForShareContext({
           ...options,
+          isServerless,
           onClose,
         });
 
         this.toggleShareContextMenu({
           ...options,
-          allowEmbed: isServerless ? false : options.allowEmbed,
           onClose,
           menuItems,
           publicAPIEnabled: !isServerless,
@@ -63,7 +63,6 @@ export class ShareMenuManager {
 
   private toggleShareContextMenu({
     anchorElement,
-    allowEmbed,
     allowShortUrl,
     objectId,
     objectType,
@@ -73,7 +72,6 @@ export class ShareMenuManager {
     shareableUrl,
     shareableUrlLocatorParams,
     onClose,
-    disabledShareUrl,
     isDirty,
     publicAPIEnabled,
     ...startServices
@@ -99,17 +97,15 @@ export class ShareMenuManager {
     const mount = toMountPoint(
       <ShareMenu
         shareContext={{
-          publicAPIEnabled,
-          anchorElement,
-          allowEmbed,
-          allowShortUrl,
           objectId,
           objectType,
           objectTypeMeta,
+          anchorElement,
+          publicAPIEnabled,
+          allowShortUrl,
           sharingData,
           shareableUrl,
           shareableUrlLocatorParams,
-          disabledShareUrl,
           isDirty,
           shareMenuItems: menuItems,
           onClose: () => {
