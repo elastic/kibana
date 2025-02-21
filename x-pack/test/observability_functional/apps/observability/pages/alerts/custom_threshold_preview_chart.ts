@@ -9,7 +9,7 @@ import expect from 'expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService, getPageObject }: FtrProviderContext) => {
-  const common = getPageObject('common');
+  const pageObjects = getPageObject(['common', 'header']);
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
@@ -47,7 +47,7 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       await observability.alerts.rulesPage.clickCreateRuleButton();
       await observability.alerts.rulesPage.clickOnObservabilityCategory();
       await observability.alerts.rulesPage.clickOnCustomThresholdRule();
-      await common.sleep(1000);
+      await pageObjects.common.sleep(1000);
       expect(await find.existsByCssSelector('[data-rendering-count="2"]')).toBe(true);
     });
 
