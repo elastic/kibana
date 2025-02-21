@@ -713,7 +713,7 @@ export const ESQLEditor = memo(function ESQLEditor({
       wordWrap: 'on',
       wrappingIndent: 'none',
     }),
-    [isDisabled]
+    [isDisabled, darkMode]
   );
 
   const editorPanel = (
