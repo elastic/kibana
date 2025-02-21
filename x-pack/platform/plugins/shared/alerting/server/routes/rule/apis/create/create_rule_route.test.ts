@@ -19,7 +19,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { docLinksServiceMock } from '@kbn/core/server/mocks';
-import { alertDeletionClientMock } from '@kbn/alerting-plugin/server/alert_deletion/alert_deletion_client.mock';
+import { alertDeletionClientMock } from '../../../../alert_deletion/alert_deletion_client.mock';
 
 const rulesClient = rulesClientMock.create();
 const alertDeletionClient = alertDeletionClientMock.create();
