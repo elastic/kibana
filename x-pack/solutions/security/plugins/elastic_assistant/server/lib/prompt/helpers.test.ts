@@ -42,7 +42,7 @@ describe('helper', () => {
         'Current time: 13/02/2025, 23:33:12 GMT-8 (14/02/2025, 07:33:12 GMT)',
       ],
 
-      // kibana settings timezone and screen context timezone
+      // Custom kibana settings timezone and screen context timezone
       [
         'Europe/Zurich',
         'America/Denver',

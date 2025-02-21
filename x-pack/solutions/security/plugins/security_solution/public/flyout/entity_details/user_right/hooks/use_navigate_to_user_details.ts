@@ -48,8 +48,8 @@ export const useNavigateToUserDetails = ({
 }: UseNavigateToUserDetailsParams): UseNavigateToUserDetailsResult => {
   const { telemetry } = useKibana().services;
   const { openLeftPanel, openFlyout } = useExpandableFlyoutApi();
-  const isNewNavigationEnabled = useIsExperimentalFeatureEnabled(
-    'newExpandableFlyoutNavigationEnabled'
+  const isNewNavigationEnabled = !useIsExperimentalFeatureEnabled(
+    'newExpandableFlyoutNavigationDisabled'
   );
 
   const isLinkEnabled = !isPreviewMode || (isNewNavigationEnabled && isPreviewMode);

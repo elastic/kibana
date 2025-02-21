@@ -11,6 +11,7 @@ import {
   ApiConfig,
   Replacements,
   ScreenContext,
+  MessageMetadata,
 } from '@kbn/elastic-assistant-common';
 import { API_ERROR } from '../translations';
 import { getOptionalRequestParams } from '../helpers';
@@ -40,6 +41,7 @@ export interface FetchConnectorExecuteResponse {
     transactionId: string;
     traceId: string;
   };
+  metadata?: MessageMetadata;
 }
 
 export const fetchConnectorExecuteAction = async ({
@@ -118,6 +120,7 @@ export const fetchConnectorExecuteAction = async ({
         transaction_id: string;
         trace_id: string;
       };
+      metadata?: MessageMetadata;
     }>(`/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`, {
       method: 'POST',
       body: JSON.stringify(requestBody),
@@ -152,6 +155,7 @@ export const fetchConnectorExecuteAction = async ({
 
     return {
       response: response.data,
+      metadata: response.metadata,
       isError: false,
       isStream: false,
       traceData,
