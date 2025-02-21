@@ -400,7 +400,7 @@ describe('IndexPattern', () => {
       const newField = 'new_field_test';
       indexPattern.addRuntimeField(newField, {
         ...runtimeWithAttrs,
-        popularity: '10',
+        popularity: 10,
       });
       expect(indexPattern.getFieldByName(newField)?.count).toEqual(10);
       indexPattern.setFieldCount(newField, 20);

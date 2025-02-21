@@ -485,7 +485,7 @@ describe('DataViewLazy', () => {
       fieldCapsResponse = [];
       dataViewLazy.addRuntimeField(newField, {
         ...runtimeWithAttrs,
-        popularity: '10',
+        popularity: 10,
       });
       expect((await dataViewLazy.getFieldByName(newField))?.count).toEqual(10);
       dataViewLazy.setFieldCount(newField, 20);
