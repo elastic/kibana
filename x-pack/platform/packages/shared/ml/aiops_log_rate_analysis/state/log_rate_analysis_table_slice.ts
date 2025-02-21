@@ -52,6 +52,9 @@ export const commonColumns = {
 };
 
 export const significantItemColumns = {
+  ['Select']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.selectColumnTitle', {
+    defaultMessage: 'Select',
+  }),
   ['Field name']: i18n.translate('xpack.aiops.logRateAnalysis.resultsTable.fieldNameColumnTitle', {
     defaultMessage: 'Field name',
   }),

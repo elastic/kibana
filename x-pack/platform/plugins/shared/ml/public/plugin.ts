@@ -16,6 +16,7 @@ import type {
 import { BehaviorSubject, mergeMap } from 'rxjs';
 import { take } from 'rxjs';
 
+import type { EventBusPluginStart } from '@kbn/event-bus-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
@@ -85,6 +86,7 @@ export interface MlStartDependencies {
   dataViewEditor: DataViewEditorStart;
   dataVisualizer: DataVisualizerPluginStart;
   embeddable: EmbeddableStart;
+  eventBus: EventBusPluginStart;
   fieldFormats: FieldFormatsRegistry;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
@@ -194,6 +196,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             dataViewEditor: pluginsStart.dataViewEditor,
             dataVisualizer: pluginsStart.dataVisualizer,
             embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
+            eventBus: pluginsStart.eventBus,
             fieldFormats: pluginsStart.fieldFormats,
             home: pluginsSetup.home,
             kibanaVersion: this.initializerContext.env.packageInfo.version,
