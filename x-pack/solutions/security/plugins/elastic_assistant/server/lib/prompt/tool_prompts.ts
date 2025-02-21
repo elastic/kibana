@@ -78,13 +78,5 @@ export const localToolPrompts: Prompt[] = [
     prompt: {
       default: 'Call this for Elastic Defend insights.',
     },
-  },
-  {
-    promptId: 'CurrentTimeTool',
-    promptGroupId,
-    prompt: {
-      default:
-        'Call this to get the current local time of the user, the local timezone, and the UTC equivelent. Useful for time-sensitive operations where the absoloute time is needed. Sometimes this tool may need to be called alongside other tool calls.',
-    },
-  },
+  }
 ];

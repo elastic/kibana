@@ -5,41 +5,10 @@
  * 2.0.
  */
 
-import type { AssistantToolParams } from '@kbn/elastic-assistant-plugin/server';
-import type { CurrentTimeToolParams } from './current_time_tool';
-import { CURRENT_TIME_TOOL } from './current_time_tool';
-import type { ScreenContext } from '@kbn/elastic-assistant-common';
+import { getFormattedTime } from "./helpers";
 
-describe('CurrentTimeTool', () => {
-  const defaultArgs = {
-    core: {
-      uiSettings: {
-        client: {
-          get: jest.fn().mockResolvedValue('Browser'),
-        },
-      },
-    },
-  } as unknown as CurrentTimeToolParams;
-
-  it('isSupported returns true when core is defined', () => {
-    expect(CURRENT_TIME_TOOL.isSupported(defaultArgs)).toEqual(true);
-  });
-
-  it('isSupported return false when core is not defined', () => {
-    expect(CURRENT_TIME_TOOL.isSupported({} as unknown as AssistantToolParams)).toEqual(false);
-  });
-
-  it('name', () => {
-    expect(CURRENT_TIME_TOOL.name).toEqual('CurrentTimeTool');
-  });
-
-  it('description', () => {
-    expect(CURRENT_TIME_TOOL.description).toContain(
-      'Call this to get the current local time of the user'
-    );
-  });
-
-  describe('tool', () => {
+describe('helper', () => {
+  describe('getCurrentTimeForPrompt', () => {
     beforeEach(() => {
       jest.clearAllMocks();
       jest
@@ -122,22 +91,16 @@ describe('CurrentTimeTool', () => {
     ])(
       'when timezone from kibana settings is "%s" and screenContext.timezone is "%s", then result is "%s"',
       async (
-        kibanaSettingTimezone: string | undefined,
+        uiSettingsDateFormatTimezone: string | undefined,
         screenContextTimezone: string | undefined,
         expectedResult: string
       ) => {
-        defaultArgs.core.uiSettings.client.get = jest
-          .fn()
-          .mockImplementation(async (key: string) => {
-            expect(key).toEqual('dateFormat:tz');
-            return kibanaSettingTimezone;
-          });
 
-        const screenContext: Partial<ScreenContext> = { timeZone: screenContextTimezone };
+        const result = getFormattedTime({
+            screenContextTimezone,
+            uiSettingsDateFormatTimezone
+            });
 
-        const result = await CURRENT_TIME_TOOL.getTool({ ...defaultArgs, screenContext })?.invoke(
-          {}
-        );
         expect(result).toEqual(expectedResult);
       }
     );

@@ -241,7 +241,6 @@ export interface AssistantToolParams {
   isEnabledKnowledgeBase: boolean;
   connectorId?: string;
   contentReferencesStore: ContentReferencesStore | undefined;
-  core?: CoreRequestHandlerContext;
   description?: string;
   esClient: ElasticsearchClient;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
@@ -257,7 +256,6 @@ export interface AssistantToolParams {
     unknown,
     ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody | DefendInsightsPostRequestBody
   >;
-  screenContext?: ScreenContext;
   size?: number;
   telemetry?: AnalyticsServiceSetup;
 }

@@ -18,7 +18,7 @@ import { pruneContentReferences, MessageMetadata } from '@kbn/elastic-assistant-
 import { getPrompt, resolveProviderAndModel } from '@kbn/security-ai-prompts';
 import { localToolPrompts, promptGroupId as toolsGroupId } from '../../../prompt/tool_prompts';
 import { promptGroupId } from '../../../prompt/local_prompt_object';
-import { getModelOrOss } from '../../../prompt/helpers';
+import { getFormattedTime, getModelOrOss } from '../../../prompt/helpers';
 import { getPrompt as localGetPrompt, promptDictionary } from '../../../prompt';
 import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
@@ -53,6 +53,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   replacements,
   request,
   savedObjectsClient,
+  screenContext,
   size,
   systemPrompt,
   telemetry,
@@ -113,7 +114,6 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     anonymizationFields,
     connectorId,
     contentReferencesStore,
-    core,
     esClient,
     inference,
     isEnabledKnowledgeBase,
@@ -218,6 +218,13 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
           actionsClient,
         })
       : { provider: llmType };
+  
+  const uiSettingsDateFormatTimezone = await core.uiSettings.client.get<string>('dateFormat:tz');
+  const _getFormattedTime = () => getFormattedTime({
+    screenContextTimezone: screenContext?.timeZone,
+    uiSettingsDateFormatTimezone
+  })
+
   const assistantGraph = getDefaultAssistantGraph({
     agentRunnable,
     dataClients,
@@ -231,6 +238,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
     ...(llmType === 'bedrock' ? { signal: abortSignal } : {}),
     contentReferencesEnabled: Boolean(contentReferencesStore),
+    getFormattedTime: _getFormattedTime,
   });
   const inputs: GraphInputs = {
     responseLanguage,
