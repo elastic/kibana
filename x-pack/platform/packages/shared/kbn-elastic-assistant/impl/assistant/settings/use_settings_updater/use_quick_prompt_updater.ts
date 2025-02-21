@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FindPromptsResponse, PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common';
 import { PerformPromptsBulkActionRequestBody as PromptsPerformBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/prompts/bulk_crud_prompts_route.gen';
 import { HttpSetup } from '@kbn/core-http-browser';
@@ -20,7 +20,7 @@ interface Params {
   promptsLoaded: boolean;
 }
 interface QuickPromptUpdater {
-  onPromptContentChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onPromptContentChange: (newValue: string) => void;
   onQuickPromptColorChange: EuiSetColorMethod;
   onQuickPromptContextChange: (promptContexts: PromptContextTemplate[]) => void;
   onQuickPromptDelete: (id: string) => void;
@@ -102,14 +102,14 @@ export const useQuickPromptUpdater = ({
   );
 
   const onPromptContentChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    (newValue: string) => {
       if (selectedQuickPrompt != null) {
         setUpdatedQuickPromptSettings((prev): PromptResponse[] =>
           prev.map((sp): PromptResponse => {
             if (sp.id === selectedQuickPrompt.id) {
               return {
                 ...sp,
-                content: e.target.value,
+                content: newValue,
               };
             }
             return sp;
@@ -127,7 +127,7 @@ export const useQuickPromptUpdater = ({
                     ),
                     {
                       ...selectedQuickPrompt,
-                      content: e.target.value,
+                      content: newValue,
                     },
                   ],
                 }
@@ -138,7 +138,7 @@ export const useQuickPromptUpdater = ({
                     ),
                     {
                       ...selectedQuickPrompt,
-                      content: e.target.value,
+                      content: newValue,
                     },
                   ],
                 }),

@@ -114,8 +114,6 @@ export const useAssistantOverlay = (
   // proxy show / hide calls to assistant context, using our internal prompt context id:
   // silent:boolean doesn't show the toast notification if the conversation is not found
   const showAssistantOverlay = useCallback(
-    // shouldCreateConversation should only be passed for
-    // non-default conversations that may need to be initialized
     async (showOverlay: boolean) => {
       if (promptContextId != null && isAssistantEnabled && conversationTitle != null) {
         const refetched = await refetch();

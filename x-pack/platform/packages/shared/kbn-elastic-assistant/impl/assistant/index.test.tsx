@@ -33,23 +33,38 @@ jest.mock('./quick_prompts/quick_prompts', () => ({ QuickPrompts: jest.fn() }));
 jest.mock('./api/conversations/use_fetch_current_user_conversations');
 
 jest.mock('./use_conversation');
+const apiConfig = { connectorId: '123' };
+const fullWelcomeConversation = {
+  id: 'welcome_id',
+  title: 'Welcome',
+  category: 'assistant',
+  messages: [],
+  apiConfig,
+  replacements: {},
+  updatedAt: '2024-09-10T22:07:44.915Z',
+};
+const fullSheepConversation = {
+  id: 'electric_sheep_id',
+  title: 'electric sheep',
+  category: 'assistant',
+  messages: [],
+  replacements: {},
+  apiConfig,
+  updatedAt: '2024-10-10T22:07:44.915Z',
+};
 
 const mockData = {
   welcome_id: {
-    id: 'welcome_id',
-    title: 'Welcome',
-    category: 'assistant',
-    messages: [],
-    apiConfig: { connectorId: '123' },
-    replacements: {},
+    id: fullWelcomeConversation.id,
+    title: fullWelcomeConversation.title,
+    apiConfig: fullWelcomeConversation.apiConfig,
+    updatedAt: fullWelcomeConversation.updatedAt,
   },
   electric_sheep_id: {
-    id: 'electric_sheep_id',
-    category: 'assistant',
-    title: 'electric sheep',
-    messages: [],
-    apiConfig: { connectorId: '123' },
-    replacements: {},
+    id: fullSheepConversation.id,
+    title: fullSheepConversation.title,
+    apiConfig: fullSheepConversation.apiConfig,
+    updatedAt: fullSheepConversation.updatedAt,
   },
 };
 
@@ -58,7 +73,7 @@ const renderAssistant = async (extraProps = {}) => {
   const assistant = render(
     <TestProviders>
       <Assistant
-        conversationTitle={'Welcome'}
+        lastConversation={{ id: 'welcome_id' }}
         chatHistoryVisible={true}
         setChatHistoryVisible={jest.fn()}
         {...extraProps}
@@ -69,7 +84,7 @@ const renderAssistant = async (extraProps = {}) => {
     // wait for conversation to mount before performing any tests
     expect(chatSendSpy).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        currentConversation: mockData.welcome_id,
+        currentConversation: expect.objectContaining({ apiConfig }),
       })
     );
   });
@@ -78,8 +93,8 @@ const renderAssistant = async (extraProps = {}) => {
 const mockDeleteConvo = jest.fn();
 const clearConversation = jest.fn();
 const mockUseConversation = {
-  clearConversation: clearConversation.mockResolvedValue(mockData.welcome_id),
-  getConversation: jest.fn(),
+  clearConversation: clearConversation.mockResolvedValue(fullWelcomeConversation),
+  getConversation: jest.fn().mockResolvedValue(fullWelcomeConversation),
   deleteConversation: mockDeleteConvo,
   setApiConfig: jest.fn().mockResolvedValue({}),
 };
@@ -147,6 +162,11 @@ describe('Assistant', () => {
   describe('persistent storage', () => {
     it('should delete conversation when delete button is clicked', async () => {
       await renderAssistant();
+      const openConversationMenu = screen.getAllByTestId('aiAssistantFlyoutNavigationToggle')[0];
+      await act(async () => {
+        fireEvent.click(openConversationMenu);
+      });
+      // selecting first conversation proves sort by updatedAt is working
       const deleteButton = screen.getAllByTestId('delete-option')[0];
       await act(async () => {
         fireEvent.click(deleteButton);
@@ -174,7 +194,7 @@ describe('Assistant', () => {
 
   describe('when selected conversation changes and some connectors are loaded', () => {
     it('should persist the conversation id to local storage', async () => {
-      const getConversation = jest.fn().mockResolvedValue(mockData.electric_sheep_id);
+      const getConversation = jest.fn().mockResolvedValue(fullSheepConversation);
       (useConversation as jest.Mock).mockReturnValue({
         ...mockUseConversation,
         getConversation,
@@ -183,66 +203,25 @@ describe('Assistant', () => {
 
       expect(persistToLocalStorage).toHaveBeenCalled();
 
-      expect(persistToLocalStorage).toHaveBeenLastCalledWith(mockData.welcome_id.id);
+      expect(persistToLocalStorage).toHaveBeenLastCalledWith({ id: mockData.welcome_id.id });
 
-      const previousConversationButton = await screen.findByText(mockData.electric_sheep_id.title);
+      const previousConversationButton = (
+        await screen.findAllByText(mockData.electric_sheep_id.title)
+      )[0];
       expect(previousConversationButton).toBeInTheDocument();
       await act(async () => {
         fireEvent.click(previousConversationButton);
       });
 
-      expect(persistToLocalStorage).toHaveBeenLastCalledWith('electric_sheep_id');
+      expect(persistToLocalStorage).toHaveBeenLastCalledWith({ id: 'electric_sheep_id' });
     });
 
-    it('should not persist the conversation id to local storage when excludeFromLastConversationStorage flag is indicated', async () => {
-      const conversation = {
-        ...mockData.electric_sheep_id,
-        excludeFromLastConversationStorage: true,
-      };
-      const getConversation = jest.fn().mockResolvedValue(conversation);
+    it('should fetch current conversation when id has value', async () => {
+      const getConversation = jest.fn().mockResolvedValue(fullSheepConversation);
       (useConversation as jest.Mock).mockReturnValue({
         ...mockUseConversation,
         getConversation,
       });
-      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
-        ...defaultFetchUserConversations,
-        data: {
-          ...mockData,
-          electric_sheep_id: conversation,
-        },
-        refetch: refetchResults.mockResolvedValue({
-          isLoading: false,
-          data: {
-            pages: [
-              {
-                page: 1,
-                perPage: 28,
-                total: 150,
-                data: [...Object.values(mockData), conversation],
-              },
-            ],
-          },
-        }),
-      } as unknown as FetchCurrentUserConversations);
-
-      const { findByText } = await renderAssistant();
-
-      expect(persistToLocalStorage).toHaveBeenCalled();
-
-      expect(persistToLocalStorage).toHaveBeenLastCalledWith(mockData.welcome_id.id);
-
-      const previousConversationButton = await findByText(mockData.electric_sheep_id.title);
-
-      expect(previousConversationButton).toBeInTheDocument();
-
-      await act(async () => {
-        fireEvent.click(previousConversationButton);
-      });
-      expect(persistToLocalStorage).toHaveBeenLastCalledWith(mockData.welcome_id.id);
-    });
-
-    it('should fetch current conversation when id has value', async () => {
-      const refetch = jest.fn();
       jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
         ...defaultFetchUserConversations,
         data: {
@@ -273,9 +252,9 @@ describe('Assistant', () => {
         fireEvent.click(previousConversationButton);
       });
 
-      expect(refetch).toHaveBeenCalled();
+      expect(getConversation).toHaveBeenCalled();
 
-      expect(persistToLocalStorage).toHaveBeenLastCalledWith('electric_sheep_id');
+      expect(persistToLocalStorage).toHaveBeenLastCalledWith({ id: 'electric_sheep_id' });
     });
   });
 
@@ -284,7 +263,7 @@ describe('Assistant', () => {
       await renderAssistant();
 
       expect(persistToLocalStorage).toHaveBeenCalled();
-      expect(persistToLocalStorage).toHaveBeenLastCalledWith(mockData.welcome_id.id);
+      expect(persistToLocalStorage).toHaveBeenLastCalledWith({ id: mockData.welcome_id.id });
     });
   });
 

@@ -43,8 +43,8 @@ export interface SystemPromptSettings extends PromptResponse {
 
 interface SystemPromptUpdater {
   onConversationSelectionChange: (currentPromptConversations: Conversation[]) => void;
-  onNewConversationDefaultChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onPromptContentChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onNewConversationDefaultChange: (isChecked: boolean) => void;
+  onPromptContentChange: (newValue: string) => void;
   onSystemPromptDelete: (id: string) => void;
   onSystemPromptSelect: (systemPrompt?: SystemPromptSettings | string) => void;
   refetchSystemPromptConversations: () => Promise<
@@ -182,14 +182,14 @@ export const useSystemPromptUpdater = ({
   );
 
   const onPromptContentChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    (newValue: string) => {
       if (selectedSystemPrompt != null) {
         setSystemPromptSettingsUpdates((prev): SystemPromptSettings[] =>
           prev.map((sp): SystemPromptSettings => {
             if (sp.id === selectedSystemPrompt.id) {
               return {
                 ...sp,
-                content: e.target.value,
+                content: newValue,
               };
             }
             return sp;
@@ -210,7 +210,7 @@ export const useSystemPromptUpdater = ({
                     ),
                     {
                       ...selectedSystemPrompt,
-                      content: e.target.value,
+                      content: newValue,
                     },
                   ],
                 }
@@ -221,7 +221,7 @@ export const useSystemPromptUpdater = ({
                     ),
                     {
                       ...selectedSystemPrompt,
-                      content: e.target.value,
+                      content: newValue,
                     },
                   ],
                 }),
@@ -234,8 +234,7 @@ export const useSystemPromptUpdater = ({
   );
 
   const onNewConversationDefaultChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const isChecked = e.target.checked;
+    (isChecked: boolean) => {
       const defaultNewSystemPrompts = systemPromptSettingsUpdates.filter(
         (p) => p.isNewConversationDefault
       );

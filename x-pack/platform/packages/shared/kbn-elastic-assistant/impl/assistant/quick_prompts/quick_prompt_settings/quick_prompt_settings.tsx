@@ -15,7 +15,7 @@ import { QuickPromptSettingsEditor } from './quick_prompt_editor';
 import { PromptContextTemplate } from '../../../..';
 
 interface Props {
-  onPromptContentChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onPromptContentChange: (newValue: string) => void;
   onQuickPromptColorChange: EuiSetColorMethod;
   onQuickPromptContextChange: (promptContexts: PromptContextTemplate[]) => void;
   onQuickPromptDelete: (id: string) => void;

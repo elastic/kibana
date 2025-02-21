@@ -143,7 +143,7 @@ describe('useAssistantOverlay', () => {
     expect(mockUseAssistantContext.unRegisterPromptContext).toHaveBeenCalledWith('id');
   });
 
-  it('calls `showAssistantOverlay` from the assistant context', () => {
+  it('calls `showAssistantOverlay` when the conversation does not exist', async () => {
     const isAssistantAvailable = true;
     const { result } = renderHook(() =>
       useAssistantOverlay(
@@ -162,47 +162,13 @@ describe('useAssistantOverlay', () => {
       result.current.showAssistantOverlay(true);
     });
 
-    expect(mockCreateConversation).not.toHaveBeenCalled();
-    expect(mockUseAssistantContext.showAssistantOverlay).toHaveBeenCalledWith({
-      showOverlay: true,
-      promptContextId: 'id',
-      conversationTitle: 'conversation-id',
-    });
-  });
-
-  it('calls `showAssistantOverlay` and creates a new conversation when shouldCreateConversation: true and the conversation does not exist', async () => {
-    const isAssistantAvailable = true;
-    const { result } = renderHook(() =>
-      useAssistantOverlay(
-        'event',
-        'conversation-id',
-        'description',
-        () => Promise.resolve('data'),
-        'id',
-        null,
-        'tooltip',
-        isAssistantAvailable
-      )
-    );
-
-    act(() => {
-      result.current.showAssistantOverlay(true, true);
-    });
-
-    expect(mockCreateConversation).toHaveBeenCalledWith({
-      title: 'conversation-id',
-      apiConfig: {
-        actionTypeId: '.gen-ai',
-        connectorId: 'connectorId',
-      },
-      category: 'assistant',
-    });
-
     await waitFor(() => {
       expect(mockUseAssistantContext.showAssistantOverlay).toHaveBeenCalledWith({
         showOverlay: true,
         promptContextId: 'id',
-        conversationTitle: 'conversation-id',
+        selectedConversation: {
+          title: 'conversation-id',
+        },
       });
     });
   });
@@ -223,16 +189,16 @@ describe('useAssistantOverlay', () => {
     );
 
     act(() => {
-      result.current.showAssistantOverlay(true, true);
+      result.current.showAssistantOverlay(true);
     });
-
-    expect(mockCreateConversation).not.toHaveBeenCalled();
 
     await waitFor(() => {
       expect(mockUseAssistantContext.showAssistantOverlay).toHaveBeenCalledWith({
         showOverlay: true,
         promptContextId: 'id',
-        conversationTitle: 'electric sheep',
+        selectedConversation: {
+          id: 'electric_sheep_id',
+        },
       });
     });
   });

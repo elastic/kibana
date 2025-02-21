@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiFormRow,
   EuiTextArea,
@@ -26,8 +26,8 @@ import { TEST_IDS } from '../../../constants';
 interface Props {
   conversations: Record<string, Conversation>;
   onConversationSelectionChange: (currentPromptConversations: Conversation[]) => void;
-  onNewConversationDefaultChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onPromptContentChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onNewConversationDefaultChange: (isChecked: boolean) => void;
+  onPromptContentChange: (newValue: string) => void;
   onSystemPromptDelete: (id: string) => void;
   onSystemPromptSelect: (systemPrompt?: SystemPromptSettings | string) => void;
   resetSettings?: () => void;
@@ -73,6 +73,14 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
     () => selectedSystemPrompt?.isNewConversationDefault ?? false,
     [selectedSystemPrompt?.isNewConversationDefault]
   );
+  const onContentChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => onPromptContentChange(e.target.value),
+    [onPromptContentChange]
+  );
+  const onCheckChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => onNewConversationDefaultChange(e.target.checked),
+    [onNewConversationDefaultChange]
+  );
 
   return (
     <>
@@ -89,7 +97,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
         <EuiTextArea
           data-test-subj={TEST_IDS.SYSTEM_PROMPT_MODAL.PROMPT_TEXT}
           disabled={disableFields}
-          onChange={onPromptContentChange}
+          onChange={onContentChange}
           placeholder={i18n.SYSTEM_PROMPT_PROMPT_PLACEHOLDER}
           value={promptContent}
           compressed
@@ -128,7 +136,7 @@ export const SystemPromptEditorComponent: React.FC<Props> = ({
             </EuiFlexGroup>
           }
           checked={isNewConversationDefault}
-          onChange={onNewConversationDefaultChange}
+          onChange={onCheckChange}
         />
       </EuiFormRow>
     </>

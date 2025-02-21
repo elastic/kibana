@@ -19,7 +19,7 @@ import { PromptContextSelector } from '../prompt_context_selector/prompt_context
 import { useAssistantContext } from '../../../assistant_context';
 
 interface Props {
-  onPromptContentChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+  onPromptContentChange: (newValue: string) => void;
   onQuickPromptColorChange: EuiSetColorMethod;
   onQuickPromptContextChange: (promptContexts: PromptContextTemplate[]) => void;
   onQuickPromptDelete: (id: string) => void;
@@ -68,6 +68,11 @@ const QuickPromptSettingsEditorComponent = ({
     [basePromptContexts, selectedQuickPrompt?.categories]
   );
 
+  const onContentChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => onPromptContentChange(e.target.value),
+    [onPromptContentChange]
+  );
+
   return (
     <>
       <EuiFormRow label={i18n.QUICK_PROMPT_NAME} display="rowCompressed" fullWidth>
@@ -87,7 +92,7 @@ const QuickPromptSettingsEditorComponent = ({
           disabled={selectedQuickPrompt == null}
           fullWidth
           data-test-subj="quick-prompt-prompt"
-          onChange={onPromptContentChange}
+          onChange={onContentChange}
           placeholder={i18n.QUICK_PROMPT_PROMPT_PLACEHOLDER}
           value={promptContent}
           css={css`

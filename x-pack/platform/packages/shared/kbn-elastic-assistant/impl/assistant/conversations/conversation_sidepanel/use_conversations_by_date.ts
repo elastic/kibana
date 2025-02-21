@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { orderBy } from 'lodash';
 import { Conversation } from '../../../..';
 import { getAbsoluteTime, isValidDateMath } from './date_utils';
 
@@ -31,8 +32,7 @@ export function useConversationsByDate(conversations: Conversation[] = []) {
       THIS_YEAR: [],
       OLDER: [],
     };
-
-    conversations.forEach((conversation) => {
+    orderBy(conversations, 'updatedAt', 'desc').forEach((conversation) => {
       if (!conversation.updatedAt) {
         return;
       }

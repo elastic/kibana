@@ -195,7 +195,11 @@ export const ConversationSidePanel = React.memo<Props>(
               overflow: auto;
             `}
           >
-            <EuiPanel hasShadow={false} borderRadius="none">
+            <EuiPanel
+              hasShadow={false}
+              borderRadius="none"
+              data-test-subj={'conversationSidePanel'}
+            >
               {Object.entries(conversationsCategorizedByDate).map(([category, convoList]) =>
                 convoList.length ? (
                   <EuiFlexItem grow={false} key={category}>
