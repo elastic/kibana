@@ -98,7 +98,6 @@ export function registerAnomalyRuleType({
     actionGroups: ruleTypeConfig.actionGroups,
     defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
     validate: { params: anomalyParamsSchema },
-    doesSetRecoveryContext: true,
     schemas: {
       params: {
         type: 'config-schema',
