@@ -67,7 +67,8 @@ import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
 import { SecurityError } from './errors/security_error';
 import { NameTakenError } from './errors/name_taken_error';
 import { MalformedStreamError } from './errors/malformed_stream_error';
-import { State, StateChange } from './state_management/state';
+import { State } from './state_management/state';
+import { StreamChange } from './state_management/types';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -120,7 +121,7 @@ export class StreamsClient {
   }
 
   // What should this function return?
-  private async attemptChanges(requestedChanges: StateChange[], dryRun: boolean = false) {
+  private async attemptChanges(requestedChanges: StreamChange[], dryRun: boolean = false) {
     const startingState = await State.currentState(this.dependencies.storageClient);
     // Optional: Validate the starting state for drift outside of Streams
 
@@ -154,8 +155,8 @@ export class StreamsClient {
   async enableStreams(): Promise<EnableStreamsResponse> {
     await this.attemptChanges([
       {
-        stream_type: 'wired',
-        change: 'upsert',
+        target: rootStreamDefinition.name,
+        type: 'wired_upsert',
         request: {
           dashboards: [],
           stream: rootStreamDefinition,

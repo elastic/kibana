@@ -5,19 +5,55 @@
  * 2.0.
  */
 
-// Does this create a circular dependency?
 import { IScopedClusterClient } from '@kbn/core/server';
-import { State } from './state';
+import {
+  GroupStreamUpsertRequest,
+  StreamDefinition,
+  WiredStreamUpsertRequest,
+} from '@kbn/streams-schema';
+import { State } from './state'; // Does this create a circular dependency?
 
 export interface ValidationResult {
   isValid: boolean;
   errors: string[]; // Or Errors?
 }
 
-export interface Stream {
+// Interface or abstract class to make somethings private?
+export interface StreamActiveRecord {
+  definition: StreamDefinition;
+  clone(): StreamActiveRecord;
+  markForDeletion(): void;
+  update(newDefinition: StreamDefinition): void;
   validate(
     desiredState: State,
     startingState: State,
     scopedClusterClient: IScopedClusterClient
   ): Promise<ValidationResult>;
 }
+
+interface WiredStreamUpsertChange {
+  target: string;
+  type: 'wired_upsert';
+  request: WiredStreamUpsertRequest & {
+    stream: {
+      name: string;
+    };
+  };
+}
+
+interface GroupStreamUpsertChange {
+  target: string;
+  type: 'group_upsert';
+  request: GroupStreamUpsertRequest & {
+    stream: {
+      name: string;
+    };
+  };
+}
+
+interface StreamDeleteChange {
+  target: string;
+  type: 'delete';
+}
+
+export type StreamChange = WiredStreamUpsertChange | GroupStreamUpsertChange | StreamDeleteChange;

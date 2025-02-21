@@ -7,63 +7,59 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 import { StreamsStorageClient } from '../service';
-import { GroupStream, GroupStreamChange } from './group_stream';
-import { ValidationResult } from './types';
-import { WiredStream, WiredStreamChange } from './wired_stream';
-
-interface ApplyChangeMap {
-  wired: typeof WiredStream.applyChange;
-  group: typeof GroupStream.applyChange;
-}
-
-const applyChangeByType: ApplyChangeMap = {
-  wired: WiredStream.applyChange,
-  group: GroupStream.applyChange,
-};
-
-export type StateChange = WiredStreamChange | GroupStreamChange;
+import { StreamActiveRecord, StreamChange, ValidationResult } from './types';
+import { streamFromDefinition } from './stream_from_definition';
+import { StreamsRepository } from './stream_repository';
 
 export class State {
-  wiredStreams: WiredStream[];
-  groupStreams: GroupStream[];
+  streams: StreamsRepository;
 
-  constructor(wiredStreams: WiredStream[], groupStreams: GroupStream[]) {
-    this.wiredStreams = wiredStreams;
-    this.groupStreams = groupStreams;
+  constructor(streams: StreamActiveRecord[]) {
+    this.streams = new StreamsRepository(streams);
   }
 
-  applyChanges(requestedChanges: StateChange[]): State {
+  applyChanges(requestedChanges: StreamChange[]): State {
     // Optional: Expand requested changes to include automatic creation of missing streams
     const newState = this.clone();
-    requestedChanges.forEach(this.makeApplyChange(newState));
+
+    requestedChanges.forEach((change) => {
+      const targetStream = this.streams.get(change.target);
+
+      if (!targetStream) {
+        if (change.type === 'delete') {
+          throw new Error('Cannot delete non-existing stream');
+        } else {
+          const newStream = streamFromDefinition(change.request.stream);
+          // Mark as changed
+          // What if adding this stream to the state triggers other changes?
+          this.streams.set(newStream.definition.name, newStream);
+        }
+      } else {
+        if (change.type === 'delete') {
+          targetStream.markForDeletion();
+        } else {
+          // Each stream type should check that the payload matches the existing stream type
+          // What if this update needs to also change things in other streams?
+          targetStream.update(change.request.stream);
+        }
+      }
+    });
+
     return newState;
   }
 
   private clone(): State {
-    const wiredStreams = this.wiredStreams.map((wiredStream) => wiredStream.clone());
-    const groupStreams = this.groupStreams.map((groupStream) => groupStream.clone());
-    return new State(wiredStreams, groupStreams);
-  }
-
-  private makeApplyChange(newState: State) {
-    return <T extends StateChange>(requestedChange: T) => {
-      const applyChange = applyChangeByType[requestedChange.stream_type] as (
-        requestedChange: T,
-        newState: State
-      ) => void;
-
-      applyChange(requestedChange, newState);
-    };
+    const newStreams = this.streams.all().map((stream) => stream.clone());
+    return new State(newStreams);
   }
 
   async validate(
     startingState: State,
     scopedClusterClient: IScopedClusterClient
   ): Promise<ValidationResult> {
-    const streams = [...this.wiredStreams, ...this.groupStreams];
     // Should I use allSettled here?
     const validationResults = await Promise.all(
-      streams.map((stream) => stream.validate(this, startingState, scopedClusterClient))
+      this.streams.all().map((stream) => stream.validate(this, startingState, scopedClusterClient))
     );
 
     const isValid = validationResults.every((validationResult) => validationResult.isValid);
@@ -84,8 +80,17 @@ export class State {
   }
 
   static async currentState(storageClient: StreamsStorageClient): Promise<State> {
-    const wiredStreams = await WiredStream.all(storageClient);
-    const groupStreams = await GroupStream.all(storageClient);
-    return new State(wiredStreams, groupStreams);
+    const streamsSearchResponse = await storageClient.search({
+      size: 10000, // Paginate if there are more...
+      sort: [{ name: 'asc' }],
+      track_total_hits: false,
+    });
+
+    const streams = streamsSearchResponse.hits.hits.map(({ _source: definition }) =>
+      streamFromDefinition(definition)
+    );
+
+    // State might need to be enriched with more information about these stream instances, like their existing ES resources
+    return new State(streams);
   }
 }
