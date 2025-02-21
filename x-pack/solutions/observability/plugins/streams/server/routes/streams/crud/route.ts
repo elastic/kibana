@@ -12,6 +12,7 @@ import {
   StreamGetResponse,
   isWiredStreamDefinition,
   streamUpsertRequestSchema,
+  isGroupStreamDefinitionBase,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { badData, badRequest } from '@hapi/boom';
@@ -163,8 +164,27 @@ export const editStreamRoute = createServerRoute({
       throw badRequest('Cannot create wired stream due to unsupported root stream');
     }
 
+    if (
+      isGroupStreamDefinition({ ...params.body.stream, name: params.path.name }) &&
+      params.path.name.startsWith('logs.')
+    ) {
+      throw badRequest('A group stream name can not start with [logs.]');
+    }
+
+    const body = isGroupStreamDefinitionBase(params.body.stream)
+      ? {
+          ...params.body,
+          stream: {
+            group: {
+              ...params.body.stream.group,
+              members: Array.from(new Set(params.body.stream.group.members)),
+            },
+          },
+        }
+      : params.body;
+
     return await streamsClient.upsertStream({
-      request: params.body,
+      request: body,
       name: params.path.name,
     });
   },
