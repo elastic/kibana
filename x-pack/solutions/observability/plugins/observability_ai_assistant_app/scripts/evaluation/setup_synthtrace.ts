@@ -34,6 +34,7 @@ export async function setupSynthtrace({
   const logger: Logger = {
     debug: (...args) => log.debug(...args),
     info: (...args) => log.info(...args),
+    warn: (...args) => log.warning(...args),
     error: (...args) => log.error(args.map((arg) => arg.toString()).join(' ')),
     perf: (name, cb) => {
       const now = performance.now();

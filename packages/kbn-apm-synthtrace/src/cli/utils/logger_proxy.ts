@@ -39,5 +39,6 @@ export const loggerProxy: Logger = isMainThread
       },
       debug: getLogMethod(LogLevel.debug),
       info: getLogMethod(LogLevel.info),
+      warn: getLogMethod(LogLevel.warn),
       error: getLogMethod(LogLevel.error),
     };
