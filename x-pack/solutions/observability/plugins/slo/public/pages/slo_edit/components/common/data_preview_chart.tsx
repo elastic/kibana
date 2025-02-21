@@ -167,27 +167,66 @@ export function DataPreviewChart({
       type: 'color',
     },
     {
-      id: 'label',
+      id: 'group',
       type: 'custom',
+      header: i18n.translate('xpack.slo.sloEdit.dataPreviewChart.tooltip.groupLabel', {
+        defaultMessage: 'Group',
+      }),
       truncate: true,
       cell: ({ label: cellLabel }) => <span className="echTooltip__label">{cellLabel}</span>,
-      style: {
-        textAlign: 'left',
-      },
+      style: { textAlign: 'left' },
     },
     {
-      id: 'value',
+      id: 'sli',
       type: 'custom',
+      header: i18n.translate('xpack.slo.sloEdit.dataPreviewChart.tooltip.sliLabel', {
+        defaultMessage: 'SLI',
+      }),
       cell: ({ formattedValue }) => (
-        <>
-          <span className="echTooltip__value" dir="ltr">
-            {formattedValue}
-          </span>
-        </>
+        <span className="echTooltip__value" dir="ltr">
+          {formattedValue}
+        </span>
       ),
-      style: {
-        textAlign: 'right',
-      },
+      style: { textAlign: 'right' },
+    },
+    {
+      id: 'good',
+      type: 'custom',
+      header: i18n.translate('xpack.slo.sloEdit.dataPreviewChart.tooltip.goodEventsLabel', {
+        defaultMessage: 'Good events',
+      }),
+      cell: ({ datum }) => (
+        <span className="echTooltip__value" dir="ltr">
+          {datum.events?.good ?? '-'}
+        </span>
+      ),
+      style: { textAlign: 'right' },
+    },
+    {
+      id: 'bad',
+      type: 'custom',
+      header: i18n.translate('xpack.slo.sloEdit.dataPreviewChart.tooltip.badEventsLabel', {
+        defaultMessage: 'Bad events',
+      }),
+      cell: ({ datum }) => (
+        <span className="echTooltip__value" dir="ltr">
+          {datum.events?.bad ?? '-'}
+        </span>
+      ),
+      style: { textAlign: 'right' },
+    },
+    {
+      id: 'total',
+      type: 'custom',
+      header: i18n.translate('xpack.slo.sloEdit.dataPreviewChart.tooltip.totalEventsLabel', {
+        defaultMessage: 'Total events',
+      }),
+      cell: ({ datum }) => (
+        <span className="echTooltip__value" dir="ltr">
+          {datum.events?.total ?? '-'}
+        </span>
+      ),
+      style: { textAlign: 'right' },
     },
   ];
 
@@ -231,36 +270,7 @@ export function DataPreviewChart({
               <Tooltip
                 type="vertical"
                 body={({ items }) => {
-                  const firstItem = items[0];
-                  const events = firstItem.datum.events;
-                  const rows = [
-                    {
-                      ...items[0],
-                      label: i18n.translate('xpack.slo.sloEdit.dataPreviewChart.sliLabel', {
-                        defaultMessage: 'SLI',
-                      }),
-                    },
-                  ];
-                  if (events) {
-                    rows.push({
-                      ...firstItem,
-                      formattedValue: events.good,
-                      value: events.good,
-                      label: i18n.translate('xpack.slo.sloEdit.dataPreviewChart.goodEvents', {
-                        defaultMessage: 'Good events',
-                      }),
-                    });
-                    rows.push({
-                      ...firstItem,
-                      value: events.total,
-                      formattedValue: events.total,
-                      label: i18n.translate('xpack.slo.sloEdit.dataPreviewChart.badEvents', {
-                        defaultMessage: 'Total events',
-                      }),
-                    });
-                  }
-
-                  return <TooltipTable columns={columns} items={rows} />;
+                  return <TooltipTable columns={columns} items={items} />;
                 }}
               />
               <Settings
@@ -317,6 +327,7 @@ export function DataPreviewChart({
                   events: datum.events,
                 }))}
               />
+
               {map(previewData?.groups, (data, group) => (
                 <AreaSeries
                   key={group}
