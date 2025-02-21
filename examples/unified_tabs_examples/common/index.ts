@@ -7,8 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test/jest_node',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/src/dev/packages/core-test-helpers-kbn-server'],
-};
+export const PLUGIN_ID = 'unifiedTabsExamples';
+export const PLUGIN_NAME = 'Unified Tabs Examples';
