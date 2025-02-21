@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await PageObjects.discover.waitUntilSearchingHasFinished();
 
-        await dataGrid.scrollTo(200);
+        await dataGrid.scrollTo(300);
 
         await PageObjects.discover.waitUntilSearchingHasFinished();
         // In ESQL Mode, pagination is disabled

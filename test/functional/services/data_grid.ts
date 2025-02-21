@@ -985,6 +985,7 @@ export class DataGridService extends FtrService {
 
   public async scrollTo(targetIndex: number) {
     const dataGridTargetIndex = targetIndex - 1; // 0-based index
+    let lastRowIndex = -1;
 
     while (true) {
       const rows = await this.find.allByCssSelector('.euiDataGridRow');
@@ -995,11 +996,16 @@ export class DataGridService extends FtrService {
       );
       const container = await this.find.byCssSelector('.euiDataGrid__virtualized');
 
+      if (currentLastRowIndex === lastRowIndex) {
+        break; // Exit if no further scrolling is possible
+      }
+
       if (currentLastRowIndex >= dataGridTargetIndex) {
-        // After reaching the bottom, one last scroll is required to reach complete bottom
-        await this.browser.execute('arguments[0].scrollTop += 100', container); // Increase scroll increment
+        await this.browser.execute('arguments[0].scrollTop += 100', container); // Final scroll increment
         break; // Exit if reached the target index
       }
+
+      lastRowIndex = currentLastRowIndex;
 
       await this.browser.execute('arguments[0].scrollTop += 500', container); // Increase scroll increment
 
