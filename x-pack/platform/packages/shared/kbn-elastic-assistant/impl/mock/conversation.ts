@@ -9,7 +9,7 @@ import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/c
 import { ClientMessage, Conversation } from '../..';
 
 export const alertConvo: Conversation = {
-  id: '',
+  id: 'alert-convo',
   title: 'Alert summary',
   category: 'assistant',
   messages: [
@@ -66,6 +66,7 @@ export const conversationWithContentReferences: Conversation = {
 
 export const welcomeConvo: Conversation = {
   ...emptyWelcomeConvo,
+  id: 'has-an-id',
   messages: [
     {
       content:

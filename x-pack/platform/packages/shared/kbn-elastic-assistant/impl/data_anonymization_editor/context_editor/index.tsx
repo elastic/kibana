@@ -104,7 +104,11 @@ const ContextEditorComponent: React.FC<Props> = ({
   }, [rows]);
 
   const { onTableChange, pagination, sorting } = useSessionPagination<ContextEditorRow, true>({
-    defaultTableOptions: getDefaultTableOptions<ContextEditorRow>('field'),
+    defaultTableOptions: getDefaultTableOptions<ContextEditorRow>({
+      pageSize: 10,
+      sortDirection: 'asc',
+      sortField: 'field',
+    }),
     nameSpace,
     storageKey: ANONYMIZATION_TABLE_SESSION_STORAGE_KEY,
   });

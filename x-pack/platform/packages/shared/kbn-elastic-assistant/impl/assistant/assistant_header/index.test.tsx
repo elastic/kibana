@@ -45,6 +45,7 @@ const testProps = {
   allPrompts: [],
   contentReferencesVisible: true,
   setContentReferencesVisible: jest.fn(),
+  setPaginationObserver: jest.fn(),
 };
 
 jest.mock('../../connectorland/use_load_connectors', () => ({
@@ -87,6 +88,7 @@ describe('AssistantHeader', () => {
     });
     expect(onConversationSelected).toHaveBeenCalledWith({
       cId: alertConvo.id,
+      cTitle: alertConvo.title,
     });
   });
 

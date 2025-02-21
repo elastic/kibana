@@ -62,7 +62,7 @@ const ConversationSettingsManagementComponent: React.FC<Props> = ({
   const { onTableChange, pagination, sorting } = useSessionPagination<Conversation, false>({
     nameSpace,
     storageKey: CONVERSATION_TABLE_SESSION_STORAGE_KEY,
-    defaultTableOptions: getDefaultTableOptions<Conversation>('updatedAt'),
+    defaultTableOptions: getDefaultTableOptions<Conversation>({ sortField: 'updatedAt' }),
     inMemory: false,
     totalItemCount,
   });

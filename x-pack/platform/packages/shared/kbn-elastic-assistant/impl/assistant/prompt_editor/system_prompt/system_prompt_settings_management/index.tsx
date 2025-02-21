@@ -181,7 +181,7 @@ const SystemPromptSettingsManagementComponent = ({ connectors, defaultConnector 
   const { getColumns } = useSystemPromptTable();
 
   const { onTableChange, pagination, sorting } = useSessionPagination<SystemPromptSettings, true>({
-    defaultTableOptions: getDefaultTableOptions<SystemPromptSettings>('updatedAt'),
+    defaultTableOptions: getDefaultTableOptions<SystemPromptSettings>({ sortField: 'updatedAt' }),
     nameSpace,
     storageKey: SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY,
   });

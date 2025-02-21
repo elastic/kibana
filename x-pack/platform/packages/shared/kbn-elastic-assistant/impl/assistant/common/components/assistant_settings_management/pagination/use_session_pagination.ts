@@ -11,9 +11,17 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { DEFAULT_ASSISTANT_NAMESPACE } from '../../../../../assistant_context/constants';
 import { DEFAULT_PAGE_SIZE } from '../../../../settings/const';
 
-export const getDefaultTableOptions = <T>(sortField: keyof T) => ({
-  page: { size: DEFAULT_PAGE_SIZE, index: 0 },
-  sort: { field: sortField, direction: 'desc' as const },
+export const getDefaultTableOptions = <T>({
+  pageSize,
+  sortDirection,
+  sortField,
+}: {
+  sortField: keyof T;
+  sortDirection?: 'asc' | 'desc';
+  pageSize?: number;
+}) => ({
+  page: { size: pageSize ?? DEFAULT_PAGE_SIZE, index: 0 },
+  sort: { field: sortField, direction: sortDirection ?? ('desc' as const) },
 });
 
 interface InMemoryPagination {
