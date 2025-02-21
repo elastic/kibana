@@ -443,10 +443,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     const created =
       docsCreated.length > 0
         ? await this.findDocuments<EsKnowledgeBaseEntrySchema>({
-          page: 1,
-          perPage: 10000,
-          filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
-        })
+            page: 1,
+            perPage: 10000,
+            filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
+          })
         : undefined;
     // Intentionally no telemetry here - this path only used to install security docs
     // Plans to make this function private in a different PR so no user entry ever is created in this path

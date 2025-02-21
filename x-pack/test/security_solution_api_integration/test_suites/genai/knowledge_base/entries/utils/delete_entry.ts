@@ -45,7 +45,10 @@ export const deleteEntry = async ({
   space?: string;
   expectedHttpCode?: number;
 }): Promise<DeleteKnowledgeBaseEntryResponse> => {
-  const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID, space).replace('{id}', params.id);
+  const route = routeWithNamespace(
+    ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
+    space
+  ).replace('{id}', params.id);
   let request = (user ? supertestWithoutAuth : supertest)
     .delete(route)
     .set('kbn-xsrf', 'true')

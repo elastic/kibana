@@ -130,11 +130,11 @@ export const transformToUpdateSchema = ({
     users: global
       ? []
       : [
-        {
-          id: user.profile_uid,
-          name: user.username,
-        },
-      ],
+          {
+            id: user.profile_uid,
+            name: user.username,
+          },
+        ],
   };
 
   if (entry.type === 'index') {
@@ -200,11 +200,11 @@ export const transformToCreateSchema = ({
     users: global
       ? []
       : [
-        {
-          id: user.profile_uid,
-          name: user.username,
-        },
-      ],
+          {
+            id: user.profile_uid,
+            name: user.username,
+          },
+        ],
   };
 
   if (entry.type === 'index') {

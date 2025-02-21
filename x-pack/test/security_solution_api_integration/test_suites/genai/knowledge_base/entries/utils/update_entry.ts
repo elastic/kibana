@@ -44,7 +44,10 @@ export const updateEntry = async ({
   user?: User;
   expectedHttpCode?: number;
 }): Promise<KnowledgeBaseEntryResponse> => {
-  let route = routeWithNamespace(ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID, space).replace('{id}', entry.id);
+  const route = routeWithNamespace(
+    ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
+    space
+  ).replace('{id}', entry.id);
 
   let request = (user ? supertestWithoutAuth : supertest)
     .put(route)
@@ -55,9 +58,7 @@ export const updateEntry = async ({
     request = request.auth(user.username, user.password);
   }
 
-  const response = await request
-    .send(entry)
-    .expect(expectedHttpCode);
+  const response = await request.send(entry).expect(expectedHttpCode);
 
   return response.body;
 };

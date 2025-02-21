@@ -211,7 +211,12 @@ export default ({ getService }: FtrProviderContext) => {
             })
           )
         );
-        const entry = await getEntry({ supertest, supertestWithoutAuth, params: { id: createdEntries[0].id }, log });
+        const entry = await getEntry({
+          supertest,
+          supertestWithoutAuth,
+          params: { id: createdEntries[0].id },
+          log,
+        });
 
         expect(removeServerGeneratedProperties(entry)).toEqual(globalDocumentEntry);
       });
@@ -233,8 +238,13 @@ export default ({ getService }: FtrProviderContext) => {
         let entry;
 
         try {
-          entry = await getEntry({ supertest, supertestWithoutAuth, params: { id: createdEntries[0].id }, log });
-        } catch (e) { }
+          entry = await getEntry({
+            supertest,
+            supertestWithoutAuth,
+            params: { id: createdEntries[0].id },
+            log,
+          });
+        } catch (e) {}
 
         expect(entry).toBeUndefined();
       });
@@ -261,9 +271,7 @@ export default ({ getService }: FtrProviderContext) => {
           text: 'This is a sample of updated document entry',
         };
 
-        expect(response).toMatchObject(
-          expectedDocumentEntry
-        );
+        expect(response).toMatchObject(expectedDocumentEntry);
       });
 
       it('should not update private document entry created by another user', async () => {
@@ -311,9 +319,7 @@ export default ({ getService }: FtrProviderContext) => {
           text: 'This is a sample of updated global document entry',
         };
 
-        expect(response).toMatchObject(
-          expectedDocumentEntry
-        );
+        expect(response).toMatchObject(expectedDocumentEntry);
       });
 
       it('should update own global document entry and make it private', async () => {
@@ -337,9 +343,7 @@ export default ({ getService }: FtrProviderContext) => {
           text: 'This is a sample of updated global document entry',
         };
 
-        expect(response).toMatchObject(
-          expectedDocumentEntry
-        );
+        expect(response).toMatchObject(expectedDocumentEntry);
       });
 
       it('should update global document entry created by another user', async () => {
@@ -358,7 +362,7 @@ export default ({ getService }: FtrProviderContext) => {
           supertest,
           supertestWithoutAuth,
           log,
-          entry: updatedDocumentEntry
+          entry: updatedDocumentEntry,
         });
 
         const expectedDocumentEntry = {
@@ -366,9 +370,7 @@ export default ({ getService }: FtrProviderContext) => {
           text: 'This is a sample of updated global document entry',
         };
 
-        expect(response).toMatchObject(
-          expectedDocumentEntry
-        );
+        expect(response).toMatchObject(expectedDocumentEntry);
       });
 
       it('should update own private document even if user does not have `manage_global_knowledge_base` privileges', async () => {
@@ -398,9 +400,7 @@ export default ({ getService }: FtrProviderContext) => {
           text: 'This is a sample of updated document entry',
         };
 
-        expect(response).toMatchObject(
-          expectedDocumentEntry
-        );
+        expect(response).toMatchObject(expectedDocumentEntry);
       });
 
       it('should not update global document if user does not have `manage_global_knowledge_base` privileges', async () => {

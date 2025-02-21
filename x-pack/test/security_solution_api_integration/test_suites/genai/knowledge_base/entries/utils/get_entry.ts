@@ -43,7 +43,10 @@ export const getEntry = async ({
   params: ReadKnowledgeBaseEntryRequestParamsInput;
   space?: string;
 }): Promise<ReadKnowledgeBaseEntryResponse> => {
-  const route = routeWithNamespace(ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID, space).replace('{id}', params.id);
+  const route = routeWithNamespace(
+    ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
+    space
+  ).replace('{id}', params.id);
   const request = user ? supertestWithoutAuth.auth(user.username, user.password) : supertest;
   const response = await request
     .get(route)
