@@ -41,6 +41,7 @@ export const renderWithProviders = (
   return rtlRender;
 };
 
+// legacy enzyme usage: remove when all tests are migrated to @testing-library/react
 export const mountWithProviders = (component: React.ReactElement, options?: MountRendererProps) => {
   const { wrappingComponent, wrappingComponentProps } = options || {};
 
