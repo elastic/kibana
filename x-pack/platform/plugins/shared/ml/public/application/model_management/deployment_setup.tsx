@@ -951,7 +951,7 @@ export const getUserInputModelDeploymentParamsProvider =
                 modelId={modelId}
                 onConfigChange={(config) => {
                   modalSession.close();
-                  console.log('config: ', config);
+
                   resolve(config);
                 }}
                 onClose={() => {
