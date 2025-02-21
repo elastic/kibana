@@ -49,10 +49,10 @@ export const KnowledgeBaseEntryErrorSchema = z
   .strict();
 
 /**
- * Knowledge Base resource name for grouping entries, e.g. 'esql', 'user', etc
+ * Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc
  */
 export type KnowledgeBaseResource = z.infer<typeof KnowledgeBaseResource>;
-export const KnowledgeBaseResource = z.enum(['esql', 'user']);
+export const KnowledgeBaseResource = z.enum(['security_labs', 'user']);
 export type KnowledgeBaseResourceEnum = typeof KnowledgeBaseResource.enum;
 export const KnowledgeBaseResourceEnum = KnowledgeBaseResource.enum;
 
@@ -104,7 +104,7 @@ export const BaseDefaultableFields = z.object({
   /**
    * Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
    */
-  users: z.array(User).optional(),
+  users: z.array(User).nullable().optional(),
 });
 
 export type BaseCreateProps = z.infer<typeof BaseCreateProps>;
@@ -118,7 +118,14 @@ export const BaseUpdateProps = BaseCreateProps.partial().merge(
 );
 
 export type BaseResponseProps = z.infer<typeof BaseResponseProps>;
-export const BaseResponseProps = BaseRequiredFields.merge(BaseDefaultableFields.required());
+export const BaseResponseProps = BaseRequiredFields.merge(BaseDefaultableFields.required()).merge(
+  z.object({
+    /**
+     * Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
+     */
+    users: z.array(User),
+  })
+);
 
 export type ResponseFields = z.infer<typeof ResponseFields>;
 export const ResponseFields = z.object({

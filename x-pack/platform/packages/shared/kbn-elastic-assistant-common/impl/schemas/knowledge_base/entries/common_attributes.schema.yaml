@@ -96,6 +96,7 @@ components:
           description: Kibana Space, defaults to 'default' space
         users:
           type: array
+          nullable: true
           description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
           items:
             $ref: "../../common_attributes.schema.yaml#/components/schemas/User"
@@ -124,6 +125,15 @@ components:
         - $ref: "#/components/schemas/BaseRequiredFields"
         - $ref: "#/components/schemas/BaseDefaultableFields"
           x-modify: required
+        - type: object
+          properties:
+            users:
+              type: array
+              description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
+              items:
+                $ref: "../../common_attributes.schema.yaml#/components/schemas/User"
+          required:
+            - users
 
     ResponseFields:
       type: object
@@ -164,10 +174,10 @@ components:
         - $ref: "#/components/schemas/ResponseFields"
 
     KnowledgeBaseResource:
-      description: Knowledge Base resource name for grouping entries, e.g. 'esql', 'user', etc
+      description: Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc
       type: string
       enum:
-        - esql
+        - security_labs
         - user
 
     ###########

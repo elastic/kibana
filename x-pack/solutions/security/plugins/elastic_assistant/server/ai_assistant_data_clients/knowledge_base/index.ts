@@ -443,10 +443,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     const created =
       docsCreated.length > 0
         ? await this.findDocuments<EsKnowledgeBaseEntrySchema>({
-            page: 1,
-            perPage: 10000,
-            filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
-          })
+          page: 1,
+          perPage: 10000,
+          filter: docsCreated.map((c) => `_id:${c}`).join(' OR '),
+        })
         : undefined;
     // Intentionally no telemetry here - this path only used to install security docs
     // Plans to make this function private in a different PR so no user entry ever is created in this path
@@ -722,32 +722,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
 
     await validateDocumentsModification(this, authenticatedUser, [knowledgeBaseEntry.id], 'update');
-
-    const userFilter = getKBUserFilter(authenticatedUser);
-    const entries = await this.findDocuments<EsKnowledgeBaseEntrySchema>({
-      page: 1,
-      perPage: 1,
-      filter: `_id:"${knowledgeBaseEntry.id}" AND ${userFilter}`,
-    });
-
-    const existingEntry = transformESSearchToKnowledgeBaseEntry(entries.data)?.[0];
-
-    if (existingEntry?.users?.length === 0 && knowledgeBaseEntry?.users?.length) {
-      let response;
-      let errors;
-      try {
-        response = await this.createKnowledgeBaseEntry({
-          auditLogger,
-          knowledgeBaseEntry,
-          global: false,
-          telemetry,
-        });
-      } catch (e) {
-        errors = e;
-      }
-
-      return { errors, updatedEntry: response };
-    }
 
     this.options.logger.debug(
       () => `Updating Knowledge Base Entry:\n ${JSON.stringify(knowledgeBaseEntry, null, 2)}`

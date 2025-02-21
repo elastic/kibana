@@ -130,11 +130,11 @@ export const transformToUpdateSchema = ({
     users: global
       ? []
       : [
-          {
-            id: user.profile_uid,
-            name: user.username,
-          },
-        ],
+        {
+          id: user.profile_uid,
+          name: user.username,
+        },
+      ],
   };
 
   if (entry.type === 'index') {
@@ -142,6 +142,7 @@ export const transformToUpdateSchema = ({
     return {
       ...base,
       ...restEntry,
+      users: restEntry.users ?? base.users,
       query_description: queryDescription,
       input_schema:
         entry.inputSchema?.map((schema) => ({
@@ -199,11 +200,11 @@ export const transformToCreateSchema = ({
     users: global
       ? []
       : [
-          {
-            id: user.profile_uid,
-            name: user.username,
-          },
-        ],
+        {
+          id: user.profile_uid,
+          name: user.username,
+        },
+      ],
   };
 
   if (entry.type === 'index') {
@@ -211,6 +212,7 @@ export const transformToCreateSchema = ({
     return {
       ...base,
       ...restEntry,
+      users: restEntry.users ?? base.users,
       query_description: queryDescription,
       input_schema:
         entry.inputSchema?.map((schema) => ({

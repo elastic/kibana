@@ -736,6 +736,14 @@ paths:
       description: Update a Knowledge Base Entry
       operationId: UpdateKnowledgeBaseEntry
       parameters:
+        - description: >-
+            Whether to duplicate the entry on privacy change. Works only when
+            making global entry private.
+          in: query
+          name: duplicate_on_privacy_change
+          required: false
+          schema:
+            type: boolean
         - description: The Knowledge Base Entry's `id` value
           in: path
           name: id
@@ -1313,6 +1321,7 @@ components:
                 current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/User'
+              nullable: true
               type: array
           required:
             - name
@@ -1336,6 +1345,7 @@ components:
                 current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/User'
+              nullable: true
               type: array
           required:
             - name
@@ -1392,6 +1402,7 @@ components:
                 current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/User'
+              nullable: true
               type: array
           required:
             - id
@@ -1472,6 +1483,7 @@ components:
                 current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/User'
+              nullable: true
               type: array
           required:
             - name
@@ -1495,6 +1507,7 @@ components:
                 current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/User'
+              nullable: true
               type: array
           required:
             - name
@@ -1564,6 +1577,7 @@ components:
                 current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/User'
+              nullable: true
               type: array
           required:
             - id
