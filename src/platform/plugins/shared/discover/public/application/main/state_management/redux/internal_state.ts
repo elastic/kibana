@@ -19,7 +19,11 @@ import {
 } from '@reduxjs/toolkit';
 import type { DiscoverServices } from '../../../../build_services';
 import type { RuntimeStateManager } from './runtime_state';
-import type { DiscoverInternalState, InternalStateDataRequestParams } from './types';
+import {
+  LoadingStatus,
+  type DiscoverInternalState,
+  type InternalStateDataRequestParams,
+} from './types';
 
 const initialState: DiscoverInternalState = {
   dataViewId: undefined,
@@ -35,6 +39,18 @@ const initialState: DiscoverInternalState = {
     columns: false,
     rowHeight: false,
     breakdownField: false,
+  },
+  documentsRequest: {
+    loadingStatus: LoadingStatus.Uninitialized,
+    result: [],
+  },
+  totalHitsRequest: {
+    loadingStatus: LoadingStatus.Uninitialized,
+    result: 0,
+  },
+  chartRequest: {
+    loadingStatus: LoadingStatus.Uninitialized,
+    result: {},
   },
 };
 
