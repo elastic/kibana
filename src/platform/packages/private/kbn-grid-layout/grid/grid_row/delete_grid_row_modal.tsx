@@ -47,11 +47,7 @@ export const DeleteGridRowModal = ({
       <EuiModalBody>
         {i18n.translate('kbnGridLayout.deleteGridRowModal.body', {
           defaultMessage:
-            'Are you sure you want to remove this section and its {panelCount} {panelCount, plural, one {panel} other {panels}}?',
-          values: {
-            panelCount: Object.keys(gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels)
-              .length,
-          },
+            'Choose to remove the section, including its contents, or only the section.',
         })}
       </EuiModalBody>
       <EuiModalFooter>
@@ -67,19 +63,6 @@ export const DeleteGridRowModal = ({
         <EuiButton
           onClick={() => {
             setDeleteModalVisible(false);
-            const newLayout = deleteRow(gridLayoutStateManager.gridLayout$.getValue(), rowIndex);
-            gridLayoutStateManager.gridLayout$.next(newLayout);
-          }}
-          fill
-          color="danger"
-        >
-          {i18n.translate('kbnGridLayout.deleteGridRowModal.confirmDeleteAllPanels', {
-            defaultMessage: 'Yes',
-          })}
-        </EuiButton>
-        <EuiButton
-          onClick={() => {
-            setDeleteModalVisible(false);
             let newLayout = movePanelsToRow(
               gridLayoutStateManager.gridLayout$.getValue(),
               rowIndex,
@@ -88,10 +71,29 @@ export const DeleteGridRowModal = ({
             newLayout = deleteRow(newLayout, rowIndex);
             gridLayoutStateManager.gridLayout$.next(newLayout);
           }}
-          fill
+          color="danger"
         >
           {i18n.translate('kbnGridLayout.deleteGridRowModal.confirmDeleteSection', {
             defaultMessage: 'Delete section only',
+          })}
+        </EuiButton>
+        <EuiButton
+          onClick={() => {
+            setDeleteModalVisible(false);
+            const newLayout = deleteRow(gridLayoutStateManager.gridLayout$.getValue(), rowIndex);
+            gridLayoutStateManager.gridLayout$.next(newLayout);
+          }}
+          fill
+          color="danger"
+        >
+          {i18n.translate('kbnGridLayout.deleteGridRowModal.confirmDeleteAllPanels', {
+            defaultMessage:
+              'Delete section and {panelCount} {panelCount, plural, one {panel} other {panels}}',
+            values: {
+              panelCount: Object.keys(
+                gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels
+              ).length,
+            },
           })}
         </EuiButton>
       </EuiModalFooter>
