@@ -318,8 +318,8 @@ src/core/packages/status/server-internal @elastic/kibana-core
 src/core/packages/status/server-mocks @elastic/kibana-core
 src/core/packages/test-helpers/deprecations-getters @elastic/kibana-core
 src/core/packages/test-helpers/http-setup-browser @elastic/kibana-core
-src/dev/packages/core-test-helpers-kbn-server @elastic/kibana-core
-src/dev/packages/core-test-helpers-model-versions @elastic/kibana-core
+src/core/test-helpers/kbn-server @elastic/kibana-core
+src/core/test-helpers/model-versions @elastic/kibana-core
 src/core/packages/test-helpers/so-type-serializer @elastic/kibana-core
 src/core/packages/test-helpers/test-utils @elastic/kibana-core
 src/core/packages/theme/browser @elastic/kibana-core
