@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     log.debug('Checking no error labels');
     await dashboardExpect.noErrorEmbeddablesPresent();
     log.debug('Checking charts rendered');
-    await elasticChart.waitForRenderComplete(visualizationContainer ?? 'lnsVisualizationContainer');
+    await elasticChart.waitForRenderComplete(visualizationContainer ?? 'lnsDataTableContainer');
     log.debug('Checking saved searches rendered');
     await dashboardExpect.savedSearchRowCount(11);
     log.debug('Checking input controls rendered');
