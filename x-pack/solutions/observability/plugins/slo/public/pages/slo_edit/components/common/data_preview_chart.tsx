@@ -24,11 +24,10 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
   EuiLoadingChart,
   EuiPanel,
   EuiSpacer,
-  EuiTitle,
+  EuiTitle
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -59,8 +58,7 @@ export function DataPreviewChart({
   thresholdColor,
   thresholdMessage,
   ignoreMoreThan100,
-}: // end specific timeslice metric indicator type
-DataPreviewChartProps) {
+}: DataPreviewChartProps) {
   const { watch, getFieldState, formState, getValues } = useFormContext<CreateSLOForm>();
   const { charts, uiSettings } = useKibana().services;
   const { isIndicatorSectionValid } = useSectionFormValidation({
@@ -76,13 +74,14 @@ DataPreviewChartProps) {
   });
 
   const indicator = watch('indicator');
+  const groupBy = watch('groupBy');
 
   const {
     data: previewData,
-    isLoading: isPreviewLoading,
+    isLoading,
     isSuccess,
     isError,
-  } = useDebouncedGetPreviewData(isIndicatorSectionValid, indicator, range);
+  } = useDebouncedGetPreviewData(isIndicatorSectionValid, indicator, range, groupBy);
 
   const isMoreThan100 =
     !ignoreMoreThan100 &&
@@ -224,10 +223,10 @@ DataPreviewChartProps) {
       )}
       <EuiFormRow fullWidth>
         <EuiPanel hasBorder={true} hasShadow={false} style={{ minHeight: 194 }}>
-          {(isPreviewLoading || isError) && (
+          {(isLoading || isError) && (
             <EuiFlexGroup justifyContent="center" alignItems="center" style={{ height: 160 }}>
               <EuiFlexItem grow={false}>
-                {isPreviewLoading && <EuiLoadingChart size="m" mono />}
+                {isLoading && <EuiLoadingChart size="m" mono />}
                 {isError && (
                   <span>
                     {i18n.translate('xpack.slo.sloEdit.dataPreviewChart.errorMessage', {
@@ -246,7 +245,14 @@ DataPreviewChartProps) {
                 body={({ items }) => {
                   const firstItem = items[0];
                   const events = firstItem.datum.events;
-                  const rows = [items[0]];
+                  const rows = [
+                    {
+                      ...items[0],
+                      label: i18n.translate('xpack.slo.sloEdit.dataPreviewChart.sliLabel', {
+                        defaultMessage: 'SLI',
+                      }),
+                    },
+                  ];
                   if (events) {
                     rows.push({
                       ...firstItem,
@@ -271,31 +277,16 @@ DataPreviewChartProps) {
               />
               <Settings
                 baseTheme={baseTheme}
-                showLegend={false}
-                theme={[
-                  {
-                    lineSeriesStyle: {
-                      point: { visible: 'never' },
-                    },
-                  },
-                ]}
-                noResults={
-                  <EuiIcon
-                    type="visualizeApp"
-                    size="l"
-                    color="subdued"
-                    title={i18n.translate('xpack.slo.dataPreviewChart.noResultsLabel', {
-                      defaultMessage: 'no results',
-                    })}
-                  />
-                }
+                showLegend={true}
+                legendPosition={Position.Right}
+                theme={[{ lineSeriesStyle: { point: { visible: 'never' } } }]}
                 locale={i18n.getLocale()}
               />
 
               {annotation}
 
               <Axis
-                id="y-axis"
+                id="value"
                 title={i18n.translate('xpack.slo.sloEdit.dataPreviewChart.yTitle', {
                   defaultMessage: 'SLI',
                 })}
@@ -304,10 +295,11 @@ DataPreviewChartProps) {
                 tickFormat={(d) => numeral(d).format(numberFormat)}
                 domain={domain}
               />
-
               <Axis
                 id="time"
-                title={LABEL}
+                title={i18n.translate('xpack.slo.sloEdit.dataPreviewChart.xTitle', {
+                  defaultMessage: 'Last 24 hours',
+                })}
                 tickFormat={(d) => moment(d).format(dateFormat)}
                 position={Position.Bottom}
                 timeAxisLayerCount={2}
@@ -324,8 +316,9 @@ DataPreviewChartProps) {
                   },
                 }}
               />
+
               <AreaSeries
-                id="SLI"
+                id="All groups"
                 xScaleType={ScaleType.Time}
                 yScaleType={ScaleType.Linear}
                 xAccessor="date"
@@ -336,6 +329,24 @@ DataPreviewChartProps) {
                   events: datum.events,
                 }))}
               />
+
+              {Object.keys(previewData?.groups ?? {}).map((group) => (
+                <AreaSeries
+                  key={group}
+                  id={group}
+                  xScaleType={ScaleType.Time}
+                  yScaleType={ScaleType.Linear}
+                  xAccessor="date"
+                  yAccessors={['value']}
+                  // stackAccessors={[0]}
+                  // @ts-ignore
+                  data={previewData!.groups[group].map((datum) => ({
+                    date: new Date(datum.date).getTime(),
+                    value: datum.sliValue && datum.sliValue >= 0 ? datum.sliValue : null,
+                    events: datum.events,
+                  }))}
+                />
+              ))}
             </Chart>
           )}
         </EuiPanel>
@@ -343,7 +354,3 @@ DataPreviewChartProps) {
     </EuiFlexItem>
   );
 }
-
-const LABEL = i18n.translate('xpack.slo.sloEdit.dataPreviewChart.xTitle', {
-  defaultMessage: 'Last 24 hours',
-});

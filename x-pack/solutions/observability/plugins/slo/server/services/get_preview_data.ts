@@ -850,7 +850,7 @@ export class GetPreviewData {
         remoteName: params.remoteName,
         groupings: params.groupings,
         interval: `${bucketSize}m`,
-        groupBy: params.groupBy,
+        groupBy: params.groupBy?.filter((value) => value !== ALL_VALUE),
       };
 
       const type = params.indicator.type;
