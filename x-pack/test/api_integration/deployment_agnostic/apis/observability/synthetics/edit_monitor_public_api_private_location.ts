@@ -5,63 +5,78 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import rawExpect from 'expect';
+import { v4 as uuidv4 } from 'uuid';
 import { omit } from 'lodash';
-
+import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import moment from 'moment';
 import { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
 import { LOCATION_REQUIRED_ERROR } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/monitor_validation';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
-import { PrivateLocationTestService } from './services/private_location_test_service';
+import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
+import { PrivateLocationTestService } from '../../../services/synthetics_private_location';
 
-export const editMonitorAPIHelper = async (
-  supertestAPI: any,
-  monitorId: string,
-  monitor: any,
-  statusCode = 200
-) => {
-  const result = await supertestAPI
-    .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + `/${monitorId}`)
-    .set('kbn-xsrf', 'true')
-    .send(monitor);
-
-  expect(result.status).eql(statusCode, JSON.stringify(result.body));
-
-  if (statusCode === 200) {
-    const { created_at: createdAt, updated_at: updatedAt, id, config_id: configId } = result.body;
-    expect(id).not.empty();
-    expect(configId).not.empty();
-    expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
-    return {
-      rawBody: result.body,
-      body: {
-        ...omit(result.body, ['created_at', 'updated_at', 'id', 'config_id', 'form_monitor_type']),
-      },
-    };
-  }
-  return result.body;
-};
-
-export default function ({ getService }: FtrProviderContext) {
-  describe('EditMonitorsPublicAPI', function () {
-    this.tags('skipCloud');
-
-    const supertestAPI = getService('supertest');
+export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
+  describe('EditMonitorsPublicAPI - Private Location', function () {
+    const supertestAPI = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
+    const samlAuth = getService('samlAuth');
     const testPrivateLocations = new PrivateLocationTestService(getService);
+    let editorUser: RoleCredentials;
+    let privateLocation1: PrivateLocation;
+    let privateLocation2: PrivateLocation;
 
     async function addMonitorAPI(monitor: any, statusCode: number = 200) {
-      return await addMonitorAPIHelper(supertestAPI, monitor, statusCode);
+      return await addMonitorAPIHelper(supertestAPI, monitor, statusCode, editorUser, samlAuth);
     }
 
     async function editMonitorAPI(id: string, monitor: any, statusCode: number = 200) {
-      return await editMonitorAPIHelper(supertestAPI, id, monitor, statusCode);
+      return await editMonitorAPIHelper(id, monitor, statusCode);
+    }
+
+    async function editMonitorAPIHelper(monitorId: string, monitor: any, statusCode = 200) {
+      const result = await supertestAPI
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + `/${monitorId}`)
+        .set(editorUser.apiKeyHeader)
+        .set(samlAuth.getInternalRequestHeader())
+        .send(monitor);
+
+      expect(result.status).eql(statusCode, JSON.stringify(result.body));
+
+      if (statusCode === 200) {
+        const {
+          created_at: createdAt,
+          updated_at: updatedAt,
+          id,
+          config_id: configId,
+        } = result.body;
+        expect(id).not.empty();
+        expect(configId).not.empty();
+        expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+        return {
+          rawBody: result.body,
+          body: {
+            ...omit(result.body, [
+              'created_at',
+              'updated_at',
+              'id',
+              'config_id',
+              'form_monitor_type',
+            ]),
+          },
+        };
+      }
+      return result.body;
     }
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      editorUser = await samlAuth.createM2mApiKeyWithRoleScope('editor');
+      await testPrivateLocations.installSyntheticsPackage();
+      privateLocation1 = await testPrivateLocations.addTestPrivateLocation();
+      privateLocation2 = await testPrivateLocations.addTestPrivateLocation();
     });
 
     after(async () => {
@@ -70,10 +85,11 @@ export default function ({ getService }: FtrProviderContext) {
     let monitorId = 'test-id';
 
     const defaultFields = DEFAULT_FIELDS.http;
+
     it('adds test monitor', async () => {
       const monitor = {
         type: 'http',
-        locations: ['dev'],
+        private_locations: [privateLocation1.id],
         url: 'https://www.google.com',
       };
       const { body: result, rawBody } = await addMonitorAPI(monitor);
@@ -83,7 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
         omitMonitorKeys({
           ...defaultFields,
           ...monitor,
-          locations: [localLoc],
+          locations: [privateLocation1],
           name: 'https://www.google.com',
         })
       );
@@ -114,8 +130,8 @@ export default function ({ getService }: FtrProviderContext) {
         { type: 'http', locations: ['mars'] },
         400
       );
-      expect(message).eql(
-        "Invalid locations specified. Elastic managed Location(s) 'mars' not found. Available locations are 'dev|dev2'"
+      rawExpect(message).toContain(
+        "Invalid locations specified. Elastic managed Location(s) 'mars' not found."
       );
     });
 
@@ -140,24 +156,13 @@ export default function ({ getService }: FtrProviderContext) {
         },
         400
       );
-      expect(result.message).eql(
-        "Invalid locations specified. Elastic managed Location(s) 'mars' not found. Available locations are 'dev|dev2' Private Location(s) 'moon' not found. No private location available to use."
-      );
+      rawExpect(result.message).toContain("Private Location(s) 'moon' not found.");
     });
-
-    const localLoc = {
-      id: 'dev',
-      label: 'Dev Service',
-      geo: {
-        lat: 0,
-        lon: 0,
-      },
-      isServiceManaged: true,
-    };
 
     it('throws an error if empty locations', async () => {
       const monitor = {
         locations: [],
+        private_locations: [],
       };
       const { message } = await editMonitorAPI(monitorId, monitor, 400);
 
@@ -184,9 +189,9 @@ export default function ({ getService }: FtrProviderContext) {
     const updates: any = {};
 
     it('can change name of monitor', async () => {
-      updates.name = 'updated name';
+      updates.name = `updated name ${uuidv4()}`;
       const monitor = {
-        name: 'updated name',
+        name: updates.name,
       };
       const { body: result } = await editMonitorAPI(monitorId, monitor);
 
@@ -195,7 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
           ...defaultFields,
           ...monitor,
           ...updates,
-          locations: [localLoc],
+          locations: [privateLocation1],
           revision: 2,
           url: 'https://www.google.com',
         })
@@ -203,27 +208,35 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('prevents duplicate name of monitor', async () => {
+      const name = `test name ${uuidv4()}`;
       const monitor = {
+        name,
         type: 'http',
-        locations: ['dev'],
+        private_locations: [privateLocation1.id],
         url: 'https://www.google.com',
       };
-      const { body: result, rawBody } = await addMonitorAPI(monitor);
+      // create one monitor with one name
+      await addMonitorAPI(monitor);
+      // create another monitor with a different name
+      const { body: result, rawBody } = await addMonitorAPI({
+        ...monitor,
+        name: 'test name',
+      });
       const newMonitorId = rawBody.id;
 
       expect(result).eql(
         omitMonitorKeys({
           ...defaultFields,
           ...monitor,
-          locations: [localLoc],
-          name: 'https://www.google.com',
+          locations: [privateLocation1],
+          name: 'test name',
         })
       );
 
       const editResult = await editMonitorAPI(
         newMonitorId,
         {
-          name: 'updated name',
+          name,
         },
         400
       );
@@ -231,21 +244,16 @@ export default function ({ getService }: FtrProviderContext) {
       expect(editResult).eql({
         statusCode: 400,
         error: 'Bad Request',
-        message: 'Monitor name must be unique, "updated name" already exists.',
-        attributes: { details: 'Monitor name must be unique, "updated name" already exists.' },
+        message: `Monitor name must be unique, "${name}" already exists.`,
+        attributes: {
+          details: `Monitor name must be unique, "${name}" already exists.`,
+        },
       });
     });
 
-    let pvtLoc: PrivateLocation;
-
-    it('can add private location to existing monitor', async () => {
-      await testPrivateLocations.installSyntheticsPackage();
-      pvtLoc = await testPrivateLocations.addPrivateLocation();
-
-      expect(pvtLoc).not.empty();
-
+    it('can add a second private location to existing monitor', async () => {
       const monitor = {
-        private_locations: [pvtLoc.id],
+        private_locations: [privateLocation1.id, privateLocation2.id],
       };
 
       const { body: result } = await editMonitorAPI(monitorId, monitor);
@@ -256,29 +264,14 @@ export default function ({ getService }: FtrProviderContext) {
           ...updates,
           revision: 3,
           url: 'https://www.google.com',
-          locations: [localLoc, omit(pvtLoc, 'spaces')],
-        })
-      );
-
-      const { body: result2 } = await editMonitorAPI(monitorId, {
-        locations: [pvtLoc],
-      });
-
-      expect(result2).eql(
-        omitMonitorKeys({
-          ...defaultFields,
-          ...updates,
-          revision: 4,
-          url: 'https://www.google.com',
-          locations: [omit(pvtLoc, 'spaces')],
+          locations: [omit(privateLocation1, 'spaces'), omit(privateLocation2, 'spaces')],
         })
       );
     });
 
     it('can remove private location from existing monitor', async () => {
-      let monitor: any = {
-        locations: [localLoc.id],
-        private_locations: [pvtLoc.id],
+      const monitor = {
+        private_locations: [privateLocation2.id],
       };
 
       const { body: result } = await editMonitorAPI(monitorId, monitor);
@@ -287,25 +280,9 @@ export default function ({ getService }: FtrProviderContext) {
         omitMonitorKeys({
           ...defaultFields,
           ...updates,
-          revision: 5,
+          revision: 4,
           url: 'https://www.google.com',
-          locations: [localLoc, omit(pvtLoc, 'spaces')],
-        })
-      );
-
-      monitor = {
-        private_locations: [],
-      };
-
-      const { body: result1 } = await editMonitorAPI(monitorId, monitor);
-
-      expect(result1).eql(
-        omitMonitorKeys({
-          ...defaultFields,
-          ...updates,
-          revision: 6,
-          url: 'https://www.google.com',
-          locations: [localLoc],
+          locations: [omit(privateLocation2, 'spaces')],
         })
       );
     });
