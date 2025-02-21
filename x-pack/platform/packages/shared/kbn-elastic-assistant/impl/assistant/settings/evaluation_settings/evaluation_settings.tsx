@@ -211,8 +211,8 @@ export const EvaluationSettings: React.FC = React.memo(() => {
       runName,
       size: Number(size),
       screenContext: {
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-      }
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      },
     };
     performEvaluation(evalParams);
   }, [
