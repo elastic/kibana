@@ -17,7 +17,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import moment from 'moment';
-import { EuiCallOut, UseEuiTheme, euiBreakpoint, useEuiBreakpoint } from '@elastic/eui';
+import { EuiCallOut, UseEuiTheme, useEuiBreakpoint } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SerializedStyles, css } from '@emotion/react';
 import { LENS_APP_LOCATOR } from '../../common/locator/locator';
@@ -104,10 +104,6 @@ function getSaveButtonMeta({
 }
 
 const NavItemWithDividerStyles = (euiThemeContext: UseEuiTheme) => css`
-  ${euiBreakpoint(euiThemeContext, ['m', 'l', 'xl'])} {
-    margin-right: ${euiThemeContext.euiTheme.size.m};
-    position: relative;
-  }
   ${useEuiBreakpoint(['m', 'l', 'xl'])} {
     margin-right: ${euiThemeContext.euiTheme.size.m};
     position: relative;

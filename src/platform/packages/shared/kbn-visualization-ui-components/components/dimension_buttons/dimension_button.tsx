@@ -75,7 +75,6 @@ function DimensionButtonImpl({
         <EuiFlexItem>
           <EuiToolTip content={message?.content} position="left">
             <EuiLink
-              className="lnsLayerPanel__dimensionLink"
               css={css`
                 width: 100%;
                 &:focus {

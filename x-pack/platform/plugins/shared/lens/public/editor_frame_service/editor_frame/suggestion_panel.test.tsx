@@ -13,7 +13,9 @@ import {
   createExpressionRendererMock,
   DatasourceMock,
   createMockFramePublicAPI,
+  renderWithReduxStore,
 } from '../../mocks';
+import { screen } from '@testing-library/react';
 import { act } from 'react-dom/test-utils';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
 import { SuggestionPanel, SuggestionPanelProps, SuggestionPanelWrapper } from './suggestion_panel';
@@ -32,6 +34,7 @@ import {
   VisualizationState,
 } from '../../state_management';
 import { setChangesApplied } from '../../state_management/lens_slice';
+import { userEvent } from '@testing-library/user-event';
 
 const SELECTORS = {
   APPLY_CHANGES_BUTTON: 'button[data-test-subj="lnsApplyChanges__suggestions"]',
@@ -219,19 +222,15 @@ describe('suggestion_panel', () => {
       expect(getSuggestionsMock).toHaveBeenCalledTimes(1);
     });
 
-    it.skip('should highlight currently active suggestion', async () => {
-      const { instance } = await mountWithProvider(<SuggestionPanel {...defaultProps} />, {
+    it('should select currently active suggestion', async () => {
+      const getSuggestionByName = (name: string) => screen.getByRole('listitem', { name });
+
+      renderWithReduxStore(<SuggestionPanel {...defaultProps} />, undefined, {
         preloadedState,
       });
-      act(() => {
-        instance.find(SELECTORS.SUGGESTION_TILE_BUTTON).at(2).simulate('click');
-      });
-
-      instance.update();
-
-      expect(instance.find(SELECTORS.SUGGESTION_TILE_BUTTON).at(2).prop('className')).toContain(
-        'lnsSuggestionPanel__button-isSelected'
-      );
+      expect(getSuggestionByName('Current visualization')).toHaveAttribute('aria-current', 'true');
+      await userEvent.click(getSuggestionByName('Suggestion1'));
+      expect(getSuggestionByName('Suggestion1')).toHaveAttribute('aria-current', 'true');
     });
 
     it('should rollback suggestion if current panel is clicked', async () => {

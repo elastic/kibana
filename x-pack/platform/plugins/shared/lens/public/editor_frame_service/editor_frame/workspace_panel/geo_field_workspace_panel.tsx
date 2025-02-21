@@ -45,10 +45,7 @@ export function GeoFieldWorkspacePanel(props: Props) {
   }
 
   return (
-    <div
-      className="lnsWorkspacePanelWrapper__pageContentBody  eui-scrollBar"
-      css={pageContentBodyStyles}
-    >
+    <div className="eui-scrollBar" css={pageContentBodyStyles}>
       <EuiText textAlign="center" size="s">
         <div>
           <h2>

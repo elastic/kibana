@@ -129,9 +129,10 @@ const PreviewRenderer = ({
   hasError: boolean;
   onRender: () => void;
 }) => {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   const onErrorMessage = (
-    <div css={suggestionStyles.icon}>
+    <div css={suggestionStyles.icon(euiThemeContext)}>
       <EuiIconTip
         size="xl"
         color="danger"
@@ -277,7 +278,7 @@ const SuggestionPreview = ({
               onRender={onRender}
             />
           ) : (
-            <span css={suggestionStyles.icon}>
+            <span css={suggestionStyles.icon(euiThemeContext)}>
               <EuiIcon size="xxl" type={preview.icon} />
             </span>
           )}
@@ -658,7 +659,7 @@ export function SuggestionPanel({
       }
     >
       <div
-        className="eui-scrollBar lnsSuggestionPanel__suggestions"
+        className="eui-scrollBar"
         data-test-subj="lnsSuggestionsPanel"
         role="list"
         tabIndex={0}

@@ -669,8 +669,15 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
         order={dropProps.order}
       >
         <div
-          className="lnsWorkspacePanelWrapper__pageContentBody eui-scrollBar"
-          css={pageContentBodyStyles}
+          className="eui-scrollBar"
+          css={[
+            pageContentBodyStyles,
+            isFullscreen &&
+              `
+            box-shadow: none;
+            border-radius: 0;
+          `,
+          ]}
         >
           {renderWorkspaceContents()}
         </div>

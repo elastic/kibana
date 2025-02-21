@@ -256,12 +256,7 @@ export function WorkspacePanelWrapper({
             height: 100%;
             position: absolute;
           }
-          ${isFullscreen &&
-          ` margin-bottom: 0;
-            .lnsWorkspacePanelWrapper__pageContentBody {
-              box-shadow: none;
-              border-radius: 0;
-            }`}
+          ${isFullscreen && `margin-bottom: 0;`}
         `}
         color="transparent"
       >
