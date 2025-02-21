@@ -7,7 +7,7 @@
 
 import { UseEuiTheme } from '@elastic/eui';
 
-export const DataPanelStyles = ({ euiTheme }: UseEuiTheme) => {
+export const dataPanelStyles = ({ euiTheme }: UseEuiTheme) => {
   return `
     padding: ${euiTheme.size.base} ${euiTheme.size.base} 0;
     .unifiedFieldListItemButton.kbnFieldButton {

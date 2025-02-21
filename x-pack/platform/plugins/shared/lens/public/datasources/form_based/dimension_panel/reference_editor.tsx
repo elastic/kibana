@@ -31,7 +31,7 @@ import type { FormBasedLayer } from '../types';
 import type { IndexPattern, IndexPatternField, ParamEditorCustomProps } from '../../../types';
 import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import { FormRow } from '../operations/definitions/shared_components';
-import { OperationsButtonStyles } from './dimension_editor';
+import { operationsButtonStyles } from './dimension_editor';
 
 const operationDisplay = getOperationDisplay();
 
@@ -56,7 +56,7 @@ const getFunctionOptions = (
     return {
       label,
       value: operationType,
-      css: OperationsButtonStyles,
+      css: operationsButtonStyles,
       'data-test-subj': `lns-indexPatternDimension-${operationType}${
         isCompatible ? '' : ' incompatible'
       }`,
@@ -204,7 +204,7 @@ export const ReferenceEditor = (props: ReferenceEditorProps) => {
     const brokenFunctionOption = {
       label: selectedOperationType && operationDisplay[selectedOperationType].displayName,
       value: selectedOperationType,
-      css: OperationsButtonStyles,
+      css: operationsButtonStyles,
       'data-test-subj': `lns-indexPatternDimension-${selectedOperationType} incompatible`,
     } as EuiComboBoxOptionOption<string>;
     functionOptions?.push(brokenFunctionOption);

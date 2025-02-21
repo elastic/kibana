@@ -19,7 +19,7 @@ const flyoutOpenCloseAnimation = keyframes`
   }
 `;
 
-export const FlyoutContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
+export const flyoutContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
   border-left: ${euiTheme.border.thin};
   ${useEuiShadow('xl')};
   position: fixed;

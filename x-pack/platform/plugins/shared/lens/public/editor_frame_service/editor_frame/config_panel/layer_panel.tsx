@@ -776,7 +776,7 @@ export function LayerPanel(props: LayerPanelProps) {
         isInlineEditing={isInlineEditing}
         handleClose={closeDimensionEditor}
         panel={
-          <div css={DimensionContainerStyles}>
+          <div css={dimensionContainerStyles}>
             {openColumnGroup &&
               openColumnId &&
               layerDatasource &&
@@ -864,7 +864,7 @@ export function LayerPanel(props: LayerPanelProps) {
   );
 }
 
-const DimensionContainerStyles = ({ euiTheme }: UseEuiTheme) => `
+const dimensionContainerStyles = ({ euiTheme }: UseEuiTheme) => `
     .lnsIndexPatternDimensionEditor--padded {
       padding: ${euiTheme.size.base};
     }

@@ -23,7 +23,7 @@ import { IndexPattern } from '../../../../../types';
 import { updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
 import type { BaseIndexPatternColumn } from '../column_types';
-import { DraggablePopoverButtonStyles, FilterPopover } from './filter_popover';
+import { draggablePopoverButtonStyles, FilterPopover } from './filter_popover';
 import { TermsIndexPatternColumn } from '../terms';
 import { isColumnOfType } from '../helpers';
 
@@ -274,7 +274,7 @@ export const FilterList = ({
                     title={i18n.translate('xpack.lens.indexPattern.filters.clickToEdit', {
                       defaultMessage: 'Click to edit',
                     })}
-                    css={DraggablePopoverButtonStyles}
+                    css={draggablePopoverButtonStyles}
                   >
                     {filter.label || (filter.input.query as string) || defaultLabel}
                   </EuiLink>

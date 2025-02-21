@@ -103,11 +103,11 @@ export const MessageList = ({
       isOpen={isPopoverOpen}
       closePopover={closePopover}
     >
-      <ul css={WorkspaceWarningListStyles.self} className="eui-yScroll">
+      <ul css={workspaceWarningListStyles.self} className="eui-yScroll">
         {messages.map(({ hidePopoverIcon = false, ...message }, index) => (
           <li
             key={index}
-            css={WorkspaceWarningListStyles.item}
+            css={workspaceWarningListStyles.item}
             data-test-subj={`lens-message-list-${message.severity}`}
           >
             {typeof message.longMessage === 'function' ? (
@@ -116,7 +116,7 @@ export const MessageList = ({
               <EuiFlexGroup
                 gutterSize="s"
                 responsive={false}
-                css={WorkspaceWarningListStyles.textItem}
+                css={workspaceWarningListStyles.textItem}
               >
                 {!hidePopoverIcon && (
                   <EuiFlexItem grow={false}>
@@ -127,7 +127,7 @@ export const MessageList = ({
                     )}
                   </EuiFlexItem>
                 )}
-                <EuiFlexItem grow={1} css={WorkspaceWarningListStyles.description}>
+                <EuiFlexItem grow={1} css={workspaceWarningListStyles.description}>
                   <EuiText size="s">{message.longMessage}</EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -139,7 +139,7 @@ export const MessageList = ({
   );
 };
 
-const WorkspaceWarningListStyles = {
+const workspaceWarningListStyles = {
   self: css`
     max-height: 320px;
     width: 256px;

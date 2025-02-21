@@ -31,7 +31,7 @@ export const HelpPopoverButton = ({
   return (
     <EuiText size="xs">
       <EuiLink onClick={onClick}>
-        <EuiIcon size="s" type="help" css={HelpPopoverStyles.button} />
+        <EuiIcon size="s" type="help" css={helpPopoverStyles.button} />
         {children}
       </EuiLink>
     </EuiText>
@@ -42,14 +42,14 @@ const HelpPopoverContent = ({ title, children }: { title?: string; children: Rea
   return (
     <>
       {title && <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle>}
-      <EuiText className="eui-yScroll" size="s" css={HelpPopoverStyles.content}>
+      <EuiText className="eui-yScroll" size="s" css={helpPopoverStyles.content}>
         {children}
       </EuiText>
     </>
   );
 };
 
-const HelpPopoverStyles = {
+const helpPopoverStyles = {
   button: ({ euiTheme }: UseEuiTheme) => `
     margin-right: ${euiTheme.size.xs};
   `,

@@ -10,7 +10,7 @@ import { TracksOverlays } from '@kbn/presentation-containers';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { InlineFlyoutStyles } from './flyout.styles';
+import { inlineFlyoutStyles } from './flyout.styles';
 
 /**
  * Shared logic to mount the inline config panel
@@ -42,7 +42,7 @@ export function mountInlineEditPanel(
       ),
       {
         className: 'lnsConfigPanel__overlay',
-        css: InlineFlyoutStyles,
+        css: inlineFlyoutStyles,
         size: 's',
         'data-test-subj': 'customizeLens',
         type: 'push',

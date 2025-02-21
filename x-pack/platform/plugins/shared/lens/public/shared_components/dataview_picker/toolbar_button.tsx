@@ -68,7 +68,7 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
       data-test-subj={dataTestSubj}
       className={classes}
       iconSide="right"
-      css={ToolbarButtonStyles}
+      css={toolbarButtonStyles}
       iconType={hasArrow ? 'arrowDown' : ''}
       color="text"
       contentProps={{
@@ -86,7 +86,7 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
   );
 };
 
-const ToolbarButtonStyles = (euiThemeObj: UseEuiTheme) => {
+const toolbarButtonStyles = (euiThemeObj: UseEuiTheme) => {
   const { euiTheme } = euiThemeObj;
   return `
    &.kbnToolbarButton {

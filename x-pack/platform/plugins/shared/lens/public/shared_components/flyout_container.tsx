@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../utils';
-import { FlyoutContainerStyles } from './flyout.styles';
+import { flyoutContainerStyles } from './flyout.styles';
 
 function fromExcludedClickTarget(event: Event) {
   for (
@@ -104,11 +104,11 @@ export function FlyoutContainer({
           role="dialog"
           aria-labelledby="lnsDimensionContainerTitle"
           css={[
-            FlyoutContainerStyles,
+            flyoutContainerStyles,
             css`
               box-shadow: ${isInlineEditing ? 'none !important' : 'inherit'};
             `,
-            DimensionContainerStyles.self,
+            dimensionContainerStyles.self,
           ]}
           onAnimationEnd={() => {
             if (isOpen) {
@@ -119,7 +119,7 @@ export function FlyoutContainer({
             }
           }}
         >
-          <EuiFlyoutHeader hasBorder css={DimensionContainerStyles.header}>
+          <EuiFlyoutHeader hasBorder css={dimensionContainerStyles.header}>
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
               {isInlineEditing && (
                 <EuiFlexItem grow={false}>
@@ -168,7 +168,7 @@ export function FlyoutContainer({
           </div>
 
           {customFooter || (
-            <EuiFlyoutFooter css={DimensionContainerStyles.footer}>
+            <EuiFlyoutFooter css={dimensionContainerStyles.footer}>
               <EuiButtonEmpty
                 flush="left"
                 size="s"
@@ -192,7 +192,7 @@ export function FlyoutContainer({
   );
 }
 
-const DimensionContainerStyles = {
+const dimensionContainerStyles = {
   self: (euiThemeContext: UseEuiTheme) => {
     return `
     // But with custom positioning to keep it within the sidebar contents
