@@ -89,6 +89,7 @@ export function ChatContextMenu({
             key="delete"
             css={css`
               color: ${euiTheme.colors.danger};
+              padding: ${euiTheme.size.s};
             `}
             icon={<EuiIcon type="trash" size="m" color="danger" />}
             onClick={() => {
