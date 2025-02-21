@@ -10,11 +10,11 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { API_VERSIONS } from '../../../../common/constants';
-
 import type { AssetInventoryRoutesDeps } from '../types';
 import { InitEntityStoreRequestBody } from '../../../../common/api/entity_analytics/entity_store/enable.gen';
 import { ASSET_INVENTORY_ENABLE_API_PATH } from '../../../../common/api/asset_inventory/constants';
 import { checkAndInitAssetCriticalityResources } from '../../entity_analytics/asset_criticality/check_and_init_asset_criticality_resources';
+import { checkAssetInventoryEnabled } from '../check_ui_settings';
 
 export const enableAssetInventoryRoute = (
   router: AssetInventoryRoutesDeps['router'],
@@ -42,12 +42,16 @@ export const enableAssetInventoryRoute = (
 
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
-        const secSol = await context.securitySolution;
+
+        if (!(await checkAssetInventoryEnabled(context, logger))) {
+          return response.forbidden();
+        }
 
         try {
           // Criticality resources are required by the Entity Store transforms
           await checkAndInitAssetCriticalityResources(context, logger);
 
+          const secSol = await context.securitySolution;
           const body = await secSol.getAssetInventoryClient().enable(secSol, request.body);
 
           return response.ok({ body });

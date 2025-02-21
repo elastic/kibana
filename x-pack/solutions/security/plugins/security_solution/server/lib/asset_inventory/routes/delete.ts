@@ -11,6 +11,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { ASSET_INVENTORY_DELETE_API_PATH } from '../../../../common/api/asset_inventory/constants';
 import { API_VERSIONS } from '../../../../common/constants';
 import type { AssetInventoryRoutesDeps } from '../types';
+import { checkAssetInventoryEnabled } from '../check_ui_settings';
 
 export const deleteAssetInventoryRoute = (
   router: AssetInventoryRoutesDeps['router'],
@@ -33,8 +34,12 @@ export const deleteAssetInventoryRoute = (
         validate: false,
       },
 
-      async (context, request, response) => {
+      async (context, _request, response) => {
         const siemResponse = buildSiemResponse(response);
+
+        if (!(await checkAssetInventoryEnabled(context, logger))) {
+          return response.forbidden();
+        }
 
         try {
           const secSol = await context.securitySolution;
