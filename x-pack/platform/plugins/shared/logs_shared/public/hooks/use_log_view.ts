@@ -117,8 +117,9 @@ export const useLogView = ({
   const isLoading =
     isLoadingLogView || isResolvingLogView || isLoadingLogViewStatus || isUpdatingLogView;
 
-  const isUninitialized = useSelector(logViewStateService, (state) =>
-    state.matches('uninitialized')
+  const isUninitialized = useSelector(
+    logViewStateService,
+    (state) => state.matches('uninitialized') || state.matches('initializingFromUrl')
   );
 
   const hasFailedLoadingLogView = useSelector(logViewStateService, (state) =>
