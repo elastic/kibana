@@ -30,7 +30,11 @@ import {
   EuiSelectableProps,
   useCurrentEuiBreakpoint,
 } from '@elastic/eui';
-import { ActionConnector, checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared';
+import {
+  ActionConnector,
+  type ActionTypeModel,
+  checkActionFormActionTypeEnabled,
+} from '@kbn/alerts-ui-shared';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { RuleFormParamsErrors } from '../common/types';
@@ -126,7 +130,7 @@ export const RuleActionsConnectorsBody = ({
   const availableConnectors = useMemo(() => {
     return connectors.filter(({ actionTypeId }) => {
       const actionType = connectorTypes.find(({ id }) => id === actionTypeId);
-      let actionTypeModel;
+      let actionTypeModel: ActionTypeModel;
       try {
         actionTypeModel = actionTypeRegistry.get(actionTypeId);
         if (!actionTypeModel) return false;
@@ -349,7 +353,7 @@ export const RuleActionsConnectorsBody = ({
       <EuiFlexGroup direction="column">
         {filteredConnectors.map((connector) => {
           const { id, actionTypeId, name } = connector;
-          let actionTypeModel;
+          let actionTypeModel: ActionTypeModel;
           try {
             actionTypeModel = actionTypeRegistry.get(actionTypeId);
             if (!actionTypeModel) return null;
