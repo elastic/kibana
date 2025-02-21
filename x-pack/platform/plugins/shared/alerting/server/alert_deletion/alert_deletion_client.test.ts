@@ -198,6 +198,7 @@ const mockCreatePointInTimeFinderAsInternalUser = (
           isInactiveAlertsDeletionEnabled: true,
           activeAlertsDeletionThreshold: 1,
           inactiveAlertsDeletionThreshold: 30,
+          categoryIds: ['securitySolution']
         },
         references: [],
         namespaces: ['space-1'],
@@ -296,6 +297,8 @@ describe('AlertDeletionClient', () => {
         'space-1'
       );
 
+      expect(ruleTypeRegistry.getAllTypes).toHaveBeenCalled();
+      expect(ruleTypeRegistry.getAllTypesForCategories).not.toHaveBeenCalled();
       expect(esClient.count).toHaveBeenCalledTimes(1);
       expect(esClient.count).toHaveBeenCalledWith({
         index: ['index1', 'index2'],
@@ -320,6 +323,8 @@ describe('AlertDeletionClient', () => {
         'space-1'
       );
 
+      expect(ruleTypeRegistry.getAllTypes).toHaveBeenCalled();
+      expect(ruleTypeRegistry.getAllTypesForCategories).not.toHaveBeenCalled();
       expect(esClient.count).toHaveBeenCalledTimes(1);
       expect(esClient.count).toHaveBeenCalledWith({
         index: ['index1', 'index2'],
@@ -359,6 +364,33 @@ describe('AlertDeletionClient', () => {
       });
 
       expect(result).toEqual(9);
+    });
+
+    test('should use category IDs if specified', async () => {
+      esClient.count.mockResolvedValue({
+        count: 1,
+        _shards: { failed: 0, successful: 0, total: 0 },
+      });
+      const result = await alertDeletionClient.previewTask(
+        {
+          isActiveAlertsDeletionEnabled: false,
+          isInactiveAlertsDeletionEnabled: true,
+          activeAlertsDeletionThreshold: 1,
+          inactiveAlertsDeletionThreshold: 30,
+          categoryIds: ['observability'],
+        },
+        'space-1'
+      );
+
+      expect(ruleTypeRegistry.getAllTypes).not.toHaveBeenCalled();
+      expect(ruleTypeRegistry.getAllTypesForCategories).toHaveBeenCalledWith(['observability']);
+      expect(esClient.count).toHaveBeenCalledTimes(1);
+      expect(esClient.count).toHaveBeenCalledWith({
+        index: ['index1', 'index2'],
+        query: inactiveAlertsQuery(),
+      });
+
+      expect(result).toEqual(1);
     });
 
     test('should throw error if count query throws error', async () => {
@@ -452,6 +484,10 @@ describe('AlertDeletionClient', () => {
 
       // @ts-ignore - accessing private function for testing
       await alertDeletionClient.runTask(alertDeletionTaskInstance, new AbortController());
+
+      expect(ruleTypeRegistry.getAllTypes).toHaveBeenCalledTimes(2);
+      expect(ruleTypeRegistry.getAllTypesForCategories).toHaveBeenCalledTimes(1);
+      expect(ruleTypeRegistry.getAllTypesForCategories).toHaveBeenCalledWith(['securitySolution']);
 
       // 3 settings with isInactiveAlertsDeletionEnabled = true, should be 3 delete by queries
       expect(esClient.deleteByQuery).toHaveBeenCalledTimes(3);

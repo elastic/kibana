@@ -112,18 +112,19 @@ export class AlertDeletionClient {
     spaceId: string
   ): Promise<number> {
     const esClient = await this.elasticsearchClientPromise;
-    const indices = this.getAlertIndicesAlias(this.ruleTypeRegistry.getAllTypes(), spaceId);
 
     const {
       isActiveAlertsDeletionEnabled,
       isInactiveAlertsDeletionEnabled,
       activeAlertsDeletionThreshold,
       inactiveAlertsDeletionThreshold,
+      categoryIds
     } = settings;
 
-    let numAlertsToBeDeleted = 0;
+    const ruleTypes = categoryIds && categoryIds.length > 0 ? this.ruleTypeRegistry.getAllTypesForCategories(categoryIds) : this.ruleTypeRegistry.getAllTypes();
+    const indices = this.getAlertIndicesAlias(ruleTypes, spaceId);
 
-    // TODO - are we filtering by solution type?
+    let numAlertsToBeDeleted = 0;
 
     if (isActiveAlertsDeletionEnabled) {
       const activeAlertsQuery = getActiveAlertsQuery(activeAlertsDeletionThreshold, spaceId);
@@ -231,19 +232,20 @@ export class AlertDeletionClient {
   ): Promise<{ numAlertsDeleted: number; errors?: string[] }> {
     const esClient = await this.elasticsearchClientPromise;
     const taskManager = await this.taskManagerStartPromise;
-    const indices = this.getAlertIndicesAlias(this.ruleTypeRegistry.getAllTypes(), spaceId);
 
     const {
       isActiveAlertsDeletionEnabled,
       isInactiveAlertsDeletionEnabled,
       activeAlertsDeletionThreshold,
       inactiveAlertsDeletionThreshold,
+      categoryIds
     } = settings;
+
+    const ruleTypes = categoryIds && categoryIds.length > 0 ? this.ruleTypeRegistry.getAllTypesForCategories(categoryIds) : this.ruleTypeRegistry.getAllTypes();
+    const indices = this.getAlertIndicesAlias(ruleTypes, spaceId);
 
     let numAlertsDeleted = 0;
     const errors = [];
-
-    // TODO - are we filtering by solution type?
 
     if (isActiveAlertsDeletionEnabled) {
       const activeAlertsQuery = getActiveAlertsQuery(activeAlertsDeletionThreshold, spaceId);

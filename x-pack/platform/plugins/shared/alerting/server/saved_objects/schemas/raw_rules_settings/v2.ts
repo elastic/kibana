@@ -8,11 +8,28 @@
 import { schema } from '@kbn/config-schema';
 import { rawRulesSettingsSchema as rawRulesSettingsSchemaV1 } from './v1';
 
+const alertDeletionCategoryIdTypes = {
+  OBSERVABILITY: 'observability',
+  SECURITY_SOLUTION: 'securitySolution',
+  MANAGEMENT: 'management',
+} as const;
+
 export const rawRulesSettingsSchema = rawRulesSettingsSchemaV1.extends({
   alertDeletion: schema.maybe(
     schema.object({
       createdAt: schema.string(),
       createdBy: schema.nullable(schema.string()),
+      categoryIds: schema.maybe(
+        schema.nullable(
+          schema.arrayOf(
+            schema.oneOf([
+              schema.literal(alertDeletionCategoryIdTypes.OBSERVABILITY),
+              schema.literal(alertDeletionCategoryIdTypes.SECURITY_SOLUTION),
+              schema.literal(alertDeletionCategoryIdTypes.MANAGEMENT),
+            ])
+          )
+        )
+      ),
       isActiveAlertsDeletionEnabled: schema.boolean(),
       isInactiveAlertsDeletionEnabled: schema.boolean(),
       activeAlertsDeletionThreshold: schema.number({ min: 1, max: 1000 }),
