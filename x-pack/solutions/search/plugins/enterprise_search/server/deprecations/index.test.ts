@@ -15,19 +15,15 @@ jest.mock('@kbn/search-connectors', () => {
     fetchConnectors: () => mockedFetchConnectors(),
   };
 });
-import { DeprecationDetailsMessage, DeprecationsDetails } from '@kbn/core-deprecations-common';
 import { GetDeprecationsContext } from '@kbn/core-deprecations-server';
 
 import { Connector } from '@kbn/search-connectors';
 
 import { ConfigType } from '..';
 
-import indexDeprecatorFxns = require('./pre_eight_index_deprecator');
-
 import {
   getCrawlerDeprecations,
   getEnterpriseSearchNodeDeprecation,
-  getEnterpriseSearchPre8IndexDeprecations,
   getNativeConnectorDeprecations,
 } from '.';
 
@@ -39,11 +35,6 @@ const ctx = {
 const cloud = { baseUrl: 'cloud.elastic.co', deploymentId: '123', cloudId: 'abc' } as CloudSetup;
 const notCloud = {} as CloudSetup;
 const docsUrl = 'example.com';
-
-function getMessageFromDeprecation(details: DeprecationsDetails): string {
-  const message = details.message as DeprecationDetailsMessage;
-  return message.content;
-}
 
 describe('Enterprise Search node deprecation', () => {
   it('Tells you to remove capacity if running on cloud', () => {
@@ -134,80 +125,5 @@ describe('Native connector deprecations', () => {
     );
     expect(deprecations[0].correctiveActions.api?.body).toStrictEqual({ ids: ['foo'] });
     expect(deprecations[0].title).toMatch('Elastic-managed connectors are no longer supported');
-  });
-});
-
-describe('getEnterpriseSearchPre8IndexDeprecations', () => {
-  it('can register index and data stream deprecations that need to be set to read only', async () => {
-    const getIndicesMock = jest.fn(() =>
-      Promise.resolve([
-        {
-          name: '.ent-search-index_without_datastream',
-          hasDatastream: false,
-          datastreams: [],
-        },
-        {
-          name: '.ent-search-with_data_stream',
-          hasDatastream: true,
-          datastreams: ['datastream-testing'],
-        },
-      ])
-    );
-
-    jest
-      .spyOn(indexDeprecatorFxns, 'getPreEightEnterpriseSearchIndices')
-      .mockImplementation(getIndicesMock);
-
-    const deprecations = await getEnterpriseSearchPre8IndexDeprecations(ctx, 'docsurl', 'mockhost');
-    expect(deprecations).toHaveLength(1);
-    expect(deprecations[0].correctiveActions.api?.path).toStrictEqual(
-      '/internal/enterprise_search/deprecations/set_enterprise_search_indices_read_only'
-    );
-    expect(deprecations[0].title).toMatch('Pre 8.x Enterprise Search indices compatibility');
-    expect(getMessageFromDeprecation(deprecations[0])).toContain(
-      'The following indices are found to be incompatible for upgrade'
-    );
-    expect(getMessageFromDeprecation(deprecations[0])).toContain(
-      '.ent-search-index_without_datastream'
-    );
-    expect(getMessageFromDeprecation(deprecations[0])).toContain(
-      'The following data streams are found to be incompatible for upgrade'
-    );
-    expect(getMessageFromDeprecation(deprecations[0])).toContain('.ent-search-with_data_stream');
-  });
-
-  it('can register an index without data stream deprecations that need to be set to read only', async () => {
-    const getIndicesMock = jest.fn(() =>
-      Promise.resolve([
-        {
-          name: '.ent-search-index_without_datastream',
-          hasDatastream: false,
-          datastreams: [''],
-        },
-      ])
-    );
-
-    jest
-      .spyOn(indexDeprecatorFxns, 'getPreEightEnterpriseSearchIndices')
-      .mockImplementation(getIndicesMock);
-
-    const deprecations = await getEnterpriseSearchPre8IndexDeprecations(ctx, 'docsurl', 'mockhost');
-    expect(deprecations).toHaveLength(1);
-    expect(deprecations[0].correctiveActions.api?.path).toStrictEqual(
-      '/internal/enterprise_search/deprecations/set_enterprise_search_indices_read_only'
-    );
-    expect(deprecations[0].title).toMatch('Pre 8.x Enterprise Search indices compatibility');
-    expect(getMessageFromDeprecation(deprecations[0])).toContain(
-      'The following indices are found to be incompatible for upgrade'
-    );
-    expect(getMessageFromDeprecation(deprecations[0])).toContain(
-      '.ent-search-index_without_datastream'
-    );
-    expect(getMessageFromDeprecation(deprecations[0])).not.toContain(
-      'The following data streams are found to be incompatible for upgrade'
-    );
-    expect(getMessageFromDeprecation(deprecations[0])).not.toContain(
-      '.ent-search-with_data_stream'
-    );
   });
 });

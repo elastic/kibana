@@ -12,7 +12,6 @@ import {
   setPreEightEnterpriseSearchIndicesReadOnly,
 } from './pre_eight_index_deprecator';
 
-// settings?.index?.version?.created?.startsWith('7') && indexData.settings?.index?.blocks?.write !== 'true'
 const testIndices = {
   'non-ent-search-index': {
     settings: {
