@@ -534,7 +534,17 @@ describe('<IndexDetailsPage />', () => {
   });
 
   describe('Semantic Text Banner', () => {
-    const mockIndexMappingResponse: any = {
+    const mockIndexMappingResponseWithoutSemanticText: any = {
+      ...testIndexMappings.mappings,
+      properties: {
+        ...testIndexMappings.mappings.properties,
+        name: {
+          type: 'text',
+        },
+      },
+    };
+
+    const mockIndexMappingResponseWithSemanticText: any = {
       ...testIndexMappings.mappings,
       properties: {
         ...testIndexMappings.mappings.properties,
@@ -563,14 +573,23 @@ describe('<IndexDetailsPage />', () => {
           },
         });
       });
+    });
+
+    it('semantic text banner is visible if there is no semantic_text field in the mapping', async () => {
       httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
-        mappings: mockIndexMappingResponse,
+        mappings: mockIndexMappingResponseWithoutSemanticText,
       });
       testBed.component.update();
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      expect(testBed.actions.mappings.isSemanticTextBannerVisible()).toBe(true);
     });
 
-    it('semantic text banner is not visible', async () => {
+    it('semantic text banner is not visible if there exists a semantic_text field in the mapping', async () => {
+      httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+        mappings: mockIndexMappingResponseWithSemanticText,
+      });
+      testBed.component.update();
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
       expect(testBed.actions.mappings.isSemanticTextBannerVisible()).toBe(false);
     });
   });
