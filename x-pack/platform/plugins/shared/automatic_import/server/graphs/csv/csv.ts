@@ -82,8 +82,10 @@ export async function handleCSV({
     yieldUniqueColumnNames(needColumns, [llmProvidedColumns, headerColumns], temporaryColumns)
   );
   const prefixedColumns = prefixColumns(columns, prefix);
+
+  // Instantiate the processors to handle the CSV format
   const csvProcessor = createCSVProcessor('message', prefixedColumns);
-  const csvHandlingProcessors = [csvProcessor];
+  const csvHandlingProcessors = [csvProcessor, ...dropProcessors];
 
   const { pipelineResults: finalResults, errors: finalErrors } = await createJSONInput(
     csvHandlingProcessors,
