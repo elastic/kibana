@@ -6,7 +6,7 @@ paths: { }
 components:
   schemas:
     Id:
-      description: 'The ID of the object.'
+      description: 'The ID of the query.'
       type: string
     IdOrUndefined:
       $ref: '#/components/schemas/Id'

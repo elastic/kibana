@@ -60,6 +60,7 @@ paths:
         - name: query
           in: query
           schema:
+            description: 'Additional query parameters.'
             type: object
             additionalProperties: true
       responses:
@@ -68,7 +69,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+                $ref: './find_live_query.schema.yaml#/components/schemas/FindLiveQueryDetailsResponse'
 
   /api/osquery/live_queries/{id}/results/{actionId}:
     get:
