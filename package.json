@@ -1304,7 +1304,7 @@
     "wellknown": "^0.5.0",
     "whatwg-fetch": "^3.0.0",
     "xml2js": "^0.5.0",
-    "xstate": "^4.38.2",
+    "xstate": "^4.38.3",
     "xstate5": "npm:xstate@^5.19.2",
     "xterm": "^5.3.0",
     "yaml": "^2.5.1",
