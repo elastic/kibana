@@ -10,7 +10,13 @@
 import { createPortal, type Renderer, Container } from 'react-dom';
 import { createRoot, Root } from 'react-dom/client';
 
-const elements = new WeakMap<Container, Root>();
+// @ts-ignore
+if (!window._elements) {
+  // @ts-ignore
+  window._elements = new WeakMap();
+}
+// @ts-ignore
+const elements: WeakMap<Container, Root> = window._elements;
 
 const render: Renderer = (element: any, container: any, cb: any) => {
   const root = elements.get(container) ?? createRoot(container);
@@ -25,7 +31,7 @@ const render: Renderer = (element: any, container: any, cb: any) => {
   return element;
 };
 
-const unmountComponentAtNode = (container: Container) => {
+const unmountComponentAtNode = (container: Container): void => {
   const root = elements.get(container);
   if (root) {
     root.unmount();
