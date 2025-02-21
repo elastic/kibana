@@ -49,11 +49,6 @@ interface DataPreviewChartProps {
   thresholdColor?: string;
   thresholdMessage?: string;
   ignoreMoreThan100?: boolean;
-  rangeLabel?: string;
-  range?: {
-    from: Date;
-    to: Date;
-  };
 }
 
 export function DataPreviewChart({
@@ -64,10 +59,8 @@ export function DataPreviewChart({
   thresholdColor,
   thresholdMessage,
   ignoreMoreThan100,
-  // end specific timeslice metric indicator type
-  rangeLabel,
-  range,
-}: DataPreviewChartProps) {
+}: // end specific timeslice metric indicator type
+DataPreviewChartProps) {
   const { watch, getFieldState, formState, getValues } = useFormContext<CreateSLOForm>();
   const { charts, uiSettings } = useKibana().services;
   const { isIndicatorSectionValid } = useSectionFormValidation({
@@ -77,8 +70,8 @@ export function DataPreviewChart({
     watch,
   });
 
-  const [defaultRange, _] = useState({
-    from: moment().subtract(1, 'hour').toDate(),
+  const [range, _] = useState({
+    from: moment().subtract(1, 'day').toDate(),
     to: new Date(),
   });
 
@@ -89,7 +82,7 @@ export function DataPreviewChart({
     isLoading: isPreviewLoading,
     isSuccess,
     isError,
-  } = useDebouncedGetPreviewData(isIndicatorSectionValid, indicator, range ?? defaultRange);
+  } = useDebouncedGetPreviewData(isIndicatorSectionValid, indicator, range);
 
   const isMoreThan100 =
     !ignoreMoreThan100 &&
@@ -314,7 +307,7 @@ export function DataPreviewChart({
 
               <Axis
                 id="time"
-                title={rangeLabel ?? DEFAULT_LABEL}
+                title={LABEL}
                 tickFormat={(d) => moment(d).format(dateFormat)}
                 position={Position.Bottom}
                 timeAxisLayerCount={2}
@@ -351,6 +344,6 @@ export function DataPreviewChart({
   );
 }
 
-const DEFAULT_LABEL = i18n.translate('xpack.slo.sloEdit.dataPreviewChart.xTitle', {
-  defaultMessage: 'Last hour',
+const LABEL = i18n.translate('xpack.slo.sloEdit.dataPreviewChart.xTitle', {
+  defaultMessage: 'Last 24 hours',
 });
