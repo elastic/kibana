@@ -59,6 +59,7 @@ export function sloBurnRateRuleType(
     ],
     category: DEFAULT_APP_CATEGORIES.observability.id,
     producer: sloFeatureId,
+    solution: 'observability' as const,
     minimumLicenseRequired: 'platinum' as LicenseType,
     isExportable: true,
     executor: getRuleExecutor(basePath),

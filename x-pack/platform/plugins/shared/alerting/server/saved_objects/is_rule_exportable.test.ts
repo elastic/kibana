@@ -59,6 +59,7 @@ describe('isRuleExportable', () => {
       executor: jest.fn(),
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       validate: {
         params: { validate: (params) => params },
       },
@@ -119,6 +120,7 @@ describe('isRuleExportable', () => {
       executor: jest.fn(),
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       validate: {
         params: { validate: (params) => params },
       },
@@ -182,6 +184,7 @@ describe('isRuleExportable', () => {
       executor: jest.fn(),
       category: 'test',
       producer: 'alerts',
+      solution: 'stack',
       validate: {
         params: { validate: (params) => params },
       },
