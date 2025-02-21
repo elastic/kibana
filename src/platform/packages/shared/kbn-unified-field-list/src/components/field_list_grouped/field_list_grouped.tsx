@@ -9,15 +9,21 @@
 
 import { partition, throttle } from 'lodash';
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import { css } from '@emotion/react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
-import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
+import {
+  EuiScreenReaderOnly,
+  EuiSpacer,
+  useEuiOverflowScroll,
+  useEuiTheme,
+  useEuiScrollBar,
+} from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { NoFieldsCallout } from './no_fields_callout';
 import { FieldsAccordion, type FieldsAccordionProps, getFieldKey } from './fields_accordion';
 import type { FieldListGroups, FieldListItem } from '../../types';
 import { ExistenceFetchStatus, FieldsGroup, FieldsGroupNames } from '../../types';
-import './field_list_grouped.scss';
 
 const PAGINATION_SIZE = 50;
 export const LOCAL_STORAGE_KEY_SECTIONS = 'unifiedFieldList.initiallyOpenSections';
@@ -54,6 +60,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   localStorageKeyPrefix,
   'data-test-subj': dataTestSubject = 'fieldListGrouped',
 }: FieldListGroupedProps<T>) {
+  const { euiTheme } = useEuiTheme();
   const hasSyncedExistingFields =
     fieldsExistenceStatus && fieldsExistenceStatus !== ExistenceFetchStatus.unknown;
 
@@ -124,10 +131,16 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   }, [pageSize, fieldGroupsToShow, accordionState]);
 
   const hasSpecialFields = Boolean(fieldGroupsToCollapse[0]?.[1]?.fields?.length);
-
   return (
     <div
-      className="unifiedFieldList__fieldListGrouped"
+      css={css`
+        margin-left: -${euiTheme.size.base};
+        position: relative;
+        flex-grow: 1;
+        overflow: auto;
+        ${useEuiOverflowScroll('y', true)}
+        ${useEuiScrollBar()}
+      `}
       data-test-subj={`${dataTestSubject}FieldGroups`}
       ref={(el) => {
         if (el && !el.dataset.dynamicScroll) {
@@ -137,7 +150,15 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
       }}
       onScroll={throttle(lazyScroll, 100)}
     >
-      <div className="unifiedFieldList__fieldListGrouped__container">
+      <div
+        css={css`
+          padding-top: ${euiTheme.size.s};
+          position: absolute;
+          top: 0;
+          left: ${euiTheme.size.base};
+          right: ${euiTheme.size.xs};
+        `}
+      >
         {Boolean(screenReaderDescriptionId) && (
           <EuiScreenReaderOnly>
             <div
