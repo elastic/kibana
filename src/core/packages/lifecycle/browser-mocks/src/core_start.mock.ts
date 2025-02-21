@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
@@ -49,6 +50,9 @@ export function createCoreStartMock({ basePath = '' } = {}) {
     userProfile: userProfileServiceMock.createStart(),
     plugins: {
       onStart: jest.fn(),
+    },
+    rendering: {
+      wrapReact: jest.fn().mockImplementation((element: React.ReactNode) => element),
     },
   };
 

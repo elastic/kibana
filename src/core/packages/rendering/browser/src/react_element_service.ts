@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { RenderingService, ReactElementService } from './src';
+import React from 'react';
+
+export interface ReactElementService {
+  wrapReact: (element: React.ReactElement) => React.ReactElement;
+}

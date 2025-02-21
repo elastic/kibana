@@ -8,3 +8,4 @@
  */
 
 export { RenderingService } from './rendering_service';
+export { ReactElementService } from './react_element_service';
