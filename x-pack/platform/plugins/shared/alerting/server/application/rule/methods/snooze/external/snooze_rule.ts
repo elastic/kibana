@@ -6,8 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
+import { v4 as uuidV4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
-import { ruleSnoozeScheduleSchema } from '../../../../../../common/routes/rule/request';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../../saved_objects';
 import { getRuleSavedObject } from '../../../../../rules_client/lib';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../../rules_client/common/audit_events';
@@ -29,15 +29,17 @@ import {
   transformRuleAttributesToRuleDomain,
 } from '../../../transforms';
 import { snoozeParamsSchema } from '../../../../../../common/routes/rule/apis/snooze';
+import { ruleSnoozeScheduleSchema } from '../../../../../../common/routes/rule/request';
 import type { SnoozeRule } from './types';
 
 export async function snoozeRule<Params extends RuleParams = never>(
   context: RulesClientContext,
   { id, snoozeSchedule }: SnoozeRule
 ): Promise<SanitizedRule<Params>> {
+  const snoozeScheduleId = uuidV4();
   try {
     snoozeParamsSchema.validate({ id });
-    ruleSnoozeScheduleSchema.validate({ ...snoozeSchedule });
+    ruleSnoozeScheduleSchema.validate({ ...snoozeSchedule, id: snoozeScheduleId });
   } catch (error) {
     throw Boom.badRequest(`Error validating snooze - ${error.message}`);
   }
@@ -49,13 +51,13 @@ export async function snoozeRule<Params extends RuleParams = never>(
   return await retryIfConflicts(
     context.logger,
     `rulesClient.snooze('${id}', ${JSON.stringify(snoozeSchedule, null, 4)})`,
-    async () => await snoozeWithOCC(context, { id, snoozeSchedule })
+    async () => await snoozeWithOCC(context, { id, snoozeSchedule, snoozeScheduleId })
   );
 }
 
 async function snoozeWithOCC<Params extends RuleParams = never>(
   context: RulesClientContext,
-  { id, snoozeSchedule }: SnoozeRule
+  { id, snoozeSchedule, snoozeScheduleId }: SnoozeRule & { snoozeScheduleId: string }
 ): Promise<SanitizedRule<Params>> {
   const { attributes, version } = await withSpan(
     { name: 'getRuleSavedObject', type: 'rules' },
@@ -97,7 +99,10 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-  const newAttrs = getSnoozeAttributes(attributes, snoozeSchedule);
+  const newAttrs = getSnoozeAttributes(attributes, {
+    ...snoozeSchedule,
+    id: snoozeScheduleId,
+  });
 
   try {
     verifySnoozeAttributeScheduleLimit(newAttrs);

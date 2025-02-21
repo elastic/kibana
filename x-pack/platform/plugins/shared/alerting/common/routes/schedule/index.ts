@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-export { scheduleRequestSchema } from './schema/request/latest';
-export { scheduleResponseSchema } from './schema/response/latest';
-export { transformScheduleToRRule, transformRRuleToSchedule } from './transforms/latest';
+export { scheduleRequestSchema } from './schema/latest';
+export { transformCustomScheduleToRRule } from './transforms/request/latest';
+export { transformRRuleToCustomSchedule } from './transforms/response/latest';
 export type { ScheduleRequest } from './types/latest';
 
-export { scheduleRequestSchema as scheduleRequestSchemaV1 } from './schema/request/v1';
-export { scheduleResponseSchema as scheduleResponseSchemaV1 } from './schema/response/v1';
-export {
-  transformScheduleToRRule as transformScheduleToRRuleV1,
-  transformRRuleToSchedule as transformRRuleToScheduleV1,
-} from './transforms/v1';
+export { scheduleRequestSchema as scheduleRequestSchemaV1 } from './schema/v1';
+export { transformCustomScheduleToRRule as transformCustomScheduleToRRuleV1 } from './transforms/request/v1';
+export { transformRRuleToCustomSchedule as transformRRuleToCustomScheduleV1 } from './transforms/response/v1';
 export type { ScheduleRequest as ScheduleRequestV1 } from './types/v1';

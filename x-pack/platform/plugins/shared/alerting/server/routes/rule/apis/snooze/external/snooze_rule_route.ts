@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v4 as uuidV4 } from 'uuid';
+import Boom from '@hapi/boom';
 import { IRouter } from '@kbn/core/server';
 import {
   type SnoozeParams,
@@ -19,10 +19,10 @@ import { verifyAccessAndContext } from '../../../../lib';
 import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../../../../../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
 import {
-  transformScheduleToRRule,
-  transformRRuleToSchedule,
+  transformCustomScheduleToRRule,
+  transformRRuleToCustomSchedule,
 } from '../../../../../../common/routes/schedule';
-import type { SnoozeRuleOptions } from '../../../../../application/rule/methods/snooze';
+import type { SnoozeRule } from '../../../../../application/rule/methods/snooze';
 
 export const snoozeRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -64,11 +64,17 @@ export const snoozeRuleRoute = (
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
         const params: SnoozeParams = req.params;
-        const { rRule, duration } = transformScheduleToRRule(req.body.schedule);
+        const customSchedule = req.body.schedule?.custom;
+
+        if (!customSchedule) {
+          throw Boom.badRequest('Custom schedule is required');
+        }
+
+        const { rRule, duration } = transformCustomScheduleToRRule(customSchedule);
+
         const snoozeSchedule = {
-          id: uuidV4(),
           duration,
-          rRule: rRule as SnoozeRuleOptions['snoozeSchedule']['rRule'],
+          rRule: rRule as SnoozeRule['snoozeSchedule']['rRule'],
         };
 
         try {
@@ -77,8 +83,19 @@ export const snoozeRuleRoute = (
             snoozeSchedule,
           });
 
+          const createdSchedule = {
+            id: (snoozedRule?.snoozeSchedule?.length
+              ? snoozedRule?.snoozeSchedule[snoozedRule.snoozeSchedule.length - 1].id
+              : '') as string,
+            custom: transformRRuleToCustomSchedule({
+              snoozeSchedule: snoozedRule.snoozeSchedule ?? [],
+            }),
+          };
+
           const response: SnoozeResponse = {
-            body: transformRRuleToSchedule(snoozedRule?.snoozeSchedule),
+            body: {
+              schedule: createdSchedule,
+            },
           };
 
           return res.ok(response);

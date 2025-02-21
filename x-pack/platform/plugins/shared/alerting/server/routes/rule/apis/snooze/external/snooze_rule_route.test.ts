@@ -23,10 +23,12 @@ beforeEach(() => {
 });
 
 const schedule = {
-  duration: '240h',
-  start: '2021-03-07T00:00:00.000Z',
-  recurring: {
-    occurrences: 1,
+  custom: {
+    duration: '240h',
+    start: '2021-03-07T00:00:00.000Z',
+    recurring: {
+      occurrences: 1,
+    },
   },
 };
 
@@ -109,7 +111,9 @@ describe('snoozeAlertRoute', () => {
     `);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: [{ ...schedule, id: 'random-schedule-id', timezone: 'UTC' }],
+      body: {
+        schedule: { custom: { ...schedule.custom, timezone: 'UTC' }, id: 'random-schedule-id' },
+      },
     });
   });
 
@@ -146,8 +150,10 @@ describe('snoozeAlertRoute', () => {
         },
         body: {
           schedule: {
-            ...schedule,
-            duration: '-1',
+            custom: {
+              ...schedule.custom,
+              duration: '-1',
+            },
           },
         },
       },
@@ -157,7 +163,7 @@ describe('snoozeAlertRoute', () => {
     expect(await handler(context, req, res)).toEqual(undefined);
 
     expect(rulesClient.snooze).toHaveBeenCalledTimes(1);
-    expect(rulesClient.snooze.mock.calls[0][0].snoozeSchedule.duration).toMatchInlineSnapshot(`-1`);
+    expect(rulesClient.snooze.mock.calls[0][0].snoozeSchedule.duration).toEqual(-1);
     expect(rulesClient.snooze.mock.calls[0][0].snoozeSchedule.rRule).toMatchInlineSnapshot(`
       Object {
         "bymonth": undefined,
@@ -173,7 +179,12 @@ describe('snoozeAlertRoute', () => {
     `);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: [{ ...schedule, duration: '-1', id: 'random-schedule-id', timezone: 'UTC' }],
+      body: {
+        schedule: {
+          custom: { ...schedule.custom, timezone: 'UTC', duration: '-1' },
+          id: 'random-schedule-id',
+        },
+      },
     });
   });
 
@@ -213,12 +224,15 @@ describe('snoozeAlertRoute', () => {
         },
         body: {
           schedule: {
-            ...schedule,
-            timezone: 'America/New_York',
-            recurring: {
-              every: '1w',
-              end: '2021-05-10T00:00:00.000Z',
-              onWeekDay: ['MO'],
+            custom: {
+              duration: '240h',
+              start: '2021-03-07T00:00:00.000Z',
+              timezone: 'America/New_York',
+              recurring: {
+                every: '1w',
+                end: '2021-05-10T00:00:00.000Z',
+                onWeekDay: ['MO'],
+              },
             },
           },
         },
@@ -246,18 +260,21 @@ describe('snoozeAlertRoute', () => {
     `);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: [
-        {
-          ...schedule,
-          recurring: {
-            every: '1w',
-            end: '2021-05-10T00:00:00.000Z',
-            onWeekDay: ['MO'],
+      body: {
+        schedule: {
+          custom: {
+            duration: '240h',
+            start: '2021-03-07T00:00:00.000Z',
+            timezone: 'America/New_York',
+            recurring: {
+              every: '1w',
+              end: '2021-05-10T00:00:00.000Z',
+              onWeekDay: ['MO'],
+            },
           },
           id: 'random-schedule-id',
-          timezone: 'America/New_York',
         },
-      ],
+      },
     });
   });
 
@@ -298,12 +315,15 @@ describe('snoozeAlertRoute', () => {
         },
         body: {
           schedule: {
-            ...schedule,
-            recurring: {
-              every: '1y',
-              occurrences: 5,
-              onMonthDay: [5, 25],
-              onMonth: [2, 4, 6, 8, 10, 12],
+            custom: {
+              duration: '240h',
+              start: '2021-03-07T00:00:00.000Z',
+              recurring: {
+                every: '1y',
+                occurrences: 5,
+                onMonthDay: [5, 25],
+                onMonth: [2, 4, 6, 8, 10, 12],
+              },
             },
           },
         },
@@ -339,19 +359,22 @@ describe('snoozeAlertRoute', () => {
     `);
 
     expect(res.ok).toHaveBeenCalledWith({
-      body: [
-        {
-          ...schedule,
-          recurring: {
-            every: '1y',
-            occurrences: 5,
-            onMonthDay: [5, 25],
-            onMonth: [2, 4, 6, 8, 10, 12],
+      body: {
+        schedule: {
+          custom: {
+            duration: '240h',
+            start: '2021-03-07T00:00:00.000Z',
+            recurring: {
+              every: '1y',
+              occurrences: 5,
+              onMonthDay: [5, 25],
+              onMonth: [2, 4, 6, 8, 10, 12],
+            },
+            timezone: 'UTC',
           },
           id: 'random-schedule-id',
-          timezone: 'UTC',
         },
-      ],
+      },
     });
   });
 
@@ -367,7 +390,7 @@ describe('snoozeAlertRoute', () => {
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
-      { params: { id: '1' }, body: { schedule: { duration: '1h' } } },
+      { params: { id: '1' }, body: { schedule: { custom: { duration: '1h' } } } },
       ['ok', 'forbidden']
     );
 

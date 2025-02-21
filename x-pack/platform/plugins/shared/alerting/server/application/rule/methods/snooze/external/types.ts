@@ -10,7 +10,6 @@ import type { RRule } from '../../../../r_rule/types';
 export interface SnoozeRule {
   id: string;
   snoozeSchedule: {
-    id: string;
     duration: number;
     rRule: RRule;
   };
