@@ -58,7 +58,7 @@ paths-ignore:
   - packages/kbn-web-worker-stub
   - packages/kbn-yarn-lock-validator
   - scripts
-  - src/dev/packages/core-test-helpers-kbn-server
+  - src/core/test-helpers/kbn-server
   - src/platform/packages/*/kbn-ambient-*-types
   - src/platform/packages/*/kbn-babel-*
   - src/platform/packages/*/kbn-ci-*

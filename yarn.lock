@@ -5117,11 +5117,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-kbn-server@link:src/dev/packages/core-test-helpers-kbn-server":
+"@kbn/core-test-helpers-kbn-server@link:src/core/test-helpers/kbn-server":
   version "0.0.0"
   uid ""
 
-"@kbn/core-test-helpers-model-versions@link:src/dev/packages/core-test-helpers-model-versions":
+"@kbn/core-test-helpers-model-versions@link:src/core/test-helpers/model-versions":
   version "0.0.0"
   uid ""
 
@@ -7914,6 +7914,14 @@
   uid ""
 
 "@kbn/unified-search-plugin@link:src/platform/plugins/shared/unified_search":
+  version "0.0.0"
+  uid ""
+
+"@kbn/unified-tabs-examples-plugin@link:examples/unified_tabs_examples":
+  version "0.0.0"
+  uid ""
+
+"@kbn/unified-tabs@link:src/platform/packages/shared/kbn-unified-tabs":
   version "0.0.0"
   uid ""
 
