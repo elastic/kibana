@@ -192,5 +192,6 @@
     "@kbn/server-route-repository-utils",
     "@kbn/streams-plugin",
     "@kbn/response-ops-rule-params",
+    "@kbn/inference-common",
   ]
 }
