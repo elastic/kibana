@@ -84,11 +84,11 @@ describe('autocomplete.suggest', () => {
           'var0 = ',
           ...getPolicyFields('policy'),
         ]);
-        await assertSuggestions(`from a | enrich policy on b with var0 = keywordField, /`, [
+        await assertSuggestions(`from a | enrich policy on b with var0 = otherField, /`, [
           'var1 = ',
           ...getPolicyFields('policy'),
         ]);
-        await assertSuggestions(`from a | enrich policy on b with var0 = keywordField, fi/`, [
+        await assertSuggestions(`from a | enrich policy on b with var0 = otherField, fi/`, [
           'var1 = ',
           ...getPolicyFields('policy'),
         ]);
@@ -96,7 +96,7 @@ describe('autocomplete.suggest', () => {
 
       test('after first word', async () => {
         await assertSuggestions(`from a | enrich policy on b with var0 /`, ['= $0']);
-        await assertSuggestions(`from a | enrich policy on b with keywordField /`, [',', '| ']);
+        await assertSuggestions(`from a | enrich policy on b with otherField /`, [',', '| ']);
       });
 
       test('after open assignment', async () => {
@@ -106,25 +106,23 @@ describe('autocomplete.suggest', () => {
         await assertSuggestions(`from a | enrich policy on b with var0 = fi/`, [
           ...getPolicyFields('policy'),
         ]);
-        await assertSuggestions(`from a | enrich policy on b with var0 = keywordField, var1 =  /`, [
+        await assertSuggestions(`from a | enrich policy on b with var0 = otherField, var1 =  /`, [
           ...getPolicyFields('policy'),
         ]);
       });
 
       test('after complete clause', async () => {
-        await assertSuggestions(`from a | enrich policy on b with var0 = keywordField /`, [
+        // works with escaped field names
+        await assertSuggestions(`from a | enrich policy on b with var0 = \`otherField\` /`, [
           ',',
           '| ',
         ]);
-        await assertSuggestions(`from a | enrich policy on b with var0=keywordField /`, [
-          ',',
-          '| ',
-        ]);
-        await assertSuggestions(`from a | enrich policy on b with keywordField /`, [',', '| ']);
+        await assertSuggestions(`from a | enrich policy on b with var0=otherField /`, [',', '| ']);
+        await assertSuggestions(`from a | enrich policy on b with otherField /`, [',', '| ']);
       });
 
       test('after user-defined column name', async () => {
-        await assertSuggestions(`from a | enrich policy on b with var0 = keywordField, var1 /`, [
+        await assertSuggestions(`from a | enrich policy on b with var0 = otherField, var1 /`, [
           '= $0',
         ]);
       });

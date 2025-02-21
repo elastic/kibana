@@ -44,7 +44,7 @@ import {
   getExpressionType,
 } from '../shared/helpers';
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
-import type { ESQLPolicy, ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
+import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import {
   allStarConstant,
   commaCompleteItem,
@@ -105,30 +105,6 @@ import { getRecommendedQueriesSuggestions } from './recommended_queries/suggesti
 
 type GetFieldsMapFn = () => Promise<Map<string, ESQLRealField>>;
 type GetPoliciesFn = () => Promise<SuggestionRawDefinition[]>;
-
-function hasSameArgBothSides(assignFn: ESQLFunction) {
-  if (assignFn.name === '=' && isColumnItem(assignFn.args[0]) && assignFn.args[1]) {
-    const assignValue = assignFn.args[1];
-    if (Array.isArray(assignValue) && isColumnItem(assignValue[0])) {
-      return assignFn.args[0].name === assignValue[0].name;
-    }
-  }
-}
-
-function appendEnrichFields(
-  fieldsMap: Map<string, ESQLRealField>,
-  policyMetadata: ESQLPolicy | undefined
-) {
-  if (!policyMetadata) {
-    return fieldsMap;
-  }
-  // @TODO: improve this
-  const newMap: Map<string, ESQLRealField> = new Map(fieldsMap);
-  for (const field of policyMetadata.enrichFields) {
-    newMap.set(field, { name: field, type: 'double' });
-  }
-  return newMap;
-}
 
 function getFinalSuggestions({ comma }: { comma?: boolean } = { comma: true }) {
   const finalSuggestions = [pipeCompleteItem];
@@ -403,7 +379,17 @@ async function getSuggestionsWithinCommandExpression(
       getColumnsByType,
       getAllColumnNames: () => Array.from(fieldsMap.keys()),
       columnExists: (col: string) => Boolean(getColumnByName(col, references)),
-      getSuggestedVariableName: () => findNewVariable(anyVariables),
+      getSuggestedVariableName: (extraFieldNames?: string[]) => {
+        if (!extraFieldNames?.length) {
+          return findNewVariable(anyVariables);
+        }
+
+        const augmentedFieldsMap = new Map(fieldsMap);
+        extraFieldNames.forEach((name) => {
+          augmentedFieldsMap.set(name, { name, type: 'double' });
+        });
+        return findNewVariable(collectVariables(commands, augmentedFieldsMap, innerText));
+      },
       getExpressionType: (expression: ESQLAstItem | undefined) =>
         getExpressionType(expression, references.fields, references.variables),
       getPreferences,

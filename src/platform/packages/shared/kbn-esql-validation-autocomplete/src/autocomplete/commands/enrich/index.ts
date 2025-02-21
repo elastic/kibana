@@ -8,7 +8,12 @@
  */
 
 import { ESQLSource } from '@kbn/esql-ast';
-import { findFinalWord, findPreviousWord, isSingleItem } from '../../../shared/helpers';
+import {
+  findFinalWord,
+  findPreviousWord,
+  isSingleItem,
+  unescapeColumnName,
+} from '../../../shared/helpers';
 import { CommandSuggestParams } from '../../../definitions/types';
 import type { SuggestionRawDefinition } from '../../types';
 import {
@@ -35,7 +40,6 @@ export async function suggest({
   getPolicyMetadata,
   getAllColumnNames,
   getSuggestedVariableName,
-  columnExists,
 }: CommandSuggestParams<'enrich'>): Promise<SuggestionRawDefinition[]> {
   const pos = getPosition(innerText, command);
 
@@ -105,19 +109,39 @@ export async function suggest({
       return [withSuggestion, pipeCompleteItem];
 
     case Position.WITH_NEW_CLAUSE: {
+      if (!policyName) {
+        return [];
+      }
+
+      const policyMetadata = await getPolicyMetadata(policyName);
+      if (!policyMetadata) {
+        return [];
+      }
+
       const suggestions: SuggestionRawDefinition[] = [];
-      suggestions.push(getNewVariableSuggestion(getSuggestedVariableName()));
+      suggestions.push(
+        getNewVariableSuggestion(getSuggestedVariableName(policyMetadata.enrichFields))
+      );
       suggestions.push(...(await getFieldSuggestionsForWithClause()));
       return suggestions;
     }
 
     case Position.WITH_AFTER_FIRST_WORD: {
+      if (!policyName) {
+        return [];
+      }
+      const policyMetadata = await getPolicyMetadata(policyName);
+
+      if (!policyMetadata) {
+        return [];
+      }
+
       const word = findPreviousWord(innerText);
-      if (columnExists(word)) {
-        // comma or pipe
+      if (policyMetadata.enrichFields.includes(unescapeColumnName(word))) {
+        // complete field name
         return [pipeCompleteItem, { ...commaCompleteItem, command: TRIGGER_SUGGESTION_COMMAND }];
       } else {
-        // assignment
+        // not recognized as a field name, assume new user-defined column name
         return getOperatorSuggestions({ command: 'enrich' });
       }
     }
