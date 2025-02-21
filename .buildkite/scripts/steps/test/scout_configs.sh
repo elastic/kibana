@@ -18,9 +18,6 @@ export JOB="$SCOUT_CONFIG_GROUP_KEY"
 
 FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${SCOUT_CONFIG_GROUP_KEY}"
 
-# a Scout failure will result in the script returning an exit code of 10
-EXIT_CODE=0
-
 echo "--- downloading scout test configuration"
 download_artifact scout_test_configs.json .
 configs=$(jq -r '.[env.SCOUT_CONFIG_GROUP_KEY].configs[]' scout_test_configs.json)
@@ -50,6 +47,8 @@ failedConfigs=()
 configWithoutTests=()
 passedConfigs=()
 
+FINAL_EXIT_CODE=0
+
 # Run tests for each config
 while read -r config_path; do
   if [[ -z "$config_path" ]]; then
@@ -63,33 +62,36 @@ while read -r config_path; do
     EXIT_CODE=$?
 
     if [[ $EXIT_CODE -eq 2 ]]; then
-      configWithoutTests+=("$config_path ($mode) No tests found")
-      # Reset exit code to 0, no failure if there are no tests
-      EXIT_CODE=0
+      configWithoutTests+=("$config_path ($mode) ⚠️ No tests found")
     elif [[ $EXIT_CODE -ne 0 ]]; then
       failedConfigs+=("$config_path ($mode) ❌")
+      FINAL_EXIT_CODE=10  # Ensure we exit with failure if any test fails with (exit code 10 to match FTR)
     else
-      passedConfigs+=("$config_path ($mode) ✅")
+      results+=("$config_path ($mode) ✅")
     fi
   done
 done <<< "$configs"
 
 echo "--- Scout Test Run Complete: Summary"
-if [[ "$passedConfigs" ]]; then
-  echo "✅ Passed:"
-  printf "%s\n" "${passedConfigs[@]}"
+echo "✅ Passed: ${#results[@]}"
+echo "⚠️ No tests found: ${#configWithoutTests[@]}"
+echo "❌ Failed: ${#failedConfigs[@]}"
+
+if [[ ${#results[@]} -gt 0 ]]; then
+  echo "✅ Successful tests:"
+  printf '%s\n' "${results[@]}"
 fi
 
-if [[ "$configWithoutTests" ]]; then
-  echo "No tests in config:"
-  printf "%s\n" "${configWithoutTests[@]}"
+if [[ ${#configWithoutTests[@]} -gt 0 ]]; then
+  echo "⚠️ Configs with no tests:"
+  printf '%s\n' "${configWithoutTests[@]}"
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$configWithoutTests"
 fi
 
-if [[ "$failedConfigs" ]]; then
-  echo "❌ Failed:"
-  printf "%s\n" "${failedConfigs[@]}"
+if [[ ${#failedConfigs[@]} -gt 0 ]]; then
+  echo "❌ Failed tests:"
+  printf '%s\n' "${failedConfigs[@]}"
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
 fi
 
-exit $EXIT_CODE
+exit $FINAL_EXIT_CODE  # Exit with 10 only if there were config failures
