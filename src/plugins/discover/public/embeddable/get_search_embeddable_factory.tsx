@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
   FetchContext,
+  getUnchangingComparator,
   initializeTimeRange,
   initializeTitles,
   useBatchedPublishingSubjects,
@@ -89,6 +90,13 @@ export const getSearchEmbeddableFactory = ({
       /** Build API */
       const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
       const timeRange = initializeTimeRange(initialState);
+      const dynamicActionsApi =
+        discoverServices.embeddableEnhanced?.initializeReactEmbeddableDynamicActions(
+          uuid,
+          () => titlesApi.panelTitle.getValue(),
+          initialState
+        );
+      const maybeStopDynamicActions = dynamicActionsApi?.startDynamicActions();
       const searchEmbeddable = await initializeSearchEmbeddableApi(initialState, {
         discoverServices,
       });
@@ -114,6 +122,7 @@ export const getSearchEmbeddableFactory = ({
           ...titlesApi,
           ...searchEmbeddable.api,
           ...timeRange.api,
+          ...dynamicActionsApi?.dynamicActionsApi,
           ...initializeEditApi({
             uuid,
             parentApi,
@@ -183,14 +192,23 @@ export const getSearchEmbeddableFactory = ({
               savedSearch: searchEmbeddable.api.savedSearch$.getValue(),
               serializeTitles,
               serializeTimeRange: timeRange.serialize,
+              serializeDynamicActions: dynamicActionsApi?.serializeDynamicActions,
               savedObjectId: savedObjectId$.getValue(),
               discoverServices,
             }),
           getInspectorAdapters: () => searchEmbeddable.stateManager.inspectorAdapters.getValue(),
+          supportedTriggers: () => {
+            // No triggers are supported, but this is still required to pass the drilldown
+            // compatibilty check and ensure top-level drilldowns (e.g. URL) work as expected
+            return [];
+          },
         },
         {
           ...titleComparators,
           ...timeRange.comparators,
+          ...(dynamicActionsApi?.dynamicActionsComparator ?? {
+            enhancements: getUnchangingComparator(),
+          }),
           ...searchEmbeddable.comparators,
           savedObjectId: [savedObjectId$, (value) => savedObjectId$.next(value)],
           savedObjectTitle: [defaultPanelTitle$, (value) => defaultPanelTitle$.next(value)],
@@ -213,6 +231,7 @@ export const getSearchEmbeddableFactory = ({
             return () => {
               searchEmbeddable.cleanup();
               unsubscribeFromFetch();
+              maybeStopDynamicActions?.stopDynamicActions();
             };
           }, []);
 
