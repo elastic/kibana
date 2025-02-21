@@ -230,7 +230,7 @@ export interface UnifiedDataTableProps {
   isPaginationEnabled?: boolean;
   /**
    * Manage pagination mode
-   * @default 'standard'
+   * @default 'multiPage'
    * "multiPage" - Regular pagination with numbers and arrows to control the page
    * "singlePage" - Hides the general pagination bar and shows Load more button at the bottom of the grid
    * "infinite" - Hides the general pagination bar and loads more data as the user scrolls [Not yet implemented]
