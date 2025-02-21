@@ -390,7 +390,7 @@
         "label": "GetEntityDefinitionQuerySchema",
         "description": [],
         "signature": [
-          "{ includeState: boolean; page?: number | undefined; perPage?: number | undefined; }"
+          "{ page?: number | undefined; perPage?: number | undefined; includeState?: any; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/rest_spec/get.ts",
         "deprecated": false,
@@ -545,7 +545,7 @@
         "label": "createEntityDefinitionQuerySchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ installOnly: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { installOnly: boolean; }, { installOnly?: boolean | \"true\" | \"false\" | undefined; }>"
+          "Zod.ZodObject<{ installOnly: Zod.ZodDefault<Zod.ZodOptional<KbnZodBooleanFromString>>; }, \"strip\", Zod.ZodTypeAny, { installOnly?: any; }, { installOnly?: any; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/rest_spec/create.ts",
         "deprecated": false,
@@ -575,7 +575,7 @@
         "label": "deleteEntityDefinitionQuerySchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ deleteData: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { deleteData: boolean; }, { deleteData?: boolean | \"true\" | \"false\" | undefined; }>"
+          "Zod.ZodObject<{ deleteData: Zod.ZodDefault<Zod.ZodOptional<KbnZodBooleanFromString>>; }, \"strip\", Zod.ZodTypeAny, { deleteData?: any; }, { deleteData?: any; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/rest_spec/delete.ts",
         "deprecated": false,
@@ -822,7 +822,7 @@
         "label": "getEntityDefinitionQuerySchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ page: Zod.ZodOptional<Zod.ZodNumber>; perPage: Zod.ZodOptional<Zod.ZodNumber>; includeState: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodEnum<[\"true\", \"false\"]>, Zod.ZodBoolean]>, boolean, boolean | \"true\" | \"false\">>>; }, \"strip\", Zod.ZodTypeAny, { includeState: boolean; page?: number | undefined; perPage?: number | undefined; }, { page?: number | undefined; perPage?: number | undefined; includeState?: boolean | \"true\" | \"false\" | undefined; }>"
+          "Zod.ZodObject<{ page: Zod.ZodOptional<Zod.ZodNumber>; perPage: Zod.ZodOptional<Zod.ZodNumber>; includeState: Zod.ZodDefault<Zod.ZodOptional<KbnZodBooleanFromString>>; }, \"strip\", Zod.ZodTypeAny, { page?: number | undefined; perPage?: number | undefined; includeState?: any; }, { page?: number | undefined; perPage?: number | undefined; includeState?: any; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/rest_spec/get.ts",
         "deprecated": false,
