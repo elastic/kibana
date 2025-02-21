@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
-import { debounce, isEmpty, uniq, uniqBy } from 'lodash';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { debounce, isEmpty, isEqual, uniq, uniqBy } from 'lodash';
 import {
   IngestStreamGetResponse,
   getProcessorConfig,
@@ -14,22 +14,52 @@ import {
   Condition,
   processorDefinitionSchema,
   isSchema,
-  RecursiveRecord,
+  FlattenRecord,
 } from '@kbn/streams-schema';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import { APIReturnType } from '@kbn/streams-plugin/public/api';
+import { i18n } from '@kbn/i18n';
+import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
 import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
 import { processorConverter } from '../utils';
 
-type Simulation = APIReturnType<'POST /api/streams/{name}/processing/_simulate'>;
+export type Simulation = APIReturnType<'POST /api/streams/{name}/processing/_simulate'>;
+export type ProcessorMetrics =
+  Simulation['processors_metrics'][keyof Simulation['processors_metrics']];
 
 export interface TableColumn {
   name: string;
   origin: 'processor' | 'detected';
 }
+
+export const docsFilterOptions = {
+  outcome_filter_all: {
+    id: 'outcome_filter_all',
+    label: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.all',
+      { defaultMessage: 'All samples' }
+    ),
+  },
+  outcome_filter_matched: {
+    id: 'outcome_filter_matched',
+    label: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.matched',
+      { defaultMessage: 'Matched' }
+    ),
+  },
+  outcome_filter_unmatched: {
+    id: 'outcome_filter_unmatched',
+    label: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControls.unmatched',
+      { defaultMessage: 'Unmatched' }
+    ),
+  },
+} as const;
+
+export type DocsFilterOption = keyof typeof docsFilterOptions;
 
 export interface UseProcessingSimulatorProps {
   definition: IngestStreamGetResponse;
@@ -40,13 +70,17 @@ export interface UseProcessingSimulatorReturn {
   hasLiveChanges: boolean;
   error?: IHttpFetchError<ResponseErrorBody>;
   isLoading: boolean;
-  samples: RecursiveRecord[];
+  samples: FlattenRecord[];
+  filteredSamples: FlattenRecord[];
   simulation?: Simulation | null;
   tableColumns: TableColumn[];
   refreshSamples: () => void;
   watchProcessor: (
     processor: ProcessorDefinitionWithUIAttributes | { id: string; deleteIfExists: true }
   ) => void;
+  refreshSimulation: () => void;
+  selectedDocsFilter: DocsFilterOption;
+  setSelectedDocsFilter: (filter: DocsFilterOption) => void;
 }
 
 export const useProcessingSimulator = ({
@@ -105,27 +139,33 @@ export const useProcessingSimulator = ({
             });
           }
         },
-        500
+        800
       ),
     []
   );
 
-  const samplingCondition = useMemo(
-    () => composeSamplingCondition(liveDraftProcessors),
-    [liveDraftProcessors]
-  );
+  const memoizedSamplingCondition = useRef<Condition | undefined>();
+
+  const samplingCondition = useMemo(() => {
+    const newSamplingCondition = composeSamplingCondition(liveDraftProcessors);
+    if (isEqual(newSamplingCondition, memoizedSamplingCondition.current)) {
+      return memoizedSamplingCondition.current;
+    }
+    memoizedSamplingCondition.current = newSamplingCondition;
+    return newSamplingCondition;
+  }, [liveDraftProcessors]);
 
   const {
     loading: isLoadingSamples,
-    value: samples,
+    value: sampleDocs,
     refresh: refreshSamples,
   } = useStreamsAppFetch(
-    ({ signal }) => {
+    async ({ signal }) => {
       if (!definition) {
-        return { documents: [] };
+        return [];
       }
 
-      return streamsRepositoryClient.fetch('POST /api/streams/{name}/_sample', {
+      const samplesBody = await streamsRepositoryClient.fetch('POST /api/streams/{name}/_sample', {
         signal,
         params: {
           path: { name: definition.stream.name },
@@ -137,21 +177,23 @@ export const useProcessingSimulator = ({
           },
         },
       });
+
+      return samplesBody.documents.map((doc) => flattenObjectNestedLast(doc)) as FlattenRecord[];
     },
     [definition, streamsRepositoryClient, start, end, samplingCondition],
     { disableToastOnError: true }
   );
 
-  const sampleDocs = samples?.documents;
-
   const {
     loading: isLoadingSimulation,
     value: simulation,
     error: simulationError,
+    refresh: refreshSimulation,
   } = useStreamsAppFetch(
-    ({ signal }) => {
-      if (!definition || isEmpty<RecursiveRecord[]>(sampleDocs) || isEmpty(liveDraftProcessors)) {
-        return Promise.resolve(null);
+    ({ signal }): Promise<Simulation> => {
+      if (!definition || isEmpty<FlattenRecord[]>(sampleDocs) || isEmpty(liveDraftProcessors)) {
+        // This is a hack to avoid losing the previous value of the simulation once the conditions are not met. The state management refactor will fix this.
+        return Promise.resolve(simulation!);
       }
 
       const processing = liveDraftProcessors.map(processorConverter.toAPIDefinition);
@@ -162,7 +204,8 @@ export const useProcessingSimulator = ({
 
       // Each processor should meet the minimum schema requirements to run the simulation
       if (!hasValidProcessors) {
-        return Promise.resolve(null);
+        // This is a hack to avoid losing the previous value of the simulation once the conditions are not met. The state management refactor will fix this.
+        return Promise.resolve(simulation!);
       }
 
       return streamsRepositoryClient.fetch('POST /api/streams/{name}/processing/_simulate', {
@@ -171,7 +214,7 @@ export const useProcessingSimulator = ({
           path: { name: definition.stream.name },
           body: {
             documents: sampleDocs,
-            processing: liveDraftProcessors.map(processorConverter.toAPIDefinition),
+            processing: liveDraftProcessors.map(processorConverter.toSimulateDefinition),
           },
         },
       });
@@ -189,6 +232,29 @@ export const useProcessingSimulator = ({
 
   const hasLiveChanges = !isEmpty(liveDraftProcessors);
 
+  const [selectedDocsFilter, setSelectedDocsFilter] =
+    useState<DocsFilterOption>('outcome_filter_all');
+
+  const filteredSamples = useMemo(() => {
+    if (!simulation?.documents) {
+      return sampleDocs?.map((doc) => flattenObjectNestedLast(doc)) as FlattenRecord[];
+    }
+
+    const filterDocuments = (filter: DocsFilterOption) => {
+      switch (filter) {
+        case 'outcome_filter_matched':
+          return simulation.documents.filter((doc) => doc.status === 'parsed');
+        case 'outcome_filter_unmatched':
+          return simulation.documents.filter((doc) => doc.status !== 'parsed');
+        case 'outcome_filter_all':
+        default:
+          return simulation.documents;
+      }
+    };
+
+    return filterDocuments(selectedDocsFilter).map((doc) => doc.value);
+  }, [sampleDocs, simulation?.documents, selectedDocsFilter]);
+
   return {
     hasLiveChanges,
     isLoading: isLoadingSamples || isLoadingSimulation,
@@ -196,8 +262,12 @@ export const useProcessingSimulator = ({
     refreshSamples,
     simulation,
     samples: sampleDocs ?? [],
+    filteredSamples: filteredSamples ?? [],
     tableColumns,
     watchProcessor,
+    refreshSimulation,
+    selectedDocsFilter,
+    setSelectedDocsFilter,
   };
 };
 

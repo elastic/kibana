@@ -272,18 +272,18 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
 
           for (const nesting of NESTED_DEPTHS) {
             describe(`depth = ${nesting}`, () => {
-              describe('builtin', () => {
-                const builtinWrapping = Array(nesting).fill('+1').join('');
+              describe('operators', () => {
+                const operatorsWrapping = Array(nesting).fill('+1').join('');
 
                 test('no errors', async () => {
                   const { expectErrors } = await setup();
 
                   await expectErrors(
-                    `from a_index | stats 5 + avg(doubleField) ${builtinWrapping}`,
+                    `from a_index | stats 5 + avg(doubleField) ${operatorsWrapping}`,
                     []
                   );
                   await expectErrors(
-                    `from a_index | stats 5 ${builtinWrapping} + avg(doubleField)`,
+                    `from a_index | stats 5 ${operatorsWrapping} + avg(doubleField)`,
                     []
                   );
                 });
@@ -291,16 +291,16 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
                 test('errors', async () => {
                   const { expectErrors } = await setup();
 
-                  await expectErrors(`from a_index | stats 5 ${builtinWrapping} + doubleField`, [
-                    `At least one aggregation function required in [STATS], found [5${builtinWrapping}+doubleField]`,
+                  await expectErrors(`from a_index | stats 5 ${operatorsWrapping} + doubleField`, [
+                    `At least one aggregation function required in [STATS], found [5${operatorsWrapping}+doubleField]`,
                   ]);
-                  await expectErrors(`from a_index | stats 5 + doubleField ${builtinWrapping}`, [
-                    `At least one aggregation function required in [STATS], found [5+doubleField${builtinWrapping}]`,
+                  await expectErrors(`from a_index | stats 5 + doubleField ${operatorsWrapping}`, [
+                    `At least one aggregation function required in [STATS], found [5+doubleField${operatorsWrapping}]`,
                   ]);
                   await expectErrors(
-                    `from a_index | stats 5 + doubleField ${builtinWrapping}, var0 = sum(doubleField)`,
+                    `from a_index | stats 5 + doubleField ${operatorsWrapping}, var0 = sum(doubleField)`,
                     [
-                      `At least one aggregation function required in [STATS], found [5+doubleField${builtinWrapping}]`,
+                      `At least one aggregation function required in [STATS], found [5+doubleField${operatorsWrapping}]`,
                     ]
                   );
                 });
