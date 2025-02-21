@@ -51251,6 +51251,10 @@ components:
             name:
               description: Name of the Knowledge Base Entry
               type: string
+          required:
+            - name
+        - type: object
+          properties:
             namespace:
               description: Kibana Space, defaults to 'default' space
               type: string
@@ -51258,10 +51262,19 @@ components:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+              nullable: true
               type: array
           required:
-            - name
             - namespace
+            - users
+        - type: object
+          properties:
+            users:
+              description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
+              items:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+              type: array
+          required:
             - users
         - $ref: '#/components/schemas/Security_AI_Assistant_API_ResponseFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryResponseFields'
@@ -51279,6 +51292,7 @@ components:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+              nullable: true
               type: array
           required:
             - name
@@ -51333,6 +51347,7 @@ components:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+              nullable: true
               type: array
           required:
             - id
@@ -51404,6 +51419,10 @@ components:
             name:
               description: Name of the Knowledge Base Entry
               type: string
+          required:
+            - name
+        - type: object
+          properties:
             namespace:
               description: Kibana Space, defaults to 'default' space
               type: string
@@ -51411,10 +51430,19 @@ components:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+              nullable: true
               type: array
           required:
-            - name
             - namespace
+            - users
+        - type: object
+          properties:
+            users:
+              description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
+              items:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+              type: array
+          required:
             - users
         - $ref: '#/components/schemas/Security_AI_Assistant_API_ResponseFields'
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryResponseFields'
@@ -51432,6 +51460,7 @@ components:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+              nullable: true
               type: array
           required:
             - name
@@ -51493,6 +51522,7 @@ components:
               description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
               items:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+              nullable: true
               type: array
           required:
             - id
@@ -51667,9 +51697,9 @@ components:
       discriminator:
         propertyName: type
     Security_AI_Assistant_API_KnowledgeBaseResource:
-      description: Knowledge Base resource name for grouping entries, e.g. 'esql', 'user', etc
+      description: Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc
       enum:
-        - esql
+        - security_labs
         - user
       type: string
     Security_AI_Assistant_API_KnowledgeBaseResponse:
