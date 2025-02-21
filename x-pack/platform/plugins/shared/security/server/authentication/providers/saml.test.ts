@@ -542,7 +542,6 @@ describe('SAMLAuthenticationProvider', () => {
 
     describe('IdP initiated login with existing session', () => {
       it('fails if new SAML Response is rejected and provider is not configured with specific realm.', async () => {
-        console.log('starting');
         const request = httpServerMock.createKibanaRequest({ headers: {} });
         const authorization = 'Bearer some-valid-token';
 
@@ -831,7 +830,7 @@ describe('SAMLAuthenticationProvider', () => {
             'https://idp-host/path/login?SAMLRequest=some%20request%20',
             {
               state: {
-                requestIds: [mockSAMLSet1.requestId],
+                requestIds: ['someRequestId'],
                 redirectURL: '/test-base-path/some-path#some-fragment',
                 realm: 'test-realm',
               },
@@ -873,7 +872,7 @@ describe('SAMLAuthenticationProvider', () => {
             'https://idp-host/path/login?SAMLRequest=some%20request%20',
             {
               state: {
-                requestIds: [mockSAMLSet1.requestId],
+                requestIds: ['someRequestId'],
                 redirectURL: '/test-base-path/some-path#some-fragment',
                 realm: 'test-realm',
               },
@@ -921,7 +920,7 @@ describe('SAMLAuthenticationProvider', () => {
             'https://idp-host/path/login?SAMLRequest=some%20request%20',
             {
               state: {
-                requestIds: [mockSAMLSet1.requestId],
+                requestIds: ['someRequestId'],
                 redirectURL: '/test-base-path/some-path#some-fragment',
                 realm: 'test-realm',
               },
@@ -1039,12 +1038,13 @@ describe('SAMLAuthenticationProvider', () => {
         path: '/s/foo/some-path',
         query: { [AUTH_URL_HASH_QUERY_STRING_PARAMETER]: '#some-fragment' },
       });
+
       await expect(provider.authenticate(request)).resolves.toEqual(
         AuthenticationResult.redirectTo(
           'https://idp-host/path/login?SAMLRequest=some%20request%20',
           {
             state: {
-              requestIds: [mockSAMLSet1.requestId],
+              requestIds: ['someRequestId'],
               redirectURL: '/mock-server-basepath/s/foo/some-path#some-fragment',
             },
           }

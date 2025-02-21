@@ -814,7 +814,6 @@ export class Authenticator {
 
       existingSessionValue = null;
     } else if (sessionHasBeenAuthenticated) {
-      // TODO KCG Check here for unauthc session being invalidated for authc session
       this.logger.debug(
         'Session is authenticated, existing unauthenticated session will be invalidated.'
       );

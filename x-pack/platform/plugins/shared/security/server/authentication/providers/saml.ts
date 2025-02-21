@@ -163,21 +163,14 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
 
     const { samlResponse, relayState } = attempt;
 
-    console.log('before state check');
-
     const authenticationResult = state
       ? await this.authenticateViaState(request, state)
       : AuthenticationResult.notHandled();
 
-    console.log('after state check');
     // Let's check if user is redirected to Kibana from IdP with valid SAMLResponse.
     if (authenticationResult.notHandled()) {
-      console.log('we gonna loginWithSAMLResponse');
       return await this.loginWithSAMLResponse(request, samlResponse, relayState, state);
     }
-    console.log('we gonna do somethin else');
-
-    console.log(authenticationResult);
 
     // If user has been authenticated via session or failed to do so because of expired access token,
     // but request also includes SAML payload we should check whether this payload is for the exactly
@@ -361,7 +354,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       return AuthenticationResult.failed(Boom.badRequest(message));
     }
 
-    // When we don't have state, and hence requestIds, we assume that SAMLResponse came from an IdP initiated login.
+    // When we don't have requestIds we assume that SAMLResponse came from an IdP initiated login.
     const isIdPInitiatedLogin = !stateRequestIds?.length;
 
     this.logger.debug(
@@ -508,12 +501,15 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
   ) {
     this.logger.info('Trying to log in with SAML response payload and existing valid session.');
 
+    // If there are requestIds we want to pass the state
+    const shouldPassState = (existingState?.requestIds?.length ?? 0) > 0;
+
     // First let's try to authenticate via SAML Response payload.
     const payloadAuthenticationResult = await this.loginWithSAMLResponse(
       request,
       samlResponse,
       relayState,
-      existingState
+      shouldPassState ? existingState : null
     );
 
     if (payloadAuthenticationResult.failed() || payloadAuthenticationResult.notHandled()) {
@@ -795,7 +791,7 @@ export class SAMLAuthenticationProvider extends BaseAuthenticationProvider {
       )}`,
       // Here we indicate that current session, if any, should be invalidated. It is a no-op for the
       // initial handshake, but is essential when both access and refresh tokens are expired.
-      { state }
+      { state: state ? state : null }
     );
   }
 }
