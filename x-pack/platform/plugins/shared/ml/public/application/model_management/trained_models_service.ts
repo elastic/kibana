@@ -505,13 +505,7 @@ export class TrainedModelsService {
 
     return apiParams.adaptiveAllocationsParams
       ? {
-          adaptive_allocations: {
-            enabled: apiParams.adaptiveAllocationsParams.enabled,
-            min_number_of_allocations:
-              apiParams.adaptiveAllocationsParams.min_number_of_allocations,
-            max_number_of_allocations:
-              apiParams.adaptiveAllocationsParams.max_number_of_allocations,
-          },
+          adaptive_allocations: apiParams.adaptiveAllocationsParams,
         }
       : {
           number_of_allocations: apiParams.deploymentParams.number_of_allocations!,
