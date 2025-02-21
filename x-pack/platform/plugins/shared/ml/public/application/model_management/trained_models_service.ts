@@ -221,7 +221,7 @@ export class TrainedModelsService {
         modelIds.map((modelId) =>
           this.trainedModelsApiService.deleteTrainedModel({
             modelId,
-            ...options,
+            options,
           })
         )
       );
