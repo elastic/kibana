@@ -168,6 +168,7 @@ export function ConversationList({
                           onClick={(event) => onClickConversation(event, conversation.id)}
                           extraAction={{
                             iconType: 'trash',
+                            color: 'danger',
                             'aria-label': i18n.translate(
                               'xpack.aiAssistant.conversationList.deleteConversationIconLabel',
                               {
