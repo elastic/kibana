@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { FindPacksRequestQuery, FindPacksResponse } from './find_packs.gen';
+import { FindPacksRequestQuery, FindPacksResponse, FindPackResponse } from './find_packs.gen';
 import { CreatePacksRequestBody, CreatePacksResponse } from './create_pack.gen';
 import { PackId, DefaultSuccessResponse } from '../model/schema/common_attributes.gen';
 import { UpdatePacksRequestBody } from './update_packs.gen';
@@ -56,7 +56,7 @@ export type OsqueryGetPacksDetailsRequestParamsInput = z.input<
 >;
 
 export type OsqueryGetPacksDetailsResponse = z.infer<typeof OsqueryGetPacksDetailsResponse>;
-export const OsqueryGetPacksDetailsResponse = DefaultSuccessResponse;
+export const OsqueryGetPacksDetailsResponse = FindPackResponse;
 
 export type OsqueryUpdatePacksRequestParams = z.infer<typeof OsqueryUpdatePacksRequestParams>;
 export const OsqueryUpdatePacksRequestParams = z.object({
