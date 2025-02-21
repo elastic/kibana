@@ -47,20 +47,33 @@ export async function handleCSV({
     throw new UnparseableCSVFormatError(tempErrors as CSVParseError[]);
   }
 
+  // Some basic information we'll need later
   const prefix = [packageName, dataStreamName];
 
   // What columns does the LLM suggest?
   const llmProvidedColumns = (state.samplesFormat.columns || []).map(toSafeColumnName);
-  const needColumns = totalColumnCount(temporaryColumns, tempResults);
 
-  // What columns do we get by parsing the header row, if any?
+  // What columns do we get by parsing the header row, if any exists?
   const headerColumns: Array<string | undefined> = [];
-  const dropProcessors: ESProcessorItem[] = [];
   if (state.samplesFormat.header) {
     const headerResults = tempResults[0];
     headerColumns.push(...columnsFromHeader(temporaryColumns, headerResults));
+  }
 
-    const dropValues = temporaryColumns.reduce((acc, column, index) => {
+  // Combine all that information into a single list of columns
+  const columns: string[] = Array.from(
+    yieldUniqueColumnNames(
+      totalColumnCount(temporaryColumns, tempResults),
+      [llmProvidedColumns, headerColumns],
+      temporaryColumns
+    )
+  );
+
+  // Instantiate the processors to handle the CSV format
+  const dropProcessors: ESProcessorItem[] = [];
+  if (state.samplesFormat.header) {
+    const headerResults = tempResults[0];
+    const dropValues = columns.reduce((acc, column, index) => {
       const headerValue = headerResults[temporaryColumns[index]];
       if (typeof headerValue === 'string') {
         acc[column] = headerValue;
@@ -76,17 +89,10 @@ export async function handleCSV({
     );
     dropProcessors.push(dropProcessor);
   }
-
-  // Combine all that information into a single list of columns
-  const columns: string[] = Array.from(
-    yieldUniqueColumnNames(needColumns, [llmProvidedColumns, headerColumns], temporaryColumns)
-  );
   const prefixedColumns = prefixColumns(columns, prefix);
+  const csvHandlingProcessors = [createCSVProcessor('message', prefixedColumns), ...dropProcessors];
 
-  // Instantiate the processors to handle the CSV format
-  const csvProcessor = createCSVProcessor('message', prefixedColumns);
-  const csvHandlingProcessors = [csvProcessor, ...dropProcessors];
-
+  // Test the processors on the samples provided
   const { pipelineResults: finalResults, errors: finalErrors } = await createJSONInput(
     csvHandlingProcessors,
     samples,
