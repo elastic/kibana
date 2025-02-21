@@ -76,10 +76,8 @@ export class ShareMenuManager {
     publicAPIEnabled,
     ...startServices
   }: ShowShareMenuOptions & {
-    anchorElement: HTMLElement;
     menuItems: ShareConfigs[];
     onClose: () => void;
-    isDirty: boolean;
     userProfile: UserProfileService;
     theme: ThemeServiceStart;
     i18n: CoreStart['i18n'];

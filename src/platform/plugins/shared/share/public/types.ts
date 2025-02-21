@@ -307,7 +307,7 @@ export interface UrlParamExtension {
 
 /** @public */
 export interface ShowShareMenuOptions extends Omit<ShareContext, 'onClose'> {
-  anchorElement?: HTMLElement;
+  anchorElement: HTMLElement;
   allowShortUrl: boolean;
   onClose?: () => void;
   publicAPIEnabled?: boolean;
