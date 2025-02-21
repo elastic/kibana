@@ -45,8 +45,9 @@ export interface SharePublicSetup {
   setAnonymousAccessServiceProvider: (provider: () => AnonymousAccessServiceContract) => void;
 
   registerShareIntegration: ShareRegistry['registerShareIntegration'];
+
   /**
-   * @deprecated Use `registerShareIntegration` instead.
+   * @deprecated Use {@link registerShareIntegration} instead.
    */
   register: ShareRegistry['register'];
 }
@@ -151,7 +152,7 @@ export class SharePlugin
     const sharingContextMenuStart = this.shareContextMenu.start({
       core,
       isServerless,
-      shareRegistry: this.shareRegistry.start({
+      resolveShareItemsForShareContext: this.shareRegistry.start({
         urlService: this.url!,
         anonymousAccessServiceProvider: () => this.anonymousAccessServiceProvider!(),
       }),
