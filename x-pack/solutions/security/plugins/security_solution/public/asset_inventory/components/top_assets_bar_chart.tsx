@@ -6,9 +6,9 @@
  */
 import React from 'react';
 import { Chart, Settings, Axis, BarSeries, Position, ScaleType } from '@elastic/charts';
-import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
+import type { AggregationResult } from '../hooks/use_fetch_chart_data';
 
 const chartTitle = i18n.translate(
   'xpack.securitySolution.assetInventory.topAssetsBarChart.chartTitle',
@@ -26,42 +26,12 @@ const yAxisTitle = i18n.translate(
 
 const chartStyles = { height: '260px' };
 
-export interface AssetGroup {
-  category: string;
-  source: string;
-  count: number;
-}
-
-// Example output:
-//
-// [
-//   { category: 'cloud-compute', source: 'gcp-compute', count: 500, },
-//   { category: 'cloud-compute', source: 'aws-security', count: 300, },
-//   { category: 'cloud-storage', source: 'gcp-compute', count: 221, },
-//   { category: 'cloud-storage', source: 'aws-security', count: 117, },
-// ];
-const groupByCategoryAndSource = (entities: DataTableRecord[]): AssetGroup[] => {
-  const counts = new Map<string, number>();
-  const delimiter = '::';
-
-  for (const entity of entities) {
-    const category = entity.flattened['entity.category'] as string; // TODO verify attribute
-    const source = entity.flattened['entity.type'] as string; // TODO verify attribute
-    const key = `${category}${delimiter}${source}`;
-    counts.set(key, (counts.get(key) || 0) + 1);
-  }
-
-  return Array.from(counts, ([key, count]) => {
-    const [category, source] = key.split(delimiter);
-    return { category, source, count };
-  });
-};
-
 export interface TopAssetsBarChartProps {
-  entities: DataTableRecord[];
+  loading: boolean;
+  entities: AggregationResult[];
 }
 
-export const TopAssetsBarChart = ({ entities }: TopAssetsBarChartProps) => {
+export const TopAssetsBarChart = ({ loading, entities }: TopAssetsBarChartProps) => {
   const baseTheme = useElasticChartsTheme();
   return (
     <div css={chartStyles}>
@@ -94,16 +64,7 @@ export const TopAssetsBarChart = ({ entities }: TopAssetsBarChartProps) => {
           splitSeriesAccessors={['source']}
           stackAccessors={['category']}
           minBarHeight={1}
-          data={groupByCategoryAndSource(entities).sort((a, b) => b.count - a.count)}
-          // TODO Remove mocked data
-          // data={[
-          //   { category: 'cloud-compute', source: 'gcp-compute', count: 500 },
-          //   { category: 'cloud-compute', source: 'aws-security', count: 300 },
-          //   { category: 'cloud-storage', source: 'gcp-compute', count: 221 },
-          //   { category: 'cloud-storage', source: 'aws-security', count: 117 },
-          //   { category: 'other', source: 'aws-security', count: 42 },
-          //   { category: 'other', source: 'gcp-compute', count: 38 },
-          // ]}
+          data={entities}
         />
       </Chart>
     </div>

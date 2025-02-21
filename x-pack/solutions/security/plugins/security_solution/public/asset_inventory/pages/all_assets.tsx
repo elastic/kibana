@@ -61,6 +61,7 @@ import {
   type URLQuery,
 } from '../hooks/use_asset_inventory_data_table';
 import { useFetchData } from '../hooks/use_fetch_data';
+import { useFetchChartData } from '../hooks/use_fetch_chart_data';
 import { DEFAULT_VISIBLE_ROWS_PER_PAGE, MAX_ASSETS_TO_LOAD } from '../constants';
 
 const gridStyle: EuiDataGridStyle = {
@@ -217,6 +218,17 @@ const AllAssets = ({
     sort,
     enabled: !queryError,
     pageSize: DEFAULT_VISIBLE_ROWS_PER_PAGE,
+  });
+
+  const {
+    data: chartData,
+    // error: fetchChartDataError,
+    isFetching: isFetchingChartData,
+    isLoading: isLoadingChartData,
+  } = useFetchChartData({
+    query,
+    sort,
+    enabled: !queryError,
   });
 
   const rows = getRowsFromPages(rowsData?.pages);
@@ -448,8 +460,11 @@ const AllAssets = ({
             setUrlQuery({ filters: newFilters });
           }}
         />
-        {dataView && loadingState === DataLoadingState.loaded && totalHits > 0 ? (
-          <TopAssetsBarChart entities={rows} />
+        {dataView ? (
+          <TopAssetsBarChart
+            loading={isLoadingChartData || isFetchingChartData}
+            entities={!!chartData && chartData.length > 0 ? chartData : []}
+          />
         ) : null}
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <div
