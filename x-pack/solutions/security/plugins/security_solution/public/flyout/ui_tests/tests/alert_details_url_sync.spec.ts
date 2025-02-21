@@ -5,16 +5,28 @@
  * 2.0.
  */
 
-import { test } from '@kbn/scout-security';
+import { expect, test } from '@kbn/scout-security';
 
-test.describe('test', { tag: ['@svlSecurity'] }, () => {
+const RIGHT = 'right';
+
+test.describe('Expandable flyout state sync', { tag: ['@svlSecurity'] }, () => {
   test.beforeEach(async ({ browserAuth, detectionRuleApi }) => {
     await detectionRuleApi.deleteAll();
     await detectionRuleApi.createCustomQueryRule();
     await browserAuth.loginAsPlatformEngineer();
   });
 
-  test('body of the test', async ({ pageObjects: { entityAnalyticsPage } }) => {
-    await entityAnalyticsPage.navigate();
+  test('should test flyout url sync', async ({ pageObjects: { alertsTablePage } }) => {
+    await alertsTablePage.navigate();
+    
+    const urlBeforeAlertDetails = await alertsTablePage.getCurrentUrl();
+    expect(urlBeforeAlertDetails).not.toContain(RIGHT);
+    
+    await alertsTablePage.expandAlertDetailsFlyout();
+    
+    const urlAfterAlertDetails = await alertsTablePage.getCurrentUrl();
+    expect(urlAfterAlertDetails).toContain(RIGHT);
+
+    
   });
 });

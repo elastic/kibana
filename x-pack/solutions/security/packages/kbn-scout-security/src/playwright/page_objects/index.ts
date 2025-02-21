@@ -6,15 +6,15 @@
  */
 
 import { PageObjects, ScoutPage, createLazyPageObject } from '@kbn/scout';
-import { EntityAnalyticsPage } from './entity_analytics';
+import { AlertsTablePage } from './alerts_table';
 
 export interface SecurityPageObjects extends PageObjects {
-  entityAnalyticsPage: EntityAnalyticsPage;
+  alertsTablePage: AlertsTablePage;
 }
 
 export function extendPageObjects(pageObjects: PageObjects, page: ScoutPage): SecurityPageObjects {
   return {
     ...pageObjects,
-    entityAnalyticsPage: createLazyPageObject(EntityAnalyticsPage, page),
+    alertsTablePage: createLazyPageObject(AlertsTablePage, page),
   };
 }
