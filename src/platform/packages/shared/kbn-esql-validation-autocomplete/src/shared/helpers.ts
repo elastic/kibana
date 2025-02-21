@@ -25,7 +25,7 @@ import {
   ESQLParamLiteral,
   ESQLProperNode,
 } from '@kbn/esql-ast/src/types';
-import { aggregationFunctionDefinitions } from '../definitions/generated/aggregation_functions';
+import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
 import { commandDefinitions } from '../definitions/commands';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
@@ -50,6 +50,7 @@ import {
   FunctionReturnType,
   ArrayType,
   SupportedDataType,
+  FunctionDefinitionTypes,
 } from '../definitions/types';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
@@ -146,7 +147,7 @@ function buildFunctionLookup() {
     fnLookups = operatorsDefinitions
       .concat(
         scalarFunctionDefinitions,
-        aggregationFunctionDefinitions,
+        aggFunctionDefinitions,
         groupingFunctionDefinitions,
         getTestFunctions()
       )
@@ -652,7 +653,7 @@ export function shouldBeQuotedText(
 }
 
 export const isAggFunction = (arg: ESQLFunction): boolean =>
-  getFunctionDefinition(arg.name)?.type === 'agg';
+  getFunctionDefinition(arg.name)?.type === FunctionDefinitionTypes.AGG;
 
 export const isParam = (x: unknown): x is ESQLParamLiteral =>
   !!x &&
