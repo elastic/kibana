@@ -7,9 +7,11 @@ components:
   schemas:
     UpdatePacksRequestBody:
       type: object
+      example:
+        name: 'updated_my_pack_name'
       properties:
-        id:
-          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackId'
+        name:
+          $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/PackName'
         description:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DescriptionOrUndefined'
         enabled:
@@ -20,3 +22,8 @@ components:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/Shards'
         queries:
           $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/ObjectQueries'
+    UpdatePacksResponse:
+        type: object
+        properties: { }
+        example:
+            data: { }

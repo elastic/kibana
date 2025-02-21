@@ -108,4 +108,4 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '../model/schema/common_attributes.schema.yaml#/components/schemas/DefaultSuccessResponse'
+                $ref: './update_packs.schema.yaml#/components/schemas/UpdatePacksResponse'
