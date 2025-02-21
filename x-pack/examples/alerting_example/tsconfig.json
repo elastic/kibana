@@ -31,5 +31,6 @@
     "@kbn/data-views-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/response-ops-rule-form",
+    "@kbn/fields-metadata-plugin",
   ]
 }
