@@ -117,7 +117,8 @@
     "@kbn/entities-schema",
     "@kbn/zod",
     "@kbn/observability-utils-server",
-    "@kbn/observability-utils-common"
+    "@kbn/observability-utils-common",
+    "@kbn/core-test-helpers-model-versions"
   ],
   "exclude": ["target/**/*"]
 }
