@@ -12,161 +12,326 @@ import {
   EXCEPTION_LIST_ITEM_URL,
 } from '@kbn/securitysolution-list-constants';
 import expect from '@kbn/expect';
-import { buildSpaceOwnerIdTag } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/utils';
+import {
+  buildPerPolicyTag,
+  buildSpaceOwnerIdTag,
+} from '@kbn/security-solution-plugin/common/endpoint/service/artifacts/utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { exceptionItemToCreateExceptionItem } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { Role } from '@kbn/security-plugin-types-common';
+import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
+import { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
 import { createSupertestErrorLogger } from '../../utils';
 import { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
 import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
   const utils = getService('securitySolutionUtils');
-  const endpointTestresources = getService('endpointTestResources');
+  const rolesUsersProvider = getService('rolesUsersProvider');
   const endpointArtifactTestResources = getService('endpointArtifactTestResources');
+  const policyTestResources = getService('endpointPolicyTestResources');
   const kbnServer = getService('kibanaServer');
   const log = getService('log');
 
   describe('@ess @serverless @skipInServerlessMKI Endpoint Artifacts space awareness support', function () {
-    let adminSupertest: TestAgent;
-    let dataSpaceA: Awaited<ReturnType<typeof endpointTestresources.loadEndpointData>>;
-    let dataSpaceB: Awaited<ReturnType<typeof endpointTestresources.loadEndpointData>>;
+    const spaceOneId = 'space_one';
+    const spaceTwoId = 'space_two';
+
+    let artifactManagerRole: Role;
+    let globalArtifactManagerRole: Role;
+    let supertestArtifactManager: TestAgent;
+    let supertestGlobalArtifactManager: TestAgent;
+    let spaceOnePolicy: PolicyTestResourceInfo;
 
     before(async () => {
-      adminSupertest = await utils.createSuperTest();
+      // For testing, we're using the `t3_analyst` role which already has All privileges
+      // to all artifacts and manipulating that role definition to create two new roles/users
+      artifactManagerRole = Object.assign(
+        rolesUsersProvider.loader.getPreDefinedRole('t3_analyst'),
+        { name: 'artifactManager' }
+      );
 
-      await Promise.all([
-        ensureSpaceIdExists(kbnServer, 'space_a', { log }),
-        ensureSpaceIdExists(kbnServer, 'space_b', { log }),
+      if (artifactManagerRole.kibana[0].feature.siemV2.includes('global_artifact_management_all')) {
+        artifactManagerRole.kibana[0].feature.siemV2 =
+          artifactManagerRole.kibana[0].feature.siemV2.filter(
+            (privilege) => privilege !== 'global_artifact_management_all'
+          );
+      }
+
+      globalArtifactManagerRole = Object.assign(
+        rolesUsersProvider.loader.getPreDefinedRole('t3_analyst'),
+        { name: 'globalArtifactManager' }
+      );
+
+      if (
+        !globalArtifactManagerRole.kibana[0].feature.siemV2.includes(
+          'global_artifact_management_all'
+        )
+      ) {
+        globalArtifactManagerRole.kibana[0].feature.siemV2.push('global_artifact_management_all');
+      }
+
+      const [artifactManagerUser, globalArtifactManagerUser] = await Promise.all([
+        rolesUsersProvider.loader.create(artifactManagerRole),
+        rolesUsersProvider.loader.create(globalArtifactManagerRole),
       ]);
 
-      dataSpaceA = await endpointTestresources.loadEndpointData({
-        spaceId: 'space_a',
-        generatorSeed: Math.random().toString(32),
-      });
-
-      dataSpaceB = await endpointTestresources.loadEndpointData({
-        spaceId: 'space_b',
-        generatorSeed: Math.random().toString(32),
-      });
-
-      log.verbose(
-        `mocked data loaded:\nSPACE A:\n${JSON.stringify(
-          dataSpaceA,
-          null,
-          2
-        )}\nSPACE B:\n${JSON.stringify(dataSpaceB, null, 2)}`
+      supertestArtifactManager = await utils.createSuperTest(
+        artifactManagerUser.username,
+        artifactManagerUser.password
       );
+      supertestGlobalArtifactManager = await utils.createSuperTest(
+        globalArtifactManagerUser.username,
+        globalArtifactManagerUser.password
+      );
+
+      await Promise.all([
+        ensureSpaceIdExists(kbnServer, spaceOneId, { log }),
+        ensureSpaceIdExists(kbnServer, spaceTwoId, { log }),
+      ]);
+
+      spaceOnePolicy = await policyTestResources.createPolicy();
     });
 
     // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
     // to do it manually
     after(async () => {
-      if (dataSpaceA) {
-        await dataSpaceA.unloadEndpointData();
+      if (artifactManagerRole) {
+        await rolesUsersProvider.loader.delete(artifactManagerRole.name);
         // @ts-expect-error
-        dataSpaceA = undefined;
+        artifactManagerRole = undefined;
       }
-      if (dataSpaceB) {
-        await dataSpaceB.unloadEndpointData();
+
+      if (globalArtifactManagerRole) {
+        await rolesUsersProvider.loader.delete(globalArtifactManagerRole.name);
         // @ts-expect-error
-        dataSpaceB = undefined;
+        globalArtifactManagerRole = undefined;
+      }
+
+      if (spaceOnePolicy) {
+        await spaceOnePolicy.cleanup();
+        // @ts-expect-error
+        spaceOnePolicy = undefined;
       }
     });
 
-    describe(`Artifact management (via Lists plugin)`, () => {
-      const artifactLists = Object.keys(ENDPOINT_ARTIFACT_LISTS);
+    const artifactLists = Object.keys(ENDPOINT_ARTIFACT_LISTS);
 
-      for (const artifactList of artifactLists) {
-        const listInfo =
-          ENDPOINT_ARTIFACT_LISTS[artifactList as keyof typeof ENDPOINT_ARTIFACT_LISTS];
+    for (const artifactList of artifactLists) {
+      const listInfo =
+        ENDPOINT_ARTIFACT_LISTS[artifactList as keyof typeof ENDPOINT_ARTIFACT_LISTS];
 
-        describe(`for ${listInfo.name}`, () => {
-          let itemDataSpaceA: ArtifactTestData;
+      describe(`for ${listInfo.name}`, () => {
+        let spaceOnePerPolicyArtifact: ArtifactTestData;
+        let spaceOneGlobalArtifact: ArtifactTestData;
 
-          beforeEach(async () => {
-            itemDataSpaceA = await endpointArtifactTestResources.createArtifact(
-              listInfo.id,
-              { tags: [] },
-              { supertest: adminSupertest, spaceId: dataSpaceA.spaceId }
-            );
+        beforeEach(async () => {
+          spaceOnePerPolicyArtifact = await endpointArtifactTestResources.createArtifact(
+            listInfo.id,
+            { tags: [buildPerPolicyTag(spaceOnePolicy.packagePolicy.id)] },
+            { supertest: supertestArtifactManager, spaceId: spaceOneId }
+          );
+
+          spaceOneGlobalArtifact = await endpointArtifactTestResources.createArtifact(
+            listInfo.id,
+            { tags: [GLOBAL_ARTIFACT_TAG] },
+            { supertest: supertestGlobalArtifactManager, spaceId: spaceOneId }
+          );
+        });
+
+        afterEach(async () => {
+          if (spaceOnePerPolicyArtifact) {
+            await spaceOnePerPolicyArtifact.cleanup();
+            // @ts-expect-error assigning `undefined`
+            spaceOnePerPolicyArtifact = undefined;
+          }
+        });
+
+        it('should add owner space id when item is created', async () => {
+          expect(spaceOnePerPolicyArtifact.artifact.tags).to.include.string(
+            buildSpaceOwnerIdTag(spaceOneId)
+          );
+        });
+
+        it('should not add owner space id during artifact update if one is already present', async () => {
+          const { body } = await supertestArtifactManager
+            .put(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
+            .set('elastic-api-version', '2023-10-31')
+            .set('x-elastic-internal-origin', 'kibana')
+            .set('kbn-xsrf', 'true')
+            .on('error', createSupertestErrorLogger(log))
+            .send(
+              exceptionItemToCreateExceptionItem({
+                ...spaceOnePerPolicyArtifact.artifact,
+                description: 'item was updated',
+              })
+            )
+            .expect(200);
+
+          expect((body as ExceptionListItemSchema).tags).to.eql(
+            spaceOnePerPolicyArtifact.artifact.tags
+          );
+        });
+
+        describe('and user does NOT have global artifact management privilege', () => {
+          it('should error when attempting to create artifact with additional owner space id tags', async () => {
+            await supertestArtifactManager
+              .post(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
+              .set('elastic-api-version', '2023-10-31')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+              .send(
+                Object.assign(
+                  exceptionItemToCreateExceptionItem({
+                    ...spaceOnePerPolicyArtifact.artifact,
+                    tags: [buildSpaceOwnerIdTag('foo')],
+                  }),
+                  { item_id: undefined }
+                )
+              )
+              .expect(403);
           });
 
-          afterEach(async () => {
-            if (itemDataSpaceA) {
-              await itemDataSpaceA.cleanup();
-              // @ts-expect-error assigning `undefined`
-              itemDataSpaceA = undefined;
-            }
+          it('should error when attempting to update artifact with different owner space id tags', async () => {
+            await supertestArtifactManager
+              .put(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
+              .set('elastic-api-version', '2023-10-31')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+              .send(
+                exceptionItemToCreateExceptionItem({
+                  ...spaceOnePerPolicyArtifact.artifact,
+                  tags: [buildSpaceOwnerIdTag('foo')],
+                })
+              )
+              .expect(403);
           });
 
-          it('should add owner space id when item is created', async () => {
-            expect(itemDataSpaceA.artifact.tags).to.include.string(
-              buildSpaceOwnerIdTag(dataSpaceA.spaceId)
-            );
+          // TODO:PT Un-skip in next PR. I got a little ahead of myself and added a test for the change that wil come with the next PR.
+          it.skip('should error if attempting to update a global artifact', async () => {
+            await supertestArtifactManager
+              .put(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
+              .set('elastic-api-version', '2023-10-31')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+              .send(
+                exceptionItemToCreateExceptionItem({
+                  ...spaceOneGlobalArtifact.artifact,
+                  description: 'updating a global here',
+                })
+              )
+              .expect(403);
           });
 
-          it('should add active owner space id when item is created even if payload has a owner space id tag', async () => {
-            const { body } = await adminSupertest
-              .post(addSpaceIdToPath('/', dataSpaceA.spaceId, EXCEPTION_LIST_ITEM_URL))
+          // TODO:PT Un-skip in next PR. I got a little ahead of myself and added a test for the change that wil come with the next PR.
+          it.skip('should error when attempting to change a global artifact to per-policy', async () => {
+            await supertestArtifactManager
+              .put(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
+              .set('elastic-api-version', '2023-10-31')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log).ignoreCodes([403]))
+              .send(
+                exceptionItemToCreateExceptionItem({
+                  ...spaceOneGlobalArtifact.artifact,
+                  tags: spaceOneGlobalArtifact.artifact.tags
+                    .filter((tag) => tag !== GLOBAL_ARTIFACT_TAG)
+                    .concat(buildPerPolicyTag(spaceOnePolicy.packagePolicy.id)),
+                })
+              )
+              .expect(403);
+          });
+        });
+
+        describe('and user has privilege to manage global artifacts', () => {
+          it('should allow creating artifact with additional owner space id tags', async () => {
+            const { body } = await supertestGlobalArtifactManager
+              .post(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
               .set('elastic-api-version', '2023-10-31')
               .set('x-elastic-internal-origin', 'kibana')
               .set('kbn-xsrf', 'true')
               .on('error', createSupertestErrorLogger(log))
               .send(
-                exceptionItemToCreateExceptionItem({
-                  ...itemDataSpaceA.artifact,
-                  tags: [buildSpaceOwnerIdTag('foo')],
-                  item_id: '',
-                })
+                Object.assign(
+                  exceptionItemToCreateExceptionItem({
+                    ...spaceOnePerPolicyArtifact.artifact,
+                    tags: [buildSpaceOwnerIdTag('foo')],
+                  }),
+                  { item_id: undefined }
+                )
               )
               .expect(200);
 
             expect((body as ExceptionListItemSchema).tags).to.eql([
               buildSpaceOwnerIdTag('foo'),
-              buildSpaceOwnerIdTag(dataSpaceA.spaceId),
+              buildSpaceOwnerIdTag(spaceOneId),
             ]);
           });
 
-          it('should not add owner space id during artifact update if one is already present', async () => {
-            const { body } = await adminSupertest
-              .put(addSpaceIdToPath('/', dataSpaceA.spaceId, EXCEPTION_LIST_ITEM_URL))
+          it('should add owner space id when item is updated without having an owner tag', async () => {
+            const { body } = await supertestGlobalArtifactManager
+              .put(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
               .set('elastic-api-version', '2023-10-31')
               .set('x-elastic-internal-origin', 'kibana')
               .set('kbn-xsrf', 'true')
               .on('error', createSupertestErrorLogger(log))
               .send(
                 exceptionItemToCreateExceptionItem({
-                  ...itemDataSpaceA.artifact,
-                  description: 'item was updated',
-                })
-              )
-              .expect(200);
-
-            expect((body as ExceptionListItemSchema).tags).to.eql(itemDataSpaceA.artifact.tags);
-          });
-
-          it('should add owner space id when item is updated, if one is not present', async () => {
-            const { body } = await adminSupertest
-              .put(addSpaceIdToPath('/', dataSpaceA.spaceId, EXCEPTION_LIST_ITEM_URL))
-              .set('elastic-api-version', '2023-10-31')
-              .set('x-elastic-internal-origin', 'kibana')
-              .set('kbn-xsrf', 'true')
-              .on('error', createSupertestErrorLogger(log))
-              .send(
-                exceptionItemToCreateExceptionItem({
-                  ...itemDataSpaceA.artifact,
+                  ...spaceOnePerPolicyArtifact.artifact,
                   tags: [],
                 })
               )
               .expect(200);
 
             expect((body as ExceptionListItemSchema).tags).to.eql([
-              buildSpaceOwnerIdTag(dataSpaceA.spaceId),
+              buildSpaceOwnerIdTag(spaceOneId),
             ]);
           });
+
+          it('should allow creation of global artifacts', async () => {
+            // test is already covered by the fact that we created a global artifact for testing
+            expect(spaceOneGlobalArtifact.artifact).to.not.equal(undefined);
+          });
+
+          it('should allow updating of global artifacts', async () => {
+            await supertestGlobalArtifactManager
+              .put(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
+              .set('elastic-api-version', '2023-10-31')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log))
+              .send(
+                exceptionItemToCreateExceptionItem({
+                  ...spaceOneGlobalArtifact.artifact,
+                  description: 'updating of global artifacts',
+                })
+              )
+              .expect(200);
+          });
+
+          it('should allow converting global artifact to per-policy', async () => {
+            await supertestGlobalArtifactManager
+              .put(addSpaceIdToPath('/', spaceOneId, EXCEPTION_LIST_ITEM_URL))
+              .set('elastic-api-version', '2023-10-31')
+              .set('x-elastic-internal-origin', 'kibana')
+              .set('kbn-xsrf', 'true')
+              .on('error', createSupertestErrorLogger(log))
+              .send(
+                exceptionItemToCreateExceptionItem({
+                  ...spaceOneGlobalArtifact.artifact,
+                  tags: spaceOneGlobalArtifact.artifact.tags
+                    .filter((tag) => tag !== GLOBAL_ARTIFACT_TAG)
+                    .concat(buildPerPolicyTag(spaceOnePolicy.packagePolicy.id)),
+                })
+              )
+              .expect(200);
+          });
         });
-      }
-    });
+      });
+    }
   });
 }

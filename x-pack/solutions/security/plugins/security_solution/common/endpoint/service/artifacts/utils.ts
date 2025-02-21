@@ -52,6 +52,14 @@ export const isPolicySelectionTag: TagFilter = (tag) =>
   tag.startsWith(BY_POLICY_ARTIFACT_TAG_PREFIX) || tag === GLOBAL_ARTIFACT_TAG;
 
 /**
+ * Builds the per-policy tag that should be stored in the artifact's `tags` array
+ * @param policyId
+ */
+export const buildPerPolicyTag = (policyId: string): string => {
+  return `${BY_POLICY_ARTIFACT_TAG_PREFIX}${policyId}`;
+};
+
+/**
  * Return a list of artifact policy tags based on a current
  * selection by the EffectedPolicySelection component.
  */
@@ -61,7 +69,7 @@ export const getArtifactTagsByPolicySelection = (selection: EffectedPolicySelect
   }
 
   return selection.selected.map((policy) => {
-    return `${BY_POLICY_ARTIFACT_TAG_PREFIX}${policy.id}`;
+    return buildPerPolicyTag(policy.id);
   });
 };
 
