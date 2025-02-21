@@ -252,7 +252,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         isDisabled={isEdit}
         isInvalid={isInvalid}
         fullWidth
-        icon={!config?.provider ? { type: 'sparkles', side: 'left' } : providerIcon}
+        icon={!config?.provider ? { type: 'sparkles', side: 'left' } : null}
       >
         <EuiFieldText
           onClick={toggleProviderPopover}
