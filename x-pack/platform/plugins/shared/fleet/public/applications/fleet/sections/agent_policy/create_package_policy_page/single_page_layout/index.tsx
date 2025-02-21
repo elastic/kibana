@@ -122,7 +122,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
-  const [isFetchedPackagePolicies, setIsFetchedPackagePolicies] = useState<boolean | undefined>(
+  /*
+   * if there is no extension - will remain undefined
+   * if there is an extension and it is loaded - will be set to true, otherwise false
+   */
+  const [isFleetExtensionLoaded, setIsFleetExtensionLoaded] = useState<boolean | undefined>(
     undefined
   );
 
@@ -270,9 +274,9 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const handleExtensionViewOnChange = useCallback<
     PackagePolicyEditExtensionComponentProps['onChange']
   >(
-    ({ isValid, updatedPolicy, isLoadedPackagePolicies }) => {
+    ({ isValid, updatedPolicy, isExtensionLoaded }) => {
       updatePackagePolicy(updatedPolicy);
-      setIsFetchedPackagePolicies(isLoadedPackagePolicies);
+      setIsFleetExtensionLoaded(isExtensionLoaded);
       setFormState((prevState) => {
         if (prevState === 'VALID' && !isValid) {
           return 'INVALID';
@@ -660,7 +664,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
                           formState !== 'VALID' ||
                           hasAgentPolicyError ||
                           !validationResults ||
-                          isFetchedPackagePolicies === false
+                          isFleetExtensionLoaded === false
                         }
                         iconType="save"
                         color="primary"

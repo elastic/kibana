@@ -197,7 +197,7 @@ const AwsAccountTypeSelect = ({
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_aws' }>;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (updatedPolicy: NewPackagePolicy, isLoadedPackagePolicies?: boolean) => void;
+  updatePolicy: (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
@@ -303,7 +303,7 @@ const GcpAccountTypeSelect = ({
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_gcp' }>;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (updatedPolicy: NewPackagePolicy, isLoadedPackagePolicies?: boolean) => void;
+  updatePolicy: (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
   packageInfo: PackageInfo;
   disabled: boolean;
 }) => {
@@ -443,7 +443,7 @@ const AzureAccountTypeSelect = ({
 }: {
   input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (updatedPolicy: NewPackagePolicy, isLoadedPackagePolicies?: boolean) => void;
+  updatePolicy: (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
   disabled: boolean;
   packageInfo: PackageInfo;
   setupTechnology: SetupTechnology;
@@ -548,7 +548,7 @@ const useEnsureDefaultNamespace = ({
 }: {
   newPolicy: NewPackagePolicy;
   input: NewPackagePolicyPostureInput;
-  updatePolicy: (policy: NewPackagePolicy, isLoadedPackagePolicies?: boolean) => void;
+  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
 }) => {
   useEffect(() => {
     if (newPolicy.namespace === POSTURE_NAMESPACE) return;
@@ -572,7 +572,7 @@ const usePolicyTemplateInitialName = ({
   integration: CloudSecurityPolicyTemplate | undefined;
   newPolicy: NewPackagePolicy;
   packagePolicyList: PackagePolicy[] | undefined;
-  updatePolicy: (policy: NewPackagePolicy, isLoadedPackagePolicies?: boolean) => void;
+  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
   setCanFetchIntegration: (canFetch: boolean) => void;
 }) => {
   useEffect(() => {
@@ -586,12 +586,17 @@ const usePolicyTemplateInitialName = ({
 
     const currentIntegrationName = getMaxPackageName(integration, packagePolicyListByIntegration);
 
+    /*
+     * If 'packagePolicyListByIntegration' is undefined it means policies were still not feteched - Array.isArray(undefined) = false
+     * if policie were fetched its an array - the check will return true
+     */
+    const isPoliciesLoaded = Array.isArray(packagePolicyListByIntegration);
     updatePolicy(
       {
         ...newPolicy,
         name: currentIntegrationName,
       },
-      Array.isArray(packagePolicyListByIntegration)
+      isPoliciesLoaded
     );
     setCanFetchIntegration(false);
     // since this useEffect should only run on initial mount updatePolicy and newPolicy shouldn't re-trigger it
@@ -628,7 +633,7 @@ const useCloudFormationTemplate = ({
 }: {
   packageInfo: PackageInfo;
   newPolicy: NewPackagePolicy;
-  updatePolicy: (policy: NewPackagePolicy, isLoadedPackagePolicies?: boolean) => void;
+  updatePolicy: (policy: NewPackagePolicy, isExtensionLoaded?: boolean) => void;
 }) => {
   useEffect(() => {
     const templateUrl = getVulnMgmtCloudFormationDefaultValue(packageInfo);
@@ -743,8 +748,8 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     };
 
     const updatePolicy = useCallback(
-      (updatedPolicy: NewPackagePolicy, isLoadedPackagePolicies?: boolean) => {
-        onChange({ isValid, updatedPolicy, isLoadedPackagePolicies });
+      (updatedPolicy: NewPackagePolicy, isExtensionLoaded?: boolean) => {
+        onChange({ isValid, updatedPolicy, isExtensionLoaded });
       },
       [onChange, isValid]
     );

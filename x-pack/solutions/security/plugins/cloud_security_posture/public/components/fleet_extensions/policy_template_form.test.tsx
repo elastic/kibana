@@ -429,7 +429,7 @@ describe('<CspPolicyTemplateForm />', () => {
     });
   });
 
-  it('KSPM - calls onChange with isLoadedPackagePolicies the second time after increment of package version', () => {
+  it('KSPM - calls onChange with isExtensionLoaded the second time after increment of package version', () => {
     const policy = getMockPolicyK8s();
 
     // enable all inputs of a policy template, same as fleet does
@@ -472,7 +472,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
     // 1st call happens on mount and selects the default policy template enabled input
     expect(onChange).nthCalledWith(1, {
-      isLoadedPackagePolicies: undefined,
+      isExtensionLoaded: undefined,
       isValid: true,
       updatedPolicy: {
         ...getMockPolicyK8s(),
@@ -482,7 +482,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
     // 2nd call happens on mount and increments kspm template enabled input
     expect(onChange).nthCalledWith(2, {
-      isLoadedPackagePolicies: undefined,
+      isExtensionLoaded: undefined,
       isValid: true,
       updatedPolicy: {
         ...getMockPolicyK8s(),
@@ -496,10 +496,10 @@ describe('<CspPolicyTemplateForm />', () => {
 
     /*
       3rd call happens when policies are fetched and the package version is incremented 
-      in that case isLoadedPackagePolicies is set to 'true'
+      in that case isExtensionLoaded is set to 'true'
     */
     expect(onChange).nthCalledWith(3, {
-      isLoadedPackagePolicies: true,
+      isExtensionLoaded: true,
       isValid: true,
       updatedPolicy: {
         ...getMockPolicyK8s(),

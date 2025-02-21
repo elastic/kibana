@@ -75,7 +75,7 @@ export interface PackagePolicyEditExtensionComponentProps {
     isValid: boolean;
     /** The updated Integration Policy to be merged back and included in the API call */
     updatedPolicy: Partial<NewPackagePolicy>;
-    isLoadedPackagePolicies?: boolean;
+    isExtensionLoaded?: boolean;
   }) => void;
 }
 
