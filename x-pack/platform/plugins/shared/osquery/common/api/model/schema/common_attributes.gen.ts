@@ -19,31 +19,17 @@ import { z } from '@kbn/zod';
 /**
  * The ID of the query.
  */
-export type Id = z.infer<typeof Id>;
-export const Id = z.string();
-
-export type IdOrUndefined = z.infer<typeof IdOrUndefined>;
-export const IdOrUndefined = Id.nullable();
-
-export type AgentSelection = z.infer<typeof AgentSelection>;
-export const AgentSelection = z.object({
-  agents: z.array(z.string()).optional(),
-  allAgentsSelected: z.boolean().optional(),
-  platformsSelected: z.array(z.string()).optional(),
-  policiesSelected: z.array(z.string()).optional(),
-});
-
-export type AgentSelectionOrUndefined = z.infer<typeof AgentSelectionOrUndefined>;
-export const AgentSelectionOrUndefined = AgentSelection.nullable();
+export type QueryId = z.infer<typeof QueryId>;
+export const QueryId = z.string();
 
 /**
  * The pack description.
  */
-export type Description = z.infer<typeof Description>;
-export const Description = z.string();
+export type PackDescription = z.infer<typeof PackDescription>;
+export const PackDescription = z.string();
 
-export type DescriptionOrUndefined = z.infer<typeof DescriptionOrUndefined>;
-export const DescriptionOrUndefined = Description.nullable();
+export type PackDescriptionOrUndefined = z.infer<typeof PackDescriptionOrUndefined>;
+export const PackDescriptionOrUndefined = PackDescription.nullable();
 
 /**
  * Restricts the query to a specified platform. The default is all platforms. To specify multiple platforms, use commas. For example, linux,darwin.
@@ -72,6 +58,9 @@ export const Version = z.string();
 export type VersionOrUndefined = z.infer<typeof VersionOrUndefined>;
 export const VersionOrUndefined = Version.nullable();
 
+/**
+ *  An interval, in seconds, on which to run the query.
+ */
 export type Interval = z.infer<typeof Interval>;
 export const Interval = z.string();
 
@@ -112,6 +101,15 @@ export type SavedQueryIdOrUndefined = z.infer<typeof SavedQueryIdOrUndefined>;
 export const SavedQueryIdOrUndefined = SavedQueryId.nullable();
 
 /**
+ * The saved query description.
+ */
+export type SavedQueryDescription = z.infer<typeof SavedQueryDescription>;
+export const SavedQueryDescription = z.string();
+
+export type SavedQueryDescriptionOrUndefined = z.infer<typeof SavedQueryDescriptionOrUndefined>;
+export const SavedQueryDescriptionOrUndefined = SavedQueryDescription.nullable();
+
+/**
  * The ID of the pack you want to run.
  */
 export type PackId = z.infer<typeof PackId>;
@@ -138,15 +136,6 @@ export const PolicyIds = z.array(z.string());
 export type PolicyIdsOrUndefined = z.infer<typeof PolicyIdsOrUndefined>;
 export const PolicyIdsOrUndefined = PolicyIds.nullable();
 
-export type ExecutionContext = z.infer<typeof ExecutionContext>;
-export const ExecutionContext = z.object({
-  name: z.string().nullable().optional(),
-  url: z.string().nullable().optional(),
-});
-
-export type ExecutionContextOrUndefined = z.infer<typeof ExecutionContextOrUndefined>;
-export const ExecutionContextOrUndefined = ExecutionContext.nullable();
-
 export type ECSMappingItem = z.infer<typeof ECSMappingItem>;
 export const ECSMappingItem = z.object({
   /**
@@ -168,12 +157,9 @@ export const ECSMapping = z.object({}).catchall(ECSMappingItem);
 export type ECSMappingOrUndefined = z.infer<typeof ECSMappingOrUndefined>;
 export const ECSMappingOrUndefined = ECSMapping.nullable();
 
-export type StringArrayOrUndefined = z.infer<typeof StringArrayOrUndefined>;
-export const StringArrayOrUndefined = z.array(z.string().nullable());
-
 export type ArrayQueriesItem = z.infer<typeof ArrayQueriesItem>;
 export const ArrayQueriesItem = z.object({
-  id: Id.optional(),
+  id: QueryId.optional(),
   query: Query.optional(),
   ecs_mapping: ECSMappingOrUndefined.optional(),
   version: VersionOrUndefined.optional(),
@@ -191,7 +177,7 @@ export const ArrayQueries = z.array(ArrayQueriesItem);
 export type ObjectQueriesItem = z.infer<typeof ObjectQueriesItem>;
 export const ObjectQueriesItem = z.object({
   query: Query.optional(),
-  id: Id.optional(),
+  id: QueryId.optional(),
   ecs_mapping: ECSMappingOrUndefined.optional(),
   version: VersionOrUndefined.optional(),
   platform: PlatformOrUndefined.optional(),

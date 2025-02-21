@@ -30,3 +30,9 @@ export const FindSavedQueryRequestQuery = z.object({
   sort: SortOrUndefined.optional(),
   sortOrder: SortOrderOrUndefined.optional(),
 });
+
+export type FindSavedQueryResponse = z.infer<typeof FindSavedQueryResponse>;
+export const FindSavedQueryResponse = z.object({});
+
+export type FindSavedQueryDetailResponse = z.infer<typeof FindSavedQueryDetailResponse>;
+export const FindSavedQueryDetailResponse = z.object({});

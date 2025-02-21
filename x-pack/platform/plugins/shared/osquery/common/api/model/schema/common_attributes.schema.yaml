@@ -5,42 +5,16 @@ info:
 paths: { }
 components:
   schemas:
-    Id:
+    QueryId:
       description: 'The ID of the query.'
       type: string
-    IdOrUndefined:
-      $ref: '#/components/schemas/Id'
-      nullable: true
 
-    AgentSelection:
-      type: object
-      properties:
-        agents:
-          type: array
-          items:
-            type: string
-        allAgentsSelected:
-          type: boolean
-        platformsSelected:
-          type: array
-          items:
-            type: string
-        policiesSelected:
-          type: array
-          items:
-            type: string
-
-    AgentSelectionOrUndefined:
-      $ref: '#/components/schemas/AgentSelection'
-      nullable: true
-
-
-    Description:
+    PackDescription:
       description: 'The pack description.'
       type: string
 
-    DescriptionOrUndefined:
-      $ref: '#/components/schemas/Description'
+    PackDescriptionOrUndefined:
+      $ref: '#/components/schemas/PackDescription'
       nullable: true
 
 
@@ -70,6 +44,7 @@ components:
       nullable: true
 
     Interval:
+      description: ' An interval, in seconds, on which to run the query.'
       type: string
 
     IntervalOrUndefined:
@@ -98,10 +73,19 @@ components:
 
     SavedQueryId:
       description: 'The ID of a saved query.'
+      example: '3c42c847-eb30-4452-80e0-728584042334'
       type: string
 
     SavedQueryIdOrUndefined:
       $ref: '#/components/schemas/SavedQueryId'
+      nullable: true
+
+    SavedQueryDescription:
+      description: 'The saved query description.'
+      type: string
+
+    SavedQueryDescriptionOrUndefined:
+      $ref: '#/components/schemas/SavedQueryDescription'
       nullable: true
 
 
@@ -132,22 +116,6 @@ components:
       $ref: '#/components/schemas/PolicyIds'
       nullable: true
 
-    ExecutionContext:
-      type: object
-      properties:
-        name:
-          type: string
-          nullable: true
-        url:
-          type: string
-          nullable: true
-
-
-    ExecutionContextOrUndefined:
-      $ref: '#/components/schemas/ExecutionContext'
-      nullable: true
-
-
     ECSMappingItem:
       type: object
       properties:
@@ -172,19 +140,11 @@ components:
       $ref: '#/components/schemas/ECSMapping'
       nullable: true
 
-
-    StringArrayOrUndefined:
-      type: array
-      items:
-        type: string
-        nullable: true
-
-
     ArrayQueriesItem:
       type: object
       properties:
         id:
-          $ref: '#/components/schemas/Id'
+          $ref: '#/components/schemas/QueryId'
         query:
           $ref: '#/components/schemas/Query'
         ecs_mapping:
@@ -210,7 +170,7 @@ components:
         query:
           $ref: '#/components/schemas/Query'
         id:
-          $ref: '#/components/schemas/Id'
+          $ref: '#/components/schemas/QueryId'
         ecs_mapping:
           $ref: '#/components/schemas/ECSMappingOrUndefined'
         version:
