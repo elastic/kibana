@@ -104,8 +104,8 @@ export class BaseValidator {
     }
   }
 
-  protected isItemByPolicy(item: ExceptionItemLikeOptions): boolean {
-    return isArtifactByPolicy(item);
+  protected isItemByPolicy(item: Partial<Pick<ExceptionListItemSchema, 'tags'>>): boolean {
+    return isArtifactByPolicy(item as Pick<ExceptionListItemSchema, 'tags'>);
   }
 
   protected async isAllowedToCreateArtifactsByPolicy(): Promise<boolean> {
@@ -280,6 +280,82 @@ export class BaseValidator {
   ): Promise<void> {
     if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
       setArtifactOwnerSpaceId(item, await this.getActiveSpaceId());
+    }
+  }
+
+  protected async validateCanCreateGlobalArtifacts(item: ExceptionItemLikeOptions): Promise<void> {
+    if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+      if (
+        !this.isItemByPolicy(item) &&
+        !(await this.endpointAuthzPromise).canManageGlobalArtifacts
+      ) {
+        throw new EndpointArtifactExceptionValidationError(
+          `Endpoint authorization failure. ${NO_GLOBAL_ARTIFACT_AUTHZ_MESSAGE}`,
+          403
+        );
+      }
+    }
+  }
+
+  protected async validateCanUpdateItemInActiveSpace(
+    updatedItem: Partial<Pick<ExceptionListItemSchema, 'tags'>>,
+    currentSavedItem: ExceptionListItemSchema
+  ): Promise<void> {
+    if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+      // Those with global artifact management privilege can do it all
+      if ((await this.endpointAuthzPromise).canManageGlobalArtifacts) {
+        return;
+      }
+
+      // If either the updated item or the saved item is a global artifact, then
+      // ensure that user has global artifact management privilege
+      if (!this.isItemByPolicy(updatedItem) || !this.isItemByPolicy(currentSavedItem)) {
+        throw new EndpointArtifactExceptionValidationError(
+          `Endpoint authorization failure. ${NO_GLOBAL_ARTIFACT_AUTHZ_MESSAGE}`,
+          403
+        );
+      }
+
+      const itemOwnerSpaces = getArtifactOwnerSpaceIds(currentSavedItem);
+
+      // Per-space items can only be managed from one of the `ownerSpaceId`'s
+      if (!itemOwnerSpaces.includes(await this.getActiveSpaceId())) {
+        throw new EndpointArtifactExceptionValidationError(
+          `Updates to this item can only be done from the following space IDs: ${itemOwnerSpaces.join(
+            ', '
+          )} or by someone having global artifact management privilege`
+        );
+      }
+    }
+  }
+
+  protected async validateCanDeleteItemInActiveSpace(
+    currentSavedItem: ExceptionListItemSchema
+  ): Promise<void> {
+    if (this.endpointAppContext.experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
+      // Those with global artifact management privilege can do it all
+      if ((await this.endpointAuthzPromise).canManageGlobalArtifacts) {
+        return;
+      }
+
+      // If item is a global artifact then error - user must have global artifact management privilege
+      if (!this.isItemByPolicy(currentSavedItem)) {
+        throw new EndpointArtifactExceptionValidationError(
+          `Endpoint authorization failure. ${NO_GLOBAL_ARTIFACT_AUTHZ_MESSAGE}`,
+          403
+        );
+      }
+
+      const itemOwnerSpaces = getArtifactOwnerSpaceIds(currentSavedItem);
+
+      // Per-space items can only be deleted from one of the `ownerSpaceId`'s
+      if (!itemOwnerSpaces.includes(await this.getActiveSpaceId())) {
+        throw new EndpointArtifactExceptionValidationError(
+          `Updates to this item can only be done from the following space IDs: ${itemOwnerSpaces.join(
+            ', '
+          )} or by someone having global artifact management privilege`
+        );
+      }
     }
   }
 }
