@@ -80,6 +80,7 @@ describe('listRuleTypes', () => {
     name: 'alertingAlertType',
     category: 'test',
     producer: 'alerts',
+    solution: 'stack',
     enabledInLicense: true,
     hasAlertsMappings: false,
     hasFieldsForAAD: false,
@@ -97,6 +98,7 @@ describe('listRuleTypes', () => {
     name: 'myAppAlertType',
     category: 'test',
     producer: 'myApp',
+    solution: 'stack',
     enabledInLicense: true,
     hasAlertsMappings: false,
     hasFieldsForAAD: false,
@@ -162,6 +164,7 @@ describe('listRuleTypes', () => {
             "id": "recovered",
             "name": "Recovered",
           },
+          "solution": "stack",
           "validLegacyConsumers": Array [],
         },
         Object {
@@ -195,6 +198,7 @@ describe('listRuleTypes', () => {
             "id": "recovered",
             "name": "Recovered",
           },
+          "solution": "stack",
           "validLegacyConsumers": Array [],
         },
       ]
@@ -241,6 +245,7 @@ describe('listRuleTypes', () => {
           "minimumLicenseRequired": "basic",
           "name": "myAppAlertType",
           "producer": "myApp",
+          "solution": "stack",
           "recoveryActionGroup": Object {
             "id": "recovered",
             "name": "Recovered",
@@ -266,6 +271,7 @@ describe('listRuleTypes', () => {
           name: 'myType',
           category: 'test',
           producer: 'myApp',
+          solution: 'stack',
           enabledInLicense: true,
           hasAlertsMappings: false,
           hasFieldsForAAD: false,
@@ -284,6 +290,7 @@ describe('listRuleTypes', () => {
           recoveryActionGroup: RecoveredActionGroup,
           category: 'test',
           producer: 'alerts',
+          solution: 'stack',
           enabledInLicense: true,
           hasAlertsMappings: false,
           hasFieldsForAAD: false,
@@ -332,6 +339,7 @@ describe('listRuleTypes', () => {
             "minimumLicenseRequired": "basic",
             "name": "myType",
             "producer": "myApp",
+            "solution": "stack",
             "recoveryActionGroup": Object {
               "id": "recovered",
               "name": "Recovered",

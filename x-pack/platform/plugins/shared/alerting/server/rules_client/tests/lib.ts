@@ -125,6 +125,7 @@ export function getBeforeSetup(
     },
     category: 'test',
     producer: 'alerts',
+    solution: 'stack',
     validate: {
       params: { validate: (params) => params },
     },

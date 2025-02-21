@@ -50,6 +50,7 @@ describe('createGetAlertIndicesAliasFn', () => {
     executor: jest.fn(),
     category: 'test',
     producer: 'alerts',
+    solution: 'stack',
     alerts: {
       context: 'test',
       mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
@@ -73,6 +74,7 @@ describe('createGetAlertIndicesAliasFn', () => {
     executor: jest.fn(),
     category: 'test',
     producer: 'alerts',
+    solution: 'stack',
     alerts: {
       context: 'spaceAware',
       isSpaceAware: true,
@@ -97,6 +99,7 @@ describe('createGetAlertIndicesAliasFn', () => {
     executor: jest.fn(),
     category: 'test',
     producer: 'alerts',
+    solution: 'stack',
     validate: {
       params: schema.any(),
     },

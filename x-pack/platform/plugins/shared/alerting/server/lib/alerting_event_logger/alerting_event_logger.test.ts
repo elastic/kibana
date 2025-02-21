@@ -52,6 +52,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   executor: jest.fn(),
   category: 'test',
   producer: 'alerts',
+  solution: 'stack',
   ruleTaskTimeout: '1m',
   validate: {
     params: schema.any(),

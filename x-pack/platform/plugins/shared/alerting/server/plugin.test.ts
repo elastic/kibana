@@ -49,6 +49,7 @@ const sampleRuleType: RuleType<never, never, {}, never, never, 'default', 'recov
   defaultActionGroupId: 'default',
   category: 'test',
   producer: 'test',
+  solution: 'stack',
   async executor() {
     return { state: {} };
   },
