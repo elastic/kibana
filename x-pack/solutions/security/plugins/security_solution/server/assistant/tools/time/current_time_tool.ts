@@ -14,7 +14,7 @@ export interface CurrentTimeToolParams extends AssistantToolParams {
   core: CoreRequestHandlerContext;
 }
 
-export const TOOL_DETAILS = {
+export const CURRENT_TIME_TOOL_DETAILS = {
   id: 'current-time-tool',
   name: 'CurrentTimeTool',
   description:
@@ -47,12 +47,12 @@ const getShortOffsetTimezone = (formatter: Intl.DateTimeFormat) => {
 };
 
 export const CURRENT_TIME_TOOL: AssistantTool = {
-  id: TOOL_DETAILS.id,
-  name: TOOL_DETAILS.name,
+  id: CURRENT_TIME_TOOL_DETAILS.id,
+  name: CURRENT_TIME_TOOL_DETAILS.name,
   // note: this description is overwritten when `getTool` is called
   // local definitions exist ../elastic_assistant/server/lib/prompt/tool_prompts.ts
   // local definitions can be overwritten by security-ai-prompt integration definitions
-  description: TOOL_DETAILS.description,
+  description: CURRENT_TIME_TOOL_DETAILS.description,
   sourceRegister: APP_UI_ID,
   isSupported: (params: AssistantToolParams): params is CurrentTimeToolParams => {
     const { core } = params;
@@ -67,29 +67,27 @@ export const CURRENT_TIME_TOOL: AssistantTool = {
         const settingsDateFormatTimezone = await core.uiSettings.client.get<string | undefined>(
           'dateFormat:tz'
         );
-        const localTimezone: string =
+        const currentTimezone: string =
           (settingsDateFormatTimezone === 'Browser'
             ? params.screenContext?.timeZone
             : settingsDateFormatTimezone) ?? 'UTC';
 
-        const now = new Date();
-
-        const localFormatter = getTimeFormatter(localTimezone);
+        const currentFormatter = getTimeFormatter(currentTimezone);
         const utcFormatter = getTimeFormatter('UTC');
 
         // If the local timezone is different from UTC, we should show the UTC time as well
         const utcConversionRequired =
-          getShortOffsetTimezone(localFormatter) !== getShortOffsetTimezone(utcFormatter);
+          getShortOffsetTimezone(currentFormatter) !== getShortOffsetTimezone(utcFormatter);
 
+        const now = new Date();
         const utcConversion = utcConversionRequired ? utcFormatter.format(now) : undefined;
+        const currentTime = currentFormatter.format(now);
 
-        const localTime = localFormatter.format(now);
-
-        return `Local time: ${localTime} ${utcConversion ? `(${utcConversion})` : ''}`.trim();
+        return `Current time: ${currentTime} ${utcConversion ? `(${utcConversion})` : ''}`.trim();
       },
       {
-        name: TOOL_DETAILS.name,
-        description: TOOL_DETAILS.description,
+        name: CURRENT_TIME_TOOL_DETAILS.name,
+        description: CURRENT_TIME_TOOL_DETAILS.description,
       }
     );
   },
