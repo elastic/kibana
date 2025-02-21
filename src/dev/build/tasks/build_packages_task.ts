@@ -314,11 +314,13 @@ export async function buildWebpackBundles(
       ? ['ignore', 'pipe', 'pipe']
       : ['inherit', 'inherit', 'inherit'];
 
+    const pathToNx = './node_modules/.bin/nx';
+
     log.info(`Building webpack artifacts for packages: ${packageNames.join(', ')}`);
 
     const packagesFilter = ['--projects', packageNames.join(',')];
     await execa(
-      'nx',
+      pathToNx,
       ['run-many', '--target=build', ...packagesFilter, ...(dist ? ['--', '--dist'] : [])],
       {
         cwd: path.resolve(REPO_ROOT),
