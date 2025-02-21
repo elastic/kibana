@@ -107,8 +107,10 @@ if [[ ${#results[@]} -gt 0 ]]; then
 fi
 
 if [[ ${#configWithoutTests[@]} -gt 0 ]]; then
-  echo "⚠️ Configs with no tests:"
-  printf "%s\n" "${configWithoutTests[@]}" | buildkite-agent annotate --style "warning" --context "no-tests"
+  {
+    echo "### ⚠️ [$SCOUT_CONFIG_GROUP_TYPE / $SCOUT_CONFIG_GROUP_KEY] Scout configs without tests:"
+    printf "%s\n" "${configWithoutTests[@]}"
+  } | buildkite-agent annotate --style "warning" --context "no-tests"
 fi
 
 if [[ ${#failedConfigs[@]} -gt 0 ]]; then
