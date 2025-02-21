@@ -805,12 +805,9 @@ describe('StepDefineRule', () => {
             saved_id: null,
           },
         };
-        const { debug } = render(
-          <TestForm formProps={{ isQueryBarValid: false }} initialState={initialState} />,
-          {
-            wrapper: TestProviders,
-          }
-        );
+        render(<TestForm formProps={{ isQueryBarValid: false }} initialState={initialState} />, {
+          wrapper: TestProviders,
+        });
 
         await submitForm();
 
@@ -862,7 +859,7 @@ describe('StepDefineRule', () => {
             filters: [],
             saved_id: null,
           },
-          ruleType: 'esql',
+          ruleType: 'esql' as const,
         };
         render(<TestForm formProps={{ isQueryBarValid: false }} initialState={initialState} />, {
           wrapper: TestProviders,
@@ -884,7 +881,7 @@ describe('StepDefineRule', () => {
             filters: [],
             saved_id: null,
           },
-          ruleType: 'esql',
+          ruleType: 'esql' as const,
         };
         render(<TestForm formProps={{ isQueryBarValid: false }} initialState={initialState} />, {
           wrapper: TestProviders,
@@ -910,7 +907,7 @@ describe('StepDefineRule', () => {
             filters: [],
             saved_id: null,
           },
-          ruleType: 'eql',
+          ruleType: 'eql' as const,
         };
         render(<TestForm formProps={{ isQueryBarValid: false }} initialState={initialState} />, {
           wrapper: TestProviders,
@@ -939,7 +936,7 @@ describe('StepDefineRule', () => {
             ],
             saved_id: null,
           },
-          ruleType: 'eql',
+          ruleType: 'eql' as const,
         };
         render(<TestForm formProps={{ isQueryBarValid: false }} initialState={initialState} />, {
           wrapper: TestProviders,
@@ -959,7 +956,7 @@ describe('StepDefineRule', () => {
             filters: [],
             saved_id: null,
           },
-          ruleType: 'eql',
+          ruleType: 'eql' as const,
         };
         render(<TestForm formProps={{ isQueryBarValid: false }} initialState={initialState} />, {
           wrapper: TestProviders,
