@@ -67,7 +67,7 @@ export const kbnSuperTestWithAuthClient = () => {
   return kbnSuperTestWithAuthClientInstance;
 };
 
-export function getEsClient(config: ScoutTestConfig, log: ScoutLogger | ToolingLog) {
+export function getEsClient(config: ScoutTestConfig, log: ScoutLogger | ToolingLog): EsClient {
   if (!esClientInstance) {
     const { username, password } = config.auth;
     const elasticsearchUrl = createClientUrlWithAuth({
@@ -87,7 +87,7 @@ export function getEsClient(config: ScoutTestConfig, log: ScoutLogger | ToolingL
   return esClientInstance;
 }
 
-export function getKbnClient(config: ScoutTestConfig, log: ScoutLogger) {
+export function getKbnClient(config: ScoutTestConfig, log: ScoutLogger): KbnClient {
   if (!kbnClientInstance) {
     const kibanaUrl = createClientUrlWithAuth({
       serviceName: 'kbn',

@@ -8,8 +8,16 @@
  */
 
 import Url from 'url';
-import { esTestConfig, kbnTestConfig } from '@kbn/test';
-import { getEsArchiver, getEsClient, getKbnClient, getLogger, ScoutTestConfig } from '../..';
+import { esTestConfig, KbnClient, kbnTestConfig } from '@kbn/test';
+import type { EsArchiver } from '@kbn/es-archiver';
+import {
+  type EsClient,
+  getEsArchiver,
+  getEsClient,
+  getKbnClient,
+  getLogger,
+  type ScoutTestConfig,
+} from '../..';
 
 export const scoutApiTestConfig: ScoutTestConfig = {
   serverless: false,
@@ -37,8 +45,14 @@ const log = getLogger();
 const kbnClient = getKbnClient(scoutApiTestConfig, log);
 const esClient = getEsClient(scoutApiTestConfig, log);
 
-export const clients = () => ({
+export const clients = (): ScoutApiTestClients => ({
   kbnClient,
   esClient,
   esArchiver: getEsArchiver(esClient, kbnClient, log),
 });
+
+export interface ScoutApiTestClients {
+  kbnClient: KbnClient;
+  esClient: EsClient;
+  esArchiver: EsArchiver;
+}
