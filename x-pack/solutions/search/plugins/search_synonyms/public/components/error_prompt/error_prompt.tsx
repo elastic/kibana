@@ -10,26 +10,42 @@ import React from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const ErrorPrompt = () => {
+const ERROR_MESSAGES = {
+  generic: {
+    title: (
+      <FormattedMessage id="xpack.search.synonyms.errorTitle" defaultMessage="An error occurred" />
+    ),
+    body: (
+      <FormattedMessage
+        id="xpack.search.synonyms.errorDescription"
+        defaultMessage="An error occured while fetching synonyms. Check Kibana logs for more information."
+      />
+    ),
+  },
+  missingPermissions: {
+    title: (
+      <FormattedMessage
+        id="xpack.search.synonyms.missingPermissionsTitle"
+        defaultMessage="Missing permissions"
+      />
+    ),
+    body: (
+      <FormattedMessage
+        id="xpack.search.synonyms.missingPermissionsDescription"
+        defaultMessage="You do not have the necessary permissions to manage synonyms. Contact your system administrator."
+      />
+    ),
+  },
+};
+
+export const ErrorPrompt: React.FC<{ errorType: 'missingPermissions' | 'generic' }> = ({
+  errorType,
+}) => {
   return (
     <EuiEmptyPrompt
       iconType="logoEnterpriseSearch"
-      title={
-        <h2>
-          <FormattedMessage
-            id="xpack.search.synonyms.errorTitle"
-            defaultMessage="An error occurred"
-          />
-        </h2>
-      }
-      body={
-        <p>
-          <FormattedMessage
-            id="xpack.search.synonyms.errorDescription"
-            defaultMessage="An error occured while fetching synonyms. Check Kibana logs for more information."
-          />
-        </p>
-      }
+      title={<h2>{ERROR_MESSAGES[errorType].title}</h2>}
+      body={<p>{ERROR_MESSAGES[errorType].body}</p>}
     />
   );
 };

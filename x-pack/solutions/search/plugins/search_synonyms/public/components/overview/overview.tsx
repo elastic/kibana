@@ -23,8 +23,8 @@ import { SynonymSets } from '../synonym_sets/synonym_sets';
 import { useFetchSynonymsSets } from '../../hooks/use_fetch_synonyms_sets';
 import { EmptyPrompt } from '../empty_prompt/empty_prompt';
 import { CreateSynonymsSetModal } from '../synonym_sets/create_new_set_modal';
-import { MissingPermissionsPrompt } from '../missing_permissions/missing_permissions';
 import { ErrorPrompt } from '../error_prompt/error_prompt';
+import { isPermissionError } from '../../utils/synonyms_utils';
 
 export const SearchSynonymsOverview = () => {
   const {
@@ -101,8 +101,9 @@ export const SearchSynonymsOverview = () => {
           />
         )}
         {isInitialLoading && <EuiLoadingSpinner />}
-        {isError && error.body.statusCode === 403 && <MissingPermissionsPrompt />}
-        {isError && error.body.statusCode !== 403 && <ErrorPrompt />}
+        {isError && (
+          <ErrorPrompt errorType={isPermissionError(error) ? 'missingPermissions' : 'generic'} />
+        )}
 
         {!isInitialLoading && synonymsData && synonymsData._meta.totalItemCount > 0 && (
           <SynonymSets />
