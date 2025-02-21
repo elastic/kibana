@@ -211,7 +211,7 @@ describe('Panel', () => {
 
   describe('custom content', () => {
     test('should render custom component inside the panel', async () => {
-      const panelContentProvider: PanelContentProvider = (id) => {
+      const panelContentProvider: PanelContentProvider = (_id) => {
         return {
           content: ({ closePanel, selectedNode, activeNodes }) => {
             const [path0 = []] = activeNodes;
