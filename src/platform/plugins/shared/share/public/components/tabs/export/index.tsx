@@ -26,7 +26,7 @@ const ExportTabContent = () => {
       objectType={objectType}
       isDirty={isDirty}
       onClose={onClose}
-      aggregateReportTypes={shareMenuItems}
+      aggregateExportTypes={shareMenuItems}
       publicAPIEnabled={publicAPIEnabled ?? true}
     />
   );
