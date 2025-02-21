@@ -50,6 +50,8 @@ export interface GetUiSettingsContext {
   request?: KibanaRequest;
 }
 
+export type UiSettingsSolution = 'es' | 'oblt' | 'security';
+
 /**
  * UiSettings parameters defined by the plugins.
  * @public
@@ -116,6 +118,10 @@ export interface UiSettingsParams<T = unknown> {
    * scoped to a namespace. The default value is 'namespace'
    */
   scope?: UiSettingsScope;
+  /** The solution where this setting is applicable.
+   * This field is used to determine whether the setting should be displayed in the Advanced settings app.
+   * If undefined, the setting must be displayed in all solutions. */
+  solution?: UiSettingsSolution;
 }
 
 /**

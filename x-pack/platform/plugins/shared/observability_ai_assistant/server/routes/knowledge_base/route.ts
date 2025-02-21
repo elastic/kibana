@@ -101,7 +101,7 @@ const resetKnowledgeBase = createObservabilityAIAssistantServerRoute({
 });
 
 const semanticTextMigrationKnowledgeBase = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/kb/semantic_text_migration',
+  endpoint: 'POST /internal/observability_ai_assistant/kb/migrations/kb_semantic_text',
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],
@@ -114,7 +114,7 @@ const semanticTextMigrationKnowledgeBase = createObservabilityAIAssistantServerR
       throw notImplemented();
     }
 
-    return client.migrateKnowledgeBaseToSemanticText();
+    return client.reIndexKnowledgeBaseAndPopulateSemanticTextField();
   },
 });
 

@@ -6,6 +6,10 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
+import {
+  RuleTranslationResult,
+  SiemMigrationStatus,
+} from '@kbn/security-solution-plugin/common/siem_migrations/constants';
 
 import {
   ElasticRule,
@@ -93,6 +97,58 @@ export const getMigrationRuleDocuments = (
     docs.push(getMigrationRuleDocument(overrideParams));
   }
   return docs;
+};
+
+export const statsOverrideCallbackFactory = ({
+  migrationId,
+  failed = 0,
+  pending = 0,
+  processing = 0,
+  completed = 0,
+  fullyTranslated = 0,
+  partiallyTranslated = 0,
+}: {
+  migrationId: string;
+  failed?: number;
+  pending?: number;
+  processing?: number;
+  completed?: number;
+  fullyTranslated?: number;
+  partiallyTranslated?: number;
+}) => {
+  const overrideCallback = (index: number): Partial<RuleMigrationDocument> => {
+    let translationResult;
+    let status = SiemMigrationStatus.PENDING;
+
+    const pendingEndIndex = failed + pending;
+    const processingEndIndex = failed + pending + processing;
+    const completedEndIndex = failed + pending + processing + completed;
+    if (index < failed) {
+      status = SiemMigrationStatus.FAILED;
+    } else if (index < pendingEndIndex) {
+      status = SiemMigrationStatus.PENDING;
+    } else if (index < processingEndIndex) {
+      status = SiemMigrationStatus.PROCESSING;
+    } else if (index < completedEndIndex) {
+      status = SiemMigrationStatus.COMPLETED;
+      const fullyTranslatedEndIndex = completedEndIndex - completed + fullyTranslated;
+      const partiallyTranslatedEndIndex =
+        completedEndIndex - completed + fullyTranslated + partiallyTranslated;
+      if (index < fullyTranslatedEndIndex) {
+        translationResult = RuleTranslationResult.FULL;
+      } else if (index < partiallyTranslatedEndIndex) {
+        translationResult = RuleTranslationResult.PARTIAL;
+      } else {
+        translationResult = RuleTranslationResult.UNTRANSLATABLE;
+      }
+    }
+    return {
+      migration_id: migrationId,
+      translation_result: translationResult,
+      status,
+    };
+  };
+  return overrideCallback;
 };
 
 export const createMigrationRules = async (
