@@ -14,6 +14,7 @@ import { CoreStart } from '@kbn/core/public';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiIcon, EuiFlexItem, EuiCard, EuiFlexGroup } from '@elastic/eui';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 import { AlertingExampleComponentParams } from '../application';
 import { ALERTING_EXAMPLE_APP_ID } from '../../common/constants';
@@ -23,6 +24,7 @@ type KibanaDeps = {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 } & CoreStart;
 
 export const CreateAlert = ({

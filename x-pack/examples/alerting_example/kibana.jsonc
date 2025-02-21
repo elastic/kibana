@@ -16,7 +16,8 @@
       "features",
       "developerExamples",
       "unifiedSearch",
-      "dataViews"
+      "dataViews",
+      "fieldsMetadata"
     ],
     "requiredBundles": ["kibanaReact"]
   }

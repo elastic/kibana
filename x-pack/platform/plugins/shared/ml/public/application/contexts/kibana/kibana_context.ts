@@ -34,6 +34,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { MlServicesContext } from '../../app';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 interface StartPlugins {
   cases?: CasesPublicStart;
@@ -61,6 +62,7 @@ interface StartPlugins {
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection?: UsageCollectionSetup;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 export type StartServices = CoreStart &
   StartPlugins & {

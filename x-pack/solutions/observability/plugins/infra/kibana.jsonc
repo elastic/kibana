@@ -38,7 +38,8 @@
       "visTypeTimeseries",
       "apmDataAccess",
       "logsDataAccess",
-      "entityManager"
+      "entityManager",
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
       "spaces",

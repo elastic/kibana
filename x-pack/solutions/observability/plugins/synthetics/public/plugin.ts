@@ -73,6 +73,7 @@ import {
   SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
 } from './apps/embeddables/constants';
 import { registerSyntheticsUiActions } from './apps/embeddables/ui_actions/register_ui_actions';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export interface ClientPluginsSetup {
   home?: HomePublicPluginSetup;
@@ -122,6 +123,7 @@ export interface ClientPluginsStart {
   dashboard: DashboardStart;
   charts: ChartsPluginStart;
   uiActions: UiActionsStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export interface SyntheticsPluginServices extends Partial<CoreStart> {

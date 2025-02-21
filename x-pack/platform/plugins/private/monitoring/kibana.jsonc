@@ -16,7 +16,8 @@
       "navigation",
       "dataViews",
       "unifiedSearch",
-      "share"
+      "share",
+      "fieldsMetadata"
     ],
     "optionalPlugins": [
       "usageCollection",

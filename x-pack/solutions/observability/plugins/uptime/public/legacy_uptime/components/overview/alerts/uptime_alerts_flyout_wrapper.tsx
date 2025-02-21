@@ -14,6 +14,7 @@ import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { CoreStart } from '@kbn/core/public';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 interface Props {
   alertFlyoutVisible: boolean;
@@ -27,6 +28,7 @@ type KibanaDeps = {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 } & CoreStart;
 
 export const UptimeAlertsFlyoutWrapperComponent = ({

@@ -86,6 +86,7 @@ import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
 import type { ITelemetryClient } from './services/telemetry';
 import { TelemetryService } from './services/telemetry';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
 export type ApmPluginStart = void;
@@ -148,6 +149,7 @@ export interface ApmPluginStartDeps {
   logsShared: LogsSharedClientStartExports;
   logsDataAccess: LogsDataAccessPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {

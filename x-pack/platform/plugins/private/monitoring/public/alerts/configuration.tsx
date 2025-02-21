@@ -21,6 +21,7 @@ import { CoreStart } from '@kbn/core/public';
 import { hideBottomBar, showBottomBar } from '../lib/setup_mode';
 import { Legacy } from '../legacy_shims';
 import { CommonAlert } from '../../common/types/alerts';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 interface Props {
   alert: CommonAlert;
@@ -32,6 +33,7 @@ type KibanaDeps = {
   charts?: ChartsPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 } & CoreStart;
 
 export const AlertConfiguration: React.FC<Props> = (props: Props) => {

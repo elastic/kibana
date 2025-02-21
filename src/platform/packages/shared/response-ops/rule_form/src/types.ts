@@ -69,7 +69,7 @@ export interface RuleFormPlugins {
   docLinks: DocLinksStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  fieldsMetadata?: FieldsMetadataPublicStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export interface RuleFormState<

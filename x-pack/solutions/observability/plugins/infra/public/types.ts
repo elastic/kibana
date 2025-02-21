@@ -54,6 +54,7 @@ import type { UnwrapPromise } from '../common/utility_types';
 import type { InventoryViewsServiceStart } from './services/inventory_views';
 import type { MetricsExplorerViewsServiceStart } from './services/metrics_explorer_views';
 import type { TelemetryServiceStart } from './services/telemetry';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface InfraClientSetupExports {}
@@ -109,6 +110,7 @@ export interface InfraClientStartDeps {
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 
 export type InfraClientCoreSetup = CoreSetup<InfraClientStartDeps, InfraClientStartExports>;

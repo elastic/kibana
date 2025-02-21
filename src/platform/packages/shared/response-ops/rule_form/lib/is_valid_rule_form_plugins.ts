@@ -22,12 +22,14 @@ const requiredPluginNames = [
   'unifiedSearch',
   'docLinks',
   'dataViews',
+  'fieldsMetadata',
 ];
 
 type RequiredRuleFormPlugins = Omit<
   RuleFormProps['plugins'],
   'actionTypeRegistry' | 'ruleTypeRegistry'
 >;
+
 export const isValidRuleFormPlugins = (input: unknown): input is RequiredRuleFormPlugins => {
   if (typeof input !== 'object' || input === null) {
     return false;

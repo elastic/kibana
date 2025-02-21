@@ -88,6 +88,7 @@ import {
   createObservabilityRuleTypeRegistry,
 } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
+import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 
 export interface ConfigSchema {
   unsafe: {
@@ -165,6 +166,7 @@ export interface ObservabilityPublicPluginsStart {
   toastNotifications: ToastsStart;
   investigate?: InvestigatePublicStart;
   streams?: StreamsPluginStart;
+  fieldsMetadata: FieldsMetadataPublicStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 

@@ -26,6 +26,7 @@ import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { DiscoverStateContainer } from '../../../state_management/discover_state';
 import { AppMenuDiscoverParams } from './types';
 import { DiscoverServices } from '../../../../../build_services';
+import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 
 const EsQueryValidConsumer: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
@@ -83,6 +84,11 @@ const CreateAlertFlyout: React.FC<{
     }),
     [adHocDataViews]
   );
+
+  // Some of the rule form's required plugins are from x-pack, so make sure they're defined before
+  // rendering the flyout. The alerting plugin is also part of x-pack, so this check should probably never
+  // return false. This is mostly here because Typescript requires us to mark x-pack plugins as optional.
+  if (!isValidRuleFormPlugins(services)) return null;
 
   return (
     <RuleFormFlyoutWithType

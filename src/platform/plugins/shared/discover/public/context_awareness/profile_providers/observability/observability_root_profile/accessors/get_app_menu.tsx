@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { AppMenuExtensionParams } from '../../../..';
 import type { RootProfileProvider } from '../../../../profiles';
 import { ProfileProviderServices } from '../../../profile_provider_services';
+import { isValidRuleFormPlugins } from '@kbn/response-ops-rule-form/lib';
 
 export const createGetAppMenu =
   (services: ProfileProviderServices): RootProfileProvider['profile']['getAppMenu'] =>
@@ -97,9 +98,19 @@ const registerCustomThresholdRuleAction = (
         const index = dataView?.toMinimalSpec();
         const { filters, query } = data.query.getState();
 
+        // Some of the rule form's required plugins are from x-pack, so make sure they're defined before
+        // rendering the flyout. The alerting plugin is also part of x-pack, so this check should probably never
+        // return false. This is mostly here because Typescript requires us to mark x-pack plugins as optional.
+        const plugins = { ...services, data };
+        if (!isValidRuleFormPlugins(plugins)) return null;
+
         return (
           <RuleFormFlyout
-            plugins={{ data, ruleTypeRegistry, actionTypeRegistry, ...services }}
+            plugins={{
+              ...plugins,
+              ruleTypeRegistry,
+              actionTypeRegistry,
+            }}
             consumer={'logs'}
             ruleTypeId={OBSERVABILITY_THRESHOLD_RULE_TYPE_ID}
             initialValues={{
