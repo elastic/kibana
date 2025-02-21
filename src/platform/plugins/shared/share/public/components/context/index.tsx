@@ -13,7 +13,8 @@ import React, { type PropsWithChildren, createContext, useContext } from 'react'
 
 import type { ShareConfigs, ShareTypes, ShowShareMenuOptions } from '../../types';
 
-export interface IShareContext extends ShowShareMenuOptions {
+export interface IShareContext extends Omit<ShowShareMenuOptions, 'onClose'> {
+  onClose: () => void;
   shareMenuItems: ShareConfigs[];
   theme: ThemeServiceSetup;
   i18n: I18nStart;
@@ -55,7 +56,7 @@ export const useShareTabsContext = <T extends ShareTypes>(
     ...rest,
     objectTypeMeta: {
       ...objectTypeMeta,
-      config: shareType ? objectTypeMeta.config[shareType] : objectTypeMeta.config,
+      config: shareType ? objectTypeMeta.config[shareType] ?? {} : objectTypeMeta.config,
     },
     shareMenuItems: shareTypeImplementations,
   };
