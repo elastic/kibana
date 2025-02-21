@@ -9,7 +9,7 @@
 
 import React, { useEffect, useMemo, useState, type FC } from 'react';
 import { cloneDeep } from 'lodash';
-import vl from 'vega-lite-api';
+import * as vl from 'vega-lite-api';
 import * as vega from 'vega';
 import * as vegaLite from 'vega-lite';
 import * as vegaTooltip from 'vega-tooltip';
