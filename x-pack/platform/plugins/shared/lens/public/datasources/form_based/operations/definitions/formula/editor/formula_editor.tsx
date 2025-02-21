@@ -125,7 +125,8 @@ export function FormulaEditor({
   const disposables = React.useRef<monaco.IDisposable[]>([]);
   const editor1 = React.useRef<monaco.editor.IStandaloneCodeEditor>();
 
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
 
   const visibleOperationsMap = useMemo(
     () => filterByVisibleOperation(operationDefinitionMap),
@@ -684,7 +685,12 @@ export function FormulaEditor({
   // in the behavior of Monaco when it's first loaded and then reloaded.
   return (
     <div
-      css={[sharedEditorStyles.self, isFullscreen ? fullscreenEditorStyles : defaultEditorStyles]}
+      css={[
+        sharedEditorStyles.self(euiThemeContext),
+        isFullscreen
+          ? fullscreenEditorStyles(euiThemeContext)
+          : defaultEditorStyles(euiThemeContext),
+      ]}
     >
       {!isFullscreen && (
         <EuiFormLabel
@@ -709,7 +715,7 @@ export function FormulaEditor({
         }}
       >
         <div className="lnsFormula__editor">
-          <div css={sharedEditorStyles.editorHeader}>
+          <div css={sharedEditorStyles.editorHeader(euiThemeContext)}>
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
               <EuiFlexItem
                 css={css`
@@ -810,7 +816,7 @@ export function FormulaEditor({
             {!text ? (
               <div
                 className="lnsFormula__editorPlaceholder"
-                css={sharedEditorStyles.editorPlaceholder}
+                css={sharedEditorStyles.editorPlaceholder(euiThemeContext)}
               >
                 <EuiText color="subdued" size="s">
                   {i18n.translate('xpack.lens.formulaPlaceholderText', {
@@ -823,7 +829,7 @@ export function FormulaEditor({
             ) : null}
           </div>
 
-          <div css={sharedEditorStyles.editorFooter}>
+          <div css={sharedEditorStyles.editorFooter(euiThemeContext)}>
             <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
               <EuiFlexItem className="lnsFormula__editorFooterGroup">
                 {isFullscreen ? (
@@ -845,7 +851,7 @@ export function FormulaEditor({
                         defaultMessage: 'Hide function reference',
                       })}
                       className="lnsFormula__editorHelp lnsFormula__editorHelp--inline"
-                      css={sharedEditorStyles.editorHelpLink}
+                      css={sharedEditorStyles.editorHelpLink(euiThemeContext)}
                       color="text"
                       onClick={() => setIsHelpOpen(!isHelpOpen)}
                     >
@@ -919,7 +925,7 @@ export function FormulaEditor({
                         <div
                           key={index}
                           className="lnsFormula__warningText"
-                          css={sharedEditorStyles.warningText}
+                          css={sharedEditorStyles.warningText(euiThemeContext)}
                         >
                           <EuiText
                             size="s"
@@ -941,7 +947,10 @@ export function FormulaEditor({
 
         {/* fix the css here */}
         {isFullscreen && isHelpOpen ? (
-          <div className="documentation__docs--inline" css={sharedEditorStyles.formulaDocs}>
+          <div
+            className="documentation__docs--inline"
+            css={sharedEditorStyles.formulaDocs(euiThemeContext)}
+          >
             <LanguageDocumentationPopoverContent
               language="Formula"
               sections={documentationSections}
@@ -1044,7 +1053,7 @@ const fullscreenEditorStyles = ({ euiTheme }: UseEuiTheme) => {
       display: flex;
       flex-direction: column;
       & > * + * {
-        border-top: $euiBorderThin;
+        border-top: ${euiTheme.border.thin};
       }
     };
     .lnsFormula__editorContent {

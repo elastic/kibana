@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { omit } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { EuiFormRow, EuiLink, htmlIdGenerator } from '@elastic/eui';
+import { EuiFormRow, EuiLink, htmlIdGenerator, useEuiTheme } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { queryFilterToAst } from '@kbn/data-plugin/common';
@@ -23,7 +23,7 @@ import { IndexPattern } from '../../../../../types';
 import { updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
 import type { BaseIndexPatternColumn } from '../column_types';
-import { DraggablePopoverButtonStyles, FilterPopover } from './filter_popover';
+import { draggablePopoverButtonStyles, FilterPopover } from './filter_popover';
 import { TermsIndexPatternColumn } from '../terms';
 import { isColumnOfType } from '../helpers';
 
@@ -180,6 +180,7 @@ export const FilterList = ({
   indexPattern: IndexPattern;
   defaultQuery: Filter;
 }) => {
+  const euiThemeContext = useEuiTheme();
   const [activeFilterId, setActiveFilterId] = useState('');
   const [localFilters, setLocalFilters] = useState(() =>
     filters.map((filter) => ({ ...filter, id: generateId() }))
@@ -274,7 +275,7 @@ export const FilterList = ({
                     title={i18n.translate('xpack.lens.indexPattern.filters.clickToEdit', {
                       defaultMessage: 'Click to edit',
                     })}
-                    css={DraggablePopoverButtonStyles}
+                    css={draggablePopoverButtonStyles(euiThemeContext)}
                   >
                     {filter.label || (filter.input.query as string) || defaultLabel}
                   </EuiLink>

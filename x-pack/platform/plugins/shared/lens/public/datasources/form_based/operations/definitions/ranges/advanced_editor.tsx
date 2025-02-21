@@ -19,6 +19,7 @@ import {
   EuiToolTip,
   htmlIdGenerator,
   keys,
+  useEuiTheme,
 } from '@elastic/eui';
 import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import {
@@ -32,7 +33,7 @@ import { RangeTypeLens, isValidRange } from './ranges';
 import { FROM_PLACEHOLDER, TO_PLACEHOLDER, TYPING_DEBOUNCE_TIME } from './constants';
 import { LabelInput } from '../shared_components';
 import { isValidNumber } from '../helpers';
-import { DraggablePopoverButtonStyles } from '../filters/filter_popover';
+import { draggablePopoverButtonStyles } from '../filters/filter_popover';
 
 const generateId = htmlIdGenerator();
 
@@ -207,6 +208,7 @@ export const AdvancedRangeEditor = ({
   onToggleEditor: () => void;
   formatter: IFieldFormat;
 }) => {
+  const euiThemeContext = useEuiTheme();
   const [activeRangeId, setActiveRangeId] = useState('');
   // use a local state to store ids with range objects
   const [localRanges, setLocalRanges] = useState<LocalRangeType[]>(() =>
@@ -308,7 +310,7 @@ export const AdvancedRangeEditor = ({
                     color="text"
                     onClick={() => changeActiveRange(range.id)}
                     data-test-subj="dataView-ranges-popover-trigger"
-                    css={DraggablePopoverButtonStyles}
+                    css={draggablePopoverButtonStyles(euiThemeContext)}
                   >
                     <EuiText
                       size="s"

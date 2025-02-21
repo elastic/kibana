@@ -6,12 +6,13 @@
  */
 
 import React, { useState } from 'react';
-import { EuiPopover, EuiSpacer, euiTextBreakWord, useEuiFontSize, UseEuiTheme } from '@elastic/eui';
+import { euiFontSize, EuiPopover, EuiSpacer, euiTextBreakWord, UseEuiTheme } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 // Need to keep it separate to make it work Jest mocks in dimension_panel tests
 // import { QueryInput } from '../../../../shared_components/query_input';
 import { isQueryValid, QueryInput } from '@kbn/visualization-ui-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { css } from '@emotion/react';
 import { LENS_APP_NAME } from '../../../../../../common/constants';
 import { IndexPattern } from '../../../../../types';
 import { FilterValue, defaultLabel } from '.';
@@ -101,12 +102,11 @@ export const FilterPopover = ({
   );
 };
 
-export const DraggablePopoverButtonStyles = ({ euiTheme }: UseEuiTheme) => {
-  const euiFontSize = useEuiFontSize('s');
-  return `
+export const draggablePopoverButtonStyles = (euiThemeContext: UseEuiTheme) => {
+  return css`
     ${euiTextBreakWord()};
-    ${euiFontSize};
-    min-height: ${euiTheme.size.xl};
+    ${euiFontSize(euiThemeContext, 's')};
+    min-height: ${euiThemeContext.euiTheme.size.xl};
     width: 100%;
   `;
 };

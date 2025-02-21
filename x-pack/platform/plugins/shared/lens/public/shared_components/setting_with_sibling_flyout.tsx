@@ -19,9 +19,10 @@ import {
   EuiOutsideClickDetector,
   EuiPortal,
   UseEuiTheme,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { FlyoutContainerStyles } from './flyout.styles';
+import { flyoutContainerStyles } from './flyout.styles';
 
 const DEFAULT_TITLE = i18n.translate('xpack.lens.colorSiblingFlyoutTitle', {
   defaultMessage: 'Color',
@@ -44,6 +45,7 @@ export function SettingWithSiblingFlyout({
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const euiThemeContext = useEuiTheme();
 
   const toggleFlyout = () => {
     setIsFlyoutOpen(!isFlyoutOpen);
@@ -75,9 +77,15 @@ export function SettingWithSiblingFlyout({
                 role="dialog"
                 aria-labelledby="lnsSettingWithSiblingFlyoutTitle"
                 data-test-subj={dataTestSubj}
-                css={[FlyoutContainerStyles, siblingFlyoutContainerStyles.self]}
+                css={[
+                  flyoutContainerStyles(euiThemeContext),
+                  siblingflyoutContainerStyles.self(euiThemeContext),
+                ]}
               >
-                <EuiFlyoutHeader hasBorder css={siblingFlyoutContainerStyles.header}>
+                <EuiFlyoutHeader
+                  hasBorder
+                  css={siblingflyoutContainerStyles.header(euiThemeContext)}
+                >
                   <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
                       <EuiButtonIcon
@@ -110,7 +118,7 @@ export function SettingWithSiblingFlyout({
                   </div>
                 )}
 
-                <EuiFlyoutFooter css={siblingFlyoutContainerStyles.footer}>
+                <EuiFlyoutFooter css={siblingflyoutContainerStyles.footer(euiThemeContext)}>
                   <EuiButtonEmpty flush="left" size="s" iconType="sortLeft" onClick={closeFlyout}>
                     {i18n.translate('xpack.lens.settingWithSiblingFlyout.back', {
                       defaultMessage: 'Back',
@@ -126,7 +134,7 @@ export function SettingWithSiblingFlyout({
   );
 }
 
-const siblingFlyoutContainerStyles = {
+const siblingflyoutContainerStyles = {
   self: ({ euiTheme }: UseEuiTheme) => css`
     position: absolute;
     right: 0;

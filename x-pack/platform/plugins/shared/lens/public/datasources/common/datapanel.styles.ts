@@ -6,9 +6,10 @@
  */
 
 import { UseEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export const dataPanelStyles = ({ euiTheme }: UseEuiTheme) => {
-  return `
+  return css`
     padding: ${euiTheme.size.base} ${euiTheme.size.base} 0;
     .unifiedFieldListItemButton.kbnFieldButton {
       background: none;
@@ -17,5 +18,6 @@ export const dataPanelStyles = ({ euiTheme }: UseEuiTheme) => {
     }
     .unifiedFieldListItemButton__dragging {
       background: ${euiTheme.colors.backgroundBasePlain};
-    }`;
+    }
+  `;
 };

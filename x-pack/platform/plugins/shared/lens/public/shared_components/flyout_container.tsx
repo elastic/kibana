@@ -18,10 +18,11 @@ import {
   EuiFocusTrap,
   UseEuiTheme,
   euiBreakpoint,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../utils';
-import { FlyoutContainerStyles } from './flyout.styles';
+import { flyoutContainerStyles } from './flyout.styles';
 
 function fromExcludedClickTarget(event: Event) {
   for (
@@ -62,6 +63,7 @@ export function FlyoutContainer({
   isInlineEditing?: boolean;
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
+  const euiThemeContext = useEuiTheme();
 
   const closeFlyout = useCallback(() => {
     setFocusTrapIsEnabled(false);
@@ -104,11 +106,11 @@ export function FlyoutContainer({
           role="dialog"
           aria-labelledby="lnsDimensionContainerTitle"
           css={[
-            FlyoutContainerStyles,
+            flyoutContainerStyles(euiThemeContext),
             css`
               box-shadow: ${isInlineEditing ? 'none !important' : 'inherit'};
             `,
-            dimensionContainerStyles.self,
+            dimensionContainerStyles.self(euiThemeContext),
           ]}
           onAnimationEnd={() => {
             if (isOpen) {
@@ -119,7 +121,7 @@ export function FlyoutContainer({
             }
           }}
         >
-          <EuiFlyoutHeader hasBorder css={dimensionContainerStyles.header}>
+          <EuiFlyoutHeader hasBorder css={dimensionContainerStyles.header(euiThemeContext)}>
             <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
               {isInlineEditing && (
                 <EuiFlexItem grow={false}>
@@ -168,7 +170,7 @@ export function FlyoutContainer({
           </div>
 
           {customFooter || (
-            <EuiFlyoutFooter css={dimensionContainerStyles.footer}>
+            <EuiFlyoutFooter css={dimensionContainerStyles.footer(euiThemeContext)}>
               <EuiButtonEmpty
                 flush="left"
                 size="s"
@@ -194,17 +196,17 @@ export function FlyoutContainer({
 
 const dimensionContainerStyles = {
   self: (euiThemeContext: UseEuiTheme) => {
-    return `
-    // But with custom positioning to keep it within the sidebar contents
-    max-width: none !important;
-    left: 0;
-    z-index: ${euiThemeContext.euiTheme.levels.menu};
-    ${euiBreakpoint(euiThemeContext, ['m', 'l', 'xl'])} {
-      height: 100% !important;
-      position: absolute;
-      top: 0 !important;
-    }
-  `;
+    return css`
+      // But with custom positioning to keep it within the sidebar contents
+      max-width: none !important;
+      left: 0;
+      z-index: ${euiThemeContext.euiTheme.levels.menu};
+      ${euiBreakpoint(euiThemeContext, ['m', 'l', 'xl'])} {
+        height: 100% !important;
+        position: absolute;
+        top: 0 !important;
+      }
+    `;
   },
   header: ({ euiTheme }: UseEuiTheme) => css`
     padding: ${euiTheme.size.base};

@@ -30,7 +30,8 @@ export interface FrameLayoutProps {
 
 export function FrameLayout(props: FrameLayoutProps) {
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
-  const euiTheme = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
 
   return (
     <EuiFlexGroup direction="column" responsive={false} gutterSize="none" alignItems="stretch">
@@ -65,7 +66,7 @@ export function FrameLayout(props: FrameLayoutProps) {
             bottom: 0;
             overflow: hidden;
             flex-direction: column;
-            ${euiBreakpoint(euiTheme, ['xs', 's', 'm'])} {
+            ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
               position: static;
             }
           `}
@@ -78,7 +79,7 @@ export function FrameLayout(props: FrameLayoutProps) {
               overflow: hidden;
               flex-grow: 1;
               flex-direction: row;
-              ${euiBreakpoint(euiTheme, ['xs', 's', 'm'])} {
+              ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
                 flex-wrap: wrap;
                 overflow: auto;
                 > * {
@@ -91,7 +92,7 @@ export function FrameLayout(props: FrameLayoutProps) {
               className={'hide-for-sharing'}
               aria-labelledby="dataPanelId"
               css={[
-                sidebarStyles,
+                sidebarStyles(euiThemeContext),
                 css`
                   ${isFullscreen &&
                   `
@@ -121,13 +122,13 @@ export function FrameLayout(props: FrameLayoutProps) {
                 // Leave out bottom padding so the suggestions scrollbar stays flush to window edge
                 // Leave out left padding so the left sidebar's focus states are visible outside of content bounds
                 // This also means needing to add same amount of margin to page content and suggestion items
-                padding: ${euiTheme.euiTheme.size.base} ${euiTheme.euiTheme.size.base} 0;
+                padding: ${euiTheme.size.base} ${euiTheme.size.base} 0;
                 position: relative;
                 z-index: 1;
-                border-left: ${euiTheme.euiTheme.border.thin};
-                border-right: ${euiTheme.euiTheme.border.thin};
+                border-left: ${euiTheme.border.thin};
+                border-right: ${euiTheme.border.thin};
                 &:first-child {
-                  padding-left: ${euiTheme.euiTheme.size.base};
+                  padding-left: ${euiTheme.size.base};
                 }
                 ${isFullscreen &&
                 `
@@ -148,13 +149,13 @@ export function FrameLayout(props: FrameLayoutProps) {
             </section>
             <section
               css={[
-                sidebarStyles,
+                sidebarStyles(euiThemeContext),
                 css`
                   flex-basis: 25%;
                   min-width: 358px;
                   max-width: 440px;
                   max-height: 100%;
-                  ${euiBreakpoint(euiTheme, ['xs', 's', 'm'])} {
+                  ${euiBreakpoint(euiThemeContext, ['xs', 's', 'm'])} {
                     max-width: 100%;
                   }
                   ${isFullscreen && `flex: 1; max-width: none;`}
