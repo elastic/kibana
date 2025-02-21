@@ -27,7 +27,7 @@ export const shouldUseAINavigation = (productTypes: SecurityProductTypes) => {
 // The navigation tree received by parameter is generated at: x-pack/solutions/security/plugins/security_solution/public/app/solution_navigation/navigation_tree.ts
 // An example of static navigation tree: x-pack/solutions/observability/plugins/observability/public/navigation_tree.ts
 // This is a temporary solution until the "classic" navigation is deprecated and the "generated" navigationTree is replaced by a static navigationTree (probably multiple of them).
-export const applySocNavigation = (
+export const applyAiSocNavigation = (
   draft: WritableDraft<NavigationTreeDefinition<AppDeepLinkId>>
 ): void => {
   const group = draft.body[0] as WritableDraft<GroupDefinition<AppDeepLinkId, string, string>>;
@@ -57,6 +57,6 @@ export const applySocNavigation = (
       defaultIsCollapsed: false,
       isCollapsible: false,
     };
-    draft.body.push(aiGroup);
+    draft.body = [aiGroup];
   }
 };

@@ -11,7 +11,7 @@ import produce from 'immer';
 import { map } from 'rxjs';
 import type { SecurityProductTypes } from '../../common/config';
 import { type Services } from '../common/services';
-import { applySocNavigation, shouldUseAINavigation } from './soc_navigation';
+import { applyAiSocNavigation, shouldUseAINavigation } from './ai_soc_navigation';
 
 const PROJECT_SETTINGS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.navLinks.projectSettings.title',
@@ -49,7 +49,7 @@ export const initSideNavigation = async (
         }
 
         if (showAINavigation) {
-          applySocNavigation(draft);
+          applyAiSocNavigation(draft);
         }
       })
     )
