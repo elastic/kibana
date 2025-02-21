@@ -62,6 +62,7 @@ describe('<FieldEditorFlyoutContent />', () => {
       script: { source: 'emit(true)' },
       customLabel: 'cool demo test field',
       format: { id: 'boolean' },
+      popularity: 1,
     };
 
     const { find } = await setup({ fieldToCreate });
@@ -70,6 +71,7 @@ describe('<FieldEditorFlyoutContent />', () => {
     expect(find('nameField.input').props().value).toBe(fieldToCreate.name);
     expect(find('typeField').props().value).toBe(fieldToCreate.type);
     expect(find('scriptField').props().value).toBe(fieldToCreate.script.source);
+    expect(find('editorFieldCount').props().value).toBe(fieldToCreate.popularity);
   });
 
   test('should accept an "onSave" prop', async () => {
