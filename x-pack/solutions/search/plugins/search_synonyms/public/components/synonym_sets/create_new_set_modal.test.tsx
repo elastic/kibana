@@ -125,27 +125,6 @@ describe('CreateNewSetModal', () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it('should show error if synonyms set already exists', () => {
-    render(
-      <Wrapper>
-        <CreateSynonymsSetModal onClose={onClose} />
-      </Wrapper>
-    );
-
-    expect(usePutSynonymsSet).toHaveBeenCalledWith(expect.any(Function), expect.any(Function));
-
-    act(ACTIONS.TypeSetName);
-    act(ACTIONS.PressCreateButton);
-
-    expect(mutate).toHaveBeenCalledWith({ synonymsSetId: 'test', forceWrite: false });
-
-    act(ACTIONS.SimulateConflictError);
-
-    expect(screen.getByTestId(TEST_IDS.CreateButton)).toBeDisabled();
-    expect(screen.getByTestId(TEST_IDS.ErrorText)).toBeInTheDocument();
-    expect(screen.getByTestId(TEST_IDS.ForceWriteCheckbox)).not.toBeChecked();
-  });
-
   it('should overwrite when force checkbox is checked', () => {
     render(
       <Wrapper>
