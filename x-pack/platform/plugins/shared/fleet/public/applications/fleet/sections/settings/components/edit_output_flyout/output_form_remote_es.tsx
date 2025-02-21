@@ -227,6 +227,7 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
           >
             <EuiSwitch
               {...inputs.syncIntegrationsInput.props}
+              data-test-subj="syncIntegrationsSwitch"
               label={
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.syncIntegrationsSwitchLabel"
