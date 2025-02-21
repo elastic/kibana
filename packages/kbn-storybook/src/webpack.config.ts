@@ -10,7 +10,7 @@
 import { externals } from '@kbn/ui-shared-deps-src';
 import { stringifyRequest } from 'loader-utils';
 import { resolve } from 'path';
-import webpack, { Configuration, Stats } from 'webpack';
+import webpack, { Configuration } from 'webpack';
 import webpackMerge from 'webpack-merge';
 import { REPO_ROOT } from './lib/constants';
 import { IgnoreNotFoundExportPlugin } from './ignore_not_found_export_plugin';
@@ -19,10 +19,13 @@ import 'webpack-dev-server'; // Extends webpack configuration with `devServer` p
 type Preset = string | [string, Record<string, unknown>] | Record<string, unknown>;
 
 const stats = {
-  ...Stats.presetToOptions('minimal'),
+  all: false,
+  modules: true,
   colors: true,
   errorDetails: true,
   errors: true,
+  warnings: true,
+  logging: 'warn',
   moduleTrace: true,
 };
 
@@ -157,7 +160,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         },
         {
           test: /node_modules[\/\\]@?xyflow[\/\\].*.js$/,
-          loaders: 'babel-loader',
+          loader: 'babel-loader',
           options: {
             presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
             plugins: ['@babel/plugin-transform-logical-assignment-operators'],

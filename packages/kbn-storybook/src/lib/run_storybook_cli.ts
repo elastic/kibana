@@ -9,7 +9,7 @@
 
 import { join } from 'path';
 import { logger } from '@storybook/node-logger';
-import buildStandalone from '@storybook/react/standalone';
+import { build } from '@storybook/core-server';
 import { Flags, run } from '@kbn/dev-cli-runner';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
@@ -62,7 +62,7 @@ export function runStorybookCli({ configDir, name }: { configDir: string; name: 
       interpret.extensions['.tsx'] = [require.resolve('@kbn/babel-register/install')];
       interpret.extensions['.jsx'] = [require.resolve('@kbn/babel-register/install')];
 
-      await buildStandalone(config);
+      await build(config);
 
       // Line is only reached when building the static version
       if (flags.site) process.exit();

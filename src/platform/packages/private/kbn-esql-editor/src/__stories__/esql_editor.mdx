@@ -1,0 +1,39 @@
+import { Canvas, Meta, Story, Controls } from '@storybook/blocks';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { ESQLEditor } from '../esql_editor';
+import * as EsqlEditorStories from './esql_editor.stories';
+
+export const Template = (args) => 
+<I18nProvider> 
+    <KibanaContextProvider
+        services={{
+          settings: { client: { get: () => {} } },
+          uiSettings: { get: () => {} },
+        }}
+    >
+        <ESQLEditor {...args} />
+    </KibanaContextProvider>
+</I18nProvider>;
+
+<Meta of={EsqlEditorStories} />
+
+# Overview
+
+The ESQLEditor component is a reusable component and can be used to support text based languages in your application (SQL, ESQL):
+
+<Canvas>
+  <Story of={EsqlEditorStories.ExpandedMode} />
+</Canvas>
+
+When there are errors to the query the UI displays the errors to the editor:
+
+<Canvas>
+  <Story of={EsqlEditorStories.WithErrors} />
+</Canvas>
+
+## Component props
+
+The component exposes the following properties:
+
+<Controls />../esql\_editor
