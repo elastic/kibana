@@ -17,8 +17,10 @@ import {
   EuiPopoverTitle,
   EuiText,
   UseEuiTheme,
+  useEuiTheme,
 } from '@elastic/eui';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { css } from '@emotion/react';
 import { StartServices } from '../../types';
 
 export const HelpPopoverButton = ({
@@ -28,10 +30,11 @@ export const HelpPopoverButton = ({
   children: string;
   onClick: EuiLinkButtonProps['onClick'];
 }) => {
+  const euiThemeContext = useEuiTheme();
   return (
     <EuiText size="xs">
       <EuiLink onClick={onClick}>
-        <EuiIcon size="s" type="help" css={helpPopoverStyles.button} />
+        <EuiIcon size="s" type="help" css={helpPopoverStyles.button(euiThemeContext)} />
         {children}
       </EuiLink>
     </EuiText>
@@ -39,10 +42,11 @@ export const HelpPopoverButton = ({
 };
 
 const HelpPopoverContent = ({ title, children }: { title?: string; children: ReactNode }) => {
+  const euiThemeContext = useEuiTheme();
   return (
     <>
       {title && <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle>}
-      <EuiText className="eui-yScroll" size="s" css={helpPopoverStyles.content}>
+      <EuiText className="eui-yScroll" size="s" css={helpPopoverStyles.content(euiThemeContext)}>
         {children}
       </EuiText>
     </>
@@ -50,10 +54,10 @@ const HelpPopoverContent = ({ title, children }: { title?: string; children: Rea
 };
 
 const helpPopoverStyles = {
-  button: ({ euiTheme }: UseEuiTheme) => `
+  button: ({ euiTheme }: UseEuiTheme) => css`
     margin-right: ${euiTheme.size.xs};
   `,
-  content: ({ euiTheme }: UseEuiTheme) => `
+  content: ({ euiTheme }: UseEuiTheme) => css`
     max-height: 40vh;
     padding: ${euiTheme.size.m};
   `,

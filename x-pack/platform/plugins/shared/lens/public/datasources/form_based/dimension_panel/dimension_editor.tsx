@@ -141,7 +141,9 @@ export function DimensionEditor(props: DimensionEditorProps) {
 
   const temporaryQuickFunction = Boolean(temporaryState === quickFunctionsName);
   const temporaryStaticValue = Boolean(temporaryState === staticValueOperationName);
-  const { euiTheme } = useEuiTheme();
+
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
 
   const updateLayer = useCallback(
     (newLayer: Partial<FormBasedLayer>) =>
@@ -534,7 +536,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         isActive,
         size: 's',
         isDisabled: !!disabledStatus,
-        css: operationsButtonStyles,
+        css: operationsButtonStyles(euiThemeContext),
         'data-test-subj': `lns-indexPatternDimension-${operationType}${
           compatibleWithCurrentField ? '' : ' incompatible'
         }`,
@@ -811,7 +813,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
         fullWidth
       >
         <EuiListGroup
-          css={sideNavItems.length > 3 ? operationsTwoColumnsStyles : undefined}
+          css={sideNavItems.length > 3 ? operationsTwoColumnsStyles(euiThemeContext) : undefined}
           gutterSize="none"
           color="primary"
           listItems={
@@ -1292,7 +1294,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
 }
 
 const operationsTwoColumnsStyles = ({ euiTheme }: UseEuiTheme) => {
-  return `
+  return css`
     display: block;
     column-count: 2;
     column-gap: ${euiTheme.size.m};
@@ -1300,7 +1302,7 @@ const operationsTwoColumnsStyles = ({ euiTheme }: UseEuiTheme) => {
 };
 
 export const operationsButtonStyles = ({ euiTheme }: UseEuiTheme) => {
-  return `
+  return css`
     > button {
       padding-top: 0;
       padding-bottom: 0;

@@ -25,6 +25,7 @@ import {
   useGroupedFields,
 } from '@kbn/unified-field-list';
 import { OverrideFieldGroupDetails } from '@kbn/unified-field-list/src/types';
+import { useEuiTheme } from '@elastic/eui';
 import type { DatasourceDataPanelProps } from '../../../types';
 import type { TextBasedPrivateState } from '../types';
 import { getStateFromAggregateQuery } from '../utils';
@@ -130,7 +131,7 @@ export function TextBasedDataPanel({
     },
     [hasSuggestionForField, dropOntoWorkspace]
   );
-
+  const euiThemeContext = useEuiTheme();
   return (
     <KibanaContextProvider
       services={{
@@ -138,7 +139,7 @@ export function TextBasedDataPanel({
       }}
     >
       <FieldList
-        css={dataPanelStyles}
+        css={dataPanelStyles(euiThemeContext)}
         isProcessing={!dataHasLoaded}
         prepend={
           <FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsTextBasedLanguages" />

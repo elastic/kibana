@@ -17,7 +17,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import moment from 'moment';
-import { EuiCallOut, UseEuiTheme, useEuiBreakpoint } from '@elastic/eui';
+import { EuiCallOut, UseEuiTheme, euiBreakpoint } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SerializedStyles, css } from '@emotion/react';
 import { LENS_APP_LOCATOR } from '../../common/locator/locator';
@@ -103,8 +103,8 @@ function getSaveButtonMeta({
   }
 }
 
-const NavItemWithDividerStyles = (euiThemeContext: UseEuiTheme) => css`
-  ${useEuiBreakpoint(['m', 'l', 'xl'])} {
+const navItemWithDividerStyles = (euiThemeContext: UseEuiTheme) => css`
+  ${euiBreakpoint(euiThemeContext, ['m', 'l', 'xl'])} {
     margin-right: ${euiThemeContext.euiTheme.size.m};
     position: relative;
     &:after {
@@ -177,7 +177,7 @@ function getLensTopNavConfig(options: {
         values: { contextOriginatingApp },
       }),
       disableButton: !actions.goBack.enabled,
-      css: NavItemWithDividerStyles,
+      css: navItemWithDividerStyles,
     });
   }
 
@@ -195,7 +195,7 @@ function getLensTopNavConfig(options: {
       tooltip: actions.getUnderlyingDataUrl.tooltip,
       target: '_blank',
       href: actions.getUnderlyingDataUrl.getLink?.(),
-      css: NavItemWithDividerStyles,
+      css: navItemWithDividerStyles,
     });
   }
 
@@ -235,7 +235,7 @@ function getLensTopNavConfig(options: {
     description: i18n.translate('xpack.lens.app.settingsAriaLabel', {
       defaultMessage: 'Open the Lens settings menu',
     }),
-    css: NavItemWithDividerStyles,
+    css: navItemWithDividerStyles,
   });
 
   if (actions.cancel.visible) {

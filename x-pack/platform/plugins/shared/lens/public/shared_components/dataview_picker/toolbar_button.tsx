@@ -7,7 +7,15 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { EuiButton, PropsOf, EuiButtonProps, UseEuiTheme, euiFontSize } from '@elastic/eui';
+import {
+  EuiButton,
+  PropsOf,
+  EuiButtonProps,
+  UseEuiTheme,
+  euiFontSize,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 
 const groupPositionToClassMap = {
   none: null,
@@ -56,6 +64,7 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
   textProps,
   ...rest
 }) => {
+  const euiThemeContext = useEuiTheme();
   const classes = classNames(
     'kbnToolbarButton',
     groupPositionToClassMap[groupPosition],
@@ -68,7 +77,7 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
       data-test-subj={dataTestSubj}
       className={classes}
       iconSide="right"
-      css={toolbarButtonStyles}
+      css={toolbarButtonStyles(euiThemeContext)}
       iconType={hasArrow ? 'arrowDown' : ''}
       color="text"
       contentProps={{
@@ -86,68 +95,69 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
   );
 };
 
-const toolbarButtonStyles = (euiThemeObj: UseEuiTheme) => {
-  const { euiTheme } = euiThemeObj;
-  return `
-   &.kbnToolbarButton {
-    line-height: ${euiTheme.size.xxl}; // Keeps alignment of text and chart icon
+const toolbarButtonStyles = (euiThemeContext: UseEuiTheme) => {
+  const { euiTheme } = euiThemeContext;
+  return css`
+    &.kbnToolbarButton {
+      line-height: ${euiTheme.size.xxl}; // Keeps alignment of text and chart icon
 
-    // todo: once issue https://github.com/elastic/eui/issues/4730 is merged, this code might be safe to remove
-    // Some toolbar buttons are just icons, but EuiButton comes with margin and min-width that need to be removed
-    min-width: 0;
-    border-width: ${euiTheme.border.width.thin};
-    border-style: solid;
-    border-color: ${euiTheme.border.color}; // Lighten the border color for all states
+      // todo: once issue https://github.com/elastic/eui/issues/4730 is merged, this code might be safe to remove
+      // Some toolbar buttons are just icons, but EuiButton comes with margin and min-width that need to be removed
+      min-width: 0;
+      border-width: ${euiTheme.border.width.thin};
+      border-style: solid;
+      border-color: ${euiTheme.border.color}; // Lighten the border color for all states
 
-  // Override background color for non-disabled buttons
-  &:not(:disabled) {
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-  }
+      // Override background color for non-disabled buttons
+      &:not(:disabled) {
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+      }
 
-  &.kbnToolbarButton__text > svg {
-    margin-top: -1px; // Just some weird alignment issue when icon is the child not the iconType
-  }
+      &.kbnToolbarButton__text > svg {
+        margin-top: -1px; // Just some weird alignment issue when icon is the child not the iconType
+      }
 
-  &.kbnToolbarButton__text:empty {
-    margin: 0;
-  }
+      &.kbnToolbarButton__text:empty {
+        margin: 0;
+      }
 
-    // Toolbar buttons don't look good with centered text when fullWidth
-    &[class*='fullWidth'] {
-      text-align: left;
+      // Toolbar buttons don't look good with centered text when fullWidth
+      &[class*='fullWidth'] {
+        text-align: left;
 
-      .kbnToolbarButton__content {
-        justify-content: space-between;
+        .kbnToolbarButton__content {
+          justify-content: space-between;
+        }
       }
     }
-  }
 
-  &.kbnToolbarButton--groupLeft {
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-  }
+    &.kbnToolbarButton--groupLeft {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
 
-  &.kbnToolbarButton--groupCenter {
-    border-radius: 0;
-    border-left: none;
-  }
+    &.kbnToolbarButton--groupCenter {
+      border-radius: 0;
+      border-left: none;
+    }
 
-  &.kbnToolbarButton--groupRight {
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-    border-left: none;
-  }
+    &.kbnToolbarButton--groupRight {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      border-left: none;
+    }
 
-  &.kbnToolbarButton--bold {
-    font-weight: ${euiTheme.font.weight.bold};
-  }
+    &.kbnToolbarButton--bold {
+      font-weight: ${euiTheme.font.weight.bold};
+    }
 
-  &.kbnToolbarButton--normal {
-    font-weight:${euiTheme.font.weight.regular};
-  }
+    &.kbnToolbarButton--normal {
+      font-weight: ${euiTheme.font.weight.regular};
+    }
 
-  &.kbnToolbarButton--s {
-    box-shadow: none !important; // sass-lint:disable-line no-important
-    font-size:${euiFontSize(euiThemeObj, 's').fontSize};
-  }`;
+    &.kbnToolbarButton--s {
+      box-shadow: none !important; // sass-lint:disable-line no-important
+      font-size: ${euiFontSize(euiThemeContext, 's').fontSize};
+    }
+  `;
 };

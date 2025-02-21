@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UseEuiTheme, useEuiShadow } from '@elastic/eui';
+import { UseEuiTheme, euiShadow } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 
 const flyoutOpenCloseAnimation = keyframes`
@@ -19,19 +19,19 @@ const flyoutOpenCloseAnimation = keyframes`
   }
 `;
 
-export const FlyoutContainerStyles = ({ euiTheme }: UseEuiTheme) => css`
-  border-left: ${euiTheme.border.thin};
-  ${useEuiShadow('xl')};
+export const flyoutContainerStyles = (euiThemeContext: UseEuiTheme) => css`
+  border-left: ${euiThemeContext.euiTheme.border.thin};
+  ${euiShadow(euiThemeContext, 'xl')};
   position: fixed;
   top: 0;
   bottom: 0;
   right: 0;
   height: 100%;
-  z-index: ${euiTheme.levels.flyout};
-  background: ${euiTheme.colors.backgroundBasePlain};
+  z-index: ${euiThemeContext.euiTheme.levels.flyout};
+  background: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  animation: ${flyoutOpenCloseAnimation} ${euiTheme.animation.normal}
-    ${euiTheme.animation.resistance};
+  animation: ${flyoutOpenCloseAnimation} ${euiThemeContext.euiTheme.animation.normal}
+    ${euiThemeContext.euiTheme.animation.resistance};
 `;
