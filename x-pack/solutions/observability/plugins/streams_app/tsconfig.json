@@ -57,5 +57,8 @@
     "@kbn/actions-plugin",
     "@kbn/object-utils",
     "@kbn/traced-es-client",
+    "@kbn/datemath",
+    "@kbn/dataset-quality-plugin",
+    "@kbn/search-types"
   ]
 }

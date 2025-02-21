@@ -306,12 +306,6 @@ export class EntityStoreDataClient {
     requestBody: InitEntityEngineRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityEngineResponse> {
-    const { experimentalFeatures } = this.options;
-
-    if (entityType === EntityType.universal && !experimentalFeatures.assetInventoryStoreEnabled) {
-      throw new Error('Universal entity store is not enabled');
-    }
-
     if (!this.options.taskManager) {
       throw new Error('Task Manager is not available');
     }
