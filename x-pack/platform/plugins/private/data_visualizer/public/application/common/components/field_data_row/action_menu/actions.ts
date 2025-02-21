@@ -28,7 +28,7 @@ export function getActions(
   combinedQuery: CombinedQuery,
   dataViewEditorRef: MutableRefObject<(() => void | undefined) | undefined> | undefined
 ): Array<Action<FieldVisConfig>> {
-  const { lens: lensPlugin, maps: mapsPlugin, data } = services;
+  const { lens: lensPlugin, maps: mapsPlugin, data, timefilter: timeFilter } = services;
 
   const actions: Array<Action<FieldVisConfig>> = [];
   const filters = data?.query.filterManager.getFilters() ?? [];
@@ -63,6 +63,7 @@ export function getActions(
             {
               id: `dataVisualizer-${item.fieldName}`,
               attributes: lensAttributes,
+              timeRange: timeFilter.getTime(),
             },
             { openInNewTab: isModifiedEvent(event) }
           );
