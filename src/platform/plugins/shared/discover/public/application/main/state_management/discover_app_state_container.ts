@@ -40,8 +40,8 @@ import {
   DiscoverDataSource,
   isDataSourceType,
 } from '../../../../common/data_sources';
-import type { DiscoverInternalStateContainer } from './discover_internal_state_container';
 import type { DiscoverSavedSearchContainer } from './discover_saved_search_container';
+import { internalStateActions, InternalStateStore } from './redux';
 
 export const APP_STATE_URL_KEY = '_a';
 export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<DiscoverAppState> {
@@ -185,12 +185,12 @@ export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelec
  */
 export const getDiscoverAppStateContainer = ({
   stateStorage,
-  internalStateContainer,
+  internalState,
   savedSearchContainer,
   services,
 }: {
   stateStorage: IKbnUrlStateStorage;
-  internalStateContainer: DiscoverInternalStateContainer;
+  internalState: InternalStateStore;
   savedSearchContainer: DiscoverSavedSearchContainer;
   services: DiscoverServices;
 }): DiscoverAppStateContainer => {
@@ -268,11 +268,13 @@ export const getDiscoverAppStateContainer = ({
       const { breakdownField, columns, rowHeight } = getCurrentUrlState(stateStorage, services);
 
       // Only set default state which is not already set in the URL
-      internalStateContainer.transitions.setResetDefaultProfileState({
-        columns: columns === undefined,
-        rowHeight: rowHeight === undefined,
-        breakdownField: breakdownField === undefined,
-      });
+      internalState.dispatch(
+        internalStateActions.setResetDefaultProfileState({
+          columns: columns === undefined,
+          rowHeight: rowHeight === undefined,
+          breakdownField: breakdownField === undefined,
+        })
+      );
     }
 
     const { data } = services;
