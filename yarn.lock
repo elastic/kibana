@@ -7665,11 +7665,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/streams-app-plugin@link:x-pack/solutions/observability/plugins/streams_app":
+"@kbn/streams-app-plugin@link:x-pack/platform/plugins/shared/streams_app":
   version "0.0.0"
   uid ""
 
-"@kbn/streams-plugin@link:x-pack/solutions/observability/plugins/streams":
+"@kbn/streams-app-wrapper-plugin@link:x-pack/solutions/observability/plugins/observability_streams_wrapper":
+  version "0.0.0"
+  uid ""
+
+"@kbn/streams-plugin@link:x-pack/platform/plugins/shared/streams":
   version "0.0.0"
   uid ""
 
@@ -8919,10 +8923,10 @@
   resolved "https://registry.yarnpkg.com/@open-draft/until/-/until-2.1.0.tgz#0acf32f470af2ceaf47f095cdecd40d68666efda"
   integrity sha512-U69T3ItWHvLwGg5eJ0n3I62nWuE6ilHlmz7zM0npLBRvPRd7e6NYmg54vvRtP5mZG7kZqZCFVdsTWo7BPtBujg==
 
-"@openfeature/core@^1.7.0":
-  version "1.7.1"
-  resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.7.1.tgz#d81aecce13184fdbd1e59ac76d857b0eed97a50d"
-  integrity sha512-6w3MvNp8aR3BZRxafKunS76I2FGzDL/ehmbzgRTjh2ohWGnfIgOV2IpG1UFMpPRu1qw0KazwvqXowqec5DKSeQ==
+"@openfeature/core@^1.7.1":
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/@openfeature/core/-/core-1.7.2.tgz#b2663f7beb93310dfeef003509cb140e33790fb7"
+  integrity sha512-pbpREdO/8D6ocFYWIzAJ24iJ1td04Anl+TehUzx9r1xR8vKJab+O4TlC/XP7s9JuD5hRPBfmo5gDha/KWVSG4A==
 
 "@openfeature/launchdarkly-client-provider@^0.3.1":
   version "0.3.1"
@@ -34079,10 +34083,10 @@ xpath@^0.0.33:
   resolved "https://registry.yarnpkg.com/xstate/-/xstate-5.19.2.tgz#db3f1ee614bbb6a49ad3f0c96ddbf98562d456ba"
   integrity sha512-B8fL2aP0ogn5aviAXFzI5oZseAMqN00fg/TeDa3ZtatyDcViYLIfuQl4y8qmHCiKZgGEzmnTyNtNQL9oeJE2gw==
 
-xstate@^4.38.2:
-  version "4.38.2"
-  resolved "https://registry.yarnpkg.com/xstate/-/xstate-4.38.2.tgz#1b74544fc9c8c6c713ba77f81c6017e65aa89804"
-  integrity sha512-Fba/DwEPDLneHT3tbJ9F3zafbQXszOlyCJyQqqdzmtlY/cwE2th462KK48yaANf98jHlP6lJvxfNtN0LFKXPQg==
+xstate@^4.38.3:
+  version "4.38.3"
+  resolved "https://registry.yarnpkg.com/xstate/-/xstate-4.38.3.tgz#4e15e7ad3aa0ca1eea2010548a5379966d8f1075"
+  integrity sha512-SH7nAaaPQx57dx6qvfcIgqKRXIh4L0A1iYEqim4s1u7c9VoCgzZc+63FY90AKU4ZzOC2cfJzTnpO4zK7fCUzzw==
 
 "xtend@>=4.0.0 <4.1.0-0", xtend@^4.0.0, xtend@^4.0.1, xtend@^4.0.2, xtend@~4.0.1:
   version "4.0.2"
