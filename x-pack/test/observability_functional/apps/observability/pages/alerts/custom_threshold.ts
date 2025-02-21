@@ -49,6 +49,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         logger,
       });
       await observability.alerts.common.navigateToRulesPage();
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
