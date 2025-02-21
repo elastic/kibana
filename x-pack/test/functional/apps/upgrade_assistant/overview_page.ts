@@ -27,7 +27,7 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
     });
 
     beforeEach(async () => {
-      await PageObjects.upgradeAssistant.navigateToPage();
+      await pageObjects.upgradeAssistant.navigateToPage();
     });
 
     it('Should render overview page', async () => {
