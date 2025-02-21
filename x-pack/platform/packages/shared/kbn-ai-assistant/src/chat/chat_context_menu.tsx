@@ -12,7 +12,11 @@ import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiToolTip,
+  EuiHorizontalRule,
+  EuiIcon,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 export function ChatContextMenu({
@@ -24,6 +28,7 @@ export function ChatContextMenu({
   onCopyUrlClick: () => void;
   disabled: boolean;
 }) {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   return (
@@ -31,16 +36,17 @@ export function ChatContextMenu({
       button={
         <EuiToolTip
           content={i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.chatActionsTooltip', {
-            defaultMessage: 'Chat actions',
+            defaultMessage: 'Conversation actions',
           })}
           display="block"
         >
           <EuiButtonIcon
             data-test-subj="observabilityAiAssistantChatContextMenuButtonIcon"
-            iconType="boxesHorizontal"
+            iconType="boxesVertical"
+            color="text"
             disabled={disabled}
             aria-label={i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.iconAreaLabel', {
-              defaultMessage: 'Chat context menu',
+              defaultMessage: 'Conversation context menu',
             })}
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           />
@@ -76,6 +82,22 @@ export function ChatContextMenu({
           >
             {i18n.translate('xpack.aiAssistant.chatHeader.contextMenu.copyUrl', {
               defaultMessage: 'Copy URL',
+            })}
+          </EuiContextMenuItem>,
+          <EuiHorizontalRule margin="none" />,
+          <EuiContextMenuItem
+            key="delete"
+            css={css`
+              color: ${euiTheme.colors.danger};
+            `}
+            icon={<EuiIcon type="trash" size="m" color="danger" />}
+            onClick={() => {
+              // onCopyUrlClick();
+              setIsPopoverOpen(false);
+            }}
+          >
+            {i18n.translate('xpack.aiAssistant.conversationList.deleteConversationIconLabel', {
+              defaultMessage: 'Delete',
             })}
           </EuiContextMenuItem>,
         ]}

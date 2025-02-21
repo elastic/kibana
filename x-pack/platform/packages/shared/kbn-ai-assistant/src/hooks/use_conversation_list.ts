@@ -14,6 +14,7 @@ import {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { useAIAssistantAppService } from './use_ai_assistant_app_service';
 import { useKibana } from './use_kibana';
+
 export interface UseConversationListResult {
   isLoading: boolean;
   conversations: AbortableAsyncState<{ conversations: Conversation[] }>;
