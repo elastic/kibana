@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
+import type { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 
 export interface InputOverrides {
   [key: string]: string | undefined;
