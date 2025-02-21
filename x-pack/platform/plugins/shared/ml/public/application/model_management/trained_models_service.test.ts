@@ -438,7 +438,7 @@ describe('TrainedModelsService', () => {
 
     expect(mockDisplayErrorToast).toHaveBeenCalledWith(
       error,
-      i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorMessage', {
+      i18n.translate('xpack.ml.trainedModels.modelsList.fetchDeletionErrorTitle', {
         defaultMessage: '{modelsCount, plural, one {Model} other {Models}} deletion failed',
         values: {
           modelsCount: modelIds.length,
