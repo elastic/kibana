@@ -534,6 +534,24 @@ describe('<IndexDetailsPage />', () => {
   });
 
   describe('Semantic Text Banner', () => {
+    const mockIndexMappingResponse: any = {
+      ...testIndexMappings.mappings,
+      properties: {
+        ...testIndexMappings.mappings.properties,
+        name: {
+          type: 'text',
+        },
+        sem_text: {
+          type: 'semantic_text',
+          inference_id: '.elser-2-elasticsearch',
+        },
+        title: {
+          type: 'text',
+          copy_to: ['sem_text'],
+        },
+      },
+    };
+
     beforeEach(async () => {
       await act(async () => {
         testBed = await setup({
@@ -545,12 +563,15 @@ describe('<IndexDetailsPage />', () => {
           },
         });
       });
+      httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+        mappings: mockIndexMappingResponse,
+      });
       testBed.component.update();
       await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
     });
 
-    it('semantic text banner is visible', async () => {
-      expect(testBed.actions.mappings.isSemanticTextBannerVisible()).toBe(true);
+    it('semantic text banner is not visible', async () => {
+      expect(testBed.actions.mappings.isSemanticTextBannerVisible()).toBe(false);
     });
   });
 
